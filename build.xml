@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="explorer" default="compile"  basedir=".">
+	<description>
+		The base ant build file.
+    </description>
+
+	<!-- set global properties for this build -->
+	<property name="src.dir" location="src" />
+	<property name="classes.dir" location="classes" />
+	<property name="dist.dir" location="dist" />
+	<property name="lib.dir" location="lib" />
+	<property name="ext.dir" location="ext" />
+	<property name="test.dir" location="test_dist" />
+	<property name="main.class" value="loader.Loader" />
+	<property name="splash.image" value="loader/IMS_Splash.png" />
+	<property name="jar.name" value="explorer.jar" />
+	<property name="dist.archive" value="explorer.zip" />
+
+
+	<target name="init" description="Clears the /class directory">
+		<!-- Create the time stamp -->
+		<tstamp>
+			<format property="build.time" pattern="MM/dd/yyyy hh:mm:ss" />
+		</tstamp>
+		<mkdir dir="dist" />
+		<mkdir dir="javadoc" />
+		<mkdir dir="classes" />
+	</target>
+
+	<target name="compile" depends="init" description="Compile the source">
+		<!-- Compile the java code from ${src} into ${classes} -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="classes" includes="**/*" />
+		</delete>
+
+		<!-- resolve referenced libraries (include basedir) -->
+		<path id="classpath">
+			<fileset dir="${lib.dir}" includes="**/*.jar" />
+			<fileset dir="${ext.dir}" includes="**/*.jar" />
+		</path>
+		
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" executable="javac"
+			optimize="false" debug="on" classpathref="classpath"/>
+
+	</target>
+
+	<target name="build" depends="compile" description="Build the distribution .jar file">
+		<!-- Create the temporary distribution directory -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${dist.dir}" includes="**/*" />
+		</delete>
+		<mkdir dir="${dist.dir}/temp-${DSTAMP}" />
+		
+		<!-- copy compiled class files -->
+		<copy todir="${dist.dir}/temp-${DSTAMP}">
+			<fileset dir="${classes.dir}" />
+		</copy>
+		
+		<!-- copy icons, resources and language files -->
+		<copy todir="${dist.dir}/temp-${DSTAMP}">
+			<fileset dir="${src.dir}">
+				<include name="**/*.gif" />
+				<include name="**/*.png" />
+				<include name="**/*.properties" />
+				<include name="**/*.xml" />
+				<include name="**/*.ini" />
+				<include name="**/*.txt" />
+			</fileset>
+		</copy>
+
+
+		<!-- resolve referenced libraries (include basedir) -->
+		<path id="class.path">
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+		<!-- generate usable classpath-string for manifest -->
+		<pathconvert property="class-path" dirsep="/" pathsep=" "
+			refid="class.path">
+			<map from="${lib.dir}" to="lib" />
+		</pathconvert>
+
+		<!-- generate manifest file -->
+		<manifest file="manifest.mf">
+			<attribute name="Class-Path" value=". ${class-path}" />
+			<attribute name="Main-Class" value="${main.class}" />
+			<attribute name="SplashScreen-Image" value="${splash.image}" />
+			<attribute name="Created-On" value="${build.time}" />
+			<!-- TODO: additional attributes should go here -->
+		</manifest>
+
+		<!-- pack everything into a .jar file -->
+		<jar jarfile="${jar.name}" basedir="${dist.dir}/temp-${DSTAMP}"
+			index="true" manifest="manifest.mf" />
+		<delete dir="${dist.dir}/temp-${DSTAMP}" />
+		
+		<!-- copy stuff into clean test folder -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${test.dir}" includes="**/*" />
+		</delete>
+		<mkdir dir="${test.dir}/lib" />
+		<mkdir dir="${test.dir}/ext" />
+		<copy file="${jar.name}" tofile="${test.dir}/${jar.name}" />
+		<copy todir="${test.dir}/lib">
+			<fileset dir="${lib.dir}" />
+		</copy>
+		<copy todir="${test.dir}/ext">
+			<fileset dir="${ext.dir}" />
+		</copy>
+		
+		<!-- create a 'ready to ship' archive -->
+		<zip destfile="${dist.archive}" basedir="${test.dir}" />
+	</target>
+
+	<target name="javadoc" depends="init"
+		description="Create javadoc documentation">
+		<delete includeEmptyDirs="true">
+			<fileset dir="javadoc" includes="**/*" />
+		</delete>
+		<javadoc destdir="javadoc" access="package" source="1.7" use="false"
+			notree="false" nonavbar="false" noindex="true" splitindex="false"
+			author="true" version="true" nodeprecatedlist="true" nodeprecated="false"
+			sourcepath="src" classpath="class" />
+	</target>
+
+	<target name="all" depends="init,compile,javadoc" description="Make all" />
+</project>
+

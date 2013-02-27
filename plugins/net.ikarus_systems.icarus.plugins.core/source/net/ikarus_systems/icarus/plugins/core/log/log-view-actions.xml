@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		LOG VIEW
+	-->
+
+	<!-- Clear Log -->
+	<action id="plugins.core.logView.clearLogAction"
+		name="${id}.name" desc="${id}.description" icon="clear_co.gif" />
+
+	<!-- Copy Record to Clipboard -->
+	<action id="plugins.core.logView.copyRecordAction"
+		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+
+	<!-- Scroll Lock -->
+	<action id="plugins.core.logView.scrollLockAction"
+		name="${id}.name" desc="${id}.description" icon="lock_co.gif" type="toggle" />
+
+	<!-- Show on Error -->
+	<action id="plugins.core.logView.showOnErrorAction"
+		name="${id}.name" desc="${id}.description" icon="writeerr_co.gif" type="toggle" />
+
+	<!-- Show on Warning -->
+	<action id="plugins.core.logView.showOnWarningAction"
+		name="${id}.name" desc="${id}.description" icon="writeout_co.gif" type="toggle" />
+
+	<!-- ToolBar List -->
+	<action-list id="plugins.core.logView.toolBarList">
+		<!-- leftArea will be placeholder for a glue component to align buttons to the right -->
+		<item type="custom" value="glue"/>
+		<item type="action" value="plugins.core.logView.clearLogAction" />
+		<item type="action" value="plugins.core.logView.copyRecordAction" />
+		<separator />
+		<item type="action" value="plugins.core.logView.scrollLockAction" />
+		<item type="action" value="plugins.core.logView.showOnWarningAction" />
+		<item type="action" value="plugins.core.logView.showOnErrorAction" />
+	</action-list>
+
+	<!-- Popup Menu List -->
+	<action-list id="plugins.core.logView.popupMenuList">
+		<item type="action" value="plugins.core.logView.clearLogAction" />
+		<item type="action" value="plugins.core.logView.copyRecordAction" />
+	</action-list>
+</actions>

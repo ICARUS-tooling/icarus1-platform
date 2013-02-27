@@ -1,0 +1,78 @@
+<project name="explorer (matetools)" default="compile"  basedir=".">
+	<description>
+		The base ant build file.
+    </description>
+
+	<!-- set global properties for this build -->
+	<property name="src.dir" location="src" />
+	<property name="matetools.dir" location="matetools" />
+	<property name="classes.dir" location="classes" />
+	<property name="dist.dir" location="dist" />
+	<property name="lib.dir" location="lib" />
+	<property name="ext.dir" location="ext" />
+	<property name="explorer.jar" location="explorer.jar" />
+
+
+	<target name="init" description="Clears the /class directory">
+		<!-- Create the time stamp -->
+		<tstamp>
+			<format property="build.time" pattern="MM/dd/yyyy hh:mm:ss" />
+		</tstamp>
+		<mkdir dir="dist" />
+		<mkdir dir="javadoc" />
+		<mkdir dir="classes" />
+	</target>
+
+	<target name="compile" depends="init" description="Compile the source">
+		<!-- Compile the java code from ${matetools} into ${classes} -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="classes" includes="**/*" />
+		</delete>
+
+		<!-- resolve referenced libraries (include basedir) -->
+		<path id="classpath">
+			<fileset dir="${lib.dir}" includes="**/*.jar" />
+			<fileset dir="${ext.dir}" includes="**/*.jar" />
+			<pathelement path="${explorer.jar}"/>
+		</path>
+		
+		<javac srcdir="${matetools.dir}" destdir="${classes.dir}" executable="javac"
+			optimize="false" debug="on" classpathref="classpath"/>
+
+	</target>
+
+	<target name="build" depends="compile" description="Build the distribution .jar file">
+		<!-- Create the temporary distribution directory -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${dist.dir}" includes="**/*" />
+		</delete>
+		<mkdir dir="${dist.dir}/temp-${DSTAMP}" />
+		
+		<!-- copy compiled class files -->
+		<copy todir="${dist.dir}/temp-${DSTAMP}">
+			<fileset dir="${classes.dir}" />
+		</copy>
+		
+		<!-- copy icons and language files -->
+		<copy todir="${dist.dir}/temp-${DSTAMP}">
+			<fileset dir="${matetools.dir}">
+				<include name="**/*.gif" />
+				<include name="**/*.png" />
+				<include name="**/*.properties" />
+				<include name="**/*.xml" />
+			</fileset>
+		</copy>
+
+		<!-- generate manifest file -->
+		<manifest file="manifest.mf">
+			<attribute name="Created-On" value="${build.time}" />
+			<!-- TODO: additional attributes should go here -->
+		</manifest>
+
+		<!-- pack everything into a .jar file -->
+		<jar jarfile="ext/matetools-adapter.jar" basedir="${dist.dir}/temp-${DSTAMP}"
+			index="true" manifest="manifest.mf" />
+		<delete dir="${dist.dir}/temp-{DSTAMP}" />
+	</target>
+</project>
+

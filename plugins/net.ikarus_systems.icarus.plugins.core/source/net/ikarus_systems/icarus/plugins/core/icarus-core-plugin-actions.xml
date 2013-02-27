@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		ICARUS CORE PLUGIN ACTIONS
+	-->
+		
+	<!-- Exit -->
+	<action id="plugins.core.icarusCorePlugin.exitAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- About -->
+	<action id="plugins.core.icarusCorePlugin.aboutAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.core.icarusCorePlugin.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" />
+
+</actions>

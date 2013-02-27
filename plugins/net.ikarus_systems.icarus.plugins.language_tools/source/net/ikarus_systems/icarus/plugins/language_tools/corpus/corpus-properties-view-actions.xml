@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		CORPUS PROPERTIES VIEW
+	-->
+		
+	<!-- Copy Properties -->
+	<action id="plugins.languageTools.corpusPropertiesView.copyPropertiesAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy Property -->
+	<action id="plugins.languageTools.corpusPropertiesView.copyPropertyAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy Meta-Data -->
+	<action id="plugins.languageTools.corpusPropertiesView.copyMetaDataAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy All Properties -->
+	<action id="plugins.languageTools.corpusPropertiesView.copyAllPropertiesAction"
+		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+		
+	<!-- Export Properties -->
+	<action id="plugins.languageTools.corpusPropertiesView.exportPropertiesAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- Edit Corpus -->
+	<action id="plugins.languageTools.corpusPropertiesView.editCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
+	<!-- Inspect Corpus -->
+	<action id="plugins.languageTools.corpusPropertiesView.inspectCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		
+	<!-- Load Corpus -->
+	<action id="plugins.languageTools.corpusPropertiesView.loadCorpusAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Free Corpus -->
+	<action id="plugins.languageTools.corpusPropertiesView.freeCorpusAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.languageTools.corpusPropertiesView.toolBarList">
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.copyAllPropertiesAction" />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.exportPropertiesAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.editCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.inspectCorpusAction" />
+	</action-list>
+		
+	<!-- Popup Menu List -->
+	<action-list id="plugins.languageTools.corpusPropertiesView.popupMenuList">
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.copyPropertiesAction" />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.copyPropertyAction" />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.copyMetaDataAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.copyAllPropertiesAction" />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.exportPropertiesAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.editCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusPropertiesView.inspectCorpusAction" />
+	</action-list>
+	
+</actions>

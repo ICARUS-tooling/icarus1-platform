@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		CORPUS EXPLORER VIEW
+	-->
+		
+	<!-- New Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.newCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="newclass_wiz.gif" />
+		
+	<!-- Delete Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.deleteCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		
+	<!-- Clone Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.cloneCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		
+	<!-- Rename Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.renameCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="wordassist_co.gif" />
+		
+	<!-- Open Location -->
+	<action id="plugins.languageTools.corpusExplorerView.openLocationAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Edit Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.editCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
+	<!-- Inspect Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.inspectCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		
+	<!-- Export Corpus -->
+	<action id="plugins.languageTools.corpusExplorerView.exportCorpusAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.languageTools.corpusExplorerView.toolBarList">
+		<item type="action" value="plugins.languageTools.corpusExplorerView.newCorpusAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.deleteCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.renameCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.editCorpusAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.inspectCorpusAction" />
+	</action-list>
+		
+	<!-- Popup Menu List -->
+	<action-list id="plugins.languageTools.corpusExplorerView.popupMenuList">
+		<item type="action" value="plugins.languageTools.corpusExplorerView.newCorpusAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.deleteCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.cloneCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.renameCorpusAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.openLocationAction" />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.inspectCorpusAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.editCorpusAction" />
+		<item type="action" value="plugins.languageTools.corpusExplorerView.exportCorpusAction" />
+	</action-list>
+	
+</actions>

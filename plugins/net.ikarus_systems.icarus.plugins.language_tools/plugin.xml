@@ -1,0 +1,295 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.languageTools" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.language_tools.LanguageToolsPlugin">
+	
+	<doc>
+		<doc-text>
+			Collection of general purpose language tools.
+		</doc-text>
+	</doc>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+	</requires>
+	
+	<!-- Extension-Points -->
+			
+	<extension-point id="Grammar" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter-def id="class" multiplicity="one">
+			<doc>
+				<doc-text>
+					The 'tokenizer' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.Grammar interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Tokenizer" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Point of registration for all tokenizer implementations that desire
+				to be included when the user is presented a list of usable tokenizers.
+				Note that this extension-point extends the abstract 'Localizable'
+				point but it does not require all the features inherited. In fact
+				connected extensions can completely ommit the usage of those
+				parameters in which case the corresponding tokenizer implementations
+				will be identified solely by their id as declared in the plugin-xml.
+			</doc-text>
+		</doc>
+		<parameter-def id="class" multiplicity="one">
+			<doc>
+				<doc-text>
+					The 'tokenizer' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.tokenizer.Tokenizer interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Corpus" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Entry point to define access to certain type of corpus resources
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'corpus' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.corpus.Corpus interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="grammar" multiplicity="any">
+			<doc>
+				<doc-text>
+					Identifies the grammar object associated with
+					this corpus. Used to thin out the number of
+					corpora being displayed. Corpora that
+					reference an unknown grammar are ignored.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SentenceDataReader">
+		<doc>
+			<doc-text>
+				Helper object for reading a certain type of 'sentence format'
+				from an arbitrary location.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'reader' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.SentenceDataReader interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="grammar">
+			<doc>
+				<doc-text>
+					Identifies the grammar object associated with this reader. 
+					Used to thin out the number of corpora being displayed. 
+					Readers that reference an unknown grammar are ignored.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SentenceDataWriter">
+		<doc>
+			<doc-text>
+				Helper object for saving a certain type of 'sentence format'
+				to an arbitrary location.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'writer' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.SentenceDataWriter interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="grammar">
+			<doc>
+				<doc-text>
+					Identifies the grammar object associated with this writer 
+					Used to thin out the number of writers being displayed. 
+					Writers that reference an unknown grammar are ignored. If a 
+					writer is able to handle more than one grammar it should
+					be connected to this extension-point once for every grammar
+					it supports so that different instances are created for each.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="LanguageToolsView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that only want to
+				contribute language tool like capabilities. Typically a perspective
+				that holds a collection of language tools will add all extensions
+				to this extension-point to its default list of views.
+			</doc-text>
+		</doc>
+	</extension-point>
+			
+	<extension-point id="CorpusManagementView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that should only
+				be used in the corpus management context.
+			</doc-text>
+		</doc>
+	</extension-point>
+	
+	<!-- Standard Extensions -->
+	
+	<extension id="CorpusManagerPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				Perspective that allows the management of corpora instances.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.corpusManagerPerspective.identity.name" />
+		<parameter id="description" value="plugins.languageTools.corpusManagerPerspective.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.CorpusManagerPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus-manager-perspective.gif" />
+	</extension>
+	
+	<extension id="TextInputView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="LanguageToolsView">
+		<doc>
+			<doc-text>
+				Plain simple text input.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.textInputView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.textInputView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.input.TextInputView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/input/text-input-view.gif" />
+		<parameter id="alignment" value="bottom" />
+		<parameter id="priority" value="high" />
+		<parameter id="requiresTab" value="false" />
+	</extension>
+	
+	<extension id="CorpusEditView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="CorpusManagementView">
+		<doc>
+			<doc-text>
+				Editor for corpora using registered CorpusEditor implementations
+				to perform the actual editing.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.corpusEditView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.corpusEditView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusEditView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-edit-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="high" />
+	</extension>
+	
+	<extension id="CorpusExplorerView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="CorpusManagementView">
+		<doc>
+			<doc-text>
+				Default explorer to browse corpus categories and instances.
+				Allows basic management: add, delete, rename
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.corpusExplorerView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.corpusExplorerView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusExplorerView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-explorer-view.gif" />
+		<parameter id="alignment" value="left" />
+		<parameter id="priority" value="high" />
+	</extension>
+	
+	<extension id="CorpusPropertiesView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="CorpusManagementView">
+		<doc>
+			<doc-text>
+				Outline view to display corpus fields (name, editable, type, ...)
+				and properties. If meta-data information is available for the
+				currently displayed corpus it will be shown as well. Supports
+				export and copy functions for property and/or meta-data entries. 
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.corpusPropertiesView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.corpusPropertiesView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusPropertiesView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-properties-view.gif" />
+		<parameter id="alignment" value="right" />
+		<parameter id="priority" value="standard" />
+	</extension>
+	
+	<extension id="DefaultSimpleCorpus" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Corpus">
+		<doc>
+			<doc-text>
+				A simple synchronous corpus implementation that relies on
+				SentenceDataReader objects to handle the actual loading
+				of its content data. This implementation will suffice for
+				most small or medium sized corpora.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.DefaultSimpleCorpus" />
+	</extension>
+	
+	<extension id="FilteredCorpus" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Corpus">
+		<doc>
+			<doc-text>
+				Wrapper implementation for derived corpora that are "filtered" by 
+				an array of integers. Those indices mark the data items in the base
+				corpus that are to be included in the "filtered" corpus. This
+				implementation reflects the type and properties of its base corpus and
+				forwards all listener related method calls to it.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.FilteredCorpus" />
+	</extension>
+	
+	<extension id="BasicCorpusEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Default editor usable for basically any type of Corpus
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
+	</extension>
+	
+	<extension id="DerivedCorpusEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Editor used for derived corpora that enables the
+				selection of a base corpus.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.DerivedCorpusEditor" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.DerivedCorpus" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
+	</extension>
+</plugin>

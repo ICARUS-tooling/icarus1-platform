@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.dependency" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.dependency.DependencyPlugin">
+	
+	<doc>
+		<doc-text>
+			The base plug-in for all dependency related tools.
+		</doc-text>
+	</doc>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+	</requires>
+</plugin>

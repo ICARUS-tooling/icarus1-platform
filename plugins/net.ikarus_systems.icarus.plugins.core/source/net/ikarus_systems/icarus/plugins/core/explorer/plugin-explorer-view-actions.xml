@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		PLUGIN EXPLORER VIEW
+	-->
+
+	<!-- Activate Plug-In -->
+	<action id="plugins.core.pluginExplorerView.activatePluginAction"
+		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		
+	<!-- Deactivate Plug-In -->
+	<action id="plugins.core.pluginExplorerView.deactivatePluginAction"
+		name="${id}.name" desc="${id}.description" icon="nav_stop.gif" />
+		
+	<!-- Check Integrity -->
+	<action id="plugins.core.pluginExplorerView.checkIntegrityAction"
+		name="${id}.name" desc="${id}.description" icon="dep_loop.gif" />
+		
+	<!-- View Element -->
+	<action id="plugins.core.pluginExplorerView.viewElementAction"
+		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif"/>
+		
+	<!-- Open in Hierarchy View -->
+	<action id="plugins.core.pluginExplorerView.openHierarchyViewAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Open Directory -->
+	<action id="plugins.core.pluginExplorerView.openDirectoryAction"
+		name="${id}.name" desc="${id}.description" icon="fldr_obj.gif" />
+		
+	<!-- View Manifest -->
+	<action id="plugins.core.pluginExplorerView.viewManifestAction"
+		name="${id}.name" desc="${id}.description" icon="plugin_mf_obj.gif" />
+		
+	<!-- Copy Element -->
+	<action id="plugins.core.pluginExplorerView.copyElementAction"
+		name="${id}.name" desc="${id}.description" icon="copy.gif" />
+		
+	<!-- Copy Element Name -->
+	<action id="plugins.core.pluginExplorerView.copyElementNameAction"
+		name="${id}.name" desc="${id}.description" icon="cpyqual_menu.gif" />
+		
+	<!-- Show Declaring Plug-In -->
+	<action id="plugins.core.pluginExplorerView.showPluginAction"
+		name="${id}.name" desc="${id}.description" icon="search_decl_obj.gif" />
+		
+	<!-- Popup Menu List -->
+	<action-list id="plugins.core.pluginExplorerView.popupMenuList">
+		<item type="action" value="plugins.core.pluginExplorerView.viewElementAction" />
+		<item type="action" value="plugins.core.pluginExplorerView.openHierarchyViewAction" />
+		<separator />
+		<item type="action" value="plugins.core.pluginExplorerView.copyElementAction" />
+		<item type="action" value="plugins.core.pluginExplorerView.copyElementNameAction" />
+		<separator />
+		<item type="action" value="plugins.core.pluginExplorerView.activatePluginAction" />
+		<item type="action" value="plugins.core.pluginExplorerView.deactivatePluginAction" />
+		<item type="action" value="plugins.core.pluginExplorerView.checkIntegrityAction" />
+		<separator />
+		<item type="action" value="plugins.core.pluginExplorerView.viewManifestAction" />
+		<item type="action" value="plugins.core.pluginExplorerView.openDirectoryAction" />
+		<item type="action" value="plugins.core.pluginExplorerView.showPluginAction" />
+	</action-list>
+	
+</actions>

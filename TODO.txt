@@ -1,0 +1,12 @@
+FIXME:
+
+OPTIONAL:
+
+TODO:
+
+	-	add command line flag to start in management mode:
+		-	only core plug-in active with management perspective
+		-	no integrity check of plug-in registry!
+		-	limited options for user in terms of additional perspectives and/or views
+
+DONE:
