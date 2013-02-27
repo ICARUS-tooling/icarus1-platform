@@ -1,11 +1,11 @@
 /*
- * $Revision: 262 $
- * $Date: 2012-12-22 22:30:56 +0100 (Sa, 22 Dez 2012) $
- * $URL: https://subversion.assembla.com/svn/ims-studienarbeit/trunk/Icarus/core/net.ikarus.systems.icarus.platform.launcher/source/net/ikarus/systems/icarus/platform/launcher/Launcher.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2012-12-22 22:30:56 +0100 (Sa, 22 Dez 2012) $ 
- * $LastChangedRevision: 262 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package net.ikarus_systems.icarus.resources;
 

@@ -1,5 +1,5 @@
 /**
- * $Id: mxEventObject.java,v 1.4 2009-12-01 15:21:30 gaudenz Exp $
+ * $Id$
  * Copyright (c) 2007, Gaudenz Alder
  */
 package net.ikarus_systems.icarus.ui.events;
