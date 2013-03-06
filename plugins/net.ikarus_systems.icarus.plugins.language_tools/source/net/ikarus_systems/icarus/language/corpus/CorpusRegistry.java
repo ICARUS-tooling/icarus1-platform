@@ -355,6 +355,55 @@ public class CorpusRegistry {
 	public static String getTempName(Corpus corpus) {
 		return corpus.hashCode()+"@"+System.currentTimeMillis(); //$NON-NLS-1$
 	}
+	
+	public void setProperties(Corpus corpus, Map<String, Object> properties) {		
+		Map<String, Object> oldProperties = corpus.getProperties();
+		oldProperties.clear();
+		
+		if(properties!=null) {
+			oldProperties.putAll(properties);
+		}
+		
+		corpusChanged(corpus);
+	}
+	
+	public void setProperty(Corpus corpus, String key, Object value) {
+		if(key==null)
+			throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+		
+		Object oldValue = corpus.getProperty(key);
+		if(oldValue==value || (value!=null && value.equals(oldValue))) {
+			return;
+		}
+		
+		corpus.setProperty(key, value);
+		
+		corpusChanged(corpus);
+	}
+	
+	public void setName(Corpus corpus, String name) {
+		if(name==null)
+			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+		if(name.equals(corpus.getName())) {
+			return;
+		}
+		
+		corpus.setName(name);
+		
+		corpusChanged(corpus);
+	}
+	
+	public void setLocation(Corpus corpus, Location location) {
+		if(location==null)
+			throw new IllegalArgumentException("Invalid location"); //$NON-NLS-1$
+		if(location.equals(corpus.getLocation())) {
+			return;
+		}
+		
+		corpus.setLocation(location);
+		
+		corpusChanged(corpus);
+	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.ui.events.EventSource#addListener(java.lang.String, net.ikarus_systems.icarus.ui.events.EventListener)

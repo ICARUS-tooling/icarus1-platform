@@ -20,6 +20,8 @@ import java.util.WeakHashMap;
  */
 public class WeakLRUCache<K, V> extends WeakHashMap<K, V> implements Cache<K, V> {
 	
+	// FIXME using WeakHashMap is crap here!
+	
 	private LinkedHashSet<K> order = new LinkedHashSet<>();
 	
 	protected int maxSize = Integer.MAX_VALUE;

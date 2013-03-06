@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.language;
 
+import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Collections;
@@ -51,7 +52,7 @@ public final class LanguageManager implements Serializable {
 	
 	// prevent multiple deserialization
 	private Object readResolve() throws ObjectStreamException {
-		return getInstance();
+		throw new NotSerializableException();
 	}
 	
 	// prevent cloning
@@ -78,8 +79,7 @@ public final class LanguageManager implements Serializable {
 	public Grammar getGrammar(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		
-		Object grammar = null;
-		grammar = grammars.get(id);
+		Object grammar = grammars.get(id);
 		
 		if(grammar==null)
 			throw new UnknownIdentifierException("No such grammar: "+id); //$NON-NLS-1$

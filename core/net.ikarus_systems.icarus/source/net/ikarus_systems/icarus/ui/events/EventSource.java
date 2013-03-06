@@ -36,6 +36,10 @@ public class EventSource {
 	 * used in its place.
 	 */
 	protected Object eventSource;
+	
+	protected transient volatile int deadListenerCount = 0;
+	
+	protected transient int deadListenerTreshold = 5;
 
 	/**
 	 * Flag to enable or disable firing of events.
@@ -77,11 +81,16 @@ public class EventSource {
 		return eventsEnabled;
 	}
 
-	/**
-	 * 
-	 */
 	public void setEventsEnabled(boolean eventsEnabled) {
 		this.eventsEnabled = eventsEnabled;
+	}
+
+	public int getDeadListenerTreshold() {
+		return deadListenerTreshold;
+	}
+
+	public void setDeadListenerTreshold(int deadListenerTreshold) {
+		this.deadListenerTreshold = deadListenerTreshold;
 	}
 
 	/**
@@ -95,8 +104,9 @@ public class EventSource {
 	public void addListener(String eventName, EventListener listener) {
 		Exceptions.testNullArgument(listener, "listener"); //$NON-NLS-1$
 		
-		if (eventListeners == null)
+		if (eventListeners == null) {
 			eventListeners = new ArrayList<>();
+		}
 
 		eventListeners.add(eventName);
 		eventListeners.add(listener);
@@ -126,8 +136,8 @@ public class EventSource {
 				if (eventListeners.get(i + 1) == listener
 						&& (eventName == null || String.valueOf(
 								eventListeners.get(i)).equals(eventName))) {
-					eventListeners.remove(i + 1);
-					eventListeners.remove(i);
+					eventListeners.set(i+1, null);
+					eventListeners.set(i, null);
 				}
 			}
 		}
@@ -178,13 +188,30 @@ public class EventSource {
 
 			for (int i = 0; i < eventListeners.size(); i += 2) {
 				String listen = (String) eventListeners.get(i);
-
-				if (listen == null || listen.equals(event.getName())) {
-					((EventListener) eventListeners.get(i + 1)).invoke(
-							sender, event);
+				EventListener listener = (EventListener) eventListeners.get(i + 1);
+				
+				if(listener==null) {
+					deadListenerCount++;
+				} else if (listen == null || listen.equals(event.getName())) {
+					listener.invoke(sender, event);
 				}
 			}
+			
+			if(deadListenerCount>=deadListenerTreshold) {
+				clearEventListeners();
+			}
 		}
+	}
+	
+	protected void clearEventListeners() {
+		for(int i=eventListeners.size()-2; i>-1; i-=2) {
+			if(eventListeners.get(i)==null && eventListeners.get(i+1)==null) {
+				eventListeners.remove(i+1);
+				eventListeners.remove(i);
+			}
+		}
+		
+		deadListenerCount = 0;
 	}
 
 	public void fireEventEDT(final EventObject event, final Object sender) {

@@ -216,6 +216,7 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		propertiesTable.setIntercellSpacing(new Dimension(4, 4));
 		
 		CorpusRegistry.getInstance().addListener(Events.REMOVED, handler);
+		CorpusRegistry.getInstance().addListener(Events.CHANGED, handler);
 	}
 	
 	protected String getCorpusName() {
@@ -280,6 +281,13 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		
 		// Properties
 		propertiesTableModel.reload();
+		refreshPropertiesActions();
+	}
+	
+	protected void refreshPropertiesActions() {
+		boolean enabled = propertiesTable.getSelectedRow()!=-1;
+		propertyEditButton.setEnabled(enabled);
+		propertyRemoveButton.setEnabled(enabled);
 	}
 
 	/**
@@ -305,23 +313,20 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 						newName, uniqueName);
 			}
 			nameInput.setText(uniqueName);
-			corpus.setName(uniqueName);
+			CorpusRegistry.getInstance().setName(corpus, uniqueName);
 		}
 		
 		// Location
 		String locationString = locationInput.getText();
 		if(locationString!=null && !locationString.isEmpty()) {
-			corpus.setLocation(new DefaultFileLocation(new File(locationString)));
+			CorpusRegistry.getInstance().setLocation(corpus, 
+					new DefaultFileLocation(new File(locationString)));
 		}
 
 		// Properties
-		corpus.getProperties().clear();
-		Map<String, Object> properties = propertiesTableModel.properties;
-		if(properties!=null) {
-			// Replace the old set of properties
-			corpus.getProperties().putAll(properties);
-		}
-		
+		// Replace the old set of properties
+		CorpusRegistry.getInstance().setProperties(corpus, 
+				propertiesTableModel.properties);
 	}
 
 	/**

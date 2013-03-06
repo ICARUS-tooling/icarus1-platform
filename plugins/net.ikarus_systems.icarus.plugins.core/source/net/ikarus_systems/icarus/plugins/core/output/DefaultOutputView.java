@@ -26,7 +26,6 @@ import javax.swing.border.EmptyBorder;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.ManagementConstants;
 import net.ikarus_systems.icarus.plugins.core.View;
-import net.ikarus_systems.icarus.plugins.core.explorer.PluginElementProxy;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.events.EventListener;
@@ -35,6 +34,7 @@ import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.Wrapper;
 import net.ikarus_systems.icarus.util.opi.Commands;
 import net.ikarus_systems.icarus.util.opi.Message;
 import net.ikarus_systems.icarus.util.opi.ResultMessage;
@@ -89,18 +89,14 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#reset()
 	 */
 	@Override
 	public void reset() {
+		if(presenterPane==null) {
+			return;
+		}
+		
 		for(int i=presenterPane.getTabCount()-1; i>-1; i--) {
 			TabComponent tabComponent = (TabComponent) presenterPane.getTabComponentAt(i);
 			if(tabComponent.presenter!=null) {
@@ -154,6 +150,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			options = Options.emptyOptions;
 		}
 		
+		// Lazily create presenter pane
 		if(presenterPane==null) {
 			presenterPane = new JTabbedPane();
 			UIUtil.defaultHideTabbedPaneDecoration(presenterPane);
@@ -193,17 +190,20 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		
 		Object data = message.getData();
 		
-		if(data instanceof PluginElementProxy) {
-			data = ((PluginElementProxy)data).getElement();
-		}
-		
-		if(!canDisplay(data)) {
-			return message.unsupportedDataResult();
+		// Unwrap wrapped data
+		if(data instanceof Wrapper) {
+			data = ((Wrapper<?>)data).get();
 		}
 		
 		Object owner = message.getOption(ManagementConstants.OWNER_OPTION);
 		
 		if(Commands.PRESENT.equals(message.getCommand()) && owner!=null) {
+			
+			// Check if there is a presenter available for the supplied object
+			if(!canDisplay(data)) {
+				return message.unsupportedDataResult();
+			}
+			
 			displayData(data, owner, message.getOptions());
 			return message.successResult(null);
 		} else {

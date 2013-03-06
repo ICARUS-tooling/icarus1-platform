@@ -287,22 +287,6 @@ public class ExtensionPointOutlineView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#close()
-	 */
-	@Override
-	public void close() {
-		// no-op
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#reset()
 	 */
 	@Override
@@ -322,7 +306,7 @@ public class ExtensionPointOutlineView extends View {
 			selectedObject = ((DefaultMutableTreeNode)selectedObject).getUserObject();
 		}
 		if(selectedObject instanceof PluginElementProxy) {
-			selectedObject = ((PluginElementProxy)selectedObject).getElement();
+			selectedObject = ((PluginElementProxy)selectedObject).get();
 		}
 		
 		if(selectedObject instanceof PluginElement) {

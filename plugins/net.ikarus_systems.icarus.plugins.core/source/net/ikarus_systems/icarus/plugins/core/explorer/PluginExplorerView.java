@@ -386,23 +386,6 @@ public class PluginExplorerView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#close()
-	 */
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#reset()
 	 */
 	@Override
@@ -424,7 +407,7 @@ public class PluginExplorerView extends View {
 		Object data = message.getData();
 		
 		if(data instanceof PluginElementProxy) {
-			data = ((PluginElementProxy)data).getElement();
+			data = ((PluginElementProxy)data).get();
 		}
 		
 		if(data==null) {
@@ -519,7 +502,7 @@ public class PluginExplorerView extends View {
 		if(path!=null) {
 			item = path[path.length-1];
 			if(item instanceof PluginElementProxy)
-				item = ((PluginElementProxy)item).getElement();
+				item = ((PluginElementProxy)item).get();
 		}
 		
 		PluginManager pluginManager = PluginUtil.getPluginManager();
@@ -700,7 +683,7 @@ public class PluginExplorerView extends View {
 			}
 			
 			if(selectedObject instanceof PluginElementProxy) {
-				selectedObject = ((PluginElementProxy)selectedObject).getElement();
+				selectedObject = ((PluginElementProxy)selectedObject).get();
 				// selectedObject should not be non-null!
 			}
 			
@@ -839,7 +822,7 @@ public class PluginExplorerView extends View {
 			}
 			
 			if(selectedObject instanceof PluginElementProxy) {
-				selectedObject = ((PluginElementProxy)selectedObject).getElement();
+				selectedObject = ((PluginElementProxy)selectedObject).get();
 			}
 			
 			if(!(selectedObject instanceof PluginElement)) {

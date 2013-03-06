@@ -55,7 +55,6 @@ import net.ikarus_systems.icarus.util.Location;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.opi.Commands;
 import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
 
 import org.java.plugin.registry.Extension;
 
@@ -136,36 +135,12 @@ public class CorpusExplorerView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#close()
-	 */
-	@Override
-	public void close() {
-		// no-op
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#reset()
 	 */
 	@Override
 	public void reset() {
 		UIUtil.expandAll(corporaTree, false);
 		corporaTree.expandPath(new TreePath(corporaTree.getModel().getRoot()));
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.opi.Message)
-	 */
-	@Override
-	protected ResultMessage handleRequest(Message message) throws Exception {
-		return message.unknownRequestResult();
 	}
 	
 	private Object[] getSelectionPath() {
@@ -487,7 +462,7 @@ public class CorpusExplorerView extends View {
 			}
 			
 			try {
-				corpus.setName(uniqueName);
+				CorpusRegistry.getInstance().setName(corpus, uniqueName);
 			} catch (Exception ex) {
 				LoggerFactory.getLogger(CorpusExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
 						"Unable to rename corpus "+currentName+" to "+uniqueName, ex)); //$NON-NLS-1$ //$NON-NLS-2$

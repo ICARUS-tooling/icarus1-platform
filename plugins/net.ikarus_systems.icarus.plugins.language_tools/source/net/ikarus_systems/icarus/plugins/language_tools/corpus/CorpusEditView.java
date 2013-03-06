@@ -137,6 +137,14 @@ public class CorpusEditView extends View {
 	private void showDefaultInfo() {
 		scrollPane.setViewportView(infoLabel);
 		header.setText(""); //$NON-NLS-1$
+		
+		// Close any active editor and discard its reference
+		// This is required to prevent "old" corpora to block
+		// refresh operations
+		if(editor!=null) {
+			editor.close();
+			editor = null;
+		}
 	}
 	
 	private void refreshActions() {
@@ -267,6 +275,8 @@ public class CorpusEditView extends View {
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		if(Commands.EDIT.equals(message.getCommand())) {
 			Object data = message.getData();
+			
+			// We allow null values since this is a way to clear the editor view
 			if(data==null || data instanceof Corpus) {
 				editCorpus((Corpus) data);
 				refreshActions();

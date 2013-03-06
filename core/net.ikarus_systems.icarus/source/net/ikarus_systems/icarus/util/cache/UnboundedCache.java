@@ -18,9 +18,6 @@ import java.util.HashMap;
  */
 public class UnboundedCache<K, V> extends HashMap<K, V> implements Cache<K, V> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7567083572311257863L;
 
 	/**

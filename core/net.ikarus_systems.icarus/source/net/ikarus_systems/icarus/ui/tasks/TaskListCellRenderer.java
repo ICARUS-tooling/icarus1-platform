@@ -11,15 +11,22 @@ package net.ikarus_systems.icarus.ui.tasks;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.GroupLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
+import javax.swing.border.EmptyBorder;
 
+import net.ikarus_systems.icarus.ui.GridBagUtil;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 
@@ -29,18 +36,21 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
  *
  */
 public class TaskListCellRenderer extends JPanel implements
-		ListCellRenderer<Object>, EventListener {
+		ListCellRenderer<Object>, EventListener, ActionListener {
 
 	private static final long serialVersionUID = 3335847880598821420L;
 	
+	private JLabel taskIcon;
 	private JLabel header;
 	private JProgressBar progressBar;
-	private JLabel footer;
+	private JTextArea footer;
 	private JButton cancelButton;
 	
 	private Object task;
 	
 	private final TaskManager manager;
+	
+	private static Icon defaultIcon;
 
 	public TaskListCellRenderer(TaskManager manager) {
 		if(manager==null)
@@ -52,8 +62,37 @@ public class TaskListCellRenderer extends JPanel implements
 	}
 	
 	private void buildPanel() {
-		GroupLayout layout = new GroupLayout(this);
 		
+		taskIcon = new JLabel();
+		taskIcon.setBorder(new EmptyBorder(3, 3, 3, 5));
+		
+		progressBar = new JProgressBar();
+		
+		header = new JLabel();
+		header.setBorder(new EmptyBorder(3, 5, 2, 5));
+		
+		footer = new JTextArea(5, 40);
+		footer.setWrapStyleWord(true);
+		footer.setLineWrap(true);
+		
+		cancelButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("nav_stop.gif")); //$NON-NLS-1$
+		cancelButton.setFocusable(false);
+		cancelButton.setBorderPainted(false);
+		cancelButton.addActionListener(this);
+		
+		setLayout(GridBagUtil.getLayout());
+		
+		GridBagConstraints gbc = GridBagUtil.makeGbc(0, 0);
+		add(taskIcon, gbc);
+		
+		gbc = GridBagUtil.makeGbcH(1, 0, 1, 1);
+		add(progressBar, gbc);
+		
+		gbc = GridBagUtil.makeGbcH(1, 1, 1, 1);
+		add(header, gbc);
+		
+		gbc = GridBagUtil.makeGbc(2, 0);
+		add(cancelButton, gbc);
 	}
 
 	/**
@@ -89,11 +128,47 @@ public class TaskListCellRenderer extends JPanel implements
 		
 		return this;
 	}
+	
+	private Icon getDefaultIcon() {
+		if(defaultIcon==null) {
+			defaultIcon = IconRegistry.getGlobalRegistry().getIcon("");
+		}
+		return defaultIcon;
+	}
 
 	public void showTask(Object task) {
+		if(header==null) {
+			buildPanel();
+		}
+		
+		// Set "default" appearance
 		if(task==null) {
-			// TODO set all components to an "empty" state
+			taskIcon.setIcon(null);
+			header.setText(null);
+			footer.setText(null);
+			cancelButton.setVisible(false);
+			progressBar.setVisible(false);
 			return;
+		}
+		
+		Icon icon = manager.getIcon(task);
+		if(icon==null) {
+			icon = getDefaultIcon();
+		}
+		
+		taskIcon.setIcon(icon);
+		header.setText(manager.getTitle(task));
+		footer.setText(manager.getInfo(task));
+		
+		if(manager.isActiveTask(task)) {
+			progressBar.setIndeterminate(manager.isIndeterminate(task));
+			progressBar.setValue(manager.getProgress(task));
+			
+			progressBar.setVisible(true);
+			cancelButton.setVisible(true);
+		} else {
+			progressBar.setVisible(false);
+			cancelButton.setVisible(false);
 		}
 	}
 	
@@ -101,6 +176,9 @@ public class TaskListCellRenderer extends JPanel implements
 		if(this.task==task) {
 			return;
 		}
+		
+		this.task = task;
+		showTask(task);
 	}
 
 	/**
@@ -112,11 +190,24 @@ public class TaskListCellRenderer extends JPanel implements
 				|| this.task==null) {
 			return;
 		}
-		Object task = event.getProperty("task");
+		Object task = event.getProperty("task"); //$NON-NLS-1$
 		if(this.task!=task) {
 			return;
 		}
 		
 		// TODO refresh components based on property
+	}
+
+	/**
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		try {
+			Object task = manager.getActiveTask();
+			manager.cancelTask(task);
+		} catch(Exception ex) {
+			// TODO
+		}
 	}
 }

@@ -370,7 +370,7 @@ public class ExtensionPointHierarchyView extends View {
 			selectedObject = ((DefaultMutableTreeNode)selectedObject).getUserObject();
 		}
 		if(selectedObject instanceof PluginElementProxy) {
-			selectedObject = ((PluginElementProxy)selectedObject).getElement();
+			selectedObject = ((PluginElementProxy)selectedObject).get();
 		}
 		
 		if(showPoint) { 
@@ -428,14 +428,6 @@ public class ExtensionPointHierarchyView extends View {
 		outlineModel.clear();
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode)hierarchyTree.getModel().getRoot();
 		root.removeAllChildren();
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
 	}
 
 	/**
@@ -627,7 +619,7 @@ public class ExtensionPointHierarchyView extends View {
 				selectedObject = ((DefaultMutableTreeNode)selectedObject).getUserObject();
 			}
 			if(selectedObject instanceof PluginElementProxy) {
-				selectedObject = ((PluginElementProxy)selectedObject).getElement();
+				selectedObject = ((PluginElementProxy)selectedObject).get();
 			}
 			
 			if(selectedObject instanceof ExtensionPoint) {

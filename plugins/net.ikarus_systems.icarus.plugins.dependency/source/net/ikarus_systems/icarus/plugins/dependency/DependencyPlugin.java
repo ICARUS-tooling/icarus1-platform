@@ -18,11 +18,8 @@ import org.java.plugin.Plugin;
  */
 public class DependencyPlugin extends Plugin {
 
-	/**
-	 * 
-	 */
 	public DependencyPlugin() {
-		// TODO Auto-generated constructor stub
+		// no-op
 	}
 
 	/**

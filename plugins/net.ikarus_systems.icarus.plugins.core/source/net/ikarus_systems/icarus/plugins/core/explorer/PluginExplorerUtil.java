@@ -39,7 +39,7 @@ public final class PluginExplorerUtil {
 				item = ((DefaultMutableTreeNode)item).getUserObject();
 			}
 			if(item instanceof PluginElementProxy) {
-				item = ((PluginElementProxy)item).getElement();
+				item = ((PluginElementProxy)item).get();
 			}
 			items[index] = item;
 			treePath = treePath.getParentPath();
@@ -60,7 +60,7 @@ public final class PluginExplorerUtil {
 		for(int i=objectPath.length-1; i>-1; i--) {
 			Object node = objectPath[i];
 			if(node instanceof PluginElementProxy) {
-				node = ((PluginElementProxy)node).getElement();
+				node = ((PluginElementProxy)node).get();
 			}
 			if(node instanceof PluginDescriptor) {
 				return (PluginDescriptor) node;
@@ -87,7 +87,7 @@ public final class PluginExplorerUtil {
 		for(int i=objectPath.length-1; i>-1; i--) {
 			Object node = objectPath[i];
 			if(node instanceof PluginElementProxy) {
-				node = ((PluginElementProxy)node).getElement();
+				node = ((PluginElementProxy)node).get();
 			}
 			if(node instanceof PluginDescriptor) {
 				return (PluginDescriptor) node;

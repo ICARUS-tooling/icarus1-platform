@@ -120,7 +120,7 @@ public final class TaskManager {
 		return states.get(task);
 	}
 	
-	private SwingWorker<?, ?> getWorker(Object task) {
+	SwingWorker<?, ?> getWorker(Object task) {
 		if(task instanceof SwingWorker) {
 			return (SwingWorker<?, ?>)task;
 		}
@@ -237,6 +237,10 @@ public final class TaskManager {
 			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
 		
 		return ((SwingWorker<?, ?>)task).getProgress();
+	}
+	
+	void cancelTask(Object task) {
+		// TODO
 	}
 	
 	TaskQueue getQueue() {

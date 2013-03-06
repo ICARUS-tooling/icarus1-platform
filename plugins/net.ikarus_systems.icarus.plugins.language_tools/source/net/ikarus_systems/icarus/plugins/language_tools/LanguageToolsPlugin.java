@@ -25,9 +25,6 @@ public class LanguageToolsPlugin extends Plugin {
 	
 	public static final String PLUGIN_ID = LanguageToolsConstants.LANGUAGE_TOOLS_PLUGIN_ID;
 
-	/**
-	 * 
-	 */
 	public LanguageToolsPlugin() {
 		// no-op
 	}

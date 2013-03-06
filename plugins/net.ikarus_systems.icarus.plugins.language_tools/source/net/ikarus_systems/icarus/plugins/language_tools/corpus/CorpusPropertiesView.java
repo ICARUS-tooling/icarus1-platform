@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import javax.swing.Box;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,7 +48,6 @@ import net.ikarus_systems.icarus.resources.Localizer;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
-import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -266,14 +265,6 @@ public class CorpusPropertiesView extends View {
 		corpus = null;
 		CorpusRegistry.getInstance().removeListener(handler);
 		removeBroadcastListener(handler);
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
 	}
 
 	/**

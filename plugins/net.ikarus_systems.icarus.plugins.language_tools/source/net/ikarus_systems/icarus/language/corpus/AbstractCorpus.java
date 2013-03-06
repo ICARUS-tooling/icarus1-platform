@@ -70,10 +70,6 @@ public abstract class AbstractCorpus {
 	public void setName(String name) {
 		if(name==null)
 			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
-		if(name.equals(this.name)) {
-			return;
-		}
-		
 		this.name = name;
 	}
 

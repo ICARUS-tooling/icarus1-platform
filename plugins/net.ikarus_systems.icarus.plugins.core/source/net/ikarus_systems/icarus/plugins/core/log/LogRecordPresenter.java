@@ -276,4 +276,9 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 			cacheText(record, text);
 		}
 	}
+	
+	@Override
+	public void close() {
+		// no-op
+	}
 }

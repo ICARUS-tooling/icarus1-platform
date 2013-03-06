@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.ikarus_systems.icarus.language.corpus.Corpus;
+import net.ikarus_systems.icarus.language.corpus.CorpusRegistry;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
@@ -142,6 +143,7 @@ public class DerivedCorpusEditor extends BasicCorpusEditor {
 		
 		FilteredCorpus filteredCorpus = getEditingItem();
 		filteredCorpus.setBase((Corpus) baseCorpusSelect.getSelectedItem());
+		CorpusRegistry.getInstance().corpusChanged(filteredCorpus);
 	}
 
 	/**

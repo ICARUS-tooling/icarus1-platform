@@ -58,8 +58,6 @@ import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.id.DefaultIdentity;
 import net.ikarus_systems.icarus.util.id.Identity;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
 
 /**
  * @author Markus Gärtner 
@@ -337,14 +335,6 @@ public class LogView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#reset()
 	 */
 	@Override
@@ -353,15 +343,6 @@ public class LogView extends View {
 			return;
 		}
 		loggingModel.clear();
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#receiveData(net.ikarus_systems.icarus.plugins.core.View, java.lang.Object, net.ikarus_systems.icarus.util.Options)
-	 */
-	@Override
-	protected ResultMessage handleRequest(Message message) throws Exception {
-		// Unknown request
-		return new ResultMessage(message);
 	}
 	
 	private LogRecord getSelectedRecord() {

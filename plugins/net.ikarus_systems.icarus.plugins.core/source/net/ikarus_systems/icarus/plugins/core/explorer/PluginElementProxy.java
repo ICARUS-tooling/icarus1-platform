@@ -28,6 +28,7 @@ import net.ikarus_systems.icarus.ui.DecoratedIcon;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.Wrapper;
 
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
@@ -43,7 +44,7 @@ import org.java.plugin.registry.PluginFragment;
  * @version $Id$
  *
  */
-public class PluginElementProxy {
+public class PluginElementProxy implements Wrapper<Object> {
 
 	private final Object element, parent;
 	
@@ -262,7 +263,8 @@ public class PluginElementProxy {
 		}
 	}
 	
-	public Object getElement() {
+	@Override
+	public Object get() {
 		return element;
 	}
 	

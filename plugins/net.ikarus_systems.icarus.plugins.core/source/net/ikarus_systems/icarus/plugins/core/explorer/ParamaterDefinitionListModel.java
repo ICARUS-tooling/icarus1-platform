@@ -83,9 +83,9 @@ public class ParamaterDefinitionListModel extends AbstractListModel<Object> {
 					@Override
 					public int compare(Object o1, Object o2) {
 						ExtensionPoint.ParameterDefinition param1 = 
-								(ParameterDefinition) ((PluginElementProxy)o1).getElement();
+								(ParameterDefinition) ((PluginElementProxy)o1).get();
 						ExtensionPoint.ParameterDefinition param2 = 
-								(ParameterDefinition) ((PluginElementProxy)o2).getElement();
+								(ParameterDefinition) ((PluginElementProxy)o2).get();
 						
 						int result = param1.getDeclaringExtensionPoint().getUniqueId().compareTo(
 								param2.getDeclaringExtensionPoint().getUniqueId());
@@ -106,9 +106,9 @@ public class ParamaterDefinitionListModel extends AbstractListModel<Object> {
 					@Override
 					public int compare(Object o1, Object o2) {
 						ExtensionPoint.ParameterDefinition param1 = 
-								(ParameterDefinition) ((PluginElementProxy)o1).getElement();
+								(ParameterDefinition) ((PluginElementProxy)o1).get();
 						ExtensionPoint.ParameterDefinition param2 = 
-								(ParameterDefinition) ((PluginElementProxy)o2).getElement();
+								(ParameterDefinition) ((PluginElementProxy)o2).get();
 						
 						return param1.getId().compareTo(param2.getId());
 					}

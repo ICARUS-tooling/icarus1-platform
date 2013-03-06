@@ -49,24 +49,6 @@ public class CorpusInspectView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#close()
-	 */
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#reset()
 	 */
 	@Override

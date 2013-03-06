@@ -136,7 +136,9 @@ public abstract class View implements Identifiable {
 	 * all of its managed resources and therefore suggests immediate exit of
 	 * the program
 	 */
-	public abstract void close();
+	public void close() {
+		// Subclasses should override this to actually handle the close command
+	}
 	
 	/**
 	 * Checks whether this {@code View} can be closed. This method exists 
@@ -145,11 +147,17 @@ public abstract class View implements Identifiable {
 	 * situations the return value from this method being {@code true} does
 	 * {@code not} prevent the enclosing {@code Perspective} to close this
 	 * {@code View} by calling {@code #close()}!
+	 * <p>
+	 * The default implementation returns {@code true}.
 	 * @return {@code true} if this {@code View} is ready to be closed
 	 */
-	public abstract boolean isClosable();
+	public boolean isClosable() {
+		return true;
+	}
 	
-	public abstract void reset();
+	public void reset() {
+		// no-op
+	}
 	
 	@Override
 	public String toString() {
@@ -192,7 +200,9 @@ public abstract class View implements Identifiable {
 		this.perspective = perspective;
 	}
 
-	protected abstract ResultMessage handleRequest(Message message) throws Exception;
+	protected ResultMessage handleRequest(Message message) throws Exception {
+		return message.unknownRequestResult();
+	}
 	
 	/**
 	 * Forwards the given {@code data} to this {@code View}'s {@code Perspective}
