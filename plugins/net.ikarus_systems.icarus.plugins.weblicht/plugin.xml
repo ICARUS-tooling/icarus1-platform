@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.weblicht" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.weblicht.WeblichtPlugin">
+	
+	<doc>
+		<doc-text>
+			Weblicht web stuff
+		</doc-text>
+	</doc>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+	</requires>
+	
+	<!-- Extension-Points -->
+	
+	<!-- Standard Extensions -->
+	
+	<extension id="WeblichtPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				Perspective that allows the management of Weblicht services
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.weblicht.weblichtPerspective.identity.name" />
+		<parameter id="description" value="plugins.weblicht.weblichtPerspective.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.WeblichtPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/weblicht/weblicht-perspective.gif" />
+	</extension>
+	
+	<extension id="WeblichtChainView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Collection of all Weblicht Webchains.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.weblicht.weblichtChainView.identity.name" />
+		<parameter id="description" value="plugins.weblicht.weblichtChainView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.WeblichtChainView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/weblicht/weblicht-perspective.gif" />
+		<parameter id="alignment" value="left" />
+		<parameter id="priority" value="high" />
+	</extension>
+	
+	<extension id="WeblichtEditView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Editor for building new Weblicht Webchains.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.weblicht.weblichtEditView.identity.name" />
+		<parameter id="description" value="plugins.weblicht.weblichtEditView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.WeblichtEditView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/weblicht/weblicht-edit-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="high" />
+	</extension>
+	
+</plugin>
