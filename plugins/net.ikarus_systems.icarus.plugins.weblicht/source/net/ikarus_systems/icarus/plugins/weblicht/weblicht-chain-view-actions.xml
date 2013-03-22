@@ -8,7 +8,7 @@
 		
 	<!-- New Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.newWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="new_weblicht.gif" />
+		name="${id}.name" desc="${id}.description" icon="new_link_obj_dark.gif" />
 		
 	<!-- Delete Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.deleteWebchainAction"
@@ -26,6 +26,10 @@
 	<action id="plugins.weblicht.weblichtChainView.editWebchainAction"
 		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
 	
+	<!-- Info Webservice -->
+	<action id="plugins.weblicht.weblichtChainView.webserviceInfo"
+		name="${id}.name" desc="${id}.description" icon="help_contents.gif" />
+	
 	<!-- Run Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.runWebchainAction"
 		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
@@ -40,24 +44,29 @@
 		<item type="action" value="plugins.weblicht.weblichtChainView.stopWebchainAction" />
 		<separator />
 		<item type="action" value="plugins.weblicht.weblichtChainView.newWebchainAction" />
-		<separator />
 		<item type="action" value="plugins.weblicht.weblichtChainView.deleteWebchainAction" />
 		<item type="action" value="plugins.weblicht.weblichtChainView.cloneWebchainAction" />
-		<item type="action" value="plugins.weblicht.weblichtChainView.renameWebchainAction" />
 		<separator />
+		<item type="action" value="plugins.weblicht.weblichtChainView.renameWebchainAction" />		
 		<item type="action" value="plugins.weblicht.weblichtChainView.editWebchainAction" />
+		<separator />
+		<item type="action" value="plugins.weblicht.weblichtChainView.webserviceInfo" />
 	</action-list>
 
 		
 	<!-- Popup Menu List -->
 	<action-list id="plugins.weblicht.weblichtChainView.popupMenuList">
-		<item type="action" value="plugins.weblicht.weblichtChainView.newWebchainAction" />
+		<item type="action" value="plugins.weblicht.weblichtChainView.runWebchainAction" />
+		<item type="action" value="plugins.weblicht.weblichtChainView.stopWebchainAction" />
 		<separator />
+		<item type="action" value="plugins.weblicht.weblichtChainView.newWebchainAction" />
 		<item type="action" value="plugins.weblicht.weblichtChainView.deleteWebchainAction" />
 		<item type="action" value="plugins.weblicht.weblichtChainView.cloneWebchainAction" />
-		<item type="action" value="plugins.weblicht.weblichtChainView.renameWebchainAction" />
 		<separator />
+		<item type="action" value="plugins.weblicht.weblichtChainView.renameWebchainAction" />
 		<item type="action" value="plugins.weblicht.weblichtChainView.editWebchainAction" />
+		<separator />
+		<item type="action" value="plugins.weblicht.weblichtChainView.webserviceInfo" />
 	</action-list>
 	
 </actions>

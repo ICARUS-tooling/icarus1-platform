@@ -1,3 +1,12 @@
+/* 
+ * $Revision$ 
+ * $Date$ 
+ * $URL$ 
+ * 
+ * $LastChangedDate$  
+ * $LastChangedRevision$  
+ * $LastChangedBy$ 
+ */
 package net.ikarus_systems.icarus.plugins.weblicht;
 
 import java.awt.BorderLayout;
@@ -17,8 +26,8 @@ import javax.swing.border.EmptyBorder;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
-import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
-import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceEditor;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceRegistry;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
@@ -35,14 +44,13 @@ import net.ikarus_systems.icarus.util.opi.Message;
 import net.ikarus_systems.icarus.util.opi.ResultMessage;
 
 /**
- * 
  * @author Gregor Thiele
  * @version $Id$
  *
  */
-public class WeblichtEditView extends View {
-
-	private Editor<Webchain> editor;
+public class WebserviceEditView extends View {
+	//private Editor<Webservice> editor;
+	private WebserviceEditor editor;
 
 	private JLabel header;
 	private JLabel infoLabel;
@@ -51,12 +59,13 @@ public class WeblichtEditView extends View {
 
 	private Handler handler;
 	private CallbackHandler callbackHandler;
-
-
+	
+	boolean editable;
+	
 	/**
 	 * 
 	 */
-	public WeblichtEditView() {
+	public WebserviceEditView() {
 		// no-op
 	}
 
@@ -64,17 +73,17 @@ public class WeblichtEditView extends View {
 	public void init(JComponent container) {
 
 		// Load actions
-		URL actionLocation = WeblichtEditView.class
-				.getResource("weblicht-edit-view-actions.xml"); //$NON-NLS-1$
+		URL actionLocation = WebserviceEditView.class
+				.getResource("webservice-edit-view-actions.xml"); //$NON-NLS-1$
 		if (actionLocation == null)
 			throw new CorruptedStateException(
-					"Missing resources: weblicht-edit-view-actions.xml"); //$NON-NLS-1$
+					"webservice-edit-view-actions.xml"); //$NON-NLS-1$
 
 		ActionManager actionManager = getDefaultActionManager();
 		try {
 			actionManager.loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(WeblichtEditView.class).log(
+			LoggerFactory.getLogger(WebserviceEditView.class).log(
 					LoggerFactory.record(Level.SEVERE,
 							"Failed to load actions from file", e)); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
@@ -97,16 +106,16 @@ public class WeblichtEditView extends View {
 				.getInstance()
 				.getGlobalDomain()
 				.prepareComponent(infoLabel,
-						"plugins.weblicht.weblichtEditView.notAvailable", null); //$NON-NLS-1$
+						"plugins.weblicht.webserviceEditView.notAvailable", null); //$NON-NLS-1$
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 
 		// Footer area
 		JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
 		footer.setBorder(new EmptyBorder(5, 20, 5, 20));
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.weblicht.weblichtEditView.resetEditAction"))); //$NON-NLS-1$
+				"plugins.weblicht.webserviceEditView.resetEditAction"))); //$NON-NLS-1$
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.weblicht.weblichtEditView.applyEditAction"))); //$NON-NLS-1$	
+				"plugins.weblicht.webserviceEditView.applyEditAction"))); //$NON-NLS-1$		
 
 		// Description Scrollpane
 		scrollPane = new JScrollPane();
@@ -119,7 +128,7 @@ public class WeblichtEditView extends View {
 
 		showDefaultInfo();
 
-		WebchainRegistry.getInstance().addListener(Events.REMOVED, handler);
+		WebserviceRegistry.getInstance().addListener(Events.REMOVED, handler);
 		
 		registerActionCallbacks();	
 		refreshActions();
@@ -132,31 +141,30 @@ public class WeblichtEditView extends View {
 
 	private void refreshActions() {
 		ActionManager actionManager = getDefaultActionManager();
-		// add weblicht service check.. get weblicht,
+		// add webservice service check.. get webservice,
 
-		actionManager.setEnabled(getWebchain() != null,
-				"plugins.weblicht.weblichtEditView.resetEditAction", //$NON-NLS-1$
-				"plugins.weblicht.weblichtEditView.applyEditAction"); //$NON-NLS-1$
+		actionManager.setEnabled(getWebservice() != null,
+				"plugins.weblicht.webserviceEditView.resetEditAction", //$NON-NLS-1$
+				"plugins.weblicht.webserviceEditView.applyEditAction"); //$NON-NLS-1$
 
 	}
 
-	private Webchain getWebchain() {
+	private Webservice getWebservice() {
 		return editor == null ? null : editor.getEditingItem();
 	}
 
-	private Editor<Webchain> getEditor() {
+	private Editor<Webservice> getEditor() {
 		return editor;
 	}
 
 	@Override
 	public void close() {
-		WebchainRegistry.getInstance().removeListener(handler);
+		WebserviceRegistry.getInstance().removeListener(handler);
 		
-		Editor<Webchain> editor = this.editor;
+		Editor<Webservice> editor = this.editor;
 		if(editor!=null) {
 			editor.close();
-		}
-
+		}		
 		this.editor = null;
 
 	}
@@ -170,73 +178,73 @@ public class WeblichtEditView extends View {
 			return true;
 		}
 		
-		Webchain webchain = getWebchain();
-		if(webchain==null) {
+		Webservice webservice = getWebservice();
+		if(webservice==null) {
 			return true;
 		}
 		
 		// Let user decide whether to discard unsaved changes
 		return DialogFactory.getGlobalFactory().showConfirm(null, 
-				"plugins.weblicht.weblichtEditView.dialogs.discardChanges.title",  //$NON-NLS-1$
-				"plugins.weblicht.weblichtEditView.dialogs.discardChanges.message",  //$NON-NLS-1$
-				webchain.getName());
+				"plugins.weblicht.webserviceEditView.dialogs.discardChanges.title",  //$NON-NLS-1$
+				"plugins.weblicht.webserviceEditView.dialogs.discardChanges.message",  //$NON-NLS-1$
+				webservice.getName());
 	}
 
 	@Override
 	public void reset() {
-		editWebchain(null);
+		editWebservice(null);
 		refreshActions();
 	}
 	
 	
 	
-	private void editWebchain(Webchain webchain) {
-		if(webchain!=null) {
+	private void showWebservice(Webservice webservice) {
+		if(webservice!=null) {
 			requestFocusInPerspective();
 		}
 		
-		Webchain oldWebchain = getWebchain();
-		if(oldWebchain==webchain) {
+		Webservice oldWebservice = getWebservice();
+		if(oldWebservice==webservice) {
 			return;
 		}
 		
 		// Offer chance to save changes 
-		if(oldWebchain!=null && editor!=null && editor.hasChanges()) {
+		if(oldWebservice!=null && editor!=null && editor.hasChanges()) {
 			// Let user decide whether to discard unsaved changes
 			if(DialogFactory.getGlobalFactory().showConfirm(null, 
-					"plugins.weblicht.weblichtEditView.dialogs.saveChanges.title",  //$NON-NLS-1$
-					"plugins.weblicht.weblichtEditView.dialogs.saveChanges.message",  //$NON-NLS-1$
-					oldWebchain.getName())) {
+					"plugins.weblicht.webserviceEditView.dialogs.saveChanges.title",  //$NON-NLS-1$
+					"plugins.weblicht.webserviceEditView.dialogs.saveChanges.message",  //$NON-NLS-1$
+					oldWebservice.getName())) {
 				
 				try {
 					editor.applyEdit();
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WeblichtEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to apply edit: "+getWebchain(), ex)); //$NON-NLS-1$
+					LoggerFactory.getLogger(WebserviceEditView.class).log(LoggerFactory.record(Level.SEVERE, 
+							"Failed to apply edit: "+getWebservice(), ex)); //$NON-NLS-1$
 				}
 			}
 		}
 		
 		getContainer().remove(infoLabel);
 		
-		if(webchain==null) {
+		if(webservice==null) {
 			showDefaultInfo();
 			return;
 		}
 		
-		// If the new Webchain is of the same type just use
+		// If the new Webservice is of the same type just use
 		// the present editor!
-		if(oldWebchain!=null && oldWebchain.getClass().equals(
-				webchain.getClass()) && editor!=null) {
-			editor.setEditingItem(webchain);
-			header.setText(webchain.getName());
+		if(oldWebservice!=null && oldWebservice.getClass().equals(
+				webservice.getClass()) && editor!=null) {
+			editor.setEditingItem(webservice);
+			header.setText(webservice.getName());
 			return;
 		}
 		
-		// Try to fetch an editor for the supplied webchain
+		// Try to fetch an editor for the supplied Webservice
 		@SuppressWarnings("unchecked")
-		Editor<Webchain> editor = UIHelperRegistry.globalRegistry().findHelper(
-				Editor.class, webchain);
+		Editor<Webservice> editor = UIHelperRegistry.globalRegistry().findHelper(
+				Editor.class, webservice);
 
 		if(editor==null) {
 			showDefaultInfo();
@@ -247,12 +255,83 @@ public class WeblichtEditView extends View {
 			this.editor.close();
 		}
 
-		this.editor = editor;
+		this.editor = (WebserviceEditor) editor;
 		
 		
-		editor.setEditingItem(webchain);
+		editor.setEditingItem(webservice);
+		
 		scrollPane.setViewportView(editor.getEditorComponent());
-		header.setText(webchain.getName());
+		header.setText(webservice.getName());
+
+	}
+	
+	
+	private void editWebservice(Webservice webservice) {
+		
+		if(webservice!=null) {
+			requestFocusInPerspective();
+		}
+		
+		Webservice oldWebservice = getWebservice();
+		if(oldWebservice==webservice) {
+			return;
+		}
+		
+		
+		
+		// Offer chance to save changes 
+		if(oldWebservice!=null && editor!=null && editor.hasChanges()) {
+			// Let user decide whether to discard unsaved changes
+			if(DialogFactory.getGlobalFactory().showConfirm(null, 
+					"plugins.weblicht.webserviceEditView.dialogs.saveChanges.title",  //$NON-NLS-1$
+					"plugins.weblicht.webserviceEditView.dialogs.saveChanges.message",  //$NON-NLS-1$
+					oldWebservice.getName())) {
+				
+				try {
+					editor.applyEdit();
+				} catch(Exception ex) {
+					LoggerFactory.getLogger(WebserviceEditView.class).log(LoggerFactory.record(Level.SEVERE, 
+							"Failed to apply edit: "+getWebservice(), ex)); //$NON-NLS-1$
+				}
+			}
+		}
+		
+		getContainer().remove(infoLabel);
+		
+		if(webservice==null) {
+			showDefaultInfo();
+			return;
+		}
+		
+		// If the new Webservice is of the same type just use
+		// the present editor!
+		if(oldWebservice!=null && oldWebservice.getClass().equals(
+				webservice.getClass()) && editor!=null) {			
+			editor.setEditingItem(webservice);
+			header.setText(webservice.getName());
+			editor.setAccessType(editable);
+			return;
+		}
+		
+		// Try to fetch an editor for the supplied Webservice
+		@SuppressWarnings("unchecked")
+		Editor<Webservice> editor = UIHelperRegistry.globalRegistry().findHelper(
+				Editor.class, webservice);
+
+		if(editor==null) {
+			showDefaultInfo();
+			return;
+		}
+		
+		if(this.editor!=null) {
+			this.editor.close();
+		}
+
+		this.editor = (WebserviceEditor) editor;		
+		editor.setEditingItem(webservice);
+		
+		scrollPane.setViewportView(editor.getEditorComponent());
+		header.setText(webservice.getName());
 
 	}
 	
@@ -261,10 +340,31 @@ public class WeblichtEditView extends View {
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		
 		if(Commands.EDIT.equals(message.getCommand())) {
+			System.out.println("edit");
 			Object data = message.getData();
+			//enable edit
+			editable = true;
+			if (!(editor==null)) editor.setAccessType(editable);
 			// We allow null values since this is a way to clear the editor view
-			if(data==null || data instanceof Webchain) {
-				editWebchain((Webchain) data);
+			if(data==null || data instanceof Webservice) {
+				editWebservice((Webservice) data);
+				refreshActions();
+				return message.successResult(null);				
+			} else {
+				return message.unsupportedDataResult();
+			}
+			
+		}
+		if(Commands.DISPLAY.equals(message.getCommand())) {
+			System.out.println("show");
+			
+			Object data = message.getData();
+			//only display
+			editable = false;
+			if (!(editor==null)) editor.setAccessType(editable);
+			// We allow null values since this is a way to clear the editor view
+			if(data==null || data instanceof Webservice) {
+				editWebservice((Webservice) data);
 				refreshActions();
 				return message.successResult(null);				
 			} else {
@@ -285,11 +385,11 @@ public class WeblichtEditView extends View {
 		ActionManager actionManager = getDefaultActionManager();
 
 		actionManager.addHandler(
-				"plugins.weblicht.weblichtEditView.resetEditAction", //$NON-NLS-1$
+				"plugins.weblicht.webserviceEditView.resetEditAction", //$NON-NLS-1$
 				callbackHandler, "resetEdit"); //$NON-NLS-1$
 
 		actionManager.addHandler(
-				"plugins.weblicht.weblichtEditView.applyEditAction", //$NON-NLS-1$
+				"plugins.weblicht.webserviceEditView.applyEditAction", //$NON-NLS-1$
 				callbackHandler, "applyEdit"); //$NON-NLS-1$
 	}
 	
@@ -301,15 +401,15 @@ public class WeblichtEditView extends View {
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
-			if(getWebchain()==null) {
+			if(getWebservice()==null) {
 				return;
 			}
 			
 			if(sender==WebserviceRegistry.getInstance()) {
-				Webchain webchain = (Webchain) event.getProperty("webchain"); //$NON-NLS-1$
+				Webservice webservice = (Webservice) event.getProperty("webservice"); //$NON-NLS-1$
 
 				// Handle deleted Webservice							
-				if(webchain==getWebchain()) {
+				if(webservice==getWebservice()) {
 					reset();
 					return;
 				}
@@ -325,7 +425,7 @@ public class WeblichtEditView extends View {
 		}
 
 		public void resetEdit(ActionEvent e) {
-			Editor<Webchain> editor = getEditor();
+			Editor<Webservice> editor = getEditor();
 			if (editor == null) {
 				return;
 			}
@@ -333,30 +433,28 @@ public class WeblichtEditView extends View {
 			try {
 				editor.resetEdit();
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtEditView.class).log(
+				LoggerFactory.getLogger(WebserviceEditView.class).log(
 						LoggerFactory.record(Level.SEVERE,
-								"Failed to reset editor: " + getWebchain(), ex)); //$NON-NLS-1$
+								"Failed to reset editor: " + getWebservice(), ex)); //$NON-NLS-1$
 			}
 		}
 
-		public void applyEdit(ActionEvent e) {			
-			Editor<Webchain> editor = getEditor();
-
+		public void applyEdit(ActionEvent e) {
+			Editor<Webservice> editor = getEditor();
 			if (editor == null) {
 				return;
 			}
 
 			try {
-				editor.applyEdit();				
-				//TODO
+				editor.applyEdit();
 				//WebserviceRegistry.getInstance().webserviceChanged(editor.getEditingItem());
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtEditView.class).log(
+				LoggerFactory.getLogger(WebserviceEditView.class).log(
 						LoggerFactory.record(Level.SEVERE,
-								"Failed to apply edit: " + getWebchain(), ex)); //$NON-NLS-1$
+								"Failed to apply edit: " + getWebservice(), ex)); //$NON-NLS-1$
 			}
 			
-			header.setText(getWebchain().getName());
+			header.setText(getWebservice().getName());
 		}
 	}
 

@@ -12,14 +12,22 @@ package net.ikarus_systems.icarus.ui.dialog;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.List;
 
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import net.ikarus_systems.icarus.plugins.weblicht.WebserviceViewListModel;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceIOAttributes;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceRegistry;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
@@ -291,4 +299,6 @@ public final class DialogFactory {
 		
 		return text;
 	}
+	
+	
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		WEBLICHT WEBSERVICE VIEW
+	-->
+		
+	<!-- New Webservice -->
+	<action id="plugins.weblicht.weblichtWebserviceView.newWebserviceAction"
+		name="${id}.name" desc="${id}.description" icon="new_webservice.gif" />
+		
+	<!-- Delete Webservice -->
+	<action id="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+
+		
+	<!-- Edit Webservice -->
+	<action id="plugins.weblicht.weblichtWebserviceView.editWebserviceAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+	
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.weblicht.weblichtWebserviceView.toolBarList">
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.newWebserviceAction" />
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction" />
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.editWebserviceAction" />
+	</action-list>
+
+		
+	<!-- Popup Menu List -->
+	<action-list id="plugins.weblicht.weblichtWebserviceView.popupMenuList">
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.newWebserviceAction" />
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction" />
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.editWebserviceAction" />
+	</action-list>
+	
+</actions>

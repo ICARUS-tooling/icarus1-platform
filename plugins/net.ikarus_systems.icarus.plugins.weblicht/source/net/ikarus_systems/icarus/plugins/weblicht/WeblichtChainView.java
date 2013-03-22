@@ -1,20 +1,17 @@
 package net.ikarus_systems.icarus.plugins.weblicht;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -28,23 +25,31 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
-import org.java.plugin.registry.Extension;
-
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
-import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebExecutionService;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.Location;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.opi.Commands;
 import net.ikarus_systems.icarus.util.opi.Message;
 import net.ikarus_systems.icarus.util.opi.ResultMessage;
 
+
+/**
+ * 
+ * @author Gregor Thiele
+ * @version $Id$
+ *
+ */
 public class WeblichtChainView extends View {
 
 	private JTree weblichtTree;
@@ -84,9 +89,9 @@ public class WeblichtChainView extends View {
 		weblichtTree.setBorder(UIUtil.defaultContentBorder);
 		weblichtTree.setLargeModel(true);
 		weblichtTree.setRootVisible(false);
+		weblichtTree.setShowsRootHandles(true);
 		DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
-		selectionModel
-				.setSelectionMode(DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
+		selectionModel.setSelectionMode(DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
 		weblichtTree.setSelectionModel(selectionModel);
 		weblichtTree.addTreeSelectionListener(handler);
 		weblichtTree.addMouseListener(handler);
@@ -109,7 +114,9 @@ public class WeblichtChainView extends View {
 		container.add(scrollPane, BorderLayout.CENTER);
 		container.setPreferredSize(new Dimension(300, 500));
 		container.setMinimumSize(new Dimension(250, 400));
-
+		
+		registerActionCallbacks();
+		refreshActions(null);
 	}
 
 	@Override
@@ -125,15 +132,15 @@ public class WeblichtChainView extends View {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
+		UIUtil.expandAll(weblichtTree, true);
+		//weblichtTree.expandPath(new TreePath(weblichtTree.getModel().getRoot()));
 
 	}
+	
+    public void expandAllNodes() {
+    	for (int i = 0; i < weblichtTree.getRowCount(); i++) weblichtTree.expandRow(i);
+    }
 
-	@Override
-	protected ResultMessage handleRequest(Message message) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	// #########
 
@@ -186,14 +193,43 @@ public class WeblichtChainView extends View {
 	private void refreshActions(Object selectedObject) {
 		ActionManager actionManager = getDefaultActionManager();
 
-		actionManager.setEnabled(selectedObject instanceof Webservice
-				|| selectedObject instanceof Extension,
-				"plugins.weblicht.weblichtChainView.newWebchainAction"); //$NON-NLS-1$
-
-		actionManager.setEnabled(selectedObject instanceof Webservice,
+		actionManager.setEnabled(selectedObject instanceof Webchain,
 				"plugins.weblicht.weblichtChainView.deleteWebchainAction", //$NON-NLS-1$
-				"plugins.weblicht.weblichtChainView.cloneWebchainAction"); //$NON-NLS-1$
+				"plugins.weblicht.weblichtChainView.cloneWebchainAction", //$NON-NLS-1$
+				"plugins.weblicht.weblichtChainView.renameWebchainAction", //$NON-NLS-1$
+				"plugins.weblicht.weblichtChainView.editWebchainAction", //$NON-NLS-1$
+				"plugins.weblicht.weblichtChainView.runWebchainAction", //$NON-NLS-1$
+				"plugins.weblicht.weblichtChainView.stopWebchainAction"); //$NON-NLS-1$);
+
+		actionManager.setEnabled((selectedObject instanceof WebserviceProxy),
+			"plugins.weblicht.weblichtChainView.webserviceInfo"); //$NON-NLS-1$
+		
 	}
+	
+	private void registerActionCallbacks() {
+		if(callbackHandler==null) {
+			callbackHandler = new CallbackHandler();
+		}
+		
+		ActionManager actionManager = getDefaultActionManager();
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.newWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "newWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.deleteWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "deleteWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.cloneWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "cloneWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.renameWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "renameWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.editWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "editWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.runWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "runWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.stopWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "stopWebchain"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.webserviceInfo",  //$NON-NLS-1$
+				callbackHandler, "webserviceInfo"); //$NON-NLS-1$
+	}
+	
 
 	private class Handler extends MouseAdapter implements
 			TreeSelectionListener, TreeModelListener {
@@ -230,7 +266,7 @@ public class WeblichtChainView extends View {
 				// does not use the supplied ActionEvent object, so we pass
 				// null.
 				// If this ever changes we could run into some trouble!
-				callbackHandler.editWeblicht(null);
+				callbackHandler.editWebchain(null);
 			}
 		}
 
@@ -263,11 +299,12 @@ public class WeblichtChainView extends View {
 		 */
 		@Override
 		public void treeNodesInserted(TreeModelEvent e) {
-			TreePath path = e.getTreePath();
+			TreePath path = e.getTreePath();			
 			if (path == null) {
 				return;
 			}
-			weblichtTree.expandPath(path);
+			weblichtTree.expandPath(path);	
+			//UIUtil.expandAll(weblichtTree, true);
 		}
 
 		/**
@@ -284,11 +321,16 @@ public class WeblichtChainView extends View {
 		@Override
 		public void treeStructureChanged(TreeModelEvent e) {
 			TreePath path = e.getTreePath();
+
+			//System.out.println(path);
 			if (path == null) {
 				return;
 			}
 			weblichtTree.expandPath(path);
+			//UIUtil.expandAll(weblichtTree, true);
 		}
+		
+
 	}
 
 	public final class CallbackHandler {
@@ -296,11 +338,207 @@ public class WeblichtChainView extends View {
 		private CallbackHandler() {
 			// no-op
 		}
+		
+		/**
+		 * 
+		 * @param e
+		 */
+		public void newWebchain(ActionEvent e) {			
+			String name = null;
+			name = DialogFactory.getGlobalFactory().showInputDialog(getFrame(),
+					"plugins.weblicht.weblichtChainView.dialogs.addWebchain.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.addWebchain.message", //$NON-NLS-1$
+					name, null);
+			
+			//canceled by user
+			if (name == null){
+				return;
+			}
+			//name = WebchainRegistry.getInstance().getUniqueName("New "+name); //$NON-NLS-1$
+			
+			try {
+				WebchainRegistry.getInstance().newWebchain(name);
+			} catch (Exception ex) {
+				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Unable to create new webchain: "+name, ex)); //$NON-NLS-1$
+			}		
+			
+		}
+		
+		/**
+		 * 
+		 * @param e
+		 */
+		public void deleteWebchain(ActionEvent e) {
+			Object selectedObject = getSelectedObject();
+			if(selectedObject==null || !(selectedObject instanceof Webchain)) {
+				return;
+			}
+			
+			Webchain webchain = (Webchain)selectedObject;
+			boolean doDelete = false;
+			
+			doDelete = DialogFactory.getGlobalFactory().showConfirm(getFrame(), 
+					"plugins.weblicht.weblichtChainView.dialogs.deleteWebchain.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.deleteWebchain.message",  //$NON-NLS-1$
+					webchain.getName());
+			
+			if(doDelete) {
+				try {
+					WebchainRegistry.getInstance().deleteWebchain(webchain);
+				} catch(Exception ex) {
+					LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+							"Unable to delete webchain: "+webchain.getName(), ex)); //$NON-NLS-1$
+				}
+			}
+			
+		}
+		
+		/**
+		 * 
+		 * @param e
+		 */
+		public void cloneWebchain(ActionEvent e) {
+			
+			Object[] path = getSelectionPath();
+			if(path==null || path.length==0) {
+				return;
+			}
+			Object selectedObject = path[path.length-1];
+			if(selectedObject==null || !(selectedObject instanceof Webchain)) {
+				return;
+			}
+			
+			Webchain webchain = (Webchain)selectedObject;
+			
+			//to clone complete chain collect all used webservices
+			List<String> serviceIDList = webchain.getWebservices(webchain);
 
-		public void editWeblicht(Object object) {
-			// TODO Auto-generated method stub
+			
+			String name = WebchainRegistry.getInstance().getUniqueName(webchain.getName());
+			try {
+				if (serviceIDList == null){
+					WebchainRegistry.getInstance().newWebchain(name);
+				} else {
+					WebchainRegistry.getInstance().newWebchain(name,serviceIDList);
+				}
+			} catch (Exception ex) {
+				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Unable to clone webchain: "+name, ex)); //$NON-NLS-1$
+			}
+			
+		}
+		
+		/**
+		 * 
+		 * @param e
+		 */
+		public void editWebchain(ActionEvent e) {
+			Object selectedObject = getSelectedObject();
+			if(selectedObject==null || !(selectedObject instanceof Webchain)) {
+				return;
+			}
+			
+			if(selectedObject instanceof Webchain){
+			
+				Webchain webchain = (Webchain)selectedObject;
+			
+				Message message = new Message(Commands.EDIT, webchain, null);
+				sendRequest(WeblichtConstants.WEBLICHT_EDIT_VIEW_ID, message);
+			}
 
 		}
+		
+		/**
+		 * 
+		 * @param e
+		 */
+		public void webserviceInfo(ActionEvent e) {
+			Object selectedObject = getSelectedObject();
+			
+			if(selectedObject==null || !(selectedObject instanceof WebserviceProxy)) {
+				return;
+			}
+			
+			WebserviceProxy webserviceproxy = (WebserviceProxy)selectedObject;
+			Webservice webservice = webserviceproxy.get();
+			//System.out.println(webservice.getName() + " " + webservice.getUID());
+			
+			Message message = new Message(Commands.DISPLAY, webservice, null);
+			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
+		}
+
+		/**
+		 * 
+		 * @param e
+		 */
+		public void renameWebchain(ActionEvent e) {
+			Object selectedObject = getSelectedObject();
+			if(selectedObject==null || !(selectedObject instanceof Webchain)) {
+				return;
+			}
+			
+			Webchain webchain = (Webchain)selectedObject;
+			
+			String currentName = webchain.getName();
+			String newName = DialogFactory.getGlobalFactory().showInputDialog(getFrame(), 
+					"plugins.weblicht.weblichtChainView.dialogs.renameWebchain.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.renameWebchain.message",  //$NON-NLS-1$
+					currentName, currentName);
+			
+			if(newName==null || newName.isEmpty()) {
+				return;
+			}
+			
+			if(currentName.equals(newName)) {
+				return;
+			}
+			
+			try {
+				WebchainRegistry.getInstance().setName(webchain, newName);
+			} catch (Exception ex) {
+				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Unable to rename corpus "+currentName+" to "+newName, ex)); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			
+		}
+		
+		public void runWebchain(ActionEvent e) {
+			Object selectedObject = getSelectedObject();
+			if(selectedObject==null || !(selectedObject instanceof Webchain)) {
+				return;
+			}
+			
+			Webchain webchain = (Webchain)selectedObject;
+			String test = "Karin fliegt nach New York";
+			
+			/*
+			String input = DialogFactory.getGlobalFactory().showTextInputDialog(getFrame(),
+					"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.message", //$NON-NLS-1$
+					webchain.getName(),test);
+			
+			//user cancelled
+			if(input==null || input.isEmpty()) {
+				return;
+			}
+			*/
+			
+			try {
+				String out = WebExecutionService.getInstance().runWebchain(webchain, test);
+				System.out.println(out);	
+			} catch (Exception ex) {
+				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Failed to execute chain list "+webchain.getName(), ex)); //$NON-NLS-1$ //$NON-NLS-2$
+
+			}		
+
+		}
+		
+		public void stopWebchain(ActionEvent e) {
+			//TODO
+		}
+		
 	}
 
 }

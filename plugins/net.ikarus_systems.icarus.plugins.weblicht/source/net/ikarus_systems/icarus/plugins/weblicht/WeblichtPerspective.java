@@ -11,6 +11,7 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 
 public class WeblichtPerspective extends Perspective {
@@ -27,7 +28,9 @@ public class WeblichtPerspective extends Perspective {
 		
 		String[] defaultViewIds = {
 				WeblichtConstants.WEBLICHT_CHAIN_VIEW_ID,
+				WeblichtConstants.WEBLICHT_WEBSERVICE_VIEW_ID,
 				WeblichtConstants.WEBLICHT_EDIT_VIEW_ID,
+				WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID,
 		};
 		
 		Set<Extension> newExtensions = new HashSet<>();
@@ -40,6 +43,13 @@ public class WeblichtPerspective extends Perspective {
 				throw new CorruptedStateException("Missing default extension: "+viewId); //$NON-NLS-1$
 			
 			newExtensions.add(extension);
+		}
+		
+		// Collect all extensions that are connected to the WeblichtManagementView point
+		// -> might result in redundant adds, so we use a Set<Extension>
+		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("WeblichtManagementView"); //$NON-NLS-1$
+		if(managementViewPoint!=null) {
+			newExtensions.addAll(managementViewPoint.getConnectedExtensions());
 		}
 		
 		// Add some general views
