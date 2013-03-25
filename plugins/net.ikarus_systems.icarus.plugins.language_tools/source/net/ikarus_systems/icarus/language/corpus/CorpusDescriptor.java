@@ -12,6 +12,8 @@ package net.ikarus_systems.icarus.language.corpus;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -19,11 +21,13 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import net.ikarus_systems.icarus.plugins.PluginUtil;
-import net.ikarus_systems.icarus.util.Location;
+import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.xml.ExtensionAdapter;
 import net.ikarus_systems.icarus.xml.LocationAdapter;
+import net.ikarus_systems.icarus.xml.MapAdapter;
 
 import org.java.plugin.registry.Extension;
+
 
 /**
  * 
@@ -31,7 +35,8 @@ import org.java.plugin.registry.Extension;
  * @version $Id$
  *
  */
-@XmlRootElement(name="corpus")
+@XmlRootElement(name="corpus", namespace="")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 	
 	// User defined id for the corpus
@@ -56,7 +61,8 @@ public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 	@XmlJavaTypeAdapter(LocationAdapter.class)
 	private Location location;
 	
-	@XmlElement
+	@XmlElement(name="properties", nillable=true)
+	@XmlJavaTypeAdapter(MapAdapter.class)
 	private Map<String, Object> properties;
 	
 	public Extension getExtension() {
@@ -76,7 +82,7 @@ public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 	
 	void instantiateCorpus() throws Exception {
 		if(corpus!=null)
-			throw new IllegalStateException("Corpus already loaded: "+id); //$NON-NLS-1$
+			throw new IllegalStateException("Corpus already instantiated: "+id); //$NON-NLS-1$
 
 		ClassLoader loader = PluginUtil.getPluginManager().getPluginClassLoader(
 				extension.getDeclaringPluginDescriptor());
@@ -97,6 +103,9 @@ public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 	}
 	
 	void setId(String id) {
+		if(id==null)
+			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+		
 		this.id = id;
 	}
 
@@ -107,9 +116,7 @@ public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 		return id;
 	}
 
-	/**
-	 * @return the location
-	 */
+	@XmlTransient
 	public Location getLocation() {
 		return location;
 	}

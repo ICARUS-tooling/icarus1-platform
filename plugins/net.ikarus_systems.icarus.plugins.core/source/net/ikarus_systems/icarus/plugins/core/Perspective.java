@@ -9,8 +9,14 @@
  */
 package net.ikarus_systems.icarus.plugins.core;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +36,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -80,6 +88,8 @@ public abstract class Perspective implements Identifiable {
 	protected final Map<Extension, ViewContainer> containers = new HashMap<>();
 	
 	protected final Set<View> views = new HashSet<>();
+	
+	private View activeView = null;
 	
 	private Extension extension;
 	
@@ -184,8 +194,14 @@ public abstract class Perspective implements Identifiable {
 		
 		return true;
 	}
-	
+
+    private static final String PERMANENT_FOCUS_OWNER_PROPERTY 
+    		= "permanentFocusOwner";  //$NON-NLS-1$
+    
 	public void close() {
+		KeyboardFocusManager.getCurrentKeyboardFocusManager()
+			.removePropertyChangeListener(PERMANENT_FOCUS_OWNER_PROPERTY, focusTracker);
+		
 		for(View view : getViews()) {
 			try {
 				view.close();
@@ -385,6 +401,9 @@ public abstract class Perspective implements Identifiable {
 		layout.doLayout();
 		
 		this.areaLayout = layout;
+
+		KeyboardFocusManager.getCurrentKeyboardFocusManager()
+			.addPropertyChangeListener(PERMANENT_FOCUS_OWNER_PROPERTY, focusTracker);
 	}
 	
 	protected Alignment getViewAlignment(Extension extension) {
@@ -438,6 +457,123 @@ public abstract class Perspective implements Identifiable {
 			if(container!=null) {
 				activateView(container);
 			}
+			
+			View view = container.getView();
+			if(view!=null) {
+				view.focusView();
+			}
+		}
+	};
+	
+	protected InfoPanel getInfoPanel() {
+		return getFrameDelegate().getFrame().getInfoPanel(this);
+	}
+	
+	protected View getFocusedView() {
+		Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getPermanentFocusOwner();
+		if(focusOwner==null) {
+			return null;
+		}
+		
+		ViewContainer container = getContainer(focusOwner);
+		if(container==null) {
+			return null;
+		}
+		
+		return container.getView();
+	}
+	
+	/**
+	 * Checks whether the given {@code View} is the currently active
+	 * view in this {@code Perspective}. 
+	 */
+	public boolean isActiveView(View view) {
+		if(view==null)
+			throw new NullPointerException();
+		
+		View focusedView = getFocusedView();
+		return view==focusedView;
+	}
+	
+	protected void refreshInfoPanelForView(View view) {
+		InfoPanel infoPanel = getInfoPanel();
+		if(infoPanel==null) {
+			return;
+		}
+		
+		infoPanel.clear();
+
+		if(view==null) {
+			return;
+		}
+		
+		view.refreshInfoPanel(infoPanel);
+	}
+	
+	public InfoPanel getInfoPanel(View view) {
+		if(!isActiveView(view)) {
+			return null;
+		}
+		return getInfoPanel();
+	}
+	
+	public final View getActiveView() {
+		return activeView;
+	}
+	
+	protected final void setActiveView(View view) {
+		if(view!=null && view==activeView) {
+			return;
+		}
+		
+		activeView = view;
+		refreshInfoPanelForView(view);
+	}
+	
+	/**
+	 * Returns the ViewContainer for the given component. Returns null
+	 * if the component is part of a component hierarchy that resides
+	 * outside of this perspective's root container.
+	 */
+	protected final ViewContainer getContainer(Component comp) {
+		if(comp==null) {
+			return null;
+		}
+		if(comp instanceof ViewContainer) {
+			return (ViewContainer) comp;
+		}
+		ViewContainer ancestor = (ViewContainer)SwingUtilities.getAncestorOfClass(ViewContainer.class, comp);
+		
+		// Expensive call to containsValue, but should be ok since we never have 
+		// more than 10 to 20 views
+		if(ancestor!=null && !containers.containsValue(ancestor)) {
+			ancestor = null;
+		}
+		return ancestor;
+	}
+	
+	protected PropertyChangeListener focusTracker = new PropertyChangeListener() {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			ViewContainer oldFocusOwner = getContainer((Component) evt.getOldValue());
+			ViewContainer newFocusOwner = getContainer((Component) evt.getNewValue());
+			
+			if(oldFocusOwner==newFocusOwner) {
+				return;
+			}
+			
+			if(oldFocusOwner!=null) {
+				oldFocusOwner.setFocused(false);
+			}
+			
+			if(newFocusOwner!=null) {
+				newFocusOwner.setFocused(true);
+			}
+			
+			// Tell perspective to refresh info panel
+			View view = newFocusOwner==null ? null : newFocusOwner.getView();			
+			setActiveView(view);
 		}
 	};
 	
@@ -462,8 +598,9 @@ public abstract class Perspective implements Identifiable {
 		
 		// If we are not forced to close the view
 		// let it decide for itself
-		if(!forceClose && !view.isClosable())
+		if(!forceClose && !view.isClosable()) {
 			return;
+		}
 		
 		eventSource.fireEvent(new EventObject(PerspectiveEvents.CLOSE_VIEW, "id", viewId)); //$NON-NLS-1$
 		
@@ -529,9 +666,6 @@ public abstract class Perspective implements Identifiable {
 		if(parent instanceof JTabbedPane) {
 			JTabbedPane tabbedPane = (JTabbedPane) parent;
 			tabbedPane.setSelectedComponent(container);
-			
-			// TODO really focus view?
-			view.focusView();
 		}
 	}
 	
@@ -572,6 +706,24 @@ public abstract class Perspective implements Identifiable {
 	
 	protected void buildMenuBar(MenuDelegate delegate) {
 		// no-op
+	}
+	
+	protected void buildToolBar(ToolBarDelegate delegate) {
+		List<View> views = new ArrayList<>(activatedViews.values());
+		if(views.isEmpty()) {
+			return;
+		}
+		
+		Collections.sort(views, Identifiable.COMPARATOR);
+		
+		for(View view : views) {
+			try {
+				view.buildToolBar(delegate);
+			} catch(Exception e) {
+				getLogger().log(LoggerFactory.record(Level.SEVERE, 
+						"Failed to build tool-bar elements for view: "+view.getIdentity().getId(), e)); //$NON-NLS-1$
+			}
+		}
 	}
 	
 	protected void activateView(ViewContainer container) {
@@ -667,7 +819,11 @@ public abstract class Perspective implements Identifiable {
 					activateView(containers.get(extension));
 					view = activatedViews.get(extension);
 				}
-				receivers.add(view);
+				
+				// Include only loaded and valid view instances
+				if(view!=null) {
+					receivers.add(view);
+				}
 			}
 		}
 		
@@ -688,7 +844,7 @@ public abstract class Perspective implements Identifiable {
 		}
 		
 		// Depending on the number of results either return the one
-		// existing result or wrap them all in a multi- result
+		// existing result or wrap them all in a multi-result
 		if(results.size()==1) {
 			return results.get(0);
 		} else {
@@ -710,6 +866,10 @@ public abstract class Perspective implements Identifiable {
 			return new MultiResultMessage(dominatingType, message, results);
 		}
 	}
+	
+	// Eclipse view highlight color: r=160, g=191, b=244
+	private static Color defaultHighlightColor = new Color(160, 191, 244);
+
 	
 	/**
 	 * Searches the component hierarchy of the given
@@ -736,7 +896,7 @@ public abstract class Perspective implements Identifiable {
 	 * @version $Id$
 	 *
 	 */
-	protected class ViewContainer extends JPanel implements Identifiable {
+	protected class ViewContainer extends JPanel implements Identifiable, Border {
 
 		private static final long serialVersionUID = -2139304858671288495L;
 		
@@ -745,6 +905,7 @@ public abstract class Perspective implements Identifiable {
 		private View view;
 		private boolean invalid = false;
 		private Identity identity;
+		private boolean focused = false;
 
 		public ViewContainer(Extension viewExtension, Alignment alignment) {
 			if(viewExtension==null)
@@ -753,7 +914,13 @@ public abstract class Perspective implements Identifiable {
 			this.viewExtension = viewExtension;
 			this.alignment = alignment;
 			
+			setBorder(this);
+			
 			init();
+		}
+		
+		public ViewContainer(Extension viewExtension) {
+			this(viewExtension, null);
 		}
 		
 		protected void init() {
@@ -762,10 +929,6 @@ public abstract class Perspective implements Identifiable {
 				putClientProperty(DefaultAreaLayout.REQUIRES_TAB_PROPERTY, 
 						param.valueAsBoolean());
 			}
-		}
-		
-		public ViewContainer(Extension viewExtension) {
-			this(viewExtension, null);
 		}
 
 		/**
@@ -834,7 +997,84 @@ public abstract class Perspective implements Identifiable {
 			}
 			return identity;
 		}
+
+		/**
+		 * @return the focused
+		 */
+		public boolean isFocused() {
+			return focused;
+		}
+
+		/**
+		 * @param focused the focused to set
+		 */
+		public void setFocused(boolean focused) {
+			if(focused!=this.focused) {
+				this.focused = focused;
+				repaint();
+			}
+		}
 		
+		/**
+		 * @see java.awt.Component#getName()
+		 */
+		@Override
+		public String getName() {
+			return viewExtension==null ? super.getName() : viewExtension.getId();
+		}
+		
+		/**
+		 * @see javax.swing.border.Border#paintBorder(java.awt.Component, java.awt.Graphics, int, int, int, int)
+		 */
+		@Override
+		public void paintBorder(Component c, Graphics g, int x, int y,
+				int w, int h) {
+			
+			Color col = isFocused() ? UIManager.getColor("TabbedPane.focus") : getBackground(); //$NON-NLS-1$
+			if(Color.black.equals(col)) {
+				col = defaultHighlightColor;
+			}
+			
+			g.setColor(col);
+			
+			int b = y+h-1;
+			int r = x+w-1;
+			
+			// top
+			g.drawLine(x, y, r, y);
+			g.drawLine(x, y+1, r, y+1);
+			// left
+			g.drawLine(x, y, x, b);
+			g.drawLine(x+1, y, x+1, b);
+			// right
+			g.drawLine(r, y, r, b);
+			g.drawLine(r-1, y, r-1, b);
+			// bottom
+			g.drawLine(x, b, r, b);
+			g.drawLine(x, b-1, r, b-1);
+			
+			// Only separate from header area if we are inside of a tabbed pane
+			if(!isFocused() && getParent() instanceof JTabbedPane) {
+				g.setColor(Color.black);
+				g.drawLine(x+1, y, r-1, y);
+			}
+		}
+
+		/**
+		 * @see javax.swing.border.Border#getBorderInsets(java.awt.Component)
+		 */
+		@Override
+		public Insets getBorderInsets(Component c) {
+			return new Insets(2, 2, 2, 2);
+		}
+
+		/**
+		 * @see javax.swing.border.Border#isBorderOpaque()
+		 */
+		@Override
+		public boolean isBorderOpaque() {
+			return true;
+		}
 	}
 	
 	/**

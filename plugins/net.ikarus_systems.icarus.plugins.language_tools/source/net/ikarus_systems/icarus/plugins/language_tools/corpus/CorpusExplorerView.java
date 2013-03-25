@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -37,22 +36,26 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
 import net.ikarus_systems.icarus.language.corpus.Corpus;
+import net.ikarus_systems.icarus.language.corpus.CorpusDescriptor;
 import net.ikarus_systems.icarus.language.corpus.CorpusRegistry;
 import net.ikarus_systems.icarus.language.corpus.DerivedCorpus;
+import net.ikarus_systems.icarus.language.corpus.swing.CorpusTreeCellRenderer;
+import net.ikarus_systems.icarus.language.corpus.swing.CorpusTreeModel;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.core.InfoPanel;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.plugins.language_tools.LanguageToolsConstants;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
-import net.ikarus_systems.icarus.ui.corpus.CorpusTreeCellRenderer;
-import net.ikarus_systems.icarus.ui.corpus.CorpusTreeModel;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
+import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
+import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.Location;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.opi.Commands;
 import net.ikarus_systems.icarus.util.opi.Message;
 
@@ -105,7 +108,8 @@ public class CorpusExplorerView extends View {
 		corporaTree.setEditable(false);
 		corporaTree.setBorder(UIUtil.defaultContentBorder);
 		corporaTree.setLargeModel(true);
-		corporaTree.setRootVisible(false);		
+		corporaTree.setRootVisible(false);
+		corporaTree.setShowsRootHandles(true);	
 		DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
 		selectionModel.setSelectionMode(DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
 		corporaTree.setSelectionModel(selectionModel);
@@ -122,13 +126,15 @@ public class CorpusExplorerView extends View {
 		// Header
 		JToolBar toolBar = getDefaultActionManager().createToolBar(
 				"plugins.languageTools.corpusExplorerView.toolBarList", null); //$NON-NLS-1$
-		toolBar.add(Box.createHorizontalGlue());
 		
 		container.setLayout(new BorderLayout());
 		container.add(toolBar, BorderLayout.NORTH);
 		container.add(scrollPane, BorderLayout.CENTER);
 		container.setPreferredSize(new Dimension(300, 500));
 		container.setMinimumSize(new Dimension(250, 400));
+		
+		CorpusRegistry.getInstance().addListener(Events.ADDED, handler);
+		CorpusRegistry.getInstance().addListener(Events.REMOVED, handler);
 		
 		registerActionCallbacks();
 		refreshActions(null);
@@ -141,6 +147,56 @@ public class CorpusExplorerView extends View {
 	public void reset() {
 		UIUtil.expandAll(corporaTree, false);
 		corporaTree.expandPath(new TreePath(corporaTree.getModel().getRoot()));
+	}
+	
+	/**
+	 * @see net.ikarus_systems.icarus.plugins.core.View#close()
+	 */
+	@Override
+	public void close() {
+		CorpusRegistry.getInstance().removeListener(handler);
+	}
+
+	@Override
+	protected void refreshInfoPanel(InfoPanel infoPanel) {
+		infoPanel.addLabel("selectedItem"); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("totalTypes", 70); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("totalCorpora", 70); //$NON-NLS-1$
+		infoPanel.addGap(100);
+		
+		showCorpusInfo();
+	}
+	
+	private void showCorpusInfo() {
+		InfoPanel infoPanel = getInfoPanel();
+		if(infoPanel==null) {
+			return;
+		}
+		
+		Object selectedItem = getSelectedObject();
+		if(selectedItem instanceof Corpus) {
+			Corpus corpus = (Corpus) selectedItem;
+			CorpusDescriptor descriptor = CorpusRegistry.getInstance().getDescriptor(corpus);
+			String text = corpus.getName()+" - "+descriptor.getExtension().getUniqueId(); //$NON-NLS-1$
+
+			infoPanel.displayText("selectedItem", text); //$NON-NLS-1$
+		} else {
+			infoPanel.displayText("selectedItem", null); //$NON-NLS-1$
+		}
+		
+		// Total corpus types
+		String text = ResourceManager.getInstance().get(
+				"plugins.languageTools.corpusExplorerView.labels.totalTypes",  //$NON-NLS-1$
+				CorpusRegistry.getInstance().availableTypeCount()); 
+		infoPanel.displayText("totalTypes", text); //$NON-NLS-1$
+		
+		// Total corpora
+		text = ResourceManager.getInstance().get(
+				"plugins.languageTools.corpusExplorerView.labels.totalCorpora",  //$NON-NLS-1$
+				CorpusRegistry.getInstance().availableCorporaCount()); 
+		infoPanel.displayText("totalCorpora", text); //$NON-NLS-1$
 	}
 	
 	private Object[] getSelectionPath() {
@@ -229,7 +285,7 @@ public class CorpusExplorerView extends View {
 	}
 	
 	private class Handler extends MouseAdapter implements TreeSelectionListener, 
-		TreeModelListener {
+		TreeModelListener, EventListener {
 
 		/**
 		 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
@@ -240,6 +296,8 @@ public class CorpusExplorerView extends View {
 			Object selectedObject = (path==null || path.length==0) ? null : path[path.length-1];
 	
 			refreshActions(selectedObject);
+			
+			showCorpusInfo();
 			
 			fireBroadcastEvent(new EventObject(LanguageToolsConstants.CORPUS_EXPLORER_SELECTION_CHANGED, 
 					"item", selectedObject, "path", path)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -319,6 +377,14 @@ public class CorpusExplorerView extends View {
 			}
 			corporaTree.expandPath(path);
 		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.events.EventListener#invoke(java.lang.Object, net.ikarus_systems.icarus.ui.events.EventObject)
+		 */
+		@Override
+		public void invoke(Object sender, EventObject event) {
+			showCorpusInfo();
+		}
 	}
 	
 	public final class CallbackHandler {
@@ -374,7 +440,7 @@ public class CorpusExplorerView extends View {
 				if(derivedCorpora.size()>5) {
 					sb.append(ResourceManager.getInstance().get(
 							"plugins.languageTools.corpusExplorerView.dialogs.deleteBaseCorpus.hint", //$NON-NLS-1$
-							new Object[]{derivedCorpora.size()-5})).append("\n"); //$NON-NLS-1$
+							derivedCorpora.size()-5)).append("\n"); //$NON-NLS-1$
 				}
 
 				doDelete = DialogFactory.getGlobalFactory().showConfirm(getFrame(), 
@@ -449,10 +515,12 @@ public class CorpusExplorerView extends View {
 				return;
 			}
 			
+			// No changes
 			if(currentName.equals(newName)) {
 				return;
 			}
 			
+			// Let corpus registry manage naming checks
 			String uniqueName = CorpusRegistry.getInstance().getUniqueName(newName);
 			if(!uniqueName.equals(newName)) {
 				DialogFactory.getGlobalFactory().showInfo(getFrame(), 

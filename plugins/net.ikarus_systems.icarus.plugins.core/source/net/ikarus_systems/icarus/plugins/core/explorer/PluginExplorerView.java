@@ -45,6 +45,7 @@ import net.ikarus_systems.hermes.util.IoUtil;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin;
+import net.ikarus_systems.icarus.plugins.core.InfoPanel;
 import net.ikarus_systems.icarus.plugins.core.ManagementConstants;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
@@ -143,15 +144,11 @@ public class PluginExplorerView extends View {
 		for(int i=0; i<plugins.size(); i++) {
 			PluginDescriptor descriptor = plugins.get(i);
 			feedPluginNode(pluginManager, root, descriptor);
-			
-			// TODO find some way to add a slight empty row between 2 plugin nodes
-			/*if(i<plugins.size()-1) {
-				root.add(new DefaultMutableTreeNode("")); //$NON-NLS-1$
-			}*/
 		}
 
 		pluginTree.expandRow(0);
 		pluginTree.setRootVisible(false);
+		pluginTree.setShowsRootHandles(true);
 		
 		handler = new Handler();		
 		pluginTree.addTreeSelectionListener(handler);		
@@ -446,6 +443,50 @@ public class PluginExplorerView extends View {
 		if(pluginTree!=null) {
 			pluginTree.requestFocusInWindow();
 		}
+	}
+	
+	@Override
+	protected void refreshInfoPanel(InfoPanel infoPanel) {
+		infoPanel.addLabel("selectedItem"); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("totalPlugins", 70); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("enabledPlugins", 70); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("activePlugins", 70); //$NON-NLS-1$
+		infoPanel.addGap(100);
+		
+		Object item = getSelectedObject();
+		if(item!=null) {
+			infoPanel.displayText("selectedItem", item.toString()); //$NON-NLS-1$
+		}
+		
+		showPluginInfo();
+	}
+	
+	private void showPluginInfo() {
+		InfoPanel infoPanel = getInfoPanel();
+		if(infoPanel==null) {
+			return;
+		}
+		
+		// Total plug-ins
+		String text = ResourceManager.getInstance().get(
+				"plugins.core.pluginExplorerView.labels.totalPlugins",  //$NON-NLS-1$
+				PluginUtil.pluginCount()); 
+		infoPanel.displayText("totalPlugins", text); //$NON-NLS-1$
+		
+		// Enabled plug-ins
+		text = ResourceManager.getInstance().get(
+				"plugins.core.pluginExplorerView.labels.enabledPlugins",  //$NON-NLS-1$
+				PluginUtil.countEnabled()); 
+		infoPanel.displayText("enabledPlugins", text); //$NON-NLS-1$
+		
+		// Active plug-ins
+		text = ResourceManager.getInstance().get(
+				"plugins.core.pluginExplorerView.labels.activePlugins",  //$NON-NLS-1$
+				PluginUtil.countActive()); 
+		infoPanel.displayText("activePlugins", text); //$NON-NLS-1$
 	}
 	
 	private void registerActionCallbacks() {
@@ -875,6 +916,10 @@ public class PluginExplorerView extends View {
 					"owner", PluginExplorerView.this, //$NON-NLS-1$
 					"title", title); //$NON-NLS-1$
 
+			InfoPanel infoPanel = getInfoPanel();
+			if(infoPanel!=null) {
+				infoPanel.displayText("selectedItem", item.toString()); //$NON-NLS-1$
+			}
 			
 			fireBroadcastEvent(new EventObject(
 					ManagementConstants.EXPLORER_SELECTION_CHANGED, 
@@ -943,6 +988,7 @@ public class PluginExplorerView extends View {
 		@Override
 		public void pluginActivated(Plugin plugin) {
 			refreshPluginIcon(plugin.getDescriptor());
+			showPluginInfo();
 		}
 
 		/**
@@ -951,6 +997,7 @@ public class PluginExplorerView extends View {
 		@Override
 		public void pluginDeactivated(Plugin plugin) {
 			refreshPluginIcon(plugin.getDescriptor());
+			showPluginInfo();
 		}
 
 		/**
@@ -958,7 +1005,7 @@ public class PluginExplorerView extends View {
 		 */
 		@Override
 		public void pluginDisabled(PluginDescriptor descriptor) {
-			// no-op
+			showPluginInfo();
 		}
 
 		/**
@@ -966,7 +1013,7 @@ public class PluginExplorerView extends View {
 		 */
 		@Override
 		public void pluginEnabled(PluginDescriptor descriptor) {
-			// no-op
+			showPluginInfo();
 		}
 	}
 }

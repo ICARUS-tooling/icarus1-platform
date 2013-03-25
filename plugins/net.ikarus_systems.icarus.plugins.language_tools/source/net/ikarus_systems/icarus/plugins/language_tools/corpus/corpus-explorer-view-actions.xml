@@ -47,6 +47,7 @@
 		<item type="action" value="plugins.languageTools.corpusExplorerView.editCorpusAction" />
 		<separator />
 		<item type="action" value="plugins.languageTools.corpusExplorerView.inspectCorpusAction" />
+		<item type="glue" />
 	</action-list>
 		
 	<!-- Popup Menu List -->

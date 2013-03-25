@@ -30,7 +30,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
  * @version $Id$
  *
  */
-public class LogListHandler extends Handler implements ListModel<LogRecord> {
+public class LogListModel extends Handler implements ListModel<LogRecord> {
 	
 	private List<LogRecord> records;
 	private int maxSize;
@@ -42,11 +42,11 @@ public class LogListHandler extends Handler implements ListModel<LogRecord> {
 	private int errorCount = 0;
 	private ChangeEvent changeEvent = new ChangeEvent(this);
 
-	public LogListHandler() {
+	public LogListModel() {
 		this(1000);
 	}
 
-	public LogListHandler(int maxSize) {
+	public LogListModel(int maxSize) {
 		setMaxSize(maxSize);
 		setLevel(Level.ALL);
 	}

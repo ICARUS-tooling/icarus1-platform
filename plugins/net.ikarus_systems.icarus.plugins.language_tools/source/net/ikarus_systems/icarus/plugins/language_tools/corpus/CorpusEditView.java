@@ -30,6 +30,7 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
@@ -90,6 +91,7 @@ public class CorpusEditView extends View {
 		
 		// Header label
 		header = new JLabel(""); //$NON-NLS-1$
+		UIUtil.disableHtml(header);
 		header.setBorder(new EmptyBorder(3, 5, 10, 20));
 		header.setFont(header.getFont().deriveFont(header.getFont().getSize2D()+2));
 		
@@ -206,7 +208,7 @@ public class CorpusEditView extends View {
 	
 	private void editCorpus(Corpus corpus) {
 		if(corpus!=null) {
-			requestFocusInPerspective();
+			selectViewTab();
 		}
 		
 		Corpus oldCorpus = getCorpus();

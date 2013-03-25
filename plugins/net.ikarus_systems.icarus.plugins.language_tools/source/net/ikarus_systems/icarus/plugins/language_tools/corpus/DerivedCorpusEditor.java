@@ -18,11 +18,11 @@ import javax.swing.JPanel;
 
 import net.ikarus_systems.icarus.language.corpus.Corpus;
 import net.ikarus_systems.icarus.language.corpus.CorpusRegistry;
+import net.ikarus_systems.icarus.language.corpus.swing.CorpusListCellRenderer;
+import net.ikarus_systems.icarus.language.corpus.swing.CorpusListModel;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
-import net.ikarus_systems.icarus.ui.corpus.CorpusListCellRenderer;
-import net.ikarus_systems.icarus.ui.corpus.CorpusListModel;
 
 /**
  * @author Markus Gärtner
@@ -138,11 +138,16 @@ public class DerivedCorpusEditor extends BasicCorpusEditor {
 		if(corpus==null) {
 			return;
 		}
-		
-		super.applyEdit();
-		
+
 		FilteredCorpus filteredCorpus = getEditingItem();
-		filteredCorpus.setBase((Corpus) baseCorpusSelect.getSelectedItem());
+		setIgnoreCorpusEvents(true);
+		try {
+			super.applyEdit();
+			
+			filteredCorpus.setBase((Corpus) baseCorpusSelect.getSelectedItem());
+		} finally {
+			setIgnoreCorpusEvents(false);
+		}
 		CorpusRegistry.getInstance().corpusChanged(filteredCorpus);
 	}
 

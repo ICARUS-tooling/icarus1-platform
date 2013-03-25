@@ -144,7 +144,6 @@ public class WeakEventSource extends EventSource {
 		
 		private void delete() {
 			ref.clear();
-			ref = null;
 		}
 	}
 }

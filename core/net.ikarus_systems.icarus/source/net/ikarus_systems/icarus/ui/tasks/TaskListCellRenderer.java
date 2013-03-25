@@ -11,9 +11,15 @@ package net.ikarus_systems.icarus.ui.tasks;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -27,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 
@@ -36,7 +43,8 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
  *
  */
 public class TaskListCellRenderer extends JPanel implements
-		ListCellRenderer<Object>, EventListener, ActionListener {
+		ListCellRenderer<Object>, EventListener, ActionListener,
+		MouseListener, MouseMotionListener {
 
 	private static final long serialVersionUID = 3335847880598821420L;
 	
@@ -50,15 +58,22 @@ public class TaskListCellRenderer extends JPanel implements
 	
 	private final TaskManager manager;
 	
+	private final JList<?> list;
+	
 	private static Icon defaultIcon;
 
-	public TaskListCellRenderer(TaskManager manager) {
+	public TaskListCellRenderer(TaskManager manager, JList<?> list) {
 		if(manager==null)
 			throw new IllegalArgumentException("Invalid manager"); //$NON-NLS-1$
 		
 		this.manager = manager;
+		this.list = list;
 		
 		manager.addListener(null, this);
+		list.addMouseListener(this);
+		list.addMouseMotionListener(this);
+		
+		list.setCellRenderer(this);
 	}
 	
 	private void buildPanel() {
@@ -71,28 +86,38 @@ public class TaskListCellRenderer extends JPanel implements
 		header = new JLabel();
 		header.setBorder(new EmptyBorder(3, 5, 2, 5));
 		
-		footer = new JTextArea(5, 40);
+		footer = new JTextArea();
 		footer.setWrapStyleWord(true);
 		footer.setLineWrap(true);
+		footer.setOpaque(false);
 		
 		cancelButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("nav_stop.gif")); //$NON-NLS-1$
 		cancelButton.setFocusable(false);
-		cancelButton.setBorderPainted(false);
+		cancelButton.setContentAreaFilled(false);
+		cancelButton.setBorder(new UIUtil.FlatButtonBorder());
 		cancelButton.addActionListener(this);
+		cancelButton.setSize(new Dimension(24, 24));
 		
 		setLayout(GridBagUtil.getLayout());
 		
 		GridBagConstraints gbc = GridBagUtil.makeGbc(0, 0);
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.anchor = GridBagConstraints.CENTER;
 		add(taskIcon, gbc);
 		
 		gbc = GridBagUtil.makeGbcH(1, 0, 1, 1);
-		add(progressBar, gbc);
-		
-		gbc = GridBagUtil.makeGbcH(1, 1, 1, 1);
 		add(header, gbc);
 		
-		gbc = GridBagUtil.makeGbc(2, 0);
+		gbc = GridBagUtil.makeGbcH(1, 1, 1, 1);
+		gbc.anchor = GridBagConstraints.CENTER;
+		add(progressBar, gbc);
+		
+		gbc = GridBagUtil.makeGbc(2, 1);
+		gbc.anchor = GridBagConstraints.CENTER;
 		add(cancelButton, gbc);
+		
+		gbc = GridBagUtil.makeGbcH(1, 2, 1, 1);
+		add(footer, gbc);
 	}
 
 	/**
@@ -113,25 +138,27 @@ public class TaskListCellRenderer extends JPanel implements
 		// Background
 		Color c = list.getBackground();
 		if(isSelected) {
-			c = list.getSelectionBackground();
+			//c = list.getSelectionBackground();
 		}
 		setBackground(c);
 		
 		// Foreground
 		c = list.getForeground();
 		if(isSelected) {
-			c = list.getSelectionForeground();
+			//c = list.getSelectionForeground();
 		}
 		setForeground(c);
 		
 		showTask(value);
+		
+		validate();
 		
 		return this;
 	}
 	
 	private Icon getDefaultIcon() {
 		if(defaultIcon==null) {
-			defaultIcon = IconRegistry.getGlobalRegistry().getIcon("");
+			defaultIcon = IconRegistry.getGlobalRegistry().getIcon("task_set.gif"); //$NON-NLS-1$
 		}
 		return defaultIcon;
 	}
@@ -195,7 +222,40 @@ public class TaskListCellRenderer extends JPanel implements
 			return;
 		}
 		
-		// TODO refresh components based on property
+		String property = (String)event.getProperty("property"); //$NON-NLS-1$
+		
+		// General change
+		if(property==null) {
+			showTask(task);
+			return;
+		}
+		
+		// "Named" change
+		switch (property) {
+		case "title": //$NON-NLS-1$
+			header.setText(manager.getTitle(task));
+			break;
+
+		case "info": //$NON-NLS-1$
+			footer.setText(manager.getInfo(task));
+			break;
+
+		case "icon": //$NON-NLS-1$
+			taskIcon.setIcon(manager.getIcon(task));
+			break;
+
+		case "indetermminate": //$NON-NLS-1$
+			progressBar.setIndeterminate(manager.isIndeterminate(task));
+			break;
+
+		case "progress": //$NON-NLS-1$
+			progressBar.setValue(manager.getProgress(task));
+			break;
+			
+		default:
+			showTask(task);
+			break;
+		}
 	}
 
 	/**
@@ -207,7 +267,102 @@ public class TaskListCellRenderer extends JPanel implements
 			Object task = manager.getActiveTask();
 			manager.cancelTask(task);
 		} catch(Exception ex) {
-			// TODO
+			// TODO show error dialog
 		}
+	}
+
+	/**
+	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// no-op
+	}
+
+	/**
+	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mousePressed(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	/**
+	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	/**
+	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// no-op
+	}
+
+	/**
+	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// no-op
+	}
+	
+	private void dispatchMouseEvent(MouseEvent e) {
+		if(header==null) {
+			return;
+		}
+		
+		Point p = e.getPoint();
+		int index = list.locationToIndex(p);
+		
+		if(index==-1) {
+			return;
+		}
+		
+		// Only care about active task
+		Object task = list.getModel().getElementAt(index);
+		if(!manager.isActiveTask(task)) {
+			return;
+		}
+		
+		// Translate location to current row
+		Rectangle cellBounds = list.getCellBounds(index, index);
+		p.translate(-cellBounds.x, -cellBounds.y);
+		
+		// Translate location to cancel button
+		Rectangle buttonBounds = cancelButton.getBounds();
+		p.translate(-buttonBounds.x, -buttonBounds.y);
+		cancelButton.getModel().setArmed(cancelButton.contains(p));
+		
+		if(!cancelButton.getModel().isArmed()) {
+			return;
+		}
+		
+		// Forward event
+		MouseEvent newEvent = new MouseEvent(cancelButton, e.getID(), 
+				e.getWhen(), e.getModifiers(), p.x, p.y, 
+				e.getClickCount(), e.isPopupTrigger());
+		cancelButton.dispatchEvent(newEvent);
+		list.repaint(cellBounds);
+	}
+
+	/**
+	 * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		// no-op
+	}
+
+	/**
+	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		dispatchMouseEvent(e);
 	}
 }

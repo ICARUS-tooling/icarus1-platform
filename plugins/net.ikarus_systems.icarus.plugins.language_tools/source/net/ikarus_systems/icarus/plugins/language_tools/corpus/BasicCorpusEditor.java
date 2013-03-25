@@ -20,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -60,9 +59,10 @@ import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.helper.Editor;
-import net.ikarus_systems.icarus.util.DefaultFileLocation;
 import net.ikarus_systems.icarus.util.KeyValuePair;
-import net.ikarus_systems.icarus.util.Location;
+import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.location.Location;
+import net.ikarus_systems.icarus.util.location.Locations;
 
 /**
  * @author Markus Gärtner
@@ -92,8 +92,25 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 	
 	protected Handler handler;
 	
+	private int ignoreCorpusEvents = 0;
+	
 	public BasicCorpusEditor() {
 		// no-op
+	}
+	
+	protected final void setIgnoreCorpusEvents(boolean ignore) {
+		if(ignore)
+			ignoreCorpusEvents++;
+		else
+			ignoreCorpusEvents--;
+	}
+	
+	protected final boolean isIgnoreCorpusEvents() {
+		return ignoreCorpusEvents>0;
+	}
+	
+	protected final void resetIgnoreCorpusEvents() {
+		ignoreCorpusEvents = 0;
 	}
 	
 	protected int feedBasicComponents(JPanel panel) {
@@ -208,6 +225,7 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		
 		propertiesTableModel = new PropertiesTableModel();
 		propertiesTable = new JTable(propertiesTableModel);
+		UIUtil.disableHtml(propertiesTable.getDefaultRenderer(Object.class));
 		propertiesTable.setBorder(UIUtil.defaultContentBorder);
 		propertiesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		propertiesTable.getTableHeader().setReorderingAllowed(false);
@@ -250,6 +268,7 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		
 		this.corpus = corpus;
 		
+		resetIgnoreCorpusEvents();
 		resetEdit();
 	}
 
@@ -273,10 +292,7 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		
 		// Location
 		Location location = corpus.getLocation();
-		String locationString = null;
-		if(location!=null) {
-			locationString = location.getFile().getAbsolutePath();
-		}
+		String locationString = Locations.getPath(location);
 		locationInput.setText(locationString);
 		
 		// Properties
@@ -302,31 +318,47 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 			return;
 		}
 		
-		// Name
-		String newName = nameInput.getText();
-		if(!newName.equals(corpus.getName())) {
-			String uniqueName = CorpusRegistry.getInstance().getUniqueName(newName);
-			if(!uniqueName.equals(newName)) {
-				DialogFactory.getGlobalFactory().showInfo(null, 
-						"plugins.languageTools.corpusExplorerView.dialogs.title",  //$NON-NLS-1$
-						"plugins.languageTools.corpusExplorerView.dialogs.duplicateName",  //$NON-NLS-1$
-						newName, uniqueName);
+		setIgnoreCorpusEvents(true);
+		try {
+			
+			// Name
+			String newName = nameInput.getText();
+			if(!newName.equals(corpus.getName())) {
+				String uniqueName = CorpusRegistry.getInstance().getUniqueName(newName);
+				if(!uniqueName.equals(newName)) {
+					DialogFactory.getGlobalFactory().showInfo(null, 
+							"plugins.languageTools.corpusEditView.dialogs.title",  //$NON-NLS-1$
+							"plugins.languageTools.corpusExplorerView.dialogs.duplicateName",  //$NON-NLS-1$
+							newName, uniqueName);
+				}
+				nameInput.setText(uniqueName);
+				CorpusRegistry.getInstance().setName(corpus, uniqueName);
 			}
-			nameInput.setText(uniqueName);
-			CorpusRegistry.getInstance().setName(corpus, uniqueName);
+			
+			// Location
+			String locationString = locationInput.getText();
+			if(locationString!=null && !locationString.isEmpty()) {
+				Location location = null;
+				try {
+					location = Locations.getLocation(locationString);
+				} catch (MalformedURLException e) {
+					LoggerFactory.getLogger(BasicCorpusEditor.class).log(LoggerFactory.record(
+							Level.SEVERE, "Failed to resolve location for corpus: "+corpus.getName(), e)); //$NON-NLS-1$
+					DialogFactory.getGlobalFactory().showError(null, 
+							"plugins.languageTools.corpusEditView.dialogs.title",  //$NON-NLS-1$
+							"plugins.languageTools.corpusEditView.dialogs.invalidLocation",  //$NON-NLS-1$
+							locationString);
+				}
+				CorpusRegistry.getInstance().setLocation(corpus, location);
+			}
+	
+			// Properties
+			// Replace the old set of properties
+			CorpusRegistry.getInstance().setProperties(corpus, 
+					propertiesTableModel.properties);
+		} finally {
+			setIgnoreCorpusEvents(true);
 		}
-		
-		// Location
-		String locationString = locationInput.getText();
-		if(locationString!=null && !locationString.isEmpty()) {
-			CorpusRegistry.getInstance().setLocation(corpus, 
-					new DefaultFileLocation(new File(locationString)));
-		}
-
-		// Properties
-		// Replace the old set of properties
-		CorpusRegistry.getInstance().setProperties(corpus, 
-				propertiesTableModel.properties);
 	}
 
 	/**
@@ -350,7 +382,7 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		Location location = corpus.getLocation();
 		String locationString = locationInput.getText();
 		if(!locationString.isEmpty() && (location==null || 
-				!new File(locationString).equals(location.getFile()))) {
+				!locationString.equals(Locations.getPath(location)))) {
 			return true;
 		}
 		
@@ -386,7 +418,9 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 	 */
 	@Override
 	public void close() {
-		CorpusRegistry.getInstance().removeListener(handler);
+		if(handler!=null) {
+			CorpusRegistry.getInstance().removeListener(handler);
+		}
 		
 		if(localizedComponents==null) {
 			return;
@@ -447,27 +481,9 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		editProperty(null);
 	}
 	
-	protected static Pattern indexPattern;
-	
 	private String getValidKey(String baseKey) {
-		int count = 1;
-		
-		if(indexPattern==null) {
-			indexPattern = Pattern.compile("\\((\\d+)\\)$"); //$NON-NLS-1$
-		}
-		Matcher matcher = indexPattern.matcher(baseKey);
-		if(matcher.find()) {
-			int currentCount = 0;
-			try {
-				currentCount = Integer.parseInt(matcher.group(1));
-			} catch(NumberFormatException e) {
-				LoggerFactory.getLogger(BasicCorpusEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to parse existing base key index suffix: "+baseKey, e)); //$NON-NLS-1$
-			}
-			
-			count = Math.max(count, currentCount+1);
-			baseKey = baseKey.substring(0, baseKey.length()-matcher.group().length()).trim();
-		}
+		int count = Math.max(1, NamingUtil.getCurrentCount(baseKey));
+		baseKey = NamingUtil.getBaseName(baseKey);
 		
 		String key = null;
 		while(!isPropertyKeyAllowed((key = baseKey+" ("+count+")")) //$NON-NLS-1$ //$NON-NLS-2$
@@ -651,7 +667,9 @@ public class BasicCorpusEditor implements Editor<Corpus> {
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
-			resetEdit();
+			if(!isIgnoreCorpusEvents()) {
+				resetEdit();
+			}
 		}
 		
 	}

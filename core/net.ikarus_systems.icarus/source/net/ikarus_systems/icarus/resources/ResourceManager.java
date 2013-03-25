@@ -35,7 +35,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
  */
 public final class ResourceManager {
 
-	private Locale locale = Locale.ENGLISH;
+	private Locale locale = Locale.getDefault();
 	
 	private WeakHashMap<Object, Localizer> items = new WeakHashMap<Object, Localizer>();
 
@@ -206,12 +206,12 @@ public final class ResourceManager {
 		return globalDomain.get(key, defaultValue);
 	}
 
-	public String get(String key, Object[] params) {
+	public String get(String key, Object...params) {
 		return globalDomain.get(key, params);
 	}
 
-	public String get(String key, Object[] params, String defaultValue) {
-		return globalDomain.get(key, params, defaultValue);
+	public String get(String key, String defaultValue, Object...params) {
+		return globalDomain.get(key, defaultValue, params);
 	}
 	
 	public static String format(String text, Object...params) {

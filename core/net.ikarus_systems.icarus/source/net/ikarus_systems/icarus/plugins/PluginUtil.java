@@ -9,10 +9,25 @@
  */
 package net.ikarus_systems.icarus.plugins;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.logging.Logger;
+
+import javax.swing.JDialog;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+
+import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.dialog.BasicDialogBuilder;
+import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.ObjectFactory;
 import org.java.plugin.PathResolver;
@@ -38,6 +53,32 @@ public final class PluginUtil {
 
 	private PluginUtil() {
 		// no-op
+	}
+
+	public static int countActive() {
+		int active = 0;
+		
+		for(PluginDescriptor descriptor : getPluginRegistry().getPluginDescriptors()) {
+			if(getPluginManager().isPluginActivated(descriptor))
+				active++;
+		}
+		
+		return active;
+	}
+	
+	public static int countEnabled() {
+		int active = 0;
+		
+		for(PluginDescriptor descriptor : getPluginRegistry().getPluginDescriptors()) {
+			if(getPluginManager().isPluginEnabled(descriptor))
+				active++;
+		}
+		
+		return active;
+	}
+	
+	public static int pluginCount() {
+		return getPluginRegistry().getPluginDescriptors().size();
 	}
 	
 	// prevent multiple deserialization
@@ -105,6 +146,26 @@ public final class PluginUtil {
 		}
 	
 	};
+	
+	public static final Comparator<Extension> EXTENSION_COMPARATOR = new Comparator<Extension>() {
+
+		@Override
+		public int compare(Extension e1, Extension e2) {
+			if(e1==e2) {
+				return 0;
+			}
+			
+			Identity id1 = ExtensionIdentityCache.getInstance().getIdentity(e1);
+			Identity id2 = ExtensionIdentityCache.getInstance().getIdentity(e2);
+			
+			if(id1!=null && id2!=null) {
+				return Identity.COMPARATOR.compare(id1, id2);
+			} else {
+				return e1.getId().compareTo(e2.getId());
+			}
+		}
+		
+	};
 
 	public static Extension findExtension(String pluginId, String extensionPointId, String uid) {
 		PluginDescriptor descriptor = getPluginManager().getRegistry().getPluginDescriptor(pluginId);
@@ -121,5 +182,62 @@ public final class PluginUtil {
 			}
 		}
 		return null;
+	}
+	
+	public static Extension showExtensionDialog(Component parent, 
+			String title, ExtensionPoint extensionPoint, boolean doSort) {
+		if(extensionPoint==null)
+			throw new IllegalArgumentException("Invalid extension-point"); //$NON-NLS-1$
+		
+		Collection<Extension> extensions = extensionPoint.getConnectedExtensions();
+		// Nothing more to do in case there are no extensions connected
+		if(extensions==null ||extensions.isEmpty()) {
+			return null;
+		}
+		
+		ExtensionListModel model = new ExtensionListModel(extensions, doSort);
+		final JList<Extension> list = new JList<>(model);
+		list.setCellRenderer(new ExtensionListCellRenderer());
+		
+		final MutableBoolean selected = new MutableBoolean(false);
+		
+		list.addMouseListener(new MouseAdapter() {
+
+			/**
+			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount()!=2) {
+					return;
+				}
+				
+				JDialog dialog = (JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, list);
+				if(dialog==null) {
+					return;
+				}
+				
+				selected.setValue(true);
+				dialog.setVisible(false);
+			}
+		});
+		
+		JScrollPane scrollPane = new JScrollPane(list);
+		scrollPane.setPreferredSize(new Dimension(250, 200));
+		
+		BasicDialogBuilder builder = new BasicDialogBuilder(
+				ResourceManager.getInstance().getGlobalDomain());
+		builder.setTitle(title);
+		builder.addMessage(scrollPane);
+		builder.setPlainType();
+		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		builder.showDialog(parent);
+		
+		if(!builder.isOkValue() && !selected.getValue()) {
+			return null;
+		}
+		
+		return list.getSelectedValue();
 	}
 }

@@ -86,6 +86,26 @@ public class StaticIdentity implements Identity {
 	public Object getOwner() {
 		return owner;
 	}
+	
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Identity) {
+			Identity other = (Identity)obj;
+			return getId().equals(other.getId());
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return getId();
+	}
 
 	/**
 	 * @return the iconLocation

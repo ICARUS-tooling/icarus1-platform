@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.plugins.core;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,8 +25,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -44,6 +50,7 @@ import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
 
 /**
  * @author Markus Gärtner 
@@ -63,8 +70,12 @@ public class IcarusFrame extends JFrame {
 	private Map<Perspective, PerspectiveContainer> containers;
 	private JPanel rootPanel;
 	
+	private InfoPanel infoPanel;
+	private PerspectivePanel perspectivePanel;
+	
 	private IcarusFrameDelegate frameDelegate;
 	private MenuDelegate menuDelegate;
+	private ToolBarDelegate toolBarDelegate;
 	private CallbackHandler callbackHandler;
 	private Handler handler;
 	
@@ -153,6 +164,8 @@ public class IcarusFrame extends JFrame {
 		menuDelegate = new MenuDelegate("plugins.core.icarusFrame.menuBarList"); //$NON-NLS-1$
 		menuDelegate.setActionManager(getActionManager());
 		
+		toolBarDelegate = new ToolBarDelegate();
+
 		// TODO read config to get default perspective?
 		
 		if(currentPerspective!=null){
@@ -173,6 +186,21 @@ public class IcarusFrame extends JFrame {
 		//setLocationByPlatform(true);
 		
 		registerActionCallbacks();
+	}
+	
+	private InfoPanel getInfoPanel() {
+		if(infoPanel==null) {
+			infoPanel = new InfoPanel();
+		}
+		return infoPanel;
+	}
+	
+	InfoPanel getInfoPanel(Perspective perspective) {
+		if(perspective!=currentPerspective) {
+			return null;
+		}
+		
+		return infoPanel;
 	}
 	
 	private IcarusFrameDelegate getFrameDelegate() {
@@ -212,11 +240,37 @@ public class IcarusFrame extends JFrame {
 		return actionManager;
 	}
 	
+	private Object getOpenedPerspective(Object data) {
+		if(data==null || containers==null) {
+			return data;
+		}
+		
+		for(Perspective perspective : containers.keySet()) {
+			if(data instanceof Extension && perspective.getExtension()==data) {
+				data = perspective;
+				break;
+			} else if(data instanceof Class && perspective.getClass()==data) {
+				data = perspective;
+				break;
+			} else if(data instanceof Perspective && perspective.getClass()==data.getClass()) {
+				data = perspective;
+				break;
+			} else if(data instanceof String && perspective.getClass().getName().equals(data)) {
+				data = perspective;
+				break;
+			}
+		}
+		
+		return data;
+	}
+	
 	void openPerspective(Object data, boolean clearPerspective) throws Exception {
 		Perspective currentPerspective = this.currentPerspective;
 		if(clearPerspective) {
 			currentPerspective = null;
 		}
+		
+		data = getOpenedPerspective(data);
 		
 		Extension perspectiveExtension = null;
 		
@@ -294,20 +348,18 @@ public class IcarusFrame extends JFrame {
 		String id = currentPerspective.getIdentity().getId();
 
 		// Load container
-		if(containers==null) {
-			containers = new LinkedHashMap<>();
-		}		
-		PerspectiveContainer container = containers.get(currentPerspective);
+		PerspectiveContainer container = getContainers().get(currentPerspective);
 		
 		// Show perspective
 		try {
 			if(container==null) {
 				container = new PerspectiveContainer(currentPerspective);
 				container.init();
-				containers.put(currentPerspective, container);
+				getContainers().put(currentPerspective, container);
 			}
 			rootPanel.setLayout(new BorderLayout());
-			rootPanel.add(container);
+			rootPanel.add(container, BorderLayout.CENTER);
+			rootPanel.add(getInfoPanel().getContentPanel(), BorderLayout.SOUTH);
 		} catch (Exception e) {
 			logger.log(LoggerFactory.record(Level.SEVERE, 
 					"Failed to init perspective: "+id, e)); //$NON-NLS-1$
@@ -319,13 +371,19 @@ public class IcarusFrame extends JFrame {
 		this.currentPerspective = currentPerspective;
 		
 		// Refresh menu bar
-		refreshMenu();
+		refreshMenuBar();
+		
+		// Refresh tool-bar
+		refreshToolBar();
 		
 		logger.log(LoggerFactory.record(
 				Level.FINE, "Opened perspective: "+id)); //$NON-NLS-1$
+		
+		getEventSource().fireEvent(new EventObject(IcarusFrameEvents.PERSPECTIVE_OPENED, 
+				"perspective", currentPerspective)); //$NON-NLS-1$
 	}
 	
-	void refreshMenu() {
+	void refreshMenuBar() {
 		
 		Perspective perspective = currentPerspective;
 		
@@ -336,6 +394,24 @@ public class IcarusFrame extends JFrame {
 			perspective.buildMenuBar(menuDelegate);
 		}
 		setJMenuBar(menuDelegate.createMenuBar());
+	}
+	
+	void refreshToolBar() {
+		
+		Perspective perspective = currentPerspective;
+		
+		// Refresh tool-bar
+		toolBarDelegate.clear();
+		if(perspective!=null) {
+			perspective.buildToolBar(toolBarDelegate);
+		}
+		
+		if(perspectivePanel==null) {
+			perspectivePanel = new PerspectivePanel();
+		}
+		perspectivePanel.feedToolBar(toolBarDelegate);
+		
+		rootPanel.add(toolBarDelegate.getToolbar(), BorderLayout.NORTH);
 	}
 	
 	void closePerspective(Perspective perspective) {
@@ -375,6 +451,9 @@ public class IcarusFrame extends JFrame {
 		if(perspective==currentPerspective) {
 			this.currentPerspective = null;
 		}
+		
+		getEventSource().fireEvent(new EventObject(IcarusFrameEvents.PERSPECTIVE_CLOSED, 
+				"perspective", perspective)); //$NON-NLS-1$
 	}
 	
 	void refreshContent() throws Exception {
@@ -394,12 +473,15 @@ public class IcarusFrame extends JFrame {
 		getContentPane().validate();
 	}
 	
-	void mapContainer(Perspective perspective, PerspectiveContainer container) {
+	private Map<Perspective, PerspectiveContainer> getContainers() {
 		if(containers==null) {
 			containers = new LinkedHashMap<>();
 		}
-		
-		containers.put(perspective, container);
+		return containers;
+	}
+	
+	void mapContainer(Perspective perspective, PerspectiveContainer container) {
+		getContainers().put(perspective, container);
 	}
 	
 	JComponent getContainer(Perspective perspective) {
@@ -459,7 +541,7 @@ public class IcarusFrame extends JFrame {
 				.getPluginDescriptor(IcarusCorePlugin.PLUGIN_ID)
 				.getExtensionPoint("Perspective").getConnectedExtensions()); //$NON-NLS-1$
 		
-		// TODO sort extensions
+		// TODO sort extensions?
 		
 		List<Object> menuItems = new ArrayList<>(extensions.size());
 		
@@ -507,8 +589,17 @@ public class IcarusFrame extends JFrame {
 		
 		actionManager.addHandler("plugins.core.icarusFrame.resetPerspectiveAction",  //$NON-NLS-1$
 				callbackHandler, "resetPerspective"); //$NON-NLS-1$
+		
+		actionManager.addHandler("plugins.core.icarusFrame.openPerspectiveDialogAction",  //$NON-NLS-1$
+				callbackHandler, "openPerspectiveDialog"); //$NON-NLS-1$
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	class Handler implements WindowListener, ChangeListener {
 
 		/**
@@ -596,6 +687,12 @@ public class IcarusFrame extends JFrame {
 		
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	class IcarusFrameDelegate extends FrameDelegate {
 
 		/**
@@ -775,5 +872,164 @@ public class IcarusFrame extends JFrame {
 				}
 			}
 		}
+		
+		public void openPerspectiveDialog(ActionEvent e) {
+			ExtensionPoint extensionPoint = PluginUtil.getCorePlugin().getExtensionPoint("Perspective"); //$NON-NLS-1$
+			// TODO Sort shown extensions in dialog?
+			boolean doSort = false;
+			Object perspective = PluginUtil.showExtensionDialog(IcarusFrame.this, 
+					"plugins.core.icarusFrame.dialogs.openPerspective",  //$NON-NLS-1$
+					extensionPoint, doSort);
+			
+			if(perspective==null) {
+				return;
+			}
+			
+			try {
+				openPerspective(perspective, false);
+			} catch (Exception ex) {
+				logger.log(LoggerFactory.record(Level.SEVERE,
+						"Failed to open perspective: "+perspective, ex)); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	private class PerspectivePanel implements EventListener, ActionListener {
+		
+		private JComboBox<Object> comboBox;
+		
+		PerspectivePanel() {
+			IcarusFrame.this.getEventSource().addListener(IcarusFrameEvents.PERSPECTIVE_OPENED, this);
+			IcarusFrame.this.getEventSource().addListener(IcarusFrameEvents.PERSPECTIVE_CLOSED, this);
+		}
+		
+		void feedToolBar(ToolBarDelegate toolBarDelegate) {
+			toolBarDelegate.add(Box.createGlue());
+			if(!toolBarDelegate.isEmpty()) {
+				toolBarDelegate.addSeparator();
+			}
+			
+			if(comboBox==null) {
+				init();
+			}
+			
+			toolBarDelegate.addAction(getActionManager(), 
+					"plugins.core.icarusFrame.openPerspectiveDialogAction"); //$NON-NLS-1$
+			toolBarDelegate.addSeparator();
+			toolBarDelegate.add(comboBox);
+		}
+		
+		private void init() {
+			comboBox = new JComboBox<>();
+			comboBox.setEditable(false);
+			comboBox.setRenderer(new PerspectiveListCellRenderer());
+			comboBox.addActionListener(this);
+
+			Dimension size = new Dimension(200, 25);
+			comboBox.setPreferredSize(size);
+			comboBox.setMinimumSize(size);
+			comboBox.setMaximumSize(size);
+			
+			for(Perspective perspective : getContainers().keySet()) {
+				comboBox.addItem(perspective);
+			}
+			comboBox.setSelectedItem(currentPerspective);
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.events.EventListener#invoke(java.lang.Object, net.ikarus_systems.icarus.ui.events.EventObject)
+		 */
+		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public void invoke(Object sender, EventObject event) {
+			if(comboBox==null) {
+				return;
+			}
+			
+			Perspective perspective = (Perspective) event.getProperty("perspective"); //$NON-NLS-1$
+						
+			if(IcarusFrameEvents.PERSPECTIVE_OPENED.equals(event.getName())) {
+				// Only add opened perspective if it is not already present
+				boolean doAdd = true;
+				for(int i=comboBox.getItemCount()-1; i>-1; i--) {
+					if(comboBox.getItemAt(i).equals(perspective)) {
+						doAdd = false;
+						break;
+					}
+				}
+				
+				if(doAdd) {
+					comboBox.addItem(perspective);
+				}
+				
+				comboBox.setSelectedItem(perspective);
+			} else {
+				comboBox.removeItem(perspective);
+				comboBox.setSelectedItem(currentPerspective);
+			}
+			
+			comboBox.setVisible(comboBox.getItemCount()>1);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Object perspective = comboBox.getSelectedItem();
+
+			if(perspective==null) {
+				return;
+			}
+			
+			try {
+				openPerspective(perspective, false);
+			} catch (Exception ex) {
+				logger.log(LoggerFactory.record(Level.SEVERE,
+						"Failed to open perspective: "+perspective, ex)); //$NON-NLS-1$
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	private static class PerspectiveListCellRenderer extends DefaultListCellRenderer {
+
+		private static final long serialVersionUID = -250478882345416648L;
+
+		/**
+		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+		 */
+		@Override
+		public Component getListCellRendererComponent(JList<?> list,
+				Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
+			
+			Perspective perspective = null;
+			if(value instanceof Perspective) {
+				perspective = (Perspective) value;
+				value = perspective.getIdentity().getName();
+			}
+			
+			super.getListCellRendererComponent(list, value, index, isSelected,
+					cellHasFocus);
+			
+			if(perspective!=null) {
+				setIcon(perspective.getIdentity().getIcon());
+			}
+			
+			return this;
+		}
+		
 	}
 }

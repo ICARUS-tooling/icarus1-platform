@@ -11,10 +11,10 @@ package net.ikarus_systems.icarus.language;
 
 import java.io.IOException;
 
-import net.ikarus_systems.icarus.util.Location;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.UnsupportedLocationException;
+import net.ikarus_systems.icarus.util.location.Location;
 
 /**
  * Deserialization handler for {@code SentenceData} objects.

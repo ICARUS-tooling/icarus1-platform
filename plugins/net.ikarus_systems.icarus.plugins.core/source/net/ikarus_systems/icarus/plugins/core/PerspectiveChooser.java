@@ -100,8 +100,8 @@ public class PerspectiveChooser {
 		// Selection panels for perspectives
 		JPanel infoPanel = new JPanel();
 		infoPanel.setBorder(new EmptyBorder(5, 10, 10, 10));
-		int rows = Math.max(1, connectedExtensions.size()/2);
-		infoPanel.setLayout(new GridLayout(rows, 2, 5, 10));
+		int rows = (int) Math.ceil(connectedExtensions.size()*0.5);
+		infoPanel.setLayout(new GridLayout(rows, 2, 5, 5));
 		for(Extension extension : connectedExtensions) {
 			infoPanel.add(new PerspectivePanel(extension).getPanel());
 		}

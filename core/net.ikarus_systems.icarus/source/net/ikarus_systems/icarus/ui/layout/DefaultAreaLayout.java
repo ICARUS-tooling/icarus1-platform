@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.ui.layout;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.LayoutManager;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -268,7 +269,7 @@ public class DefaultAreaLayout implements AreaLayout {
 		
 		
 		for(JComponent comp : components) {
-			comp.setBorder(UIUtil.topLineBorder);
+			//comp.setBorder(UIUtil.topLineBorder);
 			
 			int index = Math.max(0, tabbedPane.getTabCount()-1);
 			
@@ -380,6 +381,7 @@ public class DefaultAreaLayout implements AreaLayout {
 			} else {
 				maximize(container);
 			}
+			focusContainer(container);
 		} finally {
 			root.revalidate();
 			root.repaint();
@@ -445,6 +447,25 @@ public class DefaultAreaLayout implements AreaLayout {
 		} finally {
 			maximizedArea = comp;
 		}
+	}
+	
+	protected void focusContainer(Component comp) {
+		if(comp instanceof JTabbedPane) {
+			JTabbedPane tabbedPane = (JTabbedPane) comp;
+			int tabIndex = tabbedPane.getSelectedIndex();
+			if(tabIndex!=-1) {
+				comp = tabbedPane.getComponentAt(tabIndex);
+			}
+		} else if(comp instanceof Container) {
+			Container container = (Container) comp;
+			synchronized (container.getTreeLock()) {
+				if(container.getComponentCount()>0) {
+					comp = container.getComponent(0);
+				}
+			}
+		}
+		
+		comp.requestFocusInWindow();
 	}
 
 	/**

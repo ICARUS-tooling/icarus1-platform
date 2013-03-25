@@ -292,4 +292,37 @@
 		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.DerivedCorpus" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
+	
+	<extension id="CorpusListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Renderer to be used for corpus objects displayed in JList implementations.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusListCellRenderer" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="CorpusTreeCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Renderer to be used for corpus objects displayed in JTree implementations.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusTreeCellRenderer" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="interface" value="javax.swing.tree.TreeCellRenderer" />
+	</extension>
+	
+	<extension id="CorpusListModel" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				ListModel implementation as frontend for the CorpusRegistry.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusListModel" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="interface" value="javax.swing.ListModel" />
+	</extension>
 </plugin>

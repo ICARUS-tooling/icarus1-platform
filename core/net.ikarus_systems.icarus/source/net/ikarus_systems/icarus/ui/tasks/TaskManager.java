@@ -87,7 +87,7 @@ public final class TaskManager {
 	}
 
 	public TaskManager() {
-		// TODO Auto-generated constructor stub
+		// no-op
 	}
 	
 	/**
@@ -180,7 +180,7 @@ public final class TaskManager {
 		if(state!=null) {
 			state.setTitle(title);
 			eventSource.fireEvent(new EventObject(
-					Events.CHANGED, "task", task)); //$NON-NLS-1$
+					Events.CHANGED, "task", task, "property", "title")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -189,7 +189,7 @@ public final class TaskManager {
 		if(state!=null) {
 			state.setInfo(info);
 			eventSource.fireEvent(new EventObject(
-					Events.CHANGED, "task", task)); //$NON-NLS-1$
+					Events.CHANGED, "task", task, "property", "info")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -198,7 +198,7 @@ public final class TaskManager {
 		if(state!=null) {
 			state.setIcon(icon);
 			eventSource.fireEvent(new EventObject(
-					Events.CHANGED, "task", task)); //$NON-NLS-1$
+					Events.CHANGED, "task", task, "property", "icon")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -213,7 +213,7 @@ public final class TaskManager {
 		if(state!=null) {
 			state.setIndeterminate(indeterminate);
 			eventSource.fireEvent(new EventObject(
-					Events.CHANGED, "task", task)); //$NON-NLS-1$
+					Events.CHANGED, "task", task, "property", "indeterminate")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -239,8 +239,18 @@ public final class TaskManager {
 		return ((SwingWorker<?, ?>)task).getProgress();
 	}
 	
-	void cancelTask(Object task) {
+	synchronized void cancelTask(Object task) {
 		// TODO
+		SwingWorker<?, ?> worker = getWorker(task);
+		
+		wrapperMap.removeValue(worker);
+		states.remove(worker);
+		
+		if(currentWorker==worker) {
+			worker.cancel(true);
+		} else {
+			taskQueue.remove(task);
+		}
 	}
 	
 	TaskQueue getQueue() {
@@ -264,14 +274,14 @@ public final class TaskManager {
 		
 		SwingWorker<?, ?> worker = null;
 		
-		if(task instanceof Runnable) {
+		if(task instanceof SwingWorker) {
+			worker = (SwingWorker<?, ?>) task;
+		} else if(task instanceof Runnable) {
 			worker = Tasks.createWorker((Runnable)task);
 			wrapperMap.put(task, worker);
 		} else if(task instanceof Callable) {
 			worker = Tasks.createWorker((Callable<?>)task);
 			wrapperMap.put(task, worker);
-		} else if(task instanceof SwingWorker) {
-			worker = (SwingWorker<?, ?>) task;
 		}
 		
 		if(!(worker instanceof SwingWorker))
@@ -295,7 +305,7 @@ public final class TaskManager {
 		// Clear lookup tables if adding failed
 		if(!result) {
 			states.remove(worker);
-			wrapperMap.remove(task);
+			wrapperMap.removeValue(worker);
 		}
 		
 		if(result && currentWorker==null) {
@@ -531,6 +541,8 @@ public final class TaskManager {
 		 */
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
+			//System.out.printf("name=%s value=%s\n", evt.getPropertyName(), evt.getNewValue());
+			
 			SwingWorker<?, ?> worker = (SwingWorker<?, ?>) evt.getSource();
 			Object task = wrapperMap.getKey(worker);
 			if(task==null) {
@@ -554,6 +566,11 @@ public final class TaskManager {
 				setIndeterminate(task, (Boolean)evt.getNewValue());
 				break;
 				
+			case "progress": //$NON-NLS-1$
+				eventSource.fireEvent(new EventObject(
+						Events.CHANGED, "task", task, "property", "progress")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				break;
+				
 			case "state": //$NON-NLS-1$
 				if(worker.isDone()) {
 					worker.removePropertyChangeListener(this);
@@ -571,6 +588,9 @@ public final class TaskManager {
 					dispatch();
 					break;
 				}
+				eventSource.fireEvent(new EventObject(
+						Events.CHANGED, "task", task, "property", "state")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				break;
 
 			default:
 				eventSource.fireEvent(new EventObject(
@@ -596,6 +616,8 @@ public final class TaskManager {
 				
 				currentWorker = worker;			
 				worker.addPropertyChangeListener(this);
+				
+				worker.execute();
 				
 				eventSource.fireEvent(new EventObject(
 						TaskConstants.ACTIVE_TASK_CHANGED));
@@ -700,6 +722,47 @@ public final class TaskManager {
 			return true;
 		}
 		
+		void remove(Object task) {
+			lock.lock();
+			try {
+				if(size==0) {
+					return;
+				}
+				
+				for(TaskPriority priority : TaskPriority.values()) {
+					Queue<Object> list = queue.get(priority);
+					if(list==null || list.isEmpty()) {
+						continue;
+					}
+						
+					// Remove task and remove list if empty
+					if(!list.remove(task)) {
+						continue;
+					}
+					if(list.isEmpty()) {
+						queue.remove(priority);
+					}
+					
+					// Remove priority from task lookup list
+					List<TaskPriority> priorities = taskPriorities.get(task);
+					priorities.remove(priority);
+					if(priorities.isEmpty()) {
+						taskPriorities.remove(task);
+					}
+					
+					// Decrement total counter
+					size--;
+
+					eventSource.fireEvent(new EventObject(Events.REMOVED, 
+							"task", task, "priority", priority)); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					break;
+				}
+			} finally {
+				lock.unlock();
+			}
+		}
+		
 		/**
 		 * Fetches the first task in any priority queue starting with
 		 * the highest priority.
@@ -708,7 +771,7 @@ public final class TaskManager {
 			lock.lock();
 			Object task = null;
 			try {
-				if(queue.size()==0) {
+				if(size==0) {
 					return null;
 				}
 				

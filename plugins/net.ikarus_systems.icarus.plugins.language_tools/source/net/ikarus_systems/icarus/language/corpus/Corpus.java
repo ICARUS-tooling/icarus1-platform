@@ -14,7 +14,7 @@ import java.util.Map;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.ui.events.EventListener;
-import net.ikarus_systems.icarus.util.Location;
+import net.ikarus_systems.icarus.util.location.Location;
 
 /**
  * 

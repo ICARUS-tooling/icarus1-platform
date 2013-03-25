@@ -25,7 +25,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
 /**
  * An {@code ActionList} encapsulates a collection of action related
  * objects that can be used to construct menus, tool-bars, pop-ups and 
- * the like. It basically holds a list of identifier {@code String}s or
+ * the like. It basically holds a list of identifier {@code Strings} or
  * {@code null} values that are each associated with a certain {@code EntryType}.
  * Each {@code ActionList} created by the {@code ActionManager} or other
  * framework elements is immutable (i.e. it was created using a {@code null}
@@ -155,8 +155,9 @@ public final class ActionList {
 	void add(EntryType type, String value) {
 		Exceptions.testNullArgument(type, "type"); //$NON-NLS-1$
 		
-		if(list==null)
+		if(list==null) {
 			list = new ArrayList<>();
+		}
 			
 		ListEntry entry = new ListEntry(type, value);
 		list.add(entry);
@@ -311,9 +312,19 @@ public final class ActionList {
 		/**
 		 * Inserts an implementation specific placeholder that typically
 		 * is roughly the same size as a regular action component for the
-		 * current container.
+		 * current container. It is possible to assign a specific size value
+		 * that determines either the width or height of the inserted component
+		 * depending on the type of action component the containing list
+		 * is converted into.
 		 */
 		EMPTY,
+		
+		/**
+		 * Inserts an implementation specific 'glue' component that consumes
+		 * free space when available. Note that typically only tool-bar
+		 * components support such behavior.
+		 */
+		GLUE,
 		
 		/**
 		 * Mightiest type to assign to an entry.
@@ -349,6 +360,7 @@ public final class ActionList {
 			case "label": return LABEL; //$NON-NLS-1$
 			case "custom": return CUSTOM; //$NON-NLS-1$
 			case "empty": return SEPARATOR; //$NON-NLS-1$
+			case "glue": return GLUE; //$NON-NLS-1$
 			default:
 				throw new IllegalArgumentException("Unknown entry-type: "+text); //$NON-NLS-1$
 			}

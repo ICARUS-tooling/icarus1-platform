@@ -11,6 +11,8 @@ package net.ikarus_systems.icarus.plugins.language_tools.corpus;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -23,17 +25,17 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import javax.swing.Box;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
@@ -48,6 +50,7 @@ import net.ikarus_systems.icarus.resources.Localizer;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -67,11 +70,7 @@ public class CorpusPropertiesView extends View {
 
 	private JLabel infoLabel;
 	
-	private JLabel nameLabel;
-	private JLabel typeLabel;
-	private JLabel goldLabel;
-	private JLabel loadedLabel;
-	private JLabel editableLabel;
+	private JTextArea propertiesArea;
 	
 	private JTable propertiesTable;
 	private PropertiesTableModel propertiesTableModel;
@@ -119,88 +118,60 @@ public class CorpusPropertiesView extends View {
 
 		// Info label
 		infoLabel = new JLabel();
+		UIUtil.disableHtml(infoLabel);
 		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		infoLabel.setVerticalAlignment(SwingConstants.TOP);
 		ResourceManager.getInstance().getGlobalDomain().prepareComponent(
 				infoLabel, "plugins.languageTools.corpusPropertiesView.notAvailable", null); //$NON-NLS-1$
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 		
-		contentPanel = new JPanel();		
-		GroupLayout layout = new GroupLayout(contentPanel);
-		contentPanel.setLayout(layout);
-		GroupLayout.SequentialGroup vGroup = layout.createSequentialGroup();
-		GroupLayout.ParallelGroup hGroup = layout.createParallelGroup(Alignment.LEADING);
+		contentPanel = new JPanel(new GridBagLayout());
 		
-		Border border = new EmptyBorder(0, 3, 0, 3);
 		Border titleBoarder = new EmptyBorder(5, 3, 5, 3);
 		
-		// Name
-		nameLabel = new JLabel();
-		nameLabel.setBorder(titleBoarder);
-		nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(nameLabel);
-		hGroup.addComponent(nameLabel);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+		gbc.gridx = 0;
+		gbc.weightx = 100;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
-		// Type
-		typeLabel = new JLabel();
-		typeLabel.setBorder(border);
-		typeLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(typeLabel);
-		hGroup.addComponent(typeLabel);
-		
-		// Loaded label
-		loadedLabel = new JLabel();
-		loadedLabel.setBorder(border);
-		loadedLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(loadedLabel);
-		hGroup.addComponent(loadedLabel);
-		
-		// Gold label
-		goldLabel = new JLabel();
-		goldLabel.setBorder(border);
-		goldLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(goldLabel);
-		hGroup.addComponent(goldLabel);
-		
-		// Editable label
-		editableLabel = new JLabel();
-		editableLabel.setBorder(border);
-		editableLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(editableLabel);
-		hGroup.addComponent(editableLabel);
+		// General properties
+		propertiesArea = new JTextArea();
+		propertiesArea.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
+		UIUtil.disableHtml(propertiesArea);
+		propertiesArea.setBorder(titleBoarder);
+		propertiesArea.addMouseListener(handler);
 		
 		// Properties table
 		propertiesLabel = new JLabel();
 		propertiesLabel.setBorder(titleBoarder);
 		propertiesLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(propertiesLabel);
-		hGroup.addComponent(propertiesLabel);
 		propertiesTableModel = new PropertiesTableModel();
 		propertiesTable = new JTable(propertiesTableModel);
+		UIUtil.disableHtml(propertiesTable.getDefaultRenderer(Object.class));
 		propertiesTable.getTableHeader().setReorderingAllowed(false);
 		propertiesTable.addMouseListener(handler);
-		vGroup.addComponent(propertiesTable.getTableHeader());
-		vGroup.addComponent(propertiesTable);
-		hGroup.addComponent(propertiesTable.getTableHeader());
-		hGroup.addComponent(propertiesTable);
 		
 		// MetaData table
 		metaDataLabel = new JLabel();
 		metaDataLabel.setBorder(titleBoarder);
 		metaDataLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		vGroup.addComponent(metaDataLabel);
-		hGroup.addComponent(metaDataLabel);
 		metaDataTableModel = new MetaDataTableModel();
 		metaDataTable = new JTable(metaDataTableModel);
+		UIUtil.disableHtml(metaDataTable.getDefaultRenderer(Object.class));
 		metaDataTable.getTableHeader().setReorderingAllowed(false);
 		metaDataTable.addMouseListener(handler);
-		vGroup.addComponent(metaDataTable.getTableHeader());
-		vGroup.addComponent(metaDataTable);
-		hGroup.addComponent(metaDataTable.getTableHeader());
-		hGroup.addComponent(metaDataTable);
-		
-		layout.setHorizontalGroup(hGroup);
-		layout.setVerticalGroup(vGroup);
+
+		contentPanel.add(propertiesArea, gbc);
+		contentPanel.add(propertiesLabel, gbc);
+		contentPanel.add(propertiesTable.getTableHeader(), gbc);
+		contentPanel.add(propertiesTable, gbc);
+		contentPanel.add(metaDataLabel, gbc);
+		contentPanel.add(metaDataTable.getTableHeader(), gbc);
+		contentPanel.add(metaDataTable, gbc);
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weighty = 100;
+		contentPanel.add(Box.createGlue(), gbc);
 		
 		// Scroll pane
 		scrollPane = new JScrollPane();
@@ -209,13 +180,12 @@ public class CorpusPropertiesView extends View {
 		// ToolBar
 		JToolBar toolBar = getDefaultActionManager().createToolBar(
 				"plugins.languageTools.corpusPropertiesView.toolBarList", null); //$NON-NLS-1$
-		toolBar.add(Box.createHorizontalGlue());
 		
 		container.setLayout(new BorderLayout());
 		container.add(toolBar, BorderLayout.NORTH);
 		container.add(scrollPane, BorderLayout.CENTER);
 		container.setPreferredSize(new Dimension(220, 200));
-		container.setMinimumSize(new Dimension(180, 150));
+		container.setMinimumSize(new Dimension(180, 150));		
 		
 		showDefaultInfo();
 		
@@ -287,11 +257,13 @@ public class CorpusPropertiesView extends View {
 			showDefaultInfo();
 		} else {
 			refresh();
+			contentPanel.setBackground(UIManager.getColor("TextArea.background")); //$NON-NLS-1$
 			scrollPane.setViewportView(contentPanel);
 		}
 	}
 	
 	private static String COLON = ": "; //$NON-NLS-1$
+	private static String LF = "\n"; //$NON-NLS-1$
 	
 	private void refresh() {
 		if(corpus==null) {
@@ -300,26 +272,38 @@ public class CorpusPropertiesView extends View {
 		
 		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
 		
-		// Name
-		nameLabel.setText(resourceDomain.get(
-				"plugins.languageTools.labels.name")+COLON+corpus.getName()); //$NON-NLS-1$
+		StringBuilder sb = new StringBuilder(200);
+		
+		// General properties
+		sb.append(resourceDomain.get("plugins.languageTools.labels.name")) //$NON-NLS-1$
+		.append(COLON)
+		.append(corpus.getName())
+		.append(LF);
 		
 		// Type
-		typeLabel.setText(resourceDomain.get(
-				"plugins.languageTools.labels.type")+COLON+ //$NON-NLS-1$
-				CorpusRegistry.getInstance().getExtension(corpus).getId());
+		sb.append(resourceDomain.get("plugins.languageTools.labels.type")) //$NON-NLS-1$
+		.append(COLON)
+		.append(CorpusRegistry.getInstance().getExtension(corpus).getId())
+		.append(LF);
 		
 		// Loaded
-		loadedLabel.setText(resourceDomain.get(
-				"plugins.languageTools.labels.loaded")+COLON+Boolean.toString(corpus.isLoaded())); //$NON-NLS-1$
+		sb.append(resourceDomain.get("plugins.languageTools.labels.loaded")) //$NON-NLS-1$
+		.append(COLON)
+		.append(Boolean.toString(corpus.isLoaded()))
+		.append(LF);
 		
 		// Editable
-		editableLabel.setText(resourceDomain.get(
-				"plugins.languageTools.labels.editable")+COLON+Boolean.toString(corpus.isEditable())); //$NON-NLS-1$
+		sb.append(resourceDomain.get("plugins.languageTools.labels.editable")) //$NON-NLS-1$
+		.append(COLON)
+		.append(Boolean.toString(corpus.isEditable()))
+		.append(LF);
 		
 		// Gold
-		goldLabel.setText(resourceDomain.get(
-				"plugins.languageTools.labels.gold")+COLON+Boolean.toString(corpus.hasGold())); //$NON-NLS-1$
+		sb.append(resourceDomain.get("plugins.languageTools.labels.gold")) //$NON-NLS-1$
+		.append(COLON)
+		.append(Boolean.toString(corpus.hasGold())); // no LF on last line!
+		
+		propertiesArea.setText(sb.toString());
 		
 		if(corpus.getProperties().isEmpty()) {
 			propertiesLabel.setText(resourceDomain.get(

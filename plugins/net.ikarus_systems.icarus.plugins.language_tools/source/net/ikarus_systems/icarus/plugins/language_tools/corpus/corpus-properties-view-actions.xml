@@ -49,6 +49,7 @@
 		<separator />
 		<item type="action" value="plugins.languageTools.corpusPropertiesView.editCorpusAction" />
 		<item type="action" value="plugins.languageTools.corpusPropertiesView.inspectCorpusAction" />
+		<item type="glue" />
 	</action-list>
 		
 	<!-- Popup Menu List -->
@@ -62,6 +63,7 @@
 		<separator />
 		<item type="action" value="plugins.languageTools.corpusPropertiesView.editCorpusAction" />
 		<item type="action" value="plugins.languageTools.corpusPropertiesView.inspectCorpusAction" />
+		<item type="glue"/>
 	</action-list>
 	
 </actions>

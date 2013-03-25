@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.ui.corpus;
+package net.ikarus_systems.icarus.language.corpus.swing;
 
 import java.awt.Component;
 
@@ -15,6 +15,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
 import net.ikarus_systems.icarus.language.corpus.Corpus;
+import net.ikarus_systems.icarus.ui.UIUtil;
+
 
 /**
  * @author Markus Gärtner
@@ -29,7 +31,7 @@ public class CorpusListCellRenderer extends DefaultListCellRenderer {
 	 * 
 	 */
 	public CorpusListCellRenderer() {
-		// no-op
+		UIUtil.disableHtml(this);
 	}
 
 	/**

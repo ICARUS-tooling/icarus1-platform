@@ -179,8 +179,24 @@ public abstract class View implements Identifiable {
 		return perspective;
 	}
 	
-	protected Frame getFrame() {
+	protected final Frame getFrame() {
 		return getPerspective().getFrame();
+	}
+	
+	protected InfoPanel getInfoPanel() {
+		return getPerspective().getInfoPanel(this);
+	}
+	
+	protected void refreshInfoPanel(InfoPanel infoPanel) {
+		infoPanel.clear();
+	}
+	
+	/**
+	 * Entry point for subclasses to add tool-bar elements to the
+	 * frame-wide tool-bar. The default implementation does nothing.
+	 */
+	protected void buildToolBar(ToolBarDelegate delegate) {
+		// no-op
 	}
 
 	/**
@@ -226,7 +242,7 @@ public abstract class View implements Identifiable {
 	 * that holds this {@code View}'s {@code container} object as the
 	 * selected component in the corresponding {@code JTabbedPane}.
 	 */
-	protected final void requestFocusInPerspective() {
+	protected final void selectViewTab() {
 		getPerspective().selectViewTab(this);
 	}
 	

@@ -46,7 +46,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 	}
 	
 	protected void initOptionPane() {
-		optionPane = new JOptionPane();
+		optionPane = new JOptionPane(null);
 		optionPane.setOptionType(JOptionPane.DEFAULT_OPTION);
 		optionPane.setMessageType(JOptionPane.PLAIN_MESSAGE);
 	}

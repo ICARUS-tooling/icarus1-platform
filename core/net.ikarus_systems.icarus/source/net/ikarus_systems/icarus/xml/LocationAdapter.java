@@ -9,13 +9,10 @@
  */
 package net.ikarus_systems.icarus.xml;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import net.ikarus_systems.icarus.util.DefaultURLLocation;
-import net.ikarus_systems.icarus.util.Location;
+import net.ikarus_systems.icarus.util.location.Location;
+import net.ikarus_systems.icarus.util.location.Locations;
 
 /**
  * @author Markus Gärtner
@@ -26,13 +23,13 @@ public class LocationAdapter extends XmlAdapter<String, Location> {
 	
 	public Location unmarshal(String s) {
 		try {
-			return new DefaultURLLocation(new URL(s));
-		} catch (MalformedURLException e) {
+			return Locations.getLocation(s);
+		} catch (Exception e) {
 			return null;
 		}
 	}
 
 	public String marshal(Location loc) {
-		return loc.getURL().toExternalForm();
+		return Locations.getPath(loc);
 	}
 }

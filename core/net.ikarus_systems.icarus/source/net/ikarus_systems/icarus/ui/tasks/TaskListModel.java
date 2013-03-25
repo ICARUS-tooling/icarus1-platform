@@ -40,12 +40,29 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 	
 	private final TaskManager manager;
 	
+	private boolean includeActiveTask = false;
+	
 	public TaskListModel(TaskManager manager) {
 		this.manager = manager;
 		
-		manager.addListener(Events.CHANGED, this);
-		manager.addListener(Events.REMOVED, this);
-		manager.addListener(Events.ADDED, this);
+		manager.addListener(null, this);
+	}
+
+	/**
+	 * @return the includeActiveTask
+	 */
+	public boolean isIncludeActiveTask() {
+		return includeActiveTask;
+	}
+
+	/**
+	 * @param includeActiveTask the includeActiveTask to set
+	 */
+	public void setIncludeActiveTask(boolean includeActiveTask) {
+		if(includeActiveTask!=this.includeActiveTask) {
+			this.includeActiveTask = includeActiveTask;
+			fireContentsChanged(this, 0, getSize());
+		}
 	}
 
 	/**
@@ -53,7 +70,32 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 	 */
 	@Override
 	public int getSize() {
-		return manager.getQueue().size();
+		int size = manager.getQueue().size();
+		
+		if(isIncludeActiveTask() && manager.getActiveTask()!=null) {
+			size++;
+		}
+		
+		//System.out.printf("size=%d iac=%b\n", size, isIncludeActiveTask()); //$NON-NLS-1$
+		
+		return size;
+	}
+	
+	private Object taskAt(int index) {
+		Object task = null;
+		if(isIncludeActiveTask() && index==0) {
+			task = manager.getActiveTask();
+		}
+		
+		if(task==null) {
+			if(isIncludeActiveTask()) {
+				index--;
+			}
+			
+			task = manager.getQueue().taskAt(index);
+		}
+		
+		return task;
 	}
 
 	/**
@@ -71,7 +113,7 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 		synchronized (cacheLock) {
 			// Create cache if necessary
 			if(cache==null) {
-				cache = new Object[10];
+				cache = new Object[Math.max(size, 10)];
 			}
 			// Expand cache if necessary
 			if(cache.length<index) {
@@ -82,7 +124,7 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 			
 			task = cache[index];
 			if(task==null) {
-				task = manager.getQueue().taskAt(index);
+				task = taskAt(index);
 				cache[index] = task;
 			}
 			
@@ -102,10 +144,16 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 			return;
 		}
 		
+		if(TaskConstants.ACTIVE_TASK_CHANGED.equals(event.getName())) {
+			System.arraycopy(cache, 1, cache, 0, cacheSize-1);
+			fireContentsChanged(this, 0, getSize());
+			return;
+		}
+		
 		Object task = event.getProperty("task"); //$NON-NLS-1$
 		
 		// We are not interested in changes to the active task
-		if(manager.isActiveTask(task)) {
+		if(manager.isActiveTask(task) && !isIncludeActiveTask()) {
 			return;
 		}
 		

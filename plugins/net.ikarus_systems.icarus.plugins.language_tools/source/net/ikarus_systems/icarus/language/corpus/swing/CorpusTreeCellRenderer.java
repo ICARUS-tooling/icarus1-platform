@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.ui.corpus;
+package net.ikarus_systems.icarus.language.corpus.swing;
 
 import java.awt.Component;
 
@@ -17,6 +17,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.ikarus_systems.icarus.language.corpus.Corpus;
 import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.ui.UIUtil;
 
 import org.java.plugin.registry.Extension;
 
@@ -33,6 +34,7 @@ public class CorpusTreeCellRenderer extends DefaultTreeCellRenderer {
 		setLeafIcon(null);
 		setClosedIcon(null);
 		setOpenIcon(null);
+		UIUtil.disableHtml(this);
 	}
 
 	/**

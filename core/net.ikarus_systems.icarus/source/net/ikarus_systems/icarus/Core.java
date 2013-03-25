@@ -282,27 +282,6 @@ public class Core {
 	
 	private final class PluginManagerLog implements PluginManager.EventListener {
 		
-		private int countActive() {
-			int active = 0;
-			
-			for(PluginDescriptor descriptor : PluginUtil.getPluginRegistry().getPluginDescriptors()) {
-				if(PluginUtil.getPluginManager().isPluginActivated(descriptor))
-					active++;
-			}
-			
-			return active;
-		}
-		
-		private int countEnabled() {
-			int active = 0;
-			
-			for(PluginDescriptor descriptor : PluginUtil.getPluginRegistry().getPluginDescriptors()) {
-				if(PluginUtil.getPluginManager().isPluginEnabled(descriptor))
-					active++;
-			}
-			
-			return active;
-		}
 
 		/**
 		 * @see org.java.plugin.PluginManager.EventListener#pluginActivated(org.java.plugin.Plugin)
@@ -310,7 +289,7 @@ public class Core {
 		@Override
 		public void pluginActivated(Plugin plugin) {
             logger.info("plug-in started - " + plugin.getDescriptor().getUniqueId() //$NON-NLS-1$
-                    + " (active/total: " + countActive() //$NON-NLS-1$
+                    + " (active/total: " + PluginUtil.countActive() //$NON-NLS-1$
                     + " of "  //$NON-NLS-1$
                     + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
 		}
@@ -321,7 +300,7 @@ public class Core {
 		@Override
 		public void pluginDeactivated(Plugin plugin) {
             logger.info("plug-in stopped - " + plugin.getDescriptor().getUniqueId() //$NON-NLS-1$
-                    + " (active/total: " + countActive() //$NON-NLS-1$
+                    + " (active/total: " + PluginUtil.countActive() //$NON-NLS-1$
                     + " of " //$NON-NLS-1$
                     + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
 		}
@@ -332,7 +311,7 @@ public class Core {
 		@Override
 		public void pluginDisabled(PluginDescriptor descriptor) {
             logger.info("plug-in disabled - " + descriptor.getUniqueId() //$NON-NLS-1$
-                    + " (enabled/total: " + countEnabled() //$NON-NLS-1$
+                    + " (enabled/total: " + PluginUtil.countEnabled() //$NON-NLS-1$
                     + " of " //$NON-NLS-1$
                     + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
 		}
@@ -343,7 +322,7 @@ public class Core {
 		@Override
 		public void pluginEnabled(PluginDescriptor descriptor) {
             logger.info("plug-in enabled - " + descriptor.getUniqueId() //$NON-NLS-1$
-                    + " (enabled/total: " + countEnabled() //$NON-NLS-1$
+                    + " (enabled/total: " + PluginUtil.countEnabled() //$NON-NLS-1$
                     + " of " //$NON-NLS-1$
                     + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
 		}

@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.ui.corpus;
+package net.ikarus_systems.icarus.language.corpus.swing;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,28 +21,33 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import javax.swing.Icon;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.language_tools.LanguageToolsConstants;
+import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
 import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.events.WeakEventSource;
-import net.ikarus_systems.icarus.util.Location;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
+import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
+import net.ikarus_systems.icarus.util.NamingUtil;
 import net.ikarus_systems.icarus.util.UnknownIdentifierException;
+import net.ikarus_systems.icarus.util.location.Location;
+import net.ikarus_systems.icarus.xml.JAXBUtils.ListBuffer;
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
@@ -105,48 +109,20 @@ public class CorpusRegistry {
 		}
 	}
 	
-	private void load() throws Exception {
-		File file = new File(Core.getCore().getDataFolder(), "corpora.xml"); //$NON-NLS-1$
-		if(!file.exists() || file.length()==0) {
-			return;
-		}
-		
-		JAXBContext context = JAXBContext.newInstance(CorpusBuffer.class);
-		
-		CorpusBuffer buffer = (CorpusBuffer) context.createUnmarshaller().unmarshal(file);
-		descriptorMap.clear();
-		for(CorpusDescriptor descriptor : buffer.corpora) {
-			try {
-				descriptor.instantiateCorpus();
-			} catch(Exception e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to instantiate corpus: "+descriptor, e)); //$NON-NLS-1$
-			}
-		}
-	}
-	
-	private void save() throws Exception {
-		File file = new File(Core.getCore().getDataFolder(), "corpora.xml"); //$NON-NLS-1$
-		if(!file.exists()) {
-			file.createNewFile();
-		}
-		
-		CorpusBuffer buffer = new CorpusBuffer();
-		for(CorpusDescriptor descriptor : descriptorMap.values()) {
-			descriptor.syncFromCorpus();
-			buffer.corpora.add(descriptor);
-		}
-
-		JAXBContext context = JAXBContext.newInstance(CorpusBuffer.class);
-		context.createMarshaller().marshal(descriptorMap, file);
-	}
-	
 	public Set<Extension> availableCorpusTypes() {
 		return new HashSet<>(corpusTypes.values());
 	}
 	
+	public int availableTypeCount() {
+		return corpusTypes.size();
+	}
+	
 	public Collection<Corpus> availableCorpora() {
 		return Collections.unmodifiableCollection(corporaMap.keySet());
+	}
+	
+	public int availableCorporaCount() {
+		return corporaMap.size();
 	}
 	
 	public Set<Extension> compatibleCorpusTypes(String grammar) {
@@ -253,42 +229,13 @@ public class CorpusRegistry {
 		return descriptor==null ? null : descriptor.getCorpus();
 	}
 	
-	private static Pattern indexPattern;
-	
 	public String getUniqueName(String baseName) {
 		Set<String> usedNames = new HashSet<>(corporaMap.size());
 		for(Corpus corpus : corporaMap.keySet()) {
 			usedNames.add(corpus.getName());
 		}
 
-		String name = baseName;
-		int count = 2;
-		
-		if(indexPattern==null) {
-			indexPattern = Pattern.compile("\\((\\d+)\\)$"); //$NON-NLS-1$
-		}
-		
-		Matcher matcher = indexPattern.matcher(baseName);
-		if(matcher.find()) {
-			int currentCount = 0;
-			try {
-				currentCount = Integer.parseInt(matcher.group(1));
-			} catch(NumberFormatException e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to parse existing base name index suffix: "+baseName, e)); //$NON-NLS-1$
-			}
-			
-			count = Math.max(count, currentCount+1);
-			baseName = baseName.substring(0, baseName.length()-matcher.group().length()).trim();
-		}
-		
-		if(usedNames.contains(name)) {
-			while(usedNames.contains((name = baseName+" ("+count+")"))) { //$NON-NLS-1$ //$NON-NLS-2$
-				count++;
-			}
-		}
-		
-		return name;
+		return NamingUtil.getUniqueName(baseName, usedNames);
 	}
 	
 	public void deleteCorpus(Corpus corpus) {
@@ -314,6 +261,8 @@ public class CorpusRegistry {
 			eventSource.fireEvent(new EventObject(Events.REMOVED, 
 					"corpus", corpus, //$NON-NLS-1$
 					"extension", descriptor.getExtension())); //$NON-NLS-1$
+			
+			saveBackground();
 		}
 	}
 
@@ -345,11 +294,15 @@ public class CorpusRegistry {
 		eventSource.fireEvent(new EventObject(Events.ADDED, 
 				"corpus", descriptor.getCorpus(),  //$NON-NLS-1$
 				"extension", descriptor.getExtension())); //$NON-NLS-1$
+		
+		saveBackground();
 	}
 	
 	public void corpusChanged(Corpus corpus) {
 		eventSource.fireEvent(new EventObject(Events.CHANGED, 
 				"corpus", corpus)); //$NON-NLS-1$
+
+		saveBackground();
 	}
 	
 	public static String getTempName(Corpus corpus) {
@@ -393,10 +346,11 @@ public class CorpusRegistry {
 		corpusChanged(corpus);
 	}
 	
+	/**
+	 * Allows {@code null} location
+	 */
 	public void setLocation(Corpus corpus, Location location) {
-		if(location==null)
-			throw new IllegalArgumentException("Invalid location"); //$NON-NLS-1$
-		if(location.equals(corpus.getLocation())) {
+		if(location!=null && location.equals(corpus.getLocation())) {
 			return;
 		}
 		
@@ -580,13 +534,81 @@ public class CorpusRegistry {
 		
 	};
 	
-	@XmlRootElement(name="corpora")
-	private class CorpusBuffer {
+	private AtomicBoolean saveCheck = new AtomicBoolean();
+	private Runnable saveTask;
+	
+	private void saveBackground() {
+		if(saveCheck.compareAndSet(false, true)) {			
+			if(saveTask==null) {
+				saveTask = new Runnable() {
+					
+					@Override
+					public void run() {
+						try {
+							save();
+						} catch (Exception e) {
+							getLogger().log(LoggerFactory.record(
+									Level.SEVERE, "Failed to save corpus descriptor list", e)); //$NON-NLS-1$
+						} finally {
+							saveCheck.set(false);
+						}
+					}
+				};
+			}
+			
+			String title = ResourceManager.getInstance().get(
+					"plugins.languageTools.corpusSaveTask.title"); //$NON-NLS-1$
+			String info = ResourceManager.getInstance().get(
+					"plugins.languageTools.corpusSaveTask.description", availableCorporaCount()); //$NON-NLS-1$
+			Icon icon = IconRegistry.getGlobalRegistry().getIcon("corpus_saveas_edit.gif"); //$NON-NLS-1$
+			
+			TaskManager.getInstance().schedule(saveTask, title, 
+					info, icon, TaskPriority.DEFAULT, true);
+		}
+	}
+	
+	private void load() throws Exception {
+		File file = new File(Core.getCore().getDataFolder(), "corpora.xml"); //$NON-NLS-1$
+		if(!file.exists() || file.length()==0) {
+			return;
+		}
+
+		JAXBContext context = JAXBContext.newInstance(
+				ListBuffer.class, CorpusDescriptor.class);
+		Unmarshaller unmarshaller = context.createUnmarshaller();
+		ListBuffer buffer = (ListBuffer) unmarshaller.unmarshal(file);
 		
-		@XmlAttribute(name="timestamp")
-		private String timestamp = new Date().toString();
+		descriptorMap.clear();
+		for(Object item : buffer.getItems()) {
+			CorpusDescriptor descriptor = (CorpusDescriptor) item;
+			try {
+				descriptor.instantiateCorpus();
+			} catch(Exception e) {
+				getLogger().log(LoggerFactory.record(Level.SEVERE, 
+						"Failed to instantiate corpus: "+descriptor, e)); //$NON-NLS-1$
+			}
+			
+			addCorpus(descriptor);
+		}
+	}
+	
+	private void save() throws Exception {
+		File file = new File(Core.getCore().getDataFolder(), "corpora.xml"); //$NON-NLS-1$
+		if(!file.exists()) {
+			file.createNewFile();
+		}
 		
-		@XmlElement(name="corpus")
-		private List<CorpusDescriptor> corpora = new ArrayList<>();
+		ListBuffer buffer = new ListBuffer();
+		
+		for(CorpusDescriptor descriptor : descriptorMap.values()) {
+			descriptor.syncFromCorpus();
+			buffer.add(descriptor);
+		}
+
+		JAXBContext context = JAXBContext.newInstance(
+				ListBuffer.class, CorpusDescriptor.class);
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		marshaller.marshal(buffer, file);
 	}
 }

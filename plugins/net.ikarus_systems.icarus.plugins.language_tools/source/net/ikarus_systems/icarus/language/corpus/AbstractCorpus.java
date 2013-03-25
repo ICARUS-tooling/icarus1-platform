@@ -17,7 +17,7 @@ import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
-import net.ikarus_systems.icarus.util.Location;
+import net.ikarus_systems.icarus.util.location.Location;
 
 /**
  * Skeleton class for {@code Corpus} implementations. This class
@@ -93,10 +93,7 @@ public abstract class AbstractCorpus {
 	 * @see net.ikarus_systems.icarus.language.corpus.Corpus#loadState(net.ikarus_systems.icarus.language.corpus.CorpusDescriptor)
 	 */
 	public void loadState(CorpusDescriptor descriptor) {
-		if(properties==null) {
-			properties = new HashMap<>();
-		}
-		properties.putAll(descriptor.getProperties());
+		getProperties().putAll(descriptor.getProperties());
 		name = descriptor.getName();
 		location = descriptor.getLocation();
 	}

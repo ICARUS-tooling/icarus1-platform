@@ -114,5 +114,5 @@ public class ActionSet {
 		Exceptions.testNullArgument(actionId, "actionId"); //$NON-NLS-1$
 		
 		mapGroup(actionId, groupId);
-	}
+	} 
 }

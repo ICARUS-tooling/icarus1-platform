@@ -134,12 +134,16 @@
     				being interpreted as either a numerical width or one of
     				'small', 'medium', 'wide' with an implementation
     				specific mapping to actual separator width values.
-    empty:			Places an empty placeholder at the current position.
+    empty:			Places an empty placeholder at the current position (using 'value' as width).
+    glue:			Inserts a 'glue' component, i.e. a component that expands
+    				automatically to consume free space. This item type is not
+    				supported by all action components. Usually only tool-bar
+    				components make use of this.
 -->
 
 <!ELEMENT item EMPTY>
 <!ATTLIST item
-          type      (action|action-list|action-set|label|custom|separator|empty) #REQUIRED
+          type      (action|action-list|action-set|label|custom|separator|empty|glue) #REQUIRED
           value		CDATA #IMPLIED
 >
 

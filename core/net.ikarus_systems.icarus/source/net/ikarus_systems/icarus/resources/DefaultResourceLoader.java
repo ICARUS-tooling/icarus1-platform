@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.resources;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.ResourceBundle.Control;
 
 import net.ikarus_systems.icarus.util.Exceptions;
 
@@ -25,6 +26,8 @@ import net.ikarus_systems.icarus.util.Exceptions;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 	
+	private static Control control;
+	
 	protected ClassLoader classLoader;
 
 	/**
@@ -32,6 +35,15 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	public DefaultResourceLoader(ClassLoader classLoader) {
 		setLoader(classLoader);
+	}
+	
+	protected Control getControl() {
+		synchronized (DefaultResourceLoader.class) {
+			if(control==null) {
+				control = new UTF8Control();
+			}
+		}
+		return control;
 	}
 	
 	public ClassLoader getLoader() {
@@ -57,7 +69,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	@Override
 	public ResourceBundle loadResource(String name, Locale locale) {
-		return PropertyResourceBundle.getBundle(name, locale, getLoader());
+		return PropertyResourceBundle.getBundle(name, locale, getLoader(), getControl());
 	}
 
 }

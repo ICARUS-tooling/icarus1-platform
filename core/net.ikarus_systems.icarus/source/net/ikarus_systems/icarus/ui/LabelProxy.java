@@ -39,7 +39,7 @@ public class LabelProxy {
 	
 	@Override
 	public String toString() {
-		return ResourceManager.getInstance().get(key, params, key);
+		return ResourceManager.getInstance().get(key, key, params);
 	}
 
 	public Icon getIcon() {

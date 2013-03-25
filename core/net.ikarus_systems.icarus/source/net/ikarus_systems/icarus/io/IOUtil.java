@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * @author Markus Gärtner
@@ -53,5 +54,35 @@ public final class IOUtil {
 		}
 		
 		return null;
+	}
+
+	public static boolean isLocalFile(URL url) {
+		String scheme = url.getProtocol();
+		return "file".equalsIgnoreCase(scheme) && !hasHost(url); //$NON-NLS-1$
+	}
+
+	public static boolean hasHost(URL url) {
+		String host = url.getHost();
+		return host != null && !"".equals(host); //$NON-NLS-1$
+	}
+
+	public static boolean isLocal(URL url) {
+		if (isLocalFile(url)) {
+			return true;
+		}
+		String protocol = url.getProtocol();
+		if ("jar".equalsIgnoreCase(protocol)) { //$NON-NLS-1$
+			String path = url.getPath();
+			int emIdx = path.lastIndexOf('!');
+			String subUrlString = emIdx == -1 ? path : path.substring(0, emIdx);
+			try {
+				URL subUrl = new URL(subUrlString);
+				return isLocal(subUrl);
+			} catch (java.net.MalformedURLException mfu) {
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 }

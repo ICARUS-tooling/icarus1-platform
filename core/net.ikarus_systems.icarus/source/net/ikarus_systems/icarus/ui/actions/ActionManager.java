@@ -569,7 +569,11 @@ public class ActionManager {
 				break;
 				
 			case EMPTY:
-				handler.feedEmpty(container);
+				handler.feedEmpty(container, value);
+				break;
+				
+			case GLUE:
+				handler.feedGlue(container);
 				break;
 				
 			case ACTION_ID:
@@ -751,6 +755,29 @@ public class ActionManager {
 		configureToolBar(toolBar);
 		
 		return toolBar;
+	}
+
+	public void feedToolBar(String id, JToolBar toolBar, Map<String, Object> properties) {
+		ActionList actionList = getActionList(id);
+		
+		if(actionList==null) {
+			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
+					Level.WARNING, "Unknown action-list id: "+id)); //$NON-NLS-1$
+			return;
+		}
+		
+		feedToolBar(actionList, toolBar, properties);
+	}
+	
+	public void feedToolBar(ActionList actionList, JToolBar toolBar, Map<String, Object> properties) {
+		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
+		if(properties==null) {
+			properties = EMPTY_PROPERTIES;
+		}
+		
+		feedActionList(toolBar, getHandler(JToolBar.class), actionList, properties);
+		
+		configureToolBar(toolBar);
 	}
 
 	public JPopupMenu createPopupMenu(String id, Map<String, Object> properties) {
@@ -1284,7 +1311,8 @@ public class ActionManager {
 		void feedAction(Component container, Action a, String groupId);
 		void feedSeparator(Component container, String value);
 		void feedComponent(Component container, Component comp);
-		void feedEmpty(Component container);
+		void feedEmpty(Component container, String value);
+		void feedGlue(Component container);
 	}
 	
 	/**
@@ -1347,9 +1375,17 @@ public class ActionManager {
 		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedEmpty(java.awt.Component)
 		 */
 		@Override
-		public void feedEmpty(Component container) {
+		public void feedEmpty(Component container, String value) {
 			JMenu menu = (JMenu) container;
 			menu.add(" "); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedGlue(java.awt.Component)
+		 */
+		@Override
+		public void feedGlue(Component container) {
+			// not supported
 		}
 		
 	}
@@ -1370,8 +1406,9 @@ public class ActionManager {
 				Map<String, Object> properties) {
 			JPopupMenu menu = (JPopupMenu) container;
 			JMenu subMenu = createMenu(list, properties);
-			if(subMenu!=null)
+			if(subMenu!=null) {
 				menu.add(subMenu);
+			}
 		}
 
 		/**
@@ -1414,9 +1451,17 @@ public class ActionManager {
 		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedEmpty(java.awt.Component)
 		 */
 		@Override
-		public void feedEmpty(Component container) {
+		public void feedEmpty(Component container, String value) {
 			JPopupMenu menu = (JPopupMenu) container;
 			menu.add(" "); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedGlue(java.awt.Component)
+		 */
+		@Override
+		public void feedGlue(Component container) {
+			// not supported
 		}
 		
 	}
@@ -1440,8 +1485,9 @@ public class ActionManager {
 			JMenuBar menuBar = (JMenuBar)container;
 			
 			JMenu menu = createMenu(list, properties);
-			if(menu!=null)
+			if(menu!=null) {
 				menuBar.add(menu);
+			}
 		}
 
 		/**
@@ -1472,8 +1518,16 @@ public class ActionManager {
 		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedEmpty(java.awt.Component)
 		 */
 		@Override
-		public void feedEmpty(Component container) {
+		public void feedEmpty(Component container, String value) {
 			// not supported by menu bars
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedGlue(java.awt.Component)
+		 */
+		@Override
+		public void feedGlue(Component container) {
+			// not supported
 		}
 		
 	}
@@ -1575,11 +1629,48 @@ public class ActionManager {
 		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedEmpty(java.awt.Component)
 		 */
 		@Override
-		public void feedEmpty(Component container) {
+		public void feedEmpty(Component container, String value) {
 			JToolBar toolBar = (JToolBar) container;
-			Dimension size = toolBar.getPreferredSize();
-			int width = (size==null || size.width<1) ? 25 : size.width;
+			int width = -1;
+			
+			if(value!=null) {
+				switch (value) {
+				case SEPARATOR_WIDE:
+					width = 50;
+					break;
+
+				case SEPARATOR_MEDIUM:
+					width = 25;
+					break;
+
+				case SEPARATOR_SMALL:
+					width = 10;
+					break;
+	
+				default:
+					try {
+						width = Integer.parseInt(value);
+					} catch(NumberFormatException e) {
+						width = -1;
+					}
+					break;
+				}
+			}
+			
+			if(width==-1) {
+				width = 25;
+			}
+			
 			toolBar.add(Box.createHorizontalStrut(width));
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.actions.ActionManager.ComponentHandler#feedGlue(java.awt.Component)
+		 */
+		@Override
+		public void feedGlue(Component container) {
+			JToolBar toolBar = (JToolBar) container;
+			toolBar.add(Box.createHorizontalGlue());
 		}
 		
 	}

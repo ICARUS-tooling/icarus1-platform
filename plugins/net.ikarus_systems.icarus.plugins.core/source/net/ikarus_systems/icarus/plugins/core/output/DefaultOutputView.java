@@ -144,7 +144,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		if(owner==null)
 			throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
 		
-		requestFocusInPerspective();
+		selectViewTab();
 		
 		if(options==null) {
 			options = Options.emptyOptions;

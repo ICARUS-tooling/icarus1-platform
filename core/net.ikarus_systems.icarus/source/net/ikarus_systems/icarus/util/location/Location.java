@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.util;
+package net.ikarus_systems.icarus.util.location;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,15 +20,15 @@ import java.net.URL;
  * @version $Id$
  *
  */
-public interface Location {
+public abstract class Location {
 
-	URL getURL();
+	public abstract URL getURL();
 	
-	boolean isLocal();
+	public abstract boolean isLocal();
 	
-	File getFile();
+	public abstract File getFile();
 	
-	OutputStream openOutputStream() throws IOException;
+	public abstract OutputStream openOutputStream() throws IOException;
 	
-	InputStream openInputStream() throws IOException;
+	public abstract InputStream openInputStream() throws IOException;
 }

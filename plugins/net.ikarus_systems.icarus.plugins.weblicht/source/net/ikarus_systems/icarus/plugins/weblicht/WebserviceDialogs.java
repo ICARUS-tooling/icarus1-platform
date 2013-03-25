@@ -176,6 +176,7 @@ public class WebserviceDialogs {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory().getResourceDomain());
 		
+		// FIXME use localization keys instead of non-localized labels for the addMessage() calls
 
 		builder.setTitle(title);
 		builder.setMessage(message, params);

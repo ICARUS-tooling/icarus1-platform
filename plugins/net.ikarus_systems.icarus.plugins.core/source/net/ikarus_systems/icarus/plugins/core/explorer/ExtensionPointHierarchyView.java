@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -126,9 +125,8 @@ public class ExtensionPointHierarchyView extends View {
 		contentPanel = new JPanel(new BorderLayout());
 		
 		// Header area
-		Options options = new Options("glue", Box.createHorizontalGlue()); //$NON-NLS-1$
 		contentPanel.add(getDefaultActionManager().createToolBar(
-				"plugins.core.extensionPointHierarchyView.typeSelectionList", options), //$NON-NLS-1$
+				"plugins.core.extensionPointHierarchyView.typeSelectionList", null), //$NON-NLS-1$
 				BorderLayout.NORTH);
 		
 		// Upper panel holding header label and tree
@@ -139,6 +137,7 @@ public class ExtensionPointHierarchyView extends View {
 		hierarchyTree = new JTree(treeModel);
 		UIUtil.enableRighClickTreeSelection(hierarchyTree);
 		hierarchyTree.setRootVisible(false);
+		hierarchyTree.setShowsRootHandles(true);
 		hierarchyTree.setEditable(false);
 		hierarchyTree.setBorder(UIUtil.defaultContentBorder);
 		hierarchyTree.addTreeSelectionListener(handler);
@@ -157,7 +156,7 @@ public class ExtensionPointHierarchyView extends View {
 		JPanel lowerPanel = new JPanel(new BorderLayout());
 		outlineLabel = new JLabel();
 		outlineLabel.setIcon(IconRegistry.getGlobalRegistry().getIcon("ext_point_obj.gif")); //$NON-NLS-1$
-		options = new Options("label", outlineLabel, "glue", Box.createHorizontalGlue()); //$NON-NLS-1$ //$NON-NLS-2$
+		Options options = new Options("label", outlineLabel); //$NON-NLS-1$
 		lowerPanel.add(getDefaultActionManager().createToolBar(
 				"plugins.core.extensionPointHierarchyView.parameterOutlineList", options), //$NON-NLS-1$
 				BorderLayout.NORTH);
@@ -456,7 +455,8 @@ public class ExtensionPointHierarchyView extends View {
 		
 		if(Commands.DISPLAY.equals(message.getCommand())) {
 			displayData((ExtensionPoint)data);
-			requestFocusInPerspective();
+			selectViewTab();
+			focusView();
 			return message.successResult(null);
 		} else {
 			return message.unknownRequestResult();

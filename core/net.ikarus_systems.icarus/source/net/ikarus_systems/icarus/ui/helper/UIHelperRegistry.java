@@ -17,7 +17,6 @@ import java.util.logging.Level;
 
 import javax.swing.CellEditor;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
@@ -78,17 +77,11 @@ public final class UIHelperRegistry {
 		setFallbackHelper(TreeCellEditor.class, "javax.swing.DefaultCellEditor"); //$NON-NLS-1$
 		
 		// ACTUAL HELPERS
-		
-		// Corpus helpers 
 		registerHelper(ListCellRenderer.class, 
-				"net.ikarus_systems.icarus.language.corpus.Corpus",  //$NON-NLS-1$
-				"net.ikarus_systems.icarus.ui.corpus.CorpusListCellRenderer"); //$NON-NLS-1$
-		registerHelper(TreeCellRenderer.class, 
-				"net.ikarus_systems.icarus.language.corpus.Corpus",  //$NON-NLS-1$
-				"net.ikarus_systems.icarus.ui.corpus.CorpusTreeCellRenderer"); //$NON-NLS-1$
-		registerHelper(ListModel.class, 
-				"net.ikarus_systems.icarus.language.corpus.Corpus",  //$NON-NLS-1$
-				"net.ikarus_systems.icarus.ui.corpus.CorpusListModel"); //$NON-NLS-1$
+				"org.java.plugin.registry.Extension",  //$NON-NLS-1$
+				"net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer"); //$NON-NLS-1$
+		
+		// TODO do we have some helpers that are not part of a plug-in?
 	}
 	
 	// prevent multiple deserialization

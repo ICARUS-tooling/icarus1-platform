@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.util;
 
+import net.ikarus_systems.icarus.util.location.Location;
+
 /**
  * Exception to indicate that a certain {@code Location} is not
  * supported by some method or framework. For example a reader

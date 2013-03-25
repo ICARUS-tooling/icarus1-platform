@@ -85,7 +85,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
  * @version $Id$
  *
  */
-public class UIUtil {
+public final class UIUtil {
 	
 	static {
 		// Disable event consumption by closing popups. This enables
@@ -101,7 +101,7 @@ public class UIUtil {
 		// no-op
 	}
 
-	public static final Color defaultBorderColor = Color.BLACK;
+	public static final Color defaultBorderColor = new Color(128, 128, 128);
 	
 	public static final Border defaultAreaBorder = BorderFactory.createLineBorder(defaultBorderColor, 1, true);
 	
@@ -214,7 +214,7 @@ public class UIUtil {
 	// Resizing methods
 
 	/** */
-	public static final <C extends Component> C resizeComponent(C comp,
+	public static <C extends Component> C resizeComponent(C comp,
 			Dimension dimension) {
 		comp.setMinimumSize(dimension);
 		comp.setPreferredSize(dimension);
@@ -222,13 +222,13 @@ public class UIUtil {
 		return comp;
 	}
 
-	public static final <C extends Component> C resizeComponent(C comp,
+	public static <C extends Component> C resizeComponent(C comp,
 			Integer width, Integer height) {
 		Dimension dimension = new Dimension(width, height);
 		return resizeComponent(comp, dimension);
 	}
 
-	public static final <C extends Component> C resizeComponent(C comp,
+	public static <C extends Component> C resizeComponent(C comp,
 			Dimension min, Dimension pref, Dimension max) {
 		comp.setMinimumSize(min);
 		comp.setPreferredSize(pref);
@@ -236,7 +236,7 @@ public class UIUtil {
 		return comp;
 	}
 
-	public static final <C extends Component> C resizeComponent(C comp,
+	public static <C extends Component> C resizeComponent(C comp,
 			Integer minWidth, Integer prefWidth, Integer maxWidth,
 			Integer minHeight, Integer prefHeight, Integer maxHeight) {
 		Dimension min = new Dimension(minWidth, minHeight);
@@ -245,7 +245,7 @@ public class UIUtil {
 		return resizeComponent(comp, min, pref, max);
 	}
 
-	public static final <C extends Component> C resizeIfNeccessary(C comp,
+	public static <C extends Component> C resizeIfNeccessary(C comp,
 			Dimension dim) {
 		if (comp.getSize().width > dim.width)
 			dim.width = comp.getSize().width;
@@ -282,7 +282,7 @@ public class UIUtil {
 	}
 
 	/** */
-	public static final <C extends Component> C unsizeComponent(C comp) {
+	public static <C extends Component> C unsizeComponent(C comp) {
 		comp.setMinimumSize(null);
 		comp.setPreferredSize(null);
 		comp.setMaximumSize(null);
@@ -429,7 +429,7 @@ public class UIUtil {
 	}
 
 	/** */
-	public static final void alignToOwner(Component owner, Component comp) {
+	public static void alignToOwner(Component owner, Component comp) {
 		Point p = owner.getLocation();
 		p.x += owner.getWidth() * 0.5 - comp.getWidth() * 0.5;
 		p.y += owner.getHeight() * 0.5 - comp.getHeight() * 0.5;
@@ -437,7 +437,7 @@ public class UIUtil {
 	}
 
 	/** */
-	public static final <C extends Component> C centerComponent(C comp) {
+	public static <C extends Component> C centerComponent(C comp) {
 		Dimension d = comp.getSize();
 		GraphicsEnvironment ge = GraphicsEnvironment
 				.getLocalGraphicsEnvironment();
@@ -450,7 +450,7 @@ public class UIUtil {
 	}
 
 	/** */
-	public static final <C extends Component> C centerComponent(C comp,
+	public static <C extends Component> C centerComponent(C comp,
 			GraphicsConfiguration gc) {
 		Dimension d = comp.getSize();
 		Rectangle r = gc.getBounds();
@@ -470,7 +470,7 @@ public class UIUtil {
 		}
 	}
 	
-	public static final void defaultHideTabbedPaneDecoration(JTabbedPane tabbedPane) {
+	public static void defaultHideTabbedPaneDecoration(JTabbedPane tabbedPane) {
 		tabbedPane.setUI(new UndecoratedTabbedPaneUI());
 		tabbedPane.setBorder(defaultAreaBorder);
 		// Prevent focus border on tabs being drawn
@@ -483,16 +483,24 @@ public class UIUtil {
 
 				private static final long serialVersionUID = -9149206851193508390L;
 
+				@Override
 				public void setBorder(Border b) {
 				}
 			};
 		}
 	}
 	
-	public static final void defaultHideSplitPaneDecoration(JSplitPane splitPane) {
+	public static void defaultHideSplitPaneDecoration(JSplitPane splitPane) {
 		splitPane.setUI(new UndecoratedSplitPaneUI());
 		splitPane.setDividerSize(4);
 		splitPane.setBorder(null);
+	}
+	
+	public static void disableHtml(Object item) {
+		if(item instanceof JComponent) {
+			JComponent comp = (JComponent) item;
+			comp.putClientProperty("html.disable", Boolean.TRUE); //$NON-NLS-1$
+		}
 	}
 	
 	public static final int DEFAULT_SCROLL_UNIT_INCREMENT = 16;
@@ -597,16 +605,19 @@ public class UIUtil {
 
 		private static final long serialVersionUID = 8756755116840451541L;
 
+		@Override
 		public Insets getBorderInsets(Component c, Insets insets) {
 			insets.set(2, 2, 2, 2);
 
 			return insets;
 		}
 
+		@Override
 		public boolean isBorderOpaque() {
 			return true;
 		}
 
+		@Override
 		public void paintBorder(Component c, Graphics g, int x, int y,
 				int width, int height) {
 			if (c instanceof AbstractButton) {

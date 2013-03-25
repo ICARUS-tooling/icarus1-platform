@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -43,6 +42,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.core.InfoPanel;
 import net.ikarus_systems.icarus.plugins.core.ManagementConstants;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
@@ -76,7 +76,7 @@ public class LogView extends View {
 	private JPopupMenu popupMenu;
 	private Handler handler;
 	
-	private LogListHandler loggingModel;
+	private LogListModel loggingModel;
 	
 	private boolean scrollLock = false;
 	private boolean showOnError = true;
@@ -205,7 +205,7 @@ public class LogView extends View {
 		
 		container.add(infoLabel, BorderLayout.NORTH);
 		
-		loggingModel = new LogListHandler(1000);
+		loggingModel = new LogListModel(1000);
 		
 		logRecordList = new JList<LogRecord>(loggingModel){
 
@@ -245,10 +245,8 @@ public class LogView extends View {
 		logScrollpane.setBorder(UIUtil.topLineBorder);
 		
 		// Make the tool-bar align the buttons to the right
-		Options options = new Options(
-				"glue", Box.createHorizontalGlue()); //$NON-NLS-1$
 		JToolBar toolBar = getDefaultActionManager().createToolBar(
-				"plugins.core.logView.toolBarList", options); //$NON-NLS-1$
+				"plugins.core.logView.toolBarList", null); //$NON-NLS-1$
 		
 		contentPanel = new JPanel(new BorderLayout());
 		contentPanel.add(toolBar, BorderLayout.NORTH);
@@ -260,6 +258,45 @@ public class LogView extends View {
 		container.setPreferredSize(new Dimension(400, 120));
 		
 		registerActionCallbacks();
+	}
+	
+	@Override
+	protected void refreshInfoPanel(InfoPanel infoPanel) {
+		infoPanel.addGlue();
+		infoPanel.addSeparator();
+		infoPanel.addLabel("recordCount", 110); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("warningCount", 110); //$NON-NLS-1$
+		infoPanel.addSeparator();
+		infoPanel.addLabel("errorCount", 110); //$NON-NLS-1$
+		infoPanel.addGap(100);
+		
+		showLogInfo();
+	}
+	
+	private void showLogInfo() {
+		InfoPanel infoPanel = getInfoPanel();
+		if(infoPanel==null) {
+			return;
+		}
+		
+		// Record count
+		String text = ResourceManager.getInstance().get(
+				"plugins.core.logView.labels.recordCount",  //$NON-NLS-1$
+				loggingModel.getSize()); 
+		infoPanel.displayText("recordCount", text); //$NON-NLS-1$
+		
+		// Warning count
+		text = ResourceManager.getInstance().get(
+				"plugins.core.logView.labels.warningCount",  //$NON-NLS-1$
+				loggingModel.getWarningCount()); 
+		infoPanel.displayText("warningCount", text); //$NON-NLS-1$
+		
+		// Error count
+		text = ResourceManager.getInstance().get(
+				"plugins.core.logView.labels.errorCount",  //$NON-NLS-1$
+				loggingModel.getErrorCount()); 
+		infoPanel.displayText("errorCount", text); //$NON-NLS-1$
 	}
 	
 	private void refreshIcon() {
@@ -384,7 +421,7 @@ public class LogView extends View {
 		int level = record.getLevel().intValue();
 		if((showOnError && level>=Level.SEVERE.intValue())
 				|| (showOnWarning && level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue())) {
-			requestFocusInPerspective();
+			selectViewTab();
 		}
 	}
 	
@@ -464,6 +501,7 @@ public class LogView extends View {
 		@Override
 		public void intervalRemoved(ListDataEvent e) {
 			maybeShowList();
+			showLogInfo();
 		}
 
 		@Override
@@ -471,11 +509,13 @@ public class LogView extends View {
 			maybeShowList();
 			checkScrollLock();
 			checkShowRecord(loggingModel.getElementAt(e.getIndex0()));
+			showLogInfo();
 		}
 
 		@Override
 		public void contentsChanged(ListDataEvent e) {
 			maybeShowList();
+			showLogInfo();
 		}
 
 		@Override
