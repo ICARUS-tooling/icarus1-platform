@@ -62,6 +62,13 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
+		<parameter-def id="webserviceFormat">
+			<doc>
+				<doc-text>
+					Webservice Format (Defaultvalue text/xml)
+				</doc-text>
+			</doc>
+		</parameter-def>
 		<parameter-def id="input" type="any" multiplicity="one-or-more">
 			<doc>
 				<doc-text>

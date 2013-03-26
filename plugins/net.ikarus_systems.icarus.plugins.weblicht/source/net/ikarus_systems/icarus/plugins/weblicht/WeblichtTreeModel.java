@@ -6,8 +6,6 @@ import java.util.WeakHashMap;
 
 import javax.swing.tree.TreePath;
 
-import com.sun.jersey.core.header.reader.HttpHeaderReader.Event;
-
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;

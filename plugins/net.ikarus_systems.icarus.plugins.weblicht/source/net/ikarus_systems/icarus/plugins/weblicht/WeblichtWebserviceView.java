@@ -64,6 +64,7 @@ public class WeblichtWebserviceView extends View {
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#init(javax.swing.JComponent)
 	 */
+	@SuppressWarnings("static-access")
 	@Override
 	public void init(JComponent container) {
 		// Load actions
@@ -169,6 +170,8 @@ public class WeblichtWebserviceView extends View {
 		}
 		
 		ActionManager actionManager = getDefaultActionManager();
+		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.saveWebserviceAction",  //$NON-NLS-1$
+				callbackHandler, "saveWebservice"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.newWebserviceAction",  //$NON-NLS-1$
 				callbackHandler, "newWebservice"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction",  //$NON-NLS-1$
@@ -278,6 +281,13 @@ public class WeblichtWebserviceView extends View {
 		}
 		
 		/**
+		 * Check required Webservicefields, webservicename must be set!
+		 * @param webservice
+		 * @param uID 
+		 */
+		
+
+		/**
 		 * 
 		 * @param e
 		 */
@@ -291,27 +301,20 @@ public class WeblichtWebserviceView extends View {
 				return;
 			}
 			
+			//only uid needed rest will be filled out by user later!	
+			Webservice webservice = WebserviceDialogs
+					.getWebserviceDialogFactory()
+					.showNewWebserviceReworkDialog(
+							null,
+							"plugins.weblicht.weblichtWebserviceView.dialogs.addWebservice.title", //$NON-NLS-1$
+							"plugins.weblicht.weblichtWebserviceView.dialogs.addWebservice.message", //$NON-NLS-1$
+							uID, null, null, null, null, null, null, null, null, null);
 
-			Webservice webservice = WebserviceDialogs.getWebserviceDialogFactory().showWebserviceInputDialog(null, 
-					"plugins.weblicht.weblichtWebserviceView.dialogs.addWebservice.title",  //$NON-NLS-1$
-					"plugins.weblicht.weblichtWebserviceView.dialogs.addWebservice.message",  //$NON-NLS-1$
-					uID, null, null);
 			
-			//user canceled
+			//user canceled or webservicename empty
 			if (webservice==null){
 				return;
 			}
-			
-			if (webservice.getName().equals("")){ //$NON-NLS-1$
-				DialogFactory.getGlobalFactory().showError(getFrame(),
-						"plugins.weblicht.weblichtWebserviceView.dialogs.noEmptyName.title",  //$NON-NLS-1$
-						"plugins.weblicht.weblichtWebserviceView.dialogs.noEmptyName.message"); //$NON-NLS-1$
-				return;
-			}
-
-			System.out.println(webservice.getName());
-			
-			//webservice = (Webservice) webserviceViewListModel.getElementAt(0);
 
 			try {				
 				WebserviceRegistry.getInstance().addNewWebservice(webservice);
@@ -383,6 +386,20 @@ public class WeblichtWebserviceView extends View {
 			
 			Message message = new Message(Commands.EDIT, webservice, null);
 			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
+		}
+		
+		
+		/**
+		 * 
+		 * @param e
+		 */
+		public void saveWebservice(ActionEvent e) {
+			try {
+				WebserviceRegistry.getInstance().saveWebservices();
+			} catch(Exception ex) {
+				LoggerFactory.getLogger(WeblichtWebserviceView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Unable to save Webservices: ", ex)); //$NON-NLS-1$
+			}			
 		}
 		
 	}

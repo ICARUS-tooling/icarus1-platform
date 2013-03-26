@@ -40,7 +40,6 @@ import javax.swing.event.ListSelectionListener;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.weblicht.WebserviceDialogs;
-import net.ikarus_systems.icarus.plugins.weblicht.WebserviceEditView;
 import net.ikarus_systems.icarus.plugins.weblicht.WebserviceEditorExtension;
 import net.ikarus_systems.icarus.plugins.weblicht.WebserviceInputTableModel;
 import net.ikarus_systems.icarus.plugins.weblicht.WebserviceOutputTableModel;
@@ -74,6 +73,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 	protected JTextField contact;
 	protected JTextField url;
 	protected JTextField serviceID;
+	protected JTextField webresourceFormat;
 	protected JTextField uniqueID;
 	
 	//protected JList<Object> inputList;
@@ -109,7 +109,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		gbc.insets = new Insets(1, 2, 1, 2);
 		
 		
-		// Webservice contact edit Field
+		// Webservice uniqueID edit Field
 		label = new JLabel();
 		resourceDomain.prepareComponent(label, 
 				"plugins.weblicht.labels.webservice.uniqueID", null); //$NON-NLS-1$
@@ -181,6 +181,18 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		panel.add(label, gbc);
 		gbc.gridx++;
 		panel.add(serviceID,gbc);
+		
+		// Webservice webresourceFormat Field
+		gbc.gridx = 0;
+		gbc.gridy++;
+		label = new JLabel();
+		resourceDomain.prepareComponent(label, 
+				"plugins.weblicht.labels.webservice.webresourceFormat", null); //$NON-NLS-1$
+		resourceDomain.addComponent(label);
+		localizedComponents.add(label);
+		panel.add(label, gbc);
+		gbc.gridx++;
+		panel.add(webresourceFormat,gbc);
 		
 		
 		// Webservice description edit Field
@@ -364,6 +376,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		contact = createTextField();
 		url = createTextField();
 		serviceID = createTextField();
+		webresourceFormat = createTextField();
 		
 		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
 		
@@ -454,6 +467,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		contact.setEditable(getAccessType());
 		url.setEditable(getAccessType());
 		serviceID.setEditable(getAccessType());
+		webresourceFormat.setEditable(getAccessType());
 		
 		inputTable.setEnabled(getAccessType());
 		outputTable.setEnabled(getAccessType());
@@ -556,6 +570,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 			contact.setText(null);
 			url.setText(null);
 			serviceID.setText(null);
+			webresourceFormat.setText(null);
 			uniqueID.setText(null);
 			return;
 		}
@@ -567,6 +582,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		contact.setText(webservice.getContact());
 		url.setText(webservice.getURL());
 		serviceID.setText(webservice.getServiceID());
+		webresourceFormat.setText(webservice.getWebresourceFormat());
 		uniqueID.setText(webservice.getUID());
 		uniqueID.setEditable(false);
 	
@@ -613,6 +629,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		String newContact = contact.getText();
 		String newURL = url.getText();
 		String newServiceID = serviceID.getText();
+		String newWebresourceFormat = webresourceFormat.getText();
 		List<WebserviceIOAttributes> newInput = fetchInputTable(inputTableModel);
 		List<WebserviceIOAttributes> newOutput = fetchOutputTable(outputTableModel);;
 		
@@ -627,6 +644,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		WebserviceRegistry.getInstance().setContact(webservice, newContact);
 		WebserviceRegistry.getInstance().setURL(webservice, newURL);
 		WebserviceRegistry.getInstance().setServiceID(webservice, newServiceID);
+		WebserviceRegistry.getInstance().setWebresourceFormat(webservice, newWebresourceFormat);
 		WebserviceRegistry.getInstance().setInputAttributes(webservice, newInput);
 		WebserviceRegistry.getInstance().setOutputAttributes(webservice, newOutput);
 	}
@@ -706,6 +724,11 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		}
 		// Compare description
 		if(!serviceID.getText().equals(webservice.getServiceID())) {
+			return true;
+		}
+		
+		// Compare webserviceFormat
+		if(!webresourceFormat.getText().equals(webservice.getWebresourceFormat())) {
 			return true;
 		}
 		

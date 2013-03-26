@@ -42,7 +42,6 @@ import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.opi.Commands;
 import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
 
 
 /**
@@ -60,6 +59,7 @@ public class WeblichtChainView extends View {
 	private Handler handler;
 	private CallbackHandler callbackHandler;
 
+	@SuppressWarnings("static-access")
 	@Override
 	public void init(JComponent container) {
 
@@ -213,6 +213,8 @@ public class WeblichtChainView extends View {
 		}
 		
 		ActionManager actionManager = getDefaultActionManager();
+		actionManager.addHandler("plugins.weblicht.weblichtChainView.saveWebchainAction",  //$NON-NLS-1$
+				callbackHandler, "saveWebchain"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtChainView.newWebchainAction",  //$NON-NLS-1$
 				callbackHandler, "newWebchain"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtChainView.deleteWebchainAction",  //$NON-NLS-1$
@@ -511,7 +513,7 @@ public class WeblichtChainView extends View {
 			}
 			
 			Webchain webchain = (Webchain)selectedObject;
-			String test = "Karin fliegt nach New York";
+			String test = "Karin fliegt nach New York"; //$NON-NLS-1$
 			
 			/*
 			String input = DialogFactory.getGlobalFactory().showTextInputDialog(getFrame(),
@@ -530,7 +532,7 @@ public class WeblichtChainView extends View {
 				System.out.println(out);	
 			} catch (Exception ex) {
 				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to execute chain list "+webchain.getName(), ex)); //$NON-NLS-1$ //$NON-NLS-2$
+						"Failed to execute chain list "+webchain.getName(), ex)); //$NON-NLS-1$
 
 			}		
 
@@ -538,6 +540,15 @@ public class WeblichtChainView extends View {
 		
 		public void stopWebchain(ActionEvent e) {
 			//TODO
+		}
+		
+		public void saveWebchain(ActionEvent e) {
+			try {
+				WebchainRegistry.getInstance().saveWebchains();
+			} catch(Exception ex) {
+				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Unable to save Webchains: ", ex)); //$NON-NLS-1$
+			}			
 		}
 		
 	}

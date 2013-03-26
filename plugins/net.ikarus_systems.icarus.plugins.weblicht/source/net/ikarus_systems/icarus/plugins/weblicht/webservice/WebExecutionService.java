@@ -83,10 +83,12 @@ public class WebExecutionService {
 
 			WebResource webresource = client.resource(webservice.getURL());
 			ClientResponse response = webresource.get(ClientResponse.class);
-			System.out.println("Status: " + webservice.getURL() + " " + response.getStatus());
+				
+			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
+								+ " " + response.getStatus()); //$NON-NLS-1$
 			
 			//we use only the latest input type for our query!
-			result = webresource.accept(query.get(query.size() - 1)).post(
+			result = webresource.accept(webservice.getWebresourceFormat()).post(
 					String.class, result);
 
 			/*

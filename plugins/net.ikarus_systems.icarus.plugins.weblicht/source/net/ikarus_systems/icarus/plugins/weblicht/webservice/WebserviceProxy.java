@@ -9,8 +9,6 @@
  */
 package net.ikarus_systems.icarus.plugins.weblicht.webservice;
 
-import java.util.List;
-
 import net.ikarus_systems.icarus.util.Wrapper;
 
 /**

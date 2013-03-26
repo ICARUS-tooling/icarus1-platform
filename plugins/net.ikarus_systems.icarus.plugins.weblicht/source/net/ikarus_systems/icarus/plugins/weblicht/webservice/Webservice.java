@@ -21,6 +21,7 @@ public class Webservice implements Identifiable {
 	protected String creator;
 	protected String contact;
 	protected String url;
+	protected String webserviceFormat; 
 	protected List<WebserviceIOAttributes> input;
 	protected List<WebserviceIOAttributes> output;	
 
@@ -88,7 +89,14 @@ public class Webservice implements Identifiable {
 	public String getURL() {
 		return this.url;	}
 
+	
+	public void setWebresourceFormat(String webserviceFormat) {
+		this.webserviceFormat= webserviceFormat;
+	}
 
+	public String getWebresourceFormat() {
+		return this.webserviceFormat;
+	}
 
 	/**
 	 * @return the input

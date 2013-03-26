@@ -198,74 +198,6 @@ public class WebserviceEditView extends View {
 	
 	
 	
-	private void showWebservice(Webservice webservice) {
-		if(webservice!=null) {
-			requestFocusInPerspective();
-		}
-		
-		Webservice oldWebservice = getWebservice();
-		if(oldWebservice==webservice) {
-			return;
-		}
-		
-		// Offer chance to save changes 
-		if(oldWebservice!=null && editor!=null && editor.hasChanges()) {
-			// Let user decide whether to discard unsaved changes
-			if(DialogFactory.getGlobalFactory().showConfirm(null, 
-					"plugins.weblicht.webserviceEditView.dialogs.saveChanges.title",  //$NON-NLS-1$
-					"plugins.weblicht.webserviceEditView.dialogs.saveChanges.message",  //$NON-NLS-1$
-					oldWebservice.getName())) {
-				
-				try {
-					editor.applyEdit();
-				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebserviceEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to apply edit: "+getWebservice(), ex)); //$NON-NLS-1$
-				}
-			}
-		}
-		
-		getContainer().remove(infoLabel);
-		
-		if(webservice==null) {
-			showDefaultInfo();
-			return;
-		}
-		
-		// If the new Webservice is of the same type just use
-		// the present editor!
-		if(oldWebservice!=null && oldWebservice.getClass().equals(
-				webservice.getClass()) && editor!=null) {
-			editor.setEditingItem(webservice);
-			header.setText(webservice.getName());
-			return;
-		}
-		
-		// Try to fetch an editor for the supplied Webservice
-		@SuppressWarnings("unchecked")
-		Editor<Webservice> editor = UIHelperRegistry.globalRegistry().findHelper(
-				Editor.class, webservice);
-
-		if(editor==null) {
-			showDefaultInfo();
-			return;
-		}
-		
-		if(this.editor!=null) {
-			this.editor.close();
-		}
-
-		this.editor = (WebserviceEditor) editor;
-		
-		
-		editor.setEditingItem(webservice);
-		
-		scrollPane.setViewportView(editor.getEditorComponent());
-		header.setText(webservice.getName());
-
-	}
-	
-	
 	private void editWebservice(Webservice webservice) {
 		
 		if(webservice!=null) {
@@ -340,7 +272,7 @@ public class WebserviceEditView extends View {
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		
 		if(Commands.EDIT.equals(message.getCommand())) {
-			System.out.println("edit");
+			
 			Object data = message.getData();
 			//enable edit
 			editable = true;
@@ -355,8 +287,7 @@ public class WebserviceEditView extends View {
 			}
 			
 		}
-		if(Commands.DISPLAY.equals(message.getCommand())) {
-			System.out.println("show");
+		if(Commands.DISPLAY.equals(message.getCommand())) {			
 			
 			Object data = message.getData();
 			//only display

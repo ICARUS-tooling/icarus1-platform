@@ -388,18 +388,29 @@ public class WebchainEditor implements Editor<Webchain> {
 		protected void addWebservice() {
 			
 			List<Webservice> ws = new ArrayList<>(webserviceListModel.getWebservicesFromChain(webchain));
-			List<String> wsQuery = WebchainRegistry.getInstance().getQueryFromWebchain(webchain);
+			//List<String> wsQuery = WebchainRegistry.getInstance().getQueryFromWebchain(webchain);
 			
-			String uniqueWS = WebserviceDialogs.getWebserviceDialogFactory().showWebserviceCooserDialog(null, 
+			/*
+			String uniqueWS = WebserviceDialogs.getWebserviceDialogFactory().showWebserviceChooserDialog(null, 
 					"plugins.weblicht.weblichtChainView.dialogs.addWebservice.title",  //$NON-NLS-1$
 					"plugins.weblicht.weblichtChainView.dialogs.addWebservice.message",  //$NON-NLS-1$
 					ws, wsQuery, null);
+			
+			*/
+			
+			String uniqueWS = WebserviceDialogs.getWebserviceDialogFactory().showWebserviceChooserDialogReworked(null, 
+					"plugins.weblicht.weblichtChainView.dialogs.addWebservice.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.addWebservice.message",  //$NON-NLS-1$
+					webserviceListModel.webservices, null);
+			
+			//System.out.println(webserviceListModel.webservices);
 			
 			// Cancelled by user
 			if(uniqueWS==null) {
 				return;
 			}			
 			
+			/* no more needed filter before webservice can be added implemented
 			//Cancelled service already in chain
 			for (int i = 0; i < ws.size(); i++){
 				if (ws.get(i).getUID().equals(uniqueWS)){
@@ -409,7 +420,8 @@ public class WebchainEditor implements Editor<Webchain> {
 							WebserviceRegistry.getInstance().getNameFromUniqueID(uniqueWS),webchain);
 					return;
 				}
-			}			
+			}	
+			*/		
 			
 			Webservice webservice = WebserviceRegistry.getInstance().getWebserviceFromUniqueID(uniqueWS);
 
@@ -435,8 +447,9 @@ public class WebchainEditor implements Editor<Webchain> {
 			
 			protected List<Webservice> getWebservicesFromChain(Webchain webchain){
 				List<Webservice> services = new ArrayList<>();
+				
 				for (int i = 0; i< webchain.getWebserviceCount();i++){
-					services.add(webchain.getWebserviceAt(i).get());
+						services.add(webchain.getWebserviceAt(i).get());					
 				}
 				return services;
 			}

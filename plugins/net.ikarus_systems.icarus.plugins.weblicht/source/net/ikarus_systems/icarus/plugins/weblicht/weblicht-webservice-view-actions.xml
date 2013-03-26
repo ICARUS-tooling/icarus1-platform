@@ -5,6 +5,10 @@
 	<!--
 		WEBLICHT WEBSERVICE VIEW
 	-->
+	
+	<!-- Save Webservice -->
+	<action id="plugins.weblicht.weblichtWebserviceView.saveWebserviceAction"
+		name="${id}.name" desc="${id}.description" icon="save_webservice.gif" />
 		
 	<!-- New Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.newWebserviceAction"
@@ -21,6 +25,8 @@
 	
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.weblicht.weblichtWebserviceView.toolBarList">
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.saveWebserviceAction" />
+		<separator />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.newWebserviceAction" />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction" />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.editWebserviceAction" />

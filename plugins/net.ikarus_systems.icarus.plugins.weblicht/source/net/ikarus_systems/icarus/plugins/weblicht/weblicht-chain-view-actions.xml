@@ -5,6 +5,11 @@
 	<!--
 		WEBLICHT CHAIN VIEW
 	-->
+	
+	<!-- Save Webchain -->
+	<action id="plugins.weblicht.weblichtChainView.saveWebchainAction"
+		name="${id}.name" desc="${id}.description" icon="save_webchain.gif" />
+
 		
 	<!-- New Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.newWebchainAction"
@@ -40,6 +45,8 @@
 	
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.weblicht.weblichtChainView.toolBarList">
+		<item type="action" value="plugins.weblicht.weblichtChainView.saveWebchainAction" />
+		<separator />
 		<item type="action" value="plugins.weblicht.weblichtChainView.runWebchainAction" />
 		<item type="action" value="plugins.weblicht.weblichtChainView.stopWebchainAction" />
 		<separator />

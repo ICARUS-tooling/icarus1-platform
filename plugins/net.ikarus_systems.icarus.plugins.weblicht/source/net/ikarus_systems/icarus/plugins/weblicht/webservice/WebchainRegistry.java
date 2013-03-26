@@ -10,12 +10,11 @@
 package net.ikarus_systems.icarus.plugins.weblicht.webservice;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,9 +23,12 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import net.ikarus_systems.icarus.Core;
-import net.ikarus_systems.icarus.language.corpus.Corpus;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -36,14 +38,8 @@ import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 /**
  * @author Gregor Thiele
@@ -100,6 +96,90 @@ public class WebchainRegistry {
 		//System.out.println(webchainList.get(1).getWebserviceIDList());	
 	}
 	
+	/**
+	 * 
+	 * @param document
+	 * @param eName
+	 * @param eData
+	 * @return
+	 */
+	private Element generateChainElement(Document document, String eName, String eData){
+		Element em = document.createElement(eName);
+		em.setAttribute("uid", eData); //$NON-NLS-1$
+		return em;		
+	}
+	
+	
+	public void saveWebchains() throws Exception{
+
+		String root = "Webchains"; //$NON-NLS-1$
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+				.newInstance();
+		
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		Document document = documentBuilder.newDocument();
+
+		Element rootElement = document.createElement(root);
+
+		document.appendChild(rootElement);
+		
+		for (int i = 0; i < webchainList.size(); i++){
+			Webchain webchain = getWebchainAt(i);
+	
+			Element chain = document.createElement("Chain"); //$NON-NLS-1$
+			chain.setAttribute("chainname", webchain.getName()); //$NON-NLS-1$
+			
+			List<WebserviceProxy> webservicesInChain = webchain.getWebserviceProxyList();			
+			
+			for (int j = 0; j < webservicesInChain.size(); j++){
+				chain.appendChild(generateChainElement(document, "service" //$NON-NLS-1$
+						, webservicesInChain.get(j).get().getUID()));			
+			}
+				
+			
+			rootElement.appendChild(chain);
+		}
+		
+	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        
+        //format output
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", //$NON-NLS-1$
+        								"2"); //$NON-NLS-1$
+        DOMSource source = new DOMSource(document);
+        StreamResult result =  new StreamResult(new StringWriter());
+        transformer.transform(source, result);
+        
+
+        saveXMLToFile(result);
+        
+	}
+	
+	
+	private void saveXMLToFile (StreamResult result) throws Exception{
+        //writing to file
+        FileOutputStream fop = null;
+        File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchains_out.xml"); //$NON-NLS-1$
+       
+        fop = new FileOutputStream(file);
+
+        // if file doesnt exists, then create it
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        // get the content in bytes
+        String xmlString = result.getWriter().toString();
+        System.out.println(xmlString);
+        byte[] contentInBytes = xmlString.getBytes();
+
+        fop.write(contentInBytes);
+        fop.flush();
+        fop.close();
+	}
+
+	
 	private void loadWebchainXML() throws Exception {
 			
 			//File fXmlFile = new File(Core.getCore().getDataFolder(),"webchain.xml"); //$NON-NLS-1$
@@ -136,8 +216,8 @@ public class WebchainRegistry {
 					
 					Element eElement = (Element) sNode;
 					
-					//System.out.println("Chainname : " +	eElement.getAttribute("uname"));
-					webchain.setName(eElement.getAttribute("uname"));					 //$NON-NLS-1$
+					//System.out.println("Chainname : " +	eElement.getAttribute("chainname"));
+					webchain.setName(eElement.getAttribute("chainname"));					 //$NON-NLS-1$
 					
 					//Grab all unique webservice numbers from chain
 					NodeList uidList = eElement.getElementsByTagName("service"); //$NON-NLS-1$
@@ -226,8 +306,8 @@ public class WebchainRegistry {
 		webchain.setName(name);
 		int index = indexOfWebchain(webchain);
 		eventSource.fireEvent(new EventObject(Events.CHANGED,
-				"webchain",webchain, //$NON-NLS-1$
-				"index",index));//$NON-NLS-1
+				"webchain",webchain //$NON-NLS-1$
+				,"index",index));//NON-NLS-1$ //$NON-NLS-1$
 	}
 	
 	
@@ -331,7 +411,8 @@ public class WebchainRegistry {
 				if (attribute.getAttributevalues().equals("")){ //$NON-NLS-1$
 					sb.append(attribute.getAttributename());
 				} else {
-					sb.append(attribute.getAttributename()).append("=").append(attribute.getAttributevalues());
+					sb.append(attribute.getAttributename()).append("=") //$NON-NLS-1$
+						.append(attribute.getAttributevalues()); 
 				}				
 				
 				//only add if type not in list
@@ -423,8 +504,13 @@ public class WebchainRegistry {
 	public static void main(String[] args) {
 		
 		WebchainRegistry wcl = new WebchainRegistry();
-		Webchain w = WebchainRegistry.getInstance().getWebchainAt(0);
-		List<String> list = WebchainRegistry.getInstance().getQueryFromWebchain(w);
+		//List<String> list = WebchainRegistry.getInstance().getQueryFromWebchain(w);
+		try {
+			wcl.saveWebchains();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("fertig"); //$NON-NLS-1$
 
 	}

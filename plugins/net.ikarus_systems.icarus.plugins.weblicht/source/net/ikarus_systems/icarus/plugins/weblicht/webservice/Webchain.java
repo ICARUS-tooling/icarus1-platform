@@ -86,6 +86,16 @@ public class Webchain {
 		return webserviceProxyList.get(index);	
 	}
 	
+	
+	public boolean inListWebserviceProxy(Webservice webservice){
+		for (int i = 0; i < getWebserviceCount(); i++){
+			if (getWebserviceAt(i).get().equals(webservice)) return true;
+		}
+		return false;
+			
+	}
+	
+	
 	public void addWebservice(String serviceID){
 		webserviceProxyList.add(new WebserviceProxy(serviceID));
 	}
@@ -101,7 +111,7 @@ public class Webchain {
 	public List<String> getWebservices(Webchain webchain){
 		List<String> serviceIDList = new ArrayList<String>();
 		for (int i = 0; i < getWebserviceCount(); i++){
-			serviceIDList.add(getWebserviceAt(i).getServiceID());
+			serviceIDList.add(getWebserviceAt(i).get().getUID());
 		}
 		return serviceIDList;
 	}
@@ -113,6 +123,25 @@ public class Webchain {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	/**
+	 * @return
+	 */
+	public List<Webservice> getFilteredWebservices(Webchain webchain) {
+		List<Webservice> filtered = new ArrayList<>();
+		List<String> idList = webchain.getWebservices(webchain);
+		int webservicesCount = WebserviceRegistry.getInstance().getWebserviceCount();
+
+		for (int i = 0; i < webservicesCount; i++) {
+			Webservice webservice = WebserviceRegistry.getInstance().getWebserviceAt(i);
+			if (!(idList.contains(webservice.getUID()))){
+				filtered.add(webservice);				
+			};
+
+		}
+
+		return filtered;
 	}
 
 
