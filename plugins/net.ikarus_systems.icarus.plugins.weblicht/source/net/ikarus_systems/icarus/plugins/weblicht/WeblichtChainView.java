@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -39,7 +41,6 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.opi.Commands;
 import net.ikarus_systems.icarus.util.opi.Message;
 
@@ -58,7 +59,7 @@ public class WeblichtChainView extends View {
 
 	private Handler handler;
 	private CallbackHandler callbackHandler;
-
+	
 	@SuppressWarnings("static-access")
 	@Override
 	public void init(JComponent container) {
@@ -199,11 +200,33 @@ public class WeblichtChainView extends View {
 				"plugins.weblicht.weblichtChainView.cloneWebchainAction", //$NON-NLS-1$
 				"plugins.weblicht.weblichtChainView.renameWebchainAction", //$NON-NLS-1$
 				"plugins.weblicht.weblichtChainView.editWebchainAction", //$NON-NLS-1$
-				"plugins.weblicht.weblichtChainView.runWebchainAction", //$NON-NLS-1$
-				"plugins.weblicht.weblichtChainView.stopWebchainAction"); //$NON-NLS-1$);
+				"plugins.weblicht.weblichtChainView.runWebchainAction"); //$NON-NLS-1$);
+		
+		actionManager.setEnabled(false,
+				"plugins.weblicht.weblichtChainView.stopWebchainAction"); //$NON-NLS-1$
 
 		actionManager.setEnabled((selectedObject instanceof WebserviceProxy),
 			"plugins.weblicht.weblichtChainView.webserviceInfo"); //$NON-NLS-1$
+		
+	}
+	
+	private String readInputFromFile(String filename) throws IOException{
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String result;
+	    try {			
+	        StringBuilder sb = new StringBuilder();
+	        String line = br.readLine();	        
+
+	        while (line != null) {
+	            sb.append(line).append("\n"); //$NON-NLS-1$
+	            line = br.readLine();
+	        }
+	        result = sb.toString();
+	    } finally {	    	
+	        br.close();
+	    }
+	    return result;
+		
 		
 	}
 	
@@ -346,21 +369,28 @@ public class WeblichtChainView extends View {
 		 * 
 		 * @param e
 		 */
-		public void newWebchain(ActionEvent e) {			
+		public void newWebchain(ActionEvent e) {
 			String name = null;
+			/*
+			 *
 			name = DialogFactory.getGlobalFactory().showInputDialog(getFrame(),
 					"plugins.weblicht.weblichtChainView.dialogs.addWebchain.title",  //$NON-NLS-1$
 					"plugins.weblicht.weblichtChainView.dialogs.addWebchain.message", //$NON-NLS-1$
-					name, null);
+					name, null);*/
+			
+			Webchain webchain = WebserviceDialogs.getWebserviceDialogFactory().showNewWebchain(getFrame(),
+					"plugins.weblicht.weblichtChainView.dialogs.addWebchain.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.addWebchain.message", //$NON-NLS-1$
+					null, null);
 			
 			//canceled by user
-			if (name == null){
+			if (webchain == null){
 				return;
 			}
 			//name = WebchainRegistry.getInstance().getUniqueName("New "+name); //$NON-NLS-1$
 			
 			try {
-				WebchainRegistry.getInstance().newWebchain(name);
+				WebchainRegistry.getInstance().addNewWebchain(webchain);
 			} catch (Exception ex) {
 				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
 						"Unable to create new webchain: "+name, ex)); //$NON-NLS-1$
@@ -421,9 +451,9 @@ public class WeblichtChainView extends View {
 			String name = WebchainRegistry.getInstance().getUniqueName(webchain.getName());
 			try {
 				if (serviceIDList == null){
-					WebchainRegistry.getInstance().newWebchain(name);
+					WebchainRegistry.getInstance().cloneWebchain(name,webchain);
 				} else {
-					WebchainRegistry.getInstance().newWebchain(name,serviceIDList);
+					WebchainRegistry.getInstance().cloneWebchain(name,webchain,serviceIDList);
 				}
 			} catch (Exception ex) {
 				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
@@ -506,30 +536,55 @@ public class WeblichtChainView extends View {
 			
 		}
 		
-		public void runWebchain(ActionEvent e) {
+		public void runWebchain(ActionEvent e){
 			Object selectedObject = getSelectedObject();
 			if(selectedObject==null || !(selectedObject instanceof Webchain)) {
 				return;
 			}
 			
 			Webchain webchain = (Webchain)selectedObject;
-			String test = "Karin fliegt nach New York"; //$NON-NLS-1$
+			
+			String inputType = webchain.getWebchainInputType().getInputType();
+			String inputText = null;
+			if (inputType.equals("static")) { //$NON-NLS-1$
+				inputText = webchain.getWebchainInputType().getInputTypeValue();				
+			}
+			if (inputType.equals("location")) { //$NON-NLS-1$
+				String filename = webchain.getWebchainInputType().getInputTypeValue();
+				try {
+					inputText = readInputFromFile(filename);
+				} catch (Exception ex) {
+					LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+							"Failed open File " + filename //$NON-NLS-1$
+							+ " " + webchain.getName(), ex)); //$NON-NLS-1$;
+				}
+							
+			}
+			if (inputType.equals("dynamic")) { //$NON-NLS-1$
+				//TODO grab input from UI
+				inputText = "Karin fliegt nach New York"; //$NON-NLS-1$				
+			}
+
 			
 			/*
 			String input = DialogFactory.getGlobalFactory().showTextInputDialog(getFrame(),
 					"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.title", //$NON-NLS-1$
 					"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.message", //$NON-NLS-1$
 					webchain.getName(),test);
-			
-			//user cancelled
-			if(input==null || input.isEmpty()) {
-				return;
-			}
 			*/
 			
+			//empty input will cause error in execusion
+			if(inputText==null || inputText.isEmpty()) {
+				DialogFactory.getGlobalFactory().showError(getFrame(),
+						"plugins.weblicht.weblichtChainView.dialogs.inputTextEmpty.title", //$NON-NLS-1$
+						"plugins.weblicht.weblichtChainView.dialogs.inputTextEmpty.message", //$NON-NLS-1$
+						webchain.getName(),null);
+				return;
+			}
+
+			
 			try {
-				String out = WebExecutionService.getInstance().runWebchain(webchain, test);
-				System.out.println(out);	
+				WebExecutionService.getInstance().runWebchain(webchain, inputText);
 			} catch (Exception ex) {
 				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
 						"Failed to execute chain list "+webchain.getName(), ex)); //$NON-NLS-1$

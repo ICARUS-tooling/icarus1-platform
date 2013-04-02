@@ -201,13 +201,16 @@ public class WebserviceEditView extends View {
 	private void editWebservice(Webservice webservice) {
 		
 		if(webservice!=null) {
-			requestFocusInPerspective();
+			focusView();
 		}
 		
 		Webservice oldWebservice = getWebservice();
+		// not needed; oldservice may be the same webchainShowOnly = webserviceEditView
 		if(oldWebservice==webservice) {
+			System.out.println("same" + editable); //$NON-NLS-1$
 			return;
 		}
+		
 		
 		
 		
@@ -261,6 +264,7 @@ public class WebserviceEditView extends View {
 
 		this.editor = (WebserviceEditor) editor;		
 		editor.setEditingItem(webservice);
+
 		
 		scrollPane.setViewportView(editor.getEditorComponent());
 		header.setText(webservice.getName());

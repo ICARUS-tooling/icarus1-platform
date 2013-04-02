@@ -17,7 +17,10 @@
 	<!-- Delete Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction"
 		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
-
+	
+	<!-- Clone Webchain -->
+	<action id="plugins.weblicht.weblichtWebserviceView.cloneWebserviceAction"
+		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
 		
 	<!-- Edit Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.editWebserviceAction"
@@ -29,6 +32,8 @@
 		<separator />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.newWebserviceAction" />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction" />
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.cloneWebserviceAction" />
+		<separator />		
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.editWebserviceAction" />
 	</action-list>
 
@@ -37,6 +42,8 @@
 	<action-list id="plugins.weblicht.weblichtWebserviceView.popupMenuList">
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.newWebserviceAction" />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction" />
+		<item type="action" value="plugins.weblicht.weblichtWebserviceView.cloneWebserviceAction" />
+		<separator />
 		<item type="action" value="plugins.weblicht.weblichtWebserviceView.editWebserviceAction" />
 	</action-list>
 	

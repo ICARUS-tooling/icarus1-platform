@@ -13,7 +13,7 @@ import net.ikarus_systems.icarus.util.id.Identity;
  * @version $Id$
  * 
  */
-public class Webservice implements Identifiable {
+public class Webservice implements Identifiable{
 	
 
 	protected String serviceID;
@@ -165,6 +165,49 @@ public class Webservice implements Identifiable {
 		return getName();
 	}
 
+	/**
+	 * @return
+	 */
+	public String getOutputText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[ "); //$NON-NLS-1$
+		for (int index = 0; index < getOutputAttributesSize() ; index++){
+			WebserviceIOAttributes wio = getOutputAttributesAt(index);
+			if (wio.getAttributevalues().equals("")){ //$NON-NLS-1$
+				sb.append(wio.getAttributename());
+			} else {
+				sb.append(wio.getAttributename())
+					.append("=") //$NON-NLS-1$
+					.append(wio.getAttributevalues());
+			}
+			if (index < getOutputAttributesSize()-1 ) sb.append(" | "); //$NON-NLS-1$
+		}
+		sb.append("]"); //$NON-NLS-1$
+			
+		return sb.toString();
+	}
+
+	/**
+	 * @return
+	 */
+	public String getInputText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[ "); //$NON-NLS-1$
+		for (int index = 0; index < getInputAttributesSize() ; index++){
+			WebserviceIOAttributes wio = getInputAttributesAt(index);
+			if (wio.getAttributevalues().equals("")){ //$NON-NLS-1$
+				sb.append(wio.getAttributename());
+			} else {
+				sb.append(wio.getAttributename())
+					.append("=") //$NON-NLS-1$
+					.append(wio.getAttributevalues());
+			}
+			if (index < getInputAttributesSize()-1 ) sb.append(" | "); //$NON-NLS-1$
+		}
+		sb.append("]"); //$NON-NLS-1$
+			
+		return sb.toString();
+	}
 
 
 

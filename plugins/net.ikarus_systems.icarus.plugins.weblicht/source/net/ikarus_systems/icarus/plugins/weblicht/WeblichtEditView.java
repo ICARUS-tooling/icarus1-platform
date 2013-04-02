@@ -192,7 +192,7 @@ public class WeblichtEditView extends View {
 	
 	private void editWebchain(Webchain webchain) {
 		if(webchain!=null) {
-			requestFocusInPerspective();
+			focusView();
 		}
 		
 		Webchain oldWebchain = getWebchain();

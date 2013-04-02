@@ -24,6 +24,7 @@ public class Webchain {
 	
 	protected String name;
 	protected String description;
+	protected WebchainInputType inputType;
 	
 	/*
 	protected Map<String,List<WebserviceProxy>> chainMap;
@@ -33,8 +34,16 @@ public class Webchain {
 	}*/
 	
 	
+
+
+	/**
+	 * @param inputType the inputType to set
+	 */
+	public void setInputType(WebchainInputType inputType) {
+		this.inputType = inputType;
+	}
+
 	public Webchain(){
-		//noop
 	}
 
 	/**
@@ -57,6 +66,7 @@ public class Webchain {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 
 	/**
 	 * @return the name
@@ -114,6 +124,15 @@ public class Webchain {
 			serviceIDList.add(getWebserviceAt(i).get().getUID());
 		}
 		return serviceIDList;
+	}
+	
+	
+	public void setWebchainInputType(WebchainInputType chainInput) {
+		this.inputType = chainInput;
+	}
+	
+	public WebchainInputType getWebchainInputType(){
+		return inputType;
 	}
 
 

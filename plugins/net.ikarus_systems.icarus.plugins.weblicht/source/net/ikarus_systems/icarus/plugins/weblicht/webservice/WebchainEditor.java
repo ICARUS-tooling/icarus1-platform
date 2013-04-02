@@ -17,18 +17,26 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
@@ -60,8 +68,20 @@ public class WebchainEditor implements Editor<Webchain> {
 	protected Collection<JComponent> localizedComponents;
 	
 	protected JTextField nameInput;
+	
 	protected JButton webserviceAddButton;
 	protected JButton webserviceRemoveButton;	
+	
+	// One file chooser should be enough for all editor instances
+	protected static JFileChooser locationChooser;
+	
+	protected JRadioButton webserviceStaticInput;
+	protected JRadioButton webserviceLocationInput;
+	protected JRadioButton webserviceDynamicInput;
+	protected ButtonGroup webserviceInputGroup;
+	protected ButtonModel latestGroupSelection;
+	protected JTextArea webserviceInputArea;
+	
 	
 	protected JList<Object> webservicesList;
 	protected WebserviceListModel webserviceListModel;
@@ -123,15 +143,51 @@ public class WebchainEditor implements Editor<Webchain> {
 		gbc.gridx++;
 		gbc.gridheight = 1;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		//panel.add(webserviceTable.getTableHeader(), gbc);
-
 		gbc.gridy++;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weighty = 100;
 		gbc.weightx = 100;
-		//panel.add(webserviceTable, gbc);
 		panel.add(webservicesList,gbc);
+		
+		GridBagConstraints gbcInput = new GridBagConstraints();
+		gbcInput.gridx = 0;
+		gbcInput.gridy = gbc.gridy+1;
+		panel.add(Box.createVerticalStrut(10), gbcInput);
+
+		gbcInput.gridy++;
+		gbcInput.gridheight = GridBagConstraints.REMAINDER;
+		gbcInput.anchor = GridBagConstraints.NORTH;
+		JPanel inputPanel = new JPanel(new GridLayout(3, 2));
+		inputPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
+	    		
+		webserviceInputGroup.add(webserviceStaticInput);
+		webserviceInputGroup.add(webserviceLocationInput);
+		webserviceInputGroup.add(webserviceDynamicInput);
+		JLabel staticImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("addrepo_rep.gif")); //$NON-NLS-1$
+	    inputPanel.add(staticImage);
+		inputPanel.add(webserviceStaticInput);
+		
+		JLabel locationImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("history_rep.gif")); //$NON-NLS-1$
+	    inputPanel.add(locationImage);
+		inputPanel.add(webserviceLocationInput);
+		
+		JLabel dynamicImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("newconnect_wiz.gif")); //$NON-NLS-1$
+	    inputPanel.add(dynamicImage);
+		inputPanel.add(webserviceDynamicInput);
+		panel.add(inputPanel,gbcInput);
+		
+		gbcInput.gridx++;
+		gbcInput.gridy++;
+		gbcInput.gridheight = 1;
+		gbcInput.fill = GridBagConstraints.BOTH;
+		gbcInput.weighty = 100;
+		gbcInput.weightx = 100;
+	
+		panel.add(webserviceInputArea,gbcInput);
+
+		
+		
+		
 	}
 	
 	protected Handler createHandler() {
@@ -161,7 +217,7 @@ public class WebchainEditor implements Editor<Webchain> {
 		resourceDomain.prepareComponent(webserviceRemoveButton, "delete", null); //$NON-NLS-1$
 		resourceDomain.addComponent(webserviceRemoveButton);
 		localizedComponents.add(webserviceRemoveButton);
-		webserviceRemoveButton.addActionListener(handler);
+		webserviceRemoveButton.addActionListener(handler);	
 		
 		
 		webserviceListModel = new WebserviceListModel();
@@ -169,7 +225,35 @@ public class WebchainEditor implements Editor<Webchain> {
 		webservicesList.setBorder(UIUtil.defaultContentBorder);
 		webservicesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		webservicesList.getSelectionModel().addListSelectionListener(handler);
-		webservicesList.addMouseListener(handler);
+		webservicesList.addMouseListener(handler);		
+		
+		
+		//input Buttons
+		webserviceStaticInput = new JRadioButton();
+		webserviceStaticInput.setName("static"); //$NON-NLS-1$
+		resourceDomain.prepareComponent(webserviceStaticInput, "static", null); //$NON-NLS-1$
+		resourceDomain.addComponent(webserviceStaticInput);
+		localizedComponents.add(webserviceStaticInput);
+		webserviceStaticInput.addActionListener(handler);	
+		
+		webserviceLocationInput = new JRadioButton();
+		webserviceLocationInput.setName("location"); //$NON-NLS-1$
+		resourceDomain.prepareComponent(webserviceLocationInput, "location", null); //$NON-NLS-1$
+		resourceDomain.addComponent(webserviceLocationInput);
+		localizedComponents.add(webserviceLocationInput);
+		webserviceLocationInput.addActionListener(handler);	
+		
+		webserviceDynamicInput = new JRadioButton();
+		webserviceDynamicInput.setName("dynamic"); //$NON-NLS-1$
+		resourceDomain.prepareComponent(webserviceDynamicInput, "dynamic", null); //$NON-NLS-1$
+		resourceDomain.addComponent(webserviceDynamicInput);
+		localizedComponents.add(webserviceDynamicInput);
+		webserviceDynamicInput.addActionListener(handler);
+		
+		
+		webserviceInputGroup = new ButtonGroup();
+		webserviceInputArea = new JTextArea();
+		webserviceInputArea.setBorder(UIUtil.defaultContentBorder);
 		
 		WebchainRegistry.getInstance().addListener(Events.REMOVED, handler);
 		WebchainRegistry.getInstance().addListener(Events.CHANGED, handler);
@@ -244,6 +328,67 @@ public class WebchainEditor implements Editor<Webchain> {
 		webserviceListModel.reload();
 		refreshWebchainActions();
 		
+		latestGroupSelection = getSelectedInputType();
+		
+		webserviceInputGroup.setSelected(latestGroupSelection, true);
+		
+		webserviceInputArea.setEnabled(true);
+
+		
+	}
+	
+	private ButtonModel getSelectedInputType(){
+		ButtonModel bm = null;
+		if (webchain.getWebchainInputType().getInputType().equals("static")){ //$NON-NLS-1$
+			bm = webserviceStaticInput.getModel();
+		}
+		if (webchain.getWebchainInputType().getInputType().equals("dynamic")){ //$NON-NLS-1$
+			bm = webserviceDynamicInput.getModel();
+		}
+		if (webchain.getWebchainInputType().getInputType().equals("location")){ //$NON-NLS-1$
+			bm = webserviceLocationInput.getModel();
+		}
+
+		return bm;
+	}
+	
+	private String getNameFromSelectedButton(){
+		  Enumeration<AbstractButton> allRadioButton = webserviceInputGroup.getElements();  
+		   
+		  while(allRadioButton.hasMoreElements()) {  
+		   JRadioButton temp=(JRadioButton)allRadioButton.nextElement();  
+		   if(temp.isSelected()) {
+		    return temp.getName();
+		   } 
+		  }
+		  return null;		   
+	}
+	
+	
+	protected static JFileChooser getLocationChooser() {
+		if(locationChooser==null) {
+			locationChooser = new JFileChooser();
+			locationChooser.setMultiSelectionEnabled(false);
+			// TODO configure file chooser
+		}
+		
+		return locationChooser;
+	}
+	
+	protected boolean openLocationChooser() {
+		File file = new File(webserviceInputArea.getText());
+		JFileChooser fileChooser = getLocationChooser();
+		fileChooser.setSelectedFile(file);
+		int result = fileChooser.showDialog(contentPanel, ResourceManager.getInstance().get(
+				"select")); //$NON-NLS-1$
+		
+		if(result==JFileChooser.APPROVE_OPTION) {
+			file = fileChooser.getSelectedFile();
+			webserviceInputArea.setText(file.getAbsolutePath());
+			return true;
+		}
+		
+		return false;
 	}
 
 
@@ -267,6 +412,11 @@ public class WebchainEditor implements Editor<Webchain> {
 		// Replace the old set of webchains
 		WebchainRegistry.getInstance().setWebservices(webchain, webserviceListModel.webservices);
 		
+		
+		// Save InputType
+		WebchainRegistry.getInstance().setWebserviceInput(webchain,
+					getNameFromSelectedButton(),
+					webserviceInputArea.getText());
 	}
 	
 
@@ -301,6 +451,19 @@ public class WebchainEditor implements Editor<Webchain> {
 			}
 		}
 		
+		//compare input 
+		if(!webchain.getWebchainInputType().getInputType()
+				.equals(getNameFromSelectedButton()) ){
+			return true;			
+		} 
+		//inputtype equal valueschanged
+		else {
+			if(!webchain.getWebchainInputType().getInputTypeValue()
+					.equals(webserviceInputArea.getText())){
+				return true;
+			}
+		}
+		
 		
 		return false;
 	}
@@ -322,6 +485,7 @@ public class WebchainEditor implements Editor<Webchain> {
 		webchain = null;
 		
 	}
+	
 	
 	protected class Handler extends MouseAdapter implements ActionListener, 
 	ListSelectionListener, EventListener {
@@ -380,6 +544,64 @@ public class WebchainEditor implements Editor<Webchain> {
 				}
 				return;
 			}
+			
+			
+			// Add webserviceStaticInput
+			if(e.getSource()==webserviceStaticInput) {
+				String staticInput = DialogFactory.getGlobalFactory()
+						.showTextInputDialog(contentPanel,
+						"plugins.weblicht.webchainEditor.staticInput.title", //$NON-NLS-1$
+						"plugins.weblicht.webchainEditor.staticInput.message", //$NON-NLS-1$
+						webserviceInputArea.getText(),
+						webchain.getName());
+				
+				//user canceled
+				if (staticInput == null){
+					webserviceInputGroup.setSelected(latestGroupSelection, true);
+					return;
+				}
+				
+				latestGroupSelection = webserviceInputGroup.getSelection();
+				webserviceInputArea.setText(staticInput);
+				webserviceInputArea.setEnabled(true);
+
+			}
+			
+			// Add webserviceLocationInput
+			if(e.getSource()==webserviceLocationInput) {
+				if (openLocationChooser()){
+					webserviceInputArea.setEnabled(true);
+					latestGroupSelection = webserviceInputGroup.getSelection();
+				}
+				else {
+					//back to latest selection
+					webserviceInputGroup.setSelected(latestGroupSelection, true);
+				}
+				
+
+
+			}
+			
+			// Add webserviceDynamicInput
+			if(e.getSource()==webserviceDynamicInput) {
+				//switch to dynamic mode only if accepted
+				if (DialogFactory.getGlobalFactory().showConfirm(contentPanel,
+						"plugins.weblicht.webchainEditor.dynamicInput.title", //$NON-NLS-1$
+						"plugins.weblicht.webchainEditor.dynamicInput.message", //$NON-NLS-1$
+						webchain.getName())) {
+					/*
+					webserviceInputArea.setText(
+							ResourceManager.getInstance().get(
+									"plugins.weblicht.webchainEditor.dynamicInput.mode")); //$NON-NLS-1$
+					*/
+					webserviceInputArea.setEnabled(false);
+					latestGroupSelection = webserviceInputGroup.getSelection();
+				} else {
+					//back to latest selection
+					webserviceInputGroup.setSelected(latestGroupSelection, true);
+				}
+
+			}
 
 		}
 	}
@@ -387,7 +609,6 @@ public class WebchainEditor implements Editor<Webchain> {
 	//Action Operation
 		protected void addWebservice() {
 			
-			List<Webservice> ws = new ArrayList<>(webserviceListModel.getWebservicesFromChain(webchain));
 			//List<String> wsQuery = WebchainRegistry.getInstance().getQueryFromWebchain(webchain);
 			
 			/*
@@ -438,7 +659,7 @@ public class WebchainEditor implements Editor<Webchain> {
 			}			
 		}
 		
-
+		
 		protected class WebserviceListModel extends AbstractListModel<Object>{
 				
 			private static final long serialVersionUID = -8873909135748882977L;
@@ -469,14 +690,28 @@ public class WebchainEditor implements Editor<Webchain> {
 				*/
 				fireContentsChanged(webchain, 0, webservices.size());
 			}
+			
+			private String buildListViewString(int index){
+				StringBuilder sb = new StringBuilder();
+				sb.append(ResourceManager.getInstance().get(
+						"plugins.weblicht.webchainEditor.serviceName")) //$NON-NLS-1$
+					.append(" ") //$NON-NLS-1$
+					.append(webservices.get(index).getName())
+					.append(" ") //$NON-NLS-1$
+					.append(ResourceManager.getInstance().get(
+							"plugins.weblicht.webchainEditor.outFormat")) //$NON-NLS-1$
+					.append(" ") //$NON-NLS-1$
+					.append(webservices.get(index).getOutputText());
+				return sb.toString();
+				
+			}
 		
 			/**
 			 * @see javax.swing.ListModel#getElementAt(int)
 			 */
 			@Override
 			public Object getElementAt(int index) {
-				return webservices==null ? null : "UniqueID: " + webservices.get(index).getUID() //$NON-NLS-1$
-											+ " Service Name: " + webservices.get(index).getName(); //$NON-NLS-1$
+				return webservices==null ? null : buildListViewString(index);
 			}
 		
 			/**

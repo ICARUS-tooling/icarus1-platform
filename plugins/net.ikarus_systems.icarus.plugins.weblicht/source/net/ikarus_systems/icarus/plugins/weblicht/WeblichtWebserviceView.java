@@ -161,6 +161,7 @@ public class WeblichtWebserviceView extends View {
 				
 		actionManager.setEnabled(selectedObject instanceof Webservice,
 				"plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction", //$NON-NLS-1$
+				"plugins.weblicht.weblichtWebserviceView.cloneWebserviceAction",  //$NON-NLS-1$
 				"plugins.weblicht.weblichtWebserviceView.editWebserviceAction");//$NON-NLS-1$
 	}
 	
@@ -176,6 +177,8 @@ public class WeblichtWebserviceView extends View {
 				callbackHandler, "newWebservice"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction",  //$NON-NLS-1$
 				callbackHandler, "deleteWebservice"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.cloneWebserviceAction",  //$NON-NLS-1$
+				callbackHandler, "cloneWebservice"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.editWebserviceAction",  //$NON-NLS-1$
 				callbackHandler, "editWebservice"); //$NON-NLS-1$
 	}
@@ -308,7 +311,7 @@ public class WeblichtWebserviceView extends View {
 							null,
 							"plugins.weblicht.weblichtWebserviceView.dialogs.addWebservice.title", //$NON-NLS-1$
 							"plugins.weblicht.weblichtWebserviceView.dialogs.addWebservice.message", //$NON-NLS-1$
-							uID, null, null, null, null, null, null, null, null, null);
+							uID, null, null, null, null, null, null, "text/xml",null , null); //$NON-NLS-1$
 
 			
 			//user canceled or webservicename empty
@@ -373,6 +376,60 @@ public class WeblichtWebserviceView extends View {
 		 * 
 		 * @param e
 		 */
+		public void cloneWebservice(ActionEvent e) {
+			Object selectedObject = webserviceList.getSelectedValue();
+			if(selectedObject==null || !(selectedObject instanceof Webservice)) {
+				return;
+			}
+			
+			String uID = WebserviceRegistry.getInstance().createUniqueID(""); //$NON-NLS-1$
+			
+			//not needed? check already in webservice registry
+			if (!WebserviceRegistry.getInstance().isValidUniqueID(uID)){
+				//System.out.println("unique " +  WebserviceRegistry.getInstance().isValidUniqueID(uID));
+				return;
+			}
+			
+			Webservice webserviceOld = (Webservice)selectedObject;
+			
+			String webserviceName = WebserviceRegistry.getInstance()
+					.getUniqueName(webserviceOld.getName());
+			
+			//only uid needed rest will be filled out by user later!	
+			Webservice webservice = WebserviceDialogs
+					.getWebserviceDialogFactory()
+					.showNewWebserviceReworkDialog(
+							null,
+							"plugins.weblicht.weblichtWebserviceView.dialogs.cloneWebservice.title", //$NON-NLS-1$
+							"plugins.weblicht.weblichtWebserviceView.dialogs.cloneWebservice.message", //$NON-NLS-1$
+							uID,
+							webserviceName,
+							webserviceOld.getDescription(),							
+							webserviceOld.getCreator(),
+							webserviceOld.getContact(),
+							webserviceOld.getURL(),
+							webserviceOld.getServiceID(),
+							webserviceOld.getWebresourceFormat(),
+							null , null);
+
+			
+			//user canceled or webservicename empty
+			if (webservice==null){
+				return;
+			}
+
+			try {				
+				WebserviceRegistry.getInstance().cloneWebservice(webservice,webserviceOld);
+			} catch (Exception ex) {
+				LoggerFactory.getLogger(WeblichtWebserviceView.class).log(LoggerFactory.record(Level.SEVERE, 
+						"Unable to create new webservice: "+webservice.getName(), ex)); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * 
+		 * @param e
+		 */
 		public void editWebservice(ActionEvent e) {
 			Object selectedObject = webserviceList.getSelectedValue();
 
@@ -387,7 +444,6 @@ public class WeblichtWebserviceView extends View {
 			Message message = new Message(Commands.EDIT, webservice, null);
 			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
 		}
-		
 		
 		/**
 		 * 

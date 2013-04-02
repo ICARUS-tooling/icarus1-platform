@@ -49,6 +49,7 @@ import org.w3c.dom.NodeList;
 public class WebchainRegistry {	
 
 	protected List<Webchain> webchainList;
+	protected WebchainInputType defaultInputType;
 	
 	//protected Webservice webservice;
 	
@@ -83,6 +84,11 @@ public class WebchainRegistry {
 		eventSource = new WeakEventSource(this);
 		//webchain = new Webchain();
 		webchainList = new ArrayList<Webchain>();
+		
+		//set defaultInputType
+		defaultInputType = new WebchainInputType();
+		defaultInputType.setInputType("dynamic"); //$NON-NLS-1$
+		defaultInputType.setInputTypeValue(""); //$NON-NLS-1$
 		
 		// Attempt to load webservice list
 		try {			
@@ -212,12 +218,37 @@ public class WebchainRegistry {
 				//System.out.println("\nCurrent Element :" + sNode.getNodeName());							
 
 				if (sNode.getNodeType() == Node.ELEMENT_NODE) {
-					 webchain = new Webchain();
+					webchain = new Webchain();
 					
 					Element eElement = (Element) sNode;
 					
 					//System.out.println("Chainname : " +	eElement.getAttribute("chainname"));
-					webchain.setName(eElement.getAttribute("chainname"));					 //$NON-NLS-1$
+					webchain.setName(eElement.getAttribute("chainname"));	 //$NON-NLS-1$
+
+					
+					/*
+					System.out.println("Type: "
+							+ getNodeFromElement(eElement, "input", "type")
+							+ " Value: "
+							+ getTextFromElement(eElement, "input"));
+					*/
+					
+					WebchainInputType inputType = new WebchainInputType();
+					inputType.setInputType(getNodeFromElement(eElement, "input", "type")); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					if (inputType.getInputType().equals("static")){ //$NON-NLS-1$
+						inputType.setInputTypeValue(getTextFromElement(eElement, "input")); //$NON-NLS-1$
+					}
+					
+					if (inputType.getInputType().equals("location")){ //$NON-NLS-1$
+						inputType.setInputTypeValue(getTextFromElement(eElement, "input")); //$NON-NLS-1$
+					}
+					
+					if (inputType.getInputType().equals("dynamic")){ //$NON-NLS-1$
+						inputType.setInputTypeValue(""); //$NON-NLS-1$
+					}
+					
+					webchain.setWebchainInputType(inputType);
 					
 					//Grab all unique webservice numbers from chain
 					NodeList uidList = eElement.getElementsByTagName("service"); //$NON-NLS-1$
@@ -236,6 +267,30 @@ public class WebchainRegistry {
 				}
 			}			
 	}
+	
+	
+
+	/**
+	 * e is XML Element, s is the Name of our Node Element
+	 * 
+	 * @param e
+	 * @param s
+	 * @return xml node text content
+	 */
+	private String getTextFromElement(Element e, String s) {
+		return e.getElementsByTagName(s).item(0).getTextContent();
+	}
+	
+	/**
+	 * 
+	 * @param e
+	 * @param s
+	 * @return
+	 */
+	private String getNodeFromElement(Element e, String s, String item) {
+		return e.getElementsByTagName(s).item(0).getAttributes().getNamedItem(item).getNodeValue();
+	}
+	
 	
 	/**
 	 * 
@@ -278,23 +333,44 @@ public class WebchainRegistry {
 	/**
 	 * @param name
 	 */
-	public void newWebchain(String name) {
+	public Webchain createWebchain(String name, WebchainInputType inputType) {
 		Webchain webchain = new Webchain();
 		webchain.setName(name);	
-		addNewWebchain(webchain);
+		webchain.setWebchainInputType(inputType);
+		return webchain;
+		//addNewWebchain(webchain);
 	}
 	
+	
 	/**
+	 * 
 	 * @param name
-	 * @param webservicesList
+	 * @param oldWebchain
 	 */
-	public void newWebchain(String name, List<String> serviceIDList) {
+	public void cloneWebchain(String name, Webchain old) {
+		Webchain webchain = new Webchain();
+		webchain.setName(name);
+		webchain.setWebchainInputType(old.getWebchainInputType());
+		addNewWebchain(webchain);	
+	}
+	
+	
+	/**
+	 * 
+	 * @param name
+	 * @param oldWebchain
+	 * @param serviceIDList
+	 */
+	public void cloneWebchain(String name, Webchain old , List<String> serviceIDList) {
 		Webchain webchain = new Webchain();
 		webchain.setName(name);	
 		webchain.addWebservices(serviceIDList);
+		webchain.setWebchainInputType(old.getWebchainInputType());
 		addNewWebchain(webchain);	
 		
 	}
+	
+	
 
 	public void setName(Webchain webchain, String name) {
 		if(name==null)
@@ -348,6 +424,22 @@ public class WebchainRegistry {
 	}
 	
 	
+	/**
+	 * @param webchain 
+	 * @param nameFromSelectedButton
+	 * @param text
+	 */
+	public void setWebserviceInput(Webchain webchain, String type, String value) {
+		if (type==null){			
+			return;
+		}
+		WebchainInputType chainInput = new WebchainInputType();
+		chainInput.setInputType(type);
+		chainInput.setInputTypeValue(value);
+		webchain.setWebchainInputType(chainInput);
+		
+	}
+
 	//compare 2 webservice proxy lists
 	private boolean equalsProxy(List<WebserviceProxy> w1, List<WebserviceProxy> w2){
 		boolean equal = true;
@@ -506,7 +598,7 @@ public class WebchainRegistry {
 		WebchainRegistry wcl = new WebchainRegistry();
 		//List<String> list = WebchainRegistry.getInstance().getQueryFromWebchain(w);
 		try {
-			wcl.saveWebchains();
+			//wcl.saveWebchains();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

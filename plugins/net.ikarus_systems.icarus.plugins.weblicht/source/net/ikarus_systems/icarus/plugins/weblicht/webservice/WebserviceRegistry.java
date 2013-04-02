@@ -14,10 +14,14 @@ import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -83,8 +87,6 @@ public class WebserviceRegistry {
 	}
 
 	private WebserviceRegistry() {
-		// webserviceHashMap = new LinkedHashMap<String,Webservice>();
-
 		eventSource = new WeakEventSource(this);
 		webserviceList = new ArrayList<Webservice>();
 
@@ -95,8 +97,7 @@ public class WebserviceRegistry {
 					LoggerFactory.record(Level.SEVERE,
 							"Failed to load webservices", e)); //$NON-NLS-1$
 		}
-		// System.out.println(wHMap.keySet());
-		// System.out.println(wHMap.get("1").getInput().keySet());
+
 	}
 
 	private void loadWebserviceExtensions() {
@@ -149,11 +150,13 @@ public class WebserviceRegistry {
 
 			if (sNode.getNodeType() == Node.ELEMENT_NODE) {
 
+				
 				Element eElement = (Element) sNode;
 				NamedNodeMap inputMap = getAttributesFromElement(eElement,
 						"Input"); //$NON-NLS-1$
 				NamedNodeMap outputMap = getAttributesFromElement(eElement,
 						"Output"); //$NON-NLS-1$
+
 
 				// Debug Stuff
 				/*
@@ -336,6 +339,7 @@ public class WebserviceRegistry {
 	private String getTextFromElement(Element e, String s) {
 		return e.getElementsByTagName(s).item(0).getTextContent();
 	}
+	
 
 	/**
 	 * e is XML Element, s is the Name of our Node Element
@@ -347,6 +351,8 @@ public class WebserviceRegistry {
 	private NamedNodeMap getAttributesFromElement(Element e, String s) {
 		return e.getElementsByTagName(s).item(0).getAttributes();
 	}
+	
+
 
 	public Webservice getWebserviceFromUniqueID(String uniqueID) {
 		Webservice webservice = null;
@@ -370,7 +376,25 @@ public class WebserviceRegistry {
 		// return webserviceHashMap.get(serviceid).getName();
 		return serviceName;
 	}
+	
+	/**
+	 * 
+	 * @param webservice
+	 */
+	public void cloneWebservice(Webservice webservice, Webservice webserviceOld) {
+		webservice.setInput(webserviceOld.getInput());
+		webservice.setOutput(webserviceOld.getOutput());
+		webserviceList.add(webservice);
+		int index = indexOfWebservice(webservice);
+		eventSource.fireEvent(new EventObject(Events.ADDED,
+				"webservice", webservice, //$NON-NLS-1$
+				"index", index));//$NON-NLS-1$
+	}
 
+	/**
+	 * 
+	 * @param webservice
+	 */
 	public void addNewWebservice(Webservice webservice) {
 		webserviceList.add(webservice);
 		int index = indexOfWebservice(webservice);
@@ -665,7 +689,7 @@ public class WebserviceRegistry {
 	}
 	
 	
-	// return webservice chain query
+	// return webservice chain query string
 	public List<String> getQueryFromWebserviceList(List<Webservice> webservices){
 		List<String> query = new ArrayList<>();	
 		String type = null;		
@@ -673,13 +697,12 @@ public class WebserviceRegistry {
 		for (int i = 0; i < webservices.size(); i++){
 			Webservice webservice = webservices.get(i);
 			
-			//collect output attributes
-			StringBuilder sb = new StringBuilder();
+			//collect output attributes			
 			for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
 				WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);	
-				
+				StringBuilder sb = new StringBuilder();
 				if (attribute.getAttributename().equals("type")){ //$NON-NLS-1$
-					type = //attribute.getAttributename() +"="+
+					type = attribute.getAttributename() +"="+ //$NON-NLS-1$
 							attribute.getAttributevalues();
 					//System.out.println("Last Webchain Type " + type);
 				} else {
@@ -695,7 +718,7 @@ public class WebserviceRegistry {
 				if (!query.contains(sb.toString())){
 					query.add(sb.toString());
 				}
-				sb.delete(0, sb.length());
+				//sb.delete(0, sb.length());
 				}
 			} 
 		}
@@ -712,16 +735,75 @@ public class WebserviceRegistry {
 		//System.out.println(query.get(query.size()-1));
 		return query;
 	}
+	
+	
+	// return webservice chain query string
+	public List<WebserviceIOAttributes> getWIOQueryFromWebserviceList(List<Webservice> webservices){
+		List<WebserviceIOAttributes> query = new ArrayList<>();	
+	
+		//collect webservices
+		for (int i = 0; i < webservices.size(); i++){
+			Webservice webservice = webservices.get(i);
+			
+			//collect output attributes
+			for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
+				WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);
+				if (!query.contains(attribute))	query.add(attribute);
+			} 
+		}
+
+		return query;
+	}
+	
+	
+	private static Pattern indexPattern;
+	
+	public String getUniqueName(String baseName) {
+		Set<String> usedNames = new HashSet<>(webserviceList.size());
+		for(int i = 0; i< webserviceList.size(); i++) {
+			usedNames.add(webserviceList.get(i).getName());
+		}
+	
+		String name = baseName;
+		int count = 2;
+		
+		if(indexPattern==null) {
+			indexPattern = Pattern.compile("\\((\\d+)\\)$"); //$NON-NLS-1$
+		}
+		
+		Matcher matcher = indexPattern.matcher(baseName);
+		if(matcher.find()) {
+			int currentCount = 0;
+			try {
+				currentCount = Integer.parseInt(matcher.group(1));
+			} catch(NumberFormatException e) {
+				getLogger().log(LoggerFactory.record(Level.SEVERE, 
+						"Failed to parse existing base name index suffix: "+baseName, e)); //$NON-NLS-1$
+			}
+			
+			count = Math.max(count, currentCount+1);
+			baseName = baseName.substring(0, baseName.length()-matcher.group().length()).trim();
+		}
+		
+		if(usedNames.contains(name)) {
+			while(usedNames.contains((name = baseName+" ("+count+")"))) { //$NON-NLS-1$ //$NON-NLS-2$
+				count++;
+			}
+		}
+		
+		return name;
+	}
 
 	public static void main(String[] args) {
 		WebserviceRegistry wl = new WebserviceRegistry();
+
+		//List<String> test = wl.getQueryFromWebserviceList(wl.webserviceList);
+		
 		try {
-			wl.saveWebservices();
+			//wl.saveWebservices();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// System.out.println(wl.webserviceHashMap.size());
 
 	}
 

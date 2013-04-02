@@ -100,6 +100,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 	}
 	
 	
+
 	protected int feedBasicComponents(JPanel panel) {
 		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
 		JLabel label;
@@ -460,6 +461,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 	
 	//remove edit options from items when limited acces type is set
 	protected void refreshItemAccess(){
+		
 		nameInput.setEditable(getAccessType());
 		description.setEditable(getAccessType());
 		//description.setEnabled(getAccessType());
