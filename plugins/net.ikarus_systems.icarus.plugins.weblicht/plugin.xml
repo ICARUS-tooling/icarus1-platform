@@ -99,6 +99,7 @@
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.WeblichtPerspective" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/weblicht/weblicht-perspective.gif" />
+		<parameter id="preview" value="net/ikarus_systems/icarus/plugins/weblicht/webservice-preview.jpg" />	
 	</extension>
 	
 	<extension id="WeblichtChainView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
@@ -119,7 +120,7 @@
 	<extension id="WeblichtWebserviceView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
 		<doc>
 			<doc-text>
-				Collection of all Webservices
+				Collection of all Webservices.
 			</doc-text>
 		</doc>
 		<parameter id="name" value="plugins.weblicht.weblichtWebserviceView.identity.name" />
@@ -167,7 +168,7 @@
 	<extension id="WebchainEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				Editor used for Webchain.
+				Editor used for Webchains.
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainEditor" />
