@@ -12,8 +12,8 @@ package net.ikarus_systems.icarus.language;
 import java.io.IOException;
 
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.UnsupportedLocationException;
 import net.ikarus_systems.icarus.util.location.Location;
+import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 
 /**
  * @author Markus Gärtner 

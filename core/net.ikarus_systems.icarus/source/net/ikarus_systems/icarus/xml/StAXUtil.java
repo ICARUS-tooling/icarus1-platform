@@ -11,6 +11,8 @@ package net.ikarus_systems.icarus.xml;
 
 import javax.xml.bind.ValidationException;
 import javax.xml.stream.Location;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -21,9 +23,36 @@ import javax.xml.stream.XMLStreamReader;
  *
  */
 public final class StAXUtil {
+	
+	private static final Object lock = new Object();
+	
+	private static XMLInputFactory inputFactory;
+	private static XMLOutputFactory outputFactory;
 
 	private StAXUtil() {
 		// no-op
+	}
+	
+	public static XMLInputFactory getSharedInputFactory() {
+		if(inputFactory==null) {
+			synchronized (lock) {
+				if(inputFactory==null) {
+					inputFactory = XMLInputFactory.newInstance();
+				}
+			}
+		}
+		return inputFactory;
+	}
+	
+	public static XMLOutputFactory getSharedOutputFactory() {
+		if(outputFactory==null) {
+			synchronized (lock) {
+				if(outputFactory==null) {
+					outputFactory = XMLOutputFactory.newInstance();
+				}
+			}
+		}
+		return outputFactory;
 	}
 	
 	public static String errorText(XMLStreamReader reader) {

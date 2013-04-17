@@ -40,7 +40,7 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 			extension = (Extension) value;
 		}		
 		if(extension!=null) {
-			identity = ExtensionIdentityCache.getInstance().getIdentity(extension);
+			identity = PluginUtil.getIdentity(extension);
 		}
 		if(identity!=null) {
 			value = identity.getName();

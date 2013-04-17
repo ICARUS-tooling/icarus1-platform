@@ -38,7 +38,7 @@ public interface SentenceData extends Serializable {
 	/**
 	 * Returns {@code true} if this {@code SentenceData} object
 	 * represents the empty sentence. This is equivalent with
-	 * {@link #getForms()} returning an empty array of {@code String}s.
+	 * {@link #getForms()} returning an empty array of {@code String} tokens.
 	 * @return {@code true} if and only if the underlying sentence is empty
 	 */
 	boolean isEmpty();

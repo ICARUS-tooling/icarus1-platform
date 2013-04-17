@@ -33,6 +33,15 @@ public class DefaultFileLocation extends Location {
 		
 		this.file = file;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Location) {
+			return Locations.equals(this, (Location)obj);
+		}
+		
+		return false;
+	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.util.location.Location#getURL()

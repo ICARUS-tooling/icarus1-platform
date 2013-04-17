@@ -12,9 +12,11 @@ package net.ikarus_systems.icarus.ui.dialog;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.io.File;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -27,6 +29,7 @@ import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.KeyValuePair;
 import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
+import net.ikarus_systems.icarus.util.NamingUtil;
 
 /**
  * @author Markus Gärtner 
@@ -49,6 +52,8 @@ public final class DialogFactory {
 		return globalFactory;
 	}
 	
+	private JFileChooser sharedFileChooser;
+	
 	protected final ResourceDomain resourceDomain;
 
 	public DialogFactory(ResourceDomain resourceDomain) {
@@ -57,8 +62,23 @@ public final class DialogFactory {
 		this.resourceDomain = resourceDomain;
 	}
 	
+	private JFileChooser getFileChooser() {
+		if(sharedFileChooser==null) {
+			synchronized (this) {
+				if(sharedFileChooser==null) {
+					sharedFileChooser = new JFileChooser();
+				}
+			}
+		}
+		return sharedFileChooser;
+	}
+	
 	public ResourceDomain getResourceDomain() {
 		return resourceDomain;
+	}
+	
+	public BasicDialogBuilder newBuilder() {
+		return new BasicDialogBuilder(getResourceDomain());
 	}
 
 	public void showError(Component parent, String title, 
@@ -170,6 +190,39 @@ public final class DialogFactory {
 		return builder.isYesValue();
 	}
 	
+	public boolean showGenericDialog(Component parent, String title,
+			String message, Component comp, Object...options) {
+		
+		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
+		
+		builder.setTitle(title);
+		builder.setMessage(message);
+		builder.addMessage(comp);
+		builder.setPlainType();
+		builder.setOptions(options);
+		
+		builder.showDialog(parent);
+		
+		return builder.isYesValue();
+	}
+	
+	public boolean showOverwriteFileDialog(Component parent, File file) {
+		String path = file.getAbsolutePath();
+		path = NamingUtil.fit(path, 50);
+		
+		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
+		
+		builder.setTitle("dialogs.overwriteFile.title"); //$NON-NLS-1$
+		builder.addMessage("dialogs.overwriteFile.message", path); //$NON-NLS-1$
+		builder.setPlainType();
+		builder.setOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		builder.showDialog(parent);
+		
+		return builder.isYesValue();
+		
+	}
+	
 	private JTextArea createTextArea() {
 		JTextArea textArea = new JTextArea() {
 
@@ -192,6 +245,8 @@ public final class DialogFactory {
 		textArea.putClientProperty("container", container);		 //$NON-NLS-1$
 		textArea.setText(null);
 		textArea.setToolTipText(null);
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
 		
 		return textArea;
 	}
@@ -292,5 +347,52 @@ public final class DialogFactory {
 		return text;
 	}
 	
+	public File showDestinationFileDialog(Component parent, String title, 
+			File directory) {
+		JFileChooser fileChooser = getFileChooser();
+		fileChooser.setCurrentDirectory(directory);
+		fileChooser.setSelectedFile(null);
+		fileChooser.setDialogTitle(resourceDomain.get(title));
+		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+		fileChooser.setApproveButtonText(resourceDomain.get("select")); //$NON-NLS-1$
+		
+		while(true) {
+			int result = fileChooser.showDialog(parent, null);
+			if(result==JFileChooser.CANCEL_OPTION) {
+				return null;
+			}
+			
+			File file = fileChooser.getSelectedFile();
+			
+			if(file==null) {
+				continue;
+			}
+			
+			if(!file.exists() || file.length()==0) {
+				return file;
+			}
+			
+			if(file.exists() && file.length()>0 && 
+					showOverwriteFileDialog(parent, file)) {
+				return file;
+			}
+		}
+	}
 	
+	public File showSourceFileDialog(Component parent, String title, 
+			File directory) {
+		JFileChooser fileChooser = getFileChooser();
+		fileChooser.setCurrentDirectory(directory);
+		fileChooser.setSelectedFile(null);
+		fileChooser.setDialogTitle(resourceDomain.get(title));
+		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+		fileChooser.setApproveButtonText(resourceDomain.get("select")); //$NON-NLS-1$
+		
+		int result = fileChooser.showDialog(parent, null);
+		if(result==JFileChooser.CANCEL_OPTION) {
+			return null;
+		}
+			
+		return fileChooser.getSelectedFile();
+	}
 }

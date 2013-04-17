@@ -38,6 +38,14 @@
 	<action id="plugins.languageTools.corpusExplorerView.exportCorpusAction"
 		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
 		
+	<!-- Export Corpora -->
+	<action id="plugins.languageTools.corpusExplorerView.exportCorporaAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- Import Corpora -->
+	<action id="plugins.languageTools.corpusExplorerView.importCorporaAction"
+		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.languageTools.corpusExplorerView.toolBarList">
 		<item type="action" value="plugins.languageTools.corpusExplorerView.newCorpusAction" />

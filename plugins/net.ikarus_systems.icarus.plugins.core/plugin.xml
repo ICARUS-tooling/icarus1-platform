@@ -31,7 +31,7 @@
 		<doc>
 			<doc-text>
 				Abstract root extension definition for localizable extensions
-				that offer localized identifier and description
+				that offer localized identifier and description.
 			</doc-text>
 		</doc>
 		<parameter-def id="icon" multiplicity="none-or-one">
@@ -159,6 +159,13 @@
 					assigned to. Will be used to logically group
 					views when presenting them to the user in
 					a dialog or menu.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="capability" multiplicity="any">
+			<doc>
+				<doc-text>
+					A command
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -295,7 +302,7 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="interface">
+		<parameter-def id="interface" multiplicity="one-or-more">
 			<doc>
 				<doc-text>
 					Fully qualified class name of the interface this helper

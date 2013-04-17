@@ -58,8 +58,8 @@ import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.WeakHandler;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.util.Exceptions;
-import net.ikarus_systems.icarus.util.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
+import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

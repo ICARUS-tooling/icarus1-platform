@@ -35,6 +35,15 @@ public class DefaultURLLocation extends Location {
 			
 		this.url = url;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Location) {
+			return Locations.equals(this, (Location)obj);
+		}
+		
+		return false;
+	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.util.location.Location#getURL()
@@ -49,7 +58,7 @@ public class DefaultURLLocation extends Location {
 	 */
 	@Override
 	public boolean isLocal() {
-		return IoUtil.url2file(url)!=null;
+		return getFile()!=null;
 	}
 
 	/**

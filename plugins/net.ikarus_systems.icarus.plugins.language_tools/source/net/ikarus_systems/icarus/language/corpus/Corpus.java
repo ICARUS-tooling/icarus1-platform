@@ -30,6 +30,14 @@ public interface Corpus {
 	
 	String getName();
 	
+	/**
+	 * Returns {@code true} if and only if this {@code Corpus} supports the
+	 * {@code gold} feature. When this is the case both the {@link #getGold(int)}
+	 * and {@link #getGold(int, CorpusObserver)} methods can be used to fetch
+	 * the {@code SentenceData} objects designated for a given index.
+	 * 
+	 *  TODO: general definition of "gold" or at least link to resources
+	 */
 	boolean hasGold();
 
 	/**

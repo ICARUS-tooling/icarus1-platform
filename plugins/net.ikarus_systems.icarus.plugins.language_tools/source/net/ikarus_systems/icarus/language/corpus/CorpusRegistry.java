@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.language.corpus;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +31,10 @@ import javax.swing.Icon;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.language.SentenceData;
@@ -45,12 +51,12 @@ import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.NamingUtil;
-import net.ikarus_systems.icarus.util.UnknownIdentifierException;
+import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.location.Location;
-import net.ikarus_systems.icarus.xml.JAXBUtils.ListBuffer;
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
+import org.java.plugin.registry.Version;
 
 
 
@@ -76,7 +82,11 @@ public class CorpusRegistry {
 	
 	private EventSource eventSource;
 	
-	private Map<String, CorpusDescriptor> descriptorMap = new HashMap<>();
+	// maps uuid to descriptor
+	private Map<String, CorpusDescriptor> descriptorMap = 
+			Collections.synchronizedMap(new HashMap<String, CorpusDescriptor>());
+	
+	// maps instantiated corpus to its descriptor
 	private Map<Corpus, CorpusDescriptor> corporaMap = new HashMap<>();
 	
 	private Map<String, Extension> corpusTypes = new HashMap<>();
@@ -287,15 +297,34 @@ public class CorpusRegistry {
 		return descriptor;
 	}
 	
-	void addCorpus(CorpusDescriptor descriptor) {
-		descriptorMap.put(descriptor.getId(), descriptor);
-		corporaMap.put(descriptor.getCorpus(), descriptor);
+	public void addCorpus(CorpusDescriptor descriptor) throws Exception {
+		
+		addCorpus0(descriptor);
 		
 		eventSource.fireEvent(new EventObject(Events.ADDED, 
 				"corpus", descriptor.getCorpus(),  //$NON-NLS-1$
 				"extension", descriptor.getExtension())); //$NON-NLS-1$
 		
 		saveBackground();
+	}
+	
+	private void addCorpus0(CorpusDescriptor descriptor) throws Exception {
+		
+		// Ensure uniqueness of ids
+		CorpusDescriptor presentDescriptor = descriptorMap.get(descriptor.getId());
+		if(presentDescriptor==descriptor) {
+			return;
+		}
+		if(presentDescriptor!=null) {
+			descriptor.setId(UUID.randomUUID().toString());
+		}
+		
+		if(!descriptor.hasCorpus()) {
+			descriptor.instantiateCorpus();
+		}
+		
+		descriptorMap.put(descriptor.getId(), descriptor);
+		corporaMap.put(descriptor.getCorpus(), descriptor);
 	}
 	
 	public void corpusChanged(Corpus corpus) {
@@ -535,6 +564,7 @@ public class CorpusRegistry {
 	};
 	
 	private AtomicBoolean saveCheck = new AtomicBoolean();
+	private AtomicInteger saveCount = new AtomicInteger();
 	private Runnable saveTask;
 	
 	private void saveBackground() {
@@ -573,7 +603,7 @@ public class CorpusRegistry {
 			return;
 		}
 
-		JAXBContext context = JAXBContext.newInstance(
+		/*JAXBContext context = JAXBContext.newInstance(
 				ListBuffer.class, CorpusDescriptor.class);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		ListBuffer buffer = (ListBuffer) unmarshaller.unmarshal(file);
@@ -589,6 +619,21 @@ public class CorpusRegistry {
 			}
 			
 			addCorpus(descriptor);
+		}*/
+		
+		JAXBContext context = JAXBContext.newInstance(CorpusSet.class);
+		Unmarshaller unmarshaller = context.createUnmarshaller();
+		CorpusSet corpusSet = (CorpusSet) unmarshaller.unmarshal(file);
+		
+		descriptorMap.clear();
+		for(int i=0; i<corpusSet.getItemCount(); i++) {
+			CorpusDescriptor descriptor = corpusSet.getItem(i);
+			try {
+				addCorpus0(descriptor);
+			} catch(Exception e) {
+				getLogger().log(LoggerFactory.record(Level.SEVERE, 
+						"Failed to add corpus: "+descriptor, e)); //$NON-NLS-1$
+			}
 		}
 	}
 	
@@ -598,7 +643,7 @@ public class CorpusRegistry {
 			file.createNewFile();
 		}
 		
-		ListBuffer buffer = new ListBuffer();
+		/*ListBuffer buffer = new ListBuffer();
 		
 		for(CorpusDescriptor descriptor : descriptorMap.values()) {
 			descriptor.syncFromCorpus();
@@ -609,6 +654,179 @@ public class CorpusRegistry {
 				ListBuffer.class, CorpusDescriptor.class);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		marshaller.marshal(buffer, file);
+		marshaller.marshal(buffer, file);*/
+
+		for(CorpusDescriptor descriptor : descriptorMap.values()) {
+			descriptor.syncFromCorpus();
+		}
+		CorpusSet corpusSet = new CorpusSet(descriptorMap.values());
+		
+		JAXBContext context = JAXBContext.newInstance(CorpusSet.class);
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		marshaller.marshal(corpusSet, file);
+	}
+	
+	@XmlRootElement
+	@XmlAccessorType(XmlAccessType.FIELD)
+	static class CorpusInfoSet {
+		@XmlElement(name="info")
+		private List<CorpusInfo> items = new ArrayList<>();
+		
+		@XmlElement(name="corpus")
+		private List<CorpusDescriptor> descriptors = new ArrayList<>();
+		
+		public CorpusInfoSet() {
+			// no-op
+		}
+		
+		public CorpusInfoSet(List<Corpus> corpora) {
+			for(Corpus corpus : corpora) {
+				CorpusDescriptor descriptor = getInstance().getDescriptor(corpus);
+				CorpusInfo info = new CorpusInfo(descriptor);
+				
+				items.add(info);
+				descriptors.add(descriptor);
+			}
+		}
+		
+		public int getItemCount() {
+			if(items.size()!=descriptors.size())
+				throw new IllegalStateException();
+			
+			return items.size();
+		}
+		
+		public CorpusInfo getInfo(int index) {
+			return items.get(index);
+		}
+		
+		public CorpusDescriptor getDescriptor(int index) {
+			return descriptors.get(index);
+		}
+	}
+	
+	@XmlRootElement(name="corpora")
+	@XmlAccessorType(XmlAccessType.FIELD)
+	static class CorpusSet {
+		@XmlElement(name="corpus")
+		private List<CorpusDescriptor> items = new ArrayList<>();
+		
+		public CorpusSet() {
+			// no-op
+		}
+		
+		public CorpusSet(Collection<CorpusDescriptor> corpora) {
+			items.addAll(corpora);
+		}
+		
+		int getItemCount() {
+			return items.size();
+		}
+		
+		CorpusDescriptor getItem(int index) {
+			return items.get(index);
+		}
+	}
+	
+	public void exportCorpora(File file, List<Corpus> corpora) throws IOException, Exception {
+		if(file==null)
+			throw new IllegalArgumentException("Invalid file"); //$NON-NLS-1$
+		if(corpora==null)
+			throw new IllegalArgumentException("Invalid corpora"); //$NON-NLS-1$
+		
+		if(corpora.isEmpty()) {
+			return;
+		}
+		
+		JAXBContext context = JAXBContext.newInstance(CorpusInfoSet.class);
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		/*marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+		
+		writer.writeStartDocument();
+		try {
+			for(Corpus corpus : corpora) {
+				CorpusDescriptor descriptor = getDescriptor(corpus);
+				CorpusInfo info = new CorpusInfo(descriptor);
+				
+				marshaller.marshal(info, out);
+				marshaller.marshal(descriptor, out);
+			}
+			
+			writer.writeEndDocument();
+		} finally {
+			writer.close();
+		}*/
+		
+		CorpusInfoSet infoSet = new CorpusInfoSet(corpora);
+		
+		marshaller.marshal(infoSet, file);
+	}
+	
+	private boolean isCorpusAvailable(CorpusInfo info) {
+		if(!PluginUtil.getPluginRegistry().isPluginDescriptorAvailable(info.getPluginId())) {
+			return false;
+		}
+		PluginDescriptor pluginDescriptor = PluginUtil.getPluginRegistry().getPluginDescriptor(info.getPluginId());
+		Version currentVersion = pluginDescriptor.getVersion();
+		Version requiredVersion = Version.parse(info.getPluginVersion());
+		
+		return currentVersion.isCompatibleWith(requiredVersion);
+	}
+	
+	public CorpusImportResult importCorpora(File file) throws IOException, Exception {
+		if(file==null)
+			throw new IllegalArgumentException("Invalid file"); //$NON-NLS-1$
+		
+		if(file.length()==0) {
+			return null;
+		}
+
+		JAXBContext context = JAXBContext.newInstance(CorpusInfoSet.class);
+		Unmarshaller unmarshaller = context.createUnmarshaller();
+		
+		CorpusInfoSet infoSet = (CorpusInfoSet) unmarshaller.unmarshal(file);
+		
+		CorpusImportResult result = new CorpusImportResult();
+		
+		for(int i = 0; i<infoSet.getItemCount(); i++) {
+			CorpusInfo info = infoSet.getInfo(i);
+			CorpusDescriptor descriptor = infoSet.getDescriptor(i);
+
+			if(!isCorpusAvailable(info)) {
+				result.addUnavailable(info);
+			} else {
+				result.addAvailable(info, descriptor);
+			}
+		}
+		
+		/*unmarshal_loop : while(reader.hasNext()) {
+			// Move to next element declaration
+			//reader.nextTag();
+			
+			// First read the info and check if plug-in is available
+			CorpusInfo info = (CorpusInfo) unmarshaller.unmarshal(reader);
+			if(!isCorpusAvailable(info)) {
+				result.addUnavailable(info);
+				
+				// Skip entire descriptor
+				skip_loop : while(reader.hasNext()) {
+					int eventType = reader.next();
+					if(eventType==XMLStreamConstants.END_ELEMENT
+							&& "corpus".equals(reader.getLocalName())) { //$NON-NLS-1$
+						break skip_loop;
+					}
+				}
+				
+				continue unmarshal_loop;
+			}
+			
+			// Read descriptor and mark as available
+			CorpusDescriptor descriptor = (CorpusDescriptor) unmarshaller.unmarshal(reader);
+			result.addAvailable(info, descriptor);
+		}*/
+		
+		return result;
 	}
 }

@@ -28,8 +28,8 @@ import net.ikarus_systems.icarus.ui.view.Template;
 import net.ikarus_systems.icarus.ui.view.Template.SubTemplateCache;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.cache.LRUCache;
+import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
 import org.java.plugin.registry.Documentable;
 import org.java.plugin.registry.Documentation;

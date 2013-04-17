@@ -12,6 +12,8 @@ package net.ikarus_systems.icarus.config;
 import java.util.Hashtable;
 import java.util.Map;
 
+import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
+
 /**
  * 
  * @author Markus Gärtner
@@ -48,6 +50,10 @@ public class ConfigEvent {
 				}
 			}
 		}
+	}
+	
+	public Handle getHandle() {
+		return (Handle) getProperty("handle"); //$NON-NLS-1$
 	}
 	
 	@Override

@@ -22,7 +22,7 @@ import java.util.regex.PatternSyntaxException;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.HtmlUtils;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.UnknownIdentifierException;
+import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
 /**
  * @author Markus Gärtner

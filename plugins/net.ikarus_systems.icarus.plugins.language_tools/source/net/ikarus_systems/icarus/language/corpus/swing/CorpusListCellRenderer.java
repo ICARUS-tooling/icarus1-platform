@@ -15,6 +15,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
 import net.ikarus_systems.icarus.language.corpus.Corpus;
+import net.ikarus_systems.icarus.language.corpus.CorpusDescriptor;
+import net.ikarus_systems.icarus.language.corpus.CorpusInfo;
 import net.ikarus_systems.icarus.ui.UIUtil;
 
 
@@ -41,8 +43,14 @@ public class CorpusListCellRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		
+		setToolTipText(null);
+		
 		if(value instanceof Corpus) {
 			value = ((Corpus)value).getName();
+		} else if(value instanceof CorpusDescriptor) {
+			value = ((CorpusDescriptor)value).getName();
+		} else if(value instanceof CorpusInfo) {
+			value = ((CorpusInfo)value).getCorpusName();
 		}
 		
 		return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

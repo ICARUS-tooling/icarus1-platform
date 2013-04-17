@@ -204,8 +204,7 @@ public class PerspectiveChooser {
 			Extension.Parameter param = extension.getParameter("preview"); //$NON-NLS-1$
 			if(param!=null) {
 				try {
-					ClassLoader loader = PluginUtil.getPluginManager().getPluginClassLoader(
-							extension.getDeclaringPluginDescriptor());
+					ClassLoader loader = PluginUtil.getClassLoader(extension);
 					URL location = loader.getResource(param.valueAsString());
 					Image image = ImageIO.read(location);
 					// Wait for image to be fully loaded

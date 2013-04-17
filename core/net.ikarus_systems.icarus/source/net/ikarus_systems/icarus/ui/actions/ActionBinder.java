@@ -43,8 +43,7 @@ public final class ActionBinder {
 			throw new IllegalArgumentException("Extension does not define 'class' parameter"); //$NON-NLS-1$
 		
 		// load and instantiate bindable action
-		ClassLoader loader = PluginUtil.getPluginManager()
-				.getPluginClassLoader(extension.getDeclaringPluginDescriptor());
+		ClassLoader loader = PluginUtil.getClassLoader(extension);
 		BindableAction action = (BindableAction) loader.loadClass(param.valueAsString()).newInstance();
 		
 		// load properties

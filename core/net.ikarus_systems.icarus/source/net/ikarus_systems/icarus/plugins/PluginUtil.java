@@ -16,7 +16,10 @@ import java.awt.event.MouseEvent;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.swing.JDialog;
@@ -24,9 +27,9 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import net.ikarus_systems.icarus.resources.ResourceManager;
-import net.ikarus_systems.icarus.ui.dialog.BasicDialogBuilder;
+import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
+import net.ikarus_systems.icarus.util.id.ExtensionIdentity;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.ObjectFactory;
@@ -35,6 +38,7 @@ import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
+import org.java.plugin.registry.PluginElement;
 import org.java.plugin.registry.PluginRegistry;
 import org.java.plugin.standard.StandardObjectFactory;
 
@@ -92,6 +96,31 @@ public final class PluginUtil {
 		throw new CloneNotSupportedException();
 	}
 	
+	private static Map<Extension, Identity> identityCache;
+
+	public static Identity getIdentity(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		if(identityCache==null) {
+			identityCache = Collections.synchronizedMap(new HashMap<Extension, Identity>());
+		}
+		
+		Identity identity = identityCache.get(extension);
+		if(identity==null) {
+			synchronized (PluginUtil.class) {
+				if(!identityCache.containsKey(extension)) {
+					identity = new ExtensionIdentity(extension);
+					identityCache.put(extension, identity);
+				} else {
+					identity = identityCache.get(extension);
+				}
+			}
+		}
+		
+		return identity;
+	}
+	
 	public static void load(Logger logger) throws Exception {
 		if(pluginRegistry!=null)
 			throw new IllegalStateException("Plug-in registry object already loaded"); //$NON-NLS-1$
@@ -100,7 +129,7 @@ public final class PluginUtil {
 		if(pluginManager!=null)
 			throw new IllegalStateException("Plug-in manager object already loaded"); //$NON-NLS-1$
 		
-		// init plu-gin management objects
+		// Init plug-in management objects
 		ObjectFactory objectFactory = StandardObjectFactory.newInstance();
 		logger.info("Using object factory: "+objectFactory); //$NON-NLS-1$
 		
@@ -112,6 +141,10 @@ public final class PluginUtil {
 		
 		pluginManager = objectFactory.createManager(pluginRegistry, pathResolver);
 		logger.info("Using plugin manager: "+pluginManager); //$NON-NLS-1$
+	}
+	
+	public static ClassLoader getClassLoader(PluginElement<?> element) {
+		return getPluginManager().getPluginClassLoader(element.getDeclaringPluginDescriptor());
 	}
 	
 	public static PluginManager getPluginManager() {
@@ -136,6 +169,31 @@ public final class PluginUtil {
 	public static PluginDescriptor getCorePlugin() {
 		return getPluginRegistry().getPluginDescriptor(CORE_PLUGIN_ID);
 	}
+	
+	public static Extension getExtension(String uid) {
+		try {
+			String[] parts = uid.split("\\@"); //$NON-NLS-1$
+			PluginDescriptor descriptor = getPluginRegistry().getPluginDescriptor(parts[0]);
+			Extension extension = descriptor.getExtension(parts[1]);
+			return extension;
+		} catch(IllegalArgumentException e) {
+			return null;
+		}
+	}
+	
+	public static Object instantiate(Extension extension) throws InstantiationException, 
+			IllegalAccessException, ClassNotFoundException {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
+		if(param==null)
+			throw new IllegalArgumentException("Extension does not declare class parameter: "+extension.getUniqueId()); //$NON-NLS-1$
+		
+		ClassLoader loader = getClassLoader(extension);
+		Class<?> clazz = loader.loadClass(param.valueAsString());
+		return clazz.newInstance();
+	}
 
 	public static final Comparator<org.java.plugin.registry.Identity> IDENTITY_COMPARATOR = new Comparator<org.java.plugin.registry.Identity>() {
 	
@@ -155,8 +213,8 @@ public final class PluginUtil {
 				return 0;
 			}
 			
-			Identity id1 = ExtensionIdentityCache.getInstance().getIdentity(e1);
-			Identity id2 = ExtensionIdentityCache.getInstance().getIdentity(e2);
+			Identity id1 = getIdentity(e1);
+			Identity id2 = getIdentity(e2);
 			
 			if(id1!=null && id2!=null) {
 				return Identity.COMPARATOR.compare(id1, id2);
@@ -199,7 +257,7 @@ public final class PluginUtil {
 		final JList<Extension> list = new JList<>(model);
 		list.setCellRenderer(new ExtensionListCellRenderer());
 		
-		final MutableBoolean selected = new MutableBoolean(false);
+		final MutableBoolean selectedByClick = new MutableBoolean(false);
 		
 		list.addMouseListener(new MouseAdapter() {
 
@@ -217,7 +275,7 @@ public final class PluginUtil {
 					return;
 				}
 				
-				selected.setValue(true);
+				selectedByClick.setValue(true);
 				dialog.setVisible(false);
 			}
 		});
@@ -225,16 +283,9 @@ public final class PluginUtil {
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setPreferredSize(new Dimension(250, 200));
 		
-		BasicDialogBuilder builder = new BasicDialogBuilder(
-				ResourceManager.getInstance().getGlobalDomain());
-		builder.setTitle(title);
-		builder.addMessage(scrollPane);
-		builder.setPlainType();
-		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		builder.showDialog(parent);
-		
-		if(!builder.isOkValue() && !selected.getValue()) {
+		if(!DialogFactory.getGlobalFactory().showGenericDialog(
+				parent, title, null, scrollPane, "ok", "cancel")  //$NON-NLS-1$ //$NON-NLS-2$
+				&& !selectedByClick.getValue()) {
 			return null;
 		}
 		

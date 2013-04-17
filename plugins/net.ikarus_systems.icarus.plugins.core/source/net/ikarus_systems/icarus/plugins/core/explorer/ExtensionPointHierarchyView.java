@@ -48,9 +48,9 @@ import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.cache.LRUCache;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;

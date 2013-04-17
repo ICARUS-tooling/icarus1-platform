@@ -57,8 +57,9 @@ public class ConfigBuilder implements ConfigConstants {
 	}
 	
 	public void reset(Handle handle, Object owner) {
-		if(!handles.isEmpty())
+		if(!handles.isEmpty()) {
 			handles.clear();
+		}
 		
 		handles.push(handle);
 		this.owner = owner;
@@ -67,8 +68,9 @@ public class ConfigBuilder implements ConfigConstants {
 	public void backTo(int level) {
 		check(level);
 		
-		while(handles.size()>level)
+		while(handles.size()>level) {
 			handles.pop();
+		}
 	}
 	
 	public void back(int offset) {
@@ -104,6 +106,11 @@ public class ConfigBuilder implements ConfigConstants {
 		}
 	}
 	
+	public Object getValue(String name) {
+		Handle child = config.getChildHandle(handles.peek(), name);
+		return child==null ? null : config.getValue(child);
+	}
+	
 	public Handle addGroup(String name) {
 		return addGroup(name, null, false);
 	}
@@ -118,11 +125,13 @@ public class ConfigBuilder implements ConfigConstants {
 	
 	public Handle addGroup(String name, String mode, boolean stepInto) {
 		Handle handle = config.getChildHandle(handles.peek(), name);
-		if(handle==null)
+		if(handle==null) {
 			handle = config.newGroup(owner, handles.peek(), name);
+		}
 		
-		if(mode!=null)
+		if(mode!=null) {
 			config.setProperty(owner, handle, DISPLAY_MODE, mode);
+		}
 		
 		if(stepInto) {
 			handles.push(handle);
@@ -155,14 +164,17 @@ public class ConfigBuilder implements ConfigConstants {
 			Boolean multiline) {
 		Handle handle = addStringEntry(name, value);
 		
-		if(maxLength!=null)
+		if(maxLength!=null) {
 			config.setProperty(owner, handle, MAX_LENGTH, maxLength);
+		}
 		
-		if(pattern!=null)
+		if(pattern!=null) {
 			config.setProperty(owner, handle, PATTERN, pattern);
+		}
 		
-		if(multiline!=null)
+		if(multiline!=null) {
 			config.setProperty(owner, handle, MULTILINE, multiline);
+		}
 		
 		return handle;
 	}
@@ -200,17 +212,21 @@ public class ConfigBuilder implements ConfigConstants {
 		config.setValueFilter(owner, handle, (exclusive!=null && exclusive==true) ? 
 				ConfigRegistry.rangeFilter : ConfigRegistry.rangeFilter);
 		
-		if(minValue!=null)
+		if(minValue!=null) {
 			config.setProperty(owner, handle, MIN_VALUE, minValue);
+		}
 		
-		if(maxValue!=null)
+		if(maxValue!=null) {
 			config.setProperty(owner, handle, MAX_VALUE, maxValue);
+		}
 		
-		if(precision!=null)
+		if(precision!=null) {
 			config.setProperty(owner, handle, PRECISION, precision);
+		}
 		
-		if(exclusive!=null)
+		if(exclusive!=null) {
 			config.setProperty(owner, handle, EXCLUSIVE, exclusive);
+		}
 		
 		return handle;
 	}
@@ -240,17 +256,21 @@ public class ConfigBuilder implements ConfigConstants {
 		config.setValueFilter(owner, handle, (exclusive!=null && exclusive==true) ? 
 				ConfigRegistry.rangeFilter : ConfigRegistry.rangeFilter);
 		
-		if(minValue!=null)
+		if(minValue!=null) {
 			config.setProperty(owner, handle, MIN_VALUE, minValue);
+		}
 		
-		if(maxValue!=null)
+		if(maxValue!=null) {
 			config.setProperty(owner, handle, MAX_VALUE, maxValue);
+		}
 		
-		if(precision!=null)
+		if(precision!=null) {
 			config.setProperty(owner, handle, PRECISION, precision);
+		}
 		
-		if(exclusive!=null)
+		if(exclusive!=null) {
 			config.setProperty(owner, handle, EXCLUSIVE, exclusive);
+		}
 		
 		return handle;
 	}
@@ -353,6 +373,12 @@ public class ConfigBuilder implements ConfigConstants {
 		setProperties(SEPARATED, true);
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class IllegalBuilderOperationException extends RuntimeException {
 
 		private static final long serialVersionUID = 2602233758549443612L;

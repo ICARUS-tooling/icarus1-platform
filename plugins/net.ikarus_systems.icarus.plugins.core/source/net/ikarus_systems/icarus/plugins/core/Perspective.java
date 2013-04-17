@@ -42,7 +42,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.plugins.ExtensionIdentityCache;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.Localizer;
 import net.ikarus_systems.icarus.ui.Alignment;
@@ -55,13 +54,14 @@ import net.ikarus_systems.icarus.ui.layout.AreaLayout;
 import net.ikarus_systems.icarus.ui.layout.DefaultAreaLayout;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.Priority;
 import net.ikarus_systems.icarus.util.id.ExtensionIdentity;
 import net.ikarus_systems.icarus.util.id.Identifiable;
 import net.ikarus_systems.icarus.util.id.Identity;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.MultiResultMessage;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
-import net.ikarus_systems.icarus.util.opi.ResultMessage.ResultType;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.MultiResultMessage;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage.ResultType;
 
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
@@ -583,7 +583,11 @@ public abstract class Perspective implements Identifiable {
 		public int compare(JComponent c1, JComponent c2) {
 			ViewContainer vc1 = (ViewContainer) c1;
 			ViewContainer vc2 = (ViewContainer) c2;
-			return vc1.getIdentity().getId().compareTo(vc2.getIdentity().getId());
+			int result = vc1.getPriority().compareTo(vc2.getPriority());
+			if(result==0) {
+				result = vc1.getIdentity().getId().compareTo(vc2.getIdentity().getId());
+			}
+			return result;
 		}
 		
 	};
@@ -726,7 +730,7 @@ public abstract class Perspective implements Identifiable {
 		}
 	}
 	
-	protected void activateView(ViewContainer container) {
+	protected final void activateView(ViewContainer container) {
 		Extension extension = container.getViewExtension(); 
 		View view = container.getView(); 
 		
@@ -748,7 +752,7 @@ public abstract class Perspective implements Identifiable {
 	            // Notify view about new enclosing perspective
 	            view.addNotify(this);
 	            // Initialize class instance according to interface specification
-	            view.init(container);
+	            initView(view, container);
 	            views.add(view);
 	            activatedViews.put(extension, view);
 	            
@@ -771,6 +775,20 @@ public abstract class Perspective implements Identifiable {
 			
 	        container.setView(view); 
 		}
+	}
+	
+	/**
+	 * Called after a {@code View} instance has been activated and before
+	 * notifying listeners to allow subclasses to perform implementation
+	 * specific configuration of views. Note that it is mandatory to call
+	 * {@link View#init(JComponent)} during this initialization process!
+	 * Subclasses should either make that call themselves or simply call
+	 * {@code super#initView(View, ViewContainer)} since the default
+	 * implementation only calls the {@code View#init(JComponent)} method
+	 * without additional configuration.
+	 */
+	protected void initView(View view, ViewContainer container) {
+		view.init(container);
 	}
 	
 	protected final ResultMessage sendRequest(Object receiver, Message message) {
@@ -930,6 +948,11 @@ public abstract class Perspective implements Identifiable {
 						param.valueAsBoolean());
 			}
 		}
+		
+		public Priority getPriority() {
+			Extension.Parameter param = viewExtension.getParameter("priority");  //$NON-NLS-1$
+			return param==null ? Priority.STANDARD : Priority.parse(param.valueAsString());
+		}
 
 		/**
 		 * @return the viewExtension
@@ -993,7 +1016,7 @@ public abstract class Perspective implements Identifiable {
 				return view.getIdentity();
 			}
 			if(identity==null) {
-				identity = ExtensionIdentityCache.getInstance().getIdentity(viewExtension);
+				identity = PluginUtil.getIdentity(viewExtension);
 			}
 			return identity;
 		}

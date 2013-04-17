@@ -105,8 +105,9 @@ public class ResourceDomain {
 	}
 	
 	public void clear() {
-		for(ManagedResource resource : resources)
+		for(ManagedResource resource : resources) {
 			resource.clear();
+		}
 	}
 	
 	public ManagedResource addResource(String baseName, ResourceLoader loader) {

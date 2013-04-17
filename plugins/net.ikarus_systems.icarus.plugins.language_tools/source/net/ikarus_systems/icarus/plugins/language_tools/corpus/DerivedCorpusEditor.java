@@ -9,20 +9,11 @@
  */
 package net.ikarus_systems.icarus.plugins.language_tools.corpus;
 
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import net.ikarus_systems.icarus.language.corpus.Corpus;
 import net.ikarus_systems.icarus.language.corpus.CorpusRegistry;
 import net.ikarus_systems.icarus.language.corpus.swing.CorpusListCellRenderer;
 import net.ikarus_systems.icarus.language.corpus.swing.CorpusListModel;
-import net.ikarus_systems.icarus.resources.ResourceDomain;
-import net.ikarus_systems.icarus.resources.ResourceManager;
-import net.ikarus_systems.icarus.ui.GridBagUtil;
+import net.ikarus_systems.icarus.ui.dialog.ChoiceFormEntry;
 
 /**
  * @author Markus Gärtner
@@ -30,39 +21,9 @@ import net.ikarus_systems.icarus.ui.GridBagUtil;
  *
  */
 public class DerivedCorpusEditor extends BasicCorpusEditor {
-	
-	protected JComboBox<Corpus> baseCorpusSelect;
-	protected CorpusListModel baseListModel;
 
 	public DerivedCorpusEditor() {
 		// no-op
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor#feedBasicComponents(javax.swing.JPanel)
-	 */
-	@Override
-	protected int feedBasicComponents(JPanel panel) {
-		int row = super.feedBasicComponents(panel);
-		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
-		JLabel label;
-		
-		GridBagConstraints gbc = GridBagUtil.makeGbc(0, row);
-		gbc.anchor = GridBagConstraints.WEST;
-		gbc.insets = new Insets(1, 2, 1, 2);
-		
-		// Base 
-		label = new JLabel();
-		resourceDomain.prepareComponent(label, 
-				"plugins.languageTools.labels.base", null); //$NON-NLS-1$
-		resourceDomain.addComponent(label);
-		localizedComponents.add(label);
-		panel.add(label, gbc);
-		gbc.gridx++;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(baseCorpusSelect, gbc);
-
-		return ++gbc.gridy;
 	}
 
 	/**
@@ -77,16 +38,17 @@ public class DerivedCorpusEditor extends BasicCorpusEditor {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor#init()
+	 * @see net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor#initForm()
 	 */
 	@Override
-	protected void init() {
-		super.init();
+	protected void initForm() {
+		super.initForm();
 		
-		baseListModel = new CorpusListModel();
-		baseCorpusSelect = new JComboBox<>(baseListModel);
-		baseCorpusSelect.setRenderer(new CorpusListCellRenderer());
-		baseCorpusSelect.setEditable(false);
+		CorpusListModel model = new CorpusListModel();
+		ChoiceFormEntry entry = new ChoiceFormEntry(
+				"plugins.languageTools.labels.base", model); //$NON-NLS-1$
+		entry.getComboBox().setRenderer(new CorpusListCellRenderer());
+		formBuilder.insertEntry("base", entry, "location"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -100,7 +62,7 @@ public class DerivedCorpusEditor extends BasicCorpusEditor {
 		
 		FilteredCorpus filteredCorpus = getEditingItem();
 		
-		if(baseCorpusSelect.getSelectedItem()!=filteredCorpus.getBase()) {
+		if(formBuilder.getValue("base")!=filteredCorpus.getBase()) { //$NON-NLS-1$
 			return true;
 		}
 		
@@ -111,44 +73,32 @@ public class DerivedCorpusEditor extends BasicCorpusEditor {
 	 * @see net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor#resetEdit()
 	 */
 	@Override
-	public void resetEdit() {
-		if(contentPanel==null) {
-			return;
-		}
-		super.resetEdit();
-		
-		if(corpus==null) {
-			baseListModel.setSelectedItem(null);
-			return;
-		}
+	protected void doResetEdit() {
+		super.doResetEdit();
 		
 		FilteredCorpus corpus = getEditingItem();
-		baseListModel.setExcludes(corpus);
-		baseListModel.setSelectedItem(corpus.getBase());
+		ChoiceFormEntry entry = (ChoiceFormEntry) formBuilder.getEntry("base"); //$NON-NLS-1$
+		CorpusListModel model = (CorpusListModel) entry.getComboBox().getModel();
+		model.setExcludes(corpus);
+		model.setSelectedItem(corpus.getBase());
 	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor#applyEdit()
 	 */
 	@Override
-	public void applyEdit() {
-		if(contentPanel==null) {
-			return;
-		}
-		if(corpus==null) {
-			return;
-		}
+	protected void doApplyEdit() {
 
 		FilteredCorpus filteredCorpus = getEditingItem();
 		setIgnoreCorpusEvents(true);
 		try {
-			super.applyEdit();
+			super.doApplyEdit();
 			
-			filteredCorpus.setBase((Corpus) baseCorpusSelect.getSelectedItem());
+			filteredCorpus.setBase((Corpus) formBuilder.getValue("base")); //$NON-NLS-1$
+			CorpusRegistry.getInstance().corpusChanged(filteredCorpus);
 		} finally {
 			setIgnoreCorpusEvents(false);
 		}
-		CorpusRegistry.getInstance().corpusChanged(filteredCorpus);
 	}
 
 	/**

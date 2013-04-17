@@ -161,6 +161,10 @@ public final class LoggerFactory {
 		}
 		return logger;
 	}
+	
+	public static BufferedHandler getRootHandler() {
+		return rootHandler;
+	}
 
 	/**
 	 * @return the initialLevel

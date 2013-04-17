@@ -104,4 +104,22 @@ public final class NamingUtil {
 		
 		return name;
 	}
+	
+	public static String fit(String s, int maxLength) {
+		if(s==null) {
+			return ""; //$NON-NLS-1$
+		}
+		if(s.length()<=maxLength) {
+			return s;
+		}
+		
+		int chunkLength = (maxLength-3)/2;
+		
+		StringBuilder sb = new StringBuilder(maxLength);
+		sb.append(s, 0, chunkLength)
+		.append("...") //$NON-NLS-1$
+		.append(s, chunkLength+3, maxLength-chunkLength);
+		
+		return sb.toString();
+	}
 }

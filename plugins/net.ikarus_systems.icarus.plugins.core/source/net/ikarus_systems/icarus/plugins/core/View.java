@@ -10,10 +10,12 @@
 package net.ikarus_systems.icarus.plugins.core;
 
 import java.awt.Frame;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 
-import net.ikarus_systems.icarus.plugins.ExtensionIdentityCache;
+import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -22,8 +24,8 @@ import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.id.Identifiable;
 import net.ikarus_systems.icarus.util.id.Identity;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 import org.java.plugin.registry.Extension;
 
@@ -56,6 +58,10 @@ public abstract class View implements Identifiable {
 		// no-op
 	}
 	
+	protected Logger getLogger() {
+		return LoggerFactory.getLogger(getClass());
+	}
+	
 	public final Extension getExtension() {
 		return extension;
 	}
@@ -69,7 +75,7 @@ public abstract class View implements Identifiable {
 	 */
 	@Override
 	public Identity getIdentity() {
-		return ExtensionIdentityCache.getInstance().getIdentity(getExtension());
+		return PluginUtil.getIdentity(getExtension());
 	}
 
 	/**

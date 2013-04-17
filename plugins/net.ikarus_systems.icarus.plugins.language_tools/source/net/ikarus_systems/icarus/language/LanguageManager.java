@@ -18,8 +18,8 @@ import java.util.Map;
 
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.Exceptions;
-import net.ikarus_systems.icarus.util.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
+import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
 /**
  * @author Markus Gärtner 

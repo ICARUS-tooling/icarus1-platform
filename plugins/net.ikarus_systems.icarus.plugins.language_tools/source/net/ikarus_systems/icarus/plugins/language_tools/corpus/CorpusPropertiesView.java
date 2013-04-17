@@ -57,9 +57,9 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 /**
  * @author Markus Gärtner
@@ -140,6 +140,7 @@ public class CorpusPropertiesView extends View {
 		propertiesArea.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
 		UIUtil.disableHtml(propertiesArea);
 		propertiesArea.setBorder(titleBoarder);
+		propertiesArea.setEditable(false);
 		propertiesArea.addMouseListener(handler);
 		
 		// Properties table
@@ -342,7 +343,7 @@ public class CorpusPropertiesView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.opi.Message)
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
@@ -533,16 +534,6 @@ public class CorpusPropertiesView extends View {
 		private void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
 				showPopup(e);
-			}
-		}
-
-		/**
-		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount()==2) {
-				
 			}
 		}
 

@@ -85,7 +85,8 @@
 		</parameter-def>
 	</extension-point>
 			
-	<extension-point id="SentenceDataReader">
+	<extension-point id="SentenceDataReader" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
 		<doc>
 			<doc-text>
 				Helper object for reading a certain type of 'sentence format'
@@ -105,14 +106,15 @@
 			<doc>
 				<doc-text>
 					Identifies the grammar object associated with this reader. 
-					Used to thin out the number of corpora being displayed. 
+					Used to thin out the number of available readers being displayed. 
 					Readers that reference an unknown grammar are ignored.
 				</doc-text>
 			</doc>
 		</parameter-def>
 	</extension-point>
 			
-	<extension-point id="SentenceDataWriter">
+	<extension-point id="SentenceDataWriter" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
 		<doc>
 			<doc-text>
 				Helper object for saving a certain type of 'sentence format'
@@ -175,8 +177,8 @@
 		<parameter id="name" value="plugins.languageTools.corpusManagerPerspective.identity.name" />
 		<parameter id="description" value="plugins.languageTools.corpusManagerPerspective.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.CorpusManagerPerspective" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus-manager-perspective.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusManagerPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-manager-perspective.gif" />
 	</extension>
 	
 	<extension id="TextInputView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="LanguageToolsView">
@@ -270,13 +272,13 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.FilteredCorpus" />
 	</extension>
 	
-	<extension id="BasicCorpusEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+	<extension id="DefaultSimpleCorpusEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
 				Default editor usable for basically any type of Corpus
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.BasicCorpusEditor" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.DefaultSimpleCorpusEditor" />
 		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
@@ -296,7 +298,7 @@
 	<extension id="CorpusListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				Renderer to be used for corpus objects displayed in JList implementations.
+				Renderer to be used for corpus objects displayed in JList and JComboBox implementations.
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusListCellRenderer" />
@@ -324,5 +326,6 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusListModel" />
 		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
 		<parameter id="interface" value="javax.swing.ListModel" />
+		<parameter id="interface" value="javax.swing.ComboBoxModel" />
 	</extension>
 </plugin>

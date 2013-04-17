@@ -44,8 +44,7 @@ public class ExtensionIdentity implements Identity {
 		
 		Extension.Parameter param = extension.getParameter("resources"); //$NON-NLS-1$
 		if(param!=null) {
-			ClassLoader classLoader = PluginUtil.getPluginManager().getPluginClassLoader(
-					extension.getDeclaringPluginDescriptor());
+			ClassLoader classLoader = PluginUtil.getClassLoader(extension);
 			String basename = param.valueAsString();
 			ResourceLoader loader = new DefaultResourceLoader(classLoader);
 			resources = ResourceManager.getInstance().addManagedResource(basename, loader);
@@ -97,7 +96,7 @@ public class ExtensionIdentity implements Identity {
 	public Icon getIcon() {
 		Extension.Parameter param = extension.getParameter("icon"); //$NON-NLS-1$
 		if(icon==null && param!=null) {
-			ClassLoader loader = PluginUtil.getPluginManager().getPluginClassLoader(extension.getDeclaringPluginDescriptor());
+			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			URL iconLocation = loader.getResource(param.valueAsString());
 			
 			if(iconLocation!=null) {

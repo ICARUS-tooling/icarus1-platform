@@ -12,6 +12,9 @@ package net.ikarus_systems.icarus.plugins.language_tools.corpus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+
+import org.java.plugin.registry.Extension;
 
 import net.ikarus_systems.icarus.language.Grammar;
 import net.ikarus_systems.icarus.language.SentenceData;
@@ -24,6 +27,8 @@ import net.ikarus_systems.icarus.language.corpus.CorpusEvents;
 import net.ikarus_systems.icarus.language.corpus.CorpusMetaData;
 import net.ikarus_systems.icarus.language.corpus.CorpusMetaDataBuilder;
 import net.ikarus_systems.icarus.language.corpus.CorpusObserver;
+import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 
 /**
@@ -32,6 +37,8 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
  *
  */
 public class DefaultSimpleCorpus extends AbstractCorpus implements Corpus {
+
+	public static final String READER_EXTENSION_PROPERTY = "DefaultSimpleCorpus::reader_extension"; //$NON-NLS-1$
 	
 	protected List<SentenceData> buffer;
 	
@@ -42,16 +49,71 @@ public class DefaultSimpleCorpus extends AbstractCorpus implements Corpus {
 	protected AtomicBoolean loading = new AtomicBoolean();
 	protected boolean loaded = false;
 	
-	protected SentenceDataReader reader;
+	protected transient SentenceDataReader reader;
+	
+	protected Extension readerExtension;
 	
 	protected CorpusMetaData metaData;
 	
 	public DefaultSimpleCorpus() {
 		// no-op
 	}
-	
-	public void init(CorpusDescriptor descriptor) {
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.corpus.Corpus#saveState(net.ikarus_systems.icarus.language.corpus.CorpusDescriptor)
+	 */
+	public void saveState(CorpusDescriptor descriptor) {
+		super.saveState(descriptor);
 		
+		if(readerExtension!=null) {
+			descriptor.getProperties().put(READER_EXTENSION_PROPERTY, readerExtension.getUniqueId());
+		}
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.corpus.Corpus#loadState(net.ikarus_systems.icarus.language.corpus.CorpusDescriptor)
+	 */
+	public void loadState(CorpusDescriptor descriptor) {		
+		super.loadState(descriptor);
+		
+		String uid = (String) properties.get(READER_EXTENSION_PROPERTY);
+		if(uid!=null) {
+			readerExtension = PluginUtil.getExtension(uid);
+		}
+		
+		reader = null;
+	}
+	
+	public void setReader(Extension readerExtension) {
+		if(readerExtension!=null && readerExtension.equals(this.readerExtension)) {
+			return;
+		}
+		
+		this.readerExtension = readerExtension;
+		reader = null;
+	}
+	
+	public Extension getReader() {
+		return readerExtension;
+	}
+	
+	protected SentenceDataReader getSentenceDataReader() {
+		if(reader!=null) {
+			return reader;
+		}
+		
+		if(readerExtension==null)
+			throw new IllegalStateException("No reader defined"); //$NON-NLS-1$
+				
+		try {
+			reader = (SentenceDataReader) PluginUtil.instantiate(readerExtension);
+		} catch (InstantiationException | IllegalAccessException
+				| ClassNotFoundException e) {
+			LoggerFactory.getLogger(DefaultSimpleCorpus.class).log(LoggerFactory.record(
+					Level.SEVERE, "Failed to instantiate reader: "+readerExtension.getUniqueId(), e)); //$NON-NLS-1$
+		}
+		
+		return reader;
 	}
 
 	/**
@@ -147,6 +209,8 @@ public class DefaultSimpleCorpus extends AbstractCorpus implements Corpus {
 	 */
 	@Override
 	public void load() throws Exception {
+		SentenceDataReader reader = getSentenceDataReader();
+		
 		if(location==null)
 			throw new IllegalStateException("Invalid location"); //$NON-NLS-1$
 		if(reader==null)
@@ -226,7 +290,7 @@ public class DefaultSimpleCorpus extends AbstractCorpus implements Corpus {
 	 */
 	@Override
 	public Class<? extends SentenceData> getEntryClass() {
-		return reader==null ? SentenceData.class : reader.getDataClass();
+		return reader==null ? SentenceData.class : getSentenceDataReader().getDataClass();
 	}
 
 	/**

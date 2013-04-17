@@ -148,8 +148,7 @@ public abstract class ViewFilter {
 			if(viewClazz==null) {
 				try {
 					String className = extension.getParameter("class").valueAsString(); //$NON-NLS-1$
-					ClassLoader loader = PluginUtil.getPluginManager().getPluginClassLoader(
-							extension.getDeclaringPluginDescriptor());
+					ClassLoader loader = PluginUtil.getClassLoader(extension);
 					viewClazz = loader.loadClass(className);
 				} catch(Exception e) {
 					LoggerFactory.getLogger(ViewFilter.class).log(LoggerFactory.record(Level.SEVERE, 

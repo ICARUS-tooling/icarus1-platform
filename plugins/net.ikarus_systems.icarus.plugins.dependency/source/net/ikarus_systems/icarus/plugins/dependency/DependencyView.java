@@ -13,8 +13,8 @@ import javax.swing.JComponent;
 
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.util.id.Identity;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 /**
  * @author Markus Gärtner

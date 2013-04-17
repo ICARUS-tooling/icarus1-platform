@@ -13,8 +13,8 @@ import java.io.IOException;
 
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
-import net.ikarus_systems.icarus.util.UnsupportedLocationException;
 import net.ikarus_systems.icarus.util.location.Location;
+import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 
 /**
  * Deserialization handler for {@code SentenceData} objects.
@@ -51,7 +51,8 @@ public interface SentenceDataReader {
 	 * should simply be forwarded to the calling method and in the case of
 	 * data that is {@code unreadable} for this reader an {@code UnsupportedFormatException}
 	 * should be thrown instead of returning {@code null}.
-	 * @return the next {@code SentenceData} object available for this reader
+	 * @return the next {@code SentenceData} object available for this reader or
+	 * {@code null} if the end of the {@code "data stream"} is reached
 	 * @throws IOException simple forwarding of encountered {@code IOException}s
 	 * @throws UnsupportedFormatException if the reader could not construct
 	 * a new {@code SentenceData} object from the loaded data.

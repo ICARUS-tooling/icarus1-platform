@@ -68,6 +68,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -720,6 +721,7 @@ public final class UIUtil {
 		new TextAction(DefaultEditorKit.copyAction, comp);
 		new TextAction(DefaultEditorKit.pasteAction, comp);
 		new TextAction(DefaultEditorKit.selectAllAction, comp);
+		new TextAction("clear", comp); //$NON-NLS-1$
 
 		if (allowUndo && comp.getClientProperty("undoManager") != null) { //$NON-NLS-1$
 			menu.add(actionMap.get("undo")); //$NON-NLS-1$
@@ -732,6 +734,7 @@ public final class UIUtil {
 		menu.add(actionMap.get(DefaultEditorKit.pasteAction));
 		menu.addSeparator();
 		menu.add(actionMap.get(DefaultEditorKit.selectAllAction));
+		menu.add(actionMap.get("clear")); //$NON-NLS-1$
 
 		return menu;
 	}
@@ -805,9 +808,16 @@ public final class UIUtil {
 						.getKeyStroke("ctrl V")); //$NON-NLS-1$
 			} else if (DefaultEditorKit.selectAllAction.equals(actionID)) {
 				// SELECT ALL
+				putValue(Action.SMALL_ICON, IconRegistry.getGlobalRegistry().getIcon("task_obj.gif")); //$NON-NLS-1$
 				putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 				putValue(Action.ACCELERATOR_KEY, KeyStroke
 						.getKeyStroke("ctrl A")); //$NON-NLS-1$
+			} else if("clear".equals(actionID)) { //$NON-NLS-1$
+				// CLEAR ALL
+				putValue(Action.SMALL_ICON, IconRegistry.getGlobalRegistry().getIcon("clear_co.gif")); //$NON-NLS-1$
+				putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
+				putValue(Action.ACCELERATOR_KEY, KeyStroke
+						.getKeyStroke("ctrl N")); //$NON-NLS-1$
 			}
 
 			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, actionID, null);
@@ -834,6 +844,13 @@ public final class UIUtil {
 				component.copy();
 			} else if (DefaultEditorKit.pasteAction.equals(actionID)) {
 				component.paste();
+			} else if ("clear".equals(actionID)) { //$NON-NLS-1$
+				Document doc = component.getDocument();
+				try {
+					doc.remove(0, doc.getLength());
+				} catch (BadLocationException e1) {
+					// no-op
+				}
 			}
 		}
 

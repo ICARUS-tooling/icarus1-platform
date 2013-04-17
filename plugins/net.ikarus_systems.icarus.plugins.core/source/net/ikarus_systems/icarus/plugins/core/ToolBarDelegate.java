@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 
@@ -53,6 +54,7 @@ public class ToolBarDelegate {
 		ensureToolBar();
 		
 		toolBar.add(comp);
+		comp.setFocusable(false);
 		separatorAllowed = !(comp instanceof JSeparator);
 	}
 	
@@ -91,7 +93,8 @@ public class ToolBarDelegate {
 			return;
 		}
 		JToolBar toolBar = getToolbar();
-		toolBar.add(action);
+		JButton b = toolBar.add(action);
+		b.setFocusable(false);
 		separatorAllowed = true;
 	}
 	

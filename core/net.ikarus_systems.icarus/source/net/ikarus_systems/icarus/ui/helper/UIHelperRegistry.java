@@ -151,8 +151,7 @@ public final class UIHelperRegistry {
 		// Wrap extension into a compact proxy
 		if(helper instanceof Extension) {
 			Extension ext = (Extension) helper;
-			ClassLoader loader = PluginUtil.getPluginManager().getPluginClassLoader(
-					ext.getDeclaringPluginDescriptor());
+			ClassLoader loader = PluginUtil.getClassLoader(ext);
 			String className = ext.getParameter("class").valueAsString();  //$NON-NLS-1$
 			helper = new ClassProxy(className, loader);
 		}

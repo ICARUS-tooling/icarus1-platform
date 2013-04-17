@@ -22,9 +22,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.util.location.Location;
-import net.ikarus_systems.icarus.xml.ExtensionAdapter;
-import net.ikarus_systems.icarus.xml.LocationAdapter;
-import net.ikarus_systems.icarus.xml.MapAdapter;
+import net.ikarus_systems.icarus.xml.jaxb.ExtensionAdapter;
+import net.ikarus_systems.icarus.xml.jaxb.LocationAdapter;
+import net.ikarus_systems.icarus.xml.jaxb.MapAdapter;
 
 import org.java.plugin.registry.Extension;
 
@@ -35,7 +35,7 @@ import org.java.plugin.registry.Extension;
  * @version $Id$
  *
  */
-@XmlRootElement(name="corpus", namespace="")
+@XmlRootElement(name="corpus")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 	
@@ -73,6 +73,10 @@ public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 		this.extension = extension;
 	}
 	
+	boolean hasCorpus() {
+		return corpus!=null;
+	}
+	
 	public Corpus getCorpus() {
 		if(corpus==null)
 			throw new IllegalStateException("No corpus loaded: "+id); //$NON-NLS-1$
@@ -84,8 +88,7 @@ public class CorpusDescriptor implements Comparable<CorpusDescriptor> {
 		if(corpus!=null)
 			throw new IllegalStateException("Corpus already instantiated: "+id); //$NON-NLS-1$
 
-		ClassLoader loader = PluginUtil.getPluginManager().getPluginClassLoader(
-				extension.getDeclaringPluginDescriptor());
+		ClassLoader loader = PluginUtil.getClassLoader(extension);
 		String className = extension.getParameter("class").valueAsString(); //$NON-NLS-1$
 		Class<?> clazz = loader.loadClass(className);
 		

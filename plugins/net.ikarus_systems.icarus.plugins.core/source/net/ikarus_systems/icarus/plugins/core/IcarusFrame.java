@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -38,7 +37,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.plugins.ExtensionIdentityCache;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
@@ -47,6 +45,7 @@ import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
+import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.registry.Extension;
@@ -84,57 +83,67 @@ public class IcarusFrame extends JFrame {
 	/**
 	 * 
 	 */
-	public IcarusFrame(Object data) {
+	public IcarusFrame(Options options) {
+		if(options==null) {
+			options = Options.emptyOptions;
+		}
+		
+		currentPerspective = readPerspectiveOption(options);
+	}
+	
+	private Perspective readPerspectiveOption(Options options) {
+
 		Extension perspectiveExtension = null;
 		
+		Object perspective = options.get("perspective"); //$NON-NLS-1$
+		
 		// Interpret a string as guid for some Perspective extension
-		if(data instanceof String) {
-			data = PluginUtil.findExtension(IcarusCorePlugin.PLUGIN_ID, 
-					"Perspective", (String)data); //$NON-NLS-1$
+		if(perspective instanceof String) {
+			perspective = PluginUtil.findExtension(IcarusCorePlugin.PLUGIN_ID, 
+					"Perspective", (String)perspective); //$NON-NLS-1$
 		}
-		if(data instanceof Extension) {
-			Extension extension = (Extension) data;
+		if(perspective instanceof Extension) {
+			Extension extension = (Extension) perspective;
 			perspectiveExtension = extension;
 			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
 			if(param==null)
 				throw new IllegalArgumentException("Provided extension does not declare a class"); //$NON-NLS-1$
-			ClassLoader loader = PluginUtil.getPluginManager()
-					.getPluginClassLoader(extension.getDeclaringPluginDescriptor());
+			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			try {
-				data = loader.loadClass(param.valueAsString());
+				perspective = loader.loadClass(param.valueAsString());
 			} catch(ClassNotFoundException e) {
 				LoggerFactory.getLogger(IcarusFrame.class).log(LoggerFactory.record(Level.SEVERE, 
 						"Unable to load class for perspective extension: "+extension.getUniqueId(), e)); //$NON-NLS-1$
-				throw new IllegalArgumentException("Not a valid perspective class: "+data, e); //$NON-NLS-1$
+				throw new IllegalArgumentException("Not a valid perspective class: "+perspective, e); //$NON-NLS-1$
 			}
 		}
-		if(data instanceof Class<?>) {
-			Class<?> clazz = (Class<?>) data;
+		if(perspective instanceof Class<?>) {
+			Class<?> clazz = (Class<?>) perspective;
 			if(!Perspective.class.isAssignableFrom(clazz))
 				throw new IllegalArgumentException(
 						"Supplied perspective class is not compatible with "+Perspective.class.getName() //$NON-NLS-1$
-						+" : "+data); //$NON-NLS-1$
+						+" : "+perspective); //$NON-NLS-1$
 			
 			if(perspectiveExtension==null) {
 				perspectiveExtension = findDeclaringExtension(clazz);
 			}
 			
 			try {
-				Perspective perspective = (Perspective) clazz.newInstance();
-				perspective.setExtension(perspectiveExtension);
-				data = perspective;
+				Perspective newPerspective = (Perspective) clazz.newInstance();
+				newPerspective.setExtension(perspectiveExtension);
+				perspective = newPerspective;
 			} catch(Exception e) {
 				LoggerFactory.getLogger(IcarusFrame.class).log(Level.SEVERE, 
 						"Failed to instantiate perspective class: "+clazz, e); //$NON-NLS-1$
-				throw new IllegalArgumentException("Not a valid perspective class: "+data, e); //$NON-NLS-1$
+				throw new IllegalArgumentException("Not a valid perspective class: "+perspective, e); //$NON-NLS-1$
 			}
 		}
 		
 		// Make sure we only accept Perspective objects
-		if(data!=null && !(data instanceof Perspective))
-			throw new IllegalArgumentException("Provided object is not a perspective: "+data); //$NON-NLS-1$
+		if(perspective!=null && !(perspective instanceof Perspective))
+			throw new IllegalArgumentException("Provided object is not a perspective: "+perspective); //$NON-NLS-1$
 		
-		currentPerspective = (Perspective) data;
+		return (Perspective) perspective;
 	}
 	
 	void init() throws Exception {
@@ -289,8 +298,7 @@ public class IcarusFrame extends JFrame {
 			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
 			if(param==null)
 				throw new IllegalArgumentException("Provided extension does not declare a class"); //$NON-NLS-1$
-			ClassLoader loader = PluginUtil.getPluginManager()
-					.getPluginClassLoader(extension.getDeclaringPluginDescriptor());
+			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			try {
 				data = loader.loadClass(param.valueAsString());
 			} catch(ClassNotFoundException e) {
@@ -554,7 +562,7 @@ public class IcarusFrame extends JFrame {
 				continue;
 			}
 			
-			Identity identity = ExtensionIdentityCache.getInstance().getIdentity(extension);
+			Identity identity = PluginUtil.getIdentity(extension);
 			
 			JMenuItem item = new JMenuItem(identity.getName(), identity.getIcon());
 			item.setActionCommand(extension.getUniqueId());
@@ -812,12 +820,14 @@ public class IcarusFrame extends JFrame {
 		
 		public void copyFrame(ActionEvent e) {
 			try {
-				Object perspective = null;
+				Options options = null;
 				Perspective currentPerspective = IcarusFrame.this.currentPerspective;
 				if(currentPerspective!=null) {
-					perspective = currentPerspective.getClass();
+					options = new Options(
+							"perspective", currentPerspective.getClass()); //$NON-NLS-1$
 				}
-				FrameManager.getInstance().newFrame(perspective);
+				
+				FrameManager.getInstance().newFrame(options);
 			} catch(Exception ex) {
 				logger.log(LoggerFactory.record(Level.SEVERE,
 						"Failed to copy frame: "+currentPerspective, ex)); //$NON-NLS-1$
@@ -946,7 +956,6 @@ public class IcarusFrame extends JFrame {
 		 * @see net.ikarus_systems.icarus.ui.events.EventListener#invoke(java.lang.Object, net.ikarus_systems.icarus.ui.events.EventObject)
 		 */
 		@Override
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public void invoke(Object sender, EventObject event) {
 			if(comboBox==null) {
 				return;

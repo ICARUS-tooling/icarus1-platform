@@ -480,16 +480,18 @@ public class ConfigRegistry implements ConfigConstants {
 			item.path = item.parent.path+delimiter+item.name;
 			
 			if(item instanceof ConfigGroup && ((ConfigGroup)item).items!=null) {
-				for(ConfigItem subItem : ((ConfigGroup)item).items)
+				for(ConfigItem subItem : ((ConfigGroup)item).items) {
 					refreshPath(subItem);
+				}
 			}
 		}
 	}
 	
 	private ConfigStorage getStorage(ConfigItem item) {
 		ConfigStorage storage = null;
-		while(item!=null && (storage = item.storage)==null)
+		while(item!=null && (storage = item.storage)==null) {
 			item = item.parent;
+		}
 		
 		return storage;
 	}

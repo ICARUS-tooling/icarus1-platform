@@ -39,9 +39,9 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 /**
  * @author Markus Gärtner
@@ -123,6 +123,7 @@ public class CorpusEditView extends View {
 		showDefaultInfo();
 		
 		CorpusRegistry.getInstance().addListener(Events.REMOVED, handler);
+		CorpusRegistry.getInstance().addListener(Events.CHANGED, handler);
 
 		registerActionCallbacks();
 		refreshActions();
@@ -271,7 +272,7 @@ public class CorpusEditView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.opi.Message)
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
@@ -319,9 +320,19 @@ public class CorpusEditView extends View {
 			if(sender==CorpusRegistry.getInstance()) {
 				Corpus corpus = (Corpus) event.getProperty("corpus"); //$NON-NLS-1$
 
+				if(corpus!=getCorpus()) {
+					return;
+				}
+				
 				// Handle deleted corpora								
-				if(corpus==getCorpus()) {
+				if(Events.REMOVED.equals(event.getName())) {
 					reset();
+					return;
+				}
+				
+				// Handle changes so we can display latest name								
+				if(Events.CHANGED.equals(event.getName())) {
+					header.setText(corpus.getName());
 					return;
 				}
 			}

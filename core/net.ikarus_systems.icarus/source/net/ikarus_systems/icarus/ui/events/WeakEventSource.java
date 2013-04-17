@@ -75,7 +75,10 @@ public class WeakEventSource extends EventSource {
 		if (eventListeners != null) {
 			for (int i=eventListeners.size()-1; i>-1; i--) {
 				Entry entry = (Entry)eventListeners.get(i);
-				if(entry.ref.get()==null || (entry.ref.get()==listener
+				if(entry==null) {
+					continue;
+				}
+				if(entry.ref==null || entry.ref.get()==null || (entry.ref.get()==listener
 						&& (eventName==null || String.valueOf(
 								entry.eventName).equals(eventName)))) {
 					entry.delete();

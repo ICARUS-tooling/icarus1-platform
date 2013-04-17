@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,7 +91,55 @@ public final class IcarusCorePlugin extends Plugin {
 		actionManager.addHandler("plugins.core.icarusCorePlugin.openPreferencesAction",  //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
 
-		// Init config		
+		// Init config
+		initConfig();
+		
+		// Reload config data from storage
+		ConfigRegistry.getGlobalRegistry().updateConfigTree(null);
+		
+		// Register ui-helper objects
+		registerUIHelpers();
+		
+		// Show ui elements
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					initAndShowGUI();
+				} catch (Exception e) {
+					logger.log(LoggerFactory.record(Level.SEVERE, 
+							"Failed to init core plug-in interface", e)); //$NON-NLS-1$
+				}
+			}
+		});
+	}
+	
+	private void registerUIHelpers() {
+		for(Extension extension : getDescriptor().getExtensionPoint("UIHelper").getConnectedExtensions()) { //$NON-NLS-1$
+			try {
+				// No need to use a special class-loader since the helper
+				// interfaces should be globally accessible to all plug-ins
+				// and preferably be hosted within the icarus core.
+				// UPDATE: We allow to host helper interfaces in external plug-ins!
+				ClassLoader loader = PluginUtil.getClassLoader(extension);
+				Collection<Extension.Parameter> interfaceParams = extension.getParameters("interface"); //$NON-NLS-1$
+				for(Extension.Parameter param : interfaceParams) {
+					Class<?> helperClass = loader.loadClass(param.valueAsString());
+					String objectClassName = extension.getParameter("target").valueAsString(); //$NON-NLS-1$
+					
+					// The registry already knows how to wrap extension objects
+					UIHelperRegistry.globalRegistry().registerHelper(
+							helperClass, objectClassName, extension);
+				}
+			} catch(Exception e) {
+				logger.log(LoggerFactory.record(Level.SEVERE, 
+						"Failed to register ui-helper: "+extension.getUniqueId(), e)); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	private void initConfig() {
 		ConfigBuilder builder = new ConfigBuilder(ConfigRegistry.getGlobalRegistry());
 		
 		// GENERAL GROUP
@@ -115,40 +164,11 @@ public final class IcarusCorePlugin extends Plugin {
 		builder.back();
 		// END GENERAL GROUP
 		
-		// Reload config data from storage
-		ConfigRegistry.getGlobalRegistry().updateConfigTree(null);
-		
-		// Register ui-helper objects
-		for(Extension extension : getDescriptor().getExtensionPoint("UIHelper").getConnectedExtensions()) { //$NON-NLS-1$
-			try {
-				// No need to use a special class-loader since the helper
-				// interfaces should be globally accessible to all plug-ins
-				// and preferably be hosted within the icarus core.
-				Class<?> helperClass = Class.forName(extension.getParameter("interface").valueAsString()); //$NON-NLS-1$
-				String objectClassName = extension.getParameter("target").valueAsString(); //$NON-NLS-1$
-				
-				// The registry already knows how to wrap extension objects
-				UIHelperRegistry.globalRegistry().registerHelper(
-						helperClass, objectClassName, extension);
-			} catch(Exception e) {
-				logger.log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to register ui-helper: "+extension.getUniqueId(), e)); //$NON-NLS-1$
-			}
-		}
-		
-		// Show ui elements
-		SwingUtilities.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					initAndShowGUI();
-				} catch (Exception e) {
-					logger.log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to init core plug-in interface", e)); //$NON-NLS-1$
-				}
-			}
-		});
+		// PLUGINS GROUP
+		builder.addGroup("plugins", true); //$NON-NLS-1$
+		// TODO add plugins options
+		builder.back();
+		// END PLUGINS GROUP
 	}
 	
 	private void initAndShowGUI() throws Exception {

@@ -33,7 +33,8 @@ public interface Editor<T extends Object> {
 	/**
 	 * Resets the editor to use the supplied {@code item}. It is legal to
 	 * provide {@code null} values in which case the editor should simply
-	 * clear its interface.
+	 * clear its interface. If the supplied {@code item} is not of a supported
+	 * type then the editor should throw an {@link IllegalArgumentException}.
 	 */
 	void setEditingItem(T item);
 	
@@ -71,4 +72,26 @@ public interface Editor<T extends Object> {
 	 * no longer considered to be usable.
 	 */
 	void close();
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 * @param <T>
+	 */
+	public interface TableEditor<T extends Object> extends Editor<T> {
+		
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 * @param <T>
+	 */
+	public interface GraphEditor<T extends Object> extends Editor<T> {
+		
+	}
 }

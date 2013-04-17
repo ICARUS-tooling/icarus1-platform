@@ -72,6 +72,7 @@ public class Core {
 	private final File logFolder;
 	private final File pluginFolder;
 	private final File dataFolder;
+	private final File tempFolder;
 	
 	private static final String ICARUS_CORE_PLUGIN = 
 			"net.ikarus_systems.icarus.core"; //$NON-NLS-1$
@@ -97,7 +98,12 @@ public class Core {
 		if(!dataFolder.isDirectory() && !dataFolder.mkdir())
 			throw new Error("Unable to create data directory"); //$NON-NLS-1$
 
-		// init default log file
+		// init temp folder
+		tempFolder = new File(rootFolder, "temp"); //$NON-NLS-1$
+		if(!tempFolder.isDirectory() && !tempFolder.mkdir())
+			throw new Error("Unable to create temp directory"); //$NON-NLS-1$
+
+		// Init default log file
 		File logFile = new File(logFolder, "launcher.log"); //$NON-NLS-1$
 		try {
 			logger.addHandler(new FileHandler(logFile.getPath()));
@@ -107,14 +113,15 @@ public class Core {
 			throw new Error("Unable to access log file: "+logFile.getAbsolutePath(), e); //$NON-NLS-1$
 		}
 		
-		// from here on we can use our logger
+		// From here on we can use our logger
 		try {
 			PluginUtil.load(logger);
 		} catch (Exception e) {
 			throw new Error("Failed to load plug-in framework objects", e); //$NON-NLS-1$
 		}
 		
-		PluginUtil.getPluginManager().registerListener(new PluginManagerLog());
+		// XXX
+		//PluginUtil.getPluginManager().registerListener(new PluginManagerLog());
 	}
 	
 	// prevent multiple deserialization
@@ -278,6 +285,17 @@ public class Core {
 	 */
 	public File getDataFolder() {
 		return dataFolder;
+	}
+
+	/**
+	 * @return the tempFolder
+	 */
+	public File getTempFolder() {
+		return tempFolder;
+	}
+	
+	public File createTempFile(String baseName) throws IOException {
+		return File.createTempFile(baseName, "tmp", getTempFolder()); //$NON-NLS-1$
 	}
 	
 	private final class PluginManagerLog implements PluginManager.EventListener {

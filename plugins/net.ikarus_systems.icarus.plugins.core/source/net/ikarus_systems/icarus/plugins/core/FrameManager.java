@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.BiDiMap;
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -65,8 +66,8 @@ public final class FrameManager {
 		return newFrame(null);
 	}
 
-	public FrameHandle newFrame(Object perspective) {
-		IcarusFrame frame = new IcarusFrame(perspective);
+	public FrameHandle newFrame(Options options) {
+		IcarusFrame frame = new IcarusFrame(options);
 		try {
 			frame.init();
 		} catch (Exception e) {
