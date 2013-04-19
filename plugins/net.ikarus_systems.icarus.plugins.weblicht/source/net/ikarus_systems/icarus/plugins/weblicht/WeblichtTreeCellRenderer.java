@@ -7,7 +7,10 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainInputType;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainOutputType;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.util.Wrapper;
 
@@ -45,6 +48,14 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 		} else if(value instanceof Webservice) {
 			value = ((Webservice)value).getName();
 			icon = IconRegistry.getGlobalRegistry().getIcon("repository_rep.gif"); //$NON-NLS-1$
+		} else if(value instanceof WebchainOutputType) {
+			value = ResourceManager.getInstance().get("output") //$NON-NLS-1$
+					+ ((WebchainOutputType)value).getOutputType();
+			icon = IconRegistry.getGlobalRegistry().getIcon("history_rep.gif"); //$NON-NLS-1$
+		} else if(value instanceof WebchainInputType) {
+			value = ResourceManager.getInstance().get("input") //$NON-NLS-1$
+					+ ((WebchainOutputType)value).getOutputType();
+			icon = IconRegistry.getGlobalRegistry().getIcon("addrepo_rep.gif"); //$NON-NLS-1$
 		}
 		
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,

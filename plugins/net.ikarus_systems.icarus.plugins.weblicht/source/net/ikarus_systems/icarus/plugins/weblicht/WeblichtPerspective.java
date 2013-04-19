@@ -29,8 +29,8 @@ public class WeblichtPerspective extends Perspective {
 		String[] defaultViewIds = {
 				WeblichtConstants.WEBLICHT_CHAIN_VIEW_ID,
 				WeblichtConstants.WEBLICHT_WEBSERVICE_VIEW_ID,
-				WeblichtConstants.WEBLICHT_EDIT_VIEW_ID,
 				WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID,
+				WeblichtConstants.WEBLICHT_EDIT_VIEW_ID				
 		};
 		
 		Set<Extension> newExtensions = new HashSet<>();

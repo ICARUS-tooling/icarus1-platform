@@ -21,36 +21,16 @@ public class Webchain {
 	
 
 	protected List<WebserviceProxy> webserviceProxyList = new ArrayList<>();
+	protected List<WebchainElements> webchainElementsList = new ArrayList<>();
 	
 	protected String name;
 	protected String description;
 	protected WebchainInputType inputType;
 	
-	/*
-	protected Map<String,List<WebserviceProxy>> chainMap;
-
-	Map<String,List<WebserviceProxy>> getWebserviceMap() {
-		return chainMap;
-	}*/
 	
-	
-
-
-	/**
-	 * @param inputType the inputType to set
-	 */
-	public void setInputType(WebchainInputType inputType) {
-		this.inputType = inputType;
-	}
 
 	public Webchain(){
-	}
-
-	/**
-	 * @return the webserviceIDList
-	 */
-	List<WebserviceProxy> getWebserviceProxyList() {
-		return webserviceProxyList;
+		//no-op
 	}
 
 	/**
@@ -83,6 +63,12 @@ public class Webchain {
 	}
 	
 	
+
+	//return procylist
+	List<WebserviceProxy> getWebserviceProxyList() {
+		return webserviceProxyList;
+	}
+
 	public int getWebserviceCount(){
 		return webserviceProxyList.size();
 	}
@@ -97,6 +83,12 @@ public class Webchain {
 	}
 	
 	
+	public void addWebservice(String serviceID){
+		webserviceProxyList.add(new WebserviceProxy(serviceID));
+	}
+	
+	
+	
 	public boolean inListWebserviceProxy(Webservice webservice){
 		for (int i = 0; i < getWebserviceCount(); i++){
 			if (getWebserviceAt(i).get().equals(webservice)) return true;
@@ -106,9 +98,6 @@ public class Webchain {
 	}
 	
 	
-	public void addWebservice(String serviceID){
-		webserviceProxyList.add(new WebserviceProxy(serviceID));
-	}
 	
 	
 	public void addWebservices(List<String> serviceIDList){
@@ -143,6 +132,7 @@ public class Webchain {
 	public String toString() {
 		return name;
 	}
+	
 
 	/**
 	 * @return
@@ -161,6 +151,48 @@ public class Webchain {
 		}
 
 		return filtered;
+	}
+	
+
+	/**
+	 * Input Attribute
+	 * @param wit
+	 */
+	public void addWebchainElement(WebchainInputType wit) {		
+		webchainElementsList.add((WebchainElements) wit);
+	}
+	
+	
+	/**
+	 * Output Attribute
+	 * @param wot
+	 */
+	public void addWebchainElement(WebchainOutputType wot) {		
+		webchainElementsList.add((WebchainElements) wot);
+	}
+	
+	
+	/**
+	 * Webservice
+	 * @param serviceID
+	 */
+	public void addWebchainElement(String serviceID) {
+		webchainElementsList.add((WebchainElements) new WebserviceProxy(serviceID));
+		
+	}
+	
+	
+	
+	public int getElementsCount(){
+		return webchainElementsList.size();
+	}
+	
+	public int indexOfElement(WebchainElements webchainElements){
+		return webchainElementsList.indexOf(webchainElements);
+	}
+	
+	public WebchainElements getElementAt(int index){
+		return webchainElementsList.get(index);	
 	}
 
 

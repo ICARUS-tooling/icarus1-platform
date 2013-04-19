@@ -14,7 +14,7 @@ package net.ikarus_systems.icarus.plugins.weblicht.webservice;
  * @version $Id$
  *
  */
-public class WebchainInputType {
+public class WebchainInputType implements WebchainElements {
 	
 	protected String inputType;
 	protected String inputTypeValue;

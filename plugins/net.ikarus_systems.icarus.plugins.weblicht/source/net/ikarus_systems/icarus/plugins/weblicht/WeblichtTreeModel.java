@@ -7,6 +7,7 @@ import java.util.WeakHashMap;
 import javax.swing.tree.TreePath;
 
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainElements;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
 
@@ -55,7 +56,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 		if (parent == root) {
 			child = WebchainRegistry.getInstance().getWebchainAt(index);
 		} else if (parent instanceof Webchain) {
-			child = ((Webchain) parent).getWebserviceAt(index);
+			//child = ((Webchain) parent).getWebserviceAt(index);
+			child = ((Webchain) parent).getElementAt(index);
 		}
 		// System.out.println("getChild@ parent: "+parent +" child: " +child +
 		// " index: " +index);
@@ -71,7 +73,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 		if (parent == root) {
 			childCount = WebchainRegistry.getInstance().getWebchainCount();
 		} else if (parent instanceof Webchain) {
-			childCount = ((Webchain) parent).getWebserviceCount();
+			//childCount = ((Webchain) parent).getWebserviceCount();
+			childCount = ((Webchain) parent).getElementsCount();
 		}
 		// System.out.println("getChildCount@ parent: "+parent +" childc: "
 		// +childCount);
@@ -83,7 +86,7 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 	 */
 	@Override
 	public boolean isLeaf(Object node) {
-		return node instanceof WebserviceProxy;
+		return node instanceof WebchainElements;
 	}
 
 	/**
@@ -109,8 +112,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 			childIndex = WebchainRegistry.getInstance().indexOfWebchain(
 					(Webchain) child);
 		} else if (parent instanceof Webchain) {
-			childIndex = ((Webchain) parent)
-					.indexOfWebservice((WebserviceProxy) child);
+			//childIndex = ((Webchain) parent).indexOfWebservice((WebserviceProxy) child);
+			childIndex = ((Webchain) parent).indexOfElement((WebchainElements) child);
 		}
 		// System.out.println("getIndexOfChild@ parent: "+parent +" child: "
 		// +child + " cindex: " +childIndex);

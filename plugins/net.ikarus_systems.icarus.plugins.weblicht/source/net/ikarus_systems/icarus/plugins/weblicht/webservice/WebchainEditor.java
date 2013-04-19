@@ -666,7 +666,9 @@ public class WebchainEditor implements Editor<Webchain> {
 			
 			protected List<Webservice> webservices;
 			
-			protected List<Webservice> getWebservicesFromChain(Webchain webchain){
+			//TODO change to webchainelements
+			
+			protected List<Webservice> getWebelementsFromChain(Webchain webchain){
 				List<Webservice> services = new ArrayList<>();
 				
 				for (int i = 0; i< webchain.getWebserviceCount();i++){
@@ -679,7 +681,7 @@ public class WebchainEditor implements Editor<Webchain> {
 				if(webchain==null) {
 					webservices = null;
 				} else {
-					webservices = new ArrayList<>(getWebservicesFromChain(webchain));
+					webservices = new ArrayList<>(getWebelementsFromChain(webchain));
 				}
 				
 				/*

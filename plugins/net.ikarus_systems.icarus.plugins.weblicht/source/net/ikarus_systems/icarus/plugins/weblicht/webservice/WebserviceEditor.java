@@ -355,7 +355,9 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		
 		textArea.putClientProperty("container", container);		 //$NON-NLS-1$
 		textArea.setText(null);
-		textArea.setToolTipText(null);
+		textArea.setToolTipText(null);		
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
 		
 		return textArea;
 	}
@@ -510,9 +512,12 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 	 */
 	@Override
 	public void setEditingItem(Webservice webservice) {
+		
+		/*TODO Complete remove to ensure access feature working correct
 		if(this.webservice==webservice) {
 			return;
 		}
+		*/
 		
 		this.webservice = webservice;
 		resetEdit();

@@ -16,7 +16,7 @@ import net.ikarus_systems.icarus.util.Wrapper;
  * @version $Id$
  *
  */
-public class WebserviceProxy implements Wrapper<Webservice> {
+public class WebserviceProxy implements Wrapper<Webservice>, WebchainElements {
 	private final String uniqueServiceID;
 	
 	

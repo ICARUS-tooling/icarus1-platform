@@ -30,9 +30,9 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 /**
  * 
@@ -192,7 +192,7 @@ public class WeblichtEditView extends View {
 	
 	private void editWebchain(Webchain webchain) {
 		if(webchain!=null) {
-			focusView();
+			selectViewTab();
 		}
 		
 		Webchain oldWebchain = getWebchain();

@@ -133,6 +133,21 @@
 	</extension>
 
 	
+	<extension id="WebserviceEditView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Editor for building new Webservices.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.weblicht.webserviceEditView.identity.name" />
+		<parameter id="description" value="plugins.weblicht.webserviceEditView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.WebserviceEditView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/weblicht/webservice-edit-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="standard" />
+	</extension>
+
 	<extension id="WeblichtEditView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
 		<doc>
 			<doc-text>
@@ -148,34 +163,6 @@
 		<parameter id="priority" value="high" />
 	</extension>
 	
-	<extension id="WebserviceEditView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
-		<doc>
-			<doc-text>
-				Editor for building new Webservices.
-			</doc-text>
-		</doc>
-		<parameter id="name" value="plugins.weblicht.webserviceEditView.identity.name" />
-		<parameter id="description" value="plugins.weblicht.webserviceEditView.identity.description" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.WebserviceEditView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/weblicht/webservice-edit-view.gif" />
-		<parameter id="alignment" value="center" />
-		<parameter id="priority" value="high" />
-	</extension>
-
-	
-
-	<extension id="WebchainEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
-		<doc>
-			<doc-text>
-				Editor used for Webchains.
-			</doc-text>
-		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain" />
-		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
-	</extension>
-	
 	<extension id="WebserviceEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
@@ -186,4 +173,16 @@
 		<parameter id="target" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
+
+	<extension id="WebchainEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Editor used for Webchains.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainEditor" />
+		<parameter id="target" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
+	</extension>	
+
 </plugin>

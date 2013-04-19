@@ -30,6 +30,7 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
@@ -43,8 +44,8 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
 
 /**
  * @author Gregor Thiele

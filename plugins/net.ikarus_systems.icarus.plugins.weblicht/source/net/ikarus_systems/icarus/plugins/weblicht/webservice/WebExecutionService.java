@@ -9,9 +9,15 @@
  */
 package net.ikarus_systems.icarus.plugins.weblicht.webservice;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.ikarus_systems.icarus.language.MutableSentenceData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventSource;
@@ -21,6 +27,10 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+
+import de.tuebingen.uni.sfs.wlf1.io.TextCorpusStreamed;
+import de.tuebingen.uni.sfs.wlf1.io.WLFormatException;
+import de.tuebingen.uni.sfs.wlf1.tc.xb.TextCorpusLayerTag;
 
 /**
  * @author Gregor Thiele
@@ -74,6 +84,8 @@ public class WebExecutionService{
 
 		List<String> query = WebchainRegistry.getInstance()
 				.getQueryFromWebchain(webchain);
+		
+		System.out.println(query);
 
 		String result = input;
 
@@ -130,8 +142,67 @@ public class WebExecutionService{
 			
 		}	
 		
-		System.out.println("Webresult: " + result);
+		
+		createTCFfromString(result, getReadableLayerTags(query));
 
+		
+		System.out.println("Webresult: " + result);
+		
+	}
+	
+	private EnumSet<TextCorpusLayerTag> getReadableLayerTags(List<String> format){
+		EnumSet<TextCorpusLayerTag> layers2Read = EnumSet.noneOf(TextCorpusLayerTag.class);
+		
+		for (int i = 0; i < format.size(); i++){
+			EnumSet<TextCorpusLayerTag> tmp = EnumSet.noneOf(TextCorpusLayerTag.class);
+
+			if (format.get(i).equals("text")){ //$NON-NLS-1$
+				tmp = EnumSet.of(TextCorpusLayerTag.TEXT);
+			}
+			
+			if (format.get(i).equals("tokens")){ //$NON-NLS-1$
+				tmp = EnumSet.of(TextCorpusLayerTag.TOKENS);
+			}
+			
+			if (format.get(i).equals("sentences")){ //$NON-NLS-1$
+				tmp = EnumSet.of(TextCorpusLayerTag.SENTENCES);
+			}
+			
+			
+			//TODO add other stuff
+			/*
+			[TEXT, TOKENS, SENTENCES,
+			 LEMMAS, POSTAGS, MORPHOLOGY,
+			 PARSING_CONSTITUENT, PARSING_DEPENDENCY,
+			 RELATIONS, NAMED_ENTITIES, REFERENCES,
+			 SYNONYMY, ANTONYMY, HYPONYMY, HYPERONYMY,
+			 WORD_SPLITTINGS, PHONETICS, GEO, ORTHOGRAPHY,
+			 TEXT_STRUCTURE, DISCOURSE_CONNECTIVES, CORPUS_MATCHES]
+			 */
+			layers2Read.addAll(tmp);
+			
+		}
+		System.out.println(layers2Read);
+		return layers2Read;
+		
+	}
+	
+	
+	private void createTCFfromString(String input, EnumSet<TextCorpusLayerTag> layersToRead){
+		InputStream is = new ByteArrayInputStream(input.getBytes());
+		
+		
+		try {
+			TextCorpusStreamed tcs = new TextCorpusStreamed(is, layersToRead);
+			
+			//see WebLichtAdapter wlfxb
+			System.out.println(tcs.getTokensLayer());
+			System.out.println(tcs.getAntonymyLayer());
+		} catch (WLFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	//TODO return format/corpus

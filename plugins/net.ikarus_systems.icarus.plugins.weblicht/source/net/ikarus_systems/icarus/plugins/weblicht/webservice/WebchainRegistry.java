@@ -197,8 +197,6 @@ public class WebchainRegistry {
 				return;
 			}
 			
-			List<WebserviceProxy> webserviceProxyList;
-			
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -250,19 +248,35 @@ public class WebchainRegistry {
 					
 					webchain.setWebchainInputType(inputType);
 					
+					//addinput
+					webchain.addWebchainElement(inputType);
+					
 					//Grab all unique webservice numbers from chain
 					NodeList uidList = eElement.getElementsByTagName("service"); //$NON-NLS-1$
 					
-					webserviceProxyList = new ArrayList<>();
 					for (int j = 0; j < uidList.getLength(); j++) {						
 						Node uidNode = uidList.item(j);
 						//System.out.println("Chainname : " +	eElement.getAttribute("uname"));
 						if (uidNode.getNodeType() == Node.ELEMENT_NODE) {
 							Element idElement = (Element) uidNode;
-							String uniqueID = idElement.getAttribute("uid");							 //$NON-NLS-1$
-							webchain.addWebservice(uniqueID);
-						}							
-					}	
+							String uniqueID = idElement.getAttribute("uid"); //$NON-NLS-1$
+							
+							//we found an output element
+							if (uniqueID.equals("")){
+								
+								webchain.addWebchainElement(
+										new WebchainOutputType(
+												idElement.getAttribute("type"), //$NON-NLS-1$
+												idElement.getAttribute("value"))); //$NON-NLS-1$
+							}
+							
+							//webservice
+							else {
+								webchain.addWebchainElement(uniqueID);
+								webchain.addWebservice(uniqueID);
+							}
+						}
+					}
 					addNewWebchain(webchain);
 				}
 			}			
@@ -422,6 +436,8 @@ public class WebchainRegistry {
 				"webchain",webchain, //$NON-NLS-1$
 				"index",index));//$NON-NLS-1$
 	}
+	
+	
 	
 	
 	/**
@@ -603,6 +619,8 @@ public class WebchainRegistry {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		System.out.println(wcl.getWebchainAt(0).getElementsCount());;
 		System.out.println("fertig"); //$NON-NLS-1$
 
 	}

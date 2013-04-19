@@ -39,9 +39,9 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
-import net.ikarus_systems.icarus.util.opi.ResultMessage;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 /**
  * @author Gregor Thiele
@@ -137,6 +137,14 @@ public class WebserviceEditView extends View {
 	private void showDefaultInfo() {
 		scrollPane.setViewportView(infoLabel);
 		header.setText(""); //$NON-NLS-1$
+		
+		// Close any active editor and discard its reference
+		// This is required to prevent "old" webservice to block
+		// refresh operations
+		if(editor!=null) {
+			editor.close();
+			editor = null;
+		}
 	}
 
 	private void refreshActions() {
@@ -201,17 +209,16 @@ public class WebserviceEditView extends View {
 	private void editWebservice(Webservice webservice) {
 		
 		if(webservice!=null) {
-			focusView();
+			selectViewTab();
 		}
 		
 		Webservice oldWebservice = getWebservice();
-		// not needed; oldservice may be the same webchainShowOnly = webserviceEditView
-		if(oldWebservice==webservice) {
-			System.out.println("same" + editable); //$NON-NLS-1$
+		// oldservice may be the same, accesstype may changed repaint to avoid inconsistency
+		if(oldWebservice==webservice) {			
+			editor.setAccessType(editable);
+			editor.setEditingItem(webservice);
 			return;
-		}
-		
-		
+		}	
 		
 		
 		// Offer chance to save changes 
@@ -241,13 +248,13 @@ public class WebserviceEditView extends View {
 		// If the new Webservice is of the same type just use
 		// the present editor!
 		if(oldWebservice!=null && oldWebservice.getClass().equals(
-				webservice.getClass()) && editor!=null) {			
-			editor.setEditingItem(webservice);
-			header.setText(webservice.getName());
+				webservice.getClass()) && editor!=null) {
 			editor.setAccessType(editable);
+			editor.setEditingItem(webservice);
+			header.setText(webservice.getName());			
 			return;
 		}
-		
+
 		// Try to fetch an editor for the supplied Webservice
 		@SuppressWarnings("unchecked")
 		Editor<Webservice> editor = UIHelperRegistry.globalRegistry().findHelper(
@@ -262,7 +269,8 @@ public class WebserviceEditView extends View {
 			this.editor.close();
 		}
 
-		this.editor = (WebserviceEditor) editor;		
+		this.editor = (WebserviceEditor) editor;
+		this.editor.setAccessType(editable);
 		editor.setEditingItem(webservice);
 
 		
@@ -279,12 +287,12 @@ public class WebserviceEditView extends View {
 			
 			Object data = message.getData();
 			//enable edit
-			editable = true;
+			editable = true;			
 			if (!(editor==null)) editor.setAccessType(editable);
 			// We allow null values since this is a way to clear the editor view
 			if(data==null || data instanceof Webservice) {
 				editWebservice((Webservice) data);
-				refreshActions();
+				refreshActions();				
 				return message.successResult(null);				
 			} else {
 				return message.unsupportedDataResult();

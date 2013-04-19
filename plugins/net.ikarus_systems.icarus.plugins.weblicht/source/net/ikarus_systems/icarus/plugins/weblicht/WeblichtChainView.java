@@ -41,8 +41,8 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.opi.Commands;
-import net.ikarus_systems.icarus.util.opi.Message;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
 
 
 /**
