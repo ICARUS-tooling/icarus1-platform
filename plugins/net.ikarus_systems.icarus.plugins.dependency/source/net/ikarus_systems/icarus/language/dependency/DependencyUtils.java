@@ -30,7 +30,7 @@ import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.language.MutableSentenceData;
 import net.ikarus_systems.icarus.language.SentenceData;
-import net.ikarus_systems.icarus.language.corpus.Corpus;
+import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.Options;
 
@@ -1080,10 +1080,10 @@ public class DependencyUtils implements DependencyConstants {
 		return Arrays.toString(buffer);
 	}
 	
-	public static boolean isDependencyCorpus(Corpus corpus) {
-		Exceptions.testNullArgument(corpus, "corpus");
+	public static boolean isDependencyTreebank(Treebank treebank) {
+		Exceptions.testNullArgument(treebank, "treebank");
 		
-		return DependencyData.class.isAssignableFrom(corpus.getEntryClass());
+		return DependencyData.class.isAssignableFrom(treebank.getEntryClass());
 	}
 	
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {

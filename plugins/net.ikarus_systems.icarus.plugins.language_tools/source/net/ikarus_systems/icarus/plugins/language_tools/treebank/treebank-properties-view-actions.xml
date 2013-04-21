@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		TREEBANK PROPERTIES VIEW
+	-->
+		
+	<!-- Copy Properties -->
+	<action id="plugins.languageTools.treebankPropertiesView.copyPropertiesAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy Property -->
+	<action id="plugins.languageTools.treebankPropertiesView.copyPropertyAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy Meta-Data -->
+	<action id="plugins.languageTools.treebankPropertiesView.copyMetaDataAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy All Properties -->
+	<action id="plugins.languageTools.treebankPropertiesView.copyAllPropertiesAction"
+		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+		
+	<!-- Export Properties -->
+	<action id="plugins.languageTools.treebankPropertiesView.exportPropertiesAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- Edit Treebank -->
+	<action id="plugins.languageTools.treebankPropertiesView.editTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
+	<!-- Inspect Treebank -->
+	<action id="plugins.languageTools.treebankPropertiesView.inspectTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		
+	<!-- Load Treebank -->
+	<action id="plugins.languageTools.treebankPropertiesView.loadTreebankAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Free Treebank -->
+	<action id="plugins.languageTools.treebankPropertiesView.freeTreebankAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.languageTools.treebankPropertiesView.toolBarList">
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyAllPropertiesAction" />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.exportPropertiesAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.editTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.inspectTreebankAction" />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup Menu List -->
+	<action-list id="plugins.languageTools.treebankPropertiesView.popupMenuList">
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyPropertiesAction" />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyPropertyAction" />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyMetaDataAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyAllPropertiesAction" />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.exportPropertiesAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.editTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankPropertiesView.inspectTreebankAction" />
+		<item type="glue"/>
+	</action-list>
+	
+</actions>
