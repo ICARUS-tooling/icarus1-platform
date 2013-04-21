@@ -236,11 +236,15 @@ public abstract class View implements Identifiable {
 	 * <p>
 	 * <b>Note:</b> As long as data is being dispatched by {@link Perspective#dispatchData(View, String, Object, Object, Options)}
 	 * this method will always be called on the {@code EventDispatchThread}
-	 * @param receiver target filter, may be a {@code String}, a {@code Class} or {@code null}
+	 * @param receiver target filter, may be a {@code ViewFilter} a {@code String}, a {@code Class} or {@code null}
 	 * @param message the request to be dispatched
 	 */
 	protected final ResultMessage sendRequest(Object receiver, Message message) {
 		return getPerspective().sendRequest(receiver, message);
+	}
+	
+	protected final ResultMessage sendRequest(Object perspective, Object receiver, Message message) {
+		return getPerspective().sendRequest(perspective, receiver, message);
 	}
 	
 	/**

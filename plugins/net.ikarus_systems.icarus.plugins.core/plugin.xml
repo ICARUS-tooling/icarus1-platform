@@ -113,6 +113,17 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
+		<parameter-def id="capability" multiplicity="any">
+			<doc>
+				<doc-text>
+					A simple string describing a single capability of this perspective
+					in a "command_target" style. The "_target" part can be omitted
+					if a view is able to handle a command in a rather general way. This
+					parameter behaves in exactly the same way as the similar named one in the
+					'View' extension-point.
+				</doc-text>
+			</doc>
+		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="PerspectiveCategory" parent-point-id="Localizable" 
@@ -165,7 +176,14 @@
 		<parameter-def id="capability" multiplicity="any">
 			<doc>
 				<doc-text>
-					A command
+					A simple string describing a single capability of this view
+					in a "command_target" style. The "_target" part can be omitted
+					if a view is able to handle a command in a rather general way. 
+					For example the default output view declares a "display" capability
+					indicating that it is able to visualize arbitrary content to the user.
+					A more specialized version would be a capability in the form "display_text"
+					that could restrict the type of data to be strings. A view can declare
+					multiple capabilities.
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -377,6 +395,10 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
 		<parameter id="requiresTab" value="false" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capability" value="display" />
+		<parameter id="capability" value="display_text" />
 	</extension>
 	
 	<extension id="ExtensionPointOutlineView" plugin-id="net.ikarus_systems.icarus.core" point-id="ManagementView">
@@ -392,6 +414,9 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/explorer/extension-point-outline-view.gif" />
 		<parameter id="alignment" value="right" />
 		<parameter id="priority" value="standard" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capability" value="display_extension-point" />
 	</extension>
 	
 	<extension id="ExtensionPointHierarchyView" plugin-id="net.ikarus_systems.icarus.core" point-id="ManagementView">
@@ -407,6 +432,9 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/explorer/extension-point-hierarchy-view.gif" />
 		<parameter id="alignment" value="right" />
 		<parameter id="priority" value="low" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capability" value="display_extension-point" />
 	</extension>
 	
 	<extension id="LogRecordListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">

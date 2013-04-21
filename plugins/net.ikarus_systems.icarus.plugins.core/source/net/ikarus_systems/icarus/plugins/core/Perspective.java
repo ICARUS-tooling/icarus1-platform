@@ -52,8 +52,10 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
 import net.ikarus_systems.icarus.ui.layout.AreaLayout;
 import net.ikarus_systems.icarus.ui.layout.DefaultAreaLayout;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.Priority;
 import net.ikarus_systems.icarus.util.id.ExtensionIdentity;
 import net.ikarus_systems.icarus.util.id.Identifiable;
@@ -262,6 +264,10 @@ public abstract class Perspective implements Identifiable {
 	 */
 	public final Collection<View> getViews() {
 		return Collections.unmodifiableCollection(views);
+	}
+	
+	public final Collection<View> getViews(Filter filter) {
+		return CollectionUtils.filter(views, filter);
 	}
 	
 	/**
@@ -791,7 +797,25 @@ public abstract class Perspective implements Identifiable {
 		view.init(container);
 	}
 	
-	protected final ResultMessage sendRequest(Object receiver, Message message) {
+	protected final ResultMessage sendRequest(Object perspective, Object receiver, Message message) {
+		Perspective target = getFrameDelegate().getFrame().ensurePerspective(perspective);
+		
+		if(target==null) {
+			return message.unknownReceiver();
+		}
+		
+		try {
+			return target.handleRequest(receiver, message);
+		} catch (Exception e) {
+			return message.errorResult(e);
+		}
+	}
+
+	protected ResultMessage handleRequest(Object receiver, Message message) throws Exception {
+		return sendRequest(receiver, message);
+	}
+	
+	final ResultMessage sendRequest(Object receiver, Message message) {
 		if(message==null)
 			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
 		

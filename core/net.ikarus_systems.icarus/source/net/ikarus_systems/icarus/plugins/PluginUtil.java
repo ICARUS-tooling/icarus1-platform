@@ -15,10 +15,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -28,14 +31,18 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
+import net.ikarus_systems.icarus.util.Capability;
+import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
 import net.ikarus_systems.icarus.util.id.ExtensionIdentity;
 import net.ikarus_systems.icarus.util.id.Identity;
+import net.ikarus_systems.icarus.util.id.StaticIdentity;
 
 import org.java.plugin.ObjectFactory;
 import org.java.plugin.PathResolver;
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.Extension.Parameter;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.PluginElement;
@@ -96,24 +103,29 @@ public final class PluginUtil {
 		throw new CloneNotSupportedException();
 	}
 	
-	private static Map<Extension, Identity> identityCache;
+	private static Map<PluginElement<?>, Identity> identityCache;
 
-	public static Identity getIdentity(Extension extension) {
-		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+	public static Identity getIdentity(PluginElement<?> element) {
+		if(element==null)
+			throw new IllegalArgumentException("Invalid element"); //$NON-NLS-1$
 		
 		if(identityCache==null) {
-			identityCache = Collections.synchronizedMap(new HashMap<Extension, Identity>());
+			identityCache = Collections.synchronizedMap(
+					new HashMap<PluginElement<?>, Identity>());
 		}
 		
-		Identity identity = identityCache.get(extension);
+		Identity identity = identityCache.get(element);
 		if(identity==null) {
 			synchronized (PluginUtil.class) {
-				if(!identityCache.containsKey(extension)) {
-					identity = new ExtensionIdentity(extension);
-					identityCache.put(extension, identity);
+				if(!identityCache.containsKey(element)) {
+					if(element instanceof Extension) {
+						identity = new ExtensionIdentity((Extension) element);
+					} else {
+						identity = new StaticIdentity(element.getId(), element);
+					}
+					identityCache.put(element, identity);
 				} else {
-					identity = identityCache.get(extension);
+					identity = identityCache.get(element);
 				}
 			}
 		}
@@ -194,6 +206,11 @@ public final class PluginUtil {
 		Class<?> clazz = loader.loadClass(param.valueAsString());
 		return clazz.newInstance();
 	}
+	
+	public static boolean isExtensionOf(Extension extension, ExtensionPoint extensionPoint) {
+		ExtensionPoint target = extension.getDeclaringPluginDescriptor().getExtensionPoint(extension.getExtendedPointId());
+		return target.isSuccessorOf(extensionPoint);
+	}
 
 	public static final Comparator<org.java.plugin.registry.Identity> IDENTITY_COMPARATOR = new Comparator<org.java.plugin.registry.Identity>() {
 	
@@ -242,13 +259,48 @@ public final class PluginUtil {
 		return null;
 	}
 	
-	public static Extension showExtensionDialog(Component parent, 
-			String title, ExtensionPoint extensionPoint, boolean doSort) {
-		if(extensionPoint==null)
-			throw new IllegalArgumentException("Invalid extension-point"); //$NON-NLS-1$
+	public static Collection<Extension> findExtensions(ExtensionPoint extensionPoint, Filter filter) {
+		Collection<Extension> extensions = new LinkedList<>();
 		
-		Collection<Extension> extensions = extensionPoint.getConnectedExtensions();
-		// Nothing more to do in case there are no extensions connected
+		for(PluginDescriptor descriptor : getPluginRegistry().getPluginDescriptors()) {
+			for(Extension extension : descriptor.getExtensions()) {
+				if(isExtensionOf(extension, extensionPoint) &&
+						(filter==null || filter.accepts(extension))) {
+					extensions.add(extension);
+				}
+			}
+		}
+		
+		return extensions;
+	}
+	
+	public static Filter createCapabilityFilter(final Capability capability, final boolean generalize) {
+		return new Filter() {
+			
+			@Override
+			public boolean accepts(Object obj) {
+				Extension extension = (Extension)obj;
+				return hasCapability(extension, capability, generalize);
+			}
+		};
+	}
+	
+	public static Extension showExtensionDialog(Component parent, 
+			String title, ExtensionPoint extensionPoint, boolean deepSearch, boolean doSort) {
+		Collection<Extension> extensions = null;
+		if(deepSearch) {
+			extensions = findExtensions(extensionPoint, null);
+		} else {
+			extensions = extensionPoint.getConnectedExtensions();
+		}
+		
+		return showExtensionDialog(parent, title, extensions, doSort);
+	}
+	
+	public static Extension showExtensionDialog(Component parent, 
+			String title, Collection<Extension> extensions, boolean doSort) {
+		
+		// Nothing more to do in case there are no extensions given
 		if(extensions==null ||extensions.isEmpty()) {
 			return null;
 		}
@@ -290,5 +342,50 @@ public final class PluginUtil {
 		}
 		
 		return list.getSelectedValue();
+	}
+	
+	public static List<Capability> getCapabilities(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		List<Capability> capabilities = new ArrayList<>();
+		Collection<Parameter> params = null;
+		try {
+			params = extension.getParameters("capability"); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			// Ignore the fact that extension does not declare any capabilities
+		}
+		
+		// Convert declarations into actual capability objects
+		if(params!=null && !params.isEmpty()) {
+			for(Extension.Parameter param : params) {
+				capabilities.add(Capability.getCapability(param.valueAsString()));
+			}
+		}
+		
+		return capabilities;
+	}
+	
+	public static boolean hasCapability(Extension extension, Capability capability, boolean generalize) {
+
+		Collection<Parameter> params = null;
+		try {
+			params = extension.getParameters("capability"); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			return false;
+		}
+		
+		if(params==null || params.isEmpty()) {
+			return false;
+		}
+		
+		for(Extension.Parameter param : params) {
+			if((generalize && capability.isGeneralizationOf(param.valueAsString()))
+					|| (!generalize && capability.matches(param.valueAsString()))) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

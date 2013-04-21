@@ -88,6 +88,10 @@ public class Message {
 		return new ResultMessage(this);
 	}
 	
+	public ResultMessage unknownReceiver() {
+		return new ResultMessage(ResultType.UNKNOWN_RECEIVER, this);
+	}
+	
 	public ResultMessage successResult(Object data) {
 		return new ResultMessage(this, data);
 	}

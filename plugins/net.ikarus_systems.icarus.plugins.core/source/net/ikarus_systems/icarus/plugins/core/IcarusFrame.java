@@ -249,8 +249,23 @@ public class IcarusFrame extends JFrame {
 		return actionManager;
 	}
 	
+	/**
+	 * @see #openPerspective(Object, boolean)
+	 */
+	Perspective ensurePerspective(Object perspective) {
+		try {
+			openPerspective(perspective, false);
+		} catch (Exception e) {
+			logger.log(LoggerFactory.record(Level.SEVERE, 
+					"Unable to open perspective: "+perspective, e)); //$NON-NLS-1$
+			return null;
+		}
+		
+		return currentPerspective;
+	}
+	
 	private Object getOpenedPerspective(Object data) {
-		if(data==null || containers==null) {
+		if(data==null || containers==null || containers.isEmpty()) {
 			return data;
 		}
 		
@@ -264,7 +279,7 @@ public class IcarusFrame extends JFrame {
 			} else if(data instanceof Perspective && perspective.getClass()==data.getClass()) {
 				data = perspective;
 				break;
-			} else if(data instanceof String && perspective.getClass().getName().equals(data)) {
+			} else if(data instanceof String && perspective.getExtension().getUniqueId().equals(data)) {
 				data = perspective;
 				break;
 			}
@@ -273,6 +288,23 @@ public class IcarusFrame extends JFrame {
 		return data;
 	}
 	
+	/**
+	 * Opens a {@code Perspective} specified by the {@code data} parameter.
+	 * It may be of the following types:
+	 * <ul>
+	 * <li>String - interpreted as the globally unique id of an 
+	 * {@link Extension} extending the {@code Perspective} extension-point
+	 * of the icarus core plug-in</li>
+	 * <li>Extension - as described above required to extend the {@code Perspective}</li>
+	 * extension-point
+	 * <li>Class - extending the {@link Perspective} class</li>
+	 * <li>Perspective - actual instance</li>
+	 * </ul>
+	 * 
+	 * Note that there is only one instance allowed per {@code Perspective} class
+	 * and window! Attempting to display e.g. a new instance of an already active
+	 * perspective will ignore that new instance and instead open the existing one!
+	 */
 	void openPerspective(Object data, boolean clearPerspective) throws Exception {
 		Perspective currentPerspective = this.currentPerspective;
 		if(clearPerspective) {
@@ -280,6 +312,11 @@ public class IcarusFrame extends JFrame {
 		}
 		
 		data = getOpenedPerspective(data);
+		
+		// Abort if perspective is already open!
+		if(data==currentPerspective) {
+			return;
+		}
 		
 		Extension perspectiveExtension = null;
 		
@@ -290,10 +327,10 @@ public class IcarusFrame extends JFrame {
 		}
 		if(data instanceof Extension) {
 			Extension extension = (Extension) data;
-			if(currentPerspective!=null && currentPerspective.getExtension()==extension) {
+			/*if(currentPerspective!=null && currentPerspective.getExtension()==extension) {
 				// Already showing -> no need to load class
 				return;
-			}
+			}*/
 			perspectiveExtension = extension;
 			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
 			if(param==null)
@@ -314,10 +351,10 @@ public class IcarusFrame extends JFrame {
 						"Supplied perspective class is not compatible with "+Perspective.class.getName() //$NON-NLS-1$
 						+" : "+data); //$NON-NLS-1$
 			
-			if(currentPerspective!=null && currentPerspective.getClass().equals(clazz)) {
+			/*if(currentPerspective!=null && currentPerspective.getClass().equals(clazz)) {
 				// Already showing -> no need to instantiate object
 				return;
-			}
+			}*/
 			
 			if(perspectiveExtension==null) {
 				perspectiveExtension = findDeclaringExtension(clazz);
@@ -339,9 +376,9 @@ public class IcarusFrame extends JFrame {
 			throw new IllegalArgumentException("Provided object is not a perspective: "+data); //$NON-NLS-1$
 		
 		// Already showing
-		if(currentPerspective!=null && data==currentPerspective) {
+		/*if(currentPerspective!=null && data==currentPerspective) {
 			return;
-		}
+		}*/
 		
 		// Clear previous components
 		// Ensures we have no fragments of failed perspectives 
@@ -887,9 +924,10 @@ public class IcarusFrame extends JFrame {
 			ExtensionPoint extensionPoint = PluginUtil.getCorePlugin().getExtensionPoint("Perspective"); //$NON-NLS-1$
 			// TODO Sort shown extensions in dialog?
 			boolean doSort = false;
-			Object perspective = PluginUtil.showExtensionDialog(IcarusFrame.this, 
+			Object perspective = PluginUtil.showExtensionDialog(
+					IcarusFrame.this, 
 					"plugins.core.icarusFrame.dialogs.openPerspective",  //$NON-NLS-1$
-					extensionPoint, doSort);
+					extensionPoint, true, doSort);
 			
 			if(perspective==null) {
 				return;

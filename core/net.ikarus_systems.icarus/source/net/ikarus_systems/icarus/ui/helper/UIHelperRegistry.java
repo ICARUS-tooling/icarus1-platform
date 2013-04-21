@@ -24,6 +24,7 @@ import javax.swing.tree.TreeCellRenderer;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.ui.view.Presenter;
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.Exceptions;
 
@@ -80,6 +81,10 @@ public final class UIHelperRegistry {
 		registerHelper(ListCellRenderer.class, 
 				"org.java.plugin.registry.Extension",  //$NON-NLS-1$
 				"net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer"); //$NON-NLS-1$
+		
+		registerHelper(Presenter.class, 
+				"java.lang.String",  //$NON-NLS-1$
+				"net.ikarus_systems.icarus.ui.view.TextPresenter"); //$NON-NLS-1$
 		
 		// TODO do we have some helpers that are not part of a plug-in?
 	}

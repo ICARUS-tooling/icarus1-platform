@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,18 @@ public final class CollectionUtils {
 	 */
 	private CollectionUtils() {
 		// no-op
+	}
+	
+	public static <T extends Object> Collection<T> filter(Collection<T> col, Filter filter) {
+		Collection<T> result = new LinkedList<>();
+		
+		for(T element : col) {
+			if(filter==null || filter.accepts(element)) {
+				result.add(element);
+			}
+		}
+		
+		return result;
 	}
 
     @SafeVarargs
