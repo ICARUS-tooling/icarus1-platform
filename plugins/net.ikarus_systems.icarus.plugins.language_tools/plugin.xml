@@ -57,19 +57,19 @@
 		</parameter-def>
 	</extension-point>
 			
-	<extension-point id="Corpus" parent-point-id="Localizable" 
+	<extension-point id="Treebank" parent-point-id="Localizable" 
 			parent-plugin-id="net.ikarus_systems.icarus.core">
 		<doc>
 			<doc-text>
-				Entry point to define access to certain type of corpus resources
+				Entry point to define access to certain type of treebank resources
 			</doc-text>
 		</doc>
 		<parameter-def id="class">
 			<doc>
 				<doc-text>
-					The 'corpus' itself as a java class.
+					The 'treebank' itself as a java class.
 					Required to have no-args constructor and implement
-					net.ikarus_systems.icarus.language.corpus.Corpus interface!
+					net.ikarus_systems.icarus.language.treebank.Treebank interface!
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -77,8 +77,8 @@
 			<doc>
 				<doc-text>
 					Identifies the grammar object associated with
-					this corpus. Used to thin out the number of
-					corpora being displayed. Corpora that
+					this treebank. Used to thin out the number of
+					treebanks being displayed. Treebanks that
 					reference an unknown grammar are ignored.
 				</doc-text>
 			</doc>
@@ -156,29 +156,29 @@
 		</doc>
 	</extension-point>
 			
-	<extension-point id="CorpusManagementView" parent-point-id="View" 
+	<extension-point id="TreebankManagementView" parent-point-id="View" 
 			parent-plugin-id="net.ikarus_systems.icarus.core">
 		<doc>
 			<doc-text>
 				Special entry point for 'View' extensions that should only
-				be used in the corpus management context.
+				be used in the treebank management context.
 			</doc-text>
 		</doc>
 	</extension-point>
 	
 	<!-- Standard Extensions -->
 	
-	<extension id="CorpusManagerPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+	<extension id="TreebankManagerPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
-				Perspective that allows the management of corpora instances.
+				Perspective that allows the management of treebank instances.
 			</doc-text>
 		</doc>
-		<parameter id="name" value="plugins.languageTools.corpusManagerPerspective.identity.name" />
-		<parameter id="description" value="plugins.languageTools.corpusManagerPerspective.identity.description" />
+		<parameter id="name" value="plugins.languageTools.treebankManagerPerspective.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankManagerPerspective.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusManagerPerspective" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-manager-perspective.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankManagerPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-manager-perspective.gif" />
 	</extension>
 	
 	<extension id="TextInputView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="LanguageToolsView">
@@ -197,134 +197,134 @@
 		<parameter id="requiresTab" value="false" />
 	</extension>
 	
-	<extension id="CorpusEditView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="CorpusManagementView">
+	<extension id="TreebankEditView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
 		<doc>
 			<doc-text>
-				Editor for corpora using registered CorpusEditor implementations
+				Editor for treebanksora using registered Editor helper implementations
 				to perform the actual editing.
 			</doc-text>
 		</doc>
-		<parameter id="name" value="plugins.languageTools.corpusEditView.identity.name" />
-		<parameter id="description" value="plugins.languageTools.corpusEditView.identity.description" />
+		<parameter id="name" value="plugins.languageTools.treebankEditView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankEditView.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusEditView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-edit-view.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankEditView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-edit-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
 	</extension>
 	
-	<extension id="CorpusExplorerView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="CorpusManagementView">
+	<extension id="TreebankExplorerView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
 		<doc>
 			<doc-text>
-				Default explorer to browse corpus categories and instances.
+				Default explorer to browse treebank categories and instances.
 				Allows basic management: add, delete, rename
 			</doc-text>
 		</doc>
-		<parameter id="name" value="plugins.languageTools.corpusExplorerView.identity.name" />
-		<parameter id="description" value="plugins.languageTools.corpusExplorerView.identity.description" />
+		<parameter id="name" value="plugins.languageTools.treebankExplorerView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankExplorerView.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusExplorerView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-explorer-view.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankExplorerView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-explorer-view.gif" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="high" />
 	</extension>
 	
-	<extension id="CorpusPropertiesView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="CorpusManagementView">
+	<extension id="TreebankPropertiesView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
 		<doc>
 			<doc-text>
-				Outline view to display corpus fields (name, editable, type, ...)
+				Outline view to display treebank fields (name, editable, type, ...)
 				and properties. If meta-data information is available for the
-				currently displayed corpus it will be shown as well. Supports
+				currently displayed treebank it will be shown as well. Supports
 				export and copy functions for property and/or meta-data entries. 
 			</doc-text>
 		</doc>
-		<parameter id="name" value="plugins.languageTools.corpusPropertiesView.identity.name" />
-		<parameter id="description" value="plugins.languageTools.corpusPropertiesView.identity.description" />
+		<parameter id="name" value="plugins.languageTools.treebankPropertiesView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankPropertiesView.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.CorpusPropertiesView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/corpus/corpus-properties-view.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankPropertiesView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-properties-view.gif" />
 		<parameter id="alignment" value="right" />
 		<parameter id="priority" value="standard" />
 	</extension>
 	
-	<extension id="DefaultSimpleCorpus" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Corpus">
+	<extension id="DefaultSimpleTreebank" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Treebank">
 		<doc>
 			<doc-text>
-				A simple synchronous corpus implementation that relies on
+				A simple synchronous treebank implementation that relies on
 				SentenceDataReader objects to handle the actual loading
 				of its content data. This implementation will suffice for
-				most small or medium sized corpora.
+				most small or medium sized treebanks.
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.DefaultSimpleCorpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DefaultSimpleTreebank" />
 	</extension>
 	
-	<extension id="FilteredCorpus" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Corpus">
+	<extension id="FilteredTreebank" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Treebank">
 		<doc>
 			<doc-text>
-				Wrapper implementation for derived corpora that are "filtered" by 
+				Wrapper implementation for derived treebanks that are "filtered" by 
 				an array of integers. Those indices mark the data items in the base
-				corpus that are to be included in the "filtered" corpus. This
-				implementation reflects the type and properties of its base corpus and
+				treebank that are to be included in the "filtered" treebank. This
+				implementation reflects the type and properties of its base treebank and
 				forwards all listener related method calls to it.
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.FilteredCorpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.FilteredTreebank" />
 	</extension>
 	
-	<extension id="DefaultSimpleCorpusEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+	<extension id="DefaultSimpleTreebankEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				Default editor usable for basically any type of Corpus
+				Default editor usable for basically any type of Treebank
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.DefaultSimpleCorpusEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DefaultSimpleTreebankEditor" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
 	
-	<extension id="DerivedCorpusEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+	<extension id="DerivedTreebankEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				Editor used for derived corpora that enables the
-				selection of a base corpus.
+				Editor used for derived treebanks that enables the
+				selection of a base treebank.
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.corpus.DerivedCorpusEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.DerivedCorpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DerivedTreebankEditor" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.DerivedTreebank" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
 	
-	<extension id="CorpusListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+	<extension id="TreebankListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				Renderer to be used for corpus objects displayed in JList and JComboBox implementations.
+				Renderer to be used for treebank objects displayed in JList and JComboBox implementations.
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusListCellRenderer" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankListCellRenderer" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
 	
-	<extension id="CorpusTreeCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+	<extension id="TreebankTreeCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				Renderer to be used for corpus objects displayed in JTree implementations.
+				Renderer to be used for treebank objects displayed in JTree implementations.
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusTreeCellRenderer" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankTreeCellRenderer" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
 		<parameter id="interface" value="javax.swing.tree.TreeCellRenderer" />
 	</extension>
 	
-	<extension id="CorpusListModel" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+	<extension id="TreebankListModel" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
-				ListModel implementation as frontend for the CorpusRegistry.
+				ListModel implementation as frontend for the TreebankRegistry.
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.language.corpus.swing.CorpusListModel" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.corpus.Corpus" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankListModel" />
+		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
 		<parameter id="interface" value="javax.swing.ListModel" />
 		<parameter id="interface" value="javax.swing.ComboBoxModel" />
 	</extension>
