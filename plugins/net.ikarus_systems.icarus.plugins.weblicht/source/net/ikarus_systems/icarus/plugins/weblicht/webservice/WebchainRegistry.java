@@ -267,7 +267,9 @@ public class WebchainRegistry {
 								webchain.addWebchainElement(
 										new WebchainOutputType(
 												idElement.getAttribute("type"), //$NON-NLS-1$
-												idElement.getAttribute("value"))); //$NON-NLS-1$
+												idElement.getAttribute("value"), //$NON-NLS-1$
+												getBoolean(idElement.getAttribute("outputused")))); //$NON-NLS-1$
+												
 							}
 							
 							//webservice
@@ -283,6 +285,15 @@ public class WebchainRegistry {
 	}
 	
 	
+
+	/**
+	 * @param attribute
+	 * @return
+	 */
+	private boolean getBoolean(String attribute) {
+		if (attribute.equals("true")) return true; //$NON-NLS-1$
+		return false;
+	}
 
 	/**
 	 * e is XML Element, s is the Name of our Node Element
@@ -403,33 +414,40 @@ public class WebchainRegistry {
 	
 	/**
 	 * @param webchain
-	 * @param webservices
+	 * @param webchainElements
 	 */
-	public void setWebservices(Webchain webchain, List<Webservice> webservices) {
+	public void setWebservices(Webchain webchain, List<WebchainElements> webchainElements) {
 		
 		//prepare Proxylist
 		//clearAllWebservices(webchain);
 		
-		if (webservices==null){			
+		if (webchainElements==null){			
 			return;
 		}
 		
-		List<WebserviceProxy> wspList = new ArrayList<WebserviceProxy>();
+		List<WebchainElements> wElementList = new ArrayList<WebchainElements>();
 		
-		WebserviceProxy wsp = null;
-		for(int i = 0; i < webservices.size();i++){
+		WebchainElements chainElement = null;
+		for(int i = 0; i < webchainElements.size();i++){
 			//System.out.println("UID " + webservices.get(i).getUID());
-			wsp = new WebserviceProxy(webservices.get(i).getUID());
-			wspList.add(wsp);
+			if (webchainElements.get(i) instanceof WebserviceProxy){
+				
+			}
+
+			wElementList.add(webchainElements.get(i));
 		}	
 		
+		System.out.println(webchain.webchainElementsList + " - " + wElementList);
+		
 		//compare lists if there are no changes do nothing
-		if(equalsProxy(webchain.webserviceProxyList, wspList)){
+		
+		if(equalElements(webchain.webchainElementsList, wElementList)){
 			return;
 		}
+		
 
 		//lists are different replace old proxy list
-		webchain.webserviceProxyList = wspList;
+		webchain.webchainElementsList = wElementList;
 		
 		int index = indexOfWebchain(webchain);
 		eventSource.fireEvent(new EventObject(Events.CHANGE,
@@ -456,20 +474,74 @@ public class WebchainRegistry {
 		
 	}
 
-	//compare 2 webservice proxy lists
-	private boolean equalsProxy(List<WebserviceProxy> w1, List<WebserviceProxy> w2){
+	//compare 2 webservice element lists
+	public boolean equalElements(List<WebchainElements> w1, List<WebchainElements> w2){
 		boolean equal = true;
 		if (w1.size() != w2.size()){
 			return false;
 		} else {
-			//same lsitsize we need to check proxyitems
+			//same listsize we need to check items
 			for (int i = 0; i < w1.size(); i++){
-				if (!(w1.get(i).getServiceID().equals(w2.get(i).getServiceID()))){
-					equal = false;
-				};
+				
+				if (w1.get(i) instanceof WebserviceProxy
+						&& w2.get(i) instanceof WebserviceProxy) {
+					//TODO check auf webservice bzw output und jeweilige typen
+					if (!(((WebserviceProxy) w1.get(i)).getServiceID()
+							.equals(((WebserviceProxy) w2.get(i)).getServiceID()))){
+						equal = false;
+					}
+				}
+				
+				//Check Input
+				if (w1.get(i) instanceof WebchainInputType
+						&& w2.get(i) instanceof WebchainInputType) {
+						equal = compareWebchainInputType(
+								(WebchainInputType) w1.get(i), 
+								(WebchainInputType) w2.get(i));				
+				}
+				
+				//Check Output
+				if (w1.get(i) instanceof WebchainInputType
+						&& w2.get(i) instanceof WebchainInputType) {
+						equal = compareWebchainInputType(
+								(WebchainInputType) w1.get(i), 
+								(WebchainInputType) w2.get(i));				
+				}
+				
 			}
 		}
 		return equal;		
+	}
+	
+	/**
+	 * Compare 2 Webchain Input Types
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	public boolean compareWebchainInputType(WebchainInputType t1, WebchainInputType t2){
+		if (t1.getInputType().equals(t2.getInputType())
+				&& t1.getInputTypeValue().equals(t2.getInputTypeValue())){
+			return true;			
+		}
+		return false;
+		
+	}
+	
+	
+	/**
+	 * Compare 2 Webchain Input Types
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	public boolean compareWebchainOutputType(WebchainOutputType t1, WebchainOutputType t2){
+		if (t1.getOutputType().equals(t2.getOutputType())
+				&& t1.getOutputTypeValue().equals(t2.getOutputTypeValue())){
+			return true;			
+		}
+		return false;
+		
 	}
 
 

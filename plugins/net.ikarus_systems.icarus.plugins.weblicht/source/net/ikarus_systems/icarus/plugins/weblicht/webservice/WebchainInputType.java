@@ -50,7 +50,7 @@ public class WebchainInputType implements WebchainElements {
 	public void setInputTypeValue(String inputTypeValue) {
 		this.inputTypeValue = inputTypeValue;
 	}
-
+	
 
 
 }

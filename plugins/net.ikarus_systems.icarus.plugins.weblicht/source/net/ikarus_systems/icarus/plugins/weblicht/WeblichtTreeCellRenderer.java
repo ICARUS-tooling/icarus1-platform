@@ -11,6 +11,7 @@ import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainInputType;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainOutputType;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.CompoundIcon;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.util.Wrapper;
 
@@ -18,6 +19,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 
 
 	private static final long serialVersionUID = -2589454462089491253L;
+	private static CompoundIcon outputenableicon;
 
 	public WeblichtTreeCellRenderer() {
 		setLeafIcon(null);
@@ -46,15 +48,25 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 			value = ((Webchain)value).getName();
 			icon = IconRegistry.getGlobalRegistry().getIcon("link_obj_dark.gif"); //$NON-NLS-1$			
 		} else if(value instanceof Webservice) {
-			value = ((Webservice)value).getName();
+			value = ((Webservice)value).getName();			
 			icon = IconRegistry.getGlobalRegistry().getIcon("repository_rep.gif"); //$NON-NLS-1$
 		} else if(value instanceof WebchainOutputType) {
+			WebchainOutputType wo = (WebchainOutputType)value;
 			value = ResourceManager.getInstance().get("output") //$NON-NLS-1$
-					+ ((WebchainOutputType)value).getOutputType();
-			icon = IconRegistry.getGlobalRegistry().getIcon("history_rep.gif"); //$NON-NLS-1$
+					+ wo.getOutputType();			
+			if (outputenableicon == null){
+				outputenableicon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("outrepo_rep.gif")); //$NON-NLS-1$
+			}
+			if (wo.getIsOutputUsed()) {
+				outputenableicon.setBottomLeftOverlay(null);
+			} else {
+				outputenableicon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif")); //$NON-NLS-1$
+			}
+			icon = outputenableicon;
+			
 		} else if(value instanceof WebchainInputType) {
 			value = ResourceManager.getInstance().get("input") //$NON-NLS-1$
-					+ ((WebchainOutputType)value).getOutputType();
+					+ ((WebchainInputType)value).getInputType();
 			icon = IconRegistry.getGlobalRegistry().getIcon("addrepo_rep.gif"); //$NON-NLS-1$
 		}
 		

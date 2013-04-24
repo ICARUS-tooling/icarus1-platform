@@ -179,9 +179,7 @@ public class Webchain {
 	public void addWebchainElement(String serviceID) {
 		webchainElementsList.add((WebchainElements) new WebserviceProxy(serviceID));
 		
-	}
-	
-	
+	}	
 	
 	public int getElementsCount(){
 		return webchainElementsList.size();
@@ -193,7 +191,7 @@ public class Webchain {
 	
 	public WebchainElements getElementAt(int index){
 		return webchainElementsList.get(index);	
-	}
+	}	
 
 
 }

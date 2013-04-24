@@ -690,37 +690,37 @@ public class WebserviceRegistry {
 	
 	
 	// return webservice chain query string
-	public List<String> getQueryFromWebserviceList(List<Webservice> webservices){
+	public List<String> getQueryFromWebserviceList(List<Webservice> webserviceList){
 		List<String> query = new ArrayList<>();	
 		String type = null;		
 		//collect webservices
-		for (int i = 0; i < webservices.size(); i++){
-			Webservice webservice = webservices.get(i);
-			
-			//collect output attributes			
-			for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
-				WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);	
-				StringBuilder sb = new StringBuilder();
-				if (attribute.getAttributename().equals("type")){ //$NON-NLS-1$
-					type = attribute.getAttributename() +"="+ //$NON-NLS-1$
-							attribute.getAttributevalues();
-					//System.out.println("Last Webchain Type " + type);
-				} else {
-
-				if (attribute.getAttributevalues().equals("")){ //$NON-NLS-1$
-					sb.append(attribute.getAttributename());
-				} else {
-					sb.append(attribute.getAttributename()).append("=") //$NON-NLS-1$
-						.append(attribute.getAttributevalues()); 
-				}				
+		for (int i = 0; i < webserviceList.size(); i++){
+				Webservice webservice = (Webservice) webserviceList.get(i);
 				
-				//only add if type not in list
-				if (!query.contains(sb.toString())){
-					query.add(sb.toString());
-				}
-				//sb.delete(0, sb.length());
-				}
-			} 
+				//collect output attributes			
+				for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
+					WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);	
+					StringBuilder sb = new StringBuilder();
+					if (attribute.getAttributename().equals("type")){ //$NON-NLS-1$
+						type = attribute.getAttributename() +"="+ //$NON-NLS-1$
+								attribute.getAttributevalues();
+						//System.out.println("Last Webchain Type " + type);
+					} else {
+	
+					if (attribute.getAttributevalues().equals("")){ //$NON-NLS-1$
+						sb.append(attribute.getAttributename());
+					} else {
+						sb.append(attribute.getAttributename()).append("=") //$NON-NLS-1$
+							.append(attribute.getAttributevalues()); 
+					}				
+					
+					//only add if type not in list
+					if (!query.contains(sb.toString())){
+						query.add(sb.toString());
+					}
+					//sb.delete(0, sb.length());
+					}
+			}
 		}
 		
 		//add type from last item

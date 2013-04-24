@@ -13,6 +13,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -20,8 +23,10 @@ import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -33,12 +38,17 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainElements;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainInputType;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainOutputType;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceIOAttributes;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceRegistry;
+import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.dialog.BasicDialogBuilder;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
@@ -52,8 +62,7 @@ public class WebserviceDialogs {
 	
 	private static WebserviceDialogs webserviceDialogFactory;
 	
-	private DocumentListener requiredFieldsListener = new RequiredFieldsListener();
-	
+	private DocumentListener requiredFieldsListener = new RequiredFieldsListener();	
 
 	public static WebserviceDialogs getWebserviceDialogFactory() {
 		if(webserviceDialogFactory==null) {
@@ -324,6 +333,25 @@ public class WebserviceDialogs {
 	
 	
 	/**
+	 * Little helper to grab only the Webservices from a given Webchain Webelement List
+	 * e.g. building the requirements for new webservices (in/out) we only need webservices
+	 * and dont care about what the outputservice does.
+	 * @param list
+	 * @return
+	 */
+	private List<Webservice> extractWebservicesFromElements(List<WebchainElements> list){
+		List<Webservice> serviceList = new ArrayList<>();
+		for (int i = 0; i < list.size();i++){
+			if (list.get(i) instanceof WebserviceProxy){
+				WebserviceProxy wsp = (WebserviceProxy)list.get(i);
+				serviceList.add(wsp.get());
+			}
+		}
+		return serviceList;
+	}
+	
+	
+	/**
 	 * 
 	 * @param bGroup
 	 * @return
@@ -419,7 +447,7 @@ public class WebserviceDialogs {
 	//reworked
 	@SuppressWarnings("static-access")
 	public String showWebserviceChooserDialogReworked(Component parent, String title, 
-			String message, List<Webservice> webservices,
+			String message, List<WebchainElements> chainElements,
 			String query, Object...params) {
 		
 		JList<Object> webserviceList;
@@ -427,8 +455,10 @@ public class WebserviceDialogs {
 		JList<Object> queryList;		
 
 		//fresh list with outputitems from selected webchainmodel
-		List<String> wsQuery = WebserviceRegistry.getInstance().getQueryFromWebserviceList(webservices);
-		
+		List<String> wsQuery = WebserviceRegistry.getInstance()
+								.getQueryFromWebserviceList(
+										extractWebservicesFromElements(chainElements));
+
 
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory().getResourceDomain());
@@ -437,13 +467,13 @@ public class WebserviceDialogs {
 		
 		//prepare filtered list
 		WebserviceFilteredViewListModel webserviceFilteredViewListModel;
-		if (webservices.size()>0){
+		if (chainElements.size()>0){
 			webserviceFilteredViewListModel = new WebserviceFilteredViewListModel(
-					filterWebservicePlusIOAttributes(webservices, wsQuery),true);
+					filterWebservicePlusIOAttributes(extractWebservicesFromElements(chainElements), wsQuery),true);
 		} else {
 			// only show webservices where input type is text/plain
 			webserviceFilteredViewListModel = new WebserviceFilteredViewListModel(
-					filterWebserviceByKeyPair(webservices,
+					filterWebserviceByKeyPair(extractWebservicesFromElements(chainElements),
 									"type", //$NON-NLS-1$
 									"text/plain"),true);//$NON-NLS-1$
 		}
@@ -455,7 +485,8 @@ public class WebserviceDialogs {
 		//prepare unfiltered list
 		WebserviceFilteredViewListModel webserviceFilteredRemainingListModel;
 		webserviceFilteredRemainingListModel = new WebserviceFilteredViewListModel(
-				filterWebservicePlusIOAttributesUnfullfilled(webservices, wsQuery),false);
+				filterWebservicePlusIOAttributesUnfullfilled(extractWebservicesFromElements(chainElements),
+						wsQuery),false);
 
 		webserviceListUnfiltered = new JList<Object>(webserviceFilteredRemainingListModel);
 		webserviceListUnfiltered.setBorder(UIUtil.defaultContentBorder);
@@ -488,6 +519,140 @@ public class WebserviceDialogs {
 		
 		return builder.isYesValue() ? webserviceSel.getUID() : null;
 	}
+	
+	
+	
+	/**
+	 * Using Fields From WebchainEditor
+	 * @param parent
+	 * @param title
+	 * @param message
+	 * @param chainelement
+	 * @param inputPanel
+	 * @param inputArea
+	 * @param params
+	 */
+	public void editIOPanel(Component parent, String title, 
+			String message, WebchainElements chainelement,
+			JPanel inputPanel,JTextArea inputArea, Object...params) {		
+
+		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
+																.getResourceDomain());
+		WebchainElements wce;
+		
+		if(chainelement instanceof WebchainInputType){
+			builder.addMessage("plugins.weblicht.labels.webservice.WebchainInput"); //$NON-NLS-1$
+		}
+		
+		if(chainelement instanceof WebchainOutputType){
+			builder.addMessage("plugins.weblicht.labels.webservice.WebchainOutput"); //$NON-NLS-1$
+		}
+		
+		builder.setTitle(title);
+		builder.addMessage(inputPanel);
+		builder.addMessage(inputArea);
+		System.out.println(inputPanel.getComponentCount());
+		builder.setPlainType();
+		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		builder.showDialog(parent);
+		
+		
+		
+		if(chainelement instanceof WebchainInputType){
+			WebchainInputType wi = new WebchainInputType();
+			wi.setInputTypeValue(inputArea.getText());
+			
+		}
+		
+		if(chainelement instanceof WebchainOutputType){
+			builder.addMessage("plugins.weblicht.labels.webservice.WebchainOutput"); //$NON-NLS-1$
+		}
+
+		
+		//return builder.isYesValue() ? webserviceSel.getUID() : null;
+	}
+
+	/**
+	 * @param object
+	 * @param string
+	 * @param string2
+	 * @param chainelement
+	 * @param object2
+	 * @return 
+	 */
+	public WebchainOutputType showAddOutputElementDialog(Component parent, String title, 
+			String message, WebchainElements chainelement, Object...params) {
+		
+		JRadioButton webserviceStaticInput;
+		JRadioButton webserviceLocationInput;
+		JRadioButton webserviceDynamicInput;
+		ButtonGroup  webserviceInputGroup;
+		JTextArea	 webserviceInputArea;
+				
+		JTextField ioValueField = new JTextField(30);
+
+		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
+		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
+																.getResourceDomain());		
+
+		//input Buttons
+		webserviceStaticInput = new JRadioButton();
+		webserviceStaticInput.setName("static"); //$NON-NLS-1$
+		resourceDomain.prepareComponent(webserviceStaticInput, "static", null); //$NON-NLS-1$
+		resourceDomain.addComponent(webserviceStaticInput);
+		//webserviceStaticInput.addActionListener(handler);	
+		
+		webserviceLocationInput = new JRadioButton();
+		webserviceLocationInput.setName("location"); //$NON-NLS-1$
+		resourceDomain.prepareComponent(webserviceLocationInput, "location", null); //$NON-NLS-1$
+		resourceDomain.addComponent(webserviceLocationInput);
+		//webserviceLocationInput.addActionListener(handler);	
+		
+		webserviceDynamicInput = new JRadioButton();
+		webserviceDynamicInput.setName("dynamic"); //$NON-NLS-1$
+		resourceDomain.prepareComponent(webserviceDynamicInput, "dynamic", null); //$NON-NLS-1$
+		resourceDomain.addComponent(webserviceDynamicInput);
+		//webserviceDynamicInput.addActionListener(handler);
+		
+		
+		webserviceInputGroup = new ButtonGroup();
+		webserviceInputArea = new JTextArea();
+		webserviceInputArea.setBorder(UIUtil.defaultContentBorder);
+		
+		webserviceInputGroup.add(webserviceStaticInput);
+		webserviceInputGroup.add(webserviceLocationInput);
+		webserviceInputGroup.add(webserviceDynamicInput);
+
+		
+		builder.setTitle(title);
+		builder.addMessage("plugins.weblicht.labels.webservice.WebchainOutput"); //$NON-NLS-1$
+	
+		
+		
+		builder.addMessage(webserviceStaticInput);
+		builder.addMessage(webserviceLocationInput);
+		builder.addMessage(webserviceDynamicInput);
+		builder.addMessage(ioValueField);
+		
+
+		builder.setPlainType();
+		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		builder.showDialog(parent);
+		
+		WebchainOutputType wo = new WebchainOutputType();
+		
+		if (webserviceDynamicInput.isSelected()) wo.setOutputType("dynamic");		
+		if (webserviceLocationInput.isSelected()) wo.setOutputType("location");
+		if (webserviceStaticInput.isSelected()) wo.setOutputType("static");
+		System.out.println(wo.getOutputType());
+		
+		return builder.isYesValue() ? wo : null;
+		
+	}
+	
+
 
 	public Webchain showNewWebchain(Component parent, String title, 
 			String message, Object...params) {
@@ -733,6 +898,7 @@ public class WebserviceDialogs {
 		}
 
 	}	
+	
 	
 	
 	public class RequiredFieldsListener implements DocumentListener{

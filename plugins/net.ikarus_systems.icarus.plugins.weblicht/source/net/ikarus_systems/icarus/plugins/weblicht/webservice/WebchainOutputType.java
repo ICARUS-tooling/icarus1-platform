@@ -18,10 +18,15 @@ public class WebchainOutputType implements WebchainElements{
 	
 	protected String outputType;
 	protected String outputTypeValue;
+	protected boolean isOutputUsed;
 	
-	public WebchainOutputType(String outputType, String outputTypeValue){
+	public WebchainOutputType(){		
+	}
+	
+	public WebchainOutputType(String outputType, String outputTypeValue, boolean isOutputUsed){
 		this.outputType = outputType;
 		this.outputTypeValue = outputTypeValue;
+		this.isOutputUsed = isOutputUsed;
 	}
 
 	/**
@@ -50,6 +55,25 @@ public class WebchainOutputType implements WebchainElements{
 	 */
 	public void setOutputTypeValue(String outputTypeValue) {
 		this.outputTypeValue = outputTypeValue;
+	}
+
+	/**
+	 * @return the isOutputUsed
+	 */
+	public boolean getIsOutputUsed() {
+		return isOutputUsed;
+	}
+	
+	public String getOutputUsed() {
+		if (isOutputUsed) return "enabled"; //$NON-NLS-1$
+		return "disabled"; //$NON-NLS-1$
+	}
+
+	/**
+	 * @param isOutputUsed the isOutputUsed to set
+	 */
+	public void setOutputUsed(boolean isOutputUsed) {
+		this.isOutputUsed = isOutputUsed;
 	}
 
 
