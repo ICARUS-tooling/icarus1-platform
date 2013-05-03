@@ -18,9 +18,12 @@ import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
+import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.language.helper.AbstractSentenceTablePresenter;
 import net.ikarus_systems.icarus.ui.table.TableColumnManager;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner
@@ -35,8 +38,9 @@ public class DependencyTablePresenter extends AbstractSentenceTablePresenter<Dep
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Object data) {
-		return data instanceof DependencyData;
+	public boolean supports(ContentType type) {
+		return ContentTypeRegistry.isCompatible(
+				DependencyConstants.CONTENT_TYPE_ID, type);
 	}
 
 	/**

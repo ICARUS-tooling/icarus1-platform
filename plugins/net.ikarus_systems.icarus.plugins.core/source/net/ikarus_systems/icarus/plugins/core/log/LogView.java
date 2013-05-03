@@ -159,8 +159,7 @@ public class LogView extends View {
 	@Override
 	public Identity getIdentity() {
 		if(identity==null) {
-			viewIcon = new CompoundIcon(new ImageIcon(
-					LogView.class.getResource("log-view.gif"))); //$NON-NLS-1$
+			decorateIcon(false);
 			
 			// create identity object
 			DefaultIdentity id = new DefaultIdentity(super.getIdentity(), this);
@@ -255,6 +254,7 @@ public class LogView extends View {
 		container.setPreferredSize(new Dimension(400, 120));
 		
 		registerActionCallbacks();
+		decorateIcon(true);
 	}
 	
 	@Override
@@ -296,21 +296,29 @@ public class LogView extends View {
 		infoPanel.displayText("errorCount", text); //$NON-NLS-1$
 	}
 	
-	private void refreshIcon() {
-		if(loggingModel==null || viewIcon==null) {
+	private void decorateIcon(boolean reload) {		
+		if(viewIcon==null) {
+			viewIcon = new CompoundIcon(new ImageIcon(
+					LogView.class.getResource("log-view.gif"))); //$NON-NLS-1$
+		}
+		
+		if(loggingModel==null) {
 			return;
 		}
 		
-		if(loggingModel.getErrorCount()>0)
+		if(loggingModel.getErrorCount()>0) {
 			viewIcon.setOverlay(CompoundIcon.BOTTOM_LEFT, 
 					IconRegistry.getGlobalRegistry().getIcon("error_co.gif")); //$NON-NLS-1$
-		else if(loggingModel.getWarningCount()>0)
+		} else if(loggingModel.getWarningCount()>0) {
 			viewIcon.setOverlay(CompoundIcon.BOTTOM_LEFT, 
 					IconRegistry.getGlobalRegistry().getIcon("warning_co.gif")); //$NON-NLS-1$
-		else
+		} else {
 			viewIcon.setOverlay(CompoundIcon.BOTTOM_LEFT, null);
+		}
 		
-		reloadViewTab();
+		if(reload) {
+			reloadViewTab();
+		}
 	}
 	
 	private void showPopup(MouseEvent trigger) {
@@ -515,7 +523,7 @@ public class LogView extends View {
 
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			refreshIcon();
+			decorateIcon(true);
 		}
 		
 		private void maybeShowPopup(MouseEvent e) {

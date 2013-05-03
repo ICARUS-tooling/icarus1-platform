@@ -48,6 +48,20 @@ public class LogListModel implements ListModel<LogRecord>, EventListener {
 		LoggerFactory.getRootHandler().addListener(Events.ADDED, this);
 		LoggerFactory.getRootHandler().addListener(Events.REMOVED, this);
 		LoggerFactory.getRootHandler().addListener(Events.CLEANED, this);
+		
+		initCounts();
+	}
+	
+	private void initCounts() {
+		for(int i=0; i<getSize(); i++) {
+			LogRecord record = getElementAt(i);
+			int level = record.getLevel().intValue();
+			if(level>=Level.SEVERE.intValue()) {
+				errorCount++;
+			} else if(level>=Level.WARNING.intValue()) {
+				warningCount++;
+			}
+		}
 	}
 	
 	public void clear() {
@@ -199,12 +213,12 @@ public class LogListModel implements ListModel<LogRecord>, EventListener {
 			int index = (int) event.getProperty("index"); //$NON-NLS-1$
             int level = record.getLevel().intValue();
 	        boolean hasChanged = false;
-	        if(level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue()) {
-	            warningCount++;
-	            hasChanged = warningCount==1;
-	        } else if(level>=Level.SEVERE.intValue()) {
+	        if(level>=Level.SEVERE.intValue()) {
 	            errorCount++;
 	            hasChanged = errorCount==1;
+	        } else if(level>=Level.WARNING.intValue()) {
+	            warningCount++;
+	            hasChanged = warningCount==1;
 	        }
 
             index -= offset;
@@ -219,12 +233,12 @@ public class LogListModel implements ListModel<LogRecord>, EventListener {
 			int index = (int) event.getProperty("index"); //$NON-NLS-1$
             int level = removed.getLevel().intValue();
             boolean hasChanged = false;
-            if(level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue()) {
-                warningCount--;
-                hasChanged = warningCount==0;
-            } else if(level>=Level.SEVERE.intValue()) {
+            if(level>=Level.SEVERE.intValue()) {
                 errorCount--;
                 hasChanged = errorCount==0;
+            } else if(level>=Level.WARNING.intValue()) {
+                warningCount--;
+                hasChanged = warningCount==0;
             }
 
             index -= offset;

@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.matetools" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.matetools.MatetoolsPlugin">
+	
+	<doc>
+		<doc-text>
+			Interface to the matetools project
+		</doc-text>
+	</doc>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+	</requires>
+	
+	<runtime>
+		<library id="mate-tools" path="lib/anna.jar" type="code">
+			<doc>
+				<doc-text>
+					matetools library as of version 3.1 ?
+				</doc-text>
+			</doc>
+		</library>
+	</runtime>
+	
+	<!-- Extensions -->
+	
+	<extension id="CONLL09SentenceDataReader" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="SentenceDataReader">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.conll.CONLL09SentenceDataReader" />
+	</extension>
+</plugin>

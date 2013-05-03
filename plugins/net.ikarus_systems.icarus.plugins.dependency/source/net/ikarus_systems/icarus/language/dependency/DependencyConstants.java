@@ -18,6 +18,8 @@ package net.ikarus_systems.icarus.language.dependency;
 public interface DependencyConstants {
 	
 	public static final String GRAMMAR_ID = "dependency"; //$NON-NLS-1$
+	
+	public static final String CONTENT_TYPE_ID = "DependencyDataContentType"; //$NON-NLS-1$
 
 	public static final int DATA_FIELD_ALL = (1 << 6);
 

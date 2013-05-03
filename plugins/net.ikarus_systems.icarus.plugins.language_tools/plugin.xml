@@ -102,7 +102,7 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="grammar">
+		<parameter-def id="grammar" multiplicity="one-or-none">
 			<doc>
 				<doc-text>
 					Identifies the grammar object associated with this reader. 
@@ -130,7 +130,7 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="grammar">
+		<parameter-def id="grammar" multiplicity="one-or-none">
 			<doc>
 				<doc-text>
 					Identifies the grammar object associated with this writer 
