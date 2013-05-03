@@ -196,8 +196,7 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 			try {
 				location = (Location)formBuilder.getValue("location"); //$NON-NLS-1$
 			} catch (InvalidFormDataException e) {
-				LoggerFactory.getLogger(BasicTreebankEditor.class).log(LoggerFactory.record(
-						Level.SEVERE, "Failed to resolve location for treebank: "+treebank.getName(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Failed to resolve location for treebank: "+treebank.getName(), e); //$NON-NLS-1$
 				DialogFactory.getGlobalFactory().showError(null, 
 						"plugins.languageTools.treebankEditView.dialogs.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankEditView.dialogs.invalidLocation",  //$NON-NLS-1$

@@ -48,8 +48,7 @@ public class ManagementPerspective extends Perspective {
 					"net.ikarus_systems.icarus.plugins.core.resources.management", resourceLoader); //$NON-NLS-1$
 			
 		} catch(Exception e) {
-			LoggerFactory.getLogger(ManagementPerspective.class).log(LoggerFactory.record(
-					Level.SEVERE, "Unable to add resources", e)); //$NON-NLS-1$
+			LoggerFactory.log(ManagementPerspective.class, Level.SEVERE, "Unable to add resources", e); //$NON-NLS-1$
 		}
 	}
 

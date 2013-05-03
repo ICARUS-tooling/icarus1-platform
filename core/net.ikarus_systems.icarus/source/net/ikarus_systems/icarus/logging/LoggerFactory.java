@@ -192,6 +192,18 @@ public final class LoggerFactory {
 		setCallerFields(record);
 		return record;
 	}
+	
+	public static LogRecord log(Object owner, Level level, String message, Throwable t) {
+		LogRecord record = record(level, message, t);
+		getLogger(owner).log(record);
+		return record;
+	}
+	
+	public static LogRecord log(Object owner, Level level, String message) {
+		LogRecord record = record(level, message);
+		getLogger(owner).log(record);
+		return record;
+	}
 
 	public static void setCallerFields(LogRecord record) {
 		Throwable throwable = new Throwable();

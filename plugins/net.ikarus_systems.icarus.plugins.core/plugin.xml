@@ -10,21 +10,6 @@
 		</doc-text>
 	</doc>
 	
-	<attributes>
-		<attribute id="mode" value="ui" />
-	</attributes>
-	
-	<runtime>
-		<library id="ClassesFolder" path="classes" type="resources">
-			<doc>
-				<doc-text>
-					Location of class files for this plugin.
-				</doc-text>
-			</doc>
-		</library>
-		<library id="UtilityLib" path="hermes-1.0.jar" type="code" />
-	</runtime>
-	
 	<!-- Extension-Points -->
 			
 	<extension-point id="Localizable" extension-multiplicity="none">
@@ -259,6 +244,23 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="UITheme" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Allows plug-ins to provide new Look-and-Feel implementations for
+				the user to choose.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Classname of the Look-and-Feel implementation
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="Action" extension-multiplicity="none">
 		<doc>
 			<doc-text>
@@ -299,6 +301,98 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="ContentType" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Allows easy declaration of new content types at plug-in startup time.
+				See net.ikarus_systems.icarus.util.data.ContentType for documentation.
+			</doc-text>
+		</doc>
+		<parameter-def id="contentClass">
+			<doc>
+				<doc-text>
+					Superclass or interface for content of this type.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="properties" multiplicity="none-or-one" type="any">
+			<doc>
+				<doc-text>
+					List of sub-parameters that serve as key-value pairs for
+					creation of a properties map.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="DataConverter" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Allows for registration of data converters at plug-in startup time
+				without the need to actualls activate the hosting plug-in. Converters
+				registered by means of this extension-point will be instantiated only
+				when asked for conversion.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Converter class itself, needs to implement net.ikarus_systems.icarus.util.data.Converter interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="accuracy" type="number">
+			<doc>
+				<doc-text>
+					Conversion accuracy A that may be between 0 and 1 (including 1).
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="inputType" type="extension-id"
+				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Input content type.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="outputType" type="extension-id"
+				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Result content type.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="ErrorFormatter">
+		<doc>
+			<doc-text>
+				See net.ikarus_systems.icarus.util.Exceptions
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Implementing class, needs to have no-args constructor and implement
+					net.ikarus_systems.icarus.util.ErrorFormatter interface.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="throwableClass" multiplicity="one-or-more">
+			<doc>
+				<doc-text>
+					Class name of throwable this formatter wants to handle.
+					Note that only the first formatter for a certain throwable will
+					be saved.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="UIHelper">
 		<doc>
 			<doc-text>
@@ -315,16 +409,22 @@
 		<parameter-def id="target">
 			<doc>
 				<doc-text>
-					Fully qualified name of the object class this helper should
-					registered for. 
+					Fully qualified name of the object class this helper should be registered for. 
 				</doc-text>
 			</doc>
 		</parameter-def>
 		<parameter-def id="interface" multiplicity="one-or-more">
 			<doc>
 				<doc-text>
-					Fully qualified class name of the interface this helper
-					implements.
+					Fully qualified class name of the interface this helper	implements.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="override" multiplicity="none-or-one" type="boolean" default-value="false">
+			<doc>
+				<doc-text>
+					Allows extensions to override previously registered helpers and in that
+					way promote themselves to exclusive helper for the specified target object type. 
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -457,5 +557,23 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.log.LogRecordPresenter" />
 		<parameter id="target" value="java.util.logging.LogRecord" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.Presenter" />
+	</extension>
+	
+	<extension id="LogRecordContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the LogRecord content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="java.util.logging.LogRecord" />
+	</extension>
+	
+	<extension id="DocumentableContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the Documentable content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="org.java.plugin.registry.Documentable" />
 	</extension>
 </plugin>

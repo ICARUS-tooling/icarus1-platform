@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.language;
 import java.io.IOException;
 
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 
@@ -49,7 +50,7 @@ public interface SentenceDataWriter {
 	
 	/**
 	 * Closes all underlying I/O-objects. Subsequent calls to 
-	 * {@link SentenceDataWriter#write(SentenceData)} should throw 
+	 * {@link #write(SentenceData)} should throw 
 	 * {@code IOException}. Note that this method might be called
 	 * before a 'logical set' of data has been written or even while
 	 * a write operation is currently in progress. It is up to the
@@ -61,4 +62,6 @@ public interface SentenceDataWriter {
 	 * discard all data before risking invalid {@code xml}-code.
 	 */
 	void close();
+	
+	ContentType getDataType();
 }

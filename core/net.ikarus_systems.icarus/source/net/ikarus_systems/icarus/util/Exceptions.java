@@ -11,6 +11,10 @@ package net.ikarus_systems.icarus.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 
 /**
  * 
@@ -18,12 +22,52 @@ import java.io.StringWriter;
  * @version $Id$
  *
  */
-public class Exceptions {
+public final class Exceptions {
+	
+	private static Map<String, ErrorFormatter> formatters;
 
 	private Exceptions() {
 	}
+	
+	public static void addFormatter(String throwableClassName, ErrorFormatter formatter) {
+		if(throwableClassName==null)
+			throw new IllegalArgumentException("Invalid throwable class name"); //$NON-NLS-1$
+		if(formatter==null)
+			throw new IllegalArgumentException("Invalid formatter"); //$NON-NLS-1$
+		
+		if(formatters==null) {
+			synchronized (Exceptions.class) {
+				if(formatters==null) {
+					formatters = new HashMap<>();
+				}
+			}
+		}
+		
+		if(formatters.containsKey(throwableClassName))
+			throw new DuplicateIdentifierException("Formatter already registered for throwable class: "+throwableClassName); //$NON-NLS-1$
+		
+		formatters.put(throwableClassName, formatter);
+	}
+	
+	public static String getFormattedMessage(Throwable t) {
+		if(formatters==null || formatters.isEmpty()) {
+			return t.getMessage();
+		}
+		
+		String message = null;
+		ErrorFormatter formatter = formatters.get(t.getClass().getName());
+		if(formatter!=null) {
+			message = formatter.getMessage(t);
+		}
+		
+		if(message==null) {
+			message = t.getMessage();
+		}
+		
+		return message;
+	}
 
-	public static final void testNullArgument(Object o, String name) {
+	public static void testNullArgument(Object o, String name) {
 		if (o == null)
 			throw new IllegalArgumentException("Invalid argument: " + name); //$NON-NLS-1$
 	}
@@ -34,14 +78,14 @@ public class Exceptions {
 					"Invalid array argument (null or empty): " + name); //$NON-NLS-1$
 	}
 
-	public static final String stackTraceToString(Throwable thr) {
+	public static String stackTraceToString(Throwable thr) {
 		Exceptions.testNullArgument(thr, "throwable"); //$NON-NLS-1$
 		StringWriter sw = new StringWriter(1000);
 		thr.printStackTrace(new PrintWriter(sw));
 		return sw.toString();
 	}
 
-	public static final void testArgumentClass(Object o, Class<?> clazz,
+	public static void testArgumentClass(Object o, Class<?> clazz,
 			String name) {
 		Exceptions.testNullArgument(o, "o"); //$NON-NLS-1$
 		Exceptions.testNullArgument(clazz, "clazz"); //$NON-NLS-1$
@@ -52,7 +96,7 @@ public class Exceptions {
 							.getName()));
 	}
 	
-	public static final void testBounds(int value, int min, int max, String name) {
+	public static void testBounds(int value, int min, int max, String name) {
 		if(value<min || value>max)
 			throw new IllegalArgumentException(String.format(
 					"Argument '%s' is out of range [%d to %d]: %d",  //$NON-NLS-1$

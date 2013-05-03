@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JDialog;
@@ -30,6 +31,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.util.Capability;
 import net.ikarus_systems.icarus.util.Filter;
@@ -40,6 +42,7 @@ import net.ikarus_systems.icarus.util.id.StaticIdentity;
 
 import org.java.plugin.ObjectFactory;
 import org.java.plugin.PathResolver;
+import org.java.plugin.PluginLifecycleException;
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.Extension.Parameter;
@@ -159,6 +162,43 @@ public final class PluginUtil {
 		return getPluginManager().getPluginClassLoader(element.getDeclaringPluginDescriptor());
 	}
 	
+	public static Map<String, Object> getProperties(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		Extension.Parameter propertiesParam = null;
+		
+		try {
+			propertiesParam = extension.getParameter("properties"); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			return null;
+		}
+		
+		// call to getParameter(string) should throw IllegalArgumentException if not present!
+		assert propertiesParam!=null : "invalid extension implementation!"; //$NON-NLS-1$
+		
+		Map<String, Object> map = new HashMap<>();
+		feedProperties(map, propertiesParam);
+		return map;
+	}
+	
+	private static void feedProperties(Map<String, Object> map, Extension.Parameter param) {
+		if(param==null) {
+			return;
+		}
+		
+		Collection<Extension.Parameter> subParams = param.getSubParameters();
+		if(subParams==null || subParams.isEmpty()) {
+			map.put(param.getId(), param.valueAsString());
+		} else {
+			Map<String, Object> subMap = new HashMap<>();
+			for(Extension.Parameter subParam : subParams) {
+				feedProperties(subMap, subParam);
+			}
+			map.put(param.getId(), subMap);
+		}
+	}
+	
 	public static PluginManager getPluginManager() {
 		if(pluginManager==null)
 			throw new IllegalStateException("Plug-in manager not yet loaded!"); //$NON-NLS-1$
@@ -193,10 +233,23 @@ public final class PluginUtil {
 		}
 	}
 	
+	public static void activatePlugin(PluginElement<?> element) throws PluginLifecycleException {
+		PluginDescriptor descriptor = element.getDeclaringPluginDescriptor();
+		getPluginManager().activatePlugin(descriptor.getId());
+	}
+	
 	public static Object instantiate(Extension extension) throws InstantiationException, 
 			IllegalAccessException, ClassNotFoundException {
 		if(extension==null)
 			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		try {
+			activatePlugin(extension);
+		} catch (PluginLifecycleException e) {
+			LoggerFactory.log(PluginUtil.class, Level.SEVERE, "Failed to activate plug-in: "+extension.getDeclaringPluginDescriptor().getId(), e); //$NON-NLS-1$
+			
+			throw new IllegalStateException("Plug-in not active for extension: "+extension.getUniqueId());  //$NON-NLS-1$
+		}
 		
 		Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
 		if(param==null)
@@ -208,8 +261,10 @@ public final class PluginUtil {
 	}
 	
 	public static boolean isExtensionOf(Extension extension, ExtensionPoint extensionPoint) {
-		ExtensionPoint target = extension.getDeclaringPluginDescriptor().getExtensionPoint(extension.getExtendedPointId());
-		return target.isSuccessorOf(extensionPoint);
+		ExtensionPoint target = getPluginRegistry().getPluginDescriptor(
+				extension.getExtendedPluginId()).getExtensionPoint(
+						extension.getExtendedPointId());
+		return  target==extensionPoint || target.isSuccessorOf(extensionPoint);
 	}
 
 	public static final Comparator<org.java.plugin.registry.Identity> IDENTITY_COMPARATOR = new Comparator<org.java.plugin.registry.Identity>() {
@@ -222,6 +277,11 @@ public final class PluginUtil {
 	
 	};
 	
+	/**
+	 * Sorts extensions by their identity in case they extend the
+	 * {@code Localizable} extension-point or by their unique id
+	 * otherwise.
+	 */
 	public static final Comparator<Extension> EXTENSION_COMPARATOR = new Comparator<Extension>() {
 
 		@Override
@@ -236,7 +296,7 @@ public final class PluginUtil {
 			if(id1!=null && id2!=null) {
 				return Identity.COMPARATOR.compare(id1, id2);
 			} else {
-				return e1.getId().compareTo(e2.getId());
+				return e1.getUniqueId().compareTo(e2.getUniqueId());
 			}
 		}
 		
@@ -260,13 +320,21 @@ public final class PluginUtil {
 	}
 	
 	public static Collection<Extension> findExtensions(ExtensionPoint extensionPoint, Filter filter) {
-		Collection<Extension> extensions = new LinkedList<>();
+		Collection<Extension> extensions = new LinkedHashSet<>();
 		
-		for(PluginDescriptor descriptor : getPluginRegistry().getPluginDescriptors()) {
-			for(Extension extension : descriptor.getExtensions()) {
-				if(isExtensionOf(extension, extensionPoint) &&
-						(filter==null || filter.accepts(extension))) {
-					extensions.add(extension);
+		for(Extension extension : extensionPoint.getConnectedExtensions()) {
+			if(filter==null || filter.accepts(extension)) {
+				extensions.add(extension);
+			}
+		}
+		
+		Collection<ExtensionPoint> descendants = extensionPoint.getDescendants();
+		if(descendants!=null && !descendants.isEmpty()) {
+			for(ExtensionPoint descendant : descendants) {
+				for(Extension extension : descendant.getConnectedExtensions()) {
+					if(filter==null || filter.accepts(extension)) {
+						extensions.add(extension);
+					}
 				}
 			}
 		}
@@ -383,6 +451,30 @@ public final class PluginUtil {
 			if((generalize && capability.isGeneralizationOf(param.valueAsString()))
 					|| (!generalize && capability.matches(param.valueAsString()))) {
 				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean hasCapability(Extension extension, Capability...capabilities) {
+
+		Collection<Parameter> params = null;
+		try {
+			params = extension.getParameters("capability"); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			return false;
+		}
+		
+		if(params==null || params.isEmpty()) {
+			return false;
+		}
+		
+		for(Extension.Parameter param : params) {
+			for(Capability capability : capabilities) {
+				if(capability.matches(param.valueAsString())) {
+					return true;
+				}
 			}
 		}
 		

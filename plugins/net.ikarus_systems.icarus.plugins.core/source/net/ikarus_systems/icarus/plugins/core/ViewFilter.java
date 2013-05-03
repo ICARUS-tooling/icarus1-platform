@@ -151,8 +151,8 @@ public abstract class ViewFilter {
 					ClassLoader loader = PluginUtil.getClassLoader(extension);
 					viewClazz = loader.loadClass(className);
 				} catch(Exception e) {
-					LoggerFactory.getLogger(ViewFilter.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Unable to load extension view class: "+extension, e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Unable to load extension view class: "+extension, e); //$NON-NLS-1$
 				}
 			}
 			

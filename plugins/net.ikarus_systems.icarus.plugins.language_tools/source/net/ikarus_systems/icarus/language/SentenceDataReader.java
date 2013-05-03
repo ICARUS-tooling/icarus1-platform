@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
+import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 
@@ -65,5 +66,5 @@ public interface SentenceDataReader {
 	 */
 	void close();
 	
-	Class<? extends SentenceData> getDataClass();
+	ContentType getDataType();
 }

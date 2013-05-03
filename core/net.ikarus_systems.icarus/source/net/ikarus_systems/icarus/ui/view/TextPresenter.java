@@ -10,6 +10,8 @@
 package net.ikarus_systems.icarus.ui.view;
 
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner
@@ -22,8 +24,8 @@ public class TextPresenter extends AbstractEditorPanePresenter<String> {
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Object data) {
-		return data instanceof String;
+	public boolean supports(ContentType type) {
+		return ContentTypeRegistry.isCompatible("StringContentType", type); //$NON-NLS-1$
 	}
 
 	/**

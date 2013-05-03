@@ -112,8 +112,8 @@ public class PluginExplorerView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -370,8 +370,7 @@ public class PluginExplorerView extends View {
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(
-						Level.SEVERE, "Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 		
@@ -642,8 +641,8 @@ public class PluginExplorerView extends View {
 			try {
 				pluginManager.activatePlugin(descriptor.getId());
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to activate plug-in: "+descriptor.getId(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to activate plug-in: "+descriptor.getId(), ex); //$NON-NLS-1$
 				
 				DialogFactory.getGlobalFactory().showError(getContainer(), 
 						"plugins.core.pluginExplorerView.identity.name",  //$NON-NLS-1$
@@ -671,8 +670,8 @@ public class PluginExplorerView extends View {
 			try {
 				pluginManager.deactivatePlugin(descriptor.getId());
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to deactivate plug-in: "+descriptor.getId(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to deactivate plug-in: "+descriptor.getId(), ex); //$NON-NLS-1$
 				
 				DialogFactory.getGlobalFactory().showError(getContainer(), 
 						"plugins.core.pluginExplorerView.identity.name",  //$NON-NLS-1$
@@ -699,8 +698,8 @@ public class PluginExplorerView extends View {
 						ManagementConstants.EXTENSION_POINT_HIERARCHY_VIEW_ID, message);
 				
 				if(result.getThrowable()!=null) {
-					LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to send extension-point to hierarchy view", result.getThrowable())); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to send extension-point to hierarchy view", result.getThrowable()); //$NON-NLS-1$
 				}
 			}
 		}
@@ -741,8 +740,7 @@ public class PluginExplorerView extends View {
 			}
 			
 			if(location==null) {
-				LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(
-						Level.INFO, "Not a valid directory owner: "+selectedObject)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.INFO, "Not a valid directory owner: "+selectedObject); //$NON-NLS-1$
 				return;
 			}
 			
@@ -754,7 +752,7 @@ public class PluginExplorerView extends View {
 			}
 			
 			if(targetFile==null) {
-				LoggerFactory.getLogger(PluginExplorerView.class).fine("Unable to resolve file: "+location); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.FINE, "Unable to resolve file: "+location); //$NON-NLS-1$
 				return;
 			}
 			
@@ -775,7 +773,7 @@ public class PluginExplorerView extends View {
 			try {
 				Desktop.getDesktop().open(targetFile);
 			} catch (IOException ex) {
-				LoggerFactory.getLogger(PluginExplorerView.class).log(Level.SEVERE, "Failed to open directory in desktop: "+targetFile, ex); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Failed to open directory in desktop: "+targetFile, ex); //$NON-NLS-1$
 				DialogFactory.getGlobalFactory().showError(getContainer(), 
 						"plugins.core.pluginExplorerView.identity.name",  //$NON-NLS-1$
 						"plugins.core.pluginExplorerView.dialogs.desktopError",  //$NON-NLS-1$
@@ -877,8 +875,7 @@ public class PluginExplorerView extends View {
 			Object pluginNode = nodeMap.get(descriptor);
 			if(pluginNode==null) {
 				// Should never happen, but we better report this inconsistency
-				LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(
-						Level.INFO, "Missing element mapping for plugin-descriptor: "+descriptor)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.INFO, "Missing element mapping for plugin-descriptor: "+descriptor); //$NON-NLS-1$
 				return;
 			}
 			
@@ -957,8 +954,7 @@ public class PluginExplorerView extends View {
 			Object pluginNode = nodeMap.get(descriptor);
 			
 			if(pluginNode==null) {
-				LoggerFactory.getLogger(PluginExplorerView.class).log(LoggerFactory.record(
-						Level.INFO, "Missing element mapping for plugin-descriptor: "+descriptor)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.INFO, "Missing element mapping for plugin-descriptor: "+descriptor); //$NON-NLS-1$
 				return;
 			}
 			

@@ -99,8 +99,7 @@ public final class IconRegistry {
 					}
 					
 				} catch(Exception e) {
-					LoggerFactory.getLogger(IconRegistry.class).log(LoggerFactory.record(
-							Level.SEVERE, "Error while loading icon: "+name, e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, "Error while loading icon: "+name, e); //$NON-NLS-1$
 				}
 			}
 		}

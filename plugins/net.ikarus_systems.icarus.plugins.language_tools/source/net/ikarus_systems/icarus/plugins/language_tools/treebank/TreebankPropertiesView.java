@@ -39,6 +39,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 
+import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankMetaData;
 import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
@@ -107,8 +108,8 @@ public class TreebankPropertiesView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(TreebankPropertiesView.class).log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -217,8 +218,7 @@ public class TreebankPropertiesView extends View {
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(TreebankPropertiesView.class).log(LoggerFactory.record(
-						Level.SEVERE, "Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 		
@@ -301,7 +301,7 @@ public class TreebankPropertiesView extends View {
 		// Gold
 		sb.append(resourceDomain.get("plugins.languageTools.labels.gold")) //$NON-NLS-1$
 		.append(COLON)
-		.append(Boolean.toString(treebank.hasGold())); // no LF on last line!
+		.append(Boolean.toString(treebank.supportsType(DataType.GOLD))); // no LF on last line!
 		
 		propertiesArea.setText(sb.toString());
 		

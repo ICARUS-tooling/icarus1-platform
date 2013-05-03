@@ -12,8 +12,8 @@ package net.ikarus_systems.icarus.language.treebank;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
-import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
@@ -51,18 +51,6 @@ public abstract class AbstractTreebank {
 	public boolean isEditable() {
 		return false;
 	}
-	
-	public boolean hasGold() {
-		return false;
-	}
-
-	public SentenceData getGold(int index, TreebankObserver observer) {
-		return null;
-	}
-
-	public SentenceData getGold(int index) {
-		return null;
-	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#setName(java.lang.String)
@@ -96,46 +84,6 @@ public abstract class AbstractTreebank {
 		getProperties().putAll(descriptor.getProperties());
 		name = descriptor.getName();
 		location = descriptor.getLocation();
-	}
-
-	/**
-	 * 
-	 * @param item
-	 * @throws UnsupportedSentenceDataException
-	 * @throws UnsupportedOperationException
-	 */
-	public void add(SentenceData item) {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
-	 * 
-	 * @param item
-	 * @param index
-	 * @throws UnsupportedSentenceDataException
-	 * @throws UnsupportedOperationException
-	 */
-	public void add(SentenceData item, int index) {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
-	 * 
-	 * @param item
-	 * @throws UnsupportedSentenceDataException
-	 * @throws UnsupportedOperationException
-	 */
-	public void remove(SentenceData item) {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
-	 * 
-	 * @param index
-	 * @throws UnsupportedOperationException
-	 */
-	public void remove(int index) {
-		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -200,5 +148,21 @@ public abstract class AbstractTreebank {
 	 */
 	public void removeListener(EventListener listener, String eventName) {
 		eventSource.removeListener(listener, eventName);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#set(net.ikarus_systems.icarus.language.SentenceData, int, net.ikarus_systems.icarus.language.DataType)
+	 */
+	public void set(SentenceData item, int index, DataType type) {
+		if(!isEditable())
+			throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#remove(int, net.ikarus_systems.icarus.language.DataType)
+	 */
+	public void remove(int index, DataType type) {
+		if(!isEditable())
+			throw new UnsupportedOperationException();
 	}
 }

@@ -55,8 +55,7 @@ public abstract class WeakHandler {
 		try {
 			statement.execute();
 		} catch(Exception e) {
-			LoggerFactory.getLogger(WeakHandler.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to execute handler statement: "+Arrays.toString(args), e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to execute handler statement: "+Arrays.toString(args), e); //$NON-NLS-1$
 		}
 	}
 }

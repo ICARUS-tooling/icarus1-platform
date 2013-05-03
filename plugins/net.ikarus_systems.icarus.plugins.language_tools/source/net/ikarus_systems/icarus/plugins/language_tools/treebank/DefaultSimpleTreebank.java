@@ -16,9 +16,12 @@ import java.util.logging.Level;
 
 import org.java.plugin.registry.Extension;
 
+import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.Grammar;
+import net.ikarus_systems.icarus.language.LanguageManager;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
+import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.language.treebank.AbstractTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
@@ -26,10 +29,11 @@ import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
 import net.ikarus_systems.icarus.language.treebank.TreebankEvents;
 import net.ikarus_systems.icarus.language.treebank.TreebankMetaData;
 import net.ikarus_systems.icarus.language.treebank.TreebankMetaDataBuilder;
-import net.ikarus_systems.icarus.language.treebank.TreebankObserver;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.events.EventObject;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner
@@ -109,8 +113,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 			reader = (SentenceDataReader) PluginUtil.instantiate(readerExtension);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e) {
-			LoggerFactory.getLogger(DefaultSimpleTreebank.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to instantiate reader: "+readerExtension.getUniqueId(), e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to instantiate reader: "+readerExtension.getUniqueId(), e); //$NON-NLS-1$
 		}
 		
 		return reader;
@@ -131,61 +134,38 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#add(net.ikarus_systems.icarus.language.SentenceData)
+	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#set(net.ikarus_systems.icarus.language.SentenceData, int, net.ikarus_systems.icarus.language.DataType)
 	 */
-	@Override
-	public void add(SentenceData item) {
-		int index = buffer==null ? 0 : buffer.size();
-		add(item, index);
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#add(net.ikarus_systems.icarus.language.SentenceData, int)
-	 */
-	@Override
-	public void add(SentenceData item, int index) {
-		if(!editable)
-			throw new UnsupportedOperationException("Cannot add sentence data when not editable"); //$NON-NLS-1$
-		if(!getEntryClass().isAssignableFrom(item.getClass()))
+	public void set(SentenceData item, int index, DataType type) {
+		if(!isEditable())
+			throw new UnsupportedOperationException();
+		if(!ContentTypeRegistry.isCompatible(getDataType(), item))
 			throw new UnsupportedSentenceDataException("Unsupported data: "+item); //$NON-NLS-1$
+		
+		if(!supportsType(type)) {
+			return;
+		}
 		
 		if(buffer==null) {
 			buffer = new ArrayList<>();
 		}
 		
-		buffer.add(index, item);
+		if(index==buffer.size()) {
+			buffer.add(item);
+		} else {
+			buffer.set(index, item);
+		}
 		
 		eventSource.fireEvent(new EventObject(TreebankEvents.ADDED, 
 				"item", item, "index", index)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#remove(net.ikarus_systems.icarus.language.SentenceData)
+	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#remove(int, net.ikarus_systems.icarus.language.DataType)
 	 */
-	@Override
-	public void remove(SentenceData item) {
-		if(!editable)
-			throw new UnsupportedOperationException("Cannot remove sentence data when not editable"); //$NON-NLS-1$
-		if(!getEntryClass().isAssignableFrom(item.getClass()))
-			throw new UnsupportedSentenceDataException("Unsupported data: "+item); //$NON-NLS-1$
-		
-		if(buffer==null) {
-			return;
-		}
-		
-		if(buffer.remove(item)) {
-			eventSource.fireEvent(new EventObject(TreebankEvents.REMOVED, 
-					"item", item)); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#remove(int)
-	 */
-	@Override
-	public void remove(int index) {
-		if(!editable)
-			throw new UnsupportedOperationException("Cannot remove sentence data when not editable"); //$NON-NLS-1$
+	public void remove(int index, DataType type) {
+		if(!isEditable())
+			throw new UnsupportedOperationException();
 		
 		if(buffer==null) {
 			return;
@@ -270,27 +250,12 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#get(int)
-	 */
-	@Override
-	public SentenceData get(int index) {
-		return buffer==null ? null : buffer.get(index);
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#get(int, net.ikarus_systems.icarus.language.treebank.TreebankObserver)
-	 */
-	@Override
-	public SentenceData get(int index, TreebankObserver observer) {
-		return get(index);
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#getEntryClass()
 	 */
 	@Override
-	public Class<? extends SentenceData> getEntryClass() {
-		return reader==null ? SentenceData.class : getSentenceDataReader().getDataClass();
+	public ContentType getDataType() {
+		return readerExtension==null ? LanguageManager.getInstance().getBasicLanguageDataType() 
+				: getSentenceDataReader().getDataType();
 	}
 
 	/**
@@ -299,5 +264,30 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	@Override
 	public TreebankMetaData getMetaData() {
 		return metaData;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#supportsType(net.ikarus_systems.icarus.language.DataType)
+	 */
+	@Override
+	public boolean supportsType(DataType type) {
+		return type==DataType.SYSTEM;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType)
+	 */
+	@Override
+	public SentenceData get(int index, DataType type) {
+		return type==DataType.SYSTEM ? buffer.get(index) : null;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType, net.ikarus_systems.icarus.language.AvailabilityObserver)
+	 */
+	@Override
+	public SentenceData get(int index, DataType type,
+			AvailabilityObserver observer) {
+		return get(index, type);
 	}
 }

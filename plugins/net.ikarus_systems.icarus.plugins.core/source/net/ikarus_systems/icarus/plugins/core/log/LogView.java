@@ -187,8 +187,7 @@ public class LogView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(LogView.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -205,7 +204,7 @@ public class LogView extends View {
 		
 		container.add(infoLabel, BorderLayout.NORTH);
 		
-		loggingModel = new LogListModel(1000);
+		loggingModel = new LogListModel();
 		
 		logRecordList = new JList<LogRecord>(loggingModel){
 
@@ -238,8 +237,6 @@ public class LogView extends View {
 		 * was added!
 		 */
 		loggingModel.addListDataListener(handler);
-		
-		LoggerFactory.getRootLogger().addHandler(loggingModel);
 		
 		JScrollPane logScrollpane = new JScrollPane(logRecordList);
 		logScrollpane.setBorder(UIUtil.topLineBorder);
@@ -326,8 +323,7 @@ public class LogView extends View {
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(LogView.class).log(LoggerFactory.record(
-						Level.SEVERE, "Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 		
@@ -367,7 +363,6 @@ public class LogView extends View {
 	 */
 	@Override
 	public void close() {
-		LoggerFactory.getRootLogger().removeHandler(loggingModel);
 		loggingModel.close();
 	}
 

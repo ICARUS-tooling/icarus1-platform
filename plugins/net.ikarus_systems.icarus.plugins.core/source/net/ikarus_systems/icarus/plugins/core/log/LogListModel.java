@@ -11,7 +11,6 @@ package net.ikarus_systems.icarus.plugins.core.log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -22,7 +21,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
+import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.events.EventListener;
+import net.ikarus_systems.icarus.ui.events.EventObject;
+import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.util.Exceptions;
 
 /**
@@ -30,12 +33,11 @@ import net.ikarus_systems.icarus.util.Exceptions;
  * @version $Id$
  *
  */
-public class LogListModel extends Handler implements ListModel<LogRecord> {
+public class LogListModel implements ListModel<LogRecord>, EventListener {
 	
-	private List<LogRecord> records;
-	private int maxSize;
+	private int offset = 0;
+	
 	private List<ListDataListener> listDataListeners;
-	private List<Integer> indexFilter;
 	
 	private List<ChangeListener> changeListeners;
 	private int warningCount = 0;
@@ -43,49 +45,21 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 	private ChangeEvent changeEvent = new ChangeEvent(this);
 
 	public LogListModel() {
-		this(1000);
-	}
-
-	public LogListModel(int maxSize) {
-		setMaxSize(maxSize);
-		setLevel(Level.ALL);
-	}
-	
-	/**
-	 * @return the maxSize
-	 */
-	public int getMaxSize() {
-		return maxSize;
-	}
-
-	/**
-	 * @param maxSize the maxSize to set
-	 */
-	public void setMaxSize(int maxSize) {
-		if(maxSize<100)
-			throw new IllegalArgumentException("Maximum size value too small: "+maxSize); //$NON-NLS-1$
-		
-		this.maxSize = maxSize;
-		
-		if(records==null) {
-			records = new ArrayList<>(Math.min(200, maxSize/2));
-		} else if(records!=null && records.size()>maxSize) {
-			records.subList(maxSize, records.size()-1).clear();
-		}
+		LoggerFactory.getRootHandler().addListener(Events.ADDED, this);
+		LoggerFactory.getRootHandler().addListener(Events.REMOVED, this);
+		LoggerFactory.getRootHandler().addListener(Events.CLEANED, this);
 	}
 	
 	public void clear() {
-		synchronized (records) {
-			if(indexFilter!=null)
-				indexFilter.clear();
+		int toIndex = Math.max(0, getSize()-1);
+		offset = LoggerFactory.getRootHandler().getRecordCount();
+		
+		warningCount = 0;
+		errorCount = 0;
 
-			int size = getSize();
-			records.clear();
-			warningCount = errorCount = 0;
-			fireListDataEvent(new ListDataEvent(this, 
-					ListDataEvent.INTERVAL_REMOVED, 0, size));
-			fireStateChanged();
-		}
+		fireListDataEvent(new ListDataEvent(this, 
+				ListDataEvent.INTERVAL_REMOVED, 0, toIndex));
+		fireStateChanged();
 	}
 
 	/**
@@ -93,9 +67,7 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 	 */
 	@Override
 	public int getSize() {
-		List<?> list = indexFilter==null ? records : indexFilter;
-		
-		return list==null ? 0 : list.size();
+		return Math.max(0, LoggerFactory.getRootHandler().getRecordCount()-offset);
 	}
 
 	/**
@@ -103,10 +75,10 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 	 */
 	@Override
 	public LogRecord getElementAt(int index) {
-		if(indexFilter!=null)
-			index = indexFilter.get(index);
+		index += offset;
 		
-		return records.get(index);
+		return index>=LoggerFactory.getRootHandler().getRecordCount() ?
+				null : LoggerFactory.getRootHandler().getRecord(index);
 	}
 
 	/**
@@ -116,8 +88,9 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 	public void addListDataListener(ListDataListener listener) {
 		Exceptions.testNullArgument(listener, "listener"); //$NON-NLS-1$
 		
-		if(listDataListeners==null)
+		if(listDataListeners==null) {
 			listDataListeners = new ArrayList<>();
+		}
 			
 		listDataListeners.add(listener);
 	}
@@ -129,8 +102,9 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 	public void removeListDataListener(ListDataListener listener) {
 		Exceptions.testNullArgument(listener, "listener"); //$NON-NLS-1$
 		
-		if(listDataListeners!=null)
+		if(listDataListeners!=null) {
 			listDataListeners.remove(listener);
+		}
 	}
 	
 	private void fireListDataEvent(final ListDataEvent evt) {
@@ -183,90 +157,28 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 	}
 	
 	private void fireStateChanged() {
-		if(changeListeners!=null) {
-			for(ChangeListener listener : changeListeners)
-				listener.stateChanged(changeEvent);
-		}
-	}
-
-	/**
-	 * @see java.util.logging.Handler#publish(java.util.logging.LogRecord)
-	 */
-	@Override
-	public void publish(final LogRecord record) {
 		
 		if(!SwingUtilities.isEventDispatchThread()) {
 			UIUtil.invokeLater(new Runnable() {
 				
 				@Override
 				public void run() {
-					publish(record);
+					fireStateChanged();
 				}
 			});
+			
 			return;
 		}
 		
-		boolean hasChanged = false;
-		LogRecord removed = null;
-		
-		synchronized (records) {
-			records.add(record);
-			
-			int fromIndex, toIndex;
-			
-			if(records.size()>maxSize) {
-				removed = records.remove(0);
-				fromIndex = 0;
-				toIndex = records.size()-1;
-				fireListDataEvent(new ListDataEvent(this, 
-						ListDataEvent.CONTENTS_CHANGED, fromIndex, toIndex));
-			}
-
-			fromIndex = records.size()-1;
-			toIndex = fromIndex;
-			
-			fireListDataEvent(new ListDataEvent(this, 
-					ListDataEvent.INTERVAL_ADDED, fromIndex, toIndex));
-		}
-		
-		int level = record.getLevel().intValue();
-		if(level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue()) {
-			warningCount++;
-			hasChanged = warningCount==1;
-		} else if(level>=Level.SEVERE.intValue()) {
-			errorCount++;
-			hasChanged = errorCount==1;
-		}
-		
-		if(removed!=null) {
-			level = removed.getLevel().intValue();
-			if(level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue()) {
-				warningCount--;
-				hasChanged = warningCount==0;
-			} else if(level>=Level.SEVERE.intValue()) {
-				errorCount--;
-				hasChanged = errorCount==0;
+		if(changeListeners!=null) {
+			for(ChangeListener listener : changeListeners) {
+				listener.stateChanged(changeEvent);
 			}
 		}
-		
-		if(hasChanged)
-			fireStateChanged();
 	}
 
-	/**
-	 * @see java.util.logging.Handler#flush()
-	 */
-	@Override
-	public void flush() {
-		// no-op
-	}
-
-	/**
-	 * @see java.util.logging.Handler#close()
-	 */
-	@Override
-	public void close() throws SecurityException {
-		clear();
+	public void close() {
+		LoggerFactory.getRootHandler().removeListener(this);
 	}
 
 	public int getWarningCount() {
@@ -275,6 +187,56 @@ public class LogListModel extends Handler implements ListModel<LogRecord> {
 
 	public int getErrorCount() {
 		return errorCount;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.ui.events.EventListener#invoke(java.lang.Object, net.ikarus_systems.icarus.ui.events.EventObject)
+	 */
+	@Override
+	public void invoke(Object sender, EventObject event) {
+		if(Events.ADDED.equals(event.getName())) {
+			LogRecord record = (LogRecord) event.getProperty("record"); //$NON-NLS-1$
+			int index = (int) event.getProperty("index"); //$NON-NLS-1$
+            int level = record.getLevel().intValue();
+	        boolean hasChanged = false;
+	        if(level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue()) {
+	            warningCount++;
+	            hasChanged = warningCount==1;
+	        } else if(level>=Level.SEVERE.intValue()) {
+	            errorCount++;
+	            hasChanged = errorCount==1;
+	        }
+
+            index -= offset;
+            fireListDataEvent(new ListDataEvent(this,
+                    ListDataEvent.INTERVAL_ADDED, index, index));
+            if(hasChanged) {
+            	fireStateChanged();
+            }
+			
+		} else if(Events.REMOVED.equals(event.getName())) {
+			LogRecord removed = (LogRecord) event.getProperty("record"); //$NON-NLS-1$
+			int index = (int) event.getProperty("index"); //$NON-NLS-1$
+            int level = removed.getLevel().intValue();
+            boolean hasChanged = false;
+            if(level>=Level.WARNING.intValue() && level<Level.SEVERE.intValue()) {
+                warningCount--;
+                hasChanged = warningCount==0;
+            } else if(level>=Level.SEVERE.intValue()) {
+                errorCount--;
+                hasChanged = errorCount==0;
+            }
+
+            index -= offset;
+            fireListDataEvent(new ListDataEvent(this,
+                    ListDataEvent.CONTENTS_CHANGED, index, index));
+            if(hasChanged) {
+            	fireStateChanged();
+            }
+            
+		} else if(Events.CLEANED.equals(event.getName())) {
+			clear();
+		}
 	}
 
 }

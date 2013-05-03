@@ -11,13 +11,14 @@ package net.ikarus_systems.icarus.language;
 
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
@@ -26,9 +27,12 @@ import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
  * @version $Id$
  *
  */
-public final class LanguageManager implements Serializable {
-
-	private static final long serialVersionUID = 2940925679465686703L;
+public final class LanguageManager {
+	
+	private ContentType basicSentenceDataType;
+	
+	private Map<String, Object> grammars = Collections.synchronizedMap(
+			new LinkedHashMap<String, Object>());
 	
 	// singleton
 	private static LanguageManager instance;
@@ -44,10 +48,8 @@ public final class LanguageManager implements Serializable {
 		return instance;
 	}
 	
-	private Map<String, Object> grammars = Collections.synchronizedMap(new HashMap<String, Object>());
-	
 	private LanguageManager() {
-		// no-op
+		basicSentenceDataType = ContentTypeRegistry.getInstance().getType("extension-point"); //$NON-NLS-1$
 	}
 	
 	// prevent multiple deserialization
@@ -90,5 +92,9 @@ public final class LanguageManager implements Serializable {
 		}
 		
 		return (Grammar) grammar;
+	}
+	
+	public ContentType getBasicLanguageDataType() {
+		return basicSentenceDataType;
 	}
 }

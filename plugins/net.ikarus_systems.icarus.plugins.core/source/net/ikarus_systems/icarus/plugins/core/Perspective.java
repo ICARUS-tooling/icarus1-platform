@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -170,10 +169,6 @@ public abstract class Perspective implements Identifiable {
 	protected boolean usePrivateActionNamespace() {
 		return true;
 	}
-	
-	protected Logger getLogger() {
-		return LoggerFactory.getLogger(Perspective.class);
-	}
 
 	/**
 	 * Called from the framework when a {@code Perspective} is made
@@ -209,8 +204,7 @@ public abstract class Perspective implements Identifiable {
 				view.close();
 			} catch(Exception e) {
 				Identity id = view.getIdentity();
-				getLogger().log(LoggerFactory.record(
-						Level.SEVERE, "Error while closing view: "+id.getName()+" ("+id.getId()+")", e)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				LoggerFactory.log(this, Level.SEVERE, "Error while closing view: "+id.getName()+" ("+id.getId()+")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 	}
@@ -304,8 +298,8 @@ public abstract class Perspective implements Identifiable {
 				if(e instanceof CorruptedStateException)
 					ex = (CorruptedStateException)e;
 				
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to reset view: "+view.getIdentity().getId(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to reset view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
 			}
 		}
 		
@@ -443,7 +437,7 @@ public abstract class Perspective implements Identifiable {
 					tabbedPane.setTitleAt(i, identity.getName());
 					tabbedPane.setToolTipTextAt(i, identity.getDescription());
 				} catch(Throwable t) {
-					getLogger().log(Level.SEVERE, "Failed to localize container: "+container, t); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, "Failed to localize container: "+container, t); //$NON-NLS-1$
 				}
 			}
 		}
@@ -730,8 +724,8 @@ public abstract class Perspective implements Identifiable {
 			try {
 				view.buildToolBar(delegate);
 			} catch(Exception e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to build tool-bar elements for view: "+view.getIdentity().getId(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to build tool-bar elements for view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
 			}
 		}
 	}
@@ -764,15 +758,15 @@ public abstract class Perspective implements Identifiable {
 	            
 	            reloadViewTab(view);
 	            
-	        	getLogger().log(LoggerFactory.record(Level.FINE, 
-	        			"Activated view: "+extension.getId())); //$NON-NLS-1$
+	            LoggerFactory.log(this, Level.FINE, 
+	        			"Activated view: "+extension.getId()); //$NON-NLS-1$
 	            
 	            eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEW_ACTIVATED, "view", view)); //$NON-NLS-1$
 	        } catch (Throwable t) {
 	        	// Present the user some feedback both at logging level
 	        	// and on the container itself
-	        	getLogger().log(LoggerFactory.record(Level.SEVERE, 
-	        			"Failed to activate view: "+extension.getId(), t)); //$NON-NLS-1$
+	        	LoggerFactory.log(this, Level.SEVERE, 
+	        			"Failed to activate view: "+extension.getId(), t); //$NON-NLS-1$
 	        	UIDummies.createDefaultErrorOutput(container, t);
 	        	container.setToolTipText("View: "+extension.getId()); //$NON-NLS-1$
 	        	container.setInvalid();
@@ -789,8 +783,8 @@ public abstract class Perspective implements Identifiable {
 	 * specific configuration of views. Note that it is mandatory to call
 	 * {@link View#init(JComponent)} during this initialization process!
 	 * Subclasses should either make that call themselves or simply call
-	 * {@code super#initView(View, ViewContainer)} since the default
-	 * implementation only calls the {@code View#init(JComponent)} method
+	 * {@code super.initView(View, ViewContainer)} since the default
+	 * implementation only calls the {@link View#init(JComponent)} method
 	 * without additional configuration.
 	 */
 	protected void initView(View view, ViewContainer container) {
@@ -879,8 +873,8 @@ public abstract class Perspective implements Identifiable {
 			try {
 				results.add(view.handleRequest(message));
 			} catch(Exception e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to dispatch message to view: "+view.getIdentity().getId(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to dispatch message to view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
 				results.add(new ResultMessage(message, e));
 			}
 		}

@@ -11,7 +11,10 @@ package net.ikarus_systems.icarus.language.treebank;
 
 import java.util.Map;
 
+import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
+import net.ikarus_systems.icarus.language.AvailabilityObserver;
+import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.util.location.Location;
@@ -22,55 +25,33 @@ import net.ikarus_systems.icarus.util.location.Location;
  * @version $Id$
  *
  */
-public interface Treebank {
+public interface Treebank extends SentenceDataList {
 	
 	boolean isEditable();
 	
 	void setName(String name);
 	
 	String getName();
-	
-	/**
-	 * Returns {@code true} if and only if this {@code Treebank} supports the
-	 * {@code gold} feature. When this is the case both the {@link #getGold(int)}
-	 * and {@link #getGold(int, TreebankObserver)} methods can be used to fetch
-	 * the {@code SentenceData} objects designated for a given index.
-	 * 
-	 *  TODO: general definition of "gold" or at least link to resources
-	 */
-	boolean hasGold();
 
 	/**
-	 * 
-	 * @param item
-	 * @throws UnsupportedSentenceDataException
-	 * @throws UnsupportedOperationException
+	 * Replaces
 	 */
-	void add(SentenceData item);
+	void set(SentenceData item, int index, DataType type);
 	
 	/**
-	 * 
-	 * @param item
-	 * @param index
-	 * @throws UnsupportedSentenceDataException
-	 * @throws UnsupportedOperationException
+	 * Removes from this {@code Treebank} the data stored at the
+	 * specified {@code index} that is associated with the given
+	 * {@code type}. The exact behavior in case of the {@code type}
+	 * argument being {@code null} is implementation specific. The general
+	 * advice is to remove all data stored for that index, but implementations
+	 * might decide to ignore calls without a valid {@code DataType} parameter.
+	 * In addition an implementation can remove all data for that index if
+	 * data of some important type was removed. I.e. a typical {@code Treebank}
+	 * representing parse or other annotation results created by an automated
+	 * process would drop an entire index when data of the type {@value DataType#SYSTEM}
+	 * is removed.
 	 */
-	void add(SentenceData item, int index);
-	
-	/**
-	 * 
-	 * @param item
-	 * @throws UnsupportedSentenceDataException
-	 * @throws UnsupportedOperationException
-	 */
-	void remove(SentenceData item);
-	
-	/**
-	 * 
-	 * @param index
-	 * @throws UnsupportedOperationException
-	 */
-	void remove(int index);
+	void remove(int index, DataType type);
 
 	/**
 	 * 
@@ -104,13 +85,6 @@ public interface Treebank {
 	 * @return the {@code source} of this {@code Treebank}
 	 */
 	Location getLocation();
-
-	/**
-	 * Returns the number of {@code SentenceData} objects that
-	 * this {@code Treebank} currently contains. 
-	 * @return the number of elements in this {@code Treebank}
-	 */
-	int size();
 	
 	/**
 	 * Releases all data within this {@code Treebank} so that 
@@ -121,52 +95,6 @@ public interface Treebank {
 	void saveState(TreebankDescriptor descriptor);
 	
 	void loadState(TreebankDescriptor descriptor);
-
-	/**
-	 * Synchronously fetches the {@link SentenceData} object
-	 * for the specified index. If this {@code Treebank} supports
-	 * asynchronous loading of elements then this method may
-	 * return {@code null} if the desired {@code index} is not 
-	 * available.
-	 * 
-	 * @param index the index of interest
-	 * @return the {@code SentenceData} object at position {@code index}
-	 * within this {@code Treebank}
-	 */
-	SentenceData get(int index);
-	
-	SentenceData getGold(int index);
-
-
-	/**
-	 * Asynchronously fetches the {@link SentenceData} object
-	 * for the specified index.<p>
-	 * This method might return {@code null} and use the optional
-	 * {@link TreebankObserver} to notify about a successful loading
-	 * of the desired data later. Implementations should only
-	 * store a weak reference to the provided {@code observer} since
-	 * the calling code might decide to release the {@code TreebankObserver}
-	 * object and its associated resources while the loading is 
-	 * still in progress. Therefore exclusive ownership of this object 
-	 * should be left to the original code that created it.
-	 * 
-	 * @param index the index of interest
-	 * @param observer the {@code TreebankObserver} to be notified
-	 * when the asynchronous loading of the desired {@code SentenceData}
-	 * is finished
-	 * @return
-	 */
-	SentenceData get(int index, TreebankObserver observer);
-
-	SentenceData getGold(int index, TreebankObserver observer);
-	
-	/**
-	 * Returns the {@code Class} used for {@code SentenceData} objects
-	 * in this {@code Treebank}. 
-	 * @return the {@code Class} used to represent sentence data within
-	 * this {@code Treebank}
-	 */
-	Class<? extends SentenceData> getEntryClass();
 	
 	TreebankMetaData getMetaData();
 

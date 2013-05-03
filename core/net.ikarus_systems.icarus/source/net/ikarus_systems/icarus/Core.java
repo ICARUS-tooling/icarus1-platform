@@ -14,12 +14,21 @@
 package net.ikarus_systems.icarus;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -35,10 +44,67 @@ import org.java.plugin.PluginLifecycleException;
 import org.java.plugin.PluginManager;
 import org.java.plugin.PluginManager.PluginLocation;
 import org.java.plugin.registry.IntegrityCheckReport;
+import org.java.plugin.registry.PluginAttribute;
 import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.standard.StandardPluginLocation;
 
 /**
+ * Main class and application entry point for startup operation.
+ * <p>
+ * Manages default folder structure and the following levels of
+ * properties (or <i>options</i>):
+ * <ol>
+ * <li>System properties</li>
+ * <li>Plug-in properties</li>
+ * <li>Application properties</li>
+ * </ol>
+ * 
+ * <i>System properties</i> are the collection of system wide properties
+ * accessible by Java via the {@link System#getProperties()} method.
+ * <p>
+ * <i>Plug-in properties</i> are properties defined within the {@code attributes}
+ * section of a plug-in manifest file. Only attributes that are declared as child attributes
+ * of the first {@value #PROPERTIES_KEY} attribute are considered to be 
+ * property definitions and will be processed in order of their
+ * definition and checked for being a plain property definition (using the
+ * {@code id} field as key and {@code value} field as value for a new property
+ * entry) or a link pointing to a resource that can be used to load properties from.
+ * Such links have to use the {@value #PROPERTIES_PATH_KEY} string as {@code id} and their
+ * {@code value} field will be used to locate the properties resource(s).<br>
+ * Note that there can be multiple attributes legally sharing the same {@code id}, 
+ * however only the <b>last</b> attribute's {@code value} will be used for the
+ * property in question! In the case of multiple attributes linking to property
+ * resources all of them will be read following the same pattern of overwriting.
+ * If a plug-in wishes to disable the publishing of its declared property attributes
+ * it can simply define an attribute with the {@value #IGNORE_ATTRIBUTES_KEY} {@code id}
+ * and a {@code value} that causes a call to {@code Boolean#parseBoolean(String)} to
+ * return {@code true} (any mix of upper and lower cases of the string "true").
+ * This flag will prevent the traversal of all property definitions within the 
+ * declaring plug-in!
+ * <p>
+ * <i>Application properties</i> can be specified on startup via the {@code -config}
+ * argument that has to point to a file that contains property definitions in a format
+ * suitable to either {@link Properties#load(InputStream)} or {@link Properties#loadFromXML(InputStream)}.
+ * The method to be applied is determined by the file ending of the supplied path. If ending
+ * on ".xml" the {@link Properties#loadFromXML(InputStream)} method will be used.
+ * In addition one can set properties directly by using the same argument format as
+ * of the Java VM itself:<br>
+ * Any argument starting with {@code -D} will be interpreted as a <i>key=value</i>
+ * string and parsed accordingly.<br>
+ * <b>Example:</b> {@code -Dsome.property.key=some.value}
+ * <p>
+ * Access to properties is also handled by this class using a hierarchical
+ * approach for searching. When asked for a property value the internal properties maps
+ * will be checked in reverse order of the levels described above until a mapping for the given
+ * key is found. So for a call to {@link #getProperty(String)} a property defined on
+ * plug-in level will override default system settings but will be hidden by
+ * an application property defined as command line argument or in a config file 
+ * linked via command line argument. Additionally there are methods defined to 
+ * query specific collections of properties and all properties related methods
+ * exist in two forms, one allowing for a default value to be supplied that will
+ * be used in case no property for the given key could be found. 
+ * 
+ * 
  * @author Markus Gärtner 
  *
  */
@@ -56,10 +122,14 @@ public class Core {
 			
 			core = new Core(args);
 			
-			// collect plugins and verify integrity
+			// Collect plug-ins and verify integrity
 			core.collectPlugins();
 			
-			// launch core plug-in
+			// Collect properties defined by plug-ins
+			// (this might technically override system settings)
+			core.collectProperties();
+			
+			// Launch core plug-in
 			core.launchCorePlugin();
 		} catch(Throwable e) {
 			new CoreErrorDialog(e).setVisible(true);
@@ -74,11 +144,31 @@ public class Core {
 	private final File dataFolder;
 	private final File tempFolder;
 	
-	private static final String ICARUS_CORE_PLUGIN = 
+	private static final String DEFAULT_CORE_PLUGIN_ID = 
 			"net.ikarus_systems.icarus.core"; //$NON-NLS-1$
+	
+	public static final String PROPERTIES_PATH_KEY = 
+			"net.ikarus_systems.icarus.propertiesPath"; //$NON-NLS-1$
+	
+	public static final String PROPERTIES_KEY = 
+			"net.ikarus_systems.icarus.properties"; //$NON-NLS-1$
+	
+	public static final String IGNORE_ATTRIBUTES_KEY = 
+			"net.ikarus_systems.icarus.ignoreAttributes"; //$NON-NLS-1$
+	
+	public static final String CORE_PLUGIN_KEY =  
+			"net.ikarus_systems.icarus.corePlugin"; //$NON-NLS-1$
+	
+	private Map<String, String> applicationProperties;
+	private Map<String, String> pluginProperties;
+	
+	private final Options options;
 
 	private Core(String[] args) {
 		logger = Logger.getLogger("icarus.launcher"); //$NON-NLS-1$
+		
+		// Init options
+		options = new Options(args);
 		
 		// init folders
 		rootFolder = new File(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -135,6 +225,64 @@ public class Core {
 		throw new CloneNotSupportedException();
 	}
 	
+	private void collectProperties() {
+		// Just use the options set of properties as application properties
+		applicationProperties = options.properties;
+		
+		// Read in all attributes from plug-ins
+		for(PluginDescriptor descriptor : PluginUtil.getPluginRegistry().getPluginDescriptors()) {
+			
+			// Check if ignore flag is set
+			PluginAttribute ignoreAttr = descriptor.getAttribute(IGNORE_ATTRIBUTES_KEY);
+			if(ignoreAttr!=null && Boolean.parseBoolean(ignoreAttr.getValue())) {
+				continue;
+			}
+			
+			// Check if plug-in defines properties
+			PluginAttribute propertiesAttr = descriptor.getAttribute(PROPERTIES_KEY);
+			if(propertiesAttr==null) {
+				continue;
+			}
+			
+			// Fetch and read property attributes
+			for(PluginAttribute attribute : propertiesAttr.getSubAttributes()) {
+				readProperty(attribute);
+			}
+		}
+	}
+	
+	private void readProperty(PluginAttribute attribute) {
+		if(PROPERTIES_PATH_KEY.equals(attribute.getId())) {
+			// Read in properties resource file
+			ClassLoader classLoader = PluginUtil.getClassLoader(attribute);
+			String path = attribute.getValue();
+			URL url = classLoader.getResource(path);
+			if(url==null) {
+				logger.log(Level.WARNING, "Could not locate properties file: "+path); //$NON-NLS-1$
+				return;
+			}
+			
+			Properties properties = readProperties(url, path.endsWith(".xml")); //$NON-NLS-1$
+			if(properties==null) {
+				// Logging is done on the readProperties() method
+				return;
+			}
+
+			if(pluginProperties==null) {
+				pluginProperties = new HashMap<>();
+			}
+			for(String key : properties.stringPropertyNames()) {
+				pluginProperties.put(key, properties.getProperty(key));
+			}
+		} else {
+			// Simple key-value definition
+			if(pluginProperties==null) {
+				pluginProperties = new HashMap<>();
+			}
+			pluginProperties.put(attribute.getId(), attribute.getValue());
+		}
+	}
+	
 	private void collectPlugins() {
 		List<PluginLocation> pluginLocations = new LinkedList<>();
 		logger.fine("Collecting plug-ins"); //$NON-NLS-1$
@@ -168,8 +316,9 @@ public class Core {
 		}
 		
 		// in case of errors simply exit launcher completely
-		if(report.countErrors()>0)
+		if(report.countErrors()>0) {
 			exit(new Error("Integrity check failed")); //$NON-NLS-1$
+		}
 	}
     
     private String integrityCheckReport2str(final String header, final IntegrityCheckReport report) {
@@ -231,7 +380,9 @@ public class Core {
 			// DEBUG
 			LoggerFactory.setInitialLevel(Level.ALL);
 			
-			Plugin corePlugin = PluginUtil.getPluginManager().getPlugin(ICARUS_CORE_PLUGIN);
+			String corePluginId = getProperty(CORE_PLUGIN_KEY, DEFAULT_CORE_PLUGIN_ID);
+			
+			Plugin corePlugin = PluginUtil.getPluginManager().getPlugin(corePluginId);
 			logger.info("Started core plugin: "+corePlugin); //$NON-NLS-1$
 		} catch (PluginLifecycleException e) {
 			exit(new Error("Failed to start core plugin: "+e.getMessage(), e)); //$NON-NLS-1$
@@ -249,14 +400,18 @@ public class Core {
 			}
 		}
 		
-		new CoreErrorDialog(e).setVisible(true);
+		throw e;
 	}
 
 	/**
-	 * @return the launcher
+	 * Returns the singleton {@code Core} instance.
 	 */
 	public static Core getCore() {
 		return core;
+	}
+	
+	public Options getOptions() {
+		return options;
 	}
 
 	/**
@@ -298,7 +453,158 @@ public class Core {
 		return File.createTempFile(baseName, "tmp", getTempFolder()); //$NON-NLS-1$
 	}
 	
-	private final class PluginManagerLog implements PluginManager.EventListener {
+	// PROPERTIES ACCESS
+
+	public String getProperty(String key) {
+		return getProperty(key, null);
+	}
+	
+	public String getProperty(String key, String defaultValue) {
+		String value = applicationProperties==null ? null : applicationProperties.get(key);
+		if(value==null) {
+			value = pluginProperties==null ? null : pluginProperties.get(key);
+		}
+		if(value==null) {
+			value = System.getProperty(key, defaultValue);
+		}
+		
+		return value;
+	}
+	
+	public String getApplicationProperty(String key) {
+		return getApplicationProperty(key, null);
+	}
+	
+	public String getApplicationProperty(String key, String defaultValue) {
+		String value = applicationProperties==null ? null : applicationProperties.get(key);
+		return value==null ? defaultValue : value;
+	}
+	
+	public String getPluginProperty(String key) {
+		return getPluginProperty(key, null);
+	}
+	
+	public String getPluginProperty(String key, String defaultValue) {
+		String value = pluginProperties==null ? null : pluginProperties.get(key);
+		return value==null ? defaultValue : value;
+	}
+
+	public Map<String, String> getApplicationProperties() {
+		return Collections.unmodifiableMap(applicationProperties);
+	}
+	
+	public Map<String, String> getPluginProperties() {
+		return Collections.unmodifiableMap(pluginProperties);
+	}
+	
+	private Properties readProperties(InputStream in, boolean xml) {
+		Properties properties = new Properties();
+		
+		try {
+			if(xml) {
+				properties.loadFromXML(in);
+			} else {
+				properties.load(in);
+			}
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Failed to read properties", e); //$NON-NLS-1$
+			properties = null;
+		}
+		
+		return properties;
+	}
+	
+	private Properties readProperties(File file, boolean xml) {
+		try {
+			return readProperties(new FileInputStream(file), xml);
+		} catch (FileNotFoundException e) {
+			logger.log(Level.SEVERE, "Properties file does not exist: "+file.getAbsolutePath(), e); //$NON-NLS-1$
+		}
+		return null;
+	}
+	
+	private Properties readProperties(URL url, boolean xml) {
+		try {
+			return readProperties(url.openStream(), xml);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Unable to connect to properties location: "+url, e); //$NON-NLS-1$
+		}
+		return null;
+	}
+	
+	public class Options {
+		private Map<String,String> properties;
+		private boolean verbose = false;
+		
+		private final String[] args;
+		
+		public Options(String[] args) {
+			this.args = args;
+			
+			for(int i=0; i<args.length; i++) {
+				String token = args[i];
+				if("-v".equals(token)) { //$NON-NLS-1$
+					verbose = true;
+				} else if("-plugin".equals(token)) { //$NON-NLS-1$
+					putProperty(CORE_PLUGIN_KEY, args[++i]);
+				} else if("-config".equals(token)) { //$NON-NLS-1$
+					String path = args[++i];
+					File file = new File(path);
+					Properties props = readProperties(file, path.endsWith(".xml")); //$NON-NLS-1$
+					putProperties(props);
+				} else if(token.startsWith("-D")) { //$NON-NLS-1$
+					int deli = token.indexOf('=', 3);
+					if(deli==-1) {
+						continue;
+					}
+					String key = token.substring(2, deli-1);
+					String value = token.substring(deli+1);
+					if(value.startsWith("\"") && value.endsWith("\"")) { //$NON-NLS-1$ //$NON-NLS-2$
+						value = value.substring(1, value.length()-1);
+					}
+					
+					putProperty(key, value);
+				}
+			}
+		}
+		
+		private void putProperties(Properties props) {
+			if(props==null || props.isEmpty()) {
+				return;
+			}
+			
+			if(properties==null) {
+				properties = new HashMap<>();
+			}
+
+			for(String key : props.stringPropertyNames()) {
+				properties.put(key, props.getProperty(key));
+			}
+		}
+		
+		private void putProperty(String key, String value) {
+			if(properties==null) {
+				properties = new HashMap<>();
+			}
+			properties.put(key, value);
+		}
+		
+		public boolean isVerbose() {
+			return verbose;
+		}
+		
+		public String[] getArgs() {
+			return Arrays.copyOf(args, args.length);
+		}
+		
+		public String getProperty(String key) {
+			return properties==null ? null : properties.get(key);
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	// XXX
+	private class PluginManagerLog implements PluginManager.EventListener {
 		
 
 		/**

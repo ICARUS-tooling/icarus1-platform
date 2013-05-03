@@ -32,9 +32,13 @@ import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
+import net.ikarus_systems.icarus.ui.view.Presenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Wrapper;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeCollection;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -136,6 +140,15 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			return false;
 		}
 		return UIHelperRegistry.globalRegistry().hasHelper(AWTPresenter.class, data);
+	}
+	
+	private boolean presenterSupports(Presenter presenter, ContentTypeCollection collection) {
+		for(ContentType type : collection.getContentTypes()) {
+			if(presenter.supports(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void displayData(Object data, Object owner, Options options) {
@@ -297,12 +310,13 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			// Try to find a suitable presenter if no presenter
 			// is present or the current presenter is not able to
 			// present the given data
-			if(presenter==null || !presenter.supports(presentedObject)) {
+			ContentTypeCollection contentTypes = ContentTypeRegistry.getInstance().getEnclosingTypes(presentedObject);
+			if(presenter==null || !presenterSupports(presenter, contentTypes)) {
 				presenter = findPresenter(presentedObject);
 			}
 			
 			// Only with a suitable presenter show the content
-			if(presenter!=null && presenter.supports(presentedObject)) {
+			if(presenter!=null && presenterSupports(presenter, contentTypes)) {
 				this.presentedObject = presentedObject;
 				this.options = options;
 				this.presenter = presenter;
@@ -326,8 +340,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 					presenterPane.setTitleAt(tabIndex, title);
 					presenterPane.setToolTipTextAt(tabIndex, title);
 				} catch (UnsupportedPresentationDataException e) {
-					LoggerFactory.getLogger(DefaultOutputView.class).log(LoggerFactory.record(
-							Level.SEVERE, "Failed to present data: "+presentedObject, e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, "Failed to present data: "+presentedObject, e); //$NON-NLS-1$
 					
 					// Show info if data not supported
 					String infoText = ResourceManager.getInstance().get(
@@ -425,8 +438,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			
 			Object owner = options.get(OWNER_OPTION);
 			if(owner==null) {
-				LoggerFactory.getLogger(DefaultOutputView.class).log(LoggerFactory.record(
-						Level.INFO, "No owner set for item to display: "+item)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.INFO, "No owner set for item to display: "+item); //$NON-NLS-1$
 				return;
 			}
 			

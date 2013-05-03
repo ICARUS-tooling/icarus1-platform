@@ -55,6 +55,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
@@ -178,6 +179,29 @@ public final class UIUtil {
 		list.addMouseListener(rightClickSelectionHandler);
 	}
 	
+	public static int getDirection(String s) {
+		if("north".equals(s) || "top".equals(s) || "up".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return SwingConstants.NORTH;
+		} else if("south".equals(s) || "bottom".equals(s) || "down".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return SwingConstants.SOUTH;
+		} else if("east".equals(s) || "right".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$
+			return SwingConstants.EAST;
+		} else if("west".equals(s) || "left".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$
+			return SwingConstants.WEST;
+		} else if("south_west".equals(s) || "bottom_left".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$
+			return SwingConstants.SOUTH_WEST;
+		} else if("south_east".equals(s) || "bottom_right".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$
+			return SwingConstants.SOUTH_EAST;
+		} else if("north_west".equals(s) || "top_left".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$
+			return SwingConstants.NORTH_WEST;
+		} else if("north_east".equals(s) || "top_right".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$
+			return SwingConstants.NORTH_EAST;
+		} else if("center".equals(s)) { //$NON-NLS-1$
+			return SwingConstants.CENTER;
+		} else
+			throw new IllegalArgumentException("Invalid direction: "+s); //$NON-NLS-1$
+	}
+	
 	public static void invokeLater(final Runnable runnable) {
 		Exceptions.testNullArgument(runnable, "runnable"); //$NON-NLS-1$
 		
@@ -188,8 +212,7 @@ public final class UIUtil {
 				try {
 					runnable.run();
 				} catch(Throwable t) {
-					LoggerFactory.getLogger(UIUtil.class).log(LoggerFactory.record(
-							Level.SEVERE, "Error while executing runnable on event dispatch thread", t)); //$NON-NLS-1$
+					LoggerFactory.log(UIUtil.class, Level.SEVERE, "Error while executing runnable on event dispatch thread", t); //$NON-NLS-1$
 				}
 			}
 		});
@@ -205,8 +228,7 @@ public final class UIUtil {
 				try {
 					runnable.run();
 				} catch(Throwable t) {
-					LoggerFactory.getLogger(UIUtil.class).log(LoggerFactory.record(
-							Level.SEVERE, "Error while executing runnable on event dispatch thread", t)); //$NON-NLS-1$
+					LoggerFactory.log(UIUtil.class, Level.SEVERE, "Error while executing runnable on event dispatch thread", t); //$NON-NLS-1$
 				}
 			}
 		});

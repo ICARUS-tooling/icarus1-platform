@@ -29,6 +29,8 @@ import net.ikarus_systems.icarus.ui.view.Template.SubTemplateCache;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.cache.LRUCache;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
 import org.java.plugin.registry.Documentable;
@@ -131,8 +133,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		
 		URL url = PluginElementPresenter.class.getResource(name);
 		if(url==null) {
-			LoggerFactory.getLogger(PluginElementPresenter.class).log(LoggerFactory.record(
-					Level.SEVERE, "Cannot find template file: "+name)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Cannot find template file: "+name); //$NON-NLS-1$
 			return null;
 		}
 		String templateData = null;
@@ -142,10 +143,10 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			templateData = IOUtil.readStream(url.openStream(), IOUtil.UTF8_ENCODING);
 			template = Template.compile(templateData, null);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(PluginElementPresenter.class).log(Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to read template data from resource: "+url, e); //$NON-NLS-1$
 		} catch (MalformedTemplateException e) {
-			LoggerFactory.getLogger(PluginElementPresenter.class).log(Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE, 
 					"Malformed template data in resource: "+url, e); //$NON-NLS-1$
 		}
 		
@@ -156,8 +157,8 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Object data) {
-		return getTemplateName(data)!=null;
+	public boolean supports(ContentType type) {
+		return ContentTypeRegistry.isCompatible("DocumentableContentType", type); //$NON-NLS-1$
 	}
 
 	/**
@@ -228,12 +229,10 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			try {
 				baseURL = new URL(jarLocation, "net/ikarus_systems/icarus/plugins/core/icons/"); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
-				LoggerFactory.getLogger(PluginElementPresenter.class).log(LoggerFactory.record(
-						Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e)); //$NON-NLS-1$
+				LoggerFactory.log(PluginElementPresenter.class, Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e); //$NON-NLS-1$
 			}
 			
-			LoggerFactory.getLogger(PluginElementPresenter.class).log(LoggerFactory.record(
-					Level.FINE, "New base url for plugin element presenter html templates:\n"+baseURL)); //$NON-NLS-1$
+			LoggerFactory.log(PluginElementPresenter.class, Level.FINE, "New base url for plugin element presenter html templates:\n"+baseURL); //$NON-NLS-1$
 		}
 		return baseURL;
 	}

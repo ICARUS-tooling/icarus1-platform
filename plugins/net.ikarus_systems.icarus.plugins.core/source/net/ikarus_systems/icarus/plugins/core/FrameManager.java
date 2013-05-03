@@ -26,8 +26,6 @@ public final class FrameManager {
 	
 	private static FrameManager instance;
 	
-	private Logger logger = LoggerFactory.getLogger(getClass());
-	
 	private BiDiMap<IcarusFrame, FrameHandle> frames;
 	
 	private AtomicInteger frameCount = new AtomicInteger();
@@ -71,8 +69,8 @@ public final class FrameManager {
 		try {
 			frame.init();
 		} catch (Exception e) {
-			logger.log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to init frame: "+frame, e)); //$NON-NLS-1$
+			LoggerFactory.log(FrameManager.class, Level.SEVERE, 
+					"Failed to init frame: "+frame, e); //$NON-NLS-1$
 			return null;
 		}
 		

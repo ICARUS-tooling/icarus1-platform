@@ -81,8 +81,8 @@ public class TreebankEditView extends View {
 		try {
 			actionManager.loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(TreebankEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -228,8 +228,8 @@ public class TreebankEditView extends View {
 				try {
 					editor.applyEdit();
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(TreebankEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to apply edit: "+getTreebank(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to apply edit: "+getTreebank(), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -354,8 +354,8 @@ public class TreebankEditView extends View {
 			try {
 				editor.resetEdit();
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(TreebankEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to reset editor: "+getTreebank(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to reset editor: "+getTreebank(), ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -370,8 +370,8 @@ public class TreebankEditView extends View {
 				
 				TreebankRegistry.getInstance().treebankChanged(editor.getEditingItem());
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(TreebankEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to apply edit: "+getTreebank(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to apply edit: "+getTreebank(), ex); //$NON-NLS-1$
 			}
 			
 			header.setText(getTreebank().getName());

@@ -108,8 +108,8 @@ public class TreebankExplorerView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -256,8 +256,7 @@ public class TreebankExplorerView extends View {
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(
-						Level.SEVERE, "Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 		
@@ -445,8 +444,8 @@ public class TreebankExplorerView extends View {
 			try {
 				TreebankRegistry.getInstance().newTreebank(extension, name);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to create new treebank: "+name, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to create new treebank: "+name, ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -490,8 +489,8 @@ public class TreebankExplorerView extends View {
 				try {
 					TreebankRegistry.getInstance().deleteTreebank(treebank);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Unable to delete treebank: "+treebank.getName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Unable to delete treebank: "+treebank.getName(), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -523,8 +522,8 @@ public class TreebankExplorerView extends View {
 			try {
 				TreebankRegistry.getInstance().newTreebank(extension, name);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to create new treebank: "+name, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to create new treebank: "+name, ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -563,8 +562,8 @@ public class TreebankExplorerView extends View {
 			try {
 				TreebankRegistry.getInstance().setName(treebank, uniqueName);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to rename treebank "+currentName+" to "+uniqueName, ex)); //$NON-NLS-1$ //$NON-NLS-2$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to rename treebank "+currentName+" to "+uniqueName, ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		
@@ -594,8 +593,8 @@ public class TreebankExplorerView extends View {
 					desktop.browse(location.getURL().toURI());
 				}
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(TreebankExplorerView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to open treebank location: "+treebank.getName(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to open treebank location: "+treebank.getName(), ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -680,8 +679,8 @@ public class TreebankExplorerView extends View {
 				// Perform export
 				TreebankRegistry.getInstance().exportTreebanks(file, treebanks);
 			} catch (Exception ex) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to export treebanks to file: "+file.getAbsolutePath(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to export treebanks to file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.ioException",  //$NON-NLS-1$
@@ -716,8 +715,8 @@ public class TreebankExplorerView extends View {
 			try {
 				importResult = TreebankRegistry.getInstance().importTreebanks(file);
 			} catch (IOException ex) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to import treebanks from file: "+file.getAbsolutePath(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to import treebanks from file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.ioException",  //$NON-NLS-1$
@@ -725,8 +724,8 @@ public class TreebankExplorerView extends View {
 						NamingUtil.fit(ex.toString(), 100));
 				return;
 			} catch (Exception ex) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Cannot import treebank data from file: "+file.getAbsolutePath(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Cannot import treebank data from file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.invalidContent",  //$NON-NLS-1$
@@ -838,12 +837,12 @@ public class TreebankExplorerView extends View {
 				} catch (Exception ex) {
 					errorCount++;
 					sb.append("  error"); //$NON-NLS-1$
-					getLogger().log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to add new treebank: "+info.fullInfo(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to add new treebank: "+info.fullInfo(), ex); //$NON-NLS-1$
 				}
 			}
 			
-			getLogger().log(LoggerFactory.record(Level.INFO, sb.toString()));
+			LoggerFactory.log(this, Level.INFO, sb.toString());
 			
 			// Present result of import operation
 			DialogFactory.getGlobalFactory().showInfo(getFrame(), 

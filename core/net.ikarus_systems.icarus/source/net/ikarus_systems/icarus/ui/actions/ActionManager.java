@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
@@ -285,7 +284,11 @@ public class ActionManager {
 		if(attr.getValue(LARGE_ICON_INDEX)!=null) {
 			action.putValue(Action.LARGE_ICON_KEY, getIconRegistry().getIcon(attr.getValue(LARGE_ICON_INDEX)));
 		}
-		action.putValue(Action.ACTION_COMMAND_KEY, id);
+		String command = attr.getValue(COMMAND_INDEX);
+		if(command==null) {
+			command = id;
+		}
+		action.putValue(Action.ACTION_COMMAND_KEY, command);
 		action.putValue(Action.SHORT_DESCRIPTION, attr.getValue(DESC_INDEX));
 		action.putValue(Action.LONG_DESCRIPTION, attr.getValue(DESC_INDEX));
 		
@@ -534,10 +537,9 @@ public class ActionManager {
 			if(action!=null)
 				handler.feedAction(container, action, actionSet.getGroupId(actionId));
 			else
-				LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-						Level.WARNING, String.format(
+				LoggerFactory.log(this, Level.WARNING, String.format(
 						"Unknown action id in set '%s': '%s'",  //$NON-NLS-1$
-						actionSet.getId(), actionSet.getActionIdAt(i))));
+						actionSet.getId(), actionSet.getActionIdAt(i)));
 		}
 	}
 	
@@ -546,7 +548,6 @@ public class ActionManager {
 		
 		Action action;
 		ActionSet actionSet;
-		Logger logger = LoggerFactory.getLogger(ActionManager.class);
 		
 		int size = list.size();
 		int index;
@@ -581,15 +582,13 @@ public class ActionManager {
 				if(action!=null)
 					handler.feedAction(container, action, null);
 				else
-					logger.log(LoggerFactory.record(
-							Level.WARNING, "Unknown action id: "+value)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.WARNING, "Unknown action id: "+value); //$NON-NLS-1$
 				break;
 				
 			case ACTION_SET_ID:
 				actionSet = getActionSet(value);
 				if(actionSet==null) {
-					logger.log(LoggerFactory.record(
-							Level.WARNING, "Unknown action-set id: "+value)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.WARNING, "Unknown action-set id: "+value); //$NON-NLS-1$
 					break;
 				}
 				feedActionSet(container, handler, actionSet, properties);
@@ -600,8 +599,7 @@ public class ActionManager {
 				if(subList!=null)
 					handler.feedList(container, subList, properties);
 				else
-					logger.log(LoggerFactory.record(
-							Level.WARNING, "Unknown action-list id: "+value)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+value); //$NON-NLS-1$
 				break;
 				
 			case CUSTOM:
@@ -627,11 +625,9 @@ public class ActionManager {
 							handler.feedSeparator(container, null);
 						} else if(item!=null) {
 							// Null replacements are legal, unrecognizable objects are not
-							logger.log(LoggerFactory.record(
-									Level.WARNING, "Not a valid action-list element: "+String.valueOf(item))); //$NON-NLS-1$
+							LoggerFactory.log(this, Level.WARNING, "Not a valid action-list element: "+String.valueOf(item)); //$NON-NLS-1$
 						} else {
-							logger.log(LoggerFactory.record(
-									Level.FINE, "No replacement defined for item: "+list.getTypeAt(index))); //$NON-NLS-1$
+							LoggerFactory.log(this, Level.FINE, "No replacement defined for item: "+list.getTypeAt(index)); //$NON-NLS-1$
 						}
 					}
 				}
@@ -680,8 +676,7 @@ public class ActionManager {
 		ActionList actionList = getActionList(id);
 		
 		if(actionList==null) {
-			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-					Level.WARNING, "Unknown action-list id: "+id)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
 		
@@ -709,8 +704,7 @@ public class ActionManager {
 		ActionList actionList = getActionList(id);
 		
 		if(actionList==null) {
-			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-					Level.WARNING, "Unknown action-list id: "+id)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
 		
@@ -734,8 +728,7 @@ public class ActionManager {
 		ActionList actionList = getActionList(id);
 		
 		if(actionList==null) {
-			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-					Level.WARNING, "Unknown action-list id: "+id)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
 		
@@ -761,8 +754,7 @@ public class ActionManager {
 		ActionList actionList = getActionList(id);
 		
 		if(actionList==null) {
-			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-					Level.WARNING, "Unknown action-list id: "+id)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return;
 		}
 		
@@ -784,8 +776,7 @@ public class ActionManager {
 		ActionList actionList = getActionList(id);
 		
 		if(actionList==null) {
-			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-					Level.WARNING, "Unknown action-list id: "+id)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
 		
@@ -1023,7 +1014,7 @@ public class ActionManager {
 		private String[] array;
 
 		public ActionAttributes(Attributes attrs) {
-			array = new String[9];
+			array = new String[10];
 			setValue(ID_INDEX, attrs.getValue(ID_ATTRIBUTE));
 			setAttributes(attrs);
 		}
@@ -1059,6 +1050,7 @@ public class ActionManager {
 			setValue(SMALL_ICON_INDEX, attrs.getValue(SMALL_ICON_ATTRIBUTE));
 			setValue(TYPE_INDEX, attrs.getValue(TYPE_ATTRIBUTE));
 			setValue(VIRTUAL_INDEX, attrs.getValue(VIRTUAL_ATTRIBUTE));
+			setValue(COMMAND_INDEX, attrs.getValue(COMMAND_ATTRIBUTE));
 		}
 	}
 	
@@ -1073,6 +1065,7 @@ public class ActionManager {
     private final static String TYPE_ATTRIBUTE = "type"; //$NON-NLS-1$
     private final static String VALUE_ATTRIBUTE = "value"; //$NON-NLS-1$
     private final static String VIRTUAL_ATTRIBUTE = "virtual"; //$NON-NLS-1$
+    private final static String COMMAND_ATTRIBUTE = "command"; //$NON-NLS-1$
 
     private final static int ACCEL_INDEX = 0;
     private final static int DESC_INDEX = 1;
@@ -1083,6 +1076,7 @@ public class ActionManager {
     private final static int LARGE_ICON_INDEX = 6;
     private final static int TYPE_INDEX = 7;
     private final static int VIRTUAL_INDEX = 8;
+    private final static int COMMAND_INDEX = 9;
     
     private static SAXParserFactory parserFactory;
     private XmlActionHandler xmlHandler;
@@ -1294,8 +1288,7 @@ public class ActionManager {
 			if(ex.getException()!=null)
 				sb.append("\nEmbedded: ").append(ex.getException()); //$NON-NLS-1$
 			
-			LoggerFactory.getLogger(ActionManager.class).log(LoggerFactory.record(
-					level, sb.toString(), ex));
+			LoggerFactory.log(this, level, sb.toString(), ex);
 		}		
 	}
 

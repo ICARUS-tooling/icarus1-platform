@@ -442,8 +442,7 @@ public final class Localizers {
 				if (Modifier.isPublic(method.getModifiers()))
 					method.invoke(item, textString(key));
 			} catch (Exception e) {
-				LoggerFactory.getLogger(ResourceManager.class).log(LoggerFactory.record(
-						Level.WARNING, "Unable to localize object: "+item, e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.WARNING, "Unable to localize object: "+item, e); //$NON-NLS-1$
 			}
 		}
 

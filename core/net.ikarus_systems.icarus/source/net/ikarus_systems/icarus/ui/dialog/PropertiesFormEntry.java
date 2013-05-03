@@ -196,8 +196,8 @@ public class PropertiesFormEntry extends LabeledFormEntry<PropertiesFormEntry> i
 			try {
 				editProperty(key);
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(PropertiesFormEntry.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to edit property '"+key+"'", ex)); //$NON-NLS-1$ //$NON-NLS-2$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit property '"+key+"'", ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -347,8 +347,8 @@ public class PropertiesFormEntry extends LabeledFormEntry<PropertiesFormEntry> i
 			try {
 				addProperty();
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(PropertiesFormEntry.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to add property", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to add property", ex); //$NON-NLS-1$
 			}
 			return;
 		}
@@ -367,8 +367,8 @@ public class PropertiesFormEntry extends LabeledFormEntry<PropertiesFormEntry> i
 			try {
 				removeProperty(key);
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(PropertiesFormEntry.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to remove property '"+key+"'", ex)); //$NON-NLS-1$ //$NON-NLS-2$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to remove property '"+key+"'", ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return;
 		}
@@ -387,8 +387,8 @@ public class PropertiesFormEntry extends LabeledFormEntry<PropertiesFormEntry> i
 			try {
 				editProperty(key);
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(PropertiesFormEntry.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to edit property '"+key+"'", ex)); //$NON-NLS-1$ //$NON-NLS-2$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit property '"+key+"'", ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return;
 		}

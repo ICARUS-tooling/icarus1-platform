@@ -53,8 +53,8 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
-				LoggerFactory.getLogger(JAXBConfigStorage.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to create config storage file: "+file, e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to create config storage file: "+file, e); //$NON-NLS-1$
 			}
 		}
 		

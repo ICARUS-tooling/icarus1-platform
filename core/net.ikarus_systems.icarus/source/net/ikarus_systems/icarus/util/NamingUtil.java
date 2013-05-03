@@ -11,7 +11,6 @@ package net.ikarus_systems.icarus.util;
 
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,15 +22,6 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
  *
  */
 public final class NamingUtil {
-	
-	private static Logger logger;
-	
-	private static Logger getLogger() {
-		if(logger==null) {
-			logger = LoggerFactory.getLogger(NamingUtil.class);
-		}
-		return logger;
-	}
 
 	private NamingUtil() {
 		// no-op
@@ -64,8 +54,8 @@ public final class NamingUtil {
 			try {
 				currentCount = Integer.parseInt(matcher.group(1));
 			} catch(NumberFormatException e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to parse existing base name index suffix: "+name, e)); //$NON-NLS-1$
+				LoggerFactory.log(NamingUtil.class, Level.SEVERE, 
+						"Failed to parse existing base name index suffix: "+name, e); //$NON-NLS-1$
 			}
 			return currentCount;
 		}

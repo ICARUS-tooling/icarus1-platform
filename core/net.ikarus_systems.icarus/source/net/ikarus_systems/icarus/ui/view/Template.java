@@ -57,7 +57,7 @@ public final class Template {
 		try {
 			pattern = Pattern.compile(patternString);
 		} catch(PatternSyntaxException e) {
-			LoggerFactory.getLogger(Template.class).log(Level.SEVERE, 
+			LoggerFactory.log(Template.class, Level.SEVERE, 
 					"Unable to generate template 'Pattern' intance", e); //$NON-NLS-1$
 		}
 	}

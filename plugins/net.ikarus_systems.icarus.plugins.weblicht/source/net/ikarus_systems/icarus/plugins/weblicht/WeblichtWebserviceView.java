@@ -78,9 +78,8 @@ public class WeblichtWebserviceView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(WeblichtWebserviceView.class).log(
-					LoggerFactory.record(Level.SEVERE,
-							"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE,
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -139,9 +138,8 @@ public class WeblichtWebserviceView extends View {
 			if (popupMenu != null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(
-						LoggerFactory.record(Level.SEVERE,
-								"Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 
@@ -323,8 +321,8 @@ public class WeblichtWebserviceView extends View {
 			try {				
 				WebserviceRegistry.getInstance().addNewWebservice(webservice);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtWebserviceView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to create new webservice: "+webservice.getName(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to create new webservice: "+webservice.getName(), ex); //$NON-NLS-1$
 			}
 			
 			//System.out.println("WSCount " + WebserviceRegistry.getInstance().getWebserviceCount());
@@ -367,8 +365,8 @@ public class WeblichtWebserviceView extends View {
 					//webserviceViewListModel.removeWebservice(webservice);
 					WebserviceRegistry.getInstance().deleteWebservice(webservice);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WeblichtWebserviceView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Unable to delete webservice: "+webservice.getName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Unable to delete webservice: "+webservice.getName(), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -422,8 +420,8 @@ public class WeblichtWebserviceView extends View {
 			try {				
 				WebserviceRegistry.getInstance().cloneWebservice(webservice,webserviceOld);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtWebserviceView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to create new webservice: "+webservice.getName(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to create new webservice: "+webservice.getName(), ex); //$NON-NLS-1$
 			}
 		}
 
@@ -454,8 +452,8 @@ public class WeblichtWebserviceView extends View {
 			try {
 				WebserviceRegistry.getInstance().saveWebservices();
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(WeblichtWebserviceView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to save Webservices: ", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to save Webservices: ", ex); //$NON-NLS-1$
 			}			
 		}
 		

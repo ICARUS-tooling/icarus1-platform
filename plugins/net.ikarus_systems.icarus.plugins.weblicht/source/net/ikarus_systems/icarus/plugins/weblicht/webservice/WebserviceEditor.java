@@ -888,8 +888,8 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 					}
 
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebserviceEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to add attribute to webservice "+getWebserviceName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to add attribute to webservice "+getWebserviceName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}
@@ -908,8 +908,8 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				try {
 					editWebserviceInput(attribute,attributevalue);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebserviceEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to edit input attribute from webservice "+getWebserviceName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to edit input attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}			
@@ -929,8 +929,8 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				try {
 					deleteWebserviceInput(attribute);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebserviceEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to delete attribute from webservice "+getWebserviceName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to delete attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}
@@ -950,8 +950,8 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				try {
 					editWebserviceOutput(attribute,attributevalue);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebserviceEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to edit output attribute from webservice "+getWebserviceName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to edit output attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}
@@ -971,8 +971,8 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				try {
 					deleteWebserviceOutput(attribute);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebserviceEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to delete output attribute from webservice "+getWebserviceName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to delete output attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}

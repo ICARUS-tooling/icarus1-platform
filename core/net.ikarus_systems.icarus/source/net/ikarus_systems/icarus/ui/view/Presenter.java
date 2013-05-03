@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.ui.view;
 
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
 
 /**
  * A very abstract specification of an object that is capable of
@@ -29,9 +30,9 @@ public interface Presenter {
 
 	/**
 	 * Checks whether an implementation is capable of presenting
-	 * a certain {@code data} object.
+	 * a certain {@code ContentType} instance.
 	 */
-	boolean supports(Object data);
+	boolean supports(ContentType type);
 	
 	/**
 	 * {@code Presents} the given {@code data} object using the

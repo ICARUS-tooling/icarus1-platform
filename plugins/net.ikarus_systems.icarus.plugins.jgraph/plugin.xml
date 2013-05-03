@@ -1,0 +1,186 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.jgraph" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.jgraph.JGraphPlugin">
+	
+	<doc>
+		<doc-text>
+			Interface to the jGraph graph-visualization framework
+		</doc-text>
+	</doc>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+	</requires>
+	
+	<runtime>
+		<library id="jGraphLib" path="lib/jgraphx.jar" type="code">
+			<doc>
+				<doc-text>
+					jGraph library version 1.10.1.4
+				</doc-text>
+			</doc>
+		</library>
+	</runtime>
+	
+	<!-- Extension-Points -->
+			
+	<extension-point id="GraphLayout" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of layout object, has to implement the net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Supported content type(s). Used to filter out layouts when presenting
+					choice dialog or other means of selection capabilities to the user. If
+					parameter is missing then the layout is assumed to be not depending on
+					content of a graph. Examples for such "general" layouts are the default
+					implementations for LinearArcLayout and BasicTreeLayout.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Shape">
+		<doc>
+			<doc-text>
+				Special type of renderer used by the jGraph framework to render
+				arbitrary types of shapes. Every implementation of com.mxgraph.shape.mxIShape
+				is responsible for a certain type of shape.
+			</doc-text>
+		</doc>
+		<parameter-def id="name">
+			<doc>
+				<doc-text>
+					Identifier used for style definitions.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of shape object, has to implement the com.mxgraph.shape.mxIShape interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="TextShape">
+		<doc>
+			<doc-text>
+				Special type of renderer used by the jGraph framework to render
+				arbitrary types of text. Every implementation of com.mxgraph.shape.mxITextShape
+				is responsible for a certain type of text like html or plain-text.
+			</doc-text>
+		</doc>
+		<parameter-def id="name">
+			<doc>
+				<doc-text>
+					Identifier used for style definitions.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of text-shape object, has to implement the com.mxgraph.shape.mxITextShape interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="EdgeStyle">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter-def id="name">
+			<doc>
+				<doc-text>
+					Identifier used for registration at com.mxgraph.view.mxStyleRegistry.
+					In case of duplicate name declaration only the first edge-style will be registered!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of text-shape object, has to implement the com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+	
+	<!-- Standard Extensions -->
+	
+	<extension id="LinearArcLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
+		<doc>
+			<doc-text>
+				Layout that orders vertices horizontally with edges shaped as arcs. Regular edges are placed
+				above vertices and order edges below.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.linearArcLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.linearArcLayout.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/icons/graph_arc.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.LinearArcLayout" />
+	</extension>
+	
+	<extension id="BasicTreeLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
+		<doc>
+			<doc-text>
+				Layout that generates a simple tree view.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.basicTreeLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.basicTreeLayout.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/icons/graph_tree.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.BasicTreeLayout" />
+	</extension>
+	
+	<extension id="ArcConnectorShape" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="Shape">
+		<doc>
+			<doc-text>
+				A simple connector shape that creates arc shaped connection lines between vertices.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="arc" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.ArcConnectorShape" />
+	</extension>
+	
+	<extension id="TopArcEdgeStyle" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="EdgeStyle">
+		<doc>
+			<doc-text>
+				Generates the points used to construct an arc shape above two connected vertices..
+			</doc-text>
+		</doc>
+		<parameter id="name" value="topArcEdgeStyle" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.TopArcEdgeStyle" />
+	</extension>
+	
+	<extension id="BottomArcEdgeStyle" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="EdgeStyle">
+		<doc>
+			<doc-text>
+				Generates the points used to construct an arc shape above two connected vertices..
+			</doc-text>
+		</doc>
+		<parameter id="name" value="bottomArcEdgeStyle" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.BottomArcEdgeStyle" />
+	</extension>
+</plugin>

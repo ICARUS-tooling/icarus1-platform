@@ -45,8 +45,7 @@ public abstract class AbstractConfigStorage implements ConfigStorage, ConfigCons
 					write();
 					unsavedChangesCounter.addAndGet(-changeCount);
 				} catch (Exception e) {
-					LoggerFactory.getLogger(getClass()).log(LoggerFactory.record(
-							Level.SEVERE, "Failed to save config storage", e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, "Failed to save config storage", e); //$NON-NLS-1$
 				}
 			}
 			saveScheduled.set(false);
@@ -66,8 +65,7 @@ public abstract class AbstractConfigStorage implements ConfigStorage, ConfigCons
 					registry.storageUpdated(AbstractConfigStorage.this);
 				}
 			} catch (Exception e) {
-				LoggerFactory.getLogger(getClass()).log(LoggerFactory.record(
-						Level.SEVERE, "Failed to load config storage", e)); //$NON-NLS-1$
+				LoggerFactory.log(this,	Level.SEVERE, "Failed to load config storage", e); //$NON-NLS-1$
 			}
 		}
 	};

@@ -74,9 +74,8 @@ public class WeblichtEditView extends View {
 		try {
 			actionManager.loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(WeblichtEditView.class).log(
-					LoggerFactory.record(Level.SEVERE,
-							"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE,
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -211,8 +210,8 @@ public class WeblichtEditView extends View {
 				try {
 					editor.applyEdit();
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WeblichtEditView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to apply edit: "+getWebchain(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to apply edit: "+getWebchain(), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -333,9 +332,8 @@ public class WeblichtEditView extends View {
 			try {
 				editor.resetEdit();
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtEditView.class).log(
-						LoggerFactory.record(Level.SEVERE,
-								"Failed to reset editor: " + getWebchain(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to reset editor: " + getWebchain(), ex); //$NON-NLS-1$
 			}
 		}
 
@@ -351,9 +349,8 @@ public class WeblichtEditView extends View {
 				//TODO
 				//WebserviceRegistry.getInstance().webserviceChanged(editor.getEditingItem());
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtEditView.class).log(
-						LoggerFactory.record(Level.SEVERE,
-								"Failed to apply edit: " + getWebchain(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to apply edit: " + getWebchain(), ex); //$NON-NLS-1$
 			}
 			
 			header.setText(getWebchain().getName());

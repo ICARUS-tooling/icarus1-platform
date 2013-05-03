@@ -17,10 +17,14 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
@@ -39,13 +43,23 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import net.ikarus_systems.icarus.Core;
+import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.id.ExtensionIdentity;
 import net.ikarus_systems.icarus.util.id.Identity;
+import net.ikarus_systems.icarus.xml.jaxb.MapAdapter;
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
@@ -61,6 +75,8 @@ public class PerspectiveChooser {
 	private Filter filter;
 	private Extension selectedPerspective;
 	private ChangeListener changeListener;
+	
+	private PerspectiveUsageStatistic statistics;
 
 	public PerspectiveChooser(ChangeListener changeListener, Filter filter) {
 		if(changeListener==null)
@@ -74,14 +90,33 @@ public class PerspectiveChooser {
 		this(changeListener, null);
 	}
 	
+	private static final String STATISTICS_FILE = "perspectiveUsages.xml"; //$NON-NLS-1$
+	
 	public void init(JComponent container) {
-		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
-				.getPluginDescriptor(IcarusCorePlugin.PLUGIN_ID);
+		// Load statistics
+		File file = new File(Core.getCore().getDataFolder(), STATISTICS_FILE);
+		if(file.exists()) {
+			try {
+				JAXBContext context = JAXBContext.newInstance(PerspectiveUsageStatistic.class);
+				Unmarshaller unmarshaller = context.createUnmarshaller();
+				statistics = (PerspectiveUsageStatistic)unmarshaller.unmarshal(file);
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, "Failed to load usage statistics from file: "+file.getAbsolutePath(), e); //$NON-NLS-1$
+			}
+		}
+		if(statistics==null) {
+			statistics = new PerspectiveUsageStatistic();
+		}
 		
+		
+		// Collect available perspectives
+		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
+				.getPluginDescriptor(IcarusCorePlugin.PLUGIN_ID);		
 		ExtensionPoint extensionPoint = descriptor.getExtensionPoint("Perspective"); //$NON-NLS-1$
 		List<Extension> connectedExtensions = new ArrayList<>(
-				extensionPoint.getConnectedExtensions());
+				PluginUtil.findExtensions(extensionPoint, getFilter()));
 		
+		// Handle (almost impossible) case of no available perspectives
 		if(connectedExtensions.isEmpty()) {
 			JTextArea info = new JTextArea(ResourceManager.getInstance().get(
 					"plugins.core.perspectiveChooser.noPerspectives")); //$NON-NLS-1$
@@ -95,7 +130,13 @@ public class PerspectiveChooser {
 			return;
 		}
 		
-		Collections.sort(connectedExtensions, PluginUtil.IDENTITY_COMPARATOR);
+		// Sort perspectives one way or the other
+		if(ConfigRegistry.getGlobalRegistry().getBoolean(
+				"general.appearance.sortPerspectivesByStatistics")) { //$NON-NLS-1$
+			Collections.sort(connectedExtensions, statistics);
+		} else {
+			Collections.sort(connectedExtensions, PluginUtil.IDENTITY_COMPARATOR);
+		}
 		
 		// Selection panels for perspectives
 		JPanel infoPanel = new JPanel();
@@ -135,6 +176,19 @@ public class PerspectiveChooser {
 			throw new IllegalArgumentException("Invalid perspective extension"); //$NON-NLS-1$
 		
 		this.selectedPerspective = selectedPerspective;
+		
+		statistics.increment(selectedPerspective);
+		// Save statistics
+		File file = new File(Core.getCore().getDataFolder(), STATISTICS_FILE);
+		if(file.exists()) {
+			try {
+				JAXBContext context = JAXBContext.newInstance(PerspectiveUsageStatistic.class);
+				Marshaller marshaller = context.createMarshaller();
+				marshaller.marshal(statistics, file);
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, "Failed to save usage statistics to file: "+file.getAbsolutePath(), e); //$NON-NLS-1$
+			}
+		}
 		
 		UIUtil.invokeLater(new Runnable() {
 			
@@ -225,8 +279,7 @@ public class PerspectiveChooser {
 							icon.getIconWidth(), icon.getIconHeight()));
 					preview.setMinimumSize(preview.getPreferredSize());
 				} catch(Exception e) {
-					LoggerFactory.getLogger(PerspectiveChooser.class).log(LoggerFactory.record(
-							Level.FINE,	"Unable to load preview-icon: "+param.valueAsString(), e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.FINE,	"Unable to load preview-icon: "+param.valueAsString(), e); //$NON-NLS-1$
 					param = null;
 				}
 			}
@@ -297,14 +350,39 @@ public class PerspectiveChooser {
 			setSelectedPerspective(extension);
 		}
 	}
+	
+	@XmlRootElement(name="PerspectiveUsageStatistic")
+	public static class PerspectiveUsageStatistic implements Comparator<Extension> {
+		
+		@XmlElement
+		@XmlJavaTypeAdapter(value=MapAdapter.class)
+		private Map<String, Integer> usageCounts = new HashMap<>();
+		
+		void increment(Extension extension) {
+			String perspectiveId = extension.getUniqueId();
+			Integer count = usageCounts.get(perspectiveId);
+			if(count==null) {
+				count = 0;
+			}
+			count++;
+			usageCounts.put(perspectiveId, count);
+		}
+		
+		int getCount(Extension extension) {
+			Integer count = usageCounts.get(extension.getUniqueId());
+			return count==null ? 0 : count;
+		}
 
-	/**
-	 * 
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	public interface Filter {
-		boolean include(Extension perspectiveExtension);
+		/**
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public int compare(Extension e1, Extension e2) {
+			int result = Integer.compare(getCount(e1), getCount(e2));
+			if(result==0) {
+				result = PluginUtil.IDENTITY_COMPARATOR.compare(e1, e2);
+			}
+			return result;
+		}
 	}
 }

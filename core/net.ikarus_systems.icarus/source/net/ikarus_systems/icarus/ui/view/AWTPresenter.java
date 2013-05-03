@@ -31,24 +31,4 @@ public interface AWTPresenter extends Presenter {
 	 * to be displayed by the visual {@code content} of the returned component.
 	 */
 	Component getPresentingComponent();
-	
-	/**
-	 * 
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	public interface TablePresenter extends AWTPresenter {
-		
-	}
-	
-	/**
-	 * 
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	public interface GraphPresenter extends AWTPresenter {
-		
-	}
 }

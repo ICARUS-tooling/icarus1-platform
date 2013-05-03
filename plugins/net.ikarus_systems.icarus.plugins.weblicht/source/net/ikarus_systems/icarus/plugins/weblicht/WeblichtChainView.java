@@ -74,9 +74,8 @@ public class WeblichtChainView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(WeblichtChainView.class).log(
-					LoggerFactory.record(Level.SEVERE,
-							"Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE,
+					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -181,9 +180,8 @@ public class WeblichtChainView extends View {
 			if (popupMenu != null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(
-						LoggerFactory.record(Level.SEVERE,
-								"Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 
@@ -392,8 +390,8 @@ public class WeblichtChainView extends View {
 			try {
 				WebchainRegistry.getInstance().addNewWebchain(webchain);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to create new webchain: "+name, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to create new webchain: "+name, ex); //$NON-NLS-1$
 			}		
 			
 		}
@@ -420,8 +418,8 @@ public class WeblichtChainView extends View {
 				try {
 					WebchainRegistry.getInstance().deleteWebchain(webchain);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Unable to delete webchain: "+webchain.getName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Unable to delete webchain: "+webchain.getName(), ex); //$NON-NLS-1$
 				}
 			}
 			
@@ -456,8 +454,8 @@ public class WeblichtChainView extends View {
 					WebchainRegistry.getInstance().cloneWebchain(name,webchain,serviceIDList);
 				}
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to clone webchain: "+name, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to clone webchain: "+name, ex); //$NON-NLS-1$
 			}
 			
 		}
@@ -530,8 +528,8 @@ public class WeblichtChainView extends View {
 			try {
 				WebchainRegistry.getInstance().setName(webchain, newName);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to rename corpus "+currentName+" to "+newName, ex)); //$NON-NLS-1$ //$NON-NLS-2$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to rename treebank "+currentName+" to "+newName, ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		}
@@ -554,9 +552,9 @@ public class WeblichtChainView extends View {
 				try {
 					inputText = readInputFromFile(filename);
 				} catch (Exception ex) {
-					LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
+					LoggerFactory.log(this, Level.SEVERE, 
 							"Failed open File " + filename //$NON-NLS-1$
-							+ " " + webchain.getName(), ex)); //$NON-NLS-1$;
+							+ " " + webchain.getName(), ex); //$NON-NLS-1$;
 				}
 							
 			}
@@ -586,8 +584,8 @@ public class WeblichtChainView extends View {
 			try {
 				WebExecutionService.getInstance().runWebchain(webchain, inputText);
 			} catch (Exception ex) {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to execute chain list "+webchain.getName(), ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to execute chain list "+webchain.getName(), ex); //$NON-NLS-1$
 
 			}		
 
@@ -601,8 +599,8 @@ public class WeblichtChainView extends View {
 			try {
 				WebchainRegistry.getInstance().saveWebchains();
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(WeblichtChainView.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to save Webchains: ", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to save Webchains: ", ex); //$NON-NLS-1$
 			}			
 		}
 		

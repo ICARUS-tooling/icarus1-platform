@@ -20,7 +20,7 @@ import javax.swing.JToolBar;
 import net.ikarus_systems.icarus.language.MutableSentenceData;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
-import net.ikarus_systems.icarus.ui.view.AWTPresenter.TablePresenter;
+import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 
@@ -30,7 +30,7 @@ import net.ikarus_systems.icarus.util.Options;
  *
  */
 public abstract class AbstractSentenceTablePresenter<T extends SentenceData> 
-		implements TablePresenter, SentenceDataListener {
+		implements AWTPresenter, SentenceDataListener {
 	
 	protected JTable table;
 	
@@ -68,6 +68,10 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 		}
 		
 		this.data = data;
+		
+		if(this.data!=null && this.data instanceof MutableSentenceData) {
+			((MutableSentenceData)this.data).addSentenceDataListener(this);
+		}
 	}
 
 	/**
@@ -80,22 +84,11 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 		if(data==null)
 			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
 		
-		if(!supports(data))
-			throw new UnsupportedPresentationDataException("Unsupported data: "+data); //$NON-NLS-1$
-		
 		if(data.equals(this.data)) {
 			return;
 		}
 		
-		if(this.data!=null && this.data instanceof MutableSentenceData) {
-			((MutableSentenceData)this.data).removeSentenceDataListener(this);
-		}
-		
-		this.data = (T)data;
-
-		if(this.data instanceof MutableSentenceData) {
-			((MutableSentenceData)this.data).addSentenceDataListener(this);
-		}
+		setData((T) data);
 		
 		table.repaint();
 	}
@@ -122,7 +115,10 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 	 */
 	@Override
 	public void close() {
-		// no-op
+		
+		if(data instanceof MutableSentenceData) {
+			((MutableSentenceData)data).removeSentenceDataListener(this);
+		}
 	}
 
 	/**

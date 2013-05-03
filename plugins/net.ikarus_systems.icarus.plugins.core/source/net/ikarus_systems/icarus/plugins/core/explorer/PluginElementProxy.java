@@ -101,8 +101,7 @@ public class PluginElementProxy implements Wrapper<Object> {
 				URL iconLocation = classLoader.getResource(param.valueAsString());
 				if(iconLocation==null) {
 					// inform developer of missing icon resource
-					LoggerFactory.getLogger(PluginElementProxy.class).log(LoggerFactory.record(
-							Level.WARNING, "Failed to load icon '"+param.valueAsString()+"' for extension "+extension.getUniqueId())); //$NON-NLS-1$ //$NON-NLS-2$
+					LoggerFactory.log(this, Level.WARNING, "Failed to load icon '"+param.valueAsString()+"' for extension "+extension.getUniqueId()); //$NON-NLS-1$ //$NON-NLS-2$
 				} else
 					icon = new ImageIcon(iconLocation);
 			} 

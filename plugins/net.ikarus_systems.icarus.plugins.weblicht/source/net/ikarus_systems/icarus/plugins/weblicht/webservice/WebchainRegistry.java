@@ -67,15 +67,6 @@ public class WebchainRegistry {
 		return instance;
 	}
 	
-	private static Logger logger;
-	
-	private static Logger getLogger() {
-		if(logger==null) {
-			logger = LoggerFactory.getLogger(WebchainRegistry.class);
-		}
-		return logger;
-	}
-	
 	//--
 
 	
@@ -94,8 +85,8 @@ public class WebchainRegistry {
 		try {			
 			loadWebchainXML();			
 		} catch (Exception e) {
-			getLogger().log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to load webservice chain list", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to load webservice chain list", e); //$NON-NLS-1$
 		}
 
 		//System.out.println(webchainList.get(0).getWebserviceIDList());	
@@ -643,8 +634,8 @@ public class WebchainRegistry {
 			try {
 				currentCount = Integer.parseInt(matcher.group(1));
 			} catch(NumberFormatException e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to parse existing base name index suffix: "+baseName, e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to parse existing base name index suffix: "+baseName, e); //$NON-NLS-1$
 			}
 			
 			count = Math.max(count, currentCount+1);

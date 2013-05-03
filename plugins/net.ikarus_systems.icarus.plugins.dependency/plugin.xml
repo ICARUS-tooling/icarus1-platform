@@ -12,5 +12,15 @@
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
 	</requires>
+	
+	<extension id="DependencyDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.dependency.DependencyData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyData" />
+	</extension>
 </plugin>

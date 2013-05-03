@@ -32,6 +32,53 @@ public final class CollectionUtils {
 		// no-op
 	}
 	
+	/**
+	 * Tests whether a specific key maps to some value that represents
+	 * the boolean value {@code true} either directly by being of type
+	 * {@code boolean} or in textual form such that a call to
+	 * {@link Boolean#parseBoolean(String)} returns {@code true}.
+	 * If the {@code map} argument is {@code null} then the return value
+	 * is {@code false};
+	 */
+	public static boolean isTrue(Map<?, ?> map, Object key) {
+		if(map==null || map.isEmpty()) {
+			return false;
+		}
+		
+		Object value = map.get(key);
+		if(value instanceof Boolean) {
+			return (boolean)value;
+		} else if(value instanceof String) {
+			return Boolean.parseBoolean((String)value);
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Checks whether the given {@code key} is mapped to an object equal
+	 * to the {@code value} parameter. If the {@code map} argument is 
+	 * {@code null} then the return value is {@code true} in case that
+	 * the {@code value} parameter is {@code null} and {@code false} in any
+	 * other case.
+	 */
+	public static boolean equals(Map<?, ?> map, Object key, Object value) {
+		if(map==null || map.isEmpty()) {
+			return value==null;
+		}
+		
+		Object v = map.get(key);
+		if(v==null) {
+			return value==null;
+		} else {
+			return value.equals(v);
+		}
+	}
+	
+	public static <V extends Object> V get(Map<?, V> map, Object key) {
+		return map==null ? null : map.get(key);
+	}
+	
 	public static <T extends Object> Collection<T> filter(Collection<T> col, Filter filter) {
 		Collection<T> result = new LinkedList<>();
 		
@@ -47,7 +94,7 @@ public final class CollectionUtils {
     @SafeVarargs
 	private static <T extends Object> void feedItems(
 			Collection<T> collection, T...items) {
-		if(items==null) {
+		if(items==null || items.length==0) {
 			return;
 		}
 		for(T item : items) {

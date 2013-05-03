@@ -144,7 +144,7 @@ public class ResourceDomain {
 	}
 
 	public String get(String key) {
-		return get(key, null, key);
+		return get(key, key, (Object[])null);
 	}
 
 	public String get(String key, String defaultValue) {
@@ -161,8 +161,7 @@ public class ResourceDomain {
 		// Applies default value if required
 		if (value == null) {
 			if(ResourceManager.isNotifyMissingResource()) {
-				LoggerFactory.getLogger(ResourceManager.class).log(LoggerFactory.record(
-						Level.INFO, "No resource entry for key: "+key)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.INFO, "No resource entry for key: "+key); //$NON-NLS-1$
 			}
 			value = defaultValue;
 		}

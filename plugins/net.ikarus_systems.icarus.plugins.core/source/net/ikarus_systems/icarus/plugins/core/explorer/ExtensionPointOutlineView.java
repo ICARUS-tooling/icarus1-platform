@@ -99,8 +99,7 @@ public class ExtensionPointOutlineView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(ExtensionPointOutlineView.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -188,8 +187,7 @@ public class ExtensionPointOutlineView extends View {
 		if(extensionPoint==null)
 			return;
 		
-		LoggerFactory.getLogger(ExtensionPointOutlineView.class).log(LoggerFactory.record(
-				Level.FINE, "Rebuilding tree for extension "+extensionPoint.getUniqueId())); //$NON-NLS-1$
+		LoggerFactory.log(this, Level.FINE, "Rebuilding tree for extension "+extensionPoint.getUniqueId()); //$NON-NLS-1$
 		
 		root.setUserObject(new PluginElementProxy(extensionPoint));
 		
@@ -322,8 +320,8 @@ public class ExtensionPointOutlineView extends View {
 				ManagementConstants.PLUGIN_EXPLORER_VIEW_ID, message);
 		
 		if(result.getThrowable()!=null) {
-			LoggerFactory.getLogger(ExtensionPointOutlineView.class).log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to send display data to plugin explorer: "+selectedObject, result.getThrowable())); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to send display data to plugin explorer: "+selectedObject, result.getThrowable()); //$NON-NLS-1$
 		}
 	}
 	
@@ -350,8 +348,7 @@ public class ExtensionPointOutlineView extends View {
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(ExtensionPointOutlineView.class).log(LoggerFactory.record(
-						Level.SEVERE, "Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 		

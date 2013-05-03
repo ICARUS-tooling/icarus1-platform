@@ -104,8 +104,7 @@ public class ExtensionPointHierarchyView extends View {
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(ExtensionPointHierarchyView.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
@@ -390,8 +389,8 @@ public class ExtensionPointHierarchyView extends View {
 		ResultMessage result = sendRequest(ManagementConstants.PLUGIN_EXPLORER_VIEW_ID, message);
 		
 		if(result.getThrowable()!=null) {
-			LoggerFactory.getLogger(ExtensionPointHierarchyView.class).log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to send display data to plugin explorer: "+selectedObject, result.getThrowable())); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to send display data to plugin explorer: "+selectedObject, result.getThrowable()); //$NON-NLS-1$
 		}
 	}
 	
@@ -406,8 +405,7 @@ public class ExtensionPointHierarchyView extends View {
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
-				LoggerFactory.getLogger(ExtensionPointHierarchyView.class).log(LoggerFactory.record(
-						Level.SEVERE, "Unable to create popup menu")); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
 		

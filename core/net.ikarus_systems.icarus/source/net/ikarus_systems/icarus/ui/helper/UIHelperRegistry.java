@@ -24,7 +24,7 @@ import javax.swing.tree.TreeCellRenderer;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
-import net.ikarus_systems.icarus.ui.view.Presenter;
+import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.Exceptions;
 
@@ -82,7 +82,7 @@ public final class UIHelperRegistry {
 				"org.java.plugin.registry.Extension",  //$NON-NLS-1$
 				"net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer"); //$NON-NLS-1$
 		
-		registerHelper(Presenter.class, 
+		registerHelper(AWTPresenter.class, 
 				"java.lang.String",  //$NON-NLS-1$
 				"net.ikarus_systems.icarus.ui.view.TextPresenter"); //$NON-NLS-1$
 		
@@ -307,7 +307,7 @@ public final class UIHelperRegistry {
 			} catch (ClassNotFoundException e) {
 				String msg = String.format("Unable to find helper class '%s' of type '%s'",  //$NON-NLS-1$
 						helper, helperClass.getName());
-				LoggerFactory.getLogger(UIHelperRegistry.class).log(Level.WARNING, msg, e);
+				LoggerFactory.log(this, Level.WARNING, msg, e);
 				helper = null;
 			}
 		} 
@@ -318,12 +318,12 @@ public final class UIHelperRegistry {
 			} catch (InstantiationException e) {
 				String msg = String.format("Unable to instantiate helper class '%s' of type '%s'",  //$NON-NLS-1$
 						helper, helperClass.getName());
-				LoggerFactory.getLogger(UIHelperRegistry.class).log(Level.WARNING, msg, e);
+				LoggerFactory.log(this, Level.WARNING, msg, e);
 				helper = null;
 			} catch (IllegalAccessException e) {
 				String msg = String.format("Not allowed to access helper class '%s' of type '%s'",  //$NON-NLS-1$
 						helper, helperClass.getName());
-				LoggerFactory.getLogger(UIHelperRegistry.class).log(Level.WARNING, msg, e);
+				LoggerFactory.log(this, Level.WARNING, msg, e);
 				helper = null;
 			}
 		}

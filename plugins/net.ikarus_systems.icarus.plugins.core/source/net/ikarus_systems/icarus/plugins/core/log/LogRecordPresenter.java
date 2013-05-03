@@ -30,6 +30,8 @@ import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.HtmlUtils;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.cache.WeakLRUCache;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner
@@ -59,8 +61,7 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 			
 			URL url = LogRecordPresenter.class.getResource(name);
 			if(url==null) {
-				LoggerFactory.getLogger(LogRecordPresenter.class).log(LoggerFactory.record(
-						Level.SEVERE, "Cannot find template file: "+name)); //$NON-NLS-1$
+				LoggerFactory.log(LogRecordPresenter.class, Level.SEVERE, "Cannot find template file: "+name); //$NON-NLS-1$
 				return null;
 			}
 			String templateData = null;
@@ -69,11 +70,9 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 				templateData = IOUtil.readStream(url.openStream(), IOUtil.UTF8_ENCODING);
 				sharedTemplate = Template.compile(templateData, null);
 			} catch (IOException e) {
-				LoggerFactory.getLogger(LogRecordPresenter.class).log(LoggerFactory.record(
-						Level.SEVERE, "Failed to read template data from resource: "+url, e)); //$NON-NLS-1$
+				LoggerFactory.log(LogRecordPresenter.class, Level.SEVERE, "Failed to read template data from resource: "+url, e); //$NON-NLS-1$
 			} catch (MalformedTemplateException e) {
-				LoggerFactory.getLogger(LogRecordPresenter.class).log(LoggerFactory.record(
-						Level.SEVERE, "Malformed template data in resource: "+url, e)); //$NON-NLS-1$
+				LoggerFactory.log(LogRecordPresenter.class, Level.SEVERE, "Malformed template data in resource: "+url, e); //$NON-NLS-1$
 			}
 		}
 		return sharedTemplate;
@@ -97,12 +96,10 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 			try {
 				baseURL = new URL(jarLocation, "net/ikarus_systems/icarus/plugins/core/icons/"); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
-				LoggerFactory.getLogger(LogRecordPresenter.class).log(LoggerFactory.record(
-						Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e)); //$NON-NLS-1$
+				LoggerFactory.log(LogRecordPresenter.class, Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e); //$NON-NLS-1$
 			}
 			
-			LoggerFactory.getLogger(LogRecordPresenter.class).log(LoggerFactory.record(
-					Level.FINE, "New base url for log-record presenter html templates:\n"+baseURL)); //$NON-NLS-1$
+			LoggerFactory.log(LogRecordPresenter.class, Level.FINE, "New base url for log-record presenter html templates:\n"+baseURL); //$NON-NLS-1$
 		}
 		return baseURL;
 	}
@@ -118,8 +115,8 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Object data) {
-		return data instanceof LogRecord;
+	public boolean supports(ContentType type) {
+		return ContentTypeRegistry.isCompatible("LogRecordContentType", type); //$NON-NLS-1$
 	}
 
 	/**

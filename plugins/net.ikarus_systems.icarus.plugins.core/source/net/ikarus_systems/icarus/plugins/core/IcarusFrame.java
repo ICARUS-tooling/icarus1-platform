@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
@@ -36,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.UIDummies;
@@ -59,8 +59,6 @@ import org.java.plugin.registry.ExtensionPoint;
 public class IcarusFrame extends JFrame {
 
 	private static final long serialVersionUID = 8408785238638475020L;
-	
-	private static final Logger logger = LoggerFactory.getLogger(IcarusFrame.class);
 	
 	private Perspective currentPerspective;
 	
@@ -112,8 +110,8 @@ public class IcarusFrame extends JFrame {
 			try {
 				perspective = loader.loadClass(param.valueAsString());
 			} catch(ClassNotFoundException e) {
-				LoggerFactory.getLogger(IcarusFrame.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to load class for perspective extension: "+extension.getUniqueId(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to load class for perspective extension: "+extension.getUniqueId(), e); //$NON-NLS-1$
 				throw new IllegalArgumentException("Not a valid perspective class: "+perspective, e); //$NON-NLS-1$
 			}
 		}
@@ -133,7 +131,7 @@ public class IcarusFrame extends JFrame {
 				newPerspective.setExtension(perspectiveExtension);
 				perspective = newPerspective;
 			} catch(Exception e) {
-				LoggerFactory.getLogger(IcarusFrame.class).log(Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to instantiate perspective class: "+clazz, e); //$NON-NLS-1$
 				throw new IllegalArgumentException("Not a valid perspective class: "+perspective, e); //$NON-NLS-1$
 			}
@@ -160,8 +158,7 @@ public class IcarusFrame extends JFrame {
 		try {
 			getActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(IcarusFrame.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to load actions from file", e)); //$NON-NLS-1$
+			LoggerFactory.log(this,	Level.SEVERE, "Failed to load actions from file", e); //$NON-NLS-1$
 			JPanel container = new JPanel();
 			getContentPane().add(container);
 			UIDummies.createDefaultErrorOutput(container, e);
@@ -176,6 +173,16 @@ public class IcarusFrame extends JFrame {
 		toolBarDelegate = new ToolBarDelegate();
 
 		// TODO read config to get default perspective?
+		
+		Object defaultPerspective = ConfigRegistry.getGlobalRegistry().getValue(
+				"general.appearance.defaultPerspective"); //$NON-NLS-1$
+		if(defaultPerspective instanceof Extension) {
+			try {
+				currentPerspective = (Perspective) PluginUtil.instantiate((Extension)defaultPerspective);
+			} catch(Exception e) {
+				LoggerFactory.log(this,	Level.SEVERE, "Failed to instantiate default perspective: "+defaultPerspective, e); //$NON-NLS-1$
+			}
+		}
 		
 		if(currentPerspective!=null){
 			openPerspective(currentPerspective, true);
@@ -256,8 +263,8 @@ public class IcarusFrame extends JFrame {
 		try {
 			openPerspective(perspective, false);
 		} catch (Exception e) {
-			logger.log(LoggerFactory.record(Level.SEVERE, 
-					"Unable to open perspective: "+perspective, e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Unable to open perspective: "+perspective, e); //$NON-NLS-1$
 			return null;
 		}
 		
@@ -332,15 +339,18 @@ public class IcarusFrame extends JFrame {
 				return;
 			}*/
 			perspectiveExtension = extension;
+			
+			PluginUtil.activatePlugin(perspectiveExtension);
+			
 			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
 			if(param==null)
 				throw new IllegalArgumentException("Provided extension does not declare a class"); //$NON-NLS-1$
 			ClassLoader loader = PluginUtil.getClassLoader(extension);
-			try {
+			try {				
 				data = loader.loadClass(param.valueAsString());
 			} catch(ClassNotFoundException e) {
-				logger.log(LoggerFactory.record(Level.SEVERE, 
-						"Unable to load class for perspective extension: "+extension.getUniqueId(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to load class for perspective extension: "+extension.getUniqueId(), e); //$NON-NLS-1$
 				throw e;
 			}
 		}
@@ -365,7 +375,7 @@ public class IcarusFrame extends JFrame {
 				perspective.setExtension(perspectiveExtension);
 				data = perspective;
 			} catch(Exception e) {
-				logger.log(Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to instantiate perspective class: "+clazz, e); //$NON-NLS-1$
 				throw e;
 			}
@@ -406,8 +416,8 @@ public class IcarusFrame extends JFrame {
 			rootPanel.add(container, BorderLayout.CENTER);
 			rootPanel.add(getInfoPanel().getContentPanel(), BorderLayout.SOUTH);
 		} catch (Exception e) {
-			logger.log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to init perspective: "+id, e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to init perspective: "+id, e); //$NON-NLS-1$
 			throw e;
 		} finally {
 			rootPanel.setVisible(true);
@@ -421,8 +431,7 @@ public class IcarusFrame extends JFrame {
 		// Refresh tool-bar
 		refreshToolBar();
 		
-		logger.log(LoggerFactory.record(
-				Level.FINE, "Opened perspective: "+id)); //$NON-NLS-1$
+		LoggerFactory.log(this, Level.FINE, "Opened perspective: "+id); //$NON-NLS-1$
 		
 		getEventSource().fireEvent(new EventObject(IcarusFrameEvents.PERSPECTIVE_OPENED, 
 				"perspective", currentPerspective)); //$NON-NLS-1$
@@ -473,20 +482,20 @@ public class IcarusFrame extends JFrame {
 				containers.remove(perspective);
 			}
 		} catch(CorruptedStateException e) {
-			logger.log(LoggerFactory.record(Level.SEVERE, 
-					"Perspective entered corrputed state: "+id, e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Perspective entered corrputed state: "+id, e); //$NON-NLS-1$
 			DialogFactory.getGlobalFactory().showDetailedError(this, 
 					"plugins.core.icarusFrame.dialogs.errorTitle",  //$NON-NLS-1$
 					"plugins.core.icarusFrame.dialogs.corruptedState", e, id); //$NON-NLS-1$
 		} catch(Exception e) {
-			logger.log(LoggerFactory.record(Level.SEVERE, 
-					"Perspective failed to close properly: "+id, e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Perspective failed to close properly: "+id, e); //$NON-NLS-1$
 			DialogFactory.getGlobalFactory().showDetailedError(this, 
 					"plugins.core.icarusFrame.dialogs.errorTitle",  //$NON-NLS-1$
 					"plugins.core.icarusFrame.dialogs.closingFailed", e, id); //$NON-NLS-1$
 		} catch(Error e) {
-			logger.log(LoggerFactory.record(Level.SEVERE, 
-					"Error while attempting to close perspective: "+id, e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Error while attempting to close perspective: "+id, e); //$NON-NLS-1$
 			String operation = "Perspective.close() on "+id; //$NON-NLS-1$
 			DialogFactory.getGlobalFactory().showDetailedError(this, 
 					"plugins.core.icarusFrame.dialogs.errorTitle",  //$NON-NLS-1$
@@ -544,8 +553,8 @@ public class IcarusFrame extends JFrame {
 				try {
 					perspective.close();
 				} catch(Exception e) {
-					logger.log(LoggerFactory.record(Level.SEVERE, 
-							"Perspective failed to close properly: "+id, e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Perspective failed to close properly: "+id, e); //$NON-NLS-1$
 				}
 			}
 		} finally {
@@ -724,8 +733,8 @@ public class IcarusFrame extends JFrame {
 				try {
 					openPerspective(perspective, false);
 				} catch (Exception ex) {
-					logger.log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to open perspective: "+perspective.getUniqueId(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to open perspective: "+perspective.getUniqueId(), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -832,8 +841,8 @@ public class IcarusFrame extends JFrame {
 			try {
 				openPerspective(extensionId, false);
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to open perspective: "+extensionId, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to open perspective: "+extensionId, ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -841,8 +850,8 @@ public class IcarusFrame extends JFrame {
 			try {
 				FrameManager.getInstance().closeFrame(IcarusFrame.this);
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to close frame", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to close frame", ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -850,8 +859,8 @@ public class IcarusFrame extends JFrame {
 			try {
 				FrameManager.getInstance().newFrame();
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to create new frame", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to create new frame", ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -866,8 +875,8 @@ public class IcarusFrame extends JFrame {
 				
 				FrameManager.getInstance().newFrame(options);
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to copy frame: "+currentPerspective, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to copy frame: "+currentPerspective, ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -879,8 +888,8 @@ public class IcarusFrame extends JFrame {
 					refreshContent();
 				}
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to close perspective: "+currentPerspective, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to close perspective: "+currentPerspective, ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -902,8 +911,8 @@ public class IcarusFrame extends JFrame {
 				
 				refreshContent();
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to copy frame: "+currentPerspective, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to copy frame: "+currentPerspective, ex); //$NON-NLS-1$
 			}
 		}
 		
@@ -914,8 +923,8 @@ public class IcarusFrame extends JFrame {
 				try {
 					perspective.reset();
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(IcarusFrame.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to reset perspective: "+id, ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to reset perspective: "+id, ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -936,8 +945,8 @@ public class IcarusFrame extends JFrame {
 			try {
 				openPerspective(perspective, false);
 			} catch (Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to open perspective: "+perspective, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to open perspective: "+perspective, ex); //$NON-NLS-1$
 			}
 		}
 	}
@@ -1038,8 +1047,8 @@ public class IcarusFrame extends JFrame {
 			try {
 				openPerspective(perspective, false);
 			} catch (Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE,
-						"Failed to open perspective: "+perspective, ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to open perspective: "+perspective, ex); //$NON-NLS-1$
 			}
 		}
 	}

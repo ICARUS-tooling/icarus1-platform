@@ -144,8 +144,8 @@ public class LocationFormEntry extends LabeledFormEntry<LocationFormEntry> imple
 			try {
 				openLocationChooser();
 			} catch(Exception ex) {
-				LoggerFactory.getLogger(LocationFormEntry.class).log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to edit location", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit location", ex); //$NON-NLS-1$
 			}
 			return;
 		}

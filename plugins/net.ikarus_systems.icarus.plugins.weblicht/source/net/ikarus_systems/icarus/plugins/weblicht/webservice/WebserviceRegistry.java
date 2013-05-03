@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,15 +76,6 @@ public class WebserviceRegistry {
 		return instance;
 	}
 
-	private static Logger logger;
-
-	private static Logger getLogger() {
-		if (logger == null) {
-			logger = LoggerFactory.getLogger(WebserviceRegistry.class);
-		}
-		return logger;
-	}
-
 	private WebserviceRegistry() {
 		eventSource = new WeakEventSource(this);
 		webserviceList = new ArrayList<Webservice>();
@@ -93,9 +83,8 @@ public class WebserviceRegistry {
 		try {
 			loadWebserviceXML();
 		} catch (Exception e) {
-			getLogger().log(
-					LoggerFactory.record(Level.SEVERE,
-							"Failed to load webservices", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE,
+					"Failed to load webservices", e); //$NON-NLS-1$
 		}
 
 	}
@@ -777,8 +766,8 @@ public class WebserviceRegistry {
 			try {
 				currentCount = Integer.parseInt(matcher.group(1));
 			} catch(NumberFormatException e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to parse existing base name index suffix: "+baseName, e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to parse existing base name index suffix: "+baseName, e); //$NON-NLS-1$
 			}
 			
 			count = Math.max(count, currentCount+1);

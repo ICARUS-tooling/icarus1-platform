@@ -45,11 +45,11 @@ public final class ClassProxy {
 			
 			return clazz.newInstance();
 		} catch (ClassNotFoundException e) {
-			LoggerFactory.getLogger(ClassProxy.class).log(Level.SEVERE, "ClassProxy: Could not find class: "+className, e); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "ClassProxy: Could not find class: "+className, e); //$NON-NLS-1$
 		} catch (InstantiationException e) {
-			LoggerFactory.getLogger(ClassProxy.class).log(Level.SEVERE, "ClassProxy: Unable to instantiate class: "+className, e); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "ClassProxy: Unable to instantiate class: "+className, e); //$NON-NLS-1$
 		} catch (IllegalAccessException e) {
-			LoggerFactory.getLogger(ClassProxy.class).log(Level.SEVERE, "ClassProxy: Unable to access default constructor: "+className, e); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "ClassProxy: Unable to access default constructor: "+className, e); //$NON-NLS-1$
 		}
 		
 		return null;

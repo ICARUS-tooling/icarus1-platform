@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.language.Grammar;
-import net.ikarus_systems.icarus.language.GrammarRegistry;
+import net.ikarus_systems.icarus.language.LanguageManager;
 
 /**
  * 
@@ -180,7 +180,7 @@ public class SimpleDependencyData implements DependencyData {
 	 */
 	@Override
 	public Grammar getSourceGrammar() {
-		return GrammarRegistry.getInstance().getGrammar(
+		return LanguageManager.getInstance().getGrammar(
 				DependencyConstants.GRAMMAR_ID);
 	}
 }

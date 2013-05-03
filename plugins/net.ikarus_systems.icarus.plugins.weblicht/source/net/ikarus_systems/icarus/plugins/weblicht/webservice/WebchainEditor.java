@@ -621,8 +621,8 @@ public class WebchainEditor implements Editor<Webchain> {
 				try {
 					addWebchainElement();
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebchainEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to add webservice to webchain "+getWebchainName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to add webservice to webchain "+getWebchainName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}
@@ -641,8 +641,8 @@ public class WebchainEditor implements Editor<Webchain> {
 				try {
 					removeWebchainElement(key);
 				} catch(Exception ex) {
-					LoggerFactory.getLogger(WebchainEditor.class).log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to remove webservice from webchain "+getWebchainName(), ex)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to remove webservice from webchain "+getWebchainName(), ex); //$NON-NLS-1$
 				}
 				return;
 			}

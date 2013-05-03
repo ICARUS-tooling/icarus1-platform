@@ -14,6 +14,7 @@ import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.registry.Extension;
@@ -44,6 +45,8 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 		}
 		if(identity!=null) {
 			value = identity.getName();
+		} else if(value instanceof String) {
+			value = ResourceManager.getInstance().get((String)value);
 		}
 		
 		super.getListCellRendererComponent(list, value, index, isSelected,

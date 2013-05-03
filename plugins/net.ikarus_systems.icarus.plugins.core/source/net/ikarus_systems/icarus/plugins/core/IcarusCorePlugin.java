@@ -13,17 +13,22 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.ikarus_systems.icarus.config.ConfigBuilder;
+import net.ikarus_systems.icarus.config.ConfigConstants;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.EntryType;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.DefaultResourceLoader;
 import net.ikarus_systems.icarus.resources.ResourceLoader;
@@ -33,9 +38,14 @@ import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.config.ConfigDialog;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
+import net.ikarus_systems.icarus.util.ErrorFormatter;
+import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.data.ExtensionContentType;
 
 import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
 
 /**
  * @author Markus Gärtner 
@@ -47,8 +57,6 @@ public final class IcarusCorePlugin extends Plugin {
 	public static final String PLUGIN_ID = PluginUtil.CORE_PLUGIN_ID;
 
 	private CallbackHandler callbackHandler;
-	
-	private Logger logger = LoggerFactory.getLogger(IcarusCorePlugin.class);
 	
 	/**
 	 * @see org.java.plugin.Plugin#doStart()
@@ -77,8 +85,7 @@ public final class IcarusCorePlugin extends Plugin {
 		try {
 			actionManager.loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.getLogger(IcarusCorePlugin.class).log(LoggerFactory.record(
-					Level.SEVERE, "Failed to load actions from file: "+actionLocation, e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
 			throw e;
 		}
 		
@@ -100,6 +107,12 @@ public final class IcarusCorePlugin extends Plugin {
 		// Register ui-helper objects
 		registerUIHelpers();
 		
+		// Register content types
+		registerContentTypes();
+		
+		// Register error formatters
+		registerErrorFormatters();
+		
 		// Show ui elements
 		SwingUtilities.invokeLater(new Runnable() {
 			
@@ -108,8 +121,8 @@ public final class IcarusCorePlugin extends Plugin {
 				try {
 					initAndShowGUI();
 				} catch (Exception e) {
-					logger.log(LoggerFactory.record(Level.SEVERE, 
-							"Failed to init core plug-in interface", e)); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to init core plug-in interface", e); //$NON-NLS-1$
 				}
 			}
 		});
@@ -118,6 +131,14 @@ public final class IcarusCorePlugin extends Plugin {
 	private void registerUIHelpers() {
 		for(Extension extension : getDescriptor().getExtensionPoint("UIHelper").getConnectedExtensions()) { //$NON-NLS-1$
 			try {
+				boolean override = false;
+				try {
+					Extension.Parameter param = extension.getParameter("override"); //$NON-NLS-1$
+					override = param==null ? false : param.valueAsBoolean();
+				} catch(IllegalArgumentException e) {
+					// ignore
+				}
+				
 				// No need to use a special class-loader since the helper
 				// interfaces should be globally accessible to all plug-ins
 				// and preferably be hosted within the icarus core.
@@ -130,11 +151,49 @@ public final class IcarusCorePlugin extends Plugin {
 					
 					// The registry already knows how to wrap extension objects
 					UIHelperRegistry.globalRegistry().registerHelper(
-							helperClass, objectClassName, extension);
+							helperClass, objectClassName, extension, override);
 				}
 			} catch(Exception e) {
-				logger.log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to register ui-helper: "+extension.getUniqueId(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to register ui-helper: "+extension.getUniqueId(), e); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	/**
+	 * Load and register all content types that are defined at plug-in manifest level
+	 */
+	private void registerContentTypes() {
+		for(Extension extension : getDescriptor().getExtensionPoint("ContentType").getConnectedExtensions()) { //$NON-NLS-1$
+			try {
+				ContentTypeRegistry.getInstance().addType(new ExtensionContentType(extension));
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to register content type: "+extension.getUniqueId(), e); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	/**
+	 * Load and register all {@code ErrorFormatter} extensions.
+	 */
+	private void registerErrorFormatters() {
+		for(Extension extension : getDescriptor().getExtensionPoint("ErrorFormatter").getConnectedExtensions()) { //$NON-NLS-1$
+			ErrorFormatter formatter = null;
+			try {
+				formatter = (ErrorFormatter) PluginUtil.instantiate(extension);
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, "Failed to instantiate error formatter: "+extension.getUniqueId(), e); //$NON-NLS-1$
+				continue;
+			}
+			
+			for(Extension.Parameter param : extension.getParameters("throwableClass")) { //$NON-NLS-1$
+				try {
+					Exceptions.addFormatter(param.valueAsString(), formatter);
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to register formatter: "+extension.getUniqueId()+" for throwable "+param.valueAsString(), e); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 		}
 	}
@@ -152,12 +211,14 @@ public final class IcarusCorePlugin extends Plugin {
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		builder.addBooleanEntry("useSystemLaF", true); //$NON-NLS-1$
-		builder.addOptionsEntry("lookAndFeel", 0,  //$NON-NLS-1$
-				"DEFAULT", //$NON-NLS-1$
-				"javax.swing.plaf.basic.BasicLookAndFeel", //$NON-NLS-1$
-				"javax.swing.plaf.metal.MetalLookAndFeel", //$NON-NLS-1$
-				"javax.swing.plaf.nimbus.NimbusLookAndFeel"); //$NON-NLS-1$
+		builder.setProperties(
+				builder.addOptionsEntry("lookAndFeel", 0, collectAvailableLookAndFeels()), //$NON-NLS-1$
+				ConfigConstants.RENDERER, new ExtensionListCellRenderer());
 		builder.addBooleanEntry("exitWithoutPrompt", false); //$NON-NLS-1$
+		builder.addBooleanEntry("sortPerspectivesByStatistics", true); //$NON-NLS-1$
+		builder.setProperties(
+				builder.addOptionsEntry("defaultPerspective", 0, collectAvailablePerspectives()), //$NON-NLS-1$
+				ConfigConstants.RENDERER, new ExtensionListCellRenderer());
 		builder.back();
 		// END APPEARANCE GROUP
 		
@@ -180,9 +241,14 @@ public final class IcarusCorePlugin extends Plugin {
 		if(config.getBoolean("general.appearance.useSystemLaF")) { //$NON-NLS-1$
 			lafClassName = UIManager.getSystemLookAndFeelClassName();
 		} else {
-			lafClassName = config.getString("general.appearance.lookAndFeel"); //$NON-NLS-1$
+			Object lafValue = config.getValue("general.appearance.lookAndFeel"); //$NON-NLS-1$
 			if("DEFAULT".equals(lafClassName)) { //$NON-NLS-1$
 				lafClassName = null;
+			} else if(lafValue instanceof String) {
+				lafClassName = (String)lafValue;
+			} else if(lafValue instanceof Extension) {
+				Extension lafExtension = (Extension)lafValue;
+				lafClassName = lafExtension.getParameter("class").valueAsString(); //$NON-NLS-1$
 			}
 		}
 		
@@ -191,13 +257,38 @@ public final class IcarusCorePlugin extends Plugin {
 			try {
 				UIManager.setLookAndFeel(lafClassName);
 			} catch(Exception e) {
-				logger.log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to set up Look&Feel: "+lafClassName, e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to set up Look&Feel: "+lafClassName, e); //$NON-NLS-1$
 			}
 		}
 		
 		// Show first frame
 		FrameManager.getInstance().newFrame();
+	}
+	
+	private Object[] collectAvailableLookAndFeels() {
+		List<Object> items = new ArrayList<>();
+		
+		items.add("DEFAULT"); //$NON-NLS-1$
+		items.add("javax.swing.plaf.basic.BasicLookAndFeel"); //$NON-NLS-1$
+		items.add("javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$
+		items.add("javax.swing.plaf.nimbus.NimbusLookAndFeel"); //$NON-NLS-1$
+		
+		ExtensionPoint extensionPoint = getDescriptor().getExtensionPoint("UITheme"); //$NON-NLS-1$
+		items.addAll(extensionPoint.getConnectedExtensions());
+		
+		return items.toArray();
+	}
+	
+	private Object[] collectAvailablePerspectives() {
+		Set<Object> items = new LinkedHashSet<>();
+		
+		items.add("NONE"); //$NON-NLS-1$
+		
+		ExtensionPoint extensionPoint = getDescriptor().getExtensionPoint("Perspective"); //$NON-NLS-1$
+		items.addAll(PluginUtil.findExtensions(extensionPoint, null));
+		
+		return items.toArray();
 	}
 
 	/**
@@ -238,8 +329,8 @@ public final class IcarusCorePlugin extends Plugin {
 			try {
 				new ConfigDialog(ConfigRegistry.getGlobalRegistry()).setVisible(true);
 			} catch(Exception ex) {
-				logger.log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to show config dialog", ex)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to show config dialog", ex); //$NON-NLS-1$
 			}
 		}
 	}

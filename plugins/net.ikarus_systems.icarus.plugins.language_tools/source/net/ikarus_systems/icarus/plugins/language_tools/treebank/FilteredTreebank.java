@@ -9,18 +9,20 @@
  */
 package net.ikarus_systems.icarus.plugins.language_tools.treebank;
 
+import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
+import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.treebank.AbstractTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
 import net.ikarus_systems.icarus.language.treebank.TreebankMetaData;
-import net.ikarus_systems.icarus.language.treebank.TreebankObserver;
 import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.language.treebank.DerivedTreebank;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.data.ContentType;
 
 import com.sun.xml.internal.txw2.IllegalSignatureException;
 
@@ -75,18 +77,8 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	}
 
 	@Override
-	public SentenceData get(int index) {
-		return getBase().get(filter==null ? index : filter[index]);
-	}
-
-	@Override
-	public SentenceData get(int index, TreebankObserver observer) {
-		return getBase().get(filter==null ? index : filter[index], observer);
-	}
-
-	@Override
-	public Class<? extends SentenceData> getEntryClass() {
-		return getBase().getEntryClass();
+	public ContentType getDataType() {
+		return getBase().getDataType();
 	}
 
 	@Override
@@ -190,18 +182,59 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	 */
 	@Override
 	public TreebankMetaData getMetaData() {
-		return base.getMetaData();
+		return getBase().getMetaData();
 	}
 	
 	public void addListener(String eventName, EventListener listener) {
-		base.addListener(eventName, listener);
+		getBase().addListener(eventName, listener);
 	}
 
 	public void removeListener(EventListener listener) {
-		base.removeListener(listener);
+		getBase().removeListener(listener);
 	}
 
 	public void removeListener(EventListener listener, String eventName) {
-		base.removeListener(listener, eventName);
+		getBase().removeListener(listener, eventName);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#set(net.ikarus_systems.icarus.language.SentenceData, int, net.ikarus_systems.icarus.language.DataType)
+	 */
+	@Override
+	public void set(SentenceData item, int index, DataType type) {
+		getBase().set(item, index, type);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#remove(int, net.ikarus_systems.icarus.language.DataType)
+	 */
+	@Override
+	public void remove(int index, DataType type) {
+		getBase().remove(index, type);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#supportsType(net.ikarus_systems.icarus.language.DataType)
+	 */
+	@Override
+	public boolean supportsType(DataType type) {
+		return getBase().supportsType(type);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType)
+	 */
+	@Override
+	public SentenceData get(int index, DataType type) {
+		return getBase().get(filter==null ? index : filter[index], type);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType, net.ikarus_systems.icarus.language.AvailabilityObserver)
+	 */
+	@Override
+	public SentenceData get(int index, DataType type,
+			AvailabilityObserver observer) {
+		return getBase().get(filter==null ? index : filter[index], type, observer);
 	}
 }

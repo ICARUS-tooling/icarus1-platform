@@ -55,15 +55,6 @@ public class WebExecutionService{
 		}
 		return instance;
 	}
-
-	private static Logger logger;
-
-	private static Logger getLogger() {
-		if (logger == null) {
-			logger = LoggerFactory.getLogger(WebExecutionService.class);
-		}
-		return logger;
-	}
 	
 
 	private WebExecutionService() {
@@ -205,5 +196,5 @@ public class WebExecutionService{
 		
 	}
 	
-	//TODO return format/corpus
+	//TODO return format/treebank
 }

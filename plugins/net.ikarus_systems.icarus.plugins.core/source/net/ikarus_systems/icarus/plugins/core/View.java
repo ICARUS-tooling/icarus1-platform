@@ -10,11 +10,9 @@
 package net.ikarus_systems.icarus.plugins.core;
 
 import java.awt.Frame;
-import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 
-import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventListener;
@@ -56,10 +54,6 @@ public abstract class View implements Identifiable {
 	 */
 	protected View() {
 		// no-op
-	}
-	
-	protected Logger getLogger() {
-		return LoggerFactory.getLogger(getClass());
 	}
 	
 	public final Extension getExtension() {

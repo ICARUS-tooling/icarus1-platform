@@ -328,4 +328,31 @@
 		<parameter id="interface" value="javax.swing.ListModel" />
 		<parameter id="interface" value="javax.swing.ComboBoxModel" />
 	</extension>
+	
+	<extension id="TreebankContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.treebank.Treebank
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+	</extension>
+	
+	<extension id="SentenceDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.SentenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.SentenceData" />
+	</extension>
+	
+	<extension id="SentenceDataListContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.SentenceDataList
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.SentenceDataList" />
+	</extension>
 </plugin>

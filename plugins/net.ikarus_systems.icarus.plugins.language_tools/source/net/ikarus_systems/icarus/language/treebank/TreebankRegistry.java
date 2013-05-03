@@ -25,7 +25,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.Icon;
 import javax.xml.bind.JAXBContext;
@@ -37,6 +36,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.Core;
+import net.ikarus_systems.icarus.language.AvailabilityObserver;
+import net.ikarus_systems.icarus.language.DataType;
+import net.ikarus_systems.icarus.language.LanguageManager;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
@@ -51,6 +53,7 @@ import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.location.Location;
 
@@ -91,15 +94,6 @@ public class TreebankRegistry {
 	
 	private Map<String, Extension> treebankTypes = new HashMap<>();
 	
-	private static Logger logger;
-	
-	private static Logger getLogger() {
-		if(logger==null) {
-			logger = LoggerFactory.getLogger(TreebankRegistry.class);
-		}
-		return logger;
-	}
-	
 	private TreebankRegistry() {
 		eventSource = new WeakEventSource(this);
 		
@@ -114,8 +108,7 @@ public class TreebankRegistry {
 		try {
 			load();
 		} catch (Exception e) {
-			getLogger().log(LoggerFactory.record(Level.SEVERE, 
-					"Failed to load treebank list", e)); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load treebank list", e); //$NON-NLS-1$
 		}
 	}
 	
@@ -263,8 +256,8 @@ public class TreebankRegistry {
 			try {
 				treebank.free();
 			} catch(Exception e) {
-				logger.log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to free treebank: "+treebank.getName(), e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$
 			}
 			
 			// Finally notify listeners
@@ -449,16 +442,6 @@ public class TreebankRegistry {
 		}
 		
 		@Override
-		public void remove(int index) {
-			// no-op
-		}
-		
-		@Override
-		public void remove(SentenceData item) {
-			// no-op
-		}
-		
-		@Override
 		public void loadState(TreebankDescriptor descriptor) {
 			// no-op
 		}
@@ -504,18 +487,9 @@ public class TreebankRegistry {
 		}
 		
 		@Override
-		public Class<? extends SentenceData> getEntryClass() {
-			return SentenceData.class;
-		}
 		
-		@Override
-		public SentenceData get(int index, TreebankObserver observer) {
-			return null;
-		}
-		
-		@Override
-		public SentenceData get(int index) {
-			return null;
+		public ContentType getDataType() {
+			return LanguageManager.getInstance().getBasicLanguageDataType();
 		}
 		
 		@Override
@@ -527,30 +501,31 @@ public class TreebankRegistry {
 		public void addListener(String eventName, EventListener listener) {
 			// no-op
 		}
-		
-		@Override
-		public void add(SentenceData item, int index) {
-			// no-op
-		}
-		
-		@Override
-		public void add(SentenceData item) {
-			// no-op
-		}
 
 		@Override
-		public boolean hasGold() {
+		public boolean supportsType(DataType type) {
 			return false;
 		}
 
 		@Override
-		public SentenceData getGold(int index) {
+		public SentenceData get(int index, DataType type) {
 			return null;
 		}
 
 		@Override
-		public SentenceData getGold(int index, TreebankObserver observer) {
+		public SentenceData get(int index, DataType type,
+				AvailabilityObserver observer) {
 			return null;
+		}
+
+		@Override
+		public void set(SentenceData item, int index, DataType type) {
+			// no-op
+		}
+
+		@Override
+		public void remove(int index, DataType type) {
+			// no-op
 		}
 	};
 	
@@ -577,8 +552,7 @@ public class TreebankRegistry {
 						try {
 							save();
 						} catch (Exception e) {
-							getLogger().log(LoggerFactory.record(
-									Level.SEVERE, "Failed to save treebank descriptor list", e)); //$NON-NLS-1$
+							LoggerFactory.log(this, Level.SEVERE, "Failed to save treebank descriptor list", e); //$NON-NLS-1$
 						} finally {
 							saveCheck.set(false);
 						}
@@ -615,8 +589,8 @@ public class TreebankRegistry {
 			try {
 				addTreebank0(descriptor);
 			} catch(Exception e) {
-				getLogger().log(LoggerFactory.record(Level.SEVERE, 
-						"Failed to add treebank: "+descriptor, e)); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to add treebank: "+descriptor, e); //$NON-NLS-1$
 			}
 		}
 	}
