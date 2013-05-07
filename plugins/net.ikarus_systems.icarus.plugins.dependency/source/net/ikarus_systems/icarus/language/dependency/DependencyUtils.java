@@ -10,7 +10,6 @@
 package net.ikarus_systems.icarus.language.dependency;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -18,21 +17,27 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
-import javax.naming.directory.SearchResult;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
-import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
-import net.ikarus_systems.icarus.language.MutableSentenceData;
+import net.ikarus_systems.icarus.language.Grammar;
+import net.ikarus_systems.icarus.language.LanguageManager;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
+import net.ikarus_systems.icarus.language.treebank.search.SearchMode;
+import net.ikarus_systems.icarus.language.treebank.search.SearchParameters;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.Orientation;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+
+import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.view.mxGraph;
 
 /**
  * 
@@ -68,28 +73,26 @@ public class DependencyUtils implements DependencyConstants {
 	private static String nodeHighlightColorString = getHexColorString(nodeHighlightColor);
 	private static String edgeHighlightColorString = getHexColorString(edgeHighlightColor);
 	
-	private static HighlightCombinationPolicy combinationPolicy;
-	
 	private static StyleContext styleContext = new StyleContext();
 	
 	private static String getHexColorString(Color color) {
 		return Integer.toHexString((color.getRGB() & 0x00FFFFFF)
 				| (color.getAlpha() << 24));
 	}
-
+	
 	public static void loadConfig(ConfigRegistry config, Handle group) {
-		formColor = new Color(config.getInteger(config.getChildHandle(group, "formHighlight")));
-		posColor = new Color(config.getInteger(config.getChildHandle(group, "posHighlight")));
-		lemmaColor = new Color(config.getInteger(config.getChildHandle(group, "lemmaHighlight")));
-		featuresColor = new Color(config.getInteger(config.getChildHandle(group, "featuresHighlight")));
-		existenceColor = new Color(config.getInteger(config.getChildHandle(group, "existenceHighlight")));
-		relationColor = new Color(config.getInteger(config.getChildHandle(group, "relationHighlight")));
-		directionColor = new Color(config.getInteger(config.getChildHandle(group, "directionHighlight")));
-		distanceColor = new Color(config.getInteger(config.getChildHandle(group, "distanceHighlight")));
-		rootColor = new Color(config.getInteger(config.getChildHandle(group, "rootHighlight")));
+		formColor = new Color(config.getInteger(config.getChildHandle(group, "formHighlight"))); //$NON-NLS-1$
+		posColor = new Color(config.getInteger(config.getChildHandle(group, "posHighlight"))); //$NON-NLS-1$
+		lemmaColor = new Color(config.getInteger(config.getChildHandle(group, "lemmaHighlight"))); //$NON-NLS-1$
+		featuresColor = new Color(config.getInteger(config.getChildHandle(group, "featuresHighlight"))); //$NON-NLS-1$
+		existenceColor = new Color(config.getInteger(config.getChildHandle(group, "existenceHighlight"))); //$NON-NLS-1$
+		relationColor = new Color(config.getInteger(config.getChildHandle(group, "relationHighlight"))); //$NON-NLS-1$
+		directionColor = new Color(config.getInteger(config.getChildHandle(group, "directionHighlight"))); //$NON-NLS-1$
+		distanceColor = new Color(config.getInteger(config.getChildHandle(group, "distanceHighlight"))); //$NON-NLS-1$
+		rootColor = new Color(config.getInteger(config.getChildHandle(group, "rootHighlight"))); //$NON-NLS-1$
 
-		nodeHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "nodeHighlight")));
-		edgeHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "edgeHighlight")));
+		nodeHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "nodeHighlight"))); //$NON-NLS-1$
+		edgeHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "edgeHighlight"))); //$NON-NLS-1$
 
 		/*combinationPolicy = (HighlightCombinationPolicy) 
 				config.getValue(config.getChildHandle(group, "combinationPolicy"));*/
@@ -110,75 +113,75 @@ public class DependencyUtils implements DependencyConstants {
 		Style style;
 		
 		// CASEDIFF 1
-		style = styleContext.addStyle("caseDiff1", null);
+		style = styleContext.addStyle("caseDiff1", null); //$NON-NLS-1$
 		StyleConstants.setBackground(style, getCaseDiffColor(0));
 		StyleConstants.setBold(style, true);
 		
 		// CASEDIFF 2
-		style = styleContext.addStyle("caseDiff2", null);
+		style = styleContext.addStyle("caseDiff2", null); //$NON-NLS-1$
 		StyleConstants.setBackground(style, getCaseDiffColor(1));
 		StyleConstants.setBold(style, true);
 		
 		// CASEDIFF 3
-		style = styleContext.addStyle("caseDiff3", null);
+		style = styleContext.addStyle("caseDiff3", null); //$NON-NLS-1$
 		StyleConstants.setBackground(style, getCaseDiffColor(2));
 		StyleConstants.setBold(style, true);
 
 		
 		// NODE
-		style = styleContext.addStyle("node", null);
+		style = styleContext.addStyle("node", null); //$NON-NLS-1$
 		StyleConstants.setForeground(style, nodeHighlightColor);
 		StyleConstants.setItalic(style, true);
 		
 		// EDGE
-		style = styleContext.addStyle("edge", null);
+		style = styleContext.addStyle("edge", null); //$NON-NLS-1$
 		StyleConstants.setForeground(style, edgeHighlightColor);
 		StyleConstants.setItalic(style, true);
 
 		// MULTIPLE HIGHLIGHTS
-		style = styleContext.addStyle("multiple", null);
-		StyleConstants.setIcon(style, GuiUtils.getIcon("multiple_annotation.gif"));
+		style = styleContext.addStyle("multiple", null); //$NON-NLS-1$
+		StyleConstants.setIcon(style, IconRegistry.getGlobalRegistry().getIcon("stcksync_ov.gif")); //$NON-NLS-1$
 	}
 
 	
 	public static Options createOptionsFromConfig() {
 
-		ConfigRegistry config = Core.core().getConfig();
+		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
 		
 		Options options = new Options();
-		options.put(ExplorerConstants.SEARCH_USE_REGEX, 
-				config.getBoolean("dependency.search.useRegex"));
-		options.put(ExplorerConstants.SEARCH_CASESENSITIVE, 
-				config.getBoolean("dependency.search.caseSensitive"));
-		options.put(ExplorerConstants.SEARCH_ORIENTATION, 
-				"leftToRight".equals(
-						config.getString("dependency.search.direction"))?
+		options.put(SearchParameters.REGEX_ENABLED, 
+				config.getBoolean("dependency.search.useRegex")); //$NON-NLS-1$
+		options.put(SearchParameters.SEARCH_CASESENSITIVE, 
+				config.getBoolean("dependency.search.caseSensitive")); //$NON-NLS-1$
+		options.put(SearchParameters.SEARCH_ORIENTATION, 
+				"leftToRight".equals( //$NON-NLS-1$
+						config.getString("dependency.search.direction"))? //$NON-NLS-1$
 								Orientation.LEFT_TO_RIGHT 
 								: Orientation.RIGHT_TO_LEFT);
-		options.put(ExplorerConstants.SEARCH_MAX_RESULT_COUNT,
-				config.getInteger("dependency.search.maxResultCount"));
+		options.put(SearchParameters.SEARCH_RESULT_LIMIT,
+				config.getInteger("dependency.search.maxResultCount")); //$NON-NLS-1$
 		boolean exhaustive = false;
 		SearchMode mode = SearchMode.SENTENCES;
-		String modeString = config.getString("dependency.search.searchMode");
-		if("occurrences".equals(modeString)) {
+		String modeString = config.getString("dependency.search.searchMode"); //$NON-NLS-1$
+		if("occurrences".equals(modeString)) { //$NON-NLS-1$
 			mode = SearchMode.OCCURENCES;
 			exhaustive = true;
-		} else if("exhaustiveSentences".equals(modeString)) {
+		} else if("exhaustiveSentences".equals(modeString)) { //$NON-NLS-1$
 			exhaustive = true;
 		}
 		
-		options.put(ExplorerConstants.SEARCH_EXHAUSTIVE_SEARCH, exhaustive);
-		options.put(ExplorerConstants.SEARCH_MODE, mode);
+		options.put(SearchParameters.SEARCH_EXHAUSTIVE, exhaustive);
+		options.put(SearchParameters.SEARCH_MODE, mode);
 		
 		return options;
 	}
 
 	public static Color getCaseDiffColor(int index) {
-		return CaseDiffStorage.getColor(index);
+		return null; // TODO
 	}
 
 	public static String getCaseDiffColorString(int index) {
-		return getHexColorString(CaseDiffStorage.getColor(index));
+		return getHexColorString(null); // TODO
 	}
 
 	/**
@@ -308,14 +311,6 @@ public class DependencyUtils implements DependencyConstants {
 	}
 
 	/**
-	 * @return the combinationPolicy
-	 */
-	public static HighlightCombinationPolicy getCombinationPolicy() {
-		return combinationPolicy;
-	}
-
-
-	/**
 	 * @return the nodeHighlightColor
 	 */
 	public static Color getNodeHighlightColor() {
@@ -353,7 +348,7 @@ public class DependencyUtils implements DependencyConstants {
 	public static String combine(SentenceData data) {
 		StringBuilder sb = new StringBuilder(data.getForms().length*4);
 		for(String token : data.getForms())
-			sb.append(token).append(" ");
+			sb.append(token).append(" "); //$NON-NLS-1$
 		
 		return sb.toString().trim();
 	}
@@ -363,65 +358,45 @@ public class DependencyUtils implements DependencyConstants {
 	}
 	
 	public static String createExampleQuery() {
-		return "[pos=<*>[form=the]][pos=NN]";
+		return "[pos=<*>[form=the]][pos=NN]"; //$NON-NLS-1$
 	}
 
 	public static DependencyData createExampleSentenceData() {
 		return new SimpleDependencyData(
-				new String[] { "That", "thing", "I", "will", "never", "forget" }, 
-				new String[] { "that", "thing", "i", "will", "never", "forget" },
-				new String[] { "_", "_", "_", "_", "_", "_" },
-				new String[] { "DT", "NN", "PRP", "MD", "RB", "VB" }, 
-				new String[] {"NMOD", "ROOT", "SBJ", "NMOD", "TMP", "VC" }, 
-				new int[] { 1, 5, 3, DATA_HEAD_ROOT, 3, 3 });
+				new String[] { "That", "thing", "I", "will", "never", "forget" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				new String[] { "that", "thing", "i", "will", "never", "forget" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				new String[] { "_", "_", "_", "_", "_", "_" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				new String[] { "DT", "NN", "PRP", "MD", "RB", "VB" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				new String[] {"NMOD", "ROOT", "SBJ", "NMOD", "TMP", "VC" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				new int[] { 1, 5, 3, DATA_HEAD_ROOT, 3, 3 },
+				new long[]{ 0, 0, 0, 0, 0, 0}); // TODO
 	}
 	
-	public static JLabel[] createCaseDiffCountLabels(int count) {
-		JLabel[] caseDiffCountLabels = new JLabel[count];
-		for(int i=0; i<caseDiffCountLabels.length; i++) {
-			caseDiffCountLabels[i] = new JLabel();
-			//GuiUtils.resizeComponent(caseDiffCountLabels[i], 75, 25);
-		}
-		
-		return caseDiffCountLabels;
+	public static boolean isRoot(int value) {
+		return value==DATA_HEAD_ROOT;
 	}
 	
-	public static void refreshCaseDiffCountLabels(JLabel[] caseDiffCountLabels, 
-			SearchResult result) {
-		refreshCaseDiffCountLabels(caseDiffCountLabels, result, 0);
+	public static boolean isRoot(String value) {
+		return DATA_ROOT_LABEL.equals(value);
 	}
 	
-	public static void refreshCaseDiffCountLabels(JLabel[] caseDiffCountLabels, 
-			SearchResult result, int offset) {
-		if(result==null) {
-			for(JLabel label : caseDiffCountLabels)
-				label.setText("");
-		} else {			
-			String label;						
-			for(int i=0; i<caseDiffCountLabels.length; i++) {
-				if(i<result.getDimension()) {
-					label = String.format("'%s': %s", 
-							result.getCaseDiffType(i),
-							ExplorerUtils.formatDecimal(
-									result.getCaseDiffLabelCount(i)));
-					
-					caseDiffCountLabels[i].setForeground(getCaseDiffColor(i+offset));
-					caseDiffCountLabels[i].setText(label);
-				} else {
-					caseDiffCountLabels[i].setText("");
-				}
-			}
-		}
+	public static boolean isUndefined(int value) {
+		return value==DATA_UNDEFINED_VALUE;
+	}
+	
+	public static boolean isUndefined(String value) {
+		return value==null || value.isEmpty() || value.equals(DATA_UNDEFINED_LABEL);
 	}
 	
 	public static final SentenceData dummySentenceData = 
 		new SimpleDependencyData(
-				new String[]{"Test"}, 
-				new String[]{""},  
-				new String[]{""},  
-				new String[]{""}, 
-				new String[]{""}, 
-				new int[]{DependencyConstants.DATA_UNDEFINED_VALUE});
+				new String[]{"Test"},  //$NON-NLS-1$
+				new String[]{""},   //$NON-NLS-1$
+				new String[]{""},   //$NON-NLS-1$
+				new String[]{""},  //$NON-NLS-1$
+				new String[]{""},  //$NON-NLS-1$
+				new int[]{DependencyConstants.DATA_UNDEFINED_VALUE},
+				new long[]{0});
 	
 	/*public static String getExistenceLabel(int existence) {
 		switch (existence) {
@@ -456,7 +431,7 @@ public class DependencyUtils implements DependencyConstants {
 			return String.valueOf(false);
 		}
 		
-		throw new IllegalArgumentException("Unknown value: "+value);
+		throw new IllegalArgumentException("Unknown value: "+value); //$NON-NLS-1$
 	}
 	
 	public static int parseBooleanLabel(String label) {
@@ -586,16 +561,16 @@ public class DependencyUtils implements DependencyConstants {
 	
 	private static class DataEntry {
 		public int index = DATA_UNDEFINED_VALUE;
-		public String form = "";
-		public String lemma = "";
-		public String features = "";
-		public String pos = "";
-		public String relation = "";
+		public String form = ""; //$NON-NLS-1$
+		public String lemma = ""; //$NON-NLS-1$
+		public String features = ""; //$NON-NLS-1$
+		public String pos = ""; //$NON-NLS-1$
+		public String relation = ""; //$NON-NLS-1$
 		public DataEntry head = null;
 	}
 	
 	public static SimpleDependencyData parseData(String text) {
-		Exceptions.testNullArgument(text, "text");
+		Exceptions.testNullArgument(text, "text"); //$NON-NLS-1$
 
 		int length = text.length();
 		if (length < 2 || text.charAt(0) != '['
@@ -675,7 +650,7 @@ public class DependencyUtils implements DependencyConstants {
 		}
 
 		if (trace.size() > 0)
-			throw new IllegalStateException("Unclosed '[' in sentence description");
+			throw new IllegalStateException("Unclosed '[' in sentence description"); //$NON-NLS-1$
 
 		int size = items.size();
 		String[] forms = new String[size];
@@ -695,7 +670,7 @@ public class DependencyUtils implements DependencyConstants {
 			heads[i] = entry.head==null ? DATA_HEAD_ROOT : entry.head.index;
 		}
 		
-		return new SimpleDependencyData(forms, lemmas, features, poss, relations, heads);
+		return new SimpleDependencyData(forms, lemmas, features, poss, relations, heads, null);
 	}
 
 	protected static void addConstraint(DataEntry entry,
@@ -712,47 +687,47 @@ public class DependencyUtils implements DependencyConstants {
 			entry.relation = value;
 		else
 			throw new IllegalArgumentException(String.format(
-					"Unknown field key: '%s' (value='%s')", String
+					"Unknown field key: '%s' (value='%s')", String //$NON-NLS-1$
 							.valueOf(key), String.valueOf(value)));
 	}
 	
 	public static String getHighlightDump(int highlight) {
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("bin=").append(Integer.toBinaryString(highlight));
+		sb.append("bin=").append(Integer.toBinaryString(highlight)); //$NON-NLS-1$
 		
 		if(isHighlight(highlight)) {
-			sb.append(" hl=");
+			sb.append(" hl="); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_GENERAL) == HIGHLIGHT_GENERAL)
-				sb.append("+");
+				sb.append("+"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_FORM) == HIGHLIGHT_FORM)
-				sb.append("f");
+				sb.append("f"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_POS) == HIGHLIGHT_POS)
-				sb.append("p");
+				sb.append("p"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_RELATION) == HIGHLIGHT_RELATION)
-				sb.append("r");
+				sb.append("r"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_DIRECTION) ==  HIGHLIGHT_DIRECTION)
-				sb.append("d");
+				sb.append("d"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_DISTANCE) == HIGHLIGHT_DISTANCE)
-				sb.append("s");
+				sb.append("s"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_NODE_GENERAL) == HIGHLIGHT_NODE_GENERAL)
-				sb.append("N");
+				sb.append("N"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_EDGE_GENERAL) == HIGHLIGHT_EDGE_GENERAL)
-				sb.append("E");
+				sb.append("E"); //$NON-NLS-1$
 	
-			sb.append(" cd=");
+			sb.append(" cd="); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_CASEDIFF) == HIGHLIGHT_CASEDIFF)
-				sb.append("+");
+				sb.append("+"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_FORM_CASEDIFF) == HIGHLIGHT_FORM_CASEDIFF)
-				sb.append("f");
+				sb.append("f"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_POS_CASEDIFF) == HIGHLIGHT_POS_CASEDIFF)
-				sb.append("p");
+				sb.append("p"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_RELATION_CASEDIFF) == HIGHLIGHT_RELATION_CASEDIFF)
-				sb.append("r");
+				sb.append("r"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_DIRECTION_CASEDIFF) ==  HIGHLIGHT_DIRECTION_CASEDIFF)
-				sb.append("d");
+				sb.append("d"); //$NON-NLS-1$
 			if((highlight & HIGHLIGHT_DISTANCE_CASEDIFF) == HIGHLIGHT_DISTANCE_CASEDIFF)
-				sb.append("s");
+				sb.append("s"); //$NON-NLS-1$
 		}
 		
 		return sb.toString();
@@ -983,29 +958,17 @@ public class DependencyUtils implements DependencyConstants {
 		return count;
 	}
 	
-	public static void propagateResultViewChanged(Component comp, Object source) {
-		Exceptions.testNullArgument(comp, "comp");
-		
-		SearchView observer = (SearchView) SwingUtilities.getAncestorOfClass(
-				SearchView.class, comp);
-		
-		if(observer!=null)
-			observer.resultViewChanged(source);
+	public static Grammar getDependencyGrammar() {
+		return LanguageManager.getInstance().getGrammar(GRAMMAR_ID);
 	}
-	
-	public static void propagateSearchStateChanged(Component comp, Object source) {
-		Exceptions.testNullArgument(comp, "comp");
-		
-		SearchView observer = (SearchView) SwingUtilities.getAncestorOfClass(
-				SearchView.class, comp);
-		
-		if(observer!=null)
-			observer.searchStateChanged(source);
+
+	public static ContentType getDependencyContentType() {
+		return ContentTypeRegistry.getInstance().getType(CONTENT_TYPE_ID);
 	}
 	
 	public static String getForms(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1016,7 +979,7 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getLemmas(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1027,7 +990,7 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getFeatures(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1038,7 +1001,7 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getPoss(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1049,7 +1012,7 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getRelations(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1060,7 +1023,7 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getHeads(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1071,7 +1034,7 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getIndices(DependencyNodeData[] items) {
 		if(items==null)
-			return "";
+			return ""; //$NON-NLS-1$
 		
 		int[] buffer = new int[items.length];
 		for(int i=0; i<items.length; i++)
@@ -1081,9 +1044,10 @@ public class DependencyUtils implements DependencyConstants {
 	}
 	
 	public static boolean isDependencyTreebank(Treebank treebank) {
-		Exceptions.testNullArgument(treebank, "treebank");
-		
-		return DependencyData.class.isAssignableFrom(treebank.getEntryClass());
+		Exceptions.testNullArgument(treebank, "treebank"); //$NON-NLS-1$
+
+		return ContentTypeRegistry.isCompatible(
+				DependencyConstants.CONTENT_TYPE_ID, treebank.getDataType());
 	}
 	
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {
@@ -1099,8 +1063,8 @@ public class DependencyUtils implements DependencyConstants {
 	}
 	
 	public static DependencyTree getTreeFromGraph(mxGraph graph, Object root) {
-		Exceptions.testNullArgument(graph, "graph");
-		Exceptions.testNullArgument(root, "root");
+		Exceptions.testNullArgument(graph, "graph"); //$NON-NLS-1$
+		Exceptions.testNullArgument(root, "root"); //$NON-NLS-1$
 		
 		DependencyTree tree = new DependencyTree();
 		Set<Object> visited = new HashSet<Object>();
@@ -1112,7 +1076,7 @@ public class DependencyUtils implements DependencyConstants {
 	private static void feedTreeFromGraph(DependencyTree node, mxGraph graph, 
 			Object cell, Set<Object> visited) {
 		if(visited.contains(cell))
-			throw new IllegalArgumentException("Supplied graph is cyclic!");
+			throw new IllegalArgumentException("Supplied graph is cyclic!"); //$NON-NLS-1$
 		
 		mxIGraphModel model = graph.getModel();
 		visited.add(cell);

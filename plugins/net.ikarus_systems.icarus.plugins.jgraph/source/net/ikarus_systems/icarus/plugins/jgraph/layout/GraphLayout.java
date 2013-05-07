@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.plugins.jgraph.layout;
 
 import net.ikarus_systems.icarus.util.Filter;
+import net.ikarus_systems.icarus.util.Installable;
 import net.ikarus_systems.icarus.util.Options;
 
 import com.mxgraph.util.mxRectangle;
@@ -19,7 +20,7 @@ import com.mxgraph.util.mxRectangle;
  * @version $Id$
  *
  */
-public interface GraphLayout {
+public interface GraphLayout extends Installable<GraphOwner> {
 	
 	/**
 	 * Layout the given collection of cells in the graph.

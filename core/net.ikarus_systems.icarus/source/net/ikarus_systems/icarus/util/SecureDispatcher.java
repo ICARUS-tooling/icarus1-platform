@@ -61,4 +61,8 @@ public abstract class SecureDispatcher implements Runnable {
 	public Exception getException() {
 		return exception;
 	}
+	
+	public boolean hasException() {
+		return exception!=null;
+	}
 }

@@ -13,11 +13,10 @@ import java.io.IOException;
 
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
-import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
+import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentType;
-import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 
@@ -68,8 +67,7 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 	 */
 	@Override
 	public ContentType getDataType() {
-		return ContentTypeRegistry.getInstance().getType(
-				DependencyConstants.CONTENT_TYPE_ID);
+		return DependencyUtils.getDependencyContentType();
 	}
 
 }

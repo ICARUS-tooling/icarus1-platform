@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.dependency.helper;
+package net.ikarus_systems.icarus.plugins.dependency.table;
 
 import java.awt.Dimension;
 
@@ -20,6 +20,7 @@ import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
 import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
+import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.helper.AbstractSentenceTablePresenter;
 import net.ikarus_systems.icarus.ui.table.TableColumnManager;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -40,7 +41,7 @@ public class DependencyTablePresenter extends AbstractSentenceTablePresenter<Dep
 	@Override
 	public boolean supports(ContentType type) {
 		return ContentTypeRegistry.isCompatible(
-				DependencyConstants.CONTENT_TYPE_ID, type);
+				DependencyUtils.getDependencyContentType(), type);
 	}
 
 	/**

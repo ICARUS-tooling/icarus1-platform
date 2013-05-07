@@ -57,4 +57,8 @@ public interface SearchQuery {
 	 * strings returned by calls to their respective {@link #getQueryString()} methods!
 	 */
 	boolean equals(Object obj);
+	
+	void setProperty(String key, Object value);
+	
+	Object getProperty(String key);
 }

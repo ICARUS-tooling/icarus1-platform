@@ -31,9 +31,12 @@ public interface DependencyData extends SentenceData {
 	
 	int getHead(int index);
 	
-	void setFlag(int index, long flag);
-	
-	void unsetFlag(int index, long flag);
-	
+	/**
+	 * Tests whether a given flag is set on the current {@code SentenceData}
+	 * object. The exact meaning of {@code flag} values is implementation group
+	 * specific.
+	 */
 	boolean isFlagSet(int index, long flag);
+	
+	long getFlags(int index);
 }

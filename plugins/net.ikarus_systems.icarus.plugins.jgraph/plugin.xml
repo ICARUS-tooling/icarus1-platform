@@ -54,6 +54,63 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="GraphStyle" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of style object, has to implement the net.ikarus_systems.icarus.plugins.jgraph.layout.GraphStyle interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Supported content type(s). Used to filter out styles when presenting
+					choice dialog or other means of selection capabilities to the user. If
+					parameter is missing then the style is assumed to be not depending on
+					content of a graph.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="GraphRenderer" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Advanced type of canvas originally used by mxGraphComponent to paint
+				cells and labels. GraphPresenter uses GraphRenderer implementations to
+				determine the actual label-string and the tooltip-text for cells.
+				Implementations are free to apply content specific coloring and or highlighting.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of renderer object, has to implement the net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Supported content type(s). Used to filter out renderers when presenting
+					choice dialog or other means of selection capabilities to the user. If
+					parameter is missing then the renderer is assumed to be not depending on
+					content of a graph.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="Shape">
 		<doc>
 			<doc-text>

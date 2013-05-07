@@ -12,13 +12,14 @@
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="net.ikarus_systems.icarus.dependency" />
 	</requires>
 	
 	<runtime>
-		<library id="mate-tools" path="lib/anna.jar" type="code">
+		<library id="mate-tools" path="lib/anna-3-1.jar" type="code">
 			<doc>
 				<doc-text>
-					matetools library as of version 3.1 ?
+					matetools library as of version 3.1
 				</doc-text>
 			</doc>
 		</library>

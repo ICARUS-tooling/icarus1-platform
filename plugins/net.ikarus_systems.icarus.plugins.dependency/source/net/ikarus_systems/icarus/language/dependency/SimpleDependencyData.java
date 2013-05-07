@@ -15,7 +15,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.language.Grammar;
-import net.ikarus_systems.icarus.language.LanguageManager;
 
 /**
  * 
@@ -51,13 +50,14 @@ public class SimpleDependencyData implements DependencyData {
 	protected long[] flags;
 
 	public SimpleDependencyData(String[] forms, String[] lemmas, 
-			String[] features, String[] poss, String[] relations, int[] heads) {
+			String[] features, String[] poss, String[] relations, int[] heads, long[] flags) {
 		this.forms = forms;
 		this.lemmas = lemmas;
 		this.features = features;
 		this.poss = poss;
 		this.relations = relations;
 		this.heads = heads;
+		this.flags = flags;
 	}
 
 	public SimpleDependencyData(DependencyData source) {
@@ -69,14 +69,16 @@ public class SimpleDependencyData implements DependencyData {
 		poss = new String[size];
 		relations = new String[size];
 		heads = new int[size];
+		flags = new long[size];
 
-		while (--size >= 0) {
-			forms[size] = source.getForm(size);
-			lemmas[size] = source.getLemma(size);
-			features[size] = source.getFeatures(size);
-			poss[size] = source.getPos(size);
-			relations[size] = source.getRelation(size);
-			heads[size] = source.getHead(size);
+		for(int index=0; index<size; index++) {
+			forms[index] = source.getForm(index);
+			lemmas[index] = source.getLemma(index);
+			features[index] = source.getFeatures(index);
+			poss[index] = source.getPos(index);
+			relations[index] = source.getRelation(index);
+			heads[index] = source.getHead(index);
+			flags[index] = source.getFlags(index);
 		}
 	}
 
@@ -160,27 +162,20 @@ public class SimpleDependencyData implements DependencyData {
 	public boolean isFlagSet(int index, long flag) {
 		return flags!=null && (flags[index] & flag)==flag;
 	}
-	
-	public void setFlag(int index, long flag) {
-		if(flags==null)
-			flags = new long[forms.length];
-		
-		flags[index] |= flag;
-	}
-	
-	public void unsetFlag(int index, long flag) {
-		if(flags==null)
-			return;
-		
-		flags[index] &= ~flag;
-	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.language.SentenceData#getSourceGrammar()
 	 */
 	@Override
 	public Grammar getSourceGrammar() {
-		return LanguageManager.getInstance().getGrammar(
-				DependencyConstants.GRAMMAR_ID);
+		return DependencyUtils.getDependencyGrammar();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.language.dependency.DependencyData#getFlags(int)
+	 */
+	@Override
+	public long getFlags(int index) {
+		return flags==null ? 0 : flags[index];
 	}
 }

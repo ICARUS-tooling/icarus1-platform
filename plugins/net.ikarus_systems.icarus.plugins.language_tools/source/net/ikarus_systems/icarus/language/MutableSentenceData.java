@@ -73,4 +73,17 @@ public interface MutableSentenceData extends SentenceData {
 	 * @param listener the {@code SentenceDataListener} to be removed
 	 */
 	void removeSentenceDataListener(SentenceDataListener listener);
+	
+	/**
+	 * Stores a mapping from {@code key} to a value of arbitrary type.
+	 * It is up to an implementation how to handle {@code null} values
+	 * but the recommended way is to use {@code null} as hint for removing
+	 * a certain mapping entirely.
+	 */
+	void setProperty(String key, Object value);
+	
+	/**
+	 * Returns the value of a previously stored mapping
+	 */
+	Object getProperty(String key);
 }

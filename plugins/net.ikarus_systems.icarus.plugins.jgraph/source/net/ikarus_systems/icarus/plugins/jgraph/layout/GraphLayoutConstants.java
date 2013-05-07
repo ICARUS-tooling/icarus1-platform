@@ -31,6 +31,9 @@ public interface GraphLayoutConstants {
 	public static final String CONTENT_AREA_KEY = "contentArea"; //$NON-NLS-1$
 	public static final String CELL_SPACING_KEY = "cellSpacing"; //$NON-NLS-1$
 
+	public static final String OFFSET_X_KEY = "offsetX"; //$NON-NLS-1$
+	public static final String OFFSET_Y_KEY = "offsetY"; //$NON-NLS-1$
+
 	public static final String DEFAULT_EDGE_STYLE_KEY = "defaultEdgeStyle"; //$NON-NLS-1$
 	public static final String ORDER_EDGE_STYLE_KEY = "orderEdgeStyle"; //$NON-NLS-1$
 	public static final String LTR_EDGE_STYLE_KEY = "ltrEdgeStyle"; //$NON-NLS-1$

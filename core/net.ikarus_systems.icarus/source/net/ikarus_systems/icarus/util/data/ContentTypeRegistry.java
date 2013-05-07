@@ -287,6 +287,37 @@ public final class ContentTypeRegistry {
 		return CollectionUtils.isTrue(type.getProperties(), ContentType.STRICT_INHERITANCE);
 	}
 	
+	public boolean isConvertible(ContentType source, ContentType target) {
+		return getConverter0(source, target)!=null;
+	}
+	
+	public Collection<ContentType> getConversionTargets(ContentType type, boolean includeCompatible) {
+		if(type==null)
+			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+		
+		Set<ContentType> targets = new LinkedHashSet<>();
+		
+		// Collect raw converters
+		for(DataConverter converter : rawConverters) {
+			if(type.equals(converter.getInputType()) ||
+					includeCompatible && isCompatible(type, converter.getInputType())) {
+				targets.add(converter.getResultType());
+			}
+		}
+		
+		// Collect derived converters
+		if(converterLookup!=null) {
+			for(ContentTypePair key : converterLookup.keySet()) {
+				if(type.equals(key.getInputType()) ||
+						includeCompatible && isCompatible(type, key.getInputType())) {
+					targets.add(key.getOutputType());
+				}
+			}
+		}
+		
+		return targets;
+	}
+	
 	public Object convert(Object data, Object targetType) throws DataConversionException {
 		if(targetType==null)
 			throw new IllegalArgumentException("Invalid target type"); //$NON-NLS-1$
@@ -523,6 +554,14 @@ public final class ContentTypeRegistry {
 						&& outputType.equals(other.outputType);
 			}
 			return false;
+		}
+
+		ContentType getInputType() {
+			return inputType;
+		}
+
+		ContentType getOutputType() {
+			return outputType;
 		}
 	}
 	

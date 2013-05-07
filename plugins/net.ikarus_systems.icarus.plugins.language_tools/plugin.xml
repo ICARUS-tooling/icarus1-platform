@@ -102,7 +102,7 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="grammar" multiplicity="one-or-none">
+		<parameter-def id="grammar" multiplicity="none-or-one">
 			<doc>
 				<doc-text>
 					Identifies the grammar object associated with this reader. 
@@ -130,7 +130,7 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="grammar" multiplicity="one-or-none">
+		<parameter-def id="grammar" multiplicity="none-or-one">
 			<doc>
 				<doc-text>
 					Identifies the grammar object associated with this writer 
@@ -345,6 +345,15 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.SentenceData" />
+	</extension>
+	
+	<extension id="MutableSentenceDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.MutableSentenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.MutableSentenceData" />
 	</extension>
 	
 	<extension id="SentenceDataListContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">

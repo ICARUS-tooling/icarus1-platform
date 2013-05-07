@@ -40,4 +40,20 @@ public class BasicTreeLayout implements GraphLayout {
 		// TODO Auto-generated method stub
 
 	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
+	 */
+	@Override
+	public void install(GraphOwner target) {
+		// no-op
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
+	 */
+	@Override
+	public void uninstall(GraphOwner target) {
+		// no-op
+	}
 }

@@ -76,8 +76,10 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 			for(int i=0; i<cells.length; i++) {
 				Object cell = cells[i];
 				
-				// Refresh cell size
-				graph.cellLabelChanged(cell, model.getValue(cell), graph.isAutoSizeCell(cell));
+				// Refresh cell size if graph is auto-sizing
+				if(graph.isAutoSizeCell(cell)) {
+					graph.cellSizeUpdated(cell, false);
+				}
 				
 				// Move cell to new location
 				mxGeometry geometry = (mxGeometry) model.getGeometry(cell).clone();
@@ -117,7 +119,10 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 						style += rtlEdgeStyle;
 					}
 					
-					model.setStyle(edge, style);
+					String oldStyle = model.getStyle(edge);
+					if(oldStyle==null || !oldStyle.endsWith(style)) {
+						model.setStyle(edge, style);
+					}
 				}
 			}
 			
@@ -309,5 +314,21 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 		} finally {
 			model.endUpdate();
 		}
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
+	 */
+	@Override
+	public void install(GraphOwner target) {
+		// no-op
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
+	 */
+	@Override
+	public void uninstall(GraphOwner target) {
+		// no-op
 	}
 }
