@@ -16,13 +16,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sun.xml.internal.bind.v2.model.core.MaybeElement;
-
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
 import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.dependency.SimpleDependencyData;
-import net.ikarus_systems.icarus.plugins.tcf.tcf04.TCF04SentenceDataReader;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -40,6 +37,7 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 	protected CONLLReader09 reader;
 	protected boolean normalize;
 	protected boolean gold;
+	protected boolean system;
 	protected int inputFormat; // 0 (default) or 1
 	protected int maxLength = 0;
 	
@@ -62,16 +60,25 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 		File file = location.getFile();
 		
 		if(file == null)
-			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$		
-		
+			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$	
 		
 		if(!file.exists())
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
 											+file.getAbsolutePath());
 		
+		if (options == null){
+			options = options.emptyOptions;
+		}
+		
 		normalize = true;
+		inputFormat = 0;
 		//TODO extend me
-		gold = true;	
+		gold = options.get(INCLUDE_GOLD_OPTION, false);
+		system = options.get(INCLUDE_SYSTEM_OPTION, false);
+		
+		if (!gold && !system){
+			system = true;
+		}	
 		inputFormat = 0;
 		
 		reader = new CONLLReader09(file.toString(), normalize);	
@@ -115,22 +122,22 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 				
 				
 				//TODO extend compound setData()
-				if(gold) {
-					heads[i] = input.heads[iSource] - 1;
-					lemmas[i] = ensureValid(input.lemmas[iSource]);
-					features[i] = ensureValid(input.ofeats[iSource]);
-					poss[i] = ensureValid(input.gpos[iSource]);
-					relations[i] = ensureValid(input.labels[iSource]);					
-				} else {
+				 if(system) {
 					heads[i] = input.pheads[iSource] - 1;
 					lemmas[i] = ensureValid(input.plemmas[iSource]);
 					features[i] = ensureValid(input.pfeats[iSource]);
 					poss[i] = ensureValid(input.ppos[iSource]);
 					relations[i] = ensureValid(input.plabels[iSource]);
-				}	
+				 }	
+				 else {
+					heads[i] = input.heads[iSource] - 1;
+					lemmas[i] = ensureValid(input.lemmas[iSource]);
+					features[i] = ensureValid(input.ofeats[iSource]);
+					poss[i] = ensureValid(input.gpos[iSource]);
+					relations[i] = ensureValid(input.labels[iSource]);					
+				 }
 				
-				// 			 Head: 3 PoS: DT Feat: 	Lemma: the Relation: NMOD
-				// Form: The Head: 1 PoS: DT Feat:  Lemma: the Relation: NMOD
+
 				/*
 				System.out.print("Form: "+ forms[i]);
 				System.out.print(" Head: "+ heads[i]);

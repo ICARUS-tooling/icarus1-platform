@@ -13,13 +13,8 @@ import is2.data.SentenceData09;
 import is2.io.CONLLWriter09;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
-
-import sun.nio.cs.Surrogate;
-
-
 
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataWriter;
@@ -27,8 +22,6 @@ import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
 import net.ikarus_systems.icarus.language.dependency.SimpleDependencyData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.plugins.tcf.tcf04.TCF04SentenceDataReader;
-import net.ikarus_systems.icarus.plugins.tcf.tcf04.TCF04SentenceDataWriter;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentType;
