@@ -32,6 +32,10 @@ import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
  *
  */
 public interface SentenceDataReader {
+	
+	public static final String INCLUDE_SYSTEM_OPTION = "includeSystem"; //$NON-NLS-1$	
+	public static final String INCLUDE_GOLD_OPTION = "includeGold"; //$NON-NLS-1$
+	public static final String INCLUDE_USER_OPTION = "includeUser"; //$NON-NLS-1$
 
 	/**
 	 * Sets the {@code Location} to load data from and initializes
