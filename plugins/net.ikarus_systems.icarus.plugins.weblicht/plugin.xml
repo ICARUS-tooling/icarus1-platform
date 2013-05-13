@@ -12,6 +12,7 @@
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="net.ikarus_systems.icarus.tcf" />
 	</requires>
 	
 	<!-- Extension-Points -->

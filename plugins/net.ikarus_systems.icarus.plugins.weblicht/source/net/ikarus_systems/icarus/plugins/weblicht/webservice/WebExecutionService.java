@@ -11,14 +11,8 @@ package net.ikarus_systems.icarus.plugins.weblicht.webservice;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.logging.Logger;
-
-import net.ikarus_systems.icarus.language.MutableSentenceData;
-import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventSource;
 
@@ -137,10 +131,20 @@ public class WebExecutionService{
 		createTCFfromString(result, getReadableLayerTags(query));
 
 		
-		System.out.println("Webresult: " + result);
+		System.out.println("Webresult: " + result); //$NON-NLS-1$
 		
 	}
 	
+	
+	/**
+	 * All readable layers in the result are inserted in the return EnumSet. Later TCF reader
+	 * may use only the TextCorpusLayerTags which are inside the returnvalue. 
+	 * Thus the reader is not forced to progress all the given layers if some of them are not
+	 * needed.
+	 * 
+	 * @param format
+	 * @return
+	 */
 	private EnumSet<TextCorpusLayerTag> getReadableLayerTags(List<String> format){
 		EnumSet<TextCorpusLayerTag> layers2Read = EnumSet.noneOf(TextCorpusLayerTag.class);
 		

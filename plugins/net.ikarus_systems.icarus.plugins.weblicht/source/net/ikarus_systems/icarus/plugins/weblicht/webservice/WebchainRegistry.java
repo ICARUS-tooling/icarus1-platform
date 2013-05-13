@@ -242,8 +242,8 @@ public class WebchainRegistry {
 					//addinput
 					webchain.addWebchainElement(inputType);
 					
-					//Grab all unique webservice numbers from chain
-					NodeList uidList = eElement.getElementsByTagName("service"); //$NON-NLS-1$
+					//Grab all chainelements from chain
+					NodeList uidList = eElement.getElementsByTagName("chainelement"); //$NON-NLS-1$
 					
 					for (int j = 0; j < uidList.getLength(); j++) {						
 						Node uidNode = uidList.item(j);
@@ -407,7 +407,7 @@ public class WebchainRegistry {
 	 * @param webchain
 	 * @param webchainElements
 	 */
-	public void setWebservices(Webchain webchain, List<WebchainElements> webchainElements) {
+	public void setWebchainElements(Webchain webchain, List<WebchainElements> webchainElements) {
 		
 		//prepare Proxylist
 		//clearAllWebservices(webchain);
@@ -416,31 +416,33 @@ public class WebchainRegistry {
 			return;
 		}
 		
-		List<WebchainElements> wElementList = new ArrayList<WebchainElements>();
+		//Temp List of old webchain elements
+		List<WebchainElements> oldElementList = new ArrayList<WebchainElements>();
 		
-		WebchainElements chainElement = null;
-		for(int i = 0; i < webchainElements.size();i++){
+		for(int i = 0; i < webchain.getElementsCount();i++){
 			//System.out.println("UID " + webservices.get(i).getUID());
+			//TODO remove
 			if (webchainElements.get(i) instanceof WebserviceProxy){
 				
 			}
 
-			wElementList.add(webchainElements.get(i));
+			oldElementList.add(webchain.getElementAt(i));
 		}	
-		
-		System.out.println(webchain.webchainElementsList + " - " + wElementList);
+
 		
 		//compare lists if there are no changes do nothing
 		
-		if(equalElements(webchain.webchainElementsList, wElementList)){
+		if(equalElements(oldElementList, webchainElements)){
 			return;
 		}
 		
 
-		//lists are different replace old proxy list
-		webchain.webchainElementsList = wElementList;
+		//lists are different replace old webchainelement list
+		webchain.setNewChainlist(webchainElements);
 		
 		int index = indexOfWebchain(webchain);
+
+		//fire event to refresh webchaintree with the latest data
 		eventSource.fireEvent(new EventObject(Events.CHANGE,
 				"webchain",webchain, //$NON-NLS-1$
 				"index",index));//$NON-NLS-1$
@@ -474,29 +476,34 @@ public class WebchainRegistry {
 			//same listsize we need to check items
 			for (int i = 0; i < w1.size(); i++){
 				
+				//TODO Check of equal = false replace with return?!
 				if (w1.get(i) instanceof WebserviceProxy
 						&& w2.get(i) instanceof WebserviceProxy) {
 					//TODO check auf webservice bzw output und jeweilige typen
 					if (!(((WebserviceProxy) w1.get(i)).getServiceID()
 							.equals(((WebserviceProxy) w2.get(i)).getServiceID()))){
-						equal = false;
+						return false;
 					}
 				}
 				
 				//Check Input
-				if (w1.get(i) instanceof WebchainInputType
+				else if (w1.get(i) instanceof WebchainInputType
 						&& w2.get(i) instanceof WebchainInputType) {
 						equal = compareWebchainInputType(
 								(WebchainInputType) w1.get(i), 
-								(WebchainInputType) w2.get(i));				
+								(WebchainInputType) w2.get(i));
+						if (!equal) return false;
 				}
 				
 				//Check Output
-				if (w1.get(i) instanceof WebchainInputType
-						&& w2.get(i) instanceof WebchainInputType) {
-						equal = compareWebchainInputType(
-								(WebchainInputType) w1.get(i), 
-								(WebchainInputType) w2.get(i));				
+				else if (w1.get(i) instanceof WebchainOutputType
+						&& w2.get(i) instanceof WebchainOutputType) {					
+						equal = compareWebchainOutputType(
+								(WebchainOutputType) w1.get(i), 
+								(WebchainOutputType) w2.get(i));
+						if (!equal) return false;
+				} else {
+					return false;
 				}
 				
 			}
@@ -527,8 +534,10 @@ public class WebchainRegistry {
 	 * @return
 	 */
 	public boolean compareWebchainOutputType(WebchainOutputType t1, WebchainOutputType t2){
+		//same type, value and activatestatus
 		if (t1.getOutputType().equals(t2.getOutputType())
-				&& t1.getOutputTypeValue().equals(t2.getOutputTypeValue())){
+				&& t1.getOutputTypeValue().equals(t2.getOutputTypeValue())
+				&& t1.getOutputUsed().equals(t2.getIsOutputUsed())){
 			return true;			
 		}
 		return false;
@@ -606,6 +615,18 @@ public class WebchainRegistry {
 		
 		//System.out.println(query.get(query.size()-1));
 		return query;
+	}
+	
+	
+	
+	
+	public boolean hasChainOutput(Webchain webchain){
+		for(int i = 0; i < webchain.getElementsCount(); i++){
+			if (webchain.getElementAt(i) instanceof WebchainOutputType){
+				return true;
+			}			
+		}
+		return false;
 	}
 	
 

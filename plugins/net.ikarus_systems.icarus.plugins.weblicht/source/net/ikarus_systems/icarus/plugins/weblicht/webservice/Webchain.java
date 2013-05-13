@@ -62,9 +62,9 @@ public class Webchain {
 		this.name = name;
 	}
 	
-	
 
-	//return procylist
+
+	//return proxylist
 	List<WebserviceProxy> getWebserviceProxyList() {
 		return webserviceProxyList;
 	}
@@ -107,6 +107,7 @@ public class Webchain {
 	}
 	
 	
+	
 	public List<String> getWebservices(Webchain webchain){
 		List<String> serviceIDList = new ArrayList<String>();
 		for (int i = 0; i < getWebserviceCount(); i++){
@@ -139,7 +140,7 @@ public class Webchain {
 	 */
 	public List<Webservice> getFilteredWebservices(Webchain webchain) {
 		List<Webservice> filtered = new ArrayList<>();
-		List<String> idList = webchain.getWebservices(webchain);
+		List<String> idList = getWebservices(webchain);
 		int webservicesCount = WebserviceRegistry.getInstance().getWebserviceCount();
 
 		for (int i = 0; i < webservicesCount; i++) {
@@ -191,7 +192,16 @@ public class Webchain {
 	
 	public WebchainElements getElementAt(int index){
 		return webchainElementsList.get(index);	
+	}
+
+	/**
+	 * @param wElementList
+	 */
+	public void setNewChainlist(List<WebchainElements> wElementList) {
+		this.webchainElementsList = wElementList;
+		
 	}	
+
 
 
 }

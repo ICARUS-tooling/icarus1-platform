@@ -30,6 +30,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.events.EventListener;
@@ -117,11 +118,15 @@ public class WebserviceRegistry {
 	}
 
 	private void loadWebserviceXML() throws Exception {
+		
+		File fXmlFile = new File(Core.getCore().getDataFolder(), "weblicht.xml"); //$NON-NLS-1$
 
-		//File fXmlFile = new File(Core.getCore().getDataFolder(),"weblicht.xml"); //$NON-NLS-1$
-
-		File fXmlFile = new File(
-				"D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht.xml"); //$NON-NLS-1$
+		//File fXmlFile = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht.xml"); //$NON-NLS-1$
+		
+		if(!fXmlFile.exists() || fXmlFile.length()==0) {
+			return;
+		}
+		
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(fXmlFile);

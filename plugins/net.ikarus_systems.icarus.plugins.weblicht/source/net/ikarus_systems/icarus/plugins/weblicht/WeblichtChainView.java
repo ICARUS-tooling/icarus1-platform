@@ -316,6 +316,7 @@ public class WeblichtChainView extends View {
 		@Override
 		public void treeNodesChanged(TreeModelEvent e) {
 			// no-op
+			UIUtil.expandAll(weblichtTree, true);
 		}
 
 		/**
@@ -327,8 +328,9 @@ public class WeblichtChainView extends View {
 			if (path == null) {
 				return;
 			}
-			weblichtTree.expandPath(path);	
-			//UIUtil.expandAll(weblichtTree, true);
+			//weblichtTree.expandPath(path);
+			//System.out.println("Inserted " + path);
+			UIUtil.expandAll(weblichtTree, true);
 		}
 
 		/**
@@ -346,12 +348,13 @@ public class WeblichtChainView extends View {
 		public void treeStructureChanged(TreeModelEvent e) {
 			TreePath path = e.getTreePath();
 
-			//System.out.println(path);
+			System.out.println("Changed " + path);
 			if (path == null) {
 				return;
 			}
-			weblichtTree.expandPath(path);
-			//UIUtil.expandAll(weblichtTree, true);
+			//weblichtTree.expandPath(path);
+			weblichtTree.getComponentCount();
+			UIUtil.expandAll(weblichtTree, true);
 		}
 		
 

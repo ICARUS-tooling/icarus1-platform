@@ -48,6 +48,7 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.weblicht.WebserviceDialogs;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.CompoundIcon;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
@@ -78,7 +79,8 @@ public class WebchainEditor implements Editor<Webchain> {
 	// One file chooser should be enough for all editor instances
 	protected static JFileChooser locationChooser;
 	
-	protected JButton outputAddButton;
+	protected JButton addOutputButton;
+	protected JButton changeOutputUsedStatusButton;
 	
 	protected JRadioButton webserviceStaticInput;
 	protected JRadioButton webserviceLocationInput;
@@ -137,12 +139,13 @@ public class WebchainEditor implements Editor<Webchain> {
 		gbc.gridy++;
 		gbc.gridheight = GridBagConstraints.REMAINDER;
 		gbc.anchor = GridBagConstraints.NORTH;
-		JPanel buttonPanel = new JPanel(new GridLayout(6, 1));
+		JPanel buttonPanel = new JPanel(new GridLayout(7, 1));
 		buttonPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
 		buttonPanel.add(webserviceAddButton);		
 		buttonPanel.add(new JLabel("-------------------------------"));
-		buttonPanel.add(outputAddButton);
+		buttonPanel.add(addOutputButton);
 		buttonPanel.add(ioEditButton);
+		buttonPanel.add(changeOutputUsedStatusButton);
 		buttonPanel.add(new JLabel("-------------------------------"));
 		buttonPanel.add(webserviceRemoveButton);
 		
@@ -234,13 +237,21 @@ public class WebchainEditor implements Editor<Webchain> {
 		webserviceRemoveButton.addActionListener(handler);	
 		
 		
-		//AddIO- /Edit-Button
-		outputAddButton = new JButton();
-		outputAddButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("add_obj.gif")); //$NON-NLS-1$
-		resourceDomain.prepareComponent(outputAddButton, "addOutput", null); //$NON-NLS-1$
-		resourceDomain.addComponent(outputAddButton);
-		localizedComponents.add(outputAddButton);
-		outputAddButton.addActionListener(handler);
+		//AddIO- /Activate /Edit-Button
+		addOutputButton = new JButton();
+		addOutputButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("add_obj.gif")); //$NON-NLS-1$
+		resourceDomain.prepareComponent(addOutputButton, "addOutput", null); //$NON-NLS-1$
+		resourceDomain.addComponent(addOutputButton);
+		localizedComponents.add(addOutputButton);
+		addOutputButton.addActionListener(handler);
+				
+		
+		changeOutputUsedStatusButton = new JButton();
+		changeOutputUsedStatusButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("outrepo_rep.gif")); //$NON-NLS-1$
+		resourceDomain.prepareComponent(changeOutputUsedStatusButton, "changeStatus", null); //$NON-NLS-1$
+		resourceDomain.addComponent(changeOutputUsedStatusButton);
+		localizedComponents.add(changeOutputUsedStatusButton);
+		changeOutputUsedStatusButton.addActionListener(handler);
 		
 		
 		ioEditButton = new JButton();
@@ -335,16 +346,17 @@ public class WebchainEditor implements Editor<Webchain> {
 	protected void refreshWebchainActions() {
 		boolean enabled = webchainElementList.getSelectedIndex()!=-1;
 		webserviceRemoveButton.setEnabled(enabled);
-		ioEditButton.setEnabled(enabled);
+		ioEditButton.setEnabled(enabled);		
+		changeOutputUsedStatusButton.setEnabled(enabled);
 		
 		
 		int lastitem = webchainElementListModel.getSize();
 		WebchainElements element = webchainElementListModel.getKey(lastitem-1);
 
 		if(element instanceof WebchainOutputType) {
-			outputAddButton.setEnabled(false);
+			addOutputButton.setEnabled(false);
 		} else {
-			outputAddButton.setEnabled(true);	
+			addOutputButton.setEnabled(true);
 		}
 	}
 
@@ -466,9 +478,8 @@ public class WebchainEditor implements Editor<Webchain> {
 		String newName = nameInput.getText();
 		WebchainRegistry.getInstance().setName(webchain, newName);
 		
-
-		// Replace the old set of webchains
-		WebchainRegistry.getInstance().setWebservices(webchain,
+		// Replace the old set of Webchainelements with new ones
+		WebchainRegistry.getInstance().setWebchainElements(webchain,
 								webchainElementListModel.webchainElements);
 		
 		
@@ -477,9 +488,23 @@ public class WebchainEditor implements Editor<Webchain> {
 		// Save InputType
 		WebchainRegistry.getInstance().setWebserviceInput(webchain,
 					getNameFromSelectedButton(),
-					webserviceInputArea.getText());
+					webserviceInputArea.getText());		
+		
 	}
 	
+
+	/**
+	 * @param webchainElements
+	 */
+	private void printelement(List<WebchainElements> webchainElements) {
+		for ( int i = 0 ; i < webchainElements.size(); i++){
+			if (webchainElements.get(i) instanceof WebchainOutputType){
+				WebchainOutputType wo = (WebchainOutputType) webchainElements.get(i);
+				System.out.print(wo.getOutputType() + " " + wo.getOutputUsed());
+			}
+		}		
+	}
+
 
 	/**
 	 * @see net.ikarus_systems.icarus.ui.helper.Editor#hasChanges()
@@ -588,6 +613,12 @@ public class WebchainEditor implements Editor<Webchain> {
 				ioEditButton.setEnabled(!enabled);
 			}
 			
+			if(we instanceof WebchainOutputType){
+				changeOutputUsedStatusButton.setEnabled(enabled);
+			} else {
+				changeOutputUsedStatusButton.setEnabled(!enabled);
+			}
+			
 			//removebutton only allowed for services and outputtypes
 			if (!(we instanceof WebchainInputType)){
 				webserviceRemoveButton.setEnabled(enabled);				
@@ -601,9 +632,9 @@ public class WebchainEditor implements Editor<Webchain> {
 			WebchainElements element = webchainElementListModel.getKey(lastitem-1);
 
 			if(element instanceof WebchainOutputType) {
-				outputAddButton.setEnabled(false);
+				addOutputButton.setEnabled(false);
 			} else {
-				outputAddButton.setEnabled(true);	
+				addOutputButton.setEnabled(true);
 			}
 			
 			
@@ -649,7 +680,7 @@ public class WebchainEditor implements Editor<Webchain> {
 			
 			
 			// Add Output
-			if(e.getSource()==outputAddButton) {
+			if(e.getSource()==addOutputButton) {
 				
 				try {
 					addOutputElement();
@@ -658,6 +689,26 @@ public class WebchainEditor implements Editor<Webchain> {
 							"Failed to add output to webchain "+getWebchainName(), ex)); //$NON-NLS-1$
 				}
 				return;
+			}
+			
+			if(e.getSource()==changeOutputUsedStatusButton){
+				int index = webchainElementList.getSelectedIndex();
+				if(index==-1) {
+					return;
+				}
+				WebchainElements key = webchainElementListModel.getKey(index);
+				if(key==null) {
+					return;
+				}
+				
+				try {
+					changeOutputStatus(key, index);
+				} catch(Exception ex) {
+					LoggerFactory.getLogger(WebchainEditor.class).log(LoggerFactory.record(Level.SEVERE, 
+							"Failed to change Output Status from webchain "+getWebchainName(), ex)); //$NON-NLS-1$
+				}
+				return;
+				
 			}
 			
 			
@@ -822,6 +873,17 @@ public class WebchainEditor implements Editor<Webchain> {
 					webchainElementListModel.removeWebservice(chainelement);
 			}
 		}
+		
+		protected void changeOutputStatus(WebchainElements chainelement, int index){			
+			
+			WebchainOutputType wo = (WebchainOutputType) chainelement;
+			boolean changOutputStatus = wo.getIsOutputUsed();
+			wo.setOutputUsed(!changOutputStatus);
+			
+			webchainElementListModel.editElement(chainelement, index);	
+			printelement(webchainElementListModel.webchainElements);
+		}
+		
 		
 		/**
 		 * edit Input/Output Elements
