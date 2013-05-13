@@ -29,7 +29,9 @@ public final class UIDummies {
 
 	public static void createDefaultErrorOutput(JComponent container, Throwable t) {
 		container.removeAll();
-        container.setLayout(new BorderLayout());
+		if(!(container.getLayout() instanceof BorderLayout)) {
+			container.setLayout(new BorderLayout());
+		}
         container.add(new JLabel("Error:"), BorderLayout.NORTH); //$NON-NLS-1$
         JScrollPane scrollPane = new JScrollPane();
         container.add(scrollPane, BorderLayout.CENTER);

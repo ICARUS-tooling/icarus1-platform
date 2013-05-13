@@ -51,6 +51,7 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
 import net.ikarus_systems.icarus.ui.layout.AreaLayout;
 import net.ikarus_systems.icarus.ui.layout.DefaultAreaLayout;
+import net.ikarus_systems.icarus.util.Capability;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Exceptions;
@@ -795,13 +796,13 @@ public abstract class Perspective implements Identifiable {
 		Perspective target = getFrameDelegate().getFrame().ensurePerspective(perspective);
 		
 		if(target==null) {
-			return message.unknownReceiver();
+			return message.unknownReceiver(this);
 		}
 		
 		try {
 			return target.handleRequest(receiver, message);
 		} catch (Exception e) {
-			return message.errorResult(e);
+			return message.errorResult(this, e);
 		}
 	}
 
@@ -823,7 +824,7 @@ public abstract class Perspective implements Identifiable {
 				SwingUtilities.invokeAndWait(dispatcher);
 				result = dispatcher.getResult();
 			} catch (InvocationTargetException | InterruptedException e) {
-				result = new ResultMessage(message, e);
+				result = new ResultMessage(this, message, e);
 			}
 		}
 		
@@ -840,6 +841,10 @@ public abstract class Perspective implements Identifiable {
 			filter = (ViewFilter) receiver;
 		} else if(receiver instanceof String) {
 			filter = new ViewFilter.ViewIdFilter((String)receiver);
+		} else if(receiver instanceof Capability) {
+			filter = new ViewFilter.ViewCapabilityFilter((Capability)receiver);
+		} else if(receiver instanceof Capability[]) {
+			filter = new ViewFilter.ViewCapabilityFilter((Capability[])receiver);
 		} else if(receiver instanceof Class) {
 			filter = new ViewFilter.ViewClassFilter((Class<?>) receiver);
 		} else if(receiver != null) {
@@ -865,7 +870,7 @@ public abstract class Perspective implements Identifiable {
 		
 		// Tell the sender if we couldn't find suitable receivers
 		if(receivers.isEmpty()) {
-			return new ResultMessage(ResultType.UNKNOWN_RECEIVER, message, null, null);
+			return new ResultMessage(this, ResultType.UNKNOWN_RECEIVER, message, null, null);
 		}
 		
 		List<ResultMessage> results = new ArrayList<>();
@@ -875,7 +880,7 @@ public abstract class Perspective implements Identifiable {
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to dispatch message to view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
-				results.add(new ResultMessage(message, e));
+				results.add(new ResultMessage(this, message, e));
 			}
 		}
 		
@@ -885,21 +890,21 @@ public abstract class Perspective implements Identifiable {
 			return results.get(0);
 		} else {
 			
-			// Find the 'worst' result type among all results
-			ResultType dominatingType = ResultType.REQUEST_SUCCESSFUL;
+			// Find the 'best' result type among all results
+			ResultType dominatingType = ResultType.REQUEST_FAILED;
 			for(ResultMessage result : results) {
-				if(result.getType().compareTo(dominatingType)>0) {
+				if(result.getType().compareTo(dominatingType)<0) {
 					dominatingType = result.getType();
 				}
 				
-				// Worst possible result type encountered 
+				// Best possible result type encountered 
 				// -> no need to search further
-				if(dominatingType==ResultType.REQUEST_FAILED) {
+				if(dominatingType==ResultType.REQUEST_SUCCESSFUL) {
 					break;
 				}
 			}
 			
-			return new MultiResultMessage(dominatingType, message, results);
+			return new MultiResultMessage(this, dominatingType, message, results);
 		}
 	}
 	
@@ -1144,7 +1149,7 @@ public abstract class Perspective implements Identifiable {
 			try {
 				result = dispatchRequest(receiver, message);
 			} catch(Exception e) {
-				result = new ResultMessage(message, e);
+				result = new ResultMessage(this, message, e);
 			}
 		}
 		

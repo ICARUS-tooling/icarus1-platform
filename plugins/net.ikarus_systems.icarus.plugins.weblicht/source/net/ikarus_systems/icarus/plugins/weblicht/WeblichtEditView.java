@@ -30,6 +30,8 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -189,6 +191,7 @@ public class WeblichtEditView extends View {
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	private void editWebchain(Webchain webchain) {
 		if(webchain!=null) {
 			selectViewTab();
@@ -233,9 +236,12 @@ public class WeblichtEditView extends View {
 		}
 		
 		// Try to fetch an editor for the supplied webchain
-		@SuppressWarnings("unchecked")
-		Editor<Webchain> editor = UIHelperRegistry.globalRegistry().findHelper(
-				Editor.class, webchain);
+		Editor<Webchain> editor = null;
+		ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(webchain);
+		if(contentType!=null) {
+			editor = UIHelperRegistry.globalRegistry().findHelper(
+				Editor.class, contentType);
+		}
 
 		if(editor==null) {
 			showDefaultInfo();
@@ -265,13 +271,13 @@ public class WeblichtEditView extends View {
 			if(data==null || data instanceof Webchain) {
 				editWebchain((Webchain) data);
 				refreshActions();
-				return message.successResult(null);				
+				return message.successResult(this, null);				
 			} else {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
 			
 		}else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 	

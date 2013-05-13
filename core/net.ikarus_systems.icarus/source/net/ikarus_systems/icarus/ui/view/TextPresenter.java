@@ -34,10 +34,10 @@ public class TextPresenter extends AbstractEditorPanePresenter<String> {
 	@Override
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
-		if(data==null) {
-			return;
-		}		
-		if(data==presentedData) {
+		if(data==null)
+			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+		
+		if(data.equals(presentedData)) {
 			return;
 		}
 		

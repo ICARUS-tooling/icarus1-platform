@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.ui;
+package net.ikarus_systems.icarus.ui.helper;
 
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;

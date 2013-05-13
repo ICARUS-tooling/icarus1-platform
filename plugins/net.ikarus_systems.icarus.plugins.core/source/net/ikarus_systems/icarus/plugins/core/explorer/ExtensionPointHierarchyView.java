@@ -385,7 +385,7 @@ public class ExtensionPointHierarchyView extends View {
 		}
 		
 		// selectedObject is now either a PluginDescriptor or ExtensionPoint
-		Message message = new Message(Commands.SELECT, selectedObject, null);
+		Message message = new Message(this, Commands.SELECT, selectedObject, null);
 		ResultMessage result = sendRequest(ManagementConstants.PLUGIN_EXPLORER_VIEW_ID, message);
 		
 		if(result.getThrowable()!=null) {
@@ -440,7 +440,13 @@ public class ExtensionPointHierarchyView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#receiveData(net.ikarus_systems.icarus.plugins.core.View, java.lang.Object, net.ikarus_systems.icarus.util.Options)
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#DISPLAY}</li>
+	 * <li>{@link Commands#CLEAR}</li>
+	 * </ul>
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
@@ -448,16 +454,20 @@ public class ExtensionPointHierarchyView extends View {
 		Object data = message.getData();
 		
 		if(!(data instanceof ExtensionPoint)) {
-			return message.unsupportedDataResult();
+			return message.unsupportedDataResult(this);
 		}
 		
 		if(Commands.DISPLAY.equals(message.getCommand())) {
 			displayData((ExtensionPoint)data);
 			selectViewTab();
 			focusView();
-			return message.successResult(null);
+			return message.successResult(this, null);
+		} else if(Commands.CLEAR.equals(message.getCommand())) {
+			reset();
+			
+			return message.successResult(this, null);
 		} else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 

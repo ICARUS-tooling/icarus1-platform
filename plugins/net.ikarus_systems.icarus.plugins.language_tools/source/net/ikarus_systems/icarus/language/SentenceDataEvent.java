@@ -57,6 +57,14 @@ public abstract class SentenceDataEvent {
 		
 		this.source = source;
 	}
+	
+	protected void setType(int type) {
+		if(type==CHANGE_EVENT || type==INSERT_EVENT
+				|| type==REMOVE_EVENT || type==UPDATE_EVENT) {
+			this.type = type;
+		} else
+			throw new IllegalArgumentException("Invalid type: "+type); //$NON-NLS-1$
+	}
 
 	/**
 	 * Returns the source of this event

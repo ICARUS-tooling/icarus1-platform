@@ -17,5 +17,5 @@ package net.ikarus_systems.icarus.plugins.jgraph;
 public interface JGraphConstants {
 
 	public static final String JGRAPH_PLUGIN_ID = 
-			"net.ikarus_systems.icarus.plugins.jgraph.JGraphPlugin"; //$NON-NLS-1$
+			"net.ikarus_systems.icarus.jgraph"; //$NON-NLS-1$
 }

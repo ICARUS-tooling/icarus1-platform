@@ -170,7 +170,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.weblicht@WebserviceContentType" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
 
@@ -181,8 +181,26 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.weblicht@WebchainContentType" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>	
+	
+	<extension id="WebchainContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain" />
+	</extension>
+	
+	<extension id="WebserviceContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice" />
+	</extension>
 
 </plugin>

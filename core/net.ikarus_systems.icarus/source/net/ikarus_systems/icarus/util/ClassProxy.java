@@ -13,7 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.java.plugin.registry.Extension;
+
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.PluginUtil;
 
 /**
  * @author Markus Gärtner 
@@ -28,15 +31,19 @@ public final class ClassProxy {
 	
 	private Map<String, Object> properties;
 
-	/**
-	 * 
-	 */
 	public ClassProxy(String className, ClassLoader classLoader) {
 		Exceptions.testNullArgument(className, "className"); //$NON-NLS-1$
 		Exceptions.testNullArgument(classLoader, "classLoader"); //$NON-NLS-1$
 		
 		this.className = className;
 		this.classLoader = classLoader;
+	}
+	
+	public ClassProxy(Extension extension) {
+		Exceptions.testNullArgument(extension, "extension"); //$NON-NLS-1$
+		
+		className = extension.getParameter("class").valueAsString(); //$NON-NLS-1$
+		classLoader = PluginUtil.getClassLoader(extension);
 	}
 
 	public Object loadObject() {
@@ -82,8 +89,9 @@ public final class ClassProxy {
 	}
 	
 	public void setProperty(String key, Object value) {
-		if(properties==null)
+		if(properties==null) {
 			properties = new HashMap<>();
+		}
 			
 		properties.put(key, value);
 	}

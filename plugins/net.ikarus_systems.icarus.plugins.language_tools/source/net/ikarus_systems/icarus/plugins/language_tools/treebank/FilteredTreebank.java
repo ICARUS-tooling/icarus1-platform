@@ -77,8 +77,8 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	}
 
 	@Override
-	public ContentType getDataType() {
-		return getBase().getDataType();
+	public ContentType getContentType() {
+		return getBase().getContentType();
 	}
 
 	@Override

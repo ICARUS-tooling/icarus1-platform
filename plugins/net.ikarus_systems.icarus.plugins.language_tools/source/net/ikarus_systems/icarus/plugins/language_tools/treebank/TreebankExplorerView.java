@@ -44,12 +44,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
+import net.ikarus_systems.icarus.language.treebank.DerivedTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
 import net.ikarus_systems.icarus.language.treebank.TreebankImportResult;
 import net.ikarus_systems.icarus.language.treebank.TreebankInfo;
+import net.ikarus_systems.icarus.language.treebank.TreebankListDelegate;
 import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
-import net.ikarus_systems.icarus.language.treebank.DerivedTreebank;
 import net.ikarus_systems.icarus.language.treebank.swing.TreebankListCellRenderer;
 import net.ikarus_systems.icarus.language.treebank.swing.TreebankTreeCellRenderer;
 import net.ikarus_systems.icarus.language.treebank.swing.TreebankTreeModel;
@@ -70,6 +71,8 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.NamingUtil;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.location.Location;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
@@ -605,9 +608,15 @@ public class TreebankExplorerView extends View {
 			}
 			
 			Treebank treebank = (Treebank)selectedObject;
+			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(Treebank.class);
 			
-			Message message = new Message(Commands.DISPLAY, treebank, null);
-			sendRequest(LanguageToolsConstants.TREEBANK_INSPECT_VIEW_ID, message);
+			Options options = new Options();
+			options.put(Options.CONTENT_TYPE, contentType);
+			// TODO send some kind of hint that we want the presenter not to modify content?
+			TreebankListDelegate delegate = TreebankRegistry.getInstance().getListDelegate(treebank);
+			
+			Message message = new Message(this, Commands.DISPLAY, delegate, options);
+			sendRequest(null, message);
 		}
 		
 		public void editTreebank(ActionEvent e) {			
@@ -618,7 +627,7 @@ public class TreebankExplorerView extends View {
 			
 			Treebank treebank = (Treebank)selectedObject;
 			
-			Message message = new Message(Commands.EDIT, treebank, null);
+			Message message = new Message(this, Commands.EDIT, treebank, null);
 			sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
 		}
 		

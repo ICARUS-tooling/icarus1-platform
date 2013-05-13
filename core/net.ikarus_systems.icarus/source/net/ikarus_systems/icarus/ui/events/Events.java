@@ -31,4 +31,6 @@ public interface Events {
 	public static final String DELETED = "deleted"; //$NON-NLS-1$
 	public static final String CHANGE = "changing"; //$NON-NLS-1$
 	public static final String CHANGED = "changed"; //$NON-NLS-1$
+
+	public static final String SELECTION_CHANGED = "selectionChanged"; //$NON-NLS-1$
 }

@@ -22,14 +22,21 @@ public class Message {
 
 	private final Object data;
 	private final String command;
+	private final Object source;
 	private Options options;
 	
-	public Message(String command, Object data, Options options) {
+	public Message(Object source, String command, Object data, Options options) {
+		Exceptions.testNullArgument(source, "source"); //$NON-NLS-1$
 		Exceptions.testNullArgument(command, "command"); //$NON-NLS-1$
 		
+		this.source = source;
 		this.command = command;
 		this.data = data;
 		this.options = options;
+	}
+	
+	public Object getSource() {
+		return source;
 	}
 	
 	private Options getOptions0() {
@@ -76,23 +83,23 @@ public class Message {
 		return options==null ? null : options.get(key);
 	}
 	
-	public ResultMessage errorResult(Throwable t) {
-		return new ResultMessage(this, t);
+	public ResultMessage errorResult(Object source, Throwable t) {
+		return new ResultMessage(source, this, t);
 	}
 	
-	public ResultMessage unsupportedDataResult() {
-		return new ResultMessage(ResultType.UNSUPPORTED_DATA, this);
+	public ResultMessage unsupportedDataResult(Object source) {
+		return new ResultMessage(source, ResultType.UNSUPPORTED_DATA, this);
 	}
 	
-	public ResultMessage unknownRequestResult() {
-		return new ResultMessage(this);
+	public ResultMessage unknownRequestResult(Object source) {
+		return new ResultMessage(source, this);
 	}
 	
-	public ResultMessage unknownReceiver() {
-		return new ResultMessage(ResultType.UNKNOWN_RECEIVER, this);
+	public ResultMessage unknownReceiver(Object source) {
+		return new ResultMessage(source, ResultType.UNKNOWN_RECEIVER, this);
 	}
 	
-	public ResultMessage successResult(Object data) {
-		return new ResultMessage(this, data);
+	public ResultMessage successResult(Object source, Object data) {
+		return new ResultMessage(source, this, data);
 	}
 }

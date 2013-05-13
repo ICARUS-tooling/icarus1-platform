@@ -12,21 +12,17 @@ package net.ikarus_systems.icarus.ui.helper;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
-import javax.swing.CellEditor;
-import javax.swing.ListCellRenderer;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.tree.TreeCellEditor;
-import javax.swing.tree.TreeCellRenderer;
-
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.plugins.PluginUtil;
-import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeCollection;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 import org.java.plugin.registry.Extension;
 
@@ -67,29 +63,25 @@ public final class UIHelperRegistry {
 	private void init() {
 		// FALLBACKS
 		
-		// register renderers
-		setFallbackHelper(ListCellRenderer.class, "javax.swing.DefaultListCellRenderer"); //$NON-NLS-1$
-		setFallbackHelper(TreeCellRenderer.class, "javax.swing.tree.DefaultTreeCellRenderer"); //$NON-NLS-1$
-		setFallbackHelper(TableCellRenderer.class, "javax.swing.table.DefaultTableCellRenderer"); //$NON-NLS-1$
+		// Register renderers
+		setFallbackHelper("javax.swing.ListCellRenderer", "javax.swing.DefaultListCellRenderer"); //$NON-NLS-1$ //$NON-NLS-2$
+		setFallbackHelper("java.lang.String", "javax.swing.tree.DefaultTreeCellRenderer"); //$NON-NLS-1$ //$NON-NLS-2$
+		setFallbackHelper("java.lang.String", "javax.swing.table.DefaultTableCellRenderer"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		// register editors
-		setFallbackHelper(CellEditor.class, "javax.swing.DefaultCellEditor"); //$NON-NLS-1$
-		setFallbackHelper(TableCellEditor.class, "javax.swing.DefaultCellEditor"); //$NON-NLS-1$
-		setFallbackHelper(TreeCellEditor.class, "javax.swing.DefaultCellEditor"); //$NON-NLS-1$
+		// Register editors
+		setFallbackHelper("javax.swing.CellEditor", "javax.swing.DefaultCellEditor"); //$NON-NLS-1$ //$NON-NLS-2$
+		setFallbackHelper("javax.swing.table.TableCellEditor", "javax.swing.DefaultCellEditor"); //$NON-NLS-1$ //$NON-NLS-2$
+		setFallbackHelper("javax.swing.tree.TreeCellEditor", "javax.swing.DefaultCellEditor"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		// ACTUAL HELPERS
-		registerHelper(ListCellRenderer.class, 
-				"org.java.plugin.registry.Extension",  //$NON-NLS-1$
-				"net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer"); //$NON-NLS-1$
-		
-		registerHelper(AWTPresenter.class, 
-				"java.lang.String",  //$NON-NLS-1$
+		registerHelper("net.ikarus_systems.icarus.ui.view.AWTPresenter",  //$NON-NLS-1$
+				"StringContentType",  //$NON-NLS-1$
 				"net.ikarus_systems.icarus.ui.view.TextPresenter"); //$NON-NLS-1$
 		
 		// TODO do we have some helpers that are not part of a plug-in?
 	}
 	
-	// prevent multiple deserialization
+	// Prevent multiple de-serialization
 	private Object readResolve() throws ObjectStreamException {
 		throw new NotSerializableException(UIHelperRegistry.class.getName());
 	}
@@ -100,11 +92,11 @@ public final class UIHelperRegistry {
 		throw new CloneNotSupportedException();
 	}
 	
-	public void setFallbackHelper(Class<?> helperClass, Object helper) {
+	public void setFallbackHelper(String helperClass, Object helper) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(helper, "helper"); //$NON-NLS-1$
 		
-		fallbackHelpers.put(helperClass.getName(), helper);
+		fallbackHelpers.put(helperClass, helper);
 	}
 	
 	/**
@@ -134,84 +126,49 @@ public final class UIHelperRegistry {
 		return fallbackHelpers.get(helperClass.getName());
 	}
 
-	public void registerHelper(Class<?> helperClass, String objectClassName, Object helper) {
-		registerHelper(helperClass, objectClassName, helper, false);
+	public boolean registerHelper(String helperClass, String contentTypeId, Object helper) {
+		return registerHelper(helperClass, contentTypeId, helper, false);
+	}
+
+	public boolean registerHelper(String helperClass, String contentTypeId, Object helper, boolean replace) {
+		ContentType contentType = ContentTypeRegistry.getInstance().getType(contentTypeId);
+		return registerHelper(helperClass, contentType, helper, replace);
+	}
+
+	public boolean registerHelper(String helperClass, ContentType contentType, Object helper) {
+		return registerHelper(helperClass, contentType, helper, false);
 	}
 	
-	public void registerHelper(Class<?> helperClass, String objectClassName, Object helper, boolean replace) {
+	public boolean registerHelper(String helperClass, ContentType contentType, Object helper, boolean replace) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
-		Exceptions.testNullArgument(objectClassName, "objectClassName"); //$NON-NLS-1$
+		Exceptions.testNullArgument(contentType, "contentType"); //$NON-NLS-1$
 		Exceptions.testNullArgument(helper, "helper"); //$NON-NLS-1$
 		
-		Map<String, Object> map = helpers.get(helperClass.getName());
+		Map<String, Object> map = helpers.get(helperClass);
 		if(map==null) {
-			map = new HashMap<>();
-			helpers.put(helperClass.getName(), map);
+			map = new LinkedHashMap<>();
+			helpers.put(helperClass, map);
 		}
 		
-		Object currentHelper = map.get(objectClassName);
-		if(currentHelper!=null && !replace)
-			return;
+		String contentTypeId = contentType.getId();
+		
+		Object currentHelper = map.get(contentTypeId);
+		if(currentHelper!=null && !replace) {
+			return false;
+		}
 
 		// Wrap extension into a compact proxy
 		if(helper instanceof Extension) {
-			Extension ext = (Extension) helper;
-			ClassLoader loader = PluginUtil.getClassLoader(ext);
-			String className = ext.getParameter("class").valueAsString();  //$NON-NLS-1$
-			helper = new ClassProxy(className, loader);
+			helper = new ClassProxy((Extension)helper);
 		}
 	
-		map.put(objectClassName, helper);
+		map.put(contentTypeId, helper);
+		
+		return true;
 	}
 	
-	private Object findHelper0(Map<String, Object> map, Class<?> clazz, 
-			boolean includeSuperTypes, boolean includeInterfaces) {
-		
-		// Try to fetch a helper for this specific class
-		Object helper = map.get(clazz.getName());
-		
-		// If there is no special helper for this class
-		// we have to check superclasses and interfaces
-		// if we are allowed to do so
-		
-		// first check interfaces
-		if(helper==null && (includeInterfaces || clazz.isInterface())) {
-			for(Class<?> implementedInterface : clazz.getInterfaces()) {
-				helper = findHelper0(map, implementedInterface, true, true);
-				if(helper!=null)
-					break;
-			}
-		}
-		
-		// Now check superclass
-		if(helper==null && includeSuperTypes) {
-			clazz = clazz.getSuperclass();
-			if(clazz!=null) {
-				helper = findHelper0(map, clazz, includeSuperTypes, includeInterfaces);
-			}
-		}
-		
-		return helper;
-	}
-
-	public <T extends Object> T findHelper(Class<T> helperClass, Object obj) {
-		return findHelper(helperClass, obj, true, true, true);
-	}
-	
-	/**
-	 * 
-	 * @param helperClass
-	 * @param obj
-	 * @param includeSuperTypes
-	 * @param includeInterfaces
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Object> T findHelper(Class<T> helperClass, Object obj, 
-			boolean includeSuperTypes, boolean includeInterfaces, boolean useFallbackHelper) {
-		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
-		Exceptions.testNullArgument(obj, "obj"); //$NON-NLS-1$
-			
+	private Object findHelper0(Class<?> helperClass, ContentType contentType, 
+			boolean includeCompatible, boolean useFallbackHelper) {	
 		Map<String, Object> map = helpers.get(helperClass.getName());
 		
 		// Cannot search empty map, so sadly we have to return null
@@ -219,19 +176,90 @@ public final class UIHelperRegistry {
 			return null;
 		}
 		
-		// Ensure our search object is a class
-		if(!(obj instanceof Class)) {
-			obj = obj.getClass();
+		String contentTypeId = contentType.getId();
+		
+		Object helper = map.get(contentTypeId);
+		
+		if(helper==null && includeCompatible) {
+			for(Entry<String, Object> entry : map.entrySet()) {
+				if(entry.getKey().equals(contentTypeId)) {
+					continue;
+				}
+				ContentType targetType = ContentTypeRegistry.getInstance().getType(entry.getKey());
+				if(ContentTypeRegistry.isCompatible(contentType, targetType)) {
+					helper = entry.getValue();
+					break;
+				}
+			}
 		}
 		
-		// Delegate search to recursive search method
-		Object helper = findHelper0(map, (Class<?>)obj, includeSuperTypes, includeInterfaces);
-
 		// Only if allowed use fallback helper in case we
 		// could not find a 'real' helper object
 		if(helper==null && useFallbackHelper) {
 			helper = getFallbackHelper0(helperClass);
 		}
+		
+		return helper;
+	}
+	
+	public <T extends Object> T findHelper(Class<T> helperClass, Object data) {
+		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
+		Exceptions.testNullArgument(data, "data"); //$NON-NLS-1$
+		
+		T helper = null;
+		
+		// Try direct type
+		try {
+			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(data);
+			helper = findHelper(helperClass, contentType);
+		} catch(IllegalArgumentException e) {
+			// ignore
+		}
+		
+		if(helper!=null) {
+			return helper;
+		}
+		
+		// Try enclosing type
+		try {
+			ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(data);
+			helper = findHelper(helperClass, contentType);
+		} catch(IllegalArgumentException e) {
+			// ignore
+		}
+		
+		if(helper!=null) {
+			return helper;
+		}
+		
+		// Try all compatible content types
+		ContentTypeCollection collection = ContentTypeRegistry.getInstance().getEnclosingTypes(data);
+		for(ContentType contentType : collection.getContentTypes()) {
+			helper = findHelper(helperClass, contentType, true, false);
+			if(helper!=null) {
+				break;
+			}
+		}
+		
+		return helper;
+	}
+
+	/**
+	 * Looks for helper implementations of the given class that are declared
+	 * to handle exactly the specified type.
+	 */
+	public <T extends Object> T findHelper(Class<T> helperClass, ContentType contentType) {
+		return findHelper(helperClass, contentType, false, false);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends Object> T findHelper(Class<T> helperClass, ContentType contentType, 
+			boolean includeCompatible, boolean useFallbackHelper) {
+		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
+		Exceptions.testNullArgument(contentType, "contentType"); //$NON-NLS-1$
+		
+		Object helper = findHelper0(helperClass, contentType, 
+				includeCompatible, useFallbackHelper);
 
 		/* 
 		 * Postprocessing of found helper objects:
@@ -260,34 +288,56 @@ public final class UIHelperRegistry {
 		return (T) helper;
 	}
 	
-	public <T extends Object> boolean hasHelper(Class<T> helperClass, Object obj) {
-		return hasHelper(helperClass, obj, true, true, true);
+	public <T extends Object> boolean hasHelper(Class<T> helperClass, ContentType contentType) {
+		return hasHelper(helperClass, contentType, false, false);
 	}
 	
-	public <T extends Object> boolean hasHelper(Class<T> helperClass, Object obj, 
-			boolean includeSuperTypes, boolean includeInterfaces, boolean useFallbackHelper) {
+	public <T extends Object> boolean hasHelper(Class<T> helperClass, ContentType contentType, 
+			boolean includeCompatible, boolean useFallbackHelper) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
-		Exceptions.testNullArgument(obj, "obj"); //$NON-NLS-1$
-			
-		Map<String, Object> map = helpers.get(helperClass.getName());
+		Exceptions.testNullArgument(contentType, "contentType"); //$NON-NLS-1$
 		
-		// Cannot search empty map, so sadly we have to return null
-		if(map==null) {
-			return false;
+		return findHelper0(helperClass, contentType, 
+				includeCompatible, useFallbackHelper)!=null;
+	}
+	
+	public boolean hasHelper(Class<?> helperClass, Object data) {
+		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
+		Exceptions.testNullArgument(data, "data"); //$NON-NLS-1$
+		
+		Object helper = null;
+		
+		// Try direct type
+		try {
+			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(data);
+			helper = findHelper0(helperClass, contentType, false, false);
+		} catch(IllegalArgumentException e) {
+			// ignore
 		}
 		
-		// Ensure our search object is a class
-		if(!(obj instanceof Class)) {
-			obj = obj.getClass();
+		if(helper!=null) {
+			return true;
 		}
 		
-		// Delegate search to recursive search method
-		Object helper = findHelper0(map, (Class<?>)obj, includeSuperTypes, includeInterfaces);
-
-		// Only if allowed use fallback helper in case we
-		// could not find a 'real' helper object
-		if(helper==null && useFallbackHelper) {
-			helper = getFallbackHelper0(helperClass);
+		// Try enclosing type
+		try {
+			ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(data);
+			helper = findHelper0(helperClass, contentType, false, false);
+		} catch(IllegalArgumentException e) {
+			// ignore
+		}
+		
+		if(helper!=null) {
+			return true;
+		}
+		
+		// Try all compatible content types
+		ContentTypeCollection collection = ContentTypeRegistry.getInstance().getEnclosingTypes(data);
+		for(ContentType contentType : collection.getContentTypes()) {
+			helper = findHelper0(helperClass, contentType, true, false);
+			if(helper!=null) {
+				break;
+			}
 		}
 		
 		return helper!=null;

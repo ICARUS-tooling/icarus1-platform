@@ -7,55 +7,74 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.plugins.jgraph.ui;
+package net.ikarus_systems.icarus.plugins.jgraph.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer;
+import net.ikarus_systems.icarus.plugins.ExtensionListModel;
+import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultArcLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphStyle;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.LayoutRegistry;
 import net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer;
+import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
+import net.ikarus_systems.icarus.ui.helper.ModifiedFlowLayout;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
+import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
-import com.mxgraph.model.mxGraphModel;
+import org.java.plugin.registry.Extension;
+
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.swing.view.mxInteractiveCanvas;
 import com.mxgraph.util.mxEvent;
@@ -98,17 +117,6 @@ import com.mxgraph.view.mxStylesheet;
 public abstract class GraphPresenter extends mxGraphComponent implements AWTPresenter, GraphOwner {
 
 	private static final long serialVersionUID = -3776528318060931576L;
-
-	/**
-	 * The tool-bar located at the top of the visible region of the graph
-	 */
-	protected JToolBar mainToolBar;
-	
-	/**
-	 * Secondary tool-bar located to the left of the visible graph region.
-	 * Most implementations may not use this.
-	 */
-	protected JToolBar secondaryToolBar;
 	
 	protected ActionManager actionManager;
 	
@@ -116,13 +124,13 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected GraphStyle graphStyle;
 	protected GraphRenderer graphRenderer;
 	
-	protected JComponent contentPanel;
-	
 	protected CallbackHandler callbackHandler;
 	
 	protected Handler handler;
 	
 	protected GraphUndoManager undoManager;
+	
+	protected mxRubberband rubberband;
 	
 	protected boolean compressEnabled;
 	protected boolean autoZoomEnabled;
@@ -132,29 +140,48 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected Dimension preferredNodeSize;
 	protected Dimension maximumNodeSize;
 	
-	protected final boolean editable;
+	protected boolean editable = true;
 
 	protected boolean ignoreDataChange;
 	
-	protected GraphPresenter(boolean editable) {
+	protected Component presentingComponent;
+	
+	protected GraphPresenter() {
 		super(null);
 		
-		this.editable = editable;
-		
-		// TODO do it this way?
-		setEnabled(editable);
+		setGraph(createGraph());
 	}
-	
+
 	protected ActionManager createActionManager() {
 		ActionManager actionManager = ActionManager.globalManager().derive();
-		
-		// TODO load default actions
+
+		// Load default actions
+		URL actionLocation = GraphPresenter.class.getResource(
+				"graph-presenter-actions.xml"); //$NON-NLS-1$
+		if(actionLocation==null)
+			throw new CorruptedStateException("Missing resources: graph-presenter-actions.xml"); //$NON-NLS-1$
+		try {
+			actionManager.loadActions(actionLocation);
+		} catch (IOException e) {
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
+		}
 		
 		return actionManager;
 	}
 	
 	public boolean isEditable() {
 		return editable;
+	}
+	
+	public void setEditable(boolean editable) {
+		if(this.editable==editable) {
+			return;
+		}
+		
+		boolean oldValue = this.editable;
+		this.editable = editable;
+		
+		firePropertyChange("editable", oldValue, editable); //$NON-NLS-1$
 	}
 	
 	public abstract ContentType getContentType();
@@ -184,6 +211,24 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		clearUndoHistory();
 		refreshActions();
 	}
+	
+	protected Component createPresentingComponent() {
+		JPanel contentPanel = new JPanel(new BorderLayout());
+		contentPanel.add(this, BorderLayout.CENTER);
+		
+		Component upperComponent = createUpperComponent();
+		Component leftComponent = createLeftComponent();
+		
+		if(upperComponent!=null) {
+			contentPanel.add(upperComponent, BorderLayout.NORTH);
+		}
+		
+		if(leftComponent!=null) {
+			contentPanel.add(leftComponent, BorderLayout.WEST);
+		}
+		
+		return contentPanel;
+	}
 
 	/**
 	 * Hook for subclasses to check if the underlying data is mutable
@@ -208,38 +253,40 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		return handler;
 	}
 	
-	protected void init() {
-		setGraph(createGraph());
+	public void init() {
+		initGraphComponentInternals();
 		
 		installUtilities();
 		
 		installKeyboardActions();
 		
 		registerActionCallbacks();
-		
-		mainToolBar = createMainToolBar();
-		secondaryToolBar = createSecondaryToolBar();
-		
-		if(mainToolBar!=null) {
-			setCorner(ScrollPaneConstants.COLUMN_HEADER, mainToolBar);
-		}
-		
-		if(secondaryToolBar!=null) {
-			setCorner(ScrollPaneConstants.ROW_HEADER, secondaryToolBar);
-		}
 	}
 	
-	protected void buildContentPanel() {
-		init();
+	protected void initGraphComponentInternals() {
+		setImportEnabled(false);
+		setDragEnabled(false);
+		setToolTips(true);
+		setKeepSelectionVisibleOnZoom(true);
+		setGridVisible(true);
 
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(this, BorderLayout.CENTER);
+		setBorder(UIUtil.topLineBorder);
+		getViewport().setOpaque(true);
+		getViewport().setBackground(Color.WHITE);
 		
-		contentPanel = panel;
+		UIUtil.defaultSetUnitIncrement(this);
+
+		setAntiAlias(true);
+		setTextAntiAlias(true);
 	}
 	
 	protected void installUtilities() {		
 		addMouseWheelListener(getHandler());
+		addComponentListener(getHandler());
+		
+		setGraphLayout(new DefaultArcLayout());
+		
+		rubberband = new mxRubberband(this);
 		
 		GraphUndoManager undoManager = getUndoManager();
 		if(undoManager!=null) {
@@ -319,12 +366,99 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		return map;
 	}
 	
-	protected JToolBar createMainToolBar() {
-		// TODO
-		return actionManager.createToolBar("", null); //$NON-NLS-1$
+	protected String editableMainToolBarListId = "plugins.jgraph.graphPresenter.editableMainToolBarList"; //$NON-NLS-1$
+	protected String uneditableMainToolBarListId = "plugins.jgraph.graphPresenter.uneditableMainToolBarList"; //$NON-NLS-1$
+		
+	protected Component createUpperComponent() {
+		ActionManager actionManager = getActionManager();
+		
+		Options options = new Options();
+		feedSelector(options, SELECT_LAYOUT_COMMAND);
+		feedSelector(options, SELECT_STYLE_COMMAND);
+		feedSelector(options, SELECT_RENDERER_COMMAND);
+		options.put("multiline", true); //$NON-NLS-1$
+		
+		String actionListId = isEditable() ? editableMainToolBarListId : uneditableMainToolBarListId;
+		JToolBar toolBar = actionManager.createToolBar(actionListId, options);
+		toolBar.setLayout(new ModifiedFlowLayout(FlowLayout.LEFT, 1, 3));
+		
+		return toolBar;
 	}
 	
-	protected JToolBar createSecondaryToolBar() {
+	protected JComboBox<Extension> feedSelector(Options options, String command) {
+		Collection<Extension> items = null;
+		switch (command) {
+		case SELECT_LAYOUT_COMMAND:
+			items = LayoutRegistry.getInstance().getCompatibleLayouts(getContentType(), true);
+			break;
+
+		case SELECT_STYLE_COMMAND:
+			items = LayoutRegistry.getInstance().getCompatibleStyles(getContentType(), true);
+			break;
+
+		case SELECT_RENDERER_COMMAND:
+			items = LayoutRegistry.getInstance().getCompatibleRenderers(getContentType(), true);
+			break;
+
+		default:
+			throw new IllegalArgumentException("Unknown selection command: "+command); //$NON-NLS-1$
+		}
+		
+		// Return null if there are no extensions or if it would
+		// not make sense to present a selection
+		if(items==null || items.size()<2) {
+			return null;
+		}
+		
+		JComboBox<Extension> comboBox = new JComboBox<>(
+				new ExtensionListModel(items, true));
+		comboBox.setRenderer(new ExtensionListCellRenderer());
+		comboBox.setEditable(false);
+		comboBox.addActionListener(getHandler());
+		comboBox.setActionCommand(command);
+		String tooltip = ResourceManager.getInstance().get(
+				"plugins.jgraph.toolBar."+command+".descriptions", (String)null); //$NON-NLS-1$ //$NON-NLS-2$
+		comboBox.setToolTipText(UIUtil.toSwingTooltip(tooltip));
+		
+		// Get currently set helper for the given type of selection
+		Object selectedValue = null;
+		switch (command) {
+		case SELECT_LAYOUT_COMMAND:
+			selectedValue = getGraphLayout();
+			break;
+
+		case SELECT_STYLE_COMMAND:
+			selectedValue = getGraphStyle();
+			break;
+
+		case SELECT_RENDERER_COMMAND:
+			selectedValue = getGraphRenderer();
+			break;
+		}
+		
+		// If a helper is currently set try to fetch the extension
+		// it originated from and mark it as selected item in the combo-box
+		if(selectedValue!=null) {
+			selectedValue = selectedValue.getClass().getName();
+			for(Extension extension : items) {
+				if(extension.getParameter("class").valueAsString().equals(selectedValue)) { //$NON-NLS-1$
+					comboBox.setSelectedItem(extension);
+					break;
+				}
+			}
+		}
+		
+		UIUtil.fitToContent(comboBox, 100, 200);
+		
+		if(options!=null) {
+			options.put(command, comboBox);
+			options.put(command+"Label", "plugins.jgraph.toolBar."+command+".label"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		
+		return comboBox;
+	}
+	
+	protected Component createLeftComponent() {
 		return null;
 	}
 	
@@ -341,31 +475,110 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	}
 	
 	protected mxGraph createGraph() {
-		mxGraph graph = new mxGraph();
-
-		graph.setGridSize(15);
-		
-		graph.setMultigraph(false);
-		graph.setAllowDanglingEdges(false);
-		graph.setAllowLoops(false);
-		graph.setCellsDisconnectable(false);
-		graph.setCellsResizable(false);
-		graph.setEdgeLabelsMovable(false);
-		graph.setAutoSizeCells(true);
-		graph.setHtmlLabels(false);
-		graph.setGridEnabled(false);
-
-		graph.getSelectionModel().setSingleSelection(false);
-
-		return graph;
+		return new DelegatingGraph();
 	}
 	
 	protected void registerActionCallbacks() {
+		if(callbackHandler==null) {
+			callbackHandler = createCallbackHandler();
+		}
 		
+		ActionManager actionManager = getActionManager();
+		if(actionManager==null) 
+			throw new CorruptedStateException("No valid action-manager present"); //$NON-NLS-1$
+		
+		// Init 'selected' states
+		actionManager.setSelected(isAutoZoomEnabled(), 
+				"plugins.jgraph.graphPresenter.toggleAutoZoomAction"); //$NON-NLS-1$
+		actionManager.setSelected(isCompressEnabled(), 
+				"plugins.jgraph.graphPresenter.toggleCompressAction"); //$NON-NLS-1$
+		
+		// Register callback functions
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.cloneCellsAction",  //$NON-NLS-1$
+				callbackHandler, "cloneCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.copyCellsAction",  //$NON-NLS-1$
+				callbackHandler, "copyCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.pasteCellsAction",  //$NON-NLS-1$
+				callbackHandler, "pasteCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.moveCellsNorthAction",  //$NON-NLS-1$
+				callbackHandler, "moveCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.moveCellsSouthAction",  //$NON-NLS-1$
+				callbackHandler, "moveCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.moveCellsWestAction",  //$NON-NLS-1$
+				callbackHandler, "moveCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.moveCellsEastAction",  //$NON-NLS-1$
+				callbackHandler, "moveCellst"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.deleteCellsAction",  //$NON-NLS-1$
+				callbackHandler, "deleteCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.printGraphAction",  //$NON-NLS-1$
+				callbackHandler, "printGraph"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.clearGraphAction",  //$NON-NLS-1$
+				callbackHandler, "clearGraph"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.addNodeAction",  //$NON-NLS-1$
+				callbackHandler, "addNode"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.addEdgeAction",  //$NON-NLS-1$
+				callbackHandler, "addEdge"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.addOrderEdgeAction",  //$NON-NLS-1$
+				callbackHandler, "addOrderEdge"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.editCellAction",  //$NON-NLS-1$
+				callbackHandler, "editCell"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.importCellsAction",  //$NON-NLS-1$
+				callbackHandler, "importCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.exportCellsAction",  //$NON-NLS-1$
+				callbackHandler, "exportCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.undoEditAction",  //$NON-NLS-1$
+				callbackHandler, "undoEdit"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.redoEditAction",  //$NON-NLS-1$
+				callbackHandler, "redoEdit"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.zoomInAction",  //$NON-NLS-1$
+				callbackHandler, "zoomIn"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.zoomOutAction",  //$NON-NLS-1$
+				callbackHandler, "zoomOut"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.resetZoomAction",  //$NON-NLS-1$
+				callbackHandler, "resetZoom"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.openPreferencesAction",  //$NON-NLS-1$
+				callbackHandler, "openPreferences"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.rebuildGraphAction",  //$NON-NLS-1$
+				callbackHandler, "rebuildGraph"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.collapseCellsAction",  //$NON-NLS-1$
+				callbackHandler, "collapseCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.expandCellsAction",  //$NON-NLS-1$
+				callbackHandler, "expandCells"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.toggleAutoZoomAction",  //$NON-NLS-1$
+				callbackHandler, "toggleAutoZoom"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.toggleCompressAction",  //$NON-NLS-1$
+				callbackHandler, "toggleCompress"); //$NON-NLS-1$
 	}
 	
 	protected void refreshActions() {
-		
+		// TODO
 	}
 	
 	public boolean isCompressEnabled() {
@@ -402,6 +615,9 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	}
 
 	public GraphUndoManager getUndoManager() {
+		if(!isEditable()) {
+			return null;
+		}
 		if(undoManager==null) {
 			undoManager = createUndoManager();
 		}
@@ -494,11 +710,11 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	 */
 	@Override
 	public Component getPresentingComponent() {
-		if(contentPanel==null) {
-			buildContentPanel();
+		if(presentingComponent==null) {
+			presentingComponent = createPresentingComponent();
 		}
 		
-		return contentPanel;
+		return presentingComponent;
 	}
 
 	// Expansion of original class
@@ -561,8 +777,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 		
 		graph.setStylesheet(style.createStylesheet(this, null));
-		
-		refreshStyles();
 		
 		firePropertyChange("graphStyle", oldValue, style); //$NON-NLS-1$
 	}
@@ -721,6 +935,9 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 		
 		Object[] cells = getLayoutCells();
+		if(cells.length==0) {
+			return;
+		}
 		
 		if(isCompressEnabled()) {
 			Dimension size = getSize();
@@ -732,6 +949,15 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 	}
 	
+	/**
+	 * Uses the current {@code GraphStyle} to refresh style strings
+	 * on all cells. Note that since this technically erases all style
+	 * modifications done by the current {@code GraphLayout} this call
+	 * should always be followed by {@link #refreshLayout()} to allow
+	 * for proper final styles!
+	 * <p>
+	 * If no {@code GraphStyle} is currently set this method does nothing.
+	 */
 	public void refreshStyles() {
 		if(graphStyle==null) {
 			return;
@@ -742,7 +968,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		
 		model.beginUpdate();
 		try {
-			for(Object cell : mxGraphModel.getChildren(model, parent)) {
+			for(Object cell : graph.getChildCells(parent)) {
 				String style = graphStyle.getStyle(this, cell, null);
 				if(style==null) {
 					style = model.isVertex(cell) ? "defaultVertex" : "defaultEdge"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -758,20 +984,54 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		if (!isEditable()) {
 			return;
 		}
-
-		if (cells == null) {
-			cells = graph.getSelectionCells();
+		
+		graph.getModel().beginUpdate();
+		try {
+			GraphUtils.moveCells(graph, cells, deltaX, deltaY);
+		} finally {
+			graph.getModel().endUpdate();
 		}
+	}
 
-		graph.moveCells(cells, deltaX, deltaY);
+	
+	public void editCell(Object cell) {
+		if (!isEditable()) {
+			return;
+		}
+		
+		startEditingAtCell(cell);
 	}
 	
 	public void deleteCells(Object[] cells) {
+		if (!isEditable()) {
+			return;
+		}
 		
+		graph.getModel().beginUpdate();
+		try {
+			GraphUtils.deleteCells(graph, cells);
+		} finally {
+			graph.getModel().endUpdate();
+		}
+		
+		pauseChangeHandling();
+		try {
+			syncToData();
+		} finally {
+			resumeChangeHandling();
+		}
 	}
 	
 	public void cloneCells(Object[] cells) {
-		// no-op
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
+	}
+	
+	public void copyCells(Object[] cells) {
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
+	}
+	
+	public void pasteCells() {
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
 	}
 	
 	public void rebuildGraph() {
@@ -784,31 +1044,42 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		clearUndoHistory();
 	}
 	
-	public void clearGraph() {
-		mxIGraphModel model = graph.getModel();
-		if(model instanceof mxGraphModel) {
-			((mxGraphModel)model).clear();
-		}
-	}
-	
-	public CellBuffer exportCells(Object[] cells) {
-		return null;
-	}
-	
-	public void importCells(CellBuffer buffer) {
-		Object[] cells = CellBuffer.buildCells(buffer);
-		if(cells==null || cells.length==0) {
-			return;
-		}
-
-		mxIGraphModel model = graph.getModel();
-		model.beginUpdate();
+	/**
+	 * Removes all cells from the graph and synchronizes the
+	 * empty graph to the internal data, effectively clearing it
+	 * of whatever content it is holding.
+	 */
+	public void clearGraph() {		
+		graph.getModel().beginUpdate();
 		try {
-			graph.addCells(cells);
+			GraphUtils.clearGraph(graph);
+		} finally {
+			graph.getModel().endUpdate();
+		}
+		
+		pauseChangeHandling();
+		try {
 			syncToData();
 		} finally {
-			model.endUpdate();
+			resumeChangeHandling();
 		}
+	}
+	
+	/**
+	 * Creates and returns an interchangeable snapshot of the
+	 * current graph and all of it's internal data fit for exportation.
+	 */
+	public CellBuffer exportCells(Object[] cells) {
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Imports and integrates the given {@code CellBuffer}'s content
+	 * into the graph and synchronizes the resulting graph to the internal
+	 * data.
+	 */
+	public void importCells(CellBuffer buffer) {
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
 	}
 	
 	/**
@@ -844,12 +1115,17 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 	}
 	
+	/**
+	 * Appends a new empty node to the graph and synchronizes it 
+	 * with the internal data. Note that the meaning of the term 
+	 * <i>empty</i> is implementation depending!
+	 */
 	public void addNode() {
-		
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
 	}
 	
 	public void addEdge(Object source, Object target, boolean orderEdge) {
-		
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
 	}
 	
 	public void undo() {
@@ -857,11 +1133,20 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return;
 		}
 		
+		// Perform undo
 		graph.getModel().beginUpdate();
 		try {
 			undoManager.undo();
 		} finally {
 			graph.getModel().endUpdate();
+		}
+
+		// Sync to data
+		pauseChangeHandling();
+		try {
+			syncToData();
+		} finally {
+			resumeChangeHandling();
 		}
 	}
 	
@@ -870,16 +1155,33 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return;
 		}
 		
+		// Perform redo
 		graph.getModel().beginUpdate();
 		try {
 			undoManager.redo();
 		} finally {
 			graph.getModel().endUpdate();
 		}
+
+		// Sync to data
+		pauseChangeHandling();
+		try {
+			syncToData();
+		} finally {
+			resumeChangeHandling();
+		}
 	}
 	
-	protected void handleUndoOperation(mxEventObject evt) {
-		syncToData();
+	public void openPreferences() {
+		// for subclasses
+	}
+	
+	public void collapseCells(Object[] cells) {
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
+	}
+	
+	public void expandCells(Object[] cells) {
+		throw new UnsupportedOperationException("Method not overriden by subclass: "+getClass()); //$NON-NLS-1$
 	}
 	
 	public void pauseChangeHandling() {
@@ -895,6 +1197,24 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	}
 	
 	/**
+	 * Hook for subclasses to allow renderers or layouts to determine
+	 * whether a given cell can be expanded and should therefore be decorated
+	 * with additional hints for the user.
+	 */
+	public boolean canExpand(Object cell) {
+		return false;
+	}
+	
+	/**
+	 * Hook for subclasses to allow renderers or layouts to determine
+	 * whether a given cell can be collapsed and should therefore be decorated
+	 * with additional hints for the user.
+	 */
+	public boolean canCollapse(Object cell) {
+		return false;
+	}
+	
+	/**
 	 * 
 	 * @author Markus Gärtner
 	 * @version $Id$
@@ -904,20 +1224,44 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 
 		public DelegatingGraph() {
 			super();
+			
+			init();
 		}
 
 		public DelegatingGraph(mxIGraphModel model, mxStylesheet stylesheet) {
 			super(model, stylesheet);
+			
+			init();
 		}
 
 		public DelegatingGraph(mxIGraphModel model) {
 			super(model);
+			
+			init();
 		}
 
 		public DelegatingGraph(mxStylesheet stylesheet) {
 			super(stylesheet);
+			
+			init();
 		}
 
+		protected void init() {
+
+			setGridSize(15);
+			
+			setMultigraph(false);
+			setAllowDanglingEdges(false);
+			setAllowLoops(false);
+			setCellsDisconnectable(false);
+			setCellsResizable(false);
+			setEdgeLabelsMovable(false);
+			setAutoSizeCells(true);
+			setHtmlLabels(false);
+			setGridEnabled(false);
+
+			getSelectionModel().setSingleSelection(false);
+		}
 
 		/**
 		 * Computes the required size for the given cell.
@@ -1012,24 +1356,34 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	}
 	
 	/**
+	 * Constant used as action command for default layout combo-box
+	 */
+	protected static final String SELECT_LAYOUT_COMMAND = "selectLayout"; //$NON-NLS-1$
+
+	/**
+	 * Constant used as action command for default style combo-box
+	 */
+	protected static final String SELECT_STYLE_COMMAND = "selectStyle"; //$NON-NLS-1$
+
+	/**
+	 * Constant used as action command for default renderer combo-box
+	 */
+	protected static final String SELECT_RENDERER_COMMAND = "selectRenderer"; //$NON-NLS-1$
+	
+	/**
 	 * 
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
-	protected class Handler implements mxIEventListener, MouseWheelListener {
+	protected class Handler implements mxIEventListener, MouseWheelListener, 
+			ActionListener, ComponentListener {
 
 		/**
 		 * @see com.mxgraph.util.mxEventSource.mxIEventListener#invoke(java.lang.Object, com.mxgraph.util.mxEventObject)
 		 */
 		@Override
 		public void invoke(Object sender, mxEventObject evt) {
-			
-			// Handle undo/redo operations by re-synchronizing graph to data 
-			if(sender==getUndoManager()) {
-				handleUndoOperation(evt);
-			}
-			
 		}
 
 		/**
@@ -1042,16 +1396,116 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 			
 			if (e.isControlDown()) {
-				if (e.getPreciseWheelRotation() < 0) {
-					zoomIn();
-				} else {
-					zoomOut();
+				try {
+					if (e.getPreciseWheelRotation() < 0) {
+						zoomIn();
+					} else {
+						zoomOut();
+					}
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to handle wheel-zoom command for event: "+e, ex); //$NON-NLS-1$
 				}
 
 				e.consume();
 			}
 		}
-		
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// Per default the handler is only used as ActionListener
+			// on the three combo-boxes for selection of layout, style and renderer
+			if(!(e.getSource() instanceof JComboBox)) {
+				return;
+			}
+			
+			JComboBox<?> comboBox = (JComboBox<?>)e.getSource();
+			Object value = comboBox.getSelectedItem();
+			if(!(value instanceof Extension)) {
+				return;
+			}
+			
+			try {
+				Object instantiatedValue = PluginUtil.instantiate((Extension)value);
+				
+				switch (e.getActionCommand()) {
+				case SELECT_LAYOUT_COMMAND:
+					setGraphLayout((GraphLayout)instantiatedValue);
+					break;
+
+				case SELECT_STYLE_COMMAND:
+					setGraphStyle((GraphStyle)instantiatedValue);
+					break;
+
+				case SELECT_RENDERER_COMMAND:
+					setGraphRenderer((GraphRenderer)instantiatedValue);
+					break;
+
+				default:
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Unknown command for combo-box selection: "+e.getActionCommand()); //$NON-NLS-1$
+				}
+				
+				// TODO required?
+				refreshAll();
+				
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to handle combo-box selection for command '"+e.getActionCommand()+"' with value: "+value, ex); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentResized(ComponentEvent e) {
+			try {
+				// We need to rebuild cells since previous compression
+				// might have collapsed some nodes and tracking them is way
+				// more work than simply re-synchronizing the graph
+				syncToGraph();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to handle resize event: "+e, ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentMoved(ComponentEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentShown(ComponentEvent e) {
+			// TODO verify the need for this event!
+			try {
+				// We need to rebuild cells since previous compression
+				// might have collapsed some nodes and tracking them is way
+				// more work than simply re-synchronizing the graph
+				syncToGraph();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to handle show event: "+e, ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentHidden(ComponentEvent e) {
+			// no-op
+		}
 	}
 	
 	/**
@@ -1063,7 +1517,11 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	 * @version $Id$
 	 *
 	 */
-	protected class CallbackHandler {
+	public class CallbackHandler {
+		
+		protected CallbackHandler() {
+			// no-op
+		}
 		
 		/**
 		 * @see GraphPresenter#cloneCells(Object[])
@@ -1072,6 +1530,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			if(!canEdit()) {
 				return;
 			}
+			
 			if(graph.getSelectionCount()==0) {
 				return;
 			}
@@ -1093,6 +1552,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			if(!canEdit()) {
 				return;
 			}
+			
 			if(graph.getSelectionCount()==0) {
 				return;
 			}
@@ -1114,6 +1574,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			if(!canEdit()) {
 				return;
 			}
+			
 			if(graph.getSelectionCount()==0) {
 				return;
 			}
@@ -1171,16 +1632,60 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		}
 
-		public void copyCells(ActionEvent e) {
-			
+		/**
+		 * @see GraphPresenter#pasteCells()
+		 */
+		public void pasteCells(ActionEvent e) {
+			try {
+				GraphPresenter.this.pasteCells();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to paste cells", ex); //$NON-NLS-1$
+			}
 		}
-		
+
+		/**
+		 * @see GraphPresenter#copyCells(Object[])
+		 */
+		public void copyCells(ActionEvent e) {
+			if(graph.getSelectionCount()==0) {
+				return;
+			}
+			
+			Object[] cells = getSelectionCells();
+			
+			try {
+				GraphPresenter.this.copyCells(cells);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to copy cells", ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see GraphPresenter#editCell(Object)
+		 */
 		public void editCell(ActionEvent e) {
 			if(!canEdit()) {
 				return;
 			}
+			
+			Object cell = graph.getSelectionCell();
+			if(cell==null) {
+				return;
+			}
+			
+			try {
+				GraphPresenter.this.editCell(cell);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit cell: "+cell, ex); //$NON-NLS-1$
+			}
 		}
-		
+
+		/**
+		 * @see GraphPresenter#clearGraph()
+		 */
 		public void clearGraph(ActionEvent e) {
 			if(!canEdit()) {
 				return;
@@ -1194,14 +1699,12 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		}
 
-
 		/**
 		 * @see GraphPresenter#exportCells(Object[])
 		 */
 		public void exportCells(ActionEvent e) {
-			
+			// TODO
 		}
-
 
 		/**
 		 * @see GraphPresenter#importCells(CellBuffer)
@@ -1210,8 +1713,9 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			if(!canEdit()) {
 				return;
 			}
+			
+			// TODO
 		}
-
 
 		/**
 		 * @see GraphPresenter#printGraph()
@@ -1224,7 +1728,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 						"Failed to add node", ex); //$NON-NLS-1$
 			}
 		}
-
 
 		/**
 		 * @see GraphPresenter#addNode()
@@ -1242,7 +1745,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		}
 
-
 		/**
 		 * @see GraphPresenter#addEdge(Object, Object, boolean)
 		 */
@@ -1259,7 +1761,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		}
 
-
 		/**
 		 * @see GraphPresenter#addEdge(Object, Object, boolean)
 		 */
@@ -1275,7 +1776,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 						"Failed to add order edge", ex); //$NON-NLS-1$
 			}
 		}
-
 
 		/**
 		 * @see GraphPresenter#addEdge(Object, Object, boolean)
@@ -1298,7 +1798,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			GraphPresenter.this.addEdge(source, target, orderEdge);
 		}
 
-
 		/**
 		 * @see GraphPresenter#undo()
 		 */
@@ -1314,7 +1813,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 						"Failed to undo edit", ex); //$NON-NLS-1$
 			}
 		}
-
 
 		/**
 		 * @see GraphPresenter#redo()
@@ -1332,7 +1830,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		}
 
-
 		/**
 		 * @see GraphPresenter#zoomIn()
 		 */
@@ -1344,7 +1841,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 						"Failed to zoom in", ex); //$NON-NLS-1$
 			}
 		}
-
 
 		/**
 		 * @see GraphPresenter#zoomOut()
@@ -1358,7 +1854,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		}
 
-
 		/**
 		 * @see GraphPresenter#zoomActual()
 		 */
@@ -1368,6 +1863,108 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to reset zoom", ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see GraphPresenter#openPreferences()
+		 */
+		public void openPreferences(ActionEvent e) {
+			try {
+				GraphPresenter.this.openPreferences();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to open preferences", ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see GraphPresenter#rebuildGraph()
+		 */
+		public void rebuildGraph(ActionEvent e) {
+			try {
+				GraphPresenter.this.rebuildGraph();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to rebuild graph", ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see GraphPresenter#collapseCells(Object[])
+		 */
+		public void collapseCells(ActionEvent e) {			
+			if(graph.getSelectionCount()==0) {
+				return;
+			}
+			
+			Object[] cells = getSelectionVertices();
+			if(cells.length==0) {
+				return;
+			}
+			
+			try {
+				GraphPresenter.this.collapseCells(cells);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to collapse cells", ex); //$NON-NLS-1$
+			}
+		}
+
+		/**
+		 * @see GraphPresenter#expandCells(Object[])
+		 */
+		public void expandCells(ActionEvent e) {			
+			if(graph.getSelectionCount()==0) {
+				return;
+			}
+			
+			Object[] cells = getSelectionVertices();
+			if(cells.length==0) {
+				return;
+			}
+			
+			try {
+				GraphPresenter.this.expandCells(cells);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to expand cells", ex); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleAutoZoom(ActionEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see GraphPresenter#setAutoZoomEnabled(boolean)
+		 * @see GraphPresenter#isAutoZoomEnabled()
+		 */
+		public void toggleAutoZoom(boolean b) {
+			try {
+				setAutoZoomEnabled(b);
+				// TODO refresh current zoom level!
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'autoZoomEnabled' state", ex); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleCompress(ActionEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see GraphPresenter#setCompressEnabled(boolean)
+		 * @see GraphPresenter#isCompressEnabled()
+		 */
+		public void toggleCompress(boolean b) {
+			try {
+				setCompressEnabled(b);
+				syncToGraph();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to 'compressEnabled' state", ex); //$NON-NLS-1$
 			}
 		}
 	}

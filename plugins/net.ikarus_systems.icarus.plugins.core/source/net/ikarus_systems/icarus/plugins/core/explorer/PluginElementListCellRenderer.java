@@ -16,6 +16,7 @@ import javax.swing.JList;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import net.ikarus_systems.icarus.ui.LabelProxy;
+import net.ikarus_systems.icarus.ui.UIUtil;
 
 /**
  * @author Markus Gärtner
@@ -44,7 +45,7 @@ public class PluginElementListCellRenderer extends DefaultListCellRenderer {
 		
 		if(value instanceof PluginElementProxy) {
 			PluginElementProxy proxy = (PluginElementProxy)value; 
-			setToolTipText(proxy.getElementDescription());
+			setToolTipText(UIUtil.toSwingTooltip(proxy.getElementDescription()));
 			setIcon(proxy.getIcon());
 		} else if(value instanceof LabelProxy) {
 			setIcon(((LabelProxy)value).getIcon());

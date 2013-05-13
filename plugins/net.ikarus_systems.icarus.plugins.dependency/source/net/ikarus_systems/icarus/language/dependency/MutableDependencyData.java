@@ -61,14 +61,15 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 	public MutableDependencyData(String[] forms, String[] lemmas, 
 			String[] features, String[] poss, int[] heads,
-			String[] depRels) {
+			String[] relations, long[] flags) {
 		this();
 
 		items.clear();
 
 		for (int i = 0; i < forms.length; i++) {
 			items.add(this.new DependencyDataEntry(
-					forms[i], lemmas[i], features[i], poss[i], heads[i], depRels[i]));
+					forms[i], lemmas[i], features[i], 
+					poss[i], heads[i], relations[i], flags[i]));
 		}
 	}
 
@@ -124,9 +125,9 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		return item;
 	}
 
-	public void addItem(String form, String lemma, String features, String pos, int head, String depRel) {
+	public void addItem(String form, String lemma, String features, String pos, int head, String relation, long flags) {
 		items.add(this.new DependencyDataEntry(
-				form, lemma, features, pos, head, depRel));
+				form, lemma, features, pos, head, relation, flags));
 		int index = items.size() - 1;
 		fireItemsInserted(index, index);
 	}
@@ -142,9 +143,9 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	public void insertItem(int index, String form, String lemma, String features, 
-			String pos, int head, String depRel) {
+			String pos, int head, String relation, long flags) {
 		items.add(index, this.new DependencyDataEntry(
-				form, lemma, features, pos, head, depRel));
+				form, lemma, features, pos, head, relation, flags));
 		fireItemsInserted(index, index);
 	}
 
@@ -162,6 +163,27 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	public void removeItemAt(int index) {
+		// Find children
+		int indexFrom = Integer.MAX_VALUE;
+		int indexTo = -1;
+		
+		for(int i=0; i<items.size(); i++) {
+			if(i==index) {
+				continue;
+			}
+			
+			DependencyDataEntry item = items.get(i);
+			if(item.getHead()==index) {
+				item.setHead0(DATA_UNDEFINED_VALUE);
+				indexFrom = Math.min(indexFrom, i);
+				indexTo = Math.max(indexTo, i);
+			}
+		}
+		
+		if(indexFrom<Integer.MAX_VALUE && indexTo>-1) {
+			fireItemsUpdated(indexFrom, indexTo);
+		}
+		
 		items.remove(index);
 		fireItemsRemoved(index, index);
 	}
@@ -169,8 +191,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public boolean removeItem(DependencyDataEntry item) {
 		int index = items.indexOf(item);
 		if (index >= 0) {
-			items.remove(index);
-			fireItemsRemoved(index, index);
+			removeItemAt(index);
 			return true;
 		}
 
@@ -198,13 +219,12 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		DependencyData data = (DependencyData) source;
 		items.clear();
 		for (int i = 0; i < data.length(); i++) {
-			items.add(this.new DependencyDataEntry(data.getForm(i),
-					data.getLemma(i), data.getFeatures(i),
-					data.getPos(i), data.getHead(i), data.getRelation(i)));
+			items.add(this.new DependencyDataEntry(data, i));
 		}
 		
-		if(source instanceof AnnotatedSentenceData)
+		if(source instanceof AnnotatedSentenceData) {
 			annotation = ((AnnotatedSentenceData)source).getAnnotation();
+		}
 		
 		fireDataChanged();
 	}
@@ -231,30 +251,54 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public String getForm(int index) {
 		return items.get(index).getForm();
 	}
+	
+	public void setForm(int index, String form) {
+		items.get(index).setForm(form);
+	}
 
 	@Override
 	public String getLemma(int index) {
 		return items.get(index).getLemma();
+	}
+	
+	public void setLemma(int index, String lemma) {
+		items.get(index).setForm(lemma);
 	}
 
 	@Override
 	public String getFeatures(int index) {
 		return items.get(index).getFeatures();
 	}
+	
+	public void setFeatures(int index, String features) {
+		items.get(index).setForm(features);
+	}
 
 	@Override
 	public int getHead(int index) {
 		return items.get(index).getHead();
+	}
+	
+	public void setHead(int index, int head) {
+		items.get(index).setHead(head);
 	}
 
 	@Override
 	public String getPos(int index) {
 		return items.get(index).getPos();
 	}
+	
+	public void setPos(int index, String pos) {
+		items.get(index).setForm(pos);
+	}
 
 	@Override
 	public String getRelation(int index) {
 		return items.get(index).getRelation();
+	}
+	
+	public void setRelation(int index, String relation) {
+		items.get(index).setForm(relation);
 	}
 
 	@Override
@@ -264,24 +308,24 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 	@Override
 	public boolean isFlagSet(int index, long flag) {
-		return (items.get(index).getFlag() & flag) == flag;
+		return (items.get(index).getFlags() & flag) == flag;
 	}
 
 	public void setFlag(int index, long flag) {
-		long value = items.get(index).getFlag();
+		long value = items.get(index).getFlags();
 		value |= flag;
-		items.get(index).setFlag(value);
+		items.get(index).setFlags(value);
 	}
 
 	public void unsetFlag(int index, long flag) {
-		long value = items.get(index).getFlag();
+		long value = items.get(index).getFlags();
 		value &= ~flag;
-		items.get(index).setFlag(value);
+		items.get(index).setFlags(value);
 	}
 	
 	@Override
 	public long getFlags(int index) {
-		return items.get(index).getFlag();
+		return items.get(index).getFlags();
 	}
 
 	/**
@@ -426,16 +470,17 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		@XmlAttribute(name="index")
 		private int index;
 		
-		@XmlAttribute(name="flag", required=false)
-		private long flag;
+		@XmlAttribute(name="flags", required=false)
+		private long flags;
 
 		public DependencyDataEntry() {
 			form = pos = relation = lemma = features = ""; //$NON-NLS-1$
 			head = DATA_UNDEFINED_VALUE;
+			flags = 0;
 		}
 
 		public DependencyDataEntry(String form, String lemma, String features, String pos, int head,
-				String relation) {
+				String relation, long flags) {
 			Exceptions.testNullArgument(form, "form"); //$NON-NLS-1$
 			Exceptions.testNullArgument(lemma, "lemma"); //$NON-NLS-1$
 			Exceptions.testNullArgument(features, "features"); //$NON-NLS-1$
@@ -448,10 +493,15 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			this.pos = pos;
 			this.head = head;
 			this.relation = relation;
+			this.flags = flags;
 		}
 
 		public DependencyDataEntry(DependencyDataEntry source) {
 			copyFrom(source);
+		}
+
+		public DependencyDataEntry(DependencyData source, int index) {
+			copyFrom(source, index);
 		}
 
 		protected void copyFrom(DependencyDataEntry source) {
@@ -462,27 +512,39 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			head = source.head;
 			index = source.index;
 			relation = source.relation;
+			flags = source.flags;
+		}
+
+		protected void copyFrom(DependencyData source, int idx) {
+			form = source.getForm(idx);
+			lemma = source.getLemma(idx);
+			features = source.getFeatures(idx);
+			pos = source.getPos(idx);
+			head = source.getHead(idx);
+			index = idx;
+			relation = source.getRelation(idx);
+			flags = source.getFlags(idx);
 		}
 
 		@Override
 		public String toString() {
-			return String.format("%s %s (%s) [%d] %s %s [%s]",  //$NON-NLS-1$
+			return String.format("%s %s (%s) [%d] %s %s [%s] <%d>",  //$NON-NLS-1$
 					form, lemma, features, index + 1, pos,
-					DependencyUtils.getHeadLabel(head), relation);
+					DependencyUtils.getHeadLabel(head), relation, flags);
 		}
 
 		/**
 		 * @return the flag
 		 */
-		public long getFlag() {
-			return flag;
+		public long getFlags() {
+			return flags;
 		}
 
 		/**
-		 * @param flag the flag to set
+		 * @param flags the flag to set
 		 */
-		public void setFlag(long flag) {
-			this.flag = flag;
+		public void setFlags(long flags) {
+			this.flags = flags;
 			
 			int index = MutableDependencyData.this.indexOf(this);
 			MutableDependencyData.this.fireItemsUpdated(index, index);
@@ -550,6 +612,10 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 				int index = MutableDependencyData.this.indexOf(this);
 				MutableDependencyData.this.fireItemsUpdated(index, index);
 			}
+		}
+		
+		void setHead0(int head) {
+			this.head = head;
 		}
 
 		public String getRelation() {

@@ -19,10 +19,18 @@ import com.mxgraph.util.mxRectangle;
  * @version $Id$
  *
  */
-public class BasicTreeLayout implements GraphLayout {
+public class DefaultTreeLayout implements GraphLayout {
+	
+	protected String regularEdgeStyle;
+	protected String orderEdgeStyle;
 
-	public BasicTreeLayout() {
-		// no-op
+	public DefaultTreeLayout() {
+		initStyles();
+	}
+	
+	protected void initStyles() {
+		regularEdgeStyle = ";exitY=1.0;entryY=0.0;exitX=0.5;entryX=0.5;shape=connector"; //$NON-NLS-1$
+		orderEdgeStyle = ";exitY=1.0;entryY=1.0;exitX=0.5;entryX=0.5;edgeStyle=bottomArcEdgeStyle;shape=arc"; //$NON-NLS-1$
 	}
 
 	/**

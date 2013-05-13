@@ -317,7 +317,7 @@ public class Core {
 		
 		// in case of errors simply exit launcher completely
 		if(report.countErrors()>0) {
-			exit(new Error("Integrity check failed")); //$NON-NLS-1$
+			exit(new Error("Integrity check failed - check log")); //$NON-NLS-1$
 		}
 	}
     

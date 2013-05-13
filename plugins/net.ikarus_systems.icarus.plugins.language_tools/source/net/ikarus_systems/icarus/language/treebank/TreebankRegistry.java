@@ -11,6 +11,8 @@ package net.ikarus_systems.icarus.language.treebank;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,11 +24,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
+import javax.swing.event.ChangeListener;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -93,6 +97,8 @@ public class TreebankRegistry {
 	private Map<Treebank, TreebankDescriptor> treebankMap = new HashMap<>();
 	
 	private Map<String, Extension> treebankTypes = new HashMap<>();
+	
+	private Map<String, Reference<TreebankListDelegate>> delegateMap;
 	
 	private TreebankRegistry() {
 		eventSource = new WeakEventSource(this);
@@ -241,10 +247,37 @@ public class TreebankRegistry {
 		return NamingUtil.getUniqueName(baseName, usedNames);
 	}
 	
+	public TreebankListDelegate getListDelegate(Treebank treebank) {
+		TreebankDescriptor descriptor = getDescriptor(treebank);
+		if(delegateMap==null) {
+			delegateMap = new WeakHashMap<>();
+		}
+		TreebankListDelegate delegate = null;
+		Reference<TreebankListDelegate> ref = delegateMap.get(descriptor.getId());
+		if(ref!=null) {
+			delegate = ref.get();
+		}
+		
+		if(delegate==null) {
+			delegate = new TreebankListDelegate(treebank);
+			ref = new WeakReference<>(delegate);
+			delegateMap.put(descriptor.getId(), ref);
+		}
+		
+		if(!delegate.hasTreebank()) {
+			delegate.setTreebank(treebank);
+		}
+		
+		return delegate;
+	}
+	
 	public void deleteTreebank(Treebank treebank) {
 		TreebankDescriptor descriptor = treebankMap.remove(treebank);
 		if(descriptor!=null) {			
 			descriptorMap.remove(descriptor.getId());
+			if(delegateMap!=null) {
+				delegateMap.remove(descriptor.getId());
+			}
 			
 			// Reset all the derived treebanks pointing to this one
 			List<DerivedTreebank> derivedTreebanks = getDerived(treebank);
@@ -488,7 +521,7 @@ public class TreebankRegistry {
 		
 		@Override
 		
-		public ContentType getDataType() {
+		public ContentType getContentType() {
 			return LanguageManager.getInstance().getBasicLanguageDataType();
 		}
 		
@@ -526,6 +559,41 @@ public class TreebankRegistry {
 		@Override
 		public void remove(int index, DataType type) {
 			// no-op
+		}
+
+		@Override
+		public void addChangeListener(ChangeListener listener) {
+			// no-op
+		}
+
+		@Override
+		public void removeChangeListener(ChangeListener listener) {
+			// no-op
+		}
+
+		@Override
+		public String getId() {
+			return getName();
+		}
+
+		@Override
+		public String getDescription() {
+			return null;
+		}
+
+		@Override
+		public Icon getIcon() {
+			return null;
+		}
+
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+
+		@Override
+		public SentenceData get(int index) {
+			return null;
 		}
 	};
 	

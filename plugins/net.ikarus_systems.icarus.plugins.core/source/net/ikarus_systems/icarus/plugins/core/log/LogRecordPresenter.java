@@ -125,9 +125,9 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 	@Override
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
-		if(data==null) {
-			return;
-		}		
+		if(data==null)
+			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+		
 		if(data==presentedData) {
 			return;
 		}

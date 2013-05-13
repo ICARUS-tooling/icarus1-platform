@@ -207,6 +207,7 @@ public class TreebankEditView extends View {
 		refreshActions();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void editTreebank(Treebank treebank) {
 		if(treebank!=null) {
 			selectViewTab();
@@ -251,7 +252,6 @@ public class TreebankEditView extends View {
 		}
 		
 		// Try to fetch an editor for the supplied treebank
-		@SuppressWarnings("unchecked")
 		Editor<Treebank> editor = UIHelperRegistry.globalRegistry().findHelper(
 				Editor.class, treebank);
 		
@@ -272,6 +272,12 @@ public class TreebankEditView extends View {
 	}
 
 	/**
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#EDIT}</li>
+	 * <li>{@link Commands#CLEAR}</li>
+	 * </ul>
+	 * 
 	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
@@ -283,12 +289,16 @@ public class TreebankEditView extends View {
 			if(data==null || data instanceof Treebank) {
 				editTreebank((Treebank) data);
 				refreshActions();
-				return message.successResult(null);				
+				return message.successResult(this, null);				
 			} else {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
+		} else if(Commands.CLEAR.equals(message.getCommand())) {
+			reset();
+			
+			return message.successResult(this, null);
 		} else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 

@@ -28,10 +28,9 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
-import net.ikarus_systems.icarus.util.id.Identity;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
-import net.ikarus_systems.icarus.util.location.Location;
-import net.ikarus_systems.icarus.util.mpi.Message;
+
+import org.java.plugin.registry.Extension;
 
 /**
  * @author Markus Gärtner
@@ -60,6 +59,12 @@ public final class ContentTypeRegistry {
 	private Map<Class<?>, ContentType> classCache;
 	
 	/**
+	 * Maps content type ids to filters that are able to directly handle
+	 * the mapped type.
+	 */
+	private Map<String, Collection<Extension>> filters;
+	
+	/**
 	 * Collection of all registered {@code raw} converters, i.e.
 	 * all converters that have not been created by this framework
 	 * as an result of <i>conversion expansion</i>
@@ -77,6 +82,7 @@ public final class ContentTypeRegistry {
 		// Object content type not supported?
 		//addType0(new DefaultContentType(Object.class));
 		
+		// Java base types
 		addType0(new DefaultContentType(Integer.class));
 		addType0(new DefaultContentType(Boolean.class));
 		addType0(new DefaultContentType(Float.class));
@@ -85,9 +91,9 @@ public final class ContentTypeRegistry {
 		addType0(new DefaultContentType(Long.class));
 		addType0(new DefaultContentType(Date.class));
 		addType0(new DefaultContentType(String.class));
-		addType0(new DefaultContentType(Location.class));
-		addType0(new DefaultContentType(Identity.class));
-		addType0(new DefaultContentType(Message.class));
+		
+		// Utility and Common types
+		addType0(new DefaultContentType(Exception.class));
 	}
 
 	public static ContentTypeRegistry getInstance() {
@@ -110,6 +116,10 @@ public final class ContentTypeRegistry {
 		return type;
 	}
 	
+	public ContentType getType(Extension extension) {
+		return getType(extension.getId());
+	}
+	
 	public ContentType getTypeForClass(Object data) {
 		if(data==null)
 			throw new IllegalArgumentException("invalid data"); //$NON-NLS-1$
@@ -126,7 +136,7 @@ public final class ContentTypeRegistry {
 	
 	private ContentType findEnclosingType(Class<?> clazz) {
 		// Skip generalization to object
-		if(clazz==Object.class) {
+		if(clazz==null || clazz==Object.class) {
 			return null;
 		}
 		
@@ -172,7 +182,11 @@ public final class ContentTypeRegistry {
 		
 		Class<?> clazz = data instanceof Class ? (Class<?>)data : data.getClass();
 		
-		return findEnclosingType(clazz);
+		ContentType type = findEnclosingType(clazz);
+		if(type==null)
+			throw new IllegalArgumentException("No enclosing type defined for class: "+clazz.getName()); //$NON-NLS-1$
+		
+		return type;
 	}
 	
 	public ContentTypeCollection getEnclosingTypes(Object data) {
@@ -195,8 +209,12 @@ public final class ContentTypeRegistry {
 	 * content classes assignable to the content class of the {@code target}
 	 * parameter. The returned collection does not contain the {@code target}
 	 * parameter itself!
+	 * <p>
+	 * Note that this method does not use the {@link ContentType#accepts(Object)}
+	 * filter method to determine assignability but relies on {@link Class#isAssignableFrom(Class)}
+	 * with the content classes of the two content types being checked.
 	 */
-	public Collection<ContentType> getCompatibleTypes(ContentType target) {
+	public Collection<ContentType> getAssignableTypes(ContentType target) {
 		if(target==null)
 			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
 		
@@ -218,23 +236,68 @@ public final class ContentTypeRegistry {
 		return compatibleTypes;
 	}
 	
+	/**
+	 * Returns a collection of {@code ContentType}s that are compatible as
+	 * per the {@link #isCompatible(ContentType, ContentType)} method.
+	 */
+	public Collection<ContentType> getCompatibleTypes(ContentType target) {
+		if(target==null)
+			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+		
+		if(contentTypes.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		List<ContentType> compatibleTypes = new ArrayList<>();
+		
+		for(ContentType type : contentTypes.values()) {
+			if(type==target) {
+				continue;
+			}
+			if(isCompatible(target, type)) {
+				compatibleTypes.add(type);
+			}
+		}
+		
+		return compatibleTypes;
+	}
+	
+	private static Class<?> getClass(Object obj) {
+		if(obj instanceof ContentType) {
+			obj = ((ContentType)obj).getContentClass();
+		}
+		return obj instanceof Class ? (Class<?>)obj : obj.getClass();
+	}
+	
+	/**
+	 * Checks whether the given {@code ContentType} accepts the {@code content}
+	 * argument. This is done by using the {@link ContentType#accepts(Object)}
+	 * method. If {@code content} is of type {@link Class} it is passed <i>as-is</i>
+	 * otherwise the result of its {@code Object#getClass()} method is used as
+	 * argument.
+	 */
 	public static boolean isCompatible(ContentType type, Object content) {
 		if(type==null)
 			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
 		if(content==null)
 			throw new IllegalArgumentException("Invalid content"); //$NON-NLS-1$
 		
-		if(isStrictType(type)) {
-			return type.getContentClass().equals(content.getClass()); 
-		} else {
-			return type.getContentClass().isAssignableFrom(content.getClass());
-		}
+		return type.accepts(getClass(content));
 	}
 	
 	/**
-	 * Checks whether the content class of {@code target} can be assigned to
-	 * the one of {@code type} or in the case of {@code type} being a <i>strict</i>
-	 * {@code ContentType} whether it is equal.
+	 * Checks whether {@code ContentType} {@code target} is compatible
+	 * towards the {@code type} argument. This check is delegates to {@code type}'s
+	 * {@link ContentType#accepts(Object)} method with the result of {@code target}'s
+	 * {@link ContentType#getContentClass()}.
+	 * <p>
+	 * Note that the default {@code ContentType} implementations for common
+	 * java data types do a pure {@code Object#equals(Object)} check on the
+	 * two {@code Class} objects in question. Implementations of type
+	 * {@code ExtensionContentType} honor the {@link ContentType#STRICT_INHERITANCE}
+	 * property and either check for class equality or assignability via
+	 * {@link Class#isAssignableFrom(Class)}. Custom implementations are free
+	 * to use whatever mechanics they seem fit. 
 	 */
 	public static boolean isCompatible(ContentType type, ContentType target) {
 		if(type==null)
@@ -242,11 +305,7 @@ public final class ContentTypeRegistry {
 		if(target==null)
 			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
 		
-		if(isStrictType(type)) {
-			return type.getContentClass().equals(target.getContentClass()); 
-		} else {
-			return type.getContentClass().isAssignableFrom(target.getContentClass());
-		}
+		return type.accepts(target.getContentClass());
 	}
 	
 	/**
@@ -283,8 +342,12 @@ public final class ContentTypeRegistry {
 		return collection.isCompatibleTo(type);
 	}
 	
-	private static boolean isStrictType(ContentType type) {
+	public static boolean isStrictType(ContentType type) {
 		return CollectionUtils.isTrue(type.getProperties(), ContentType.STRICT_INHERITANCE);
+	}
+	
+	public static String getContentTypeId(Extension extension) {
+		return extension.getId();
 	}
 	
 	public boolean isConvertible(ContentType source, ContentType target) {
@@ -382,10 +445,70 @@ public final class ContentTypeRegistry {
 	public int availableTypesCount() {
 		return contentTypes.size();
 	}
+
+	/**
+	 * Returns only those filters that are explicitly declared
+	 * to handle the given {@code ContentType}.
+	 */
+	public Collection<Extension> getFilters(ContentType contentType) {
+		return getFilters(contentType, false);
+	}
+	
+	public Collection<Extension> getFilters(ContentType contentType, boolean includeCompatible) {
+		if(contentType==null)
+			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+		
+		if(filters==null) {
+			return Collections.emptyList();
+		}
+		
+		Collection<Extension> availableFilters = new ArrayList<>();
+		
+		ContentTypeCollection types = new ContentTypeCollection();
+		if(includeCompatible) {
+			types.addTypes(getCompatibleTypes(contentType));
+		}
+		types.addType(contentType);
+		
+		for(ContentType type : types.getContentTypes()) {
+			Collection<Extension> list = filters.get(type.getId());
+			if(list==null) {
+				continue;
+			}
+			
+			availableFilters.addAll(list);
+		}
+		
+		return availableFilters;
+	}
+	
+	/**
+	 * Registers the filter represented by the given {@code Extension}
+	 */
+	public void addFilter(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		if(filters==null) {
+			filters = new HashMap<>();
+		}
+		
+		Extension contentTypeExtension = extension.getParameter("contentType").valueAsExtension(); //$NON-NLS-1$
+		String contentTypeId = getContentTypeId(contentTypeExtension);
+		
+		Collection<Extension> list = filters.get(contentTypeId);
+		if(list==null) {
+			list = new LinkedHashSet<>();
+			filters.put(contentTypeId, list);
+		}
+		list.add(extension);
+
+		eventSource.fireEvent(new EventObject(Events.ADDED, "filter", extension)); //$NON-NLS-1$
+	}
 	
 	public void addConverter(DataConverter converter) {
 		if(converter==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid converter"); //$NON-NLS-1$
 		
 		rawConverters.add(converter);
 
@@ -627,6 +750,14 @@ public final class ContentTypeRegistry {
 		@Override
 		public Map<String, Object> getProperties() {
 			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.Filter#accepts(java.lang.Object)
+		 */
+		@Override
+		public boolean accepts(Object obj) {
+			return getContentClass().equals(obj);
 		}
 		
 	}

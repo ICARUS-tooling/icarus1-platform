@@ -5,7 +5,9 @@
 	
 	<doc>
 		<doc-text>
-			The base plug-in for all dependency related tools.
+			The base plug-in for all dependency related tools. Offers definitions for
+			dependency based data structures and related tools. Provides basic visualization
+			helpers for tabular, graphical and testual representation.
 		</doc-text>
 	</doc>
 	
@@ -14,6 +16,30 @@
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
 		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
 	</requires>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PROPERTIES AND VIEWS -->
+	
+	<extension id="DependencyTestPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.DependencyTestPerspective" />
+	</extension>
+	
+	<!-- HELPERS -->
+	
+	<extension id="DependencyGraphPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				GraphPresenter implementation for use with arbitrary sentence data that implements
+				the net.ikarus_systems.icarus.language.dependency.DependencyData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.graph.DependencyGraphPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
 	
 	<extension id="DependencyDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
 		<doc>

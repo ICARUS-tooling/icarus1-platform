@@ -11,10 +11,10 @@ import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainElements;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
 
-import net.ikarus_systems.icarus.ui.AbstractTreeModel;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
+import net.ikarus_systems.icarus.ui.helper.AbstractTreeModel;
 
 public class WeblichtTreeModel extends AbstractTreeModel {
 

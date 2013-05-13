@@ -13,6 +13,10 @@ import java.util.logging.Level;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.resources.DefaultResourceLoader;
+import net.ikarus_systems.icarus.resources.ResourceLoader;
+import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 
 import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
@@ -31,13 +35,31 @@ import com.mxgraph.view.mxStyleRegistry;
 public class JGraphPlugin extends Plugin {
 
 	public JGraphPlugin() {
+		// no-op
+	}
+
+	/**
+	 * @see org.java.plugin.Plugin#doStart()
+	 */
+	@Override
+	protected void doStart() throws Exception {
+		// Make our resources accessible via the global domain
+		ResourceLoader resourceLoader = new DefaultResourceLoader(
+				getManager().getPluginClassLoader(getDescriptor()));
+		ResourceManager.getInstance().addResource(
+				"net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph", resourceLoader); //$NON-NLS-1$
+
+		// Register our icons
+		IconRegistry.getGlobalRegistry().addSearchPath(getClass().getClassLoader(), 
+				"net/ikarus_systems/icarus/plugins/jgraph/icons/"); //$NON-NLS-1$
+
 		
 		// Install shape renderer
 		for(Extension extension : getDescriptor().getExtensionPoint("Shape").getConnectedExtensions()) { //$NON-NLS-1$
 			try {
+				String name = extension.getParameter("name").valueAsString(); //$NON-NLS-1$
 				mxIShape shape = (mxIShape) PluginUtil.instantiate(extension);
-				mxGraphics2DCanvas.putShape(
-						extension.getParameter("name").valueAsString(), shape); //$NON-NLS-1$
+				mxGraphics2DCanvas.putShape(name, shape);
 			} catch (Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to install shape: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
@@ -46,9 +68,9 @@ public class JGraphPlugin extends Plugin {
 		// Install text shape renderer
 		for(Extension extension : getDescriptor().getExtensionPoint("TextShape").getConnectedExtensions()) { //$NON-NLS-1$
 			try {
+				String name = extension.getParameter("name").valueAsString(); //$NON-NLS-1$
 				mxITextShape shape = (mxITextShape) PluginUtil.instantiate(extension);
-				mxGraphics2DCanvas.putTextShape(
-						extension.getParameter("name").valueAsString(), shape); //$NON-NLS-1$
+				mxGraphics2DCanvas.putTextShape(name, shape);
 			} catch (Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to install text-shape: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
@@ -69,15 +91,6 @@ public class JGraphPlugin extends Plugin {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to install edge-style: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
 		}
-	}
-
-	/**
-	 * @see org.java.plugin.Plugin#doStart()
-	 */
-	@Override
-	protected void doStart() throws Exception {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

@@ -20,10 +20,10 @@ import javax.swing.tree.TreePath;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
-import net.ikarus_systems.icarus.ui.AbstractTreeModel;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
+import net.ikarus_systems.icarus.ui.helper.AbstractTreeModel;
 import net.ikarus_systems.icarus.util.cache.LRUCache;
 
 import org.java.plugin.registry.Extension;

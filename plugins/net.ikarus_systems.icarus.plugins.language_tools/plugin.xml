@@ -168,6 +168,8 @@
 	
 	<!-- Standard Extensions -->
 	
+	<!-- PROPERTIES AND VIEWS -->
+	
 	<extension id="TreebankManagerPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
@@ -195,6 +197,14 @@
 		<parameter id="alignment" value="bottom" />
 		<parameter id="priority" value="high" />
 		<parameter id="requiresTab" value="false" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="set-text" />
+			<parameter id="get-text" />
+			<parameter id="append" value="StringContentType" />
+		</parameter>
 	</extension>
 	
 	<extension id="TreebankEditView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
@@ -211,6 +221,12 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-edit-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="edit" value="TreebankContentType" />
+		</parameter>
 	</extension>
 	
 	<extension id="TreebankExplorerView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
@@ -245,7 +261,15 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-properties-view.gif" />
 		<parameter id="alignment" value="right" />
 		<parameter id="priority" value="standard" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" value="TreebankContentType" />
+		</parameter>
 	</extension>
+	
+	<!-- TREEBANKS -->
 	
 	<extension id="DefaultSimpleTreebank" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Treebank">
 		<doc>
@@ -272,6 +296,8 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.FilteredTreebank" />
 	</extension>
 	
+	<!-- HELPERS -->
+	
 	<extension id="DefaultSimpleTreebankEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
@@ -279,7 +305,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DefaultSimpleTreebankEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
 	
@@ -291,7 +317,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DerivedTreebankEditor" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.DerivedTreebank" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@DerivedTreebankContentType" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
 	</extension>
 	
@@ -302,7 +328,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankListCellRenderer" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
 	
@@ -313,7 +339,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankTreeCellRenderer" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
 		<parameter id="interface" value="javax.swing.tree.TreeCellRenderer" />
 	</extension>
 	
@@ -324,10 +350,34 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankListModel" />
-		<parameter id="target" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
 		<parameter id="interface" value="javax.swing.ListModel" />
 		<parameter id="interface" value="javax.swing.ComboBoxModel" />
 	</extension>
+	
+	<extension id="SentenceDataListModel" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				DataListModel implementation for net.ikarus_systems.icarus.language.SentenceData content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListModel" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.util.data.DataListModel" />
+	</extension>
+	
+	<extension id="SentenceDataListPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				ListPresenter implementation for net.ikarus_systems.icarus.language.SentenceDataList content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataListContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.ListPresenter" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
 	
 	<extension id="TreebankContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
 		<doc>
@@ -336,6 +386,15 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+	</extension>
+	
+	<extension id="DerivedTreebankContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.treebank.DerivedTreebank
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.treebank.DerivedTreebank" />
 	</extension>
 	
 	<extension id="SentenceDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">

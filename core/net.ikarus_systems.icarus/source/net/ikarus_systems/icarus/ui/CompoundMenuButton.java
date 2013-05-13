@@ -66,8 +66,9 @@ public class CompoundMenuButton extends JButton {
 
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			if(isStateAdjusting)
+			if(isStateAdjusting) {
 				return;
+			}
 			
 			isStateAdjusting = true;
 			try {

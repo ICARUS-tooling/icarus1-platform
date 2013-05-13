@@ -40,9 +40,4 @@ public interface GraphStyle extends Installable<GraphOwner> {
 	 * the right style.
 	 */
 	String getStyle(GraphOwner owner, Object cell, Options options);
-	
-	/**
-	 * Hook to release resources and/or to unregister listeners
-	 */
-	public void close();
 }

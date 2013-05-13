@@ -474,7 +474,7 @@ public class WeblichtChainView extends View {
 			
 				Webchain webchain = (Webchain)selectedObject;
 			
-				Message message = new Message(Commands.EDIT, webchain, null);
+				Message message = new Message(this, Commands.EDIT, webchain, null);
 				sendRequest(WeblichtConstants.WEBLICHT_EDIT_VIEW_ID, message);
 			}
 
@@ -495,7 +495,7 @@ public class WeblichtChainView extends View {
 			Webservice webservice = webserviceproxy.get();
 			//System.out.println(webservice.getName() + " " + webservice.getUID());
 			
-			Message message = new Message(Commands.DISPLAY, webservice, null);
+			Message message = new Message(this, Commands.DISPLAY, webservice, null);
 			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
 		}
 

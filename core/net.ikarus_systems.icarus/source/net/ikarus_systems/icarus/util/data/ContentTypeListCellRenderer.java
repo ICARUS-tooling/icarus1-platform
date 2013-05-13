@@ -14,6 +14,8 @@ import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
+import net.ikarus_systems.icarus.ui.UIUtil;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -53,7 +55,7 @@ public class ContentTypeListCellRenderer extends DefaultListCellRenderer {
 		
 		if(contentType!=null) {
 			setIcon(contentType.getIcon());
-			setToolTipText(contentType.getDescription());
+			setToolTipText(UIUtil.toSwingTooltip(contentType.getDescription()));
 		} else {
 			setIcon(null);
 			setToolTipText(null);

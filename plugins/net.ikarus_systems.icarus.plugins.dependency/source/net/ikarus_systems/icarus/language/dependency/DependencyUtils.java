@@ -1047,7 +1047,7 @@ public class DependencyUtils implements DependencyConstants {
 		Exceptions.testNullArgument(treebank, "treebank"); //$NON-NLS-1$
 
 		return ContentTypeRegistry.isCompatible(
-				DependencyConstants.CONTENT_TYPE_ID, treebank.getDataType());
+				DependencyConstants.CONTENT_TYPE_ID, treebank.getContentType());
 	}
 	
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {

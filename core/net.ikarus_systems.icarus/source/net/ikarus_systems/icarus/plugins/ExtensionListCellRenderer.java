@@ -15,6 +15,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.registry.Extension;
@@ -54,7 +55,7 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 		
 		if(identity!=null) {
 			setIcon(identity.getIcon());
-			setToolTipText(identity.getDescription());
+			setToolTipText(UIUtil.toSwingTooltip(identity.getDescription()));
 		}
 		
 		return this;

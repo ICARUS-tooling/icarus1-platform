@@ -98,14 +98,15 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="capability" multiplicity="any">
+		<parameter-def id="capabilities" multiplicity="none-or-one" type="any">
 			<doc>
 				<doc-text>
-					A simple string describing a single capability of this perspective
-					in a "command_target" style. The "_target" part can be omitted
-					if a view is able to handle a command in a rather general way. This
-					parameter behaves in exactly the same way as the similar named one in the
-					'View' extension-point.
+					Container for an arbitrary collection of capabilities.
+					Each capability is represented by a sub-parameter with the
+					parameter's id holding the 'command' field and the parameter's
+					value describing the content type associated with the capability
+					or the empty string if it is a general content type independent
+					capability ('value' is an optional parameter). 
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -158,17 +159,15 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="capability" multiplicity="any">
+		<parameter-def id="capabilities" multiplicity="none-or-one" type="any">
 			<doc>
 				<doc-text>
-					A simple string describing a single capability of this view
-					in a "command_target" style. The "_target" part can be omitted
-					if a view is able to handle a command in a rather general way. 
-					For example the default output view declares a "display" capability
-					indicating that it is able to visualize arbitrary content to the user.
-					A more specialized version would be a capability in the form "display_text"
-					that could restrict the type of data to be strings. A view can declare
-					multiple capabilities.
+					Container for an arbitrary collection of capabilities.
+					Each capability is represented by a sub-parameter with the
+					parameter's id holding the 'command' field and the parameter's
+					value describing the content type associated with the capability
+					or the empty string if it is a general content type independent
+					capability ('value' is an optional parameter). 
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -221,6 +220,18 @@
 				Special entry point for 'View' extensions that only want to
 				contribute management capabilities and are not to be used in
 				perspectives other than the 'ManagementPerspective'.
+			</doc-text>
+		</doc>
+	</extension-point>
+			
+	<extension-point id="UtilityView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Utility-views are general-purpose implementations that provide
+				tools or presentation capabilities that are used across a variety
+				of perspectives and therefore are not associated with a certain type
+				of perspective.
 			</doc-text>
 		</doc>
 	</extension-point>
@@ -316,6 +327,14 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
+		<parameter-def id="filter" multiplicity="none-or-one">
+			<doc>
+				<doc-text>
+					Optional filter implementation of net.ikarus_systems.icarus.util.Filter interface
+					to determine compatibility. Passed objects will be of type java.lang.Class.
+				</doc-text>
+			</doc>
+		</parameter-def>
 		<parameter-def id="properties" multiplicity="none-or-one" type="any">
 			<doc>
 				<doc-text>
@@ -393,6 +412,65 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="Filter" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				See net.ikarus_systems.icarus.util.Filter
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Implementing class, needs to have no-args constructor and implement
+					net.ikarus_systems.icarus.util.Filter interface.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" multiplicity="one-or-more" type="extension-id"
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
+			<doc>
+				<doc-text>
+					Arbitrary number of content types this filter is able to handle.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Link">
+		<doc>
+			<doc-text>
+				Allows the virtual registration of an extension for multiple
+				extension-points. If for example an extension defining a View
+				for a special type of perspective wishes to to contribute to some
+				other (maybe more general) perspective or other extension-point
+				it is not allowed to do so by the plug-in framework. Declaring
+				a virtual link however enables the PluginUtils utilities to
+				properly collect all extensions for a particular extension-point
+				whether they are directly connected to it or just provide
+				compatible parameters.
+			</doc-text>
+		</doc>
+		<parameter-def id="extension" type="extension-id">
+			<doc>
+				<doc-text>
+					The extension that wishes to be linked. As a general rule the
+					extension defining the link should be named according to the
+					extension it is linking. So for example an extension named
+					'Foo' should be linekd by another extension with the id 'FooLink'.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="extension-point" type="extension-point-id" multiplicity="one-or-more">
+			<doc>
+				<doc-text>
+					Arbitrary number of extension-points that will be saved as link targets.
+					Note that no validation support is available for linked extensions!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="UIHelper">
 		<doc>
 			<doc-text>
@@ -406,10 +484,11 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="target">
+		<parameter-def id="contentType" type="extension-id"
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
 			<doc>
 				<doc-text>
-					Fully qualified name of the object class this helper should be registered for. 
+					Id of the content type this helper should be registered for. 
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -433,6 +512,8 @@
 	
 	<!-- Standard Extensions -->
 	
+	<!-- PERSPECTIVES AND VIEWS -->
+	
 	<extension id="ManagementPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
@@ -449,7 +530,7 @@
 		<parameter id="preview" value="net/ikarus_systems/icarus/plugins/core/management-perspective-preview.jpg" />
 	</extension>
 	
-	<extension id="DefaultLogView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+	<extension id="DefaultLogView" plugin-id="net.ikarus_systems.icarus.core" point-id="UtilityView">
 		<doc>
 			<doc-text>
 				Compact log implementation that allows the user to filter saved
@@ -463,6 +544,11 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/log/log-view.gif" />
 		<parameter id="alignment" value="bottom" />
 		<parameter id="priority" value="low" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+		</parameter>
 	</extension>
 	
 	<extension id="PluginExplorerView" plugin-id="net.ikarus_systems.icarus.core" point-id="ManagementView">
@@ -478,6 +564,11 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/explorer/plugin-explorer-view.gif" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="standard" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="select" />
+		</parameter>
 	</extension>
 	
 	<extension id="DefaultOutputView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
@@ -497,8 +588,11 @@
 		<parameter id="requiresTab" value="false" />
 		
 		<!-- CAPABILITIES -->
-		<parameter id="capability" value="display" />
-		<parameter id="capability" value="display_text" />
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" />
+			<parameter id="display" value="StringContentType" />
+		</parameter>
 	</extension>
 	
 	<extension id="ExtensionPointOutlineView" plugin-id="net.ikarus_systems.icarus.core" point-id="ManagementView">
@@ -516,7 +610,10 @@
 		<parameter id="priority" value="standard" />
 		
 		<!-- CAPABILITIES -->
-		<parameter id="capability" value="display_extension-point" />
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" value="ExtensionPointContentType" />
+		</parameter>
 	</extension>
 	
 	<extension id="ExtensionPointHierarchyView" plugin-id="net.ikarus_systems.icarus.core" point-id="ManagementView">
@@ -534,8 +631,13 @@
 		<parameter id="priority" value="low" />
 		
 		<!-- CAPABILITIES -->
-		<parameter id="capability" value="display_extension-point" />
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" value="ExtensionPointContentType" />
+		</parameter>
 	</extension>
+	
+	<!-- HELPERS -->
 	
 	<extension id="LogRecordListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
@@ -544,7 +646,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.log.LogListCellRenderer" />
-		<parameter id="target" value="java.util.logging.LogRecord" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.core@LogRecordContentType" />
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
 	
@@ -555,25 +657,132 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.log.LogRecordPresenter" />
-		<parameter id="target" value="java.util.logging.LogRecord" />
-		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.Presenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.core@LogRecordContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.AWTPresenter" />
 	</extension>
+	
+	<extension id="PluginElementPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Presenter implementation for plug-in elements that are documentable.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.output.PluginElementPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.core@DocumentableContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.AWTPresenter" />
+	</extension>
+	
+	<extension id="ExtensionListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Default list cell renderer usable for extensions and other plug-in elements.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.core@ExtensionContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="DataListPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				ListPresenter implementation for net.ikarus_systems.icarus.util.data.DataList content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.util.data.DataListPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.core@DataListContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.ListPresenter" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
 	
 	<extension id="LogRecordContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Represents the LogRecord content type.
+				Represents the java.util.logging.LogRecord content type.
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="java.util.logging.LogRecord" />
 	</extension>
 	
+	<extension id="LocationContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the net.ikarus_systems.icarus.util.location.Location content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.util.location.Location" />
+	</extension>
+	
+	<extension id="IdentityContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the net.ikarus_systems.icarus.util.id.Identity content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.util.id.Identity" />
+	</extension>
+	
+	<extension id="MessageContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the net.ikarus_systems.icarus.util.mpi.Message content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.util.mpi.Message" />
+	</extension>
+	
 	<extension id="DocumentableContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Represents the Documentable content type.
+				Represents the org.java.plugin.registry.Documentable content type.
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="org.java.plugin.registry.Documentable" />
+	</extension>
+	
+	<extension id="ExtensionContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the org.java.plugin.registry.Extension content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="org.java.plugin.registry.Extension" />
+	</extension>
+	
+	<extension id="PluginDescriptorContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the org.java.plugin.registry.PluginDescriptor content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="org.java.plugin.registry.PluginDescriptor" />
+	</extension>
+	
+	<extension id="PluginFragmentContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the org.java.plugin.registry.PluginFragment content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="org.java.plugin.registry.PluginFragment" />
+	</extension>
+	
+	<extension id="ExtensionPointContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the org.java.plugin.registry.ExtensionPoint content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="org.java.plugin.registry.ExtensionPoint" />
+	</extension>
+	
+	<extension id="DataListContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the net.ikarus_systems.icarus.util.data.DataList content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.util.data.DataList" />
 	</extension>
 </plugin>

@@ -26,35 +26,34 @@ import com.mxgraph.view.mxGraph;
  * @version $Id$
  *
  */
-public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
+public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 	
-	protected String defaultEdgeStyle;
+	protected String regularEdgeStyle;
 	protected String orderEdgeStyle;
-	protected String ltrEdgeStyle;
-	protected String rtlEdgeStyle;
+	protected String defaultConnectionStyle;
+	protected String ltrConnectionStyle;
+	protected String rtlConnectionStyle;
 
-	public LinearArcLayout() {
+	public DefaultArcLayout() {
 		initStyles();
 	}
 	
 	protected void initStyles() {
-		defaultEdgeStyle = ";exitY=0.0;entryY=0.0;edgeStyle=topArcEdgeStyle"; //$NON-NLS-1$
-		orderEdgeStyle = ";exitY=1.0;entryY=1.0;edgeStyle=bottomArcEdgeStyle"; //$NON-NLS-1$
+		regularEdgeStyle = ";exitY=0.0;entryY=0.0;edgeStyle=topArcEdgeStyle;shape=arc"; //$NON-NLS-1$
+		orderEdgeStyle = ";exitY=1.0;entryY=1.0;edgeStyle=bottomArcEdgeStyle;shape=arc"; //$NON-NLS-1$
 		
-		ltrEdgeStyle = ";exitX=0.5;entryX=0.35"; //$NON-NLS-1$
-		rtlEdgeStyle = ";exitX=0.5;entryX=0.65"; //$NON-NLS-1$
+		defaultConnectionStyle = ";exitX=0.5;entryX=0.5"; //$NON-NLS-1$
+		ltrConnectionStyle = ";exitX=0.5;entryX=0.35"; //$NON-NLS-1$
+		rtlConnectionStyle = ";exitX=0.5;entryX=0.65"; //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("unused")
 	protected mxRectangle doLayout(GraphOwner owner, Object[] cells, Options options) {
 		mxGraph graph = owner.getGraph();
 		
 		int cellSpacing = options.get(CELL_SPACING_KEY, graph.getGridSize()*2);
-		int topInsets = options.get(TOP_INSETS_KEY, 20);
-		int bottomInsets = options.get(BOTTOM_INSETS_KEY, 20);
-		int leftInsets = options.get(LEFT_INSETS_KEY, 20);
-		int rightInsets = options.get(RIGHT_INSETS_KEY, 20);
 		int minBaseline = options.get(MIN_BASELINE_KEY, DEFAULT_MIN_BASELINE);
+		double offsetX = options.get(OFFSET_X_KEY, cellSpacing);
+		double offsetY = options.get(OFFSET_Y_KEY, cellSpacing);
 
 		mxIGraphModel model = graph.getModel();
 		
@@ -64,8 +63,8 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 
 		model.beginUpdate();
 		try {
-			double x = 0;
-			double y = 0;
+			double x = offsetX;
+			double y = offsetY;
 			
 			double width = 0;
 			double height = 0;
@@ -103,41 +102,51 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 					mxGeometry targetGeometry = model.getGeometry(model.getTerminal(edge, false));
 					double span = Math.abs(geometry.getCenterX() - targetGeometry.getCenterX());
 							
-					// Apply style
-					String style = model.getStyle(edge);
+					// Fetch basic style
+					String style;
 					if(GraphUtils.isOrderEdge(graph, edge)) {
 						bottomArcHeight = Math.max(bottomArcHeight, ArcConnectorShape.getArcHeight(span));
-						style += orderEdgeStyle;
+						style = orderEdgeStyle;
 					} else {
 						topArcHeight = Math.max(topArcHeight, ArcConnectorShape.getArcHeight(span));
-						style += defaultEdgeStyle;
+						style = regularEdgeStyle;
 					}
 					
+					// Append edge direction specific exit and entry
 					if(GraphUtils.isLtrEdge(graph, edge)) {
-						style += ltrEdgeStyle;
+						style += ltrConnectionStyle;
 					} else {
-						style += rtlEdgeStyle;
+						style += rtlConnectionStyle;
 					}
 					
+					// Fetch old style and ensure non-null
 					String oldStyle = model.getStyle(edge);
-					if(oldStyle==null || !oldStyle.endsWith(style)) {
-						model.setStyle(edge, style);
+					if(oldStyle==null) {
+						oldStyle = "defaultEdge"; //$NON-NLS-1$
+					}
+					
+					// Since the GraphLayout is the last to modify
+					// a cells style we can use suffix-equality to
+					// check whether the required style is already set
+					if(!oldStyle.endsWith(style)) {
+						model.setStyle(edge, oldStyle+style);
 					}
 				}
 			}
 			
-			// Now relocate the entire graph
-			double offsetY = topInsets + Math.max(minBaseline, topArcHeight);
-			double offsetX = leftInsets;
+			// Now relocate the entire graph southwards
+			double offset = Math.max(minBaseline, topArcHeight);
 			
+			// Modifications take place on the previously created (cloned)
+			// geometry objects, no need to clone them again!
 			for(int i=0; i<cells.length; i++) {
 				mxGeometry geometry = geometries[i];
-				geometry.setX(geometry.getX()+offsetX);
-				geometry.setY(geometry.getY()+offsetY);
+				geometry.setY(geometry.getY()+offset);
 				model.setGeometry(cells[i], geometry);
 			}
 			
-			bounds.setHeight(Math.max(minBaseline, topArcHeight)+height+bottomArcHeight);
+			// Calculate total bounds
+			bounds.setHeight(topArcHeight+height+bottomArcHeight);
 			bounds.setWidth(width);
 		} finally {
 			model.endUpdate();
@@ -161,8 +170,6 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 	/**
 	 * Tries to find a vertex whose parent is a vertex 
 	 * right beside it.
-	 * @param vertices
-	 * @return
 	 */
 	protected Object findShrinkableVertex(mxGraph graph, List<Object> vertices, Filter filter) {
 		// TODO request: do not shrink subgraph with highlighted root
@@ -177,7 +184,7 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 				continue;
 			
 			// Allow filtering of important nodes (highlighted or whatsoever)
-			if(filter.accepts(vertex))
+			if(filter!=null && filter.accepts(vertex))
 				continue;
 			
 			// Check left node
@@ -198,10 +205,15 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 	
 	protected Object getHeadNode(mxGraph graph, Object node) {
 		mxIGraphModel model = graph.getModel();
-		
-		for(Object edge : graph.getIncomingEdges(node))
-			if(!(GraphUtils.isOrderEdge(graph, edge)))
+	
+		// The only non-order edges can be incoming since we
+		// only bother with shrinking leaf nodes
+		for(int i=model.getEdgeCount(node)-1; i>-1; i--) {
+			Object edge = model.getEdgeAt(node, i);
+			if(!(GraphUtils.isOrderEdge(graph, edge))) {
 				return model.getTerminal(edge, true);
+			}
+		}
 		
 		return null;
 	}
@@ -209,7 +221,6 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout#compressGraph(com.mxgraph.view.mxGraph, java.lang.Object[], net.ikarus_systems.icarus.util.Options, net.ikarus_systems.icarus.util.Filter, com.mxgraph.util.mxRectangle)
 	 */
-	@SuppressWarnings("unused")
 	@Override
 	public void compressGraph(GraphOwner owner, Object[] cells, Options options,
 			Filter filter, mxRectangle bounds) {
@@ -225,20 +236,15 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 			mxRectangle size = doLayout(owner, cells, options);
 			
 			// Do not bother with compression if already sufficient
-			if(size.getWidth()<=bounds.getWidth()) {
+			if(size.getWidth()<=bounds.getWidth() && size.getHeight()<bounds.getHeight()) {
 				return;
 			}
 			
-			double width = size.getWidth();
-			double height = size.getHeight();
-			
 			CellMerger merger = (CellMerger) options.get(CELL_MERGER_KEY);
 			int cellSpacing = options.get(CELL_SPACING_KEY, graph.getGridSize()*2);
-			int topInsets = options.get(TOP_INSETS_KEY, 20);
-			int bottomInsets = options.get(BOTTOM_INSETS_KEY, 20);
-			int leftInsets = options.get(LEFT_INSETS_KEY, 20);
-			int rightInsets = options.get(RIGHT_INSETS_KEY, 20);
 			int minBaseline = options.get(MIN_BASELINE_KEY, DEFAULT_MIN_BASELINE);
+			double offsetX = options.get(OFFSET_X_KEY, cellSpacing);
+			double offsetY = options.get(OFFSET_Y_KEY, cellSpacing);
 			List<Object> vertices = CollectionUtils.asList(cells);
 			
 			while(size.getWidth()>bounds.getWidth()) {
@@ -285,31 +291,57 @@ public class LinearArcLayout implements GraphLayout, GraphLayoutConstants {
 
 			// If we could shrink the graph refresh layout
 			double maxHeight = 0;
-			if(width!=size.getWidth()) {
-				double x = leftInsets;
-				for(Object cell : vertices) {
-					mxGeometry geo = model.getGeometry(cell);
-					maxHeight = Math.max(maxHeight, geo.getHeight());
-					
-					geo.setX(x);
-					
-					x += geo.getWidth() + cellSpacing;
+			double x = offsetX;
+			for(Object cell : vertices) {
+				mxGeometry geo = model.getGeometry(cell);
+				maxHeight = Math.max(maxHeight, geo.getHeight());
+				
+				geo.setX(x);
+				
+				x += geo.getWidth() + cellSpacing;
+			}
+			
+			// Recalculate arc heights so we can fit the graph properly
+			
+			double topArcHeight = 0;
+			double bottomArcHeight = 0;
+
+			for(Object cell : vertices) {
+				mxGeometry geometry = model.getGeometry(cell);
+				
+				// Calculate highest arc
+				for(Object edge : graph.getOutgoingEdges(cell)) {
+					mxGeometry targetGeometry = model.getGeometry(model.getTerminal(edge, false));
+					double span = Math.abs(geometry.getCenterX() - targetGeometry.getCenterX());
+							
+					// Fetch basic style
+					if(GraphUtils.isOrderEdge(graph, edge)) {
+						bottomArcHeight = Math.max(bottomArcHeight, ArcConnectorShape.getArcHeight(span));
+					} else {
+						topArcHeight = Math.max(topArcHeight, ArcConnectorShape.getArcHeight(span));
+					}
 				}
 			}
 			
-			// Fetch new bounding box
-			// we need this to refresh height
-			size = graph.getView().getGraphBounds();
+			// Start with maximum offset
+			double y = Math.max(offsetY + topArcHeight, minBaseline);
 			
-			// Move all nodes up if we have to
-			if(height != size.getHeight()) {
-				double y = topInsets + size.getHeight() - maxHeight;
-				// honor the general minimum insets for graphs
-				y = Math.max(y, minBaseline);
-				
-				for(Object cell : vertices) {
-					model.getGeometry(cell).setY(y);
-				}
+			// Squeeze in bottom arc if required
+			if(y+maxHeight+bottomArcHeight>bounds.getHeight()) {
+				y = bounds.getHeight()-maxHeight-bottomArcHeight;
+			}
+			
+			// Squeeze in nodes if required
+			if(y+maxHeight>bounds.getHeight()) {
+				y = bounds.getHeight()-maxHeight;
+			}
+			
+			// Ensure we do not clip the upper arcs
+			y = Math.max(y, offsetY+topArcHeight);
+			
+			// Now move all nodes
+			for(Object cell : vertices) {
+				model.getGeometry(cell).setY(y);
 			}
 		} finally {
 			model.endUpdate();

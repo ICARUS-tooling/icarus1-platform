@@ -16,6 +16,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.ikarus_systems.icarus.ui.LabelProxy;
+import net.ikarus_systems.icarus.ui.UIUtil;
 
 /**
  * @author Markus Gärtner
@@ -42,7 +43,7 @@ public class PluginElementTreeCellRenderer extends DefaultTreeCellRenderer {
 		
 		if(value instanceof PluginElementProxy) {
 			PluginElementProxy proxy = (PluginElementProxy)value; 
-			setToolTipText(proxy.getElementDescription());
+			setToolTipText(UIUtil.toSwingTooltip(proxy.getElementDescription()));
 			setIcon(proxy.getIcon());
 		} else if(value instanceof LabelProxy) {
 			setIcon(((LabelProxy)value).getIcon());

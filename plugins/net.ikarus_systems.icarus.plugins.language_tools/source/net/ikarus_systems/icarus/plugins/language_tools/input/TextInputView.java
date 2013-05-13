@@ -102,17 +102,17 @@ public class TextInputView extends View {
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		if(Commands.GET_TEXT.equals(message.getCommand())) {
-			return message.successResult(inputArea.getText());
+			return message.successResult(this, inputArea.getText());
 		} else if(Commands.SET_TEXT.equals(message.getCommand())) {
 			inputArea.setText((String) message.getData());
-			return message.successResult(null);
+			return message.successResult(this, null);
 		} else if(Commands.APPEND.equals(message.getCommand())) {
 			Document doc = inputArea.getDocument();
 			String text = (String)message.getData();
 			doc.insertString(doc.getLength(), text, null);
-			return message.successResult(null);
+			return message.successResult(this, null);
 		} else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 }

@@ -21,45 +21,53 @@ public class ResultMessage {
 	private final Message message;
 	private final ResultType type;
 	private final Object data;
+	private final Object source;
 
 	/**
 	 * Generates a result message that indicates the request
 	 * defined by {@code message} could not be performed because
 	 * of the given {@code throwable}.
 	 */
-	public ResultMessage(Message message, Throwable throwable) {
-		this(ResultType.REQUEST_FAILED, message, null, throwable);
+	public ResultMessage(Object source, Message message, Throwable throwable) {
+		this(source, ResultType.REQUEST_FAILED, message, null, throwable);
 	}
 
 	/**
 	 * Generates a result message that indicates successful
 	 * handling of the request defined by the given {@code message}
 	 */
-	public ResultMessage(Message message, Object data) {
-		this(ResultType.REQUEST_SUCCESSFUL, message, data, null);
+	public ResultMessage(Object source, Message message, Object data) {
+		this(source, ResultType.REQUEST_SUCCESSFUL, message, data, null);
 	}
 
 	/**
 	 * Generates a result message that indicates an unknown request.
 	 */
-	public ResultMessage(Message message) {
-		this(ResultType.UNKNOWN_REQUEST, message, null, null);
+	public ResultMessage(Object source, Message message) {
+		this(source, ResultType.UNKNOWN_REQUEST, message, null, null);
 	}
 	
-	public ResultMessage(ResultType type, Message message) {
-		this(type, message, null, null);
+	public ResultMessage(Object source, ResultType type, Message message) {
+		this(source, type, message, null, null);
 	}
 
-	public ResultMessage(ResultType type, Message message, Object data, Throwable throwable) {
+	public ResultMessage(Object source, ResultType type, Message message, Object data, Throwable throwable) {
+		if(source==null)
+			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
 		if(message==null)
 			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
 		if(type==null)
 			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
 		
+		this.source = source;
 		this.message = message;
 		this.throwable = throwable;
 		this.type = type;
 		this.data = data;
+	}
+	
+	public Object getSource() {
+		return source;
 	}
 
 	/**

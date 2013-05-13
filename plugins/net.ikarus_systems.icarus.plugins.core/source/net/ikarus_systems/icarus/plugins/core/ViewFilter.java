@@ -14,6 +14,7 @@ import java.util.logging.Level;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.util.Capability;
 
 import org.java.plugin.registry.Extension;
 
@@ -36,6 +37,10 @@ public abstract class ViewFilter {
 	 */
 	public abstract boolean filter(Extension extension, View view);
 	
+	/**
+	 * Empty default filter, accepts all {@code View} instances.
+	 * This implementation always returns {@code true}.
+	 */
 	public static final ViewFilter emptyFilter = new ViewFilter() {
 		
 		@Override
@@ -69,7 +74,47 @@ public abstract class ViewFilter {
 		 */
 		@Override
 		public boolean filter(Extension extension, View view) {
-			return id.equals(extension.getId());
+			return id.equals(extension.getId()) || id.equals(extension.getUniqueId());
+		}		
+	}
+
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public static class ViewCapabilityFilter extends ViewFilter {
+		
+		private final Capability[] capabilities;
+		private final boolean generalize;
+		
+		public ViewCapabilityFilter(Capability...capabilities) {
+			if(capabilities==null || capabilities.length==0)
+				throw new IllegalArgumentException("Invalid capabilities list"); //$NON-NLS-1$
+			
+			this.capabilities = capabilities;
+			this.generalize = false;
+		}
+		
+		public ViewCapabilityFilter(Capability capability, boolean generalize) {
+			if(capability==null)
+				throw new IllegalArgumentException("Invalid capability"); //$NON-NLS-1$
+			
+			this.capabilities = new Capability[]{ capability };
+			this.generalize = generalize;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.plugins.core.ViewFilter#filter(org.java.plugin.registry.Extension, net.ikarus_systems.icarus.plugins.core.View)
+		 */
+		@Override
+		public boolean filter(Extension extension, View view) {
+			if(capabilities.length==1) {
+				return PluginUtil.hasCapability(extension, capabilities[0], generalize);
+			} else {
+				return PluginUtil.hasCapability(extension, capabilities);
+			}
 		}		
 	}
 

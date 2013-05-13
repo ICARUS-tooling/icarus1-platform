@@ -184,37 +184,110 @@
 	
 	<!-- Standard Extensions -->
 	
-	<extension id="LinearArcLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
+	<!-- PERSPECTIVES AND VIEWS -->
+	
+	<extension id="GraphView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Generic graph view that uses GraphPresenter objects to delegate
+				the actual presentation work to.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.graphView.identity.name" />
+		<parameter id="description" value="plugins.jgraph.graphView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.view.GraphView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/view/graph-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="present" />
+			<parameter id="display" />
+		</parameter>
+	</extension>
+	
+	<extension id="ListGraphView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Specialized view consisting of two generic presenters:
+				The ListPresenter implementation is responsible for presenting
+				the list style choice to the user and is placed in the lower area of a vertical
+				JSplitPane.
+				The GraphPresenter implementation handles content type specific presentation
+				of the currently selected sentence data object in the aforementioned list.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.listGraphView.identity.name" />
+		<parameter id="description" value="plugins.jgraph.listGraphView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.view.ListGraphView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/view/list-graph-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="low" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="select" />
+			<parameter id="present" value="ListDataContentType" />
+			<parameter id="display" value="ListDataContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="ListGraphViewLink" plugin-id="net.ikarus_systems.icarus.core" point-id="Link">
+		<parameter id="extension" value="net.ikarus_systems.icarus.jgraph@ListGraphView" />
+		<parameter id="extension-point" value="net.ikarus_systems.icarus.languageTools@TreebankManagementView" />
+	</extension>
+	
+	<!-- GRAPH UTILITIES -->
+	
+	<extension id="DefaultArcLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
 		<doc>
 			<doc-text>
 				Layout that orders vertices horizontally with edges shaped as arcs. Regular edges are placed
 				above vertices and order edges below.
 			</doc-text>
 		</doc>
-		<parameter id="name" value="plugins.jgraph.linearArcLayout.identity.name" />
-		<parameter id="description" value="plugins.jgraph.linearArcLayout.identity.description" />
+		<parameter id="name" value="plugins.jgraph.defaultArcLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultArcLayout.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/icons/graph_arc.gif" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.LinearArcLayout" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultArcLayout" />
 	</extension>
 	
-	<extension id="BasicTreeLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
+	<extension id="DefaultTreeLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
 		<doc>
 			<doc-text>
 				Layout that generates a simple tree view.
 			</doc-text>
 		</doc>
-		<parameter id="name" value="plugins.jgraph.basicTreeLayout.identity.name" />
-		<parameter id="description" value="plugins.jgraph.basicTreeLayout.identity.description" />
+		<parameter id="name" value="plugins.jgraph.defaultTreeLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultTreeLayout.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/icons/graph_tree.gif" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.BasicTreeLayout" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultTreeLayout" />
+	</extension>
+	
+	<extension id="DefaultGraphRenderer" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphRenderer">
+		<doc>
+			<doc-text>
+				Simple renderer that uses the default label generation methods as defined in the
+				abstract net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer class.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultGraphRenderer.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultGraphRenderer.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphRenderer" />
 	</extension>
 	
 	<extension id="ArcConnectorShape" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="Shape">
 		<doc>
 			<doc-text>
-				A simple connector shape that creates arc shaped connection lines between vertices.
+				A simple connector shape that draws arc shaped connection lines between vertices.
 			</doc-text>
 		</doc>
 		<parameter id="name" value="arc" />

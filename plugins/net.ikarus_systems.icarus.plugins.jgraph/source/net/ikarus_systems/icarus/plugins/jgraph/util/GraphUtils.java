@@ -9,13 +9,10 @@
  */
 package net.ikarus_systems.icarus.plugins.jgraph.util;
 
-import java.util.Collection;
-
-import org.java.plugin.registry.Extension;
-
 import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.Order;
 
+import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
 
@@ -49,5 +46,62 @@ public final class GraphUtils {
 	public static Object[] getAllCells(mxIGraphModel model, Filter filter) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public static void importCells(mxGraph graph, CellBuffer buffer) {
+		Object[] cells = CellBuffer.buildCells(buffer);
+		if(cells==null || cells.length==0) {
+			return;
+		}
+
+		mxIGraphModel model = graph.getModel();
+		model.beginUpdate();
+		try {
+			graph.addCells(cells);
+		} finally {
+			model.endUpdate();
+		}
+	}
+	
+	public static void clearGraph(mxGraph graph) {
+		mxIGraphModel model = graph.getModel();
+		if(model instanceof mxGraphModel) {
+			((mxGraphModel)model).clear();
+		} else {
+			Object[] cells = mxGraphModel.getChildren(model, graph.getDefaultParent());
+			for(Object cell : cells) {
+				model.remove(cell);
+			} 
+		}
+	}
+	
+	public static void deleteCells(mxGraph graph, Object[] cells) {
+		if (cells == null) {
+			cells = graph.getSelectionCells();
+		}
+		if(cells.length==0) {
+			return;
+		}
+		
+		graph.getModel().beginUpdate();
+		try {
+			graph.removeCells(cells);
+		} finally {
+			graph.getModel().endUpdate();
+		}
+	}
+	
+	public static void moveCells(mxGraph graph, Object[] cells, double dx, double dy) {
+		if(dx==0 &&dy==0) {
+			return;
+		}
+		if (cells == null) {
+			cells = graph.getSelectionCells();
+		}
+		if(cells.length==0) {
+			return;
+		}
+
+		graph.moveCells(cells, dx, dy);
 	}
 }

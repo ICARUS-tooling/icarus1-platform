@@ -9,14 +9,22 @@
  */
 package net.ikarus_systems.icarus.language.treebank;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.swing.Icon;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
+import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
+import net.ikarus_systems.icarus.util.id.Identity;
 import net.ikarus_systems.icarus.util.location.Location;
 
 /**
@@ -42,6 +50,8 @@ public abstract class AbstractTreebank {
 	
 	protected String name = TreebankRegistry.getTempName((Treebank)this);
 	
+	protected List<ChangeListener> changeListeners;
+	
 	
 	@Override
 	public String toString() {
@@ -66,6 +76,25 @@ public abstract class AbstractTreebank {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * @see Identity#getId()
+	 */
+	public String getId() {
+		return TreebankRegistry.getInstance().getDescriptor((Treebank)this).getId();
+	}
+	
+	public Object getOwner() {
+		return this;
+	}
+	
+	public String getDescription() {
+		return null;
+	}
+	
+	public Icon getIcon() {
+		return null;
 	}
 
 	/**
@@ -129,6 +158,10 @@ public abstract class AbstractTreebank {
 		return properties;
 	}
 	
+	public SentenceData get(int index) {
+		return ((Treebank)this).get(index, null);
+	}
+	
 	/**
 	 * @see net.ikarus_systems.icarus.ui.events.EventSource#addListener(java.lang.String, net.ikarus_systems.icarus.ui.events.EventListener)
 	 */
@@ -164,5 +197,40 @@ public abstract class AbstractTreebank {
 	public void remove(int index, DataType type) {
 		if(!isEditable())
 			throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * 
+	 * @see SentenceDataList#addChangeListener(ChangeListener)
+	 */
+	public void addChangeListener(ChangeListener listener) {
+		if(changeListeners==null) {
+			changeListeners = new ArrayList<>();
+		}
+		
+		changeListeners.add(listener);
+	}
+	
+	/**
+	 * @see SentenceDataList#removeChangeListener(ChangeListener)
+	 */
+	public void removeChangeListener(ChangeListener listener) {
+		if(changeListeners==null) {
+			return;
+		}
+		
+		changeListeners.remove(listener);
+	}
+	
+	protected void fireChangeEvent() {
+		if(changeListeners==null || changeListeners.isEmpty()) {
+			return;
+		}
+		
+		ChangeEvent event = new ChangeEvent(this);
+		Object[] listeners = changeListeners.toArray();
+		for(Object listener : listeners) {
+			((ChangeListener)listener).stateChanged(event);
+		}
 	}
 }

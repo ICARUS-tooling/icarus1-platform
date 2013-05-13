@@ -33,6 +33,10 @@ public class ContentTypeCollection {
 	void addType(ContentType type) {
 		contentTypes.add(type);
 	}
+	
+	void addTypes(Collection<ContentType> types) {
+		contentTypes.addAll(types);
+	}
 
 	public boolean contains(ContentType type) {
 		return contentTypes.contains(type);

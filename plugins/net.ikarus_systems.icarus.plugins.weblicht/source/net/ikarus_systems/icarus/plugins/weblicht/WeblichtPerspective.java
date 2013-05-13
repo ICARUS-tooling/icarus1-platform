@@ -54,7 +54,7 @@ public class WeblichtPerspective extends Perspective {
 		
 		// Add some general views
 		PluginDescriptor corePlugin = PluginUtil.getCorePlugin();
-		newExtensions.add(corePlugin.getExtensionPoint("View").getConnectedExtension( //$NON-NLS-1$
+		newExtensions.add(corePlugin.getExtensionPoint("UtilityView").getConnectedExtension( //$NON-NLS-1$
 				PluginUtil.CORE_PLUGIN_ID+"@DefaultLogView")); //$NON-NLS-1$
 		newExtensions.add(corePlugin.getExtensionPoint("View").getConnectedExtension( //$NON-NLS-1$
 				PluginUtil.CORE_PLUGIN_ID+"@DefaultOutputView")); //$NON-NLS-1$

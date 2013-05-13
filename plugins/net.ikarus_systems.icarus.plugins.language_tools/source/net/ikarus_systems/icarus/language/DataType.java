@@ -15,6 +15,12 @@ package net.ikarus_systems.icarus.language;
  *
  */
 public enum DataType {
+	
+	/**
+	 * Data that originated from some sort of automated generation
+	 * process should be associated with this type.
+	 */
+	SYSTEM,
 
 	/**
 	 * Describes the gold standard, i.e. the one version
@@ -22,12 +28,6 @@ public enum DataType {
 	 * state or annotation.
 	 */
 	GOLD,
-	
-	/**
-	 * Data that originated from some sort of automated generation
-	 * process should be associated with this type.
-	 */
-	SYSTEM,
 	
 	/**
 	 * Describes data that was created by the user himself.

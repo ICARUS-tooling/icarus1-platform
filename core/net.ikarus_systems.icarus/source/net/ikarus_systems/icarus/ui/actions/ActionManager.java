@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.ui.actions;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -25,7 +26,9 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Level;
 
@@ -33,7 +36,6 @@ import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -46,6 +48,8 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -56,6 +60,7 @@ import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.WeakHandler;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
+import net.ikarus_systems.icarus.ui.helper.ModifiedFlowLayout;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
@@ -112,6 +117,8 @@ public class ActionManager {
 	protected ComponentHandler menuHandler;
 	protected ComponentHandler popupMenuHandler;
 	protected ComponentHandler menuBarHandler;
+	
+	protected Set<String> loadedResources;
 
 	/**
 	 * 
@@ -120,6 +127,11 @@ public class ActionManager {
 		this.parent = parent;
 		this.resourceDomain = resourceDomain;
 		this.iconRegistry = iconRegistry;
+
+		// Inherit silent flag from parent
+		if(parent!=null) {
+			setSilent(parent.isSilent());
+		}
 	}
 	
 	public ResourceDomain getResourceDomain() {
@@ -190,10 +202,17 @@ public class ActionManager {
 	}
 
 	protected ActionAttributes getAttributes(String key) {
-		if (attributeMap == null) {
-			return null;
+		ActionAttributes attributes = null;
+		
+		if (attributeMap != null) {
+			attributes = attributeMap.get(key);
 		}
-		return (ActionAttributes) attributeMap.get(key);
+		
+		if(attributes==null && parent!=null) {
+			attributes = parent.getAttributes(key);
+		}
+		
+		return attributes;
 	}
 	
 	public Action deriveAction(String id, String templateId) {
@@ -210,32 +229,42 @@ public class ActionManager {
 		return createAction(attr, id);
 	}
 	
-	public Action getAction(String id) {
-		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
-		if(actionMap==null) {
-			actionMap = new HashMap<>();
-		}
-		Action action = actionMap.get(id);
-		if(action==null) {
-			ActionAttributes attr = getAttributes(id);
-			if(attr!=null && Boolean.parseBoolean(attr.getValue(VIRTUAL_INDEX)))
-				throw new IllegalArgumentException("Cannot instantiate virtual action: "+id); //$NON-NLS-1$
-			
-			action = createAction(attr, null);
+	protected Action findAction(String id) {
+		Action action = null;
+		if(actionMap!=null) {
+			action = actionMap.get(id);
 		}
 		
 		if(action==null && parent!=null) {
-			try {
-				action = parent.getAction(id);
-			} catch(UnknownIdentifierException e) {
-				// ignore the 'silent' setting of parent managers
-			}
+			action = parent.findAction(id);
 		}
 		
-		if(action==null && !isSilent())
+		return action;
+	}
+	
+	public Action getAction(String id) {
+		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
+		
+		// Search for action all along the parent line
+		Action action = findAction(id);
+		
+		// Action already found -> return it
+		if(action!=null) {
+			return action;
+		}
+		
+		// Fetch attributes to create action from
+		ActionAttributes attr = getAttributes(id);
+		
+		if(attr==null && !isSilent())
 			throw new UnknownIdentifierException("Unknown action id: "+id); //$NON-NLS-1$
 		
-		return action;
+		// Virtual actions are not supposed to be instantiated directly
+		if(attr!=null && Boolean.parseBoolean(attr.getValue(VIRTUAL_INDEX)))
+			throw new IllegalArgumentException("Cannot instantiate virtual action: "+id); //$NON-NLS-1$
+		
+		// Create new action
+		return createAction(attr, null);
 	}
 	
 	public void addAction(String id, Action action) {
@@ -309,11 +338,11 @@ public class ActionManager {
 	
 	public ActionSet getActionSet(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
-		if(actionSetMap==null) {
-			return null;
-		}
+		ActionSet actionSet = null;
 		
-		ActionSet actionSet = actionSetMap.get(id);
+		if(actionSetMap!=null) {
+			actionSet = actionSetMap.get(id);
+		}
 		
 		if(actionSet==null && parent!=null) {
 			try {
@@ -347,11 +376,10 @@ public class ActionManager {
 	
 	public ActionList getActionList(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
-		if(actionListMap==null) {
-			return null;
+		ActionList actionList = null;
+		if(actionListMap!=null) {
+			actionList = actionListMap.get(id);
 		}
-		
-		ActionList actionList = actionListMap.get(id);
 		
 		if(actionList==null && parent!=null) {
 			try {
@@ -637,14 +665,23 @@ public class ActionManager {
 		}
 	}
 	
+	private static Border DEFAULT_LABEL_BORDER;
+	
 	protected Component createLabel(String value) {
 		JLabel label = new JLabel();
 		
 		if(value!=null && !value.isEmpty()) {
 			getResourceDomain().prepareComponent(label, value, null);
 			getResourceDomain().addComponent(label);
-		} else
+		} else {
 			label.setText("<undefined>"); //$NON-NLS-1$
+		}
+		
+		if(DEFAULT_LABEL_BORDER==null) {
+			DEFAULT_LABEL_BORDER = new EmptyBorder(0, 4, 0, 3);
+		}
+		
+		label.setBorder(DEFAULT_LABEL_BORDER);
 		
 		return label;
 	}
@@ -685,17 +722,19 @@ public class ActionManager {
 	
 	public JMenu createMenu(ActionList actionList, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
-		if(properties==null)
+		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
+		}
 		
 		Action action = null;
-		if(actionList.getActionId()!=null)
+		if(actionList.getActionId()!=null) {
 			action = getAction(actionList.getActionId());
+		}
 		
 		JMenu menu = new JMenu(action);
 		
 		feedActionList(menu, getHandler(JMenu.class), actionList, properties);
-		configureMenu(menu, action);
+		configureMenu(menu, action, properties);
 		
 		return menu;
 	}
@@ -713,15 +752,23 @@ public class ActionManager {
 	
 	public JMenuBar createMenuBar(ActionList actionList, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
-		if(properties==null)
+		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
+		}
 		
 		JMenuBar menuBar = new JMenuBar();
 		
 		feedActionList(menuBar, getHandler(JMenuBar.class), actionList, properties);
-		configureMenuBar(menuBar);
+		configureMenuBar(menuBar, properties);
 		
 		return menuBar;
+	}
+	
+	public JToolBar createEmptyToolBar() {
+		JToolBar toolBar = new JToolBar();
+		configureToolBar(toolBar, EMPTY_PROPERTIES);
+		
+		return toolBar;
 	}
 
 	public JToolBar createToolBar(String id, Map<String, Object> properties) {
@@ -745,7 +792,7 @@ public class ActionManager {
 		
 		feedActionList(toolBar, getHandler(JToolBar.class), actionList, properties);
 		
-		configureToolBar(toolBar);
+		configureToolBar(toolBar, properties);
 		
 		return toolBar;
 	}
@@ -769,7 +816,7 @@ public class ActionManager {
 		
 		feedActionList(toolBar, getHandler(JToolBar.class), actionList, properties);
 		
-		configureToolBar(toolBar);
+		configureToolBar(toolBar, properties);
 	}
 
 	public JPopupMenu createPopupMenu(String id, Map<String, Object> properties) {
@@ -792,7 +839,7 @@ public class ActionManager {
 		JPopupMenu popupMenu = new JPopupMenu();
 		
 		feedActionList(popupMenu, getHandler(JPopupMenu.class), actionList, properties);
-		configurePopupMenu(popupMenu);
+		configurePopupMenu(popupMenu, properties);
 		
 		return popupMenu;
 	}
@@ -857,20 +904,25 @@ public class ActionManager {
 	
 	// configuration callbacks
 	
-	protected void configureMenu(JMenu menu, Action action) {
+	protected void configureMenu(JMenu menu, Action action, Map<String, Object> properties) {
 		// no-op
 	}
 	
-	protected void configurePopupMenu(JPopupMenu popupMenu) {
+	protected void configurePopupMenu(JPopupMenu popupMenu, Map<String, Object> properties) {
 		// no-op
 	}
 	
-	protected void configureToolBar(JToolBar toolBar) {
+	protected void configureToolBar(JToolBar toolBar, Map<String, Object> properties) {
 		toolBar.setFloatable(false);
 		toolBar.setRollover(true);
+		
+		if(Boolean.parseBoolean(String.valueOf(properties.get("multiline")))) { //$NON-NLS-1$
+			// FIXME ModifiedFlowLayout needs rework to support glue objects
+			toolBar.setLayout(new ModifiedFlowLayout(FlowLayout.LEFT, 1, 3));
+		}
 	}
 	
-	protected void configureMenuBar(JMenuBar menuBar) {
+	protected void configureMenuBar(JMenuBar menuBar, Map<String, Object> properties) {
 		// no-op
 	}
 	
@@ -882,12 +934,13 @@ public class ActionManager {
 		button.setHideActionText(true);
 		button.setFocusable(false);
 		
-		Icon icon = button.getIcon();
+		// TODO check for requirements of a default preferred size for buttons! 
+		/*Icon icon = button.getIcon();
 		if(icon!=null) {
-			int width = Math.max(22, icon.getIconWidth()+6);
-			int height = Math.max(22, icon.getIconHeight()+6);
+			int width = Math.max(24, icon.getIconWidth()+6);
+			int height = Math.max(24, icon.getIconHeight()+6);
 			button.setPreferredSize(new Dimension(width, height));
-		}
+		}*/
 	}
 
 	protected void configureToggleMenuItem(JMenuItem menuItem, Action action) {
@@ -1105,8 +1158,30 @@ public class ActionManager {
 		}
 	}
 	
+	/**
+	 * Hook for subclasses to bypass the optimization regarding
+	 * redundant loading of action resources.
+	 * <p>
+	 * The default implementation returns {@code true}.
+	 */
+	protected boolean isPreventRedundantLoading() {
+		return true;
+	}
+	
+	/**
+	 * 
+	 */
 	public void loadActions(URL location) throws IOException {
 		Exceptions.testNullArgument(location, "location"); //$NON-NLS-1$
+		
+		if(loadedResources==null) {
+			loadedResources = new HashSet<>();
+		}
+		
+		// Skip redundant loading of resources
+		if(isPreventRedundantLoading() && loadedResources.contains(location.toExternalForm())) {
+			return;
+		}	
 		
 		InputStream stream = location.openStream();
 		try {
@@ -1118,13 +1193,8 @@ public class ActionManager {
 				// ignore
 			}
 		}
-	}
-	
-	public void loadActions(InputStream stream) throws IOException {
-		Exceptions.testNullArgument(stream, "stream"); //$NON-NLS-1$
 		
-		// Stream will not closed by us, it's the calling method's job
-		parseActions(stream);
+		loadedResources.add(location.toExternalForm());
 	}
 
     /**
@@ -1594,10 +1664,17 @@ public class ActionManager {
 				}
 			}
 			
-			if(width>-1)
+			if(width<0) {
+				width = 4;
+			}
+
+			toolBar.addSeparator(new Dimension(width, 24));
+			
+			// TODO
+			/*if(width>-1)
 				toolBar.addSeparator(new Dimension(width, 24));
 			else
-				toolBar.addSeparator();
+				toolBar.addSeparator();*/
 		}
 
 		/**

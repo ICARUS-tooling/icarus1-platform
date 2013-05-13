@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		NAVIGATION CONTROL
+	-->
+
+	<!-- First Element -->
+	<action id="core.helpers.navigationControl.firstElementAction"
+		name="${id}.name" desc="${id}.description" command="firstElement" />
+
+	<!-- Previous Element -->
+	<action id="core.helpers.navigationControl.previousElementAction"
+		name="${id}.name" desc="${id}.description" command="previousElement" />
+
+	<!-- Next Element -->
+	<action id="core.helpers.navigationControl.nextElementAction"
+		name="${id}.name" desc="${id}.description" command="nextElement" />
+
+	<!-- Last Element -->
+	<action id="core.helpers.navigationControl.lastElementAction"
+		name="${id}.name" desc="${id}.description" command="lastElement" />
+
+	<!-- ToolBar List -->
+	<action-list id="core.helpers.navigationControl.toolBarList">
+		<item type="custom" value="leftContent" />
+		<item type="glue" />
+		<item type="action" value="core.helpers.navigationControl.firstElementAction" />
+		<item type="action" value="core.helpers.navigationControl.previousElementAction" />
+		<item type="custom" value="centerContent" />
+		<item type="action" value="core.helpers.navigationControl.nextElementAction" />
+		<item type="action" value="core.helpers.navigationControl.lastElementAction" />
+		<item type="glue" />
+		<item type="custom" value="rightContent" />
+	</action-list>
+
+	<!-- Popup Menu List -->
+	<action-list id="core.helpers.navigationControl.popupMenuList">
+		<item type="action" value="core.helpers.navigationControl.firstElementAction" />
+		<item type="action" value="core.helpers.navigationControl.previousElementAction" />
+		<item type="action" value="core.helpers.navigationControl.nextElementAction" />
+		<item type="action" value="core.helpers.navigationControl.lastElementAction" />
+	</action-list>
+</actions>

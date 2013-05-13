@@ -18,6 +18,7 @@ import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
+import net.ikarus_systems.icarus.util.Capability;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.id.Identifiable;
@@ -131,13 +132,18 @@ public abstract class View implements Identifiable {
 	 * so the enclosing {@code Perspective} can handle this by presenting
 	 * the user some kind of feedback that suggests him to exit the program
 	 * or that at least informs him about the unusual state and the possible
-	 * problems that may result from it.
+	 * problems that may result from it. The default implementation only
+	 * clears the container component of all its child components to fasten
+	 * the release of ui-resources.
 	 * @throws CorruptedStateException if the {@code View} was unable to release
 	 * all of its managed resources and therefore suggests immediate exit of
 	 * the program
 	 */
 	public void close() {
-		// Subclasses should override this to actually handle the close command
+		JComponent container = getContainer();
+		if(container!=null) {
+			container.removeAll();
+		}
 	}
 	
 	/**
@@ -217,16 +223,16 @@ public abstract class View implements Identifiable {
 	}
 
 	protected ResultMessage handleRequest(Message message) throws Exception {
-		return message.unknownRequestResult();
+		return message.unknownRequestResult(this);
 	}
 	
 	/**
 	 * Forwards the given {@code data} to this {@code View}'s {@code Perspective}
 	 * to be dispatched. The {@code receiver} argument serves as a filter for the
 	 * {@code Perspective} to find suitable targets. It may either be a {@code String}
-	 * defining the exact {@code id} of the desired {@code View}, a {@code Class} 
-	 * object describing a super-type for targets or {@code null} if the {@code data}
-	 * should be dispatched as a broadcast.
+	 * defining the exact {@code unique-id} of the desired {@code View}, a {@code Class} 
+	 * object describing a super-type for targets, a {@link Capability} describing
+	 * required capabilities or {@code null} if the {@code data} should be dispatched as a broadcast.
 	 * <p>
 	 * <b>Note:</b> As long as data is being dispatched by {@link Perspective#dispatchData(View, String, Object, Object, Options)}
 	 * this method will always be called on the {@code EventDispatchThread}

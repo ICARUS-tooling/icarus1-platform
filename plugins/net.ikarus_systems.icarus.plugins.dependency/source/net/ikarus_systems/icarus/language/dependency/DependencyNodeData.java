@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -100,16 +99,9 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		head = DATA_UNDEFINED_VALUE;
 		relation = ""; //$NON-NLS-1$
 	}
-
-	public DependencyDataEntry toEntry(MutableDependencyData owner) {
-		return owner.new DependencyDataEntry(form, lemma, features, pos, head, relation);
-	}
-
-	public void addTo(MutableDependencyData target) {
-		if (index < target.getItemCount())
-			target.insertItem(index, toEntry(target));
-		else
-			target.addItem(toEntry(target));
+	
+	public boolean hasHead() {
+		return head!=DATA_UNDEFINED_VALUE && head!=DATA_HEAD_ROOT;
 	}
 
 	@Override
@@ -325,19 +317,26 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		return false;
 	}
 	
-	public DependencyNodeData[] getChildren() {
+	public DependencyNodeData[] getChildren(boolean sort) {
 		if(!hasChildren())
 			return null;
 		
-		List<DependencyNodeData> list = new Vector<DependencyNodeData>();
+		List<DependencyNodeData> list = new ArrayList<>();
 		feedChildren(list);
 		
-		Collections.sort(list, childSorter);
+		if(sort) {
+			Collections.sort(list, INDEX_SORTER);
+		}
 		
 		return list.toArray(new DependencyNodeData[list.size()]);
 	}
+
 	
-	protected static Comparator<DependencyNodeData> childSorter = new Comparator<DependencyNodeData>() {
+	public DependencyNodeData[] getChildren() {
+		return getChildren(true);
+	}
+	
+	public static Comparator<DependencyNodeData> INDEX_SORTER = new Comparator<DependencyNodeData>() {
 
 		@Override
 		public int compare(DependencyNodeData item1,
@@ -351,8 +350,9 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 	
 	protected void feedChildren(List<DependencyNodeData> list) {
 		for(DependencyNodeData child : children) {
-			if(child.hasChildren())
+			if(child.hasChildren()) {
 				child.feedChildren(list);
+			}
 			
 			list.add(child);
 		}

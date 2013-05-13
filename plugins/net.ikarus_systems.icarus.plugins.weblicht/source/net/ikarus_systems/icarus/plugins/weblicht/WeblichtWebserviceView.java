@@ -440,7 +440,7 @@ public class WeblichtWebserviceView extends View {
 			
 			//System.out.println(webservice.getName() + " " + webservice.getUID());
 			
-			Message message = new Message(Commands.EDIT, webservice, null);
+			Message message = new Message(this, Commands.EDIT, webservice, null);
 			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
 		}
 		

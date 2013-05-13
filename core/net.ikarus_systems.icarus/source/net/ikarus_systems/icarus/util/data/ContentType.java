@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.util.data;
 
 import java.util.Map;
 
+import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
@@ -20,7 +21,7 @@ import net.ikarus_systems.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public interface ContentType extends Identity {
+public interface ContentType extends Identity, Filter {
 	
 	/**
 	 * Returns the root class or interface that objects associated

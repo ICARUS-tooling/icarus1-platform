@@ -41,6 +41,7 @@ import javax.swing.table.AbstractTableModel;
 
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
+import net.ikarus_systems.icarus.language.treebank.TreebankListDelegate;
 import net.ikarus_systems.icarus.language.treebank.TreebankMetaData;
 import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
@@ -57,6 +58,8 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -342,6 +345,12 @@ public class TreebankPropertiesView extends View {
 	}
 
 	/**
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#DISPLAY}</li>
+	 * <li>{@link Commands#CLEAR}</li>
+	 * </ul>
+	 * 
 	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
@@ -350,12 +359,17 @@ public class TreebankPropertiesView extends View {
 			Object data = message.getData();
 			if(data instanceof Treebank) {
 				displayTreebank((Treebank) data);
-				return message.successResult(null);
+				
+				return message.successResult(this, null);
 			} else {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
+		} else if(Commands.CLEAR.equals(message.getCommand())) {
+			reset();
+			
+			return message.successResult(this, null);
 		} else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 
@@ -624,9 +638,15 @@ public class TreebankPropertiesView extends View {
 			if(treebank==null) {
 				return;
 			}
+			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(Treebank.class);
 			
-			Message message = new Message(Commands.DISPLAY, treebank, null);
-			sendRequest(LanguageToolsConstants.TREEBANK_INSPECT_VIEW_ID, message);
+			Options options = new Options();
+			options.put(Options.CONTENT_TYPE, contentType);
+			
+			TreebankListDelegate delegate = TreebankRegistry.getInstance().getListDelegate(treebank);
+			
+			Message message = new Message(this, Commands.DISPLAY, delegate, options);
+			sendRequest(null, message);
 		}
 		
 		public void editTreebank(ActionEvent e) {
@@ -635,7 +655,7 @@ public class TreebankPropertiesView extends View {
 				return;
 			}
 			
-			Message message = new Message(Commands.EDIT, treebank, null);
+			Message message = new Message(this, Commands.EDIT, treebank, null);
 			sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
 		}
 		

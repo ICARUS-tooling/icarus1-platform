@@ -22,7 +22,6 @@ import net.ikarus_systems.icarus.resources.ResourceLoader;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.events.EventObject;
-import net.ikarus_systems.icarus.util.CorruptedStateException;
 
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
@@ -95,19 +94,14 @@ public class ManagementPerspective extends Perspective {
 		
 		// Collect default extensions and report corrupted state
 		// when one is missing
-		for(String viewId : defaultViewIds) {
-			Extension extension = descriptor.getExtension(viewId);
-			if(extension==null)
-				throw new CorruptedStateException("Missing default extension: "+viewId); //$NON-NLS-1$
-			
-			newExtensions.add(extension);
-		}
+		newExtensions.addAll(PluginUtil.getExtensions(defaultViewIds));
 		
 		// Collect all extensions that are connected to the ManagementView point
 		// -> might result in redundant adds, so we use a Set<Extension>
 		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("ManagementView"); //$NON-NLS-1$
 		if(managementViewPoint!=null) {
-			newExtensions.addAll(managementViewPoint.getConnectedExtensions());
+			newExtensions.addAll(PluginUtil.getExtensions(managementViewPoint, 
+					true, true, null));
 		}
 		
 		connectedViews.addAll(newExtensions);

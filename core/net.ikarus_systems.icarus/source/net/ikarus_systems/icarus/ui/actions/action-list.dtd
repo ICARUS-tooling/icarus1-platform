@@ -54,6 +54,7 @@
           licon      CDATA #IMPLIED
           desc      CDATA #IMPLIED
           virtual	(true | false) #IMPLIED
+          command    CDATA #IMPLIED
           accel     CDATA #IMPLIED"
 >
 

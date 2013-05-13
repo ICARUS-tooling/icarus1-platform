@@ -26,15 +26,13 @@ public interface LanguageToolsConstants {
 	
 	// View IDs
 	public static final String DEFAULT_TEXT_INPUT_VIEW_ID = 
-			"DefaultInputView"; //$NON-NLS-1$
+			LANGUAGE_TOOLS_PLUGIN_ID+"@DefaultInputView"; //$NON-NLS-1$
 	public static final String TREEBANK_EXPLORER_VIEW_ID = 
-			"TreebankExplorerView"; //$NON-NLS-1$
+			LANGUAGE_TOOLS_PLUGIN_ID+"@TreebankExplorerView"; //$NON-NLS-1$
 	public static final String TREEBANK_EDIT_VIEW_ID = 
-			"TreebankEditView"; //$NON-NLS-1$
-	public static final String TREEBANK_INSPECT_VIEW_ID = 
-			"TreebankInspectView"; //$NON-NLS-1$
+			LANGUAGE_TOOLS_PLUGIN_ID+"@TreebankEditView"; //$NON-NLS-1$
 	public static final String TREEBANK_PROPERTIES_VIEW_ID = 
-			"TreebankPropertiesView"; //$NON-NLS-1$
+			LANGUAGE_TOOLS_PLUGIN_ID+"@TreebankPropertiesView"; //$NON-NLS-1$
 
 	// Event constants
 	public static final String TREEBANK_EXPLORER_SELECTION_CHANGED = 

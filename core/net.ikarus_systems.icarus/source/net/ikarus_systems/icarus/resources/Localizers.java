@@ -25,6 +25,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.text.JTextComponent;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.Exceptions;
 
 /**
@@ -89,10 +90,11 @@ public final class Localizers {
 		
 		protected String tooltipString(String key) {
 			String tooltip = domain.get(key, (String)null);
-			if (tooltip == null || tooltip.isEmpty())
+			if (tooltip == null || tooltip.isEmpty()) {
 				return null;
+			}
 
-			return tooltip;
+			return UIUtil.toSwingTooltip(tooltip);
 		}
 		
 		protected String textString(String key) {

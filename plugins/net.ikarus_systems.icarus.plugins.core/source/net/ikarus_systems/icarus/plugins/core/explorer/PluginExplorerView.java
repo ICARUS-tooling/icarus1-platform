@@ -57,6 +57,7 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -395,7 +396,12 @@ public class PluginExplorerView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#receiveData(net.ikarus_systems.icarus.plugins.core.View, java.lang.Object, net.ikarus_systems.icarus.util.Options)
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#SELECT}</li>
+	 * </ul>
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
@@ -407,7 +413,7 @@ public class PluginExplorerView extends View {
 		}
 		
 		if(data==null) {
-			return message.unsupportedDataResult();
+			return message.unsupportedDataResult(this);
 		}
 		
 		/*
@@ -430,7 +436,7 @@ public class PluginExplorerView extends View {
 			}
 		}
 		
-		return message.successResult(null);
+		return message.successResult(this, null);
 	}
 	
 	/**
@@ -693,7 +699,9 @@ public class PluginExplorerView extends View {
 			
 			// Send extension-point to hierarchy view
 			if(selectedObject instanceof ExtensionPoint) {
-				Message message = new Message(Commands.DISPLAY, selectedObject, null);
+				Options options = new Options(
+						Options.CONTENT_TYPE, ContentTypeRegistry.getInstance().getTypeForClass(ExtensionPoint.class));
+				Message message = new Message(this, Commands.DISPLAY, selectedObject, options);
 				ResultMessage result = sendRequest(
 						ManagementConstants.EXTENSION_POINT_HIERARCHY_VIEW_ID, message);
 				

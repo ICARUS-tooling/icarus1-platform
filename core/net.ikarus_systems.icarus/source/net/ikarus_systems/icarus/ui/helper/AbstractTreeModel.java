@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.ui;
+package net.ikarus_systems.icarus.ui.helper;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;

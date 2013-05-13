@@ -39,6 +39,8 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -205,6 +207,7 @@ public class WebserviceEditView extends View {
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	private void editWebservice(Webservice webservice) {
 		
 		if(webservice!=null) {
@@ -255,9 +258,12 @@ public class WebserviceEditView extends View {
 		}
 
 		// Try to fetch an editor for the supplied Webservice
-		@SuppressWarnings("unchecked")
-		Editor<Webservice> editor = UIHelperRegistry.globalRegistry().findHelper(
-				Editor.class, webservice);
+		Editor<Webservice> editor = null;
+		ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(webservice);
+		if(contentType!=null) {
+			editor = UIHelperRegistry.globalRegistry().findHelper(
+					Editor.class, contentType);
+		}
 
 		if(editor==null) {
 			showDefaultInfo();
@@ -292,9 +298,9 @@ public class WebserviceEditView extends View {
 			if(data==null || data instanceof Webservice) {
 				editWebservice((Webservice) data);
 				refreshActions();				
-				return message.successResult(null);				
+				return message.successResult(this, null);				
 			} else {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
 			
 		}
@@ -308,13 +314,13 @@ public class WebserviceEditView extends View {
 			if(data==null || data instanceof Webservice) {
 				editWebservice((Webservice) data);
 				refreshActions();
-				return message.successResult(null);				
+				return message.successResult(this, null);				
 			} else {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
 			
 		}else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 	

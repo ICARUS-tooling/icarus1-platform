@@ -32,13 +32,10 @@ import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
-import net.ikarus_systems.icarus.ui.view.Presenter;
+import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Wrapper;
-import net.ikarus_systems.icarus.util.data.ContentType;
-import net.ikarus_systems.icarus.util.data.ContentTypeCollection;
-import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -55,20 +52,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	private JTabbedPane presenterPane;
 	
 	private Handler handler;
-	
-	// Register presenters for plugin elements
-	static {
-		UIHelperRegistry.globalRegistry().registerHelper(AWTPresenter.class, 
-				"org.java.plugin.registry.PluginDescriptor", PluginElementPresenter.class); //$NON-NLS-1$
-		UIHelperRegistry.globalRegistry().registerHelper(AWTPresenter.class, 
-				"org.java.plugin.registry.PluginElement", PluginElementPresenter.class); //$NON-NLS-1$
-		UIHelperRegistry.globalRegistry().registerHelper(AWTPresenter.class, 
-				"org.java.plugin.registry.PluginFragment", PluginElementPresenter.class); //$NON-NLS-1$
-	}
 
-	/**
-	 * 
-	 */
 	public DefaultOutputView() {
 		// no-op
 	}
@@ -127,28 +111,12 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		return null;
 	}
 	
-	private AWTPresenter findPresenter(Object data) {
-		if(data==null) {
-			return null;
-		}
-		
-		return UIHelperRegistry.globalRegistry().findHelper(AWTPresenter.class, data);
-	}
-	
 	private boolean canDisplay(Object data) {
 		if(data==null) {
 			return false;
 		}
-		return UIHelperRegistry.globalRegistry().hasHelper(AWTPresenter.class, data);
-	}
-	
-	private boolean presenterSupports(Presenter presenter, ContentTypeCollection collection) {
-		for(ContentType type : collection.getContentTypes()) {
-			if(presenter.supports(type)) {
-				return true;
-			}
-		}
-		return false;
+		return UIHelperRegistry.globalRegistry().hasHelper(
+				AWTPresenter.class, data);
 	}
 	
 	public void displayData(Object data, Object owner, Options options) {
@@ -196,7 +164,14 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#receiveData(net.ikarus_systems.icarus.plugins.core.View, java.lang.Object, net.ikarus_systems.icarus.util.Options)
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#DISPLAY}</li>
+	 * <li>{@link Commands#PRESENT}</li>
+	 * <li>{@link Commands#CLEAR}</li>
+	 * </ul>
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
@@ -208,19 +183,28 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			data = ((Wrapper<?>)data).get();
 		}
 		
-		Object owner = message.getOption(ManagementConstants.OWNER_OPTION);
+		Object owner = message.getOption(Options.OWNER);
 		
-		if(Commands.PRESENT.equals(message.getCommand()) && owner!=null) {
+		if(Commands.DISPLAY.equals(message.getCommand())
+				|| Commands.PRESENT.equals(message.getCommand())) {
+			
+			if(owner==null) {
+				return message.errorResult(this, new IllegalArgumentException("Missing owner")); //$NON-NLS-1$
+			}
 			
 			// Check if there is a presenter available for the supplied object
 			if(!canDisplay(data)) {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
 			
 			displayData(data, owner, message.getOptions());
-			return message.successResult(null);
+			
+			return message.successResult(this, null);
+		} else if(Commands.CLEAR.equals(message.getCommand())) {
+			reset();
+			return message.successResult(this, null);
 		} else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 	
@@ -235,6 +219,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		private static final long serialVersionUID = -9157665763570448381L;
 		
 		private AWTPresenter presenter;
+		@SuppressWarnings("unused")
 		private Object presentedObject;
 		private Options options;
 		private final Object owner;
@@ -244,6 +229,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			addMouseListener(this);
 		}
 		
+		@SuppressWarnings("unused")
 		private void close() {
 			if(presenter!=null) {
 				presenter.clear();
@@ -310,13 +296,13 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			// Try to find a suitable presenter if no presenter
 			// is present or the current presenter is not able to
 			// present the given data
-			ContentTypeCollection contentTypes = ContentTypeRegistry.getInstance().getEnclosingTypes(presentedObject);
-			if(presenter==null || !presenterSupports(presenter, contentTypes)) {
-				presenter = findPresenter(presentedObject);
+			if(presenter==null || !PresenterUtils.presenterSupports(presenter, presentedObject)) {
+				presenter = UIHelperRegistry.globalRegistry().findHelper(
+						AWTPresenter.class, presentedObject);
 			}
 			
 			// Only with a suitable presenter show the content
-			if(presenter!=null && presenterSupports(presenter, contentTypes)) {
+			if(presenter!=null && PresenterUtils.presenterSupports(presenter, presentedObject)) {
 				this.presentedObject = presentedObject;
 				this.options = options;
 				this.presenter = presenter;
@@ -335,8 +321,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 						((JComponent)comp).setBorder(UIUtil.topLineBorder);
 					}
 					presenterPane.setComponentAt(tabIndex, comp);
-					
-					String title = options.get(TITLE_OPTION, String.valueOf(presentedObject));
+					String title = options.get(Options.TITLE, String.valueOf(presentedObject));
 					presenterPane.setTitleAt(tabIndex, title);
 					presenterPane.setToolTipTextAt(tabIndex, title);
 				} catch (UnsupportedPresentationDataException e) {
@@ -436,7 +421,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 				options = Options.emptyOptions;
 			}
 			
-			Object owner = options.get(OWNER_OPTION);
+			Object owner = options.get(Options.OWNER);
 			if(owner==null) {
 				LoggerFactory.log(this, Level.INFO, "No owner set for item to display: "+item); //$NON-NLS-1$
 				return;

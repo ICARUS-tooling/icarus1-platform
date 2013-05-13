@@ -43,6 +43,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -66,6 +67,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
@@ -200,6 +202,32 @@ public final class UIUtil {
 			return SwingConstants.CENTER;
 		} else
 			throw new IllegalArgumentException("Invalid direction: "+s); //$NON-NLS-1$
+	}
+	
+	public static void fitToContent(JComboBox<?> comboBox, int minWidth, int maxWidth) {
+		ComboBoxUI ui = comboBox.getUI();
+		Dimension size = ui.getPreferredSize(comboBox);
+		int height = size.height;
+		int width = Math.min(maxWidth, Math.max(minWidth, size.width));
+		
+		Dimension newSize = new Dimension(width, height);
+		
+		comboBox.setPreferredSize(newSize);
+		comboBox.setMinimumSize(newSize);
+		comboBox.setMaximumSize(newSize);
+	}
+	
+	public static String toSwingTooltip(String tooltip) {
+		if(tooltip==null || tooltip.isEmpty()) {
+			return null;
+		}
+		
+		String convertedTooltip = tooltip.replaceAll(
+				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
+		if(convertedTooltip.length()!=tooltip.length()) {
+			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$
+		}
+		return tooltip;
 	}
 	
 	public static void invokeLater(final Runnable runnable) {

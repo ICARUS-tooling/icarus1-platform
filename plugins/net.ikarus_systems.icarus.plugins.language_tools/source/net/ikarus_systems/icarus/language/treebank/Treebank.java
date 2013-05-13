@@ -13,10 +13,9 @@ import java.util.Map;
 
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
-import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.SentenceDataList;
-import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.ui.events.EventListener;
+import net.ikarus_systems.icarus.util.id.Identity;
 import net.ikarus_systems.icarus.util.location.Location;
 
 /**
@@ -25,13 +24,11 @@ import net.ikarus_systems.icarus.util.location.Location;
  * @version $Id$
  *
  */
-public interface Treebank extends SentenceDataList {
+public interface Treebank extends SentenceDataList, Identity {
 	
 	boolean isEditable();
 	
 	void setName(String name);
-	
-	String getName();
 
 	/**
 	 * Replaces

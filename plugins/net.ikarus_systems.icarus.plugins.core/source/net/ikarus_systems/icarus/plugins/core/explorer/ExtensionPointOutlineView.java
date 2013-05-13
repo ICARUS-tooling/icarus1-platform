@@ -315,7 +315,7 @@ public class ExtensionPointOutlineView extends View {
 		}
 		
 		// selectedObject is now a PluginDescriptor
-		Message message = new Message(Commands.SELECT, selectedObject, null);
+		Message message = new Message(this, Commands.SELECT, selectedObject, null);
 		ResultMessage result = sendRequest(
 				ManagementConstants.PLUGIN_EXPLORER_VIEW_ID, message);
 		
@@ -377,7 +377,13 @@ public class ExtensionPointOutlineView extends View {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.View#receiveData(net.ikarus_systems.icarus.plugins.core.View, java.lang.Object, net.ikarus_systems.icarus.util.Options)
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#DISPLAY}</li>
+	 * <li>{@link Commands#CLEAR}</li>
+	 * </ul>
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
@@ -387,13 +393,17 @@ public class ExtensionPointOutlineView extends View {
 			ExtensionPoint extensionPoint = getPointFromData(message.getData());
 			
 			if(extensionPoint==null) {
-				return message.unsupportedDataResult();
+				return message.unsupportedDataResult(this);
 			}
 			
 			displayData((ExtensionPoint)extensionPoint);
-			return message.successResult(null);
+			return message.successResult(this, null);
+		} else if(Commands.CLEAR.equals(message.getCommand())) {
+			reset();
+			
+			return message.successResult(this, null);
 		} else {
-			return message.unknownRequestResult();
+			return message.unknownRequestResult(this);
 		}
 	}
 

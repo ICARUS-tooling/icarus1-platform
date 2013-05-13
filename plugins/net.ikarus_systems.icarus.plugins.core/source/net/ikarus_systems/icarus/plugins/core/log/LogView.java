@@ -52,12 +52,13 @@ import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventObject;
-import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
-import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.id.DefaultIdentity;
 import net.ikarus_systems.icarus.util.id.Identity;
+import net.ikarus_systems.icarus.util.mpi.Commands;
+import net.ikarus_systems.icarus.util.mpi.Message;
+import net.ikarus_systems.icarus.util.mpi.ResultMessage;
 
 /**
  * @author Markus Gärtner 
@@ -83,12 +84,7 @@ public class LogView extends View {
 	private boolean showOnWarning = true;
 	
 	private CallbackHandler callbackHandler;
-	
-	static {
-		UIHelperRegistry.globalRegistry().registerHelper(AWTPresenter.class, 
-				"java.util.logging.LogRecord", LogRecordPresenter.class); //$NON-NLS-1$
-	}
-	
+
 	private static Icon errorIcon, warningIcon, infoIcon, debugIcon;
 	private static Icon errorExcIcon, warningExcIcon, infoExcIcon, debugExcIcon;
 	
@@ -384,7 +380,26 @@ public class LogView extends View {
 		}
 		loggingModel.clear();
 	}
-	
+
+	/**
+	 * Accepted commands:
+	 * <ul>
+	 * <li>{@link Commands#CLEAR}</li>
+	 * </ul>
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.core.View#handleRequest(net.ikarus_systems.icarus.util.mpi.Message)
+	 */
+	@Override
+	protected ResultMessage handleRequest(Message message) throws Exception {
+		if(Commands.CLEAR.equals(message.getCommand())) {
+			reset();
+			
+			return message.successResult(this, null); 
+		} else {
+			return message.unknownRequestResult(this);
+		}
+	}
+
 	private LogRecord getSelectedRecord() {
 		if(logRecordList==null) {
 			return null;
@@ -563,9 +578,9 @@ public class LogView extends View {
 				String title = ResourceManager.getInstance().get(
 						"plugins.core.logView.outlineTitle"); //$NON-NLS-1$
 				Options options = new Options(
-						TITLE_OPTION, title, 
+						Options.TITLE, title, 
 						REUSE_TAB_OPTION, true, 
-						OWNER_OPTION, LogView.this); 
+						Options.OWNER, LogView.this); 
 				
 				fireBroadcastEvent(new EventObject(LOG_SELECTION_CHANGED, 
 						"item", selectedRecord, "options", options)); //$NON-NLS-1$ //$NON-NLS-2$

@@ -9,21 +9,15 @@
  */
 package net.ikarus_systems.icarus.language;
 
-import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.DataList;
+
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface SentenceDataList {
-
-
-	/**
-	 * Returns the number of {@code SentenceData} objects that
-	 * this {@code SentenceDataList} currently contains.
-	 */
-	int size();
+public interface SentenceDataList extends DataList<SentenceData> {
 	
 	boolean supportsType(DataType type);
 
@@ -54,12 +48,11 @@ public interface SentenceDataList {
 	 * should be left to the original code that created it.
 	 * 
 	 * @param index the index of interest
+	 * @param type the type to fetch an entry for
 	 * @param observer the {@code AvailabilityObserver} to be notified
 	 * when the asynchronous loading of the desired {@code SentenceData}
 	 * is finished
 	 * @return
 	 */
 	SentenceData get(int index, DataType type, AvailabilityObserver observer);
-	
-	ContentType getDataType();
 }

@@ -23,6 +23,7 @@ import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
 import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
+import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.treebank.AbstractTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
@@ -139,7 +140,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	public void set(SentenceData item, int index, DataType type) {
 		if(!isEditable())
 			throw new UnsupportedOperationException();
-		if(!ContentTypeRegistry.isCompatible(getDataType(), item))
+		if(!ContentTypeRegistry.isCompatible(getContentType(), item))
 			throw new UnsupportedSentenceDataException("Unsupported data: "+item); //$NON-NLS-1$
 		
 		if(!supportsType(type)) {
@@ -227,7 +228,9 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public int size() {
-		return buffer==null ? 0 : buffer.size();
+		// FIXME DEBUG
+		//return buffer==null ? 0 : buffer.size();
+		return 3;
 	}
 
 	/**
@@ -253,7 +256,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 * @see net.ikarus_systems.icarus.language.treebank.Treebank#getEntryClass()
 	 */
 	@Override
-	public ContentType getDataType() {
+	public ContentType getContentType() {
 		return readerExtension==null ? LanguageManager.getInstance().getBasicLanguageDataType() 
 				: getSentenceDataReader().getDataType();
 	}
@@ -279,7 +282,9 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public SentenceData get(int index, DataType type) {
-		return type==DataType.SYSTEM ? buffer.get(index) : null;
+		//return type==DataType.SYSTEM ? buffer.get(index) : null;
+		// FIXME DEBUG
+		return DependencyUtils.createExampleSentenceData();
 	}
 
 	/**

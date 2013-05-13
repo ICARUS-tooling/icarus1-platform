@@ -104,11 +104,11 @@ public final class IcarusCorePlugin extends Plugin {
 		// Reload config data from storage
 		ConfigRegistry.getGlobalRegistry().updateConfigTree(null);
 		
-		// Register ui-helper objects
-		registerUIHelpers();
-		
 		// Register content types
 		registerContentTypes();
+		
+		// Register ui-helper objects
+		registerUIHelpers();
 		
 		// Register error formatters
 		registerErrorFormatters();
@@ -143,15 +143,15 @@ public final class IcarusCorePlugin extends Plugin {
 				// interfaces should be globally accessible to all plug-ins
 				// and preferably be hosted within the icarus core.
 				// UPDATE: We allow to host helper interfaces in external plug-ins!
-				ClassLoader loader = PluginUtil.getClassLoader(extension);
 				Collection<Extension.Parameter> interfaceParams = extension.getParameters("interface"); //$NON-NLS-1$
 				for(Extension.Parameter param : interfaceParams) {
-					Class<?> helperClass = loader.loadClass(param.valueAsString());
-					String objectClassName = extension.getParameter("target").valueAsString(); //$NON-NLS-1$
+					String helperClass = param.valueAsString();
+					Extension contentTypeExtension = extension.getParameter("contentType").valueAsExtension(); //$NON-NLS-1$
+					String contentTypeId = ContentTypeRegistry.getContentTypeId(contentTypeExtension);
 					
 					// The registry already knows how to wrap extension objects
 					UIHelperRegistry.globalRegistry().registerHelper(
-							helperClass, objectClassName, extension, override);
+							helperClass, contentTypeId, extension, override);
 				}
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 

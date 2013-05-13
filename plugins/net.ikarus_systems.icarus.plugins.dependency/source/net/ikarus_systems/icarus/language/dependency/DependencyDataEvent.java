@@ -18,6 +18,14 @@ public class DependencyDataEvent extends SentenceDataEvent {
 		this.endIndex = endIndex;
 	}
 
+	public DependencyDataEvent(MutableSentenceData source, int type, int startIndex,
+			int endIndex) {
+		super(source);
+		setType(type);
+		this.startIndex = startIndex;
+		this.endIndex = endIndex;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("%d: %d to %d", getType(), startIndex, endIndex); //$NON-NLS-1$
@@ -37,7 +45,7 @@ public class DependencyDataEvent extends SentenceDataEvent {
 	}
 
 	void set(int type, int startIndex, int endIndex) {
-		this.type = type;
+		setType(type);
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 	}

@@ -20,7 +20,7 @@ import com.mxgraph.view.mxGraph;
  * @version $Id$
  *
  */
-public class GraphRenderer extends mxInteractiveCanvas implements Installable<GraphOwner> {
+public abstract class GraphRenderer extends mxInteractiveCanvas implements Installable<GraphOwner> {
 
 	public GraphRenderer() {
 		// no-op
@@ -61,21 +61,5 @@ public class GraphRenderer extends mxInteractiveCanvas implements Installable<Gr
 	 */
 	public String getToolTipForCell(GraphOwner owner, Object cell) {
 		return convertValueToString(owner, cell);
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
-	 */
-	@Override
-	public void install(GraphOwner target) {
-		// no-op
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
-	 */
-	@Override
-	public void uninstall(GraphOwner target) {
-		// no-op
 	}
 }

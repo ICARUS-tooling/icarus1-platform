@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.plugins.jgraph.ui;
+package net.ikarus_systems.icarus.plugins.jgraph.view;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

@@ -49,7 +49,7 @@ public final class LanguageManager {
 	}
 	
 	private LanguageManager() {
-		basicSentenceDataType = ContentTypeRegistry.getInstance().getType("extension-point"); //$NON-NLS-1$
+		basicSentenceDataType = ContentTypeRegistry.getInstance().getType("SentenceDataContentType"); //$NON-NLS-1$
 	}
 	
 	// prevent multiple deserialization

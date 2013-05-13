@@ -11,10 +11,13 @@ package net.ikarus_systems.icarus.util.data;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.swing.Icon;
 
+import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.registry.Extension;
@@ -33,6 +36,9 @@ public class ExtensionContentType implements ContentType {
 	
 	private Map<String, Object> properties;
 	
+	private final String filterClass;
+	private Filter filter;
+	
 	private final Class<?> contentClass;
 	
 	public ExtensionContentType(Extension extension) throws ClassNotFoundException {
@@ -47,6 +53,15 @@ public class ExtensionContentType implements ContentType {
 		String contentClassName = extension.getParameter("contentClass").valueAsString(); //$NON-NLS-1$
 		ClassLoader loader = PluginUtil.getClassLoader(extension);
 		contentClass = loader.loadClass(contentClassName);
+		
+		Extension.Parameter filterParam = null;
+		try {
+			filterParam = extension.getParameter("filter"); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			// ignore
+		}
+		
+		filterClass = filterParam==null ? null : filterParam.valueAsString();
 	}
 	
 	protected Identity getIdentity() {
@@ -61,7 +76,7 @@ public class ExtensionContentType implements ContentType {
 	 */
 	@Override
 	public String getId() {
-		return getIdentity().getId();
+		return ContentTypeRegistry.getContentTypeId(extension);
 	}
 
 	/**
@@ -135,6 +150,40 @@ public class ExtensionContentType implements ContentType {
 	@Override
 	public String toString() {
 		return getId();
+	}
+	
+	protected Filter getFilter() {
+		if(filterClass==null) {
+			return null;
+		}
+		if(filter==null) {
+			try {
+				ClassLoader loader = PluginUtil.getClassLoader(extension);
+				Class<?> clazz = loader.loadClass(filterClass);
+				filter = (Filter) clazz.newInstance();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to instantiate filter for content type '"+getId()+"': "+filterClass, e); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		return filter;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.Filter#accepts(java.lang.Object)
+	 */
+	@Override
+	public boolean accepts(Object obj) {
+		Filter filter = getFilter();
+		if(filter!=null) {
+			return filter.accepts(obj);
+		}
+		
+		if(ContentTypeRegistry.isStrictType(this)) {
+			return getContentClass().equals(obj);
+		} else {
+			return getContentClass().isAssignableFrom((Class<?>) obj);
+		}
 	}
 	
 }
