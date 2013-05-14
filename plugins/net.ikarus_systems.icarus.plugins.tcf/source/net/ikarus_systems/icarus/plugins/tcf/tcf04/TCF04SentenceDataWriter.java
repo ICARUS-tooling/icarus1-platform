@@ -74,6 +74,12 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 
 		if (file == null)
 			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$		
+				
+		if (options == null){
+			options = Options.emptyOptions;
+		}
+		
+		
 		fos = new FileOutputStream(file);
 
 		// TODO extend

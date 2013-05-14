@@ -57,7 +57,7 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$		
 		
 		if (options == null){
-			options = options.emptyOptions;
+			options = Options.emptyOptions;
 		}
 			
 		//TODO extend me

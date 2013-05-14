@@ -67,7 +67,7 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 											+file.getAbsolutePath());
 		
 		if (options == null){
-			options = options.emptyOptions;
+			options = Options.emptyOptions;
 		}
 		
 		normalize = true;

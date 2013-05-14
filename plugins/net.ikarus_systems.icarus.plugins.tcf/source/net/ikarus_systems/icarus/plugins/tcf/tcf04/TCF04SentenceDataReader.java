@@ -75,6 +75,10 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
 											+file.getAbsolutePath());
 		
+		if (options == null){
+			options = Options.emptyOptions;
+		}
+		
 		
 		// specify which layer/layers annotations should be read in order to process
 		layersToRead = EnumSet.of(
@@ -223,11 +227,9 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 						"| Lemma "+ lemmas[index] + " " +
 						"| Feat "+ features[index] + " " +
 						"| PoS "+ poss[index] + " " +
-						"| deprel "+ depRels[index] + " " +
-						"| head "+ heads[index]);
+						"| Relations "+ relations[index] + " " +
+						"| Head "+ heads[index]);
 				*/
-				
-				maxLength = Math.max(maxLength, token.length);
 			}
 			
 			sdd = new SimpleDependencyData(forms, lemmas, features, poss,relations, heads, flags);
@@ -274,7 +276,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 	
 	public static void main(String[] args) throws UnsupportedFormatException {
 		
-		File file = new File ("E:\\test.xml"); //$NON-NLS-1$
+		File file = new File ("E:\\tcf04-karin-wl.xml"); //$NON-NLS-1$
 		
 		DefaultFileLocation dloc = new DefaultFileLocation(file);
 		Options o = null;

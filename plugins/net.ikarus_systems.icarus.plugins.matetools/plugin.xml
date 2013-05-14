@@ -16,10 +16,10 @@
 	</requires>
 	
 	<runtime>
-		<library id="mate-tools" path="lib/anna-3-1.jar" type="code">
+		<library id="mate-tools" path="lib/anna-3.3-d8.jar" type="code">
 			<doc>
 				<doc-text>
-					matetools library as of version 3.1
+					matetools library version 3.3-d8 (SFB732-D8 Project Version)
 				</doc-text>
 			</doc>
 		</library>
