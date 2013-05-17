@@ -58,6 +58,7 @@ import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.BevelBorder;
@@ -169,6 +170,11 @@ public final class UIUtil {
 		}
 	};
 	
+	public static void enableToolTip(JComponent comp) {
+		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+		toolTipManager.registerComponent(comp);
+	}
+	
 	public static void enableRighClickTreeSelection(JTree tree) {
 		Exceptions.testNullArgument(tree, "tree"); //$NON-NLS-1$
 		
@@ -203,11 +209,17 @@ public final class UIUtil {
 		} else
 			throw new IllegalArgumentException("Invalid direction: "+s); //$NON-NLS-1$
 	}
-	
+
 	public static void fitToContent(JComboBox<?> comboBox, int minWidth, int maxWidth) {
+		fitToContent(comboBox, minWidth, maxWidth, -1);
+	}
+	
+	public static void fitToContent(JComboBox<?> comboBox, int minWidth, int maxWidth, int height) {
 		ComboBoxUI ui = comboBox.getUI();
 		Dimension size = ui.getPreferredSize(comboBox);
-		int height = size.height;
+		if(height==-1) {
+			height = size.height;
+		}
 		int width = Math.min(maxWidth, Math.max(minWidth, size.width));
 		
 		Dimension newSize = new Dimension(width, height);
@@ -576,6 +588,37 @@ public final class UIUtil {
 
 	public static final Border FLAT_BUTTON_BORDER = new FlatButtonBorder();
 	
+	public static class RolloverButton extends JButton {
+
+		private static final long serialVersionUID = 7040037926434543523L;
+
+		public RolloverButton() {
+			super();
+		}
+
+		public RolloverButton(Action a) {
+			super(a);
+		}
+
+		@Override
+		protected void paintBorder(Graphics g) {
+			ButtonModel model = getModel();
+			if(!model.isRollover()) {
+				// no-op
+			} else {
+				super.paintBorder(g);
+			}
+		}
+
+		
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class IconlessButton extends JButton {
 
 		private static final long serialVersionUID = -780096198896775331L;
@@ -673,14 +716,15 @@ public final class UIUtil {
 				int width, int height) {
 			if (c instanceof AbstractButton) {
 				ButtonModel bm = ((AbstractButton) c).getModel();
-				if (!bm.isEnabled())
+				if (!bm.isEnabled()) {
 					DUMMY_BORDER.paintBorder(c, g, x, y, width, height);
-				else if (bm.isPressed())
+				} else if (bm.isPressed()) {
 					LOWERED_DUMMY_BORDER.paintBorder(c, g, x, y, width, height);
-				else if (bm.isArmed() || bm.isRollover())
+				} else if (bm.isArmed() || bm.isRollover()) {
 					RAISED_DUMMY_BORDER.paintBorder(c, g, x, y, width, height);
-				else
+				} else {
 					DUMMY_BORDER.paintBorder(c, g, x, y, width, height);
+				}
 			} else {
 				DUMMY_BORDER.paintBorder(c, g, x, y, width, height);
 			}

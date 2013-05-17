@@ -64,4 +64,13 @@ public class DefaultTreeLayout implements GraphLayout {
 	public void uninstall(GraphOwner target) {
 		// no-op
 	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout#getEdgeStyle(net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner, java.lang.Object, net.ikarus_systems.icarus.util.Options)
+	 */
+	@Override
+	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -167,10 +167,10 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.SentenceDataReader#getDataType()
+	 * @see net.ikarus_systems.icarus.language.SentenceDataReader#getContentType()
 	 */
 	@Override
-	public ContentType getDataType() {
+	public ContentType getContentType() {
 		return DependencyUtils.getDependencyContentType();
 	}
 	

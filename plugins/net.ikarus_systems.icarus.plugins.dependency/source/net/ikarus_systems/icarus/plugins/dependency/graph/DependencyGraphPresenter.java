@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.plugins.dependency.graph;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,10 @@ import net.ikarus_systems.icarus.util.data.ContentType;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
+import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.swing.handler.mxConnectPreview;
+import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
 /**
@@ -79,6 +83,11 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	@Override
 	protected CallbackHandler createCallbackHandler() {
 		return new DCallbackHandler();
+	}
+
+	@Override
+	protected mxConnectPreview createConnectPreview() {
+		return new DConnectPreview();
 	}
 
 	public boolean isRefreshGraphOnChange() {
@@ -340,19 +349,60 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			return oldValue;
 		}
 
+		// Create and set new value
 		DependencyNodeData newValue = oldValue.clone();
+		newValue.clearHead();
 		
 		model.beginUpdate();
-		try {
-			// Create and set new value
-			newValue.clearHead();
-			
+		try {			
 			model.setValue(cell, newValue);
 			
 			if(removeEdges) {
 				// Remove incoming non-order edges
 				for(Object edge : graph.getIncomingEdges(cell)) {
 					if(!GraphUtils.isOrderEdge(graph, edge)) {
+						model.remove(edge);
+					}
+				}
+			}			
+		} finally {
+			model.endUpdate();
+		}
+		
+		return newValue;
+	}
+	
+	/**
+	 * Replaces the head of a node with the index of another node's data.
+	 * If the {@code removeEdges} parameter is {@code true} all incoming edges
+	 * on {@code cell} that are not originating from {@code newHead} will be removed. 
+	 */
+	protected DependencyNodeData replaceHead(Object cell, Object newHead, boolean removeEdges) {
+		mxIGraphModel model = graph.getModel();
+		
+		// Create and set new value
+		DependencyNodeData newValue = ((DependencyNodeData) model.getValue(cell)).clone();		
+		DependencyNodeData headData = (DependencyNodeData) model.getValue(newHead);
+		
+		newValue.setHead(headData.getIndex());
+		
+		model.beginUpdate();
+		try {			
+			model.setValue(cell, newValue);
+			
+			if(removeEdges) {
+				// Remove incoming edges not originating from 'newHead'
+				int edgeCount = model.getEdgeCount(cell);
+				for(int i=0; i<edgeCount; i++) {
+					Object edge = model.getEdgeAt(cell, i);
+					
+					// Ignore outgoing and order edges
+					if(GraphUtils.isOrderEdge(graph, edge) 
+							|| cell==model.getTerminal(edge, true)) {
+						continue;
+					}
+					
+					if(newHead==model.getTerminal(edge, true)) {
 						model.remove(edge);
 					}
 				}
@@ -575,7 +625,8 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			resumeChangeHandling();
 		}
 	}
-	
+
+	// TODO honestly: do we need this?
 	public void flipEdges(Object[] edges) {
 		if(!canEdit()) {
 			return;
@@ -625,6 +676,54 @@ public class DependencyGraphPresenter extends GraphPresenter {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to handle data change", e); //$NON-NLS-1$
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	protected class DConnectPreview extends DelegatingConnectPreview {
+
+		@Override
+		protected Object createCell(mxCellState startState, String style) {
+			mxICell cell = (mxICell) super.createCell(startState, style);
+			
+			cell.setValue(DependencyUtils.DATA_UNDEFINED_LABEL);
+			
+			return cell;
+		}
+
+		@Override
+		public Object stop(boolean commit, MouseEvent e) {
+			if(!isEditable()) {
+				return null;
+			}
+
+			Object result = (sourceState != null) ? sourceState.getCell() : null;
+			
+			if(previewState!=null) {
+				mxIGraphModel model = graph.getModel();
+				
+				// TODO access model only when committing?
+				model.beginUpdate();
+				try {
+					result = super.stop(commit, e);
+					
+					if(commit && result!=null) {
+						Object source = model.getTerminal(result, true);
+						Object target = model.getTerminal(result, false);
+						
+						replaceHead(target, source, true);
+					}
+				} finally {
+					model.endUpdate();
+				}
+			}
+			
+			return result;
+		}		
 	}
 	
 	/**

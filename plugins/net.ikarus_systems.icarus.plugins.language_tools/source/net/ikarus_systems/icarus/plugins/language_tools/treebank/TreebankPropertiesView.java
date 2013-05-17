@@ -38,6 +38,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
@@ -56,6 +57,7 @@ import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
+import net.ikarus_systems.icarus.ui.table.TooltipTableCellRenderer;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -145,6 +147,11 @@ public class TreebankPropertiesView extends View {
 		propertiesArea.setBorder(titleBoarder);
 		propertiesArea.setEditable(false);
 		propertiesArea.addMouseListener(handler);
+		propertiesArea.setFocusable(false);
+
+		// Shared renderer for tables
+		TableCellRenderer renderer = new TooltipTableCellRenderer();
+		UIUtil.disableHtml(renderer);
 		
 		// Properties table
 		propertiesLabel = new JLabel();
@@ -152,9 +159,11 @@ public class TreebankPropertiesView extends View {
 		propertiesLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		propertiesTableModel = new PropertiesTableModel();
 		propertiesTable = new JTable(propertiesTableModel);
-		UIUtil.disableHtml(propertiesTable.getDefaultRenderer(Object.class));
+		propertiesTable.setDefaultRenderer(Object.class, renderer);
 		propertiesTable.getTableHeader().setReorderingAllowed(false);
 		propertiesTable.addMouseListener(handler);
+		UIUtil.enableToolTip(propertiesTable);
+		propertiesTable.setFocusable(false);
 		
 		// MetaData table
 		metaDataLabel = new JLabel();
@@ -162,9 +171,11 @@ public class TreebankPropertiesView extends View {
 		metaDataLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		metaDataTableModel = new MetaDataTableModel();
 		metaDataTable = new JTable(metaDataTableModel);
-		UIUtil.disableHtml(metaDataTable.getDefaultRenderer(Object.class));
+		metaDataTable.setDefaultRenderer(Object.class, renderer);
 		metaDataTable.getTableHeader().setReorderingAllowed(false);
 		metaDataTable.addMouseListener(handler);
+		UIUtil.enableToolTip(metaDataTable);
+		metaDataTable.setFocusable(false);
 
 		contentPanel.add(propertiesArea, gbc);
 		contentPanel.add(propertiesLabel, gbc);
@@ -254,11 +265,16 @@ public class TreebankPropertiesView extends View {
 			return;
 		}
 		
+		if(currentTreebank!=null) {
+			currentTreebank.removeListener(handler);
+		}
+		
 		this.treebank = treebank;
 		
 		if(treebank==null) {
 			showDefaultInfo();
 		} else {
+			treebank.addListener(null, handler);
 			refresh();
 			contentPanel.setBackground(UIManager.getColor("TextArea.background")); //$NON-NLS-1$
 			scrollPane.setViewportView(contentPanel);
@@ -583,6 +599,12 @@ public class TreebankPropertiesView extends View {
 						refresh();
 					}
 				}
+				return;
+			}
+			
+			// Any changes within the treebank require refresh of displayed information
+			if(sender==getTreebank()) {
+				refresh();
 				return;
 			}
 			

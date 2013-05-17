@@ -44,6 +44,8 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
+import net.ikarus_systems.icarus.ui.tasks.TaskPanel;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.id.Identity;
@@ -68,7 +70,9 @@ public class IcarusFrame extends JFrame {
 	private JPanel rootPanel;
 	
 	private InfoPanel infoPanel;
+	private TaskPanel taskPanel;
 	private PerspectivePanel perspectivePanel;
+	private JPanel footerPanel;
 	
 	private IcarusFrameDelegate frameDelegate;
 	private MenuDelegate menuDelegate;
@@ -204,11 +208,27 @@ public class IcarusFrame extends JFrame {
 		registerActionCallbacks();
 	}
 	
+	private TaskPanel getTaskPanel() {
+		if(taskPanel==null) {
+			taskPanel = new TaskPanel(TaskManager.getInstance());
+		}
+		return taskPanel;
+	}
+	
 	private InfoPanel getInfoPanel() {
 		if(infoPanel==null) {
 			infoPanel = new InfoPanel();
 		}
 		return infoPanel;
+	}
+	
+	private JPanel getFooterPanel() {
+		if(footerPanel==null) {
+			footerPanel = new JPanel(new BorderLayout());
+			footerPanel.add(getInfoPanel().getContentPanel(), BorderLayout.CENTER);
+			footerPanel.add(getTaskPanel(), BorderLayout.EAST);
+		}
+		return footerPanel;
 	}
 	
 	InfoPanel getInfoPanel(Perspective perspective) {
@@ -414,7 +434,7 @@ public class IcarusFrame extends JFrame {
 			}
 			rootPanel.setLayout(new BorderLayout());
 			rootPanel.add(container, BorderLayout.CENTER);
-			rootPanel.add(getInfoPanel().getContentPanel(), BorderLayout.SOUTH);
+			rootPanel.add(getFooterPanel(), BorderLayout.SOUTH);
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to init perspective: "+id, e); //$NON-NLS-1$

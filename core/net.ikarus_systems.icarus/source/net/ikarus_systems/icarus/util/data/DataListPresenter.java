@@ -11,7 +11,6 @@ package net.ikarus_systems.icarus.util.data;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -95,7 +94,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 	protected JList<T> createList() {
 		JList<T> list = new JList<>(getFilteredListModel());
 		list.setSelectionModel(getSelectionModel());
-		list.setBorder(null);
+		list.setBorder(UIUtil.defaultContentBorder);
 		
 		return list;
 	}
@@ -129,14 +128,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		if(filterSelect==null) {
 			filterSelect = new JComboBox<>(new DefaultComboBoxModel<>());
 			filterSelect.setEditable(false);
+			filterSelect.setFocusable(false);
 			filterSelect.setRenderer(new ExtensionListCellRenderer());
 			filterSelect.addActionListener(getHandler());
-			UIUtil.fitToContent(filterSelect, 80, 150);
-			Dimension size = filterSelect.getPreferredSize();
-			size = new Dimension(size.width, 20);
-			filterSelect.setPreferredSize(size);
-			filterSelect.setMinimumSize(size);
-			filterSelect.setMaximumSize(size);
+			UIUtil.fitToContent(filterSelect, 80, 150, 20);
 		}
 		
 		return filterSelect;
@@ -284,9 +279,12 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 			throw new UnsupportedPresentationDataException(
 					"Data is not of required type '"+DataList.class+"' : "+data.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		if(dataList==data) {
+		
+		// It is perfectly legal to 're-display' the current list since
+		// we cannot be aware of all changes within
+		/*if(dataList==data) {
 			return;
-		}
+		}*/
 		
 		dataList = (DataList<T>)data;
 				

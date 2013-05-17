@@ -9,9 +9,10 @@
  */
 package net.ikarus_systems.icarus.plugins.core;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.BiDiMap;
@@ -30,6 +31,8 @@ public final class FrameManager {
 	
 	private AtomicInteger frameCount = new AtomicInteger();
 	
+	private boolean isShutdownActive = false;
+	
 	public static FrameManager getInstance() {
 		if(instance==null) {
 			synchronized (FrameManager.class) {
@@ -46,7 +49,7 @@ public final class FrameManager {
 		// no-op
 	}
 	
-	public void closeFrame(IcarusFrame frame) {
+	public synchronized void closeFrame(IcarusFrame frame) {
 		try {
 			frame.close();
 			frame.setVisible(false);
@@ -55,16 +58,16 @@ public final class FrameManager {
 			frames.remove(frame);
 		}
 		
-		if(frames.isEmpty()) {
-			IcarusCorePlugin.exit();
+		if(frames.isEmpty() && !isShutdownActive) {
+			ShutdownDialog.getDialog().shutdown();
 		}
 	}
 
-	public FrameHandle newFrame() {
+	public synchronized FrameHandle newFrame() {
 		return newFrame(null);
 	}
 
-	public FrameHandle newFrame(Options options) {
+	public synchronized FrameHandle newFrame(Options options) {
 		IcarusFrame frame = new IcarusFrame(options);
 		try {
 			frame.init();
@@ -86,13 +89,45 @@ public final class FrameManager {
 		return handle;
 	}
 	
-	public IcarusFrame getFrame(FrameHandle handle) {
+	public synchronized IcarusFrame getFrame(FrameHandle handle) {
 		return frames==null ? null : frames.getKey(handle);
+	}
+	
+	public synchronized FrameHandle getHandle(IcarusFrame frame) {
+		return frames==null ? null : frames.get(frame);
+	}
+	
+	public synchronized void shutdown() {
+		isShutdownActive = true;
+		// TODO
 	}
 	
 	// TODO add methods to open perspective and/or send messages to other frames
 	
+	private class FrameObserver extends WindowAdapter {
+
+		@Override
+		public void windowClosing(WindowEvent e) {
+			if(!(e.getSource() instanceof IcarusFrame))
+				throw new IllegalArgumentException("Not a valid IcarusFrame: "+e.getSource());
+			
+			// TODO if last window ask for exit
+			// TODO check if closable and then call close
+		}
+
+		@Override
+		public void windowClosed(WindowEvent e) {
+			// TODO clear
+		}
+		
+	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class FrameHandle {
 		private final String id;
 		
@@ -106,6 +141,14 @@ public final class FrameManager {
 		@Override
 		public String toString() {
 			return id;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof FrameHandle) {
+				return ((FrameHandle)obj).id.equals(id);
+			}
+			return false;
 		}
 	}
 }

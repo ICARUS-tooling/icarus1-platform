@@ -101,11 +101,27 @@ public class GraphUndoManager extends mxUndoManager
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if("view".equals(evt.getPropertyName())) { //$NON-NLS-1$
-			((mxGraphView)evt.getOldValue()).removeListener(this);
-			((mxGraphView)evt.getNewValue()).addListener(mxEvent.UNDO, this);
+			mxGraphView oldView = (mxGraphView)evt.getOldValue();
+			mxGraphView newView = (mxGraphView)evt.getNewValue();
+			
+			if(oldView!=null) {
+				oldView.removeListener(this);
+			}
+			
+			if(newView!=null) {
+				newView.addListener(mxEvent.UNDO, this);
+			}
 		} else {
-			((mxIGraphModel)evt.getOldValue()).removeListener(this);
-			((mxIGraphModel)evt.getNewValue()).addListener(mxEvent.UNDO, this);
+			mxIGraphModel oldModel = (mxIGraphModel)evt.getOldValue();
+			mxIGraphModel newModel = (mxIGraphModel)evt.getNewValue();
+			
+			if(oldModel!=null) {
+				oldModel.removeListener(this);
+			}
+			
+			if(newModel!=null) {
+				newModel.addListener(mxEvent.UNDO, this);
+			}
 		}
 	}
 	

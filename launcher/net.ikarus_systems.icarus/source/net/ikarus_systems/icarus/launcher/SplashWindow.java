@@ -42,7 +42,7 @@ public class SplashWindow {
 				}
 			} catch (Exception e) {
 				// Ignore exception
-				// DEBUG
+				// FIXME DEBUG
 				e.printStackTrace();
 			}
 		}
@@ -85,7 +85,7 @@ public class SplashWindow {
 	
 	private static void showError(Throwable t) {
 		try {
-			// DEBUG
+			// FIXME DEBUG
 			t.printStackTrace();
 			
 			// Load and show dialog instance
@@ -103,7 +103,7 @@ public class SplashWindow {
 				splashDelegate.dispose();
 			} catch(Exception e) {
 				// Ignore error
-				// DEBUG
+				// FIXME DEBUG
 				e.printStackTrace();
 			}
 		}
@@ -115,7 +115,7 @@ public class SplashWindow {
 				splashDelegate.setText(text);
 			} catch(Exception e) {
 				// Ignore error
-				// DEBUG
+				// FIXME DEBUG
 				e.printStackTrace();
 			}
 		}
@@ -127,7 +127,7 @@ public class SplashWindow {
 				splashDelegate.setMaxProgress(maxValue);
 			} catch(Exception e) {
 				// Ignore error
-				// DEBUG
+				// FIXME DEBUG
 				e.printStackTrace();
 			}
 		}
@@ -139,7 +139,7 @@ public class SplashWindow {
 				splashDelegate.setProgress(value);
 			} catch(Exception e) {
 				// Ignore error
-				// DEBUG
+				// FIXME DEBUG
 				e.printStackTrace();
 			}
 		}
@@ -153,7 +153,7 @@ public class SplashWindow {
 		boolean isVisible();
 		
 		/**
-		 * Hide the unterlying splash implementation and release
+		 * Hide the underlying splash implementation and release
 		 * all associated resources.
 		 */
 		void dispose();

@@ -32,6 +32,6 @@
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.tcf.tfc04.TCF04SentenceDataReader" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.tcf.tcf04.TCF04SentenceDataReader" />
 	</extension>
 </plugin>

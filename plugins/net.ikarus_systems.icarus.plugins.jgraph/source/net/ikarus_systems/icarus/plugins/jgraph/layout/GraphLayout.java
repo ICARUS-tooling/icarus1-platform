@@ -23,6 +23,12 @@ import com.mxgraph.util.mxRectangle;
 public interface GraphLayout extends Installable<GraphOwner> {
 	
 	/**
+	 * Special method to handle new edges in a graph.
+	 * @return 
+	 */
+	String getEdgeStyle(GraphOwner owner, Object edge, Options options);
+	
+	/**
 	 * Layout the given collection of cells in the graph.
 	 * If relying on a specific order of cells to arrange them
 	 * the order given by the {@code cells} array can be used.

@@ -288,8 +288,10 @@ public final class Localizers {
 				action.putValue(Action.NAME, textString(key));
 
 			key = (String) action.getValue(ResourceConstants.DEFAULT_DESCRIPTION_KEY);
-			if (key != null)
+			if (key != null) {
+				//System.out.printf("action: name='%s' desc='%s'\n", action.getValue(Action.NAME), tooltipString(key));
 				action.putValue(Action.SHORT_DESCRIPTION, tooltipString(key));
+			}
 		}
 
 	};

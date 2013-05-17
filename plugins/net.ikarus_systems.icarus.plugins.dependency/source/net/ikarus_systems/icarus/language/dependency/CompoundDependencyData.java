@@ -21,14 +21,8 @@ import net.ikarus_systems.icarus.language.SentenceData;
 public class CompoundDependencyData extends CompoundSentenceData implements
 		DependencyData {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -689009503616872916L;
 
-	/**
-	 * 
-	 */
 	public CompoundDependencyData() {
 		// no-op
 	}

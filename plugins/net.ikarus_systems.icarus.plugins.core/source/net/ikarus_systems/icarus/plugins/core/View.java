@@ -185,14 +185,30 @@ public abstract class View implements Identifiable {
 		return perspective;
 	}
 	
+	/**
+	 * Returns the enclosing {@link Frame}.
+	 */
 	protected final Frame getFrame() {
 		return getPerspective().getFrame();
 	}
 	
+	/**
+	 * Returns the {@code InfoPanel} available for this {@code View}.
+	 * This request is forwarded to the enclosing {@code Perspective}
+	 * which will check whether or not this {@code View} is the currently
+	 * active view, i.e. has the input focus. If this {@code View} is not
+	 * the active one {@code null} is returned.
+	 */
 	protected InfoPanel getInfoPanel() {
 		return getPerspective().getInfoPanel(this);
 	}
 	
+	/**
+	 * Called when the {@code View} gets the input focus.
+	 * Hook for subclasses to initialize displayed fields on the info panel.
+	 * The default implementation just calls {@link InfoPanel#clear()} on
+	 * the supplied argument.
+	 */
 	protected void refreshInfoPanel(InfoPanel infoPanel) {
 		infoPanel.clear();
 	}
@@ -273,6 +289,12 @@ public abstract class View implements Identifiable {
 		getPerspective().reloadViewTab(this);
 	}
 	
+	/**
+	 * Toggles the <i>state</i> of this {@code View}'s container which can
+	 * be either {@code maximized} or the default state. Usually this method
+	 * is only called by the enclosing {@code Perspective} when the user clicks
+	 * the corresponding control buttons or components.
+	 */
 	protected final void toggleContainer() {
 		getPerspective().toggleView(this);
 	}
@@ -302,6 +324,11 @@ public abstract class View implements Identifiable {
 		getPerspective().fireBroadcastEvent(this, event);
 	}
 	
+	/**
+	 * Returns the default {@code ActionManager} that is available to this
+	 * {@code View}. Per convention all views within the same {@code Perspective}
+	 * share the manager of that enclosing {@code Perspective}.
+	 */
 	protected final ActionManager getDefaultActionManager() {
 		return getPerspective().getActionManager();
 	}

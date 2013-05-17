@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -163,11 +164,22 @@ public class BasicDialogBuilder extends DialogBuilder {
 	 * @see net.ikarus_systems.icarus.ui.dialog.DialogBuilder#showDialog(java.awt.Window)
 	 */
 	@Override
-	public void showDialog(Component parent) { 
+	public void showDialog(Component parent, Options options) { 
+		if(options==null) {
+			options = Options.emptyOptions;
+		}
+		
 		JDialog dialog = optionPane.createDialog(parent, title);
+		
+		// Apply options
+		dialog.setResizable(options.get(RESIZABLE_OPTION, false));
 		
 		dialog.setVisible(true);
 		dialog.dispose();
+	}
+
+	public void showDialog(Component parent) {
+		showDialog(parent, null);
 	}
 	
 	public Object getSelectedValue() {

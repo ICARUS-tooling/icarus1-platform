@@ -64,7 +64,9 @@ public class InfoPanel {
 	
 	public void clear() {
 		JPanel contentPanel = getContentPanel();
+		
 		contentPanel.removeAll();
+		
 		if(labels!=null) {
 			labels.clear();
 		}

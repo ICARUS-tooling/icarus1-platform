@@ -14,16 +14,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-import org.java.plugin.registry.Extension;
-
+import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.Grammar;
 import net.ikarus_systems.icarus.language.LanguageManager;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
-import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
-import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.treebank.AbstractTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
@@ -35,6 +32,8 @@ import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+
+import org.java.plugin.registry.Extension;
 
 /**
  * @author Markus Gärtner
@@ -96,6 +95,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 		
 		this.readerExtension = readerExtension;
 		reader = null;
+		free();
 	}
 	
 	public Extension getReader() {
@@ -209,6 +209,8 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 			while((item = reader.next())!=null) {
 				buffer.add(item);
 				metaDataBuilder.process(item);
+				
+				//eventSource.fireEvent(new EventObject(TreebankEvents.ADDED, "item", item)); //$NON-NLS-1$
 			}
 			synchronized (this) {
 				this.buffer = buffer;
@@ -229,8 +231,8 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	@Override
 	public int size() {
 		// FIXME DEBUG
-		//return buffer==null ? 0 : buffer.size();
-		return 3;
+		return buffer==null ? 0 : buffer.size();
+		//return 3;
 	}
 
 	/**
@@ -242,12 +244,16 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 			throw new IllegalStateException("Cannot free treebank while loading is still in progress!"); //$NON-NLS-1$
 		
 		synchronized (this) {
+			eventSource.fireEvent(new EventObject(TreebankEvents.FREEING));
+			
 			loaded = false;
 			int size = size(); 
 			buffer = null;
 			
+			eventSource.fireEvent(new EventObject(TreebankEvents.FREED));
+			
 			if(size>0) {
-				eventSource.fireEvent(new EventObject(TreebankEvents.CHANGED));
+				fireChangeEvent();
 			}
 		}
 	}
@@ -258,7 +264,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	@Override
 	public ContentType getContentType() {
 		return readerExtension==null ? LanguageManager.getInstance().getBasicLanguageDataType() 
-				: getSentenceDataReader().getDataType();
+				: getSentenceDataReader().getContentType();
 	}
 
 	/**
@@ -282,9 +288,9 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public SentenceData get(int index, DataType type) {
-		//return type==DataType.SYSTEM ? buffer.get(index) : null;
+		return type==DataType.SYSTEM ? buffer.get(index) : null;
 		// FIXME DEBUG
-		return DependencyUtils.createExampleSentenceData();
+		//return DependencyUtils.createExampleSentenceData();
 	}
 
 	/**

@@ -299,11 +299,6 @@ public final class IcarusCorePlugin extends Plugin {
 		// TODO Auto-generated method stub
 
 	}
-	
-	static void exit() {
-		// TODO check for non-ui tools running and shut down entire
-		// platform in case nothing is active
-	}
 
 	/**
 	 * 
@@ -318,7 +313,7 @@ public final class IcarusCorePlugin extends Plugin {
 		}
 		
 		public void exit(ActionEvent e) {
-			IcarusCorePlugin.exit();
+			ShutdownDialog.getDialog().shutdown();
 		}
 		
 		public void about(ActionEvent e) {

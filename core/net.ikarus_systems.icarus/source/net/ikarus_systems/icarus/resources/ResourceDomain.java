@@ -161,7 +161,7 @@ public class ResourceDomain {
 		// Applies default value if required
 		if (value == null) {
 			if(ResourceManager.isNotifyMissingResource()) {
-				LoggerFactory.log(this, Level.INFO, "No resource entry for key: "+key, new Throwable()); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.INFO, "No resource entry for key: "+key/*, new Throwable()*/); //$NON-NLS-1$
 			}
 			value = defaultValue;
 		}

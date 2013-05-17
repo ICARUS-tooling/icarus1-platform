@@ -148,7 +148,7 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		
 		// Location
 		Location location = treebank.getLocation();
-		formBuilder.setValue("location", Locations.getPath(location)); //$NON-NLS-1$
+		formBuilder.setValue("location", location); //$NON-NLS-1$
 		
 		// Properties
 		Map<String, Object> properties = new HashMap<>(treebank.getProperties());

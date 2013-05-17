@@ -15,6 +15,7 @@ import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.treebank.AbstractTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
+import net.ikarus_systems.icarus.language.treebank.TreebankEvents;
 import net.ikarus_systems.icarus.language.treebank.TreebankMetaData;
 import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.language.treebank.DerivedTreebank;
@@ -174,7 +175,11 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 
 	@Override
 	public void free() {
+		eventSource.fireEvent(new EventObject(TreebankEvents.FREEING));
+		
 		filter = null;
+		
+		eventSource.fireEvent(new EventObject(TreebankEvents.FREED));
 	}
 
 	/**

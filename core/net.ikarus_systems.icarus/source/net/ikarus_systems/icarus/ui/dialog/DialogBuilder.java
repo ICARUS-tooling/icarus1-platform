@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.ui.dialog;
 import java.awt.Component;
 
 import net.ikarus_systems.icarus.resources.ResourceDomain;
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner 
@@ -19,6 +20,8 @@ import net.ikarus_systems.icarus.resources.ResourceDomain;
  *
  */
 public abstract class DialogBuilder {
+	
+	public static final String RESIZABLE_OPTION = "resizable"; //$NON-NLS-1$
 	
 	protected ResourceDomain resourceDomain;
 
@@ -36,7 +39,7 @@ public abstract class DialogBuilder {
 		this(null);
 	}
 	
-	public abstract void showDialog(Component parent);
+	public abstract void showDialog(Component parent, Options options);
 	
 	/**
 	 * @return the resourceDomain

@@ -9,7 +9,9 @@
  */
 package net.ikarus_systems.icarus.plugins.jgraph.layout;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.util.CollectionUtils;
@@ -57,7 +59,7 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 
 		mxIGraphModel model = graph.getModel();
 		
-		mxGeometry[] geometries = new mxGeometry[cells.length];
+		Map<Object, mxGeometry> geometries = new HashMap<>();
 		
 		mxRectangle bounds = new mxRectangle();
 
@@ -72,8 +74,13 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 			double topArcHeight = 0;
 			double bottomArcHeight = 0;
 			
+			// Layout cells
 			for(int i=0; i<cells.length; i++) {
 				Object cell = cells[i];
+				
+				if(model.isEdge(cell)) {
+					continue;
+				}
 				
 				// Refresh cell size if graph is auto-sizing
 				if(graph.isAutoSizeCell(cell)) {
@@ -82,8 +89,8 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 				
 				// Move cell to new location
 				mxGeometry geometry = (mxGeometry) model.getGeometry(cell).clone();
-				geometry.setX(x);
-				geometry.setY(y);
+				geometry.setX(graph.snap(x));
+				geometry.setY(graph.snap(y));
 				
 				// Shift horizontal offset
 				x += geometry.getWidth()+cellSpacing;
@@ -95,11 +102,20 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 				height = Math.max(height, geometry.getHeight());
 				
 				// Save geometry
-				geometries[i] = geometry;
+				geometries.put(cell, geometry);
+			}
+			
+			for(Object cell : cells) {
 				
-				// Calculate highest arc
+				if(model.isEdge(cell)) {
+					continue;
+				}
+				
+				mxGeometry geometry = geometries.get(cell);
+				
+				// Calculate highest arc and assign styles
 				for(Object edge : graph.getOutgoingEdges(cell)) {
-					mxGeometry targetGeometry = model.getGeometry(model.getTerminal(edge, false));
+					mxGeometry targetGeometry = geometries.get(model.getTerminal(edge, false));
 					double span = Math.abs(geometry.getCenterX() - targetGeometry.getCenterX());
 							
 					// Fetch basic style
@@ -135,14 +151,19 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 			}
 			
 			// Now relocate the entire graph southwards
-			double offset = Math.max(minBaseline, topArcHeight);
+			double offset = Math.max(minBaseline, topArcHeight+offsetY);
 			
 			// Modifications take place on the previously created (cloned)
 			// geometry objects, no need to clone them again!
-			for(int i=0; i<cells.length; i++) {
-				mxGeometry geometry = geometries[i];
-				geometry.setY(geometry.getY()+offset);
-				model.setGeometry(cells[i], geometry);
+			for(Object cell : cells) {
+				if(model.isEdge(cell)) {
+					continue;
+				}
+				
+				mxGeometry geometry = geometries.get(cell);
+				
+				geometry.setY(graph.snap(offset));
+				model.setGeometry(cell, geometry);
 			}
 			
 			// Calculate total bounds
@@ -362,5 +383,44 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 	@Override
 	public void uninstall(GraphOwner target) {
 		// no-op
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout#getEdgeStyle(net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner, java.lang.Object, net.ikarus_systems.icarus.util.Options)
+	 */
+	@Override
+	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
+
+		mxGraph graph = owner.getGraph();
+		mxIGraphModel model = graph.getModel();
+		
+		String style;
+		if(GraphUtils.isOrderEdge(graph, edge)) {
+			style = orderEdgeStyle;
+		} else {
+			style = regularEdgeStyle;
+		}
+		
+		// Append edge direction specific exit and entry
+		if(GraphUtils.isLtrEdge(graph, edge)) {
+			style += ltrConnectionStyle;
+		} else {
+			style += rtlConnectionStyle;
+		}
+		
+		// Fetch old style and ensure non-null
+		String oldStyle = model.getStyle(edge);
+		if(oldStyle==null || oldStyle.isEmpty()) {
+			oldStyle = "defaultEdge"; //$NON-NLS-1$
+		}
+		
+		// Since the GraphLayout is the last to modify
+		// a cells style we can use suffix-equality to
+		// check whether the required style is already set
+		if(!oldStyle.endsWith(style)) {
+			return oldStyle+style;
+		}
+		
+		return oldStyle;
 	}
 }

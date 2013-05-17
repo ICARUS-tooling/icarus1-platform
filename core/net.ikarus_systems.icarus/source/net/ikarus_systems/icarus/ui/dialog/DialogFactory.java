@@ -26,8 +26,10 @@ import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.KeyValuePair;
+import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
 import net.ikarus_systems.icarus.util.NamingUtil;
 
@@ -113,6 +115,19 @@ public final class DialogFactory {
 		builder.showDialog(parent);
 	}
 
+	public void showPlain(Component parent, String title, 
+			String message, Object... params) {
+		
+		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
+		
+		builder.setTitle(title);
+		builder.setMessage(message, params);
+		builder.setPlainType();
+		builder.setOptions("ok"); //$NON-NLS-1$
+		
+		builder.showDialog(parent);
+	}
+
 	public void showInfo(Component parent, String title, 
 			String message, Object... params) {
 		
@@ -191,7 +206,7 @@ public final class DialogFactory {
 	}
 	
 	public boolean showGenericDialog(Component parent, String title,
-			String message, Component comp, Object...options) {
+			String message, Component comp, boolean resizable, Object...options) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
 		
@@ -201,7 +216,10 @@ public final class DialogFactory {
 		builder.setPlainType();
 		builder.setOptions(options);
 		
-		builder.showDialog(parent);
+		Options opts = new Options();
+		opts.put(DialogBuilder.RESIZABLE_OPTION, resizable);
+		
+		builder.showDialog(parent, opts);
 		
 		return builder.isYesValue();
 	}
@@ -394,5 +412,31 @@ public final class DialogFactory {
 		}
 			
 		return fileChooser.getSelectedFile();
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public boolean showEditorDialog(Component parent, Object data, 
+			Editor editor, String title) {
+
+		editor.setEditingItem(data);
+
+		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
+		
+		builder.setTitle(title);
+		builder.setMessage(editor.getEditorComponent());
+		builder.setPlainType();
+		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		builder.showDialog(parent);
+		
+		if(!builder.isYesValue()) {
+			return false;
+		}
+		
+		if(editor.hasChanges()) {
+			editor.applyEdit();
+		}
+		
+		return true;
 	}
 }

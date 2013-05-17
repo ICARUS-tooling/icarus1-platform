@@ -13,6 +13,8 @@ import java.util.concurrent.Callable;
 
 import javax.swing.SwingWorker;
 
+import net.ikarus_systems.icarus.util.WrapperException;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -52,7 +54,11 @@ public final class Tasks {
 		@Override
 		protected Object doInBackground() throws Exception {
 			
-			runnable.run();
+			try {
+				runnable.run();
+			} catch(WrapperException e) {
+				throw e.getWrappedException();
+			}
 			
 			return null;
 		}		

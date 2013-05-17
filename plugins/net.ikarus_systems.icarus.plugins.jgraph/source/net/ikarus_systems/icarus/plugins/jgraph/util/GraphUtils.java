@@ -40,6 +40,11 @@ public final class GraphUtils {
 		mxIGraphModel model = graph.getModel();
 		Object source = model.getTerminal(edge, true);
 		Object target = model.getTerminal(edge, false);
+		
+		if(source==null || target==null) {
+			return false;
+		}
+		
 		return model.getGeometry(source).getCenterX()<model.getGeometry(target).getCenterX();
 	}
 
@@ -103,5 +108,31 @@ public final class GraphUtils {
 		}
 
 		graph.moveCells(cells, dx, dy);
+	}
+	public static boolean isAncestor(mxGraph graph, Object node, 
+			Object ancestor, boolean includeNormalEdges, boolean includeOrderEdges) {
+		if(!includeNormalEdges && !includeOrderEdges)
+			throw new IllegalArgumentException();
+		
+		if(node==null)
+			return false;
+		
+		if(node==ancestor)
+			return true;
+		
+		Object[] edges = graph.getIncomingEdges(node);
+		boolean isOrderEdge;
+		for(Object edge : edges) {
+			isOrderEdge = graph.getModel().getValue(edge) instanceof Order; 
+			if((isOrderEdge && !includeOrderEdges) 
+					|| (!isOrderEdge && !includeNormalEdges)) {
+				continue;
+			} else if(isAncestor(graph, graph.getModel().getTerminal(edge, true), ancestor,
+					includeNormalEdges, includeOrderEdges)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

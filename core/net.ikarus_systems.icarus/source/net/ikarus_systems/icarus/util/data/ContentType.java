@@ -39,6 +39,20 @@ public interface ContentType extends Identity, Filter {
 	Map<String, Object> getProperties();
 	
 	/**
+	 * Checks the given argument (typically a {@code Class} instance)
+	 * for compatibility with this content-type.
+	 * <p>
+	 * Note that although all members of the content type framework
+	 * will call this method with a valid {@code Class} argument, it
+	 * not explicitly required to do so! Custom implementations that
+	 * are designed to be used outside the framework might want to handle
+	 * arbitrary argument objects.
+	 * 
+	 * @see net.ikarus_systems.icarus.util.Filter#accepts(java.lang.Object)
+	 */
+	boolean accepts(Object obj);
+	
+	/**
 	 * Signals whether content is only allowed to be of the class
 	 * returned by {@link #getContentClass()} and not of some subclass
 	 * of it.

@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.language;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import net.ikarus_systems.icarus.util.Options;
@@ -31,7 +32,7 @@ import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
  * @version $Id$
  *
  */
-public interface SentenceDataReader {
+public interface SentenceDataReader extends Closeable {
 	
 	public static final String INCLUDE_SYSTEM_OPTION = "includeSystem"; //$NON-NLS-1$	
 	public static final String INCLUDE_GOLD_OPTION = "includeGold"; //$NON-NLS-1$
@@ -68,7 +69,7 @@ public interface SentenceDataReader {
 	 * Closes all underlying I/O-objects. Subsequent calls to {@link #next()}
 	 * should throw {@code IOException}.
 	 */
-	void close();
+	void close() throws IOException;
 	
-	ContentType getDataType();
+	ContentType getContentType();
 }

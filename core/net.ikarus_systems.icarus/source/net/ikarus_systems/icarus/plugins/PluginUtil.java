@@ -516,7 +516,7 @@ public final class PluginUtil {
 		scrollPane.setPreferredSize(new Dimension(250, 200));
 		
 		if(!DialogFactory.getGlobalFactory().showGenericDialog(
-				parent, title, null, scrollPane, "ok", "cancel")  //$NON-NLS-1$ //$NON-NLS-2$
+				parent, title, null, scrollPane, false, "ok", "cancel")  //$NON-NLS-1$ //$NON-NLS-2$
 				&& !selectedByClick.getValue()) {
 			return null;
 		}

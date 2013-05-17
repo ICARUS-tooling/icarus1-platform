@@ -65,8 +65,6 @@ public class TreebankListDelegate implements SentenceDataList {
 			return null;
 		}
 		
-		// TODO present dialog to ask user if he wants to load treebank if not loaded already
-		
 		return treebank;
 	}
 	

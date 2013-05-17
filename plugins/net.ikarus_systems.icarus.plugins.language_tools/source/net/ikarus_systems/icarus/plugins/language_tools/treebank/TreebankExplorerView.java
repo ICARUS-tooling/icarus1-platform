@@ -47,6 +47,7 @@ import javax.swing.tree.TreePath;
 import net.ikarus_systems.icarus.language.treebank.DerivedTreebank;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.language.treebank.TreebankDescriptor;
+import net.ikarus_systems.icarus.language.treebank.TreebankEvents;
 import net.ikarus_systems.icarus.language.treebank.TreebankImportResult;
 import net.ikarus_systems.icarus.language.treebank.TreebankInfo;
 import net.ikarus_systems.icarus.language.treebank.TreebankListDelegate;
@@ -68,6 +69,8 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
+import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.NamingUtil;
 import net.ikarus_systems.icarus.util.Options;
@@ -91,6 +94,7 @@ public class TreebankExplorerView extends View {
 	private JPopupMenu popupMenu;
 	
 	private Handler handler;
+	private LoadTracker loadTracker;
 	private CallbackHandler callbackHandler;
 
 	public TreebankExplorerView() {
@@ -117,10 +121,12 @@ public class TreebankExplorerView extends View {
 			return;
 		}
 		
-		handler = new Handler();		
+		handler = new Handler();
+		loadTracker = new LoadTracker();
 
 		// Create and init tree
 		treebanksTree = new JTree(new TreebankTreeModel());
+		UIUtil.enableToolTip(treebanksTree);
 		UIUtil.enableRighClickTreeSelection(treebanksTree);
 		treebanksTree.setCellRenderer(new TreebankTreeCellRenderer());
 		treebanksTree.setEditable(false);
@@ -181,7 +187,7 @@ public class TreebankExplorerView extends View {
 		infoPanel.addSeparator();
 		infoPanel.addLabel("totalTypes", 70); //$NON-NLS-1$
 		infoPanel.addSeparator();
-		infoPanel.addLabel("totalTreebanks", 70); //$NON-NLS-1$
+		infoPanel.addLabel("totalTreebanks", 100); //$NON-NLS-1$
 		infoPanel.addGap(100);
 		
 		showTreebankInfo();
@@ -271,18 +277,27 @@ public class TreebankExplorerView extends View {
 	private void refreshActions(Object selectedObject) {
 		ActionManager actionManager = getDefaultActionManager();
 		
-		actionManager.setEnabled(
-				selectedObject instanceof Treebank || selectedObject instanceof Extension, 
+		boolean isTreebank = selectedObject instanceof Treebank;
+		boolean isExtension = selectedObject instanceof Extension;
+		boolean isLoaded = isTreebank && ((Treebank)selectedObject).isLoaded();
+		
+		actionManager.setEnabled(isTreebank || isExtension, 
 				"plugins.languageTools.treebankExplorerView.newTreebankAction");  //$NON-NLS-1$
 		
-		actionManager.setEnabled(selectedObject instanceof Treebank, 
+		actionManager.setEnabled(isTreebank, 
 				"plugins.languageTools.treebankExplorerView.deleteTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.cloneTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.renameTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.openLocationAction",  //$NON-NLS-1$
-				"plugins.languageTools.treebankExplorerView.inspectTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.editTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.exportTreebankAction"); //$NON-NLS-1$
+		
+		actionManager.setEnabled(isTreebank && isLoaded, 
+				"plugins.languageTools.treebankExplorerView.inspectTreebankAction",  //$NON-NLS-1$
+				"plugins.languageTools.treebankExplorerView.freeTreebankAction"); //$NON-NLS-1$
+		
+		actionManager.setEnabled(isTreebank && !isLoaded, 
+				"plugins.languageTools.treebankExplorerView.loadTreebankAction"); //$NON-NLS-1$
 		
 		actionManager.setEnabled(TreebankRegistry.getInstance().availableTreebankCount()>0, 
 				"plugins.languageTools.treebankExplorerView.exportTreebanksAction"); //$NON-NLS-1$
@@ -306,6 +321,10 @@ public class TreebankExplorerView extends View {
 				callbackHandler, "openLocation"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.languageTools.treebankExplorerView.inspectTreebankAction",  //$NON-NLS-1$
 				callbackHandler, "inspectTreebank"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.languageTools.treebankExplorerView.loadTreebankAction",  //$NON-NLS-1$
+				callbackHandler, "loadTreebank"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.languageTools.treebankExplorerView.freeTreebankAction",  //$NON-NLS-1$
+				callbackHandler, "freeTreebank"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.languageTools.treebankExplorerView.editTreebankAction",  //$NON-NLS-1$
 				callbackHandler, "editTreebank"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.languageTools.treebankExplorerView.exportTreebankAction",  //$NON-NLS-1$
@@ -314,6 +333,47 @@ public class TreebankExplorerView extends View {
 				callbackHandler, "exportTreebanks"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.languageTools.treebankExplorerView.importTreebanksAction",  //$NON-NLS-1$
 				callbackHandler, "importTreebanks"); //$NON-NLS-1$
+	}
+	
+	private class LoadTracker implements EventListener {
+		
+		private Treebank treebank;
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.events.EventListener#invoke(java.lang.Object, net.ikarus_systems.icarus.ui.events.EventObject)
+		 */
+		@Override
+		public void invoke(Object sender, EventObject event) {
+			if(TreebankEvents.LOADED.equals(event.getName())
+					|| TreebankEvents.FREED.equals(event.getName())) {
+				refreshActions(getSelectedObject());
+			}
+		}
+		
+		void unregister() {
+			if(treebank!=null) {
+				treebank.removeListener(this);
+			}
+		}
+		
+		void register(Treebank treebank) {
+			if(treebank==this.treebank) {
+				return;
+			}
+			
+			if(this.treebank!=null) {
+				this.treebank.removeListener(this);
+			}
+			
+			this.treebank = treebank;
+			
+			if(this.treebank!=null) {
+				this.treebank.addListener(TreebankEvents.LOADING, this);
+				this.treebank.addListener(TreebankEvents.LOADED, this);
+				this.treebank.addListener(TreebankEvents.FREEING, this);
+				this.treebank.addListener(TreebankEvents.FREED, this);
+			}
+		}
 	}
 	
 	private class Handler extends MouseAdapter implements TreeSelectionListener, 
@@ -328,6 +388,12 @@ public class TreebankExplorerView extends View {
 			Object selectedObject = (path==null || path.length==0) ? null : path[path.length-1];
 	
 			refreshActions(selectedObject);
+			
+			if(selectedObject instanceof Treebank) {
+				loadTracker.register((Treebank) selectedObject);
+			} else {
+				loadTracker.unregister();
+			}
 			
 			showTreebankInfo();
 			
@@ -608,15 +674,60 @@ public class TreebankExplorerView extends View {
 			}
 			
 			Treebank treebank = (Treebank)selectedObject;
+			if(!treebank.isLoaded()) {
+				return;
+			}
+			
 			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(Treebank.class);
 			
 			Options options = new Options();
 			options.put(Options.CONTENT_TYPE, contentType);
 			// TODO send some kind of hint that we want the presenter not to modify content?
+			// -> Should be no problem since we only contain immutable data objects?
 			TreebankListDelegate delegate = TreebankRegistry.getInstance().getListDelegate(treebank);
 			
 			Message message = new Message(this, Commands.DISPLAY, delegate, options);
 			sendRequest(null, message);
+		}
+		
+		public void loadTreebank(ActionEvent e) {	
+			Object selectedObject = getSelectedObject();
+			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+				return;
+			}
+			
+			Treebank treebank = (Treebank)selectedObject;
+			if(treebank.isLoaded()) {
+				return;
+			}
+			
+			try {
+				TreebankJob task = new TreebankJob(treebank, true);
+				TaskManager.getInstance().schedule(task, TaskPriority.DEFAULT, true);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to schedule load-task for treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+			}
+		}
+		
+		public void freeTreebank(ActionEvent e) {	
+			Object selectedObject = getSelectedObject();
+			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+				return;
+			}
+			
+			Treebank treebank = (Treebank)selectedObject;
+			if(!treebank.isLoaded()) {
+				return;
+			}
+			
+			try {
+				TreebankJob task = new TreebankJob(treebank, false);
+				TaskManager.getInstance().schedule(task, TaskPriority.DEFAULT, true);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to schedule free-task for treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+			}
 		}
 		
 		public void editTreebank(ActionEvent e) {			
@@ -659,7 +770,7 @@ public class TreebankExplorerView extends View {
 					getFrame(), 
 					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.selectInfo",  //$NON-NLS-1$
-					scrollPane, "ok", "cancel")) { //$NON-NLS-1$ //$NON-NLS-2$
+					scrollPane, false, "ok", "cancel")) { //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 			

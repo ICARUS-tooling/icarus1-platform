@@ -46,7 +46,7 @@ public class SimpleDependencyData implements DependencyData {
 	@XmlElement(name="head")
 	protected int[] heads;
 
-	@XmlElement(name="flag")
+	@XmlElement(name="flag", required=false)
 	protected long[] flags;
 
 	public SimpleDependencyData(String[] forms, String[] lemmas, 
@@ -69,7 +69,6 @@ public class SimpleDependencyData implements DependencyData {
 		poss = new String[size];
 		relations = new String[size];
 		heads = new int[size];
-		flags = new long[size];
 
 		for(int index=0; index<size; index++) {
 			forms[index] = source.getForm(index);

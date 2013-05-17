@@ -35,12 +35,16 @@ import javax.swing.Icon;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import net.ikarus_systems.icarus.Core;
+import net.ikarus_systems.icarus.Core.NamedRunnable;
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
 import net.ikarus_systems.icarus.ui.events.Events;
+import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 import net.ikarus_systems.icarus.util.BiDiMap;
 import net.ikarus_systems.icarus.util.id.Identity;
 
@@ -64,7 +68,7 @@ public final class TaskManager {
 	
 	private TaskQueue taskQueue = new TaskQueue();
 	
-	private EventSource eventSource = new EventSource(this);
+	private EventSource eventSource = new WeakEventSource(this);
 	
 	private volatile SwingWorker<?, ?> currentWorker;
 	
@@ -136,7 +140,7 @@ public final class TaskManager {
 	public Icon getIcon(Object task) {
 		TaskState state = getTaskState(task);
 		
-		if(task==null) {
+		if(state==null) {
 			return null;
 		}
 		
@@ -150,7 +154,7 @@ public final class TaskManager {
 	public String getTitle(Object task) {
 		TaskState state = getTaskState(task);
 		
-		if(task==null) {
+		if(state==null) {
 			return null;
 		}
 		
@@ -164,7 +168,7 @@ public final class TaskManager {
 	public String getInfo(Object task) {
 		TaskState state = getTaskState(task);
 		
-		if(task==null) {
+		if(state==null) {
 			return null;
 		}
 		
@@ -205,7 +209,7 @@ public final class TaskManager {
 	public boolean isIndeterminate(Object task) {
 		TaskState state = getTaskState(task);
 		
-		return state==null ? null : state.isIndeterminate();
+		return state==null ? false : state.isIndeterminate();
 	}
 	
 	public void setIndeterminate(Object task, boolean indeterminate) {
@@ -285,15 +289,15 @@ public final class TaskManager {
 		}
 		
 		if(!(worker instanceof SwingWorker))
-			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid task: "+task); //$NON-NLS-1$
 				
-		boolean result = true;
-		
 		// Save task identity in state object
 		if(identity!=null) {
 			TaskState state = new TaskState(priority, identity);		
 			states.put(worker, state);
 		}
+		
+		boolean result = true;
 		
 		// Try to add task to queue
 		if(unique) {
@@ -329,6 +333,10 @@ public final class TaskManager {
 	public synchronized Object getActiveTask() {
 		SwingWorker<?, ?> worker = currentWorker;
 		return worker==null ? null : getTask(worker);
+	}
+	
+	public synchronized boolean isEmpty() {
+		return currentWorker==null && taskQueue.isEmpty();
 	}
 	
 	public void close() {
@@ -374,6 +382,8 @@ public final class TaskManager {
 					MAX_WORKER_THREADS, 10L, TimeUnit.MINUTES,
 					new LinkedBlockingQueue<Runnable>(), threadFactory,
 					rejectedTaskExecutionHandler);
+			
+			Core.getCore().addShutdownHook(new ShutdownHook());
 		}
 		return executorService;
 	}
@@ -473,6 +483,10 @@ public final class TaskManager {
 		TaskState(TaskPriority priority, Identity identity) {
 			this.priority = priority;
 			this.identity = identity;
+		}
+		
+		public TaskPriority getPriority() {
+			return priority;
 		}
 
 		public Identity getIdentity() {
@@ -645,6 +659,10 @@ public final class TaskManager {
 			return size;
 		}
 		
+		boolean isEmpty() {
+			return size==0;
+		}
+		
 		Object taskAt(int index) {
 			lock.lock();
 			try {
@@ -810,5 +828,32 @@ public final class TaskManager {
 			
 			return task;
 		}
+	}
+	
+	private static class ShutdownHook implements NamedRunnable {
+
+		/**
+		 * @see net.ikarus_systems.icarus.Core.NamedRunnable#getName()
+		 */
+		@Override
+		public String getName() {
+			return ResourceManager.getInstance().get(
+					"taskManager.shutdownHook.title", "Closing task manager"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.Core.NamedRunnable#run()
+		 */
+		@Override
+		public void run() throws Exception {
+			if(executorService==null) {
+				return;
+			}
+			
+			executorService.shutdownNow();
+			
+			// TODO await termination?
+		}
+		
 	}
 }

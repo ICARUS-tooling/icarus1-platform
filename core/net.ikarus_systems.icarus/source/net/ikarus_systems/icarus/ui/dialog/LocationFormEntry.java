@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
@@ -121,7 +122,13 @@ public class LocationFormEntry extends LabeledFormEntry<LocationFormEntry> imple
 	}
 	
 	protected void openLocationChooser() {
-		File file = new File(locationInput.getText());
+		File file = null;
+		String locationString = locationInput.getText();
+		if(locationString==null || locationString.isEmpty()) {
+			file = Core.getCore().getDataFolder();
+		} else {
+			file = new File(locationString);
+		}
 		JFileChooser fileChooser = getLocationChooser();
 		fileChooser.setSelectedFile(file);
 		int result = fileChooser.showDialog(null, 

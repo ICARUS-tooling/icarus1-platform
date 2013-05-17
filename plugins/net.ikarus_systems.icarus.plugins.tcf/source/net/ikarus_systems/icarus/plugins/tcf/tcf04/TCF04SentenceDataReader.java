@@ -256,10 +256,10 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.SentenceDataReader#getDataType()
+	 * @see net.ikarus_systems.icarus.language.SentenceDataReader#getContentType()
 	 */
 	@Override
-	public ContentType getDataType() {
+	public ContentType getContentType() {
 		return ContentTypeRegistry.getInstance().getType(
 				DependencyConstants.CONTENT_TYPE_ID);
 	}

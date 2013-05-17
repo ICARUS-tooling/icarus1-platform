@@ -57,7 +57,9 @@ public class TreebankMetaDataBuilder {
 		metaData.put(TreebankMetaData.MAX_LENGTH, maxLength);
 		metaData.put(TreebankMetaData.MIN_LENGTH, minLength);
 
-		metaData.put(TreebankMetaData.AVERAGE_LENGTH, totalLength/(double)dataCount);
+		double avgLength = totalLength/(double)dataCount;
+		avgLength = Math.floor(avgLength*100)/100;
+		metaData.put(TreebankMetaData.AVERAGE_LENGTH, avgLength);
 		
 		for(int i=minLength; i<=maxLength; i++) {
 			int count = counters[i];

@@ -62,6 +62,10 @@ public class TaskListCellRenderer extends JPanel implements
 	
 	private static Icon defaultIcon;
 
+	public TaskListCellRenderer(TaskManager manager) {
+		this(manager, null);
+	}
+
 	public TaskListCellRenderer(TaskManager manager, JList<?> list) {
 		if(manager==null)
 			throw new IllegalArgumentException("Invalid manager"); //$NON-NLS-1$
@@ -70,10 +74,13 @@ public class TaskListCellRenderer extends JPanel implements
 		this.list = list;
 		
 		manager.addListener(null, this);
-		list.addMouseListener(this);
-		list.addMouseMotionListener(this);
 		
-		list.setCellRenderer(this);
+		if(list!=null) {
+			list.addMouseListener(this);
+			list.addMouseMotionListener(this);
+			
+			list.setCellRenderer(this);
+		}
 	}
 	
 	private void buildPanel() {
@@ -90,6 +97,7 @@ public class TaskListCellRenderer extends JPanel implements
 		footer.setWrapStyleWord(true);
 		footer.setLineWrap(true);
 		footer.setOpaque(false);
+		footer.setEditable(false);
 		
 		cancelButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("nav_stop.gif")); //$NON-NLS-1$
 		cancelButton.setFocusable(false);
@@ -312,7 +320,7 @@ public class TaskListCellRenderer extends JPanel implements
 	}
 	
 	private void dispatchMouseEvent(MouseEvent e) {
-		if(header==null) {
+		if(header==null || list==null) {
 			return;
 		}
 		

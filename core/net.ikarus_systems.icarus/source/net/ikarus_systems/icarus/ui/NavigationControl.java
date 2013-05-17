@@ -281,6 +281,11 @@ public class NavigationControl implements ListSelectionListener,
 		indexField.setValue(selectedIndex+1);
 	}
 	
+	protected void refreshListSelection(int index) {
+		list.setSelectedIndex(index);
+		list.ensureIndexIsVisible(index);
+	}
+	
 	protected void refreshDisplayedSize() {
 		int size = list.getModel().getSize();
 		
@@ -288,6 +293,10 @@ public class NavigationControl implements ListSelectionListener,
 		DefaultFormatterFactory factory = (DefaultFormatterFactory)indexField.getFormatterFactory();
 		InternationalFormatter formatter = (InternationalFormatter) factory.getEditFormatter();
 		formatter.setMaximum(size);
+		
+		if(size==0) {
+			indexField.setValue(0);
+		}
 	}
 
 	/**
@@ -313,7 +322,8 @@ public class NavigationControl implements ListSelectionListener,
 	 */
 	@Override
 	public void contentsChanged(ListDataEvent e) {
-		// no-op
+		refreshDisplayedSize();
+		refreshActions();
 	}
 
 	/**
@@ -360,7 +370,7 @@ public class NavigationControl implements ListSelectionListener,
 			return;
 		}
 		
-		list.setSelectedIndex(selectedIndex);
+		refreshListSelection(selectedIndex);
 	}
 
 	/**
@@ -374,7 +384,7 @@ public class NavigationControl implements ListSelectionListener,
 			if(selectedIndex==-1) {
 				list.getSelectionModel().clearSelection();
 			} else {
-				list.setSelectedIndex(selectedIndex);
+				refreshListSelection(selectedIndex);
 			}
 		} else if("selectionModel".equals(evt.getPropertyName())) { //$NON-NLS-1$
 			((ListSelectionModel)evt.getOldValue()).removeListSelectionListener(this);

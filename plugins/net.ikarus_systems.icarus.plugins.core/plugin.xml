@@ -543,7 +543,7 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.log.LogView" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/log/log-view.gif" />
 		<parameter id="alignment" value="bottom" />
-		<parameter id="priority" value="low" />
+		<parameter id="priority" value="default" />
 		
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">
@@ -584,7 +584,7 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.output.DefaultOutputView" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/output/default-output-view.gif" />
 		<parameter id="alignment" value="center" />
-		<parameter id="priority" value="high" />
+		<parameter id="priority" value="low" />
 		<parameter id="requiresTab" value="false" />
 		
 		<!-- CAPABILITIES -->

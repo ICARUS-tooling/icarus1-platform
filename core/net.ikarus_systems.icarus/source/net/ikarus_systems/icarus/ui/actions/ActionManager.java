@@ -1627,7 +1627,7 @@ public class ActionManager {
 			AbstractButton button = createButton(a, groupId, container);
 			button.setHorizontalTextPosition(SwingConstants.CENTER);
 	        button.setVerticalTextPosition(SwingConstants.BOTTOM);
-	        button.setFocusable(false);
+	        //button.setFocusable(false);
 	        
 			toolBar.add(button);
 		}

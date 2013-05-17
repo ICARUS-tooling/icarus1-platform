@@ -135,6 +135,7 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.cloneCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
 		<separator />

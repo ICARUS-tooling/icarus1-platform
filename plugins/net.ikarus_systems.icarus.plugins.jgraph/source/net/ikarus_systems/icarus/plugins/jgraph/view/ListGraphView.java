@@ -30,7 +30,6 @@ import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
-import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.data.DataList;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
@@ -181,7 +180,7 @@ public class ListGraphView extends View {
 		
 		// Ensure graph presenter
 		ContentType entryType = dataList.getContentType();
-		entryType = ContentTypeRegistry.getInstance().getType("DependencyDataContentType");
+		//entryType = ContentTypeRegistry.getInstance().getType("DependencyDataContentType");
 		GraphPresenter graphPresenter = this.graphPresenter;
 		if(graphPresenter==null || !PresenterUtils.presenterSupports(graphPresenter, data)) {
 			graphPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphPresenter.class, entryType, true, true);

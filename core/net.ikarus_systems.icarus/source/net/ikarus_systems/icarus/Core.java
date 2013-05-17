@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -162,13 +164,15 @@ public class Core {
 	private Map<String, String> applicationProperties;
 	private Map<String, String> pluginProperties;
 	
-	private final Options options;
+	private List<NamedRunnable> shutdownHooks;
+	
+	private final CLOptions options;
 
 	private Core(String[] args) {
 		logger = Logger.getLogger("icarus.launcher"); //$NON-NLS-1$
 		
 		// Init options
-		options = new Options(args);
+		options = new CLOptions(args);
 		
 		// init folders
 		rootFolder = new File(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -389,7 +393,7 @@ public class Core {
 		}
 	}
 	
-	// exits he launcher by throwing the provided Error
+	// Exits the launcher by throwing the provided Error
 	// after closing all handlers on the internal logger
 	private void exit(Error e) {
 		logger.log(Level.SEVERE, "Fatal error encountered - launcher will exit", e); //$NON-NLS-1$
@@ -410,7 +414,59 @@ public class Core {
 		return core;
 	}
 	
-	public Options getOptions() {
+	public synchronized void addShutdownHook(NamedRunnable hook) {
+		if(shutdownHooks==null) {
+			shutdownHooks = new ArrayList<>();
+		}
+		
+		shutdownHooks.add(hook);
+	}
+	
+	public synchronized void addShutdownHook(final String name, final Runnable r) {
+		NamedRunnable hook = new NamedRunnable() {
+			
+			@Override
+			public void run() throws Exception {
+				r.run();				
+			}
+			
+			@Override
+			public String getName() {
+				return name;
+			}
+		};
+		
+		addShutdownHook(hook);
+	}
+	
+	public synchronized NamedRunnable[] getShutdownHooks() {
+		if(shutdownHooks==null) {
+			return new NamedRunnable[0];
+		}
+		
+		NamedRunnable[] hooks = new NamedRunnable[shutdownHooks.size()];
+		
+		return shutdownHooks.toArray(hooks);
+	}
+	
+	public synchronized void shutdown(UncaughtExceptionHandler handler) {
+		NamedRunnable[] hooks = getShutdownHooks();
+		
+		for(NamedRunnable hook : hooks) {
+			try {
+				hook.run();
+			} catch(Exception e) {
+				if(handler!=null) {
+					handler.uncaughtException(Thread.currentThread(), e);
+				} else {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Uncaught exception in shutdown hook: "+hook.getName(), e); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+	
+	public CLOptions getOptions() {
 		return options;
 	}
 
@@ -532,13 +588,20 @@ public class Core {
 		return null;
 	}
 	
-	public class Options {
+	/**
+	 * Command line argument wrapper
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public class CLOptions {
 		private Map<String,String> properties;
 		private boolean verbose = false;
 		
 		private final String[] args;
 		
-		public Options(String[] args) {
+		public CLOptions(String[] args) {
 			this.args = args;
 			
 			for(int i=0; i<args.length; i++) {
@@ -600,6 +663,20 @@ public class Core {
 		public String getProperty(String key) {
 			return properties==null ? null : properties.get(key);
 		}
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public static interface NamedRunnable {
+		
+		String getName();
+		
+		void run() throws Exception;
 	}
 	
 	@SuppressWarnings("unused")

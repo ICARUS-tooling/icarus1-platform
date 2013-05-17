@@ -133,6 +133,15 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 		
 		return task;
 	}
+	
+	private void shiftCache(int index) {
+		
+		cache[index] = null;
+		
+		if(index<cacheSize-1) {
+			System.arraycopy(cache, index+1, cache, index, cacheSize-index-1);
+		}
+	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.ui.events.EventListener#invoke(java.lang.Object, net.ikarus_systems.icarus.ui.events.EventObject)
@@ -145,7 +154,7 @@ public class TaskListModel extends AbstractListModel<Object> implements EventLis
 		}
 		
 		if(TaskConstants.ACTIVE_TASK_CHANGED.equals(event.getName())) {
-			System.arraycopy(cache, 1, cache, 0, cacheSize-1);
+			shiftCache(0);
 			fireContentsChanged(this, 0, getSize());
 			return;
 		}
