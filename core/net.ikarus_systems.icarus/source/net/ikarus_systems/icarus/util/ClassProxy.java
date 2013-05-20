@@ -61,6 +61,12 @@ public final class ClassProxy {
 		
 		return null;
 	}
+
+	public Object loadObjectUnsafe() throws Exception {
+		Class<?> clazz = classLoader.loadClass(className);
+		
+		return clazz.newInstance();
+	}
 	
 	@Override
 	public String toString() {

@@ -290,7 +290,7 @@ public class ConfigBuilder implements ConfigConstants {
 	public Handle addOptionsEntry(String name, int selectedIndex, Object...items) {
 		Handle handle = addEntry(name, EntryType.OPTIONS, items[selectedIndex]);
 		// TODO make it SimpleXML compatible
-		List<?> options = Arrays.asList(items);
+		List<?> options = CollectionUtils.asList(items);
 		
 		config.setProperty(owner, handle, OPTIONS, options);
 		//config.setProperty(owner, handle, RENDERER, ConfigUtils.localizingListCellRenderer);

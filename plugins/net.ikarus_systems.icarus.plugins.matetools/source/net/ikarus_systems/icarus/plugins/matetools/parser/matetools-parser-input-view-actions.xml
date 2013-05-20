@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		MATETOOLS PARSER INPUT VIEW
+	-->
+		
+	<!-- Start Pipeline -->
+	<action id="plugins.matetools.matetoolsParserInputView.startPipelineAction"
+		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.matetools.matetoolsParserInputView.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.matetools.matetoolsParserInputView.toolBarList">
+		<item type="action" value="plugins.languageTools.textInputView.undoAction" />
+		<item type="action" value="plugins.languageTools.textInputView.redoAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.textInputView.cutAction" />
+		<item type="action" value="plugins.languageTools.textInputView.copyAction" />
+		<item type="action" value="plugins.languageTools.textInputView.pasteAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.textInputView.selectAllAction" />
+		<item type="action" value="plugins.languageTools.textInputView.clearAction" />
+		<item type="glue" />
+		<item type="label" value="plugins.matetools.matetoolsParserInputView.labels.tokenizer" />
+		<item type="custom" value="selectTokenizer" />
+		<separator />
+		<item type="action" value="plugins.matetools.matetoolsParserInputView.openPreferencesAction" />
+		<item type="action" value="plugins.matetools.matetoolsParserInputView.startPipelineAction" />
+	</action-list>
+	
+</actions>

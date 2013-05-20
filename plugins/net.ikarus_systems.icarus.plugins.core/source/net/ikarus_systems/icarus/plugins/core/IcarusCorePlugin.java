@@ -38,6 +38,7 @@ import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.config.ConfigDialog;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
+import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.ErrorFormatter;
 import net.ikarus_systems.icarus.util.Exceptions;
@@ -214,13 +215,29 @@ public final class IcarusCorePlugin extends Plugin {
 		for(Extension extension : getDescriptor().getExtensionPoint("Serializable").getConnectedExtensions()) { //$NON-NLS-1$
 			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			
-			for(Extension.Parameter param : extension.getParameters("class")) {
+			for(Extension.Parameter param : extension.getParameters("class")) { //$NON-NLS-1$
 				try {
 					Class<?> clazz = loader.loadClass(param.valueAsString());
 					JAXBUtils.registerClass(clazz);
+					
 				} catch(Exception e) {
 					LoggerFactory.log(this, Level.SEVERE, 
-							"Failed to register serializable: "+param.getId()+" at extension "+extension.getUniqueId(), e); //$NON-NLS-1$
+							"Failed to register serializable: "+param.getId()+" at extension "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+			
+			for(Extension.Parameter param : extension.getParameters("adapter")) { //$NON-NLS-1$
+				try {
+					Class<?> clazz = loader.loadClass(param.valueAsString());
+					
+					for(Extension.Parameter subParam : param.getSubParameters("class")) { //$NON-NLS-1$
+						JAXBUtils.registerAdapter(clazz, new ClassProxy(
+								subParam.valueAsString(), loader));
+					}
+					
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to register adapter: "+param.getId()+" at extension "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -258,6 +275,13 @@ public final class IcarusCorePlugin extends Plugin {
 		// TODO add plugins options
 		builder.back();
 		// END PLUGINS GROUP
+		
+		try {
+			ConfigRegistry.getGlobalRegistry().loadNow();
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to load config data", e); //$NON-NLS-1$
+		}
 	}
 	
 	private void initAndShowGUI() throws Exception {

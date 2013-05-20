@@ -377,6 +377,22 @@
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.ListPresenter" />
 	</extension>
 	
+	<extension id="DefaultTokenizer" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Tokenizer">
+		<doc>
+			<doc-text>
+				Naive tokenizer implementation relying on the java.util.StringTokenizer
+				class to carry out the actual tokenization. Not that this implementation
+				should be regarded a kind of fall-back in case no 'real' tokenizer
+				can be found since the tokenization performed might not be sufficient
+				for many use cases (the input has to be aware of the delimiter).
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.defaultTokenizer.identity.name" />
+		<parameter id="description" value="plugins.languageTools.defaultTokenizer.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.input.DefaultTokenizer" />
+	</extension>
+	
 	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
 		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.TreebankDescriptor" />
 		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.TreebankInfo" />

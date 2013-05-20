@@ -331,8 +331,9 @@ public class ListGraphView extends View implements Outline {
 			int selectedIndex = -1;
 			if(message.getData() instanceof Integer) {
 				selectedIndex = (int)message.getData();
+			} else {
+				// TODO traverse list and check items
 			}
-			//TODO convert data object into index
 			
 			Object selectedItem = null;
 			if(selectedIndex==-1) {

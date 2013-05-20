@@ -11,10 +11,16 @@ package net.ikarus_systems.icarus.language;
 
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
+
+import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.plugins.language_tools.LanguageToolsConstants;
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -96,5 +102,12 @@ public final class LanguageManager {
 	
 	public ContentType getBasicLanguageDataType() {
 		return basicSentenceDataType;
+	}
+	
+	public static Collection<Extension> getAvailableTokenizers() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				LanguageToolsConstants.LANGUAGE_TOOLS_PLUGIN_ID+"@Tokenizer"); //$NON-NLS-1$
+		
+		return PluginUtil.getExtensions(extensionPoint, true, true, null);
 	}
 }

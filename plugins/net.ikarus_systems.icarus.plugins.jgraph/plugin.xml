@@ -226,7 +226,7 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.view.ListGraphView" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/view/list-graph-view.gif" />
 		<parameter id="alignment" value="center" />
-		<parameter id="priority" value="low" />
+		<parameter id="priority" value="default" />
 		
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">

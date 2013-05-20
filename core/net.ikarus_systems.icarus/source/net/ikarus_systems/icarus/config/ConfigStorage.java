@@ -65,10 +65,17 @@ public interface ConfigStorage {
 	void update();
 	
 	/**
+	 * Loads data synchronously from the underlying data storage.
+	 */
+	void updateNow();
+	
+	/**
 	 * Tells the storage to asynchronously save its
 	 * data to the underlying resource location.
 	 */
 	void commit();
+	
+	void commitNow();
 	
 	boolean hasUnsavedChanges();
 }

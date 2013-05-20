@@ -20,6 +20,7 @@ import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.helper.Outline;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
@@ -34,7 +35,7 @@ import net.ikarus_systems.icarus.util.mpi.ResultMessage;
  * @version $Id$
  *
  */
-public class GraphView extends View {
+public class GraphView extends View implements Outline {
 	
 	protected GraphPresenter presenter;
 	

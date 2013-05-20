@@ -105,6 +105,7 @@ import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.Actions;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 
 
 
@@ -2634,7 +2635,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	
 			
 			if (dlmnchange){				          	
-            	changesMap.put(handle, Arrays.asList(dlm.toArray()));
+            	changesMap.put(handle, CollectionUtils.asList(dlm.toArray()));
             	configBottomPanel.getComponent(0).setEnabled(true);
             	//System.out.println(changesMap);   
 			}

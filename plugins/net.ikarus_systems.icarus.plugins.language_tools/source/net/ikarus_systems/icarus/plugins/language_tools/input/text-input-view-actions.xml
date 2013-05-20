@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		TEXT INPUT VIEW
+	-->
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.languageTools.textInputView.toolBarList">
+		<item type="glue" />
+		<item type="action" value="plugins.languageTools.textInputView.undoAction" />
+		<item type="action" value="plugins.languageTools.textInputView.redoAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.textInputView.cutAction" />
+		<item type="action" value="plugins.languageTools.textInputView.copyAction" />
+		<item type="action" value="plugins.languageTools.textInputView.pasteAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.textInputView.selectAllAction" />
+		<item type="action" value="plugins.languageTools.textInputView.clearAction" />
+	</action-list>
+	
+</actions>

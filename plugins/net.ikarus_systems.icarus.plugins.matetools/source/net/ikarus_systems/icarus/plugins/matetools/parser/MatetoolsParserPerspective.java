@@ -7,8 +7,9 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.plugins.language_tools.treebank;
+package net.ikarus_systems.icarus.plugins.matetools.parser;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +18,8 @@ import javax.swing.JComponent;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.core.ManagementConstants;
 import net.ikarus_systems.icarus.plugins.core.Perspective;
-import net.ikarus_systems.icarus.plugins.language_tools.LanguageToolsConstants;
+import net.ikarus_systems.icarus.plugins.jgraph.JGraphConstants;
+import net.ikarus_systems.icarus.plugins.matetools.MatetoolsConstants;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 
 import org.java.plugin.registry.Extension;
@@ -29,12 +31,11 @@ import org.java.plugin.registry.PluginDescriptor;
  * @version $Id$
  *
  */
-public class TreebankManagerPerspective extends Perspective {
+public class MatetoolsParserPerspective extends Perspective {
 	
-	public static final String PERSPECTIVE_ID = LanguageToolsConstants.TREEBANK_MANAGER_PERSPECTIVE_ID;
+	public static final String PERSPECTIVE_ID = MatetoolsConstants.MATETOOLS_PARSER_PERSPECTIVE_ID;
 
-	
-	public TreebankManagerPerspective() {
+	public MatetoolsParserPerspective() {
 		// no-op
 	}
 
@@ -45,8 +46,9 @@ public class TreebankManagerPerspective extends Perspective {
 	public void init(JComponent container) {
 		collectViewExtensions();
 		defaultDoLayout(container);
+
 		
-		focusView(LanguageToolsConstants.TREEBANK_EXPLORER_VIEW_ID);
+		focusView(MatetoolsConstants.MATETOOLS_PARSER_INPUT_VIEW_ID);
 	}
 	
 	@Override
@@ -54,10 +56,8 @@ public class TreebankManagerPerspective extends Perspective {
 		PluginDescriptor descriptor = getExtension().getDeclaringPluginDescriptor();
 		
 		String[] defaultViewIds = {
-				LanguageToolsConstants.TREEBANK_EXPLORER_VIEW_ID,
-				LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID,
-				LanguageToolsConstants.TREEBANK_PROPERTIES_VIEW_ID,
-				/*LanguageToolsConstants.TREEBANK_INSPECT_VIEW_ID,*/
+				MatetoolsConstants.MATETOOLS_PARSER_INPUT_VIEW_ID,
+				JGraphConstants.LIST_GRAPH_VIEW_ID,
 				ManagementConstants.DEFAULT_LOG_VIEW_ID,
 				ManagementConstants.DEFAULT_OUTPUT_VIEW_ID,
 				ManagementConstants.TABLE_VIEW_ID,
@@ -68,26 +68,18 @@ public class TreebankManagerPerspective extends Perspective {
 		// Collect default extensions and report corrupted state
 		// when one is missing
 		newExtensions.addAll(PluginUtil.getExtensions(defaultViewIds));
-		
-		// Collect all extensions that are connected to the TreebankManagementView point
+
+		// Collect all extensions that are connected to the MatetoolsView point
 		// -> might result in redundant adds, so we use a Set<Extension>
-		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("TreebankManagementView"); //$NON-NLS-1$
-		if(managementViewPoint!=null) {
+		ExtensionPoint matetoolsViewPoint = descriptor.getExtensionPoint("MatetoolsView"); //$NON-NLS-1$
+		if(matetoolsViewPoint!=null) {
 			newExtensions.addAll(PluginUtil.getExtensions(
-					managementViewPoint, true, true, null));
+					matetoolsViewPoint, true, true, null));
 		}
 		
 		connectedViews.addAll(newExtensions);
 		
 		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEWS_ADDED, 
 				"extensions", newExtensions.toArray())); //$NON-NLS-1$
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.plugins.core.Perspective#isClosable()
-	 */
-	@Override
-	public boolean isClosable() {
-		return true;
 	}
 }

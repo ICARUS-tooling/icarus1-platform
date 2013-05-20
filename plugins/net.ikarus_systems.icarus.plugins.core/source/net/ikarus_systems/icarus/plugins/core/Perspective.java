@@ -424,6 +424,28 @@ public abstract class Perspective implements Identifiable {
 		areaLayout.toggle(container);
 	}
 	
+	protected void focusView(final Object view) {
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				View v = null;
+				
+				if(view instanceof View) {
+					v = (View)view;
+				} else if(view instanceof String) {
+					v = getView((String) view);
+				} else if(view instanceof Extension) {
+					v = activatedViews.get((Extension) view);
+				}
+				
+				if(v!=null && views.contains(v)) {
+					v.focusView();
+				}
+			}
+		});
+	}
+	
 	protected Localizer tabLocalizer = new Localizer() {
 		
 		@Override

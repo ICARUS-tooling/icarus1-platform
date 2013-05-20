@@ -42,6 +42,22 @@ public final class Locations {
 		return new DefaultURLLocation(new URL(path));
 	}
 	
+	public static Location getFileLocation(String path) {
+		if(path==null || path.isEmpty())
+			return null;
+		
+		try {
+			File file = new File(path);
+			if(file.exists()) {
+				return new DefaultFileLocation(file.getCanonicalFile());
+			}
+		} catch(IOException e) {
+			// no-op
+		}
+		
+		return null;
+	}
+	
 	public static String getPath(Location location) {
 		if(location==null) {
 			return null;

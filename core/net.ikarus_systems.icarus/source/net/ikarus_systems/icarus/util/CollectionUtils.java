@@ -104,20 +104,23 @@ public final class CollectionUtils {
 
     @SafeVarargs
 	public static <T extends Object> Set<T> asSet(T...items) {
-		Set<T> set = new HashSet<>(items.length);
+    	int size = items==null ? 0 : items.length;
+		Set<T> set = new HashSet<>(size);
 		feedItems(set, items);
 		return set;
 	}
 
     @SafeVarargs
 	public static <T extends Object> List<T> asList(T...items) {
-		List<T> list = new ArrayList<>(items.length);
+    	int size = items==null ? 0 : items.length;
+		List<T> list = new ArrayList<>(size);
 		feedItems(list, items);
 		return list;
 	}
 	
 	public static Map<Object, Object> asMap(Object...items) {
-		Map<Object, Object> map = new HashMap<>();
+    	int size = items==null ? 0 : items.length;
+		Map<Object, Object> map = new HashMap<>(Math.min(10, size/2));
 		
 		if(items!=null) {
 			for(int i = 0, len = items.length-1; i<len; i+=2) {

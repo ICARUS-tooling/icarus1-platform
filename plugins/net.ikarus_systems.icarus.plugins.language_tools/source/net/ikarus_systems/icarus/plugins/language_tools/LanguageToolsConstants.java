@@ -22,11 +22,11 @@ public interface LanguageToolsConstants {
 		
 	// Perspective IDs
 	public static final String TREEBANK_MANAGER_PERSPECTIVE_ID = 
-			"TreebankManagerPerspective"; //$NON-NLS-1$
+			LANGUAGE_TOOLS_PLUGIN_ID+"@TreebankManagerPerspective"; //$NON-NLS-1$
 	
 	// View IDs
-	public static final String DEFAULT_TEXT_INPUT_VIEW_ID = 
-			LANGUAGE_TOOLS_PLUGIN_ID+"@DefaultInputView"; //$NON-NLS-1$
+	public static final String TEXT_INPUT_VIEW_ID = 
+			LANGUAGE_TOOLS_PLUGIN_ID+"@TextInputView"; //$NON-NLS-1$
 	public static final String TREEBANK_EXPLORER_VIEW_ID = 
 			LANGUAGE_TOOLS_PLUGIN_ID+"@TreebankExplorerView"; //$NON-NLS-1$
 	public static final String TREEBANK_EDIT_VIEW_ID = 

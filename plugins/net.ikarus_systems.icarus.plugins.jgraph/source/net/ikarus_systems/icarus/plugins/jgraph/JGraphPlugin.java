@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import net.ikarus_systems.icarus.config.ConfigBuilder;
 import net.ikarus_systems.icarus.config.ConfigConstants;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
-import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
@@ -40,6 +39,8 @@ import com.mxgraph.view.mxStyleRegistry;
  *
  */
 public class JGraphPlugin extends Plugin {
+	
+	public static final String PLUGIN_ID = JGraphConstants.JGRAPH_PLUGIN_ID;
 
 	public JGraphPlugin() {
 		// no-op

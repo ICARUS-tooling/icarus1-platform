@@ -29,6 +29,24 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
+		<parameter-def id="adapter" multiplicity="any">
+			<doc>
+				<doc-text>
+					Fully qualified name of a class extending 
+					javax.xml.bind.annotation.adapters.XmlAdapter
+					that is to be registered as an adapter for the
+					serializable classes mentioned in the sub parameters
+				</doc-text>
+			</doc>
+			<parameter-def id="class" multiplicity="one-or-more">
+				<doc>
+					<doc-text>
+						Fully qualified name of a non-serializable class that
+						has to be wrapped by the aformentioned adapter.
+					</doc-text>
+				</doc>
+			</parameter-def>
+		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="Localizable" extension-multiplicity="none">

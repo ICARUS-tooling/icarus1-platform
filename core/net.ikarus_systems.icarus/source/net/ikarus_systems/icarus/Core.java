@@ -214,8 +214,7 @@ public class Core {
 			throw new Error("Failed to load plug-in framework objects", e); //$NON-NLS-1$
 		}
 		
-		// XXX
-		//PluginUtil.getPluginManager().registerListener(new PluginManagerLog());
+		PluginUtil.getPluginManager().registerListener(new PluginManagerLog());
 	}
 	
 	// prevent multiple deserialization
@@ -679,8 +678,6 @@ public class Core {
 		void run() throws Exception;
 	}
 	
-	@SuppressWarnings("unused")
-	// XXX
 	private class PluginManagerLog implements PluginManager.EventListener {
 		
 
@@ -689,10 +686,12 @@ public class Core {
 		 */
 		@Override
 		public void pluginActivated(Plugin plugin) {
-            logger.info("plug-in started - " + plugin.getDescriptor().getUniqueId() //$NON-NLS-1$
+            String msg = "plug-in started - " + plugin.getDescriptor().getUniqueId() //$NON-NLS-1$
                     + " (active/total: " + PluginUtil.countActive() //$NON-NLS-1$
                     + " of "  //$NON-NLS-1$
-                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
+                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"; //$NON-NLS-1$
+            
+            LoggerFactory.log(this, Level.INFO, msg);
 		}
 
 		/**
@@ -700,10 +699,12 @@ public class Core {
 		 */
 		@Override
 		public void pluginDeactivated(Plugin plugin) {
-            logger.info("plug-in stopped - " + plugin.getDescriptor().getUniqueId() //$NON-NLS-1$
+			String msg = "plug-in stopped - " + plugin.getDescriptor().getUniqueId() //$NON-NLS-1$
                     + " (active/total: " + PluginUtil.countActive() //$NON-NLS-1$
                     + " of " //$NON-NLS-1$
-                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
+                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"; //$NON-NLS-1$
+
+            LoggerFactory.log(this, Level.INFO, msg);
 		}
 
 		/**
@@ -711,10 +712,12 @@ public class Core {
 		 */
 		@Override
 		public void pluginDisabled(PluginDescriptor descriptor) {
-            logger.info("plug-in disabled - " + descriptor.getUniqueId() //$NON-NLS-1$
+			String msg = "plug-in disabled - " + descriptor.getUniqueId() //$NON-NLS-1$
                     + " (enabled/total: " + PluginUtil.countEnabled() //$NON-NLS-1$
                     + " of " //$NON-NLS-1$
-                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
+                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"; //$NON-NLS-1$
+
+            LoggerFactory.log(this, Level.INFO, msg);
 		}
 
 		/**
@@ -722,10 +725,12 @@ public class Core {
 		 */
 		@Override
 		public void pluginEnabled(PluginDescriptor descriptor) {
-            logger.info("plug-in enabled - " + descriptor.getUniqueId() //$NON-NLS-1$
+			String msg = "plug-in enabled - " + descriptor.getUniqueId() //$NON-NLS-1$
                     + " (enabled/total: " + PluginUtil.countEnabled() //$NON-NLS-1$
                     + " of " //$NON-NLS-1$
-                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"); //$NON-NLS-1$
+                    + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"; //$NON-NLS-1$
+
+            LoggerFactory.log(this, Level.INFO, msg);
 		}
 		
 	}

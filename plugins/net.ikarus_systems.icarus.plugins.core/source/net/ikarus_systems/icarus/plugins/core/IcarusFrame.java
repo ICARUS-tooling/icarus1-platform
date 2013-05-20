@@ -91,6 +91,8 @@ public class IcarusFrame extends JFrame {
 		}
 		
 		currentPerspective = readPerspectiveOption(options);
+		
+		refreshTitle();
 	}
 	
 	private Perspective readPerspectiveOption(Options options) {
@@ -451,6 +453,8 @@ public class IcarusFrame extends JFrame {
 		// Refresh tool-bar
 		refreshToolBar();
 		
+		refreshTitle();
+		
 		LoggerFactory.log(this, Level.FINE, "Opened perspective: "+id); //$NON-NLS-1$
 		
 		getEventSource().fireEvent(new EventObject(IcarusFrameEvents.PERSPECTIVE_OPENED, 
@@ -595,6 +599,16 @@ public class IcarusFrame extends JFrame {
 		}
 		
 		return true;
+	}
+	
+	private void refreshTitle() {
+		String title = "ICARUS"; //$NON-NLS-1$
+		Perspective perspective = currentPerspective;
+		if(perspective!=null) {
+			title += " - "+perspective.getIdentity().getName(); //$NON-NLS-1$
+		}
+		
+		setTitle(title);
 	}
 	
 	private Extension findDeclaringExtension(Class<?> clazz) {

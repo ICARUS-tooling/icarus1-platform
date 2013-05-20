@@ -20,7 +20,6 @@ import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.DefaultResourceLoader;
 import net.ikarus_systems.icarus.resources.ResourceLoader;
 import net.ikarus_systems.icarus.resources.ResourceManager;
-import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 
 import org.java.plugin.PluginManager;
@@ -66,16 +65,7 @@ public class ManagementPerspective extends Perspective {
 		collectViewExtensions();
 		defaultDoLayout(container);
 		
-		UIUtil.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				View viewToFocus = getView(ManagementConstants.PLUGIN_EXPLORER_VIEW_ID);
-				if(viewToFocus!=null) {
-					viewToFocus.focusView();
-				}
-			}
-		});
+		focusView(ManagementConstants.PLUGIN_EXPLORER_VIEW_ID);
 	}
 	
 	@Override

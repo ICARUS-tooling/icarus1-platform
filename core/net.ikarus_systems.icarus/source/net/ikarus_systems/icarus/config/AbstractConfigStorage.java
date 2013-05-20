@@ -108,6 +108,16 @@ public abstract class AbstractConfigStorage implements ConfigStorage, ConfigCons
 	public void update() {
 		ConfigUtils.execute(loadJob);
 	}
+
+	@Override
+	public void commitNow() {
+		saveJob.run();
+	}
+
+	@Override
+	public void updateNow() {
+		loadJob.run();
+	}
 	
 	private void checkSaveRequirements() {
 		if((((strategy&IMMEDIATE_SAVING)==IMMEDIATE_SAVING 

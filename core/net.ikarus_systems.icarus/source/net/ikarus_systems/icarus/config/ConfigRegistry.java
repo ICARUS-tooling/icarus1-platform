@@ -80,7 +80,7 @@ public class ConfigRegistry implements ConfigConstants {
 					File configFile = new File(Core.getCore().getDataFolder(), 
 							"config.xml"); //$NON-NLS-1$
 					JAXBConfigStorage storage = new JAXBConfigStorage(
-							configFile, BLOCKWISE_SAVING);
+							configFile, IMMEDIATE_SAVING);
 					globalRegistry = new ConfigRegistry(storage);
 				}
 			}
@@ -332,8 +332,23 @@ public class ConfigRegistry implements ConfigConstants {
 	
 	public void save() {
 		updateStorage(root, getStorage(root));
-		for(ConfigStorage storage : storages.keySet())
+		for(ConfigStorage storage : storages.keySet()) {
 			storage.commit();
+		}
+	}
+	
+	public void saveNow() {
+		updateStorage(root, getStorage(root));
+		for(ConfigStorage storage : storages.keySet()) {
+			storage.commitNow();
+		}
+	}
+	
+	public void loadNow() {
+		for(ConfigStorage storage : storages.keySet()) {
+			storage.updateNow();
+		}
+		updateConfigTree(null);
 	}
 	
 	private void updateStorage(ConfigItem item, ConfigStorage storage) {
@@ -583,6 +598,12 @@ public class ConfigRegistry implements ConfigConstants {
 		handles.put(handle, entry);
 		
 		refreshPath(entry);
+		
+		ConfigStorage storage = getStorage(entry);
+		Object storedValue = storage==null ? null : storage.getValue(entry.path);
+		if(storedValue!=null) {
+			entry.value = storedValue;
+		}
 		
 		fireEvent(new ConfigEvent(ConfigEvent.ITEM_ADDED, "handle", handle)); //$NON-NLS-1$
 		
@@ -1310,6 +1331,18 @@ public class ConfigRegistry implements ConfigConstants {
 	@SuppressWarnings("unchecked")
 	public Map<String, ?> getMap(String path) {
 		return (Map<String, ?>)getValue(path);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Object getMapEntry(String path, String key) {
+		Map<String, ?> map = (Map<String, ?>)getValue(path);
+		return map==null ? null : map.get(key);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Object getMapEntry(Handle handle, String key) {
+		Map<String, ?> map = (Map<String, ?>)getValue(handle);
+		return map==null ? null : map.get(key);
 	}
 	
 	public ValueFilter getValueFilter(String path) {

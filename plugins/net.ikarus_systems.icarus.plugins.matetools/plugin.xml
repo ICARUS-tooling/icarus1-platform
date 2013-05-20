@@ -13,6 +13,7 @@
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
 		<import plugin-id="net.ikarus_systems.icarus.dependency" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
 	</requires>
 	
 	<runtime>
@@ -24,8 +25,55 @@
 			</doc>
 		</library>
 	</runtime>
+			
+	<extension-point id="MatetoolsView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that should only
+				be used in the matetools context (parser-pipeline, etc).
+			</doc-text>
+		</doc>
+	</extension-point>
 	
 	<!-- Extensions -->
+	
+	<extension id="MatetoolsParserPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				Perspective dedicated to the use of the matetools parser-pipeline.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.matetools.matetoolsParserPerspective.identity.name" />
+		<parameter id="description" value="plugins.matetools.matetoolsParserPerspective.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.matetools.resources.matetools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.parser.MatetoolsParserPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/matetools/parser/matetools-parser-perspective.gif" />
+	</extension>
+	
+	<extension id="MatetoolsParserInputView" plugin-id="net.ikarus_systems.icarus.matetools" point-id="MatetoolsView">
+		<doc>
+			<doc-text>
+				Input and control view for access to the matetools parser-pipeline.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.matetools.matetoolsParserInputView.identity.name" />
+		<parameter id="description" value="plugins.matetools.matetoolsParserInputView.identity.name" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.matetools.resources.matetools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.parser.MatetoolsParserInputView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/matetools/parser/matetools-parser-input-view.gif" />
+		<parameter id="alignment" value="bottom" />
+		<parameter id="priority" value="high" />
+		<parameter id="requiresTab" value="false" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="set-text" />
+			<parameter id="get-text" />
+			<parameter id="append" value="StringContentType" />
+		</parameter>
+	</extension>
 	
 	<extension id="CONLL09SentenceDataReader" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="SentenceDataReader">
 		<doc>
@@ -34,5 +82,9 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.conll.CONLL09SentenceDataReader" />
+	</extension>
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.parser.ModelStorage" />
 	</extension>
 </plugin>

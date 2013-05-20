@@ -292,6 +292,7 @@ public class PluginExplorerView extends View {
 							null, extensionPoint.getParentExtensionPointId())));
 				
 				// Parameter definitions
+				// TODO need recursive traversal of sub-parameters!!
 				List<ExtensionPoint.ParameterDefinition> paramDefs = new ArrayList<>(
 						extensionPoint.getParameterDefinitions());
 				if(!paramDefs.isEmpty()) {
@@ -336,6 +337,7 @@ public class PluginExplorerView extends View {
 				
 				
 				// Parameters
+				// TODO need recursive traversal of sub-parameters!!
 				List<Extension.Parameter> params = new ArrayList<>(
 						extension.getParameters());
 				if(!params.isEmpty()) {
