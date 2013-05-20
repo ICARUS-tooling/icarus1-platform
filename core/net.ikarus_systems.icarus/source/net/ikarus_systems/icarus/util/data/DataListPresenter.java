@@ -191,6 +191,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 	protected void refresh() {
 		getDataListModel().setDataList(dataList);
 		getFilteredListModel().setFilter(filter);
+		getSelectionModel().clearSelection();
 		
 		refreshFilterOptions();
 	}

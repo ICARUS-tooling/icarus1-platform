@@ -7,20 +7,20 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.helper;
+package net.ikarus_systems.icarus.ui.table;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 
-import net.ikarus_systems.icarus.language.MutableSentenceData;
-import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
+import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 
@@ -29,17 +29,18 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public abstract class AbstractSentenceTablePresenter<T extends SentenceData> 
-		implements AWTPresenter, SentenceDataListener {
+public abstract class TablePresenter implements AWTPresenter, SentenceDataListener {
 	
 	protected JTable table;
 	
 	protected JPanel contentPanel;
-	
-	protected T data;
 
-	protected AbstractSentenceTablePresenter() {
+	protected TablePresenter() {
 		// no-op
+	}
+	
+	public void init() {
+		// for subclasses
 	}
 	
 	protected abstract JTable createTable();
@@ -51,9 +52,9 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 	protected void buildPanel() {
 		contentPanel = new JPanel(new BorderLayout());
 		
-		table = createTable();
+		JTable table = getTable();
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBorder(null);
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		JToolBar toolBar = createToolBar();
@@ -62,52 +63,33 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 		}
 	}
 	
-	protected void setData(T data) {
-		if(this.data!=null && this.data instanceof MutableSentenceData) {
-			((MutableSentenceData)this.data).removeSentenceDataListener(this);
+	public JTable getTable() {
+		if(table==null) {
+			table = createTable();
 		}
 		
-		this.data = data;
-		
-		if(this.data!=null && this.data instanceof MutableSentenceData) {
-			((MutableSentenceData)this.data).addSentenceDataListener(this);
-		}
+		return table;
 	}
+
+	protected abstract void setData(Object data, Options options);
 
 	/**
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#present(java.lang.Object, net.ikarus_systems.icarus.util.Options)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
 		if(data==null)
 			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
 		
-		if(data.equals(this.data)) {
-			return;
+		if(!PresenterUtils.presenterSupports(this, data))
+			throw new UnsupportedPresentationDataException("Unsupported data: "+data.getClass()); //$NON-NLS-1$
+		
+		setData(data, options);
+		
+		if(table!=null) {
+			table.repaint();
 		}
-		
-		setData((T) data);
-		
-		table.repaint();
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.ui.view.Presenter#clear()
-	 */
-	@Override
-	public void clear() {
-		if(data==null) {
-			return;
-		}
-		
-		if(data instanceof MutableSentenceData) {
-			((MutableSentenceData)data).removeSentenceDataListener(this);
-		}
-		
-		data = null;
-		table.repaint();
 	}
 
 	/**
@@ -115,10 +97,7 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 	 */
 	@Override
 	public void close() {
-		
-		if(data instanceof MutableSentenceData) {
-			((MutableSentenceData)data).removeSentenceDataListener(this);
-		}
+		// no-op
 	}
 
 	/**
@@ -130,22 +109,6 @@ public abstract class AbstractSentenceTablePresenter<T extends SentenceData>
 			buildPanel();
 		}
 		return contentPanel;
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.ui.view.Presenter#getPresentedData()
-	 */
-	@Override
-	public Object getPresentedData() {
-		return data;
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.ui.view.Presenter#isPresenting()
-	 */
-	@Override
-	public boolean isPresenting() {
-		return data!=null;
 	}
 
 }

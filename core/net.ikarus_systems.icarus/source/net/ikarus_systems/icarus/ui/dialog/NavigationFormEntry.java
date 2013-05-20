@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.ui.dialog;
 
+import java.text.ParseException;
+
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -22,14 +24,22 @@ public class NavigationFormEntry extends LabeledFormEntry<NavigationFormEntry> {
 	
 	protected final JSpinner spinner;
 
+	public NavigationFormEntry(String label) {
+		this(label, null);
+	}
+
 	public NavigationFormEntry(String label, SpinnerModel spinnerModel) {
 		super(label);
 		
 		if(spinnerModel==null) {
-			spinnerModel = new SpinnerNumberModel();
+			spinnerModel = new SpinnerNumberModel(0, 0, 1, 1);
 		}
 		
 		spinner = new JSpinner(spinnerModel);
+	}
+	
+	public NavigationFormEntry(String label, int min, int max, int step, int value) {
+		this(label, new SpinnerNumberModel(value, min, max, step));
 	}
 	
 	public JSpinner getSpinner() {
@@ -50,7 +60,7 @@ public class NavigationFormEntry extends LabeledFormEntry<NavigationFormEntry> {
 		SpinnerModel model = spinner.getModel();
 		if(model instanceof SpinnerNumberModel) {
 			SpinnerNumberModel snm = (SpinnerNumberModel) model;
-			snm.setMinimum(value);
+			snm.setMaximum(value);
 		}
 		
 		return this;
@@ -72,6 +82,17 @@ public class NavigationFormEntry extends LabeledFormEntry<NavigationFormEntry> {
 	@Override
 	public Object getValue() {
 		return spinner.getValue();
+	}
+	
+	public NavigationFormEntry commit() {
+		try {
+			spinner.commitEdit();
+		} catch (ParseException e) {
+			// TODO output to log?
+			spinner.setValue(spinner.getValue());
+		}
+		
+		return this;
 	}
 
 	/**

@@ -27,18 +27,10 @@ public class CompoundDependencyData extends CompoundSentenceData implements
 		// no-op
 	}
 
-	/**
-	 * @param systemData
-	 */
 	public CompoundDependencyData(DependencyData systemData) {
 		super(systemData);
 	}
 
-	/**
-	 * @param systemData
-	 * @param goldData
-	 * @param userData
-	 */
 	public CompoundDependencyData(DependencyData systemData,
 			DependencyData goldData, DependencyData userData) {
 		super(systemData, goldData, userData);

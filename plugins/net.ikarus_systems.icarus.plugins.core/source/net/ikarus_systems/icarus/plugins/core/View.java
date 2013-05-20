@@ -256,11 +256,11 @@ public abstract class View implements Identifiable {
 	 * @param message the request to be dispatched
 	 */
 	protected final ResultMessage sendRequest(Object receiver, Message message) {
-		return getPerspective().sendRequest(receiver, message);
+		return getPerspective().sendRequest(this, receiver, message);
 	}
 	
 	protected final ResultMessage sendRequest(Object perspective, Object receiver, Message message) {
-		return getPerspective().sendRequest(perspective, receiver, message);
+		return getPerspective().sendRequest(this, perspective, receiver, message);
 	}
 	
 	/**

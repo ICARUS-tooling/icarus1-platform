@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.ui.layout;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -125,6 +126,12 @@ public class DefaultAreaLayout implements AreaLayout {
 		JComponent centerContainer = getAreaContainer(Alignment.CENTER);
 		JComponent topContainer = getAreaContainer(Alignment.TOP);
 		JComponent bottomContainer = getAreaContainer(Alignment.BOTTOM);
+		
+		configureContainer(leftContainer);
+		configureContainer(rightContainer);
+		configureContainer(centerContainer);
+		configureContainer(topContainer);
+		configureContainer(bottomContainer);
 		
 		// Split center and right if necessary
 		if(centerContainer!=null && rightContainer!=null) {
@@ -308,6 +315,13 @@ public class DefaultAreaLayout implements AreaLayout {
 		LayoutManager layout = root.getLayout();
 		if(!(layout instanceof BorderLayout)) {
 			root.setLayout(new BorderLayout());
+		}
+	}
+	
+	protected void configureContainer(JComponent container) {
+		if(container!=null) {
+			container.setMinimumSize(new Dimension(100, 100));
+			container.setPreferredSize(new Dimension(250, 150));
 		}
 	}
 

@@ -71,6 +71,7 @@ public class TreebankManagerPerspective extends Perspective {
 				/*LanguageToolsConstants.TREEBANK_INSPECT_VIEW_ID,*/
 				ManagementConstants.DEFAULT_LOG_VIEW_ID,
 				ManagementConstants.DEFAULT_OUTPUT_VIEW_ID,
+				ManagementConstants.TABLE_VIEW_ID,
 		};
 		
 		Set<Extension> newExtensions = new HashSet<>();

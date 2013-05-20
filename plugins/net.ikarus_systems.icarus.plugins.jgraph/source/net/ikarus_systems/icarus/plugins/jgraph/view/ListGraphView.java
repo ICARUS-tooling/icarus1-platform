@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
@@ -24,6 +25,8 @@ import javax.swing.event.ListSelectionListener;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.helper.Outline;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.ListPresenter;
 import net.ikarus_systems.icarus.ui.view.PresenterUtils;
@@ -40,12 +43,12 @@ import net.ikarus_systems.icarus.util.mpi.ResultMessage;
  * @version $Id$
  *
  */
-public class ListGraphView extends View {
+public class ListGraphView extends View implements Outline {
 	
 	protected GraphPresenter graphPresenter;
 	protected ListPresenter listPresenter;
 	
-	protected JLabel infoLabel;
+	protected JTextArea infoLabel;
 	protected JSplitPane splitPane;
 	
 	protected Handler handler;
@@ -62,9 +65,8 @@ public class ListGraphView extends View {
 		container.setLayout(new BorderLayout());
 		
 		handler = createHandler();
-		
-		infoLabel = new JLabel();
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		infoLabel = UIUtil.defaultCreateInfoLabel(container);
 		container.add(infoLabel, BorderLayout.NORTH);
 		
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -106,6 +108,7 @@ public class ListGraphView extends View {
 		
 		if(this.listPresenter!=null) {
 			this.listPresenter.getSelectionModel().removeListSelectionListener(handler);
+			this.listPresenter.close();
 		}
 		
 		this.listPresenter = listPresenter;
@@ -139,13 +142,20 @@ public class ListGraphView extends View {
 		
 		if(selectedObject==null) {
 			graphPresenter.clear();
-		} else {
-			Options options = new Options();
-			options.put(Options.INDEX, selectedIndex);
-			options.put(Options.CONTENT_TYPE, listPresenter.getContentType());
-			
-			graphPresenter.present(selectedObject, options);
-		}
+			return;
+		} 
+		
+		
+		// Display selected object in graph presenter
+		Options options = new Options();
+		options.put(Options.INDEX, selectedIndex);
+		options.put(Options.CONTENT_TYPE, listPresenter.getContentType());
+		
+		graphPresenter.present(selectedObject, options);
+		
+		// Broadcast selected object via message
+		Message message = new Message(this, Commands.DISPLAY, selectedObject, options);
+		sendRequest(Outline.class, message);
 	}
 	
 	protected void displayData(Object data, Options options) {
@@ -182,7 +192,7 @@ public class ListGraphView extends View {
 		ContentType entryType = dataList.getContentType();
 		//entryType = ContentTypeRegistry.getInstance().getType("DependencyDataContentType");
 		GraphPresenter graphPresenter = this.graphPresenter;
-		if(graphPresenter==null || !PresenterUtils.presenterSupports(graphPresenter, data)) {
+		if(graphPresenter==null || !PresenterUtils.presenterSupports(graphPresenter, entryType)) {
 			graphPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphPresenter.class, entryType, true, true);
 		}
 		
@@ -270,8 +280,22 @@ public class ListGraphView extends View {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-		super.reset();
+		displayData(null, null);
+	}
+
+	@Override
+	public void close() {
+		super.close();
+	
+		// Close any active presenter and discard its reference
+		if(graphPresenter!=null) {
+			graphPresenter.close();
+			graphPresenter = null;
+		}		
+		if(listPresenter!=null) {
+			listPresenter.close();
+			listPresenter = null;
+		}
 	}
 
 	/**

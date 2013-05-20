@@ -73,7 +73,7 @@ import net.ikarus_systems.icarus.util.mpi.ResultMessage;
  */
 public class TreebankPropertiesView extends View {
 
-	private JLabel infoLabel;
+	private JTextArea infoLabel;
 	
 	private JTextArea propertiesArea;
 	
@@ -122,10 +122,7 @@ public class TreebankPropertiesView extends View {
 		handler = new Handler();
 
 		// Info label
-		infoLabel = new JLabel();
-		UIUtil.disableHtml(infoLabel);
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		infoLabel.setVerticalAlignment(SwingConstants.TOP);
+		infoLabel = UIUtil.defaultCreateInfoLabel(container);
 		ResourceManager.getInstance().getGlobalDomain().prepareComponent(
 				infoLabel, "plugins.languageTools.treebankPropertiesView.notAvailable", null); //$NON-NLS-1$
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);

@@ -51,8 +51,16 @@ public class FormBuilder {
 	
 	private ResourceDomain resourceDomain;
 	
+	public static FormBuilder newBuilder() {
+		return new FormBuilder(null);
+	}
+	
 	public static FormBuilder newBuilder(Container container) {
 		return new FormBuilder(container);
+	}
+
+	public static FormBuilder newLocalizingBuilder() {
+		return newLocalizingBuilder(null, ResourceManager.getInstance().getGlobalDomain());
 	}
 
 	public static FormBuilder newLocalizingBuilder(Container container) {
@@ -199,12 +207,20 @@ public class FormBuilder {
 		}
 	}
 	
+	public void pack() {
+		container.setSize(container.getPreferredSize());
+	}
+	
 	public InputFormEntry addInputFormEntry(String id) {
 		return addEntry(id, new InputFormEntry());
 	}
 	
 	public InputFormEntry addInputFormEntry(String id, String label) {
 		return addInputFormEntry(id).setLabel(label);
+	}
+	
+	public InputFormEntry addInputFormEntry(String id, String label, int columns) {
+		return addInputFormEntry(id).setLabel(label).setColumns(columns);
 	}
 	
 	public LocationFormEntry addLocationFormEntry(String id) {
@@ -305,7 +321,7 @@ public class FormBuilder {
 	}
 	
 	public void feedSeparator() {
-		feedComponent(new JSeparator(SwingConstants.HORIZONTAL), null, RESIZE_HORIZONTAL);
+		feedComponent(new JSeparator(SwingConstants.HORIZONTAL), null, RESIZE_REMAINDER);
 		newLine();
 	}
 	
@@ -362,6 +378,12 @@ public class FormBuilder {
 		FormEntry clear();
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static abstract class AbstractFormEntry implements FormEntry {
 		
 		protected int resizeMode = RESIZE_NONE;
@@ -370,8 +392,10 @@ public class FormBuilder {
 			return resizeMode;
 		}
 
-		public void setResizeMode(int resizeMode) {
+		public FormEntry setResizeMode(int resizeMode) {
 			this.resizeMode = resizeMode;
+			
+			return this;
 		}
 	}
 }

@@ -112,17 +112,17 @@ public class DependencyUtils implements DependencyConstants {
 		styleContext = new StyleContext();		
 		Style style;
 		
-		// CASEDIFF 1
+		// GROUP 1
 		style = styleContext.addStyle("caseDiff1", null); //$NON-NLS-1$
 		StyleConstants.setBackground(style, getCaseDiffColor(0));
 		StyleConstants.setBold(style, true);
 		
-		// CASEDIFF 2
+		// GROUP 2
 		style = styleContext.addStyle("caseDiff2", null); //$NON-NLS-1$
 		StyleConstants.setBackground(style, getCaseDiffColor(1));
 		StyleConstants.setBold(style, true);
 		
-		// CASEDIFF 3
+		// GROUP 3
 		style = styleContext.addStyle("caseDiff3", null); //$NON-NLS-1$
 		StyleConstants.setBackground(style, getCaseDiffColor(2));
 		StyleConstants.setBold(style, true);
@@ -402,16 +402,16 @@ public class DependencyUtils implements DependencyConstants {
 		switch (existence) {
 		case DATA_UNDEFINED_VALUE:
 			return DATA_UNDEFINED_LABEL;
-		case DATA_CASEDIFF_VALUE:
-			return DATA_CASEDIFF_LABEL;
+		case DATA_GROUP_VALUE:
+			return DATA_GROUP_LABEL;
 		default:
 			return String.valueOf(true);
 		}
 	}
 	
 	public static int parseExistenceLabel(String label) {
-		if(DATA_CASEDIFF_LABEL.equals(label))
-			return DATA_CASEDIFF_VALUE;
+		if(DATA_GROUP_LABEL.equals(label))
+			return DATA_GROUP_VALUE;
 		else if(DATA_UNDEFINED_LABEL.equals(label))
 			return DATA_UNDEFINED_VALUE;
 		else
@@ -421,8 +421,8 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getBooleanLabel(int value) {
 		switch (value) {
-		case DATA_CASEDIFF_VALUE:
-			return DATA_CASEDIFF_LABEL;
+		case DATA_GROUP_VALUE:
+			return DATA_GROUP_LABEL;
 		case DATA_UNDEFINED_VALUE:
 			return DATA_UNDEFINED_LABEL;
 		case DATA_YES_VALUE:
@@ -435,8 +435,8 @@ public class DependencyUtils implements DependencyConstants {
 	}
 	
 	public static int parseBooleanLabel(String label) {
-		if(DATA_CASEDIFF_LABEL.equals(label))
-			return DATA_CASEDIFF_VALUE;
+		if(DATA_GROUP_LABEL.equals(label))
+			return DATA_GROUP_VALUE;
 		else if(DATA_UNDEFINED_LABEL.equals(label))
 			return DATA_UNDEFINED_VALUE;
 		else if(Boolean.parseBoolean(label))
@@ -451,8 +451,8 @@ public class DependencyUtils implements DependencyConstants {
 			return DATA_ROOT_LABEL;
 		case DATA_UNDEFINED_VALUE:
 			return DATA_UNDEFINED_LABEL;
-		case DATA_CASEDIFF_VALUE:
-			return DATA_CASEDIFF_LABEL;
+		case DATA_GROUP_VALUE:
+			return DATA_GROUP_LABEL;
 		default:
 			return String.valueOf(head + 1);
 		}
@@ -462,8 +462,8 @@ public class DependencyUtils implements DependencyConstants {
 		switch (value) {
 		case DATA_UNDEFINED_VALUE:
 			return DATA_UNDEFINED_LABEL;
-		case DATA_CASEDIFF_VALUE:
-			return DATA_CASEDIFF_LABEL;
+		case DATA_GROUP_VALUE:
+			return DATA_GROUP_LABEL;
 		default:
 			return String.valueOf(value);
 		}
@@ -473,8 +473,8 @@ public class DependencyUtils implements DependencyConstants {
 		switch (value) {
 		case DATA_UNDEFINED_VALUE:
 			return DATA_UNDEFINED_LABEL;
-		case DATA_CASEDIFF_VALUE:
-			return DATA_CASEDIFF_LABEL;
+		case DATA_GROUP_VALUE:
+			return DATA_GROUP_LABEL;
 		case DATA_LEFT_VALUE:
 			return DATA_LEFT_LABEL;
 		case DATA_RIGHT_VALUE:
@@ -490,8 +490,8 @@ public class DependencyUtils implements DependencyConstants {
 			return DATA_HEAD_ROOT;
 		else if (DATA_UNDEFINED_LABEL.equals(head))
 			return DATA_UNDEFINED_VALUE;
-		else if (DATA_CASEDIFF_LABEL.equals(head))
-			return DATA_CASEDIFF_VALUE;
+		else if (DATA_GROUP_LABEL.equals(head))
+			return DATA_GROUP_VALUE;
 		else
 			return Integer.parseInt(head) - 1;
 	}
@@ -500,16 +500,16 @@ public class DependencyUtils implements DependencyConstants {
 		value = value.trim();
 		if (value.isEmpty() || DATA_UNDEFINED_LABEL.equals(value))
 			return DATA_UNDEFINED_VALUE;
-		else if (DATA_CASEDIFF_LABEL.equals(value))
-			return DATA_CASEDIFF_VALUE;
+		else if (DATA_GROUP_LABEL.equals(value))
+			return DATA_GROUP_VALUE;
 		else
 			return Integer.parseInt(value);
 	}
 
 	public static int parseDirectionLabel(String direction) {
 		direction = direction.trim();
-		if (DATA_CASEDIFF_LABEL.equals(direction))
-			return DATA_CASEDIFF_VALUE;
+		if (DATA_GROUP_LABEL.equals(direction))
+			return DATA_GROUP_VALUE;
 		else if (DATA_LEFT_LABEL.equals(direction))
 			return DATA_LEFT_VALUE;
 		else if (DATA_RIGHT_LABEL.equals(direction))
@@ -715,26 +715,26 @@ public class DependencyUtils implements DependencyConstants {
 			if((highlight & HIGHLIGHT_EDGE_GENERAL) == HIGHLIGHT_EDGE_GENERAL)
 				sb.append("E"); //$NON-NLS-1$
 	
-			sb.append(" cd="); //$NON-NLS-1$
-			if((highlight & HIGHLIGHT_CASEDIFF) == HIGHLIGHT_CASEDIFF)
+			sb.append(" gps="); //$NON-NLS-1$
+			if((highlight & HIGHLIGHT_GROUP) == HIGHLIGHT_GROUP)
 				sb.append("+"); //$NON-NLS-1$
-			if((highlight & HIGHLIGHT_FORM_CASEDIFF) == HIGHLIGHT_FORM_CASEDIFF)
+			if((highlight & HIGHLIGHT_FORM_GROUP) == HIGHLIGHT_FORM_GROUP)
 				sb.append("f"); //$NON-NLS-1$
-			if((highlight & HIGHLIGHT_POS_CASEDIFF) == HIGHLIGHT_POS_CASEDIFF)
+			if((highlight & HIGHLIGHT_POS_GROUP) == HIGHLIGHT_POS_GROUP)
 				sb.append("p"); //$NON-NLS-1$
-			if((highlight & HIGHLIGHT_RELATION_CASEDIFF) == HIGHLIGHT_RELATION_CASEDIFF)
+			if((highlight & HIGHLIGHT_RELATION_GROUP) == HIGHLIGHT_RELATION_GROUP)
 				sb.append("r"); //$NON-NLS-1$
-			if((highlight & HIGHLIGHT_DIRECTION_CASEDIFF) ==  HIGHLIGHT_DIRECTION_CASEDIFF)
+			if((highlight & HIGHLIGHT_DIRECTION_GROUP) ==  HIGHLIGHT_DIRECTION_GROUP)
 				sb.append("d"); //$NON-NLS-1$
-			if((highlight & HIGHLIGHT_DISTANCE_CASEDIFF) == HIGHLIGHT_DISTANCE_CASEDIFF)
+			if((highlight & HIGHLIGHT_DISTANCE_GROUP) == HIGHLIGHT_DISTANCE_GROUP)
 				sb.append("s"); //$NON-NLS-1$
 		}
 		
 		return sb.toString();
 	}
 	
-	public static boolean isCaseDiff(int highlight) {
-		return (highlight & HIGHLIGHT_CASEDIFF) == HIGHLIGHT_CASEDIFF;
+	public static boolean isGroup(int highlight) {
+		return (highlight & HIGHLIGHT_GROUP) == HIGHLIGHT_GROUP;
 	}
 	
 	public static boolean isHighlight(int highlight) {
@@ -908,25 +908,25 @@ public class DependencyUtils implements DependencyConstants {
 		int count = 0;
 		
 		if((highlight & HIGHLIGHT_FORM) == HIGHLIGHT_FORM
-				&& (highlight & HIGHLIGHT_FORM_CASEDIFF) != HIGHLIGHT_FORM_CASEDIFF)
+				&& (highlight & HIGHLIGHT_FORM_GROUP) != HIGHLIGHT_FORM_GROUP)
 			count++;
 		if((highlight & HIGHLIGHT_LEMMA) == HIGHLIGHT_LEMMA
-				&& (highlight & HIGHLIGHT_LEMMA_CASEDIFF) != HIGHLIGHT_LEMMA_CASEDIFF)
+				&& (highlight & HIGHLIGHT_LEMMA_GROUP) != HIGHLIGHT_LEMMA_GROUP)
 			count++;
 		if((highlight & HIGHLIGHT_FEATURES) == HIGHLIGHT_FEATURES
-				&& (highlight & HIGHLIGHT_FEATURES_CASEDIFF) != HIGHLIGHT_FEATURES_CASEDIFF)
+				&& (highlight & HIGHLIGHT_FEATURES_GROUP) != HIGHLIGHT_FEATURES_GROUP)
 			count++;
 		if((highlight & HIGHLIGHT_POS) == HIGHLIGHT_POS
-				&& (highlight & HIGHLIGHT_POS_CASEDIFF) != HIGHLIGHT_POS_CASEDIFF)
+				&& (highlight & HIGHLIGHT_POS_GROUP) != HIGHLIGHT_POS_GROUP)
 			count++;
 		if((highlight & HIGHLIGHT_RELATION) == HIGHLIGHT_RELATION
-				&& (highlight & HIGHLIGHT_RELATION_CASEDIFF) != HIGHLIGHT_RELATION_CASEDIFF)
+				&& (highlight & HIGHLIGHT_RELATION_GROUP) != HIGHLIGHT_RELATION_GROUP)
 			count++;
 		if((highlight & HIGHLIGHT_DIRECTION) == HIGHLIGHT_DIRECTION
-				&& (highlight & HIGHLIGHT_DIRECTION_CASEDIFF) != HIGHLIGHT_DIRECTION_CASEDIFF)
+				&& (highlight & HIGHLIGHT_DIRECTION_GROUP) != HIGHLIGHT_DIRECTION_GROUP)
 			count++;
 		if((highlight & HIGHLIGHT_DISTANCE) == HIGHLIGHT_DISTANCE
-				&& (highlight & HIGHLIGHT_DISTANCE_CASEDIFF) != HIGHLIGHT_DISTANCE_CASEDIFF)
+				&& (highlight & HIGHLIGHT_DISTANCE_GROUP) != HIGHLIGHT_DISTANCE_GROUP)
 			count++;
 		
 		return count;
@@ -938,21 +938,21 @@ public class DependencyUtils implements DependencyConstants {
 		
 		int count = 0;
 		
-		if((highlight & HIGHLIGHT_FORM_CASEDIFF) == HIGHLIGHT_FORM_CASEDIFF)
+		if((highlight & HIGHLIGHT_FORM_GROUP) == HIGHLIGHT_FORM_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_LEMMA_CASEDIFF) == HIGHLIGHT_LEMMA_CASEDIFF)
+		if((highlight & HIGHLIGHT_LEMMA_GROUP) == HIGHLIGHT_LEMMA_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_FEATURES_CASEDIFF) == HIGHLIGHT_FEATURES_CASEDIFF)
+		if((highlight & HIGHLIGHT_FEATURES_GROUP) == HIGHLIGHT_FEATURES_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_POS_CASEDIFF) == HIGHLIGHT_POS_CASEDIFF)
+		if((highlight & HIGHLIGHT_POS_GROUP) == HIGHLIGHT_POS_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_EXISTENCE_CASEDIFF) == HIGHLIGHT_EXISTENCE_CASEDIFF)
+		if((highlight & HIGHLIGHT_EXISTENCE_GROUP) == HIGHLIGHT_EXISTENCE_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_RELATION_CASEDIFF) == HIGHLIGHT_RELATION_CASEDIFF)
+		if((highlight & HIGHLIGHT_RELATION_GROUP) == HIGHLIGHT_RELATION_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_DIRECTION_CASEDIFF) == HIGHLIGHT_DIRECTION_CASEDIFF)
+		if((highlight & HIGHLIGHT_DIRECTION_GROUP) == HIGHLIGHT_DIRECTION_GROUP)
 			count++;
-		if((highlight & HIGHLIGHT_DISTANCE_CASEDIFF) == HIGHLIGHT_DISTANCE_CASEDIFF)
+		if((highlight & HIGHLIGHT_DISTANCE_GROUP) == HIGHLIGHT_DISTANCE_GROUP)
 			count++;
 		
 		return count;
@@ -966,15 +966,23 @@ public class DependencyUtils implements DependencyConstants {
 		return ContentTypeRegistry.getInstance().getType(CONTENT_TYPE_ID);
 	}
 	
+	public static String getForm(DependencyNodeData item) {
+		return item.hasChildren() ? item.getForm2() : item.getForm();
+	}
+	
 	public static String getForms(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
-			buffer[i] = items[i].getSoleForm();
+			buffer[i] = items[i].getForm();
 		
 		return Arrays.toString(buffer);
+	}
+	
+	public static String getLemma(DependencyNodeData item) {
+		return item.hasChildren() ? item.getLemma2() : item.getLemma();
 	}
 	
 	public static String getLemmas(DependencyNodeData[] items) {
@@ -983,9 +991,13 @@ public class DependencyUtils implements DependencyConstants {
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
-			buffer[i] = items[i].getSoleLemma();
+			buffer[i] = items[i].getLemma();
 		
 		return Arrays.toString(buffer);
+	}
+	
+	public static String getFeatures(DependencyNodeData item) {
+		return item.hasChildren() ? item.getFeatures2() : item.getFeatures();
 	}
 	
 	public static String getFeatures(DependencyNodeData[] items) {
@@ -994,9 +1006,13 @@ public class DependencyUtils implements DependencyConstants {
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
-			buffer[i] = items[i].getSoleFeatures();
+			buffer[i] = items[i].getFeatures();
 		
 		return Arrays.toString(buffer);
+	}
+	
+	public static String getPos(DependencyNodeData item) {
+		return item.hasChildren() ? item.getPos2() : item.getPos();
 	}
 	
 	public static String getPoss(DependencyNodeData[] items) {
@@ -1005,9 +1021,14 @@ public class DependencyUtils implements DependencyConstants {
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
-			buffer[i] = items[i].getSolePos();
+			buffer[i] = items[i].getPos();
 		
 		return Arrays.toString(buffer);
+	}
+	
+	public static String getRelation(DependencyNodeData item) {
+		//return item.hasChildren() ? item.getRelation2() : item.getRelation();
+		return item.getRelation();
 	}
 	
 	public static String getRelations(DependencyNodeData[] items) {
@@ -1016,7 +1037,7 @@ public class DependencyUtils implements DependencyConstants {
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
-			buffer[i] = items[i].getSoleRelation();
+			buffer[i] = items[i].getRelation();
 		
 		return Arrays.toString(buffer);
 	}
@@ -1043,11 +1064,35 @@ public class DependencyUtils implements DependencyConstants {
 		return Arrays.toString(buffer);
 	}
 	
+	public static String getDirection(DependencyNodeData item) {
+		if(item.hasHead()) {
+			return item.getHead()<item.getIndex() ? DATA_RIGHT_LABEL : DATA_LEFT_LABEL;
+		} else {
+			return ""; //$NON-NLS-1$
+		}
+	}
+	
 	public static boolean isDependencyTreebank(Treebank treebank) {
 		Exceptions.testNullArgument(treebank, "treebank"); //$NON-NLS-1$
 
 		return ContentTypeRegistry.isCompatible(
 				DependencyConstants.CONTENT_TYPE_ID, treebank.getContentType());
+	}
+	
+	/**
+	 * Algorithm by 
+	 * <a href="http://ufal.mff.cuni.cz:8080/pub/files/havelka2005.pdf">Havelka 2005</a>
+	 */
+	public static void fillProjectivityFlags(int[] heads, long[] flags) {
+		if(heads==null || flags==null)
+			throw new IllegalArgumentException();
+		if(heads.length!=flags.length)
+			throw new IllegalArgumentException("Size of heads and flags array mismatching"); //$NON-NLS-1$
+		
+		int size = heads.length;
+		
+		// TODO implement!!
+		
 	}
 	
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {

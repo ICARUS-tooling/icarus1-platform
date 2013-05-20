@@ -16,4 +16,5 @@ package net.ikarus_systems.icarus.language.treebank.search;
  */
 public interface SearchNode {
 
+	SearchConstraint[] getConstraints();
 }

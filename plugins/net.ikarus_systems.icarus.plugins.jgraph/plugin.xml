@@ -242,6 +242,12 @@
 		<parameter id="extension-point" value="net.ikarus_systems.icarus.languageTools@TreebankManagementView" />
 	</extension>
 	
+	<!-- HELPER -->
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer" />
+	</extension>
+	
 	<!-- GRAPH UTILITIES -->
 	
 	<extension id="DefaultArcLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
@@ -282,6 +288,19 @@
 		<parameter id="description" value="plugins.jgraph.defaultGraphRenderer.identity.description" />
 		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphRenderer" />
+	</extension>
+	
+	<extension id="DefaultGraphStyle" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphStyle">
+		<doc>
+			<doc-text>
+				Empty style that just ensures that edges and vertices are assigned
+				their respective default styles.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultGraphStyle.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultGraphStyle.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphStyle" />
 	</extension>
 	
 	<extension id="ArcConnectorShape" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="Shape">

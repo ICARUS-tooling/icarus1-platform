@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -29,6 +31,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
  * @version $Id$
  *
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class DependencyNodeData implements DependencyConstants, CloneableObject, Cloneable,
 		Serializable {
@@ -75,6 +78,14 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 
 	public DependencyNodeData(DependencyNodeData source) {
 		copyFrom(source);
+
+		int childCount = source.getChildCount();
+		if(childCount>0) {
+			children = new ArrayList<>(childCount);
+			for(int i=0; i<childCount; i++) {
+				children.add(source.getChildAt(i).clone());
+			}
+		}
 	}
 
 	public DependencyNodeData(DependencyData source, int index) {
@@ -109,47 +120,6 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		return new DependencyNodeData(this);
 	}
 
-	public int copyTo(DependencyDataEntry item) {
-		int fieldMask = 0;
-
-		/*
-		 * if(index!=item.getIndex()) { hasChanged = true; item.setIndex(index);
-		 * }
-		 */
-
-		if (!form.equals(item.getForm())) {
-			fieldMask = fieldMask | DependencyConstants.DATA_FIELD_FORM;
-			item.setForm(form);
-		}
-
-		if (!lemma.equals(item.getLemma())) {
-			fieldMask = fieldMask | DependencyConstants.DATA_FIELD_LEMMA;
-			item.setLemma(lemma);
-		}
-
-		if (!features.equals(item.getFeatures())) {
-			fieldMask = fieldMask | DependencyConstants.DATA_FIELD_FEATURES;
-			item.setFeatures(features);
-		}
-
-		if (!pos.equals(item.getPos())) {
-			fieldMask = fieldMask | DependencyConstants.DATA_FIELD_POS;
-			item.setPos(pos);
-		}
-
-		if (!relation.equals(item.getRelation())) {
-			fieldMask = fieldMask | DependencyConstants.DATA_FIELD_RELATION;
-			item.setRelation(relation);
-		}
-
-		if (head != item.getHead()) {
-			fieldMask = fieldMask | DependencyConstants.DATA_FIELD_HEAD;
-			item.setHead(head);
-		}
-
-		return fieldMask;
-	}
-
 	public void copyFrom(DependencyDataEntry source) {
 		form = source.getForm();
 		pos = source.getPos();
@@ -168,7 +138,7 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		relation = source.relation;
 		head = source.head;
 		index = source.index;
-		flags = source.getFlags();
+		flags = source.flags;
 	}
 
 	/** 
@@ -201,11 +171,11 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 				|| !relation.equals(source.relation);
 	}
 
-	public String getForm() {
+	public String getForm2() {
 		return hasChildren() ? form+" [...]" : form; //$NON-NLS-1$
 	}
 
-	public String getSoleForm() {
+	public String getForm() {
 		return form;
 	}
 
@@ -213,11 +183,11 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		this.form = form;
 	}
 
-	public String getLemma() {
+	public String getLemma2() {
 		return hasChildren() ? lemma+" [...]" : lemma; //$NON-NLS-1$
 	}
 
-	public String getSoleLemma() {
+	public String getLemma() {
 		return lemma;
 	}
 
@@ -225,11 +195,11 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		this.lemma = lemma;
 	}
 
-	public String getFeatures() {
+	public String getFeatures2() {
 		return hasChildren() ? features+" [...]" : features; //$NON-NLS-1$
 	}
 
-	public String getSoleFeatures() {
+	public String getFeatures() {
 		return features;
 	}
 
@@ -237,11 +207,11 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		this.features = features;
 	}
 
-	public String getPos() {
+	public String getPos2() {
 		return hasChildren() ? pos+" [...]" : pos; //$NON-NLS-1$
 	}
 
-	public String getSolePos() {
+	public String getPos() {
 		return pos;
 	}
 
@@ -250,10 +220,6 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 	}
 
 	public String getRelation() {
-		return hasChildren() ? relation+" [...]" : relation; //$NON-NLS-1$
-	}
-
-	public String getSoleRelation() {
 		return relation;
 	}
 
@@ -279,6 +245,10 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 	
 	public long getFlags() {
 		return flags;
+	}
+	
+	public boolean isFlagSet(long flag) {
+		return (flags & flag) == flag;
 	}
 	
 	public void setFlags(long flags) {
@@ -317,9 +287,10 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 		return false;
 	}
 	
-	public DependencyNodeData[] getChildren(boolean sort) {
-		if(!hasChildren())
-			return null;
+	public List<DependencyNodeData> getChildren(boolean sort) {
+		if(!hasChildren()) {
+			return Collections.emptyList();
+		}
 		
 		List<DependencyNodeData> list = new ArrayList<>();
 		feedChildren(list);
@@ -328,11 +299,21 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 			Collections.sort(list, INDEX_SORTER);
 		}
 		
-		return list.toArray(new DependencyNodeData[list.size()]);
+		return list;
 	}
 
 	
-	public DependencyNodeData[] getChildren() {
+	public DependencyNodeData[] getChildrenArray() {
+		List<DependencyNodeData> children = getChildren();
+		if(children.isEmpty()) {
+			return null;
+		}
+		DependencyNodeData[] buffer = new DependencyNodeData[children.size()];
+		return children.toArray(buffer);
+	}
+
+	
+	public List<DependencyNodeData> getChildren() {
 		return getChildren(true);
 	}
 	

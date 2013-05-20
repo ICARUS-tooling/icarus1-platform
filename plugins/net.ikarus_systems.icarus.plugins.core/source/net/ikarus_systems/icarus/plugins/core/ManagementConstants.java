@@ -33,6 +33,8 @@ public interface ManagementConstants {
 			PluginUtil.CORE_PLUGIN_ID+"@DefaultLogView"; //$NON-NLS-1$
 	public static final String DEFAULT_OUTPUT_VIEW_ID = 
 			PluginUtil.CORE_PLUGIN_ID+"@DefaultOutputView"; //$NON-NLS-1$
+	public static final String TABLE_VIEW_ID = 
+			PluginUtil.CORE_PLUGIN_ID+"@TableView"; //$NON-NLS-1$
 
 	// Event constants	
 	public static final String EXPLORER_SELECTION_CHANGED = 

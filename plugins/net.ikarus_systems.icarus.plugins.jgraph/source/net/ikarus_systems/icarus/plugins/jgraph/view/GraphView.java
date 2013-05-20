@@ -12,18 +12,19 @@ package net.ikarus_systems.icarus.plugins.jgraph.view;
 import java.awt.BorderLayout;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JTextArea;
+import javax.swing.JToolBar;
 
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIDummies;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
+import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
-import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import net.ikarus_systems.icarus.util.mpi.ResultMessage;
@@ -37,7 +38,8 @@ public class GraphView extends View {
 	
 	protected GraphPresenter presenter;
 	
-	protected JLabel infoLabel;
+	protected JTextArea infoLabel;
+	protected JToolBar toolBar;
 	protected JPanel contentPanel;
 
 	public GraphView() {
@@ -51,9 +53,8 @@ public class GraphView extends View {
 	public void init(JComponent container) {
 		
 		container.setLayout(new BorderLayout());
-		
-		infoLabel = new JLabel();
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		infoLabel = UIUtil.defaultCreateInfoLabel(container);
 		container.add(infoLabel, BorderLayout.NORTH);
 		
 		contentPanel = new JPanel(new BorderLayout());
@@ -103,6 +104,24 @@ public class GraphView extends View {
 		}
 	}
 	
+	protected void setPresenter(GraphPresenter presenter) {
+		if(this.presenter==presenter) {
+			return;
+		}
+		
+		if(this.presenter!=null) {
+			this.presenter.close();
+		}
+		
+		this.presenter = presenter;
+		
+		if(this.presenter!=null) {
+			this.presenter.init();
+		} else {
+			showInfo(null);
+		}
+	}
+	
 	protected void displayData(Object data, Options options) {
 		
 		// Show default info if nothing available to be displayed
@@ -116,38 +135,31 @@ public class GraphView extends View {
 		}
 		
 		// Fetch content type for data
-		ContentType contentType = (ContentType) options.get(Options.CONTENT_TYPE);
-		if(contentType==null) {
-			contentType = ContentTypeRegistry.getInstance().getEnclosingType(data);
-		}
-		
 		GraphPresenter presenter = this.presenter;
 		
 		// Fetch new presenter
-		if(presenter==null || !presenter.supports(contentType)) {
-			presenter = UIHelperRegistry.globalRegistry().findHelper(
-					GraphPresenter.class, contentType, true, false);
+		if(presenter==null || !PresenterUtils.presenterSupports(presenter, data)) {
+			ContentType contentType = (ContentType) options.get(Options.CONTENT_TYPE);
+			if(contentType!=null) {
+				presenter = UIHelperRegistry.globalRegistry().findHelper(
+						GraphPresenter.class, contentType, true, false);
+			} else {
+				presenter = UIHelperRegistry.globalRegistry().findHelper(
+						GraphPresenter.class, data);
+			}
 		}
 		
 		// Abort if presenter not available for content type
-		if(presenter==null || presenter.supports(contentType)) {
+		if(presenter==null) {
 			String text = ResourceManager.getInstance().get(
 					"plugins.jgraph.graphView.unsupportedType", data.getClass()); //$NON-NLS-1$
 			showInfo(text);
 			return;
 		}
 		
-		boolean refreshPresentingComponent = false;
+		boolean refreshPresentingComponent = presenter!=this.presenter;
 		
-		// Close old presenter if we found a new one and initialize the new
-		if(presenter!=this.presenter) {
-			this.presenter.close();
-			refreshPresentingComponent = true;
-			
-			presenter.init();
-		}
-		
-		this.presenter = presenter;
+		setPresenter(presenter);
 		
 		try {
 			presenter.present(data, options);
@@ -164,7 +176,8 @@ public class GraphView extends View {
 			contentPanel.removeAll();
 			contentPanel.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
 		}
-		
+
+		infoLabel.setVisible(false);
 		contentPanel.setVisible(true);
 	}
 

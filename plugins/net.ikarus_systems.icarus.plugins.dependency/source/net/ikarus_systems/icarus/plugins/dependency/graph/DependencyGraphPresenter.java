@@ -9,14 +9,17 @@
  */
 package net.ikarus_systems.icarus.plugins.dependency.graph;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.ikarus_systems.icarus.config.ConfigDelegate;
 import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
 import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
@@ -27,6 +30,8 @@ import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData;
 import net.ikarus_systems.icarus.language.dependency.SimpleDependencyData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayoutConstants;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
@@ -42,6 +47,7 @@ import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.handler.mxConnectPreview;
+import com.mxgraph.swing.view.mxICellEditor;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
@@ -53,6 +59,8 @@ import com.mxgraph.view.mxGraph;
 public class DependencyGraphPresenter extends GraphPresenter {
 	
 	private static final long serialVersionUID = -8262542126697438425L;
+	
+	public static final String NODE_DATA_TYPE = DependencyNodeData.class.getName();
 	
 	protected MutableDependencyData data;
 	
@@ -68,7 +76,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	 */
 	@Override
 	protected mxGraph createGraph() {
-		DelegatingGraph graph = new DelegatingGraph(new mxGraphModel());
+		DGraph graph = new DGraph();
 		
 		// TODO modify graph
 		
@@ -86,8 +94,23 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	}
 
 	@Override
+	protected mxICellEditor createCellEditor() {
+		return new DependencyCellEditor(this);
+	}
+
+	@Override
 	protected mxConnectPreview createConnectPreview() {
 		return new DConnectPreview();
+	}
+
+	@Override
+	protected GraphRenderer createDefaultGraphRenderer() {
+		return new DependencyGraphRenderer();
+	}
+	
+	@Override
+	protected ConfigDelegate createConfigDelegate() {
+		return new GraphConfigDelegate("plugins.jgraph.appearance.dependency", null); //$NON-NLS-1$
 	}
 
 	public boolean isRefreshGraphOnChange() {
@@ -160,6 +183,15 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		}
 	}
 
+	@Override
+	protected Options createLayoutOptions() {
+		if(isCompressEnabled()) {
+			return new Options(GraphLayoutConstants.CELL_MERGER_KEY, new DependencyCellMerger());
+		} else {
+			return null;
+		}
+	}
+
 	protected mxCell createVertex(Object item, String id, double x, double y) {
 		mxCell cell = new mxCell(item);
 		cell.setId(id);
@@ -192,6 +224,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	protected void syncToGraph() {
 		
 		mxIGraphModel model = graph.getModel();
+		pauseGraphChangeHandling();
 		model.beginUpdate();
 		try {
 			// Clear graph
@@ -234,14 +267,9 @@ public class DependencyGraphPresenter extends GraphPresenter {
 				
 				graph.addEdge(edge, parent, source, target, null);
 			}
-			
-			// Apply styles
-			refreshStyles();
-			
-			// Apply layout
-			refreshLayout();
 		} finally {
 			model.endUpdate();
+			resumeGraphChangeHandling();
 		}
 	}
 
@@ -288,12 +316,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			
 			DependencyNodeData data = (DependencyNodeData) model.getValue(cell);
 			nodes.add(data);
-			DependencyNodeData[] children = data.getChildren();
-			if(children!=null) {
-				for(DependencyNodeData child : children) {
-					nodes.add(child);
-				}
-			}
+			nodes.addAll(data.getChildren(false));
 		}
 		
 		// Sort nodes by index
@@ -324,7 +347,22 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		return new SimpleDependencyData(
 				forms, lemmas, features, poss, relations, heads, flags);
 	}
-	
+
+	/**
+	 * Sorts vertices by index
+	 */
+	protected Comparator<Object> vertexSorter = new Comparator<Object>() {
+
+		@Override
+		public int compare(Object cellA, Object cellB) {
+			DependencyNodeData a = (DependencyNodeData) graph.getModel().getValue(cellA);
+			DependencyNodeData b = (DependencyNodeData) graph.getModel().getValue(cellB);
+
+			return a.getIndex() == b.getIndex() ? 0 : 
+				a.getIndex() > b.getIndex() ? 1 : -1;
+		}
+	};
+
 	protected Object getCell(String id) {
 		mxIGraphModel model = graph.getModel();
 		if(model instanceof mxGraphModel) {
@@ -359,10 +397,8 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			
 			if(removeEdges) {
 				// Remove incoming non-order edges
-				for(Object edge : graph.getIncomingEdges(cell)) {
-					if(!GraphUtils.isOrderEdge(graph, edge)) {
-						model.remove(edge);
-					}
+				for(Object edge : GraphUtils.getNonOrderEdges(model, cell, false, true)) {
+					model.remove(edge);
 				}
 			}			
 		} finally {
@@ -397,7 +433,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 					Object edge = model.getEdgeAt(cell, i);
 					
 					// Ignore outgoing and order edges
-					if(GraphUtils.isOrderEdge(graph, edge) 
+					if(GraphUtils.isOrderEdge(model, edge) 
 							|| cell==model.getTerminal(edge, true)) {
 						continue;
 					}
@@ -493,7 +529,8 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			}
 			
 			if(rebuild) {
-				rebuildGraph();
+				syncToGraph();
+				refreshAll();
 			}
 		} finally {
 			model.endUpdate();
@@ -522,7 +559,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 				Object[] edges = graph.getEdges(cell);
 				for(Object edge : edges) {
 					toDelete.add(edge);
-					if(GraphUtils.isOrderEdge(graph, edge)) {
+					if(GraphUtils.isOrderEdge(model, edge)) {
 						// Nothing special to do
 						continue;
 					}
@@ -548,14 +585,6 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		} finally {
 			model.endUpdate();
 		}
-
-		// Sync to data
-		pauseChangeHandling();
-		try {
-			syncToData();
-		} finally {
-			resumeChangeHandling();
-		}
 	}
 
 	@Override
@@ -564,8 +593,16 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			return;
 		}
 		
-		// TODO Auto-generated method stub
-		super.cloneCells(cells);
+		mxIGraphModel model = graph.getModel();
+		model.beginUpdate();
+		try {
+			double dx = graph.getGridSize();
+			double dy = graph.getGridSize()*2;
+			
+			graph.moveCells(cells, dx, dy, true);
+		} finally {
+			model.endUpdate();
+		}
 	}
 
 	@Override
@@ -574,8 +611,29 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			return;
 		}
 		
-		// TODO Auto-generated method stub
-		super.importCells(buffer);
+		if(buffer==null)
+			throw new IllegalArgumentException("Invalid cell buffer"); //$NON-NLS-1$
+		
+		if(!NODE_DATA_TYPE.equals(buffer.graphType)) {
+			return;
+		}
+		
+		Object[] cells = CellBuffer.buildCells(buffer);
+		
+		// TODO Verify content?
+		
+		if(cells==null || cells.length==0) {
+			return;
+		}
+		
+		graph.moveCells(cells, 0, 0, true);
+	}
+
+	@Override
+	public CellBuffer exportCells(Object[] cells) {
+		return cells!=null ? 
+				CellBuffer.createBuffer(cells, graph.getModel(), NODE_DATA_TYPE)
+				: CellBuffer.createBuffer(graph.getModel(),	null, NODE_DATA_TYPE);
 	}
 
 	@Override
@@ -585,6 +643,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		}
 		
 		// Adding the dummy item causes an entire graph rebuild
+		// Problem: this makes it impossible to select the new node
 		data.addDummyItem();
 	}
 
@@ -594,13 +653,15 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			return;
 		}
 		
+		Object newEdge = null;
+		
 		// Add edge
 		mxIGraphModel model = graph.getModel();
 		model.beginUpdate();
 		try {
 			for(Object edge : graph.getEdgesBetween(source, target)) {
 				// Allow only one edge of any kind between nodes
-				if(GraphUtils.isOrderEdge(graph, edge) == orderEdge) {
+				if(GraphUtils.isOrderEdge(model, edge) == orderEdge) {
 					return;
 				}
 			}
@@ -608,52 +669,51 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			Object value = orderEdge ? Order.BEFORE : DependencyConstants.DATA_UNDEFINED_LABEL;
 			
 			// Refresh target
-			DependencyNodeData targetData = removeHead(target, true);
+			DependencyNodeData targetData = (DependencyNodeData)model.getValue(target);
+			if(!orderEdge) {
+				targetData = removeHead(target, true);
+			}
 			String id = (orderEdge ? "order" : "head")+targetData.getIndex(); //$NON-NLS-1$ //$NON-NLS-2$
 			
-			Object edge = createEdge(value, id, model.getValue(source), model.getValue(target));
-			graph.addEdge(edge, graph.getDefaultParent(), source, target, null);
+			newEdge = createEdge(value, id, model.getValue(source), model.getValue(target));
+			graph.addEdge(newEdge, graph.getDefaultParent(), source, target, null);
+			
+			if(graphStyle!=null) {
+				model.setStyle(newEdge, graphStyle.getStyle(this, newEdge, null));
+			}
+			if(graphLayout!=null) {
+				model.setStyle(newEdge, graphLayout.getEdgeStyle(this, newEdge, null));
+			}
 		} finally {
 			model.endUpdate();
 		}
-
-		// Sync to data
-		pauseChangeHandling();
-		try {
-			syncToData();
-		} finally {
-			resumeChangeHandling();
+		
+		if(newEdge!=null) {
+			graph.setSelectionCell(newEdge);
 		}
 	}
 
 	// TODO honestly: do we need this?
-	public void flipEdges(Object[] edges) {
+	public void flipEdge(Object edge) {
 		if(!canEdit()) {
 			return;
 		}
 		
-		if(edges==null) {
-			edges = getSelectionEdges();
+		if(edge==null) {
+			edge = graph.getSelectionCell();
 		}
-		if(edges.length==0) {
+		
+		mxIGraphModel model = graph.getModel();
+		if(!model.isEdge(edge)) {
 			return;
 		}
 		
-		// Flip edges
-		mxIGraphModel model = graph.getModel();
+		// Flip edge
 		model.beginUpdate();
 		try {
 			// TODO
 		} finally {
 			model.endUpdate();
-		}
-
-		// Sync to data
-		pauseChangeHandling();
-		try {
-			syncToData();
-		} finally {
-			resumeChangeHandling();
 		}
 	}
 
@@ -675,6 +735,118 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to handle data change", e); //$NON-NLS-1$
 			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	protected class DGraph extends DelegatingGraph {
+
+		public DGraph() {
+			super(new mxGraphModel());
+		}
+
+		@Override
+		public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges) {
+			if(cells==null || cells.length==0) {
+				return cells;
+			}
+			
+			// Skip entire cloning if there are invalid types contained
+			for(Object cell : cells) {
+				if((model.isVertex(cell) && !(model.getValue(cell) instanceof DependencyNodeData))
+						|| (model.isEdge(cell) && !(model.getValue(cell) instanceof String))) {
+					return null;
+				}
+			}
+			
+			// Content check successful -> proceed with regular cloning
+			return super.cloneCells(cells, allowInvalidEdges);
+		}
+
+		@Override
+		public Object[] moveCells(Object[] cells, double dx, double dy,
+				boolean clone, Object target, Point location) {
+			
+			// We only need to do special handling in case
+			// the moved cells should be cloned cause this would
+			// mess our indices on the node data objects
+			if(!clone) {
+				return super.moveCells(cells, dx, dy, clone, target, location);
+			}
+			
+			if(cells==null || cells.length==0) {
+				return cells;
+			}
+			
+			if(target==null) {
+				target = getDefaultParent();
+			}
+			
+			mxIGraphModel model = getModel();
+			
+			model.beginUpdate();
+			try {
+				int nextIndex = 0;
+				int childCount = model.getChildCount(target);
+				for(int i=0; i<childCount; i++) {
+					if(model.isVertex(model.getChildAt(target, i))) {
+						nextIndex++;
+					}
+				}
+				
+				cells = super.moveCells(cells, dx, dy, clone, target, location);
+
+				List<Object> vertices = new ArrayList<>(cells.length);
+				for(Object cell : cells) {
+					if(model.isVertex(cell)) {
+						vertices.add(cell);
+					}
+				}
+				
+				Collections.sort(vertices, vertexSorter);
+				
+				// First pass: refresh index
+				// Here each cell gets assigned a new value
+				for(Object cell : vertices) {
+					DependencyNodeData nodeData = (DependencyNodeData) model.getValue(cell);
+					nodeData = nodeData.clone();
+					nodeData.setIndex(nextIndex++);
+					model.setValue(cell, nodeData);
+				}
+				
+				// Second pass: refresh head
+				// Values are already cloned, so only apply head modification
+				cell_loop : for(Object cell : vertices) {
+					DependencyNodeData nodeData = (DependencyNodeData) model.getValue(cell);
+					
+					int edgeCount = model.getEdgeCount(cell);
+					for(int i=0; i<edgeCount; i++) {
+						Object edge = model.getEdgeAt(cell, i);
+						if(cell==model.getTerminal(edge, false)) {
+							Object head = model.getTerminal(edge, true);
+							DependencyNodeData headData = (DependencyNodeData) model.getValue(head);
+							
+							nodeData.setHead(headData.getIndex());
+							
+							continue cell_loop;
+						}
+					}
+					
+					// No incoming edge present -> make sure there is no weird
+					// head value remaining on the cell!
+					nodeData.clearHead();
+				}
+				
+			} finally {
+				model.endUpdate();
+			}
+			
+			return cells;
 		}
 	}
 	
@@ -741,21 +913,19 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		/**
 		 * @see GraphPresenter#deleteCells(Object[])
 		 */
-		public void flipEdges(ActionEvent e) {
+		public void flipEdge(ActionEvent e) {
 			if(!canEdit()) {
 				return;
 			}
-			if(graph.getSelectionCount()==0) {
+			if(graph.getSelectionCount()!=1) {
 				return;
 			}
-			
-			Object[] edges = getSelectionEdges();
 
 			try {
-				DependencyGraphPresenter.this.flipEdges(edges);
+				DependencyGraphPresenter.this.flipEdge(graph.getSelectionCell());
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to flip edges", ex); //$NON-NLS-1$
+						"Failed to flip edge", ex); //$NON-NLS-1$
 			}
 		}
 	}

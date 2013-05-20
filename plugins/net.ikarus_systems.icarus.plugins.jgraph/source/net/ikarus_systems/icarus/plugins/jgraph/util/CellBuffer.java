@@ -10,15 +10,22 @@
 package net.ikarus_systems.icarus.plugins.jgraph.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlList;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.util.CloneableObject;
@@ -37,15 +44,25 @@ import com.mxgraph.model.mxIGraphModel;
  *
  */
 @XmlRootElement(name="graph")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CellBuffer implements CloneableObject {
 	
-	@XmlList
-	public List<Cell> cells = new ArrayList<>();
+	@XmlElements({
+		@XmlElement(name="vertex", type=Vertex.class),
+		@XmlElement(name="edge", type=Edge.class)
+	})
+	public Cell[] cells;
 	
 	@XmlAttribute
 	public String graphType;
 	
 	private static Map<Cell, Cell> cloneMap = new HashMap<>();
+	
+	private static AtomicInteger idCounter = new AtomicInteger();
+	
+	public boolean isEmpty() {
+		return cells==null || cells.length==0;
+	}
 	
 	public static Object[] buildCells(CellBuffer buffer) {
 		Exceptions.testNullArgument(buffer, "buffer"); //$NON-NLS-1$
@@ -53,8 +70,9 @@ public class CellBuffer implements CloneableObject {
 		List<Object> cells = new ArrayList<>();
 		Map<Cell, mxCell> cellMap = new HashMap<>();
 		
-		for(Cell cell : buffer.cells)
+		for(Cell cell : buffer.cells) {
 			feedCell(cells, cell, cellMap);
+		}
 		
 		return cells.toArray();
 	}
@@ -62,9 +80,10 @@ public class CellBuffer implements CloneableObject {
 	private static void feedCell(List<Object> cells, Cell cell, Map<Cell, mxCell> cellMap) {
 		cells.add(buildCell(cell, cellMap));
 		
-		if(cell.children!=null && !cell.children.isEmpty()) {
-			for(Cell c : cell.children)
+		if(cell.children!=null) {
+			for(Cell c : cell.children) {
 				feedCell(cells, c, cellMap);
+			}
 		}
 	}
 	
@@ -117,7 +136,7 @@ public class CellBuffer implements CloneableObject {
 		@Override
 		public int compare(Cell o1, Cell o2) {
 			return o1 instanceof Vertex ? 
-					(o1.getClass()==o2.getClass() ? 0 : -1) : 1;
+					(o1.getClass()==o2.getClass() ? 1 : -1) : 1;
 		}
 	};
 	
@@ -135,19 +154,26 @@ public class CellBuffer implements CloneableObject {
 		Exceptions.testNullArgument(sources, "sources"); //$NON-NLS-1$
 		Exceptions.testNullArgument(type, "type"); //$NON-NLS-1$
 		
-		if(sources.length==0)
+		if(sources.length==0) {
 			return null;
+		}
+		
+		idCounter.set(0);
 		
 		CellBuffer buffer = new CellBuffer();
 		buffer.graphType = type;
 		
 		Map<Object, Cell> cache = new HashMap<>();
 		
-		for(Object cell : sources)
+		for(Object cell : sources) {
 			createCell(cell, model, cache);
+		}
 		
-		buffer.cells.addAll(cache.values());
-		Collections.sort(buffer.cells, cellSorter);
+		Collection<Cell> cells = cache.values();
+		Cell[] tmp = new Cell[cells.size()];
+		buffer.cells = cells.toArray(tmp);
+		
+		Arrays.sort(buffer.cells, cellSorter);
 		
 		return buffer;
 	}
@@ -189,14 +215,16 @@ public class CellBuffer implements CloneableObject {
 		
 		cell.style = model.getStyle(source);
 		cell.value = model.getValue(source);
-		cell.id = source instanceof mxICell ? ((mxICell)source).getId() : null;
+		cell.id = source instanceof mxICell ? ((mxICell)source).getId() : "cell_"+idCounter.getAndIncrement(); //$NON-NLS-1$
 		
-		if(model.getChildCount(source)>0) {
-			cell.children = new ArrayList<>();
-			
-			for(int i = 0; i<model.getChildCount(source); i++)
-				cell.children.add(createCell(
-						model.getChildAt(source, i), model, cache));
+		int childCount = model.getChildCount(source);
+		
+		if(childCount>0) {
+			Cell[] tmp = new Cell[childCount];
+			for(int i=0; i<childCount; i++) {
+				tmp[i] = createCell(model.getChildAt(source, i), model, cache);
+			}
+			cell.children = tmp;
 		}
 		
 		cache.put(source, cell);
@@ -226,8 +254,14 @@ public class CellBuffer implements CloneableObject {
 				
 				buffer.graphType = graphType;
 				
-				for(Cell cell : cells) {
-					buffer.cells.add(clone(cell));
+				if(!isEmpty()) {
+					int size = cells.length;
+					Cell[] tmp = new Cell[size];
+					for(int i=0; i<size; i++) {
+						tmp[i] = clone(cells[i]);
+					}
+					
+					buffer.cells = tmp;
 				}
 			} finally {
 				cloneMap.clear();
@@ -243,7 +277,6 @@ public class CellBuffer implements CloneableObject {
 	 * @version $Id$
 	 *
 	 */
-	@XmlRootElement(name="cell")
 	public abstract static class Cell implements CloneableObject {
 		@XmlElement
 		public Object value;
@@ -251,11 +284,12 @@ public class CellBuffer implements CloneableObject {
 		@XmlAttribute(required=false)
 		public String style;
 		
+		@XmlID
 		@XmlAttribute(required=false)
 		public String id;
 
-		@XmlList
-		public List<Cell> children;
+		@XmlElement
+		public Cell[] children;
 		
 		@Override
 		public abstract Cell clone();
@@ -267,10 +301,13 @@ public class CellBuffer implements CloneableObject {
 				id = cell.id;
 				style = cell.style;
 				
-				if(cell.children!=null && !cell.children.isEmpty()) {
-					children = new ArrayList<>(cell.children.size());
-					for(Cell c : cell.children)
-						children.add(CellBuffer.clone(c));
+				if(cell.children!=null) {
+					int size = cell.children.length;
+					Cell[] tmp = new Cell[size];
+					for(int i=0; i<size; i++) {
+						tmp[i] = CellBuffer.clone(cell.children[i]);
+					}
+					children = tmp;
 				}
 			}
 		}
@@ -308,9 +345,11 @@ public class CellBuffer implements CloneableObject {
 	 */
 	@XmlRootElement(name="edge")
 	public static class Edge extends Cell {
+		@XmlIDREF
 		@XmlElement
 		public Vertex source;
 		
+		@XmlIDREF
 		@XmlElement
 		public Vertex target;
 

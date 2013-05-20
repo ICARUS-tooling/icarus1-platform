@@ -21,26 +21,35 @@ import javax.swing.JComboBox;
  */
 public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 
-	/**
-	 * By default not editable!
-	 */
 	protected final JComboBox<?> comboBox;
-	
-	public ChoiceFormEntry(String label, ComboBoxModel<?> model) {
+
+	public ChoiceFormEntry(String label, ComboBoxModel<?> model, boolean editable) {
 		super(label);
-		
 		if(model==null) {
 			model = new DefaultComboBoxModel<>();
 		}
 		
 		comboBox = new JComboBox<>(model);
-		comboBox.setEditable(false);
+		comboBox.setEditable(editable);
+		comboBox.setSelectedItem(null);
 		
 		setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
 	}
+	
+	public ChoiceFormEntry(String label, ComboBoxModel<?> model) {
+		this(label, model, false);
+	}
+	
+	public ChoiceFormEntry(String label, boolean editable) {
+		this(label, (ComboBoxModel<?>) null, editable);
+	}
 
 	public ChoiceFormEntry(String label, Object[] items) {
-		this(label, new DefaultComboBoxModel<>(items));
+		this(label, items, false);
+	}
+	
+	public ChoiceFormEntry(String label, Object[] items, boolean editable) {
+		this(label, new DefaultComboBoxModel<>(items), editable);
 	}
 
 	public ChoiceFormEntry() {

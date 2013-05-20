@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.plugins.core;
 
+import java.awt.Component;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -16,11 +18,10 @@ package net.ikarus_systems.icarus.plugins.core;
  */
 public class AboutDialog {
 
-	/**
-	 * 
-	 */
-	public AboutDialog() {
-		// TODO Auto-generated constructor stub
+	private AboutDialog() {
 	}
 
+	public static void showDialog(Component parent) {
+		// TODO
+	}
 }

@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.config;
+package net.ikarus_systems.icarus.ui.helper;
 
 
 

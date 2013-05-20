@@ -68,6 +68,7 @@ public abstract class Search {
 				throw new IllegalStateException("Search not running!"); //$NON-NLS-1$
 			if(!cancelled.compareAndSet(false, true))
 				throw new IllegalStateException("Search already cancelled!"); //$NON-NLS-1$
+			
 			setState(SearchState.CANCELLED);
 		}
 	}

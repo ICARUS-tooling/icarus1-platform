@@ -26,4 +26,9 @@ public enum SearchOperator {
 	
 	CONTAINS,
 	
+	EQUALS_NOT,
+	
+	MATCHES_NOT,
+	
+	CONTAINS_NOT,
 }

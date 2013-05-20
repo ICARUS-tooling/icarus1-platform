@@ -7,10 +7,12 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -67,11 +69,53 @@ public final class JAXBUtils {
 		writer.close();
 	}
 	
-	private static List<Object> contextELements;
+	private static Collection<Class<?>> registeredClasses;
+	
+	private static JAXBContext sharedJAXBContext;
 
 	private JAXBUtils(){
 		// no-op
 	};
+	
+	public static synchronized void registerClass(Class<?> clazz) {
+		if(clazz==null)
+			throw new IllegalArgumentException("Invalid class"); //$NON-NLS-1$
+		
+		if(registeredClasses==null) {
+			registeredClasses = new HashSet<>();
+		}
+		
+		if(registeredClasses.contains(clazz)) {
+			return;
+		}
+		
+		invalidateContext();
+		
+		registeredClasses.add(clazz);
+	}
+	
+	private static void invalidateContext() {
+		sharedJAXBContext = null;
+	}
+	
+	public static synchronized Class<?>[] getRegisteredClasses() {
+		if(registeredClasses==null) {
+			return new Class[0];
+		}
+		
+		Class<?>[] result = new Class<?>[registeredClasses.size()];
+		
+		return registeredClasses.toArray(result);
+	}
+	
+	public static synchronized JAXBContext getSharedJAXBContext() throws JAXBException {
+		if(sharedJAXBContext==null) {
+			sharedJAXBContext = JAXBContext.newInstance(getRegisteredClasses());
+		}
+		
+		return sharedJAXBContext;
+	}
+	
 	
 	@XmlRootElement(name="list")
 	@XmlAccessorType(XmlAccessType.FIELD)

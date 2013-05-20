@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.plugins.core;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +43,7 @@ import net.ikarus_systems.icarus.util.ErrorFormatter;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.data.ExtensionContentType;
+import net.ikarus_systems.icarus.xml.jaxb.JAXBUtils;
 
 import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
@@ -63,6 +65,8 @@ public final class IcarusCorePlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
+		// Delegate all uncaught exceptions to the default logging facility
+		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
 		LoggerFactory.registerLogFile("net.ikarus_systems.icarus.plugins", "icarus.plugins"); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -97,6 +101,11 @@ public final class IcarusCorePlugin extends Plugin {
 				callbackHandler, "about"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.core.icarusCorePlugin.openPreferencesAction",  //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
+		
+		// Register serializables before any other loading happens!
+		// This is to enable proper use of the shared JAXBContext
+		// by the config registry and all other facilities
+		registerSerializables();
 
 		// Init config
 		initConfig();
@@ -198,8 +207,27 @@ public final class IcarusCorePlugin extends Plugin {
 		}
 	}
 	
+	/**
+	 * Load and register all classes associated with the JAXB-framework.
+	 */
+	private void registerSerializables() {
+		for(Extension extension : getDescriptor().getExtensionPoint("Serializable").getConnectedExtensions()) { //$NON-NLS-1$
+			ClassLoader loader = PluginUtil.getClassLoader(extension);
+			
+			for(Extension.Parameter param : extension.getParameters("class")) {
+				try {
+					Class<?> clazz = loader.loadClass(param.valueAsString());
+					JAXBUtils.registerClass(clazz);
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to register serializable: "+param.getId()+" at extension "+extension.getUniqueId(), e); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+	
 	private void initConfig() {
-		ConfigBuilder builder = new ConfigBuilder(ConfigRegistry.getGlobalRegistry());
+		ConfigBuilder builder = new ConfigBuilder();
 		
 		// GENERAL GROUP
 		builder.addGroup("general", true); //$NON-NLS-1$
@@ -242,7 +270,7 @@ public final class IcarusCorePlugin extends Plugin {
 			lafClassName = UIManager.getSystemLookAndFeelClassName();
 		} else {
 			Object lafValue = config.getValue("general.appearance.lookAndFeel"); //$NON-NLS-1$
-			if("DEFAULT".equals(lafClassName)) { //$NON-NLS-1$
+			if("DEFAULT_LAF".equals(lafClassName)) { //$NON-NLS-1$
 				lafClassName = null;
 			} else if(lafValue instanceof String) {
 				lafClassName = (String)lafValue;
@@ -269,7 +297,7 @@ public final class IcarusCorePlugin extends Plugin {
 	private Object[] collectAvailableLookAndFeels() {
 		List<Object> items = new ArrayList<>();
 		
-		items.add("DEFAULT"); //$NON-NLS-1$
+		items.add("DEFAULT_LAF"); //$NON-NLS-1$
 		items.add("javax.swing.plaf.basic.BasicLookAndFeel"); //$NON-NLS-1$
 		items.add("javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$
 		items.add("javax.swing.plaf.nimbus.NimbusLookAndFeel"); //$NON-NLS-1$
@@ -317,7 +345,12 @@ public final class IcarusCorePlugin extends Plugin {
 		}
 		
 		public void about(ActionEvent e) {
-			// TODO
+			try {
+				AboutDialog.showDialog(null);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to display about-screen", ex); //$NON-NLS-1$
+			}
 		}
 		
 		public void openPreferences(ActionEvent e) {
@@ -328,5 +361,24 @@ public final class IcarusCorePlugin extends Plugin {
 						"Failed to show config dialog", ex); //$NON-NLS-1$
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	private static class ExceptionHandler implements UncaughtExceptionHandler {
+
+		/**
+		 * @see java.lang.Thread.UncaughtExceptionHandler#uncaughtException(java.lang.Thread, java.lang.Throwable)
+		 */
+		@Override
+		public void uncaughtException(Thread t, Throwable e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Uncaught exception on thread "+t.getName(), e); //$NON-NLS-1$
+		}
+		
 	}
 }

@@ -14,9 +14,12 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.xml.jaxb.JAXBUtils;
+import net.ikarus_systems.icarus.xml.jaxb.MapAdapter;
 
 /**
  * 
@@ -25,6 +28,10 @@ import net.ikarus_systems.icarus.util.Exceptions;
  *
  */
 public class JAXBConfigStorage extends AbstractConfigStorage {
+	
+	static {
+		JAXBUtils.registerClass(Buffer.class);
+	}
 	
 	protected File file;
 	
@@ -82,14 +89,14 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			return;
 		}
 
-		JAXBContext context = JAXBContext.newInstance(Buffer.class);
+		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		buffer = (Buffer) unmarshaller.unmarshal(file);
 	}
 
 	@Override
 	protected void write() throws Exception {
-		JAXBContext context = JAXBContext.newInstance(Buffer.class);
+		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.marshal(buffer, file);
 	}
@@ -98,6 +105,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	private static class Buffer {
 		
 		@XmlElement(name="entries",nillable=true)
+		@XmlJavaTypeAdapter(value=MapAdapter.class)
 		private Map<String, Object> entries = new HashMap<>();
 		
 		public Object getValue(String path) {

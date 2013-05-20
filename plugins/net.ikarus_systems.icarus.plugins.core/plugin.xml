@@ -12,6 +12,25 @@
 	
 	<!-- Extension-Points -->
 			
+	<extension-point id="Serializable" extension-multiplicity="one-per-plugin">
+		<doc>
+			<doc-text>
+				Special entry point for early registration of classes that want to be
+				used via the JAXB-framework. Classes listed within the parameters of this
+				extension will be loaded as soon as the default core plug-in starts and 
+				registered to the shared JAXBContext via the JAXBUtils.
+			</doc-text>
+		</doc>
+		<parameter-def id="class" multiplicity="one-or-more">
+			<doc>
+				<doc-text>
+					Fully qualified name of a class that is to be registered to the
+					shared JAXBContext.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="Localizable" extension-multiplicity="none">
 		<doc>
 			<doc-text>
@@ -548,6 +567,30 @@
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">
 			<parameter id="clear" />
+		</parameter>
+	</extension>
+	
+	<extension id="TableView" plugin-id="net.ikarus_systems.icarus.core" point-id="UtilityView">
+		<doc>
+			<doc-text>
+				Generic view for presentation of arbitrary data in a tabular style.
+				Relies on helper implementations of type net.ikarus_systems.icarus.ui.table.TablePresenter
+				to do the actual presentation job.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.core.tableView.identity.name" />
+		<parameter id="description" value="plugins.core.tableView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.core.resources.core" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.output.TableView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/output/table-view.gif" />
+		<parameter id="alignment" value="right" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" />
+			<parameter id="present" />
 		</parameter>
 	</extension>
 	

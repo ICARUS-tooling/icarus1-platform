@@ -21,10 +21,6 @@
 	
 	<!-- PROPERTIES AND VIEWS -->
 	
-	<extension id="DependencyTestPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.DependencyTestPerspective" />
-	</extension>
-	
 	<!-- HELPERS -->
 	
 	<extension id="DependencyGraphPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
@@ -37,6 +33,23 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.graph.DependencyGraphPresenter" />
 		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter" />
+	</extension>
+	
+	<extension id="DependencyTablePresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TablePresenter implementation for use with arbitrary sentence data that implements
+				the net.ikarus_systems.icarus.language.dependency.DependencyData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.table.DependencyTablePresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.table.TablePresenter" />
+	</extension>
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.DependencyNodeData" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.SimpleDependencyData" />
 	</extension>
 	
 	<!-- CONTENT TYPES -->

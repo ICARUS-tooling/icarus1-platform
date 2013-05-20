@@ -4,6 +4,7 @@
 package net.ikarus_systems.icarus.plugins.jgraph.view;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -57,24 +58,85 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 
 	protected transient Object currentEditor;
 
-	protected AbstractAction cancelEditingAction;
+	protected AbstractAction cancelEditingAction = new AbstractAction() {
 
-	protected AbstractAction textSubmitAction;
+		private static final long serialVersionUID = 4299662825391540058L;
 
-	protected MouseInputListener movementHandler;
+		public void actionPerformed(ActionEvent e) {
+			presenter.stopEditing(true);
+		}
+	};
 
-	@SuppressWarnings("serial")
+	protected AbstractAction textSubmitAction = new AbstractAction() {
+
+		private static final long serialVersionUID = -6522329956804616380L;
+
+		public void actionPerformed(ActionEvent e) {
+			presenter.stopEditing(false);
+		}
+	};
+
+	protected MouseInputListener movementHandler = new MouseInputListener() {
+
+		private Point lastLocation;
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			lastLocation = new Point(e.getPoint());
+			e.consume();
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			lastLocation = null;
+			e.consume();
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			if (lastLocation == null)
+				lastLocation = new Point(e.getPoint());
+
+			if (lastLocation.x != e.getX() || lastLocation.y != e.getY()) {
+				JComponent comp = (JComponent) e.getSource();
+				Rectangle bounds = comp.getBounds();
+				bounds.x += e.getX() - lastLocation.x;
+				bounds.y += e.getY() - lastLocation.y;
+				
+				checkBounds(bounds);
+
+				comp.setBounds(bounds);
+			}
+
+			e.consume();
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			e.consume();
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			e.consume();
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			e.consume();
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			e.consume();
+		}
+	};;
+
 	public HeavyWeightCellEditor(GraphPresenter presenter) {
 		if(presenter==null)
 			throw new IllegalArgumentException("Invalid presenter"); //$NON-NLS-1$
 
 		this.presenter = presenter;
-
-		cancelEditingAction = new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				stopEditing(true);
-			}
-		};
 		
 		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
 		
@@ -83,72 +145,10 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 				"plugins.jgraph.editor.cancelAction.description"); //$NON-NLS-1$
 		resourceDomain.addAction(cancelEditingAction);
 
-		textSubmitAction = new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				stopEditing(false);
-			}
-		};
-
 		resourceDomain.prepareAction(textSubmitAction, 
 				"plugins.jgraph.editor.submitAction.name",  //$NON-NLS-1$
 				"plugins.jgraph.editor.submitAction.description"); //$NON-NLS-1$
-		resourceDomain.addAction(cancelEditingAction);
-
-		movementHandler = new MouseInputListener() {
-
-			private Point lastLocation;
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				lastLocation = new Point(e.getPoint());
-				e.consume();
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				lastLocation = null;
-				e.consume();
-			}
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				if (lastLocation == null)
-					lastLocation = new Point(e.getPoint());
-
-				if (lastLocation.x != e.getX() || lastLocation.y != e.getY()) {
-					JComponent comp = (JComponent) e.getSource();
-					Rectangle bounds = comp.getBounds();
-					bounds.x += e.getX() - lastLocation.x;
-					bounds.y += e.getY() - lastLocation.y;
-					
-					checkBounds(bounds);
-
-					comp.setBounds(bounds);
-				}
-
-				e.consume();
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				e.consume();
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				e.consume();
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				e.consume();
-			}
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				e.consume();
-			}
-		};
+		resourceDomain.addAction(textSubmitAction);
 
 		vertexEditor = createVertexEditor();
 		configEditorComponent(getEditorComponent(vertexEditor));
@@ -182,7 +182,7 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 		Rectangle box = presenter.getBounds();
 		// FIXME right now we apply an offset of 30px so the panel 
 		// does not shift over the bottom line
-		box.y -= 30;
+		//box.y -= 30;
 
 		if (bounds.x < box.x)
 			bounds.x = box.x+2;
@@ -199,6 +199,14 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 	
 	public GraphPresenter getPresenter() {
 		return presenter;
+	}
+
+	public Object getVertexEditor() {
+		return vertexEditor;
+	}
+
+	public Object getEdgeEditor() {
+		return edgeEditor;
 	}
 
 	/**
@@ -237,16 +245,13 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 				initEdgeEditor(value);
 			}
 
-			double scale = Math.max(1, presenter.getGraph().getView()
-					.getScale());
+			double scale = Math.max(1, presenter.getGraph().getView().getScale());
 			
 			JComponent editorComponent = getEditorComponent(currentEditor);
 			
-			Rectangle bounds = getEditorBounds(state, scale);
-			bounds.width = editorComponent.getPreferredSize().width;
-			bounds.height = editorComponent.getPreferredSize().height;
-
-			checkBounds(bounds);
+			Rectangle bounds = getCellBounds(state, scale);
+			
+			bounds = getEditorBounds(bounds);
 			
 			editorComponent.setBounds(bounds);
 			editorComponent.setVisible(true);
@@ -326,7 +331,7 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 	/**
 	 * Returns the bounds to be used for the editor.
 	 */
-	public Rectangle getEditorBounds(mxCellState state, double scale) {
+	public Rectangle getCellBounds(mxCellState state, double scale) {
 		mxIGraphModel model = state.getView().getGraph().getModel();
 		Rectangle bounds = null;
 
@@ -368,4 +373,37 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 		return bounds;
 	}
 
+	public Rectangle getEditorBounds(Rectangle cellBounds) {
+		Component editorComponent = getEditorComponent(currentEditor);
+		Rectangle bounds = new Rectangle(editorComponent.getPreferredSize());
+
+		Rectangle box = presenter.getGraphControl().getVisibleRect();		
+		box.width -= presenter.getVerticalScrollBar().getWidth();
+		box.height -= presenter.getHorizontalScrollBar().getHeight();
+		
+		// Place editor near cell
+		
+		bounds.x = cellBounds.x;
+		bounds.y = cellBounds.y-bounds.height-1;
+		
+		// Check border constraints
+
+		if (bounds.x < box.x) {
+			bounds.x = box.x+4;
+		}
+
+		if (bounds.y < box.y) {
+			bounds.y = box.y+4;
+		}
+
+		if (bounds.x + bounds.width > box.x + box.width) {
+			bounds.x = box.x + box.width - bounds.width - 4;
+		}
+
+		if (bounds.y + bounds.height > box.x + box.height) {
+			bounds.y = box.y + box.height - bounds.height - 4;
+		}
+		
+		return bounds;
+	}
 }

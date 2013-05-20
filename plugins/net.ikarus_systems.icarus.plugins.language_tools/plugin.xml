@@ -377,6 +377,11 @@
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.ListPresenter" />
 	</extension>
 	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.TreebankDescriptor" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.TreebankInfo" />
+	</extension>
+	
 	<!-- CONTENT TYPES -->
 	
 	<extension id="TreebankContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">

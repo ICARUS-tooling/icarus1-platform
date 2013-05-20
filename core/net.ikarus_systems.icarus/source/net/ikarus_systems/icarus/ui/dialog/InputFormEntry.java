@@ -67,6 +67,11 @@ public class InputFormEntry extends LabeledFormEntry<InputFormEntry> {
 		return this;
 	}
 	
+	public InputFormEntry setColumns(int columns) {
+		input.setColumns(columns);
+		return this;
+	}
+	
 	public InputFormEntry clear() {
 		input.setText(null);
 		return this;

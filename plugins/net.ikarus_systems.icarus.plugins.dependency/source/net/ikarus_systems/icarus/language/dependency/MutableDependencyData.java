@@ -14,13 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import net.ikarus_systems.icarus.language.AbstractMutableSentenceData;
 import net.ikarus_systems.icarus.language.Grammar;
 import net.ikarus_systems.icarus.language.MutableSentenceData;
@@ -36,23 +29,17 @@ import net.ikarus_systems.icarus.util.Exceptions;
  * @version $Id$
  *
  */
-@XmlRootElement(name="DependencyData")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class MutableDependencyData extends AbstractMutableSentenceData
 		implements DependencyConstants, AnnotatedSentenceData, DependencyData {
 
 	private static final long serialVersionUID = 8905987553461570238L;
 
-	@XmlTransient
 	protected transient final DependencyDataEvent event;
 
-	@XmlTransient
 	protected Object annotation = null; // TODO change to default value?
 
-	@XmlElement(name="items")
 	private List<DependencyDataEntry> items = new ArrayList<>();
 	
-	@XmlTransient
 	private Map<String, Object> properties;
 
 	public MutableDependencyData() {
@@ -73,22 +60,22 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		}
 	}
 
-	public void fireDataChanged() {
+	protected void fireDataChanged() {
 		event.set(SentenceDataEvent.CHANGE_EVENT, -1, -1);
 		fireDataChanged(event);
 	}
 
-	public void fireItemsInserted(int startIndex, int endIndex) {
+	protected void fireItemsInserted(int startIndex, int endIndex) {
 		event.set(SentenceDataEvent.INSERT_EVENT, startIndex, endIndex);
 		fireDataChanged(event);
 	}
 
-	public void fireItemsRemoved(int startIndex, int endIndex) {
+	protected void fireItemsRemoved(int startIndex, int endIndex) {
 		event.set(SentenceDataEvent.REMOVE_EVENT, startIndex, endIndex);
 		fireDataChanged(event);
 	}
 
-	public void fireItemsUpdated(int startIndex, int endIndex) {
+	protected void fireItemsUpdated(int startIndex, int endIndex) {
 		event.set(SentenceDataEvent.UPDATE_EVENT, startIndex, endIndex);
 		fireDataChanged(event);
 	}
@@ -380,18 +367,23 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 		itemA.copyFrom(itemB);
 		itemB.copyFrom(tmp);
+		
+		headSwitch(indexFrom, indexTo);
+	}
+	
+	protected void headSwitch(int oldHead, int newHead) {
 
-		int updateFrom = indexFrom;
-		int updateTo = indexTo;
+		int updateFrom = Math.min(oldHead, newHead);
+		int updateTo = Math.max(oldHead, newHead);
 
 		for (int i = 0; i < items.size(); i++) {
-			tmp = items.get(i);
-			if (tmp.head == indexFrom) {
-				tmp.head = indexTo;
+			DependencyDataEntry tmp = items.get(i);
+			if (tmp.head == oldHead) {
+				tmp.head = newHead;
 				updateFrom = Math.min(updateFrom, i);
 				updateTo = Math.max(updateTo, i);
-			} else if (tmp.head == indexTo) {
-				tmp.head = indexFrom;
+			} else if (tmp.head == newHead) {
+				tmp.head = oldHead;
 				updateFrom = Math.min(updateFrom, i);
 				updateTo = Math.max(updateTo, i);
 			}
@@ -446,31 +438,22 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	 * @version $Id$
 	 *
 	 */
-	@XmlRootElement
 	public class DependencyDataEntry {
 
-		@XmlAttribute(name="form")
 		private String form;
 
-		@XmlAttribute(name="lemma")
 		private String lemma;
 
-		@XmlAttribute(name="features")
 		private String features;
 
-		@XmlAttribute(name="pos")
 		private String pos;
 
-		@XmlAttribute(name="depRel")
 		private String relation;
 
-		@XmlAttribute(name="head")
 		private int head;
 
-		@XmlAttribute(name="index")
 		private int index;
 		
-		@XmlAttribute(name="flags", required=false)
 		private long flags;
 
 		public DependencyDataEntry() {
@@ -524,6 +507,56 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			index = idx;
 			relation = source.getRelation(idx);
 			flags = source.getFlags(idx);
+		}
+		
+		public void copyFrom(DependencyNodeData nodeData) {
+			boolean fireEvent = false;
+			
+			// FORM
+			if(!form.equals(nodeData.getForm())) {
+				fireEvent = true;
+				form = nodeData.getForm();
+			}
+			
+			// LEMMA
+			if(!lemma.equals(nodeData.getLemma())) {
+				fireEvent = true;
+				lemma = nodeData.getLemma();
+			}
+			
+			// FEATURES
+			if(!features.equals(nodeData.getFeatures())) {
+				fireEvent = true;
+				features = nodeData.getFeatures();
+			}
+			
+			// POS
+			if(!pos.equals(nodeData.getPos())) {
+				fireEvent = true;
+				pos = nodeData.getPos();
+			}
+			
+			// HEAD
+			if(head!=nodeData.getHead()) {
+				fireEvent = true;
+				head = nodeData.getHead();
+			}
+			
+			// RELATION
+			if(!relation.equals(nodeData.getRelation())) {
+				fireEvent = true;
+				relation = nodeData.getRelation();
+			}
+			
+			// INDEX
+			if(index!=nodeData.getIndex()) {
+				fireEvent = false;
+				MutableDependencyData.this.switchItems(index, nodeData.getIndex());
+			}
+			
+			if(fireEvent) {
+				MutableDependencyData.this.fireItemsUpdated(index, index);
+			}
 		}
 
 		@Override

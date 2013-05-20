@@ -792,7 +792,7 @@ public abstract class Perspective implements Identifiable {
 		view.init(container);
 	}
 	
-	protected final ResultMessage sendRequest(Object perspective, Object receiver, Message message) {
+	protected final ResultMessage sendRequest(Object sender, Object perspective, Object receiver, Message message) {
 		Perspective target = getFrameDelegate().getFrame().ensurePerspective(perspective);
 		
 		if(target==null) {
@@ -800,26 +800,26 @@ public abstract class Perspective implements Identifiable {
 		}
 		
 		try {
-			return target.handleRequest(receiver, message);
+			return target.handleRequest(sender, receiver, message);
 		} catch (Exception e) {
 			return message.errorResult(this, e);
 		}
 	}
 
-	protected ResultMessage handleRequest(Object receiver, Message message) throws Exception {
-		return sendRequest(receiver, message);
+	protected ResultMessage handleRequest(Object sender, Object receiver, Message message) throws Exception {
+		return sendRequest(sender, receiver, message);
 	}
 	
-	final ResultMessage sendRequest(Object receiver, Message message) {
+	final ResultMessage sendRequest(Object sender, Object receiver, Message message) {
 		if(message==null)
 			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
 		
 		ResultMessage result = null;
 		
 		if(SwingUtilities.isEventDispatchThread()) {
-			result = dispatchRequest(receiver, message);
+			result = dispatchRequest(sender, receiver, message);
 		} else {
-			RequestDispatcher dispatcher = new RequestDispatcher(receiver, message);
+			RequestDispatcher dispatcher = new RequestDispatcher(sender, receiver, message);
 			try {
 				SwingUtilities.invokeAndWait(dispatcher);
 				result = dispatcher.getResult();
@@ -831,7 +831,7 @@ public abstract class Perspective implements Identifiable {
 		return result;
 	}
 	
-	private ResultMessage dispatchRequest(Object receiver, Message message) {		
+	private ResultMessage dispatchRequest(Object sender, Object receiver, Message message) {		
 		Collection<View> receivers = new LinkedList<>();
 		
 		ViewFilter filter = ViewFilter.emptyFilter;
@@ -853,6 +853,11 @@ public abstract class Perspective implements Identifiable {
 		
 		for(Extension extension : connectedViews) {
 			View view = activatedViews.get(extension);
+			
+			if(view==sender) {
+				continue;
+			}
+			
 			if(filter.filter(extension, view)) {
 				// If view is to be included but not yet activated
 				// perform activation now
@@ -1132,11 +1137,13 @@ public abstract class Perspective implements Identifiable {
 	private class RequestDispatcher implements Runnable {
 		
 		private ResultMessage result;
-		
+
 		private final Object receiver;
+		private final Object sender;
 		private final Message message;
 
-		public RequestDispatcher(Object receiver, Message message) {
+		public RequestDispatcher(Object sender, Object receiver, Message message) {
+			this.sender = sender;
 			this.receiver = receiver;
 			this.message = message;
 		}
@@ -1147,7 +1154,7 @@ public abstract class Perspective implements Identifiable {
 		@Override
 		public void run() {
 			try {
-				result = dispatchRequest(receiver, message);
+				result = dispatchRequest(sender, receiver, message);
 			} catch(Exception e) {
 				result = new ResultMessage(this, message, e);
 			}

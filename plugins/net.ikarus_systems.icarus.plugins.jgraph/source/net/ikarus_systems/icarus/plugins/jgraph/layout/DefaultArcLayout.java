@@ -28,7 +28,7 @@ import com.mxgraph.view.mxGraph;
  * @version $Id$
  *
  */
-public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
+public class DefaultArcLayout implements GraphLayout {
 	
 	protected String regularEdgeStyle;
 	protected String orderEdgeStyle;
@@ -45,8 +45,8 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 		orderEdgeStyle = ";exitY=1.0;entryY=1.0;edgeStyle=bottomArcEdgeStyle;shape=arc"; //$NON-NLS-1$
 		
 		defaultConnectionStyle = ";exitX=0.5;entryX=0.5"; //$NON-NLS-1$
-		ltrConnectionStyle = ";exitX=0.5;entryX=0.35"; //$NON-NLS-1$
-		rtlConnectionStyle = ";exitX=0.5;entryX=0.65"; //$NON-NLS-1$
+		ltrConnectionStyle = ";exitX=0.65;entryX=0.5"; //$NON-NLS-1$
+		rtlConnectionStyle = ";exitX=0.35;entryX=0.5"; //$NON-NLS-1$
 	}
 
 	protected mxRectangle doLayout(GraphOwner owner, Object[] cells, Options options) {
@@ -120,7 +120,7 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 							
 					// Fetch basic style
 					String style;
-					if(GraphUtils.isOrderEdge(graph, edge)) {
+					if(GraphUtils.isOrderEdge(model, edge)) {
 						bottomArcHeight = Math.max(bottomArcHeight, ArcConnectorShape.getArcHeight(span));
 						style = orderEdgeStyle;
 					} else {
@@ -129,7 +129,7 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 					}
 					
 					// Append edge direction specific exit and entry
-					if(GraphUtils.isLtrEdge(graph, edge)) {
+					if(GraphUtils.isLtrEdge(model, edge)) {
 						style += ltrConnectionStyle;
 					} else {
 						style += rtlConnectionStyle;
@@ -180,12 +180,12 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout#layoutGraph(com.mxgraph.view.mxGraph, java.lang.Object[], net.ikarus_systems.icarus.util.Options)
 	 */
 	@Override
-	public void layoutGraph(GraphOwner owner, Object[] cells, Options options) {
+	public mxRectangle layoutGraph(GraphOwner owner, Object[] cells, Options options) {
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
 		
-		doLayout(owner, cells, options);
+		return doLayout(owner, cells, options);
 	}
 
 	/**
@@ -210,13 +210,13 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 			
 			// Check left node
 			Object head = index>0 ? vertices.get(index-1) : null;
-			if(head!=null && getHeadNode(graph, vertex)==head) {
+			if(head!=null && getLeafHeadNode(graph, vertex)==head) {
 				return vertex;
 			}
 			
 			// Check Right node
 			head = index<vertices.size()-1 ? vertices.get(index+1) : null;
-			if(head!=null && getHeadNode(graph, vertex)==head) {
+			if(head!=null && getLeafHeadNode(graph, vertex)==head) {
 				return vertex;
 			}
 		}
@@ -224,14 +224,14 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 		return null;
 	}
 	
-	protected Object getHeadNode(mxGraph graph, Object node) {
+	protected Object getLeafHeadNode(mxGraph graph, Object node) {
 		mxIGraphModel model = graph.getModel();
 	
 		// The only non-order edges can be incoming since we
 		// only bother with shrinking leaf nodes
 		for(int i=model.getEdgeCount(node)-1; i>-1; i--) {
 			Object edge = model.getEdgeAt(node, i);
-			if(!(GraphUtils.isOrderEdge(graph, edge))) {
+			if(!(GraphUtils.isOrderEdge(model, edge))) {
 				return model.getTerminal(edge, true);
 			}
 		}
@@ -243,8 +243,7 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout#compressGraph(com.mxgraph.view.mxGraph, java.lang.Object[], net.ikarus_systems.icarus.util.Options, net.ikarus_systems.icarus.util.Filter, com.mxgraph.util.mxRectangle)
 	 */
 	@Override
-	public void compressGraph(GraphOwner owner, Object[] cells, Options options,
-			Filter filter, mxRectangle bounds) {
+	public mxRectangle compressGraph(GraphOwner owner, Object[] cells, Options options, mxRectangle bounds) {
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
@@ -258,10 +257,11 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 			
 			// Do not bother with compression if already sufficient
 			if(size.getWidth()<=bounds.getWidth() && size.getHeight()<bounds.getHeight()) {
-				return;
+				return size;
 			}
 			
 			CellMerger merger = (CellMerger) options.get(CELL_MERGER_KEY);
+			Filter filter = (Filter) options.get(CELL_FILTER_KEY);
 			int cellSpacing = options.get(CELL_SPACING_KEY, graph.getGridSize()*2);
 			int minBaseline = options.get(MIN_BASELINE_KEY, DEFAULT_MIN_BASELINE);
 			double offsetX = options.get(OFFSET_X_KEY, cellSpacing);
@@ -284,7 +284,7 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 				
 				// Shrink our list
 				vertices.remove(vertex);
-				Object head = getHeadNode(graph, vertex);				
+				Object head = getLeafHeadNode(graph, vertex);				
 				double widthBefore = model.getGeometry(head).getWidth(); 
 				
 				// Merge item as child of head node
@@ -336,7 +336,7 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 					double span = Math.abs(geometry.getCenterX() - targetGeometry.getCenterX());
 							
 					// Fetch basic style
-					if(GraphUtils.isOrderEdge(graph, edge)) {
+					if(GraphUtils.isOrderEdge(model, edge)) {
 						bottomArcHeight = Math.max(bottomArcHeight, ArcConnectorShape.getArcHeight(span));
 					} else {
 						topArcHeight = Math.max(topArcHeight, ArcConnectorShape.getArcHeight(span));
@@ -364,9 +364,12 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 			for(Object cell : vertices) {
 				model.getGeometry(cell).setY(y);
 			}
+			
+			return size;
 		} finally {
 			model.endUpdate();
 		}
+		
 	}
 
 	/**
@@ -390,19 +393,17 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 	 */
 	@Override
 	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
-
-		mxGraph graph = owner.getGraph();
-		mxIGraphModel model = graph.getModel();
+		mxIGraphModel model = owner.getGraph().getModel();
 		
 		String style;
-		if(GraphUtils.isOrderEdge(graph, edge)) {
+		if(GraphUtils.isOrderEdge(model, edge)) {
 			style = orderEdgeStyle;
 		} else {
 			style = regularEdgeStyle;
 		}
 		
 		// Append edge direction specific exit and entry
-		if(GraphUtils.isLtrEdge(graph, edge)) {
+		if(GraphUtils.isLtrEdge(model, edge)) {
 			style += ltrConnectionStyle;
 		} else {
 			style += rtlConnectionStyle;
@@ -422,5 +423,14 @@ public class DefaultArcLayout implements GraphLayout, GraphLayoutConstants {
 		}
 		
 		return oldStyle;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout#getSignificantCell(net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner, java.lang.Object[], net.ikarus_systems.icarus.util.Options)
+	 */
+	@Override
+	public Object getSignificantCell(GraphOwner owner, Object[] cells,
+			Options options) {
+		return cells==null || cells.length==0 ? null : cells[0];
 	}
 }

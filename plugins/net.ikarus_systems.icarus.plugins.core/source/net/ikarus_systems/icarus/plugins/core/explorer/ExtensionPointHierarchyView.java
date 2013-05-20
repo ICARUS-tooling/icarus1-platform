@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
@@ -73,7 +74,7 @@ public class ExtensionPointHierarchyView extends View {
 	private JTree hierarchyTree;
 	private ParamaterDefinitionListModel outlineModel;
 	private JList<?> outlineList;
-	private JLabel infoLabel;
+	private JTextArea infoLabel;
 	private JLabel outlineLabel;
 	private JLabel headerLabel;
 	private ExtensionPoint currentExtensionPoint;
@@ -113,9 +114,8 @@ public class ExtensionPointHierarchyView extends View {
 		
 		container.setLayout(new BorderLayout());
 		
-		// Info label
-		infoLabel = new JLabel();
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		// Info label		
+		infoLabel = UIUtil.defaultCreateInfoLabel(container);
 		ResourceManager.getInstance().getGlobalDomain().prepareComponent(
 				infoLabel, "plugins.core.extensionPointHierarchyView.notAvailable", null); //$NON-NLS-1$
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);

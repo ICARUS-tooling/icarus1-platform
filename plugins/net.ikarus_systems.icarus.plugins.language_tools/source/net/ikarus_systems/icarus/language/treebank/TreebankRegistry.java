@@ -60,6 +60,7 @@ import net.ikarus_systems.icarus.util.NamingUtil;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.location.Location;
+import net.ikarus_systems.icarus.xml.jaxb.JAXBUtils;
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
@@ -80,6 +81,9 @@ public class TreebankRegistry {
 		if(instance==null) {
 			synchronized (TreebankRegistry.class) {
 				if(instance==null) {
+					JAXBUtils.registerClass(TreebankInfoSet.class);
+					JAXBUtils.registerClass(TreebankSet.class);
+					
 					instance = new TreebankRegistry();
 				}
 			}
@@ -646,8 +650,8 @@ public class TreebankRegistry {
 		if(!file.exists() || file.length()==0) {
 			return;
 		}
-		
-		JAXBContext context = JAXBContext.newInstance(TreebankSet.class);
+
+		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		TreebankSet treebankSet = (TreebankSet) unmarshaller.unmarshal(file);
 		
@@ -673,8 +677,8 @@ public class TreebankRegistry {
 			descriptor.syncFromTreebank();
 		}
 		TreebankSet treebankSet = new TreebankSet(descriptorMap.values());
-		
-		JAXBContext context = JAXBContext.newInstance(TreebankSet.class);
+
+		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		marshaller.marshal(treebankSet, file);
@@ -752,7 +756,7 @@ public class TreebankRegistry {
 			return;
 		}
 		
-		JAXBContext context = JAXBContext.newInstance(TreebankInfoSet.class);
+		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		
@@ -780,7 +784,7 @@ public class TreebankRegistry {
 			return null;
 		}
 
-		JAXBContext context = JAXBContext.newInstance(TreebankInfoSet.class);
+		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		
 		TreebankInfoSet infoSet = (TreebankInfoSet) unmarshaller.unmarshal(file);

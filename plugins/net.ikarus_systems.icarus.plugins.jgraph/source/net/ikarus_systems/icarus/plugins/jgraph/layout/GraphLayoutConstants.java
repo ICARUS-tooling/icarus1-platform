@@ -21,6 +21,7 @@ public interface GraphLayoutConstants {
 	public static final String GRAPH_PRESENTER_KEY = "graphPresenter"; //$NON-NLS-1$
 	public static final String STYLE_DECORATOR_KEY = "styleDecorator"; //$NON-NLS-1$
 	public static final String CELL_MERGER_KEY = "cellMerger"; //$NON-NLS-1$
+	public static final String CELL_FILTER_KEY = "cellFilter"; //$NON-NLS-1$
 	
 	public static final String MIN_BASELINE_KEY = "minBaseline"; //$NON-NLS-1$
 	public static final String TOP_INSETS_KEY = "topInsets"; //$NON-NLS-1$

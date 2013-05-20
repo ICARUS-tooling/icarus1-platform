@@ -45,6 +45,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -52,6 +53,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
@@ -575,6 +577,19 @@ public final class UIUtil {
 		} else if(obj instanceof JScrollBar) {
 			((JScrollBar)obj).setUnitIncrement(DEFAULT_SCROLL_UNIT_INCREMENT);
 		}
+	}
+	
+	public static JTextArea defaultCreateInfoLabel(JComponent container) {
+		JTextArea infoLabel = new JTextArea();
+		infoLabel.setBackground(container.getBackground());
+		infoLabel.setWrapStyleWord(true);
+		infoLabel.setLineWrap(true);
+		infoLabel.setEditable(false);
+		infoLabel.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
+		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));new JLabel();
+		UIUtil.disableHtml(infoLabel);
+		
+		return infoLabel;
 	}
 
 	public static final Border DUMMY_BORDER = BorderFactory.createEmptyBorder(

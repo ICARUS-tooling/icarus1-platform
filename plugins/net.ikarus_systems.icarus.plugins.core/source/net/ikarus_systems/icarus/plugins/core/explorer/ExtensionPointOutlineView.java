@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
@@ -68,7 +69,7 @@ public class ExtensionPointOutlineView extends View {
 	
 	public static final String VIEW_ID = ManagementConstants.EXTENSION_POINT_OUTLINE_VIEW_ID;
 	
-	private JLabel infoLabel;
+	private JTextArea infoLabel;
 	private JLabel headerLabel;
 	private JPanel contentPanel;
 	private JTree extensionPointTree;
@@ -107,9 +108,8 @@ public class ExtensionPointOutlineView extends View {
 		handler = new Handler();
 		
 		container.setLayout(new BorderLayout());
-		
-		infoLabel = new JLabel();
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		infoLabel = UIUtil.defaultCreateInfoLabel(container);
 		ResourceManager.getInstance().getGlobalDomain().prepareComponent(
 				infoLabel, "plugins.core.extensionPointOutlineView.notAvailable", null); //$NON-NLS-1$
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);

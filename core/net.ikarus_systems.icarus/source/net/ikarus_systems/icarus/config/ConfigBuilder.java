@@ -30,6 +30,10 @@ public class ConfigBuilder implements ConfigConstants {
 	private Object owner;
 	
 	private final ConfigRegistry config;
+
+	public ConfigBuilder() {
+		this(ConfigRegistry.getGlobalRegistry());
+	}
 	
 	public ConfigBuilder(ConfigRegistry config) {
 		Exceptions.testNullArgument(config, "config"); //$NON-NLS-1$
