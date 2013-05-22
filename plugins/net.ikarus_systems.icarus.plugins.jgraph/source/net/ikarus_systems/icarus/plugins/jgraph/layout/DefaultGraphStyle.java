@@ -95,6 +95,7 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 		vertexStyle.put("fontColor", "black"); //$NON-NLS-1$ //$NON-NLS-2$
 		vertexStyle.put("fontSize", 12); //$NON-NLS-1$
 		vertexStyle.put("overflow", "fill"); //$NON-NLS-1$ //$NON-NLS-2$
+		vertexStyle.put("fillColor", "white"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Map<String, Object> edgeStyle = stylesheet.getDefaultEdgeStyle();
 		edgeStyle.put("shape", "arc"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -110,6 +111,8 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 		edgeStyle.put("exitX", 0.5); //$NON-NLS-1$
 		edgeStyle.put("entryY", 0.0); //$NON-NLS-1$
 		edgeStyle.put("entryX", 0.5); //$NON-NLS-1$
+		
+		edgeStyle.put("labelBorderColor", "white"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	protected void refreshStylesheet(Handle handle) {
@@ -142,6 +145,7 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 		style.put("verticalLabelPosition", config.getString(config.getChildHandle(handle, "verticalLabelPosition"))); //$NON-NLS-1$ //$NON-NLS-2$
 		style.put("labelPosition", config.getString(config.getChildHandle(handle, "labelPosition"))); //$NON-NLS-1$ //$NON-NLS-2$
 		style.put("strokeColor", int2ColString(config.getInteger(config.getChildHandle(handle, "strokeColor")))); //$NON-NLS-1$ //$NON-NLS-2$
+		style.put("fillColor", int2ColString(config.getInteger(config.getChildHandle(handle, "fillColor")))); //$NON-NLS-1$ //$NON-NLS-2$
 		style.put("strokeWidth", config.getInteger(config.getChildHandle(handle, "strokeWidth"))); //$NON-NLS-1$ //$NON-NLS-2$
 		//style.put("perimeterSpacing", config.getInteger(config.getChildHandle(handle, "perimeterSpacing")));
 		style.put("spacing", config.getInteger(config.getChildHandle(handle, "spacing"))); //$NON-NLS-1$ //$NON-NLS-2$

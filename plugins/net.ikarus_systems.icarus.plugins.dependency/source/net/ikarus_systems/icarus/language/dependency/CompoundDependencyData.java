@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.language.dependency;
 
 import net.ikarus_systems.icarus.language.CompoundSentenceData;
 import net.ikarus_systems.icarus.language.DataType;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 
 /**
@@ -105,7 +106,7 @@ public class CompoundDependencyData extends CompoundSentenceData implements
 	@Override
 	public int getHead(int index) {
 		DependencyData data = getFirstSet();
-		return data==null ? DependencyConstants.DATA_UNDEFINED_VALUE : data.getHead(index);
+		return data==null ? LanguageUtils.DATA_UNDEFINED_VALUE : data.getHead(index);
 	}
 
 	/**

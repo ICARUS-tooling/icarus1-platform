@@ -20,9 +20,9 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import net.ikarus_systems.icarus.config.ConfigDelegate;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
-import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.language.dependency.DependencyDataEvent;
 import net.ikarus_systems.icarus.language.dependency.DependencyNodeData;
@@ -255,7 +255,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			// Add edges
 			for(int i=0; i<data.length(); i++) {
 				int head = data.getHead(i);
-				if(DependencyUtils.isUndefined(head) || DependencyUtils.isRoot(head)) {
+				if(LanguageUtils.isUndefined(head) || LanguageUtils.isRoot(head)) {
 					continue;
 				}
 				
@@ -428,19 +428,18 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			
 			if(removeEdges) {
 				// Remove incoming edges not originating from 'newHead'
-				int edgeCount = model.getEdgeCount(cell);
-				for(int i=0; i<edgeCount; i++) {
+				for(int i=0; i<model.getEdgeCount(cell); i++) {
 					Object edge = model.getEdgeAt(cell, i);
 					
 					// Ignore outgoing and order edges
 					if(GraphUtils.isOrderEdge(model, edge) 
-							|| cell==model.getTerminal(edge, true)) {
+							|| cell==model.getTerminal(edge, true)
+							|| newHead==model.getTerminal(edge, true)) {
 						continue;
 					}
 					
-					if(newHead==model.getTerminal(edge, true)) {
-						model.remove(edge);
-					}
+					model.remove(edge);
+					i--;
 				}
 			}			
 		} finally {
@@ -504,12 +503,12 @@ public class DependencyGraphPresenter extends GraphPresenter {
 						// Handle changed head
 						if(newValue.getHead()!=oldvalue.getHead()) {
 							Object edge = getCell("head"+i); //$NON-NLS-1$
-							if(DependencyUtils.isUndefined(newValue.getHead())
-									|| DependencyUtils.isRoot(newValue.getHead())) {
+							if(LanguageUtils.isUndefined(newValue.getHead())
+									|| LanguageUtils.isRoot(newValue.getHead())) {
 								// Head got removed
 								model.remove(edge);
-							} else if(DependencyUtils.isUndefined(oldvalue.getHead())
-									|| DependencyUtils.isRoot(oldvalue.getHead())) {
+							} else if(LanguageUtils.isUndefined(oldvalue.getHead())
+									|| LanguageUtils.isRoot(oldvalue.getHead())) {
 								// Head got created
 								Object source = getCell("node"+newValue.getHead()); //$NON-NLS-1$
 								edge = createEdge(data.getRelation(i), "head"+i, model.getValue(source), newValue); //$NON-NLS-1$
@@ -666,12 +665,12 @@ public class DependencyGraphPresenter extends GraphPresenter {
 				}
 			}
 			
-			Object value = orderEdge ? Order.BEFORE : DependencyConstants.DATA_UNDEFINED_LABEL;
+			Object value = orderEdge ? Order.BEFORE : LanguageUtils.DATA_UNDEFINED_LABEL;
 			
 			// Refresh target
 			DependencyNodeData targetData = (DependencyNodeData)model.getValue(target);
 			if(!orderEdge) {
-				targetData = removeHead(target, true);
+				targetData = replaceHead(target, source, true);
 			}
 			String id = (orderEdge ? "order" : "head")+targetData.getIndex(); //$NON-NLS-1$ //$NON-NLS-2$
 			
@@ -862,7 +861,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		protected Object createCell(mxCellState startState, String style) {
 			mxICell cell = (mxICell) super.createCell(startState, style);
 			
-			cell.setValue(DependencyUtils.DATA_UNDEFINED_LABEL);
+			cell.setValue(LanguageUtils.DATA_UNDEFINED_LABEL);
 			
 			return cell;
 		}

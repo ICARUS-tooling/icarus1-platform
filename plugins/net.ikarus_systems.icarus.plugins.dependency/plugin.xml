@@ -15,6 +15,7 @@
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
 		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
+		<import plugin-id="net.ikarus_systems.icarus.searchTools" />
 	</requires>
 	
 	<!-- Standard Extensions -->
@@ -62,4 +63,59 @@
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyData" />
 	</extension>
+	
+	<!-- CONSTRAINT FACTORIES -->
+	
+	<extension id="FormConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependencyform" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFormContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="PosConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_pos" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyPosContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="LemmaConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_lemma" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="RelationConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_relation" />
+		<parameter id="token" value="dependency_rel" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyRelationContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="DistanceConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_distance" />
+		<parameter id="token" value="dependency_dist" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="FeaturesConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_features" />
+		<parameter id="token" value="dependency_feats" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="DirectionConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_direction" />
+		<parameter id="token" value="dependency_dir" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>
+	
+	<extension id="DirectionProjectivityFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
+		<parameter id="token" value="dependency_projectivity" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyProjectivityContraintFactory" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+	</extension>	
+	
 </plugin>

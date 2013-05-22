@@ -7,7 +7,9 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.treebank.search;
+package net.ikarus_systems.icarus.search_tools;
+
+import net.ikarus_systems.icarus.resources.ResourceManager;
 
 /**
  * @author Markus Gärtner
@@ -21,7 +23,7 @@ public enum EdgeType {
 	 * Enables all kinds of constraints on the edge to be taken
 	 * into account when used in a matching process.
 	 */
-	DOMINANCE,
+	DOMINANCE("dominance"), //$NON-NLS-1$
 	
 	/**
 	 * Transitive closure. Assigned edge matches any directed path
@@ -32,7 +34,7 @@ public enum EdgeType {
 	 * <p>
 	 * This edge type cannot be used together with negation!
 	 */
-	TRANSITIVE,
+	TRANSITIVE("transitive"), //$NON-NLS-1$
 	
 	/**
 	 * Matching against total order of source and target {@code SearchNode}.
@@ -40,5 +42,21 @@ public enum EdgeType {
 	 * it is given by the initial order of word tokens within a sentence
 	 * that are represented by nodes in the graph.
 	 */
-	PRECEDENCE,
+	PRECEDENCE("precedence"); //$NON-NLS-1$
+	
+	private EdgeType(String key) {
+		this.key = key;
+	}
+	
+	private String key;
+	
+	public String getName() {
+		return ResourceManager.getInstance().get(
+				"plugins.searchTools.edgeType."+key+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	public String getDescription() {
+		return ResourceManager.getInstance().get(
+				"plugins.searchTools.edgeType."+key+".description"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

@@ -20,6 +20,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 
 import net.ikarus_systems.icarus.language.MutableSentenceData;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.SentenceDataListener;
 import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
@@ -169,8 +170,8 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 	};
 
 	protected static String[] headOptions = { 
-		DependencyConstants.DATA_ROOT_LABEL,
-		DependencyConstants.DATA_UNDEFINED_LABEL,
+		LanguageUtils.DATA_ROOT_LABEL,
+		LanguageUtils.DATA_UNDEFINED_LABEL,
 	};
 
 	/**
@@ -275,7 +276,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 				return entry.getRelation();
 				
 			case DependencyConstants.TABLE_INDEX_HEAD:
-				return DependencyUtils.getHeadLabel(entry.getHead());
+				return LanguageUtils.getHeadLabel(entry.getHead());
 			}
 			
 			return null;
@@ -292,7 +293,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 			
 			String sValue = String.valueOf(value);
 			String normalizedValue = sValue==null || sValue.isEmpty() ?
-					DependencyConstants.DATA_UNDEFINED_LABEL : sValue;
+					LanguageUtils.DATA_UNDEFINED_LABEL : sValue;
 			
 			DependencyDataEntry entry = data.getItem(rowIndex);
 			switch (columnIndex) {
@@ -318,7 +319,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 
 			case DependencyConstants.TABLE_INDEX_HEAD:
 				try {
-					entry.setHead(DependencyUtils.parseHeadLabel(normalizedValue));
+					entry.setHead(LanguageUtils.parseHeadLabel(normalizedValue));
 				} catch(NumberFormatException e) {
 					String msg = String.format("Failed to set value of table cell [%d,%d]: %s",  //$NON-NLS-1$
 							rowIndex, columnIndex, sValue);

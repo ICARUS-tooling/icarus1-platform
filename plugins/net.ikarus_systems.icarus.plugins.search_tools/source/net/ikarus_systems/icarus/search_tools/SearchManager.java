@@ -7,7 +7,8 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.treebank.search;
+package net.ikarus_systems.icarus.search_tools;
+
 
 /**
  * @author Markus Gärtner
@@ -15,6 +16,20 @@ package net.ikarus_systems.icarus.language.treebank.search;
  *
  */
 public final class SearchManager {
+	
+	private static SearchManager instance;
+	
+	public static SearchManager getInstance() {
+		if(instance==null) {
+			synchronized (SearchManager.class) {
+				if(instance==null) {
+					instance = new SearchManager();
+				}
+			}
+		}
+		
+		return instance;
+	}
 
 	private SearchManager() {
 		// no-op

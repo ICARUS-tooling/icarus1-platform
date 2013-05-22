@@ -25,10 +25,11 @@ import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.language.Grammar;
 import net.ikarus_systems.icarus.language.LanguageManager;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
-import net.ikarus_systems.icarus.language.treebank.search.SearchMode;
-import net.ikarus_systems.icarus.language.treebank.search.SearchParameters;
+import net.ikarus_systems.icarus.search_tools.SearchMode;
+import net.ikarus_systems.icarus.search_tools.SearchParameters;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.Options;
@@ -368,24 +369,8 @@ public class DependencyUtils implements DependencyConstants {
 				new String[] { "_", "_", "_", "_", "_", "_" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] { "DT", "NN", "PRP", "MD", "RB", "VB" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] {"NMOD", "ROOT", "SBJ", "NMOD", "TMP", "VC" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-				new int[] { 1, 5, 3, DATA_HEAD_ROOT, 3, 3 },
+				new int[] { 1, 5, 3, LanguageUtils.DATA_HEAD_ROOT, 3, 3 },
 				new long[]{ 0, 0, 0, 0, 0, 0}); // TODO
-	}
-	
-	public static boolean isRoot(int value) {
-		return value==DATA_HEAD_ROOT;
-	}
-	
-	public static boolean isRoot(String value) {
-		return DATA_ROOT_LABEL.equals(value);
-	}
-	
-	public static boolean isUndefined(int value) {
-		return value==DATA_UNDEFINED_VALUE;
-	}
-	
-	public static boolean isUndefined(String value) {
-		return value==null || value.isEmpty() || value.equals(DATA_UNDEFINED_LABEL);
 	}
 	
 	public static final SentenceData dummySentenceData = 
@@ -395,7 +380,7 @@ public class DependencyUtils implements DependencyConstants {
 				new String[]{""},   //$NON-NLS-1$
 				new String[]{""},  //$NON-NLS-1$
 				new String[]{""},  //$NON-NLS-1$
-				new int[]{DependencyConstants.DATA_UNDEFINED_VALUE},
+				new int[]{LanguageUtils.DATA_UNDEFINED_VALUE},
 				new long[]{0});
 	
 	/*public static String getExistenceLabel(int existence) {
@@ -418,116 +403,6 @@ public class DependencyUtils implements DependencyConstants {
 			// TODO should we check if label equals "true"?
 			return DATA_YES_VALUE;
 	}*/
-	
-	public static String getBooleanLabel(int value) {
-		switch (value) {
-		case DATA_GROUP_VALUE:
-			return DATA_GROUP_LABEL;
-		case DATA_UNDEFINED_VALUE:
-			return DATA_UNDEFINED_LABEL;
-		case DATA_YES_VALUE:
-			return String.valueOf(true);
-		case DATA_NO_VALUE:
-			return String.valueOf(false);
-		}
-		
-		throw new IllegalArgumentException("Unknown value: "+value); //$NON-NLS-1$
-	}
-	
-	public static int parseBooleanLabel(String label) {
-		if(DATA_GROUP_LABEL.equals(label))
-			return DATA_GROUP_VALUE;
-		else if(DATA_UNDEFINED_LABEL.equals(label))
-			return DATA_UNDEFINED_VALUE;
-		else if(Boolean.parseBoolean(label))
-			return DATA_YES_VALUE;
-		else
-			return DATA_NO_VALUE;
-	}
-
-	public static String getHeadLabel(int head) {
-		switch (head) {
-		case DATA_HEAD_ROOT:
-			return DATA_ROOT_LABEL;
-		case DATA_UNDEFINED_VALUE:
-			return DATA_UNDEFINED_LABEL;
-		case DATA_GROUP_VALUE:
-			return DATA_GROUP_LABEL;
-		default:
-			return String.valueOf(head + 1);
-		}
-	}
-
-	public static String getLabel(int value) {
-		switch (value) {
-		case DATA_UNDEFINED_VALUE:
-			return DATA_UNDEFINED_LABEL;
-		case DATA_GROUP_VALUE:
-			return DATA_GROUP_LABEL;
-		default:
-			return String.valueOf(value);
-		}
-	}
-
-	public static String getDirectionLabel(int value) {
-		switch (value) {
-		case DATA_UNDEFINED_VALUE:
-			return DATA_UNDEFINED_LABEL;
-		case DATA_GROUP_VALUE:
-			return DATA_GROUP_LABEL;
-		case DATA_LEFT_VALUE:
-			return DATA_LEFT_LABEL;
-		case DATA_RIGHT_VALUE:
-			return DATA_RIGHT_LABEL;
-		}
-
-		return null;
-	}
-
-	public static int parseHeadLabel(String head) {
-		head = head.trim();
-		if (DATA_ROOT_LABEL.equals(head))
-			return DATA_HEAD_ROOT;
-		else if (DATA_UNDEFINED_LABEL.equals(head))
-			return DATA_UNDEFINED_VALUE;
-		else if (DATA_GROUP_LABEL.equals(head))
-			return DATA_GROUP_VALUE;
-		else
-			return Integer.parseInt(head) - 1;
-	}
-
-	public static int parseLabel(String value) {
-		value = value.trim();
-		if (value.isEmpty() || DATA_UNDEFINED_LABEL.equals(value))
-			return DATA_UNDEFINED_VALUE;
-		else if (DATA_GROUP_LABEL.equals(value))
-			return DATA_GROUP_VALUE;
-		else
-			return Integer.parseInt(value);
-	}
-
-	public static int parseDirectionLabel(String direction) {
-		direction = direction.trim();
-		if (DATA_GROUP_LABEL.equals(direction))
-			return DATA_GROUP_VALUE;
-		else if (DATA_LEFT_LABEL.equals(direction))
-			return DATA_LEFT_VALUE;
-		else if (DATA_RIGHT_LABEL.equals(direction))
-			return DATA_RIGHT_VALUE;
-		else
-			return DATA_UNDEFINED_VALUE;
-	}
-
-	public static String normalizeLabel(String value) {
-		if(value==null)
-			return DATA_UNDEFINED_LABEL;
-		
-		value = value.trim();
-		if (value.isEmpty())
-			return DATA_UNDEFINED_LABEL;
-		else
-			return value;
-	}
 
 	public static int getDataField(int column) {
 		switch (column) {
@@ -560,7 +435,7 @@ public class DependencyUtils implements DependencyConstants {
 	}
 	
 	private static class DataEntry {
-		public int index = DATA_UNDEFINED_VALUE;
+		public int index = LanguageUtils.DATA_UNDEFINED_VALUE;
 		public String form = ""; //$NON-NLS-1$
 		public String lemma = ""; //$NON-NLS-1$
 		public String features = ""; //$NON-NLS-1$
@@ -667,7 +542,7 @@ public class DependencyUtils implements DependencyConstants {
 			features[i] = entry.features;
 			poss[i] = entry.pos;
 			relations[i] = entry.relation;
-			heads[i] = entry.head==null ? DATA_HEAD_ROOT : entry.head.index;
+			heads[i] = entry.head==null ? LanguageUtils.DATA_HEAD_ROOT : entry.head.index;
 		}
 		
 		return new SimpleDependencyData(forms, lemmas, features, poss, relations, heads, null);
@@ -1048,7 +923,7 @@ public class DependencyUtils implements DependencyConstants {
 		
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
-			buffer[i] = getHeadLabel(items[i].getHead());
+			buffer[i] = LanguageUtils.getHeadLabel(items[i].getHead());
 		
 		return Arrays.toString(buffer);
 	}
@@ -1066,7 +941,8 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static String getDirection(DependencyNodeData item) {
 		if(item.hasHead()) {
-			return item.getHead()<item.getIndex() ? DATA_RIGHT_LABEL : DATA_LEFT_LABEL;
+			return item.getHead()<item.getIndex() ? 
+					LanguageUtils.DATA_RIGHT_LABEL : LanguageUtils.DATA_LEFT_LABEL;
 		} else {
 			return ""; //$NON-NLS-1$
 		}
@@ -1097,9 +973,9 @@ public class DependencyUtils implements DependencyConstants {
 	
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {
 		switch (constraint) {
-		case DATA_YES_VALUE:
+		case LanguageUtils.DATA_YES_VALUE:
 			return value;
-		case DATA_NO_VALUE:
+		case LanguageUtils.DATA_NO_VALUE:
 			return !value;
 
 		default:

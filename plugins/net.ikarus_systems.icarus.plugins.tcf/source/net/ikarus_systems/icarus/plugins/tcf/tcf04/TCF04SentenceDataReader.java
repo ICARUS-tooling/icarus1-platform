@@ -25,6 +25,7 @@ import de.tuebingen.uni.sfs.wlf1.tc.api.Token;
 import de.tuebingen.uni.sfs.wlf1.tc.xb.TextCorpusLayerTag;
 
 
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
 import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
@@ -213,11 +214,11 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 
 					} else {
 						// root
-						heads[index] = DependencyConstants.DATA_HEAD_ROOT;
+						heads[index] = LanguageUtils.DATA_HEAD_ROOT;
 					}
 				} else {
 					//default value when sentence invalid
-					heads[index] = DependencyConstants.DATA_HEAD_ROOT;
+					heads[index] = LanguageUtils.DATA_HEAD_ROOT;
 					relations[index] = ""; //$NON-NLS-1$
 				}
 				

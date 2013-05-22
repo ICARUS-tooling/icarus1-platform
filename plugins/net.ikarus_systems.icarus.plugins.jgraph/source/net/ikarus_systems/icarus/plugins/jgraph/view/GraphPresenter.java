@@ -1290,7 +1290,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 
 	
 	public void editCell(Object cell) {
-		if (!isEditable()) {
+		if (!isEditable() || GraphUtils.isOrderEdge(graph.getModel(), cell)) {
 			return;
 		}
 		

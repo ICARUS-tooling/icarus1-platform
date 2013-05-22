@@ -444,4 +444,5 @@
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.SentenceDataList" />
 	</extension>
+	
 </plugin>

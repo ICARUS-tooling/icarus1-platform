@@ -28,7 +28,7 @@ public class LanguageToolsPlugin extends Plugin {
 	public LanguageToolsPlugin() {
 		// no-op
 	}
-
+	
 	/**
 	 * @see org.java.plugin.Plugin#doStart()
 	 */

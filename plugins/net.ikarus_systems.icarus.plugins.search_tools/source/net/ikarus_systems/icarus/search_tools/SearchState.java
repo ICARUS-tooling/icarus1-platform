@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.treebank.search;
+package net.ikarus_systems.icarus.search_tools;
 
 /**
  * @author Markus Gärtner

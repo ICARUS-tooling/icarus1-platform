@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.searchTools" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.search_tools.SearchToolPlugin">
+	
+	<doc>
+		<doc-text>
+			Base plug-in for search engine utilization and several search erlated
+			visualization factories.
+		</doc-text>
+	</doc>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
+	</requires>
+	
+	<!-- Extension-Points -->
+			
+	<extension-point id="ConstraintFactory">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter-def id="token" multiplicity="one-or-more">
+			<doc>
+				<doc-text>
+					Tokens the factory wants to be identified with. Note that
+					it is recommended to use prefixing for common tokens like
+					'form', 'lemma' and such that are likely to be used by several
+					implementations.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class" multiplicity="one">
+			<doc>
+				<doc-text>
+					The factory itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.plugins.searchTools.ConstraintFactory interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" multiplicity="one-or-more" type="extension-id"
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
+			<doc>
+				<doc-text>
+					Collection of content types (usually only one) that this factory is
+					compatible with.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SearchToolsView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that only want to
+				contribute search tool like capabilities. Typically a perspective
+				that holds a collection of search tools will add all extensions
+				to this extension-point to its default list of views.
+			</doc-text>
+		</doc>
+	</extension-point>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PERSPECTIVES AND VIEWS -->
+	
+	<extension id="SearchPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				Test-perspective for search stuff
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.searchTools.searchPerspective.identity.name" />
+		<parameter id="description" value="plugins.searchTools.searchPerspective.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.SearchPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-perspective.gif" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="SearchQueryContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.search_tools.SearchQuery
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.SearchQuery" />
+	</extension>
+	
+	
+	<extension id="SearchGraphContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.search_tools.SearchGraph
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.SearchGraph" />
+	</extension>
+	<!-- HELPERS -->
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint" />
+		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultTreeEdge" />
+		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultTreeNode" />
+	</extension>
+</plugin>

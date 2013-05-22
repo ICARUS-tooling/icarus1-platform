@@ -377,9 +377,11 @@ public final class TaskManager {
 			if(rejectedTaskExecutionHandler==null) {
 				rejectedTaskExecutionHandler = new RejectedTaskExecutionHandler();
 			}
+			
+			int maxThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()-1); 
 
-			executorService = new ThreadPoolExecutor(MAX_WORKER_THREADS,
-					MAX_WORKER_THREADS, 10L, TimeUnit.MINUTES,
+			executorService = new ThreadPoolExecutor(1,
+					maxThreadCount, 10L, TimeUnit.MINUTES,
 					new LinkedBlockingQueue<Runnable>(), threadFactory,
 					rejectedTaskExecutionHandler);
 			

@@ -17,6 +17,7 @@ import java.util.Map;
 import net.ikarus_systems.icarus.language.AbstractMutableSentenceData;
 import net.ikarus_systems.icarus.language.Grammar;
 import net.ikarus_systems.icarus.language.MutableSentenceData;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
@@ -161,7 +162,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			
 			DependencyDataEntry item = items.get(i);
 			if(item.getHead()==index) {
-				item.setHead0(DATA_UNDEFINED_VALUE);
+				item.setHead0(LanguageUtils.DATA_UNDEFINED_VALUE);
 				indexFrom = Math.min(indexFrom, i);
 				indexTo = Math.max(indexTo, i);
 			}
@@ -339,7 +340,8 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			DependencyDataEntry item = items.get(index);
 			visited[index] = true;
 			item.index = index;
-			if (item.head == DATA_HEAD_ROOT || item.head==DATA_UNDEFINED_VALUE) {
+			if (item.head == LanguageUtils.DATA_HEAD_ROOT 
+					|| item.head==LanguageUtils.DATA_UNDEFINED_VALUE) {
 				// 1 = root
 				counts[1]++;
 			} else if (item.head >= 0 && item.head < items.size()) {
@@ -458,7 +460,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 		public DependencyDataEntry() {
 			form = pos = relation = lemma = features = ""; //$NON-NLS-1$
-			head = DATA_UNDEFINED_VALUE;
+			head = LanguageUtils.DATA_UNDEFINED_VALUE;
 			flags = 0;
 		}
 
@@ -563,7 +565,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		public String toString() {
 			return String.format("%s %s (%s) [%d] %s %s [%s] <%d>",  //$NON-NLS-1$
 					form, lemma, features, index + 1, pos,
-					DependencyUtils.getHeadLabel(head), relation, flags);
+					LanguageUtils.getHeadLabel(head), relation, flags);
 		}
 
 		/**
@@ -677,11 +679,12 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		}
 
 		public boolean isRoot() {
-			return head == DATA_HEAD_ROOT;
+			return head == LanguageUtils.DATA_HEAD_ROOT;
 		}
 
 		public boolean hasHead() {
-			return head != DATA_HEAD_ROOT && head != DATA_UNDEFINED_VALUE;
+			return head != LanguageUtils.DATA_HEAD_ROOT 
+					&& head != LanguageUtils.DATA_UNDEFINED_VALUE;
 		}
 	}
 }

@@ -40,7 +40,7 @@ public class DefaultTreeLayout implements GraphLayout {
 	
 	protected void initStyles() {
 		regularEdgeStyle = ";exitY=1.0;entryY=0.0;exitX=0.5;entryX=0.5;shape=connector"; //$NON-NLS-1$
-		orderEdgeStyle = ";exitY=1.0;entryY=1.0;exitX=0.5;entryX=0.5;edgeStyle=bottomArcEdgeStyle;shape=arc"; //$NON-NLS-1$
+		orderEdgeStyle = ";exitY=1.0;entryY=1.0;exitX=0.5;entryX=0.5;edgeStyle=bottomArcEdgeStyle;shape=arc;dashed=1"; //$NON-NLS-1$
 	}
 	
 	protected mxRectangle layoutCell(mxIGraphModel model, Object cell, 

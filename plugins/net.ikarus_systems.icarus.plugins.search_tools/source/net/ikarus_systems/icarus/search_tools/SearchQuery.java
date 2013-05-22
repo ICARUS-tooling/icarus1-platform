@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.treebank.search;
+package net.ikarus_systems.icarus.search_tools;
 
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 
@@ -62,5 +62,5 @@ public interface SearchQuery {
 	
 	Object getProperty(String key);
 	
-	SearchNode[] getNodes();
+	SearchGraph getSearchGraph();
 }

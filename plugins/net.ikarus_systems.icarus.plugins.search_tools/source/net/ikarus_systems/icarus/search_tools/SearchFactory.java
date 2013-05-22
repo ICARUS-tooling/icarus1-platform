@@ -7,16 +7,14 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.treebank.search;
+package net.ikarus_systems.icarus.search_tools;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface SearchGraph {
+public interface SearchFactory {
 
-	SearchNode[] getNodes();
-	
-	SearchEdge[] getEdges();
+	Search createSearch(SearchQuery query);
 }

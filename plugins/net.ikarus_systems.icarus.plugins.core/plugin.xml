@@ -407,7 +407,7 @@
 			</doc>
 		</parameter-def>
 		<parameter-def id="inputType" type="extension-id"
-				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+				custom-data="net.ikarus_systems.icarus.plugins.core@ContentType">
 			<doc>
 				<doc-text>
 					Input content type.
@@ -415,7 +415,7 @@
 			</doc>
 		</parameter-def>
 		<parameter-def id="outputType" type="extension-id"
-				custom-data="net.ikarus_systems.icarus.plugins.core.IcarusCorePlugin@ContentType">
+				custom-data="net.ikarus_systems.icarus.plugins.core@ContentType">
 			<doc>
 				<doc-text>
 					Result content type.

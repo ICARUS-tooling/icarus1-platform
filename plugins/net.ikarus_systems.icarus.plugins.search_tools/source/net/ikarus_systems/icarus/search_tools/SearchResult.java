@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.treebank.search;
+package net.ikarus_systems.icarus.search_tools;
 
 import net.ikarus_systems.icarus.util.data.ContentType;
 
@@ -17,6 +17,10 @@ import net.ikarus_systems.icarus.util.data.ContentType;
  *
  */
 public interface SearchResult {
+	
+	int getDimension();
+	
+	SearchQuery getSource();
 
 	int totalHitCount();
 	
@@ -27,4 +31,6 @@ public interface SearchResult {
 	SearchConstraint groupConstraint(int groupId);
 	
 	ContentType getContentType();
+	
+	Object groupLabel(int groupId, int index);
 }

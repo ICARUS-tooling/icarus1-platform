@@ -246,6 +246,14 @@ public class FormBuilder {
 	public ChoiceFormEntry addChoiceFormEntry(String id, String label) {
 		return addChoiceFormEntry(id).setLabel(label);
 	}
+	
+	public ToggleFormEntry addToggleFormEntry(String id) {
+		return addEntry(id, new ToggleFormEntry());
+	}
+	
+	public ToggleFormEntry addToggleFormEntry(String id, String label) {
+		return addEntry(id, new ToggleFormEntry(label));
+	}
 
 	public void feedComponent(Component comp) {
 		feedComponent(comp, null, -1, -1);
@@ -384,7 +392,7 @@ public class FormBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static abstract class AbstractFormEntry implements FormEntry {
+	public static abstract class AbstractFormEntry<E extends FormEntry> implements FormEntry {
 		
 		protected int resizeMode = RESIZE_NONE;
 
@@ -392,10 +400,11 @@ public class FormBuilder {
 			return resizeMode;
 		}
 
-		public FormEntry setResizeMode(int resizeMode) {
+		@SuppressWarnings("unchecked")
+		public E setResizeMode(int resizeMode) {
 			this.resizeMode = resizeMode;
 			
-			return this;
+			return (E) this;
 		}
 	}
 }

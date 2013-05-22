@@ -42,7 +42,7 @@ public class DefaultArcLayout implements GraphLayout {
 	
 	protected void initStyles() {
 		regularEdgeStyle = ";exitY=0.0;entryY=0.0;edgeStyle=topArcEdgeStyle;shape=arc"; //$NON-NLS-1$
-		orderEdgeStyle = ";exitY=1.0;entryY=1.0;edgeStyle=bottomArcEdgeStyle;shape=arc"; //$NON-NLS-1$
+		orderEdgeStyle = ";exitY=1.0;entryY=1.0;edgeStyle=bottomArcEdgeStyle;shape=arc;dashed=1"; //$NON-NLS-1$
 		
 		defaultConnectionStyle = ";exitX=0.5;entryX=0.5"; //$NON-NLS-1$
 		ltrConnectionStyle = ";exitX=0.65;entryX=0.5"; //$NON-NLS-1$
@@ -116,6 +116,7 @@ public class DefaultArcLayout implements GraphLayout {
 				// Calculate highest arc and assign styles
 				for(Object edge : graph.getOutgoingEdges(cell)) {
 					mxGeometry targetGeometry = geometries.get(model.getTerminal(edge, false));
+					
 					double span = Math.abs(geometry.getCenterX() - targetGeometry.getCenterX());
 							
 					// Fetch basic style

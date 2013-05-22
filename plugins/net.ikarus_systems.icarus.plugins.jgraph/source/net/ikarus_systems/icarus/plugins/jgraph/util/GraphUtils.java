@@ -41,7 +41,7 @@ public final class GraphUtils {
 	}
 
 	public static boolean isOrderEdge(mxIGraphModel model, Object edge) {
-		return model.getValue(edge) instanceof Order;
+		return model.isEdge(edge) && model.getValue(edge) instanceof Order;
 	}
 	
 	/**
@@ -50,6 +50,10 @@ public final class GraphUtils {
 	 * points of the two terminal vertices of the edge on the x-axis.
 	 */
 	public static boolean isLtrEdge(mxIGraphModel model, Object edge) {
+		if(!model.isEdge(edge)) {
+			return false;
+		}
+		
 		Object source = model.getTerminal(edge, true);
 		Object target = model.getTerminal(edge, false);
 		

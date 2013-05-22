@@ -12,11 +12,12 @@ package net.ikarus_systems.icarus.plugins.dependency.graph;
 import java.util.Map;
 
 import net.ikarus_systems.icarus.config.ConfigDelegate;
-import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyNodeData;
 import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
+import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.view.TextRenderer;
@@ -82,6 +83,11 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	@Override
 	public String convertValueToString(GraphOwner owner, Object cell) {
 		mxIGraphModel model = owner.getGraph().getModel();
+		
+		if(GraphUtils.isOrderEdge(model, cell)) {
+			return ""; //$NON-NLS-1$
+		}
+		
 		Object value = null;
 		if(model.isVertex(cell)) {
 			value = model.getValue(cell);
@@ -129,7 +135,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 				sb.append(normalize(DependencyUtils.getFeatures(nodeData))).append("\n"); //$NON-NLS-1$
 			}
 			if(markRoot && nodeData.isRoot()) {
-				sb.append(DependencyConstants.DATA_ROOT_LABEL);
+				sb.append(LanguageUtils.DATA_ROOT_LABEL);
 			}
 		} else if(nodeData.hasHead()) {
 			boolean showRelation = isTrue("showRelation"); //$NON-NLS-1$
@@ -203,7 +209,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.head"), //$NON-NLS-1$
-					normalize(DependencyUtils.getHeadLabel(data.getHead())),
+					normalize(LanguageUtils.getHeadLabel(data.getHead())),
 					DependencyUtils.getHeads(children));
 			
 			tableBuilder.addRowEscaped(
@@ -220,7 +226,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.projective"), //$NON-NLS-1$
-					String.valueOf(data.isFlagSet(DependencyConstants.FLAG_PROJECTIVE)));
+					String.valueOf(data.isFlagSet(LanguageUtils.FLAG_PROJECTIVE)));
 		}
 		
 		tableBuilder.finish();

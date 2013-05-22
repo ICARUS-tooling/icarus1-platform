@@ -11,10 +11,9 @@ package net.ikarus_systems.icarus.plugins.dependency.graph;
 
 import javax.swing.JComponent;
 
-import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.language.dependency.DependencyNodeData;
-import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
 import net.ikarus_systems.icarus.plugins.jgraph.view.HeavyWeightCellEditor;
@@ -33,8 +32,8 @@ import com.mxgraph.model.mxIGraphModel;
 public class DependencyCellEditor extends HeavyWeightCellEditor {
 	
 	protected static String[] headOptions = {
-		DependencyConstants.DATA_ROOT_LABEL,
-		DependencyConstants.DATA_UNDEFINED_LABEL, 
+		LanguageUtils.DATA_ROOT_LABEL,
+		LanguageUtils.DATA_UNDEFINED_LABEL, 
 	};
 
 	public DependencyCellEditor(DependencyGraphPresenter presenter) {
@@ -148,7 +147,7 @@ public class DependencyCellEditor extends HeavyWeightCellEditor {
 			formBuilder.setValue("lemma", nodeData.getLemma()); //$NON-NLS-1$
 			formBuilder.setValue("features", nodeData.getFeatures()); //$NON-NLS-1$
 			formBuilder.setValue("pos", nodeData.getPos()); //$NON-NLS-1$
-			formBuilder.setValue("head", DependencyUtils.getHeadLabel(nodeData.getHead())); //$NON-NLS-1$
+			formBuilder.setValue("head", LanguageUtils.getHeadLabel(nodeData.getHead())); //$NON-NLS-1$
 			formBuilder.setValue("relation", nodeData.getRelation()); //$NON-NLS-1$
 			
 			// TODO handle flags
@@ -185,7 +184,7 @@ public class DependencyCellEditor extends HeavyWeightCellEditor {
 			nodeData.setLemma((String) formBuilder.getValue("lemma")); //$NON-NLS-1$
 			nodeData.setFeatures((String) formBuilder.getValue("features")); //$NON-NLS-1$
 			nodeData.setPos((String) formBuilder.getValue("pos")); //$NON-NLS-1$
-			nodeData.setHead(DependencyUtils.parseHeadLabel((String) formBuilder.getValue("head"))); //$NON-NLS-1$
+			nodeData.setHead(LanguageUtils.parseHeadLabel((String) formBuilder.getValue("head"))); //$NON-NLS-1$
 			nodeData.setRelation((String) formBuilder.getValue("relation")); //$NON-NLS-1$
 
 			if (nodeData.checkDifference(entry)) {

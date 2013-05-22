@@ -171,6 +171,7 @@ public class JGraphPlugin extends Plugin {
 				"middle", //$NON-NLS-1$
 				"bottom"); //$NON-NLS-1$
 		builder.addColorEntry("strokeColor", Color.blue.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("fillColor", Color.white.getRGB()); //$NON-NLS-1$
 		builder.addIntegerEntry("strokeWidth", 1, 1, 5); //$NON-NLS-1$
 		//builder.addIntegerEntry("perimeterSpacing", 0, 0, 8);
 		builder.addIntegerEntry("spacing", 3, 0, 25); //$NON-NLS-1$

@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
 import net.ikarus_systems.icarus.util.CloneableObject;
 import net.ikarus_systems.icarus.util.Exceptions;
@@ -33,7 +34,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class DependencyNodeData implements DependencyConstants, CloneableObject, Cloneable,
+public class DependencyNodeData implements CloneableObject, Cloneable,
 		Serializable {
 
 	private static final long serialVersionUID = -2234983923334922206L;
@@ -68,8 +69,8 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 	public DependencyNodeData() {
 		form = "<empty>"; //$NON-NLS-1$
 		pos = lemma = features = relation = ""; //$NON-NLS-1$
-		head = DATA_UNDEFINED_VALUE;
-		index = DATA_UNDEFINED_VALUE;
+		head = LanguageUtils.DATA_UNDEFINED_VALUE;
+		index = LanguageUtils.DATA_UNDEFINED_VALUE;
 	}
 
 	public DependencyNodeData(DependencyDataEntry source) {
@@ -103,16 +104,16 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 	@Override
 	public String toString() {
 		return String.format("%s [%d] %s %s [%s]", form, index + 1, pos, //$NON-NLS-1$
-				DependencyUtils.getHeadLabel(head), relation);
+				LanguageUtils.getHeadLabel(head), relation);
 	}
 
 	public void clearHead() {
-		head = DATA_UNDEFINED_VALUE;
+		head = LanguageUtils.DATA_UNDEFINED_VALUE;
 		relation = ""; //$NON-NLS-1$
 	}
 	
 	public boolean hasHead() {
-		return head!=DATA_UNDEFINED_VALUE && head!=DATA_HEAD_ROOT;
+		return head!=LanguageUtils.DATA_UNDEFINED_VALUE && head!=LanguageUtils.DATA_HEAD_ROOT;
 	}
 
 	@Override
@@ -340,6 +341,6 @@ public class DependencyNodeData implements DependencyConstants, CloneableObject,
 	}
 	
 	public boolean isRoot() {
-		return head==DATA_HEAD_ROOT;
+		return head==LanguageUtils.DATA_HEAD_ROOT;
 	}
 }

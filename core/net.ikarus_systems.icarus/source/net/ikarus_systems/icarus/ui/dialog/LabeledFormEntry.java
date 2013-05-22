@@ -18,7 +18,8 @@ import net.ikarus_systems.icarus.ui.dialog.FormBuilder.FormEntry;
  * @version $Id$
  *
  */
-public abstract class LabeledFormEntry<E extends FormEntry> extends AbstractFormEntry {
+public abstract class LabeledFormEntry<E extends FormEntry> 
+		extends AbstractFormEntry<E> {
 	
 	protected String label;
 

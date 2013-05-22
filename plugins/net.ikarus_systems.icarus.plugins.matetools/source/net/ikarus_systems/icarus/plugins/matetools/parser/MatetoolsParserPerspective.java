@@ -9,7 +9,6 @@
  */
 package net.ikarus_systems.icarus.plugins.matetools.parser;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 

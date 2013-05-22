@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.language.Grammar;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 
 /**
  * 
@@ -113,7 +114,7 @@ public class SimpleDependencyData implements DependencyData {
 
 		for (int i = 0; i < forms.length; i++) {
 			sb.append(i + 1).append(": ").append(forms[i]).append(" ").append( //$NON-NLS-1$ //$NON-NLS-2$
-					DependencyUtils.getHeadLabel(heads[i])).append(" ").append( //$NON-NLS-1$
+					LanguageUtils.getHeadLabel(heads[i])).append(" ").append( //$NON-NLS-1$
 					poss[i]).append(" ").append(relations[i]).append(" ").append( //$NON-NLS-1$ //$NON-NLS-2$
 					lemmas[i]).append(" ").append(features[i]); //$NON-NLS-1$
 			if (i < forms.length - 1)

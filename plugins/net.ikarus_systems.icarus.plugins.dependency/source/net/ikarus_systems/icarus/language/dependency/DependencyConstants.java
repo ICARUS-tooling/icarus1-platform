@@ -21,8 +21,6 @@ public interface DependencyConstants {
 	
 	public static final String CONTENT_TYPE_ID = "DependencyDataContentType"; //$NON-NLS-1$
 	
-	// flags
-	public static final int FLAG_PROJECTIVE = (1 << 0);
 
 	// mask fields for data events
 	public static final int DATA_FIELD_FORM = (1 << 0);
@@ -33,33 +31,6 @@ public interface DependencyConstants {
 	public static final int DATA_FIELD_RELATION = (1 << 5);
 	public static final int DATA_FIELD_INDEX = (1 << 6);
 	public static final int DATA_FIELD_FLAG = (1 << 7);
-
-	/**
-	 * Head value to mark the root node.
-	 */
-	public static final int DATA_HEAD_ROOT = -1;
-
-	public static final String DATA_ROOT_LABEL = "<root>"; //$NON-NLS-1$
-
-	public static final String DATA_UNDEFINED_LABEL = "?"; //$NON-NLS-1$
-
-	public static final String DATA_GROUP_LABEL = "<*>"; //$NON-NLS-1$
-
-	public static final String DATA_LEFT_LABEL = "<<"; //$NON-NLS-1$
-
-	public static final String DATA_RIGHT_LABEL = ">>"; //$NON-NLS-1$
-
-	public static final int DATA_LEFT_VALUE = -1;
-
-	public static final int DATA_RIGHT_VALUE = 1;
-
-	public static final int DATA_GROUP_VALUE = -3;
-
-	public static final int DATA_UNDEFINED_VALUE = -2;
-
-	public static final int DATA_YES_VALUE = 0;
-
-	public static final int DATA_NO_VALUE = -1;
 
 	/**
 	 * Level value to signal that no validation has been performed yet.
