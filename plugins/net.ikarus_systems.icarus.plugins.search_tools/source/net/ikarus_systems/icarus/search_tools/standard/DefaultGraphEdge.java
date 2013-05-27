@@ -32,7 +32,7 @@ import net.ikarus_systems.icarus.search_tools.SearchNode;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class DefaultTreeEdge implements SearchEdge {
+public class DefaultGraphEdge implements SearchEdge {
 	
 	private static final AtomicInteger idCounter = new AtomicInteger();
 	
@@ -60,7 +60,7 @@ public class DefaultTreeEdge implements SearchEdge {
 	@XmlAttribute
 	private EdgeType edgeType = EdgeType.DOMINANCE;
 	
-	public DefaultTreeEdge(SearchEdge edge) {
+	public DefaultGraphEdge(SearchEdge edge) {
 		setSource(edge.getSource());
 		setTarget(edge.getTarget());
 		setConstraints(edge.getConstraints());
@@ -69,19 +69,18 @@ public class DefaultTreeEdge implements SearchEdge {
 		setId(edge.getId());
 	}
 
-	public DefaultTreeEdge(SearchNode source, SearchNode target) {
+	public DefaultGraphEdge(SearchNode source, SearchNode target) {
 		setSource(source);
 		setTarget(target);
 	}
 
-	public DefaultTreeEdge(SearchNode source, SearchNode target, SearchConstraint[] constraints) {
+	public DefaultGraphEdge(SearchNode source, SearchNode target, SearchConstraint[] constraints) {
 		setSource(source);
 		setTarget(target);
 		setConstraints(constraints);
 	}
 	
-	@SuppressWarnings("unused")
-	private DefaultTreeEdge() {
+	public DefaultGraphEdge() {
 		// no-op
 	}
 

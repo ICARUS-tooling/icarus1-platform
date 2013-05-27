@@ -93,7 +93,7 @@ public class DependencyTargetTree implements TargetTree {
 		
 		data = (DependencyData)source;
 
-		size = data.length();
+		size = (int) data.length();
 		int head;
 		int[] list, tmp;
 		
@@ -164,10 +164,10 @@ public class DependencyTargetTree implements TargetTree {
 				idx = list[i];
 				prepareDescendants0(idx);
 				value += descendantCounts[idx];
-				depth = Math.max(depth, heights[idx]);
+				depth = (int) Math.max(depth, heights[idx]);
 			}
 			descendantCounts[index] = value;
-			heights[index] = depth + 1;
+			heights[index] = (int) (depth + 1);
 		} else {
 			descendantCounts[index] = 0;
 			heights[index] = 1; // MARK 1
@@ -408,7 +408,7 @@ public class DependencyTargetTree implements TargetTree {
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
-		return Math.abs(nodePointer - edges[nodePointer][1+edgePointer]);
+		return (int) Math.abs(nodePointer - edges[nodePointer][1+edgePointer]);
 	}
 	
 	public int getDirection() {

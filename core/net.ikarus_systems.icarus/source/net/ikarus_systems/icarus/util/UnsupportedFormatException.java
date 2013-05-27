@@ -22,21 +22,16 @@ package net.ikarus_systems.icarus.util;
  */
 public class UnsupportedFormatException extends Exception {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4049528089908906476L;
 
-	/**
-	 * 
-	 */
 	public UnsupportedFormatException() {
 	}
 
-	/**
-	 * @param message
-	 */
 	public UnsupportedFormatException(String message) {
 		super(message);
+	}
+
+	public UnsupportedFormatException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

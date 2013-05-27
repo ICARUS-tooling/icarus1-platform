@@ -24,6 +24,7 @@ import javax.swing.text.StyleContext;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.language.Grammar;
+import net.ikarus_systems.icarus.language.LanguageConstants;
 import net.ikarus_systems.icarus.language.LanguageManager;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
@@ -161,17 +162,15 @@ public class DependencyUtils implements DependencyConstants {
 								: Orientation.RIGHT_TO_LEFT);
 		options.put(SearchParameters.SEARCH_RESULT_LIMIT,
 				config.getInteger("dependency.search.maxResultCount")); //$NON-NLS-1$
-		boolean exhaustive = false;
-		SearchMode mode = SearchMode.SENTENCES;
+		SearchMode mode = SearchMode.MATCH;
 		String modeString = config.getString("dependency.search.searchMode"); //$NON-NLS-1$
+		
+		// TODO use accurate mode check!
 		if("occurrences".equals(modeString)) { //$NON-NLS-1$
-			mode = SearchMode.OCCURENCES;
-			exhaustive = true;
+			mode = SearchMode.HITS;
 		} else if("exhaustiveSentences".equals(modeString)) { //$NON-NLS-1$
-			exhaustive = true;
 		}
 		
-		options.put(SearchParameters.SEARCH_EXHAUSTIVE, exhaustive);
 		options.put(SearchParameters.SEARCH_MODE, mode);
 		
 		return options;
@@ -369,7 +368,7 @@ public class DependencyUtils implements DependencyConstants {
 				new String[] { "_", "_", "_", "_", "_", "_" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] { "DT", "NN", "PRP", "MD", "RB", "VB" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] {"NMOD", "ROOT", "SBJ", "NMOD", "TMP", "VC" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-				new int[] { 1, 5, 3, LanguageUtils.DATA_HEAD_ROOT, 3, 3 },
+				new short[] { 1, 5, 3, LanguageUtils.DATA_HEAD_ROOT, 3, 3 },
 				new long[]{ 0, 0, 0, 0, 0, 0}); // TODO
 	}
 	
@@ -380,7 +379,7 @@ public class DependencyUtils implements DependencyConstants {
 				new String[]{""},   //$NON-NLS-1$
 				new String[]{""},  //$NON-NLS-1$
 				new String[]{""},  //$NON-NLS-1$
-				new int[]{LanguageUtils.DATA_UNDEFINED_VALUE},
+				new short[]{LanguageUtils.DATA_UNDEFINED_VALUE},
 				new long[]{0});
 	
 	/*public static String getExistenceLabel(int existence) {
@@ -435,7 +434,7 @@ public class DependencyUtils implements DependencyConstants {
 	}
 	
 	private static class DataEntry {
-		public int index = LanguageUtils.DATA_UNDEFINED_VALUE;
+		public short index = LanguageUtils.DATA_UNDEFINED_VALUE;
 		public String form = ""; //$NON-NLS-1$
 		public String lemma = ""; //$NON-NLS-1$
 		public String features = ""; //$NON-NLS-1$
@@ -513,7 +512,7 @@ public class DependencyUtils implements DependencyConstants {
 				key = null;
 				value = null;
 
-				entry.index = items.size();
+				entry.index = (short) items.size();
 				items.add(entry);
 			}
 				break;
@@ -533,7 +532,7 @@ public class DependencyUtils implements DependencyConstants {
 		String[] features = new String[size];
 		String[] poss = new String[size];
 		String[] relations = new String[size];
-		int[] heads = new int[size];
+		short[] heads = new short[size];
 		
 		for(int i=0; i<size; i++) {
 			entry = items.get(i);
@@ -958,17 +957,18 @@ public class DependencyUtils implements DependencyConstants {
 	/**
 	 * Algorithm by 
 	 * <a href="http://ufal.mff.cuni.cz:8080/pub/files/havelka2005.pdf">Havelka 2005</a>
+	 * 
+	 * Naive approach used for now instead!
+	 * <p>
+	 * Note that all projectivity flags are assumed to be <b>not</b> set
+	 * when passed to this method!
 	 */
-	public static void fillProjectivityFlags(int[] heads, long[] flags) {
-		if(heads==null || flags==null)
-			throw new IllegalArgumentException();
-		if(heads.length!=flags.length)
-			throw new IllegalArgumentException("Size of heads and flags array mismatching"); //$NON-NLS-1$
-		
-		int size = heads.length;
-		
-		// TODO implement!!
-		
+	public static void fillProjectivityFlags(short[] heads, long[] flags) {
+		for(int i=0; i<heads.length; i++) {
+			if(LanguageUtils.isProjective(i, heads)) {
+				flags[i] |= LanguageConstants.FLAG_PROJECTIVE;
+			}
+		}
 	}
 	
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {

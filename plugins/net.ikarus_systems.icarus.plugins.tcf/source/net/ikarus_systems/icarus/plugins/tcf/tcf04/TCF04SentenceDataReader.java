@@ -113,7 +113,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 	@Override
 	public SentenceData next() throws IOException, UnsupportedFormatException {
 		String[] forms, lemmas, features, poss, relations;
-		int[] heads;
+		short[] heads;
 		long[] flags;
 		
 		SimpleDependencyData sdd = null;
@@ -128,7 +128,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			int size = token.length;
 
 
-			heads = new int[size];
+			heads = new short[size];
 			poss = new String[size];
 			forms = new String[size];
 			lemmas = new String[size];
@@ -209,8 +209,8 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 								.getTokens(toksentence);
 						// System.out.println(st[0].getOrder());
 
-						heads[index] = tSource[0].getOrder()
-								- tokenOffset[0].getOrder();
+						heads[index] = (short) (tSource[0].getOrder()
+								- tokenOffset[0].getOrder());
 
 					} else {
 						// root

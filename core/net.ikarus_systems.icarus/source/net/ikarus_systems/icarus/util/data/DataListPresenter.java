@@ -13,18 +13,22 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
@@ -34,13 +38,19 @@ import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.NavigationControl;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.helper.Editable;
 import net.ikarus_systems.icarus.ui.helper.FilteredListModel;
+import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.ListPresenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.Filter;
+import net.ikarus_systems.icarus.util.Installable;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.PropertyChangeSource;
+import net.ikarus_systems.icarus.util.annotation.AnnotationContainer;
+import net.ikarus_systems.icarus.util.annotation.AnnotationControl;
+import net.ikarus_systems.icarus.util.annotation.AnnotationManager;
 
 import org.java.plugin.registry.Extension;
 
@@ -54,7 +64,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 	protected DataListModel<T> dataListModel;
 	protected DataList<T> dataList;
 	
-	protected JList<T> list;
+	protected AnnotationManager annotationManager;
+	protected AnnotationControl annotationControl;
+	
+	protected JList<?> list;
 	protected ListSelectionModel listSelectionModel;
 	
 	protected Filter filter;
@@ -77,6 +90,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		JPanel panel = new JPanel(new BorderLayout());
 		
 		list = createList();
+		annotationControl = createAnnotationControl();
 		
 		NavigationControl navigationControl = createNavigationControl();
 
@@ -99,16 +113,37 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		return list;
 	}
 	
+	protected AnnotationControl createAnnotationControl() {
+		return new AnnotationControl(false);
+	}
+	
 	protected NavigationControl createNavigationControl() {	
 		
 		Options options = new Options();
-		Object[] rightContent = {
-				getFilterSelect(),
-				getFilterEditButton(),
-		};
-		options.put(NavigationControl.RIGHT_CONTENT_OPTION, rightContent);
+		options.put(NavigationControl.RIGHT_CONTENT_OPTION, rightNavigationContent());
+		options.put(NavigationControl.LEFT_CONTENT_OPTION, leftNavigationContent());
 		
 		return new NavigationControl(list, options);
+	}
+	
+	protected Object leftNavigationContent() {
+		return null;
+	}
+	
+	protected Object rightNavigationContent() {
+		List<Object> items = new ArrayList<>();
+		items.add(getFilterSelect());
+		items.add(getFilterEditButton());
+		
+		if(annotationControl!=null) {
+			items.add(EntryType.SEPARATOR);
+			Object[] comps = annotationControl.getComponents();
+			for(Object comp : comps) {
+				items.add(comp);
+			}
+		}
+		
+		return items.toArray();
 	}
 	
 	protected JButton getFilterEditButton() {
@@ -167,7 +202,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 	}
 	
 	protected void displayData(DataList<T> data, Options options) {
-		if(dataList==data) {
+		if(dataList==null && dataList==data) {
 			return;
 		}
 		
@@ -179,16 +214,45 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		filter = (Filter) options.get(Options.FILTER);
 		int index = options.get(Options.INDEX, -1);
 		
-		refresh();
+		if(contentPanel!=null) {
+			refresh();
 		
-		if(index!=-1) {
-			getSelectionModel().setSelectionInterval(index, index);
-		} else {
-			getSelectionModel().clearSelection();
+			if(index!=-1) {
+				getSelectionModel().setSelectionInterval(index, index);
+			} else {
+				getSelectionModel().clearSelection();
+			}
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void refresh() {
+		
+		AnnotationManager annotationManager = null;
+		if(dataList instanceof AnnotationContainer) {
+			ContentType annotationType = ((AnnotationContainer)dataList).getAnnotationType();
+		}
+		
+		ListCellRenderer renderer = null;
+		if(dataList!=null) {
+			renderer = UIHelperRegistry.globalRegistry().findHelper(
+					ListCellRenderer.class, dataList.getContentType(), 
+					true, true);
+		}
+		if(renderer==null) {
+			renderer = new DefaultListCellRenderer();
+		}
+		if(renderer instanceof Installable) {
+			((Installable)renderer).install(this);
+		}
+		
+		ListCellRenderer oldRenderer = list.getCellRenderer();
+		if(oldRenderer instanceof Installable) {
+			((Installable)oldRenderer).uninstall(this);
+		}
+		
+		list.setCellRenderer(renderer);
+		
 		getDataListModel().setDataList(dataList);
 		getFilteredListModel().setFilter(filter);
 		getSelectionModel().clearSelection();
@@ -266,6 +330,27 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		return filter;
 	}
 
+	public AnnotationManager getAnnotationManager() {
+		return annotationManager;
+	}
+
+	public void setAnnotationManager(AnnotationManager annotationManager) {
+		if(this.annotationManager==annotationManager) {
+			return;
+		}
+		
+		AnnotationManager oldValue = this.annotationManager;
+		this.annotationManager = annotationManager;
+		
+		if(annotationControl!=null) {
+			annotationControl.setAnnotationManager(annotationManager);
+		}
+		
+		firePropertyChange("annotationManager", oldValue, annotationManager); //$NON-NLS-1$
+		
+		list.repaint();
+	}
+
 	/**
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#present(java.lang.Object, net.ikarus_systems.icarus.util.Options)
 	 */
@@ -279,19 +364,9 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		if(!(data instanceof DataList))
 			throw new UnsupportedPresentationDataException(
 					"Data is not of required type '"+DataList.class+"' : "+data.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
+	
 		
-		
-		// It is perfectly legal to 're-display' the current list since
-		// we cannot be aware of all changes within
-		/*if(dataList==data) {
-			return;
-		}*/
-		
-		dataList = (DataList<T>)data;
-				
-		if(contentPanel!=null) {
-			refresh();
-		}
+		displayData((DataList<T>) data, options);
 	}
 
 	/**

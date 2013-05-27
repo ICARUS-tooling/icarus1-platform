@@ -12,7 +12,6 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
-import net.ikarus_systems.icarus.search_tools.SearchUtils;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 
@@ -23,10 +22,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
  */
 public class DependencyProjectivityContraintFactory extends AbstractConstraintFactory {
 
-	public static final String ID = "dependency_projectivity"; //$NON-NLS-1$
+	public static final String TOKEN = "projectivity"; //$NON-NLS-1$
 
 	public DependencyProjectivityContraintFactory() {
-		super(ID, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.projectivity.name",  //$NON-NLS-1$
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.projectivity.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.projectivity.description"); //$NON-NLS-1$
 	}
 
@@ -48,7 +47,6 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[]{
 				SearchOperator.EQUALS,
-				SearchOperator.EQUALS_NOT,
 				SearchOperator.GROUPING,
 		};
 	}
@@ -60,7 +58,7 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 
 	@Override
 	public Object labelToValue(Object label) {
-		return SearchUtils.parseBooleanLabel((String)label);
+		return LanguageUtils.parseBooleanLabel((String)label);
 	}
 
 	@Override
@@ -82,13 +80,12 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 		private static final long serialVersionUID = -8096178398923755732L;
 
 		public DependencyProjectivityConstraint(Object value, SearchOperator operator) {
-			super(ID, value, operator);
+			super(TOKEN, value, operator);
 		}
 
 		@Override
-		public boolean matches(Object value) {
-			value = ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
-			return super.matches(value);
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
 		}
 	}
 }

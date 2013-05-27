@@ -9,6 +9,11 @@
 		</doc-text>
 	</doc>
 	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/language_tools/icons/" />
+	</attributes>
+	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 	</requires>
@@ -364,6 +369,17 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListModel" />
 		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
 		<parameter id="interface" value="net.ikarus_systems.icarus.util.data.DataListModel" />
+	</extension>
+	
+	<extension id="SentenceDataListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Simple renderer for net.ikarus_systems.icarus.language.SentenceData list content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
 	
 	<extension id="SentenceDataListPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">

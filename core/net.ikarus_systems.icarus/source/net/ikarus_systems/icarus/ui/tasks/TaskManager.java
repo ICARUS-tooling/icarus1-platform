@@ -291,11 +291,9 @@ public final class TaskManager {
 		if(!(worker instanceof SwingWorker))
 			throw new IllegalArgumentException("Invalid task: "+task); //$NON-NLS-1$
 				
-		// Save task identity in state object
-		if(identity!=null) {
-			TaskState state = new TaskState(priority, identity);		
-			states.put(worker, state);
-		}
+		// Save task identity and priority in state object
+		TaskState state = new TaskState(priority, identity);		
+		states.put(worker, state);
 		
 		boolean result = true;
 		
@@ -582,12 +580,12 @@ public final class TaskManager {
 				setIndeterminate(task, (Boolean)evt.getNewValue());
 				break;
 				
-			case "progress": //$NON-NLS-1$
+			case TaskConstants.PROGRESS_PROPERTY:
 				eventSource.fireEvent(new EventObject(
 						Events.CHANGED, "task", task, "property", "progress")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				break;
 				
-			case "state": //$NON-NLS-1$
+			case TaskConstants.STATE_PROPERTY:
 				if(worker.isDone()) {
 					worker.removePropertyChangeListener(this);
 					

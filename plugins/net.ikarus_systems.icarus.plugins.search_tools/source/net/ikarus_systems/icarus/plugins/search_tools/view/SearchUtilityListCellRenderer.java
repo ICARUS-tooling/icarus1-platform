@@ -15,7 +15,9 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
 import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
+import net.ikarus_systems.icarus.ui.UIUtil;
 
 /**
  * @author Markus Gärtner
@@ -43,6 +45,10 @@ public class SearchUtilityListCellRenderer extends DefaultListCellRenderer {
 			SearchOperator operator = (SearchOperator)value;
 			value = operator.getSymbol();
 			tooltip = operator.getDescription();
+		} else if(value instanceof NodeType) {
+			NodeType nodeType = (NodeType)value;
+			value = nodeType.getName();
+			tooltip = nodeType.getDescription();
 		} else if(value instanceof EdgeType) {
 			EdgeType edgeType = (EdgeType)value;
 			value = edgeType.getName();
@@ -50,8 +56,8 @@ public class SearchUtilityListCellRenderer extends DefaultListCellRenderer {
 		}
 		
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		
-		setToolTipText(tooltip);
+				
+		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 		
 		return this;
 	}

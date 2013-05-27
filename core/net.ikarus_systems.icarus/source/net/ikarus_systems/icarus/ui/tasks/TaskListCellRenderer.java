@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import net.ikarus_systems.icarus.ui.GridBagUtil;
@@ -98,6 +99,7 @@ public class TaskListCellRenderer extends JPanel implements
 		footer.setLineWrap(true);
 		footer.setOpaque(false);
 		footer.setEditable(false);
+		footer.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
 		
 		cancelButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("nav_stop.gif")); //$NON-NLS-1$
 		cancelButton.setFocusable(false);
@@ -175,14 +177,11 @@ public class TaskListCellRenderer extends JPanel implements
 		if(header==null) {
 			buildPanel();
 		}
+
+		setVisible(task!=null);
 		
 		// Set "default" appearance
 		if(task==null) {
-			taskIcon.setIcon(null);
-			header.setText(null);
-			footer.setText(null);
-			cancelButton.setVisible(false);
-			progressBar.setVisible(false);
 			return;
 		}
 		

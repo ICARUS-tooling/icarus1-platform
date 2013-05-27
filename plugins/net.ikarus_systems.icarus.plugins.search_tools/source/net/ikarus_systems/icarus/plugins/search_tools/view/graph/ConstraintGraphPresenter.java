@@ -10,17 +10,33 @@
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import net.ikarus_systems.icarus.config.ConfigDelegate;
-import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultTreeLayout;
+import net.ikarus_systems.icarus.language.LanguageManager;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayoutConstants;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer;
+import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
+import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
+import net.ikarus_systems.icarus.search_tools.SearchNode;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
-import net.ikarus_systems.icarus.search_tools.SearchUtils;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphEdge;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphNode;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchGraph;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Order;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -29,6 +45,7 @@ import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.model.mxIGraphModel.mxAtomicGraphModelChange;
 import com.mxgraph.swing.handler.mxConnectPreview;
 import com.mxgraph.swing.view.mxICellEditor;
 import com.mxgraph.view.mxCellState;
@@ -40,15 +57,14 @@ import com.mxgraph.view.mxGraph;
  *
  */
 public class ConstraintGraphPresenter extends GraphPresenter {
+	
+	public static final String CELL_DATA_TYPE = ConstraintCellData.class.getName();
 
 	private static final long serialVersionUID = -674508666642816142L;
 	
-	protected SearchGraph searchGraph;
+	protected DefaultSearchGraph searchGraph;
 	
-	protected ConstraintFactory[] nodeConstraintFactories;
-	protected ConstraintFactory[] edgeConstraintFactories;
-	
-	protected ContentType constraintTargetType;
+	protected ConstraintContext constraintContext;
 	
 	public ConstraintGraphPresenter() {
 		// no-op
@@ -58,7 +74,12 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	protected void initGraphComponentInternals() {
 		super.initGraphComponentInternals();
 		
-		setMinimumNodeSize(new Dimension(35, 25));
+		setMinimumNodeSize(new Dimension(75, 20));
+	}
+	
+	protected ConstraintContext createDefaultContext() {
+		ContentType contentType = LanguageManager.getInstance().getSentenceDataContentType();
+		return SearchManager.getInstance().getConstraintContext(contentType);
 	}
 
 	@Override
@@ -73,7 +94,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	
 	@Override
 	protected GraphLayout createDefaultGraphLayout() {
-		return new DefaultTreeLayout();
+		return new DefaultGraphLayout();
 	}
 
 	@Override
@@ -84,6 +105,19 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	@Override
 	protected mxConnectPreview createConnectPreview() {
 		return new CConnectPreview();
+	}
+
+	@Override
+	protected Options createLayoutOptions() {
+		Options options = super.createLayoutOptions();
+		if(options==null) {
+			options = new Options();
+		}
+		
+		// Apply new settings
+		options.put(GraphLayoutConstants.MIN_BASELINE_KEY, 80);
+		
+		return options;
 	}
 
 	/**
@@ -99,7 +133,6 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	 */
 	@Override
 	public Object getPresentedData() {
-		// TODO create SearchGraph object from our onscreen graph and return
 		return searchGraph;
 	}
 
@@ -116,40 +149,61 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	 */
 	@Override
 	protected void setData(Object data, Options options) {
+		DefaultSearchGraph newGraph = null;
+		if(data instanceof DefaultSearchGraph) {
+			newGraph = (DefaultSearchGraph) data;
+		} else if(data instanceof SearchGraph) {
+			SearchGraph searchGraph = (SearchGraph) data;
+			
+			newGraph = new DefaultSearchGraph();
+			newGraph.setEdges(searchGraph.getEdges());
+			newGraph.setNodes(searchGraph.getNodes());
+			newGraph.setRootNodes(newGraph.getRootNodes());
+		}
+		
+		searchGraph = newGraph;
 	}
 	
 	protected ConstraintNodeData createNodeData() {
-		if(nodeConstraintFactories==null)
-			throw new IllegalStateException("Cannot create constraint data without factorsies"); //$NON-NLS-1$
+		List<ConstraintFactory> factories = getConstraintContext().getNodeFactories();
 		
-		int size = nodeConstraintFactories.length;
-		ConstraintNodeData nodeData = new ConstraintNodeData(size);
-		for(int i=0; i<size; i++) {
-			ConstraintFactory factory = nodeConstraintFactories[i];
+		ConstraintNodeData nodeData = new ConstraintNodeData(factories.size());
+		for(int i=0; i<factories.size(); i++) {
+			ConstraintFactory factory = factories.get(i);
 			SearchOperator operator = factory.getSupportedOperators()[0];
 			Object value = factory.getDefaultValue();
 			
-			nodeData.setConstraint(i, factory.createConstraint(value, operator));
+			nodeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
 		}
 				
 		return nodeData;
 	}
 	
 	protected ConstraintEdgeData createEdgeData() {
-		if(edgeConstraintFactories==null)
-			throw new IllegalStateException("Cannot create constraint data without factorsies"); //$NON-NLS-1$
+		List<ConstraintFactory> factories = getConstraintContext().getEdgeFactories();
 		
-		int size = edgeConstraintFactories.length;
-		ConstraintEdgeData edgeData = new ConstraintEdgeData(size);
-		for(int i=0; i<size; i++) {
-			ConstraintFactory factory = edgeConstraintFactories[i];
+		ConstraintEdgeData edgeData = new ConstraintEdgeData(factories.size());
+		for(int i=0; i<factories.size(); i++) {
+			ConstraintFactory factory = factories.get(i);
 			SearchOperator operator = factory.getSupportedOperators()[0];
 			Object value = factory.getDefaultValue();
 			
-			edgeData.setConstraint(i, factory.createConstraint(value, operator));
+			edgeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
 		}
-		
+				
 		return edgeData;
+	}
+
+	@Override
+	public boolean isOrderEdge(Object cell) {
+		Object value = graph.getModel().getValue(cell);
+		if(value instanceof Order) {
+			return true;
+		}
+		if(value instanceof ConstraintEdgeData) {
+			return ((ConstraintEdgeData)value).getEdgeType()==EdgeType.PRECEDENCE;
+		}
+		return false;
 	}
 
 	/**
@@ -165,7 +219,87 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	 */
 	@Override
 	protected void syncToData() {
-		// Our "backing data" is directly represented in the tree
+		pauseChangeHandling();
+		try {
+			searchGraph = (DefaultSearchGraph) snapshot();
+		} finally {
+			resumeChangeHandling();
+		}
+	}
+	
+	/**
+	 * Creates a {@code SearchGraph} that represents the current
+	 * visual state of the {@code mxGraph} this presenter is using.
+	 */
+	public SearchGraph snapshot() {
+		mxIGraphModel model = graph.getModel();
+		Object parent = graph.getDefaultParent();
+		int cellCount = model.getChildCount(parent);
+		
+		if(cellCount==0) {
+			return null;
+		}
+		
+		Map<Object, DefaultGraphNode> searchNodes = new LinkedHashMap<>();
+		Map<Object, DefaultGraphEdge> searchEdges = new LinkedHashMap<>();
+		
+		// Create and map nodes and edges
+		for(int i=0; i<cellCount; i++) {
+			Object cell = model.getChildAt(parent, i);
+			if(model.isVertex(cell)) {
+				ConstraintNodeData nodeData = (ConstraintNodeData)model.getValue(cell);
+				DefaultGraphNode node = new DefaultGraphNode();
+				node.setNegated(nodeData.isNegated());
+				node.setNodeType(nodeData.getNodeType());
+				node.setConstraints(nodeData.getConstraints());
+				
+				searchNodes.put(cell, node);
+			} else if(model.isEdge(cell)) {
+				ConstraintEdgeData edgeData = (ConstraintEdgeData)model.getValue(cell);
+				DefaultGraphEdge edge = new DefaultGraphEdge();
+				edge.setNegated(edgeData.isNegated());
+				edge.setEdgeType(edgeData.getEdgeType());
+				edge.setConstraints(edgeData.getConstraints());
+				
+				searchEdges.put(cell, edge);
+			}
+		}
+		
+		// Now do the mapping
+		for(int i=0; i<cellCount; i++) {
+			Object cell = model.getChildAt(parent, i);
+			if(model.isVertex(cell)) {
+				
+				// Connect edges to vertices
+				DefaultGraphNode node = searchNodes.get(cell);
+				int edgeCount = model.getEdgeCount(cell);
+				for(int j=0; j<edgeCount; j++) {
+					Object edge = model.getEdgeAt(cell, j);
+					node.addEdge(searchEdges.get(edge), 
+							model.getTerminal(edge, false)==cell);
+				}
+			} else if(model.isEdge(cell)) {
+				
+				// Add terminals to edges
+				DefaultGraphEdge edge = searchEdges.get(cell);
+				edge.setSource(searchNodes.get(model.getTerminal(cell, true)));
+				edge.setTarget(searchNodes.get(model.getTerminal(cell, false)));
+			}
+		}
+		
+		List<Object> roots = graph.findTreeRoots(parent);
+		List<SearchNode> rootNodes = new ArrayList<>();
+		for(Object root : roots) {
+			rootNodes.add(searchNodes.get(root));
+		}
+		
+		// Now wrap everything into a graph object
+		DefaultSearchGraph searchGraph = new DefaultSearchGraph();		
+		searchGraph.setRootNodes(rootNodes.toArray(new SearchNode[0]));
+		searchGraph.setNodes(searchNodes.values().toArray(new SearchNode[0]));
+		searchGraph.setEdges(searchEdges.values().toArray(new SearchEdge[0]));
+		
+		return searchGraph;
 	}
 
 	@Override
@@ -176,8 +310,9 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 	@Override
 	public CellBuffer exportCells(Object[] cells) {
-		// TODO Auto-generated method stub
-		return super.exportCells(cells);
+		return cells!=null ? 
+				CellBuffer.createBuffer(cells, graph.getModel(), CELL_DATA_TYPE)
+				: CellBuffer.createBuffer(graph.getModel(),	null, CELL_DATA_TYPE);
 	}
 
 	@Override
@@ -211,11 +346,20 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	public void addEdge(Object source, Object target, boolean orderEdge) {
 
 		mxIGraphModel model = graph.getModel();
+
+		if(GraphUtils.isAncestor(graph.getModel(), source, target, !orderEdge, orderEdge)) {
+			return;
+		}
+		
 		model.beginUpdate();
 		try {
 			Object value = orderEdge ? Order.BEFORE : createEdgeData();
 			
 			Object cell = graph.insertEdge(null, null, value, source, target);
+			
+			if(enforceTree && !orderEdge) {
+				ensureTree(cell);
+			}
 
 			if(graphStyle!=null) {
 				model.setStyle(cell, graphStyle.getStyle(this, cell, null));
@@ -230,45 +374,97 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		}
 	}
 
-	public ContentType getConstraintTargetType() {
-		return constraintTargetType;
+	public boolean isEnforceTree() {
+		return enforceTree;
 	}
 
-	public void setConstraintTargetType(ContentType constraintTargetType) {
-		if(constraintTargetType==null)
-			throw new IllegalArgumentException("Invalid constraint target type"); //$NON-NLS-1$
-		
-		if(this.constraintTargetType==constraintTargetType) {
+	public void setEnforceTree(boolean enforceTree) {
+		if(this.enforceTree==enforceTree) {
 			return;
 		}
 		
-		ContentType oldValue = this.constraintTargetType;
-		this.constraintTargetType = constraintTargetType;
+		boolean oldValue = this.enforceTree;
+		this.enforceTree = enforceTree;
 		
-		nodeConstraintFactories = null;
-		edgeConstraintFactories = null;
+		firePropertyChange("enforceTree", oldValue, enforceTree); //$NON-NLS-1$
+	}
+
+	public ConstraintContext getConstraintContext() {
+		return constraintContext;
+	}
+
+	public void setConstraintContext(ConstraintContext context) {
+		if(context==null)
+			throw new IllegalArgumentException("Invalid context"); //$NON-NLS-1$
 		
-		ConstraintFactory[] factories = SearchUtils.getConstraintFactories(constraintTargetType);
-		if(factories!=null) {
-			nodeConstraintFactories = SearchUtils.getNodeConstraintFactories(factories);
-			edgeConstraintFactories = SearchUtils.getEdgeConstraintFactories(factories);
+		if(this.constraintContext==context) {
+			return;
 		}
 		
-		setCellEditor(createCellEditor());
-		
-		firePropertyChange("constraintTargetType", oldValue, constraintTargetType); //$NON-NLS-1$
+		graph.getModel().beginUpdate();
+		try {
+			executeChange(new ContextChange(context));
+		} finally {
+			graph.getModel().endUpdate();
+		}
 	}
 
-	public SearchGraph getSearchGraph() {
+	public SearchGraph getData() {
 		return searchGraph;
 	}
-
-	public ConstraintFactory[] getNodeConstraintFactories() {
-		return nodeConstraintFactories;
+	
+	protected void ensureTree(Object newEdge) {
+		mxIGraphModel model = graph.getModel();
+		
+		model.beginUpdate();
+		try {			
+			
+			Object cell = model.getTerminal(newEdge, false);
+			
+			// Remove incoming edges other than 'newEdge'
+			for(int i=0; i<model.getEdgeCount(cell); i++) {
+				Object edge = model.getEdgeAt(cell, i);
+				
+				// Ignore outgoing and order edges
+				if(edge==newEdge || isOrderEdge(edge) 
+						|| cell==model.getTerminal(edge, true)) {
+					continue;
+				}
+				
+				model.remove(edge);
+				i--;
+			}
+		} finally {
+			model.endUpdate();
+		}
 	}
+	
+	protected class ContextChange extends mxAtomicGraphModelChange {
+		
+		protected ConstraintContext context, previous;
+		
+		public ContextChange(ConstraintContext context) {
+			this.context = context;
+			this.previous = this.context;
+		}
 
-	public ConstraintFactory[] getEdgeConstraintFactories() {
-		return edgeConstraintFactories;
+		/**
+		 * @see com.mxgraph.util.mxUndoableEdit.mxUndoableChange#execute()
+		 */
+		@Override
+		public void execute() {
+			context = previous;
+			previous = constraintContext;
+
+			
+			constraintContext = context;
+			
+			// Erase all content when context is switched
+			clearGraph();
+			
+			firePropertyChange("constraintContext", previous, context); //$NON-NLS-1$
+		}
+		
 	}
 
 	/**
@@ -307,5 +503,33 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			
 			return cell;
 		}
+
+		@Override
+		public Object stop(boolean commit, MouseEvent e) {
+			Object result = (sourceState != null) ? sourceState.getCell() : null;
+			
+			if(commit && enforceTree) {
+				if(previewState!=null ) {
+					mxIGraphModel model = graph.getModel();
+					
+					// TODO access model only when committing?
+					model.beginUpdate();
+					try {
+						result = super.stop(commit, e);
+						
+						if(commit && result!=null) {
+							ensureTree(result);
+						}
+					} finally {
+						model.endUpdate();
+					}
+				}
+			} else {
+				result = super.stop(commit, e);
+			}
+			
+			
+			return result;
+		}		
 	}
 }

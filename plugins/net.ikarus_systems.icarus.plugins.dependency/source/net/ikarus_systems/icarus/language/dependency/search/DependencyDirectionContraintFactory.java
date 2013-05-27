@@ -12,7 +12,6 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
-import net.ikarus_systems.icarus.search_tools.SearchUtils;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 
@@ -23,10 +22,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
  */
 public class DependencyDirectionContraintFactory extends AbstractConstraintFactory {
 
-	public static final String ID = "dependency_direction"; //$NON-NLS-1$
+	public static final String TOKEN = "direction"; //$NON-NLS-1$
 
 	public DependencyDirectionContraintFactory() {
-		super(ID, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.direction.name",  //$NON-NLS-1$
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.direction.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.direction.description"); //$NON-NLS-1$
 	}
 
@@ -48,7 +47,6 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[]{
 				SearchOperator.EQUALS,
-				SearchOperator.EQUALS_NOT,
 				SearchOperator.GROUPING,
 		};
 	}
@@ -60,12 +58,12 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 
 	@Override
 	public Object labelToValue(Object label) {
-		return SearchUtils.parseDirectionLabel((String)label);
+		return LanguageUtils.parseDirectionLabel((String)label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value) {
-		return SearchUtils.getDirectionLabel((int)value);
+		return LanguageUtils.getDirectionLabel((int)value);
 	}
 
 	@Override
@@ -82,13 +80,12 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 		private static final long serialVersionUID = 8874429868140453623L;
 
 		public DependencyDirectionConstraint(Object value, SearchOperator operator) {
-			super(ID, value, operator);
+			super(TOKEN, value, operator);
 		}
 
 		@Override
-		public boolean matches(Object value) {
-			value = ((DependencyTargetTree)value).getDirection();
-			return super.matches(value);
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getDirection();
 		}
 	}
 }

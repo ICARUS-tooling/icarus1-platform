@@ -70,6 +70,7 @@ public class ListGraphView extends View implements Outline {
 		container.add(infoLabel, BorderLayout.NORTH);
 		
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setContinuousLayout(true);
 		splitPane.setDividerSize(5);
 		splitPane.setBorder(null);
 		splitPane.setResizeWeight(1);

@@ -9,16 +9,22 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
+import java.util.List;
+
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
+import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
-import net.ikarus_systems.icarus.search_tools.SearchUtils;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.util.HtmlUtils.HtmlTableBuilder;
 
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.util.mxRectangle;
 
 /**
  * @author Markus Gärtner
@@ -41,7 +47,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(GraphOwner target) {
+	public void install(Object target) {
 		if(target instanceof ConstraintGraphPresenter) {
 			presenter = (ConstraintGraphPresenter) target;
 		}
@@ -51,7 +57,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
 	 */
 	@Override
-	public void uninstall(GraphOwner target) {
+	public void uninstall(Object target) {
 		presenter = null;
 	}
 	
@@ -66,6 +72,11 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		}
 		
 		mxIGraphModel model = owner.getGraph().getModel();
+		
+		if(GraphUtils.isOrderEdge(owner, model, cell)) {
+			return ""; //$NON-NLS-1$
+		}
+		
 		Object value = model.getValue(cell);
 		
 		if(sb==null) {
@@ -73,6 +84,9 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		}
 		
 		sb.setLength(0);
+		
+		List<ConstraintFactory> factories = null;
+		SearchConstraint[] constraints = null;
 		
 		if(value instanceof ConstraintNodeData) {
 			ConstraintNodeData data = (ConstraintNodeData)value;
@@ -82,27 +96,15 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 				sb.append(ResourceManager.getInstance().get(
 						"plugins.searchTools.labels.negated")).append(": ").append(data.isNegated()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-
-			// Root
-			if(data.isRoot()) {
-				sb.append(ResourceManager.getInstance().get(
-						"plugins.searchTools.labels.root")).append(": ").append(data.isRoot()); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			// Node Type
+			if(data.getNodeType()!=NodeType.GENERAL) {
+				sb.append("\n").append(data.getNodeType().getName()); //$NON-NLS-1$
 			}
 			
 			// Constraints
-			ConstraintFactory[] factories = presenter.getNodeConstraintFactories();
-			SearchConstraint[] constraints = data.getConstraints();
-			if(factories!=null && factories.length>0) {
-				for(int i=0; i<constraints.length; i++) {
-					if(!constraints[i].isUndefined()) {
-						Object label = factories[i].valueToLabel(constraints[i].getValue());
-						SearchOperator operator = constraints[i].getOperator();
-						sb.append("\n").append(factories[i].getName()) //$NON-NLS-1$
-						.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}
-			}
-			
+			factories = presenter.getConstraintContext().getNodeFactories();
+			constraints = data.getConstraints();
 		} else if(value instanceof ConstraintEdgeData) {
 			ConstraintEdgeData data = (ConstraintEdgeData)value;
 			
@@ -113,20 +115,24 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			}
 			
 			// Edge Type
-			sb.append("\n").append(ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.searchTools.labels.edgeType")).append(": ").append(data.getEdgeType().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			if(data.getEdgeType()!=EdgeType.DOMINANCE) {
+				sb.append("\n").append(data.getEdgeType().getName()); //$NON-NLS-1$
+			}
 			
 			// Constraints
-			ConstraintFactory[] factories = presenter.getEdgeConstraintFactories();
-			SearchConstraint[] constraints = data.getConstraints();
-			if(factories!=null && factories.length>0) {
-				for(int i=0; i<constraints.length; i++) {
-					if(!constraints[i].isUndefined()) {
-						Object label = factories[i].valueToLabel(constraints[i].getValue());
-						SearchOperator operator = constraints[i].getOperator();
-						sb.append("\n").append(factories[i].getName()) //$NON-NLS-1$
-						.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
-					}
+			factories = presenter.getConstraintContext().getEdgeFactories();
+			constraints = data.getConstraints();
+		}
+
+		// Constraints
+		if(factories!=null && !factories.isEmpty()) {
+			for(int i=0; i<constraints.length; i++) {
+				if(!constraints[i].isUndefined()) {
+					SearchOperator operator = constraints[i].getOperator();
+					Object label = operator==SearchOperator.GROUPING ? ""  //$NON-NLS-1$
+							: factories.get(i).valueToLabel(constraints[i].getValue());
+					sb.append("\n").append(factories.get(i).getName()) //$NON-NLS-1$
+					.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -144,5 +150,11 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	public String getToolTipForCell(GraphOwner owner, Object cell) {
 		// TODO use table builder to create full view of constraints!!
 		return "<html>"+convertValueToString(owner, cell).replaceAll("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	@Override
+	public mxRectangle getPreferredSizeForCell(GraphOwner owner, Object cell) {
+		// TODO Auto-generated method stub
+		return super.getPreferredSizeForCell(owner, cell);
 	}
 }

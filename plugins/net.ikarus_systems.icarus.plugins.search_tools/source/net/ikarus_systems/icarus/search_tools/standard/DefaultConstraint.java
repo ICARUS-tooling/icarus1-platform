@@ -20,8 +20,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
-import net.ikarus_systems.icarus.search_tools.SearchUtils;
 
 /**
  * @author Markus Gärtner
@@ -32,8 +32,10 @@ import net.ikarus_systems.icarus.search_tools.SearchUtils;
 @XmlRootElement(name="constraint")
 public class DefaultConstraint implements SearchConstraint {
 	
-	@XmlAttribute(name="id")
-	private String id;
+	private static final long serialVersionUID = 8086598627849516305L;
+
+	@XmlAttribute(name="token")
+	private String token;
 	
 	@XmlElements({
 		@XmlElement(name="string", type=String.class),
@@ -47,8 +49,8 @@ public class DefaultConstraint implements SearchConstraint {
 	@XmlAttribute(name="operator")
 	private SearchOperator operator;
 	
-	public DefaultConstraint(String id, Object value, SearchOperator operator) {
-		setId(id);
+	public DefaultConstraint(String token, Object value, SearchOperator operator) {
+		setToken(token);
 		setValue(value);
 		setOperator(operator);
 	}
@@ -81,6 +83,7 @@ public class DefaultConstraint implements SearchConstraint {
 	@Override
 	public boolean matches(Object value) {
 		
+		value = prepareValue(value);
 		Object constraint = this.value;
 		
 		switch (operator) {
@@ -97,12 +100,12 @@ public class DefaultConstraint implements SearchConstraint {
 			return !value.equals(constraint);
 			
 		case MATCHES: {
-			Pattern pattern = SearchUtils.getPattern((String)constraint);
+			Pattern pattern = SearchManager.getPattern((String)constraint);
 			return pattern==null ? false : pattern.matcher((String)value).find();
 		}
 			
 		case MATCHES_NOT: {
-			Pattern pattern = SearchUtils.getPattern((String)constraint);
+			Pattern pattern = SearchManager.getPattern((String)constraint);
 			return pattern==null ? true : !pattern.matcher((String)value).find();
 		}
 		
@@ -124,24 +127,14 @@ public class DefaultConstraint implements SearchConstraint {
 		
 		return false;
 	}
+	
+	protected Object prepareValue(Object value) {
+		return value;
+	}
 
 	@Override
 	public SearchConstraint clone() {
-		return new DefaultConstraint(id, value, operator);
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#getId()
-	 */
-	@Override
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		if(id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
-		this.id = id;
+		return new DefaultConstraint(token, value, operator);
 	}
 
 	public void setValue(Object value) {
@@ -161,9 +154,24 @@ public class DefaultConstraint implements SearchConstraint {
 	 */
 	@Override
 	public boolean isUndefined() {
-		return value==null || value.equals(LanguageUtils.DATA_UNDEFINED_LABEL)
+		return operator!=SearchOperator.GROUPING
+				&& (value==null || value.equals(LanguageUtils.DATA_UNDEFINED_LABEL)
 				|| value.equals(LanguageUtils.DATA_UNDEFINED_VALUE)
-				|| "".equals(value); //$NON-NLS-1$
+				|| "".equals(value)); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#getToken()
+	 */
+	@Override
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		if(token==null)
+			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+		this.token = token;
 	}
 
 }

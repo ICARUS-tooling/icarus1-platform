@@ -63,4 +63,8 @@ public interface SearchQuery {
 	Object getProperty(String key);
 	
 	SearchGraph getSearchGraph();
+	
+	void setSearchGraph(SearchGraph graph) throws UnsupportedFormatException;
+	
+	SearchQuery clone();
 }

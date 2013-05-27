@@ -20,7 +20,7 @@ import com.mxgraph.view.mxGraph;
  * @version $Id$
  *
  */
-public abstract class GraphRenderer extends mxInteractiveCanvas implements Installable<GraphOwner> {
+public abstract class GraphRenderer extends mxInteractiveCanvas implements Installable {
 
 	public GraphRenderer() {
 		// no-op

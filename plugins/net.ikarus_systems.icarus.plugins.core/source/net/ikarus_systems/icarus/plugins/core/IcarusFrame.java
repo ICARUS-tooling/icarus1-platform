@@ -182,9 +182,24 @@ public class IcarusFrame extends JFrame {
 		
 		Object defaultPerspective = ConfigRegistry.getGlobalRegistry().getValue(
 				"general.appearance.defaultPerspective"); //$NON-NLS-1$
+		
+		if("NONE".equals(defaultPerspective)) { //$NON-NLS-1$
+			defaultPerspective = null;
+		}
+		
+		if(defaultPerspective instanceof String) {
+			try {
+				defaultPerspective = PluginUtil.getExtension((String) defaultPerspective);
+			} catch(Exception e) {
+				LoggerFactory.log(this,	Level.SEVERE, "Failed to fetch perspective-extension: "+defaultPerspective, e); //$NON-NLS-1$
+			}
+		}
+		
 		if(defaultPerspective instanceof Extension) {
 			try {
-				currentPerspective = (Perspective) PluginUtil.instantiate((Extension)defaultPerspective);
+				Extension extension = (Extension) defaultPerspective;
+				currentPerspective = (Perspective) PluginUtil.instantiate(extension);
+				currentPerspective.setExtension(extension);
 			} catch(Exception e) {
 				LoggerFactory.log(this,	Level.SEVERE, "Failed to instantiate default perspective: "+defaultPerspective, e); //$NON-NLS-1$
 			}
@@ -202,6 +217,8 @@ public class IcarusFrame extends JFrame {
 		
 		setMinimumSize(new Dimension(500, 400));
 		setSize(new Dimension(1000, 650));
+		// DEBUG DUMMY
+		//setSize(new Dimension(800, 461));
 		
 		// TODO find out why setLocationByPlatform moves the frame southwards
 		setLocationRelativeTo(null);
@@ -394,7 +411,6 @@ public class IcarusFrame extends JFrame {
 			
 			try {
 				Perspective perspective = (Perspective) clazz.newInstance();
-				perspective.setExtension(perspectiveExtension);
 				data = perspective;
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
@@ -421,6 +437,9 @@ public class IcarusFrame extends JFrame {
 		// Data can only be of type Perspective now
 		currentPerspective = (Perspective) data;
 		currentPerspective.setFrameDelegate(getFrameDelegate());
+		if(perspectiveExtension!=null) {
+			currentPerspective.setExtension(perspectiveExtension);
+		}
 		
 		String id = currentPerspective.getIdentity().getId();
 

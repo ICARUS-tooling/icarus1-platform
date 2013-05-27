@@ -115,7 +115,7 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 				}
 				*/			
 
-				for(int i=0; i<currentData.length(); i++) {	
+				for(short i=0; i<currentData.length(); i++) {	
 					/*
 					System.out.print("Form: "+ sdd.getForm(i));
 					System.out.print(" Head: "+ sdd.getHead(i));

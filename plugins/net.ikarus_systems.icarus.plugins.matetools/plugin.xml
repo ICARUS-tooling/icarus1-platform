@@ -9,6 +9,11 @@
 		</doc-text>
 	</doc>
 	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.matetools.resources.matetools" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.matetools.MatetoolsPreferences" />
+	</attributes>
+	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />

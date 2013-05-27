@@ -21,10 +21,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
  */
 public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 
-	public static final String ID = "dependency_lemma"; //$NON-NLS-1$
+	public static final String TOKEN = "lemma"; //$NON-NLS-1$
 
 	public DependencyLemmaContraintFactory() {
-		super(ID, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.lemma.name",  //$NON-NLS-1$
+		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.lemma.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.lemma.description"); //$NON-NLS-1$
 	}
 
@@ -42,13 +42,12 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 		private static final long serialVersionUID = -2816057046153547371L;
 
 		public DependencyLemmaConstraint(Object value, SearchOperator operator) {
-			super(ID, value, operator);
+			super(TOKEN, value, operator);
 		}
 
 		@Override
-		public boolean matches(Object value) {
-			value = ((DependencyTargetTree)value).getLemma();
-			return super.matches(value);
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getLemma();
 		}
 	}
 }

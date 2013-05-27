@@ -67,6 +67,7 @@ public class LocationFormEntry extends LabeledFormEntry<LocationFormEntry> imple
 		if(locationChooser==null) {
 			locationChooser = new JFileChooser();
 			locationChooser.setMultiSelectionEnabled(false);
+			locationChooser.setCurrentDirectory(Core.getCore().getDataFolder());
 			// TODO configure file chooser
 		}
 		
@@ -78,7 +79,7 @@ public class LocationFormEntry extends LabeledFormEntry<LocationFormEntry> imple
 	 */
 	@Override
 	public void addComponents(FormBuilder builder) {
-		builder.feedComponent(locationInput, null, getResizeMode());
+		builder.feedComponent(locationInput, null, FormBuilder.RESIZE_HORIZONTAL);
 		builder.feedComponent(locationButton);
 	}
 
@@ -122,15 +123,13 @@ public class LocationFormEntry extends LabeledFormEntry<LocationFormEntry> imple
 	}
 	
 	protected void openLocationChooser() {
+		JFileChooser fileChooser = getLocationChooser();
 		File file = null;
 		String locationString = locationInput.getText();
-		if(locationString==null || locationString.isEmpty()) {
-			file = Core.getCore().getDataFolder();
-		} else {
+		if(locationString!=null && !locationString.isEmpty()) {
 			file = new File(locationString);
+			fileChooser.setSelectedFile(file);
 		}
-		JFileChooser fileChooser = getLocationChooser();
-		fileChooser.setSelectedFile(file);
 		int result = fileChooser.showDialog(null, 
 				ResourceManager.getInstance().get("select")); //$NON-NLS-1$
 		

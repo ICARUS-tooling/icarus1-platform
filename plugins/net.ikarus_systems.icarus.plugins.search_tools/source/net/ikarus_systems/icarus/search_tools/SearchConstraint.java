@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 public interface SearchConstraint extends Serializable {
 	
-	String getId();
+	String getToken();
 	
 	Object getValue();
 

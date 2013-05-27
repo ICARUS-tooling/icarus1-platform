@@ -9,13 +9,20 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.ToolTipManager;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
@@ -25,15 +32,21 @@ import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.jgraph.view.HeavyWeightCellEditor;
 import net.ikarus_systems.icarus.plugins.search_tools.view.SearchUtilityListCellRenderer;
+import net.ikarus_systems.icarus.resources.Localizable;
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.dialog.ChoiceFormEntry;
 import net.ikarus_systems.icarus.ui.dialog.ControlFormEntry;
 import net.ikarus_systems.icarus.ui.dialog.FormBuilder;
 import net.ikarus_systems.icarus.ui.dialog.FormBuilder.FormEntry;
+import net.ikarus_systems.icarus.util.HtmlUtils.HtmlTableBuilder;
 
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
@@ -43,10 +56,21 @@ import com.mxgraph.view.mxGraph;
  * @version $Id$
  *
  */
-public class ConstraintCellEditor extends HeavyWeightCellEditor {
+public class ConstraintCellEditor extends HeavyWeightCellEditor implements PropertyChangeListener {
 
 	public ConstraintCellEditor(ConstraintGraphPresenter presenter) {
 		super(presenter);
+		
+		presenter.addPropertyChangeListener("constraintContext", this); //$NON-NLS-1$
+	}
+
+	@Override
+	protected void buildEditors() {
+		if(getPresenter().getConstraintContext()==null) {
+			return;
+		}
+		
+		super.buildEditors();
 	}
 
 	@Override
@@ -65,6 +89,16 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 	}
 
 	/**
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if("constraintContext".equals(evt.getPropertyName())) { //$NON-NLS-1$
+			buildEditors();
+		}
+	}
+
+	/**
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.view.HeavyWeightCellEditor#getEditorComponent(java.lang.Object)
 	 */
 	@Override
@@ -74,6 +108,81 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 		} else 
 			throw new IllegalArgumentException("Editor is not a form builder instance: "+editor); //$NON-NLS-1$
 	}
+	
+	protected JLabel createInfoLabel() {
+		
+		final JLabel label = new JLabel();
+		label.addMouseListener(new MouseAdapter() {
+			
+			private int dismissDelayReminder = -1;
+			private int initialDelayReminder = -1;
+			
+			/**
+			 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				initialDelayReminder = ToolTipManager.sharedInstance().getInitialDelay();
+				dismissDelayReminder = ToolTipManager.sharedInstance().getDismissDelay();
+				
+				ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+				ToolTipManager.sharedInstance().setInitialDelay(0);
+			}
+			
+			/**
+			 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mouseExited(MouseEvent e) {
+				if(dismissDelayReminder!=-1) {
+					ToolTipManager.sharedInstance().setDismissDelay(dismissDelayReminder);
+					dismissDelayReminder = -1;
+				}
+				if(initialDelayReminder!=-1) {
+					ToolTipManager.sharedInstance().setInitialDelay(initialDelayReminder);
+					initialDelayReminder = -1;
+				}
+			}
+		});
+		label.setIcon(IconRegistry.getGlobalRegistry().getIcon("smartmode_co.gif")); //$NON-NLS-1$
+		
+		Localizable localizable = new Localizable() {
+			
+			@Override
+			public void localize() {
+				label.setToolTipText(createOperatorTooltip());
+			}
+		};
+		
+		localizable.localize();
+		ResourceManager.getInstance().getGlobalDomain().addItem(localizable);
+		
+		return label;
+	}
+	
+	protected String createOperatorTooltip() {
+		HtmlTableBuilder builder = new HtmlTableBuilder();
+		
+		builder.start(3);
+		
+		builder.addRow(
+				ResourceManager.getInstance().get("plugins.searchTools.labels.symbol"), //$NON-NLS-1$
+				ResourceManager.getInstance().get("plugins.searchTools.labels.operator"), //$NON-NLS-1$
+				ResourceManager.getInstance().get("plugins.searchTools.labels.explanation")); //$NON-NLS-1$
+		
+		for(SearchOperator operator : SearchOperator.values()) {
+			String name = operator.getName();
+			String desc = operator.getDescription();
+			if(name.equals(desc)) {
+				desc = ""; //$NON-NLS-1$
+			}
+			builder.addRowEscaped(operator.getSymbol(), name, desc);
+		}
+		
+		builder.finish();
+		
+		return builder.getResult();
+	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.view.HeavyWeightCellEditor#createVertexEditor()
@@ -82,22 +191,28 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 	protected Object createVertexEditor() {
 		FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
 		
-		ConstraintFactory[] factories = getPresenter().getNodeConstraintFactories();
+		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getNodeFactories();
 		
-		if(factories!=null) {
+		if(!factories.isEmpty()) {
 			// NEGATED
 			formBuilder.addToggleFormEntry("negated", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			// NODE TYPE
+			ChoiceFormEntry entry = new ChoiceFormEntry(
+					"plugins.searchTools.labels.nodeType",  //$NON-NLS-1$
+					NodeType.values());
+			entry.setResizeMode(FormBuilder.RESIZE_REMAINDER);
+			entry.getComboBox().setRenderer(sharedRenderer);
+			UIUtil.resizeComponent(entry.getComboBox(), 100, 20);
+			formBuilder.addEntry("nodeType", entry); //$NON-NLS-1$
 			
-			// ROOT
-			formBuilder.addToggleFormEntry("root", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
+			formBuilder.addSeperator();
 			
 			// CONSTRAINTS
-			for(int i=0; i<factories.length; i++) {
+			for(int i=0; i<factories.size(); i++) {
 				formBuilder.addEntry("constraint_"+i,  //$NON-NLS-1$
-						new ConstraintFormEntry(factories[i]));
+						new ConstraintFormEntry(factories.get(i)));
 			}
-		} else {
-			LoggerFactory.log(this, Level.WARNING, "Missing constraint factories - skipped editor creation"); //$NON-NLS-1$
 		}
 		
 		// BUTTONS
@@ -105,6 +220,15 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 				cancelEditingAction, textSubmitAction));
 		
 		formBuilder.buildForm();
+		
+		JLabel label = createInfoLabel();
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 2;
+		gbc.gridy = 0;
+		gbc.anchor = GridBagConstraints.NORTHEAST;
+		
+		formBuilder.getContainer().add(label, gbc);
+		
 		formBuilder.pack();
 		
 		return formBuilder;
@@ -117,9 +241,9 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 	protected Object createEdgeEditor() {
 		FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
 		
-		ConstraintFactory[] factories = getPresenter().getEdgeConstraintFactories();
+		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getEdgeFactories();
 		
-		if(factories!=null) {
+		if(!factories.isEmpty()) {
 			// NEGATED
 			formBuilder.addToggleFormEntry("negated", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
 			
@@ -133,12 +257,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 			formBuilder.addEntry("edgeType", entry); //$NON-NLS-1$
 			
 			// CONSTRAINTS
-			for(int i=0; i<factories.length; i++) {
+			for(int i=0; i<factories.size(); i++) {
 				formBuilder.addEntry("constraint_"+i,  //$NON-NLS-1$
-						new ConstraintFormEntry(factories[i]));
+						new ConstraintFormEntry(factories.get(i)));
 			}
-		} else {
-			LoggerFactory.log(this, Level.WARNING, "Missing constraint factories - skipped editor creation"); //$NON-NLS-1$
 		}
 		
 		// BUTTONS
@@ -146,6 +268,15 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 				cancelEditingAction, textSubmitAction));
 		
 		formBuilder.buildForm();
+		
+		JLabel label = createInfoLabel();
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 2;
+		gbc.gridy = 0;
+		gbc.anchor = GridBagConstraints.NORTHEAST;
+		
+		formBuilder.getContainer().add(label, gbc);
+		
 		formBuilder.pack();
 		
 		return formBuilder;
@@ -161,7 +292,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 		FormBuilder formBuilder = getVertexEditor();
 		
 		formBuilder.setValue("negated", nodeData.isNegated()); //$NON-NLS-1$
-		formBuilder.setValue("root", nodeData.isRoot()); //$NON-NLS-1$
+		formBuilder.setValue("nodeType", nodeData.getNodeType()); //$NON-NLS-1$
 		
 		SearchConstraint[] constraints = nodeData.getConstraints();
 		for(int i=0; i<constraints.length; i++) {
@@ -192,18 +323,23 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 	 */
 	@Override
 	protected void readVertexEditor(Object cell) {
-		ConstraintFactory[] factories = getPresenter().getNodeConstraintFactories();
-		if(factories==null || factories.length==0) {
+		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getNodeFactories();
+		if(factories.isEmpty()) {
 			LoggerFactory.log(this, Level.WARNING, "Missing node constraint factories on constraint presenter"); //$NON-NLS-1$
 			return;
 		}
 		
-		ConstraintNodeData nodeData = new ConstraintNodeData(factories.length);
+		ConstraintNodeData nodeData = new ConstraintNodeData(factories.size());
 		FormBuilder formBuilder = getVertexEditor();
 		
+		// Negated state
 		nodeData.setNegated((boolean) formBuilder.getValue("negated")); //$NON-NLS-1$
-		nodeData.setRoot((boolean) formBuilder.getValue("root")); //$NON-NLS-1$
-		for(int i=0; i<factories.length; i++) {
+		
+		// Node type
+		nodeData.setNodeType((NodeType) formBuilder.getValue("nodeType")); //$NON-NLS-1$
+		
+		// Constraints
+		for(int i=0; i<factories.size(); i++) {
 			nodeData.setConstraint(i, (SearchConstraint) formBuilder.getValue("constraint_"+i)); //$NON-NLS-1$
 		}
 
@@ -223,13 +359,13 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 	 */
 	@Override
 	protected void readEdgeEditor(Object cell) {
-		ConstraintFactory[] factories = getPresenter().getNodeConstraintFactories();
-		if(factories==null || factories.length==0) {
+		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getEdgeFactories();
+		if(factories.isEmpty()) {
 			LoggerFactory.log(this, Level.WARNING, "Missing node constraint factories on constraint presenter"); //$NON-NLS-1$
 			return;
 		}
 		
-		ConstraintEdgeData edgeData = new ConstraintEdgeData(factories.length);
+		ConstraintEdgeData edgeData = new ConstraintEdgeData(factories.size());
 		FormBuilder formBuilder = getEdgeEditor();
 		
 		// Negated state
@@ -239,7 +375,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 		edgeData.setEdgeType((EdgeType) formBuilder.getValue("edgeType")); //$NON-NLS-1$
 		
 		// Constraints
-		for(int i=0; i<factories.length; i++) {
+		for(int i=0; i<factories.size(); i++) {
 			edgeData.setConstraint(i, (SearchConstraint) formBuilder.getValue("constraint_"+i)); //$NON-NLS-1$
 		}
 
@@ -248,7 +384,8 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 		
 		model.beginUpdate();
 		try {
-			graph.cellLabelChanged(cell, edgeData, graph.isAutoSizeCell(cell));
+			model.setValue(cell, edgeData);
+			getPresenter().refreshCells(cell);
 		} finally {
 			model.endUpdate();
 		}
@@ -337,6 +474,8 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 		public ConstraintFormEntry setValue(Object value) {
 			SearchConstraint constraint = (SearchConstraint)value;
 			
+			if(!constraint.getToken().equals(factory.getToken()))
+				throw new IllegalArgumentException("Factory not designed to handle constraints for token: "+constraint.getToken()); //$NON-NLS-1$
 
 			Object currentValue = factory.valueToLabel(constraint.getValue());
 			
@@ -373,7 +512,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor {
 				value = Integer.parseInt((String)value);
 			}
 			
-			return factory.createConstraint(value, operator);
+			return new DefaultConstraint(factory.getToken(), value, operator);
 		}
 
 		/**

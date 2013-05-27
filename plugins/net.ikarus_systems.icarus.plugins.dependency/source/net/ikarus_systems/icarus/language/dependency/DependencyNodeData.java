@@ -268,7 +268,7 @@ public class DependencyNodeData implements CloneableObject, Cloneable,
 	}
 	
 	public int getChildCount() {
-		return children==null ? 0 : children.size();
+		return (int) (children==null ? 0 : children.size());
 	}
 	
 	public DependencyNodeData getChildAt(int index) {

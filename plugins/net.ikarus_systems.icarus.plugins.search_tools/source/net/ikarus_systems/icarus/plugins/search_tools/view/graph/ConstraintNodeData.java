@@ -9,38 +9,27 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
-import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.standard.ConstraintAdapter;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-@XmlRootElement
+@XmlRootElement(name="nodeConstraints")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ConstraintNodeData implements Serializable {
+public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
 
 	private static final long serialVersionUID = -5561783573729079886L;
-
-	@XmlAttribute(required=false)
-	private boolean negated = false;
 	
-	@XmlAttribute(required=false)
-	private boolean root = false;
-	
-	@XmlElement
-	@XmlJavaTypeAdapter(value=ConstraintAdapter.class)
-	private SearchConstraint[] constraints;
+	@XmlAttribute
+	private NodeType nodeType = NodeType.GENERAL;
 
 	public ConstraintNodeData() {
 		// no-op
@@ -54,13 +43,14 @@ public class ConstraintNodeData implements Serializable {
 		constraints = new SearchConstraint[size];
 	}
 	
-	public void setConstraint(int index, SearchConstraint constraint) {
-		constraints[index] = constraint;
-	}
-	
+	/**
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData#copyFrom(net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData)
+	 */
+	@Override
 	public void copyFrom(ConstraintNodeData source) {
 		negated = source.negated;
-		root = source.root;
+		nodeType = source.nodeType;
 		constraints = null;
 		
 		if(source.constraints!=null) {
@@ -73,36 +63,20 @@ public class ConstraintNodeData implements Serializable {
 		}
 	}
 
+	public NodeType getNodeType() {
+		return nodeType;
+	}
+
+	public void setNodeType(NodeType nodeType) {
+		this.nodeType = nodeType;
+	}
+
+	/**
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData#clone()
+	 */
 	@Override
 	public ConstraintNodeData clone() {
 		return new ConstraintNodeData(this);
-	}
-
-	public boolean isNegated() {
-		return negated;
-	}
-
-	public void setNegated(boolean negated) {
-		this.negated = negated;
-	}
-
-	public SearchConstraint[] getConstraints() {
-		return constraints;
-	}
-
-	public void setConstraints(SearchConstraint[] constraints) {
-		this.constraints = constraints;
-	}
-	
-	public int getConstraintCount() {
-		return constraints==null ? 0 : constraints.length;
-	}
-
-	public boolean isRoot() {
-		return root;
-	}
-
-	public void setRoot(boolean isRoot) {
-		this.root = isRoot;
 	}
 }

@@ -263,7 +263,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public ContentType getContentType() {
-		return readerExtension==null ? LanguageManager.getInstance().getBasicLanguageDataType() 
+		return readerExtension==null ? LanguageManager.getInstance().getSentenceDataContentType() 
 				: getSentenceDataReader().getContentType();
 	}
 

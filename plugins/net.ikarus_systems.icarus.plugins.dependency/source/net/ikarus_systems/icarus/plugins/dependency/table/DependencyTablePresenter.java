@@ -78,7 +78,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 		table.getTableHeader().setReorderingAllowed(true);
 		table.setIntercellSpacing(new Dimension(4, 3));
 		table.setFillsViewportHeight(true);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setDefaultRenderer(String.class, new TooltipTableCellRenderer());
 		UIUtil.enableToolTip(table);
 		return table;

@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		SEARCH MANAGER VIEW
+	-->
+		
+	<!-- New Search -->
+	<action id="plugins.searchTools.searchManagerView.newSearchAction"
+		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+		
+	<!-- Execute Search -->
+	<action id="plugins.searchTools.searchManagerView.executeSearchAction"
+		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		
+	<!-- Cancel Search -->
+	<action id="plugins.searchTools.searchManagerView.cancelSearchAction"
+		name="${id}.name" desc="${id}.description" icon="nav_stop.gif" />
+		
+	<!-- Remove Search -->
+	<action id="plugins.searchTools.searchManagerView.removeSearchAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		
+	<!-- Clear History -->
+	<action id="plugins.searchTools.searchManagerView.clearHistoryAction"
+		name="${id}.name" desc="${id}.description" icon="clear_co.gif" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.searchTools.searchManagerView.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		
+	<!-- Edit Query -->
+	<action id="plugins.searchTools.searchManagerView.editQueryAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
+	<!-- Select Factory -->
+	<action id="plugins.searchTools.searchManagerView.selectFactoryAction"
+		name="${id}.name" desc="${id}.description" icon="debugtt_obj.gif" />
+		
+	<!-- Select Target -->
+	<action id="plugins.searchTools.searchManagerView.selectTargetAction"
+		name="${id}.name" desc="${id}.description" icon="debugtt_obj.gif" />
+		
+	<!-- View Result -->
+	<action id="plugins.searchTools.searchManagerView.viewResultAction"
+		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.searchTools.searchManagerView.toolBarList">
+		<item type="action" value="plugins.searchTools.searchManagerView.openPreferencesAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.newSearchAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.executeSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.cancelSearchAction" />
+	</action-list>
+	
+</actions>

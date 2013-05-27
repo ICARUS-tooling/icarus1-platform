@@ -29,7 +29,7 @@ public class DefaultGraphRenderer extends GraphRenderer {
 	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(GraphOwner target) {
+	public void install(Object target) {
 		// no-op
 	}
 
@@ -37,7 +37,7 @@ public class DefaultGraphRenderer extends GraphRenderer {
 	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
 	 */
 	@Override
-	public void uninstall(GraphOwner target) {
+	public void uninstall(Object target) {
 		// no-op
 	}
 

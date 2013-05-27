@@ -160,7 +160,7 @@ public class DefaultTreeLayout implements GraphLayout {
 	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(GraphOwner target) {
+	public void install(Object target) {
 		// no-op
 	}
 
@@ -168,7 +168,7 @@ public class DefaultTreeLayout implements GraphLayout {
 	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
 	 */
 	@Override
-	public void uninstall(GraphOwner target) {
+	public void uninstall(Object target) {
 		// no-op
 	}
 
@@ -190,7 +190,7 @@ public class DefaultTreeLayout implements GraphLayout {
 		mxIGraphModel model = owner.getGraph().getModel();
 		
 		String style;
-		if(GraphUtils.isOrderEdge(model, edge)) {
+		if(GraphUtils.isOrderEdge(owner, model, edge)) {
 			style = orderEdgeStyle;
 		} else {
 			style = regularEdgeStyle;

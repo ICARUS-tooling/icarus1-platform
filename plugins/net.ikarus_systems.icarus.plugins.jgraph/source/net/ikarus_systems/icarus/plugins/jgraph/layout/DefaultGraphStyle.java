@@ -42,7 +42,7 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(GraphOwner target) {
+	public void install(Object target) {
 		if(target instanceof GraphPresenter) {
 			ConfigDelegate configDelegate = ((GraphPresenter) target).getConfigDelegate();
 			if(configDelegate!=null) {
@@ -55,7 +55,7 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
 	 */
 	@Override
-	public void uninstall(GraphOwner target) {
+	public void uninstall(Object target) {
 		if(target instanceof GraphPresenter) {
 			ConfigDelegate configDelegate = ((GraphPresenter) target).getConfigDelegate();
 			if(configDelegate!=null) {

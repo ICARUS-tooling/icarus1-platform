@@ -526,7 +526,7 @@ public class TreebankRegistry {
 		@Override
 		
 		public ContentType getContentType() {
-			return LanguageManager.getInstance().getBasicLanguageDataType();
+			return LanguageManager.getInstance().getSentenceDataContentType();
 		}
 		
 		@Override

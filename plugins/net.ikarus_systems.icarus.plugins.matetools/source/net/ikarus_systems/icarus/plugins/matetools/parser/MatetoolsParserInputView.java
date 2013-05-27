@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.plugins.matetools.parser;
 
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -29,6 +31,8 @@ import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import net.ikarus_systems.icarus.config.ConfigEvent;
+import net.ikarus_systems.icarus.config.ConfigListener;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
@@ -44,6 +48,7 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer;
 import net.ikarus_systems.icarus.plugins.ExtensionListModel;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.plugins.core.InfoPanel;
 import net.ikarus_systems.icarus.plugins.core.ToolBarDelegate;
 import net.ikarus_systems.icarus.plugins.jgraph.view.ListGraphView;
 import net.ikarus_systems.icarus.plugins.language_tools.input.TextInputView;
@@ -53,10 +58,13 @@ import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.config.ConfigDialog;
+import net.ikarus_systems.icarus.ui.dialog.DialogDispatcher;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.helper.Outline;
+import net.ikarus_systems.icarus.ui.tasks.TaskConstants;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
+import net.ikarus_systems.icarus.ui.tasks.TaskProgressPanel;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.AbstractDataList;
@@ -77,9 +85,12 @@ public class MatetoolsParserInputView extends TextInputView {
 	
 	private volatile PipelineWorker worker;
 	private JComboBox<Extension> tokenizerSelect;
+	private JComboBox<String> modelStorageSelect;
 	
 	private CallbackHandler callbackHandler;
 	private Handler handler;
+	
+	private TaskProgressPanel progressPanel;
 	
 	private ResultList resultList;
 	
@@ -124,7 +135,11 @@ public class MatetoolsParserInputView extends TextInputView {
 		
 		super.init(container);
 		
+		progressPanel = new TaskProgressPanel();
+		
 		inputArea.getDocument().addDocumentListener(handler);
+		ConfigRegistry.getGlobalRegistry().addGroupListener(
+				"plugins.matetools.parser", handler); //$NON-NLS-1$
 	}
 
 	@Override
@@ -176,7 +191,17 @@ public class MatetoolsParserInputView extends TextInputView {
 			}
 		}
 		
+		if(modelStorageSelect==null) {
+			modelStorageSelect = new JComboBox<>(new DefaultComboBoxModel<String>());
+			modelStorageSelect.setEditable(false);
+			
+			UIUtil.fitToContent(modelStorageSelect, 130, 200, 24);
+		}
+		
 		options.put("selectTokenizer", tokenizerSelect); //$NON-NLS-1$
+		options.put("selectModelSet", modelStorageSelect); //$NON-NLS-1$
+		
+		refreshModelSelect();
 		
 		return getDefaultActionManager().createToolBar(
 				"plugins.matetools.matetoolsParserInputView.toolBarList", options); //$NON-NLS-1$
@@ -190,6 +215,11 @@ public class MatetoolsParserInputView extends TextInputView {
 				"plugins.matetools.matetoolsParserInputView.startPipelineAction")); //$NON-NLS-1$
 	}
 	
+	@Override
+	protected void refreshInfoPanel(InfoPanel infoPanel) {
+		infoPanel.add(progressPanel, GridBagConstraints.CENTER);
+	}
+
 	private Tokenizer getTokenizer() {
 		if(tokenizerSelect==null) {
 			return null;
@@ -211,6 +241,42 @@ public class MatetoolsParserInputView extends TextInputView {
 		return null;
 	}
 	
+	private void refreshModelSelect() {
+		if(modelStorageSelect==null) {
+			return;
+		}
+		
+		Object selectedItem = modelStorageSelect.getSelectedItem();
+		
+		DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)modelStorageSelect.getModel();
+		model.removeAllElements();
+		
+		List<?> storages = (List<?>) ConfigRegistry.getGlobalRegistry().getValue(
+				"plugins.matetools.parser.models"); //$NON-NLS-1$
+		
+		if(storages==null || storages.isEmpty()) {
+			modelStorageSelect.setSelectedItem(null);
+		} else {
+			boolean selectionValid = false;
+			
+			for(Object item : storages) {
+				ModelStorage ms = (ModelStorage) item;
+				if(!selectionValid && selectedItem!=null && ms.getLanguage().equals(selectedItem)) {
+					selectionValid = true;
+				}
+				model.addElement(ms.getLanguage());
+			}
+			
+			if(selectionValid) {
+				modelStorageSelect.setSelectedItem(selectedItem);
+			} else if(model.getSize()>0) {
+				modelStorageSelect.setSelectedIndex(0);
+			} else {
+				modelStorageSelect.setSelectedItem(null);
+			}
+		}
+	}
+		
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void executePipeline() throws Exception {
 		// No concurrent parsing
@@ -228,6 +294,29 @@ public class MatetoolsParserInputView extends TextInputView {
 			return;
 		}
 		
+		// Fetch model storage
+		List<?> storages = (List<?>) ConfigRegistry.getGlobalRegistry().getValue(
+				"plugins.matetools.parser.models"); //$NON-NLS-1$		
+		ModelStorage storage = null;
+		String language = (String) modelStorageSelect.getSelectedItem();
+		if(language!=null && storages!=null) {
+			for(Object item : storages) {
+				ModelStorage ms = (ModelStorage) item;
+				if(ms.isLanguage(language)) {
+					storage = ms;
+					break;
+				}
+			}
+		}
+		if(storage==null || storage.isEmpty()) {
+			new DialogDispatcher(null, 
+					"plugins.matetools.matetoolsParserInputView.title",  //$NON-NLS-1$
+					"plugins.matetools.matetoolsParserInputView.invalidModel",  //$NON-NLS-1$
+					language).showAsError();
+			return;
+		}
+		
+		// Fetch tokenizer
 		Tokenizer tokenizer = getTokenizer();
 		
 		if(tokenizer==null)
@@ -276,7 +365,11 @@ public class MatetoolsParserInputView extends TextInputView {
 		
 		options = new Options();
 		// TODO assign new option parameters?
-		worker = new PipelineWorker(tokens, options);
+		worker = new PipelineWorker(tokens, storage, options);
+		
+		// Refresh progress panel
+		progressPanel.setTitle(worker.getDescription());
+		progressPanel.setTask(worker);
 		
 		// Schedule worker for concurrent execution on background thread
 		TaskManager.getInstance().schedule(
@@ -302,7 +395,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		sendRequest(ListGraphView.class, message);
 	}
 
-	private class Handler implements DocumentListener {
+	private class Handler implements DocumentListener, ConfigListener {
 		
 		private Handler() {
 			// no-op
@@ -330,6 +423,14 @@ public class MatetoolsParserInputView extends TextInputView {
 		@Override
 		public void changedUpdate(DocumentEvent e) {
 			refreshActions();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.config.ConfigListener#invoke(net.ikarus_systems.icarus.config.ConfigRegistry, net.ikarus_systems.icarus.config.ConfigEvent)
+		 */
+		@Override
+		public void invoke(ConfigRegistry sender, ConfigEvent event) {
+			refreshModelSelect();
 		}
 	}
 	
@@ -377,15 +478,17 @@ public class MatetoolsParserInputView extends TextInputView {
 	private class PipelineWorker extends SwingWorker<DependencyData, DependencyData> implements Identity {
 
 		private final String[] tokens;
+		private final ModelStorage storage;
 		private final Options options;
 		
 		private int stage = 0;
-		
-		PipelineWorker(String[] tokens, Options options) {
+				
+		PipelineWorker(String[] tokens, ModelStorage storage, Options options) {
 			if(tokens==null)
 				throw new IllegalArgumentException("Invalid tokens array"); //$NON-NLS-1$
 			
 			this.tokens = tokens;
+			this.storage = storage;
 			this.options = options;
 		}
 		
@@ -397,13 +500,14 @@ public class MatetoolsParserInputView extends TextInputView {
 			MatetoolsPipeline pipeline = MatetoolsPipeline.getPipeline(pipelineOwner);
 			if(pipeline==null)
 				throw new IllegalStateException("Synchronization failed - pipeline not owned by "+pipelineOwner.getName()); //$NON-NLS-1$
-			
-			return pipeline.runPipeline(tokens, options);
+						
+			return pipeline.runPipeline(tokens, storage, options);
 		}
 		
 		private void publishIntermediateResult(DependencyData data) {
 			stage++;
 			setProgress(stage*25);
+			firePropertyChange(TaskConstants.INFO_PROPERTY, null, getDescription());
 			publish(data);
 		}
 
@@ -428,6 +532,7 @@ public class MatetoolsParserInputView extends TextInputView {
 
 		@Override
 		protected void done() {
+			worker = null;
 			DependencyData data;
 			try {
 				data = get();
@@ -436,12 +541,12 @@ public class MatetoolsParserInputView extends TextInputView {
 				}
 			} catch (Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Unexpected exception while obtaining final pipeline ocmputation result", e); //$NON-NLS-1$
+						"Unexpected exception while obtaining final pipeline computation result", e); //$NON-NLS-1$
+			} finally {			
+				MatetoolsPipeline.releasePipeline(pipelineOwner);
+			
+				refreshActions();
 			}
-			
-			MatetoolsPipeline.releasePipeline(pipelineOwner);
-			
-			refreshActions();
 		}
 
 		/**

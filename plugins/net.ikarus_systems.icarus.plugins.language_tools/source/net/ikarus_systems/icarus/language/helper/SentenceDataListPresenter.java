@@ -17,8 +17,6 @@ import javax.swing.JList;
 
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
-import net.ikarus_systems.icarus.ui.NavigationControl;
-import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.data.DataListModel;
@@ -68,23 +66,12 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	}
 	
 	@Override
-	protected NavigationControl createNavigationControl() {	
-		
-		Options options = new Options();
-		Object[] rightContent = {
-				getFilterSelect(),
-				getFilterEditButton(),
-		};
-		options.put(NavigationControl.RIGHT_CONTENT_OPTION, rightContent);
-		
-		Object[] leftContent = {
+	protected Object leftNavigationContent() {
+		return new Object[] {
 				getDataTypeButton(DataType.SYSTEM),
 				getDataTypeButton(DataType.USER),
 				getDataTypeButton(DataType.GOLD),
 		};
-		options.put(NavigationControl.LEFT_CONTENT_OPTION, leftContent);
-		
-		return new NavigationControl(list, options);
 	}
 	
 	protected DataTypeButton getDataTypeButton(DataType dataType) {

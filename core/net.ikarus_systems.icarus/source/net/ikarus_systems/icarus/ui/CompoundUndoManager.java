@@ -262,8 +262,12 @@ public class CompoundUndoManager extends UndoManager implements
 				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
 						KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 			}
+			
+			String actionID = undo ? "undo" : "redo"; //$NON-NLS-1$ //$NON-NLS-2$
+			String nameKey = "textActions."+actionID+".name"; //$NON-NLS-1$ //$NON-NLS-2$
+			String descriptionKey = "textActions."+actionID+".description"; //$NON-NLS-1$ //$NON-NLS-2$
 
-			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, undo ? "undo" : "redo", null); //$NON-NLS-1$ //$NON-NLS-2$
+			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, nameKey, descriptionKey); //$NON-NLS-1$ //$NON-NLS-2$
 			ResourceManager.getInstance().getGlobalDomain().addAction(this);
 
 			setEnabled(false);

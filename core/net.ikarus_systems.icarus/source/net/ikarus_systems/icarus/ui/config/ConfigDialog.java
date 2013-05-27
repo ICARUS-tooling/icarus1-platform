@@ -23,7 +23,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -187,6 +186,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             	dialogExitAction();
               }
             } );
+        this.setLocationRelativeTo(null);
 	}
 	
 	
@@ -243,6 +243,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             	dialogExitAction();
               }
             } );
+        this.setLocationRelativeTo(null);
 	}
 	
 	
@@ -293,6 +294,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             	dialogExitAction();
               }
             } );
+        this.setLocationRelativeTo(null);
 	}
 
 	//DialogExitAction
@@ -455,7 +457,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         
         JTree tree = new JTree(root);  
         tree.setBorder(new EmptyBorder(5, 5, 5, 5));
-        //tree.setLargeModel(true);
+        tree.setLargeModel(true);
         //stuff to get eclipse config look and feel
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
         	
@@ -1109,7 +1111,11 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		if (desc == null) 
 			desc = "config.desc." + config.getName(handle); //$NON-NLS-1$
 		try {
-		return ResourceManager.getInstance().get(desc);
+		String result = ResourceManager.getInstance().get(desc);
+		if(desc.equals(result)) {
+			result = null;
+		}
+		return result;
 		}
 		catch (MissingResourceException e){
 			return null;
@@ -1124,8 +1130,12 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		if (note == null) 
 			note = "config.note." + config.getName(handle); //$NON-NLS-1$
 		try {
-			
-		return ResourceManager.getInstance().get(note);
+
+			String result = ResourceManager.getInstance().get(note);
+			if(note.equals(result)) {
+				result = null;
+			}
+			return result;
 		}
 		catch (MissingResourceException e){
 			return null;

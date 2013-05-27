@@ -11,12 +11,15 @@ package net.ikarus_systems.icarus.search_tools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.util.PropertyChangeSource;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class Search {
+public abstract class Search extends PropertyChangeSource {
 	
 	private SearchState state = SearchState.BLANK;
 	
@@ -33,23 +36,27 @@ public abstract class Search {
 		this.query = query;
 	}
 
-	void setState(SearchState state) {
+	final void setState(SearchState state) {
+		SearchState oldValue;
 		synchronized (lock) {
+			oldValue = this.state;
 			this.state = state;
 		}
+		
+		firePropertyChange("state", oldValue, state); //$NON-NLS-1$
 	}
 	
-	public SearchState getState() {
+	public final SearchState getState() {
 		synchronized (lock) {
 			return state;
 		}
 	}
 	
-	public SearchQuery getQuery() {
+	public final SearchQuery getQuery() {
 		return query;
 	}
 	
-	public boolean isCancelled() {
+	public final boolean isCancelled() {
 		return cancelled.get();
 	}
 	
@@ -59,7 +66,7 @@ public abstract class Search {
 	 * This method will throw an {@link IllegalArgumentException} if the
 	 * search is not yet running or has already been finished or cancelled.
 	 */
-	public void cancel() {
+	public final void cancel() {
 		synchronized (lock) {
 			SearchState state = getState();
 			if(state==SearchState.BLANK)
@@ -79,6 +86,12 @@ public abstract class Search {
 	 * cancellation by invoking {@link #isCancelled()}.
 	 */
 	public abstract void doSearch() throws Exception;
+	
+	/**
+	 * Returns the (estimated) progress of the search in the range
+	 * 0 to 100.
+	 */
+	public abstract int getProgress();
 	
 	/**
 	 * Returns the result of this search operation.

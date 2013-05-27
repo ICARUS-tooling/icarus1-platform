@@ -168,7 +168,7 @@ public class FormBuilder {
 	public <E extends FormEntry> E insertEntry(String id, E entry, int index) {
 		if(entry==null)
 			throw new IllegalArgumentException("Invalid entry"); //$NON-NLS-1$
-		if(getEntryMap().containsKey(id))
+		if(id!=null && getEntryMap().containsKey(id))
 			throw new DuplicateIdentifierException("Duplicate id: "+id); //$NON-NLS-1$
 		if(getEntryMap().containsValue(entry))
 			throw new IllegalArgumentException("Entry already added for id: "+id); //$NON-NLS-1$
@@ -179,7 +179,9 @@ public class FormBuilder {
 			getIds().add(index, id);
 		}
 		
-		getEntryMap().put(id, entry);
+		if(id!=null) {
+			getEntryMap().put(id, entry);
+		}
 		
 		return entry;
 	}
@@ -253,6 +255,10 @@ public class FormBuilder {
 	
 	public ToggleFormEntry addToggleFormEntry(String id, String label) {
 		return addEntry(id, new ToggleFormEntry(label));
+	}
+	
+	public void addSeperator() {
+		addEntry("sep_"+System.currentTimeMillis(), new SeparatorFormEntry()); //$NON-NLS-1$
 	}
 
 	public void feedComponent(Component comp) {
@@ -384,6 +390,42 @@ public class FormBuilder {
 		Object getValue();
 		
 		FormEntry clear();
+	}
+	
+	public static class SeparatorFormEntry implements FormEntry {
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.dialog.FormBuilder.FormEntry#addToForm(net.ikarus_systems.icarus.ui.dialog.FormBuilder)
+		 */
+		@Override
+		public FormEntry addToForm(FormBuilder builder) {
+			builder.feedSeparator();
+			return this;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.dialog.FormBuilder.FormEntry#setValue(java.lang.Object)
+		 */
+		@Override
+		public FormEntry setValue(Object value) {
+			return this;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.dialog.FormBuilder.FormEntry#getValue()
+		 */
+		@Override
+		public Object getValue() {
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.dialog.FormBuilder.FormEntry#clear()
+		 */
+		@Override
+		public FormEntry clear() {
+			return this;
+		}
 	}
 	
 	/**

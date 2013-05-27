@@ -34,7 +34,12 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.resources.DefaultResourceLoader;
+import net.ikarus_systems.icarus.resources.ResourceLoader;
+import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.util.Capability;
 import net.ikarus_systems.icarus.util.Filter;
@@ -52,6 +57,7 @@ import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.Extension.Parameter;
 import org.java.plugin.registry.ExtensionPoint;
+import org.java.plugin.registry.PluginAttribute;
 import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.PluginElement;
 import org.java.plugin.registry.PluginRegistry;
@@ -64,7 +70,16 @@ import org.java.plugin.standard.StandardObjectFactory;
  */
 public final class PluginUtil {
 	
-	public static final String CORE_PLUGIN_ID = "net.ikarus_systems.icarus.core"; //$NON-NLS-1$
+	public static final String CORE_PLUGIN_ID = Core.CORE_PLUGIN_KEY;
+	
+	public static final String PREFERENCES_KEY = 
+			"net.ikarus_systems.icarus.preferences"; //$NON-NLS-1$
+	
+	public static final String ICONS_KEY = 
+			"net.ikarus_systems.icarus.icons"; //$NON-NLS-1$
+	
+	public static final String RESOURCES_KEY = 
+			"net.ikarus_systems.icarus.resources"; //$NON-NLS-1$
 	
 	private static PluginRegistry pluginRegistry;
 	private static PathResolver pathResolver;
@@ -272,6 +287,45 @@ public final class PluginUtil {
 		logger.info("Using plugin manager: "+pluginManager); //$NON-NLS-1$
 	}
 	
+	public static void loadAttributes(PluginDescriptor descriptor) {
+		if(getPluginManager().isBadPlugin(descriptor)
+				|| !getPluginManager().isPluginEnabled(descriptor)) {
+			return;
+		}
+		
+		try {
+			ClassLoader classLoader = getPluginManager().getPluginClassLoader(descriptor);
+			
+			// Load resources
+			Collection<PluginAttribute> resourceAttributes = descriptor.getAttributes(RESOURCES_KEY); 
+			if(resourceAttributes!=null && !resourceAttributes.isEmpty()) {
+				for(PluginAttribute attribute : resourceAttributes) {
+					ResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
+					ResourceManager.getInstance().addResource(attribute.getValue(), resourceLoader);
+				}
+			}
+			
+			// Load icons
+			Collection<PluginAttribute> iconAttributes = descriptor.getAttributes(ICONS_KEY); 
+			if(iconAttributes!=null && !iconAttributes.isEmpty()) {
+				for(PluginAttribute attribute : iconAttributes) {
+					IconRegistry.getGlobalRegistry().addSearchPath(classLoader, attribute.getValue());
+				}
+			}
+			
+			// Load preferences
+			Collection<PluginAttribute> preferencesAttributes = descriptor.getAttributes(PREFERENCES_KEY); 
+			if(preferencesAttributes!=null && !preferencesAttributes.isEmpty()) {
+				for(PluginAttribute attribute : preferencesAttributes) {
+					classLoader.loadClass(attribute.getValue()).newInstance();
+				}
+			}
+		} catch(Exception e) {
+			LoggerFactory.log(PluginUtil.class, Level.SEVERE, 
+					"Failed to process plugin attributes: "+descriptor.getUniqueId(), e); //$NON-NLS-1$
+		}
+	}
+	
 	public static ClassLoader getClassLoader(PluginElement<?> element) {
 		return getPluginManager().getPluginClassLoader(element.getDeclaringPluginDescriptor());
 	}
@@ -339,6 +393,10 @@ public final class PluginUtil {
 	public static Extension getExtension(String uid) {
 		String pluginId = getPluginRegistry().extractPluginId(uid);
 		String elementId = getPluginRegistry().extractId(uid);
+		
+		if(pluginId==null || elementId==null) {
+			return null;
+		}
 		
 		return getPluginRegistry().getPluginDescriptor(pluginId).getExtension(elementId);
 	}

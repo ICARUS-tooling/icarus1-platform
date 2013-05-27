@@ -167,8 +167,18 @@ public class NavigationControl implements ListSelectionListener,
 		}
 		
 		this.arrowStyle = arrowStyle;
+
+		ActionManager actionManager = getActionManager();
 		
-		
+		// Set action icons according to arrow style value
+		actionManager.getAction(firstActionId).putValue(
+				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.FIRST_ELEMENT));
+		actionManager.getAction(previousActionId).putValue( 
+				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.PREVIOUS_ELEMENT));
+		actionManager.getAction(nextActionId).putValue( 
+				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.NEXT_ELEMENT));
+		actionManager.getAction(lastActionId).putValue( 
+				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.LAST_ELEMENT));
 	}
 	
 	protected static synchronized final ActionManager getSharedActionManager() {
@@ -205,25 +215,10 @@ public class NavigationControl implements ListSelectionListener,
 			options = Options.emptyOptions;
 		}
 		
-		// Allow for external arrow style implementation
-		ArrowStyle arrowStyle = (ArrowStyle)options.get(ARROW_STYLE_OPTION, getArrowStyle());
-
-		ActionManager actionManager = getActionManager();
-		
-		// Set action icons according to arrow style value
-		actionManager.getAction(firstActionId).putValue(
-				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.FIRST_ELEMENT));
-		actionManager.getAction(previousActionId).putValue( 
-				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.PREVIOUS_ELEMENT));
-		actionManager.getAction(nextActionId).putValue( 
-				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.NEXT_ELEMENT));
-		actionManager.getAction(lastActionId).putValue( 
-				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.LAST_ELEMENT));
-		
 		indexField = createIndexField();
 		options.put(CENTER_CONTENT_OPTION, indexField);
 		
-		return actionManager.createToolBar(
+		return getActionManager().createToolBar(
 				"core.helpers.navigationControl.toolBarList", options); //$NON-NLS-1$
 	}
 	

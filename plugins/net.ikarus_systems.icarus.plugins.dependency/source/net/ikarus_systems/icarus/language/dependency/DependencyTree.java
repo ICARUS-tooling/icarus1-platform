@@ -52,13 +52,13 @@ public class DependencyTree {
 		
 		DependencyTree[] buffer = new DependencyTree[data.length()];
 		
-		for(int i=0; i<data.length(); i++)
+		for(short i=0; i<data.length(); i++)
 			buffer[i] = new DependencyTree(null,
 					new DependencyNodeData(data, i));
 
 		ArrayList<DependencyTree> roots = new ArrayList<DependencyTree>();
 		
-		for(int i=0; i<data.length(); i++) {
+		for(short i=0; i<data.length(); i++) {
 			if(data.getHead(i)==LanguageUtils.DATA_HEAD_ROOT
 					|| data.getHead(i)==LanguageUtils.DATA_UNDEFINED_VALUE)
 				roots.add(buffer[i]);

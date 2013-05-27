@@ -120,7 +120,7 @@ public abstract class Perspective implements Identifiable {
 	}
 	
 	final void setExtension(Extension extension) {
-		if(this.extension!=null)
+		if(this.extension!=null && this.extension!=extension)
 			throw new IllegalStateException("Extension already defined"); //$NON-NLS-1$
 		
 		this.extension = extension;
@@ -606,9 +606,9 @@ public abstract class Perspective implements Identifiable {
 		public int compare(JComponent c1, JComponent c2) {
 			ViewContainer vc1 = (ViewContainer) c1;
 			ViewContainer vc2 = (ViewContainer) c2;
-			int result = vc1.getPriority().compareTo(vc2.getPriority());
+			int result = -vc1.getPriority().compareTo(vc2.getPriority());
 			if(result==0) {
-				result = vc1.getIdentity().getId().compareTo(vc2.getIdentity().getId());
+				result = -vc1.getIdentity().getId().compareTo(vc2.getIdentity().getId());
 			}
 			return result;
 		}
@@ -1147,6 +1147,11 @@ public abstract class Perspective implements Identifiable {
 		@Override
 		public boolean isBorderOpaque() {
 			return true;
+		}
+		
+		@Override
+		public String toString() {
+			return "ViewContainer: "+getName(); //$NON-NLS-1$
 		}
 	}
 	

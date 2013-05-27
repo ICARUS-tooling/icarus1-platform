@@ -121,7 +121,7 @@ public class DefaultArcLayout implements GraphLayout {
 							
 					// Fetch basic style
 					String style;
-					if(GraphUtils.isOrderEdge(model, edge)) {
+					if(GraphUtils.isOrderEdge(owner, model, edge)) {
 						bottomArcHeight = Math.max(bottomArcHeight, ArcConnectorShape.getArcHeight(span));
 						style = orderEdgeStyle;
 					} else {
@@ -193,10 +193,11 @@ public class DefaultArcLayout implements GraphLayout {
 	 * Tries to find a vertex whose parent is a vertex 
 	 * right beside it.
 	 */
-	protected Object findShrinkableVertex(mxGraph graph, List<Object> vertices, Filter filter) {
+	protected Object findShrinkableVertex(GraphOwner owner, List<Object> vertices, Filter filter) {
 		// TODO request: do not shrink subgraph with highlighted root
 		
 		int index = vertices.size();
+		mxGraph graph = owner.getGraph();
 
 		while(--index>=0) {
 			Object vertex = vertices.get(index);
@@ -211,13 +212,13 @@ public class DefaultArcLayout implements GraphLayout {
 			
 			// Check left node
 			Object head = index>0 ? vertices.get(index-1) : null;
-			if(head!=null && getLeafHeadNode(graph, vertex)==head) {
+			if(head!=null && getLeafHeadNode(owner, vertex)==head) {
 				return vertex;
 			}
 			
 			// Check Right node
 			head = index<vertices.size()-1 ? vertices.get(index+1) : null;
-			if(head!=null && getLeafHeadNode(graph, vertex)==head) {
+			if(head!=null && getLeafHeadNode(owner, vertex)==head) {
 				return vertex;
 			}
 		}
@@ -225,14 +226,15 @@ public class DefaultArcLayout implements GraphLayout {
 		return null;
 	}
 	
-	protected Object getLeafHeadNode(mxGraph graph, Object node) {
+	protected Object getLeafHeadNode(GraphOwner owner, Object node) {
+		mxGraph graph = owner.getGraph();
 		mxIGraphModel model = graph.getModel();
 	
 		// The only non-order edges can be incoming since we
 		// only bother with shrinking leaf nodes
 		for(int i=model.getEdgeCount(node)-1; i>-1; i--) {
 			Object edge = model.getEdgeAt(node, i);
-			if(!(GraphUtils.isOrderEdge(model, edge))) {
+			if(!GraphUtils.isOrderEdge(owner, model, edge)) {
 				return model.getTerminal(edge, true);
 			}
 		}
@@ -275,7 +277,7 @@ public class DefaultArcLayout implements GraphLayout {
 					break;
 			
 				// Find a vertex suitable for shrinking
-				Object vertex = findShrinkableVertex(graph, vertices, filter);
+				Object vertex = findShrinkableVertex(owner, vertices, filter);
 				
 				// Stop shrinking if no suitable node could be found
 				// this might be the case if ALL nodes are filtered out
@@ -285,7 +287,7 @@ public class DefaultArcLayout implements GraphLayout {
 				
 				// Shrink our list
 				vertices.remove(vertex);
-				Object head = getLeafHeadNode(graph, vertex);				
+				Object head = getLeafHeadNode(owner, vertex);				
 				double widthBefore = model.getGeometry(head).getWidth(); 
 				
 				// Merge item as child of head node
@@ -377,7 +379,7 @@ public class DefaultArcLayout implements GraphLayout {
 	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(GraphOwner target) {
+	public void install(Object target) {
 		// no-op
 	}
 
@@ -385,7 +387,7 @@ public class DefaultArcLayout implements GraphLayout {
 	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
 	 */
 	@Override
-	public void uninstall(GraphOwner target) {
+	public void uninstall(Object target) {
 		// no-op
 	}
 
@@ -397,7 +399,7 @@ public class DefaultArcLayout implements GraphLayout {
 		mxIGraphModel model = owner.getGraph().getModel();
 		
 		String style;
-		if(GraphUtils.isOrderEdge(model, edge)) {
+		if(GraphUtils.isOrderEdge(owner, model, edge)) {
 			style = orderEdgeStyle;
 		} else {
 			style = regularEdgeStyle;

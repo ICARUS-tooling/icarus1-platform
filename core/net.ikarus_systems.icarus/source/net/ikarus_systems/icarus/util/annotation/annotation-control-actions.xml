@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		NAVIGATION CONTROL
+	-->
+
+	<!-- Select Mode -->
+	<action id="core.helpers.annotationControl.selectModeAction"
+		name="${id}.name" desc="${id}.description"/>
+
+	<!-- Mode All -->
+	<action id="core.helpers.annotationControl.modeAllAction" type="toggle"
+		name="${id}.name" desc="${id}.description" icon="all.gif" command="all" />
+
+	<!-- Mode None -->
+	<action id="core.helpers.annotationControl.modeNoneAction" type="toggle"
+		name="${id}.name" desc="${id}.description" icon="none.gif" command="none" />
+
+	<!-- Mode First -->
+	<action id="core.helpers.annotationControl.modeFirstAction" type="toggle"
+		name="${id}.name" desc="${id}.description" icon="first.gif" command="first" />
+
+	<!-- Mode Last -->
+	<action id="core.helpers.annotationControl.modeLastAction" type="toggle"
+		name="${id}.name" desc="${id}.description" icon="last.gif" command="last" />
+
+	<!-- Mode Selected -->
+	<action id="core.helpers.annotationControl.modeSelectedAction" type="toggle"
+		name="${id}.name" desc="${id}.description" icon="selected.gif" command="selected" />
+	
+	<!-- First Element -->
+	<action id="core.helpers.annotationControl.firstElementAction"
+		name="${id}.name" desc="${id}.description" command="firstElement" />
+
+	<!-- Previous Element -->
+	<action id="core.helpers.annotationControl.previousElementAction"
+		name="${id}.name" desc="${id}.description" command="previousElement" />
+
+	<!-- Next Element -->
+	<action id="core.helpers.annotationControl.nextElementAction"
+		name="${id}.name" desc="${id}.description" command="nextElement" />
+
+	<!-- Last Element -->
+	<action id="core.helpers.annotationControl.lastElementAction"
+		name="${id}.name" desc="${id}.description" command="lastElement" />
+
+	<!-- ToolBar List -->
+	<action-list id="core.helpers.annotationControl.toolBarList">
+		<item type="custom" value="leftContent" />
+		<item type="glue" />
+		<item type="action" value="core.helpers.annotationControl.firstElementAction" />
+		<item type="action" value="core.helpers.annotationControl.previousElementAction" />
+		<item type="custom" value="centerContent" />
+		<item type="action" value="core.helpers.annotationControl.nextElementAction" />
+		<item type="action" value="core.helpers.annotationControl.lastElementAction" />
+		<item type="glue" />
+		<item type="custom" value="rightContent" />
+	</action-list>
+
+	<!-- Popup Menu List -->
+	<action-list id="core.helpers.annotationControl.popupMenuList">
+		<item type="action" value="core.helpers.annotationControl.firstElementAction" />
+		<item type="action" value="core.helpers.annotationControl.previousElementAction" />
+		<item type="action" value="core.helpers.annotationControl.nextElementAction" />
+		<item type="action" value="core.helpers.annotationControl.lastElementAction" />
+	</action-list>
+		
+	<!-- Display Mode Set -->
+	<action-set id="core.helpers.annotationControl.dispalyModeSet">
+		<group id="core.helpers.annotationControl.dispalyModeGroup">
+			<action idref="core.helpers.annotationControl.modeAllAction" />
+			<action idref="core.helpers.annotationControl.modeNoneAction" />
+			<action idref="core.helpers.annotationControl.modeFirstAction" />
+			<action idref="core.helpers.annotationControl.modeLastAction" />
+			<action idref="core.helpers.annotationControl.modeSelectedAction" />
+		</group>
+	</action-set>
+
+	<!-- Mode Popup Menu List -->
+	<action-list id="core.helpers.annotationControl.modePopupMenuList">
+		<item type="action" value="core.helpers.annotationControl.modeAllAction" />
+		<item type="action" value="core.helpers.annotationControl.modeNoneAction" />
+		<item type="action" value="core.helpers.annotationControl.modeFirstAction" />
+		<item type="action" value="core.helpers.annotationControl.modeLastAction" />
+		<item type="action" value="core.helpers.annotationControl.modeSelectedAction" />
+	</action-list>
+
+	<!-- Limited Mode Popup Menu List -->
+	<action-list id="core.helpers.annotationControl.limitedModePopupMenuList">
+		<item type="action-set" value="core.helpers.annotationControl.dispalyModeSet" />
+	</action-list>
+</actions>

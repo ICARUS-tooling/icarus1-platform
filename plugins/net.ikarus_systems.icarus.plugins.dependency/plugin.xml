@@ -11,11 +11,17 @@
 		</doc-text>
 	</doc>
 	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.dependency.resources.dependency" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/dependency/icons/" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.dependency.DependencyPreferences" />
+	</attributes>
+	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
-		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
 		<import plugin-id="net.ikarus_systems.icarus.searchTools" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
 	</requires>
 	
 	<!-- Standard Extensions -->
@@ -64,58 +70,37 @@
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyData" />
 	</extension>
 	
-	<!-- CONSTRAINT FACTORIES -->
+	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
 	
-	<extension id="FormConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependencyform" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFormContraintFactory" />
+	<extension id="DependencyConstraintContext" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintContext">
 		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="token" value="form" />
+		<parameter id="token" value="lemma" />
+		<parameter id="token" value="pos" />
+		<parameter id="token" value="features" />
+		<parameter id="token" value="relation" />
+		<parameter id="token" value="distance" />
+		<parameter id="token" value="direction" />
+		<parameter id="token" value="projectivity" />
+		<parameter id="factories">
+			<parameter id="form" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFormContraintFactory" />
+			<parameter id="lemma" value="net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaContraintFactory" />
+			<parameter id="pos" value="net.ikarus_systems.icarus.language.dependency.search.DependencyPosContraintFactory" />
+			<parameter id="features" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesContraintFactory" />
+			<parameter id="relation" value="net.ikarus_systems.icarus.language.dependency.search.DependencyRelationContraintFactory" />
+			<parameter id="distance" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceContraintFactory" />
+			<parameter id="direction" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionContraintFactory" />
+			<parameter id="projectivity" value="net.ikarus_systems.icarus.language.dependency.search.DependencyProjectivityContraintFactory" />
+		</parameter>
 	</extension>
 	
-	<extension id="PosConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_pos" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyPosContraintFactory" />
+	<extension id="DependencySearchFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchFactory">
 		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencySearchFactory" />
+		<parameter id="name" value="plugins.dependency.dependencySearchFactory.identity.name" />
+		<parameter id="description" value="plugins.dependency.dependencySearchFactory.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.dependency.resources.dependency" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/dependency/search/dependency-search-factory.gif" />
 	</extension>
-	
-	<extension id="LemmaConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_lemma" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaContraintFactory" />
-		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
-	</extension>
-	
-	<extension id="RelationConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_relation" />
-		<parameter id="token" value="dependency_rel" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyRelationContraintFactory" />
-		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
-	</extension>
-	
-	<extension id="DistanceConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_distance" />
-		<parameter id="token" value="dependency_dist" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceContraintFactory" />
-		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
-	</extension>
-	
-	<extension id="FeaturesConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_features" />
-		<parameter id="token" value="dependency_feats" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesContraintFactory" />
-		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
-	</extension>
-	
-	<extension id="DirectionConstraintFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_direction" />
-		<parameter id="token" value="dependency_dir" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionContraintFactory" />
-		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
-	</extension>
-	
-	<extension id="DirectionProjectivityFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintFactory">
-		<parameter id="token" value="dependency_projectivity" />
-		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencyProjectivityContraintFactory" />
-		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
-	</extension>	
 	
 </plugin>

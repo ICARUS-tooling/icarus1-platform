@@ -179,7 +179,7 @@ public class DependencyCellEditor extends HeavyWeightCellEditor {
 			DependencyDataEntry entry = data.getItem(nodeData.getIndex());
 			
 			nodeData = new DependencyNodeData();
-			nodeData.setIndex((int) formBuilder.getValue("index") -1); //$NON-NLS-1$
+			nodeData.setIndex((short) ((int) formBuilder.getValue("index") -1)); //$NON-NLS-1$
 			nodeData.setForm((String) formBuilder.getValue("form")); //$NON-NLS-1$
 			nodeData.setLemma((String) formBuilder.getValue("lemma")); //$NON-NLS-1$
 			nodeData.setFeatures((String) formBuilder.getValue("features")); //$NON-NLS-1$

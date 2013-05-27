@@ -45,13 +45,13 @@ public class SimpleDependencyData implements DependencyData {
 	protected String[] relations;
 
 	@XmlElement(name="head")
-	protected int[] heads;
+	protected short[] heads;
 
 	@XmlElement(name="flag", required=false)
 	protected long[] flags;
 
 	public SimpleDependencyData(String[] forms, String[] lemmas, 
-			String[] features, String[] poss, String[] relations, int[] heads, long[] flags) {
+			String[] features, String[] poss, String[] relations, short[] heads, long[] flags) {
 		this.forms = forms;
 		this.lemmas = lemmas;
 		this.features = features;
@@ -69,7 +69,7 @@ public class SimpleDependencyData implements DependencyData {
 		features = new String[size];
 		poss = new String[size];
 		relations = new String[size];
-		heads = new int[size];
+		heads = new short[size];
 
 		for(int index=0; index<size; index++) {
 			forms[index] = source.getForm(index);
@@ -77,7 +77,7 @@ public class SimpleDependencyData implements DependencyData {
 			features[index] = source.getFeatures(index);
 			poss[index] = source.getPos(index);
 			relations[index] = source.getRelation(index);
-			heads[index] = source.getHead(index);
+			heads[index] = (short) source.getHead(index);
 			flags[index] = source.getFlags(index);
 		}
 	}
@@ -90,7 +90,7 @@ public class SimpleDependencyData implements DependencyData {
 		features = new String[0];
 		poss = new String[0];
 		relations = new String[0];
-		heads = new int[0];
+		heads = new short[0];
 	}
 
 	@Override

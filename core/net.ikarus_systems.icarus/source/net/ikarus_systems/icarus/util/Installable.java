@@ -14,17 +14,17 @@ package net.ikarus_systems.icarus.util;
  * @version $Id$
  *
  */
-public interface Installable<T extends Object> {
+public interface Installable {
 
 	/**
 	 * Installs callbacks, listeners and other stuff related to the
 	 * target argument.
 	 */
-	void install(T target);
+	void install(Object target);
 	
 	/**
 	 * Releases all resources associated with the target and
 	 * unregisters listeners and callbacks.
 	 */
-	void uninstall(T target);
+	void uninstall(Object target);
 }

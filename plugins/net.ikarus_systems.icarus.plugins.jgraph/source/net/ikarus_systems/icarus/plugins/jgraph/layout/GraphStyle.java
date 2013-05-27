@@ -19,7 +19,7 @@ import com.mxgraph.view.mxStylesheet;
  * @version $Id$
  *
  */
-public interface GraphStyle extends Installable<GraphOwner> {
+public interface GraphStyle extends Installable {
 
 	/**
 	 * Generates a {@code mxStylesheet} to be used for the given

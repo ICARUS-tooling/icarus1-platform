@@ -23,6 +23,7 @@ import net.ikarus_systems.icarus.language.SentenceDataEvent;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
 import net.ikarus_systems.icarus.language.annotation.AnnotatedSentenceData;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.annotation.Annotation;
 
 /**
  * 
@@ -37,7 +38,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 	protected transient final DependencyDataEvent event;
 
-	protected Object annotation = null; // TODO change to default value?
+	protected Annotation annotation = null; // TODO change to default value?
 
 	private List<DependencyDataEntry> items = new ArrayList<>();
 	
@@ -62,7 +63,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	protected void fireDataChanged() {
-		event.set(SentenceDataEvent.CHANGE_EVENT, -1, -1);
+		event.set(SentenceDataEvent.CHANGE_EVENT, (int)-1, (int)-1);
 		fireDataChanged(event);
 	}
 
@@ -106,7 +107,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public DependencyDataEntry addDummyItem() {
 		DependencyDataEntry item = this.new DependencyDataEntry();
 		items.add(item);
-		int index = items.size() - 1;
+		int index = (int) (items.size() - 1);
 		item.index = index;
 		item.form = "<empty>"; //$NON-NLS-1$
 		fireItemsInserted(index, index);
@@ -116,14 +117,14 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public void addItem(String form, String lemma, String features, String pos, int head, String relation, long flags) {
 		items.add(this.new DependencyDataEntry(
 				form, lemma, features, pos, head, relation, flags));
-		int index = items.size() - 1;
+		int index = (int) (items.size() - 1);
 		fireItemsInserted(index, index);
 	}
 
 	public boolean addItem(DependencyDataEntry item) {
 		if (!items.contains(item)) {
 			items.add(item);
-			int index = items.size() - 1;
+			int index = (int) (items.size() - 1);
 			fireItemsInserted(index, index);
 			return true;
 		}
@@ -147,12 +148,12 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	public int indexOf(DependencyDataEntry item) {
-		return items.indexOf(item);
+		return (int) items.indexOf(item);
 	}
 
 	public void removeItemAt(int index) {
 		// Find children
-		int indexFrom = Integer.MAX_VALUE;
+		int indexFrom = Short.MAX_VALUE;
 		int indexTo = -1;
 		
 		for(int i=0; i<items.size(); i++) {
@@ -163,12 +164,12 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			DependencyDataEntry item = items.get(i);
 			if(item.getHead()==index) {
 				item.setHead0(LanguageUtils.DATA_UNDEFINED_VALUE);
-				indexFrom = Math.min(indexFrom, i);
-				indexTo = Math.max(indexTo, i);
+				indexFrom = (int) Math.min(indexFrom, i);
+				indexTo = (int) Math.max(indexTo, i);
 			}
 		}
 		
-		if(indexFrom<Integer.MAX_VALUE && indexTo>-1) {
+		if(indexFrom<Short.MAX_VALUE && indexTo>-1) {
 			fireItemsUpdated(indexFrom, indexTo);
 		}
 		
@@ -177,7 +178,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	public boolean removeItem(DependencyDataEntry item) {
-		int index = items.indexOf(item);
+		int index = (int) items.indexOf(item);
 		if (index >= 0) {
 			removeItemAt(index);
 			return true;
@@ -226,12 +227,11 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	@Override
-	public Object getAnnotation() {
+	public Annotation getAnnotation() {
 		return annotation;
 	}
 	
-	@Override
-	public void setAnnotation(Object annotation) {
+	public void setAnnotation(Annotation annotation) {
 		// TODO
 	}
 
@@ -375,19 +375,19 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	
 	protected void headSwitch(int oldHead, int newHead) {
 
-		int updateFrom = Math.min(oldHead, newHead);
-		int updateTo = Math.max(oldHead, newHead);
+		int updateFrom = (int) Math.min(oldHead, newHead);
+		int updateTo = (int) Math.max(oldHead, newHead);
 
 		for (int i = 0; i < items.size(); i++) {
 			DependencyDataEntry tmp = items.get(i);
 			if (tmp.head == oldHead) {
 				tmp.head = newHead;
-				updateFrom = Math.min(updateFrom, i);
-				updateTo = Math.max(updateTo, i);
+				updateFrom = (int) Math.min(updateFrom, i);
+				updateTo = (int) Math.max(updateTo, i);
 			} else if (tmp.head == newHead) {
 				tmp.head = oldHead;
-				updateFrom = Math.min(updateFrom, i);
-				updateTo = Math.max(updateTo, i);
+				updateFrom = (int) Math.min(updateFrom, i);
+				updateTo = (int) Math.max(updateTo, i);
 			}
 		}
 

@@ -15,36 +15,7 @@ package net.ikarus_systems.icarus.language;
  * @version $Id$
  *
  */
-public final class LanguageUtils {
-	// flags
-	public static final int FLAG_PROJECTIVE = (1 << 0);
-
-	/**
-	 * Head value to mark the root node.
-	 */
-	public static final int DATA_HEAD_ROOT = -1;
-
-	public static final String DATA_ROOT_LABEL = "<root>"; //$NON-NLS-1$
-
-	public static final String DATA_UNDEFINED_LABEL = "?"; //$NON-NLS-1$
-
-	public static final String DATA_GROUP_LABEL = "<*>"; //$NON-NLS-1$
-
-	public static final String DATA_LEFT_LABEL = "<<"; //$NON-NLS-1$
-
-	public static final String DATA_RIGHT_LABEL = ">>"; //$NON-NLS-1$
-
-	public static final int DATA_LEFT_VALUE = -1;
-
-	public static final int DATA_RIGHT_VALUE = 1;
-
-	public static final int DATA_GROUP_VALUE = -3;
-
-	public static final int DATA_UNDEFINED_VALUE = -2;
-
-	public static final int DATA_YES_VALUE = 0;
-
-	public static final int DATA_NO_VALUE = -1;
+public final class LanguageUtils implements LanguageConstants {
 	
 	private LanguageUtils() {
 		// no-op
@@ -175,4 +146,41 @@ public final class LanguageUtils {
 		else
 			return value;
 	}
+
+	public static boolean isProjectiveSentence(short[] heads){
+		for(int i=0;i<heads.length;++i){
+			if(!isProjective(i,heads))
+				return false;
+		}
+		return true;
+	}
+	
+	public static boolean isProjective(int index,short heads[]){
+		int parent=heads[index];
+		return isProjective(index,parent,heads);
+	}
+	
+	static boolean isProjective(int dep,int head,short[] heads){
+		if(head==DATA_HEAD_ROOT)
+			return true;
+		int min=dep;
+		int max;
+		if(head<dep){
+			min=head;
+			max=dep;
+		} else {
+			max=head;
+		}
+		for(int i=min+1;i<max;++i){
+			int cur=i;
+			while(cur!=dep && cur!=head){
+				if(cur==DATA_HEAD_ROOT)
+					return false;
+				cur=heads[cur];
+			}
+		}
+		return true;
+	}
+
+
 }

@@ -9,8 +9,6 @@
  */
 package net.ikarus_systems.icarus.search_tools.standard;
 
-import javax.swing.Icon;
-
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
@@ -25,7 +23,7 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory {
 
 	private String nameKey, descriptionKey;
 	
-	private String id;
+	private String token;
 	
 	private int type;
 	
@@ -33,8 +31,8 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory {
 		LanguageUtils.DATA_UNDEFINED_LABEL
 	};
 
-	public AbstractConstraintFactory(String id, int type, String nameKey, String descriptionKey) {
-		this.id = id;
+	public AbstractConstraintFactory(String token, int type, String nameKey, String descriptionKey) {
+		this.token = token;
 		this.nameKey = nameKey;
 		this.descriptionKey = descriptionKey;
 		this.type = type;
@@ -53,8 +51,8 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory {
 	 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
 	 */
 	@Override
-	public String getId() {
-		return id;
+	public String getToken() {
+		return token;
 	}
 
 	/**
@@ -71,22 +69,6 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory {
 	@Override
 	public String getDescription() {
 		return ResourceManager.getInstance().get(descriptionKey);
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
-	 */
-	@Override
-	public Icon getIcon() {
-		return null;
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
-	 */
-	@Override
-	public Object getOwner() {
-		return this;
 	}
 
 	/**

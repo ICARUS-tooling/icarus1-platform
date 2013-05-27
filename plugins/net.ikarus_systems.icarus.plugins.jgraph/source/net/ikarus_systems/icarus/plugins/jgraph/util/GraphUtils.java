@@ -9,19 +9,11 @@
  */
 package net.ikarus_systems.icarus.plugins.jgraph.util;
 
-import java.awt.Component;
-import java.awt.Font;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
-
-import net.ikarus_systems.icarus.resources.ResourceManager;
-import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
+import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
 import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.Order;
 
@@ -39,9 +31,33 @@ public final class GraphUtils {
 	private GraphUtils() {
 		// no-op
 	}
+	
+	public static Object getEdgeValue(GraphOwner owner, Object cell) {
+		if(owner.getGraph().getModel().isEdge(cell)) {
+			return owner.getGraph().getModel().getValue(cell);
+		} else {
+			return null;
+		}
+	}
+	
+	public static Object getNodeValue(GraphOwner owner, Object cell) {
+		if(owner.getGraph().getModel().isVertex(cell)) {
+			return owner.getGraph().getModel().getValue(cell);
+		} else {
+			return null;
+		}
+	}
 
 	public static boolean isOrderEdge(mxIGraphModel model, Object edge) {
 		return model.isEdge(edge) && model.getValue(edge) instanceof Order;
+	}
+	
+	public static boolean isOrderEdge(GraphOwner owner, mxIGraphModel model, Object cell) {
+		if(owner instanceof GraphPresenter) {
+			return ((GraphPresenter)owner).isOrderEdge(cell);
+		} else {
+			return isOrderEdge(model, cell);
+		}
 	}
 	
 	/**
@@ -310,110 +326,4 @@ public final class GraphUtils {
 
 		return false;
 	}
-
-	public static ListCellRenderer<Object> fontFamilyRenderer = new DefaultListCellRenderer() {
-
-		private static final long serialVersionUID = -333044504694220350L;
-		
-		private Map<String, Font> fonts;
-		
-		private Font getFont(String name) {
-			if(fonts==null)
-				fonts = new Hashtable<String, Font>();
-			
-			Font font = fonts.get(name);
-			
-			if(font==null) {
-				font = getFont();
-				font = new Font(name, font.getStyle(), font.getSize());
-				fonts.put(name, font);
-			}
-			
-			return font;
-		}
-
-		@Override
-		public Component getListCellRendererComponent(JList<?> list,
-                Object value,
-                int index,
-                boolean isSelected,
-                boolean cellHasFocus) {
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			
-			setFont(getFont((String) value));
-			
-			return this;
-		}
-	};
-	
-	public static ListCellRenderer<?> shapeRenderer = new DefaultListCellRenderer() {
-
-		private static final long serialVersionUID = -5300412794404495530L;
-
-		@Override
-		public Component getListCellRendererComponent(JList<?> list,
-                Object value,
-                int index,
-                boolean isSelected,
-                boolean cellHasFocus) {
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			
-			String shape = (String)value;
-			shape = shape.replace("Perimeter", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			setIcon(IconRegistry.getGlobalRegistry().getIcon(String.format("shape_%s.gif", shape))); //$NON-NLS-1$
-			setText(ResourceManager.getInstance().get("config.options."+shape)); //$NON-NLS-1$
-			
-			return this;
-		}
-	};
-	
-	public static ListCellRenderer<?> gridStyleRenderer = new DefaultListCellRenderer() {
-
-		private static final long serialVersionUID = -5300412794404495530L;
-
-		@Override
-		public Component getListCellRendererComponent(JList<?> list,
-                Object value,
-                int index,
-                boolean isSelected,
-                boolean cellHasFocus) {
-
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			
-			/*
-			 * 	public static final int GRID_STYLE_DOT = 0;
-			 *	public static final int GRID_STYLE_CROSS = 1;
-			 *	public static final int GRID_STYLE_LINE = 2;
-			 *  public static final int GRID_STYLE_DASHED = 3;
-			 */
-			switch ((Integer)value) {
-			case 0:
-				setText(ResourceManager.getInstance().get("config.options.gridStyleDot")); //$NON-NLS-1$
-				setIcon(IconRegistry.getGlobalRegistry().getIcon("grid_dot.gif")); //$NON-NLS-1$
-				break;
-
-			case 1:
-				setText(ResourceManager.getInstance().get("config.options.gridStyleCross")); //$NON-NLS-1$
-				setIcon(IconRegistry.getGlobalRegistry().getIcon("grid_cross.gif")); //$NON-NLS-1$
-				break;
-
-			case 2:
-				setText(ResourceManager.getInstance().get("config.options.gridStyleLine")); //$NON-NLS-1$
-				setIcon(IconRegistry.getGlobalRegistry().getIcon("grid_line.gif")); //$NON-NLS-1$
-				break;
-
-			case 3:
-				setText(ResourceManager.getInstance().get("config.options.gridStyleDashed")); //$NON-NLS-1$
-				setIcon(IconRegistry.getGlobalRegistry().getIcon("grid_dashed.gif")); //$NON-NLS-1$
-				break;
-
-			default:
-				break;
-			}
-			
-			
-			return this; 
-		}
-	};
 }

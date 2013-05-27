@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.annotation;
+package net.ikarus_systems.icarus.util.annotation;
 
 /**
  * 
@@ -15,20 +15,19 @@ package net.ikarus_systems.icarus.language.annotation;
  * @version $Id$
  *
  */
-public interface ResultAnnotation {
+public interface Annotation {
 	
 	public static final int BEFORE_FIRST = -1;
 	public static final int AFTER_LAST = -2;
 
 	/**
-	 * Returns the total number of hits the underlying result represents
-	 * @return
+	 * Returns the total number of annotations this object represents
 	 */
-	int getHitCount();
+	int getAnnotationCount();
 	
 	/**
-	 * Returns the internal hit pointer to a position
-	 * right before the first hit
+	 * Returns the internal annotation pointer to a position
+	 * right before the first annotation
 	 */
 	void reset();
 	
@@ -43,7 +42,7 @@ public interface ResultAnnotation {
 	 * @throws IllegalStateException if the internal hit pointer is 
 	 * currently after the last hit index 
 	 */
-	boolean nextHit();
+	boolean nextAnnotation();
 	
 	/**
 	 * Returns the current value of the internal index pointer
@@ -56,5 +55,5 @@ public interface ResultAnnotation {
 	 * to getter methods refer to the given index
 	 * @param hitIndex
 	 */
-	void moveToHit(int hitIndex);
+	void moveToAnnotation(int hitIndex);
 }

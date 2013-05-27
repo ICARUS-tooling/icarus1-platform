@@ -11,21 +11,22 @@ package net.ikarus_systems.icarus.search_tools.standard;
 
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
-import net.ikarus_systems.icarus.search_tools.SearchResult;
+import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultTreeSearch extends Search {
+public class AbstractTreeSearch extends Search {
 
-	/**
-	 * @param query
-	 */
-	public DefaultTreeSearch(SearchQuery query) {
+	public AbstractTreeSearch(SearchQuery query) {
 		super(query);
 		// TODO Auto-generated constructor stub
+	}
+	
+	public boolean validate() {
+		// TODO check tree structure etc
 	}
 
 	/**
@@ -44,6 +45,15 @@ public class DefaultTreeSearch extends Search {
 	public SearchResult getResult() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.Search#getProgress()
+	 */
+	@Override
+	public int getProgress() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

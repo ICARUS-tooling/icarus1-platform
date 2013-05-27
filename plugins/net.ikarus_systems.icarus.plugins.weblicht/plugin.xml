@@ -9,6 +9,11 @@
 		</doc-text>
 	</doc>
 	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.weblicht.resources.weblicht" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/weblicht/icons/" />
+	</attributes>
+	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.jgraph" />

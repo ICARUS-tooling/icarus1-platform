@@ -19,6 +19,13 @@ import net.ikarus_systems.icarus.resources.ResourceManager;
 public enum EdgeType {
 
 	/**
+	 * Marks the edge as an empty connection that only serves
+	 * as a link between two nodes and does not carry any
+	 * constraints.
+	 */
+	LINK("link"), //$NON-NLS-1$
+
+	/**
 	 * Marks the edge as active part of some functional relation.
 	 * Enables all kinds of constraints on the edge to be taken
 	 * into account when used in a matching process.

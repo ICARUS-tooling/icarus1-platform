@@ -188,6 +188,7 @@ public class DefaultAreaLayout implements AreaLayout {
 		JSplitPane splitPane = splitPanes.get(alignment);
 		if(splitPane==null) {
 			splitPane = new JSplitPane();
+			splitPane.setContinuousLayout(true);
 			
 			splitPane.setOrientation(
 					alignment==Alignment.LEFT || alignment==Alignment.RIGHT ? 
@@ -278,7 +279,7 @@ public class DefaultAreaLayout implements AreaLayout {
 		for(JComponent comp : components) {
 			//comp.setBorder(UIUtil.topLineBorder);
 			
-			int index = Math.max(0, tabbedPane.getTabCount()-1);
+			int index = tabbedPane.getTabCount();
 			
 			String title = "tab_"+index; //$NON-NLS-1$
 			Icon icon = null;

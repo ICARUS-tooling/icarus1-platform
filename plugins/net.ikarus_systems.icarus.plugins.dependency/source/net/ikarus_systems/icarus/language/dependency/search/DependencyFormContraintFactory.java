@@ -21,10 +21,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
  */
 public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 
-	public static final String ID = "dependency_form"; //$NON-NLS-1$
+	public static final String TOKEN = "form"; //$NON-NLS-1$
 
 	public DependencyFormContraintFactory() {
-		super(ID, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.form.name",  //$NON-NLS-1$
+		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.form.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.form.description"); //$NON-NLS-1$
 	}
 
@@ -42,13 +42,12 @@ public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 		private static final long serialVersionUID = 2843300705315175039L;
 
 		public DependencyFormConstraint(Object value, SearchOperator operator) {
-			super(ID, value, operator);
+			super(TOKEN, value, operator);
 		}
 
 		@Override
-		public boolean matches(Object value) {
-			value = ((DependencyTargetTree)value).getForm();
-			return super.matches(value);
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getForm();
 		}
 	}
 }

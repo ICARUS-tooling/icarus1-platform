@@ -26,6 +26,9 @@
 		<item type="action" value="plugins.languageTools.textInputView.selectAllAction" />
 		<item type="action" value="plugins.languageTools.textInputView.clearAction" />
 		<item type="glue" />
+		<item type="label" value="plugins.matetools.matetoolsParserInputView.labels.modelSet" />
+		<item type="custom" value="selectModelSet" />
+		<separator />
 		<item type="label" value="plugins.matetools.matetoolsParserInputView.labels.tokenizer" />
 		<item type="custom" value="selectTokenizer" />
 		<separator />

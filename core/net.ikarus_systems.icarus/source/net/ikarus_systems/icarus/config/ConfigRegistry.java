@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -154,6 +155,9 @@ public class ConfigRegistry implements ConfigConstants {
 	}
 	
 	private boolean equals(Object a, Object b) {
+		if(a instanceof Collection || b instanceof Collection) {
+			return false;
+		}
 		return a==null ? b==null : a.equals(b);
 	}
 	

@@ -35,7 +35,7 @@ import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
  */
 public final class LanguageManager {
 	
-	private ContentType basicSentenceDataType;
+	private ContentType sentenceDataContentType;
 	
 	private Map<String, Object> grammars = Collections.synchronizedMap(
 			new LinkedHashMap<String, Object>());
@@ -55,7 +55,8 @@ public final class LanguageManager {
 	}
 	
 	private LanguageManager() {
-		basicSentenceDataType = ContentTypeRegistry.getInstance().getType("SentenceDataContentType"); //$NON-NLS-1$
+		sentenceDataContentType = ContentTypeRegistry.getInstance()
+				.getTypeForClass(SentenceData.class);
 	}
 	
 	// prevent multiple deserialization
@@ -100,8 +101,8 @@ public final class LanguageManager {
 		return (Grammar) grammar;
 	}
 	
-	public ContentType getBasicLanguageDataType() {
-		return basicSentenceDataType;
+	public ContentType getSentenceDataContentType() {
+		return sentenceDataContentType;
 	}
 	
 	public static Collection<Extension> getAvailableTokenizers() {

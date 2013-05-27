@@ -170,7 +170,7 @@ public class ExtensionPointHierarchyView extends View {
 		UIUtil.defaultSetUnitIncrement(listScrollPane);
 		lowerPanel.add(listScrollPane, BorderLayout.CENTER);
 		
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, lowerPanel);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, upperPanel, lowerPanel);
 		UIUtil.defaultHideSplitPaneDecoration(splitPane);
 		splitPane.setResizeWeight(0.4);
 		

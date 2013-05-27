@@ -21,6 +21,7 @@ import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataList;
+import net.ikarus_systems.icarus.util.NamedObject;
 import net.ikarus_systems.icarus.util.data.ContentType;
 
 /**
@@ -28,7 +29,7 @@ import net.ikarus_systems.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class TreebankListDelegate implements SentenceDataList {
+public class TreebankListDelegate implements SentenceDataList, NamedObject {
 
 	private Reference<Treebank> ref;
 	
@@ -149,6 +150,15 @@ public class TreebankListDelegate implements SentenceDataList {
 			AvailabilityObserver observer) {
 		Treebank treebank = getTreebank();
 		return treebank==null ? null : treebank.get(index, type, observer);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.NamedObject#getName()
+	 */
+	@Override
+	public String getName() {
+		Treebank treebank = getTreebank();
+		return treebank==null ? null : treebank.getName();
 	}
 	
 	private void fireChangeEvent() {

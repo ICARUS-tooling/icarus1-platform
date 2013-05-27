@@ -15,6 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.util.id.Identifiable;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -29,6 +31,24 @@ public final class NamingUtil {
 
 	
 	private static Pattern indexPattern;
+	
+	public static String getName(Object obj) {
+		if(obj==null) {
+			return null;
+		}
+		
+		if(obj instanceof NamedObject) {
+			return ((NamedObject)obj).getName();
+		}
+		if(obj instanceof Identifiable) {
+			obj = ((Identifiable)obj).getIdentity();
+		}
+		if(obj instanceof Identity) {
+			return ((Identity)obj).getName();
+		}
+		
+		return obj.toString();
+	}
 	
 	public static String getBaseName(String name) {
 		if(indexPattern==null) {

@@ -18,6 +18,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -107,6 +108,16 @@ public final class UIUtil {
 	private UIUtil() {
 		// no-op
 	}
+
+    public static boolean isWindowsLAF() {
+        return UIManager.getLookAndFeel().getID().equals("Windows"); //$NON-NLS-1$
+    }
+
+    public static boolean isWindowsClassicLAF() {
+        return isWindowsLAF()
+                && !(Boolean) Toolkit.getDefaultToolkit().getDesktopProperty(
+                        "win.xpstyle.themeActive"); //$NON-NLS-1$
+    }
 
 	public static final Color defaultBorderColor = new Color(128, 128, 128);
 	
@@ -603,29 +614,61 @@ public final class UIUtil {
 
 	public static final Border FLAT_BUTTON_BORDER = new FlatButtonBorder();
 	
-	public static class RolloverButton extends JButton {
+	public static class RolloverButton extends JButton implements MouseListener {
 
 		private static final long serialVersionUID = 7040037926434543523L;
 
 		public RolloverButton() {
 			super();
+			setBorderPainted(false);
 		}
 
 		public RolloverButton(Action a) {
 			super(a);
+			setBorderPainted(false);
 		}
 
+		/**
+		 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+		 */
 		@Override
-		protected void paintBorder(Graphics g) {
-			ButtonModel model = getModel();
-			if(!model.isRollover()) {
-				// no-op
-			} else {
-				super.paintBorder(g);
-			}
+		public void mouseClicked(MouseEvent e) {
+			// no-op
 		}
 
-		
+		/**
+		 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			setBorderPainted(true);
+			repaint();
+		}
+
+		/**
+		 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseExited(MouseEvent e) {
+			setBorderPainted(false);
+			repaint();
+		}
 	}
 	
 	/**
@@ -745,6 +788,8 @@ public final class UIUtil {
 			}
 		}
 	}
+	
+	public static final int DEFAULT_UNDO_LIMIT = 40;
 
 	public static UndoManager createUndoSupport(JTextComponent comp, int limit) {
 		CompoundUndoManager undoManager = new CompoundUndoManager(comp);
@@ -758,6 +803,10 @@ public final class UIUtil {
 		comp.putClientProperty("undoManager", undoManager); //$NON-NLS-1$
 
 		return undoManager;
+	}
+	
+	public static UndoManager getUndoManager(JComponent comp) {
+		return (UndoManager) comp.getClientProperty("undoManager"); //$NON-NLS-1$
 	}
 
 	public static class HistoryAction extends AbstractAction {
@@ -928,8 +977,11 @@ public final class UIUtil {
 				putValue(Action.ACCELERATOR_KEY, KeyStroke
 						.getKeyStroke("ctrl N")); //$NON-NLS-1$
 			}
+			
+			String nameKey = "textActions."+actionID+".name"; //$NON-NLS-1$ //$NON-NLS-2$
+			String descriptionKey = "textActions."+actionID+".description"; //$NON-NLS-1$ //$NON-NLS-2$
 
-			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, actionID, null);
+			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, nameKey, descriptionKey);
 			ResourceManager.getInstance().getGlobalDomain().addAction(this);
 
 			component.addPropertyChangeListener("document", this); //$NON-NLS-1$

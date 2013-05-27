@@ -185,8 +185,8 @@ public final class UIHelperRegistry {
 				if(entry.getKey().equals(contentTypeId)) {
 					continue;
 				}
-				ContentType targetType = ContentTypeRegistry.getInstance().getType(entry.getKey());
-				if(ContentTypeRegistry.isCompatible(contentType, targetType)) {
+				ContentType alternateType = ContentTypeRegistry.getInstance().getType(entry.getKey());
+				if(ContentTypeRegistry.isCompatible(alternateType, contentType)) {
 					helper = entry.getValue();
 					break;
 				}

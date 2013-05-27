@@ -30,17 +30,7 @@ public interface SearchNode {
 	
 	SearchEdge getIncomingEdgeAt(int index);
 	
-	/**
-	 * Shorthand method for leaf check. Result has to be equivalent
-	 * to {@link #getOutgoingEdgeCount()}==0.
-	 */
-	boolean isLeafNode();
-	
-	/**
-	 * Shorthand method for leaf check. Result has to be equivalent
-	 * to {@link #getIncomingEdgeCount()}==0.
-	 */
-	boolean isRootNode();
+	NodeType getNodeType();
 	
 	/**
 	 * Returns the height of the sub-tree whose root node is this {@code SearchNode}. 

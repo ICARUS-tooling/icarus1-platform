@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.language.annotation;
+package net.ikarus_systems.icarus.util.annotation;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -23,19 +23,19 @@ import net.ikarus_systems.icarus.util.PropertyChangeSource;
  *
  * @param <A>
  */
-public abstract class AnnotationManager<A extends Object> 
+public abstract class AnnotationManager 
 		extends PropertyChangeSource {
 
-	protected A annotation;
+	protected Annotation annotation;
 	
 	protected AnnotationDisplayMode displayMode;
 	
-	protected int traversalIndex = ResultAnnotation.AFTER_LAST;
+	protected int traversalIndex = Annotation.AFTER_LAST;
 	
 	protected AnnotationManager() {
 	}
 	
-	protected AnnotationManager(AnnotationManager<A> parent) {
+	protected AnnotationManager(AnnotationManager parent) {
 		Exceptions.testNullArgument(parent, "parent"); //$NON-NLS-1$
 		
 		parent.addPropertyChangeListener(new ParentPropertyListener(this));
@@ -43,13 +43,12 @@ public abstract class AnnotationManager<A extends Object>
 		copyState(parent);
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected void copyState(AnnotationManager<?> source) {
+	protected void copyState(AnnotationManager source) {
 		Object oldAnnotation = annotation;
 		AnnotationDisplayMode oldDisplayMode = displayMode;
 		int oldTraversalIndex = traversalIndex;
 		
-		annotation = (A) source.annotation;
+		annotation = source.annotation;
 		displayMode = source.displayMode;
 		traversalIndex = source.traversalIndex;
 		
@@ -68,21 +67,20 @@ public abstract class AnnotationManager<A extends Object>
 	/**
 	 * @return the annotation
 	 */
-	public A getAnnotation() {
+	public Annotation getAnnotation() {
 		return annotation;
 	}
 
 	/**
 	 * @param annotation the annotation to set
 	 */
-	@SuppressWarnings("unchecked")
-	public void setAnnotation(Object annotation) {
+	public void setAnnotation(Annotation annotation) {
 		Exceptions.testNullArgument(annotation, "annotation"); //$NON-NLS-1$
 		
 		if(!annotation.equals(this.annotation)) {
 			
 			Object oldValue = this.annotation;
-			this.annotation = (A) annotation;
+			this.annotation = annotation;
 			
 			annotationChanged();
 			
@@ -123,20 +121,20 @@ public abstract class AnnotationManager<A extends Object>
 	 */
 	public int getTraversalIndex() {
 		switch (getDisplayMode()) {
-		case FIRST_HIT_ONLY:
+		case FIRST_ONLY:
 			return 0;
 			
-		case LAST_HIT_ONLY:
+		case LAST_ONLY:
 			return getMaxTraversalIndex();
 			
-		case ALL_HITS:
-			return ResultAnnotation.AFTER_LAST;
+		case ALL:
+			return Annotation.AFTER_LAST;
 			
-		case SELECTED_HIT:
+		case SELECTED:
 			return traversalIndex;
 			
-		case NO_HITS:
-			return ResultAnnotation.BEFORE_FIRST;
+		case NONE:
+			return Annotation.BEFORE_FIRST;
 			
 		default:
 			throw new IllegalStateException();
@@ -220,7 +218,7 @@ public abstract class AnnotationManager<A extends Object>
 		return traversalIndex == 0; 
 	}
 	
-	public abstract AnnotationManager<A> linkedCopy();
+	public abstract AnnotationManager linkedCopy();
 	
 	/**
 	 * Returns the total number of 'hits' the underlying
@@ -238,23 +236,24 @@ public abstract class AnnotationManager<A extends Object>
 	
 	/**
 	 * 
-	 * @author Markus G�rtner
+	 * @author Markus Gärtner
+	 * @version $Id$
 	 *
 	 */
 	protected static class ParentPropertyListener implements PropertyChangeListener {
 		
-		private final WeakReference<AnnotationManager<?>> ref;
+		private final WeakReference<AnnotationManager> ref;
 		
-		ParentPropertyListener(AnnotationManager<?> manager) {
+		ParentPropertyListener(AnnotationManager manager) {
 			Exceptions.testNullArgument(manager, "manager"); //$NON-NLS-1$
 			
-			this.ref = new WeakReference<AnnotationManager<?>>(manager);
+			this.ref = new WeakReference<AnnotationManager>(manager);
 		}
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			
-			AnnotationManager<?> parent = (AnnotationManager<?>)evt.getSource();
+			AnnotationManager parent = (AnnotationManager)evt.getSource();
 			
 			if(ref.get()==null)
 				parent.removePropertyChangeListener(this);

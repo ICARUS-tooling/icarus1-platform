@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
@@ -37,7 +38,7 @@ import net.ikarus_systems.icarus.search_tools.SearchNode;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class DefaultTreeNode implements SearchNode {
+public class DefaultGraphNode implements SearchNode {
 	
 	private static final AtomicInteger idCounter = new AtomicInteger();
 	
@@ -45,19 +46,22 @@ public class DefaultTreeNode implements SearchNode {
 	@XmlAttribute
 	private String id = "node_"+idCounter.getAndIncrement(); //$NON-NLS-1$
 	
+	@XmlAttribute
+	private NodeType nodeType;
+	
 	@XmlElement
 	@XmlJavaTypeAdapter(value=ConstraintAdapter.class)
 	private SearchConstraint[] constraints;
-
-	@XmlElement
-	@XmlIDREF
-	@XmlJavaTypeAdapter(value=EdgeAdapter.class)
-	private SearchEdge head;
 	
 	@XmlElement
 	@XmlIDREF
 	@XmlJavaTypeAdapter(value=EdgeAdapter.class)
-	private List<SearchEdge> edges;
+	private List<SearchEdge> incomingEdges;
+	
+	@XmlElement
+	@XmlIDREF
+	@XmlJavaTypeAdapter(value=EdgeAdapter.class)
+	private List<SearchEdge> outgoingEdges;
 	
 	@XmlAttribute
 	private boolean negated;
@@ -68,20 +72,21 @@ public class DefaultTreeNode implements SearchNode {
 	@XmlTransient
 	private int descendantCount = -1;
 
-	public DefaultTreeNode() {
+	public DefaultGraphNode() {
 		// no-op
 	}
 	
-	public DefaultTreeNode(SearchNode node) {
+	public DefaultGraphNode(SearchNode node) {
 		setId(node.getId());
 		setNegated(node.isNegated());
+
 		
-		if(node.getIncomingEdgeCount()>0) {
-			setHead(node.getIncomingEdgeAt(0));
+		for(int i=0; i<node.getIncomingEdgeCount(); i++) {
+			addEdge(node.getIncomingEdgeAt(i), true);
 		}
 		
 		for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
-			addEdge(node.getOutgoingEdgeAt(i));
+			addEdge(node.getOutgoingEdgeAt(i), false);
 		}
 	}
 
@@ -106,7 +111,7 @@ public class DefaultTreeNode implements SearchNode {
 	 */
 	@Override
 	public int getOutgoingEdgeCount() {
-		return edges==null ? 0 : edges.size();
+		return outgoingEdges==null ? 0 : outgoingEdges.size();
 	}
 
 	/**
@@ -114,7 +119,7 @@ public class DefaultTreeNode implements SearchNode {
 	 */
 	@Override
 	public SearchEdge getOutgoingEdgeAt(int index) {
-		return edges.get(index);
+		return outgoingEdges.get(index);
 	}
 
 	/**
@@ -122,7 +127,7 @@ public class DefaultTreeNode implements SearchNode {
 	 */
 	@Override
 	public int getIncomingEdgeCount() {
-		return head==null ? 0 : 1;
+		return incomingEdges==null ? 0 : incomingEdges.size();
 	}
 
 	/**
@@ -130,25 +135,7 @@ public class DefaultTreeNode implements SearchNode {
 	 */
 	@Override
 	public SearchEdge getIncomingEdgeAt(int index) {
-		if(head==null)
-			throw new IllegalArgumentException("Node has no head"); //$NON-NLS-1$
-		return head;
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.search_tools.SearchNode#isLeafNode()
-	 */
-	@Override
-	public boolean isLeafNode() {
-		return edges==null || edges.isEmpty();
-	}
-
-	/**
-	 * @see net.ikarus_systems.icarus.search_tools.SearchNode#isRootNode()
-	 */
-	@Override
-	public boolean isRootNode() {
-		return head==null;
+		return incomingEdges.get(index);
 	}
 
 	/**
@@ -160,8 +147,8 @@ public class DefaultTreeNode implements SearchNode {
 		if(height==-1) {
 			int value = 0;
 			
-			if(edges!=null) {
-				for(SearchEdge edge : edges) {
+			if(outgoingEdges!=null) {
+				for(SearchEdge edge : outgoingEdges) {
 					value = Math.max(value, edge.getTarget().getHeight());
 				}
 			}
@@ -181,9 +168,9 @@ public class DefaultTreeNode implements SearchNode {
 		if(descendantCount==-1) {
 			int value = 0;
 			
-			if(edges!=null) {
-				value = edges.size();
-				for(SearchEdge edge : edges) {
+			if(outgoingEdges!=null) {
+				value = outgoingEdges.size();
+				for(SearchEdge edge : outgoingEdges) {
 					value += edge.getTarget().getDescendantCount();
 				}
 			}
@@ -191,10 +178,6 @@ public class DefaultTreeNode implements SearchNode {
 		}
 		
 		return descendantCount;
-	}
-
-	public SearchEdge getHead() {
-		return head;
 	}
 
 	public String getId() {
@@ -209,40 +192,60 @@ public class DefaultTreeNode implements SearchNode {
 		this.constraints = constraints;
 	}
 
-	public void setHead(SearchEdge head) {
-		this.head = head;
-	}
-
 	public void setNegated(boolean negated) {
 		this.negated = negated;
 	}
 	
-	public void addEdge(SearchEdge edge) {
+	/**
+	 * 
+	 * @see net.ikarus_systems.icarus.search_tools.SearchNode#getNodeType()
+	 */
+	public NodeType getNodeType() {
+		return nodeType;
+	}
+
+	public void setNodeType(NodeType nodeType) {
+		this.nodeType = nodeType;
+	}
+
+	public void addEdge(SearchEdge edge, boolean incoming) {
 		if(edge==null)
 			throw new IllegalArgumentException("Invalid edge"); //$NON-NLS-1$
 		
-		if(edges==null) {
-			edges = new ArrayList<>();
+		if(incoming) {
+			if(incomingEdges==null) {
+				incomingEdges = new ArrayList<>();
+			}
+			incomingEdges.add(edge);
+		} else {
+			if(outgoingEdges==null) {
+				outgoingEdges = new ArrayList<>();
+			}
+			outgoingEdges.add(edge);
 		}
-		
-		edges.add(edge);
 		
 		height = -1;
 		descendantCount = -1;
 	}
 	
-	public void addEdges(Collection<SearchEdge> newEdges) {
+	public void addEdges(Collection<SearchEdge> newEdges, boolean incoming) {
 		if(newEdges==null)
-			throw new IllegalArgumentException("Invalid edges"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid outgoingEdges"); //$NON-NLS-1$
 		if(newEdges.isEmpty()) {
 			return;
 		}
 		
-		if(edges==null) {
-			edges = new ArrayList<>();
+		if(incoming) {
+			if(incomingEdges==null) {
+				incomingEdges = new ArrayList<>();
+			}
+			incomingEdges.addAll(newEdges);
+		} else {
+			if(outgoingEdges==null) {
+				outgoingEdges = new ArrayList<>();
+			}
+			outgoingEdges.addAll(outgoingEdges);
 		}
-		
-		edges.addAll(edges);
 		
 		height = -1;
 		descendantCount = -1;
@@ -252,6 +255,6 @@ public class DefaultTreeNode implements SearchNode {
 		if(comparator==null)
 			throw new IllegalArgumentException("Invalid comparator"); //$NON-NLS-1$
 		
-		Collections.sort(edges, comparator);
+		Collections.sort(outgoingEdges, comparator);
 	}
 }

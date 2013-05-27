@@ -106,9 +106,11 @@ public class MatetoolsPipeline {
 		// no-op
 	}
 	
-	public DependencyData runPipeline(String[] tokens, Options options) throws Exception {
+	public DependencyData runPipeline(String[] tokens, ModelStorage storage, Options options) throws Exception {
 		if(tokens==null || tokens.length==0)
 			throw new IllegalArgumentException("Invalid tokens"); //$NON-NLS-1$
+		if(storage==null || storage.isEmpty())
+			throw new IllegalArgumentException("Invalid storage"); //$NON-NLS-1$
 		
 		if(options==null) {
 			options = Options.emptyOptions;
@@ -122,26 +124,16 @@ public class MatetoolsPipeline {
 			language = config.getString("plugins.matetools.parser.language"); //$NON-NLS-1$
 		}
 		
-		// Fetch model storage
-		ModelStorage storage = getModels(language);
-		
-		if(storage==null || storage.isEmpty()) {
-			if(language.isEmpty()) {
-				language = "<empty>"; //$NON-NLS-1$
-			}
-			new DialogDispatcher(null, 
-					"plugins.matetools.parserPipeline.title",  //$NON-NLS-1$
-					"plugins.matetools.parserPipeline.missingStorage",  //$NON-NLS-1$
-					language).showAsError();
-			return null;
-		}
-		
 		// Set new models, this may clear some tools
 		setModels(storage);
 		
 		boolean verbose = config.getBoolean("plugins.matetools.parser.verbose"); //$NON-NLS-1$
 		boolean doUppercaseLemmas = config.getBoolean("plugins.matetools.parser.doUppercaseLemmas"); //$NON-NLS-1$
 		boolean fastRelease = config.getBoolean("plugins.matetools.parser.fastRelease"); //$NON-NLS-1$
+		boolean useParser = config.getBoolean("plugins.matetools.parser.useParser"); //$NON-NLS-1$
+		boolean useLemmatizer = config.getBoolean("plugins.matetools.parser.useLemmatizer"); //$NON-NLS-1$
+		boolean useTagger = config.getBoolean("plugins.matetools.parser.useTagger"); //$NON-NLS-1$
+		boolean useMTagger = config.getBoolean("plugins.matetools.parser.useMorphTagger"); //$NON-NLS-1$
 		
 		int cores = config.getInteger("plugins.matetools.parser.maxCores"); //$NON-NLS-1$
 		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
@@ -154,22 +146,22 @@ public class MatetoolsPipeline {
 		storage.clear();
 		
 		// LEMMATIZER
-		if(lemmatizer==null && storage.getLemmatizerModelPath()==null) {
+		if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()==null) {
 			missingModels.add("plugins.matetools.parserModelEditor.lemmatizerModelLabel"); //$NON-NLS-1$
 		}
 		
 		// TAGGER
-		if(tagger==null && storage.getTaggerModelPath()==null) {
+		if(useTagger && tagger==null && storage.getTaggerModelPath()==null) {
 			missingModels.add("plugins.matetools.parserModelEditor.taggerModelLabel"); //$NON-NLS-1$
 		}
 		
 		// MTAG
-		if(mtag==null && storage.getMorphTaggerModelPath()==null) {
+		if(useMTagger && mtag==null && storage.getMorphTaggerModelPath()==null) {
 			missingModels.add("plugins.matetools.parserModelEditor.morphTaggerModelLabel"); //$NON-NLS-1$
 		}
 		
 		// PARSER
-		if(parser==null && storage.getParserModelPath()==null) {
+		if(useParser && parser==null && storage.getParserModelPath()==null) {
 			missingModels.add("plugins.matetools.parserModelEditor.parserModelLabel"); //$NON-NLS-1$
 		}
 		
@@ -199,11 +191,11 @@ public class MatetoolsPipeline {
 		// Now load tools if required and apply pipeline
 		
 		// LEMMATIZER
-		if(lemmatizer==null && storage.getLemmatizerModelPath()!=null) {
+		if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()!=null) {
 			lemmatizer=new Lemmatizer(storage.getLemmatizerModelPath(),doUppercaseLemmas);
 		}
-		if(lemmatizer!=null) {
-			lemmatizer.apply(data);
+		if(useLemmatizer && lemmatizer!=null) {
+			data = lemmatizer.apply(data);
 			output = CONLLUtils.readPredicted(data, true, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Lemmatizer result:\n%s",  //$NON-NLS-1$
@@ -217,11 +209,11 @@ public class MatetoolsPipeline {
 		}
 		
 		// TAGGER
-		if(tagger==null && storage.getTaggerModelPath()!=null) {
+		if(useTagger && tagger==null && storage.getTaggerModelPath()!=null) {
 			tagger=new is2.tag.Tagger(storage.getTaggerModelPath());
 		}
-		if(tagger!=null) {
-			tagger.apply(data);
+		if(useTagger && tagger!=null) {
+			data = tagger.apply(data);
 			output = CONLLUtils.readPredicted(data, true, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Tagger result:\n%s",  //$NON-NLS-1$
@@ -236,11 +228,11 @@ public class MatetoolsPipeline {
 		
 		
 		// MTAG
-		if(mtag==null && storage.getMorphTaggerModelPath()!=null) {
+		if(useMTagger && mtag==null && storage.getMorphTaggerModelPath()!=null) {
 			mtag=new is2.mtag.Tagger(storage.getMorphTaggerModelPath());
 		}
-		if(mtag!=null) {
-			mtag.apply(data);
+		if(useMTagger && mtag!=null) {
+			data = mtag.apply(data);
 
 			// Workaround
 			if(storage.getParserModelPath()!=null && data.pfeats!=null){
@@ -263,7 +255,7 @@ public class MatetoolsPipeline {
 		}
 		
 		// PARSER
-		if(parser==null && storage.getParserModelPath()!=null) {
+		if(useParser && parser==null && storage.getParserModelPath()!=null) {
 			is2.parser.Options opts=new is2.parser.Options(new String[]{"-model",storage.getParserModelPath()}); //$NON-NLS-1$
 			Parser.THREADS=cores;
 			Parser p = new Parser();
@@ -273,8 +265,8 @@ public class MatetoolsPipeline {
 			p.readModel(opts, p.pipe, p.params);
 			parser=p;
 		}
-		if(parser!=null) {
-			parser.applyQuick(data);
+		if(useParser && parser!=null) {
+			data = parser.applyQuick(data);
 			output = CONLLUtils.readPredicted(data, false, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Parser result:\n%s",  //$NON-NLS-1$
@@ -288,24 +280,6 @@ public class MatetoolsPipeline {
 		}
 		
 		return output;
-	}
-	
-	private static ModelStorage getModels(String language) {
-		List<?> storages = (List<?>) ConfigRegistry.getGlobalRegistry().getValue(
-				"plugins.matetools.parser.models"); //$NON-NLS-1$
-		
-		if(storages==null || storages.isEmpty()) {
-			return null;
-		}
-		
-		for(Object item : storages) {
-			ModelStorage storage = (ModelStorage) item;
-			if(storage.isLanguage(language)) {
-				return storage;
-			}
-		}
-		
-		return null;
 	}
 	
 	private void setModels(ModelStorage newStorage) {

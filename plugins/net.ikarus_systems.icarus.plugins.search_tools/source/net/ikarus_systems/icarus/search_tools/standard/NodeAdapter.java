@@ -18,13 +18,13 @@ import net.ikarus_systems.icarus.search_tools.SearchNode;
  * @version $Id$
  *
  */
-public class NodeAdapter extends XmlAdapter<DefaultTreeNode, SearchNode> {
+public class NodeAdapter extends XmlAdapter<DefaultGraphNode, SearchNode> {
 
 	/**
 	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
-	public SearchNode unmarshal(DefaultTreeNode v) throws Exception {
+	public SearchNode unmarshal(DefaultGraphNode v) throws Exception {
 		return v;
 	}
 
@@ -32,8 +32,8 @@ public class NodeAdapter extends XmlAdapter<DefaultTreeNode, SearchNode> {
 	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
-	public DefaultTreeNode marshal(SearchNode v) throws Exception {
-		return v instanceof DefaultTreeNode ? (DefaultTreeNode)v : new DefaultTreeNode(v);
+	public DefaultGraphNode marshal(SearchNode v) throws Exception {
+		return v instanceof DefaultGraphNode ? (DefaultGraphNode)v : new DefaultGraphNode(v);
 	}
 
 }

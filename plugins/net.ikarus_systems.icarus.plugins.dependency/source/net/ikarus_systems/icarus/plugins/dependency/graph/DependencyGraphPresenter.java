@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
+
 import net.ikarus_systems.icarus.config.ConfigDelegate;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceDataEvent;
@@ -62,12 +64,13 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	
 	public static final String NODE_DATA_TYPE = DependencyNodeData.class.getName();
 	
-	protected MutableDependencyData data;
+	protected MutableDependencyData data = new MutableDependencyData();
 	
 	protected boolean refreshGraphOnChange = true;
 
 	public DependencyGraphPresenter() {
-		// no-op
+		setAllowCycles(false);
+		setEnforceTree(true);
 	}
 
 	/**
@@ -328,7 +331,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		String[] poss = new String[size];
 		String[] features = new String[size];
 		String[] relations = new String[size];
-		int[] heads = new int[size];
+		short[] heads = new short[size];
 		long[] flags = new long[size];
 		
 		// Save node contents and construct sentence data wrapper
@@ -340,7 +343,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			poss[i] = data.getPos();
 			features[i] = data.getFeatures();
 			relations[i] = data.getRelation();
-			heads[i] = data.getHead();
+			heads[i] = (short) data.getHead();
 			flags[i] = data.getFlags();
 		}
 		
@@ -432,7 +435,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 					Object edge = model.getEdgeAt(cell, i);
 					
 					// Ignore outgoing and order edges
-					if(GraphUtils.isOrderEdge(model, edge) 
+					if(isOrderEdge(edge) 
 							|| cell==model.getTerminal(edge, true)
 							|| newHead==model.getTerminal(edge, true)) {
 						continue;
@@ -558,7 +561,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 				Object[] edges = graph.getEdges(cell);
 				for(Object edge : edges) {
 					toDelete.add(edge);
-					if(GraphUtils.isOrderEdge(model, edge)) {
+					if(isOrderEdge(edge)) {
 						// Nothing special to do
 						continue;
 					}
@@ -651,16 +654,23 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		if(!canEdit()) {
 			return;
 		}
+		mxIGraphModel model = graph.getModel();
+		
+		// Check for cycle
+		if(GraphUtils.isAncestor(graph.getModel(), source, target, !orderEdge, orderEdge)) {
+			showMessage(JOptionPane.ERROR_MESSAGE, 
+					"plugins.jgraph.graphPresenter.messages.cycle"); //$NON-NLS-1$
+			return;
+		}
 		
 		Object newEdge = null;
 		
 		// Add edge
-		mxIGraphModel model = graph.getModel();
 		model.beginUpdate();
 		try {
 			for(Object edge : graph.getEdgesBetween(source, target)) {
 				// Allow only one edge of any kind between nodes
-				if(GraphUtils.isOrderEdge(model, edge) == orderEdge) {
+				if(isOrderEdge(edge) == orderEdge) {
 					return;
 				}
 			}

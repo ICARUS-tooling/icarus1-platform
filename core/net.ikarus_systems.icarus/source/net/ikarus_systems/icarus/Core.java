@@ -13,6 +13,8 @@
  */
 package net.ikarus_systems.icarus;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,8 +39,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
 
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 
 import org.java.plugin.JpfException;
 import org.java.plugin.Plugin;
@@ -159,20 +165,20 @@ public class Core {
 			"net.ikarus_systems.icarus.ignoreAttributes"; //$NON-NLS-1$
 	
 	public static final String CORE_PLUGIN_KEY =  
-			"net.ikarus_systems.icarus.corePlugin"; //$NON-NLS-1$
+			"net.ikarus_systems.icarus.core"; //$NON-NLS-1$
 	
 	private Map<String, String> applicationProperties;
 	private Map<String, String> pluginProperties;
 	
 	private List<NamedRunnable> shutdownHooks;
 	
-	private final CLOptions options;
+	private final CoreOptions options;
 
 	private Core(String[] args) {
 		logger = Logger.getLogger("icarus.launcher"); //$NON-NLS-1$
 		
 		// Init options
-		options = new CLOptions(args);
+		options = new CoreOptions(args);
 		
 		// init folders
 		rootFolder = new File(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -465,7 +471,7 @@ public class Core {
 		}
 	}
 	
-	public CLOptions getOptions() {
+	public CoreOptions getOptions() {
 		return options;
 	}
 
@@ -587,6 +593,16 @@ public class Core {
 		return null;
 	}
 	
+	public static void showNotice() {
+		JLabel label = new JLabel("Soon "+(char)0x2122); //$NON-NLS-1$
+		label.setForeground(Color.blue.brighter());
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setFont(new Font("Dialog", Font.PLAIN, 30)); //$NON-NLS-1$
+		
+		DialogFactory.getGlobalFactory().showGenericDialog(
+				null, "Coming...", null, label, false); //$NON-NLS-1$
+	}
+	
 	/**
 	 * Command line argument wrapper
 	 * 
@@ -594,13 +610,13 @@ public class Core {
 	 * @version $Id$
 	 *
 	 */
-	public class CLOptions {
+	public class CoreOptions {
 		private Map<String,String> properties;
 		private boolean verbose = false;
 		
 		private final String[] args;
 		
-		public CLOptions(String[] args) {
+		public CoreOptions(String[] args) {
 			this.args = args;
 			
 			for(int i=0; i<args.length; i++) {

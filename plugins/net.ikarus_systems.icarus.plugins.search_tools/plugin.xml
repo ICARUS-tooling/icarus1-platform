@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
 <plugin id="net.ikarus_systems.icarus.searchTools" version="0.0.1"
-	class="net.ikarus_systems.icarus.plugins.search_tools.SearchToolPlugin">
+	class="net.ikarus_systems.icarus.plugins.search_tools.SearchToolsPlugin">
 	
 	<doc>
 		<doc-text>
@@ -9,6 +9,12 @@
 			visualization factories.
 		</doc-text>
 	</doc>
+	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/search_tools/icons/" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.search_tools.SearchToolsPreferences" />
+	</attributes>
 	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
@@ -18,37 +24,115 @@
 	
 	<!-- Extension-Points -->
 			
-	<extension-point id="ConstraintFactory">
+	<extension-point id="ConstraintContext">
 		<doc>
 			<doc-text>
-				TODO
+				Defines a namespace associated with a collection of supported
+				constraint-tokens and the factories required to instantiate those
+				constraints. 
 			</doc-text>
 		</doc>
-		<parameter-def id="token" multiplicity="one-or-more">
+		<parameter-def id="contentType" type="extension-id"
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
 			<doc>
 				<doc-text>
-					Tokens the factory wants to be identified with. Note that
-					it is recommended to use prefixing for common tokens like
-					'form', 'lemma' and such that are likely to be used by several
-					implementations.
+					Content type this context should be associated with.
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="class" multiplicity="one">
+		<parameter-def id="token" multiplicity="one-or-more">
 			<doc>
 				<doc-text>
-					The factory itself as a java class.
-					Required to have no-args constructor and implement
+					Tokens the context supports. Tokens are case-insensitive and will
+					be cast to lower-case when registered!
+				</doc-text>
+			</doc>
+			<parameter-def id="alias" multiplicity="any">
+				<doc>
+					<doc-text>
+						Allowed aliases for the token. Note that an alias is NOT
+						allowed to be a true prefix of the token it wishes to alias.
+						For example 'foo' would by a legal alias for 'bar', but not
+						for 'foobar'. Similar to general tokens all aliases are
+						case-insensitive and the same cast to lower-case applies upon
+						registration.
+					</doc-text>
+				</doc>
+			</parameter-def>
+		</parameter-def>
+		<parameter-def id="factories" multiplicity="one" type="any">
+			<doc>
+				<doc-text>
+					Mapping of constraint tokens to their respective
+					factories. Sub-Parameters are interpreted as follows:
+					'id' represents the token to be mapped.
+					'value' is required to be the fully qualified name of the
+					factory that must have a no-args constructor and implement
 					net.ikarus_systems.icarus.plugins.searchTools.ConstraintFactory interface!
 				</doc-text>
 			</doc>
 		</parameter-def>
-		<parameter-def id="contentType" multiplicity="one-or-more" type="extension-id"
+	</extension-point>
+			
+	<extension-point id="SearchFactory" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				The search factory used in the search process is responsible
+				for transfering a given abstract search-query object into a
+				search-object instance that can be executed by the framework.
+				In particular it is the central point for possible optimizations
+				and the interfacing with content specific access of the target
+				graph structures.
+			</doc-text>
+		</doc>
+		<parameter-def id="contentType" type="extension-id"
 				custom-data="net.ikarus_systems.icarus.core@ContentType">
 			<doc>
 				<doc-text>
-					Collection of content types (usually only one) that this factory is
-					compatible with.
+					Hint for the search framework to determine what registered
+					constraints can be used when the user constructs a search graph
+					for this factory.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Factory class itself, required to have no-args constructor and
+					implement net.ikarus_systems.icarus.search_tools.SearchFactory!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SearchResultPresenter" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Highly specialized version of regular AWTPresenter implementations
+				designed to only handle SearchResult objects of a specific dimension.
+				Note that since the dimension of a particular search result is NOT encoded
+				in its content-type it is not possible to use the default ui-helper framework
+				and therefore registration for search-result presenter implementations is
+				performed solely through this extension-point!
+			</doc-text>
+		</doc>
+		<parameter-def id="dimension" type="number">
+			<doc>
+				<doc-text>
+					The result dimension this implementation is capable of handling.
+					Note that it is not intended for a result rpesenter to be able to
+					handle more than one result dimension! It is recommended to specialize
+					implementations.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Presenter class itself, required to have no-args constructor and
+					extend net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter!
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -83,6 +167,72 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-perspective.gif" />
 	</extension>
 	
+	<extension id="QueryEditorView" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchToolsView">
+		<doc>
+			<doc-text>
+				Compound view containing a graph editor and a text-area for editing a search graph
+				both visually and textual.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.searchTools.queryEditorView.identity.name" />
+		<parameter id="description" value="plugins.searchTools.queryEditorView.identity.name" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.QueryEditorView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/query-editor-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="high" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" value="SearchQueryContentType" />
+			<parameter id="present" value="SearchQueryContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="SearchManagerView" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchToolsView">
+		<doc>
+			<doc-text>
+				Central management point for search related tasks. Allows the creation and
+				modification of search instances and the tracking of their current status.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.searchTools.searchManagerView.identity.name" />
+		<parameter id="description" value="plugins.searchTools.searchManagerView.identity.name" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.SearchManagerView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-manager-view.gif" />
+		<parameter id="alignment" value="left" />
+		<parameter id="priority" value="high" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+		</parameter>
+	</extension>
+	
+	<extension id="SearchResultView" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchToolsView">
+		<doc>
+			<doc-text>
+				Generic outline view for search results. Relies on special presenter
+				implementations to delegate the actual result visualization to.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.searchTools.searchResultView.identity.name" />
+		<parameter id="description" value="plugins.searchTools.searchResultView.identity.name" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-result-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" value="SearchResultContentType" />
+		</parameter>
+	</extension>
+	
 	<!-- CONTENT TYPES -->
 	
 	<extension id="SearchQueryContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
@@ -103,11 +253,30 @@
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.SearchGraph" />
 	</extension>
+	
+	<extension id="SearchResultContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.search_tools.result.SearchResult
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.result.SearchResult" />
+	</extension>
+	
 	<!-- HELPERS -->
 	
 	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
 		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint" />
-		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultTreeEdge" />
-		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultTreeNode" />
+		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultGraphEdge" />
+		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultGraphNode" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
+	</extension>
+	<!-- CONSTRAINT CONTEXT -->
+	
+	<extension id="DefaultConstraintContext" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="form" />
+		<parameter id="factories" />
 	</extension>
 </plugin>

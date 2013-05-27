@@ -22,11 +22,11 @@ public enum SearchOperator {
 	
 	EQUALS_NOT("!=", "equalsNot"), //$NON-NLS-1$ //$NON-NLS-2$
 	
-	MATCHES("~=", "mathes"), //$NON-NLS-1$ //$NON-NLS-2$
+	MATCHES("=~", "mathes"), //$NON-NLS-1$ //$NON-NLS-2$
 	
 	MATCHES_NOT("!~", "matchesNot"), //$NON-NLS-1$ //$NON-NLS-2$
 	
-	CONTAINS("#=", "contains"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONTAINS("=#", "contains"), //$NON-NLS-1$ //$NON-NLS-2$
 	
 	CONTAINS_NOT("!#", "containsNot"), //$NON-NLS-1$ //$NON-NLS-2$
 	

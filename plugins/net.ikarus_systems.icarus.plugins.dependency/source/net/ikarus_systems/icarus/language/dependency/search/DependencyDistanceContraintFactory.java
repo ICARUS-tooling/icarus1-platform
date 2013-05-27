@@ -12,7 +12,6 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
-import net.ikarus_systems.icarus.search_tools.SearchUtils;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 
@@ -23,10 +22,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
  */
 public class DependencyDistanceContraintFactory extends AbstractConstraintFactory {
 
-	public static final String ID = "dependency_distance"; //$NON-NLS-1$
+	public static final String TOKEN = "distance"; //$NON-NLS-1$
 
 	public DependencyDistanceContraintFactory() {
-		super(ID, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.distance.description"); //$NON-NLS-1$
 	}
 
@@ -65,12 +64,12 @@ public class DependencyDistanceContraintFactory extends AbstractConstraintFactor
 
 	@Override
 	public Object labelToValue(Object label) {
-		return SearchUtils.parseLabel((String) label);
+		return LanguageUtils.parseLabel((String) label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value) {
-		return SearchUtils.getLabel((int)value);
+		return LanguageUtils.getLabel((int)value);
 	}
 
 	private static class DependencyDistanceConstraint extends DefaultConstraint {
@@ -78,13 +77,12 @@ public class DependencyDistanceContraintFactory extends AbstractConstraintFactor
 		private static final long serialVersionUID = 4020431284510729498L;
 
 		public DependencyDistanceConstraint(Object value, SearchOperator operator) {
-			super(ID, value, operator);
+			super(TOKEN, value, operator);
 		}
 
 		@Override
-		public boolean matches(Object value) {
-			value = ((DependencyTargetTree)value).getDistance();
-			return super.matches(value);
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getDistance();
 		}
 	}
 }

@@ -9,6 +9,12 @@
 		</doc-text>
 	</doc>
 	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/jgraph/icons/" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.jgraph.JGraphPreferences" />
+	</attributes>
+	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
@@ -48,7 +54,7 @@
 					choice dialog or other means of selection capabilities to the user. If
 					parameter is missing then the layout is assumed to be not depending on
 					content of a graph. Examples for such "general" layouts are the default
-					implementations for LinearArcLayout and BasicTreeLayout.
+					implementations for DefaultArcLayout and DefaultTreeLayout.
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -250,6 +256,19 @@
 	
 	<!-- GRAPH UTILITIES -->
 	
+	<extension id="DefaultGraphLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
+		<doc>
+			<doc-text>
+				'Empty' layout that does not alter the current appearance of the graph.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultGraphLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultGraphLayout.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/jgraph/icons/graph_default.gif" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphLayout" />
+	</extension>
+	
 	<extension id="DefaultArcLayout" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="GraphLayout">
 		<doc>
 			<doc-text>
@@ -326,7 +345,7 @@
 	<extension id="BottomArcEdgeStyle" plugin-id="net.ikarus_systems.icarus.jgraph" point-id="EdgeStyle">
 		<doc>
 			<doc-text>
-				Generates the points used to construct an arc shape above two connected vertices..
+				Generates the points used to construct an arc shape below two connected vertices..
 			</doc-text>
 		</doc>
 		<parameter id="name" value="bottomArcEdgeStyle" />

@@ -149,12 +149,16 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 				"plugins.jgraph.editor.submitAction.name",  //$NON-NLS-1$
 				"plugins.jgraph.editor.submitAction.description"); //$NON-NLS-1$
 		resourceDomain.addAction(textSubmitAction);
-
+		
+		buildEditors();
+	}
+	
+	protected void buildEditors() {
 		vertexEditor = createVertexEditor();
 		configEditorComponent(getEditorComponent(vertexEditor));
 
 		edgeEditor = createEdgeEditor();
-		configEditorComponent(getEditorComponent(edgeEditor));
+		configEditorComponent(getEditorComponent(edgeEditor));		
 	}
 	
 	protected abstract JComponent getEditorComponent(Object editor);
@@ -182,7 +186,7 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 		Rectangle box = presenter.getBounds();
 		// FIXME right now we apply an offset of 30px so the panel 
 		// does not shift over the bottom line
-		//box.y -= 30;
+		box.y -= 30;
 
 		if (bounds.x < box.x)
 			bounds.x = box.x+2;
@@ -225,6 +229,10 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 	 */
 	@Override
 	public void startEditing(Object cell, EventObject evt) {
+		if(edgeEditor==null || vertexEditor==null) {
+			return;
+		}
+		
 		if (editingCell != null) {
 			stopEditing(true);
 		}
@@ -278,6 +286,10 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 	 */
 	@Override
 	public void stopEditing(boolean cancel) {
+		if(edgeEditor==null || vertexEditor==null) {
+			return;
+		}
+		
 		if (editingCell != null) {
 			JComponent editorComponent = getEditorComponent(currentEditor);
 			

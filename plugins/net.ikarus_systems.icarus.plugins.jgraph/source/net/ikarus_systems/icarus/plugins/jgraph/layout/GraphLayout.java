@@ -19,7 +19,7 @@ import com.mxgraph.util.mxRectangle;
  * @version $Id$
  *
  */
-public interface GraphLayout extends Installable<GraphOwner>, GraphLayoutConstants {
+public interface GraphLayout extends Installable, GraphLayoutConstants {
 	
 	/**
 	 * Special method to handle new edges in a graph.

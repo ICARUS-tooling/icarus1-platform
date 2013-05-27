@@ -87,6 +87,24 @@ public class EventObject {
 	public void consume() {
 		consumed = true;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(name);
+		if(consumed) {
+			sb.append(" (consumed)"); //$NON-NLS-1$
+		}
+		
+		sb.append("["); //$NON-NLS-1$
+		for(Map.Entry<String, Object> entry : properties.entrySet()) {
+			sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		sb.append("]"); //$NON-NLS-1$
+		
+		return sb.toString();
+	}
 
 	public static EventObject propertyEvent(String name, Object oldValue, Object newValue) {
 		return new EventObject(Events.PROPERTY, "property", name,  //$NON-NLS-1$

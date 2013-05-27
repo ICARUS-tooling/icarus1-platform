@@ -111,17 +111,27 @@ public class InfoPanel {
 		return label;
 	}
 	
-	private void add(Component comp, boolean fill) {
+	public void add(Component comp, boolean fill) {
+		add(comp, fill, GridBagConstraints.WEST, 0);
+	}
+	
+	public void add(Component comp,  int anchor) {
+		add(comp, false, anchor, 100);
+	}
+	
+	public void add(Component comp, boolean fill, int anchor, int weight) {
 		JPanel contentPanel = getContentPanel();
 		int index = contentPanel.getComponentCount();
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = index;
 		gbc.gridy = 0;
-		gbc.anchor = GridBagConstraints.WEST;
+		gbc.anchor = anchor;
 		if(fill) {
 			gbc.fill = GridBagConstraints.HORIZONTAL;
 			gbc.weightx = 100;
+		} else {
+			gbc.weightx = weight;
 		}
 		
 		contentPanel.add(comp, gbc);

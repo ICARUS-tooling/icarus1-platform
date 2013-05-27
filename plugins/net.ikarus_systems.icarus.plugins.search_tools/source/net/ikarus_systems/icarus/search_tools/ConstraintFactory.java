@@ -9,7 +9,6 @@
  */
 package net.ikarus_systems.icarus.search_tools;
 
-import net.ikarus_systems.icarus.util.id.Identity;
 
 
 /**
@@ -19,7 +18,7 @@ import net.ikarus_systems.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public interface ConstraintFactory extends Identity {
+public interface ConstraintFactory {
 	
 	public static final int EDGE_CONSTRAINT_TYPE = 1;
 	public static final int NODE_CONSTRAINT_TYPE = 2;
@@ -27,6 +26,12 @@ public interface ConstraintFactory extends Identity {
 	SearchConstraint createConstraint(Object value, SearchOperator operator);
 	
 	SearchOperator[] getSupportedOperators();
+	
+	String getName();
+	
+	String getDescription();
+	
+	String getToken();
 	
 	/**
 	 * Returns the class of supported values. This is a hint for editors
@@ -47,8 +52,16 @@ public interface ConstraintFactory extends Identity {
 	 */	
 	Object[] getLabelSet();
 	
+	/**
+	 * Transforms or parses the given {@code label} into a value
+	 * suitable for {@code SearchConstraint} objects created by this factory.
+	 */
 	Object labelToValue(Object label);
 	
+	/**
+	 * Transforms the given {@code value} into a {@code label} object
+	 * that can be used for interface elements presented to the user.
+	 */
 	Object valueToLabel(Object value);
 	
 	int getConstraintType();

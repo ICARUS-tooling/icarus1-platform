@@ -6,6 +6,7 @@ package net.ikarus_systems.icarus.config;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			map = new HashMap<>();
 		}
 
-		if(value==null || !value.equals(map.get(path))) {
+		if(value==null || value instanceof Collection || !value.equals(map.get(path))) {
 			map.put(path, value);
 			return true;
 		}

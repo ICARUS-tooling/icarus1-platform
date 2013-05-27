@@ -21,10 +21,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
  */
 public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 
-	public static final String ID = "dependency_pos"; //$NON-NLS-1$
+	public static final String TOKEN = "pos"; //$NON-NLS-1$
 
 	public DependencyPosContraintFactory() {
-		super(ID, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.pos.name",  //$NON-NLS-1$
+		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.pos.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.pos.description"); //$NON-NLS-1$
 	}
 
@@ -42,13 +42,12 @@ public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 		private static final long serialVersionUID = 18977116270797226L;
 
 		public DependencyPosConstraint(Object value, SearchOperator operator) {
-			super(ID, value, operator);
+			super(TOKEN, value, operator);
 		}
 
 		@Override
-		public boolean matches(Object value) {
-			value = ((DependencyTargetTree)value).getPos();
-			return super.matches(value);
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getPos();
 		}
 	}
 }

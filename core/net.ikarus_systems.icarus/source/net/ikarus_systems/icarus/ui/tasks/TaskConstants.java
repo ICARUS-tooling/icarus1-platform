@@ -45,6 +45,13 @@ public interface TaskConstants {
 	 */
 	public static final String TASK_PROPERTY = "task"; //$NON-NLS-1$
 	
+
+	// SwingWorker properties
+	
+	public static final String STATE_PROPERTY = "state"; //$NON-NLS-1$
+
+	public static final String PROGRESS_PROPERTY = "progress"; //$NON-NLS-1$
+	
 	// Events
 	
 	/**

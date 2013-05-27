@@ -10,6 +10,12 @@
 		</doc-text>
 	</doc>
 	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.core.resources.core" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/core/icons/" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.core.IcarusCorePreferences" />
+	</attributes>
+	
 	<!-- Extension-Points -->
 			
 	<extension-point id="Serializable" extension-multiplicity="one-per-plugin">
@@ -88,6 +94,25 @@
 					localization of the name and description paremeters.
 					Should be accessible using the plugin classloader
 					for the given extension.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Preferences" extension-multiplicity="one-per-plugin">
+		<doc>
+			<doc-text>
+				Enables all plug-ins to induce their own configuration entries
+				in the global ConfigRegistry instance without having to actually
+				load the entire lug-in.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Fully qualified name of a class that performs the registration of
+					preferences data with the ConfigRegistry. The only requirement
+					for this class is to have a no-args constructor. 
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -580,7 +605,7 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.core.log.LogView" />
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/log/log-view.gif" />
 		<parameter id="alignment" value="bottom" />
-		<parameter id="priority" value="default" />
+		<parameter id="priority" value="low" />
 		
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">

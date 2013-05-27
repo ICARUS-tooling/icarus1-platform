@@ -17,10 +17,12 @@ import java.awt.event.ActionListener;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
@@ -49,6 +51,9 @@ public class TaskPanel extends JToolBar {
 	private TaskListCellRenderer activeTaskRenderer;
 	private JList<?> taskList;
 	private JPanel contentPanel;
+	private JScrollPane scrollPane;
+	
+	private JLabel infoLabel;
 	
 	private Handler handler;
 
@@ -95,10 +100,10 @@ public class TaskPanel extends JToolBar {
 			parent = SwingUtilities.getRoot(openDialogButton);
 		}
 		
-		if(taskListModel==null) {
+		if(contentPanel==null) {
+			activeTaskRenderer = new TaskListCellRenderer(getTaskManager());
+			
 			taskListModel = new TaskListModel(getTaskManager());
-		}
-		if(taskList==null) {
 			taskList = new JList<Object>(taskListModel){
 
 				private static final long serialVersionUID = 7924681566914684482L;
@@ -111,21 +116,29 @@ public class TaskPanel extends JToolBar {
 			taskList.setBorder(null);
 			taskList.setFocusable(false);
 			new TaskListCellRenderer(getTaskManager(), taskList);
-		}
-		if(activeTaskRenderer==null) {
-			activeTaskRenderer = new TaskListCellRenderer(getTaskManager());
-		}
-		if(contentPanel==null) {
-			JScrollPane scrollPane = new JScrollPane(taskList);
+			
+			scrollPane = new JScrollPane(taskList);
 			scrollPane.setPreferredSize(new Dimension(400, 270));
 			scrollPane.setBorder(null);
+			
+			infoLabel = new JLabel();
+			infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+			infoLabel.setVerticalAlignment(SwingConstants.TOP);
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(infoLabel, 
+					"taskManager.labels.noTasks", null); //$NON-NLS-1$
+			ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 			
 			contentPanel = new JPanel(new BorderLayout());
 			contentPanel.add(scrollPane, BorderLayout.CENTER);
 			contentPanel.add(activeTaskRenderer, BorderLayout.NORTH);
+			contentPanel.add(infoLabel, BorderLayout.SOUTH);
 		}
 		
 		activeTaskRenderer.setTask(getTaskManager().getActiveTask());
+		scrollPane.setVisible(!getTaskManager().getQueue().isEmpty());
+		
+		infoLabel.setVisible(!activeTaskRenderer.isVisible() 
+				&& !scrollPane.isVisible());
 		
 		DialogFactory.getGlobalFactory().showGenericDialog(parent, 
 				"taskManager.dialogs.title",  //$NON-NLS-1$
@@ -166,9 +179,16 @@ public class TaskPanel extends JToolBar {
 		public void invoke(Object sender, EventObject event) {
 			refreshButtonEnabled();
 			
-			if(TaskConstants.ACTIVE_TASK_CHANGED.equals(event.getName())
-					&& activeTaskRenderer!=null) {
+			if(TaskConstants.ACTIVE_TASK_CHANGED.equals(event.getName())) {
+				if(contentPanel==null) {
+					return;
+				}
+				
 				activeTaskRenderer.setTask(getTaskManager().getActiveTask());
+				scrollPane.setVisible(!getTaskManager().getQueue().isEmpty());
+				
+				infoLabel.setVisible(!activeTaskRenderer.isVisible() 
+						&& !scrollPane.isVisible());
 			}
 		}
 

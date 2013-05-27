@@ -52,7 +52,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	 * @see net.ikarus_systems.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(GraphOwner target) {
+	public void install(Object target) {
 		if(target instanceof GraphPresenter) {
 			configDelegate = ((GraphPresenter)target).getConfigDelegate();
 		}
@@ -62,7 +62,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	 * @see net.ikarus_systems.icarus.util.Installable#uninstall(java.lang.Object)
 	 */
 	@Override
-	public void uninstall(GraphOwner target) {
+	public void uninstall(Object target) {
 		configDelegate = null;
 	}
 	

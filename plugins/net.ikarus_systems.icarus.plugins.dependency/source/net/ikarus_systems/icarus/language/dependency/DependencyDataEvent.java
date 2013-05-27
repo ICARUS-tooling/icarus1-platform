@@ -8,7 +8,7 @@ public class DependencyDataEvent extends SentenceDataEvent {
 	int startIndex = -1, endIndex = -1;
 
 	public DependencyDataEvent(MutableSentenceData source) {
-		this(source, -1, -1);
+		this(source, (int)-1, (int)-1);
 	}
 
 	public DependencyDataEvent(MutableSentenceData source, int startIndex,
