@@ -48,6 +48,7 @@ import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.dialog.DialogBuilder;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -788,28 +789,37 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		}
 		
 		//System.out.println(wio.getAttributename() + " " + wio.getAttributevalues());
-		inputTableModel.setInputAttributes(wio);
+		// -1 create item
+		inputTableModel.setInputAttributes(wio, -1);
 		
 	}
 	
-	protected void editWebserviceInput(String attribute, String attributevalue) {
+	protected void editWebserviceInput(String attribute, String attributevalue, int index) {
 		
 		WebserviceIOAttributes wio = WebserviceDialogs.getWebserviceDialogFactory().showWebserviceIOEditAttributes(null, 
 				"plugins.weblicht.webserviceEditView.dialogs.editInput.title",  //$NON-NLS-1$
 				"plugins.weblicht.webserviceEditView.dialogs.editInput.message",  //$NON-NLS-1$
 				attribute, attributevalue, attribute);
 		
-		//System.out.println(wio.getAttributename() + " " + wio.getAttributevalues());		
-		inputTableModel.setInputAttributes(wio);
-
+		//empty attributename will fail later / not allowed
+		if (wio.getAttributename().equals("")){ //$NON-NLS-1$
+			DialogFactory.getGlobalFactory().showWarning(null,
+					"plugins.weblicht.weblichtEditView.dialogs.emptyAttributename.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtEditView.dialogs.emptyAttributename.message", //$NON-NLS-1$
+					null,null);
+			return;
+		}
+		
+		//System.out.println(wio.getAttributename() + " " + wio.getAttributevalues());	
+		inputTableModel.setInputAttributes(wio, index);
 	}
 	
-	protected void deleteWebserviceInput(String attribute) {
+	protected void deleteWebserviceInput(String attribute, int itemIndex) {
 		if(DialogFactory.getGlobalFactory().showConfirm(null, 
 				"plugins.weblicht.webserviceEditView.dialogs.deleteInput.title",  //$NON-NLS-1$
 				"plugins.weblicht.webserviceEditView.dialogs.deleteInput.message",  //$NON-NLS-1$
 				attribute)) {
-			inputTableModel.deleteInputAttribute(attribute, null);
+			inputTableModel.deleteInputAttribute(itemIndex);
 		}
 	}
 	
@@ -828,15 +838,19 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		
 		//empty attributename will fail later / not allowed
 		if (wio.getAttributename().equals("")){ //$NON-NLS-1$
+			DialogFactory.getGlobalFactory().showWarning(null,
+					"plugins.weblicht.weblichtEditView.dialogs.emptyAttributename.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtEditView.dialogs.emptyAttributename.message", //$NON-NLS-1$
+					null,null);
 			return;
 		}
 		
 		//System.out.println(wio.getAttributename() + " " + wio.getAttributevalues());
-		outputTableModel.setOutputAttributes(wio);
+		outputTableModel.setOutputAttributes(wio, -1);
 		
 	}
 	
-	protected void editWebserviceOutput(String attribute, String attributevalue) {
+	protected void editWebserviceOutput(String attribute, String attributevalue,int index) {
 		WebserviceIOAttributes wio = WebserviceDialogs.getWebserviceDialogFactory().showWebserviceIOEditAttributes(null, 
 				"plugins.weblicht.webserviceEditView.dialogs.editOutput.title",  //$NON-NLS-1$
 				"plugins.weblicht.webserviceEditView.dialogs.editOutput.message",  //$NON-NLS-1$
@@ -844,16 +858,25 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 		
 		//System.out.println(wio.getAttributename() + " " + wio.getAttributevalues());
 		
-		outputTableModel.setOutputAttributes(wio);
+		//empty attributename will fail later / not allowed
+		if (wio.getAttributename().equals("")){ //$NON-NLS-1$
+			DialogFactory.getGlobalFactory().showWarning(null,
+					"plugins.weblicht.weblichtEditView.dialogs.emptyAttributename.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtEditView.dialogs.emptyAttributename.message", //$NON-NLS-1$
+					null,null);
+			return;
+		}
+		
+		outputTableModel.setOutputAttributes(wio,index);
 
 	}
 	
-	protected void deleteWebserviceOutput(String attribute) {
+	protected void deleteWebserviceOutput(String attribute, int itemIndex) {
 		if(DialogFactory.getGlobalFactory().showConfirm(null, 
 				"plugins.weblicht.webserviceEditView.dialogs.deleteOutput.title",  //$NON-NLS-1$
 				"plugins.weblicht.webserviceEditView.dialogs.deleteOutput.message",  //$NON-NLS-1$
 				attribute)) {
-			outputTableModel.deleteOutputAttribute(attribute, null);
+			outputTableModel.deleteOutputAttribute(itemIndex);
 		}
 	}
 	
@@ -906,7 +929,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				String attributevalue = (String) inputTable.getValueAt(row, 1);
 				
 				try {
-					editWebserviceInput(attribute,attributevalue);
+					editWebserviceInput(attribute,attributevalue,row);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Failed to edit input attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
@@ -927,7 +950,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				//System.out.println("DelRow " + inputTableModel.getRowCount() + " " + attribute);
 				
 				try {
-					deleteWebserviceInput(attribute);
+					deleteWebserviceInput(attribute, row);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Failed to delete attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
@@ -948,7 +971,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				String attributevalue = (String) outputTable.getValueAt(row, 1);
 				
 				try {
-					editWebserviceOutput(attribute,attributevalue);
+					editWebserviceOutput(attribute,attributevalue,row);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Failed to edit output attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$
@@ -969,7 +992,7 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 				//System.out.println("DelRow " + outputTableModel.getRowCount() + " " + attribute);
 				
 				try {
-					deleteWebserviceOutput(attribute);
+					deleteWebserviceOutput(attribute, row);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Failed to delete output attribute from webservice "+getWebserviceName(), ex); //$NON-NLS-1$

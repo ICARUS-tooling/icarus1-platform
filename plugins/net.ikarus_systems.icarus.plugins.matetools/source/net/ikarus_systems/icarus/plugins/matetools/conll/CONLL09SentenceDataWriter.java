@@ -149,6 +149,9 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 		} catch (InterruptedException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"Write to File interrupted", e); //$NON-NLS-1$
+		} catch (IllegalArgumentException e) {
+			LoggerFactory.log(this, Level.SEVERE,
+					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$			
 		} finally {
 			writer.finishWriting();
 		}

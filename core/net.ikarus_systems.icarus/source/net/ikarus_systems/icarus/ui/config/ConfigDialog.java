@@ -64,6 +64,7 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
@@ -461,7 +462,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			private static final long serialVersionUID = 7567894886782628787L;
 			
 			{
-                //setLeafIcon(GridBagUtil.getIcon("info.gif"));
+                //setLeafIcon(GridBagUtil.getIcon("info.gif"));				
                 setLeafIcon(null);
                 setOpenIcon(null);
                 setClosedIcon(null);                
@@ -1063,9 +1064,10 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 	protected void buildDialog() {		
 
+		//TODO get nice size for tree and options
         JScrollPane spTree = new JScrollPane(tree);
         spTree.getVerticalScrollBar().setUnitIncrement(16);
-        UIUtil.resizeComponent(spTree, 150, 150, 600, 300, 500, 1100); 
+        UIUtil.resizeComponent(spTree, 150, 150, 1100, 300, 500, 1100); 
         
         // Panel with Options
         JPanel rightView = new JPanel();
@@ -1074,13 +1076,14 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         rightView.add(configHeaderPanel, BorderLayout.NORTH);
         spOpt.setViewportView(configOptionsPanel);
         spOpt.setBorder(null);
-        UIUtil.resizeComponent(spOpt, 400, 500, 600, 300, 500, 1100);
+        //UIUtil.resizeComponent(spOpt, 400, 500, 1100, 300, 500, 1100);
         rightView.add(spOpt, BorderLayout.CENTER);        
         
         rightView.add(configBottomPanel, BorderLayout.SOUTH);        
         
 		JSplitPane spMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
-				spTree, rightView);	
+				spTree, rightView);
+		spMain.setMinimumSize(new Dimension(200,200));
         
         this.add(spMain); 
      }
@@ -1615,7 +1618,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		int min = (Integer) config.getProperty(handle, MIN_VALUE);
 		int max = (Integer) config.getProperty(handle, MAX_VALUE);
 
-		JSlider slider = new JSlider(JSlider.HORIZONTAL, min, max, startval);
+		JSlider slider = new JSlider(SwingConstants.HORIZONTAL, min, max, startval);
 		JLabel sliderval = new JLabel(String.valueOf(slider.getValue()));
 		
 		int precision = 1;
@@ -1661,7 +1664,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		int min = (Integer) config.getProperty(handle, MIN_VALUE);
 		int max = (Integer) config.getProperty(handle, MAX_VALUE);
 
-		JSlider slider = new JSlider(JSlider.HORIZONTAL, min, max, startval);
+		JSlider slider = new JSlider(SwingConstants.HORIZONTAL, min, max, startval);
 		//slider.setToolTipText(String.valueOf(slider.getValue()));
 		slider.setPreferredSize(new Dimension(150, 30));
 		
@@ -2088,7 +2091,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	
 			JScrollPane scrollList = new JScrollPane(jl);
 			scrollList
-					.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			scrollList.getVerticalScrollBar().setUnitIncrement(16);
 			// scrollList.setPreferredSize(new Dimension(200, 80));
 			// gbc.gridwidth = 4;

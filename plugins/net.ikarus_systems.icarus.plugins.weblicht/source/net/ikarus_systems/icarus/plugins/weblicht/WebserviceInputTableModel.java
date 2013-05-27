@@ -148,21 +148,17 @@ public class WebserviceInputTableModel extends AbstractTableModel {
 	 * @param key
 	 * @param object
 	 */
-	public void deleteInputAttribute(String attribute, String attributevalues) {
-
-		for (int i = 0; i < ioList.size();i++){
-			if (ioList.get(i).getAttributename().equals(attribute)){				
-				ioList.remove(ioList.get(i));
-				fireTableDataChanged();
-			};
-		}		
+	public void deleteInputAttribute(int index) {
+		ioList.remove(ioList.get(index));
+		fireTableDataChanged();	
 	}
 
 	/**
 	 * @param wio
+	 * @param row 
 	 */
-	public void setInputAttributes(WebserviceIOAttributes wio) {
-		int index = indexOf(wio);
+	public void setInputAttributes(WebserviceIOAttributes wio, int index) {
+		//int index = indexOf(wio);
 		
 		if (index == -1){
 			addInputAttribute(wio);

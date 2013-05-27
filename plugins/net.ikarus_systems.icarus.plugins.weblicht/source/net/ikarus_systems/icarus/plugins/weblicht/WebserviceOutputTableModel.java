@@ -135,25 +135,21 @@ public class WebserviceOutputTableModel extends AbstractTableModel {
 		 * @param key
 		 * @param object
 		 */
-		public void deleteOutputAttribute(String attribute, String attributevalues) {
-
-			for (int i = 0; i < ooList.size();i++){
-				if (ooList.get(i).getAttributename().equals(attribute)){				
-					ooList.remove(ooList.get(i));
-					fireTableDataChanged();
-				};
-			}		
+		public void deleteOutputAttribute(int index) {
+			ooList.remove(ooList.get(index));
+			fireTableDataChanged();		
 		}
 
 		/**
 		 * @param wio
+		 * @param index 
 		 */
-		public void setOutputAttributes(WebserviceIOAttributes wio) {
-			int index = indexOf(wio);
-			
+		public void setOutputAttributes(WebserviceIOAttributes wio, int index) {
+			//add new item
 			if (index == -1){
 				addOutputAttribute(wio);
 			}
+			//edit item
 			else {
 				ooList.get(index).setAttributename(wio.getAttributename());
 				ooList.get(index).setAttributevalues(wio.getAttributevalues());

@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.Box;
@@ -19,6 +20,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -27,8 +30,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
+import de.tuebingen.uni.sfs.wlf1.io.TextCorpusStreamed;
+
+import net.ikarus_systems.icarus.language.SentenceDataList;
+import net.ikarus_systems.icarus.language.SentenceDataReader;
+import net.ikarus_systems.icarus.language.treebank.Treebank;
+import net.ikarus_systems.icarus.language.treebank.TreebankListDelegate;
+import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
+import net.ikarus_systems.icarus.plugins.weblicht.webservice.TCFDataList;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebExecutionService;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
@@ -41,6 +52,8 @@ import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 
@@ -59,6 +72,7 @@ public class WeblichtChainView extends View {
 
 	private Handler handler;
 	private CallbackHandler callbackHandler;
+	private SwingWorker<TextCorpusStreamed, Void> worker;
 	
 	@SuppressWarnings("static-access")
 	@Override
@@ -97,6 +111,9 @@ public class WeblichtChainView extends View {
 		weblichtTree.addTreeSelectionListener(handler);
 		weblichtTree.addMouseListener(handler);
 		weblichtTree.getModel().addTreeModelListener(handler);
+		
+		//TODO UIUtil.enableTooltip
+		ToolTipManager.sharedInstance().registerComponent(weblichtTree);
 		UIUtil.expandAll(weblichtTree, true);
 
 		// Scroll pane
@@ -543,7 +560,7 @@ public class WeblichtChainView extends View {
 				return;
 			}
 			
-			Webchain webchain = (Webchain)selectedObject;
+			final Webchain webchain = (Webchain)selectedObject;
 			
 			String inputType = webchain.getWebchainInputType().getInputType();
 			String inputText = null;
@@ -585,7 +602,45 @@ public class WeblichtChainView extends View {
 
 			
 			try {
-				WebExecutionService.getInstance().runWebchain(webchain, inputText);
+				//WebExecutionService.getInstance().runWebchain(webchain, inputText);				
+				final String input = inputText;
+			      // Construct a new SwingWorker
+			      worker = new SwingWorker<TextCorpusStreamed, Void>(){
+			 
+			        @Override
+			        protected TextCorpusStreamed doInBackground(){			         
+			          return  WebExecutionService.getInstance().runWebchain(webchain, input);
+			        }
+			        
+			        		 
+			        @Override
+			        protected void done(){
+			          try {
+			        	  
+			  			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(SentenceDataList.class);
+						
+						Options options = new Options();
+						options.put(Options.CONTENT_TYPE, contentType);
+						// TODO send some kind of hint that we want the presenter not to modify content?
+						// -> Should be no problem since we only contain immutable data objects?						
+						TCFDataList tcfList = new TCFDataList(get());
+						
+						Message message = new Message(this, Commands.DISPLAY, tcfList, options);
+						sendRequest(null, message);
+						
+						System.out.println("Finished Executino / disable break option"); //$NON-NLS-1$
+			          } catch (InterruptedException e) {
+			        	  LoggerFactory.log(this, Level.SEVERE, 
+									"Execution Interrupted "+ webchain.getName(), e); //$NON-NLS-1$
+			          } catch (ExecutionException e) {
+						LoggerFactory.log(this, Level.SEVERE, 
+									"Execute Exception "+ webchain.getName(), e); //$NON-NLS-1$
+			          }
+			        }
+			      };
+			      // Execute the SwingWorker; the GUI will not freeze
+			      worker.execute();
+				
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to execute chain list "+webchain.getName(), ex); //$NON-NLS-1$
@@ -595,7 +650,8 @@ public class WeblichtChainView extends View {
 		}
 		
 		public void stopWebchain(ActionEvent e) {
-			//TODO
+			//TODO nice stop feature close webservice
+			worker.cancel(true);
 		}
 		
 		public void saveWebchain(ActionEvent e) {

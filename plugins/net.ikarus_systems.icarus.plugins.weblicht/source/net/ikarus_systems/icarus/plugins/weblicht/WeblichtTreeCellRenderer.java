@@ -6,6 +6,7 @@ import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainInputType;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainOutputType;
@@ -14,6 +15,7 @@ import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webservice;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.CompoundIcon;
 import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.Wrapper;
 
 public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
@@ -46,6 +48,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 		}
 		
 		Icon icon = null;
+		String tooltip = ""; //$NON-NLS-1$
 		if(value instanceof Webchain) {
 			Webchain chain = (Webchain)value;
 			value = chain.getName();
@@ -59,10 +62,13 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 				webchainIcon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("warning_co.gif")); //$NON-NLS-1$
 			}
 			icon = webchainIcon;
+			tooltip = chain.getName();
 			
 		} else if(value instanceof Webservice) {
-			value = ((Webservice)value).getName();			
+			Webservice webservice = (Webservice)value;
+			value = webservice.getName();			
 			icon = IconRegistry.getGlobalRegistry().getIcon("repository_rep.gif"); //$NON-NLS-1$
+			tooltip = webservice.getDescription();
 		
 		} else if(value instanceof WebchainOutputType) {
 			WebchainOutputType wo = (WebchainOutputType)value;
@@ -73,22 +79,29 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 			}
 			if (wo.getIsOutputUsed()) {
 				outputIcon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("task_complete")); //$NON-NLS-1$
+				tooltip = ResourceManager.getInstance().get("enabledOutput"); //$NON-NLS-1$
 			} else {
 				outputIcon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif")); //$NON-NLS-1$
+				tooltip = ResourceManager.getInstance().get("disabledOutput"); //$NON-NLS-1$
 			}
 			icon = outputIcon;
 			
 		} else if(value instanceof WebchainInputType) {
+			WebchainInputType wit = (WebchainInputType)value;
 			value = ResourceManager.getInstance().get("input") //$NON-NLS-1$
-					+ ((WebchainInputType)value).getInputType();
+					+ wit.getInputType();
 			icon = IconRegistry.getGlobalRegistry().getIcon("addrepo_rep.gif"); //$NON-NLS-1$
+			tooltip = ResourceManager.getInstance().get("input")  //$NON-NLS-1$
+					+ wit.getInputType();
 		}
+		
+		
 		
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
 				row, hasFocus);
 		
+		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 		setIcon(icon);
-		
 		
 		return this;
 	}

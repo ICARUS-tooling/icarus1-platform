@@ -48,7 +48,6 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 	
 	protected TextCorpusStreamed textCorpusStreamed;
 	protected EnumSet<TextCorpusLayerTag> layersToRead;
-	protected int maxLength = 0;
 	protected int sentenceIndex;
 
 	/**
@@ -81,6 +80,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 		}
 		
 		
+		// TODO extend with options FixME: Gold/System?!
 		// specify which layer/layers annotations should be read in order to process
 		layersToRead = EnumSet.of(
 				TextCorpusLayerTag.TOKENS, TextCorpusLayerTag.SENTENCES,
@@ -89,11 +89,11 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 				TextCorpusLayerTag.PARSING_DEPENDENCY);
 
 
-		// System.out.println("Layers To Read: " + layersToRead);
+		// System.out.println("Layers2Read: " + layersToRead);
 
 		// TextCorpusStreamed object with the layers specified in (layersToRead)
-		// and file-inputstream. This object will only load the specified layers to
-		// memory and skip others
+		// and file-inputstream. This object will _only_ load the specified layers to
+		// memory and skip other layers (if there are other layers inside the tcf)
 		
 		FileInputStream fis = new FileInputStream(file);
 		sentenceIndex = 0;
@@ -136,8 +136,8 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			relations = new String[size];
 			flags = new long[size];
 			
-			// For every Token spec. Layers (layerToRead) are checked and
-			// information extracted
+			// For every Token specified Layers (layerToRead) are checked and
+			// the information extracted
 			for (int index = 0; index < token.length; index++) {
 				
 

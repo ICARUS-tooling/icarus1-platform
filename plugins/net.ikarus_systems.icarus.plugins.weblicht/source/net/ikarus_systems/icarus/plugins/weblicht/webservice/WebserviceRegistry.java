@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -33,6 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.plugins.weblicht.WebserviceViewListModel;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.EventSource;
@@ -404,6 +406,18 @@ public class WebserviceRegistry {
 					"webservice", webservice, //$NON-NLS-1$
 					"index", index)); //$NON-NLS-1$
 		}
+	}
+	
+	public void sortEvent(WebserviceViewListModel webserviceViewListModel, boolean ascending){
+		if (webserviceList.get(0) == null){
+			return;
+		}
+
+		webserviceViewListModel.setSort(ascending);
+		eventSource.fireEvent(new EventObject(Events.CHANGE,
+					"webservice", webserviceList.get(0), //$NON-NLS-1$
+					"index", 0)); //$NON-NLS-1$	
+	
 	}
 
 	/**

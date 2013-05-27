@@ -65,7 +65,7 @@ public class WeblichtWebserviceView extends View {
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#init(javax.swing.JComponent)
 	 */
-	@SuppressWarnings("static-access")
+	@SuppressWarnings({ "static-access", "unchecked" })
 	@Override
 	public void init(JComponent container) {
 		// Load actions
@@ -100,7 +100,7 @@ public class WeblichtWebserviceView extends View {
 		webserviceList.addListSelectionListener(handler);
 		webserviceList.addMouseListener(handler);
 		webserviceList.getModel().addListDataListener(handler);
-
+	
 		
 		// Scroll pane
 		JScrollPane scrollPane = new JScrollPane(webserviceList);
@@ -180,6 +180,10 @@ public class WeblichtWebserviceView extends View {
 				callbackHandler, "cloneWebservice"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.editWebserviceAction",  //$NON-NLS-1$
 				callbackHandler, "editWebservice"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.ascWebserviceSortAction",  //$NON-NLS-1$
+				callbackHandler, "ascWebserviceSortAction"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.weblicht.weblichtWebserviceView.descWebserviceSortAction",  //$NON-NLS-1$
+				callbackHandler, "descWebserviceSortAction"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -455,6 +459,16 @@ public class WeblichtWebserviceView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to save Webservices: ", ex); //$NON-NLS-1$
 			}			
+		}
+		
+		
+		public void ascWebserviceSortAction(ActionEvent e) {
+			WebserviceRegistry.getInstance().sortEvent(webserviceViewListModel,true);
+		}
+		
+		
+		public void descWebserviceSortAction(ActionEvent e) {
+			WebserviceRegistry.getInstance().sortEvent(webserviceViewListModel,false);
 		}
 		
 	}

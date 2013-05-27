@@ -11,6 +11,7 @@
 	
 	<requires>
 		<import plugin-id="net.ikarus_systems.icarus.core" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
 		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
 		<import plugin-id="net.ikarus_systems.icarus.tcf" />
 	</requires>
@@ -89,6 +90,11 @@
 	
 	<!-- Standard Extensions -->
 	
+	<extension id="ListGraphViewLink" plugin-id="net.ikarus_systems.icarus.core" point-id="Link">
+		<parameter id="extension" value="net.ikarus_systems.icarus.jgraph@ListGraphView" />
+		<parameter id="extension-point" value="net.ikarus_systems.icarus.weblicht@WeblichtManagementView" />
+	</extension>
+	
 	<extension id="WeblichtPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
@@ -103,7 +109,7 @@
 		<parameter id="preview" value="net/ikarus_systems/icarus/plugins/weblicht/webservice-preview.jpg" />	
 	</extension>
 	
-	<extension id="WeblichtChainView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+	<extension id="WeblichtChainView" plugin-id="net.ikarus_systems.icarus.weblicht" point-id="WeblichtManagementView">
 		<doc>
 			<doc-text>
 				Collection of all Webchains.
@@ -118,7 +124,7 @@
 		<parameter id="priority" value="high" />
 	</extension>
 	
-	<extension id="WeblichtWebserviceView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+	<extension id="WeblichtWebserviceView" plugin-id="net.ikarus_systems.icarus.weblicht" point-id="WeblichtManagementView">
 		<doc>
 			<doc-text>
 				Collection of all Webservices.
@@ -134,7 +140,7 @@
 	</extension>
 
 	
-	<extension id="WebserviceEditView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+	<extension id="WebserviceEditView" plugin-id="net.ikarus_systems.icarus.weblicht" point-id="WeblichtManagementView">
 		<doc>
 			<doc-text>
 				Editor for building new Webservices.
@@ -149,7 +155,7 @@
 		<parameter id="priority" value="standard" />
 	</extension>
 
-	<extension id="WeblichtEditView" plugin-id="net.ikarus_systems.icarus.core" point-id="View">
+	<extension id="WeblichtEditView" plugin-id="net.ikarus_systems.icarus.weblicht" point-id="WeblichtManagementView">
 		<doc>
 			<doc-text>
 				Editor for building new Webchains.

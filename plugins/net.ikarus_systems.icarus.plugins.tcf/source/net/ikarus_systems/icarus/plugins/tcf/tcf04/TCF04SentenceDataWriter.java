@@ -10,7 +10,6 @@
 package net.ikarus_systems.icarus.plugins.tcf.tcf04;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
