@@ -9,8 +9,6 @@ import javax.swing.tree.TreePath;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainElements;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainRegistry;
-import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
-
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
@@ -161,11 +159,17 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 
 			// parent + exakte element
 			List<WeblichtTreeModel> models = new ArrayList<>(instances.keySet());
+			
+			//TODO FIX collapsing treemodel
+//			System.out.println(parentPath);
+//			System.out.println(childIndex);
+//			System.out.println(webchain.getName());
 
 			switch (event.getName()) {
 			case Events.ADDED:
-				for (WeblichtTreeModel model : models) {
-					model.fireChildAdded(parentPath, childIndex, webchain);
+				for (WeblichtTreeModel model : models) {					
+					//model.fireChildAdded(parentPath, childIndex, webchain);
+					model.fireStructureChanged();
 				}
 				break;
 				
@@ -184,8 +188,6 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 				
 			case Events.CHANGE:
 				for (WeblichtTreeModel model : models) {
-					System.out.println(webchain.getName());
-					System.out.println(parentPath);
 					//model.fireTreeStructureChanged(parentPath);
 					model.fireStructureChanged();
 				}				

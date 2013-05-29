@@ -165,8 +165,11 @@ public class WebExecutionService {
 
 		// going trough formatstring and add all known layers
 		for (int i = 0; i < format.size(); i++) {
-
-			switch (format.get(i)) {
+			String statement = format.get(i);
+			if (statement.contains(".")){ //$NON-NLS-1$
+				statement = (String) statement.subSequence(0, statement.indexOf("."));				 //$NON-NLS-1$
+			}
+			switch (statement) {
 			case "text": //$NON-NLS-1$
 				layers2Read.add(TextCorpusLayerTag.TEXT);
 				break;
@@ -257,6 +260,8 @@ public class WebExecutionService {
 		InputStream is = new ByteArrayInputStream(input.getBytes());
 		TextCorpusStreamed tcs = null;
 
+		//System.out.println(input);
+		
 		try {
 			tcs = new TextCorpusStreamed(is, layersToRead);
 
@@ -268,9 +273,8 @@ public class WebExecutionService {
 					"TextCorpusFormat Exception", e); //$NON-NLS-1$
 		}
 		
+		//return format for message
 		return tcs;
 
 	}
-
-	// TODO return format/treebank
 }

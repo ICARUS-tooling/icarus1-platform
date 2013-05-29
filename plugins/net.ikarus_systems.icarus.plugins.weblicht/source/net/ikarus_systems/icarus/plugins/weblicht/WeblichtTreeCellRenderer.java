@@ -6,7 +6,6 @@ import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.Webchain;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainInputType;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebchainOutputType;
@@ -52,7 +51,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 		if(value instanceof Webchain) {
 			Webchain chain = (Webchain)value;
 			value = chain.getName();
-			
+			tooltip = chain.getName();
 			if (webchainIcon == null){
 				webchainIcon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("link_obj_dark.gif")); //$NON-NLS-1$
 			}
@@ -60,9 +59,9 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 				webchainIcon.setBottomLeftOverlay(null);
 			} else {
 				webchainIcon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("warning_co.gif")); //$NON-NLS-1$
+				tooltip = tooltip + ResourceManager.getInstance().get("plugins.weblicht.tooltip.noOutputInChain"); //$NON-NLS-1$
 			}
 			icon = webchainIcon;
-			tooltip = chain.getName();
 			
 		} else if(value instanceof Webservice) {
 			Webservice webservice = (Webservice)value;

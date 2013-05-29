@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +28,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -107,6 +107,22 @@ public class WebchainRegistry {
 	}
 	
 	
+	private Element generateChainInputElement(Document document, String eName, String type, String value){
+		Element em = document.createElement(eName);
+		em.setAttribute("type", type); //$NON-NLS-1$
+		em.setTextContent(value);
+		return em;		
+	}
+	
+	private Element generateChainOutputElement(Document document, String eName, String type, String value, String used){
+		Element em = document.createElement(eName);
+		em.setAttribute("type", type); //$NON-NLS-1$
+		em.setAttribute("value", value); //$NON-NLS-1$
+		em.setAttribute("outputused", used); //$NON-NLS-1$
+		return em;		
+	}
+	
+	
 	public void saveWebchains() throws Exception{
 
 		String root = "Webchains"; //$NON-NLS-1$
@@ -125,12 +141,35 @@ public class WebchainRegistry {
 	
 			Element chain = document.createElement("Chain"); //$NON-NLS-1$
 			chain.setAttribute("chainname", webchain.getName()); //$NON-NLS-1$
-			
-			List<WebserviceProxy> webservicesInChain = webchain.getWebserviceProxyList();			
-			
-			for (int j = 0; j < webservicesInChain.size(); j++){
-				chain.appendChild(generateChainElement(document, "service" //$NON-NLS-1$
-						, webservicesInChain.get(j).get().getUID()));			
+
+			for (int j = 0; j < webchain.getElementsCount(); j++){
+				if (webchain.getElementAt(j) instanceof WebserviceProxy){
+					WebserviceProxy service = (WebserviceProxy) webchain.getElementAt(j);
+					chain.appendChild(
+							generateChainElement(document, "chainelement", //$NON-NLS-1$
+													service.get().getUID()));
+					
+				}
+				if (webchain.getElementAt(j) instanceof WebchainInputType){
+					WebchainInputType wi = (WebchainInputType) webchain.getElementAt(j);
+					chain.appendChild(
+							generateChainInputElement(document, "input", //$NON-NLS-1$
+													wi.getInputType(),
+													wi.getInputTypeValue())
+							);
+					
+				}
+				if (webchain.getElementAt(j) instanceof WebchainOutputType){
+					WebchainOutputType wo = (WebchainOutputType) webchain.getElementAt(j);
+					String used = new Boolean(wo.getIsOutputUsed()).toString();
+					chain.appendChild(
+							generateChainOutputElement(document, "chainelement", //$NON-NLS-1$
+													wo.getOutputType(),
+													wo.getOutputTypeValue(),
+													used)
+							);
+					
+				}
 			}
 				
 			
@@ -179,11 +218,9 @@ public class WebchainRegistry {
 	
 	private void loadWebchainXML() throws Exception {
 			
-			//File fXmlFile = new File(Core.getCore().getDataFolder(),"webchain.xml"); //$NON-NLS-1$
-			
-			
-		File fXmlFile = new File(
-				"D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
+			File fXmlFile = new File(Core.getCore().getDataFolder(),"webchain.xml"); //$NON-NLS-1$
+					
+			//File fXmlFile = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
 			if(!fXmlFile.exists() || fXmlFile.length()==0) {
 				return;
 			}
@@ -353,6 +390,8 @@ public class WebchainRegistry {
 		Webchain webchain = new Webchain();
 		webchain.setName(name);	
 		webchain.setWebchainInputType(inputType);
+		//addinput to chainelements
+		webchain.addWebchainElement(inputType);
 		return webchain;
 		//addNewWebchain(webchain);
 	}
@@ -366,24 +405,20 @@ public class WebchainRegistry {
 	public void cloneWebchain(String name, Webchain old) {
 		Webchain webchain = new Webchain();
 		webchain.setName(name);
-		webchain.setWebchainInputType(old.getWebchainInputType());
-		addNewWebchain(webchain);	
-	}
-	
-	
-	/**
-	 * 
-	 * @param name
-	 * @param oldWebchain
-	 * @param serviceIDList
-	 */
-	public void cloneWebchain(String name, Webchain old , List<String> serviceIDList) {
-		Webchain webchain = new Webchain();
-		webchain.setName(name);	
-		webchain.addWebservices(serviceIDList);
-		webchain.setWebchainInputType(old.getWebchainInputType());
-		addNewWebchain(webchain);	
 		
+		for(int i = 0; i < old.getElementsCount();i++){
+			if(old.getElementAt(i) instanceof WebserviceProxy){
+				WebserviceProxy wp = (WebserviceProxy) old.getElementAt(i);
+				webchain.addWebchainElement(wp.get().getUID());
+			}			
+			if(old.getElementAt(i) instanceof WebchainInputType){
+				webchain.addWebchainElement((WebchainInputType) old.getElementAt(i));
+			}
+			if(old.getElementAt(i) instanceof WebchainOutputType){
+				webchain.addWebchainElement((WebchainOutputType) old.getElementAt(i));
+			}
+		}
+		addNewWebchain(webchain);	
 	}
 	
 	
@@ -409,33 +444,15 @@ public class WebchainRegistry {
 	 */
 	public void setWebchainElements(Webchain webchain, List<WebchainElements> webchainElements) {
 		
+		System.out.println(webchain.getName());
+		System.out.println(webchainElements);
 		//prepare Proxylist
 		//clearAllWebservices(webchain);
 		
 		if (webchainElements==null){			
 			return;
 		}
-		
-		//Temp List of old webchain elements
-		List<WebchainElements> oldElementList = new ArrayList<WebchainElements>();
-		
-		for(int i = 0; i < webchain.getElementsCount();i++){
-			//System.out.println("UID " + webservices.get(i).getUID());
-			//TODO remove
-			if (webchainElements.get(i) instanceof WebserviceProxy){
-				
-			}
-
-			oldElementList.add(webchain.getElementAt(i));
-		}	
-
-		
-		//compare lists if there are no changes do nothing
-		
-		if(equalElements(oldElementList, webchainElements)){
-			return;
-		}
-		
+			
 
 		//lists are different replace old webchainelement list
 		webchain.setNewChainlist(webchainElements);
@@ -469,6 +486,7 @@ public class WebchainRegistry {
 
 	//compare 2 webservice element lists
 	public boolean equalElements(List<WebchainElements> w1, List<WebchainElements> w2){
+		
 		boolean equal = true;
 		if (w1.size() != w2.size()){
 			return false;
@@ -479,31 +497,38 @@ public class WebchainRegistry {
 				//TODO Check of equal = false replace with return?!
 				if (w1.get(i) instanceof WebserviceProxy
 						&& w2.get(i) instanceof WebserviceProxy) {
+					
 					//TODO check auf webservice bzw output und jeweilige typen
 					if (!(((WebserviceProxy) w1.get(i)).getServiceID()
 							.equals(((WebserviceProxy) w2.get(i)).getServiceID()))){
-						return false;
+						equal = false;
 					}
+					//System.out.println("proxy" + equal);
 				}
 				
 				//Check Input
-				else if (w1.get(i) instanceof WebchainInputType
+				if (w1.get(i) instanceof WebchainInputType
 						&& w2.get(i) instanceof WebchainInputType) {
-						equal = compareWebchainInputType(
+					
+					equal= compareWebchainInputType(
 								(WebchainInputType) w1.get(i), 
 								(WebchainInputType) w2.get(i));
-						if (!equal) return false;
+					//System.out.println("wio" + equal);
 				}
 				
 				//Check Output
-				else if (w1.get(i) instanceof WebchainOutputType
-						&& w2.get(i) instanceof WebchainOutputType) {					
+				if (w1.get(i) instanceof WebchainOutputType
+						&& w2.get(i) instanceof WebchainOutputType) {	
+					
 						equal = compareWebchainOutputType(
 								(WebchainOutputType) w1.get(i), 
 								(WebchainOutputType) w2.get(i));
-						if (!equal) return false;
-				} else {
-					return false;
+						//System.out.println("wot" + equal);
+				}
+				
+				if(!equal){
+					//System.out.println("Changes " + w1.get(i) + w2.get(i));
+					return equal;
 				}
 				
 			}
@@ -537,7 +562,7 @@ public class WebchainRegistry {
 		//same type, value and activatestatus
 		if (t1.getOutputType().equals(t2.getOutputType())
 				&& t1.getOutputTypeValue().equals(t2.getOutputTypeValue())
-				&& t1.getOutputUsed().equals(t2.getIsOutputUsed())){
+				&& (t1.getIsOutputUsed() == t2.getIsOutputUsed())){
 			return true;			
 		}
 		return false;

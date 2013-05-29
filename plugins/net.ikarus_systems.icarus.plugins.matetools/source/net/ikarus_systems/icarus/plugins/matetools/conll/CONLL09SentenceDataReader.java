@@ -23,7 +23,6 @@ import net.ikarus_systems.icarus.language.SentenceDataReader;
 import net.ikarus_systems.icarus.language.dependency.CompoundDependencyData;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
-import net.ikarus_systems.icarus.language.dependency.SimpleDependencyData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
@@ -75,7 +74,7 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 
 		normalize = true;
 		inputFormat = 0;
-		// TODO extend me
+
 		gold = options.get(INCLUDE_GOLD_OPTION, false);
 		system = options.get(INCLUDE_SYSTEM_OPTION, false);
 
@@ -84,7 +83,7 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 		}
 		inputFormat = 0;
 
-		try{
+		try {
 			reader = new CONLLReader09(normalize);
 			reader.startReading(location.openInputStream());
 		} catch (IllegalArgumentException e) {
@@ -101,86 +100,36 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 	public SentenceData next() throws IOException, UnsupportedFormatException {
 
 		SentenceData09 input;
-		String[] forms, lemmas, features, poss, relations;
-		int[] heads;
-		int iSource;
-		long[] flags;
 
 		DependencyData resultdd = null;
-		
-
 
 		// more sentences left?
 		if ((input = reader.getNext()) != null) {
 
-			int size = input.forms.length - 1;
-
-			heads = new int[size];
-			poss = new String[size];
-			forms = new String[size];
-			lemmas = new String[size];
-			features = new String[size];
-			relations = new String[size];
-			flags = new long[size];
-
-			for (int i = 0; i < size; i++) {
-
-				iSource = i + 1;
-
-				forms[i] = ensureDummy(input.forms[iSource], "<empty>"); //$NON-NLS-1$
-				
-				SimpleDependencyData sdd = null;
-
-				//read system
-				if (system) {
-					heads[i] = input.pheads[iSource] - 1;
-					lemmas[i] = ensureValid(input.plemmas[iSource]);
-					features[i] = ensureValid(input.pfeats[iSource]);
-					poss[i] = ensureValid(input.ppos[iSource]);
-					relations[i] = ensureValid(input.plabels[iSource]);
-					sdd = new SimpleDependencyData(forms, lemmas, features, poss,
-							relations, heads, flags);
-					resultdd = sdd;
-				}
-
-				// read gold
-				if (gold) {
-					heads[i] = input.heads[iSource] - 1;
-					lemmas[i] = ensureValid(input.lemmas[iSource]);
-					features[i] = ensureValid(input.ofeats[iSource]);
-					poss[i] = ensureValid(input.gpos[iSource]);
-					relations[i] = ensureValid(input.labels[iSource]);
-					//check if system is read before, and generate compund data
-					if (!(sdd == null)) {
-						CompoundDependencyData cdd = new CompoundDependencyData();
-						cdd.setData(DataType.SYSTEM, sdd);
-						SimpleDependencyData sdd_gold = 
-								new SimpleDependencyData(forms, lemmas, features, poss,
-								relations, heads, flags);
-						cdd.setData(DataType.GOLD, sdd_gold);
-						resultdd = cdd;				
-					} else {
-						sdd = new SimpleDependencyData(forms, lemmas, features, poss,
-								relations, heads, flags);
-						resultdd = sdd;	
-					
-					}
-				}
-
-
-				/*
-				 * System.out.print("Form: "+ forms[i]);
-				 * System.out.print(" Head: "+ heads[i]);
-				 * System.out.print(" PoS: "+ poss[i]);
-				 * System.out.print(" Feat: "+ features[i]);
-				 * System.out.print(" Lemma: "+ lemmas[i]);
-				 * System.out.println(" Relation: "+ relations[i]);
-				 */
+			// read system
+			if (system) {
+				resultdd = CONLLUtils.readPredicted(input, true, true);
 			}
+
+			// read gold
+			if (gold) {
+
+				DependencyData dd_gold = CONLLUtils.readGold(input, true, true);
+				// check if system is read before, and generate compund data
+				if (resultdd != null) {
+					CompoundDependencyData cdd = new CompoundDependencyData();
+					cdd.setData(DataType.SYSTEM, resultdd);
+					cdd.setData(DataType.GOLD, dd_gold);
+					resultdd = cdd;
+				} else {
+					resultdd = dd_gold;
+
+				}
+			}
+
 		}
 
-		//catch illegal state getcause -> originale
-
+		// catch illegal state getcause -> originale
 		return (SentenceData) resultdd;
 	}
 
@@ -223,13 +172,14 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 
 			while (cr.next() != null) {
 				SentenceData sd = cr.next();
-				if (sd instanceof CompoundDependencyData){
+				if (sd instanceof CompoundDependencyData) {
 					CompoundDependencyData cdd = (CompoundDependencyData) sd;
-					System.out.println("Gold: " +  cdd.getData(DataType.GOLD)); //$NON-NLS-1$
-					System.out.println("System: " + cdd.getData(DataType.SYSTEM)); //$NON-NLS-1$
-				} else {				
+					System.out.println("Gold: " + cdd.getData(DataType.GOLD)); //$NON-NLS-1$
+					System.out
+							.println("System: " + cdd.getData(DataType.SYSTEM)); //$NON-NLS-1$
+				} else {
 					System.out.println(sd);
-				}		
+				}
 			}
 			System.out.println("Finished reading"); //$NON-NLS-1$
 		} catch (IOException e) {

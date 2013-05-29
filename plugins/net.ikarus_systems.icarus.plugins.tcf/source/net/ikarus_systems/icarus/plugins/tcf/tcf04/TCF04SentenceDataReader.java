@@ -25,10 +25,12 @@ import de.tuebingen.uni.sfs.wlf1.tc.api.Token;
 import de.tuebingen.uni.sfs.wlf1.tc.xb.TextCorpusLayerTag;
 
 
+import net.ikarus_systems.icarus.language.LanguageConstants;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataReader;
 import net.ikarus_systems.icarus.language.dependency.DependencyConstants;
+import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.dependency.SimpleDependencyData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.Options;
@@ -214,11 +216,11 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 
 					} else {
 						// root
-						heads[index] = LanguageUtils.DATA_HEAD_ROOT;
+						heads[index] = LanguageConstants.DATA_HEAD_ROOT;
 					}
 				} else {
 					//default value when sentence invalid
-					heads[index] = LanguageUtils.DATA_HEAD_ROOT;
+					heads[index] = LanguageConstants.DATA_UNDEFINED_VALUE;
 					relations[index] = ""; //$NON-NLS-1$
 				}
 				
@@ -234,6 +236,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			}
 			
 			sdd = new SimpleDependencyData(forms, lemmas, features, poss,relations, heads, flags);
+			DependencyUtils.fillProjectivityFlags(heads, flags);
 			sentenceIndex++;
 			
 		}

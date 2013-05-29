@@ -30,13 +30,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
-import de.tuebingen.uni.sfs.wlf1.io.TextCorpusStreamed;
-
 import net.ikarus_systems.icarus.language.SentenceDataList;
-import net.ikarus_systems.icarus.language.SentenceDataReader;
-import net.ikarus_systems.icarus.language.treebank.Treebank;
-import net.ikarus_systems.icarus.language.treebank.TreebankListDelegate;
-import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.TCFDataList;
@@ -56,6 +50,7 @@ import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
+import de.tuebingen.uni.sfs.wlf1.io.TextCorpusStreamed;
 
 
 /**
@@ -73,6 +68,7 @@ public class WeblichtChainView extends View {
 	private Handler handler;
 	private CallbackHandler callbackHandler;
 	private SwingWorker<TextCorpusStreamed, Void> worker;
+
 	
 	@SuppressWarnings("static-access")
 	@Override
@@ -460,19 +456,23 @@ public class WeblichtChainView extends View {
 				return;
 			}
 			
-			Webchain webchain = (Webchain)selectedObject;
+			Webchain webchainToClone = (Webchain)selectedObject;
 			
-			//to clone complete chain collect all used webservices
-			List<String> serviceIDList = webchain.getWebservices(webchain);
+			//Dialog clone Yes/No ?!			
+			if (!DialogFactory
+					.getGlobalFactory()
+					.showConfirm(
+							null,
+							"plugins.weblicht.weblichtChainView.dialogs.cloneWebchain.title", //$NON-NLS-1$
+							"plugins.weblicht.weblichtChainView.dialogs.cloneWebchain.message", //$NON-NLS-1$
+							webchainToClone.getName())) {
+				return;
+			};
 
 			
-			String name = WebchainRegistry.getInstance().getUniqueName(webchain.getName());
+			String name = WebchainRegistry.getInstance().getUniqueName(webchainToClone.getName());
 			try {
-				if (serviceIDList == null){
-					WebchainRegistry.getInstance().cloneWebchain(name,webchain);
-				} else {
-					WebchainRegistry.getInstance().cloneWebchain(name,webchain,serviceIDList);
-				}
+				WebchainRegistry.getInstance().cloneWebchain(name, webchainToClone);
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to clone webchain: "+name, ex); //$NON-NLS-1$
@@ -580,7 +580,7 @@ public class WeblichtChainView extends View {
 			}
 			if (inputType.equals("dynamic")) { //$NON-NLS-1$
 				//TODO grab input from UI
-				inputText = "Karin fliegt nach New York"; //$NON-NLS-1$				
+				inputText = "Karin fliegt nach New York. Sie will dort Urlaub machen"; //$NON-NLS-1$				
 			}
 
 			
@@ -602,50 +602,62 @@ public class WeblichtChainView extends View {
 
 			
 			try {
-				//WebExecutionService.getInstance().runWebchain(webchain, inputText);				
+				// WebExecutionService.getInstance().runWebchain(webchain, inputText);
 				final String input = inputText;
-			      // Construct a new SwingWorker
-			      worker = new SwingWorker<TextCorpusStreamed, Void>(){
-			 
-			        @Override
-			        protected TextCorpusStreamed doInBackground(){			         
-			          return  WebExecutionService.getInstance().runWebchain(webchain, input);
-			        }
-			        
-			        		 
-			        @Override
-			        protected void done(){
-			          try {
-			        	  
-			  			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(SentenceDataList.class);
-						
-						Options options = new Options();
-						options.put(Options.CONTENT_TYPE, contentType);
-						// TODO send some kind of hint that we want the presenter not to modify content?
-						// -> Should be no problem since we only contain immutable data objects?						
-						TCFDataList tcfList = new TCFDataList(get());
-						
-						Message message = new Message(this, Commands.DISPLAY, tcfList, options);
-						sendRequest(null, message);
-						
-						System.out.println("Finished Executino / disable break option"); //$NON-NLS-1$
-			          } catch (InterruptedException e) {
-			        	  LoggerFactory.log(this, Level.SEVERE, 
-									"Execution Interrupted "+ webchain.getName(), e); //$NON-NLS-1$
-			          } catch (ExecutionException e) {
-						LoggerFactory.log(this, Level.SEVERE, 
-									"Execute Exception "+ webchain.getName(), e); //$NON-NLS-1$
-			          }
-			        }
-			      };
-			      // Execute the SwingWorker; the GUI will not freeze
-			      worker.execute();
-				
-			} catch (Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to execute chain list "+webchain.getName(), ex); //$NON-NLS-1$
 
-			}		
+				// Construct a new SwingWorker
+				worker = new SwingWorker<TextCorpusStreamed, Void>() {
+
+					@Override
+					protected TextCorpusStreamed doInBackground() {
+						return WebExecutionService.getInstance().runWebchain(
+								webchain, input);
+					}
+
+					@Override
+					protected void done() {
+						try {
+
+							ContentType contentType = ContentTypeRegistry
+									.getInstance().getTypeForClass(
+											SentenceDataList.class);
+
+							Options options = new Options();
+							options.put(Options.CONTENT_TYPE, contentType);
+							// TODO send some kind of hint that we want the
+							// presenter not to modify content?
+							// -> Should be no problem since we only contain
+							// immutable data objects?
+							TCFDataList tcfList = new TCFDataList(get());
+
+							Message message = new Message(this,
+									Commands.DISPLAY, tcfList, options);
+							sendRequest(null, message);
+
+							System.out.println("Finished Executino / disable break option"); //$NON-NLS-1$
+						} catch (InterruptedException e) {
+							LoggerFactory
+									.log(this,
+											Level.SEVERE,
+											"Execution Interrupted " + webchain.getName(), e); //$NON-NLS-1$
+						} catch (ExecutionException e) {
+							LoggerFactory
+									.log(this,
+											Level.SEVERE,
+											"Execute Exception " + webchain.getName(), e); //$NON-NLS-1$
+						}
+					}
+				};
+				// Execute the SwingWorker; the GUI will not freeze
+				worker.execute();
+
+			} catch (Exception ex) {
+				LoggerFactory
+						.log(this,
+								Level.SEVERE,
+								"Failed to execute chain list " + webchain.getName(), ex); //$NON-NLS-1$
+
+			}
 
 		}
 		

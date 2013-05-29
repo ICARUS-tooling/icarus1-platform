@@ -13,20 +13,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+
 import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -48,7 +44,6 @@ import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceProxy;
 import net.ikarus_systems.icarus.plugins.weblicht.webservice.WebserviceRegistry;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
-import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.dialog.BasicDialogBuilder;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
@@ -452,14 +447,16 @@ public class WebserviceDialogs {
 		
 		JList<Object> webserviceList;
 		JList<Object> webserviceListUnfiltered;
-		JList<Object> queryList;		
+		JList<Object> queryList;
 
+		//No webservices added so far, disblay webservice which dont have any inputtypes
+		if(query == null){
+			//wsQuery
+		}		
 		//fresh list with outputitems from selected webchainmodel
 		List<String> wsQuery = WebserviceRegistry.getInstance()
 								.getQueryFromWebserviceList(
 										extractWebservicesFromElements(chainElements));
-
-
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory().getResourceDomain());
 		
@@ -467,7 +464,7 @@ public class WebserviceDialogs {
 		
 		//prepare filtered list
 		WebserviceFilteredViewListModel webserviceFilteredViewListModel;
-		if (chainElements.size()>0){
+		if (chainElements.size()>1){
 			webserviceFilteredViewListModel = new WebserviceFilteredViewListModel(
 					filterWebservicePlusIOAttributes(extractWebservicesFromElements(chainElements), wsQuery),true);
 		} else {
@@ -664,12 +661,10 @@ public class WebserviceDialogs {
 		name.setBorder(BorderFactory.createLineBorder(Color.red));
 		
 		//required fields
-		name.setBorder(BorderFactory.createLineBorder(Color.red));
-		
+		name.setBorder(BorderFactory.createLineBorder(Color.red));		
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory
 											.getGlobalFactory().getResourceDomain());
-
 
 		builder.setTitle(title);
 		builder.setMessage(message, params);
@@ -709,15 +704,11 @@ public class WebserviceDialogs {
 		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		builder.showDialog(parent);
-		
-		
-
-
-		
+				
 		if (builder.isYesValue()) {			
 			if (validateRequiredWebchainFields(name)){
-				WebchainInputType inputType = new WebchainInputType();
-				System.out.println(getNameFromSelectedButton(webserviceInputGroup));
+				//System.out.println("Input " + getNameFromSelectedButton(webserviceInputGroup));
+				WebchainInputType inputType = new WebchainInputType();				
 				inputType.setInputType(getNameFromSelectedButton(webserviceInputGroup));
 				Webchain webchain = WebchainRegistry.getInstance().createWebchain(
 						name.getText(),

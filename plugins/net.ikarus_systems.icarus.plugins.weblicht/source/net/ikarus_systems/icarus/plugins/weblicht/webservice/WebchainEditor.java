@@ -48,7 +48,6 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.weblicht.WebserviceDialogs;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
-import net.ikarus_systems.icarus.ui.CompoundIcon;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
@@ -351,13 +350,19 @@ public class WebchainEditor implements Editor<Webchain> {
 		
 		
 		int lastitem = webchainElementListModel.getSize();
-		WebchainElements element = webchainElementListModel.getKey(lastitem-1);
-
-		if(element instanceof WebchainOutputType) {
-			addOutputButton.setEnabled(false);
-		} else {
-			addOutputButton.setEnabled(true);
+		//TODO fixme at least input + one webservice needed to create output
+		System.out.println(lastitem);
+		if (lastitem > 1) {
+			WebchainElements element = webchainElementListModel.getKey(lastitem-1);	
+			if(element instanceof WebchainOutputType) {
+				addOutputButton.setEnabled(false);
+			}else {
+				addOutputButton.setEnabled(true);
+			}
+		}else {
+				addOutputButton.setEnabled(false);
 		}
+
 	}
 
 	/**
@@ -486,9 +491,9 @@ public class WebchainEditor implements Editor<Webchain> {
 		//TODO work for Chainelements?
 		
 		// Save InputType
-		WebchainRegistry.getInstance().setWebserviceInput(webchain,
-					getNameFromSelectedButton(),
-					webserviceInputArea.getText());		
+//		WebchainRegistry.getInstance().setWebserviceInput(webchain,
+//					getNameFromSelectedButton(),
+//					webserviceInputArea.getText());		
 		
 	}
 	
@@ -537,10 +542,11 @@ public class WebchainEditor implements Editor<Webchain> {
 			}
 		}
 		*/
-		
+
 		if (!(WebchainRegistry.getInstance().equalElements(webchainElementList,
 				webchain.webchainElementsList))){
 			return true;
+			
 		}
 		
 		
@@ -1062,22 +1068,7 @@ public class WebchainEditor implements Editor<Webchain> {
 				
 				return webchainElements==null ? null : webchainElements.get(index);
 			}
-		
-			/**
-			 * @param serviceID
-			 * @return
-			 */
-			//TODO remove?
-			/*
-			protected String getValue(String serviceID) {
-				for(int i = 0; i < webchainElements.size();i++){
-					if(((WebchainElements) webchainElements.get(i)).getServiceID().equals(serviceID)){
-						return String.valueOf(webchainElements.get(i));
-					}
-				}
-				return serviceID;
-			}*/
-		
+				
 			
 			/**
 			 * @param key
