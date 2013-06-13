@@ -12,6 +12,8 @@ package net.ikarus_systems.icarus.ui.tasks;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
@@ -45,6 +47,7 @@ public class TaskPanel extends JToolBar {
 	private static final long serialVersionUID = -8876327710810382573L;
 
 	private JButton openDialogButton;
+	private TaskProgressPanel progressPanel;
 	
 	private final TaskManager taskManager;
 	private TaskListModel taskListModel;
@@ -63,10 +66,6 @@ public class TaskPanel extends JToolBar {
 		
 		this.taskManager = taskManager;
 		
-		taskManager.addListener(Events.ADDED, getHandler());
-		taskManager.addListener(Events.REMOVED, getHandler());
-		taskManager.addListener(TaskConstants.ACTIVE_TASK_CHANGED, getHandler());
-		
 		openDialogButton = new JButton();
 		openDialogButton.setRolloverEnabled(true);
 		openDialogButton.setFocusable(false);
@@ -81,13 +80,26 @@ public class TaskPanel extends JToolBar {
 		
 		openDialogButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("pview.gif")); //$NON-NLS-1$
 		
-		add(openDialogButton);
+		progressPanel = new TaskProgressPanel();
+		
+		setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridy = 0;
+		gbc.anchor = GridBagConstraints.CENTER;
+		
+		add(progressPanel, gbc);
+		add(new JToolBar.Separator(null), gbc);
+		add(openDialogButton, gbc);
 		
 		setRollover(true);
 		setFloatable(false);
 		setBorder(null);
 		
-		refreshButtonEnabled();
+		refresh();
+		
+		taskManager.addListener(Events.ADDED, getHandler());
+		taskManager.addListener(Events.REMOVED, getHandler());
+		taskManager.addListener(TaskConstants.ACTIVE_TASK_CHANGED, getHandler());
 	}
 	
 	public TaskManager getTaskManager() {
@@ -152,7 +164,11 @@ public class TaskPanel extends JToolBar {
 		return handler;
 	}
 	
-	private void refreshButtonEnabled() {
+	private void refresh() {
+		TaskManager taskManager = getTaskManager();
+		Object activeTask = taskManager.getActiveTask();
+		progressPanel.setTask(activeTask==null ? null : taskManager.getWorker(activeTask));
+		
 		openDialogButton.setEnabled(!getTaskManager().isEmpty());
 	}
 	
@@ -177,15 +193,17 @@ public class TaskPanel extends JToolBar {
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
-			refreshButtonEnabled();
+			
+			refresh();
 			
 			if(TaskConstants.ACTIVE_TASK_CHANGED.equals(event.getName())) {
 				if(contentPanel==null) {
 					return;
 				}
 				
-				activeTaskRenderer.setTask(getTaskManager().getActiveTask());
-				scrollPane.setVisible(!getTaskManager().getQueue().isEmpty());
+				TaskManager taskManager = getTaskManager();
+				activeTaskRenderer.setTask(taskManager.getActiveTask());
+				scrollPane.setVisible(!taskManager.getQueue().isEmpty());
 				
 				infoLabel.setVisible(!activeTaskRenderer.isVisible() 
 						&& !scrollPane.isVisible());

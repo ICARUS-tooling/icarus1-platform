@@ -71,6 +71,7 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 	public mxStylesheet createStylesheet(GraphOwner owner, Options options) {
 		if(stylesheet==null) {
 			stylesheet = new mxStylesheet();
+			initStylesheet();
 			
 			if(owner instanceof GraphPresenter) {
 				ConfigDelegate configDelegate = ((GraphPresenter) owner).getConfigDelegate();
@@ -98,26 +99,19 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 		vertexStyle.put("fillColor", "white"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Map<String, Object> edgeStyle = stylesheet.getDefaultEdgeStyle();
-		edgeStyle.put("shape", "arc"); //$NON-NLS-1$ //$NON-NLS-2$
-		edgeStyle.put("edgeStyle", "topArcEdgeStyle"); //$NON-NLS-1$ //$NON-NLS-2$
 		edgeStyle.put("labelBackgroundColor", "white"); //$NON-NLS-1$ //$NON-NLS-2$
 		edgeStyle.put("endArrow", "classic"); //$NON-NLS-1$ //$NON-NLS-2$
 		edgeStyle.put("verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-2$
 		edgeStyle.put("align", "center"); //$NON-NLS-1$ //$NON-NLS-2$
 		edgeStyle.put("strokeColor", "black"); //$NON-NLS-1$ //$NON-NLS-2$
 		edgeStyle.put("exitPerimeter", 1); //$NON-NLS-1$ 
-		edgeStyle.put("entryPerimeter", 1); //$NON-NLS-1$ 
-		edgeStyle.put("exitY", 0.0); //$NON-NLS-1$
-		edgeStyle.put("exitX", 0.5); //$NON-NLS-1$
-		edgeStyle.put("entryY", 0.0); //$NON-NLS-1$
-		edgeStyle.put("entryX", 0.5); //$NON-NLS-1$
-		
-		edgeStyle.put("labelBorderColor", "white"); //$NON-NLS-1$ //$NON-NLS-2$
+		edgeStyle.put("entryPerimeter", 1); //$NON-NLS-1$
 	}
 	
 	protected void refreshStylesheet(Handle handle) {
 		if(stylesheet==null) {
 			stylesheet = new mxStylesheet();
+			initStylesheet();
 		}
 
 		ConfigRegistry config = handle.getSource();

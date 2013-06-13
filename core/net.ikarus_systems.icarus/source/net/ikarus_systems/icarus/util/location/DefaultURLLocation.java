@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
+
+import net.ikarus_systems.icarus.io.IOUtil;
 
 import org.java.plugin.util.IoUtil;
 
@@ -26,9 +29,6 @@ public class DefaultURLLocation extends Location {
 	
 	private final URL url;
 
-	/**
-	 * 
-	 */
 	public DefaultURLLocation(URL url) {
 		if(url==null)
 			throw new IllegalArgumentException("Invalid url"); //$NON-NLS-1$
@@ -82,7 +82,11 @@ public class DefaultURLLocation extends Location {
 	 */
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return url.openStream();
+		InputStream in = url.openStream();
+		if(IOUtil.isZipSource(url.toExternalForm())) {
+			in = new GZIPInputStream(in);
+		}
+		return in;
 	}
 
 }

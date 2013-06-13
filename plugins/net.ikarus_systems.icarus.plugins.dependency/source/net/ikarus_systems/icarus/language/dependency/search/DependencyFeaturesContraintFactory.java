@@ -12,7 +12,9 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
 
 /**
  * @author Markus Gärtner
@@ -33,20 +35,23 @@ public class DependencyFeaturesContraintFactory extends AbstractConstraintFactor
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
-		return new DependencyFeaturesConstraint(value, operator);
+			SearchOperator operator, int flags) {
+		if(isFlagSet(flags, IGNORE_CASE))
+			return new DependencyFeaturesCIConstraint(value, operator);
+		else
+			return new DependencyFeaturesConstraint(value, operator);
 	}
 
 	@Override
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[] {
-			SearchOperator.EQUALS,
-			SearchOperator.EQUALS_NOT,
-			SearchOperator.CONTAINS,
-			SearchOperator.CONTAINS_NOT,
-			SearchOperator.MATCHES,
-			SearchOperator.MATCHES_NOT,
-			SearchOperator.GROUPING,
+			DefaultSearchOperator.EQUALS,
+			DefaultSearchOperator.EQUALS_NOT,
+			DefaultSearchOperator.CONTAINS,
+			DefaultSearchOperator.CONTAINS_NOT,
+			DefaultSearchOperator.MATCHES,
+			DefaultSearchOperator.MATCHES_NOT,
+			DefaultSearchOperator.GROUPING,
 		};
 	}
 
@@ -61,6 +66,30 @@ public class DependencyFeaturesContraintFactory extends AbstractConstraintFactor
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getFeatures();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyFeaturesConstraint(getValue(), getOperator());
+		}
+	}
+
+	private static class DependencyFeaturesCIConstraint extends DefaultCaseInsensitiveConstraint {
+
+		private static final long serialVersionUID = -3346450454270312183L;
+
+		public DependencyFeaturesCIConstraint(Object value, SearchOperator operator) {
+			super(TOKEN, value, operator);
+		}
+
+		@Override
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getFeatures().toLowerCase();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyFeaturesCIConstraint(getValue(), getOperator());
 		}
 	}
 }

@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.ui.tasks;
 
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -42,7 +43,7 @@ public class TaskProgressPanel extends JPanel implements ActionListener, Propert
 	private boolean allowCancel = true;
 	
 	public TaskProgressPanel() {
-		//super(new BorderLayout(3, 0));
+		super(new FlowLayout(FlowLayout.RIGHT, 3, 0));
 		
 		label = new JLabel();
 		label.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -55,6 +56,7 @@ public class TaskProgressPanel extends JPanel implements ActionListener, Propert
 		
 		cancelButton = new JButton();
 		cancelButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("nav_stop.gif")); //$NON-NLS-1$
+		UIUtil.resizeComponent(cancelButton, 18, 18);
 		add(cancelButton);
 	}
 
@@ -63,6 +65,9 @@ public class TaskProgressPanel extends JPanel implements ActionListener, Propert
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		if(task==null) {
+			return;
+		}
 		
 		switch (evt.getPropertyName()) {
 		case TaskConstants.PROGRESS_PROPERTY:
@@ -140,6 +145,14 @@ public class TaskProgressPanel extends JPanel implements ActionListener, Propert
 		
 		setVisible(this.task!=null);
 		cancelButton.setVisible(allowCancel && this.task!=null);
+		
+		if(this.task!=null) {
+			TaskManager taskManager = TaskManager.getInstance();
+			setTitle(taskManager.getTitle(this.task));
+			setInfo(taskManager.getInfo(this.task));
+			setProgress(taskManager.getProgress(this.task));
+			setIndeterminate(taskManager.isIndeterminate(this.task));
+		}
 	}
 	
 	public void setIndeterminate(boolean value) {

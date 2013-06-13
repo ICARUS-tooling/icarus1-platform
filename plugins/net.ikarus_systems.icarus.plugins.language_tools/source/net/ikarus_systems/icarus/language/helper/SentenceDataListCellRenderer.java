@@ -42,16 +42,16 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 			Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
 		if(value instanceof SentenceData) {
-			String[] tokens = ((SentenceData)value).getForms();
-			StringBuilder sb = new StringBuilder(tokens.length*20);
+			SentenceData data = (SentenceData) value;
+			StringBuilder sb = new StringBuilder(data.length()*20);
 			
 			sb.append(index+1).append(": "); //$NON-NLS-1$
 			
-			for(int i=0; i<tokens.length; i++) {
+			for(int i=0; i<data.length(); i++) {
 				if(i>0) {
 					sb.append(" "); //$NON-NLS-1$
 				}
-				sb.append(tokens[i]);
+				sb.append(data.getForm(i));
 			}
 			
 			value = sb.toString();

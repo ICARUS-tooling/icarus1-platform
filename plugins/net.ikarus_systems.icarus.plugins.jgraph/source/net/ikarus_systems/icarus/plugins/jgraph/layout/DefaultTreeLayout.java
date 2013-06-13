@@ -43,17 +43,18 @@ public class DefaultTreeLayout implements GraphLayout {
 		orderEdgeStyle = ";exitY=1.0;entryY=1.0;exitX=0.5;entryX=0.5;edgeStyle=bottomArcEdgeStyle;shape=arc;dashed=1"; //$NON-NLS-1$
 	}
 	
-	protected mxRectangle layoutCell(mxIGraphModel model, Object cell, 
+	protected mxRectangle layoutCell(GraphOwner owner, Object cell, 
 			Set<Object> allowedCells, double x, double y, double vGap, double hGap) {
 		mxRectangle bounds;
-			
+		
+		mxIGraphModel model = owner.getGraph().getModel();
 		mxGeometry geometry = model.getGeometry(cell);
 		geometry.setX(x);
 		geometry.setY(y);
 		
 		bounds = new mxRectangle(geometry);
 		
-		Object[] children = GraphUtils.getDescendants(model, cell);
+		Object[] children = GraphUtils.getDescendants(owner, cell);
 		if(children!=null) {
 			
 			y += geometry.getHeight()+vGap;
@@ -63,7 +64,7 @@ public class DefaultTreeLayout implements GraphLayout {
 					continue;
 				}
 				
-				mxRectangle childBounds = layoutCell(model, child, 
+				mxRectangle childBounds = layoutCell(owner, child, 
 						allowedCells, x, y, vGap, hGap);
 				
 				x += childBounds.getWidth()+hGap;
@@ -133,7 +134,7 @@ public class DefaultTreeLayout implements GraphLayout {
 			
 			// Arrange all cells
 			for(Object cell : rootCells) {
-				mxRectangle rootBounds = layoutCell(model, cell, allowedCells, 
+				mxRectangle rootBounds = layoutCell(owner, cell, allowedCells, 
 						x, y, vGap, hGap);
 				
 				x += rootBounds.getWidth() + hGap;
@@ -188,9 +189,12 @@ public class DefaultTreeLayout implements GraphLayout {
 	@Override
 	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
 		mxIGraphModel model = owner.getGraph().getModel();
+
+		boolean isLink = GraphUtils.isLinkEdge(owner, edge);
+		boolean isOrder = GraphUtils.isOrderEdge(owner, model, edge);
 		
 		String style;
-		if(GraphUtils.isOrderEdge(owner, model, edge)) {
+		if(isOrder || isLink) {
 			style = orderEdgeStyle;
 		} else {
 			style = regularEdgeStyle;

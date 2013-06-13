@@ -14,6 +14,7 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
 
 /**
  * @author Markus Gärtner
@@ -35,20 +36,20 @@ public class DependencyDistanceContraintFactory extends AbstractConstraintFactor
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
+			SearchOperator operator, int flags) {
 		return new DependencyDistanceConstraint(value, operator);
 	}
 
 	@Override
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[] {
-			SearchOperator.EQUALS,
-			SearchOperator.EQUALS_NOT,
-			SearchOperator.LESS_THAN,
-			SearchOperator.LESS_OR_EQUAL,
-			SearchOperator.GREATER_THAN,
-			SearchOperator.GREATER_OR_EQUAL,
-			SearchOperator.GROUPING,
+			DefaultSearchOperator.EQUALS,
+			DefaultSearchOperator.EQUALS_NOT,
+			DefaultSearchOperator.LESS_THAN,
+			DefaultSearchOperator.LESS_OR_EQUAL,
+			DefaultSearchOperator.GREATER_THAN,
+			DefaultSearchOperator.GREATER_OR_EQUAL,
+			DefaultSearchOperator.GROUPING,
 		};
 	}
 
@@ -83,6 +84,11 @@ public class DependencyDistanceContraintFactory extends AbstractConstraintFactor
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getDistance();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyDistanceConstraint(getValue(), getOperator());
 		}
 	}
 }

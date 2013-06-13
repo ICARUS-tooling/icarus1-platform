@@ -19,6 +19,7 @@ import net.ikarus_systems.icarus.util.Order;
 
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
 /**
@@ -47,6 +48,16 @@ public final class GraphUtils {
 			return null;
 		}
 	}
+	
+	public static Object getEdgeValue(mxCellState state) {
+		mxIGraphModel model = state.getView().getGraph().getModel();
+		return model.isEdge(state.getCell()) ? model.getValue(state.getCell()) : null;
+	}
+	
+	public static Object getNodeValue(mxCellState state) {
+		mxIGraphModel model = state.getView().getGraph().getModel();
+		return model.isVertex(state.getCell()) ? model.getValue(state.getCell()) : null;
+	}
 
 	public static boolean isOrderEdge(mxIGraphModel model, Object edge) {
 		return model.isEdge(edge) && model.getValue(edge) instanceof Order;
@@ -57,6 +68,14 @@ public final class GraphUtils {
 			return ((GraphPresenter)owner).isOrderEdge(cell);
 		} else {
 			return isOrderEdge(model, cell);
+		}
+	}
+	
+	public static boolean isLinkEdge(GraphOwner owner, Object cell) {
+		if(owner instanceof GraphPresenter) {
+			return ((GraphPresenter)owner).isLinkEdge(cell);
+		} else {
+			return false;
 		}
 	}
 	
@@ -214,7 +233,27 @@ public final class GraphUtils {
 		for(int i=0; i<edgeCount; i++) {
 			Object edge = model.getEdgeAt(cell, i);
 			
-			if(model.getValue(edge) instanceof Order) {
+			if(isOrderEdge(model, edge)) {
+				continue;
+			}
+			
+			if(model.getTerminal(edge, true)==cell) {
+				result.add(model.getTerminal(edge, false));
+			}
+		}
+		
+		return result.toArray();
+	}
+	
+	public static Object[] getDescendants(GraphOwner owner, Object cell) {
+		List<Object> result = new ArrayList<>();
+		
+		mxIGraphModel model = owner.getGraph().getModel();
+		int edgeCount = model.getEdgeCount(cell);
+		for(int i=0; i<edgeCount; i++) {
+			Object edge = model.getEdgeAt(cell, i);
+			
+			if(isOrderEdge(owner, model, edge)) {
 				continue;
 			}
 			

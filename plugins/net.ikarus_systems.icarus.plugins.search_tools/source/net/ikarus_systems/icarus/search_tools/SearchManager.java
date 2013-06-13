@@ -17,8 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.search_tools.SearchToolsConstants;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -156,6 +158,35 @@ public final class SearchManager {
 		}
 		
 		return result;
+	}
+	
+	private Map<Extension, SearchFactory> factoryInstances;
+	
+	public Collection<Extension> availableSearchFactories() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchFactory"); //$NON-NLS-1$
+		return Collections.unmodifiableCollection(extensionPoint.getConnectedExtensions());
+	}
+	
+	public SearchFactory getFactory(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		if(factoryInstances==null) {
+			factoryInstances = new HashMap<>();
+		}
+		
+		SearchFactory factory = factoryInstances.get(extension);
+		if(factory==null) {
+			try {
+				factory = (SearchFactory) PluginUtil.instantiate(extension);
+			} catch (Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to instantiate search factory: "+extension.getUniqueId(), e); //$NON-NLS-1$
+			}
+		}
+		
+		return factory;
 	}
 
 	public void executeSearch(Search search) {

@@ -37,7 +37,7 @@ import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.table.PropertiesTableModel;
 import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.KeyValuePair;
-import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -258,8 +258,8 @@ public class PropertiesFormEntry extends LabeledFormEntry<PropertiesFormEntry> i
 	}
 	
 	protected String getValidKey(String baseKey) {
-		int count = Math.max(1, NamingUtil.getCurrentCount(baseKey));
-		baseKey = NamingUtil.getBaseName(baseKey);
+		int count = Math.max(1, StringUtil.getCurrentCount(baseKey));
+		baseKey = StringUtil.getBaseName(baseKey);
 		
 		String key = null;
 		while(!isPropertyKeyAllowed((key = baseKey+" ("+count+")")) //$NON-NLS-1$ //$NON-NLS-2$

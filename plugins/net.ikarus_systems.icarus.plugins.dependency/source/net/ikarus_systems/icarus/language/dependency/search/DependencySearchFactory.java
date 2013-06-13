@@ -36,7 +36,7 @@ public class DependencySearchFactory implements SearchFactory {
 	 * @see net.ikarus_systems.icarus.search_tools.SearchFactory#createSearch(net.ikarus_systems.icarus.search_tools.SearchQuery, net.ikarus_systems.icarus.util.Options)
 	 */
 	@Override
-	public Search createSearch(SearchQuery query, Options options)
+	public Search createSearch(SearchQuery query, Object target, Options options)
 			throws UnsupportedFormatException {
 		// TODO Auto-generated method stub
 		return null;

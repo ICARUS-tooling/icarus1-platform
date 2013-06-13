@@ -119,9 +119,12 @@ public class DefaultArcLayout implements GraphLayout {
 					
 					double span = Math.abs(geometry.getCenterX() - targetGeometry.getCenterX());
 							
+					boolean isOrder = GraphUtils.isOrderEdge(owner, model, edge);
+					boolean isLink = GraphUtils.isLinkEdge(owner, edge);
+					
 					// Fetch basic style
 					String style;
-					if(GraphUtils.isOrderEdge(owner, model, edge)) {
+					if(isOrder || isLink) {
 						bottomArcHeight = Math.max(bottomArcHeight, ArcConnectorShape.getArcHeight(span));
 						style = orderEdgeStyle;
 					} else {
@@ -130,10 +133,12 @@ public class DefaultArcLayout implements GraphLayout {
 					}
 					
 					// Append edge direction specific exit and entry
-					if(GraphUtils.isLtrEdge(model, edge)) {
-						style += ltrConnectionStyle;
-					} else {
-						style += rtlConnectionStyle;
+					if(!isLink) {
+						if(GraphUtils.isLtrEdge(model, edge)) {
+							style += ltrConnectionStyle;
+						} else {
+							style += rtlConnectionStyle;
+						}
 					}
 					
 					// Fetch old style and ensure non-null
@@ -398,18 +403,23 @@ public class DefaultArcLayout implements GraphLayout {
 	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
 		mxIGraphModel model = owner.getGraph().getModel();
 		
+		boolean isLink = GraphUtils.isLinkEdge(owner, edge);
+		boolean isOrder = GraphUtils.isOrderEdge(owner, model, edge);
+		
 		String style;
-		if(GraphUtils.isOrderEdge(owner, model, edge)) {
+		if(isOrder || isLink) {
 			style = orderEdgeStyle;
 		} else {
 			style = regularEdgeStyle;
 		}
 		
-		// Append edge direction specific exit and entry
-		if(GraphUtils.isLtrEdge(model, edge)) {
-			style += ltrConnectionStyle;
-		} else {
-			style += rtlConnectionStyle;
+		if(!isLink) {
+			// Append edge direction specific exit and entry
+			if(GraphUtils.isLtrEdge(model, edge)) {
+				style += ltrConnectionStyle;
+			} else {
+				style += rtlConnectionStyle;
+			}
 		}
 		
 		// Fetch old style and ensure non-null

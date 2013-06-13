@@ -344,14 +344,6 @@ public class DependencyUtils implements DependencyConstants {
 	public static StyleContext getStyleContext() {
 		return styleContext;
 	}
-	
-	public static String combine(SentenceData data) {
-		StringBuilder sb = new StringBuilder(data.getForms().length*4);
-		for(String token : data.getForms())
-			sb.append(token).append(" "); //$NON-NLS-1$
-		
-		return sb.toString().trim();
-	}
 
 	public static DependencyData createEmptySentenceData() {
 		return new SimpleDependencyData();
@@ -837,7 +829,7 @@ public class DependencyUtils implements DependencyConstants {
 	}
 
 	public static ContentType getDependencyContentType() {
-		return ContentTypeRegistry.getInstance().getType(CONTENT_TYPE_ID);
+		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
 	}
 	
 	public static String getForm(DependencyNodeData item) {

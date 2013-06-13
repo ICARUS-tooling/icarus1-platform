@@ -82,15 +82,6 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		fireDataChanged(event);
 	}
 
-	@Override
-	public String[] getForms() {
-		String[] forms = new String[items.size()];
-		for (int i = 0; i < forms.length; i++)
-			forms[i] = items.get(i).form;
-
-		return forms;
-	}
-
 	public DependencyDataEntry getItem(int index) {
 		return items.get(index);
 	}

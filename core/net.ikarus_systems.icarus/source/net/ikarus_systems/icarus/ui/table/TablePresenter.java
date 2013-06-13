@@ -55,6 +55,7 @@ public abstract class TablePresenter implements AWTPresenter, SentenceDataListen
 		JTable table = getTable();
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder());
+		//scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		JToolBar toolBar = createToolBar();
@@ -88,6 +89,7 @@ public abstract class TablePresenter implements AWTPresenter, SentenceDataListen
 		setData(data, options);
 		
 		if(table!=null) {
+			table.revalidate();
 			table.repaint();
 		}
 	}

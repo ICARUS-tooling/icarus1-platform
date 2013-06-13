@@ -298,7 +298,6 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		
 		String text = sb.toString();
 		contentPane.setText(text);
-		contentPane.setCaretPosition(0);
 		// FIXME sometimes scrollPane jumps to the bottom after setText() with new content
 		
 		// Do not cache every little stuff

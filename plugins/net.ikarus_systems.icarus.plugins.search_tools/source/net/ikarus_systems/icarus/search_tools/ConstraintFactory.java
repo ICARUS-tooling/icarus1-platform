@@ -22,8 +22,10 @@ public interface ConstraintFactory {
 	
 	public static final int EDGE_CONSTRAINT_TYPE = 1;
 	public static final int NODE_CONSTRAINT_TYPE = 2;
+	
+	public static final int IGNORE_CASE = (1 << 0);
 
-	SearchConstraint createConstraint(Object value, SearchOperator operator);
+	SearchConstraint createConstraint(Object value, SearchOperator operator, int flags);
 	
 	SearchOperator[] getSupportedOperators();
 	

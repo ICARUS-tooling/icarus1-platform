@@ -67,4 +67,12 @@ public interface Commands {
 	public static final String GET_TEXT = "get-text"; //$NON-NLS-1$
 	public static final String SET_TEXT = "set-text"; //$NON-NLS-1$
 	public static final String APPEND = "append"; //$NON-NLS-1$
+	
+	/**
+	 * Tells a target object that is assigned the task of modifying
+	 * some data to instantly commit any pending changes to that data structure.
+	 * This command is typically used to synchronize independent editor
+	 * implementations that operate on a common data structure.
+	 */
+	public static final String COMMIT = "commit"; //$NON-NLS-1$
 }

@@ -392,6 +392,11 @@ public abstract class Perspective implements Identifiable {
 			ViewContainer container = new ViewContainer(extension, alignment);
 			containers.put(extension, container);
 			
+			Extension.Parameter param = extension.getParameter("activateEarly");  //$NON-NLS-1$
+			if(param!=null && param.valueAsBoolean()) {
+				activateView(container);
+			}
+			
 			layout.add(container, alignment);
 		}
 		
@@ -699,6 +704,10 @@ public abstract class Perspective implements Identifiable {
 	JComponent getViewContainer(View view) {
 		Extension extension = view.getExtension();
 		return containers.get(extension);
+	}
+	
+	protected final JComponent getContainer() {
+		return getFrameDelegate().getFrame().getContainer(this);
 	}
 	
 	void addBroadcastListener(String eventName, EventListener listener) {

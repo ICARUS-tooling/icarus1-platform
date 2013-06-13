@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.search_tools;
 
+import java.text.ParseException;
+
 import net.ikarus_systems.icarus.resources.ResourceManager;
 
 /**
@@ -51,19 +53,38 @@ public enum EdgeType {
 	 */
 	PRECEDENCE("precedence"); //$NON-NLS-1$
 	
-	private EdgeType(String key) {
-		this.key = key;
+	private EdgeType(String token) {
+		this.token = token;
 	}
 	
-	private String key;
+	private String token;
+	
+	public String getToken() {
+		return token;
+	}
 	
 	public String getName() {
 		return ResourceManager.getInstance().get(
-				"plugins.searchTools.edgeType."+key+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+				"plugins.searchTools.edgeType."+token+".name"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public String getDescription() {
 		return ResourceManager.getInstance().get(
-				"plugins.searchTools.edgeType."+key+".description"); //$NON-NLS-1$ //$NON-NLS-2$
+				"plugins.searchTools.edgeType."+token+".description"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	public static EdgeType parseEdgeType(String s) throws ParseException {
+		if(s==null || s.isEmpty())
+			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+		
+		s = s.toLowerCase();
+		
+		for(EdgeType type : values()) {
+			if(type.token.startsWith(s)) {
+				return type;
+			}
+		}
+		
+		throw new ParseException("Unknown edge type string: "+s, 0); //$NON-NLS-1$
 	}
 }

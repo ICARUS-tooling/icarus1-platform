@@ -47,7 +47,7 @@ public class DefaultGraphNode implements SearchNode {
 	private String id = "node_"+idCounter.getAndIncrement(); //$NON-NLS-1$
 	
 	@XmlAttribute
-	private NodeType nodeType;
+	private NodeType nodeType = NodeType.GENERAL;
 	
 	@XmlElement
 	@XmlJavaTypeAdapter(value=ConstraintAdapter.class)

@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.search_tools.standard;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,6 +29,9 @@ import net.ikarus_systems.icarus.search_tools.SearchNode;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="searchGraph")
 public class DefaultSearchGraph implements SearchGraph {
+	
+	@XmlAttribute
+	private int rootOperator = OPERATOR_CONJUNCTION;
 	
 	@XmlElement
 	@XmlJavaTypeAdapter(value=NodeAdapter.class)
@@ -80,5 +84,14 @@ public class DefaultSearchGraph implements SearchGraph {
 
 	public void setRootNodes(SearchNode[] rootNodes) {
 		this.rootNodes = rootNodes;
+	}
+
+	@Override
+	public int getRootOperator() {
+		return rootOperator;
+	}
+
+	public void setRootOperator(int rootOperator) {
+		this.rootOperator = rootOperator;
 	}
 }

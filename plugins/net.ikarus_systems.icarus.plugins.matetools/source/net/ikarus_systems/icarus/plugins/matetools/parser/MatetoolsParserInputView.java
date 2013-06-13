@@ -10,7 +10,6 @@
 package net.ikarus_systems.icarus.plugins.matetools.parser;
 
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
@@ -48,7 +47,6 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer;
 import net.ikarus_systems.icarus.plugins.ExtensionListModel;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
-import net.ikarus_systems.icarus.plugins.core.InfoPanel;
 import net.ikarus_systems.icarus.plugins.core.ToolBarDelegate;
 import net.ikarus_systems.icarus.plugins.jgraph.view.ListGraphView;
 import net.ikarus_systems.icarus.plugins.language_tools.input.TextInputView;
@@ -64,7 +62,6 @@ import net.ikarus_systems.icarus.ui.helper.Outline;
 import net.ikarus_systems.icarus.ui.tasks.TaskConstants;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
-import net.ikarus_systems.icarus.ui.tasks.TaskProgressPanel;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.AbstractDataList;
@@ -90,7 +87,7 @@ public class MatetoolsParserInputView extends TextInputView {
 	private CallbackHandler callbackHandler;
 	private Handler handler;
 	
-	private TaskProgressPanel progressPanel;
+	//private TaskProgressPanel progressPanel;
 	
 	private ResultList resultList;
 	
@@ -135,7 +132,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		
 		super.init(container);
 		
-		progressPanel = new TaskProgressPanel();
+		//progressPanel = new TaskProgressPanel();
 		
 		inputArea.getDocument().addDocumentListener(handler);
 		ConfigRegistry.getGlobalRegistry().addGroupListener(
@@ -215,10 +212,10 @@ public class MatetoolsParserInputView extends TextInputView {
 				"plugins.matetools.matetoolsParserInputView.startPipelineAction")); //$NON-NLS-1$
 	}
 	
-	@Override
+	/*@Override
 	protected void refreshInfoPanel(InfoPanel infoPanel) {
 		infoPanel.add(progressPanel, GridBagConstraints.CENTER);
-	}
+	}*/
 
 	private Tokenizer getTokenizer() {
 		if(tokenizerSelect==null) {
@@ -368,8 +365,8 @@ public class MatetoolsParserInputView extends TextInputView {
 		worker = new PipelineWorker(tokens, storage, options);
 		
 		// Refresh progress panel
-		progressPanel.setTitle(worker.getDescription());
-		progressPanel.setTask(worker);
+		//progressPanel.setTitle(worker.getDescription());
+		//progressPanel.setTask(worker);
 		
 		// Schedule worker for concurrent execution on background thread
 		TaskManager.getInstance().schedule(

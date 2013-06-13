@@ -9,10 +9,15 @@
  */
 package net.ikarus_systems.icarus.io;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
+
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -25,6 +30,10 @@ public final class IOUtil {
 
 	private IOUtil() {
 		// no-op
+	}
+	
+	public static boolean isZipSource(String name) {
+		return name.endsWith("zip") || name.endsWith(".gzip") || name.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public static String readStream(InputStream input) throws IOException {
@@ -84,5 +93,38 @@ public final class IOUtil {
 		} else {
 			return false;
 		}
+	}
+	
+	public static BufferedReader getReader(InputStream is, Charset cs) throws IOException {
+		return new BufferedReader(new InputStreamReader(is, cs));
+	}
+	
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
+	
+	public static final String CHARSET_OPTION = "charset"; //$NON-NLS-1$
+	public static final String CHARSET_NAME_OPTION = "charsetName"; //$NON-NLS-1$
+	public static final String ENCODING_OPTION = "encoding"; //$NON-NLS-1$
+	
+	public static Charset getCharset(Options options, Charset defaultCharset) {
+		Object charset = null;
+		if(options!=null) {
+			charset = options.firstSet(CHARSET_OPTION, 
+					CHARSET_NAME_OPTION, ENCODING_OPTION);
+		}
+		
+		if(charset == null) {
+			charset = defaultCharset==null ? DEFAULT_CHARSET : defaultCharset;
+		} else if(charset instanceof String) {
+			charset = Charset.forName((String)charset);
+		}
+		
+		if(!(charset instanceof Charset))
+			throw new IllegalArgumentException("Invalid charset: "+charset.getClass()); //$NON-NLS-1$
+		
+		return (Charset) charset;
+	}
+	
+	public static Charset getCharset(Options options) {
+		return getCharset(options, null);
 	}
 }

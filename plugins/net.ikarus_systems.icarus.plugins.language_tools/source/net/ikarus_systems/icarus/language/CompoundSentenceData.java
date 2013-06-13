@@ -70,9 +70,9 @@ public class CompoundSentenceData implements SentenceData {
 	 * @see net.ikarus_systems.icarus.language.SentenceData#getForms()
 	 */
 	@Override
-	public String[] getForms() {
+	public String getForm(int index) {
 		SentenceData data = getFirstSet();
-		return data==null ? null : data.getForms();
+		return data==null ? null : data.getForm(index);
 	}
 
 	/**

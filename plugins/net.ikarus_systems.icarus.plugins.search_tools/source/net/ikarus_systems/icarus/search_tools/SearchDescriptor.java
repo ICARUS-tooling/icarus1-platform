@@ -19,7 +19,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.xml.jaxb.ExtensionAdapter;
 
@@ -67,7 +66,7 @@ public class SearchDescriptor {
 	public SearchFactory getSearchFactory() {
 		if(searchFactory==null) {
 			try {
-				searchFactory = (SearchFactory) PluginUtil.instantiate(factoryExtension);
+				searchFactory = SearchManager.getInstance().getFactory(getFactoryExtension());
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to instantiate search-factory: "+String.valueOf(factoryExtension), e); //$NON-NLS-1$
@@ -109,10 +108,10 @@ public class SearchDescriptor {
 			return;
 		}
 		
-		this.factoryExtension = factoryExtension; 
+		this.factoryExtension = factoryExtension;
+		
+		searchFactory = null;
 	}
-
-
 
 	public void setQueryString(String queryString) {
 		this.queryString = queryString;
@@ -126,6 +125,7 @@ public class SearchDescriptor {
 		this.target = target;
 	}
 	
+	@Override
 	public SearchDescriptor clone() {
 		SearchDescriptor clone = new SearchDescriptor();
 		clone.factoryExtension = factoryExtension;

@@ -32,7 +32,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
@@ -76,6 +79,8 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -86,6 +91,7 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.actions.Actions;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.Exceptions;
 
 /**
@@ -102,11 +108,24 @@ public final class UIUtil {
         UIManager.put("PopupMenu.consumeEventOnClose", Boolean.FALSE); //$NON-NLS-1$
 	}
 
-	/**
-	 * 
-	 */
 	private UIUtil() {
 		// no-op
+	}
+	
+	private static String[] fontNames;
+	
+	public synchronized static String[] getFontNames() {
+		if(fontNames==null) {
+			List<String> names = new LinkedList<>();
+			
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			
+			CollectionUtils.feedItems(names, ge.getAvailableFontFamilyNames());
+			
+			fontNames = names.toArray(new String[names.size()]);
+		}
+		
+		return fontNames.clone();
 	}
 
     public static boolean isWindowsLAF() {
@@ -117,6 +136,31 @@ public final class UIUtil {
         return isWindowsLAF()
                 && !(Boolean) Toolkit.getDefaultToolkit().getDesktopProperty(
                         "win.xpstyle.themeActive"); //$NON-NLS-1$
+    }
+    
+    public static void beep() {
+		try {
+			Toolkit.getDefaultToolkit().beep();
+		} catch(Exception e) {
+			// ignore
+		}
+    }
+    
+    public static Color generateRandomColor(Color mix) {
+        Random random = new Random();
+        int red = random.nextInt(256);
+        int green = random.nextInt(256);
+        int blue = random.nextInt(256);
+
+        // mix the color
+        if (mix != null) {
+            red = (red + mix.getRed()) / 2;
+            green = (green + mix.getGreen()) / 2;
+            blue = (blue + mix.getBlue()) / 2;
+        }
+
+        Color color = new Color(red, green, blue);
+        return color;
     }
 
 	public static final Color defaultBorderColor = new Color(128, 128, 128);
@@ -576,6 +620,13 @@ public final class UIUtil {
 		if(item instanceof JComponent) {
 			JComponent comp = (JComponent) item;
 			comp.putClientProperty("html.disable", Boolean.TRUE); //$NON-NLS-1$
+		}
+	}
+	
+	public static void disableCaretScroll(JTextComponent comp) {
+		Caret caret = comp.getCaret();
+		if(caret instanceof DefaultCaret) {
+			((DefaultCaret) caret).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		}
 	}
 	

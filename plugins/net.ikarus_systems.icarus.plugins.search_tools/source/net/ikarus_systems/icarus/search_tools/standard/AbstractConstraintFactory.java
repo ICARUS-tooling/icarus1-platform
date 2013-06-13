@@ -38,6 +38,10 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory {
 		this.type = type;
 	}
 	
+	protected boolean isFlagSet(int flags, int mask) {
+		return (flags & mask) == mask;
+	}
+	
 	/**
 	 * 
 	 * @see net.ikarus_systems.icarus.search_tools.ConstraintFactory#getConstraintType()
@@ -76,7 +80,7 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory {
 	 */
 	@Override
 	public SearchOperator[] getSupportedOperators() {
-		return SearchOperator.values();
+		return DefaultSearchOperator.values();
 	}
 
 	/**

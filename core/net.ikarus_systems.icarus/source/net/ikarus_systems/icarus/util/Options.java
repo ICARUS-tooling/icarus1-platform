@@ -78,6 +78,18 @@ public class Options extends HashMap<String, Object> {
 					entry.getKey(), String.valueOf(entry.getValue()));
 	}
 	
+	public Object firstSet(String...keys) {
+		Object value = null;
+		
+		for(String key : keys) {
+			if((value = get(key)) != null) {
+				break;
+			}
+		}
+		
+		return value;
+	}
+	
 	// Collection of commonly used option keys
 	
 	public static final String NAME = "name"; //$NON-NLS-1$

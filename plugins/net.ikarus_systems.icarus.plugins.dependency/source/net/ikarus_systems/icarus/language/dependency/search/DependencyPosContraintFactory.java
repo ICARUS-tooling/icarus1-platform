@@ -33,8 +33,11 @@ public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
-		return new DependencyPosConstraint(value, operator);
+			SearchOperator operator, int flags) {
+		if(isFlagSet(flags, IGNORE_CASE))
+			return new DependencyPosCIConstraint(value, operator);
+		else
+			return new DependencyPosConstraint(value, operator);
 	}
 
 	private static class DependencyPosConstraint extends DefaultConstraint {
@@ -48,6 +51,25 @@ public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getPos();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyPosConstraint(getValue(), getOperator());
+		}
+	}
+
+	private static class DependencyPosCIConstraint extends DefaultConstraint {
+
+		private static final long serialVersionUID = 4933479883479834272L;
+
+		public DependencyPosCIConstraint(Object value, SearchOperator operator) {
+			super(TOKEN, value, operator);
+		}
+
+		@Override
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getPos().toLowerCase();
 		}
 	}
 }

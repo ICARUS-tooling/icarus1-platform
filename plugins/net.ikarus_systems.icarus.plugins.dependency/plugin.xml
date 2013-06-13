@@ -78,7 +78,9 @@
 		<parameter id="token" value="lemma" />
 		<parameter id="token" value="pos" />
 		<parameter id="token" value="features" />
-		<parameter id="token" value="relation" />
+		<parameter id="token" value="relation">
+			<parameter id="alias" value="label" />
+		</parameter>
 		<parameter id="token" value="distance" />
 		<parameter id="token" value="direction" />
 		<parameter id="token" value="projectivity" />

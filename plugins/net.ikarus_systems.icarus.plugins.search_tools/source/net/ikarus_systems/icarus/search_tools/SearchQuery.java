@@ -45,7 +45,12 @@ public interface SearchQuery {
 	 * instance <i>B</i>. This holds as long as both instances operate on the
 	 * same <i>search language</i>! In addition an implementation may ignore
 	 * a call to {@link #parseQueryString(String)} when the supplied {@code query}
-	 * string matches the current collection of constraints. 
+	 * string matches the current collection of constraints.
+	 * <p>
+	 * This special convention applies only in a <i>one-way</i> manner! It is
+	 * <b>not</b> required that an implementation guarantees consistency of 
+	 * {@link #getQueryString()} results in regard to the original input
+	 * passed to {@link #parseQueryString(String)}! 
 	 * 
 	 * @see #parseQueryString(String)
 	 */

@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 
 /**
@@ -33,8 +34,11 @@ public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
-		return new DependencyFormConstraint(value, operator);
+			SearchOperator operator, int flags) {
+		if(isFlagSet(flags, IGNORE_CASE))
+			return new DependencyFormCIConstraint(value, operator);
+		else
+			return new DependencyFormConstraint(value, operator);
 	}
 
 	private static class DependencyFormConstraint extends DefaultConstraint {
@@ -48,6 +52,30 @@ public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getForm();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyFormConstraint(getValue(), getOperator());
+		}
+	}
+
+	private static class DependencyFormCIConstraint extends DefaultCaseInsensitiveConstraint {
+
+		private static final long serialVersionUID = -7737708296328734303L;
+
+		public DependencyFormCIConstraint(Object value, SearchOperator operator) {
+			super(TOKEN, value, operator);
+		}
+
+		@Override
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getForm().toLowerCase();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyFormCIConstraint(getValue(), getOperator());
 		}
 	}
 }

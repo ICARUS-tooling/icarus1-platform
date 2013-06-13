@@ -21,6 +21,7 @@ import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.HtmlUtils.HtmlTableBuilder;
 
 import com.mxgraph.model.mxIGraphModel;
@@ -36,6 +37,13 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	protected HtmlTableBuilder tableBuilder = new HtmlTableBuilder(500);
 	
 	protected StringBuilder sb;
+	
+	protected mxRectangle disjunctionNodeSize = new mxRectangle(0, 0, 25, 25);
+	
+	protected char disjunctionSymbol = (char) 0x2228;
+	protected String disjunctionString = String.valueOf(disjunctionSymbol);
+	protected char negationSymbol = (char) 0x00AC;
+	protected String negationString = String.valueOf(negationSymbol);
 	
 	protected ConstraintGraphPresenter presenter;
 
@@ -73,7 +81,8 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		
 		mxIGraphModel model = owner.getGraph().getModel();
 		
-		if(GraphUtils.isOrderEdge(owner, model, cell)) {
+		if(GraphUtils.isOrderEdge(owner, model, cell)
+				|| ConstraintGraphPresenter.isLinkEdge(owner, cell)) {
 			return ""; //$NON-NLS-1$
 		}
 		
@@ -84,12 +93,17 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		}
 		
 		sb.setLength(0);
+		boolean leaveEmpty = false;
 		
 		List<ConstraintFactory> factories = null;
 		SearchConstraint[] constraints = null;
 		
 		if(value instanceof ConstraintNodeData) {
 			ConstraintNodeData data = (ConstraintNodeData)value;
+			
+			if(data.getNodeType()==NodeType.DISJUNCTION) {
+				return data.isNegated() ? negationString+disjunctionString : disjunctionString;
+			}
 			
 			// Negated state
 			if(data.isNegated()) {
@@ -107,6 +121,11 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			constraints = data.getConstraints();
 		} else if(value instanceof ConstraintEdgeData) {
 			ConstraintEdgeData data = (ConstraintEdgeData)value;
+			leaveEmpty = data.getEdgeType()==EdgeType.DOMINANCE;
+			
+			if(data.getEdgeType()==EdgeType.LINK) {
+				return ""; //$NON-NLS-1$
+			}
 			
 			// Negated state
 			if(data.isNegated()) {
@@ -125,7 +144,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		}
 
 		// Constraints
-		if(factories!=null && !factories.isEmpty()) {
+		if(factories!=null && !factories.isEmpty() && constraints!=null) {
 			for(int i=0; i<constraints.length; i++) {
 				if(!constraints[i].isUndefined()) {
 					SearchOperator operator = constraints[i].getOperator();
@@ -139,7 +158,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		
 		String result = sb.toString().trim();
 		
-		if(result.isEmpty()) {
+		if(result.isEmpty() && !leaveEmpty) {
 			result = SearchUtils.DATA_UNDEFINED_LABEL;
 		}
 		
@@ -148,13 +167,32 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 
 	@Override
 	public String getToolTipForCell(GraphOwner owner, Object cell) {
-		// TODO use table builder to create full view of constraints!!
-		return "<html>"+convertValueToString(owner, cell).replaceAll("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String tooltip = null;
+		if(ConstraintGraphPresenter.isDisjunctionNode(owner, cell)) {
+			tooltip = ResourceManager.getInstance().get(
+					"plugins.searchTools.nodeType.disjunction.description"); //$NON-NLS-1$
+		} else if(ConstraintGraphPresenter.isLinkEdge(owner, cell)) {
+			tooltip = ResourceManager.getInstance().get(
+					"plugins.searchTools.edgeType.link.description"); //$NON-NLS-1$
+		} else {
+			// TODO use table builder to create full view of constraints!!
+			tooltip = convertValueToString(owner, cell);
+		}
+		
+		return UIUtil.toSwingTooltip(tooltip);
 	}
-
+	
 	@Override
 	public mxRectangle getPreferredSizeForCell(GraphOwner owner, Object cell) {
-		// TODO Auto-generated method stub
-		return super.getPreferredSizeForCell(owner, cell);
+		if(ConstraintGraphPresenter.isDisjunctionNode(owner, cell)) {
+			return disjunctionNodeSize;
+		} else {
+			mxRectangle size = super.getPreferredSizeForCell(owner, cell);
+			if(size!=null && size.getWidth()>0 && size.getWidth()<70) {
+				size.setWidth(70);
+			}
+			
+			return size;
+		}
 	}
 }

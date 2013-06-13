@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools;
+package net.ikarus_systems.icarus.search_tools.treebank;
 
 /**
  * A rooted tree view on arbitrary underlying data. This interface

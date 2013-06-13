@@ -11,11 +11,12 @@ package net.ikarus_systems.icarus.config;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JColorChooser;
@@ -30,6 +31,9 @@ import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
+import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.Exceptions;
 
 /**
@@ -39,20 +43,16 @@ import net.ikarus_systems.icarus.util.Exceptions;
  *
  */
 public class ConfigUtils implements ConfigConstants {
-
-	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 	
 	private static final Timer timer = new Timer("Config-autosave-timer"); //$NON-NLS-1$
 	
 	public static void execute(Runnable job) {
-		executor.execute(job);
+		TaskManager.getInstance().execute(job);
 	}
 	
 	public static void schedule(TimerTask task, long delay, long period) {
 		timer.scheduleAtFixedRate(task, delay, period);
 	}
-
-	
 	
 	public static String localizeName(ConfigRegistry config, Handle handle){
 		String name = (String) config.getProperty(handle, NAME_KEY);
@@ -70,7 +70,7 @@ public class ConfigUtils implements ConfigConstants {
 		if (desc == null)
 			desc = "config.desc." + config.getName(handle); //$NON-NLS-1$
 		
-		return ResourceManager.getInstance().get(desc, null, null);
+		return ResourceManager.getInstance().get(desc, null, (Object[])null);
 	}
 
 	public static String localizeNote(ConfigRegistry config, Handle handle) {
@@ -79,7 +79,7 @@ public class ConfigUtils implements ConfigConstants {
 		if (note == null)
 			note = "config.note." + config.getName(handle); //$NON-NLS-1$
 		
-		return ResourceManager.getInstance().get(note, null, null);
+		return ResourceManager.getInstance().get(note, null, (Object[])null);
 	}
 
 	public static String localizeOption(ConfigRegistry config, Handle handle) {
@@ -133,6 +133,85 @@ public class ConfigUtils implements ConfigConstants {
 			value = ResourceManager.getInstance().get((String) value);
 			
 			return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+		}
+	};
+	
+	public static void buildFontFamilyOption(ConfigBuilder builder, String defaultFont) {
+		if(defaultFont==null) {
+			defaultFont = "Dialog"; //$NON-NLS-1$
+		}
+
+		Object[] fonts = UIUtil.getFontNames();
+		int index = CollectionUtils.indexOf(fonts, defaultFont);
+		
+		if(index==-1)
+			throw new IllegalArgumentException("Unknown font: "+defaultFont); //$NON-NLS-1$
+		
+		builder.setProperties(builder.addOptionsEntry("fontFamily", index, fonts), //$NON-NLS-1$
+					ConfigConstants.RENDERER, ConfigUtils.fontFamilyRenderer);
+	}
+	
+	public static void buildDefaultFontConfig(ConfigBuilder builder, String defaultFont) {
+		buildFontFamilyOption(builder, defaultFont);
+		builder.addIntegerEntry("fontSize", 12, 5, 35); //$NON-NLS-1$
+		builder.addColorEntry("fontColor", Color.black.getRGB()); //$NON-NLS-1$
+		builder.addBooleanEntry("bold", false); //$NON-NLS-1$
+		builder.addBooleanEntry("italic", false); //$NON-NLS-1$
+	}
+	
+	public static Font defaultReadFont(Handle handle) {
+		ConfigRegistry config = handle.getSource();
+		String fontName = config.getString(config.getChildHandle(handle, "fontFamily")); //$NON-NLS-1$
+		int fontSize = config.getInteger(config.getChildHandle(handle, "fontSize")); //$NON-NLS-1$
+		boolean bold = config.getBoolean(config.getChildHandle(handle, "bold")); //$NON-NLS-1$
+		boolean italic = config.getBoolean(config.getChildHandle(handle, "italic")); //$NON-NLS-1$
+		
+		String style = ""; //$NON-NLS-1$
+		if(bold) {
+			style += "BOLD"; //$NON-NLS-1$
+		} 
+		if(italic) {
+			style = "ITALIC"; //$NON-NLS-1$
+		}
+		if(style.isEmpty()) {
+			style = "PLAIN"; //$NON-NLS-1$
+		}
+		
+		return Font.decode(String.format("%s-%s-%d", fontName, style, fontSize)); //$NON-NLS-1$
+	}
+
+	public static ListCellRenderer<Object> fontFamilyRenderer = new DefaultListCellRenderer() {
+
+		private static final long serialVersionUID = -333044504694220350L;
+		
+		private Map<String, Font> fonts;
+		
+		private Font getFont(String name) {
+			if(fonts==null)
+				fonts = new Hashtable<String, Font>();
+			
+			Font font = fonts.get(name);
+			
+			if(font==null) {
+				font = getFont();
+				font = new Font(name, font.getStyle(), font.getSize());
+				fonts.put(name, font);
+			}
+			
+			return font;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList<?> list,
+                Object value,
+                int index,
+                boolean isSelected,
+                boolean cellHasFocus) {
+			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			
+			setFont(getFont((String) value));
+			
+			return this;
 		}
 	};
 	

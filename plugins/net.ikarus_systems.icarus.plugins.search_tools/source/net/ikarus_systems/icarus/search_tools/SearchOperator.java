@@ -9,70 +9,77 @@
  */
 package net.ikarus_systems.icarus.search_tools;
 
-import net.ikarus_systems.icarus.resources.ResourceManager;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
+import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum SearchOperator {
+public abstract class SearchOperator implements Serializable {
+	
+	private static final long serialVersionUID = 771727767289393418L;
 
-	EQUALS("=", "equals"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	EQUALS_NOT("!=", "equalsNot"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	MATCHES("=~", "mathes"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	MATCHES_NOT("!~", "matchesNot"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	CONTAINS("=#", "contains"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	CONTAINS_NOT("!#", "containsNot"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	LESS_THAN("<", "lessThan"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	LESS_OR_EQUAL("<=", "lessOrEqual"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	GREATER_THAN(">", "greaterThan"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	GREATER_OR_EQUAL(">=", "greaterOrEqual"), //$NON-NLS-1$ //$NON-NLS-2$
-	
-	GROUPING("<*>", "grouping"); //$NON-NLS-1$ //$NON-NLS-2$
-	
 	private String symbol;
-	private String key;
 	
-	private SearchOperator(String symbol, String key) {
+	@SuppressWarnings("unused")
+	private SearchOperator() {
+		// no-op
+	}
+	
+	protected SearchOperator(String symbol) {
+		if(symbol==null)
+			throw new IllegalArgumentException("Invalid symbol"); //$NON-NLS-1$
+		
 		this.symbol = symbol;
-		this.key = key;
 	}
 	
 	public String getSymbol() {
 		return symbol;
 	}
 	
-	public String getName() {
-		return ResourceManager.getInstance().get(
-				"plugins.searchTools.operator."+key+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+	public abstract boolean apply(Object value, Object constraint);
+	
+	public abstract String getName();
+
+	public abstract String getDescription();
+	
+	public static final SearchOperator GROUPING = DefaultSearchOperator.GROUPING;
+	
+	private static Map<String, SearchOperator> available = new LinkedHashMap<>();
+	private static Set<String> symbols = Collections.unmodifiableSet(available.keySet());
+	private static Collection<SearchOperator> operators = Collections.unmodifiableCollection(available.values());
+	
+	public static void register(SearchOperator operator) {
+		if(operator==null)
+			throw new IllegalArgumentException("Invalid operator"); //$NON-NLS-1$
+		if(available.containsKey(operator.getSymbol()))
+			throw new DuplicateIdentifierException("Duplicate operator symbol: "+operator.getSymbol()); //$NON-NLS-1$
+		
+		available.put(operator.getSymbol(), operator);
 	}
 	
-	public String getDescription() {
-		return ResourceManager.getInstance().get(
-				"plugins.searchTools.operator."+key+".description"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+	public static SearchOperator getOperator(String symbol) {
+		return available.get(symbol);
 	}
 	
-	public SearchOperator parseSymbol(String symbol) {
-		if(symbol==null)
-			throw new IllegalArgumentException("Invalid symbol"); //$NON-NLS-1$
-		
-		for(SearchOperator operator : values()) {
-			if(operator.getSymbol().equals(symbol)) {
-				return operator;
-			}
-		}
-		
-		throw new IllegalArgumentException("Unknown symbol: "+symbol); //$NON-NLS-1$
+	public static Set<String> symbols() {
+		return symbols;
+	}
+	
+	public static Collection<SearchOperator> operators() {
+		return operators;
+	}
+	
+	public static SearchOperator[] values() {
+		return operators.toArray(new SearchOperator[0]);
 	}
 }

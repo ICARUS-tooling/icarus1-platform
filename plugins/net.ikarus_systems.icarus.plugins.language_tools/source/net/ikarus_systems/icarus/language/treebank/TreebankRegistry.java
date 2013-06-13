@@ -56,7 +56,7 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
-import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 import net.ikarus_systems.icarus.util.location.Location;
@@ -248,7 +248,7 @@ public class TreebankRegistry {
 			usedNames.add(treebank.getName());
 		}
 
-		return NamingUtil.getUniqueName(baseName, usedNames);
+		return StringUtil.getUniqueName(baseName, usedNames);
 	}
 	
 	public TreebankListDelegate getListDelegate(Treebank treebank) {

@@ -104,11 +104,6 @@ public class SimpleDependencyData implements DependencyData {
 	}
 
 	@Override
-	public String[] getForms() {
-		return forms;
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(200);
 

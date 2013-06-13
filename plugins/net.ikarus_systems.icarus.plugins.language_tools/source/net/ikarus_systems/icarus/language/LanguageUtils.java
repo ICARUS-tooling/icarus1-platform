@@ -21,6 +21,28 @@ public final class LanguageUtils implements LanguageConstants {
 		// no-op
 	}
 	
+	public static String combine(SentenceData data) {
+		StringBuilder sb = new StringBuilder(data.length()*4);
+		for(int i=0; i<data.length(); i++) {
+			if(i>0) {
+				sb.append(" "); //$NON-NLS-1$
+			}
+			sb.append(data.getForm(i));
+		}
+		
+		return sb.toString();
+	}
+	
+	public static String[] getForms(SentenceData data) {
+		String[] result = new String[data.length()];
+		
+		for(int i=0; i<data.length(); i++) {
+			result[i] = data.getForm(i);
+		}
+		
+		return result;
+	}
+	
 	public static boolean isRoot(int value) {
 		return value==DATA_HEAD_ROOT;
 	}
@@ -128,9 +150,9 @@ public final class LanguageUtils implements LanguageConstants {
 		direction = direction.trim();
 		if (DATA_GROUP_LABEL.equals(direction))
 			return DATA_GROUP_VALUE;
-		else if (DATA_LEFT_LABEL.equals(direction))
+		else if (DATA_LEFT_LABEL.equals(direction) || "left".equals(direction)) //$NON-NLS-1$
 			return DATA_LEFT_VALUE;
-		else if (DATA_RIGHT_LABEL.equals(direction))
+		else if (DATA_RIGHT_LABEL.equals(direction) || "right".equals(direction)) //$NON-NLS-1$
 			return DATA_RIGHT_VALUE;
 		else
 			return DATA_UNDEFINED_VALUE;

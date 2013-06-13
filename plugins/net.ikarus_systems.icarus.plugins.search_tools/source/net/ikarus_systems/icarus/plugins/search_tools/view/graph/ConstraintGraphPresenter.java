@@ -10,24 +10,33 @@
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import net.ikarus_systems.icarus.config.ConfigDelegate;
 import net.ikarus_systems.icarus.language.LanguageManager;
+import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayoutConstants;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphStyle;
 import net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
 import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
@@ -37,6 +46,10 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphEdge;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphNode;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchGraph;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
+import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.actions.ActionManager;
+import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Order;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -48,6 +61,7 @@ import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.model.mxIGraphModel.mxAtomicGraphModelChange;
 import com.mxgraph.swing.handler.mxConnectPreview;
 import com.mxgraph.swing.view.mxICellEditor;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
@@ -66,15 +80,65 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	
 	protected ConstraintContext constraintContext;
 	
+	protected boolean disjuntiveRoots = false;
+	
+	public static boolean isLinkEdge(mxIGraphModel model, Object cell) {
+		if(model.isVertex(cell)) {
+			return false;
+		}
+		Object value = model.getValue(cell);
+		if(!(value instanceof ConstraintEdgeData)) {
+			return false;
+		}
+		
+		return ((ConstraintEdgeData)value).getEdgeType()==EdgeType.LINK;
+	}
+	
+	public static boolean isLinkEdge(mxCellState state) {
+		return isLinkEdge(state.getView().getGraph().getModel(), state.getCell());
+	}
+	
+	public static boolean isLinkEdge(GraphOwner owner, Object cell) {
+		return isLinkEdge(owner.getGraph().getModel(), cell);
+	}
+	
+	public static boolean isDisjunctionNode(mxIGraphModel model, Object cell) {
+		if(model.isEdge(cell)) {
+			return false;
+		}
+		Object value = model.getValue(cell);
+		if(!(value instanceof ConstraintNodeData)) {
+			return false;
+		}
+		
+		return ((ConstraintNodeData)value).getNodeType()==NodeType.DISJUNCTION;
+	}
+	
+	public static boolean isDisjunctionNode(mxCellState state) {
+		return isDisjunctionNode(state.getView().getGraph().getModel(), state.getCell());
+	}
+	
+	public static boolean isDisjunctionNode(GraphOwner owner, Object cell) {
+		return isDisjunctionNode(owner.getGraph().getModel(), cell);
+	}
+	
 	public ConstraintGraphPresenter() {
 		// no-op
+	}
+
+	@Override
+	protected CallbackHandler createCallbackHandler() {
+		return new CCallbackHandler();
 	}
 
 	@Override
 	protected void initGraphComponentInternals() {
 		super.initGraphComponentInternals();
 		
-		setMinimumNodeSize(new Dimension(75, 20));
+		editableMainToolBarListId = "plugins.searchTools.constraintGraphPresenter.editableMainToolBarList"; //$NON-NLS-1$
+		editablePopupMenuListId = "plugins.searchTools.constraintGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
+		
+		setMinimumNodeSize(new Dimension(20, 20));
 	}
 	
 	protected ConstraintContext createDefaultContext() {
@@ -92,6 +156,11 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		return new ConstraintGraphRenderer();
 	}
 	
+	@Override
+	protected GraphStyle createDefaultGraphStyle() {
+		return new ConstraintGraphStyle();
+	}
+
 	@Override
 	protected GraphLayout createDefaultGraphLayout() {
 		return new DefaultGraphLayout();
@@ -118,6 +187,48 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		options.put(GraphLayoutConstants.MIN_BASELINE_KEY, 80);
 		
 		return options;
+	}
+
+	@Override
+	protected ActionManager createActionManager() {
+		ActionManager actionManager = super.createActionManager();
+
+		// Load default actions
+		URL actionLocation = ConstraintGraphPresenter.class.getResource(
+				"constraint-graph-presenter-actions.xml"); //$NON-NLS-1$
+		if(actionLocation==null)
+			throw new CorruptedStateException("Missing resources: constraint-graph-presenter-actions.xml"); //$NON-NLS-1$
+		try {
+			actionManager.loadActions(actionLocation);
+		} catch (IOException e) {
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
+		}
+		
+		return actionManager;
+	}
+
+	@Override
+	protected void registerActionCallbacks() {
+		super.registerActionCallbacks();
+
+		ActionManager actionManager = getActionManager();
+
+		// Init 'selected' states
+		actionManager.setSelected(isDisjuntiveRoots(), 
+				"plugins.searchTools.constraintGraphPresenter.toggleRootOperatorAction"); //$NON-NLS-1$
+		
+		// Register callback functions
+		actionManager.addHandler(
+				"plugins.searchTools.constraintGraphPresenter.addDisjunctionAction",  //$NON-NLS-1$
+				callbackHandler, "addDisjunction"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.searchTools.constraintGraphPresenter.toggleRootOperatorAction",  //$NON-NLS-1$
+				callbackHandler, "toggleRootOperator"); //$NON-NLS-1$
+	}
+
+	@Override
+	public boolean isEditable() {
+		return true;
 	}
 
 	/**
@@ -162,6 +273,10 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		}
 		
 		searchGraph = newGraph;
+		
+		boolean disjuntive = newGraph!=null && newGraph.getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
+		getActionManager().setSelected(disjuntive, 
+				"plugins.searchTools.constraintGraphPresenter.toggleRootOperatorAction"); //$NON-NLS-1$
 	}
 	
 	protected ConstraintNodeData createNodeData() {
@@ -179,6 +294,17 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		return nodeData;
 	}
 	
+	protected ConstraintNodeData createNodeData(SearchNode source, Map<String, Integer> constraintMap) {
+		ConstraintNodeData nodeData = createNodeData();
+		nodeData.setId(source.getId());
+		nodeData.setNegated(source.isNegated());
+		nodeData.setNodeType(source.getNodeType());
+		
+		nodeData.setConstraints(source.getConstraints(), constraintMap);
+		
+		return nodeData;
+	}
+	
 	protected ConstraintEdgeData createEdgeData() {
 		List<ConstraintFactory> factories = getConstraintContext().getEdgeFactories();
 		
@@ -191,6 +317,17 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			edgeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
 		}
 				
+		return edgeData;
+	}
+	
+	protected ConstraintEdgeData createEdgeData(SearchEdge source, Map<String, Integer> constraintMap) {
+		ConstraintEdgeData edgeData = createEdgeData();
+		edgeData.setId(source.getId());
+		edgeData.setNegated(source.isNegated());
+		edgeData.setEdgeType(source.getEdgeType());
+		
+		edgeData.setConstraints(source.getConstraints(), constraintMap);
+		
 		return edgeData;
 	}
 
@@ -206,12 +343,102 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		return false;
 	}
 
+	@Override
+	public boolean isLinkEdge(Object cell) {
+		return isLinkEdge(this, cell);
+	}
+	
+	protected Map<String, Integer> getConstraintMap() {		
+		Map<String, Integer> map = new HashMap<>();
+
+		List<ConstraintFactory> edgeFactories = getConstraintContext().getEdgeFactories();
+		for(int i=0; i<edgeFactories.size(); i++) {
+			map.put(edgeFactories.get(i).getToken(), i);
+		}
+
+		List<ConstraintFactory> nodeFactories = getConstraintContext().getNodeFactories();
+		for(int i=0; i<nodeFactories.size(); i++) {
+			map.put(nodeFactories.get(i).getToken(), i);
+		}
+		
+		return map;
+	}
+
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter#syncToGraph()
 	 */
 	@Override
 	protected void syncToGraph() {
-		// TODO
+
+		Map<String, Integer> constraintMap = getConstraintMap();
+
+		mxIGraphModel model = graph.getModel();
+		pauseGraphChangeHandling();
+		model.beginUpdate();
+		try {
+			// Clear graph
+			GraphUtils.clearGraph(graph);
+			
+			if(SearchUtils.isEmpty(searchGraph)) {
+				return;
+			}
+			
+			double x = 2*graph.getGridSize();
+			double y = 2*graph.getGridSize();
+			
+			Map<SearchNode, Object> cellMap = new HashMap<>();
+			
+			for(SearchNode root : searchGraph.getRootNodes()) {
+				mxRectangle bounds = layoutNode(root, x, y, null, null, cellMap, constraintMap);
+				x += bounds.getWidth() + graph.getGridSize();
+			}
+			
+			for(SearchEdge edge : searchGraph.getEdges()) {
+				if(edge.getEdgeType()==EdgeType.LINK 
+						|| edge.getEdgeType()==EdgeType.PRECEDENCE) {
+					ConstraintEdgeData edgeData = new ConstraintEdgeData(edge);
+					graph.insertEdge(null, null, edgeData, 
+							cellMap.get(edge.getSource()), cellMap.get(edge.getTarget()));
+				}
+			}
+		} finally {
+			model.endUpdate();
+			resumeGraphChangeHandling();
+		}
+	}
+	
+	protected mxRectangle layoutNode(SearchNode sourceNode, double x, double y, 
+			SearchEdge sourceEdge, Object parent, Map<SearchNode, Object> cellMap,
+			Map<String, Integer> constraintMap) {
+		// Add new vertex
+		ConstraintNodeData nodeData = createNodeData(sourceNode, constraintMap);
+		Object cell = graph.insertVertex(null, null, nodeData, x, y, 30, 30);
+		graph.cellSizeUpdated(cell, false);
+		cellMap.put(sourceNode, cell);
+		
+		mxRectangle bounds = new mxRectangle(graph.getCellGeometry(cell));
+		
+		if(sourceEdge!=null && parent!=null) {
+			ConstraintEdgeData edgeData = createEdgeData(sourceEdge, constraintMap);
+			graph.insertEdge(parent, null, edgeData, parent, cell);
+		}
+		
+		y+= bounds.getHeight()+2*graph.getGridSize();
+		
+		for(int i=0; i<sourceNode.getOutgoingEdgeCount(); i++) {
+			SearchEdge edge = sourceNode.getOutgoingEdgeAt(i);
+			if(edge.getEdgeType()==EdgeType.DOMINANCE
+					|| edge.getEdgeType()==EdgeType.TRANSITIVE) {
+				mxRectangle childBounds = layoutNode(
+						edge.getTarget(), x, y, edge, cell, cellMap, constraintMap);
+				
+				bounds.add(childBounds);
+				
+				x+= childBounds.getWidth()+graph.getGridSize();
+			}
+		}
+		
+		return bounds;
 	}
 
 	/**
@@ -219,12 +446,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	 */
 	@Override
 	protected void syncToData() {
-		pauseChangeHandling();
-		try {
-			searchGraph = (DefaultSearchGraph) snapshot();
-		} finally {
-			resumeChangeHandling();
-		}
+		searchGraph = (DefaultSearchGraph) snapshot();
 	}
 	
 	/**
@@ -252,6 +474,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				node.setNegated(nodeData.isNegated());
 				node.setNodeType(nodeData.getNodeType());
 				node.setConstraints(nodeData.getConstraints());
+				node.setId(nodeData.getId());
 				
 				searchNodes.put(cell, node);
 			} else if(model.isEdge(cell)) {
@@ -260,6 +483,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				edge.setNegated(edgeData.isNegated());
 				edge.setEdgeType(edgeData.getEdgeType());
 				edge.setConstraints(edgeData.getConstraints());
+				edge.setId(edgeData.getId());
 				
 				searchEdges.put(cell, edge);
 			}
@@ -275,8 +499,10 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				int edgeCount = model.getEdgeCount(cell);
 				for(int j=0; j<edgeCount; j++) {
 					Object edge = model.getEdgeAt(cell, j);
-					node.addEdge(searchEdges.get(edge), 
-							model.getTerminal(edge, false)==cell);
+					if(searchEdges.containsKey(edge)) {
+						node.addEdge(searchEdges.get(edge), 
+								model.getTerminal(edge, false)==cell);
+					}
 				}
 			} else if(model.isEdge(cell)) {
 				
@@ -298,6 +524,10 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		searchGraph.setRootNodes(rootNodes.toArray(new SearchNode[0]));
 		searchGraph.setNodes(searchNodes.values().toArray(new SearchNode[0]));
 		searchGraph.setEdges(searchEdges.values().toArray(new SearchEdge[0]));
+		
+		int operator = isDisjuntiveRoots() ? SearchGraph.OPERATOR_DISJUNCTION : 
+			SearchGraph.OPERATOR_CONJUNCTION;
+		searchGraph.setRootOperator(operator);
 		
 		return searchGraph;
 	}
@@ -328,7 +558,29 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		model.beginUpdate();
 		try {
 			Object cell = graph.insertVertex(null, null, createNodeData(), 
-					40, 40, 40, 25);
+					40, 40, 70, 25);
+			
+			//graph.cellSizeUpdated(cell, false);
+
+			if(graphStyle!=null) {
+				model.setStyle(cell, graphStyle.getStyle(this, cell, null));
+			}
+			
+			graph.setSelectionCell(cell);
+		} finally {
+			model.endUpdate();
+		}
+	}
+	public void addDisjunction() {
+
+		mxIGraphModel model = graph.getModel();
+		model.beginUpdate();
+		try {
+			
+			ConstraintNodeData nodeData = createNodeData();
+			nodeData.setNodeType(NodeType.DISJUNCTION);
+			Object cell = graph.insertVertex(null, null, nodeData, 
+					40, 40, 30, 30);
 			
 			graph.cellSizeUpdated(cell, false);
 
@@ -353,7 +605,10 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		
 		model.beginUpdate();
 		try {
-			Object value = orderEdge ? Order.BEFORE : createEdgeData();
+			ConstraintEdgeData value = createEdgeData();
+			if(orderEdge) {
+				value.setEdgeType(EdgeType.PRECEDENCE);
+			}
 			
 			Object cell = graph.insertEdge(null, null, value, source, target);
 			
@@ -374,19 +629,25 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		}
 	}
 
-	public boolean isEnforceTree() {
-		return enforceTree;
+	public boolean isDisjuntiveRoots() {
+		return disjuntiveRoots;
 	}
 
-	public void setEnforceTree(boolean enforceTree) {
-		if(this.enforceTree==enforceTree) {
+	public void setDisjuntiveRoots(boolean disjuntiveRoots) {
+		if(disjuntiveRoots==this.disjuntiveRoots) {
 			return;
 		}
 		
-		boolean oldValue = this.enforceTree;
-		this.enforceTree = enforceTree;
+		boolean oldValue = this.disjuntiveRoots;
+		this.disjuntiveRoots = disjuntiveRoots;
 		
-		firePropertyChange("enforceTree", oldValue, enforceTree); //$NON-NLS-1$
+		if(searchGraph!=null) {
+			int operator = isDisjuntiveRoots() ? SearchGraph.OPERATOR_DISJUNCTION : 
+				SearchGraph.OPERATOR_CONJUNCTION;
+			searchGraph.setRootOperator(operator);
+		}
+		
+		firePropertyChange("disjunctiveRoots", oldValue, disjuntiveRoots); //$NON-NLS-1$
 	}
 
 	public ConstraintContext getConstraintContext() {
@@ -455,7 +716,6 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		public void execute() {
 			context = previous;
 			previous = constraintContext;
-
 			
 			constraintContext = context;
 			
@@ -531,5 +791,30 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			
 			return result;
 		}		
+	}
+	
+	public class CCallbackHandler extends CallbackHandler {
+		
+		public void addDisjunction(ActionEvent e) {
+			if(!canEdit()) {
+				return;
+			}
+			
+			try {
+				ConstraintGraphPresenter.this.addDisjunction();
+			} catch(Exception ex) {
+				UIUtil.beep();
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to add disjunction", ex); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleRootOperator(boolean b) {
+			setDisjuntiveRoots(b);
+		}
+
+		public void toggleRootOperator(ActionEvent e) {
+			// ignore
+		}
 	}
 }

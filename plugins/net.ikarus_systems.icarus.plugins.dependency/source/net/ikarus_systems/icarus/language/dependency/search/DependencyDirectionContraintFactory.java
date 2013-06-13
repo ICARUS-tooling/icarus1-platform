@@ -14,6 +14,7 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
 
 /**
  * @author Markus Gärtner
@@ -34,7 +35,7 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
+			SearchOperator operator, int flags) {
 		return new DependencyDirectionConstraint(value, operator);
 	}
 
@@ -46,8 +47,8 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 	@Override
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[]{
-				SearchOperator.EQUALS,
-				SearchOperator.GROUPING,
+				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.GROUPING,
 		};
 	}
 
@@ -86,6 +87,11 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getDirection();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyDirectionConstraint(getValue(), getOperator());
 		}
 	}
 }

@@ -17,6 +17,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import net.ikarus_systems.icarus.io.IOUtil;
 
 /**
  * @author Markus Gärtner
@@ -76,7 +80,12 @@ public class DefaultFileLocation extends Location {
 	 */
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		return new FileOutputStream(file);
+		OutputStream out = new FileOutputStream(file);
+		if(IOUtil.isZipSource(file.getName())) {
+			out = new GZIPOutputStream(out);
+		}
+		
+		return out;
 	}
 
 	/**
@@ -84,7 +93,11 @@ public class DefaultFileLocation extends Location {
 	 */
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return new FileInputStream(file);
+		InputStream in = new FileInputStream(file);
+		if(IOUtil.isZipSource(file.getName())) {
+			in = new GZIPInputStream(in);
+		}
+		return in;
 	}
 
 }

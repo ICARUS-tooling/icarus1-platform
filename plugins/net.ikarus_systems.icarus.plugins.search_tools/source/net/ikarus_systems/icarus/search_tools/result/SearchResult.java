@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.search_tools.result;
 
+import java.util.List;
+
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
@@ -37,6 +39,8 @@ public interface SearchResult {
 	 * Returns the total count of reported matches in this result  
 	 */
 	int getTotalMatchCount();
+	
+	int getMatchCount(int...groupIndices);
 	
 	/**
 	 * Returns the number of instances that were reported for the
@@ -81,24 +85,29 @@ public interface SearchResult {
 	int getIndexOf(int groupId, Object label);
 	
 	/**
-	 * Returns the entry object at the specified index outside of
-	 * and group-indexing.
+	 * Returns the entry object at the specified index.
 	 * @throws IndexOutOfBoundsException if {@code index} &lt; 0 or
 	 * {@code index} &ge; {@link #getTotalMatchCount()}
 	 */
 	Object getEntry(int index);
 	
+	ResultEntry getRawEntry(int index);
+	
 	/**
 	 * Applies the given {@code permutation} array to the internal order
 	 * of groups and reorders all affected entries in this result.
+	 * <p>
+	 * Returns {@code true} in case the reordering was successful
 	 */
-	void reorder(int[] permutation);
+	boolean reorder(int[] permutation);
 	
 	/**
 	 * Returns a list-oriented view of all the entries for the
 	 * specified combination of group-instances.
 	 */
 	DataList<? extends Object> getEntryList(int...groupIndices);
+	
+	List<ResultEntry> getRawEntryList(int...groupIndices);
 	
 	/**
 	 * Shorthand method for accessing an entry within the list-view
@@ -110,6 +119,8 @@ public interface SearchResult {
 	 * implementation does not support entry retrieval during a running search
 	 */
 	Object getEntryAt(int index, int...groupIndices);
+	
+	ResultEntry getRawEntryAt(int index, int...groupIndices);
 	
 	/**
 	 * Creates and returns a new {@code SearchResult} that is backed by this

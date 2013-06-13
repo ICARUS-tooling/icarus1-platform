@@ -31,7 +31,7 @@ public interface SearchFactory {
 	 * structure (e.g. a factory for tree-structures would reject a full
 	 * grown graph object)
 	 */
-	Search createSearch(SearchQuery query, Options options) throws UnsupportedFormatException;
+	Search createSearch(SearchQuery query, Object target, Options options) throws UnsupportedFormatException;
 	
 	ConstraintContext getConstraintContext();
 	

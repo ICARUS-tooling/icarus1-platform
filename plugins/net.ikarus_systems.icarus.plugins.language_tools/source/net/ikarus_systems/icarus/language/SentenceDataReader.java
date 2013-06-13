@@ -9,9 +9,9 @@
  */
 package net.ikarus_systems.icarus.language;
 
-import java.io.Closeable;
 import java.io.IOException;
 
+import net.ikarus_systems.icarus.io.Reader;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -32,7 +32,7 @@ import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
  * @version $Id$
  *
  */
-public interface SentenceDataReader extends Closeable {
+public interface SentenceDataReader extends Reader<SentenceData> {
 	
 	public static final String INCLUDE_SYSTEM_OPTION = "includeSystem"; //$NON-NLS-1$	
 	public static final String INCLUDE_GOLD_OPTION = "includeGold"; //$NON-NLS-1$

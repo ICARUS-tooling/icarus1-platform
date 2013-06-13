@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.util;
 
+import java.text.DecimalFormat;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -23,9 +24,9 @@ import net.ikarus_systems.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public final class NamingUtil {
+public final class StringUtil {
 
-	private NamingUtil() {
+	private StringUtil() {
 		// no-op
 	}
 
@@ -74,7 +75,7 @@ public final class NamingUtil {
 			try {
 				currentCount = Integer.parseInt(matcher.group(1));
 			} catch(NumberFormatException e) {
-				LoggerFactory.log(NamingUtil.class, Level.SEVERE, 
+				LoggerFactory.log(StringUtil.class, Level.SEVERE, 
 						"Failed to parse existing base name index suffix: "+name, e); //$NON-NLS-1$
 			}
 			return currentCount;
@@ -131,5 +132,11 @@ public final class NamingUtil {
 		.append(s, chunkLength+3, maxLength-chunkLength);
 		
 		return sb.toString();
+	}
+	
+	private static DecimalFormat decimalFormat = new DecimalFormat("#,###"); //$NON-NLS-1$
+	
+	public static synchronized String formatDecimal(int value) {
+		return decimalFormat.format(value);
 	}
 }

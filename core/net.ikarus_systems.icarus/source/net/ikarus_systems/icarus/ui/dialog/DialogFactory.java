@@ -31,7 +31,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.KeyValuePair;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
-import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner 
@@ -226,7 +226,7 @@ public final class DialogFactory {
 	
 	public boolean showOverwriteFileDialog(Component parent, File file) {
 		String path = file.getAbsolutePath();
-		path = NamingUtil.fit(path, 50);
+		path = StringUtil.fit(path, 50);
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
 		

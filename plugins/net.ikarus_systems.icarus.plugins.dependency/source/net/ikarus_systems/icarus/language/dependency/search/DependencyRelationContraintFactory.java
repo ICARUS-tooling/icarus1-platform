@@ -33,8 +33,11 @@ public class DependencyRelationContraintFactory extends AbstractConstraintFactor
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
-		return new DependencyRelationConstraint(value, operator);
+			SearchOperator operator, int flags) {
+		if(isFlagSet(flags, IGNORE_CASE))
+			return new DependencyRelationCIConstraint(value, operator);
+		else
+			return new DependencyRelationConstraint(value, operator);
 	}
 
 	private static class DependencyRelationConstraint extends DefaultConstraint {
@@ -48,6 +51,25 @@ public class DependencyRelationContraintFactory extends AbstractConstraintFactor
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getRelation();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyRelationConstraint(getValue(), getOperator());
+		}
+	}
+
+	private static class DependencyRelationCIConstraint extends DefaultConstraint {
+
+		private static final long serialVersionUID = -3611860983057645172L;
+
+		public DependencyRelationCIConstraint(Object value, SearchOperator operator) {
+			super(TOKEN, value, operator);
+		}
+
+		@Override
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getRelation().toLowerCase();
 		}
 	}
 }

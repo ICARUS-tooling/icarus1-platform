@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.language.coref" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.coref.CoreferencePlugin">
+	
+	<doc>
+		<doc-text>
+			TODO
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.coref.resources.coref" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/coref/icons/" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.coref.CoreferencePreferences" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="net.ikarus_systems.icarus.searchTools" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
+	</requires>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PERSPECTIVES AND VIEWS -->
+	
+	<extension id="CoreferencePerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.coref.coreferencePerspective.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferencePerspective.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.coref.CoreferencePerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/coref/coreference-perspective.gif" />
+		<parameter id="preview" value="net/ikarus_systems/icarus/plugins/coref/coreference-perspective-preview.jpg" />
+	</extension>
+	
+	<!-- HELPERS -->
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="CoreferenceDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.coref.CoreferenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.coref.CoreferenceData" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.coref.CoreferenceDocumentData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.coref.CoreferenceDocumentData" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentSetContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.coref.CoreferenceDocumentSet
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.coref.CoreferenceDocumentSet" />
+	</extension>
+	
+</plugin>

@@ -9,8 +9,12 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
+import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -18,10 +22,13 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
+import javax.swing.JList;
 import javax.swing.ToolTipManager;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -36,6 +43,7 @@ import net.ikarus_systems.icarus.resources.Localizable;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
@@ -183,7 +191,21 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		
 		return builder.getResult();
 	}
+	
+	protected NodeType[] allowedNodeTypes = {
+		NodeType.GENERAL,
+		NodeType.DISJUNCTION,
+		NodeType.ROOT,
+		NodeType.LEAF,
+		NodeType.INTERMEDIATE,
+	};
 
+	protected EdgeType[] allowedEdgeTypes = {
+		EdgeType.DOMINANCE,
+		EdgeType.PRECEDENCE,
+		EdgeType.TRANSITIVE,
+	};
+	
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.jgraph.view.HeavyWeightCellEditor#createVertexEditor()
 	 */
@@ -348,7 +370,8 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		
 		model.beginUpdate();
 		try {
-			graph.cellLabelChanged(cell, nodeData, graph.isAutoSizeCell(cell));
+			model.setValue(cell, nodeData);
+			getPresenter().refreshCells(cell);
 		} finally {
 			model.endUpdate();
 		}
@@ -407,16 +430,70 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		}
 	}
 	
+	private static class GroupingCellRenderer extends DefaultListCellRenderer implements Icon {
+
+		private static final long serialVersionUID = 9171727683720878063L;
+		
+		private Grouping grouping;
+		
+		@Override
+		public Component getListCellRendererComponent(JList<?> list,
+				Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
+			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			
+			grouping = Grouping.getGrouping((int) value);
+			setText(String.valueOf(grouping.getIndex()+1));
+			setIcon(this);
+			
+			return this;
+		}
+
+		/**
+		 * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
+		 */
+		@Override
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			x += 4;
+			y += 4;
+			
+			g.setColor(grouping.getColor());
+			g.fillOval(x, y, 8, 8);
+		}
+
+		/**
+		 * @see javax.swing.Icon#getIconWidth()
+		 */
+		@Override
+		public int getIconWidth() {
+			return 16;
+		}
+
+		/**
+		 * @see javax.swing.Icon#getIconHeight()
+		 */
+		@Override
+		public int getIconHeight() {
+			return 16;
+		}
+		
+	}
+	
 	private static SearchUtilityListCellRenderer sharedRenderer =
 			new SearchUtilityListCellRenderer();
 	
-	private static class ConstraintFormEntry implements FormEntry {
+	private static GroupingCellRenderer sharedGroupingRenderer =
+			new GroupingCellRenderer();
+	
+	private static class ConstraintFormEntry implements FormEntry, ActionListener {
 		
 		private JComboBox<SearchOperator> operatorSelect;
-		private JComponent valueSelect;
+		private JComboBox<Object> valueSelect;
 		private JLabel label;
 		
 		private ConstraintFactory factory;
+		private boolean displayingGroups = false;
+		private Object buffer;
 		
 		ConstraintFormEntry(ConstraintFactory factory) {
 			this.factory = factory;
@@ -427,40 +504,24 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			operatorSelect.setEditable(false);
 			operatorSelect.setRenderer(sharedRenderer);
 			operatorSelect.setMaximumRowCount(operators.length);
+			operatorSelect.addActionListener(this);
 			UIUtil.resizeComponent(operatorSelect, 60, 20);
 			
 			Object[] labelSet = factory.getLabelSet();
 			Class<?> valueClass = factory.getValueClass();
 			Object defaultValue = factory.getDefaultValue();
+
+			valueSelect = labelSet==null ? new JComboBox<>() : new JComboBox<>(labelSet);
 			
-			if(labelSet==null) {
-				JTextField tf = new JTextField(15);
-				
-				if(Integer.class.equals(valueClass)) {
-					tf.setDocument(new NumberDocument());
-				}
-				
-				if(defaultValue!=null) {
-					tf.setText(String.valueOf(defaultValue));
-				}
-				
-				valueSelect = tf;
-			} else {
-				JComboBox<Object> cb = new JComboBox<>(labelSet);
-				
-				if(Integer.class.equals(valueClass)) {
-					JTextComponent editor = (JTextComponent) cb.getEditor().getEditorComponent();
-					editor.setDocument(new NumberDocument());
-				}
-				
-				if(valueClass!=null) {
-					cb.setEditable(true);
-				}
-				
-				cb.setSelectedItem(defaultValue);
-				
-				valueSelect = cb;
+			if(Integer.class.equals(valueClass)) {
+				JTextComponent editor = (JTextComponent) valueSelect.getEditor().getEditorComponent();
+				editor.setDocument(new NumberDocument());
 			}
+			
+			valueSelect.setEditable(valueClass!=null);
+			
+			valueSelect.setSelectedItem(defaultValue);
+			
 			
 			UIUtil.resizeComponent(valueSelect, 100, 20);
 			
@@ -472,21 +533,26 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		 */
 		@Override
 		public ConstraintFormEntry setValue(Object value) {
+			buffer = null;
+			displayingGroups = false;
+			
 			SearchConstraint constraint = (SearchConstraint)value;
 			
 			if(!constraint.getToken().equals(factory.getToken()))
 				throw new IllegalArgumentException("Factory not designed to handle constraints for token: "+constraint.getToken()); //$NON-NLS-1$
-
+			
 			Object currentValue = factory.valueToLabel(constraint.getValue());
 			
 			operatorSelect.setSelectedItem(constraint.getOperator());
-			if(valueSelect instanceof JTextField) {
-				((JTextField)valueSelect).setText(String.valueOf(currentValue));
-			} else {
-				((JComboBox<?>)valueSelect).setSelectedItem(currentValue);
-			}
 			label.setText(factory.getName());
 			label.setToolTipText(factory.getDescription());
+			
+			displayingGroups = constraint.getOperator()==SearchOperator.GROUPING;
+			if(displayingGroups) {
+				displayGroups(currentValue);
+			} else {
+				displayValue(currentValue);
+			}
 			
 			return this;
 		}
@@ -500,17 +566,15 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
 			Object value = null;
 			
-			if(valueSelect instanceof JTextField) {
-				value = ((JTextField)valueSelect).getText();
-			} else {
-				value = ((JComboBox<?>)valueSelect).getSelectedItem();
+			value = valueSelect.getSelectedItem();
+			
+			if(!displayingGroups) {
+				value = factory.labelToValue(value);
+				if(value instanceof String && Integer.class.equals(factory.getValueClass())) {
+					value = Integer.parseInt((String)value);
+				}
 			}
 			
-			value = factory.labelToValue(value);
-			
-			if(value instanceof String && Integer.class.equals(factory.getValueClass())) {
-				value = Integer.parseInt((String)value);
-			}
 			
 			return new DefaultConstraint(factory.getToken(), value, operator);
 		}
@@ -522,15 +586,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		public ConstraintFormEntry clear() {
 			operatorSelect.setSelectedIndex(0);
 			
-			if(valueSelect instanceof JTextField) {
-				((JTextField)valueSelect).setText(null);
+			if(valueSelect.isEditable()) {
+				valueSelect.setSelectedItem(null);
 			} else {
-				JComboBox<?> cb = (JComboBox<?>) valueSelect;
-				if(cb.isEditable()) {
-					cb.setSelectedItem(null);
-				} else {
-					cb.setSelectedIndex(0);
-				}
+				valueSelect.setSelectedIndex(0);
 			}
 			
 			return this;
@@ -549,5 +608,59 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			return this;
 		}
 		
+		private void displayValue(Object value) {
+			valueSelect.setRenderer(sharedRenderer);
+			DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) valueSelect.getModel();
+			model.removeAllElements();
+			
+			Object[] labelSet = factory.getLabelSet();
+			if(labelSet!=null) {
+				for(Object label : labelSet) {
+					model.addElement(label);
+				}
+			}
+			
+			if(value==null) {
+				value = factory.valueToLabel(factory.getDefaultValue());
+			}
+
+			valueSelect.setEditable(factory.getValueClass()!=null);
+			valueSelect.setSelectedItem(value);
+			
+			displayingGroups = false;
+		}
+		
+		private void displayGroups(Object currentLabel) {
+			displayingGroups = true;
+			valueSelect.setRenderer(sharedGroupingRenderer);
+			if(currentLabel==null) {
+				currentLabel = valueSelect.getSelectedItem();
+			}
+			buffer = currentLabel;
+			
+			DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) valueSelect.getModel();
+			model.removeAllElements();
+			for(int i=0; i<=Grouping.getMaxGroupIndex(); i++) {
+				model.addElement(i);
+			}
+			valueSelect.setSelectedIndex(0);
+			valueSelect.setEditable(false);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
+			if(operator==SearchOperator.GROUPING && !displayingGroups) {
+				// Switch to group selection
+				displayGroups(null);
+			} else if(operator!=SearchOperator.GROUPING && displayingGroups) {
+				// Switch to old mode
+				displayValue(buffer);
+				buffer = null;
+			}
+		}
 	}
 }

@@ -13,6 +13,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -27,7 +28,11 @@ public final class UIDummies {
 		// no-ops
 	}
 
-	public static void createDefaultErrorOutput(JComponent container, Throwable t) {
+	public static JComponent createDefaultErrorOutput(JComponent container, Throwable t) {
+		if(container==null) {
+			container = new JPanel();
+		}
+		
 		container.removeAll();
 		if(!(container.getLayout() instanceof BorderLayout)) {
 			container.setLayout(new BorderLayout());
@@ -54,5 +59,7 @@ public final class UIDummies {
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
         textArea.setCaretPosition(0);
+        
+        return container;
 	}
 }

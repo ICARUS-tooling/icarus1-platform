@@ -128,10 +128,11 @@ public class QueryEditorView extends View {
 
 		JScrollPane scrollPane = new JScrollPane(queryPane);
 		scrollPane.setBorder(null);
+		scrollPane.setPreferredSize(new Dimension(200, 50));
 		
 		JPanel lowerPanel = new JPanel(new BorderLayout());
 		lowerPanel.add(createToolBar(), BorderLayout.NORTH);
-		lowerPanel.add(queryPane, BorderLayout.CENTER);
+		lowerPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, 
 				graphPresenter.getPresentingComponent(), lowerPanel);
@@ -238,6 +239,8 @@ public class QueryEditorView extends View {
 		if(Commands.PRESENT.equals(message.getCommand())
 				|| Commands.DISPLAY.equals(message.getCommand())) {
 			if(message.getData() instanceof SearchDescriptor) {
+				selectViewTab();
+				
 				setSearchDescriptor((SearchDescriptor)message.getData());
 				return message.successResult(this, null);
 			} else {
@@ -273,7 +276,7 @@ public class QueryEditorView extends View {
 					return;
 				}
 				
-				SearchGraph searchGraph = graphPresenter.getData();
+				SearchGraph searchGraph = graphPresenter.snapshot();
 				if(searchGraph==null) {
 					return;
 				}
@@ -284,6 +287,7 @@ public class QueryEditorView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to synchronize query", ex); //$NON-NLS-1$
+				UIUtil.beep();
 			}
 		}
 		
@@ -309,6 +313,7 @@ public class QueryEditorView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to synchronize graph", ex); //$NON-NLS-1$
+				UIUtil.beep();
 			}
 		}
 	}

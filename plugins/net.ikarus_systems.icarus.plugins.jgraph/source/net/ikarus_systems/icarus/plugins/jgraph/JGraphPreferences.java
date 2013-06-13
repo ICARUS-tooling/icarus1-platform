@@ -11,9 +11,6 @@ package net.ikarus_systems.icarus.plugins.jgraph;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
-import java.util.Hashtable;
-import java.util.Map;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -21,6 +18,7 @@ import javax.swing.ListCellRenderer;
 
 import net.ikarus_systems.icarus.config.ConfigBuilder;
 import net.ikarus_systems.icarus.config.ConfigConstants;
+import net.ikarus_systems.icarus.config.ConfigUtils;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 
@@ -113,17 +111,7 @@ public class JGraphPreferences {
 		// VERTEX FONT SUBGROUP
 		builder.addGroup("font", true); //$NON-NLS-1$
 		builder.virtual();
-		builder.setProperties(builder.addOptionsEntry("fontFamily", 0,  //$NON-NLS-1$
-				"Dialog", //$NON-NLS-1$
-				"Arial", //$NON-NLS-1$
-				"Verdana", //$NON-NLS-1$
-				"Times New Roman"), //$NON-NLS-1$
-					ConfigConstants.RENDERER, fontFamilyRenderer);
-		// TODO add more font family types
-		builder.addIntegerEntry("fontSize", 12, 5, 35); //$NON-NLS-1$
-		builder.addColorEntry("fontColor", Color.black.getRGB()); //$NON-NLS-1$
-		builder.addBooleanEntry("bold", false); //$NON-NLS-1$
-		builder.addBooleanEntry("italic", false); //$NON-NLS-1$
+		ConfigUtils.buildDefaultFontConfig(builder, "Dialog"); //$NON-NLS-1$
 		builder.addBooleanEntry("underline", false); //$NON-NLS-1$
 		builder.addBooleanEntry("shadow", false); //$NON-NLS-1$
 		builder.back();
@@ -163,16 +151,7 @@ public class JGraphPreferences {
 		// EDGE FONT SUBGROUP
 		builder.addGroup("font", true); //$NON-NLS-1$
 		builder.virtual();
-		builder.setProperties(builder.addOptionsEntry("fontFamily", 0,  //$NON-NLS-1$
-				"Dialog", //$NON-NLS-1$
-				"Arial", //$NON-NLS-1$
-				"Verdana", //$NON-NLS-1$
-				"Times New Roman"), //$NON-NLS-1$
-					ConfigConstants.RENDERER, fontFamilyRenderer);
-		builder.addIntegerEntry("fontSize", 12, 5, 35); //$NON-NLS-1$
-		builder.addColorEntry("fontColor", Color.black.getRGB()); //$NON-NLS-1$
-		builder.addBooleanEntry("bold", false); //$NON-NLS-1$
-		builder.addBooleanEntry("italic", false); //$NON-NLS-1$
+		ConfigUtils.buildDefaultFontConfig(builder, "Dialog"); //$NON-NLS-1$
 		builder.addBooleanEntry("underline", false); //$NON-NLS-1$
 		builder.addBooleanEntry("shadow", false); //$NON-NLS-1$
 		builder.back();
@@ -182,41 +161,6 @@ public class JGraphPreferences {
 		builder.back();
 		// END
 	}
-
-	public static ListCellRenderer<Object> fontFamilyRenderer = new DefaultListCellRenderer() {
-
-		private static final long serialVersionUID = -333044504694220350L;
-		
-		private Map<String, Font> fonts;
-		
-		private Font getFont(String name) {
-			if(fonts==null)
-				fonts = new Hashtable<String, Font>();
-			
-			Font font = fonts.get(name);
-			
-			if(font==null) {
-				font = getFont();
-				font = new Font(name, font.getStyle(), font.getSize());
-				fonts.put(name, font);
-			}
-			
-			return font;
-		}
-
-		@Override
-		public Component getListCellRendererComponent(JList<?> list,
-                Object value,
-                int index,
-                boolean isSelected,
-                boolean cellHasFocus) {
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			
-			setFont(getFont((String) value));
-			
-			return this;
-		}
-	};
 	
 	public static ListCellRenderer<?> shapeRenderer = new DefaultListCellRenderer() {
 

@@ -117,6 +117,8 @@ public class ConstraintContext {
 	public ConstraintFactory getFactory(String token) {
 		if(token==null || token.isEmpty())
 			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+
+		token = token.toLowerCase();
 		
 		Object factory = factories.get(token);
 		if(factory!=null && !(factory instanceof ConstraintFactory)) {

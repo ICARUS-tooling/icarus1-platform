@@ -258,6 +258,7 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
             String trace = HtmlUtils.escapeHTML(sw.toString());
             trace = trace.replaceAll("\r\n|\n|\r", BR); //$NON-NLS-1$
             trace = trace.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"); //$NON-NLS-1$ //$NON-NLS-2$
+            trace = trace.replaceAll(" ", "&nbsp;"); //$NON-NLS-1$ //$NON-NLS-2$
             template.setRawValue("stackTrace", trace); //$NON-NLS-1$
 		} else {
 			template.setValue("stackTrace", NONE); //$NON-NLS-1$

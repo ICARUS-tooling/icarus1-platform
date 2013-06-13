@@ -16,6 +16,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.search_tools.EdgeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.SearchEdge;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 
 /**
  * @author Markus Gärtner
@@ -39,6 +41,10 @@ public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
 		copyFrom(source);
 	}
 
+	public ConstraintEdgeData(SearchEdge source) {
+		copyFrom(source);
+	}
+
 	public ConstraintEdgeData(int size) {
 		constraints = new SearchConstraint[size];
 	}
@@ -51,16 +57,15 @@ public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
 	public void copyFrom(ConstraintEdgeData source) {
 		negated = source.negated;
 		edgeType = source.edgeType;
-		constraints = null;
-		
-		if(source.constraints!=null) {
-			int size = source.constraints.length;
-			SearchConstraint[] newConstraints = new SearchConstraint[size];
-			for(int i=0; i<size; i++) {
-				newConstraints[i] = source.constraints[i].clone();
-			}
-			constraints = newConstraints;
-		}
+		id = source.id;
+		constraints = SearchUtils.cloneConstraints(source.constraints);
+	}
+
+	public void copyFrom(SearchEdge source) {
+		negated = source.isNegated();
+		edgeType = source.getEdgeType();
+		id = source.getId();
+		constraints = SearchUtils.cloneConstraints(source.getConstraints());
 	}
 
 	/**

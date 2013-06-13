@@ -16,6 +16,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.SearchNode;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 
 /**
  * @author Markus Gärtner
@@ -39,6 +41,10 @@ public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
 		copyFrom(source);
 	}
 
+	public ConstraintNodeData(SearchNode source) {
+		copyFrom(source);
+	}
+
 	public ConstraintNodeData(int size) {
 		constraints = new SearchConstraint[size];
 	}
@@ -51,16 +57,15 @@ public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
 	public void copyFrom(ConstraintNodeData source) {
 		negated = source.negated;
 		nodeType = source.nodeType;
-		constraints = null;
-		
-		if(source.constraints!=null) {
-			int size = source.constraints.length;
-			SearchConstraint[] newConstraints = new SearchConstraint[size];
-			for(int i=0; i<size; i++) {
-				newConstraints[i] = source.constraints[i].clone();
-			}
-			constraints = newConstraints;
-		}
+		id = source.id;
+		constraints = SearchUtils.cloneConstraints(source.constraints);
+	}
+	
+	public void copyFrom(SearchNode source) {
+		negated = source.isNegated();
+		nodeType = source.getNodeType();
+		id = source.getId();
+		constraints = SearchUtils.cloneConstraints(source.getConstraints());
 	}
 
 	public NodeType getNodeType() {

@@ -34,7 +34,6 @@ import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.plugins.search_tools.SearchToolsConstants;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
-import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
@@ -45,7 +44,7 @@ import net.ikarus_systems.icarus.ui.dialog.FormBuilder;
 import net.ikarus_systems.icarus.ui.dialog.SelectFormEntry;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 
@@ -66,9 +65,6 @@ public class SearchManagerView extends View {
 	protected Handler handler;
 	
 	protected CallbackHandler callbackHandler;
-	
-	protected Extension currentFactoryExtension;
-	protected SearchFactory currentFactory;
 
 	public SearchManagerView() {
 		// no-op
@@ -255,13 +251,31 @@ public class SearchManagerView extends View {
 			}  catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to forward editing of query", ex); //$NON-NLS-1$
+				UIUtil.beep();
 			}
 			
 		}
 		
 		public void selectFactory(ActionEvent e) {
-			// TODO
-			Core.showNotice();
+			if(currentSearchEditor.getEditingItem()==null) {
+				return;
+			}
+			
+			try {
+				Collection<Extension> extensions = SearchManager.getInstance().availableSearchFactories();
+				Extension extension = PluginUtil.showExtensionDialog(getFrame(), 
+						"plugins.searchTools.searchManagerView.dialogs.selectFactory.title",  //$NON-NLS-1$
+						extensions, true);
+
+				if(extension==null) {
+					return;
+				}
+				
+				currentSearchEditor.getEditingItem().setFactoryExtension(extension);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to select new search factory", ex); //$NON-NLS-1$
+			}
 		}
 		
 		public void viewResult(ActionEvent e) {
@@ -322,12 +336,12 @@ public class SearchManagerView extends View {
 			formBuilder.setValue("factory", PluginUtil.getIdentity(descriptor.getFactoryExtension())); //$NON-NLS-1$
 			
 			// Target
-			String name = NamingUtil.getName(descriptor.getTarget());
+			String name = StringUtil.getName(descriptor.getTarget());
 			if(name==null || name.isEmpty()) {
 				name = ResourceManager.getInstance().get("plugins.searchTools.undefinedStats"); //$NON-NLS-1$
 			}
 			//TODO DUMMY
-			name = "Treebank [english_conll08]"; //$NON-NLS-1$
+			//name = "Treebank [english_conll08]"; //$NON-NLS-1$
 			formBuilder.setValue("target", name); //$NON-NLS-1$
 			
 			// Query
@@ -336,7 +350,7 @@ public class SearchManagerView extends View {
 				query = ResourceManager.getInstance().get("plugins.searchTools.emptyStats"); //$NON-NLS-1$
 			}
 			// TODO DUMMY
-			query = "2 nodes, 1 edge, 1 root"; //$NON-NLS-1$
+			//query = "2 nodes, 1 edge, 1 root"; //$NON-NLS-1$
 			formBuilder.setValue("query", query); //$NON-NLS-1$
 			
 			// Result

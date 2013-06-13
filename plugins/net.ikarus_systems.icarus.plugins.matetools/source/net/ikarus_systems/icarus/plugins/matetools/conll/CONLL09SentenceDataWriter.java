@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataWriter;
 import net.ikarus_systems.icarus.language.UnsupportedSentenceDataException;
@@ -96,7 +97,7 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 					throw new InterruptedException();
 				
 				sdd = (SimpleDependencyData) data;
-				currentData.init(sdd.getForms());
+				currentData.init(LanguageUtils.getForms(sdd));
 				
 				if (gold){
 					initGold(currentData, sdd.length());

@@ -17,6 +17,6 @@
 	${message}
 	<p>
 	<h3><img src='stckframe_obj.gif' />&nbsp;${captionStackTrace}:</h3>
-	${stackTrace}	
+	<font face='Consolas'>${stackTrace}</font>	
 </body>
 </html>

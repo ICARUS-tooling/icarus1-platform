@@ -190,14 +190,6 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see net.ikarus_systems.icarus.language.SentenceData#getForms()
-		 */
-		@Override
-		public String[] getForms() {
-			return forms;
-		}
-
-		/**
 		 * @see net.ikarus_systems.icarus.language.SentenceData#isEmpty()
 		 */
 		@Override

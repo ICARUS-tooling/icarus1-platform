@@ -72,7 +72,7 @@ import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
-import net.ikarus_systems.icarus.util.NamingUtil;
+import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
@@ -804,8 +804,8 @@ public class TreebankExplorerView extends View {
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.ioException",  //$NON-NLS-1$
-						NamingUtil.fit(file.getAbsolutePath(), 100),
-						NamingUtil.fit(ex.getMessage(), 100));
+						StringUtil.fit(file.getAbsolutePath(), 100),
+						StringUtil.fit(ex.getMessage(), 100));
 				return;
 			}
 			
@@ -813,7 +813,7 @@ public class TreebankExplorerView extends View {
 			DialogFactory.getGlobalFactory().showInfo(getFrame(), 
 					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.result",  //$NON-NLS-1$
-					treebanks.size(), NamingUtil.fit(file.getAbsolutePath(), 100));
+					treebanks.size(), StringUtil.fit(file.getAbsolutePath(), 100));
 		}
 		
 		// TODO switch execution to background task?
@@ -840,8 +840,8 @@ public class TreebankExplorerView extends View {
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.ioException",  //$NON-NLS-1$
-						NamingUtil.fit(file.getAbsolutePath(), 100),
-						NamingUtil.fit(ex.toString(), 100));
+						StringUtil.fit(file.getAbsolutePath(), 100),
+						StringUtil.fit(ex.toString(), 100));
 				return;
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
@@ -849,8 +849,8 @@ public class TreebankExplorerView extends View {
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.invalidContent",  //$NON-NLS-1$
-						NamingUtil.fit(file.getAbsolutePath(), 100),
-						NamingUtil.fit(ex.toString(), 100));
+						StringUtil.fit(file.getAbsolutePath(), 100),
+						StringUtil.fit(ex.toString(), 100));
 				return;
 			}
 			

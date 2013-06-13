@@ -84,6 +84,7 @@ public abstract class AbstractEditorPanePresenter<T extends Object> implements A
 			contentPane = new JEditorPane("text/html", getDefaultText()); //$NON-NLS-1$
 			contentPane.setEditable(false);
 			contentPane.setBorder(UIUtil.defaultContentBorder);
+			UIUtil.disableCaretScroll(contentPane);
 			
 			scrollPane = new JScrollPane(contentPane);
 			scrollPane.setBorder(null);

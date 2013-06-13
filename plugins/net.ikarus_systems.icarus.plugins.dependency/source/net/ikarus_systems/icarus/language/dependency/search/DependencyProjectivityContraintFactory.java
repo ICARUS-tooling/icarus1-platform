@@ -14,6 +14,7 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
 
 /**
  * @author Markus Gärtner
@@ -34,7 +35,7 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
+			SearchOperator operator, int flags) {
 		return new DependencyProjectivityConstraint(value, operator);
 	}
 
@@ -46,8 +47,8 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 	@Override
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[]{
-				SearchOperator.EQUALS,
-				SearchOperator.GROUPING,
+				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.GROUPING,
 		};
 	}
 
@@ -86,6 +87,11 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyProjectivityConstraint(getValue(), getOperator());
 		}
 	}
 }

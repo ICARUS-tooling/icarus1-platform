@@ -138,6 +138,22 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="SearchOperator">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Operator class itself, required to have no-args constructor and
+					extend net.ikarus_systems.icarus.search_tools.SearchOperator!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="SearchToolsView" parent-point-id="View" 
 			parent-plugin-id="net.ikarus_systems.icarus.core">
 		<doc>

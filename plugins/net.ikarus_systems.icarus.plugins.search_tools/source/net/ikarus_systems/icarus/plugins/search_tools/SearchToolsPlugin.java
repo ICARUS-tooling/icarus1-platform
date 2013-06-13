@@ -15,6 +15,8 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
+import net.ikarus_systems.icarus.search_tools.SearchOperator;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
 import net.ikarus_systems.icarus.util.ClassProxy;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
@@ -38,7 +40,33 @@ public class SearchToolsPlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
+		registerSearchOperators();
 		registerConstraintFactories();
+	}
+	
+	private void registerSearchOperators() {
+		
+		SearchOperator.register(DefaultSearchOperator.EQUALS);
+		SearchOperator.register(DefaultSearchOperator.EQUALS_NOT);
+		SearchOperator.register(DefaultSearchOperator.MATCHES);
+		SearchOperator.register(DefaultSearchOperator.MATCHES_NOT);
+		SearchOperator.register(DefaultSearchOperator.CONTAINS);
+		SearchOperator.register(DefaultSearchOperator.CONTAINS_NOT);
+		SearchOperator.register(DefaultSearchOperator.LESS_THAN);
+		SearchOperator.register(DefaultSearchOperator.LESS_OR_EQUAL);
+		SearchOperator.register(DefaultSearchOperator.GREATER_THAN);
+		SearchOperator.register(DefaultSearchOperator.GREATER_OR_EQUAL);
+		SearchOperator.register(DefaultSearchOperator.GROUPING);
+
+		for(Extension extension : getDescriptor().getExtensionPoint("SearchOperator").getConnectedExtensions()) { //$NON-NLS-1$
+			try {
+				SearchOperator operator = (SearchOperator)PluginUtil.instantiate(extension);
+				SearchOperator.register(operator);
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to register search-operator: "+extension.getUniqueId(), e); //$NON-NLS-1$
+			}
+		}
 	}
 	
 	/**
@@ -89,7 +117,7 @@ public class SearchToolsPlugin extends Plugin {
 			
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to register cosntraint context: "+extension.getUniqueId(), e); //$NON-NLS-1$
+						"Failed to register constraint context: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
 		}
 	}

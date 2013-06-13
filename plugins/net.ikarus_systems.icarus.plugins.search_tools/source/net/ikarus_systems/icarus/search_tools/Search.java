@@ -25,15 +25,15 @@ public abstract class Search extends PropertyChangeSource {
 	
 	private Object lock = new Object();
 	
-	private final SearchQuery query;
+	private final SearchDescriptor descriptor;
 	
 	private AtomicBoolean cancelled = new AtomicBoolean();
 	
-	protected Search(SearchQuery query) {
-		if(query==null)
-			throw new IllegalArgumentException("Invalid query"); //$NON-NLS-1$
+	protected Search(SearchDescriptor descriptor) {
+		if(descriptor==null)
+			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
 		
-		this.query = query;
+		this.descriptor = descriptor;
 	}
 
 	final void setState(SearchState state) {
@@ -52,12 +52,22 @@ public abstract class Search extends PropertyChangeSource {
 		}
 	}
 	
+	public final SearchDescriptor getDescriptor() {
+		return descriptor;
+	}
+	
 	public final SearchQuery getQuery() {
-		return query;
+		return descriptor.getQuery();
 	}
 	
 	public final boolean isCancelled() {
 		return cancelled.get();
+	}
+	
+	public final boolean isDone() {
+		synchronized (lock) {
+			return state==SearchState.FINISHED || state==SearchState.CANCELLED;
+		}
 	}
 	
 	/**
@@ -85,7 +95,7 @@ public abstract class Search extends PropertyChangeSource {
 	 * Note that an implementation should regularly check for user originated
 	 * cancellation by invoking {@link #isCancelled()}.
 	 */
-	public abstract void doSearch() throws Exception;
+	public abstract void execute() throws Exception;
 	
 	/**
 	 * Returns the (estimated) progress of the search in the range

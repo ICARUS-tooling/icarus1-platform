@@ -273,6 +273,19 @@
 				</doc-text>
 			</doc>
 		</parameter-def>
+		<parameter-def id="activateEarly" multiplicity="none-or-one" default-value="false" type="boolean">
+			<doc>
+				<doc-text>
+					Hint for enclosing perspectives on when to activate this view.
+					Per default a view will be activated when its container component
+					is made visible for the first time. By setting this parameter to
+					'true' a view can request being loaded as soon as possible (the
+					exact activation time still depends on the perspective hosting this view).
+					This is essential for views that do listen to events dispatched by other
+					views via broadcasts (while not activated a view cannot register such listeners).
+				</doc-text>
+			</doc>
+		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="ManagementView" parent-point-id="View" 
@@ -672,6 +685,7 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="low" />
 		<parameter id="requiresTab" value="false" />
+		<parameter id="activateEarly" value="true" />
 		
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">
@@ -694,6 +708,7 @@
 		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/core/explorer/extension-point-outline-view.gif" />
 		<parameter id="alignment" value="right" />
 		<parameter id="priority" value="standard" />
+		<parameter id="activateEarly" value="true" />
 		
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">

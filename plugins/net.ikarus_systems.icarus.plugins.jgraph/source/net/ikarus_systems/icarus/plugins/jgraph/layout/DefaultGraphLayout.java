@@ -45,7 +45,11 @@ public class DefaultGraphLayout implements GraphLayout {
 	 */
 	@Override
 	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
-		return "defaultEdge"; //$NON-NLS-1$
+		String style = owner.getGraph().getModel().getStyle(edge);
+		if(style==null || style.isEmpty()) {
+			style = "defaultEdge"; //$NON-NLS-1$
+		}
+		return style;
 	}
 
 	/**

@@ -33,7 +33,7 @@ public interface SentenceData extends Serializable {
 	 * the terminal symbols) 
 	 * @return the {@code form} tokens of the underlying sentence
 	 */
-	String[] getForms();
+	String getForm(int index);
 
 	/**
 	 * Returns {@code true} if this {@code SentenceData} object

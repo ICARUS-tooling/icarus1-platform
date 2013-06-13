@@ -15,6 +15,9 @@ import java.awt.FontMetrics;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
+import net.ikarus_systems.icarus.util.id.Identifiable;
+import net.ikarus_systems.icarus.util.id.Identity;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -35,11 +38,24 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
+		String tooltip = null;
+		if(value instanceof Identifiable) {
+			value = ((Identifiable)value).getIdentity();
+		}
+		if(value instanceof Identity) {
+			Identity identity = (Identity) value;
+			value = identity.getName();
+			tooltip = identity.getDescription();
+		}
+		
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 		
-		String tooltip = getText();
 		int columnWidth = list.getWidth();
 		int textWidth = 0;
+		
+		if(tooltip==null) {
+			tooltip = getText();
+		}
 		
 		if(tooltip!=null && !tooltip.isEmpty()) {
 			FontMetrics fm = getFontMetrics(getFont());

@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 
 /**
@@ -33,8 +34,11 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator) {
-		return new DependencyLemmaConstraint(value, operator);
+			SearchOperator operator, int flags) {
+		if(isFlagSet(flags, IGNORE_CASE))
+			return new DependencyLemmaCIConstraint(value, operator);
+		else
+			return new DependencyLemmaConstraint(value, operator);
 	}
 
 	private static class DependencyLemmaConstraint extends DefaultConstraint {
@@ -48,6 +52,30 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 		@Override
 		protected Object prepareValue(Object value) {
 			return ((DependencyTargetTree)value).getLemma();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyLemmaConstraint(getValue(), getOperator());
+		}
+	}
+
+	private static class DependencyLemmaCIConstraint extends DefaultCaseInsensitiveConstraint {
+
+		private static final long serialVersionUID = -8582367322352411091L;
+
+		public DependencyLemmaCIConstraint(Object value, SearchOperator operator) {
+			super(TOKEN, value, operator);
+		}
+
+		@Override
+		protected Object prepareValue(Object value) {
+			return ((DependencyTargetTree)value).getLemma().toLowerCase();
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new DependencyLemmaCIConstraint(getValue(), getOperator());
 		}
 	}
 }

@@ -799,13 +799,15 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				"plugins.jgraph.graphPresenter.addOrderEdgeAction"); //$NON-NLS-1$
 	}
 	
+	protected String editablePopupMenuListId = "plugins.jgraph.graphPresenter.editablePopupMenuList"; //$NON-NLS-1$
+	protected String uneditablePopupMenuListId = "plugins.jgraph.graphPresenter.uneditablePopupMenuList"; //$NON-NLS-1$
+	
 	protected void showPopup(MouseEvent trigger) {
 		if(popupMenu==null) {
 			// Create new popup menu
 			
-			String actionListId = isEditable() ?
-					"plugins.jgraph.graphPresenter.editablePopupMenuList" //$NON-NLS-1$
-					: "plugins.jgraph.graphPresenter.uneditablePopupMenuList"; //$NON-NLS-1$
+			String actionListId = isEditable() ? editablePopupMenuListId 
+					: uneditablePopupMenuListId;
 			
 			Options options = new Options();
 			popupMenu = getActionManager().createPopupMenu(actionListId, options);
@@ -1331,7 +1333,9 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		try {
 			for(Object cell : cells) {
 				model.setStyle(cell, graphStyle.getStyle(this, cell, styleOptions));
-				graph.cellSizeUpdated(cell, false);
+				if(model.isVertex(cell)) {
+					graph.cellSizeUpdated(cell, false);
+				}
 				if(graphLayout!=null && model.isEdge(cell)) {
 					model.setStyle(cell, graphLayout.getEdgeStyle(this, cell, layoutOptions));
 				}
@@ -1399,6 +1403,10 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	
 	public boolean isOrderEdge(Object cell) {
 		return GraphUtils.isOrderEdge(graph.getModel(), cell);
+	}
+	
+	public boolean isLinkEdge(Object cell) {
+		return false;
 	}
 	
 	public void moveCells(Object[] cells, double deltaX, double deltaY) {
@@ -2305,14 +2313,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			// no-op
 		}
 		
-		protected void beep() {
-			try {
-				Toolkit.getDefaultToolkit().beep();
-			} catch(Exception e) {
-				// ignore
-			}
-		}
-		
 		/**
 		 * @see GraphPresenter#cloneCells(Object[])
 		 */
@@ -2330,7 +2330,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.cloneCells(cells);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to clone cells", ex); //$NON-NLS-1$
 			}
@@ -2353,7 +2353,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.deleteCells(cells);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to delete cells", ex); //$NON-NLS-1$
 			}
@@ -2419,7 +2419,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.moveCells(cells, deltaX, deltaY);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to move cells", ex); //$NON-NLS-1$
 			}
@@ -2448,7 +2448,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.copyCells();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to copy cells", ex); //$NON-NLS-1$
 			}
@@ -2470,7 +2470,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.editCell(cell);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to edit cell: "+cell, ex); //$NON-NLS-1$
 			}
@@ -2487,7 +2487,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.clearGraph();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to clear graph", ex); //$NON-NLS-1$
 			}
@@ -2598,7 +2598,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				}
 				
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to export cells", ex); //$NON-NLS-1$
 				
@@ -2652,7 +2652,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				}
 				
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to import cells", ex); //$NON-NLS-1$
 				
@@ -2670,7 +2670,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.printGraph();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to add node", ex); //$NON-NLS-1$
 			}
@@ -2687,7 +2687,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.addNode();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to add node", ex); //$NON-NLS-1$
 			}
@@ -2704,7 +2704,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				addEdge(e, false);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to add edge", ex); //$NON-NLS-1$
 			}
@@ -2721,7 +2721,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				addEdge(e, true);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to add order edge", ex); //$NON-NLS-1$
 			}
@@ -2759,7 +2759,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.undo();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to undo edit", ex); //$NON-NLS-1$
 			}
@@ -2776,7 +2776,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.redo();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed redo edit", ex); //$NON-NLS-1$
 			}
@@ -2789,7 +2789,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.zoomIn();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to zoom in", ex); //$NON-NLS-1$
 			}
@@ -2802,7 +2802,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.zoomOut();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to zoom out", ex); //$NON-NLS-1$
 			}
@@ -2815,7 +2815,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.zoomActual();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to reset zoom", ex); //$NON-NLS-1$
 			}
@@ -2828,7 +2828,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.openConfig();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$
 			}
@@ -2841,7 +2841,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.rebuildGraph();
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to rebuild graph", ex); //$NON-NLS-1$
 			}
@@ -2863,7 +2863,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.collapseCells(cells);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to collapse cells", ex); //$NON-NLS-1$
 			}
@@ -2885,7 +2885,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				GraphPresenter.this.expandCells(cells);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to expand cells", ex); //$NON-NLS-1$
 			}
@@ -2903,7 +2903,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				setAutoZoomEnabled(b);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle 'autoZoomEnabled' state", ex); //$NON-NLS-1$
 			}
@@ -2921,7 +2921,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			try {
 				setCompressEnabled(b);
 			} catch(Exception ex) {
-				beep();
+				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle 'compressEnabled' state", ex); //$NON-NLS-1$
 			}

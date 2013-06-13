@@ -122,6 +122,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 	}
 	
 	protected boolean isDataMutable() {
+		// obsolete check
 		return data instanceof MutableDependencyData;
 	}
 
