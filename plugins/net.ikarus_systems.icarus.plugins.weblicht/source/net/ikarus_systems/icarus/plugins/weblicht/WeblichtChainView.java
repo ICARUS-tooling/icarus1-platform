@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
@@ -147,7 +146,7 @@ public class WeblichtChainView extends View {
 	@Override
 	public void reset() {
 		UIUtil.expandAll(weblichtTree, true);
-		//weblichtTree.expandPath(new TreePath(weblichtTree.getModel().getRoot()));
+		weblichtTree.expandPath(new TreePath(weblichtTree.getModel().getRoot()));
 
 	}
 	
@@ -606,7 +605,7 @@ public class WeblichtChainView extends View {
 				final String input = inputText;
 
 				// Construct a new SwingWorker
-				worker = new SwingWorker<TextCorpusStreamed, Void>() {
+				worker = new SwingWorker<TextCorpusStreamed, Void>() {					
 
 					@Override
 					protected TextCorpusStreamed doInBackground() {
@@ -633,8 +632,16 @@ public class WeblichtChainView extends View {
 							Message message = new Message(this,
 									Commands.DISPLAY, tcfList, options);
 							sendRequest(null, message);
+							
+							System.out.println("Worker " + isCancelled() + isDone());
+							
+							if (isDone()) {
+								//ActionManager.globalManager()
+								
+							}
+							
 
-							System.out.println("Finished Executino / disable break option"); //$NON-NLS-1$
+							//System.out.println("Finished Executino / disable break option"); //$NON-NLS-1$
 						} catch (InterruptedException e) {
 							LoggerFactory
 									.log(this,

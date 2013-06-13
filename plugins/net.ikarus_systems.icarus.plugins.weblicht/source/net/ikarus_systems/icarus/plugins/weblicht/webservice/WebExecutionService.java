@@ -12,13 +12,13 @@ package net.ikarus_systems.icarus.plugins.weblicht.webservice;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
-import net.ikarus_systems.icarus.ui.events.EventSource;
-import net.ikarus_systems.icarus.util.mpi.Message;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -38,8 +38,8 @@ import de.tuebingen.uni.sfs.wlf1.tc.xb.TextCorpusLayerTag;
 public class WebExecutionService {
 
 	protected Client client;
+	protected Map<String, TextCorpusLayerTag> tcfTags;
 
-	private EventSource eventSource;
 	private static WebExecutionService instance;
 
 	public static WebExecutionService getInstance() {
@@ -139,10 +139,47 @@ public class WebExecutionService {
 		}
 		//System.out.println("Webresult: " + result);		
 		return createTCFfromString(result, getReadableLayerTags(query));
-
-
 	}
 
+	
+	
+	@SuppressWarnings("deprecation")
+	private void initializeTCFLayerTags() {
+		
+		tcfTags = new HashMap<String,TextCorpusLayerTag>();
+		
+		tcfTags.put("text", TextCorpusLayerTag.TEXT); //$NON-NLS-1$
+		tcfTags.put("tokens", TextCorpusLayerTag.TOKENS); //$NON-NLS-1$
+		tcfTags.put("sentences", TextCorpusLayerTag.SENTENCES); //$NON-NLS-1$
+		tcfTags.put("lemmas", TextCorpusLayerTag.LEMMAS); //$NON-NLS-1$
+		tcfTags.put("postags", TextCorpusLayerTag.POSTAGS); //$NON-NLS-1$
+		tcfTags.put("morphology", TextCorpusLayerTag.MORPHOLOGY); //$NON-NLS-1$
+		
+		//added becouse of "inconsistant" service descriptions
+		tcfTags.put("depparsing", TextCorpusLayerTag.PARSING_DEPENDENCY); //$NON-NLS-1$
+	
+		
+		// not used but for completeness
+		tcfTags.put("parsing_constituent", TextCorpusLayerTag.PARSING_CONSTITUENT); //$NON-NLS-1$
+		tcfTags.put("parsing_dependency", TextCorpusLayerTag.PARSING_DEPENDENCY); //$NON-NLS-1$
+		tcfTags.put("relations", TextCorpusLayerTag.RELATIONS); //$NON-NLS-1$
+		tcfTags.put("names_entities", TextCorpusLayerTag.NAMED_ENTITIES); //$NON-NLS-1$
+		tcfTags.put("references", TextCorpusLayerTag.REFERENCES); //$NON-NLS-1$
+		tcfTags.put("synonymy", TextCorpusLayerTag.SYNONYMY); //$NON-NLS-1$
+		tcfTags.put("antonymy", TextCorpusLayerTag.ANTONYMY); //$NON-NLS-1$
+		tcfTags.put("hyponymy", TextCorpusLayerTag.HYPONYMY); //$NON-NLS-1$
+		tcfTags.put("hyperonymy", TextCorpusLayerTag.HYPERONYMY); //$NON-NLS-1$
+		tcfTags.put("word_splittings", TextCorpusLayerTag.WORD_SPLITTINGS); //$NON-NLS-1$
+		tcfTags.put("phonetics", TextCorpusLayerTag.PHONETICS); //$NON-NLS-1$
+		tcfTags.put("geo", TextCorpusLayerTag.GEO); //$NON-NLS-1$
+		tcfTags.put("orthography", TextCorpusLayerTag.ORTHOGRAPHY); //$NON-NLS-1$
+		tcfTags.put("text_structure", TextCorpusLayerTag.TEXT_STRUCTURE); //$NON-NLS-1$
+		tcfTags.put("discourse_connectives", TextCorpusLayerTag.DISCOURSE_CONNECTIVES); //$NON-NLS-1$
+		tcfTags.put("corpus_mathes", TextCorpusLayerTag.CORPUS_MATCHES); //$NON-NLS-1$
+		
+		
+	}
+	
 	/**
 	 * All readable layers in the result are inserted in the return EnumSet.
 	 * Later TCF reader may use only the TextCorpusLayerTags which are inside
@@ -158,95 +195,29 @@ public class WebExecutionService {
 	 * @param format
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	private EnumSet<TextCorpusLayerTag> getReadableLayerTags(List<String> format) {
 		
 		EnumSet<TextCorpusLayerTag> layers2Read = EnumSet.noneOf(TextCorpusLayerTag.class);
+		
+		if (tcfTags == null){
+			initializeTCFLayerTags();
+		}
+		
+		
 
 		// going trough formatstring and add all known layers
 		for (int i = 0; i < format.size(); i++) {
 			String statement = format.get(i);
+			
+			//used for dependency.parsing
 			if (statement.contains(".")){ //$NON-NLS-1$
 				statement = (String) statement.subSequence(0, statement.indexOf("."));				 //$NON-NLS-1$
 			}
-			switch (statement) {
-			case "text": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.TEXT);
-				break;
-			case "tokens": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.TOKENS);
-				break;
-			case "sentences": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.SENTENCES);
-				break;
-			case "lemmas": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.LEMMAS);
-				break;
-			case "postags": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.POSTAGS);
-				break;
-			case "morphology": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.MORPHOLOGY);
-				break;
-
-			// not used but for completeness
-			case "antonymy": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.ANTONYMY);
-				break;
-			case "corpus_matches": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.CORPUS_MATCHES);
-				break;
-			case "discourse_connectives": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.DISCOURSE_CONNECTIVES);
-				break;
-			case "geo": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.GEO);
-				break;
-			case "hyperonymy": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.HYPERONYMY);
-				break;
-			case "hyponomy": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.HYPONYMY);
-				break;
-			case "named_entities": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.NAMED_ENTITIES);
-				break;
-			case "ortography": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.ORTHOGRAPHY);
-				break;
-			case "phonetics": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.PHONETICS);
-				break;
-			case "parsing_constituent": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.PARSING_CONSTITUENT);
-				break;
-			case "parsing_dependency": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.PARSING_DEPENDENCY);
-				break;
-			case "references": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.REFERENCES);
-				break;
-			case "relations": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.RELATIONS);
-				break;
-			case "synonymy": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.SYNONYMY);
-				break;
-			case "text_structure": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.TEXT_STRUCTURE);
-				break;
-			case "word_splittings": //$NON-NLS-1$
-				layers2Read.add(TextCorpusLayerTag.WORD_SPLITTINGS);
-				break;
-			// no a string associated with an tcf layer (Example: lang=de field)
-			default:
-				break;
+			
+			if (tcfTags.containsKey(statement)){
+				layers2Read.add(tcfTags.get(statement));
 			}
-
-			/*
-			 * if (format.get(i).equals("text")){ //$NON-NLS-1$
-			 * layers2Read.add(TextCorpusLayerTag.TEXT); }
-			 */
+			
 		}
 
 		System.out.println("EnumSize: " + layers2Read.size()); //$NON-NLS-1$
