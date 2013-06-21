@@ -18,6 +18,7 @@ import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.Grammar;
 import net.ikarus_systems.icarus.language.LanguageConstants;
+import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
@@ -346,6 +347,14 @@ public class TCFDataList implements SentenceDataList {
 		@Override
 		public long getFlags(int index) {
 			return flags == null ? 0 : flags[index];
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
+		 */
+		@Override
+		public String getText() {
+			return LanguageUtils.combine(this);
 		}
 
 	}

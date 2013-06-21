@@ -12,38 +12,30 @@ package net.ikarus_systems.icarus.plugins.coref.view;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.util.BitSet;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
-import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.language.coref.CoreferenceDocumentData;
 import net.ikarus_systems.icarus.language.coref.CoreferenceDocumentSet;
 import net.ikarus_systems.icarus.language.coref.CoreferenceUtils;
 import net.ikarus_systems.icarus.language.coref.text.CoreferenceDocument;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
-import net.ikarus_systems.icarus.ui.list.FilterList;
-import net.ikarus_systems.icarus.ui.list.FilterListCellRenderer;
-import net.ikarus_systems.icarus.ui.list.FilterListModel;
-import net.ikarus_systems.icarus.ui.tasks.TaskManager;
-import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
-import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
-import net.ikarus_systems.icarus.util.id.Identity;
+import net.ikarus_systems.icarus.util.data.DataListModel;
 
 /**
  * @author Markus Gärtner
@@ -54,8 +46,8 @@ public class CoreferenceDocumentSetPresenter extends
 		AbstractCoreferenceTextPresenter {
 
 	protected CoreferenceDocumentSet data;
-	protected FilterList filterList;
-	protected FilterListModel filterModel = new FilterListModel(0);
+	protected JList<?> documentList;
+	protected DataListModel<CoreferenceDocumentData> documentListModel = new DataListModel<>();
 	
 	private boolean showDocumentFilter = true;
 	
@@ -65,9 +57,6 @@ public class CoreferenceDocumentSetPresenter extends
 		
 	public CoreferenceDocumentSetPresenter() {
 		toolBarListId = "plugins.coref.coreferenceDocumentPresenter.extendedToolBarList"; //$NON-NLS-1$
-		
-		visualizationLimit = ConfigRegistry.getGlobalRegistry().getInteger(
-				"plugins.coref.appearance.visualizationLimit"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -78,15 +67,6 @@ public class CoreferenceDocumentSetPresenter extends
 		
 		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleDocumentFilterAction",  //$NON-NLS-1$
 				callbackHandler, "toggleDocumentFilter"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.filterEmptyDocumentsAction",  //$NON-NLS-1$
-				callbackHandler, "filterEmptyDocuments"); //$NON-NLS-1$
-		
-		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.selectAllDocumentsAction",  //$NON-NLS-1$
-				callbackHandler, "selectAllDocuments"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.unselectAllDocumentsAction",  //$NON-NLS-1$
-				callbackHandler, "unselectAllDocuments"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.invertDocumentSelectionAction",  //$NON-NLS-1$
-				callbackHandler, "invertDocumentSelection"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -97,16 +77,6 @@ public class CoreferenceDocumentSetPresenter extends
 		
 		actionManager.setSelected(showDocumentFilter, 
 				"plugins.coref.coreferenceDocumentPresenter.toggleDocumentFilterAction"); //$NON-NLS-1$
-		
-		int modelSize = filterModel.getSize();
-		int filterSize = filterModel.filteredElementsCount();
-		boolean hasFilter = modelSize>0;
-		actionManager.setEnabled(hasFilter && modelSize>filterSize, 
-				"plugins.coref.coreferenceDocumentPresenter.selectAllDocumentsAction"); //$NON-NLS-1$
-		actionManager.setEnabled(hasFilter && filterSize<=modelSize, 
-				"plugins.coref.coreferenceDocumentPresenter.unselectAllDocumentsAction"); //$NON-NLS-1$
-		actionManager.setEnabled(hasFilter, 
-				"plugins.coref.coreferenceDocumentPresenter.invertDocumentSelectionAction"); //$NON-NLS-1$
 	}
 
 	/**
@@ -140,14 +110,21 @@ public class CoreferenceDocumentSetPresenter extends
 	protected void setData(Object data) {
 		this.data = (CoreferenceDocumentSet) data;
 		
-		filterModel.setSize(this.data==null ? 0 : this.data.size());
+		documentListModel.setDataList(this.data);
 		
-		filterModel.fill(visualizationLimit);
+		if(documentList!=null) {
+			documentList.setSelectedIndex(0);
+		}
 	}
 
 	@Override
 	protected Handler createHandler() {
 		return new CDSHandler();
+	}
+	
+	@Override
+	protected CDSHandler getHandler() {
+		return (CDSHandler) super.getHandler();
 	}
 
 	@Override
@@ -166,11 +143,13 @@ public class CoreferenceDocumentSetPresenter extends
 		UIUtil.defaultSetUnitIncrement(spRight);
 		spRight.setBorder(null);
 
-		filterList = new FilterList(filterModel);
-		filterList.setCellRenderer(new DocumentFilterListCellRenderer());
-		filterList.addMouseListener(getHandler());
+		documentList = new JList<>(documentListModel);
+		documentList.setCellRenderer(new DocumentListCellRenderer());
+		documentList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		documentList.setSelectedIndex(0);
+		documentList.addListSelectionListener(getHandler());
 
-		JScrollPane spLeft = new JScrollPane(filterList);
+		JScrollPane spLeft = new JScrollPane(documentList);
 		UIUtil.defaultSetUnitIncrement(spLeft);
 		spLeft.setBorder(null);
 		spLeft.setVisible(showDocumentFilter);
@@ -196,15 +175,13 @@ public class CoreferenceDocumentSetPresenter extends
 			return false;
 		}
 		
-		int size = data.size();
-		for(int i=0; i<size; i++) {
-			if(Thread.currentThread().isInterrupted()) {
-				return false;
-			}
-			if(filterList.getModel().getElementAt(i)) {
-				doc.appendBatchCoreferenceDocumentData(data.get(i));
-			}
+		int index = documentList==null ? -1 : documentList.getSelectedIndex(); 
+		if(index==-1) {
+			return false;
 		}
+		
+		CoreferenceDocumentData docData = documentListModel.getElementAt(index);
+		doc.appendBatchCoreferenceDocumentData(docData);
 		
 		doc.applyBatchUpdates(0);
 		
@@ -233,24 +210,12 @@ public class CoreferenceDocumentSetPresenter extends
 		if(documentFilterPopupMenu!=null) {
 			refreshActions();
 			
-			documentFilterPopupMenu.show(filterList, trigger.getX(), trigger.getY());
+			documentFilterPopupMenu.show(documentList, trigger.getX(), trigger.getY());
 		}
 	}
 	
 	public boolean isShowDocumentFilter() {
 		return showDocumentFilter;
-	}
-
-	public void filterEmptyDocuments() {
-		if(textPane==null || data==null) {
-			return;
-		}
-		if(pendingFilter==null) {
-			return;
-		}
-		
-		RebuildFilterJob job = new RebuildFilterJob(pendingFilter);
-		TaskManager.getInstance().schedule(job, TaskPriority.DEFAULT, true);
 	}
 
 	public void setShowDocumentFilter(boolean showDocumentFilter) {
@@ -260,7 +225,7 @@ public class CoreferenceDocumentSetPresenter extends
 		
 		this.showDocumentFilter = showDocumentFilter;
 		
-		if(filterList==null) {
+		if(documentList==null) {
 			return;
 		}
 
@@ -280,50 +245,14 @@ public class CoreferenceDocumentSetPresenter extends
 		contentPanel.repaint();
 	}
 
-	protected class DocumentFilterListCellRenderer extends FilterListCellRenderer {
+	protected class CDSHandler extends Handler implements ListSelectionListener {
 
-		private static final long serialVersionUID = -7249622078036629896L;
-
+		/**
+		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+		 */
 		@Override
-		protected String getTextForValue(int index, Boolean value) {
-			if(data==null) {
-				return null;
-			}
-			
-			CoreferenceDocumentData docData = data.get(index);
-			if(docData==null) {
-				return null;
-			}
-			
-			String header = (String) docData.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
-			if(header==null) {
-				header = "document "+index; //$NON-NLS-1$
-			}
-			return header;
-		}
-	}
-	
-	protected class CDSHandler extends Handler {
-
-		@Override
-		protected void maybeShowPopup(MouseEvent e) {
-			if(e.isPopupTrigger() && e.getSource()==filterList) {
-				showDocumentFilterPopup(e);
-			} else {
-				super.maybeShowPopup(e);
-			}
-		}
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			if(SwingUtilities.isLeftMouseButton(e) && e.getSource()==filterList) {
-				int index = filterList.locationToIndex(e.getPoint());
-				if(index==-1) {
-					return;
-				}
-				
-				filterModel.flipElementAt(index);
-			}
+		public void valueChanged(ListSelectionEvent e) {
+			refresh();
 		}
 	}
 	
@@ -344,178 +273,5 @@ public class CoreferenceDocumentSetPresenter extends
 						"Failed to toggle 'filterDocuments' flag", e); //$NON-NLS-1$
 			}
 		}
-
-		public void filterEmptyDocuments(ActionEvent e) {
-			try {
-				CoreferenceDocumentSetPresenter.this.filterEmptyDocuments();
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to toggle 'filterEmptyDocuments' flag", ex); //$NON-NLS-1$
-			}
-		}
-
-		public void selectAllDocuments(ActionEvent e) {
-			// All documents already selected
-			if(filterModel.filteredElementsCount()==filterModel.getSize()) {
-				return;
-			}
-			
-			try {
-				filterModel.fill(true);
-				//CoreferenceDocumentSetPresenter.this.refresh();
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to select all documents", ex); //$NON-NLS-1$
-			}
-		}
-
-		public void unselectAllDocuments(ActionEvent e) {
-			// All documents already unselected
-			if(filterModel.filteredElementsCount()==0) {
-				return;
-			}
-			
-			try {
-				filterModel.fill(false);
-				//CoreferenceDocumentSetPresenter.this.refresh();
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to unselect all documents", ex); //$NON-NLS-1$
-			}
-		}
-
-		public void invertDocumentSelection(ActionEvent e) {
-			try {
-				filterModel.flip();
-				//CoreferenceDocumentSetPresenter.this.refresh();
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to invert document selection", ex); //$NON-NLS-1$
-			}
-		}
-	}
-	
-	protected class RebuildFilterJob extends SwingWorker<BitSet, Integer> implements Identity {
-
-		private final Filter filter;
-		
-		public RebuildFilterJob(Filter filter) {
-			if(filter==null)
-				throw new IllegalArgumentException("Invalid filter"); //$NON-NLS-1$
-			
-			this.filter = filter;
-		}
-		
-		private CoreferenceDocumentSetPresenter owner() {
-			return CoreferenceDocumentSetPresenter.this;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof RebuildFilterJob) {
-				return owner()==((RebuildFilterJob)obj).owner();
-			}
-			return false;
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
-		 */
-		@Override
-		public String getId() {
-			return getClass().getSimpleName();
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
-		 */
-		@Override
-		public String getName() {
-			return ResourceManager.getInstance().get(
-					"plugins.coref.coreferenceDocumentPresenter.rebuildFilterJob.name"); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
-		 */
-		@Override
-		public String getDescription() {
-			return ResourceManager.getInstance().get(
-					"plugins.coref.coreferenceDocumentPresenter.rebuildFilterJob.description"); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
-		 */
-		@Override
-		public Icon getIcon() {
-			return null;
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
-		 */
-		@Override
-		public Object getOwner() {
-			return this;
-		}
-
-		/**
-		 * @see javax.swing.SwingWorker#doInBackground()
-		 */
-		@Override
-		protected BitSet doInBackground() throws Exception {
-			CoreferenceDocumentSet set = data;
-			if(set==null) {
-				return null;
-			}
-
-			int documentCount = set.size();
-			int updateInterval = Math.max(1, documentCount/10);
-			int updateCount = 0;
-			
-			BitSet result = new BitSet(documentCount);
-			
-			for(int i=0; i<documentCount; i++) {
-				if(Thread.currentThread().isInterrupted()) {
-					return null;
-				}
-				
-				CoreferenceDocumentData doc = set.get(i);
-				if(CoreferenceUtils.containsSpan(doc, filter)) {
-					result.set(i);
-				}
-				
-				updateCount++;
-				if(updateCount>=updateInterval || i==documentCount-1) {
-					updateCount = 0;
-					
-					setProgress((int) ((i+1f)/documentCount*100));
-				}
-			}
-			
-			// If data has changed discard result
-			if(set!=data) {
-				result = null;
-			}
-			
-			return result;
-		}
-
-		@Override
-		protected void done() {
-			try {
-				BitSet filter = get();
-				if(filter!=null) {
-					filterModel.setFilter(filter);
-				}
-			} catch(InterruptedException | CancellationException e) {
-				// ignore
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to create new filter", e); //$NON-NLS-1$
-			}
-		}
-		
 	}
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
@@ -28,19 +29,25 @@ import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.NavigationControl;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.helper.Editable;
 import net.ikarus_systems.icarus.ui.helper.FilteredListModel;
+import net.ikarus_systems.icarus.ui.helper.TextItem;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.ListPresenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
@@ -50,6 +57,7 @@ import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.PropertyChangeSource;
 import net.ikarus_systems.icarus.util.annotation.AnnotationContainer;
 import net.ikarus_systems.icarus.util.annotation.AnnotationControl;
+import net.ikarus_systems.icarus.util.annotation.AnnotationController;
 import net.ikarus_systems.icarus.util.annotation.AnnotationManager;
 
 import org.java.plugin.registry.Extension;
@@ -59,7 +67,8 @@ import org.java.plugin.registry.Extension;
  * @version $Id$
  *
  */
-public class DataListPresenter<T extends Object> extends PropertyChangeSource implements ListPresenter {
+public class DataListPresenter<T extends Object> extends PropertyChangeSource 
+		implements ListPresenter, AnnotationController {
 	
 	protected DataListModel<T> dataListModel;
 	protected DataList<T> dataList;
@@ -76,7 +85,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 	protected JPanel contentPanel;
 	protected JComboBox<Object> filterSelect;
 	protected JButton filterEditButton;
+	protected JToggleButton outlineToggleButton;
 	protected Map<Extension, Filter> filterInstances;
+	
+	protected JTextArea textArea;
 	
 	protected final String dummyEntry = "minus"; //$NON-NLS-1$
 	
@@ -90,6 +102,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		JPanel panel = new JPanel(new BorderLayout());
 		
 		list = createList();
+		list.addListSelectionListener(getHandler());
 		annotationControl = createAnnotationControl();
 		
 		NavigationControl navigationControl = createNavigationControl();
@@ -97,8 +110,20 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setBorder(null);
 		
+		textArea = new JTextArea();
+		textArea.setWrapStyleWord(true);
+		textArea.setLineWrap(true);
+		textArea.setVisible(false);
+		textArea.setBorder(BorderFactory.createCompoundBorder(
+				UIUtil.defaultBoxBorder, 
+				BorderFactory.createEmptyBorder(0, 2, 0, 2)));
+		
+		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.add(navigationControl.getToolBar(), BorderLayout.NORTH);
+		topPanel.add(textArea, BorderLayout.CENTER);
+
+		panel.add(topPanel, BorderLayout.NORTH);
 		panel.add(scrollPane, BorderLayout.CENTER);
-		panel.add(navigationControl.getToolBar(), BorderLayout.NORTH);
 		
 		refresh();
 		
@@ -127,7 +152,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 	}
 	
 	protected Object leftNavigationContent() {
-		return null;
+		List<Object> items = new ArrayList<>();
+		items.add(getOutlineToggleButton());
+		
+		return items.toArray();
 	}
 	
 	protected Object rightNavigationContent() {
@@ -157,6 +185,24 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		}
 		
 		return filterEditButton;
+	}
+	
+	protected JToggleButton getOutlineToggleButton() {
+		if(outlineToggleButton==null) {
+			outlineToggleButton = new JToggleButton();
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(outlineToggleButton, 
+					"core.helpers.navigationControl.toggleOutlineAction.name",  //$NON-NLS-1$
+					"core.helpers.navigationControl.toggleOutlineAction.description"); //$NON-NLS-1$
+			ResourceManager.getInstance().getGlobalDomain().addComponent(outlineToggleButton);
+			outlineToggleButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("externalize.gif")); //$NON-NLS-1$
+			outlineToggleButton.setSelectedIcon(IconRegistry.getGlobalRegistry().getIcon("hide_externalized.gif")); //$NON-NLS-1$
+			outlineToggleButton.setFocusable(false);
+			outlineToggleButton.setFocusPainted(false);
+			outlineToggleButton.addActionListener(getHandler());
+			outlineToggleButton.setVisible(false);
+		}
+		
+		return outlineToggleButton;
 	}
 	
 	protected JComboBox<Object> getFilterSelect() {
@@ -231,7 +277,17 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		AnnotationManager annotationManager = null;
 		if(dataList instanceof AnnotationContainer) {
 			ContentType annotationType = ((AnnotationContainer)dataList).getAnnotationType();
+			
+			if(this.annotationManager!=null && this.annotationManager.supportsAnnotation(annotationType)) {
+				annotationManager = this.annotationManager;
+			}
+			
+			if(annotationManager==null) {
+				annotationManager = UIHelperRegistry.globalRegistry().findHelper(AnnotationManager.class, annotationType);
+			}
 		}
+		
+		setAnnotationManager(annotationManager);
 		
 		ListCellRenderer renderer = null;
 		if(dataList!=null) {
@@ -256,8 +312,18 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		getDataListModel().setDataList(dataList);
 		getFilteredListModel().setFilter(filter);
 		getSelectionModel().clearSelection();
+
+		textArea.setText(null);
+		ContentType entryType = getContentType();
+		ContentType textType = ContentTypeRegistry.getInstance().getTypeForClass(TextItem.class);
+		if(entryType==null || !ContentTypeRegistry.isCompatible(textType, entryType)) {
+			getOutlineToggleButton().setVisible(false);
+		} else {
+			getOutlineToggleButton().setVisible(true);
+		}
 		
 		refreshFilterOptions();
+		refreshTextOutline();
 	}
 	
 	protected DataListModel<T> createListModel() {
@@ -308,6 +374,21 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		filterEditButton.setVisible(visible);
 	}
 	
+	protected void refreshTextOutline() {
+		if(outlineToggleButton==null || textArea==null) {
+			return;
+		}
+		
+		Object item = list.getSelectedValue();
+		if(outlineToggleButton.isSelected() && item instanceof TextItem) {
+			textArea.setText(((TextItem)item).getText());
+			textArea.setVisible(true);
+		} else {
+			textArea.setText(null);
+			textArea.setVisible(false);
+		}
+	}
+	
 	protected void setFilter(Filter filter) {
 		if(this.filter==filter) {
 			return;
@@ -330,6 +411,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		return filter;
 	}
 
+	/**
+	 * @see net.ikarus_systems.icarus.util.annotation.AnnotationController#getAnnotationManager()
+	 */
+	@Override
 	public AnnotationManager getAnnotationManager() {
 		return annotationManager;
 	}
@@ -453,19 +538,22 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 		return filter;
 	}
 	
-	protected class Handler implements ActionListener {
+	protected class Handler implements ActionListener, ListSelectionListener {
 
 		/**
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if(filterSelect==null || filterEditButton==null) {
+			if(filterSelect==null || filterEditButton==null
+					|| outlineToggleButton==null) {
 				return;
 			}
 			
 			if(e.getSource()==filterEditButton) {
 				//TODO Show edit dialog
+			} else if(e.getSource()==outlineToggleButton) {
+				refreshTextOutline();
 			} else if(e.getSource()==filterSelect) {
 				Filter filter = null;
 				Object selectedValue = filterSelect.getSelectedItem();
@@ -476,6 +564,13 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource im
 				setFilter(filter);
 			}
 		}
-		
+
+		/**
+		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+		 */
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			refreshTextOutline();
+		}
 	}
 }

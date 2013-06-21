@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 
 /**
@@ -51,8 +50,6 @@ public abstract class SearchOperator implements Serializable {
 	public abstract String getName();
 
 	public abstract String getDescription();
-	
-	public static final SearchOperator GROUPING = DefaultSearchOperator.GROUPING;
 	
 	private static Map<String, SearchOperator> available = new LinkedHashMap<>();
 	private static Set<String> symbols = Collections.unmodifiableSet(available.keySet());

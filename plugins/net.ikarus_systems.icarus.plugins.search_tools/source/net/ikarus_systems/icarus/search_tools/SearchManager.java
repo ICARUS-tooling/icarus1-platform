@@ -17,13 +17,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import javax.swing.Icon;
+import javax.swing.SwingWorker;
+
+import net.ikarus_systems.icarus.config.ConfigRegistry;
+import net.ikarus_systems.icarus.io.Loadable;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.search_tools.SearchToolsConstants;
+import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
+import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
+import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
@@ -145,19 +159,46 @@ public final class SearchManager {
 		return extensionPoint.getConnectedExtensions();
 	}
 	
-	public static List<Extension> getResultPresenterExtensions(int dimension) {
+	public static List<Extension> getResultPresenterExtensions(ContentType contentType, int dimension) {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
 				SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchResultPresenter"); //$NON-NLS-1$
 		
 		List<Extension> result = new ArrayList<>();
 		
 		for(Extension extension : extensionPoint.getConnectedExtensions()) {
-			if(extension.getParameter("dimension").valueAsNumber().intValue()==dimension) { //$NON-NLS-1$
-				result.add(extension);
+			if(extension.getParameter("dimension").valueAsNumber().intValue()!=dimension) { //$NON-NLS-1$
+				continue;
 			}
+			
+			Collection<Extension.Parameter> params = extension.getParameters("contentType"); //$NON-NLS-1$
+			if(contentType==null && !params.isEmpty()) {
+				continue;
+			}
+			
+			if(!params.isEmpty()) {
+				boolean compatible = false;
+				
+				for(Extension.Parameter param : params) {
+					ContentType entryType = ContentTypeRegistry.getInstance().getType(param.valueAsExtension());
+					if(ContentTypeRegistry.isCompatible(entryType, entryType)) {
+						compatible = true;
+						break;
+					}
+				}
+				
+				if(!compatible) {
+					continue;
+				}
+			}
+
+			result.add(extension);
 		}
 		
 		return result;
+	}
+	
+	public static boolean isGroupingOperator(SearchOperator operator) {
+		return operator==DefaultSearchOperator.GROUPING;
 	}
 	
 	private Map<Extension, SearchFactory> factoryInstances;
@@ -176,6 +217,7 @@ public final class SearchManager {
 			factoryInstances = new HashMap<>();
 		}
 		
+		
 		SearchFactory factory = factoryInstances.get(extension);
 		if(factory==null) {
 			try {
@@ -188,8 +230,283 @@ public final class SearchManager {
 		
 		return factory;
 	}
+	
+	public Collection<Extension> availableTargetSelectors() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchTargetSelector"); //$NON-NLS-1$
+		return Collections.unmodifiableCollection(extensionPoint.getConnectedExtensions());
+	}
+	
+	private static Map<Search, ExecuteSearchJob> searchJobMap = new WeakHashMap<>();
 
 	public void executeSearch(Search search) {
+		if(search==null)
+			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+		if(search.isDone())
+			throw new IllegalArgumentException("Search already finished"); //$NON-NLS-1$
+		if(search.isCancelled())
+			throw new IllegalArgumentException("Search already cancelled"); //$NON-NLS-1$
+		if(search.getTarget()==null)
+			throw new IllegalArgumentException("No target specified for search"); //$NON-NLS-1$
+		if(search.getQuery()==null)
+			throw new IllegalArgumentException("Search not properly initialized - query is missing"); //$NON-NLS-1$
+		
+		if(searchJobMap.containsKey(search)) {
+			return;
+		}
+		
+		// If target is not loaded delay search execution and attempt to load
+		Object target = search.getTarget();
+		if(target instanceof Loadable && !((Loadable)target).isLoaded()) {
+			TaskManager.getInstance().schedule(new LoadTargetJob(search), TaskPriority.HIGH, true);
+			return;
+		}
+
+		ExecuteSearchJob task = new ExecuteSearchJob(search);
+		searchJobMap.put(search, task);
+		
+		TaskManager.getInstance().schedule(task, TaskPriority.DEFAULT, true);
+	}
+
+	public void cancelSearch(Search search) {
+		if(search==null)
+			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+		
+		ExecuteSearchJob task = searchJobMap.get(search);
+		
+		if(task!=null) {
+			TaskManager.getInstance().cancelTask(task);
+		}
+		
+		if(search.isRunning()) {
+			search.cancel();
+		}
+	}
+	
+	private static class ExecuteSearchJob extends SwingWorker<Object, Object> 
+			implements Identity {
+		
+		private final Search search;
+		private final long timeout;
+		private long startMillis;
+		
+		private ExecuteSearchJob(Search search) {
+			this.search = search;
+			
+			timeout = ConfigRegistry.getGlobalRegistry().getLong(
+					"plugins.searchTools.searchTimeout") * 1000; //$NON-NLS-1$
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof ExecuteSearchJob) {
+				return search == ((ExecuteSearchJob)obj).search;
+			}
+			return false;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
+		 */
+		@Override
+		public String getId() {
+			return getClass().getSimpleName();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
+		 */
+		@Override
+		public String getName() {
+			return ResourceManager.getInstance().get(
+					"plugins.searchTools.searchManager.executeSearchJob.name"); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			return ResourceManager.getInstance().get(
+					"plugins.searchTools.searchManager.executeSearchJob.description", //$NON-NLS-1$
+					search.getProgress());
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
+		 */
+		@Override
+		public Icon getIcon() {
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
+		 */
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected Object doInBackground() throws Exception {
+			firePropertyChange("indeterminate", false, true); //$NON-NLS-1$
+
+			search.execute();
+			
+			firePropertyChange("indeterminate", true, false); //$NON-NLS-1$
+			
+			// We start counting time only after the search returned from
+			// its execution call to allow for loading of target data which
+			// should not be counted against the timeout!
+			startMillis = System.currentTimeMillis();
+			
+			// Wait for the search to finish
+			while(!search.isDone()) {
+				// Forward cancellation or interruption to the search object
+				if(isCancelled() || Thread.currentThread().isInterrupted()) {
+					cancelSearch();
+					break;
+				}
+				
+				setProgress(search.getProgress());
+				
+				// Check for timeout
+				long duration = System.currentTimeMillis()-startMillis;
+				if(timeout==0 || duration>timeout) {
+					cancelSearch();
+					throw new TimeoutException(String.format(
+							"Search execution timed out: current executon time %d ms - timeout set to %d ms",  //$NON-NLS-1$
+							duration, timeout));
+				}
+				
+				// Sleep for another period
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					cancelSearch();
+				}
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			try {
+				get();
+			} catch(InterruptedException | CancellationException e) {
+				// ignore
+			} catch(Exception e) {
+				// TODO show error dialog
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to execute search", e); //$NON-NLS-1$
+				UIUtil.beep();
+			} finally {
+				searchJobMap.remove(search);
+			}
+		}
+		
+		private void cancelSearch() {
+			try {
+				search.cancel();
+			} catch(Exception ex) {
+				// ignore
+			}
+		}
+	}
+	
+	private static class LoadTargetJob implements Runnable, Identity {
+		
+		private final Search search;
+		
+		private LoadTargetJob(Search search) {
+			this.search = search;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof LoadTargetJob) {
+				return search == ((LoadTargetJob)obj).search;
+			}
+			return false;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
+		 */
+		@Override
+		public String getId() {
+			return getClass().getSimpleName();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
+		 */
+		@Override
+		public String getName() {
+			return ResourceManager.getInstance().get(
+					"plugins.searchTools.searchManager.loadTargetJob.name"); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			return ResourceManager.getInstance().get(
+					"plugins.searchTools.searchManager.loadTargetJob.description",  //$NON-NLS-1$
+					search.getTarget());
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
+		 */
+		@Override
+		public Icon getIcon() {
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
+		 */
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			Loadable loadable = null;
+			
+			try {
+				loadable = (Loadable)search.getTarget();
+				loadable.load();
+				
+				// Switch back to EDT for continuing the search
+				if(loadable!=null && loadable.isLoaded()) {
+					UIUtil.invokeLater(new Runnable() {
+						
+						@Override
+						public void run() {
+							SearchManager.getInstance().executeSearch(search);
+						}
+					});
+				}
+			} catch(InterruptedException e) {
+				// ignore
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to load search target: "+loadable, e); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
 		
 	}
 }

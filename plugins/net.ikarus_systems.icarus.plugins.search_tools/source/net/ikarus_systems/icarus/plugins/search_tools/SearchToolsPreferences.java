@@ -44,6 +44,8 @@ public class SearchToolsPreferences {
 		builder.addGroup("plugins", true); //$NON-NLS-1$
 		// SEARCHTOOLS GROUP
 		builder.addGroup("searchTools", true); //$NON-NLS-1$
+		builder.addBooleanEntry("alwaysUseFallbackPresenter", false); //$NON-NLS-1$
+		builder.addIntegerEntry("searchTimeout", 60); //$NON-NLS-1$
 		builder.setProperties(builder.addListEntry("groupColors", EntryType.COLOR,  //$NON-NLS-1$
 				Color.red.getRGB(), // red
 				Color.green.getRGB(), // green

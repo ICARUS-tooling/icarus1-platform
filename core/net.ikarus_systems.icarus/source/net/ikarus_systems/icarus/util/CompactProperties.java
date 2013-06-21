@@ -71,7 +71,7 @@ public class CompactProperties {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setProperty(String key, Object value) {
+	public void put(String key, Object value) {
 		Exceptions.testNullArgument(key, "key"); //$NON-NLS-1$
 		
 		// nothing to do here

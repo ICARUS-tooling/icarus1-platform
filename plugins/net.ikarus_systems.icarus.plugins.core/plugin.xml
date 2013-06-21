@@ -886,4 +886,13 @@
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.util.data.DataList" />
 	</extension>
+	
+	<extension id="TextItemContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the net.ikarus_systems.icarus.ui.helper.TextItem content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.ui.helper.TextItem" />
+	</extension>
 </plugin>

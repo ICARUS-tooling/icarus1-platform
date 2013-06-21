@@ -12,6 +12,9 @@ package net.ikarus_systems.icarus.ui.dialog;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.ListCellRenderer;
+
+import net.ikarus_systems.icarus.ui.helper.TooltipListCellRenderer;
 
 
 /**
@@ -32,6 +35,7 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 		comboBox = new JComboBox<>(model);
 		comboBox.setEditable(editable);
 		comboBox.setSelectedItem(null);
+		comboBox.setRenderer(new TooltipListCellRenderer());
 		
 		setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
 	}
@@ -66,6 +70,12 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 	@Override
 	public void addComponents(FormBuilder builder) {
 		builder.feedComponent(comboBox, null, getResizeMode());
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public ChoiceFormEntry setRenderer(ListCellRenderer renderer) {
+		getComboBox().setRenderer(renderer);
+		return this;
 	}
 
 	/**

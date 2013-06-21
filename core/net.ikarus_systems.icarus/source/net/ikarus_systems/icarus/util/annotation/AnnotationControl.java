@@ -72,6 +72,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		registerActionCallbacks();		
 		
 		buildComponents();
+		setEnabled(false);
 	}
 
 	public AnnotationControl() {
@@ -90,6 +91,8 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		
 		menuButton = new JButton(actionManager.getAction(
 				"core.helpers.annotationControl.selectModeAction")); //$NON-NLS-1$
+		menuButton.setFocusable(false);
+		menuButton.setFocusPainted(false);
 		
 		if(allowSelection) {
 			navigationButtons = new JButton[4];
@@ -336,12 +339,12 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		firePropertyChange("annotationManager", oldValue, annotationManager); //$NON-NLS-1$
 	}
 	
-	public void setEnabled(boolean visible) {
-		navigationLabel.setEnabled(visible);
-		menuButton.setEnabled(visible);
+	public void setEnabled(boolean enabled) {
+		navigationLabel.setEnabled(enabled);
+		menuButton.setEnabled(enabled);
 		if(navigationButtons!=null) {
 			for(JButton button : navigationButtons) {
-				button.setEnabled(visible);
+				button.setEnabled(enabled);
 			}
 		}
 	}

@@ -79,7 +79,7 @@ public class DefaultCoreferenceData implements CoreferenceData {
 			properties = new CompactProperties();
 		}
 		
-		properties.setProperty(key, value);
+		properties.put(key, value);
 	}
 
 	/**
@@ -102,6 +102,14 @@ public class DefaultCoreferenceData implements CoreferenceData {
 	
 	@Override
 	public String toString() {
+		return LanguageUtils.combine(this);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
+	 */
+	@Override
+	public String getText() {
 		return LanguageUtils.combine(this);
 	}
 }

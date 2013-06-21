@@ -11,6 +11,8 @@ package net.ikarus_systems.icarus.language;
 
 import java.io.Serializable;
 
+import net.ikarus_systems.icarus.ui.helper.TextItem;
+
 
 /**
  * Abstract representation of a single sentence
@@ -19,7 +21,7 @@ import java.io.Serializable;
  * @version $Id$
  *
  */
-public interface SentenceData extends Serializable {
+public interface SentenceData extends Serializable, TextItem {
 
 	/**
 	 * Creates a copy of this {@code SentenceData} object

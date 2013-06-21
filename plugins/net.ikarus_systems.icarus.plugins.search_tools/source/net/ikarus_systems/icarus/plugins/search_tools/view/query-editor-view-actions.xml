@@ -22,6 +22,10 @@
 	<action id="plugins.searchTools.queryEditorView.synchronizeQueryAction"
 		name="${id}.name" desc="${id}.description" icon="navi_down_stop.png" />
 		
+	<!-- Commit -->
+	<action id="plugins.searchTools.queryEditorView.commitAction"
+		name="${id}.name" desc="${id}.description" icon="ValidateXSD.gif" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.searchTools.queryEditorView.toolBarList">
 		<item type="action" value="plugins.searchTools.queryEditorView.undoAction" />
@@ -34,6 +38,8 @@
 		<item type="action" value="plugins.searchTools.queryEditorView.selectAllAction" />
 		<item type="action" value="plugins.searchTools.queryEditorView.clearAction" />
 		<item type="glue" />
+		<item type="action" value="plugins.searchTools.queryEditorView.commitAction" />
+		<separator />
 		<item type="action" value="plugins.searchTools.queryEditorView.synchronizeGraphAction" />
 		<item type="action" value="plugins.searchTools.queryEditorView.synchronizeQueryAction" />
 	</action-list>

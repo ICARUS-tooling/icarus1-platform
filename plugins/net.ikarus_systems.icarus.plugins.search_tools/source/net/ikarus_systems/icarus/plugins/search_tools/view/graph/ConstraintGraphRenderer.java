@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
+import java.awt.Dimension;
 import java.util.List;
 
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
@@ -19,6 +20,7 @@ import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.EdgeType;
 import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.UIUtil;
@@ -38,7 +40,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	
 	protected StringBuilder sb;
 	
-	protected mxRectangle disjunctionNodeSize = new mxRectangle(0, 0, 25, 25);
+	public static final Dimension disjunctionNodeSize = new Dimension(25, 25);
 	
 	protected char disjunctionSymbol = (char) 0x2228;
 	protected String disjunctionString = String.valueOf(disjunctionSymbol);
@@ -148,7 +150,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			for(int i=0; i<constraints.length; i++) {
 				if(!constraints[i].isUndefined()) {
 					SearchOperator operator = constraints[i].getOperator();
-					Object label = operator==SearchOperator.GROUPING ? ""  //$NON-NLS-1$
+					Object label = SearchManager.isGroupingOperator(operator) ? ""  //$NON-NLS-1$
 							: factories.get(i).valueToLabel(constraints[i].getValue());
 					sb.append("\n").append(factories.get(i).getName()) //$NON-NLS-1$
 					.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
@@ -185,11 +187,11 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	@Override
 	public mxRectangle getPreferredSizeForCell(GraphOwner owner, Object cell) {
 		if(ConstraintGraphPresenter.isDisjunctionNode(owner, cell)) {
-			return disjunctionNodeSize;
+			return new mxRectangle(0, 0, disjunctionNodeSize.width, disjunctionNodeSize.height);
 		} else {
 			mxRectangle size = super.getPreferredSizeForCell(owner, cell);
-			if(size!=null && size.getWidth()>0 && size.getWidth()<70) {
-				size.setWidth(70);
+			if(size!=null && size.getWidth()>0 && size.getWidth()<50) {
+				size.setWidth(50);
 			}
 			
 			return size;

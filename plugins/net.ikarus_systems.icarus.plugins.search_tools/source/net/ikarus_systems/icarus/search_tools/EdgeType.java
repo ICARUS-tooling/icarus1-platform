@@ -11,14 +11,17 @@ package net.ikarus_systems.icarus.search_tools;
 
 import java.text.ParseException;
 
+import javax.swing.Icon;
+
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum EdgeType {
+public enum EdgeType implements Identity {
 
 	/**
 	 * Marks the edge as an empty connection that only serves
@@ -62,12 +65,14 @@ public enum EdgeType {
 	public String getToken() {
 		return token;
 	}
-	
+
+	@Override
 	public String getName() {
 		return ResourceManager.getInstance().get(
 				"plugins.searchTools.edgeType."+token+".name"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
+	@Override
 	public String getDescription() {
 		return ResourceManager.getInstance().get(
 				"plugins.searchTools.edgeType."+token+".description"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,5 +91,29 @@ public enum EdgeType {
 		}
 		
 		throw new ParseException("Unknown edge type string: "+s, 0); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
+	 */
+	@Override
+	public String getId() {
+		return getClass().getSimpleName();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
+	 */
+	@Override
+	public Icon getIcon() {
+		return null;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 }

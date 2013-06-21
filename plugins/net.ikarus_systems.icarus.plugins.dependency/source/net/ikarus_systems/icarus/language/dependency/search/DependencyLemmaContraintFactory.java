@@ -14,6 +14,7 @@ import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -34,8 +35,8 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, int flags) {
-		if(isFlagSet(flags, IGNORE_CASE))
+			SearchOperator operator, Options options) {
+		if(options.get(SEARCH_CASESENSITIVE, false))
 			return new DependencyLemmaCIConstraint(value, operator);
 		else
 			return new DependencyLemmaConstraint(value, operator);

@@ -24,6 +24,7 @@ import net.ikarus_systems.icarus.language.treebank.TreebankRegistry;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.CollectionUtils;
+import net.ikarus_systems.icarus.util.Filter;
 
 /**
  * @author Markus Gärtner
@@ -36,8 +37,8 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 	private static final long serialVersionUID = -2738466365490012327L;
 	
 	private List<Treebank> treebanks;
-	
-	private Set<Treebank> excludes;
+		
+	private Filter filter;
 	
 	private Treebank selectedTreebank;
 	
@@ -49,22 +50,34 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 		TreebankRegistry.getInstance().addListener(null, this);
 	}
 	
+	public TreebankListModel(Filter filter) {
+		setFilter(filter);
+		
+		TreebankRegistry.getInstance().addListener(null, this);
+	}
+	
 	public void setExcludes(Treebank...excludes) {
-		setExcludes(CollectionUtils.asList(excludes));
+		setFilter(new ExclusionFilter((Object[]) excludes));
 	}
 	
 	public void setExcludes(Collection<Treebank> excludes) {
-		if(this.excludes==null) {
-			this.excludes = new HashSet<>();
-		} else {
-			this.excludes.clear();
+		setFilter(new ExclusionFilter(excludes));
+	}
+	
+	public Filter getFilter() {
+		return filter;
+	}
+
+	public void setFilter(Filter filter) {
+		if(this.filter==filter) {
+			return;
 		}
 		
-		this.excludes.addAll(excludes);
+		this.filter = filter;
 		
 		reload();
 	}
-	
+
 	public void reload() {
 		if(treebanks==null) {
 			treebanks = new ArrayList<>();
@@ -73,7 +86,7 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 		}
 		
 		for(Treebank treebank : TreebankRegistry.getInstance().availableTreebanks()) {
-			if(!this.excludes.contains(treebank)) {
+			if(filter==null || filter.accepts(treebank)) {
 				treebanks.add(treebank);
 			}
 		}
@@ -153,5 +166,28 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 	@Override
 	public void invoke(Object sender, EventObject event) {
 		reload();
+	}
+	
+	private static class ExclusionFilter implements Filter {
+		private final Set<Object> exclusions;
+		
+		private ExclusionFilter(Collection<?> items) {
+			exclusions = items==null ? null : new HashSet<>(items);
+		}
+		
+		private ExclusionFilter(Object...items) {
+			exclusions = items==null ? null : new HashSet<>();
+			if(exclusions!=null) {
+				CollectionUtils.feedItems(exclusions, items);
+			}
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.Filter#accepts(java.lang.Object)
+		 */
+		@Override
+		public boolean accepts(Object obj) {
+			return exclusions==null || !exclusions.contains(obj);
+		}
 	}
 }

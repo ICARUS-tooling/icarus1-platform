@@ -90,7 +90,7 @@ public class Span implements Serializable, Comparable<Span> {
 			properties = new CompactProperties();
 		}
 		
-		properties.setProperty(key, value);
+		properties.put(key, value);
 	}
 	
 	@Override

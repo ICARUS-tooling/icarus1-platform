@@ -563,11 +563,13 @@ public class IcarusFrame extends JFrame {
 		if(perspective!=null){
 			openPerspective(perspective, false);
 		} else {
+			rootPanel.removeAll();
 			PerspectiveChooser chooser = new PerspectiveChooser(getHandler());
 			chooser.init(rootPanel);
 		}
 		
-		getContentPane().validate();
+		getContentPane().revalidate();
+		getContentPane().repaint();
 	}
 	
 	private Map<Perspective, PerspectiveContainer> getContainers() {

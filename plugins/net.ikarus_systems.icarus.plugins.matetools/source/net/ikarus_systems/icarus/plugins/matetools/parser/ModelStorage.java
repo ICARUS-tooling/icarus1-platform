@@ -36,7 +36,7 @@ public class ModelStorage {
 	@XmlElement(name="lemmatizer", required=false)
 	private String lemmatizerModelPath;
 	
-	@XmlElement(name="morpher", required=false)
+	@XmlElement(name="morphTagger", required=false)
 	private String morphTaggerModelPath;
 
 	public String getLanguage() {

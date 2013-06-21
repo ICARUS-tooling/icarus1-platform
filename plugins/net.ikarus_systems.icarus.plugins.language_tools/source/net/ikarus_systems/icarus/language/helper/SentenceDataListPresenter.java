@@ -17,6 +17,7 @@ import javax.swing.JList;
 
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
+import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 import net.ikarus_systems.icarus.util.data.DataListModel;
@@ -68,6 +69,8 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	@Override
 	protected Object leftNavigationContent() {
 		return new Object[] {
+				getOutlineToggleButton(),
+				EntryType.SEPARATOR,
 				getDataTypeButton(DataType.SYSTEM),
 				getDataTypeButton(DataType.USER),
 				getDataTypeButton(DataType.GOLD),
@@ -107,7 +110,8 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 			
 			this.dataType = dataType;
 			
-			// TODO set tool-tips and icons 
+			// TODO set tool-tips and icons
+			setText(dataType.name().substring(0, 1));
 		}
 		
 		public DataType getDataType() {

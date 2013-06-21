@@ -89,8 +89,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	
 	protected CallbackHandler callbackHandler;
 	
-	protected int visualizationLimit = 10;
-	
 	// Filter to be applied when the user decides to filter certain spans
 	protected Filter pendingFilter = null; 
 	
@@ -152,7 +150,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	protected synchronized void refresh() {
 		RefreshJob job = refreshJob;
 		if(job!=null) {
-			job.cancel(true);
+			return;
 		}
 		
 		job = new RefreshJob();
@@ -416,8 +414,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		textPane.setFont(font);
 		textPane.setForeground(fg);
 		textPane.setBackground(bg);
-		
-		visualizationLimit = config.getInteger(config.getChildHandle(handle, "visualizationLimit")); //$NON-NLS-1$
 		
 		// Refresh is required to allow the underlying document
 		// to adjust its style definitions to the new font and color settings

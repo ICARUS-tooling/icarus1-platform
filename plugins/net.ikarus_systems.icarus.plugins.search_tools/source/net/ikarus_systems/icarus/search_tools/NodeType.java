@@ -11,14 +11,17 @@ package net.ikarus_systems.icarus.search_tools;
 
 import java.text.ParseException;
 
+import javax.swing.Icon;
+
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum NodeType {
+public enum NodeType implements Identity {
 
 	/**
 	 * Node without incoming edges and at least one outgoing edge
@@ -55,11 +58,13 @@ public enum NodeType {
 		return token;
 	}
 	
+	@Override
 	public String getName() {
 		return ResourceManager.getInstance().get(
 				"plugins.searchTools.nodeType."+token+".name"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
+	@Override
 	public String getDescription() {
 		return ResourceManager.getInstance().get(
 				"plugins.searchTools.nodeType."+token+".description"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -78,5 +83,29 @@ public enum NodeType {
 		}
 		
 		throw new ParseException("Unknown node type string: "+s, 0); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
+	 */
+	@Override
+	public String getId() {
+		return getClass().getSimpleName();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
+	 */
+	@Override
+	public Icon getIcon() {
+		return null;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 }

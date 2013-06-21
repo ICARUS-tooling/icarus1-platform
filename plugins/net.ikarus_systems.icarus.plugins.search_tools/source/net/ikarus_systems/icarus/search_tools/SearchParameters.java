@@ -20,8 +20,6 @@ public interface SearchParameters {
 
 	public static final String SEARCH_ORIENTATION = "searchOrientation"; //$NON-NLS-1$
 
-	public static final String REGEX_ENABLED = "regexEnabled"; //$NON-NLS-1$
-
 	public static final String SEARCH_CASESENSITIVE = "searchCaseSensitive"; //$NON-NLS-1$
 
 	public static final String OPTIMIZE_SEARCH = "optimizeSearch"; //$NON-NLS-1$

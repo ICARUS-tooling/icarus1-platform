@@ -426,6 +426,14 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	/**
+	 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
+	 */
+	@Override
+	public String getText() {
+		return LanguageUtils.combine(this);
+	}
+
+	/**
 	 * 
 	 * @author Markus Gärtner
 	 * @version $Id$

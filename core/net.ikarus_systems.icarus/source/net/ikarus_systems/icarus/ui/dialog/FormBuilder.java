@@ -130,6 +130,10 @@ public class FormBuilder {
 		return getIds().indexOf(id);
 	}
 	
+	public String getIdAt(int index) {
+		return getIds().get(index);
+	}
+	
 	public FormEntry removeEntry(int index) {
 		String id = getIds().remove(index);
 		return getEntryMap().remove(id);
@@ -142,6 +146,10 @@ public class FormBuilder {
 	
 	public FormEntry getEntry(String id) {
 		return getEntryMap().get(id);
+	}
+
+	public FormEntry removeEntry(String id) {
+		return getEntryMap().remove(id);
 	}
 	
 	public FormEntry removeEntry(FormEntry entry) {

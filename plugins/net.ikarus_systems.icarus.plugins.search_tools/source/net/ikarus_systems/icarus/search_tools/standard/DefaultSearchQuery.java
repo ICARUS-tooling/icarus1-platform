@@ -39,6 +39,9 @@ public class DefaultSearchQuery implements SearchQuery {
 			throw new IllegalArgumentException("Invalid content-type"); //$NON-NLS-1$
 		
 		this.contentType = contentType;
+		
+		graph = new DefaultSearchGraph();
+		query = ""; //$NON-NLS-1$
 	}
 	
 	protected DefaultQueryParser createParser() throws Exception {
@@ -163,7 +166,7 @@ public class DefaultSearchQuery implements SearchQuery {
 	@Override
 	public SearchQuery clone() {
 		DefaultSearchQuery clone = new DefaultSearchQuery(getContentType());
-		clone.graph = graph;
+		clone.graph = graph.clone();
 		clone.query = query;
 		clone.parser = parser;
 		

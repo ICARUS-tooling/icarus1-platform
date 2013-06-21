@@ -42,22 +42,6 @@
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleDocumentFilterAction"
 		name="${id}.name" desc="${id}.description" icon="filter_imported_elements.gif" type="toggle" />
 		
-	<!-- Toggle 'filterEmptyDocuments' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.filterEmptyDocumentsAction"
-		name="${id}.name" desc="${id}.description" icon="emptycontent.gif" />
-		
-	<!-- Select All Documents -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.selectAllDocumentsAction"
-		name="${id}.name" desc="${id}.description" />
-		
-	<!-- Unselect All Documents -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.unselectAllDocumentsAction"
-		name="${id}.name" desc="${id}.description" />
-		
-	<!-- Invert Document Selection -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.invertDocumentSelectionAction"
-		name="${id}.name" desc="${id}.description" />
-		
 	<!-- Open Preferences -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.openPreferencesAction"
 		name="${id}.name" desc="${id}.description" icon="settings.gif" />
@@ -100,7 +84,6 @@
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterEmptyDocumentsAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
 	</action-list>
@@ -111,13 +94,6 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
-	</action-list>
-		
-	<!-- Document-Filter Popup-Menu list -->
-	<action-list id="plugins.coref.coreferenceDocumentPresenter.documentFilterPopupMenuList">
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.selectAllDocumentsAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.unselectAllDocumentsAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.invertDocumentSelectionAction" />
 	</action-list>
 	
 </actions>

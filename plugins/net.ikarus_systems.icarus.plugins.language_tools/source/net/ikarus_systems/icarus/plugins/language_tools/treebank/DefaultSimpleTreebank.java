@@ -32,6 +32,7 @@ import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.location.Location;
 
 import org.java.plugin.registry.Extension;
 
@@ -88,6 +89,12 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 		reader = null;
 	}
 	
+	@Override
+	public void setLocation(Location location) {
+		super.setLocation(location);
+		free();
+	}
+
 	public void setReader(Extension readerExtension) {
 		if(readerExtension!=null && readerExtension.equals(this.readerExtension)) {
 			return;
@@ -207,6 +214,9 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 			SentenceData item;
 			
 			while((item = reader.next())!=null) {
+				if(Thread.currentThread().isInterrupted())
+					throw new InterruptedException();
+				
 				buffer.add(item);
 				metaDataBuilder.process(item);
 				
@@ -230,9 +240,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public int size() {
-		// FIXME DEBUG
 		return buffer==null ? 0 : buffer.size();
-		//return 3;
 	}
 
 	/**
@@ -288,9 +296,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public SentenceData get(int index, DataType type) {
-		return type==DataType.SYSTEM ? buffer.get(index) : null;
-		// FIXME DEBUG
-		//return DependencyUtils.createExampleSentenceData();
+		return get(index, type, null);
 	}
 
 	/**
@@ -299,6 +305,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	@Override
 	public SentenceData get(int index, DataType type,
 			AvailabilityObserver observer) {
-		return get(index, type);
+		SentenceData item = buffer==null ? null : buffer.get(index);
+		return type==DataType.SYSTEM ? item : null;
 	}
 }

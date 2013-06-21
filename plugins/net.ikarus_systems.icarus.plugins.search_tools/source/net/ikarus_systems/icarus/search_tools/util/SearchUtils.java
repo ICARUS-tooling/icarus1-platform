@@ -28,20 +28,24 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
+import net.ikarus_systems.icarus.search_tools.SearchMode;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
+import net.ikarus_systems.icarus.search_tools.SearchParameters;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphEdge;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphNode;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchGraph;
+import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.Orientation;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public final class SearchUtils implements LanguageConstants {
+public final class SearchUtils implements LanguageConstants, SearchParameters {
 
 	private SearchUtils() {
 		// no-op
@@ -51,7 +55,7 @@ public final class SearchUtils implements LanguageConstants {
 	 * Returns an exact copy of the given {@code SearchGraph} with
 	 * all its constraints contained within nodes and edges instantiated
 	 * using the {@code ConstraintFactory} implementations provided
-	 * by the specified context. In addition the provided flags are passed
+	 * by the specified context. In addition the provided options are passed
 	 * to the factories so one can create a copy of an existing search graph
 	 * with new settings.
 	 * <p>
@@ -60,7 +64,7 @@ public final class SearchUtils implements LanguageConstants {
 	 * can be sure that all constraints are properly instantiated and not
 	 * plain instances of {@link DefaultConstraint}.
 	 */
-	public static SearchGraph instantiate(SearchGraph graph, ConstraintContext context, int flags) {
+	public static SearchGraph instantiate(SearchGraph graph, ConstraintContext context, Options options) {
 		if(graph==null)
 			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
 		if(context==null)
@@ -77,7 +81,7 @@ public final class SearchUtils implements LanguageConstants {
 			clone.setId(node.getId());
 			clone.setNegated(node.isNegated());
 			clone.setNodeType(node.getNodeType());
-			clone.setConstraints(instantiate(node.getConstraints(), context, flags));
+			clone.setConstraints(instantiate(node.getConstraints(), context, options));
 			
 			cloneMap.put(node, clone);
 			nodes.add(clone);
@@ -88,7 +92,7 @@ public final class SearchUtils implements LanguageConstants {
 			clone.setId(edge.getId());
 			clone.setNegated(edge.isNegated());
 			clone.setEdgeType(edge.getEdgeType());
-			clone.setConstraints(instantiate(edge.getConstraints(), context, flags));
+			clone.setConstraints(instantiate(edge.getConstraints(), context, options));
 			
 			edges.add(clone);
 			
@@ -116,9 +120,13 @@ public final class SearchUtils implements LanguageConstants {
 	}
 	
 	private static SearchConstraint[] instantiate(SearchConstraint[] constraints, 
-			ConstraintContext context, int flags) {
+			ConstraintContext context, Options options) {
 		if(constraints==null) {
 			return null;
+		}
+		
+		if(options==null) {
+			options = Options.emptyOptions;
 		}
 		
 		SearchConstraint[] result = new SearchConstraint[constraints.length];
@@ -127,7 +135,7 @@ public final class SearchUtils implements LanguageConstants {
 			SearchConstraint constraint = constraints[i];
 			ConstraintFactory factory = context.getFactory(constraint.getToken());
 			result[i] = factory.createConstraint(
-					constraint.getValue(), constraint.getOperator(), flags);
+					constraint.getValue(), constraint.getOperator(), options);
 		}
 		
 		return result;
@@ -159,6 +167,10 @@ public final class SearchUtils implements LanguageConstants {
 			return null;
 		}
 		
+		if(isEmpty(searchQuery.getSearchGraph())) {
+			return null;
+		}
+		
 		String stats = getGraphStats(searchQuery.getSearchGraph());
 		String query = searchQuery.getQueryString();
 		if(stats==null && query!=null && !query.isEmpty()) {
@@ -167,6 +179,42 @@ public final class SearchUtils implements LanguageConstants {
 		}
 		
 		return stats;
+	}
+	
+	public static String getParameterStats(Options options) {
+		if(options==null) {
+			options = Options.emptyOptions;
+		}
+		
+		ResourceManager rm = ResourceManager.getInstance();
+		StringBuilder sb = new StringBuilder();
+		
+		String yes = rm.get("yes"); //$NON-NLS-1$
+		String no = rm.get("no"); //$NON-NLS-1$
+		
+		// Mode
+		SearchMode mode = options.get(SEARCH_MODE, SearchMode.MATCHES);
+		sb.append(rm.get("plugins.searchTools.labels.searchMode")) //$NON-NLS-1$
+			.append(": ").append(mode.getName()).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		// Orientation
+		Orientation orientation = options.get(SEARCH_ORIENTATION, Orientation.LEFT_TO_RIGHT);
+		sb.append(rm.get("plugins.searchTools.labels.orientation")) //$NON-NLS-1$
+			.append(": ").append(orientation.getName()).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		// Case-Sensitive
+		boolean caseSensitive = options.getBoolean(SEARCH_CASESENSITIVE, false);
+		sb.append(rm.get("plugins.searchTools.labels.caseSensitive")) //$NON-NLS-1$
+			.append(": ").append(caseSensitive ? yes : no).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		// Optimize
+		boolean optimize = options.getBoolean(OPTIMIZE_SEARCH, false);
+		sb.append(rm.get("plugins.searchTools.labels.optimize")) //$NON-NLS-1$
+			.append(": ").append(optimize ? yes : no).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		// Result Limit
+		int resultLimit = options.getInteger(SEARCH_RESULT_LIMIT, 0);
+		String limit = resultLimit==0 ? "-" : String.valueOf(resultLimit); //$NON-NLS-1$
+		sb.append(rm.get("plugins.searchTools.labels.resultLimit")) //$NON-NLS-1$
+			.append(": ").append(limit); //$NON-NLS-1$
+		
+		return sb.toString();
 	}
 	
 	public static String getGraphStats(SearchGraph searchGraph) {
@@ -333,6 +381,23 @@ public final class SearchUtils implements LanguageConstants {
 	
 	public static boolean isEmpty(SearchGraph graph) {
 		return graph==null || graph.getRootNodes()==null || graph.getRootNodes().length==0;
+	}
+	
+	public static boolean searchIsReady(Search search) {
+		if(search==null)
+			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+		
+		if(search.getTarget()==null) {
+			return false;
+		}
+		if(search.getQuery()==null) {
+			return false;
+		}
+		if(isEmpty(search.getQuery().getSearchGraph())) {
+			return false;
+		}
+		
+		return !search.isRunning() && !search.isDone();
 	}
 		
 	public static final Comparator<SearchNode> nodeIdSorter = new Comparator<SearchNode>() {

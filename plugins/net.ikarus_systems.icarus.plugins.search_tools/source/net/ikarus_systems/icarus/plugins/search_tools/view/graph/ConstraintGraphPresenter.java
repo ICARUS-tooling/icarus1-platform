@@ -138,7 +138,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		editableMainToolBarListId = "plugins.searchTools.constraintGraphPresenter.editableMainToolBarList"; //$NON-NLS-1$
 		editablePopupMenuListId = "plugins.searchTools.constraintGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
 		
-		setMinimumNodeSize(new Dimension(20, 20));
+		setMinimumNodeSize(new Dimension(50, 25));
 	}
 	
 	protected ConstraintContext createDefaultContext() {
@@ -412,7 +412,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			Map<String, Integer> constraintMap) {
 		// Add new vertex
 		ConstraintNodeData nodeData = createNodeData(sourceNode, constraintMap);
-		Object cell = graph.insertVertex(null, null, nodeData, x, y, 30, 30);
+		Object cell = graph.insertVertex(null, null, nodeData, x, y, 50, 25);
 		graph.cellSizeUpdated(cell, false);
 		cellMap.put(sourceNode, cell);
 		
@@ -464,6 +464,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		
 		Map<Object, DefaultGraphNode> searchNodes = new LinkedHashMap<>();
 		Map<Object, DefaultGraphEdge> searchEdges = new LinkedHashMap<>();
+		List<DefaultGraphNode> roots = new ArrayList<>();
 		
 		// Create and map nodes and edges
 		for(int i=0; i<cellCount; i++) {
@@ -477,6 +478,12 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				node.setId(nodeData.getId());
 				
 				searchNodes.put(cell, node);
+				
+				// Check for roots
+				if(GraphUtils.getIncomingEdgeCount(model, cell, true, false)==0) {
+					roots.add(node);
+				}
+				
 			} else if(model.isEdge(cell)) {
 				ConstraintEdgeData edgeData = (ConstraintEdgeData)model.getValue(cell);
 				DefaultGraphEdge edge = new DefaultGraphEdge();
@@ -513,15 +520,15 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			}
 		}
 		
-		List<Object> roots = graph.findTreeRoots(parent);
+		/*List<Object> roots = graph.findTreeRoots(parent);
 		List<SearchNode> rootNodes = new ArrayList<>();
 		for(Object root : roots) {
 			rootNodes.add(searchNodes.get(root));
-		}
+		}*/
 		
 		// Now wrap everything into a graph object
 		DefaultSearchGraph searchGraph = new DefaultSearchGraph();		
-		searchGraph.setRootNodes(rootNodes.toArray(new SearchNode[0]));
+		searchGraph.setRootNodes(roots.toArray(new SearchNode[0]));
 		searchGraph.setNodes(searchNodes.values().toArray(new SearchNode[0]));
 		searchGraph.setEdges(searchEdges.values().toArray(new SearchEdge[0]));
 		
@@ -534,8 +541,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 	@Override
 	protected mxGraph createGraph() {
-		// TODO Auto-generated method stub
-		return super.createGraph();
+		return new ConstraintGraph();
 	}
 
 	@Override
@@ -558,7 +564,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		model.beginUpdate();
 		try {
 			Object cell = graph.insertVertex(null, null, createNodeData(), 
-					40, 40, 70, 25);
+					40, 40, 50, 25);
 			
 			//graph.cellSizeUpdated(cell, false);
 
@@ -580,7 +586,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			ConstraintNodeData nodeData = createNodeData();
 			nodeData.setNodeType(NodeType.DISJUNCTION);
 			Object cell = graph.insertVertex(null, null, nodeData, 
-					40, 40, 30, 30);
+					40, 40, 25, 25);
 			
 			graph.cellSizeUpdated(cell, false);
 
@@ -750,6 +756,20 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			
 			// Content check successful -> proceed with regular cloning
 			return super.cloneCells(cells, allowInvalidEdges);
+		}
+
+		@Override
+		public mxRectangle getPreferredSizeForCell(Object cell) {
+			if(isDisjunctionNode(getModel(), cell)) {
+				Dimension maxSize = getMaximumNodeSize();
+				setMaximumNodeSize(ConstraintGraphRenderer.disjunctionNodeSize);
+				mxRectangle cellSize = super.getPreferredSizeForCell(cell);
+				setMaximumNodeSize(maxSize);
+				
+				return cellSize;
+			} else {
+				return super.getPreferredSizeForCell(cell);
+			}
 		}
 	}
 	

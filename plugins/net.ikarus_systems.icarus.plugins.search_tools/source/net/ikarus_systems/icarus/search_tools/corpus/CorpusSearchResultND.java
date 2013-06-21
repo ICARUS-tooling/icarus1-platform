@@ -7,11 +7,12 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.treebank;
+package net.ikarus_systems.icarus.search_tools.corpus;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +22,10 @@ import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataList;
+import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
+import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -32,11 +34,13 @@ import net.ikarus_systems.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public class TreebankSearchResultND extends AbstractTreebankSearchResult {
+public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 
 	protected Map<String, List<ResultEntry>> entries;
 	protected List<ResultEntry> totalEntries;
-	protected int[] indexBuffer;
+	protected final int[] indexBuffer;
+	
+	protected int[][] groupMatchCounts;
 	
 	public static final int DEFAULT_START_SIZE = 200;
 	
@@ -47,29 +51,51 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 	 */
 	protected final int[] indexPermutator;
 
-	public TreebankSearchResultND(SearchDescriptor descriptor,
+	public CorpusSearchResultND(Search search,
 			SearchConstraint[] groupConstraints) {
-		this(descriptor, groupConstraints, DEFAULT_START_SIZE);
+		this(search, groupConstraints, DEFAULT_START_SIZE);
 	}
 
-	public TreebankSearchResultND(SearchDescriptor descriptor,
+	public CorpusSearchResultND(Search search,
 			SearchConstraint[] groupConstraints, int size) {
-		super(descriptor, groupConstraints);
+		super(search, groupConstraints);
 		
 		indexPermutator = new int[getDimension()];
+		indexBuffer = new int[getDimension()];
+		groupMatchCounts = new int[getDimension()][];
+		
+		entries = new HashMap<>(size);
+		totalEntries = new ArrayList<>(size);
 	}
 
 	StringBuilder keyBuilder = new StringBuilder(10);
 
 	protected String getKey(int... indices) {
+		if(indices.length!=indexBuffer.length)
+			throw new IllegalArgumentException("Illegal indices count: expected "+indexBuffer.length+" - got "+indices.length); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		keyBuilder.setLength(0);
 		int last = indices.length - 1;
 		for (int i = 0; i < last; i++) {
-			keyBuilder.append(indices[i]).append("_"); //$NON-NLS-1$
+			keyBuilder.append(indices[i]).append('_');
 		}
 		keyBuilder.append(indices[last]);
 
 		return keyBuilder.toString();
+	}
+
+	@Override
+	public SearchResult getSubResult(int... groupInstances) {
+		int dif = getDimension()-groupInstances.length;
+		if(dif<0)
+			throw new IllegalArgumentException("Number of instances for sub-result exceeds current dimension: "+groupInstances.length); //$NON-NLS-1$
+		
+		if(dif==0) {
+			List<ResultEntry> list = getRawEntryList(groupInstances);
+			return new CorpusSearchResult0D(getSource(), list);
+		} else {
+			return new SubResult(this, groupInstances);
+		}
 	}
 
 	/**
@@ -85,8 +111,10 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 	 */
 	@Override
 	public int getMatchCount(int... groupIndices) {
-		// TODO Auto-generated method stub
-		return 0;
+		String key = getKey(groupIndices);
+		List<ResultEntry> list = entries.get(key);
+		
+		return list==null ? 0 : list.size(); 
 	}
 
 	/**
@@ -151,7 +179,7 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.AbstractTreebankSearchResult#createCache()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearchResult#createCache()
 	 */
 	@Override
 	public GroupCache createCache() {
@@ -159,14 +187,25 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.AbstractTreebankSearchResult#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry, net.ikarus_systems.icarus.search_tools.treebank.GroupCache)
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearchResult#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry, net.ikarus_systems.icarus.search_tools.corpus.GroupCache)
 	 */
 	@Override
 	public synchronized void commit(ResultEntry entry, GroupCache cache) {
 		ResultNDCache c = (ResultNDCache) cache;
 		
 		for (int i = 0; i < indexBuffer.length; i++) {
-			indexBuffer[i] = groupInstances[i].substitute(c.instanceBuffer[indexPermutator[i]]);
+			int index = groupInstances[i].substitute(c.instanceBuffer[indexPermutator[i]]);;
+			indexBuffer[i] = index; 
+			
+			int[] counts = groupMatchCounts[i];
+			if(counts==null) {
+				counts = new int[Math.max(index*2, 100)];
+				groupMatchCounts[i] = counts;
+			} else if(counts.length<=index) {
+				counts = Arrays.copyOf(counts, index*2);
+				groupMatchCounts[i] = counts;
+			}
+			counts[index]++;
 		}
 
 		// Generate key and ensure valid result list
@@ -182,6 +221,15 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 		totalEntries.add(entry);
 	}
 
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getGroupMatchCount(int, int)
+	 */
+	@Override
+	public int getGroupMatchCount(int groupId, int index) {
+		int[] counts = groupMatchCounts[groupId];
+		return (counts==null || counts.length<=index) ? 0 : counts[index];
+	}
+
 	protected class ResultNDCache implements GroupCache {
 
 		protected final String[] instanceBuffer = new String[getDimension()];
@@ -189,12 +237,12 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 		protected boolean locked = false;
 
 		/**
-		 * @see net.ikarus_systems.icarus.search_tools.treebank.GroupCache#cacheGroupInstance(int, java.lang.Object)
+		 * @see net.ikarus_systems.icarus.search_tools.corpus.GroupCache#cacheGroupInstance(int, java.lang.Object)
 		 */
 		@Override
 		public void cacheGroupInstance(int id, Object value) {
 			if(!locked) {
-				instanceBuffer[id] = (String) value;
+				instanceBuffer[id] = String.valueOf(value);
 			}
 		}
 		
@@ -204,7 +252,7 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 		}
 
 		/**
-		 * @see net.ikarus_systems.icarus.search_tools.treebank.GroupCache#lock()
+		 * @see net.ikarus_systems.icarus.search_tools.corpus.GroupCache#lock()
 		 */
 		@Override
 		public void lock() {
@@ -212,7 +260,7 @@ public class TreebankSearchResultND extends AbstractTreebankSearchResult {
 		}
 
 		/**
-		 * @see net.ikarus_systems.icarus.search_tools.treebank.GroupCache#reset()
+		 * @see net.ikarus_systems.icarus.search_tools.corpus.GroupCache#reset()
 		 */
 		@Override
 		public void reset() {

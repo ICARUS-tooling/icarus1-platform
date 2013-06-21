@@ -15,6 +15,7 @@ import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -35,7 +36,7 @@ public class DependencyProjectivityContraintFactory extends AbstractConstraintFa
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, int flags) {
+			SearchOperator operator, Options options) {
 		return new DependencyProjectivityConstraint(value, operator);
 	}
 

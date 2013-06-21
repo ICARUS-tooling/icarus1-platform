@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.plugins.coref.io;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -19,6 +20,7 @@ import java.util.regex.Pattern;
 
 import net.ikarus_systems.icarus.language.coref.CoreferenceData;
 import net.ikarus_systems.icarus.language.coref.CoreferenceDocumentData;
+import net.ikarus_systems.icarus.language.coref.CoreferenceUtils;
 import net.ikarus_systems.icarus.language.coref.DefaultCoreferenceData;
 import net.ikarus_systems.icarus.language.coref.Span;
 
@@ -186,6 +188,9 @@ public final class CONLL12Utils {
 		
 		
 		Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
+		if(spans!=null) {
+			Arrays.sort(spans, CoreferenceUtils.SPAN_SIZE_REVERSE_SORTER);
+		}
 		
 		DefaultCoreferenceData result = new DefaultCoreferenceData(forms, spans);
 		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);

@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.language.treebank;
 
 import java.util.Map;
 
+import net.ikarus_systems.icarus.io.Loadable;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataList;
@@ -24,7 +25,7 @@ import net.ikarus_systems.icarus.util.location.Location;
  * @version $Id$
  *
  */
-public interface Treebank extends SentenceDataList, Identity {
+public interface Treebank extends SentenceDataList, Identity, Loadable {
 	
 	boolean isEditable();
 	

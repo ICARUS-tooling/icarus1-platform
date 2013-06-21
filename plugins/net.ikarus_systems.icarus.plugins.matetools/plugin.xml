@@ -89,6 +89,15 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.conll.CONLL09SentenceDataReader" />
 	</extension>
 	
+	<extension id="CONLL09SentenceDataWriter" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="SentenceDataWriter">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.conll.CONLL09SentenceDataWriter" />
+	</extension>
+	
 	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.matetools.parser.ModelStorage" />
 	</extension>

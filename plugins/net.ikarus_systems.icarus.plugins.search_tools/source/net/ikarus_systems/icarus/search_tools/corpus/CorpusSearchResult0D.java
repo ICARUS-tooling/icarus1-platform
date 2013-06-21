@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.treebank;
+package net.ikarus_systems.icarus.search_tools.corpus;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataList;
-import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
+import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
@@ -29,21 +29,30 @@ import net.ikarus_systems.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public class TreebankSearchResult0D extends AbstractTreebankSearchResult {
+public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 	
 	protected List<ResultEntry> entries;
 	protected EntryList wrapper;
 	
 	public static final int DEFAULT_START_SIZE = 1000;
 
-	public TreebankSearchResult0D(SearchDescriptor descriptor) {
-		this(descriptor, DEFAULT_START_SIZE);
+	public CorpusSearchResult0D(Search search) {
+		this(search, DEFAULT_START_SIZE);
 	}
 
-	public TreebankSearchResult0D(SearchDescriptor descriptor, int size) {
-		super(descriptor, null);
+	public CorpusSearchResult0D(Search search, int size) {
+		super(search, null);
 		
 		entries = new ArrayList<>(size);
+	}
+
+	public CorpusSearchResult0D(Search search, List<ResultEntry> entries) {
+		super(search, null);
+		
+		if(entries==null)
+			throw new IllegalArgumentException("Invalid entry list"); //$NON-NLS-1$
+		
+		this.entries = new ArrayList<>(entries);
 	}
 
 	/**
@@ -102,7 +111,7 @@ public class TreebankSearchResult0D extends AbstractTreebankSearchResult {
 
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.AbstractTreebankSearchResult#createCache()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearchResult#createCache()
 	 */
 	@Override
 	public GroupCache createCache() {
@@ -110,7 +119,7 @@ public class TreebankSearchResult0D extends AbstractTreebankSearchResult {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.AbstractTreebankSearchResult#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry, net.ikarus_systems.icarus.search_tools.treebank.GroupCache)
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearchResult#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry, net.ikarus_systems.icarus.search_tools.corpus.GroupCache)
 	 */
 	@Override
 	public void commit(ResultEntry entry, GroupCache cache) {
@@ -131,6 +140,14 @@ public class TreebankSearchResult0D extends AbstractTreebankSearchResult {
 	@Override
 	public List<ResultEntry> getRawEntryList(int... groupIndices) {
 		return entries;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getGroupMatchCount(int, int)
+	 */
+	@Override
+	public int getGroupMatchCount(int groupId, int index) {
+		return 0;
 	}
 
 	protected class EntryList extends AbstractList<SentenceData> implements SentenceDataList {

@@ -123,6 +123,10 @@ public abstract class AbstractTreebank {
 	 * @param location the new {@code Location} to be used
 	 */
 	public void setLocation(Location location) {
+		if(this.location!=null && this.location.equals(location)) {
+			return;
+		}
+		
 		this.location = location;
 		eventSource.fireEvent(new EventObject(TreebankEvents.LOCATION));
 	}
@@ -159,7 +163,7 @@ public abstract class AbstractTreebank {
 	}
 	
 	public SentenceData get(int index) {
-		return ((Treebank)this).get(index, null);
+		return ((Treebank)this).get(index, DataType.SYSTEM);
 	}
 	
 	/**

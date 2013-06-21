@@ -131,7 +131,7 @@ public class DefaultConstraint implements SearchConstraint {
 	 */
 	@Override
 	public boolean isUndefined() {
-		return operator!=SearchOperator.GROUPING
+		return !SearchManager.isGroupingOperator(operator)
 				&& (value==null || value.equals(SearchUtils.DATA_UNDEFINED_LABEL)
 				|| value.equals(SearchUtils.DATA_UNDEFINED_VALUE)
 				|| "".equals(value)); //$NON-NLS-1$

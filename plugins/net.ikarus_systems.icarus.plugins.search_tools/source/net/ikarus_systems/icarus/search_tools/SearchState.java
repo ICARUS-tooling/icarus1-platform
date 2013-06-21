@@ -29,7 +29,7 @@ public enum SearchState {
 	/**
 	 * Search performed without interruptions.
 	 */
-	FINISHED,
+	DONE,
 	
 	/**
 	 * Search got cancelled either by user decision or by

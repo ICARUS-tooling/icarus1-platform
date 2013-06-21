@@ -55,7 +55,10 @@ public class TaskProgressPanel extends JPanel implements ActionListener, Propert
 		add(progressBar);
 		
 		cancelButton = new JButton();
+		cancelButton.setFocusable(false);
+		cancelButton.setFocusPainted(false);
 		cancelButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("nav_stop.gif")); //$NON-NLS-1$
+		cancelButton.addActionListener(this);
 		UIUtil.resizeComponent(cancelButton, 18, 18);
 		add(cancelButton);
 	}

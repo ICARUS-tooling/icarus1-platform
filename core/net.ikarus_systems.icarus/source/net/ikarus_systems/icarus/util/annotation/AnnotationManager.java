@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.PropertyChangeSource;
+import net.ikarus_systems.icarus.util.data.ContentType;
 
 /**
  * 
@@ -219,6 +220,8 @@ public abstract class AnnotationManager
 	}
 	
 	public abstract AnnotationManager linkedCopy();
+	
+	public abstract boolean supportsAnnotation(ContentType contentType);
 	
 	/**
 	 * Returns the total number of 'hits' the underlying

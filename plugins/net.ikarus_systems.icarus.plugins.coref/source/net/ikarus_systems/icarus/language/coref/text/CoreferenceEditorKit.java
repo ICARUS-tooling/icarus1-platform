@@ -167,9 +167,9 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 				//System.out.printf("alloc=%s run=%s\n", alloc, run);
 				
 				int x = alloc.x;
-				int y = run.y;
+				int y = run.y+1;
 				int w = alloc.width;
-				int h = run.height;
+				int h = run.height-2;
 				
 				Color c = g.getColor();
 				g.setColor(col);
@@ -194,7 +194,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 		public String getToolTipText(float x, float y, Shape allocation) {
 			AttributeSet attr = getAttributes();
 			if(attr.isDefined(CoreferenceDocument.PARAM_CLUSTER_ID)) {
-				return String.format("Cluster-Id: %d", attr.getAttribute(CoreferenceDocument.PARAM_CLUSTER_ID));
+				return String.format("Cluster-Id: %d", attr.getAttribute(CoreferenceDocument.PARAM_CLUSTER_ID)); //$NON-NLS-1$
 			}
 			return super.getToolTipText(x, y, allocation);
 		}

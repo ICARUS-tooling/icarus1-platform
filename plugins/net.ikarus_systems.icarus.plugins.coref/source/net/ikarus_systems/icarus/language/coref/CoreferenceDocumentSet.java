@@ -52,7 +52,7 @@ public class CoreferenceDocumentSet extends AbstractDataList<CoreferenceDocument
 			properties = new CompactProperties();
 		}
 		
-		properties.setProperty(key, value);
+		properties.put(key, value);
 	}
 	
 	public void add(CoreferenceDocumentData data) {

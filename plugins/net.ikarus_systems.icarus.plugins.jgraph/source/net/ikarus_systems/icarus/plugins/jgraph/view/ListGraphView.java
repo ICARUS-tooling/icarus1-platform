@@ -146,7 +146,6 @@ public class ListGraphView extends View implements Outline {
 			return;
 		} 
 		
-		
 		// Display selected object in graph presenter
 		Options options = new Options();
 		options.put(Options.INDEX, selectedIndex);

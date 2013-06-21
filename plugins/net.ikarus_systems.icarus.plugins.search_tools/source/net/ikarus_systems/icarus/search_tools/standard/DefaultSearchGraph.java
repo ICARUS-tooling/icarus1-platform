@@ -94,4 +94,13 @@ public class DefaultSearchGraph implements SearchGraph {
 	public void setRootOperator(int rootOperator) {
 		this.rootOperator = rootOperator;
 	}
+	
+	public SearchGraph clone() {
+		DefaultSearchGraph graph = new DefaultSearchGraph();
+		graph.rootOperator = rootOperator;
+		graph.nodes = nodes==null ? null : nodes.clone();
+		graph.edges = edges==null ? null : edges.clone();
+		graph.rootNodes = rootNodes==null ? null : rootNodes.clone();
+		return graph;
+	}
 }

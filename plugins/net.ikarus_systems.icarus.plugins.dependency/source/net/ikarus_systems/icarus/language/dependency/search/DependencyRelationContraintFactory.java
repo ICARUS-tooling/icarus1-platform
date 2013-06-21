@@ -13,6 +13,7 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -33,8 +34,8 @@ public class DependencyRelationContraintFactory extends AbstractConstraintFactor
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, int flags) {
-		if(isFlagSet(flags, IGNORE_CASE))
+			SearchOperator operator, Options options) {
+		if(options.get(SEARCH_CASESENSITIVE, false))
 			return new DependencyRelationCIConstraint(value, operator);
 		else
 			return new DependencyRelationConstraint(value, operator);

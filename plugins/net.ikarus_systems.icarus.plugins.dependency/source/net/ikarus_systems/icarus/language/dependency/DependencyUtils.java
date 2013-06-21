@@ -151,8 +151,6 @@ public class DependencyUtils implements DependencyConstants {
 		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
 		
 		Options options = new Options();
-		options.put(SearchParameters.REGEX_ENABLED, 
-				config.getBoolean("dependency.search.useRegex")); //$NON-NLS-1$
 		options.put(SearchParameters.SEARCH_CASESENSITIVE, 
 				config.getBoolean("dependency.search.caseSensitive")); //$NON-NLS-1$
 		options.put(SearchParameters.SEARCH_ORIENTATION, 
@@ -162,7 +160,7 @@ public class DependencyUtils implements DependencyConstants {
 								: Orientation.RIGHT_TO_LEFT);
 		options.put(SearchParameters.SEARCH_RESULT_LIMIT,
 				config.getInteger("dependency.search.maxResultCount")); //$NON-NLS-1$
-		SearchMode mode = SearchMode.MATCH;
+		SearchMode mode = SearchMode.MATCHES;
 		String modeString = config.getString("dependency.search.searchMode"); //$NON-NLS-1$
 		
 		// TODO use accurate mode check!

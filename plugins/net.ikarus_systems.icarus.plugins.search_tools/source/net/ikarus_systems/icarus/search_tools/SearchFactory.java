@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.search_tools;
 
+import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 
@@ -40,4 +41,6 @@ public interface SearchFactory {
 	 * a search.
 	 */
 	SearchQuery createQuery();
+	
+	Editor<Options> createParameterEditor();
 }

@@ -874,19 +874,19 @@ public class DefaultQueryParser {
 		// Collect properties and meta-constraints
 		CompactProperties properties = new CompactProperties();
 		if(idSet.contains(node)) {
-			properties.setProperty(ID_OPTION, node.getId());
+			properties.put(ID_OPTION, node.getId());
 		}
 		for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
 			SearchEdge edge = node.getOutgoingEdgeAt(i);
 			if(edge.getEdgeType()==EdgeType.PRECEDENCE) {
-				properties.setProperty(edge.getTarget().getId(), Order.AFTER.getToken());
+				properties.put(edge.getTarget().getId(), Order.AFTER.getToken());
 			}
 		}
 		if(node.getNodeType()!=NodeType.GENERAL) {
-			properties.setProperty(NODETYPE_OPTION, node.getNodeType().getToken());
+			properties.put(NODETYPE_OPTION, node.getNodeType().getToken());
 		}
 		if(head!=null && head.getEdgeType()!=EdgeType.DOMINANCE) {
-			properties.setProperty(EDGETYPE_OPTION, head.getEdgeType().getToken());
+			properties.put(EDGETYPE_OPTION, head.getEdgeType().getToken());
 		}
 		
 		// Append properties
@@ -999,7 +999,7 @@ public class DefaultQueryParser {
 			definedCount++;
 		}
 		
-		return true;
+		return definedCount>0;
 	}
 	
 	protected boolean requiresQuote(String s) {
@@ -1223,7 +1223,7 @@ public class DefaultQueryParser {
 				throw new ParseException(errorMessage(
 						"Duplicate property: "+key), index); //$NON-NLS-1$
 			
-			properties.setProperty(key, value);
+			properties.put(key, value);
 		}
 		
 		Map<String, Object> getProperties() {

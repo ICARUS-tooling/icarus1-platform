@@ -93,6 +93,7 @@ import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.actions.Actions;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.Exceptions;
+import net.ikarus_systems.icarus.util.HtmlUtils;
 
 /**
  * @author Markus Gärtner 
@@ -166,6 +167,7 @@ public final class UIUtil {
 	public static final Color defaultBorderColor = new Color(128, 128, 128);
 	
 	public static final Border defaultAreaBorder = BorderFactory.createLineBorder(defaultBorderColor, 1, true);
+	public static final Border defaultBoxBorder = BorderFactory.createLineBorder(defaultBorderColor, 1);
 	
 	public static final Border topLineBorder = new SeparatingBorder(true, false, false, false);
 	
@@ -291,7 +293,7 @@ public final class UIUtil {
 			return null;
 		}
 		
-		String convertedTooltip = tooltip.replaceAll(
+		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(convertedTooltip.length()!=tooltip.length()) {
 			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$

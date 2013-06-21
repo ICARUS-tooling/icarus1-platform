@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.util.data;
 
+import net.ikarus_systems.icarus.util.Options;
+
 /**
  * Basic converter interface without any means of restrictions for
  * in- or output. Incompatibility of data will be signaled by
@@ -20,5 +22,5 @@ package net.ikarus_systems.icarus.util.data;
  */
 public interface Converter {
 
-	Object convert(Object source) throws DataConversionException;
+	Object convert(Object source, Options options) throws DataConversionException;
 }

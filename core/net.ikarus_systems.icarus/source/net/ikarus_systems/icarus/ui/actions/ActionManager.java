@@ -43,7 +43,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
@@ -849,23 +848,17 @@ public class ActionManager {
 		if (action instanceof StateChangeAction) {
 			StateChangeAction sca = (StateChangeAction)action;
 
+			menuItem = new JCheckBoxMenuItem(sca);
+			menuItem.addItemListener(sca);
+			menuItem.setSelected(sca.isSelected());
 			if (groupId != null) {
-				menuItem = new JRadioButtonMenuItem(sca);
-				menuItem.addItemListener(sca);
-				menuItem.setSelected(sca.isSelected());
-				
 				ButtonGroup group = getGroup(groupId, container);
 				group.add(menuItem);
 
 				action.addPropertyChangeListener(new ToggleActionPropertyChangeListener(menuItem));
-				configureToggleMenuItem(menuItem, sca);
-			} else {
-				menuItem = new JCheckBoxMenuItem(sca);
-				menuItem.addItemListener(sca);
-				menuItem.setSelected(sca.isSelected());
-
-				configureToggleMenuItem(menuItem, sca);
 			}
+
+			configureToggleMenuItem(menuItem, sca);
 			
 			sca.addPropertyChangeListener(new ToggleActionPropertyChangeListener(menuItem));
 		} else if(action!=null) {

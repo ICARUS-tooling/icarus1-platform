@@ -15,7 +15,9 @@ import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultParameterEditor;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchQuery;
+import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -38,8 +40,7 @@ public class DependencySearchFactory implements SearchFactory {
 	@Override
 	public Search createSearch(SearchQuery query, Object target, Options options)
 			throws UnsupportedFormatException {
-		// TODO Auto-generated method stub
-		return null;
+		return new DependencySearch(this, query, target, options);
 	}
 
 	public ContentType getContentType() {
@@ -60,6 +61,14 @@ public class DependencySearchFactory implements SearchFactory {
 	@Override
 	public ConstraintContext getConstraintContext() {
 		return SearchManager.getInstance().getConstraintContext(getContentType());
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchFactory#createParameterEditor()
+	 */
+	@Override
+	public Editor<Options> createParameterEditor() {
+		return new DefaultParameterEditor();
 	}
 
 }

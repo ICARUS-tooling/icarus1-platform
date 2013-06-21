@@ -121,4 +121,13 @@ public class CompoundSentenceData implements SentenceData {
 		
 		return new CompoundSentenceData(systemData, goldData, userData);
 	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
+	 */
+	@Override
+	public String getText() {
+		SentenceData data = getFirstSet();
+		return data==null ? null : data.getText();
+	}
 }

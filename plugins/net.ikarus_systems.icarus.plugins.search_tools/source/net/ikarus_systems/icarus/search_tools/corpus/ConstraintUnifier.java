@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.treebank;
+package net.ikarus_systems.icarus.search_tools.corpus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,8 +21,8 @@ import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
-import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils.Visitor;
 import net.ikarus_systems.icarus.util.CollectionUtils;
@@ -159,7 +159,7 @@ public class ConstraintUnifier {
 		int count = 0;
 		
 		for(SearchConstraint constraint : constraints) {
-			if(constraint.getOperator()==SearchOperator.GROUPING) {
+			if(SearchManager.isGroupingOperator(constraint.getOperator())) {
 				list.add(constraint);
 				count++;
 			}
@@ -202,7 +202,7 @@ public class ConstraintUnifier {
 		}
 		
 		for(SearchConstraint constraint : constraints) {
-			if(constraint.getOperator()==SearchOperator.GROUPING
+			if(SearchManager.isGroupingOperator(constraint.getOperator())
 					&& !usedIndices.contains((int) constraint.getValue())) {
 				list.add(constraint);
 				usedIndices.add((int) constraint.getValue());

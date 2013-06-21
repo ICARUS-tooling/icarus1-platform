@@ -11,7 +11,7 @@ package net.ikarus_systems.icarus.language.dependency.search;
 
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
-import net.ikarus_systems.icarus.search_tools.treebank.TargetTree;
+import net.ikarus_systems.icarus.search_tools.corpus.TargetTree;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 
 /**
@@ -65,7 +65,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#size()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#size()
 	 */
 	@Override
 	public int size() {
@@ -73,7 +73,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#reset()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#reset()
 	 */
 	@Override
 	public void reset() {
@@ -82,7 +82,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#reload(java.lang.Object)
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#reload(java.lang.Object)
 	 */
 	@Override
 	public void reload(Object source) {
@@ -175,7 +175,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 	
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getNodeIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getNodeIndex()
 	 */
 	@Override
 	public int getNodeIndex() {
@@ -183,7 +183,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getEdgeIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getEdgeIndex()
 	 */
 	@Override
 	public int getEdgeIndex() {
@@ -191,7 +191,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getEdgeCount()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getEdgeCount()
 	 */
 	@Override
 	public int getEdgeCount() {
@@ -204,7 +204,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#viewEdge(int)
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewEdge(int)
 	 */
 	@Override
 	public void viewEdge(int index) {
@@ -221,7 +221,7 @@ public class DependencyTargetTree implements TargetTree {
 
 	/**
 	 * 
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#viewEdge(int, int)
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewEdge(int, int)
 	 */
 	@Override
 	public void viewEdge(int nodeIndex, int edgeIndex) {
@@ -238,7 +238,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getSourceIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getSourceIndex()
 	 */
 	@Override
 	public int getSourceIndex() {
@@ -251,7 +251,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getTargetIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getTargetIndex()
 	 */
 	@Override
 	public int getTargetIndex() {
@@ -264,7 +264,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getRootIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getRootIndex()
 	 */
 	@Override
 	public int getRootIndex() {
@@ -272,7 +272,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getParentIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getParentIndex()
 	 */
 	@Override
 	public int getParentIndex() {
@@ -283,7 +283,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#viewNode(int)
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewNode(int)
 	 */
 	@Override
 	public void viewNode(int index) {
@@ -295,7 +295,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#viewParent()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewParent()
 	 */
 	@Override
 	public void viewParent() {
@@ -309,7 +309,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#viewTarget()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewTarget()
 	 */
 	@Override
 	public void viewTarget() {
@@ -323,7 +323,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#viewSource()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewSource()
 	 */
 	@Override
 	public void viewSource() {
@@ -337,7 +337,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getHeight()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getHeight()
 	 */
 	@Override
 	public int getHeight() {
@@ -348,7 +348,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.treebank.TargetTree#getDescendantCount()
+	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getDescendantCount()
 	 */
 	@Override
 	public int getDescendantCount() {

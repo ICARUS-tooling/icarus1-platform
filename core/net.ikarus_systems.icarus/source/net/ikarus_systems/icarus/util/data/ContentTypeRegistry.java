@@ -27,6 +27,8 @@ import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
 import net.ikarus_systems.icarus.ui.events.WeakEventSource;
 import net.ikarus_systems.icarus.util.CollectionUtils;
+import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.annotation.AnnotationContainer;
 import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
@@ -350,6 +352,26 @@ public final class ContentTypeRegistry {
 		return extension.getId();
 	}
 	
+	/**
+	 * Tries to fetch the {@code ContentType} describing entries
+	 * in the given container. If no type could be fetched a result
+	 * value of {@code null} will be returned.
+	 */
+	public static ContentType getEntryType(Object container) {
+		if(container==null)
+			throw new IllegalArgumentException("Invalid container"); //$NON-NLS-1$
+		
+		if(container instanceof DataList) {
+			return ((DataList<?>)container).getContentType();
+		} else if(container instanceof DataContainer) {
+			return ((DataContainer)container).getContentType();
+		} else if(container instanceof AnnotationContainer) {
+			return ((AnnotationContainer)container).getAnnotationType();
+		}
+		
+		return null;
+	}
+	
 	public boolean isConvertible(ContentType source, ContentType target) {
 		return getConverter0(source, target)!=null;
 	}
@@ -381,7 +403,7 @@ public final class ContentTypeRegistry {
 		return targets;
 	}
 	
-	public Object convert(Object data, Object targetType) throws DataConversionException {
+	public Object convert(Object data, Object targetType, Options options) throws DataConversionException {
 		if(targetType==null)
 			throw new IllegalArgumentException("Invalid target type"); //$NON-NLS-1$
 		
@@ -403,7 +425,7 @@ public final class ContentTypeRegistry {
 		if(converter==null)
 			throw new DataConversionException("Conversion not supported from "+data.getClass()+" to type "+resultType.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		return converter.convert(data);
+		return converter.convert(data, options);
 	}
 
 	public void addListener(String eventName, EventListener listener) {

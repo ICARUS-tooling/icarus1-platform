@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
+import net.ikarus_systems.icarus.util.Options;
 
 import org.java.plugin.registry.Extension;
 
@@ -50,12 +51,12 @@ public class ExtensionDataConverter implements DataConverter {
 	 * @see net.ikarus_systems.icarus.util.data.DataConverter#convert(java.lang.Object)
 	 */
 	@Override
-	public Object convert(Object source) throws DataConversionException {
+	public Object convert(Object source, Options options) throws DataConversionException {
 		Converter converter = getConverter();
 		if(converter==null)
 			throw new DataConversionException("Invalid converter"); //$NON-NLS-1$
 		
-		return converter.convert(source);
+		return converter.convert(source, options);
 	}
 
 	/**

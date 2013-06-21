@@ -42,7 +42,7 @@ public class CoreferenceDocumentData extends AbstractDataList<SentenceData> impl
 			properties = new CompactProperties();
 		}
 		
-		properties.setProperty(key, value);
+		properties.put(key, value);
 	}
 
 	/**

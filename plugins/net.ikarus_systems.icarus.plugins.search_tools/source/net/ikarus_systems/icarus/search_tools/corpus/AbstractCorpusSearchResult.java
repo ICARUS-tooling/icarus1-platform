@@ -7,13 +7,13 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.treebank;
+package net.ikarus_systems.icarus.search_tools.corpus;
 
 import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
@@ -25,9 +25,9 @@ import net.ikarus_systems.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public abstract class AbstractTreebankSearchResult implements SearchResult {
+public abstract class AbstractCorpusSearchResult implements SearchResult {
 	
-	protected transient final SearchDescriptor descriptor;
+	protected transient final Search search;
 	
 	protected String[] groupTokens;
 	protected SubstitutionSupport[] groupInstances;
@@ -36,13 +36,13 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	
 	protected boolean finalized = false;
 
-	protected AbstractTreebankSearchResult(SearchDescriptor descriptor, SearchConstraint[] groupConstraints) {
-		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
-		if(!(descriptor.getTarget() instanceof SentenceDataList))
-			throw new IllegalArgumentException("Invalid target: "+descriptor.getTarget()); //$NON-NLS-1$
+	protected AbstractCorpusSearchResult(Search search, SearchConstraint[] groupConstraints) {
+		/*if(search==null)
+			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$*/
+		/*if(!(descriptor.getTarget() instanceof SentenceDataList))
+			throw new IllegalArgumentException("Invalid target: "+descriptor.getTarget()); //$NON-NLS-1$*/
 		
-		this.descriptor = descriptor;
+		this.search = search;
 		this.groupConstraints = SearchUtils.cloneSimple(groupConstraints);
 		
 		if(groupConstraints!=null && groupConstraints.length>0) {
@@ -71,7 +71,7 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	}
 	
 	public SentenceDataList getTarget() {
-		return (SentenceDataList) descriptor.getTarget();
+		return (SentenceDataList) search.getTarget();
 	}
 
 	@Override
@@ -92,8 +92,8 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getSource()
 	 */
 	@Override
-	public SearchDescriptor getSource() {
-		return descriptor;
+	public Search getSource() {
+		return search;
 	}
 
 	/**
@@ -121,7 +121,7 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	}
 	
 	public ConstraintContext getContext() {
-		return getSource().getSearchFactory().getConstraintContext();
+		return search==null ? null : search.getFactory().getConstraintContext();
 	}
 
 	/**
@@ -139,8 +139,7 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	 */
 	@Override
 	public Object getInstanceLabel(int groupId, int index) {
-		SubstitutionSupport sub = groupInstances[groupId];
-		return sub.resubstitute(index);
+		return groupInstances[groupId].resubstitute(index);
 	}
 
 	/**
@@ -148,8 +147,7 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	 */
 	@Override
 	public int getIndexOf(int groupId, Object label) {
-		SubstitutionSupport sub = groupInstances[groupId];
-		return sub.getSubstitution((String) label);
+		return groupInstances[groupId].getSubstitution((String) label);
 	}
 
 	/**
@@ -167,6 +165,13 @@ public abstract class AbstractTreebankSearchResult implements SearchResult {
 	@Override
 	public boolean isFinal() {
 		return finalized;
+	}
+	
+	public void finish() {
+		if(finalized)
+			throw new IllegalStateException("Result is already final!"); //$NON-NLS-1$
+		
+		finalized = true;
 	}
 	
 	public abstract GroupCache createCache();

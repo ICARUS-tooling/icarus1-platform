@@ -32,6 +32,7 @@ import javax.swing.undo.UndoManager;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.View;
+import net.ikarus_systems.icarus.plugins.search_tools.SearchToolsConstants;
 import net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintGraphPresenter;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
@@ -165,6 +166,8 @@ public class QueryEditorView extends View {
 				callbackHandler, "synchronizeGraph"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.queryEditorView.synchronizeQueryAction",  //$NON-NLS-1$
 				callbackHandler, "synchronizeQuery"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.queryEditorView.commitAction",  //$NON-NLS-1$
+				callbackHandler, "commit"); //$NON-NLS-1$
 	}
 	
 	protected JToolBar createToolBar() {
@@ -228,6 +231,55 @@ public class QueryEditorView extends View {
 	public SearchDescriptor getSearchDescriptor() {
 		return searchDescriptor;
 	}
+	
+	public void synchronizeQuery() throws Exception {
+		if(searchDescriptor==null) {
+			return;
+		}
+					
+		SearchQuery searchQuery = searchDescriptor.getQuery();
+		if(searchQuery==null) {
+			return;
+		}
+		
+		SearchGraph searchGraph = graphPresenter.snapshot();
+		if(searchGraph==null) {
+			return;
+		}
+		
+		searchQuery.setSearchGraph(searchGraph);
+		
+		queryPane.setText(searchQuery.getQueryString());
+	}
+	
+	public void synchronizeGraph() throws Exception {
+		if(searchDescriptor==null) {
+			return;
+		}			
+		
+		SearchQuery searchQuery = searchDescriptor.getQuery();
+		if(searchQuery==null) {
+			return;
+		}
+		
+		String query = queryPane.getText();
+		if(query==null || query.isEmpty()) {
+			return;
+		}
+		
+		searchQuery.parseQueryString(query);
+		
+		graphPresenter.present(searchQuery.getSearchGraph(), null);
+	}
+	
+	public void commitQuery() throws Exception {
+		synchronizeQuery();
+		
+		Message message = new Message(this, Commands.SELECT, 
+				getSearchDescriptor(), null);
+		
+		sendRequest(SearchToolsConstants.SEARCH_MANAGER_VIEW_ID, message);
+	}
 
 	@Override
 	public void reset() {
@@ -249,6 +301,9 @@ public class QueryEditorView extends View {
 		} else if(Commands.CLEAR.equals(message.getCommand())) {
 			reset();
 			return message.successResult(this, null);
+		} else if(Commands.COMMIT.equals(message.getCommand())) {
+			commitQuery();
+			return message.successResult(this, searchDescriptor);
 		} else {
 			return message.unknownRequestResult(this);
 		}
@@ -265,25 +320,19 @@ public class QueryEditorView extends View {
 			// no-op
 		}
 		
-		public void synchronizeQuery(ActionEvent e) {
-			if(searchDescriptor==null) {
-				return;
+		public void commit(ActionEvent e) {
+			try {
+				QueryEditorView.this.commitQuery();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to commit query", ex); //$NON-NLS-1$
+				UIUtil.beep();
 			}
-			
-			try {				
-				SearchQuery searchQuery = searchDescriptor.getQuery();
-				if(searchQuery==null) {
-					return;
-				}
-				
-				SearchGraph searchGraph = graphPresenter.snapshot();
-				if(searchGraph==null) {
-					return;
-				}
-				
-				searchQuery.setSearchGraph(searchGraph);
-				
-				queryPane.setText(searchQuery.getQueryString());
+		}
+		
+		public void synchronizeQuery(ActionEvent e) {
+			try {
+				QueryEditorView.this.synchronizeQuery();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to synchronize query", ex); //$NON-NLS-1$
@@ -292,24 +341,8 @@ public class QueryEditorView extends View {
 		}
 		
 		public void synchronizeGraph(ActionEvent e) {
-			if(searchDescriptor==null) {
-				return;
-			}
-			
-			try {				
-				SearchQuery searchQuery = searchDescriptor.getQuery();
-				if(searchQuery==null) {
-					return;
-				}
-				
-				String query = queryPane.getText();
-				if(query==null || query.isEmpty()) {
-					return;
-				}
-				
-				searchQuery.parseQueryString(query);
-				
-				graphPresenter.present(searchQuery.getSearchGraph(), null);
+			try {
+				QueryEditorView.this.synchronizeGraph();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to synchronize graph", ex); //$NON-NLS-1$

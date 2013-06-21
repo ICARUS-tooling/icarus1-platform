@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		SEARCH RESULT PRESENTER
+	-->
+		
+	<!-- Toggle Number-Display-Mode -->
+	<action id="plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction"
+		name="${id}.name" desc="${id}.description" icon="percent.png" type="toggle" />
+		
+	<!-- Sort Columns Actions -->
+	<action id="plugins.searchTools.searchResultPresenter.sortColsAscAlphaAction"
+		name="${id}.name" desc="${id}.description" icon="sort_cols_asc_alph.gif" command="sort_cols_asc_alph" />
+	<action id="plugins.searchTools.searchResultPresenter.sortColsDescAlphaAction"
+		name="${id}.name" desc="${id}.description" icon="sort_cols_desc_alph.gif" command="sort_cols_desc_alph" />
+	<action id="plugins.searchTools.searchResultPresenter.sortColsAscNumAction"
+		name="${id}.name" desc="${id}.description" icon="sort_cols_asc_num.gif" command="sort_cols_asc_num" />
+	<action id="plugins.searchTools.searchResultPresenter.sortColsDescNumAction"
+		name="${id}.name" desc="${id}.description" icon="sort_cols_desc_num.gif" command="sort_cols_desc_num" />
+	<!-- Sort Rows Actions -->
+	<action id="plugins.searchTools.searchResultPresenter.sortRowsAscAlphaAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_asc_alph.gif" command="sort_rows_asc_alph" />
+	<action id="plugins.searchTools.searchResultPresenter.sortRowsDescAlphaAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_desc_alph.gif" command="sort_rows_desc_alph" />
+	<action id="plugins.searchTools.searchResultPresenter.sortRowsAscNumAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_asc_num.gif" command="sort_rows_asc_num" />
+	<action id="plugins.searchTools.searchResultPresenter.sortRowsDescNumAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_desc_num.gif" command="sort_rows_desc_num" />
+	
+	<action id="plugins.searchTools.searchResultPresenter.flipTableAction"
+		name="${id}.name" desc="${id}.description" icon="flip.gif" />
+	<action id="plugins.searchTools.searchResultPresenter.resetTableAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		
+	<!-- ToolBar List for header area ( 1D result )-->
+	<action-list id="plugins.searchTools.searchResultPresenter.toolBarList1D">
+		<item type="custom" value="countLabels" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction" />
+		<item type="custom" value="sortButtons" />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
+	</action-list>
+		
+	<!-- ToolBar List for header area ( 2D result - intended to be inlined into enclosing view's toolbar )-->
+	<action-list id="plugins.searchTools.searchResultPresenter.toolBarList2D">
+		<item type="custom" value="countLabels" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction" />
+		<item type="custom" value="sortButtons" />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.flipTableAction" />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
+	</action-list>
+	
+</actions>

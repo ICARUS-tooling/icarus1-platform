@@ -19,8 +19,8 @@ import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
-import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.util.Options;
 
 /**
@@ -200,7 +200,7 @@ public class GraphValidator {
 					if(!constraint.isUndefined()) {
 						undefined = false;
 					}
-					if(constraint.getOperator()==SearchOperator.GROUPING) {
+					if(SearchManager.isGroupingOperator(constraint.getOperator())) {
 						groupCount++;
 					}
 				}
@@ -260,7 +260,7 @@ public class GraphValidator {
 					if(!constraint.isUndefined()) {
 						undefined = false;
 					}
-					if(constraint.getOperator()==SearchOperator.GROUPING) {
+					if(SearchManager.isGroupingOperator(constraint.getOperator())) {
 						groupCount++;
 					}
 				}

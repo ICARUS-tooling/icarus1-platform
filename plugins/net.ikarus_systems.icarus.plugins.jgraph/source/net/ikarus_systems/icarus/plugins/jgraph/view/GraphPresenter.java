@@ -822,7 +822,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		if(popupMenu!=null) {
 			refreshActions();
 			
-			popupMenu.show(this, trigger.getX(), trigger.getY());
+			popupMenu.show(this.getGraphControl(), trigger.getX(), trigger.getY());
 		}
 	}
 	

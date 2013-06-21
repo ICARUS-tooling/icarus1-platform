@@ -159,5 +159,4 @@ public class DefaultGraphEdge implements SearchEdge {
 	public void setId(String id) {
 		this.id = id;
 	}
-
 }

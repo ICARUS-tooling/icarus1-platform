@@ -46,6 +46,7 @@ import net.ikarus_systems.icarus.search_tools.EdgeType;
 import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 import net.ikarus_systems.icarus.ui.IconRegistry;
@@ -414,9 +415,9 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		}
 
 	}
-
+	
 	@SuppressWarnings("serial")
-	protected static class NumberDocument extends PlainDocument {
+	private static class NumberDocument extends PlainDocument {
 
 		@Override
 		public void insertString(int offset, String str, AttributeSet a)
@@ -429,7 +430,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			}
 		}
 	}
-	
+
 	private static class GroupingCellRenderer extends DefaultListCellRenderer implements Icon {
 
 		private static final long serialVersionUID = 9171727683720878063L;
@@ -547,7 +548,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			label.setText(factory.getName());
 			label.setToolTipText(factory.getDescription());
 			
-			displayingGroups = constraint.getOperator()==SearchOperator.GROUPING;
+			displayingGroups = SearchManager.isGroupingOperator(constraint.getOperator());
 			if(displayingGroups) {
 				displayGroups(currentValue);
 			} else {
@@ -653,10 +654,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
-			if(operator==SearchOperator.GROUPING && !displayingGroups) {
+			if(SearchManager.isGroupingOperator(operator) && !displayingGroups) {
 				// Switch to group selection
 				displayGroups(null);
-			} else if(operator!=SearchOperator.GROUPING && displayingGroups) {
+			} else if(!SearchManager.isGroupingOperator(operator) && displayingGroups) {
 				// Switch to old mode
 				displayValue(buffer);
 				buffer = null;

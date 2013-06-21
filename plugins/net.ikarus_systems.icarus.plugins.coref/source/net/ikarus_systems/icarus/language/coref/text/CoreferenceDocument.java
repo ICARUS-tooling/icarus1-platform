@@ -197,7 +197,7 @@ public class CoreferenceDocument extends DefaultStyledDocument {
 			}
 			
 			if(isMarkSpans() && spanBuffer.isEnd(index)) {
-				for(int i=0; i<spanBuffer.getSpanCount(index); i++) {
+				for(int i=spanBuffer.getSpanCount(index)-1; i>-1; i--) {
 					Span span = spanBuffer.getSpan(index, i);
 					if(span.getEndIndex()!=index) {
 						continue;
@@ -441,6 +441,30 @@ public class CoreferenceDocument extends DefaultStyledDocument {
 		
 		public AttributeSet getFillerStyle() {
 			return filler;
+		}
+	}
+	
+	// TODO obsolete?
+	protected class BatchDispatcher implements Runnable {
+		
+		protected int sizeReminder;
+		protected int batchSize;
+		protected int batchIndex;
+		
+		public BatchDispatcher() {
+			sizeReminder = batch.size();
+			
+			batchSize = Math.max(100, sizeReminder/100);
+		}
+		
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 }

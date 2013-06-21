@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.ui.dialog;
 
 import javax.swing.JTextField;
+import javax.swing.text.Document;
 
 /**
  * @author Markus Gärtner
@@ -60,6 +61,11 @@ public class InputFormEntry extends LabeledFormEntry<InputFormEntry> {
 
 	public JTextField getInput() {
 		return input;
+	}
+	
+	public InputFormEntry setDocument(Document doc) {
+		getInput().setDocument(doc);
+		return this;
 	}
 	
 	public InputFormEntry setValue(Object value) {

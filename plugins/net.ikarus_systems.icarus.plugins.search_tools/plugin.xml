@@ -83,7 +83,7 @@
 				search-object instance that can be executed by the framework.
 				In particular it is the central point for possible optimizations
 				and the interfacing with content specific access of the target
-				graph structures.
+				structures.
 			</doc-text>
 		</doc>
 		<parameter-def id="contentType" type="extension-id"
@@ -118,6 +118,15 @@
 				performed solely through this extension-point!
 			</doc-text>
 		</doc>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
+			<doc>
+				<doc-text>
+					Content types this presenter is able to handle. If no content type is
+					specified the presenter is considered to be "context-independent".
+				</doc-text>
+			</doc>
+		</parameter-def>
 		<parameter-def id="dimension" type="number">
 			<doc>
 				<doc-text>
@@ -133,6 +142,24 @@
 				<doc-text>
 					Presenter class itself, required to have no-args constructor and
 					extend net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SearchTargetSelector" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Helper class for the search framework to allow inclusion of arbitrary
+				targets.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Selector class itself, required to have no-args constructor and
+					implement net.ikarus_systems.icarus.search_tools.SearchTargetSelector!
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -288,6 +315,48 @@
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
 		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
 	</extension>
+	
+	<extension id="TreebankTargetSelector" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchTargetSelector">
+		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.corpus.TreebankTargetSelector" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="name" value="plugins.searchTools.treebankTargetSelector.identity.name" />
+		<parameter id="description" value="plugins.searchTools.treebankTargetSelector.identity.description" />
+	</extension>
+	
+	<!-- RESULT PRESENTERS -->
+	
+	<extension id="Default0DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+		<parameter id="dimension" value="0" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default0DResultPresenter" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="name" value="plugins.searchTools.default0DResultPresenter.identity.name" />
+		<parameter id="description" value="plugins.searchTools.default0DResultPresenter.identity.description" />
+	</extension>
+	
+	<extension id="Default1DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+		<parameter id="dimension" value="1" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default1DResultPresenter" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="name" value="plugins.searchTools.default1DResultPresenter.identity.name" />
+		<parameter id="description" value="plugins.searchTools.default1DResultPresenter.identity.description" />
+	</extension>
+	
+	<extension id="Default2DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+		<parameter id="dimension" value="2" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default2DResultPresenter" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="name" value="plugins.searchTools.default2DResultPresenter.identity.name" />
+		<parameter id="description" value="plugins.searchTools.default2DResultPresenter.identity.description" />
+	</extension>
+	
+	<extension id="Default3DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+		<parameter id="dimension" value="3" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default3DResultPresenter" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="name" value="plugins.searchTools.default3DResultPresenter.identity.name" />
+		<parameter id="description" value="plugins.searchTools.default3DResultPresenter.identity.description" />
+	</extension>
+	
 	<!-- CONSTRAINT CONTEXT -->
 	
 	<extension id="DefaultConstraintContext" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintContext">

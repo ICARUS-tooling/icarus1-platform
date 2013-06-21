@@ -16,7 +16,7 @@ import javax.swing.event.ChangeListener;
  * @version $Id$
  *
  */
-public interface DataList<T extends Object> {
+public interface DataList<T extends Object> extends DataContainer {
 
 
 	/**

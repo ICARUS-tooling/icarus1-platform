@@ -13,13 +13,14 @@ import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
+import net.ikarus_systems.icarus.search_tools.SearchParameters;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractConstraintFactory implements ConstraintFactory {
+public abstract class AbstractConstraintFactory implements ConstraintFactory, SearchParameters {
 
 	private String nameKey, descriptionKey;
 	

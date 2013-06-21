@@ -173,4 +173,12 @@ public class SimpleDependencyData implements DependencyData {
 	public long getFlags(int index) {
 		return flags==null ? 0 : flags[index];
 	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
+	 */
+	@Override
+	public String getText() {
+		return LanguageUtils.combine(this);
+	}
 }

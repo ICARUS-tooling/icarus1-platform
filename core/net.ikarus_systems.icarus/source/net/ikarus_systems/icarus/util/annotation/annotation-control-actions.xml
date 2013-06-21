@@ -8,7 +8,7 @@
 
 	<!-- Select Mode -->
 	<action id="core.helpers.annotationControl.selectModeAction"
-		name="${id}.name" desc="${id}.description"/>
+		name="${id}.name" desc="${id}.description" icon="annotation.gif"/>
 
 	<!-- Mode All -->
 	<action id="core.helpers.annotationControl.modeAllAction" type="toggle"
@@ -28,7 +28,7 @@
 
 	<!-- Mode Selected -->
 	<action id="core.helpers.annotationControl.modeSelectedAction" type="toggle"
-		name="${id}.name" desc="${id}.description" icon="selected.gif" command="selected" />
+		name="${id}.name" desc="${id}.description" icon="select.gif" command="selected" />
 	
 	<!-- First Element -->
 	<action id="core.helpers.annotationControl.firstElementAction"

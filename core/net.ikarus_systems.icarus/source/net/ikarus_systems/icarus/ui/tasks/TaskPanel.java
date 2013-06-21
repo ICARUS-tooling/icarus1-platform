@@ -81,6 +81,7 @@ public class TaskPanel extends JToolBar {
 		openDialogButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("pview.gif")); //$NON-NLS-1$
 		
 		progressPanel = new TaskProgressPanel();
+		progressPanel.setVisible(false);
 		
 		setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();

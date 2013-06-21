@@ -31,7 +31,6 @@ public class CoreferencePreferences {
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		
-		builder.addIntegerEntry("visualizationLimit", 20, 1, 100); //$NON-NLS-1$
 		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 	}

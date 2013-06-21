@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.plugins.language_tools.treebank;
 
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
@@ -18,6 +19,7 @@ import net.ikarus_systems.icarus.language.treebank.Treebank;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.tasks.TaskConstants;
 import net.ikarus_systems.icarus.util.id.Identity;
 
@@ -26,7 +28,7 @@ import net.ikarus_systems.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public class TreebankJob extends SwingWorker<Object, Object> implements Identity {
+public class TreebankJob extends SwingWorker<Treebank, Object> implements Identity {
 	
 	private final boolean load;
 	private final Treebank treebank;
@@ -43,13 +45,13 @@ public class TreebankJob extends SwingWorker<Object, Object> implements Identity
 	 * @see javax.swing.SwingWorker#doInBackground()
 	 */
 	@Override
-	protected Object doInBackground() throws Exception {
+	protected Treebank doInBackground() throws Exception {
 		if(load) {
 			load();
 		} else {
 			free();
 		}
-		return null;
+		return treebank;
 	}
 	
 	private void load() throws Exception {
@@ -58,6 +60,8 @@ public class TreebankJob extends SwingWorker<Object, Object> implements Identity
 			
 			treebank.load();
 			LoggerFactory.log(this, Level.INFO, "Loaded treebank: "+treebank.getName()); //$NON-NLS-1$
+		} catch(InterruptedException | CancellationException e) {
+			// ignore
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to load treebank: "+treebank.getName(), e); //$NON-NLS-1$
@@ -68,12 +72,21 @@ public class TreebankJob extends SwingWorker<Object, Object> implements Identity
 		}
 	}
 	
+	@Override
+	protected void done() {
+		if(load && !treebank.isLoaded()) {
+			UIUtil.beep();
+		}
+	}
+
 	private void free() throws Exception {
 		try {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, true);
 			
 			treebank.free();
 			LoggerFactory.log(this, Level.INFO, "Freed treebank: "+treebank.getName()); //$NON-NLS-1$
+		} catch(CancellationException e) {
+			// ignore
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$

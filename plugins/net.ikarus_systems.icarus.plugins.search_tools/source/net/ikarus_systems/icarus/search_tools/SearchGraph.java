@@ -37,4 +37,6 @@ public interface SearchGraph {
 	SearchEdge[] getEdges();
 	
 	SearchNode[] getRootNodes();
+	
+	SearchGraph clone();
 }

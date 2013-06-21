@@ -12,8 +12,8 @@ package net.ikarus_systems.icarus.search_tools.result;
 import java.util.List;
 
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -23,6 +23,8 @@ import net.ikarus_systems.icarus.util.data.DataList;
  *
  */
 public interface SearchResult {
+	
+	public static final String FORCE_SIMPLE_OUTLINE_PROPERTY = "forceSimpleOutline"; //$NON-NLS-1$
 
 	/**
 	 * Returns the total number of groupings in the result
@@ -30,17 +32,27 @@ public interface SearchResult {
 	int getDimension();
 	
 	/**
-	 * Returns the {@code SearchDescriptor} that wraps all the information
+	 * Returns the {@code Search} that wraps all the information
 	 * about the origin of this result. 
 	 */
-	SearchDescriptor getSource();
+	Search getSource();
 
 	/**
 	 * Returns the total count of reported matches in this result  
 	 */
 	int getTotalMatchCount();
 	
+	/**
+	 * Returns the number of matches reported for the given combination
+	 * of instances.
+	 */
 	int getMatchCount(int...groupIndices);
+	
+	/**
+	 * Returns the number of matches with an instance of the given
+	 * group in them.
+	 */
+	int getGroupMatchCount(int groupId, int index);
 	
 	/**
 	 * Returns the number of instances that were reported for the

@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.util.data;
 
+import net.ikarus_systems.icarus.util.Options;
+
 
 /**
  * Advanced version of the {@link Converter} interface. Serves as
@@ -31,7 +33,7 @@ package net.ikarus_systems.icarus.util.data;
  */
 public interface DataConverter extends Converter {
 
-	Object convert(Object source) throws DataConversionException;
+	Object convert(Object source, Options options) throws DataConversionException;
 	
 	ContentType getInputType();
 	

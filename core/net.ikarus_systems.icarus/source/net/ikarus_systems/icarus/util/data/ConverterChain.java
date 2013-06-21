@@ -12,6 +12,8 @@ package net.ikarus_systems.icarus.util.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.ikarus_systems.icarus.util.Options;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -104,11 +106,11 @@ public class ConverterChain implements DataConverter {
 	 * @see net.ikarus_systems.icarus.util.data.DataConverter#convert(java.lang.Object)
 	 */
 	@Override
-	public Object convert(Object source) throws DataConversionException {
+	public Object convert(Object source, Options options) throws DataConversionException {
 		for(int i=0; i<converters.length; i++) {
 			DataConverter converter = converters[i];
 			try {
-				source = converter.convert(source);
+				source = converter.convert(source, options);
 			} catch(DataConversionException e) {
 				throw new DataConversionException(
 						"Failed to convert data at index "+i //$NON-NLS-1$

@@ -228,8 +228,19 @@ public final class JAXBUtils {
 	@XmlRootElement
 	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class EntryImp<K, V> {
-		
-		@XmlElement(name="key")
+
+		@XmlElements({
+			@XmlElement(name="keyInteger", type=Integer.class),
+			@XmlElement(name="keyFloat", type=Float.class),
+			@XmlElement(name="keyString", type=String.class),
+			@XmlElement(name="keyLong", type=Long.class),
+			@XmlElement(name="keyDouble", type=Double.class),
+			@XmlElement(name="keyShort", type=Short.class),
+			@XmlElement(name="keyBoolean", type=Boolean.class),
+			@XmlElement(name="keyCharacter", type=Character.class),
+			@XmlElement(name="keyByte", type=Byte.class),
+			@XmlElement(name="keyObject"),
+		})
 		private K key;
 		
 		@XmlElements({

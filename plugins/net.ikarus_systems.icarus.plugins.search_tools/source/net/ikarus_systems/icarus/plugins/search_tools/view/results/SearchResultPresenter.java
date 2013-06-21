@@ -10,13 +10,27 @@
 package net.ikarus_systems.icarus.plugins.search_tools.view.results;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
 
+import net.ikarus_systems.icarus.config.ConfigRegistry;
+import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.ui.NumberDisplayMode;
+import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.actions.ActionManager;
+import net.ikarus_systems.icarus.ui.config.ConfigDialog;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
+import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
@@ -28,14 +42,73 @@ import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
  */
 public abstract class SearchResultPresenter implements AWTPresenter {
 	
+	public static final int DEFAULT_CELL_HEIGHT = 25;
+	public static final int DEFAULT_CELL_WIDTH = 75;
+	
 	protected JPanel contentPanel;
 	protected SearchResult searchResult;
+	
+	protected Handler handler;
+	protected CallbackHandler callbackHandler;
+	
+	public static final int DEFAULT_REFRESH_DELAY = 1000;
+	
+	protected ActionManager actionManager;
+	
+	private static ActionManager sharedActionManager;
+	
+	protected synchronized static ActionManager getSharedActionManager() {
+		if(sharedActionManager==null) {
+			sharedActionManager = ActionManager.globalManager().derive();
+
+			URL actionLocation = SearchResultPresenter.class.getResource("search-result-presenter-actions.xml"); //$NON-NLS-1$
+			if(actionLocation==null)
+				throw new CorruptedStateException("Missing resources: search-result-presenter-actions.xml"); //$NON-NLS-1$
+			
+			try {
+				sharedActionManager.loadActions(actionLocation);
+			} catch (IOException e) {
+				LoggerFactory.log(SearchResultPresenter.class, Level.SEVERE, 
+						"Failed to load actions from file", e); //$NON-NLS-1$
+			}
+		}
+		return sharedActionManager;
+	}
 
 	protected SearchResultPresenter() {
 		// no-op
 	}
 	
-	public abstract int getSupportedDimension();
+	protected ActionManager getActionManager() {
+		if(actionManager==null) {
+			actionManager = getSharedActionManager().derive();
+			
+			registerActionCallbacks();
+		}
+		
+		return actionManager;
+	}
+	
+	protected void registerActionCallbacks() {
+		if(callbackHandler==null) {
+			callbackHandler = createCallbackHandler();
+		}
+		
+		ActionManager actionManager = getActionManager();
+		
+		actionManager.addHandler("plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction",  //$NON-NLS-1$
+				callbackHandler, "toggleNumberDisplayMode"); //$NON-NLS-1$
+	}
+	
+	protected void refreshActions() {
+		// no-op
+	}
+	
+	public void exportToolBarItems(JToolBar toolBar) {
+		// no-op
+	}
+	
+	public abstract int getSupportedDimensions();
 
 	/**
 	 * @see net.ikarus_systems.icarus.ui.view.Presenter#supports(net.ikarus_systems.icarus.util.data.ContentType)
@@ -43,6 +116,10 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	@Override
 	public boolean supports(ContentType type) {
 		return ContentTypeRegistry.isCompatible("SearchResultContentType", type); //$NON-NLS-1$
+	}
+	
+	public boolean supportsEntryType(ContentType type) {
+		return true;
 	}
 
 	/**
@@ -58,15 +135,42 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 			throw new UnsupportedPresentationDataException("Unsupported data: "+data.getClass()); //$NON-NLS-1$
 		
 		SearchResult searchResult = (SearchResult)data;
-		if(searchResult.getDimension()!=getSupportedDimension())
+		int supportedDimension = getSupportedDimensions();
+		if(supportedDimension!=-1 && searchResult.getDimension()!=supportedDimension)
 			throw new UnsupportedPresentationDataException("Result dimension not supported: "+searchResult.getDimension()); //$NON-NLS-1$
 		
 		setSearchResult(searchResult, options);
 	}
 	
-	protected void setSearchResult(SearchResult searchResult, Options options) {
+	protected Handler getHandler() {
+		if(handler==null) {
+			handler = createHandler();
+		}
 		
+		return handler;
 	}
+	
+	protected Handler createHandler() {
+		return new Handler();
+	}
+	
+	protected CallbackHandler createCallbackHandler() {
+		return new CallbackHandler();
+	}
+	
+	protected void setSearchResult(SearchResult searchResult, Options options) {
+		if(this.searchResult==searchResult) {
+			return;
+		}
+		
+		this.searchResult = searchResult;
+		
+		displayResult();
+	}
+	
+	protected abstract void displayResult();
+	
+	public abstract void refresh();
 	
 	public SearchResult getSearchResult() {
 		return searchResult;
@@ -113,8 +217,69 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	public Component getPresentingComponent() {
 		if(contentPanel==null) {
 			buildContentPanel();
+			
+			refresh();
 		}
 		return contentPanel;
 	}
+	
+	protected void setNumberDisplayMode(NumberDisplayMode mode) {
+		// no-op
+	}
+	
+	public void openPreferences() {
+		new ConfigDialog(ConfigRegistry.getGlobalRegistry(), 
+				"plugins.searchTools").setVisible(true); //$NON-NLS-1$
+	}
+	
+	public static String getHitCountString(SearchResult result) {
+		if(result==null) {
+			return "-"; //$NON-NLS-1$
+		}
+		ResourceManager rm = ResourceManager.getInstance();
+		int total = result.getTotalMatchCount();
+		int groups = result.getDimension();
+		
+		String format = "%d %s - %d %s"; //$NON-NLS-1$
+		/*if(result.isFinal()) {
+			format += " (%s)"; //$NON-NLS-1$
+		}*/
+		
+		String hitString = total==1 ?
+				rm.get("plugins.searchTools.searchResultView.labels.hitSg") //$NON-NLS-1$
+				: rm.get("plugins.searchTools.searchResultView.labels.hitPl"); //$NON-NLS-1$
+				
+		String groupString = groups==1 ?
+				rm.get("plugins.searchTools.searchResultView.labels.groupSg") //$NON-NLS-1$
+				: rm.get("plugins.searchTools.searchResultView.labels.groupPl"); //$NON-NLS-1$
+				
+		String finalString = rm.get("plugins.searchTools.searchResultView.labels.final"); //$NON-NLS-1$
+				
+		return String.format(format, groups, groupString, total, hitString, finalString);
+	}
 
+	protected class Handler extends MouseAdapter  {
+	}
+	
+	public class CallbackHandler {
+		
+		protected CallbackHandler() {
+			// no-op
+		}
+		
+		public void toggleNumberDisplayMode(boolean b) {
+			try {
+				NumberDisplayMode mode = b ? NumberDisplayMode.PERCENTAGE : NumberDisplayMode.RAW;
+				setNumberDisplayMode(mode);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle number display mode", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+		
+		public void toggleNumberDisplayMode(ActionEvent e) {
+			// ignore
+		}
+	}
 }

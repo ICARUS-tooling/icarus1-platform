@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.search_tools;
 
+import net.ikarus_systems.icarus.util.Options;
+
 
 
 /**
@@ -22,10 +24,8 @@ public interface ConstraintFactory {
 	
 	public static final int EDGE_CONSTRAINT_TYPE = 1;
 	public static final int NODE_CONSTRAINT_TYPE = 2;
-	
-	public static final int IGNORE_CASE = (1 << 0);
 
-	SearchConstraint createConstraint(Object value, SearchOperator operator, int flags);
+	SearchConstraint createConstraint(Object value, SearchOperator operator, Options options);
 	
 	SearchOperator[] getSupportedOperators();
 	

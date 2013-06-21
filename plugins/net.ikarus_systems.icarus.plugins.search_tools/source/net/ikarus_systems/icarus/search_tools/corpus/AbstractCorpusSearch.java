@@ -7,9 +7,10 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.treebank;
+package net.ikarus_systems.icarus.search_tools.corpus;
 
 import java.awt.BorderLayout;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,8 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.java.plugin.registry.Extension;
-
+import net.ikarus_systems.icarus.io.Loadable;
 import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.resources.ResourceManager;
@@ -34,33 +34,42 @@ import net.ikarus_systems.icarus.search_tools.EdgeType;
 import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
+import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
+import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GraphValidationResult;
 import net.ikarus_systems.icarus.search_tools.standard.GraphValidator;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+
+import org.java.plugin.registry.Extension;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractTreebankSearch extends Search {
+public abstract class AbstractCorpusSearch extends Search {
 	
 	protected AtomicInteger processedItems = new AtomicInteger();
 	
-	protected SentenceDataList source;
+	protected SentenceDataList corpus;
 	
 	protected Batch lastBatch;
 	
-	protected AbstractTreebankSearchResult result;
+	protected volatile int progress = 0;
+	
+	protected AbstractCorpusSearchResult result;
 	
 	protected int batchSize = 100;
 	protected final int sourceSize;
@@ -71,32 +80,38 @@ public abstract class AbstractTreebankSearch extends Search {
 	protected Map<Node, Node> precedenceNodes = new HashMap<>();
 	protected Map<SearchNode, Object> nodeMap = new HashMap<>();
 	
-	protected AbstractTreebankSearch(SearchDescriptor descriptor) {
-		super(descriptor);
+	protected AbstractCorpusSearch(SearchFactory factory, SearchQuery query, 
+			Object target, Options options) {
+		super(factory, query, target);
 		
-		source = (SentenceDataList) descriptor.getTarget();
-		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+		// TODO Apply options
 		
-		sourceSize = source.size();
+		corpus = createTargetList(target);
+		if(corpus==null)
+			throw new IllegalArgumentException("Invalid corpus"); //$NON-NLS-1$
 		
-		disjuntiveRoots = descriptor.getQuery().getSearchGraph().getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
-		collectNodes();
+		sourceSize = corpus.size();
 		
-		result = createResult();
+		disjuntiveRoots = query.getSearchGraph().getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
+
+		if(!SearchUtils.isEmpty(query.getSearchGraph())) {
+			collectNodes();
+			
+			result = createResult();
+		}
 	}
 	
 	public SearchGraph getSearchGraph() {
-		return getDescriptor().getQuery().getSearchGraph();
+		return getQuery().getSearchGraph();
 	}
 	
 	protected void collectNodes() {
-		for(SearchNode source : getQuery().getSearchGraph().getRootNodes()) {
+		for(SearchNode source : getSearchGraph().getRootNodes()) {
 			roots.add(createNode(source, null, null));
 		}
 	}
 	
-	protected AbstractTreebankSearchResult createResult() {
+	protected AbstractCorpusSearchResult createResult() {
 		List<SearchConstraint> groupConstraints = null;
 		
 		try {
@@ -126,13 +141,16 @@ public abstract class AbstractTreebankSearch extends Search {
 			return null;
 		}
 		
+		ContentType entryType = ContentTypeRegistry.getEntryType(getTarget());
+		
 		/* Allow user to run search with a dimension that is not
 		 * covered by a specialized result presenter.
 		 * 
 		 * 'ok' will cause search to ignore group count limits
 		 */
 		int dimension = groupConstraints.size();
-		List<Extension> presenters = SearchManager.getResultPresenterExtensions(dimension);
+		List<Extension> presenters = SearchManager.getResultPresenterExtensions(
+				entryType, dimension);
 		if(presenters==null || presenters.isEmpty()) {
 			if(!DialogFactory.getGlobalFactory().showConfirm(null, 
 					"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
@@ -146,28 +164,68 @@ public abstract class AbstractTreebankSearch extends Search {
 		 * can be implemented efficiently by using a simple list storage.
 		 */
 		if(groupConstraints.isEmpty()) {
-			return new TreebankSearchResult0D(getDescriptor());
+			return new CorpusSearchResult0D(this);
 		} else {
-			return new TreebankSearchResultND(getDescriptor(), 
+			return new CorpusSearchResultND(this, 
 					groupConstraints.toArray(new SearchConstraint[0]));
 		}
 	}
 	
 	protected abstract TargetTree createTargetTree();
+	
+	protected abstract SentenceDataList createTargetList(Object target);
 
 	/**
 	 * @see net.ikarus_systems.icarus.search_tools.Search#execute()
 	 */
 	@Override
-	public void execute() throws Exception {
-		if(isDone())
-			throw new IllegalStateException("Cannot reuse search instance"); //$NON-NLS-1$
+	public boolean innerExecute() throws Exception {
+		
+		// TODO DEBUG
+		/*TaskManager.getInstance().execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				for(int i=0; i<100; i++) {
+					progress = i;
+					
+					if(isDone()) {
+						return;
+					}
+					
+					try {
+						Thread.sleep(350);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				finish();
+			}
+		});*/
 		
 		if(result==null) {
-			return;
+			return false;
+		}
+		if(roots.isEmpty()) {
+			return false;
+		}
+		
+		Object target = getTarget();
+		if(target instanceof Loadable && !((Loadable)target).isLoaded()) {
+			try {
+				((Loadable)target).load();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to load search target: "+target, e); //$NON-NLS-1$
+				throw new IOException("Could not load traget - aborting", e); //$NON-NLS-1$
+			}
 		}
 		
 		// TODO
+		
+		return true;
 	}
 	
 	public static boolean validate(SearchGraph graph) {
@@ -230,7 +288,21 @@ public abstract class AbstractTreebankSearch extends Search {
 	 */
 	@Override
 	public int getProgress() {
-		return processedItems.get()/source.size() * 100;
+		/*if(corpus.size()==0) {
+			return 0;
+		}
+		
+		return processedItems.get()/corpus.size() * 100;*/
+		return progress;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.Search#getPerformanceInfo()
+	 */
+	@Override
+	public SearchPerformanceInfo getPerformanceInfo() {
+		// TODO
+		return null;
 	}
 
 	/**
@@ -239,6 +311,10 @@ public abstract class AbstractTreebankSearch extends Search {
 	@Override
 	public SearchResult getResult() {
 		return result;
+	}
+	
+	public SentenceDataList getCorpus() {
+		return corpus;
 	}
 	
 	protected synchronized Batch nextBatch() {
@@ -435,5 +511,9 @@ public abstract class AbstractTreebankSearch extends Search {
 				// TODO
 			}
 		}
+	}
+	
+	protected abstract class Matcher {
+		// TODO
 	}
 }

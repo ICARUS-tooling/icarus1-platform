@@ -200,9 +200,11 @@ public class TaskListCellRenderer extends JPanel implements
 			
 			progressBar.setVisible(true);
 			cancelButton.setVisible(true);
+			footer.setVisible(true);
 		} else {
 			progressBar.setVisible(false);
 			cancelButton.setVisible(false);
+			footer.setVisible(false);
 		}
 	}
 	

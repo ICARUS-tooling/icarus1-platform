@@ -17,6 +17,7 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.ikarus_systems.icarus.io.Loadable;
 import net.ikarus_systems.icarus.language.AvailabilityObserver;
 import net.ikarus_systems.icarus.language.DataType;
 import net.ikarus_systems.icarus.language.SentenceData;
@@ -29,7 +30,7 @@ import net.ikarus_systems.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class TreebankListDelegate implements SentenceDataList, NamedObject {
+public class TreebankListDelegate implements SentenceDataList, NamedObject, Loadable {
 
 	private Reference<Treebank> ref;
 	
@@ -60,7 +61,7 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject {
 		fireChangeEvent();
 	}
 	
-	private Treebank getTreebank() {
+	public Treebank getTreebank() {
 		Treebank treebank = ref.get();
 		if(treebank==null) {
 			return null;
@@ -159,6 +160,26 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject {
 	public String getName() {
 		Treebank treebank = getTreebank();
 		return treebank==null ? null : treebank.getName();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.io.Loadable#isLoaded()
+	 */
+	@Override
+	public boolean isLoaded() {
+		Treebank treebank = getTreebank();
+		return treebank==null ? false : treebank.isLoaded();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.io.Loadable#load()
+	 */
+	@Override
+	public void load() throws Exception {
+		Treebank treebank = getTreebank();
+		if(treebank!=null) {
+			treebank.load();
+		}
 	}
 	
 	private void fireChangeEvent() {

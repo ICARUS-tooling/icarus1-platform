@@ -243,9 +243,16 @@ public final class TaskManager {
 		return ((SwingWorker<?, ?>)task).getProgress();
 	}
 	
-	synchronized void cancelTask(Object task) {
+	public synchronized void cancelTask(Object task) {
+		if(task==null)
+			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
 		// TODO
 		SwingWorker<?, ?> worker = getWorker(task);
+		
+		// Already executed and removed 
+		if(worker==null) {
+			return;
+		}
 		
 		wrapperMap.removeValue(worker);
 		states.remove(worker);
@@ -592,6 +599,9 @@ public final class TaskManager {
 					// Integrity check
 					if(worker!=currentWorker)
 						throw new IllegalStateException();
+
+					wrapperMap.removeValue(worker);
+					states.remove(worker);
 					
 					// Remove current worker
 					currentWorker = null;

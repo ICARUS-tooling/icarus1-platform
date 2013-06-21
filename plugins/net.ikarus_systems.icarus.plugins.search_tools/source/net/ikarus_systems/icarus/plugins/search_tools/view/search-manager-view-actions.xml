@@ -46,15 +46,33 @@
 	<action id="plugins.searchTools.searchManagerView.viewResultAction"
 		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
 		
+	<!-- View Result -->
+	<action id="plugins.searchTools.searchManagerView.editParametersAction"
+		name="${id}.name" desc="${id}.description" icon="debugtt_obj.gif" />
+		
+	<!-- Edit Search -->
+	<action id="plugins.searchTools.searchManagerView.editSearchAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.searchTools.searchManagerView.toolBarList">
 		<item type="action" value="plugins.searchTools.searchManagerView.openPreferencesAction" />
 		<separator />
-		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
-		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.newSearchAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.executeSearchAction" />
+	</action-list>
+		
+	<!-- ToolBar List for history area -->
+	<action-list id="plugins.searchTools.searchManagerView.historyToolBarList">
+		<item type="label" value="plugins.searchTools.searchManagerView.labels.history" />
+		<item type="separator" value="20" />
+		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.editSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />
+		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.cancelSearchAction" />
 	</action-list>
 	

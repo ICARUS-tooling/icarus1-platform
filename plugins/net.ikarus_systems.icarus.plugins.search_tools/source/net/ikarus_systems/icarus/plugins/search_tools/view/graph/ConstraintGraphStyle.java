@@ -18,7 +18,7 @@ import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphStyle;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
 import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.SearchOperator;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.util.Options;
 
 /**
@@ -92,7 +92,7 @@ public class ConstraintGraphStyle extends DefaultGraphStyle {
 			
 			if(constraints!=null) {
 				for(SearchConstraint constraint : constraints) {
-					if(constraint==null || constraint.getOperator()!=SearchOperator.GROUPING) {
+					if(constraint==null || !SearchManager.isGroupingOperator(constraint.getOperator())) {
 						continue;
 					}
 					

@@ -172,8 +172,14 @@ public final class DialogFactory {
 	public boolean showCheckedConfirm(Component parent, MutableBoolean output, 
 			String title, String info, String message, Object... params) {
 
-		if(info!=null && resourceDomain!=null)
+		if(info!=null && resourceDomain!=null) {
 			info = resourceDomain.get(info);
+		}
+		
+		if(info==null) {
+			info = ResourceManager.getInstance().get("dialogs.rememberDecision"); //$NON-NLS-1$
+		}
+		
 		JCheckBox checkBox = new JCheckBox(info);
 		checkBox.setSelected(output.getValue());
 		
@@ -181,6 +187,7 @@ public final class DialogFactory {
 		
 		builder.setTitle(title);
 		builder.setMessage(message, params);
+		builder.addMessage(checkBox);
 		builder.setQuestionType();
 		builder.setOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -414,9 +421,8 @@ public final class DialogFactory {
 		return fileChooser.getSelectedFile();
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public boolean showEditorDialog(Component parent, Object data, 
-			Editor editor, String title) {
+	public <T extends Object> boolean showEditorDialog(Component parent, 
+			T data, Editor<T> editor, String title) {
 
 		editor.setEditingItem(data);
 
