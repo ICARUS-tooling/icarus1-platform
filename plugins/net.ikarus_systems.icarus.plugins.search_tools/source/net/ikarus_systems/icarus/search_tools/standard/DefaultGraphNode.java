@@ -71,6 +71,8 @@ public class DefaultGraphNode implements SearchNode {
 	
 	@XmlTransient
 	private int descendantCount = -1;
+	
+	private int childCount = -1;
 
 	public DefaultGraphNode() {
 		// no-op
@@ -206,6 +208,8 @@ public class DefaultGraphNode implements SearchNode {
 
 	public void setNodeType(NodeType nodeType) {
 		this.nodeType = nodeType;
+		
+		childCount = -1;
 	}
 
 	public void addEdge(SearchEdge edge, boolean incoming) {
@@ -226,6 +230,7 @@ public class DefaultGraphNode implements SearchNode {
 		
 		height = -1;
 		descendantCount = -1;
+		childCount = -1;
 	}
 	
 	public void addEdges(Collection<SearchEdge> newEdges, boolean incoming) {
@@ -249,6 +254,7 @@ public class DefaultGraphNode implements SearchNode {
 		
 		height = -1;
 		descendantCount = -1;
+		childCount = -1;
 	}
 	
 	public void sortEdges(Comparator<SearchEdge> comparator) {
@@ -256,5 +262,40 @@ public class DefaultGraphNode implements SearchNode {
 			throw new IllegalArgumentException("Invalid comparator"); //$NON-NLS-1$
 		
 		Collections.sort(outgoingEdges, comparator);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchNode#getChildCount()
+	 */
+	@Override
+	public int getChildCount() {
+		
+		if(childCount==-1) {
+			if(nodeType==NodeType.LEAF || negated 
+					|| outgoingEdges==null || outgoingEdges.isEmpty()) {
+				childCount = 0;
+			} else if(nodeType==NodeType.DISJUNCTION) {
+				childCount = 1;
+
+				for(SearchEdge edge : outgoingEdges) {
+					if(edge.getTarget().isNegated()) {
+						childCount = 0;
+						break;
+					}
+				}
+			} else {
+				childCount = 0;
+				for(SearchEdge edge : outgoingEdges) {
+					SearchNode node = edge.getTarget();
+					if(node.getNodeType()==NodeType.DISJUNCTION) {
+						childCount += node.getChildCount();
+					} else {
+						childCount++;
+					}
+				}
+			}
+		}
+		
+		return childCount;
 	}
 }

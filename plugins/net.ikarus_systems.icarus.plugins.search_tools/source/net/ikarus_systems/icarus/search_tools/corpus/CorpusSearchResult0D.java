@@ -21,6 +21,7 @@ import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
+import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -119,14 +120,6 @@ public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearchResult#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry, net.ikarus_systems.icarus.search_tools.corpus.GroupCache)
-	 */
-	@Override
-	public void commit(ResultEntry entry, GroupCache cache) {
-		entries.add(entry);
-	}
-
-	/**
 	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getMatchCount(int[])
 	 */
 	@Override
@@ -148,6 +141,57 @@ public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 	@Override
 	public int getGroupMatchCount(int groupId, int index) {
 		return 0;
+	}
+	
+	private synchronized void commit(ResultEntry entry) {
+		entries.add(entry);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#clear()
+	 */
+	@Override
+	public void clear() {
+		if(finalized)
+			throw new IllegalStateException("Result is already final - clearing not possible"); //$NON-NLS-1$
+		
+		entries.clear();
+	}
+	
+	protected class Result0DCache implements GroupCache {
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#cacheGroupInstance(int, java.lang.Object)
+		 */
+		@Override
+		public void cacheGroupInstance(int id, Object value) {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#lock()
+		 */
+		@Override
+		public void lock() {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#reset()
+		 */
+		@Override
+		public void reset() {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+		 */
+		@Override
+		public void commit(ResultEntry entry) {
+			CorpusSearchResult0D.this.commit(entry);
+		}
+		
 	}
 
 	protected class EntryList extends AbstractList<SentenceData> implements SentenceDataList {

@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.search_tools;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -284,13 +286,16 @@ public final class SearchManager {
 	}
 	
 	private static class ExecuteSearchJob extends SwingWorker<Object, Object> 
-			implements Identity {
+			implements Identity, PropertyChangeListener {
 		
 		private final Search search;
 		private final long timeout;
 		private long startMillis;
 		
 		private ExecuteSearchJob(Search search) {
+			if(search==null)
+				throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			
 			this.search = search;
 			
 			timeout = ConfigRegistry.getGlobalRegistry().getLong(
@@ -416,6 +421,15 @@ public final class SearchManager {
 			} catch(Exception ex) {
 				// ignore
 			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			// TODO really forward all property changes?
+			//firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
 		}
 	}
 	

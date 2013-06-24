@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.corpus;
+package net.ikarus_systems.icarus.search_tools.tree;
 
 /**
  * A rooted tree view on arbitrary underlying data. This interface
@@ -30,7 +30,7 @@ public interface TargetTree {
 	int size();
 	
 	/**
-	 * Clears any pointer structures
+	 * Clears any pointer structures and unlocks all locking flags
 	 */
 	void reset();
 	
@@ -41,6 +41,7 @@ public interface TargetTree {
 	
 	/**
 	 * Rebuild the graph representation based on the given data input.
+	 * This effectively clears all previously set pointers and locks
 	 */
 	void reload(Object source);
 	
@@ -90,7 +91,7 @@ public interface TargetTree {
 	 * out of bounds: 0 &le; index &lt; {@code getEdgeCount()} when moved to the
 	 * new node.
 	 */
-	void viewEdge(int nodeindex, int edgeIndex);
+	void viewEdge(int nodeIndex, int edgeIndex);
 	
 	/**
 	 * Returns the index of the source node of the currently viewed edge.
@@ -135,6 +136,8 @@ public interface TargetTree {
 	 */
 	void viewNode(int index);
 	
+	void viewChild(int index);
+	
 	/**
 	 * Returns the height of the sub-tree whose root node is the node currently
 	 * being viewed. For a leaf node this method must return {@code 1} and for any
@@ -158,7 +161,7 @@ public interface TargetTree {
 	// Shorthand methods
 	
 	/**
-	 * Moves the scope to the node thta is the parent of the current node.
+	 * Moves the scope to the node that is the parent of the current node.
 	 * <p>
 	 * Precondition: {@code #getNodeIndex()}!=-1 && {@code #getEdgeIndex()}==-1 && {@code i}=={@code #getParentIndex()}
 	 * Postcondition: {@code #getEdgeIndex()}==-1 && {@code #getNodeIndex()}=={@code i}
@@ -171,4 +174,40 @@ public interface TargetTree {
 	void viewTarget();
 	
 	void viewSource();
+	
+	// Locking methods
+	
+	void lockNode();
+	
+	void lockEdge();
+	
+	void lockEdge(int index);
+	
+	void lockEdge(int nodeIndex, int index);
+	
+	void lockNode(int index);
+	
+	void unlockNode();
+	
+	void unlockEdge();
+	
+	void unlockEdge(int index);
+	
+	void unlockEdge(int nodeIndex, int index);
+	
+	void unlockNode(int index);
+	
+	void unlockChildren(int index);
+	
+	boolean isNodeLocked();
+	
+	boolean isEdgeLocked();
+	
+	boolean isNodeLocked(int index);
+	
+	boolean isEdgeLocked(int index);
+	
+	boolean isEdgeLocked(int nodeIndex, int index);
+	
+	void unlockAll();
 }

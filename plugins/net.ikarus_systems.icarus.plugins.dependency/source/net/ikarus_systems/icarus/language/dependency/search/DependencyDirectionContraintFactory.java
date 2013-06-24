@@ -86,7 +86,7 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getDirection();
 		}
 

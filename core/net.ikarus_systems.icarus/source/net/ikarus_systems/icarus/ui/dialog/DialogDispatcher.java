@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.ui.dialog;
 import java.awt.Component;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import net.ikarus_systems.icarus.ui.UIUtil;
 
@@ -67,9 +68,14 @@ public class DialogDispatcher implements Runnable {
 	private synchronized void dispatch() {
 		if(dispatched)
 			throw new IllegalStateException("Already dispatched"); //$NON-NLS-1$
-		
-		UIUtil.invokeLater(this);
+
 		dispatched = true;
+		
+		if(SwingUtilities.isEventDispatchThread()) {
+			run();
+		} else {
+			UIUtil.invokeLater(this);
+		}
 	}
 
 	/**

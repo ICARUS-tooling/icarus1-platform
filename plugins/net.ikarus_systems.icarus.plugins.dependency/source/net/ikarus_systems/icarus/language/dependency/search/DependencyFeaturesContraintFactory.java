@@ -65,7 +65,7 @@ public class DependencyFeaturesContraintFactory extends AbstractConstraintFactor
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getFeatures();
 		}
 
@@ -84,7 +84,7 @@ public class DependencyFeaturesContraintFactory extends AbstractConstraintFactor
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getFeatures().toLowerCase();
 		}
 

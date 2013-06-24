@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.util.CompactProperties;
+import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.PropertyChangeSource;
 
 /**
@@ -21,7 +22,7 @@ import net.ikarus_systems.icarus.util.PropertyChangeSource;
  * @version $Id$
  *
  */
-public abstract class Search extends PropertyChangeSource {
+public abstract class Search extends PropertyChangeSource implements SearchParameters {
 	
 	private SearchState state = SearchState.BLANK;
 	
@@ -34,9 +35,13 @@ public abstract class Search extends PropertyChangeSource {
 	
 	private CompactProperties properties;
 	
+	private int progress = 0;
+	
 	private final SearchFactory factory;
 	
-	protected Search(SearchFactory factory, SearchQuery query, Object target) {
+	private final Options parameters;
+	
+	protected Search(SearchFactory factory, SearchQuery query, Options parameters, Object target) {
 		if(factory==null)
 			throw new IllegalArgumentException("Invalid factory"); //$NON-NLS-1$
 		if(query==null)
@@ -44,9 +49,14 @@ public abstract class Search extends PropertyChangeSource {
 		if(target==null)
 			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
 		
+		if(parameters==null) {
+			parameters = Options.emptyOptions;
+		}
+		
 		this.factory = factory;
 		this.query = query;
 		this.target = target;
+		this.parameters = parameters.clone();
 	}
 
 	final void setState(SearchState state) {
@@ -101,6 +111,14 @@ public abstract class Search extends PropertyChangeSource {
 		properties.put(key, value);
 	}
 	
+	public final Object getParameter(String key) {
+		return parameters.get(key);
+	}
+	
+	protected Options getParameters() {
+		return parameters;
+	}
+	
 	public final boolean isCancelled() {
 		return cancelled.get();
 	}
@@ -121,9 +139,9 @@ public abstract class Search extends PropertyChangeSource {
 	 * Attempts to cancel this search by setting the internal {@code cancelled}
 	 * flag to {@code true}.
 	 * This method will throw an {@link IllegalArgumentException} if the
-	 * search is not yet running or has already been finished or cancelled.
+	 * search is not yet running or has already been finished or cancelled. 
 	 */
-	public final void cancel() {
+	public void cancel() {
 		synchronized (lock) {
 			SearchState state = getState();
 			if(state==SearchState.BLANK)
@@ -134,7 +152,17 @@ public abstract class Search extends PropertyChangeSource {
 				throw new IllegalStateException("Search already cancelled!"); //$NON-NLS-1$
 			
 			setState(SearchState.CANCELLED);
+			
+			innerCancel();
 		}
+	}
+	
+	/**
+	 * Callback for subclasses to perform proper cleanup of their
+	 * resources
+	 */
+	protected void innerCancel() {
+		// no-op
 	}
 	
 	public final void finish() {
@@ -173,7 +201,22 @@ public abstract class Search extends PropertyChangeSource {
 	 * Returns the (estimated) progress of the search in the range
 	 * 0 to 100.
 	 */
-	public abstract int getProgress();
+	public int getProgress() {
+		return progress;
+	}
+	
+	protected void setProgress(int newProgress) {
+		if(newProgress==progress) {
+			return;
+		}
+		if(newProgress<progress)
+			throw new IllegalArgumentException("Cannot decrease progress field"); //$NON-NLS-1$
+		
+		int oldProgress = progress;
+		progress = newProgress;
+		
+		firePropertyChange("progress", oldProgress, newProgress); //$NON-NLS-1$
+	}
 	
 	/**
 	 * Returns the result of this search operation.

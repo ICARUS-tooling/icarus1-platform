@@ -14,7 +14,6 @@ import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.util.SubstitutionSupport;
@@ -155,7 +154,7 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 	 */
 	@Override
 	public SearchResult getSubResult(int... groupInstances) {
-		// TODO Auto-generated method stub
+		// Per default there is no support for sub-results
 		return null;
 	}
 
@@ -173,8 +172,4 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 		
 		finalized = true;
 	}
-	
-	public abstract GroupCache createCache();
-	
-	public abstract void commit(ResultEntry entry, GroupCache cache);
 }

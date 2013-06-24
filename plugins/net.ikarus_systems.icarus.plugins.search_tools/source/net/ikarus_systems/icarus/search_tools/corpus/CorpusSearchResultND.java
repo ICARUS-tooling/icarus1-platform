@@ -26,6 +26,7 @@ import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -186,15 +187,10 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		return new ResultNDCache();
 	}
 
-	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearchResult#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry, net.ikarus_systems.icarus.search_tools.corpus.GroupCache)
-	 */
-	@Override
-	public synchronized void commit(ResultEntry entry, GroupCache cache) {
-		ResultNDCache c = (ResultNDCache) cache;
+	private synchronized void commit(ResultEntry entry, ResultNDCache cache) {
 		
 		for (int i = 0; i < indexBuffer.length; i++) {
-			int index = groupInstances[i].substitute(c.instanceBuffer[indexPermutator[i]]);;
+			int index = groupInstances[i].substitute(cache.instanceBuffer[indexPermutator[i]]);;
 			indexBuffer[i] = index; 
 			
 			int[] counts = groupMatchCounts[i];
@@ -222,6 +218,18 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 	}
 
 	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#clear()
+	 */
+	@Override
+	public void clear() {
+		if(finalized)
+			throw new IllegalStateException("Result is already final - clearing not possible"); //$NON-NLS-1$
+		
+		entries.clear();
+		totalEntries.clear();
+	}
+
+	/**
 	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getGroupMatchCount(int, int)
 	 */
 	@Override
@@ -237,7 +245,7 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		protected boolean locked = false;
 
 		/**
-		 * @see net.ikarus_systems.icarus.search_tools.corpus.GroupCache#cacheGroupInstance(int, java.lang.Object)
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#cacheGroupInstance(int, java.lang.Object)
 		 */
 		@Override
 		public void cacheGroupInstance(int id, Object value) {
@@ -252,7 +260,7 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		}
 
 		/**
-		 * @see net.ikarus_systems.icarus.search_tools.corpus.GroupCache#lock()
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#lock()
 		 */
 		@Override
 		public void lock() {
@@ -260,12 +268,20 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		}
 
 		/**
-		 * @see net.ikarus_systems.icarus.search_tools.corpus.GroupCache#reset()
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#reset()
 		 */
 		@Override
 		public void reset() {
 			locked = false;
 			Arrays.fill(instanceBuffer, null);
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.standard.GroupCache#commit(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+		 */
+		@Override
+		public void commit(ResultEntry entry) {
+			CorpusSearchResultND.this.commit(entry, this);
 		}
 		
 	}

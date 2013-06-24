@@ -44,4 +44,9 @@ public interface SearchNode {
 	 * This count does not include the node itself and is {@code 0} for leaf nodes.
 	 */
 	int getDescendantCount();
+	
+	/**
+	 * Returns the minimum number of direct child nodes.
+	 */
+	int getChildCount();
 }

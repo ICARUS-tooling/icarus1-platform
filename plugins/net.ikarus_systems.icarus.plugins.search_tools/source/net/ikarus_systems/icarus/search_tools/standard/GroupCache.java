@@ -7,7 +7,9 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.corpus;
+package net.ikarus_systems.icarus.search_tools.standard;
+
+import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 
 
 /**
@@ -22,6 +24,8 @@ public interface GroupCache {
 	void lock();
 	
 	void reset();
+	
+	void commit(ResultEntry entry);
 	
 	/**
 	 * 
@@ -39,6 +43,11 @@ public interface GroupCache {
 
 		@Override
 		public void reset() {
+		}
+
+		@Override
+		public void commit(ResultEntry entry) {
+			// no-op
 		}
 	};
 }

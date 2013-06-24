@@ -83,7 +83,7 @@ public class DependencyDistanceContraintFactory extends AbstractConstraintFactor
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getDistance();
 		}
 

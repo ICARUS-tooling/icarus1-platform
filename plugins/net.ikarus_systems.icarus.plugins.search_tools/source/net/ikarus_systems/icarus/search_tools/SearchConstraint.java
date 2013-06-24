@@ -29,5 +29,7 @@ public interface SearchConstraint extends Serializable {
 	
 	boolean matches(Object value);
 	
+	Object getInstance(Object value);
+	
 	boolean isUndefined();
 }

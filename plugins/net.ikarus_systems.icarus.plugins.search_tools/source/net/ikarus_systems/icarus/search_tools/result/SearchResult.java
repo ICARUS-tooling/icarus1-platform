@@ -14,6 +14,7 @@ import java.util.List;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -159,4 +160,27 @@ public interface SearchResult {
 	 * when they do not support certain operations during a running search.
 	 */
 	boolean isFinal();
+	
+	GroupCache createCache();
+	
+	/**
+	 * Deletes the content of this result.
+	 * <p>
+	 * An implementation should throw an {@link IllegalStateException} in case
+	 * the result is still under construction and not final.
+	 * 
+	 * @throws IllegalStateException
+	 */
+	void clear();
+	
+	/**
+	 * Attempts to finalize this result so that future modifications
+	 * will be discarded.
+	 * <p>
+	 * An implementation should throw an {@link IllegalStateException} in case
+	 * the result is already final.
+	 * 
+	 * @throws IllegalStateException
+	 */
+	void finish();
 }

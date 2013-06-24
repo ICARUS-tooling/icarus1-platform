@@ -14,7 +14,7 @@ import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearch;
-import net.ikarus_systems.icarus.search_tools.corpus.TargetTree;
+import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;

@@ -50,7 +50,7 @@ public class DependencyRelationContraintFactory extends AbstractConstraintFactor
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getRelation();
 		}
 
@@ -69,8 +69,13 @@ public class DependencyRelationContraintFactory extends AbstractConstraintFactor
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getRelation().toLowerCase();
+		}
+
+		@Override
+		public DependencyRelationCIConstraint clone() {
+			return new DependencyRelationCIConstraint(getValue(), getOperator());
 		}
 	}
 }

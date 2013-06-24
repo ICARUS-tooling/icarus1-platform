@@ -51,7 +51,7 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getLemma();
 		}
 
@@ -70,7 +70,7 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getLemma().toLowerCase();
 		}
 

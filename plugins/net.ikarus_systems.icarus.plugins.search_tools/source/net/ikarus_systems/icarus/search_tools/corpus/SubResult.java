@@ -7,6 +7,7 @@ import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
@@ -411,5 +412,29 @@ public class SubResult implements SearchResult {
 	@Override
 	public ResultEntry getRawEntry(int index) {
 		return null;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#createCache()
+	 */
+	@Override
+	public GroupCache createCache() {
+		return null;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#clear()
+	 */
+	@Override
+	public void clear() {
+		// no-op
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#finish()
+	 */
+	@Override
+	public void finish() {
+		// no-op
 	}
 }

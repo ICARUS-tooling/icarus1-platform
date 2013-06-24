@@ -53,12 +53,12 @@ import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.SearchTargetSelector;
 import net.ikarus_systems.icarus.search_tools.corpus.CorpusSearchResultND;
-import net.ikarus_systems.icarus.search_tools.corpus.GroupCache;
 import net.ikarus_systems.icarus.search_tools.result.Hit;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchOperator;
+import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
@@ -314,16 +314,19 @@ public class SearchManagerView extends View {
 		};
 		cache.cacheGroupInstance(0, "test");
 		cache.cacheGroupInstance(1, "x");
-		result.commit(new ResultEntry(12, hits), cache);
+		cache.commit(new ResultEntry(12, hits));
+		
 		cache.cacheGroupInstance(0, "bla");
 		cache.cacheGroupInstance(1, "x");
-		result.commit(new ResultEntry(11, hits), cache);
+		cache.commit(new ResultEntry(11, hits));
+		
 		cache.cacheGroupInstance(0, "test2");
 		cache.cacheGroupInstance(1, "y");
-		result.commit(new ResultEntry(7, hits), cache);
+		cache.commit(new ResultEntry(7, hits));
+		
 		cache.cacheGroupInstance(0, "test2");
 		cache.cacheGroupInstance(1, "xy");
-		result.commit(new ResultEntry(14, hits), cache);
+		cache.commit(new ResultEntry(14, hits));
 		
 		//result.finish();
 		

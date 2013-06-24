@@ -50,7 +50,7 @@ public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getPos();
 		}
 
@@ -69,8 +69,13 @@ public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getPos().toLowerCase();
+		}
+
+		@Override
+		public DependencyPosCIConstraint clone() {
+			return new DependencyPosCIConstraint(getValue(), getOperator());
 		}
 	}
 }

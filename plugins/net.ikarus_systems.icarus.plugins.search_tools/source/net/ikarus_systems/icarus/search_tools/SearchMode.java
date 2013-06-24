@@ -26,25 +26,27 @@ public enum SearchMode implements Identity {
 	 * should be cached and the graph reported as a whole.
 	 * This effectively implies exhaustive searching!
 	 */
-	HITS("hits"), //$NON-NLS-1$
+	HITS("hits", true), //$NON-NLS-1$
 	
 	/**
 	 * Every single hit encountered in a target graph
 	 * should be reported independently. This effectively
 	 * implies exhaustive searching!
 	 */
-	INDEPENDENT_HITS("independentHits"), //$NON-NLS-1$
+	INDEPENDENT_HITS("independentHits", true), //$NON-NLS-1$
 	
 	/**
 	 * Only the first hit in a target graph should be reported.
 	 * Further processing of that graph is not necessary.
 	 */
-	MATCHES("matches"); //$NON-NLS-1$
+	MATCHES("matches", false); //$NON-NLS-1$
 	
 	private final String key;
+	private final boolean exhaustive;
 	
-	private SearchMode(String key) {
+	private SearchMode(String key, boolean exhaustive) {
 		this.key = key;
+		this.exhaustive = exhaustive;
 	}
 
 	/**
@@ -87,5 +89,9 @@ public enum SearchMode implements Identity {
 	@Override
 	public Object getOwner() {
 		return this;
+	}
+
+	public boolean isExhaustive() {
+		return exhaustive;
 	}
 }

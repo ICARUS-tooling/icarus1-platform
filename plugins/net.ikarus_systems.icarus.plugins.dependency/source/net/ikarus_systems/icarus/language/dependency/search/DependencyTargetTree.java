@@ -11,7 +11,7 @@ package net.ikarus_systems.icarus.language.dependency.search;
 
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
-import net.ikarus_systems.icarus.search_tools.corpus.TargetTree;
+import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 
 /**
@@ -24,6 +24,7 @@ import net.ikarus_systems.icarus.util.CorruptedStateException;
 public class DependencyTargetTree implements TargetTree {
 	
 	private int[][] edges;
+	private boolean[][] locks;
 	private int[] heights;
 	private int[] descendantCounts;
 	
@@ -41,6 +42,8 @@ public class DependencyTargetTree implements TargetTree {
 	private DependencyData data;
 	
 	private int bufferSize = 200;
+	
+	private static final int LIST_START_SIZE = 3;
 
 	public DependencyTargetTree() {
 		buildBuffer();
@@ -48,6 +51,7 @@ public class DependencyTargetTree implements TargetTree {
 	
 	private void buildBuffer() {
 		edges = new int[bufferSize][];
+		locks = new boolean[bufferSize][];
 		heights = new int[bufferSize];
 		descendantCounts = new int[bufferSize];
 		heads = new int[bufferSize];
@@ -56,6 +60,7 @@ public class DependencyTargetTree implements TargetTree {
 	@Override
 	public void close() {
 		edges = null;
+		locks = null;
 		heights = null;
 		descendantCounts = null;
 		heads = null;
@@ -65,7 +70,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#size()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#size()
 	 */
 	@Override
 	public int size() {
@@ -73,16 +78,18 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#reset()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#reset()
 	 */
 	@Override
 	public void reset() {
 		nodePointer = -1;
 		edgePointer = -1;
+		
+		unlockAll();
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#reload(java.lang.Object)
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#reload(java.lang.Object)
 	 */
 	@Override
 	public void reload(Object source) {
@@ -115,7 +122,7 @@ public class DependencyTargetTree implements TargetTree {
 			}
 		}
 		
-		// rebuild edge lookup
+		// rebuild edge lookup and locks
 		for (int i = 0; i < size; i++) {
 			head = data.getHead(i);
 			if(head == LanguageUtils.DATA_UNDEFINED_VALUE) {
@@ -128,10 +135,12 @@ public class DependencyTargetTree implements TargetTree {
 				if (list == null) {
 					// TODO validate initial list size (run corpus and count
 					// number of arraycopy calls per data)
-					list = new int[3];
+					list = new int[LIST_START_SIZE];
 					edges[head] = list;
+					locks[head] = new boolean[LIST_START_SIZE];
 				} else if (list[0] >= list.length - 1) {
 					tmp = new int[list.length + list.length];
+					locks[head] = new boolean[tmp.length];
 					System.arraycopy(list, 0, tmp, 0, list.length);
 					list = tmp;
 					edges[head] = list;
@@ -142,6 +151,10 @@ public class DependencyTargetTree implements TargetTree {
 				list[list[0]] = i;
 				// System.out.printf("%d %s: %d %s\n", i, data.forms[i], head,
 				// Arrays.toString(list));
+			}
+			
+			if(locks[i]==null) {
+				locks[i] = new boolean[LIST_START_SIZE];
 			}
 			
 			heads[i] = head;
@@ -175,7 +188,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 	
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getNodeIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getNodeIndex()
 	 */
 	@Override
 	public int getNodeIndex() {
@@ -183,7 +196,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getEdgeIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getEdgeIndex()
 	 */
 	@Override
 	public int getEdgeIndex() {
@@ -191,7 +204,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getEdgeCount()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getEdgeCount()
 	 */
 	@Override
 	public int getEdgeCount() {
@@ -204,7 +217,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewEdge(int)
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewEdge(int)
 	 */
 	@Override
 	public void viewEdge(int index) {
@@ -221,7 +234,7 @@ public class DependencyTargetTree implements TargetTree {
 
 	/**
 	 * 
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewEdge(int, int)
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewEdge(int, int)
 	 */
 	@Override
 	public void viewEdge(int nodeIndex, int edgeIndex) {
@@ -238,7 +251,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getSourceIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getSourceIndex()
 	 */
 	@Override
 	public int getSourceIndex() {
@@ -251,7 +264,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getTargetIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getTargetIndex()
 	 */
 	@Override
 	public int getTargetIndex() {
@@ -264,7 +277,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getRootIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getRootIndex()
 	 */
 	@Override
 	public int getRootIndex() {
@@ -272,7 +285,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getParentIndex()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getParentIndex()
 	 */
 	@Override
 	public int getParentIndex() {
@@ -283,7 +296,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewNode(int)
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewNode(int)
 	 */
 	@Override
 	public void viewNode(int index) {
@@ -295,7 +308,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewParent()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewParent()
 	 */
 	@Override
 	public void viewParent() {
@@ -309,7 +322,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewTarget()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewTarget()
 	 */
 	@Override
 	public void viewTarget() {
@@ -323,7 +336,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#viewSource()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewSource()
 	 */
 	@Override
 	public void viewSource() {
@@ -337,7 +350,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getHeight()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getHeight()
 	 */
 	@Override
 	public int getHeight() {
@@ -348,7 +361,7 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.TargetTree#getDescendantCount()
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getDescendantCount()
 	 */
 	@Override
 	public int getDescendantCount() {
@@ -428,5 +441,194 @@ public class DependencyTargetTree implements TargetTree {
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
 
 		return data.isFlagSet(nodePointer, flag);
+	}
+	
+	// LOCKING METHODS
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#lockNode()
+	 */
+	@Override
+	public void lockNode() {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		locks[nodePointer][0] = true;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#lockEdge()
+	 */
+	@Override
+	public void lockEdge() {
+		if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
+		if(nodePointer==-1)
+			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
+		
+		locks[nodePointer][1+edgePointer] = true;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#lockEdge(int)
+	 */
+	@Override
+	public void lockEdge(int index) {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		locks[nodePointer][1+index] = true;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#lockEdge(int, int)
+	 */
+	@Override
+	public void lockEdge(int nodeIndex, int index) {
+		locks[nodeIndex][1+index] = true;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#lockNode(int)
+	 */
+	@Override
+	public void lockNode(int index) {
+		locks[index][0] = true;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockNode()
+	 */
+	@Override
+	public void unlockNode() {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		unlockNode(nodePointer);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockEdge()
+	 */
+	@Override
+	public void unlockEdge() {
+		if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
+		if(nodePointer==-1)
+			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
+		
+		locks[nodePointer][1+edgePointer] = false;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockEdge(int)
+	 */
+	@Override
+	public void unlockEdge(int index) {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		locks[nodePointer][1+index] = false;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockEdge(int, int)
+	 */
+	@Override
+	public void unlockEdge(int nodeIndex, int index) {
+		locks[nodeIndex][1+index] = false;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockNode(int)
+	 */
+	@Override
+	public void unlockNode(int index) {
+		locks[index][0] = false;
+		int[] list = edges[index];
+		
+		// Unlock all edges for this node!
+		if(list!=null) {
+			boolean[] lock = locks[index];
+			for(int i=1; i<=list[0]; i++) {
+				lock[i] = false;
+			}
+		}
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockChildren(int)
+	 */
+	@Override
+	public void unlockChildren(int index) {
+		int[] list = edges[index];
+		
+		if(list!=null) {
+			for(int i=1; i<=list[0]; i++) {
+				unlockNode(list[i]);
+			}
+		}
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#isNodeLocked()
+	 */
+	@Override
+	public boolean isNodeLocked() {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		return locks[nodePointer][0];
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#isEdgeLocked()
+	 */
+	@Override
+	public boolean isEdgeLocked() {
+		if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
+		if(nodePointer==-1)
+			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
+		
+		return locks[nodePointer][1+edgePointer];
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#isNodeLocked(int)
+	 */
+	@Override
+	public boolean isNodeLocked(int index) {
+		return locks[index][0];
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#isEdgeLocked(int)
+	 */
+	@Override
+	public boolean isEdgeLocked(int index) {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		return locks[nodePointer][1+index];
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#isEdgeLocked(int, int)
+	 */
+	@Override
+	public boolean isEdgeLocked(int nodeIndex, int index) {
+		return locks[nodeIndex][1+index];
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#unlockAll()
+	 */
+	@Override
+	public void unlockAll() {
+		for(int i=0; i<size; i++) {
+			locks[i][0] = false;
+			unlockChildren(i);
+		}
 	}
 }

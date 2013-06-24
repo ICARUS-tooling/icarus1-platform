@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.search_tools.util;
+package net.ikarus_systems.icarus.search_tools.corpus;
 
 import java.util.Arrays;
 

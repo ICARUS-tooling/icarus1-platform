@@ -13,6 +13,7 @@ import java.util.List;
 
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -213,6 +214,30 @@ public final class ResultDummies {
 		@Override
 		public boolean isFinal() {
 			return true;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#createCache()
+		 */
+		@Override
+		public GroupCache createCache() {
+			return GroupCache.dummyCache;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#clear()
+		 */
+		@Override
+		public void clear() {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#finish()
+		 */
+		@Override
+		public void finish() {
+			// no-op
 		}
 	}
 }

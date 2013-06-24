@@ -70,7 +70,7 @@ public class DefaultConstraint implements SearchConstraint {
 	 */
 	@Override
 	public boolean matches(Object value) {
-		return operator.apply(prepareValue(value), getConstraint());
+		return operator.apply(getInstance(value), getConstraint());
 	}
 	
 	protected Object getConstraint() {
@@ -95,7 +95,8 @@ public class DefaultConstraint implements SearchConstraint {
 		return ((Comparable)value).compareTo((Comparable)constraint);
 	}
 	
-	protected Object prepareValue(Object value) {
+	@Override
+	public Object getInstance(Object value) {
 		return value;
 	}
 

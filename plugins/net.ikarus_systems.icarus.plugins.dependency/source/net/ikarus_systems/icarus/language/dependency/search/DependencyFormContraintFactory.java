@@ -51,7 +51,7 @@ public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getForm();
 		}
 
@@ -70,7 +70,7 @@ public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		protected Object prepareValue(Object value) {
+		public Object getInstance(Object value) {
 			return ((DependencyTargetTree)value).getForm().toLowerCase();
 		}
 
