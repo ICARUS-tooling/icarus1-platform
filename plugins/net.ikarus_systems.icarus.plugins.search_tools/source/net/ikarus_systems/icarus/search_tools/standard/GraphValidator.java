@@ -75,6 +75,7 @@ public class GraphValidator {
 	public static final String ALLOW_CYCLES = "allowCycles";  //$NON-NLS-1$
 	public static final String ALLOW_LINK_CONSTRAINTS = "allowLinkConstraints";  //$NON-NLS-1$
 	public static final String ALLOW_NEGATED_LINKS = "allowNegatedLinks";  //$NON-NLS-1$
+	public static final String ALLOW_NEGATED_DISJUNCTIONS = "allowNegatedDisjunctions";  //$NON-NLS-1$
 	public static final String ALLOW_LINKS = "allowLinks";  //$NON-NLS-1$
 	public static final String ALLOW_TRANSITIVES = "allowTransitives";  //$NON-NLS-1$
 	public static final String ALLOW_DOUBLE_NEGATIVE = "allowDoubleNegation";  //$NON-NLS-1$
@@ -222,6 +223,12 @@ public class GraphValidator {
 			// Report root with incoming edges
 			if(node.getNodeType()==NodeType.ROOT && node.getIncomingEdgeCount()>0) {
 				result.addError("plugins.searchTools.graphValidation.invalidRoot", id); //$NON-NLS-1$
+			}
+			
+			// Check
+			if(node.getNodeType()==NodeType.DISJUNCTION && node.isNegated()
+					&& !options.get(ALLOW_NEGATED_DISJUNCTIONS, false)) {
+				result.addWarning("plugins.searchTools.graphValidation.negatedDisjunctionNode", id); //$NON-NLS-1$
 			}
 		}
 

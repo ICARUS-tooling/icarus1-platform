@@ -568,10 +568,10 @@ public class SearchManagerView extends View {
 			
 			try {
 				// TODO DEBUG
-				if(descriptor.getSearch()==null) {
+				/*if(descriptor.getSearch()==null) {
 					debugShowResult();
 					return;
-				}
+				}*/
 
 				SearchResult result = descriptor.getSearchResult();
 				

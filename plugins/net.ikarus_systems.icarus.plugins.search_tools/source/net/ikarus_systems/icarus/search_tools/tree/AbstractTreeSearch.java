@@ -286,6 +286,7 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 			cache = createCache();
 			rootMatcher = createRootMatcher();
 			
+			rootMatcher.setSearchMode(searchMode);
 			rootMatcher.setCache(cache);
 			rootMatcher.setTargetTree(targetTree);
 		}

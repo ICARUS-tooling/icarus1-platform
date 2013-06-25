@@ -32,8 +32,10 @@ public class RootMatcher extends Matcher {
 		boolean matched = false;
 		boolean excluded = false;
 		
-		for(int i=0; i<nodeCount; i++) {
-			targetTree.viewNode(i);
+		indexIterator.setMax(nodeCount-1);
+		
+		while(indexIterator.hasNext()) {
+			targetTree.viewNode(indexIterator.next());
 			
 			// Honor locked nodes that are allocated to other matchers!
 			if(targetTree.isNodeLocked()) {

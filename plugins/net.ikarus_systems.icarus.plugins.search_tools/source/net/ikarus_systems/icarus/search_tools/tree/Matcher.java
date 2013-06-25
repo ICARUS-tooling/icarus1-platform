@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.search_tools.tree;
 
+import java.util.Iterator;
+
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
@@ -56,8 +58,11 @@ public class Matcher implements Cloneable {
 			
 	protected boolean exhaustive = false;
 	protected SearchMode searchMode = SearchMode.MATCHES;
+	protected boolean leftToRight = true;
 	
-	protected Matcher(SearchNode node, SearchEdge edge) {
+	protected IndexIterator indexIterator = new LTRIterator();
+	
+	public Matcher(SearchNode node, SearchEdge edge) {
 		if(node==null)
 			throw new IllegalArgumentException("Invalid node"); //$NON-NLS-1$
 		
@@ -75,9 +80,11 @@ public class Matcher implements Cloneable {
 		int minIndex = getMinIndex();
 		int maxIndex = getMaxIndex();
 		
-		for(int i=0; i<childCount; i++) {
+		indexIterator.setMax(childCount-1);
+		
+		while(indexIterator.hasNext()) {
 			targetTree.viewNode(parentAllocation);
-			targetTree.viewChild(i);
+			targetTree.viewChild(indexIterator.next());
 			
 			// Honor locked nodes that are allocated to other matchers!
 			if(targetTree.isNodeLocked()) {
@@ -301,6 +308,27 @@ public class Matcher implements Cloneable {
 		this.exclusionMember = exclusionMember;
 	}
 
+	public boolean isLeftToRight() {
+		return leftToRight;
+	}
+
+	public void setLeftToRight(boolean leftToRight) {
+		this.leftToRight = leftToRight;
+		indexIterator = leftToRight ? new LTRIterator() : new RTLIterator();
+		
+		if(next!=null) {
+			next.setLeftToRight(leftToRight);
+		}
+		if(alternate!=null) {
+			alternate.setLeftToRight(leftToRight);
+		}
+		if(exclusions!=null) {
+			for(Matcher matcher : exclusions) {
+				matcher.setLeftToRight(leftToRight);
+			}
+		}
+	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -456,5 +484,71 @@ public class Matcher implements Cloneable {
 		}
 		
 		return clone;
+	}
+	
+	protected static abstract class IndexIterator implements Iterator<Integer> {
+
+		public abstract void setMax(int max);
+
+		/**
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			// no-op
+		}
+	}
+	
+	protected static class LTRIterator extends IndexIterator {
+		
+		private int max = -1;
+		private int current = -1;
+		
+		public void setMax(int max) {
+			this.max = max;
+			
+			current = -1;
+		}
+
+		/**
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			return current<max;
+		}
+
+		/**
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public Integer next() {
+			return ++current;
+		}
+	}
+	
+	protected static class RTLIterator extends IndexIterator {
+		
+		private int current = -1;
+		
+		public void setMax(int max) {
+			current = max+1;
+		}
+
+		/**
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			return current>0;
+		}
+
+		/**
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public Integer next() {
+			return --current;
+		}
 	}
 }

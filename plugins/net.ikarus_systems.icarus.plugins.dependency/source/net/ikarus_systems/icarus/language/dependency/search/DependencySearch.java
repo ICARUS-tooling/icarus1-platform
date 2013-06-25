@@ -14,6 +14,7 @@ import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearch;
+import net.ikarus_systems.icarus.search_tools.result.ResultAnnotator;
 import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -26,9 +27,9 @@ import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
  */
 public class DependencySearch extends AbstractCorpusSearch {
 
-	public DependencySearch(SearchFactory factory, SearchQuery query,
-			Object target, Options options) {
-		super(factory, query, target, options);
+	public DependencySearch(SearchFactory factory, SearchQuery query, 
+			Options options, Object target) {
+		super(factory, query, options, target);
 	}
 
 	/**
@@ -40,10 +41,10 @@ public class DependencySearch extends AbstractCorpusSearch {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearch#createTargetList(java.lang.Object)
+	 * @see net.ikarus_systems.icarus.search_tools.tree.AbstractTreeSearch#createSource(java.lang.Object)
 	 */
 	@Override
-	protected SentenceDataList createTargetList(Object target) {
+	protected SentenceDataList createSource(Object target) {
 		ContentType requiredType = DependencyUtils.getDependencyContentType();
 		ContentType entryType = ContentTypeRegistry.getEntryType(target);
 		if(entryType==null || !ContentTypeRegistry.isCompatible(requiredType, entryType))
@@ -53,5 +54,14 @@ public class DependencySearch extends AbstractCorpusSearch {
 			throw new IllegalArgumentException("Target is not a list"); //$NON-NLS-1$
 		
 		return (SentenceDataList) target;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.AbstractTreeSearch#createAnnotator()
+	 */
+	@Override
+	protected ResultAnnotator createAnnotator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

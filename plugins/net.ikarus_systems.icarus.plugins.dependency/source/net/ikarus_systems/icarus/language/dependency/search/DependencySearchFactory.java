@@ -40,7 +40,7 @@ public class DependencySearchFactory implements SearchFactory {
 	@Override
 	public Search createSearch(SearchQuery query, Object target, Options options)
 			throws UnsupportedFormatException {
-		return new DependencySearch(this, query, target, options);
+		return new DependencySearch(this, query, options, target);
 	}
 
 	public ContentType getContentType() {

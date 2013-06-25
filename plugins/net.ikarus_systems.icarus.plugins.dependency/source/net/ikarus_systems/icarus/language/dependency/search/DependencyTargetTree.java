@@ -308,6 +308,18 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewChild(int)
+	 */
+	@Override
+	public void viewChild(int index) {
+		if(nodePointer==-1)
+			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+		
+		nodePointer = edges[nodePointer][1+index];
+		edgePointer = -1;
+	}
+
+	/**
 	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewParent()
 	 */
 	@Override
