@@ -83,6 +83,9 @@ public class SearchDescriptor {
 			options = Options.emptyOptions;
 		}
 		search = factory.createSearch(getQuery(), getTarget(), options);
+		
+		search.init();
+		
 		searchResult = search.getResult();
 	}
 

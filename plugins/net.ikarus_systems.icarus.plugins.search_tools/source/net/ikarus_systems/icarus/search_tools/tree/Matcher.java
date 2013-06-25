@@ -26,7 +26,7 @@ import net.ikarus_systems.icarus.util.CorruptedStateException;
  * @version $Id$
  *
  */
-public class Matcher implements Cloneable {
+public class Matcher implements Cloneable, Comparable<Matcher> {
 	protected final SearchNode node;
 	protected final SearchEdge edge;
 	
@@ -70,18 +70,17 @@ public class Matcher implements Cloneable {
 		this.edge = edge;
 	}
 	
-	public boolean matches() {
-		int childCount = targetTree.getEdgeCount();
-					
+	public boolean matches() {					
 		int parentAllocation = parent.getAllocation();
+		targetTree.viewNode(parentAllocation);
+		indexIterator.setMax(targetTree.getEdgeCount()-1);
+		
 		boolean matched = false;
 		boolean excluded = false;
 		
 		int minIndex = getMinIndex();
 		int maxIndex = getMaxIndex();
-		
-		indexIterator.setMax(childCount-1);
-		
+				
 		while(indexIterator.hasNext()) {
 			targetTree.viewNode(parentAllocation);
 			targetTree.viewChild(indexIterator.next());
@@ -455,7 +454,7 @@ public class Matcher implements Cloneable {
 	}
 
 	public void setSearchMode(SearchMode searchMode) {
-		if(entryBuilder==null)
+		if(searchMode==null)
 			throw new IllegalArgumentException("Invalid search mode"); //$NON-NLS-1$
 		
 		this.searchMode = searchMode;
@@ -550,5 +549,13 @@ public class Matcher implements Cloneable {
 		public Integer next() {
 			return --current;
 		}
+	}
+
+	/**
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(Matcher other) {
+		return id-other.id;
 	}
 }

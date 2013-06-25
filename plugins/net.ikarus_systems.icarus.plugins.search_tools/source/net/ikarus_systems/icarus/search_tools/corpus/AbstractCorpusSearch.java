@@ -13,14 +13,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
 import net.ikarus_systems.icarus.search_tools.tree.AbstractTreeSearch;
-import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -33,7 +31,7 @@ import org.java.plugin.registry.Extension;
  * @version $Id$
  *
  */
-public abstract class AbstractCorpusSearch extends AbstractTreeSearch<SentenceDataList> {
+public abstract class AbstractCorpusSearch extends AbstractTreeSearch {
 	
 	protected AbstractCorpusSearch(SearchFactory factory, SearchQuery query, 
 			Options parameters,	Object target) {
@@ -98,9 +96,5 @@ public abstract class AbstractCorpusSearch extends AbstractTreeSearch<SentenceDa
 			return new CorpusSearchResultND(this, 
 					groupConstraints.toArray(new SearchConstraint[0]));
 		}
-	}
-	
-	public SentenceDataList getCorpus() {
-		return source;
 	}
 }

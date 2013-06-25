@@ -13,6 +13,7 @@ import javax.swing.event.ChangeListener;
 
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -45,6 +46,13 @@ public class SearchResultListWrapper implements DataList<Object> {
 	 */
 	@Override
 	public Object get(int index) {
+		ResultEntry entry = searchResult.getRawEntry(index);
+		AnnotatedData annotatedData = searchResult.getAnnotatedEntry(entry);
+		
+		return annotatedData==null ? searchResult.getPlainEntry(entry) : annotatedData;
+	}
+	
+	public Object getPlain(int index) {
 		return searchResult.getEntry(index);
 	}
 	

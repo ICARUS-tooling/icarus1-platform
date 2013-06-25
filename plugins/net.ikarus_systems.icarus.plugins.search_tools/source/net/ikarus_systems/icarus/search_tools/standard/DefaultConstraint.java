@@ -104,6 +104,12 @@ public class DefaultConstraint implements SearchConstraint {
 	public SearchConstraint clone() {
 		return new DefaultConstraint(token, value, operator);
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("[%s: %s%s%s]", getClass().getSimpleName(),  //$NON-NLS-1$
+				token, operator.getSymbol(), value);
+	}
 
 	@XmlElements({
 		@XmlElement(name="string", type=String.class),

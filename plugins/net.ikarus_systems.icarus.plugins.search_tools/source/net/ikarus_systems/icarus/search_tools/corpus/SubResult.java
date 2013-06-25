@@ -9,6 +9,7 @@ import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.CollectionUtils;
+import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -436,5 +437,21 @@ public class SubResult implements SearchResult {
 	@Override
 	public void finish() {
 		// no-op
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getPlainEntry(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+	 */
+	@Override
+	public Object getPlainEntry(ResultEntry entry) {
+		return base.getPlainEntry(entry);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getAnnotatedEntry(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+	 */
+	@Override
+	public AnnotatedData getAnnotatedEntry(ResultEntry entry) {
+		return base.getAnnotatedEntry(entry);
 	}
 }

@@ -40,6 +40,7 @@ import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.CompactProperties;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Order;
+import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
@@ -73,6 +74,7 @@ import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
  */
 public class DefaultQueryParser {
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		ConstraintContext context = new ConstraintContext(
 				ContentTypeRegistry.getInstance().getTypeForClass(String.class));
@@ -938,6 +940,8 @@ public class DefaultQueryParser {
 				appendNode(target, edge, idSet);
 			}
 		}
+		
+		StringUtil.trim(buffer);
 		
 		buffer.append(SQUAREBRAKET_CLOSING);
 	}

@@ -24,6 +24,7 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 
 /**
@@ -57,6 +58,9 @@ public class MatcherBuilder {
 		idGen = new AtomicInteger();
 		
 		SearchGraph graph = search.getQuery().getSearchGraph();
+		graph = SearchUtils.instantiate(graph, 
+				search.getFactory().getConstraintContext(), 
+				search.getParameters());
 		boolean isDisjunction = graph.getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
 		
 		TreeNode tree = new TreeNode();
@@ -94,6 +98,8 @@ public class MatcherBuilder {
 				linkMatcher0(root);
 			}
 		}
+		
+		rootMatcher = matcherMap.get(tree.getChildAt(0));
 		
 		return rootMatcher;
 	}
@@ -142,7 +148,7 @@ public class MatcherBuilder {
 
 		// Now process child nodes
 		for(int i=0; i<tree.getChildCount(); i++) {
-			optimizeTree(tree);
+			optimizeTree(tree.getChildAt(i));
 		}
 		
 		// Special handling for disjunction nodes
@@ -201,9 +207,9 @@ public class MatcherBuilder {
 		return alternates.get(0);
 	}
 	
-	protected Matcher linkMatcher0(TreeNode treeNode) {
+	protected Matcher linkMatcher0(TreeNode tree) {
 		
-		Matcher matcher = matcherMap.get(treeNode);
+		Matcher matcher = matcherMap.get(tree);
 		
 		// Append matcher to pre-order list
 		if(lastMatcher!=null) {
@@ -213,11 +219,29 @@ public class MatcherBuilder {
 		
 		matcher.setId(getId(matcher.getNode()));
 		
-		for(int i=0; i<treeNode.getChildCount(); i++) {
-			linkMatcher0(treeNode.getChildAt(i));
+		// Create exclusion list
+		List<TreeNode> negatedChildren = tree.getNegatedChildren();
+		if(negatedChildren!=null) {
+			Matcher tmp = lastMatcher;
+			
+			Matcher[] exclusions = new Matcher[negatedChildren.size()];
+			for(int i=0; i<negatedChildren.size(); i++) {
+				lastMatcher = null;
+				exclusions[i] = linkMatcher0(negatedChildren.get(i));
+			}
+			matcher.setExclusions(exclusions);
+			
+			lastMatcher = tmp;
+			
+			tree.removeChildren(negatedChildren);
 		}
 		
-		TreeNode alternate = treeNode.getAlternate();
+		// ALl remaining children are unnegated regular nodes
+		for(int i=0; i<tree.getChildCount(); i++) {
+			linkMatcher0(tree.getChildAt(i));
+		}
+		
+		TreeNode alternate = tree.getAlternate();
 		if(alternate!=null) {
 			// Force clean entry point for alternate tree
 			Matcher tmp = lastMatcher;
@@ -227,6 +251,9 @@ public class MatcherBuilder {
 			
 			lastMatcher = tmp;
 		}
+		
+		matcher.setHeight(tree.getHeight());
+		matcher.setDescendantCount(tree.getDescendantCount());
 		
 		return matcher;
 	}
@@ -310,6 +337,10 @@ public class MatcherBuilder {
 	}
 	
 	protected Matcher cloneMatcher0(Matcher matcher) {
+		if(matcher==null) {
+			return null;
+		}
+		
 		Matcher clone = cloneMap.get(matcher);
 		if(clone==null) {
 			// Create a shallow clone
@@ -352,6 +383,9 @@ public class MatcherBuilder {
 		protected TreeNode alternate;
 		
 		protected List<TreeNode> children;
+		
+		protected int height = -1;
+		protected int descendantCount = -1;
 		
 		public TreeNode() {
 			// no-op
@@ -406,6 +440,9 @@ public class MatcherBuilder {
 			
 			children.add(child);
 			child.setParent(this);
+			
+			height = -1;
+			descendantCount = -1;
 		}
 		
 		public List<TreeNode> getChildren() {
@@ -429,6 +466,9 @@ public class MatcherBuilder {
 				TreeNode child = children.remove(index);
 				if(child!=null) {
 					child.setParent(null);
+
+					height = -1;
+					descendantCount = -1;
 				}
 			}
 		}
@@ -437,6 +477,9 @@ public class MatcherBuilder {
 			if(children!=null) {
 				children.remove(child);
 				child.setParent(null);
+				
+				height = -1;
+				descendantCount = -1;
 			}
 		}
 		
@@ -450,6 +493,9 @@ public class MatcherBuilder {
 			for(TreeNode child : items) {
 				child.setParent(null);
 			}
+			
+			height = -1;
+			descendantCount = -1;
 		}
 		
 		public int indexOfChild(TreeNode child) {
@@ -459,11 +505,17 @@ public class MatcherBuilder {
 		public void setChild(int index, TreeNode child) {
 			children.set(index, child);
 			child.setParent(this);
+
+			height = -1;
+			descendantCount = -1;
 		}
 		
 		public void insertChildAt(int index, TreeNode child) {
 			children.add(index, child);
 			child.setParent(this);
+
+			height = -1;
+			descendantCount = -1;
 		}
 		
 		public void replaceChild(TreeNode oldChild, TreeNode newChild) {
@@ -475,6 +527,9 @@ public class MatcherBuilder {
 			children.set(index, newChild);
 			oldChild.setParent(null);
 			newChild.setParent(this);
+
+			height = -1;
+			descendantCount = -1;
 		}
 		
 		public void addChildren(List<TreeNode> items) {
@@ -489,6 +544,9 @@ public class MatcherBuilder {
 			for(TreeNode child : items) {
 				child.setParent(this);
 			}
+
+			height = -1;
+			descendantCount = -1;
 		}
 		
 		public boolean isNegated() {
@@ -548,6 +606,38 @@ public class MatcherBuilder {
 			return result;
 		}
 		
+		public int getHeight() {
+			if(height==-1) {
+				int value = 0;
+				if(children!=null) {
+					for(TreeNode child : children) {
+						value = Math.max(value, child.getHeight());
+					}
+				}
+				height = value + 1;
+			}
+			
+			return height;
+		}
+
+		public int getDescendantCount() {
+			if(descendantCount==-1) {
+				int value = 0;
+				
+				if(children!=null) {
+					value = children.size();
+					
+					for(TreeNode child : children) {
+						value += child.getDescendantCount();
+					}
+				}
+				
+				descendantCount = value;
+			}
+			
+			return descendantCount;
+		}
+
 		public TreeNode clone() {
 			TreeNode clone = new TreeNode(parent);
 			clone.searchNode = searchNode;

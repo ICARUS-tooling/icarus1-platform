@@ -298,8 +298,11 @@ public final class SearchManager {
 			
 			this.search = search;
 			
-			timeout = ConfigRegistry.getGlobalRegistry().getLong(
-					"plugins.searchTools.searchTimeout") * 1000; //$NON-NLS-1$
+			/*timeout = ConfigRegistry.getGlobalRegistry().getLong(
+					"plugins.searchTools.searchTimeout") * 1000; //$NON-NLS-1$*/
+			
+			// TODO DEBUG
+			timeout = 0;
 		}
 
 		@Override
@@ -381,7 +384,7 @@ public final class SearchManager {
 				
 				// Check for timeout
 				long duration = System.currentTimeMillis()-startMillis;
-				if(timeout==0 || duration>timeout) {
+				if(timeout!=0 && duration>timeout) {
 					cancelSearch();
 					throw new TimeoutException(String.format(
 							"Search execution timed out: current executon time %d ms - timeout set to %d ms",  //$NON-NLS-1$

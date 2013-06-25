@@ -116,7 +116,7 @@ public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 	 */
 	@Override
 	public GroupCache createCache() {
-		return GroupCache.dummyCache;
+		return new Result0DCache();
 	}
 
 	/**

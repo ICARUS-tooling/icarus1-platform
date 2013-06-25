@@ -36,10 +36,10 @@ public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, false))
-			return new DependencyLemmaCIConstraint(value, operator);
-		else
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new DependencyLemmaConstraint(value, operator);
+		else
+			return new DependencyLemmaCIConstraint(value, operator);
 	}
 
 	private static class DependencyLemmaConstraint extends DefaultConstraint {

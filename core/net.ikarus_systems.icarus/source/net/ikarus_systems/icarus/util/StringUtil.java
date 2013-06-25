@@ -139,4 +139,13 @@ public final class StringUtil {
 	public static synchronized String formatDecimal(int value) {
 		return decimalFormat.format(value);
 	}
+	
+	public static void trim(StringBuilder sb) {
+		while(Character.isWhitespace(sb.charAt(0))) {
+			sb.delete(0, 1);
+		}
+		while(Character.isWhitespace(sb.charAt(sb.length()-1))) {
+			sb.delete(sb.length()-1, sb.length());
+		}
+	}
 }

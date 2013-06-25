@@ -14,6 +14,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
@@ -340,7 +342,9 @@ public class SearchManagerView extends View {
 		sendRequest(SearchToolsConstants.SEARCH_RESULT_VIEW_ID, message);
 	}
 
-	protected class Handler implements ListSelectionListener {
+	protected class Handler implements ListSelectionListener, PropertyChangeListener {
+		
+		protected Search observedSearch;
 		
 		protected Handler() {
 			// no-op
@@ -351,17 +355,28 @@ public class SearchManagerView extends View {
 		 */
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
-			/*try {
-				syncEditorViews();
-				
-				SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
-				if(descriptor!=null) {
-					currentSearchEditor.setEditingItem(descriptor.cloneFlat());
-				}
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to handle selection change in search history list: "+e, ex); //$NON-NLS-1$
-			}*/
+			if(observedSearch!=null) {
+				observedSearch.removePropertyChangeListener("state", this); //$NON-NLS-1$
+				observedSearch = null;
+			}
+			
+			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
+			if(descriptor!=null) {
+				observedSearch = descriptor.getSearch();
+			}
+			
+			if(observedSearch!=null) {
+				observedSearch.addPropertyChangeListener("state", this); //$NON-NLS-1$
+			}
+			
+			refreshActions();
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
 			refreshActions();
 		}
 	}

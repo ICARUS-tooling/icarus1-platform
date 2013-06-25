@@ -26,7 +26,8 @@ import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
 import net.ikarus_systems.icarus.search_tools.SearchMode;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
-import net.ikarus_systems.icarus.search_tools.result.ResultAnnotator;
+import net.ikarus_systems.icarus.search_tools.annotation.ResultAnnotator;
+import net.ikarus_systems.icarus.search_tools.result.EntryBuilder;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
@@ -39,13 +40,13 @@ import net.ikarus_systems.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
+public abstract class AbstractTreeSearch extends Search {
 	
 	protected Matcher baseRootMatcher;
 	
 	protected SearchResult result;
 	
-	protected D source;
+	protected DataList<?> source;
 	
 	protected Batch lastBatch;
 	protected int processed;
@@ -66,12 +67,18 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 			Options parameters, Object target) {
 		super(factory, query, parameters, target);
 		
-		resultLimit = getParameters().getInteger(SEARCH_RESULT_LIMIT, 0);
-		searchMode = getParameters().get(SEARCH_MODE, SearchMode.MATCHES);
-		orientation = getParameters().get(SEARCH_ORIENTATION, Orientation.LEFT_TO_RIGHT);
-		
+		resultLimit = getParameters().getInteger(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT);
+		searchMode = getParameters().get(SEARCH_MODE, DEFAULT_SEARCH_MODE);
+		orientation = getParameters().get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION);
 	}
 	
+	@Override
+	public void init() {
+		result = createResult();
+		baseRootMatcher = new MatcherBuilder(this).createRootMatcher();
+		source = createSource(getTarget());
+	}
+
 	@Override
 	protected void innerCancel() {
 		for(SearchWorker worker : workers) {
@@ -97,7 +104,8 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 		int sourceSize = source.size();
 		
 		if(start<sourceSize) {
-			lastBatch = new Batch(start, sourceSize-start);
+			int size = Math.min(batchSize, sourceSize-start);
+			lastBatch = new Batch(start, size);
 			return lastBatch;
 		} else {
 			return null;
@@ -108,6 +116,8 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 		processed += batch.getSize();
 		double total = source.size();
 		setProgress((int)(processed/total * 100d));
+		
+		//System.out.println("batch processed: "+batch+" progress="+getProgress());
 	}
 	
 	protected synchronized Object getTargetItem(int index) {
@@ -136,7 +146,7 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 	
 	protected abstract TargetTree createTargetTree();
 	
-	protected abstract D createSource(Object target);
+	protected abstract DataList<?> createSource(Object target);
 
 	protected abstract SearchResult createResult();
 	
@@ -147,11 +157,14 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 	}
 	
 	protected Matcher createRootMatcher() {
-		if(baseRootMatcher==null) {
-			baseRootMatcher = new MatcherBuilder(this).createRootMatcher();
-		}
+		if(baseRootMatcher==null)
+			throw new IllegalStateException("No root matcher available!"); //$NON-NLS-1$
 		
 		return new MatcherBuilder(this).cloneMatcher(baseRootMatcher);
+	}
+	
+	protected EntryBuilder createEntryBuilder() {
+		return new EntryBuilder(TreeUtils.getMaxId(baseRootMatcher)+1);
 	}
 
 	/**
@@ -252,6 +265,11 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 		public int getSize() {
 			return size;
 		}
+		
+		@Override
+		public String toString() {
+			return String.format("Batch [%d:%d]", start, start+size); //$NON-NLS-1$
+		}
 	}
 	
 	protected class ResultFinalizer implements Runnable {
@@ -261,6 +279,7 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 		 */
 		@Override
 		public void run() {
+			finish();
 			finalizeResult(false);
 		}
 	}
@@ -269,6 +288,7 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 		
 		protected final TargetTree targetTree;
 		protected final GroupCache cache;
+		protected final EntryBuilder entryBuilder;
 		protected final Matcher rootMatcher;
 
 		protected Batch currentBatch;
@@ -285,10 +305,12 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 			targetTree = createTargetTree();
 			cache = createCache();
 			rootMatcher = createRootMatcher();
+			entryBuilder = createEntryBuilder();
 			
 			rootMatcher.setSearchMode(searchMode);
 			rootMatcher.setCache(cache);
 			rootMatcher.setTargetTree(targetTree);
+			rootMatcher.setEntryBuilder(entryBuilder);
 		}
 		
 		public String getId() {
@@ -330,6 +352,8 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 					break;
 				}
 				
+				//System.out.println("processing batch: "+currentBatch);
+				
 				int size = currentBatch.getSize();
 				int startIndex = currentBatch.getStart();
 				for(int i=0; i<size; i++) {
@@ -337,16 +361,21 @@ public abstract class AbstractTreeSearch<D extends DataList<?>> extends Search {
 					if(cancelled) {
 						break;
 					}
-					if(result.getTotalMatchCount()>=resultLimit) {
+					if(resultLimit>0 && result.getTotalMatchCount()>=resultLimit) {
 						break;
 					}
 					
+					int index = startIndex+i;
+					
 					// Prepare target tree
-					targetTree.reload(getTargetItem(startIndex+i));
+					targetTree.reload(getTargetItem(index));
+					entryBuilder.setIndex(index);
 					
 					// Let matcher do its part
 					rootMatcher.matches();
 				}
+				
+				batchProcessed(currentBatch);
 			}
 			
 			targetTree.close();

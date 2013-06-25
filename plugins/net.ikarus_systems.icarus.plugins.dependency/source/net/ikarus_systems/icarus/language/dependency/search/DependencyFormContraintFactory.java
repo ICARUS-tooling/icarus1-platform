@@ -36,10 +36,10 @@ public class DependencyFormContraintFactory extends AbstractConstraintFactory {
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, false))
-			return new DependencyFormCIConstraint(value, operator);
-		else
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new DependencyFormConstraint(value, operator);
+		else
+			return new DependencyFormCIConstraint(value, operator);
 	}
 
 	private static class DependencyFormConstraint extends DefaultConstraint {

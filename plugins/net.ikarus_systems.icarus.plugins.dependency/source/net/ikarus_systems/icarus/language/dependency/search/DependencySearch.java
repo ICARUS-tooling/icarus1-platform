@@ -13,12 +13,13 @@ import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
+import net.ikarus_systems.icarus.search_tools.annotation.ResultAnnotator;
 import net.ikarus_systems.icarus.search_tools.corpus.AbstractCorpusSearch;
-import net.ikarus_systems.icarus.search_tools.result.ResultAnnotator;
 import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.data.DataList;
 
 /**
  * @author Markus Gärtner
@@ -44,7 +45,7 @@ public class DependencySearch extends AbstractCorpusSearch {
 	 * @see net.ikarus_systems.icarus.search_tools.tree.AbstractTreeSearch#createSource(java.lang.Object)
 	 */
 	@Override
-	protected SentenceDataList createSource(Object target) {
+	protected DataList<?> createSource(Object target) {
 		ContentType requiredType = DependencyUtils.getDependencyContentType();
 		ContentType entryType = ContentTypeRegistry.getEntryType(target);
 		if(entryType==null || !ContentTypeRegistry.isCompatible(requiredType, entryType))

@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.language.dependency.search;
 
+import java.util.Arrays;
+
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
@@ -314,8 +316,13 @@ public class DependencyTargetTree implements TargetTree {
 	public void viewChild(int index) {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
+
+		int[] list = edges[nodePointer];
 		
-		nodePointer = edges[nodePointer][1+index];
+		if(list==null || index<0 || index>=list[0])
+			throw new IndexOutOfBoundsException("Child index out of bounds: "+index); //$NON-NLS-1$
+		
+		nodePointer = list[1+index];
 		edgePointer = -1;
 	}
 
@@ -639,8 +646,10 @@ public class DependencyTargetTree implements TargetTree {
 	@Override
 	public void unlockAll() {
 		for(int i=0; i<size; i++) {
-			locks[i][0] = false;
-			unlockChildren(i);
+			int[] list = edges[i];
+			if(list!=null) {
+				Arrays.fill(locks[i], 0, list[0], false);
+			}
 		}
 	}
 }

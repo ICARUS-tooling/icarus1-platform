@@ -53,7 +53,7 @@ public interface Annotation {
 	/**
 	 * Move the internal index pointer so that subsequent calls
 	 * to getter methods refer to the given index
-	 * @param hitIndex
+	 * @param index
 	 */
-	void moveToAnnotation(int hitIndex);
+	void moveToAnnotation(int index);
 }

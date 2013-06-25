@@ -58,6 +58,10 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 		this.target = target;
 		this.parameters = parameters.clone();
 	}
+	
+	public void init() {
+		// for subclasses
+	}
 
 	final void setState(SearchState state) {
 		SearchState oldValue;
@@ -115,7 +119,7 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 		return parameters.get(key);
 	}
 	
-	protected Options getParameters() {
+	public Options getParameters() {
 		return parameters;
 	}
 	
@@ -141,7 +145,7 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	 * This method will throw an {@link IllegalArgumentException} if the
 	 * search is not yet running or has already been finished or cancelled. 
 	 */
-	public void cancel() {
+	public final void cancel() {
 		synchronized (lock) {
 			SearchState state = getState();
 			if(state==SearchState.BLANK)

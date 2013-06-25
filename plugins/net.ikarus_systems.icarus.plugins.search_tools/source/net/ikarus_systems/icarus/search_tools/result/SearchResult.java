@@ -15,6 +15,7 @@ import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
+import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -104,7 +105,11 @@ public interface SearchResult {
 	 */
 	Object getEntry(int index);
 	
+	Object getPlainEntry(ResultEntry entry);
+	
 	ResultEntry getRawEntry(int index);
+	
+	AnnotatedData getAnnotatedEntry(ResultEntry entry);
 	
 	/**
 	 * Applies the given {@code permutation} array to the internal order

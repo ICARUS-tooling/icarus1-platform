@@ -69,11 +69,6 @@ public interface DependencyConstants {
 	public static final int GROUP_DIRECTION = 8;
 	public static final int GROUP_DISTANCE = 9;
 
-	// constraint metadata keys
-	public static final String CONSTRAINT_GROUP_ID = "GROUPId"; //$NON-NLS-1$
-	public static final String CONSTRAINT_GROUP_COUNT = "GROUPCount"; //$NON-NLS-1$
-	public static final String CONSTRAINT_LOCATION = "location"; //$NON-NLS-1$
-
 	// highlight flags and mask fields
 	public static final int HIGHLIGHT_NONE = 0;
 	public static final int HIGHLIGHT_GENERAL = 1;

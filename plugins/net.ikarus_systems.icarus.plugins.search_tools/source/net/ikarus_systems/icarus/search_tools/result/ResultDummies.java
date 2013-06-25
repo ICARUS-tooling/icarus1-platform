@@ -14,6 +14,7 @@ import java.util.List;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
+import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -238,6 +239,22 @@ public final class ResultDummies {
 		@Override
 		public void finish() {
 			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getPlainEntry(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+		 */
+		@Override
+		public Object getPlainEntry(ResultEntry entry) {
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getAnnotatedEntry(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+		 */
+		@Override
+		public AnnotatedData getAnnotatedEntry(ResultEntry entry) {
+			return null;
 		}
 	}
 }

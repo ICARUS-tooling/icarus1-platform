@@ -193,23 +193,23 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		String no = rm.get("no"); //$NON-NLS-1$
 		
 		// Mode
-		SearchMode mode = options.get(SEARCH_MODE, SearchMode.MATCHES);
+		SearchMode mode = options.get(SEARCH_MODE, DEFAULT_SEARCH_MODE);
 		sb.append(rm.get("plugins.searchTools.labels.searchMode")) //$NON-NLS-1$
 			.append(": ").append(mode.getName()).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		// Orientation
-		Orientation orientation = options.get(SEARCH_ORIENTATION, Orientation.LEFT_TO_RIGHT);
+		Orientation orientation = options.get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION);
 		sb.append(rm.get("plugins.searchTools.labels.orientation")) //$NON-NLS-1$
 			.append(": ").append(orientation.getName()).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		// Case-Sensitive
-		boolean caseSensitive = options.getBoolean(SEARCH_CASESENSITIVE, false);
+		boolean caseSensitive = options.getBoolean(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE);
 		sb.append(rm.get("plugins.searchTools.labels.caseSensitive")) //$NON-NLS-1$
 			.append(": ").append(caseSensitive ? yes : no).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		// Optimize
-		boolean optimize = options.getBoolean(OPTIMIZE_SEARCH, false);
+		boolean optimize = options.getBoolean(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH);
 		sb.append(rm.get("plugins.searchTools.labels.optimize")) //$NON-NLS-1$
 			.append(": ").append(optimize ? yes : no).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		// Result Limit
-		int resultLimit = options.getInteger(SEARCH_RESULT_LIMIT, 0);
+		int resultLimit = options.getInteger(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT);
 		String limit = resultLimit==0 ? "-" : String.valueOf(resultLimit); //$NON-NLS-1$
 		sb.append(rm.get("plugins.searchTools.labels.resultLimit")) //$NON-NLS-1$
 			.append(": ").append(limit); //$NON-NLS-1$

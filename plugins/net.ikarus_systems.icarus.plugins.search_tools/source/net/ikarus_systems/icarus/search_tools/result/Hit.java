@@ -27,34 +27,33 @@ public class Hit {
 	
 	/**
 	 * Mapping from the nodes used in the matcher that created
-	 * this {@code Hit} to indices in the corresponding 
-	 * sentence.
+	 * this {@code Hit} to indices in the corresponding  target graph.
 	 */
 	@XmlList
 	@XmlElement(name="indices")
-	private final int[] nodeIndices;
+	private final int[] indices;
 	
-	public Hit(@XmlList @XmlElement(name="indices") int[] nodeIndices) {
-		if(nodeIndices==null)
-			throw new IllegalArgumentException("Invalid node indices"); //$NON-NLS-1$
+	public Hit(@XmlList @XmlElement(name="indices") int[] indices) {
+		if(indices==null)
+			throw new IllegalArgumentException("Invalid indices"); //$NON-NLS-1$
 			
-		this.nodeIndices = nodeIndices;
+		this.indices = indices;
 	}
 
-	public int[] getNodeIndices() {
-		return nodeIndices;
+	public int[] getIndices() {
+		return indices;
 	}
 	
 	public int getIndexCount() {
-		return nodeIndices.length;
+		return indices.length;
 	}
 	
-	public int getNodeIndex(int index) {
-		return nodeIndices[index];
+	public int getIndex(int index) {
+		return indices[index];
 	}
 	
 	@Override
 	public String toString() {
-		return Arrays.toString(nodeIndices);
+		return Arrays.toString(indices);
 	}
 }

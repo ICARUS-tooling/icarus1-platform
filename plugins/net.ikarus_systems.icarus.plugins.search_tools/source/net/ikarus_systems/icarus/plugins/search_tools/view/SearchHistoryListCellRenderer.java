@@ -120,7 +120,7 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 		sb.append("[").append(index).append("] ").append(identity.getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		if(result!=null) {
 			sb.append(" (").append(result.getTotalMatchCount()) //$NON-NLS-1$
-			.append(rm.get("plugins.searchTools.labels.hits")).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+			.append(" ").append(rm.get("plugins.searchTools.labels.hits")).append(")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		label.setText(sb.toString());
 		

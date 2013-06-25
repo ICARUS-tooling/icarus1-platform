@@ -84,11 +84,11 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 		
 		Options options = data==null ? Options.emptyOptions : data;
 		
-		formBuilder.setValue(SEARCH_MODE, options.get(SEARCH_MODE, SearchMode.MATCHES)); 
-		formBuilder.setValue(SEARCH_ORIENTATION, options.get(SEARCH_ORIENTATION, Orientation.LEFT_TO_RIGHT)); 
-		formBuilder.setValue(SEARCH_CASESENSITIVE, options.get(SEARCH_CASESENSITIVE, false)); 
-		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, false)); 
-		formBuilder.setValue(SEARCH_RESULT_LIMIT, String.valueOf(options.get(SEARCH_RESULT_LIMIT, 0))); 
+		formBuilder.setValue(SEARCH_MODE, options.get(SEARCH_MODE, DEFAULT_SEARCH_MODE)); 
+		formBuilder.setValue(SEARCH_ORIENTATION, options.get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION)); 
+		formBuilder.setValue(SEARCH_CASESENSITIVE, options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE)); 
+		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH)); 
+		formBuilder.setValue(SEARCH_RESULT_LIMIT, String.valueOf(options.get(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT))); 
 	}
 
 	/**

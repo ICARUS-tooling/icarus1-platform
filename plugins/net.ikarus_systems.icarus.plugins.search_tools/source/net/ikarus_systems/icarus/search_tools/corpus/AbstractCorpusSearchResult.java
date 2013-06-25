@@ -14,9 +14,12 @@ import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.annotation.AnnotationBuffer;
+import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.util.SubstitutionSupport;
+import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
 
 /**
@@ -32,6 +35,8 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 	protected SubstitutionSupport[] groupInstances;
 	protected SearchConstraint[] groupConstraints;
 	protected int[] groupIndexMap;
+	
+	protected AnnotationBuffer annotationBuffer;
 	
 	protected boolean finalized = false;
 
@@ -171,5 +176,17 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 			throw new IllegalStateException("Result is already final!"); //$NON-NLS-1$
 		
 		finalized = true;
+	}
+	
+	public Object getPlainEntry(ResultEntry entry) {
+		return getTarget().get(entry.getIndex());
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getAnnotatedEntry(net.ikarus_systems.icarus.search_tools.result.ResultEntry)
+	 */
+	@Override
+	public AnnotatedData getAnnotatedEntry(ResultEntry entry) {
+		return annotationBuffer==null ? null : annotationBuffer.getAnnotatedData(entry);
 	}
 }

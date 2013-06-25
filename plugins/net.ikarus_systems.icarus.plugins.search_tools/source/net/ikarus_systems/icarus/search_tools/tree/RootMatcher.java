@@ -78,14 +78,10 @@ public class RootMatcher extends Matcher {
 				if(next!=null) {
 					matched |= next.matches();
 				} else if(!exclusionMember) {
-					// ONLY cache here if this matcher is not 
-					// negated and directly commit if not already done
-					// by last to match sub-matcher
 					cacheHits();
-					if(searchMode!=SearchMode.INDEPENDENT_HITS) {
+					if(searchMode==SearchMode.INDEPENDENT_HITS) {
 						commit();
 					}
-					
 					matched = true;
 				}
 			}
@@ -104,12 +100,14 @@ public class RootMatcher extends Matcher {
 		
 		// If unsuccessful and part of a disjunction let the 
 		// alternate matcher have a try.
-		if(!matched && alternate!=null) {
+		if(!matched) {
 			if(exclusionMember) {
 				commit();
 			} else if(alternate!=null) {
 				matched = alternate.matches();
 			}
+		} else if(searchMode!=SearchMode.INDEPENDENT_HITS) {
+			commit();
 		}
 		
 		return matched;

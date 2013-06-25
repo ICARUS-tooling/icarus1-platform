@@ -37,10 +37,10 @@ public class DependencyFeaturesContraintFactory extends AbstractConstraintFactor
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, false))
-			return new DependencyFeaturesCIConstraint(value, operator);
-		else
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new DependencyFeaturesConstraint(value, operator);
+		else
+			return new DependencyFeaturesCIConstraint(value, operator);
 	}
 
 	@Override
