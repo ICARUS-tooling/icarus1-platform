@@ -65,7 +65,7 @@ public class WeblichtWebserviceView extends View {
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.core.View#init(javax.swing.JComponent)
 	 */
-	@SuppressWarnings({ "static-access", "unchecked" })
+	@SuppressWarnings({ "static-access"})
 	@Override
 	public void init(JComponent container) {
 		// Load actions
@@ -252,8 +252,8 @@ public class WeblichtWebserviceView extends View {
 		@Override
 		public void contentsChanged(ListDataEvent e) {
 			// TODO Auto-generated method stub
-			System.out.println("contentsChanged: " + e.getIndex0() +
-                   ", " + e.getIndex1());
+			System.out.println("contentsChanged: " + e.getIndex0() //$NON-NLS-1$
+								+ ", " + e.getIndex1()); //$NON-NLS-1$
 			
 		}
 
@@ -263,8 +263,8 @@ public class WeblichtWebserviceView extends View {
 		@Override
 		public void intervalAdded(ListDataEvent e) {
 			// TODO Auto-generated method stub
-			System.out.println("contentAdded: " + e.getIndex0() +
-	                   ", " + e.getIndex1());
+			System.out.println("contentAdded: " + e.getIndex0() //$NON-NLS-1$
+								+   ", " + e.getIndex1()); //$NON-NLS-1$
 			
 		}
 
@@ -274,8 +274,8 @@ public class WeblichtWebserviceView extends View {
 		@Override
 		public void intervalRemoved(ListDataEvent e) {
 			// TODO Auto-generated method stub
-			System.out.println("contentDeleted: " + e.getIndex0() +
-	                   ", " + e.getIndex1());
+			System.out.println("contentDeleted: " + e.getIndex0()  //$NON-NLS-1$
+								+ ", " + e.getIndex1()); //$NON-NLS-1$
 			
 		}
 	}

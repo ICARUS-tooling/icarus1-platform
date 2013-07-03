@@ -801,10 +801,11 @@ public class WebserviceRegistry {
 		return name;
 	}
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		WebserviceRegistry wl = new WebserviceRegistry();
 
-		//List<String> test = wl.getQueryFromWebserviceList(wl.webserviceList);
+		List<String> test = wl.getQueryFromWebserviceList(wl.webserviceList);
 		
 		try {
 			//wl.saveWebservices();

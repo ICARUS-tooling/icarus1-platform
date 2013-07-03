@@ -1,9 +1,7 @@
 package net.ikarus_systems.icarus.plugins.weblicht.webservice;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-
 
 import net.ikarus_systems.icarus.util.id.Identifiable;
 import net.ikarus_systems.icarus.util.id.Identity;

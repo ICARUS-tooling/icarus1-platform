@@ -37,9 +37,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -135,22 +137,37 @@ public class WebchainEditor implements Editor<Webchain> {
 		gbc.gridy = row;
 		panel.add(Box.createVerticalStrut(10), gbc);
 		
+		
+
 		gbc.gridy++;
 		gbc.gridheight = GridBagConstraints.REMAINDER;
 		gbc.anchor = GridBagConstraints.NORTH;
-		JPanel buttonPanel = new JPanel(new GridLayout(7, 1));
+		
+		JPanel buttonPanel = new JPanel(new GridBagLayout());
+		GridBagConstraints gbcButton = new GridBagConstraints();
+		gbcButton.gridx=0;
+		gbcButton.gridy=0;
+		gbcButton.fill = GridBagConstraints.HORIZONTAL;
+		gbcButton.anchor = GridBagConstraints.CENTER;
+		gbcButton.insets = new Insets(0,2,2,2);
+		
 		buttonPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
-		buttonPanel.add(webserviceAddButton);		
-		buttonPanel.add(new JLabel("-------------------------------"));
-		buttonPanel.add(addOutputButton);
-		buttonPanel.add(ioEditButton);
-		buttonPanel.add(changeOutputUsedStatusButton);
-		buttonPanel.add(new JLabel("-------------------------------"));
-		buttonPanel.add(webserviceRemoveButton);
+		buttonPanel.add(webserviceAddButton, gbcButton);
+		gbcButton.gridy++;
+		buttonPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbcButton);
+		gbcButton.gridy++;
+		buttonPanel.add(addOutputButton, gbcButton);
+		gbcButton.gridy++;
+		buttonPanel.add(ioEditButton, gbcButton);
+		gbcButton.gridy++;
+		buttonPanel.add(changeOutputUsedStatusButton, gbcButton);
+		gbcButton.gridy++;
+		buttonPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbcButton);
+		gbcButton.gridy++;
+		buttonPanel.add(webserviceRemoveButton, gbcButton);
 		
 
-		panel.add(buttonPanel, gbc);
-		
+		panel.add(buttonPanel, gbc);		
 		
 		gbc.gridx++;
 		gbc.gridheight = 1;
@@ -351,7 +368,7 @@ public class WebchainEditor implements Editor<Webchain> {
 		
 		int lastitem = webchainElementListModel.getSize();
 		//TODO fixme at least input + one webservice needed to create output
-		System.out.println(lastitem);
+		//System.out.println(lastitem);
 		if (lastitem > 1) {
 			WebchainElements element = webchainElementListModel.getKey(lastitem-1);	
 			if(element instanceof WebchainOutputType) {
@@ -387,14 +404,11 @@ public class WebchainEditor implements Editor<Webchain> {
 		webchainElementListModel.reload();
 		refreshWebchainActions();
 		
-		//TODO remove no longer needed?!
-		/*
-		latestGroupSelection = getSelectedInputType();
+//		//remove no longer needed!		
+//		latestGroupSelection = getSelectedInputType();		
+//		webserviceInputGroup.setSelected(latestGroupSelection, true);		
+//		webserviceInputArea.setEnabled(true);
 		
-		webserviceInputGroup.setSelected(latestGroupSelection, true);
-		
-		webserviceInputArea.setEnabled(true);
-		 */
 		
 	}
 	
@@ -488,8 +502,6 @@ public class WebchainEditor implements Editor<Webchain> {
 								webchainElementListModel.webchainElements);
 		
 		
-		//TODO work for Chainelements?
-		
 		// Save InputType
 //		WebchainRegistry.getInstance().setWebserviceInput(webchain,
 //					getNameFromSelectedButton(),
@@ -505,7 +517,7 @@ public class WebchainEditor implements Editor<Webchain> {
 		for ( int i = 0 ; i < webchainElements.size(); i++){
 			if (webchainElements.get(i) instanceof WebchainOutputType){
 				WebchainOutputType wo = (WebchainOutputType) webchainElements.get(i);
-				System.out.print(wo.getOutputType() + " " + wo.getOutputUsed());
+				System.out.print(wo.getOutputType() + " " + wo.getOutputUsed()); //$NON-NLS-1$
 			}
 		}		
 	}
@@ -1085,7 +1097,6 @@ public class WebchainEditor implements Editor<Webchain> {
 						webchainElements.remove(chainelement);
 						fireIntervalRemoved(chainelement, removedindex, removedindex);
 					}
-					//TODO also needed for output?!
 					
 					//remove multiwebservices
 					else {

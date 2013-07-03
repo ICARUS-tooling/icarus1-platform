@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.Box;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -43,10 +44,13 @@ import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventObject;
+import net.ikarus_systems.icarus.ui.tasks.TaskManager;
+import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.id.Identity;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import de.tuebingen.uni.sfs.wlf1.io.TextCorpusStreamed;
@@ -66,7 +70,6 @@ public class WeblichtChainView extends View {
 
 	private Handler handler;
 	private CallbackHandler callbackHandler;
-	private SwingWorker<TextCorpusStreamed, Void> worker;
 
 	
 	@SuppressWarnings("static-access")
@@ -107,9 +110,10 @@ public class WeblichtChainView extends View {
 		weblichtTree.addMouseListener(handler);
 		weblichtTree.getModel().addTreeModelListener(handler);
 		
-		//TODO UIUtil.enableTooltip
+		//UIUtil.enableTooltip
 		ToolTipManager.sharedInstance().registerComponent(weblichtTree);
 		UIUtil.expandAll(weblichtTree, true);
+		UIUtil.enableToolTip(weblichtTree);
 
 		// Scroll pane
 		JScrollPane scrollPane = new JScrollPane(weblichtTree);
@@ -212,8 +216,8 @@ public class WeblichtChainView extends View {
 				"plugins.weblicht.weblichtChainView.editWebchainAction", //$NON-NLS-1$
 				"plugins.weblicht.weblichtChainView.runWebchainAction"); //$NON-NLS-1$);
 		
-		actionManager.setEnabled(false,
-				"plugins.weblicht.weblichtChainView.stopWebchainAction"); //$NON-NLS-1$
+//		actionManager.setEnabled(false,
+//				"plugins.weblicht.weblichtChainView.stopWebchainAction"); //$NON-NLS-1$
 
 		actionManager.setEnabled((selectedObject instanceof WebserviceProxy),
 			"plugins.weblicht.weblichtChainView.webserviceInfo"); //$NON-NLS-1$
@@ -260,8 +264,8 @@ public class WeblichtChainView extends View {
 				callbackHandler, "editWebchain"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtChainView.runWebchainAction",  //$NON-NLS-1$
 				callbackHandler, "runWebchain"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.weblicht.weblichtChainView.stopWebchainAction",  //$NON-NLS-1$
-				callbackHandler, "stopWebchain"); //$NON-NLS-1$
+//		actionManager.addHandler("plugins.weblicht.weblichtChainView.stopWebchainAction",  //$NON-NLS-1$
+//				callbackHandler, "stopWebchain"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.weblicht.weblichtChainView.webserviceInfo",  //$NON-NLS-1$
 				callbackHandler, "webserviceInfo"); //$NON-NLS-1$
 	}
@@ -360,7 +364,7 @@ public class WeblichtChainView extends View {
 		public void treeStructureChanged(TreeModelEvent e) {
 			TreePath path = e.getTreePath();
 
-			System.out.println("Changed " + path);
+			System.out.println("Changed " + path); //$NON-NLS-1$
 			if (path == null) {
 				return;
 			}
@@ -563,9 +567,32 @@ public class WeblichtChainView extends View {
 			
 			String inputType = webchain.getWebchainInputType().getInputType();
 			String inputText = null;
+			
+			
+//			//Debug
+//			System.out.println(webchain.getElementsCount());
+//			for(int i = 0; i < webchain.getElementsCount(); i++){
+//				if(webchain.getElementAt(i) instanceof WebchainInputType){
+//					WebchainInputType wi = (WebchainInputType) webchain.getElementAt(i);
+//					System.out.println(wi.getInputType() + " "  //$NON-NLS-1$
+//											+ wi.getInputTypeValue());
+//				}
+//				if(webchain.getElementAt(i) instanceof WebchainOutputType){
+//					WebchainOutputType wi = (WebchainOutputType) webchain.getElementAt(i);
+//					System.out.println(wi.getOutputType() + " "  //$NON-NLS-1$
+//											+ wi.getOutputTypeValue());
+//				} else{
+//				System.out.println(webchain.getElementAt(i));
+//				}
+//			}
+			
+			
+			//static input (specified in input chaintype)
 			if (inputType.equals("static")) { //$NON-NLS-1$
 				inputText = webchain.getWebchainInputType().getInputTypeValue();				
 			}
+			
+			//input from file
 			if (inputType.equals("location")) { //$NON-NLS-1$
 				String filename = webchain.getWebchainInputType().getInputTypeValue();
 				try {
@@ -577,18 +604,16 @@ public class WeblichtChainView extends View {
 				}
 							
 			}
+			
+			//input from icarus i/o panel dynamic
 			if (inputType.equals("dynamic")) { //$NON-NLS-1$
-				//TODO grab input from UI
-				inputText = "Karin fliegt nach New York. Sie will dort Urlaub machen"; //$NON-NLS-1$				
+				inputText = DialogFactory.getGlobalFactory().showInputDialog(getFrame(),
+						"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.title", //$NON-NLS-1$
+						"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.message", //$NON-NLS-1$
+						null, webchain.getName());				
+				//inputText = "Karin fliegt nach New York. Sie will dort Urlaub machen"; //$NON-NLS-1$				
 			}
 
-			
-			/*
-			String input = DialogFactory.getGlobalFactory().showTextInputDialog(getFrame(),
-					"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.title", //$NON-NLS-1$
-					"plugins.weblicht.weblichtChainView.dialogs.inputTextForWebchain.message", //$NON-NLS-1$
-					webchain.getName(),test);
-			*/
 			
 			//empty input will cause error in execusion
 			if(inputText==null || inputText.isEmpty()) {
@@ -603,61 +628,10 @@ public class WeblichtChainView extends View {
 			try {
 				// WebExecutionService.getInstance().runWebchain(webchain, inputText);
 				final String input = inputText;
-
-				// Construct a new SwingWorker
-				worker = new SwingWorker<TextCorpusStreamed, Void>() {					
-
-					@Override
-					protected TextCorpusStreamed doInBackground() {
-						return WebExecutionService.getInstance().runWebchain(
-								webchain, input);
-					}
-
-					@Override
-					protected void done() {
-						try {
-
-							ContentType contentType = ContentTypeRegistry
-									.getInstance().getTypeForClass(
-											SentenceDataList.class);
-
-							Options options = new Options();
-							options.put(Options.CONTENT_TYPE, contentType);
-							// TODO send some kind of hint that we want the
-							// presenter not to modify content?
-							// -> Should be no problem since we only contain
-							// immutable data objects?
-							TCFDataList tcfList = new TCFDataList(get());
-
-							Message message = new Message(this,
-									Commands.DISPLAY, tcfList, options);
-							sendRequest(null, message);
-							
-							System.out.println("Worker " + isCancelled() + isDone());
-							
-							if (isDone()) {
-								//ActionManager.globalManager()
-								
-							}
-							
-
-							//System.out.println("Finished Executino / disable break option"); //$NON-NLS-1$
-						} catch (InterruptedException e) {
-							LoggerFactory
-									.log(this,
-											Level.SEVERE,
-											"Execution Interrupted " + webchain.getName(), e); //$NON-NLS-1$
-						} catch (ExecutionException e) {
-							LoggerFactory
-									.log(this,
-											Level.SEVERE,
-											"Execute Exception " + webchain.getName(), e); //$NON-NLS-1$
-						}
-					}
-				};
+			
 				// Execute the SwingWorker; the GUI will not freeze
-				worker.execute();
-
+				TaskManager.getInstance().schedule(new WebserviceJob(webchain, input), TaskPriority.DEFAULT, true);
+				
 			} catch (Exception ex) {
 				LoggerFactory
 						.log(this,
@@ -668,10 +642,11 @@ public class WeblichtChainView extends View {
 
 		}
 		
-		public void stopWebchain(ActionEvent e) {
-			//TODO nice stop feature close webservice
-			worker.cancel(true);
-		}
+//		public void stopWebchain(ActionEvent e) {
+//			Core.showNotice();
+//			//nice stop feature close webservice
+//			//worker.cancel(true);
+//		}
 		
 		public void saveWebchain(ActionEvent e) {
 			try {
@@ -682,6 +657,130 @@ public class WeblichtChainView extends View {
 			}			
 		}
 		
+	}
+	
+	
+	protected class WebserviceJob extends SwingWorker<TextCorpusStreamed, Object>
+	implements Identity {
+		
+		protected Webchain webchain;
+		protected String input;
+
+		/**
+		 * @param webchain
+		 * @param input
+		 */
+		public WebserviceJob(Webchain webchain, String input) {
+			this.webchain= webchain;
+			this.input = input;
+		}
+		
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
+		 */
+		@Override
+		public String getId() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
+		 */
+		@Override
+		public String getName() {
+			return webchain.getName();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			return webchain.getDescription();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
+		 */
+		@Override
+		public Icon getIcon() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
+		 */
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected TextCorpusStreamed doInBackground() throws Exception {
+			return WebExecutionService.getInstance().runWebchain(
+					webchain, input);
+		}
+		
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof WebserviceJob) {
+				//System.out.println("Equals " + (WebserviceJob)obj).getName());
+				return getName()==((WebserviceJob)obj).getName();
+			}
+			
+			return false;
+		}
+		
+		
+		@Override
+		protected void done() {
+			try {
+
+				ContentType contentType = ContentTypeRegistry
+						.getInstance().getTypeForClass(
+								SentenceDataList.class);
+
+				Options options = new Options();
+				options.put(Options.CONTENT_TYPE, contentType);
+				// TODO send some kind of hint that we want the
+				// presenter not to modify content?
+				// -> Should be no problem since we only contain
+				// immutable data objects?
+
+				
+				//if null something went wrong (errorcode displayed before)
+				if(get() == null){
+					return;
+				} else {
+					TCFDataList tcfList = new TCFDataList(get());
+	
+					Message message = new Message(this,
+							Commands.DISPLAY, tcfList, options);
+					sendRequest(null, message);
+				}
+
+
+				//System.out.println("Finished Execution / disable break option"); //$NON-NLS-1$
+			} catch (InterruptedException e) {
+				LoggerFactory
+						.log(this,
+								Level.SEVERE,
+								"Execution Interrupted " + webchain.getName(), e); //$NON-NLS-1$
+			} catch (ExecutionException e) {
+				LoggerFactory
+						.log(this,
+								Level.SEVERE,
+								"Execute Exception " + webchain.getName(), e); //$NON-NLS-1$
+			}
+		}
+	
 	}
 
 }

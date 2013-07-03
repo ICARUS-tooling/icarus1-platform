@@ -20,14 +20,15 @@ import java.util.List;
 public class SentenceInfo {
 	
 	protected int sentenceNr;
-	protected List<Integer> nucleiSentencePosition;
+	protected List<Integer> nucleiIndexList;
+	protected int nucleiIndex;
 	protected int sentenceBegin;
 	protected int sentenceEnd;
 	
 	
-	public SentenceInfo (){
-		List<Integer> nucleiSentencePosition = new ArrayList<>();
-		this.nucleiSentencePosition = nucleiSentencePosition;
+	public SentenceInfo (){		
+		List<Integer> nucleiIndexList = new ArrayList<>();
+		this.nucleiIndexList = nucleiIndexList;
 				
 	}
 
@@ -104,23 +105,43 @@ public class SentenceInfo {
 	
 	
 	
-	//Nucleiliststuff
-	public void addNucleiSentencePosition(int nucleiPosition){
-		nucleiSentencePosition.add(nucleiPosition);
-	}
-	
-	
-	public int getNucleiSentencePositionSize(){
-		return nucleiSentencePosition.size();
-	}
-	
-	
-	public int getNucleiSentencePositionAt(int i){
-		return nucleiSentencePosition.get(i);
+	/**
+	 * @return the nucleiIndex
+	 */
+	public int getNucleiIndex() {
+		return nucleiIndex;
 	}
 
-	public int indexOfNucleiSentencePosition(SentenceInfo si){
-		return nucleiSentencePosition.indexOf(si);
+
+
+
+	/**
+	 * @param nucleiIndex the nucleiIndex to set
+	 */
+	public void setNucleiIndex(int nucleiIndex) {
+		this.nucleiIndex = nucleiIndex;
+	}
+
+
+
+
+	//Nucleiliststuff
+	public void addNucleiIndexList(int nucleiPosition){
+		nucleiIndexList.add(nucleiPosition);
+	}
+	
+	
+	public int getNucleiIndexListSize(){
+		return nucleiIndexList.size();
+	}
+	
+	
+	public int getNucleiIndexListAt(int i){
+		return nucleiIndexList.get(i);
+	}
+
+	public int indexOfNucleiIndexList(SentenceInfo si){
+		return nucleiIndexList.indexOf(si);
 	}
 
 

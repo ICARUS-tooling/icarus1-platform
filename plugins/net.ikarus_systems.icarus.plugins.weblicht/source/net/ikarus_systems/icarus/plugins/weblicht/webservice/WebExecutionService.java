@@ -62,14 +62,15 @@ public class WebExecutionService {
 
 		// empty data cant be processed
 		if (input == null) {
-			throw new IllegalArgumentException("Empty Input"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Empty Input"); //$NON-NLS-1$			
 		}
-
+		
 		List<String> query = WebchainRegistry.getInstance()
 				.getQueryFromWebchain(webchain);
 
-		//		System.out.println("Chain InPut: " + input); //$NON-NLS-1$
-		//		System.out.println("Querystring: " + query); //$NON-NLS-1$
+		//			System.out.println("Chain InPut: " + input); //$NON-NLS-1$
+		//			System.out.println("Querystring: " + query); //$NON-NLS-1$				
+		
 
 		//TODO input stream result?
 		String result = input;
@@ -125,10 +126,10 @@ public class WebExecutionService {
 				return null;
 			}
 
-			/*
-			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
-					+ " " + response.getStatus()); //$NON-NLS-1$
-			 */
+			
+//			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
+//					+ " " + response.getStatus()); //$NON-NLS-1$
+
 			
 			// we use only the latest input type for our query!
 			result = webresource.accept(webservice.getWebresourceFormat())
@@ -220,8 +221,8 @@ public class WebExecutionService {
 			
 		}
 
-		System.out.println("EnumSize: " + layers2Read.size()); //$NON-NLS-1$
-		System.out.println("Included EnumLayers: " + layers2Read); //$NON-NLS-1$
+//		System.out.println("EnumSize: " + layers2Read.size()); //$NON-NLS-1$
+//		System.out.println("Included EnumLayers: " + layers2Read); //$NON-NLS-1$
 		return layers2Read;
 
 	}

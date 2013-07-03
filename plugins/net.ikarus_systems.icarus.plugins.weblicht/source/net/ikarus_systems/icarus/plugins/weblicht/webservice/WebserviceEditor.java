@@ -48,7 +48,6 @@ import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
-import net.ikarus_systems.icarus.ui.dialog.DialogBuilder;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
@@ -514,11 +513,11 @@ public class WebserviceEditor implements WebserviceEditorExtension, Editor<Webse
 	@Override
 	public void setEditingItem(Webservice webservice) {
 		
-		/*TODO Complete remove to ensure access feature working correct
-		if(this.webservice==webservice) {
-			return;
-		}
-		*/
+		//Complete removed to ensure access feature working correct
+//		if(this.webservice==webservice) {
+//			return;
+//		}
+		
 		
 		this.webservice = webservice;
 		resetEdit();

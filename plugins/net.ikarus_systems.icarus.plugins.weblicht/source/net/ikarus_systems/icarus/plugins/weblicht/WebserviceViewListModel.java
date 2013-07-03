@@ -120,10 +120,8 @@ public class WebserviceViewListModel extends AbstractListModel<Object> {
 					.getProperty("webservice"); //$NON-NLS-1$
 			int index = (int) event.getProperty("index"); //$NON-NLS-1$
 
-			/*
-			 * System.out.println("Webservice: " + webservice + " Index: " +
-			 * index);
-			 */
+//			System.out.println("Webservice: " + webservice 
+//								+ " Index: " + index);
 
 			if (webservice == null) {
 				return;
@@ -141,8 +139,8 @@ public class WebserviceViewListModel extends AbstractListModel<Object> {
 				break;
 
 			case Events.REMOVED:
-				System.out.println(WebserviceRegistry.getInstance()
-						.getWebserviceCount());
+//				System.out.println(WebserviceRegistry.getInstance()
+//						.getWebserviceCount());
 				for (WebserviceViewListModel model : models) {
 					model.fireIntervalRemoved(webservice, index, index);
 				}
@@ -157,7 +155,7 @@ public class WebserviceViewListModel extends AbstractListModel<Object> {
 				
 			case Events.CHANGE:
 				for (WebserviceViewListModel model : models) {
-					System.out.println(model.getSize() + " " + index);
+					//System.out.println(model.getSize() + " " + index);
 					model.fireContentsChanged(model, index, model.getSize());
 				}
 				break;

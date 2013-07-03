@@ -198,6 +198,13 @@ public class Webchain {
 	 * @param wElementList
 	 */
 	public void setNewChainlist(List<WebchainElements> wElementList) {
+		// important to set new webchaininputtype otherwise we will crash later		
+		for (int i = 0; i < wElementList.size(); i++){
+			if(wElementList.get(i) instanceof WebchainInputType){
+				WebchainInputType wi = (WebchainInputType)wElementList.get(i);
+				this.setWebchainInputType(wi);
+			}
+		}
 		this.webchainElementsList = wElementList;
 		
 	}	

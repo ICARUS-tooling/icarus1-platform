@@ -77,7 +77,8 @@ public class ItemInNuclei {
 	public void addNewSentenceInfoUniGrams(int sentenceNR, int positionNR){
 		SentenceInfo sentenceInfo = new SentenceInfo();
 		sentenceInfo.setSentenceNr(sentenceNR);
-		sentenceInfo.addNucleiSentencePosition(positionNR);
+		sentenceInfo.addNucleiIndexList(positionNR);
+		sentenceInfo.setNucleiIndex(positionNR);
 		//sentenceInfo.setNucleiSentencePos(positionNR);
 		sentenceInfo.setSentenceBegin(positionNR);
 		sentenceInfo.setSentenceEnd(positionNR);
@@ -88,7 +89,7 @@ public class ItemInNuclei {
 	public void addNewSentenceInfo(int sentenceNR, int nucleiPos, int sentenceBegin, int sentenceEnd){
 		SentenceInfo sentenceInfo = new SentenceInfo();
 		sentenceInfo.setSentenceNr(sentenceNR);
-		sentenceInfo.addNucleiSentencePosition(nucleiPos);
+		sentenceInfo.addNucleiIndexList(nucleiPos);
 		//sentenceInfo.setNucleiSentencePos(nucleiPos);
 		sentenceInfo.setSentenceBegin(sentenceBegin);
 		sentenceInfo.setSentenceEnd(sentenceEnd);
@@ -99,11 +100,12 @@ public class ItemInNuclei {
 	public void addNewNucleiToSentenceInfoLeft(SentenceInfo si, SentenceInfo sitemp){
 		SentenceInfo sentenceInfo = new SentenceInfo();		
 		sentenceInfo.setSentenceNr(si.getSentenceNr());
-		for(int i = 0; i < sitemp.getNucleiSentencePositionSize();  i++){
-			sentenceInfo.addNucleiSentencePosition(sitemp.getNucleiSentencePositionAt(i));			
+		sentenceInfo.setNucleiIndex(si.getNucleiIndex());
+		for(int i = 0; i < sitemp.getNucleiIndexListSize();  i++){
+			sentenceInfo.addNucleiIndexList(sitemp.getNucleiIndexListAt(i));			
 		}
-		for(int i = 0; i < si.getNucleiSentencePositionSize();  i++){
-			sentenceInfo.addNucleiSentencePosition(si.getNucleiSentencePositionAt(i));			
+		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
+			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
 		}
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin()-1); //going left
 		sentenceInfo.setSentenceEnd(si.getSentenceEnd());
@@ -114,11 +116,12 @@ public class ItemInNuclei {
 	public void addNewNucleiToSentenceInfoRight(SentenceInfo si, SentenceInfo sitemp){
 		SentenceInfo sentenceInfo = new SentenceInfo();		
 		sentenceInfo.setSentenceNr(si.getSentenceNr());
-		for(int i = 0; i < si.getNucleiSentencePositionSize();  i++){
-			sentenceInfo.addNucleiSentencePosition(si.getNucleiSentencePositionAt(i));			
+		sentenceInfo.setNucleiIndex(si.getNucleiIndex());
+		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
+			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
 		}
-		for(int i = 0; i < sitemp.getNucleiSentencePositionSize();  i++){
-			sentenceInfo.addNucleiSentencePosition(sitemp.getNucleiSentencePositionAt(i));			
+		for(int i = 0; i < sitemp.getNucleiIndexListSize();  i++){
+			sentenceInfo.addNucleiIndexList(sitemp.getNucleiIndexListAt(i));			
 		}
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin());
 		sentenceInfo.setSentenceEnd(si.getSentenceEnd()+1); //going right
@@ -128,10 +131,11 @@ public class ItemInNuclei {
 	
 	public void addNewSentenceInfoLeft(SentenceInfo si){		
 		SentenceInfo sentenceInfo = new SentenceInfo();
-		//nucleiCount = sentenceInfo.getNucleiSentencePositionSize();
+		//nucleiCount = sentenceInfo.getNucleiIndexListSize();
+		sentenceInfo.setNucleiIndex(si.getNucleiIndex());
 		sentenceInfo.setSentenceNr(si.getSentenceNr());
-		for(int i = 0; i < si.getNucleiSentencePositionSize();  i++){
-			sentenceInfo.addNucleiSentencePosition(si.getNucleiSentencePositionAt(i));			
+		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
+			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
 		}
 		//sentenceInfo.setNucleiSentencePos(si.getNucleiSentencePos());
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin()-1); //going left
@@ -141,25 +145,24 @@ public class ItemInNuclei {
 	
 	public void addNewSentenceInfoRigth(SentenceInfo si){
 		SentenceInfo sentenceInfo = new SentenceInfo();
-		//nucleiCount = sentenceInfo.getNucleiSentencePositionSize();
+		//nucleiCount = sentenceInfo.getNucleiIndexListSize();
+		sentenceInfo.setNucleiIndex(si.getNucleiIndex());
 		sentenceInfo.setSentenceNr(si.getSentenceNr());
-		for(int i = 0; i < si.getNucleiSentencePositionSize();  i++){
-			sentenceInfo.addNucleiSentencePosition(si.getNucleiSentencePositionAt(i));			
+		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
+			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
 		}
 		//sentenceInfo.setNucleiSentencePos(si.getNucleiSentencePos());
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin());
 		sentenceInfo.setSentenceEnd(si.getSentenceEnd()+1); //going right
 		sl.add(sentenceInfo);
 	}
-
+	
 	
 	/**
 	 * listworkerstuff below
 	 * @return
 	 */
-	
-
-	
+		
 	
 	public int getSentenceInfoSize(){
 		return sl.size();

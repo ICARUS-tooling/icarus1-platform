@@ -113,9 +113,9 @@ public class nGramIO {
 			//Element emWordform = generateElement(document, "WordForm", wordform); //$NON-NLS-1$
 			//rootElement.appendChild(emWordform);
 			
-			Element emWordform = generateElement(document, "WordForm", ""); //$NON-NLS-1$
+			Element emWordform = generateElement(document, "WordForm", ""); //$NON-NLS-1$ //$NON-NLS-2$
 			emWordform.setAttribute("nGram", String.valueOf(keyArray.length)); //$NON-NLS-1$
-			emWordform.setAttribute("Form", wordform); //$NON-NLS-1$
+			emWordform.setAttribute("form", wordform); //$NON-NLS-1$
 			
 			rootElement.appendChild(emWordform);
 			for (int j = 0; j < arrItem.size();j++){	
@@ -130,8 +130,8 @@ public class nGramIO {
 				String elementPoSTag = "PoSTag"; //$NON-NLS-1$
 				Element emPoS = document.createElement(elementPoSTag);				
 				
-				emPoS.setAttribute("Tag", posTag); //$NON-NLS-1$
-				emPoS.setAttribute("Count", posCount); //$NON-NLS-1$
+				emPoS.setAttribute("tag", posTag); //$NON-NLS-1$
+				emPoS.setAttribute("count", posCount); //$NON-NLS-1$
 				
 				
 				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
@@ -139,27 +139,30 @@ public class nGramIO {
 					SentenceInfo si = iin.getSentenceInfoAt(k);
 					
 
-					Element emSentence = document.createElement("Sentence");
+					Element emSentence = document.createElement("Sentence"); //$NON-NLS-1$
 					
 					//emSentence.appendChild(document.createTextNode(String.valueOf(si.getSentenceNr())));
 					
 					String sentenceNR  = String.valueOf(si.getSentenceNr()-1);
-					String nucleiCount = String.valueOf(si.getNucleiSentencePositionSize());
+					String nucleiCount = String.valueOf(si.getNucleiIndexListSize());
+					String nucleiIndex = String.valueOf(si.getNucleiIndex());
 					String sStart = String.valueOf(si.getSentenceBegin());
 					String sEnd = String.valueOf(si.getSentenceEnd());
 					
-					emSentence.setAttribute("SentenceNr", sentenceNR); //$NON-NLS-1$
-					emSentence.setAttribute("NucleiCount", nucleiCount); //$NON-NLS-1$
-					emSentence.setAttribute("Begin", sStart); //$NON-NLS-1$
-					emSentence.setAttribute("End", sEnd); //$NON-NLS-1$
+					emSentence.setAttribute("sentenceNr", sentenceNR); //$NON-NLS-1$
+					emSentence.setAttribute("nucleiCount", nucleiCount); //$NON-NLS-1$
+					emSentence.setAttribute("nucleiStartIndex", nucleiIndex); //$NON-NLS-1$
+					emSentence.setAttribute("begin", sStart); //$NON-NLS-1$
+					emSentence.setAttribute("end", sEnd); //$NON-NLS-1$
 					
-
-					String elementNucleiNr = "NucleiNr"; //$NON-NLS-1$
+					//when more than one nuclei in string
+					String elementNucleiNr = "NucleiIndex"; //$NON-NLS-1$					
 					
 					
-					for(int n = 0; n < si.getNucleiSentencePositionSize(); n++){
+					//TODO only add if nucleicount > 1
+					for(int n = 0; n < si.getNucleiIndexListSize(); n++){
 						Element emNuclei = document.createElement(elementNucleiNr);
-						String nucleiNr = String.valueOf(si.getNucleiSentencePositionAt(n));
+						String nucleiNr = String.valueOf(si.getNucleiIndexListAt(n));
 						emNuclei.appendChild(document.createTextNode(nucleiNr));
 						emSentence.appendChild(emNuclei);
 					}					

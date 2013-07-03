@@ -40,7 +40,8 @@ public class IcarusCorePreferences {
 				"en", "de"); // TODO add more language options //$NON-NLS-1$ //$NON-NLS-2$
 		builder.addEntry("workingDirectory", EntryType.FILE,  //$NON-NLS-1$
 				new File(System.getProperty("user.dir")).getAbsolutePath()); //$NON-NLS-1$
-		
+		builder.addBooleanEntry("eula", false);  //$NON-NLS-1$
+				
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		builder.addBooleanEntry("useSystemLaF", true); //$NON-NLS-1$

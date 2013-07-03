@@ -535,8 +535,6 @@ public class WebserviceDialogs {
 
 		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
 																.getResourceDomain());
-		WebchainElements wce;
-		
 		if(chainelement instanceof WebchainInputType){
 			builder.addMessage("plugins.weblicht.labels.webservice.WebchainInput"); //$NON-NLS-1$
 		}
@@ -548,7 +546,7 @@ public class WebserviceDialogs {
 		builder.setTitle(title);
 		builder.addMessage(inputPanel);
 		builder.addMessage(inputArea);
-		System.out.println(inputPanel.getComponentCount());
+		//System.out.println(inputPanel.getComponentCount());
 		builder.setPlainType();
 		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -640,10 +638,16 @@ public class WebserviceDialogs {
 		
 		WebchainOutputType wo = new WebchainOutputType();
 		
-		if (webserviceDynamicInput.isSelected()) wo.setOutputType("dynamic");		
-		if (webserviceLocationInput.isSelected()) wo.setOutputType("location");
-		if (webserviceStaticInput.isSelected()) wo.setOutputType("static");
-		System.out.println(wo.getOutputType());
+		if (webserviceDynamicInput.isSelected()){
+			wo.setOutputType("dynamic");	 //$NON-NLS-1$
+		}
+		if (webserviceLocationInput.isSelected()){
+			wo.setOutputType("location"); //$NON-NLS-1$
+		}
+		if (webserviceStaticInput.isSelected()){
+			wo.setOutputType("static"); //$NON-NLS-1$
+		}
+		//System.out.println(wo.getOutputType());
 		
 		return builder.isYesValue() ? wo : null;
 		

@@ -174,11 +174,11 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         		  }
         		);
         
-        buildDialog();
+        buildDialog();        
         
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         pack();
-        this.setMinimumSize(new Dimension(750, 600));
+        this.setMinimumSize(new Dimension(800, 650));
         config.addListener(new CfgListener(starthandle));
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -235,7 +235,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         pack();
-        this.setMinimumSize(new Dimension(750, 600));
+        this.setMinimumSize(new Dimension(800, 650));
         config.addListener(new CfgListener(handle));
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -286,7 +286,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         pack();
-        this.setMinimumSize(new Dimension(750, 600));    
+        this.setMinimumSize(new Dimension(800, 650));    
 		config.addListener(new CfgListener(handle));
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -1069,7 +1069,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		//TODO get nice size for tree and options
         JScrollPane spTree = new JScrollPane(tree);
         spTree.getVerticalScrollBar().setUnitIncrement(16);
-        UIUtil.resizeComponent(spTree, 150, 150, 1100, 300, 500, 1100); 
+        UIUtil.resizeComponent(spTree, 150, 200, 1100, 300, 500, 1100); 
         
         // Panel with Options
         JPanel rightView = new JPanel();
@@ -1086,6 +1086,9 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		JSplitPane spMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
 				spTree, rightView);
 		spMain.setMinimumSize(new Dimension(200,200));
+		
+		//expand complete vonfig tree
+		UIUtil.expandAll(tree, true);
         
         this.add(spMain); 
      }

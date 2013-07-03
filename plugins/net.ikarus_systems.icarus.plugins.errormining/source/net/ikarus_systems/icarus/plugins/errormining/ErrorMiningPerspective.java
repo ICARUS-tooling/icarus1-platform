@@ -1,4 +1,13 @@
-package net.ikarus_systems.icarus.plugins.weblicht;
+/* 
+ * $Revision$ 
+ * $Date$ 
+ * $URL$ 
+ * 
+ * $LastChangedDate$  
+ * $LastChangedRevision$  
+ * $LastChangedBy$ 
+ */
+package net.ikarus_systems.icarus.plugins.errormining;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,8 +23,13 @@ import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 
-public class WeblichtPerspective extends Perspective {
-
+/**
+ * @author Gregor Thiele
+ * @version $Id$
+ *
+ */
+public class ErrorMiningPerspective extends Perspective {
+	
 	@Override
 	public void init(JComponent container) {
 		collectViewExtensions();
@@ -37,9 +51,9 @@ public class WeblichtPerspective extends Perspective {
 		// when one is missing
 		newExtensions.addAll(PluginUtil.getExtensions(defaultViewIds));
 		
-		// Collect all extensions that are connected to the TreebankManagementView point
+		// Collect all extensions that are connected to the ErrorMiningManagementView point
 		// -> might result in redundant adds, so we use a Set<Extension>
-		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("WeblichtManagementView"); //$NON-NLS-1$
+		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("ErrorMiningManagementView"); //$NON-NLS-1$
 		if(managementViewPoint!=null) {
 			newExtensions.addAll(PluginUtil.getExtensions(
 					managementViewPoint, true, true, null));

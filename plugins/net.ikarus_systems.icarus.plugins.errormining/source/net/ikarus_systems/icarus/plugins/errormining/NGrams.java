@@ -12,7 +12,6 @@ package net.ikarus_systems.icarus.plugins.errormining;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,16 +35,62 @@ import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 public class NGrams {
 	
 	protected int nGramCount;
-	//protected List<ItemInNuclei> items;
-	protected Map<String,ArrayList<ItemInNuclei>> nGramCache;
+	protected int nGramLimit;
+	protected int fringeStart;
+	protected int fringeEnd;
 	
+	//protected List<ItemInNuclei> items;
+	protected Map<String,ArrayList<ItemInNuclei>> nGramCache;	
 	
 	protected List<DependencyData> corpus;
 	
 	
+	private static NGrams instance;
 	
-	public NGrams(int nGramCount){
+	public static NGrams getInstance() {
+		if (instance == null) {
+			synchronized (NGrams.class) {
+				if (instance == null) {
+					instance = new NGrams();
+				}
+			}
+		}
+		return instance;
+	}
+	
+	
+	//Debug Konstructor
+	public NGrams(){
+		Options options = Options.emptyOptions;
+
+		this.nGramCount = 1; //normally we start with unigrams so n will be 1
+		
+		
+		//0 collect ngrams until no new ngrams are found
+		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
+		this.fringeStart = (int) options.get("FringeSTART", 0);  //$NON-NLS-1$
+		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		
+		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
+		corpus = new ArrayList<DependencyData>();
+	}
+	
+	
+	
+	public NGrams(int nGramCount, Options options){
+		
+		if (options == null) {
+			options = Options.emptyOptions;
+		}
+		
 		this.nGramCount = nGramCount; //normally we start with unigrams so n will be 1
+		
+		
+		//0 collect ngrams until no new ngrams are found
+		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
+		this.fringeStart = (int) options.get("FringeSTART", 0);  //$NON-NLS-1$
+		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		
 		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
 	}
@@ -81,6 +126,29 @@ public class NGrams {
 		}
 		return null;
 		
+	}
+	
+	
+	
+	
+	public List<String>  getVariationForTag(String tag){
+		List<String> resultVari = null;
+		
+		if (nGramCache.containsKey(tag)){
+			resultVari = new ArrayList<String>();
+			ArrayList<ItemInNuclei> arri = nGramCache.get(tag);
+			
+			
+			for(int i = 0; i < arri.size(); i++){				
+				ItemInNuclei iin = arri.get(i);
+				resultVari.add(iin.getPosTag());
+			}
+
+		}
+		
+		System.out.println(tag + " : " + resultVari); //$NON-NLS-1$
+		return resultVari;
+
 	}
 	
 	
@@ -127,7 +195,7 @@ public class NGrams {
 	 * @param dd
 	 * @param sentenceNr
 	 */
-	private void initializeUniGrams(DependencyData dd, int sentenceNr) {
+	public void initializeUniGrams(DependencyData dd, int sentenceNr) {
 		
 		corpus.add(dd);
 		
@@ -185,33 +253,99 @@ public class NGrams {
 
 	private Map<String, ArrayList<ItemInNuclei>> removeItemsLengthOne(Map<String,ArrayList<ItemInNuclei>> input){
 		
-		ArrayList<String> removeFromnGrams = new ArrayList<String>();
+		ArrayList<String> removeFromNGrams = new ArrayList<String>();
 		for(Iterator<String> i = input.keySet().iterator(); i.hasNext();){
 			String key = i.next();
 			ArrayList<ItemInNuclei> arrItem = input.get(key);
 			//oonly one PoS Tag found -> add to delet list;
 			if (arrItem.size() == 1){
-				removeFromnGrams.add(key);
+				removeFromNGrams.add(key);
 			}
 		}
 				
 		//System.out.println("Items to Remove: " + removeFromnGrams.size());
-		for(int i = 0; i < removeFromnGrams.size(); i++){
-			input.remove(removeFromnGrams.get(i));
+		for(int i = 0; i < removeFromNGrams.size(); i++){
+			input.remove(removeFromNGrams.get(i));
 		}
 
-		removeFromnGrams.clear();
+		removeFromNGrams.clear();
 		return input;
 	}
 	
 	
+	/**
+	 * Examine only non-fringe nuclei, fringe = edge of variation n-gram
+	 * 
+	 * @param input
+	 * @return 
+	 */
+	private Map<String, ArrayList<ItemInNuclei>> distrustFringeHeuristic(Map<String,ArrayList<ItemInNuclei>> input){
+		
+		ArrayList<String> removeFringeFromNGrams = new ArrayList<String>();
+		for(Iterator<String> i = input.keySet().iterator(); i.hasNext();){
+			String key = i.next();
+			ArrayList<ItemInNuclei> arrItem = input.get(key);
+			
+			for(int j = 0; j < arrItem.size(); j++){
+				ItemInNuclei iin = arrItem.get(j);
+				for (int s = 0; s < iin.getSentenceInfoSize(); s++){
+					SentenceInfo si = iin.getSentenceInfoAt(s);
+					int start = si.getSentenceBegin();
+					int end = si.getSentenceEnd();
+					
+					for(int n = 0; n < si.getNucleiIndexListSize(); n++){
+						
+						//is fringe?
+						if(isFringe(si.getNucleiIndexListAt(n), start, end)){
+							
+							if(!removeFringeFromNGrams.contains(key)){
+								//System.out.println("FringeKey " + key);
+								removeFringeFromNGrams.add(key);
+							}
+						}
+					}
+				}
+			}
+		}
+				
+		//System.out.println("FringeItems to Remove: " + removeFringeFromNGrams.size());
+		for(int i = 0; i < removeFringeFromNGrams.size(); i++){
+			input.remove(removeFringeFromNGrams.get(i));
+		}
+
+		removeFringeFromNGrams.clear();
+		return input;
+		
+	}
+	
+	
+	/**
+	 * Check if nucleiPosition is the start/begining of the sentence
+	 * return true if it is, and @distrustFringe remove all "true" items
+	 * 
+	 * @param nucleiPosition
+	 * @param end 
+	 * @param start 
+	 * @return
+	 */
+	private boolean isFringe(int nucleiPosition, int start, int end) {
+		
+		//check if nuclei is at the beginning / end of the ngram
+		if(nucleiPosition == start || nucleiPosition == end){
+			return true;
+		}
+		
+		return false;
+	}
+	
+
 	private void createNGrams(Map<String, ArrayList<ItemInNuclei>> inputNGram,
 									boolean lb, boolean rb){
 		
 		Map<String, ArrayList<ItemInNuclei>> outputNGram = new LinkedHashMap<String, ArrayList<ItemInNuclei>>();
 		Map<String, ArrayList<ItemInNuclei>> outputNGramR = new LinkedHashMap<String, ArrayList<ItemInNuclei>>();
 		boolean reachedLeftBoarder = lb;
-		boolean reachedRightBoarder = rb;		
+		boolean reachedRightBoarder = rb;
 
 		for(Iterator<String> it = inputNGram.keySet().iterator(); it.hasNext();){
 			String key = it.next();
@@ -235,8 +369,8 @@ public class NGrams {
 
 					/*
 					System.out.println("Sentence: " + si.getSentenceNr() +
-										" NucleiPos " + si.getNucleiSentencePositionSize() + 
-										" NucleiForm " + dd.getForm(si.getNucleiSentencePositionAt(0)-1));
+										" NucleiPos " + si.getNucleiIndexListSize() + 
+										" NucleiForm " + dd.getForm(si.getNucleiIndexListAt(0)-1));
 					*/
 					
 					//StringBuilder posTagBuilder = new StringBuilder();
@@ -282,16 +416,9 @@ public class NGrams {
 										if (addNewNuclei){											
 											SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 											addNucleiLeft(item, iin.getPosTag(), si, sitemp, true);
-//											//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));
-//											item.setPosTag(ensureValid(iin.getPosTag()));
-//											item.addNewNucleiToSentenceInfoLeft(si, sitemp);
-//											item.setCount(oldCount + 1);
 											knownTag = true;
 										} else {
 											addSentenceInfoLeft(item, iin.getPosTag(), si, true);
-//											item.setPosTag(ensureValid(iin.getPosTag()));											
-//											item.addNewSentenceInfoLeft(si);
-//											item.setCount(oldCount + 1);
 											knownTag = true;
 										}
 									}
@@ -307,14 +434,9 @@ public class NGrams {
 									//already an unigram
 									if (addNewNuclei){										
 										SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
-//										//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));								
-//										item.setPosTag(ensureValid(iin.getPosTag()));
-//										item.addNewNucleiToSentenceInfoLeft(si, sitemp);
 										addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
 										itemsTemp.add(item);
-									} else {		
-//										item.setPosTag(ensureValid(iin.getPosTag()));
-//										item.addNewSentenceInfoLeft(si);
+									} else {
 										addSentenceInfoLeft(item, iin.getPosTag(), si, false);
 										itemsTemp.add(item);
 									}
@@ -327,14 +449,9 @@ public class NGrams {
 								//already an unigram
 								if (addNewNuclei){									
 									SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
-//									//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));									
-//									item.setPosTag(ensureValid(iin.getPosTag()));
-//									item.addNewNucleiToSentenceInfoLeft(si, sitemp);
 									addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
 									items.add(item);
 								} else {
-//									item.setPosTag(ensureValid(iin.getPosTag()));
-//									item.addNewSentenceInfoLeft(si);
 									addSentenceInfoLeft(item, iin.getPosTag(), si, false);
 									items.add(item);
 								}
@@ -399,17 +516,10 @@ public class NGrams {
 										//int oldCount = item.getCount();
 										if (addNewNuclei){											
 											SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
-//											//item.setPosTag(ensureValid(rightPOS + " "+ iin.getPosTag()));
-//											item.setPosTag(ensureValid(iin.getPosTag()));
-//											item.addNewNucleiToSentenceInfoRight(si, sitemp);
-//											item.setCount(oldCount + 1);
 											addNucleiRigth(item, iin.getPosTag(), si, sitemp, true);
 											knownTag = true;
 										} else {											
 											addSentenceInfoRigth(item, si, iin.getPosTag(), true);
-//											item.setPosTag(ensureValid(iin.getPosTag()));											
-//											item.addNewSentenceInfoRigth(si);
-//											item.setCount(oldCount + 1);
 											knownTag = true;
 										}
 									}
@@ -422,14 +532,9 @@ public class NGrams {
 									//already an unigram
 									if (addNewNuclei){										
 										SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
-//										//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));								
-//										item.setPosTag(ensureValid(iin.getPosTag()));
-//										item.addNewNucleiToSentenceInfoRight(si, sitemp);
 										addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
 										itemsTemp.add(item);
 									} else {		
-//										item.setPosTag(ensureValid(iin.getPosTag()));
-//										item.addNewSentenceInfoRigth(si);
 										addSentenceInfoRigth(item, si, iin.getPosTag(), false);
 										itemsTemp.add(item);
 									}
@@ -442,17 +547,10 @@ public class NGrams {
 								//already an unigram
 								if (addNewNuclei){									
 									SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
-//									//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));									
-//									item.setPosTag(ensureValid(iin.getPosTag()));
-//									item.addNewNucleiToSentenceInfoRight(si, sitemp);
 									addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
 									items.add(item);
 								} else {
-//									item.setPosTag(ensureValid(iin.getPosTag()));
-//									item.addNewSentenceInfoRigth(si);									
 									addSentenceInfoRigth(item, si, iin.getPosTag(), false);
-//									System.out.println(key + " + " + isDuplicate(si,iin)
-//												+" " + item.getCount());
 									items.add(item);
 								}
 
@@ -470,13 +568,10 @@ public class NGrams {
 			}
 		}
 		
-		nGramCount++;
-		//nGramCache.clear();
-		//nGramCache.putAll(outputNGram);
 		
+	
+		//merge leftSide (outputNGram) with rightSide (outputNGramR)
 		outputNGram.putAll(outputNGramR);
-		
-		//TODO Output
 
 		
 //		for(Iterator<String> i = outputNGram.keySet().iterator(); i.hasNext();){
@@ -488,14 +583,57 @@ public class NGrams {
 //			}
 //		}
 		
+		nGramCount++;
 
-		if(outputNGram.size() > 0){			
-			//TODO remove and endable recursive
-			nGramResults(outputNGram);
+		if (outputNGram.size() > 0) {
+			// TODO remove and endable recursive
+			
+			//items with length one -> no longer variation --> remove
+			outputNGram = removeItemsLengthOne(outputNGram);
+			
+			// remove items at the fringe
+			
+
+			if(nGramCount <= fringeEnd && nGramCount >= fringeStart){
+//				System.out.println(nGramCount + " | " 
+//								+ fringeStart + " | " 
+//								+ fringeEnd);
+				outputNGram = distrustFringeHeuristic(outputNGram);
+			}
+			
+			//add results into Cache
 			nGramCache.putAll(outputNGram);
-			createNGrams(removeItemsLengthOne(outputNGram), false, false);		
-		}		
+			
+			//print to console
+			nGramResults(outputNGram);			
+			
+			
+			//continue creating ngrams?
+			if (continueNGrams()){				
+				createNGrams(outputNGram, false, false);
+			}
+		}				
+		
+	
 	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * Continue until no new NGram found or until NGram Limit is reached
+	 * @return
+	 */
+	private boolean continueNGrams() {
+		if(nGramLimit == 0){
+			return true;
+		}
+
+		return (nGramLimit > nGramCount);
+	}
+
 	
 	/**
 	 * @param item
@@ -566,6 +704,12 @@ public class NGrams {
 		item.setPosTag(ensureValid(posTag));											
 		item.addNewSentenceInfoLeft(si);			
 	}
+	
+	
+	public Map<String, ArrayList<ItemInNuclei>> getResult(){
+		return nGramCache;
+	}
+	
 
 
 	/**
@@ -612,7 +756,8 @@ public class NGrams {
 				
 				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 					System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
-					System.out.print(" | NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiSentencePositionSize());
+					System.out.print(" | NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
+					System.out.print(" NucleiIndex: " + iin.getSentenceInfoAt(k).getNucleiIndex());
 					System.out.print(" NucleiPos: "); printNuclei(iin.getSentenceInfoAt(k));
 					System.out.print(" Begin: " + iin.getSentenceInfoAt(k).getSentenceBegin());
 					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
@@ -650,7 +795,8 @@ public class NGrams {
 				
 				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 					System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
-					System.out.print(" NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiSentencePositionSize());
+					System.out.print(" NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
+					System.out.print(" NucleiIndex: " + iin.getSentenceInfoAt(k).getNucleiIndex());
 					System.out.print(" NucleiPos: "); printNuclei(iin.getSentenceInfoAt(k));
 					System.out.print(" Begin: " + iin.getSentenceInfoAt(k).getSentenceBegin());
 					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
@@ -664,8 +810,8 @@ public class NGrams {
 	
 	private void printNuclei(SentenceInfo sentenceInfo){
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < sentenceInfo.getNucleiSentencePositionSize(); i++){
-			sb.append(sentenceInfo.getNucleiSentencePositionAt(i)).append(" ");			 //$NON-NLS-1$
+		for(int i = 0; i < sentenceInfo.getNucleiIndexListSize(); i++){
+			sb.append(sentenceInfo.getNucleiIndexListAt(i)).append(" ");			 //$NON-NLS-1$
 		}
 		sb.append(" | "); //$NON-NLS-1$
 		System.out.print(sb.toString());
@@ -676,10 +822,10 @@ public class NGrams {
 	public static void main(String[] args) throws UnsupportedFormatException {
 		
 		//18 Sentences
-		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
+		String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
 		
 		//CONLL Training English (1334 Sentences)
-		String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
+		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
 		
 		//CONLL Training English (39279 Sentences)
 		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-train.txt";
@@ -691,16 +837,22 @@ public class NGrams {
 		//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
 
 		
-		int sentencesToRead = 1334;
+		int sentencesToRead = 18;
 		
 		File file = new File(inputFileName);		
 		
 		CONLL09SentenceDataReader conellReader = new CONLL09SentenceDataReader();	
 		DefaultFileLocation dloc = new DefaultFileLocation(file);
 		Options o = null;
+		
+		
+		Options on = new Options();
+		on.put("FringeSTART", 3); //$NON-NLS-1$
+		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
+		on.put("NGramLIMIT", 0); //$NON-NLS-1$
 
 	
-		NGrams ngrams = new NGrams(1);
+		NGrams ngrams = new NGrams(1, on);
 		try {
 			
 //			Treebank treebank = (Treebank) new TreebankDescriptor();
@@ -721,7 +873,7 @@ public class NGrams {
 			ngrams.nGramResults();
 			
 			ngrams.outputToFile();
-			
+
 			System.out.println("Finished nGram Processing"); //$NON-NLS-1$
 			
 		} catch (IOException e) {

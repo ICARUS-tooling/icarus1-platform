@@ -196,7 +196,10 @@ public class WebchainRegistry {
 	private void saveXMLToFile (StreamResult result) throws Exception{
         //writing to file
         FileOutputStream fop = null;
-        File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchains_out.xml"); //$NON-NLS-1$
+        
+        //debug
+        //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain_out.xml"); //$NON-NLS-1$
+        File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
        
         fop = new FileOutputStream(file);
 
@@ -290,8 +293,7 @@ public class WebchainRegistry {
 							String uniqueID = idElement.getAttribute("uid"); //$NON-NLS-1$
 							
 							//we found an output element
-							if (uniqueID.equals("")){
-								
+							if (uniqueID.equals("")){ //$NON-NLS-1$								
 								webchain.addWebchainElement(
 										new WebchainOutputType(
 												idElement.getAttribute("type"), //$NON-NLS-1$
@@ -410,9 +412,14 @@ public class WebchainRegistry {
 			if(old.getElementAt(i) instanceof WebserviceProxy){
 				WebserviceProxy wp = (WebserviceProxy) old.getElementAt(i);
 				webchain.addWebchainElement(wp.get().getUID());
+				webchain.addWebservice(wp.get().getUID());
 			}			
 			if(old.getElementAt(i) instanceof WebchainInputType){
 				webchain.addWebchainElement((WebchainInputType) old.getElementAt(i));
+				WebchainInputType wi = new WebchainInputType();
+				wi.setInputType(old.getWebchainInputType().getInputType());
+				wi.setInputTypeValue(old.getWebchainInputType().getInputTypeValue());
+				webchain.setWebchainInputType(wi);
 			}
 			if(old.getElementAt(i) instanceof WebchainOutputType){
 				webchain.addWebchainElement((WebchainOutputType) old.getElementAt(i));
@@ -443,9 +450,7 @@ public class WebchainRegistry {
 	 * @param webchainElements
 	 */
 	public void setWebchainElements(Webchain webchain, List<WebchainElements> webchainElements) {
-		
-		System.out.println(webchain.getName());
-		System.out.println(webchainElements);
+
 		//prepare Proxylist
 		//clearAllWebservices(webchain);
 		
@@ -453,7 +458,6 @@ public class WebchainRegistry {
 			return;
 		}
 			
-
 		//lists are different replace old webchainelement list
 		webchain.setNewChainlist(webchainElements);
 		
@@ -718,6 +722,9 @@ public class WebchainRegistry {
 		eventSource.removeListener(listener, eventName);
 	}
 	
+	
+	
+	
 	public static void main(String[] args) {
 		
 		WebchainRegistry wcl = new WebchainRegistry();
@@ -725,7 +732,6 @@ public class WebchainRegistry {
 		try {
 			//wcl.saveWebchains();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
