@@ -267,7 +267,7 @@ public class CompoundUndoManager extends UndoManager implements
 			String nameKey = "textActions."+actionID+".name"; //$NON-NLS-1$ //$NON-NLS-2$
 			String descriptionKey = "textActions."+actionID+".description"; //$NON-NLS-1$ //$NON-NLS-2$
 
-			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, nameKey, descriptionKey); //$NON-NLS-1$ //$NON-NLS-2$
+			ResourceManager.getInstance().getGlobalDomain().prepareAction(this, nameKey, descriptionKey); 
 			ResourceManager.getInstance().getGlobalDomain().addAction(this);
 
 			setEnabled(false);

@@ -10,7 +10,7 @@
 package net.ikarus_systems.icarus.search_tools.tree;
 
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
-import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
+import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 
 /**
@@ -19,7 +19,7 @@ import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
  * @version $Id$
  *
  */
-public class DummyGroupConstraint extends DefaultConstraint {
+public class DummyGroupConstraint implements SearchConstraint {
 	
 	private static final long serialVersionUID = -1351042489767331758L;
 	
@@ -27,8 +27,6 @@ public class DummyGroupConstraint extends DefaultConstraint {
 	private final GroupCache cache;
 
 	public DummyGroupConstraint(SearchConstraint source, GroupCache cache) {
-		super(source.getToken(), source.getValue(), source.getOperator());
-		
 		this.source = source;
 		this.cache = cache;
 	}
@@ -39,16 +37,22 @@ public class DummyGroupConstraint extends DefaultConstraint {
 	 * {@link GroupCache#cacheGroupInstance(int, Object)} method.
 	 * 
 	 * @see net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint#matches(java.lang.Object)
+	 * @see GroupCache#cacheGroupInstance(int, Object)
 	 */
 	@Override
 	public boolean matches(Object value) {
-		cache.cacheGroupInstance(getGroupId(), value);
+		cache.cacheGroupInstance(getGroupId(), getInstance(value));
 		
 		return true;
 	}
 	
+	@Override
+	public DummyGroupConstraint clone() {
+		return new DummyGroupConstraint(source, cache); 
+	}
+
 	public int getGroupId() {
-		return (int) getConstraint();
+		return (int) getValue();
 	}
 
 	public SearchConstraint getSource() {
@@ -57,5 +61,45 @@ public class DummyGroupConstraint extends DefaultConstraint {
 
 	public GroupCache getCache() {
 		return cache;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#getToken()
+	 */
+	@Override
+	public String getToken() {
+		return source.getToken();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#getValue()
+	 */
+	@Override
+	public Object getValue() {
+		return source.getValue();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#getOperator()
+	 */
+	@Override
+	public SearchOperator getOperator() {
+		return source.getOperator();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#getInstance(java.lang.Object)
+	 */
+	@Override
+	public Object getInstance(Object value) {
+		return source.getInstance(value);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.SearchConstraint#isUndefined()
+	 */
+	@Override
+	public boolean isUndefined() {
+		return false;
 	}
 }

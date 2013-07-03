@@ -26,6 +26,15 @@ import net.ikarus_systems.icarus.util.id.Identity;
 public class TooltipListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 4283938142282983275L;
+	
+	private static TooltipListCellRenderer sharedInstance;
+	
+	public static TooltipListCellRenderer getSharedInstance() {
+		if(sharedInstance==null) {
+			sharedInstance = new TooltipListCellRenderer();
+		}
+		return sharedInstance;
+	}
 
 	public TooltipListCellRenderer() {
 		// no-op

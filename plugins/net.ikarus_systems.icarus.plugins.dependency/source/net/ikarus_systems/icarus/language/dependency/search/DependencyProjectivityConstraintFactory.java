@@ -22,13 +22,13 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyDirectionContraintFactory extends AbstractConstraintFactory {
+public class DependencyProjectivityConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "direction"; //$NON-NLS-1$
+	public static final String TOKEN = "projectivity"; //$NON-NLS-1$
 
-	public DependencyDirectionContraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.direction.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.direction.description"); //$NON-NLS-1$
+	public DependencyProjectivityConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.projectivity.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.projectivity.description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Options options) {
-		return new DependencyDirectionConstraint(value, operator);
+		return new DependencyProjectivityConstraint(value, operator);
 	}
 
 	@Override
@@ -60,39 +60,39 @@ public class DependencyDirectionContraintFactory extends AbstractConstraintFacto
 
 	@Override
 	public Object labelToValue(Object label) {
-		return LanguageUtils.parseDirectionLabel((String)label);
+		return LanguageUtils.parseBooleanLabel((String)label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value) {
-		return LanguageUtils.getDirectionLabel((int)value);
+		return LanguageUtils.getBooleanLabel((int)value);
 	}
 
 	@Override
 	public Object[] getLabelSet() {
 		return new Object[]{
 				LanguageUtils.DATA_UNDEFINED_LABEL,
-				LanguageUtils.DATA_LEFT_LABEL,
-				LanguageUtils.DATA_RIGHT_LABEL,
+				LanguageUtils.getBooleanLabel(LanguageUtils.DATA_YES_VALUE),
+				LanguageUtils.getBooleanLabel(LanguageUtils.DATA_NO_VALUE),
 		};
 	}
 
-	private static class DependencyDirectionConstraint extends DefaultConstraint {
+	private static class DependencyProjectivityConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = 8874429868140453623L;
+		private static final long serialVersionUID = -8096178398923755732L;
 
-		public DependencyDirectionConstraint(Object value, SearchOperator operator) {
+		public DependencyProjectivityConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getDirection();
+			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyDirectionConstraint(getValue(), getOperator());
+			return new DependencyProjectivityConstraint(getValue(), getOperator());
 		}
 	}
 }

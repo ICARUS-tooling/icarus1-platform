@@ -116,9 +116,7 @@ public class GraphView extends View implements Outline {
 		
 		this.presenter = presenter;
 		
-		if(this.presenter!=null) {
-			this.presenter.init();
-		} else {
+		if(this.presenter==null) {
 			showInfo(null);
 		}
 	}

@@ -141,6 +141,7 @@ public class GraphValidator {
 				result.addError("plugins.searchTools.graphValidation.missingRoot", rootIdx); //$NON-NLS-1$
 				continue;
 			}
+			roots.add(root);
 		}
 		
 		// Validate nodes
@@ -233,7 +234,7 @@ public class GraphValidator {
 		}
 
 		// Validate edges
-		for(int edgeIdx = 0; edgeIdx<nodes.length; edgeIdx++) {
+		for(int edgeIdx = 0; edgeIdx<edges.length; edgeIdx++) {
 			SearchEdge edge = edges[edgeIdx];
 			if(edge==null) {
 				result.addError("plugins.searchTools.graphValidation.missingEdge", edgeIdx); //$NON-NLS-1$

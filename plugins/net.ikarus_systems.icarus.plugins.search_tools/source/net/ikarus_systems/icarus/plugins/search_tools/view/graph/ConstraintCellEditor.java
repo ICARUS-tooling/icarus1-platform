@@ -550,7 +550,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			
 			displayingGroups = SearchManager.isGroupingOperator(constraint.getOperator());
 			if(displayingGroups) {
-				displayGroups(currentValue);
+				displayGroups((int)constraint.getValue());
 			} else {
 				displayValue(currentValue);
 			}
@@ -567,13 +567,13 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
 			Object value = null;
 			
-			value = valueSelect.getSelectedItem();
-			
 			if(!displayingGroups) {
-				value = factory.labelToValue(value);
+				value = factory.labelToValue(valueSelect.getSelectedItem());
 				if(value instanceof String && Integer.class.equals(factory.getValueClass())) {
 					value = Integer.parseInt((String)value);
 				}
+			} else {
+				value = valueSelect.getSelectedIndex();
 			}
 			
 			
@@ -631,20 +631,17 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			displayingGroups = false;
 		}
 		
-		private void displayGroups(Object currentLabel) {
+		private void displayGroups(int groupId) {
 			displayingGroups = true;
 			valueSelect.setRenderer(sharedGroupingRenderer);
-			if(currentLabel==null) {
-				currentLabel = valueSelect.getSelectedItem();
-			}
-			buffer = currentLabel;
+			buffer = valueSelect.getSelectedItem();
 			
 			DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) valueSelect.getModel();
 			model.removeAllElements();
 			for(int i=0; i<=Grouping.getMaxGroupIndex(); i++) {
 				model.addElement(i);
 			}
-			valueSelect.setSelectedIndex(0);
+			valueSelect.setSelectedIndex(groupId);
 			valueSelect.setEditable(false);
 		}
 
@@ -656,7 +653,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
 			if(SearchManager.isGroupingOperator(operator) && !displayingGroups) {
 				// Switch to group selection
-				displayGroups(null);
+				displayGroups(0);
 			} else if(!SearchManager.isGroupingOperator(operator) && displayingGroups) {
 				// Switch to old mode
 				displayValue(buffer);

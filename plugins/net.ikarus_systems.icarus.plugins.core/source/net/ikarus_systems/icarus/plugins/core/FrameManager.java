@@ -11,9 +11,14 @@ package net.ikarus_systems.icarus.plugins.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import net.ikarus_systems.icarus.config.ConfigEvent;
+import net.ikarus_systems.icarus.config.ConfigListener;
+import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.util.BiDiMap;
 import net.ikarus_systems.icarus.util.Options;
@@ -33,6 +38,8 @@ public final class FrameManager {
 	
 	private boolean isShutdownActive = false;
 	
+	private Handler handler;
+	
 	public static FrameManager getInstance() {
 		if(instance==null) {
 			synchronized (FrameManager.class) {
@@ -47,6 +54,13 @@ public final class FrameManager {
 
 	private FrameManager() {
 		// no-op
+	}
+	
+	private Handler getHandler() {
+		if(handler==null) {
+			handler = new Handler();
+		}
+		return handler;
 	}
 	
 	public synchronized void closeFrame(IcarusFrame frame) {
@@ -69,6 +83,7 @@ public final class FrameManager {
 
 	public synchronized FrameHandle newFrame(Options options) {
 		IcarusFrame frame = new IcarusFrame(options);
+		
 		try {
 			frame.init();
 		} catch (Exception e) {
@@ -76,6 +91,7 @@ public final class FrameManager {
 					"Failed to init frame: "+frame, e); //$NON-NLS-1$
 			return null;
 		}
+		frame.addWindowListener(getHandler());
 		
 		String id = "IcarusFrame_"+frameCount.getAndIncrement(); //$NON-NLS-1$
 		FrameHandle handle = new FrameHandle(id);
@@ -84,6 +100,11 @@ public final class FrameManager {
 			frames = new BiDiMap<>();
 		}
 		frames.put(frame, handle);
+		
+		if(frames.size()==1) {
+			ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+			config.addGroupListener(config.ROOT_HANDLE, getHandler());
+		}
 		
 		frame.setVisible(true);
 		return handle;
@@ -99,25 +120,53 @@ public final class FrameManager {
 	
 	public synchronized void shutdown() {
 		isShutdownActive = true;
-		// TODO
+		
+		Queue<IcarusFrame> frames = new LinkedList<>(this.frames.keySet());
+		IcarusFrame frame;
+		
+		while((frame = frames.poll())!=null) {
+			try {
+				closeFrame(frame);
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to close frame: "+frame.getTitle(), e); //$NON-NLS-1$
+			}
+		}
 	}
 	
 	// TODO add methods to open perspective and/or send messages to other frames
 	
-	private class FrameObserver extends WindowAdapter {
+	private class Handler extends WindowAdapter implements ConfigListener {
 
 		@Override
 		public void windowClosing(WindowEvent e) {
 			if(!(e.getSource() instanceof IcarusFrame))
-				throw new IllegalArgumentException("Not a valid IcarusFrame: "+e.getSource());
+				throw new IllegalArgumentException("Not a valid IcarusFrame: "+e.getSource()); //$NON-NLS-1$
 			
-			// TODO if last window ask for exit
-			// TODO check if closable and then call close
+			IcarusFrame frame = (IcarusFrame) e.getSource();
+			try {
+				if(frame.isClosable()) {
+					closeFrame(frame);
+				}
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to handle close request for frame: "+frame.getTitle(), ex); //$NON-NLS-1$
+			}
 		}
 
 		@Override
 		public void windowClosed(WindowEvent e) {
 			// TODO clear
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.config.ConfigListener#invoke(net.ikarus_systems.icarus.config.ConfigRegistry, net.ikarus_systems.icarus.config.ConfigEvent)
+		 */
+		@Override
+		public void invoke(ConfigRegistry sender, ConfigEvent event) {
+			for(IcarusFrame frame : frames.keySet()) {
+				frame.repaint();
+			}
 		}
 		
 	}

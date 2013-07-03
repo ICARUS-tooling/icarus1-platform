@@ -57,6 +57,8 @@ public interface TargetTree {
 	 */
 	int getEdgeIndex();
 	
+	int getChildIndexAt(int nodeIndex, int index);
+	
 	/**
 	 * Returns the number of outgoing edges on the currently viewed
 	 * node.

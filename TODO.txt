@@ -4,6 +4,8 @@ OPTIONAL:
 
 TODO:
 
+	-	add end user agreement dialog for clarin plugin asking user to be academic!
+
 	-	add command line flag to start in management mode:
 		-	only core plug-in active with management perspective
 		-	no integrity check of plug-in registry!

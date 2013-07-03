@@ -12,14 +12,16 @@ package net.ikarus_systems.icarus.search_tools.annotation;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
+import net.ikarus_systems.icarus.util.annotation.AnnotationContainer;
 import net.ikarus_systems.icarus.util.cache.LRUCache;
+import net.ikarus_systems.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class AnnotationBuffer {
+public class AnnotationBuffer implements AnnotationContainer {
 	
 	private final SearchResult searchResult;
 	private final ResultAnnotator annotator;
@@ -54,5 +56,13 @@ public class AnnotationBuffer {
 	
 	public void clear() {
 		cache.clear();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.annotation.AnnotationContainer#getAnnotationType()
+	 */
+	@Override
+	public ContentType getAnnotationType() {
+		return annotator.getAnnotationType();
 	}
 }

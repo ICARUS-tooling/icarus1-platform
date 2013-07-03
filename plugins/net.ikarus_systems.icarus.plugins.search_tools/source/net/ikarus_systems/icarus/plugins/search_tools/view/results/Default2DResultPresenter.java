@@ -45,9 +45,9 @@ import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
+import net.ikarus_systems.icarus.ui.list.RowHeaderList;
 import net.ikarus_systems.icarus.ui.tab.ButtonTabComponent;
 import net.ikarus_systems.icarus.ui.tab.TabController;
-import net.ikarus_systems.icarus.ui.table.TableRowHeader;
 import net.ikarus_systems.icarus.ui.table.TableRowHeaderRenderer;
 import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
@@ -70,7 +70,7 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 	
 	protected JTable table;
 	
-	protected TableRowHeader rowHeader;
+	protected RowHeaderList rowHeader;
 	protected TableRowHeaderRenderer rowHeaderRenderer;
 	protected SearchResultTableModel tableModel;
 	protected ResultCountTableCellRenderer cellRenderer;
@@ -93,7 +93,12 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
 	 */
 	@Override
-	protected void displayResult() {
+	protected void displayResult(Options options) {
+		SearchResult searchResult = this.searchResult;
+		if(searchResult==null) {
+			searchResult = ResultDummies.dummyResult1D;
+		}
+		
 		tableModel.setResultData(searchResult);
 		cellRenderer.setSearchResult(searchResult);
 	}
@@ -275,12 +280,13 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
 		//header.setResizingAllowed(false);
-		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header
-				.getDefaultRenderer();
+		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
 		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
+		UIUtil.disableHtml(renderer);
 		
-		rowHeader = new TableRowHeader(tableModel.getRowHeaderModel());
+		rowHeader = new RowHeaderList(tableModel.getRowHeaderModel());
 		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
+		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
 		rowHeader.setResizingAllowed(true);
 		rowHeader.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		rowHeader.setFixedCellHeight(table.getRowHeight());
@@ -398,8 +404,12 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 			}
 			
 			try {
+				String title = ResourceManager.getInstance().get(
+						"plugins.searchTools.default2DResultPresenter.instancesTitle", //$NON-NLS-1$
+						getTitle());
+				
 				Options options = new Options();
-				options.put(Options.TITLE, getTitle());
+				options.put(Options.TITLE, title);
 				resultPresenter.present(getSubResult(), options);
 				
 				add(resultPresenter.getPresentingComponent(), BorderLayout.CENTER);

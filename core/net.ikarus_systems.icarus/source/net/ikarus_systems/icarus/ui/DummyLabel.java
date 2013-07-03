@@ -66,7 +66,7 @@ public class DummyLabel extends JLabel {
 	@Override
 	protected void firePropertyChange(String propertyName, Object oldValue,
 			Object newValue) {
-		if (propertyName == "text" || propertyName == "font") {
+		if (propertyName == "text" || propertyName == "font") { //$NON-NLS-1$ //$NON-NLS-2$
 			super.firePropertyChange(propertyName, oldValue, newValue);
 		}
 	}

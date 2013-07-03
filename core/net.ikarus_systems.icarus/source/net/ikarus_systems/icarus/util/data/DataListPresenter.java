@@ -13,6 +13,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +53,7 @@ import net.ikarus_systems.icarus.ui.helper.TextItem;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
 import net.ikarus_systems.icarus.ui.view.ListPresenter;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.Installable;
 import net.ikarus_systems.icarus.util.Options;
@@ -82,11 +85,14 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected Filter filter;
 	protected FilteredListModel<T> filteredModel;
 	
+	protected String title;
+	
 	protected JPanel contentPanel;
 	protected JComboBox<Object> filterSelect;
 	protected JButton filterEditButton;
 	protected JToggleButton outlineToggleButton;
 	protected Map<Extension, Filter> filterInstances;
+	protected NavigationControl navigationControl;
 	
 	protected JTextArea textArea;
 	
@@ -105,7 +111,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		list.addListSelectionListener(getHandler());
 		annotationControl = createAnnotationControl();
 		
-		NavigationControl navigationControl = createNavigationControl();
+		navigationControl = createNavigationControl();
 
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setBorder(null);
@@ -165,10 +171,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		
 		if(annotationControl!=null) {
 			items.add(EntryType.SEPARATOR);
-			Object[] comps = annotationControl.getComponents();
-			for(Object comp : comps) {
-				items.add(comp);
-			}
+			CollectionUtils.feedItems(items, (Object[])annotationControl.getComponents());
 		}
 		
 		return items.toArray();
@@ -260,9 +263,11 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		filter = (Filter) options.get(Options.FILTER);
 		int index = options.get(Options.INDEX, -1);
 		
+		title = (String) options.get(Options.TITLE);
+		
 		if(contentPanel!=null) {
 			refresh();
-		
+			
 			if(index!=-1) {
 				getSelectionModel().setSelectionInterval(index, index);
 			} else {
@@ -282,7 +287,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 				annotationManager = this.annotationManager;
 			}
 			
-			if(annotationManager==null) {
+			if(annotationManager==null && annotationType!=null) {
 				annotationManager = UIHelperRegistry.globalRegistry().findHelper(AnnotationManager.class, annotationType);
 			}
 		}
@@ -321,6 +326,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		} else {
 			getOutlineToggleButton().setVisible(true);
 		}
+		
+		navigationControl.setTitle(title);
 		
 		refreshFilterOptions();
 		refreshTextOutline();
@@ -424,8 +431,16 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			return;
 		}
 		
+		if(this.annotationManager!=null) {
+			this.annotationManager.removePropertyChangeListener(getHandler());
+		}
+		
 		AnnotationManager oldValue = this.annotationManager;
 		this.annotationManager = annotationManager;
+		
+		if(this.annotationManager!=null) {
+			this.annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
+		}
 		
 		if(annotationControl!=null) {
 			annotationControl.setAnnotationManager(annotationManager);
@@ -538,7 +553,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		return filter;
 	}
 	
-	protected class Handler implements ActionListener, ListSelectionListener {
+	protected class Handler implements ActionListener, ListSelectionListener,
+			PropertyChangeListener {
 
 		/**
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
@@ -571,6 +587,14 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			refreshTextOutline();
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			list.repaint(list.getVisibleRect());
 		}
 	}
 }

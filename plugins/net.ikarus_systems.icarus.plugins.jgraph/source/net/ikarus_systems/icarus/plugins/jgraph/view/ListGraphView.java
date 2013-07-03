@@ -95,7 +95,6 @@ public class ListGraphView extends View implements Outline {
 		this.graphPresenter = graphPresenter;
 		
 		if(this.graphPresenter!=null) {
-			this.graphPresenter.init();
 			splitPane.setLeftComponent(graphPresenter.getPresentingComponent());
 		} else {
 			showGraphInfo(null);

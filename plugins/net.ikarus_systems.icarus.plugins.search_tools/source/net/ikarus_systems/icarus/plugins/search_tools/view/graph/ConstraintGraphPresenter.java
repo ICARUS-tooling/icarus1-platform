@@ -52,6 +52,7 @@ import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Order;
+import net.ikarus_systems.icarus.util.annotation.AnnotationControl;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
@@ -124,6 +125,18 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	
 	public ConstraintGraphPresenter() {
 		// no-op
+	}
+
+	/**
+	 * This presenter 'creates' constraints that themselves result in
+	 * annotations, so there is no reason to provide navigable 
+	 * visualization of annotation data here.
+	 * 
+	 * @see net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter#createAnnotationControl()
+	 */
+	@Override
+	protected AnnotationControl createAnnotationControl() {
+		return null;
 	}
 
 	@Override
@@ -480,7 +493,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				searchNodes.put(cell, node);
 				
 				// Check for roots
-				if(GraphUtils.getIncomingEdgeCount(model, cell, true, false)==0) {
+				if(getIncomingEdgeCount(model, cell, true, false)==0) {
 					roots.add(node);
 				}
 				
@@ -537,6 +550,30 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		searchGraph.setRootOperator(operator);
 		
 		return searchGraph;
+	}
+	
+	protected int getIncomingEdgeCount(mxIGraphModel model, Object cell, boolean includeNormal, boolean includeOrder) {
+		if(!includeNormal && !includeOrder) {
+			includeNormal = includeOrder = true;
+		}
+		
+		int count = 0;
+		
+		int edgeCount = model.getEdgeCount(cell);
+		for(int i=0; i<edgeCount; i++) {
+			Object edge = model.getEdgeAt(cell, i);
+			boolean isOrder = isOrderEdge(edge);
+			
+			if(isOrder!=includeOrder && isOrder==includeNormal) {
+				continue;
+			}
+			
+			if(model.getTerminal(edge, false)==cell) {
+				count++;
+			}
+		}
+		
+		return count;
 	}
 
 	@Override
@@ -648,7 +685,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		this.disjuntiveRoots = disjuntiveRoots;
 		
 		if(searchGraph!=null) {
-			int operator = isDisjuntiveRoots() ? SearchGraph.OPERATOR_DISJUNCTION : 
+			int operator = disjuntiveRoots ? SearchGraph.OPERATOR_DISJUNCTION : 
 				SearchGraph.OPERATOR_CONJUNCTION;
 			searchGraph.setRootOperator(operator);
 		}

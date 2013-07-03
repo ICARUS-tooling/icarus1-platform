@@ -10,8 +10,8 @@
 package net.ikarus_systems.icarus.search_tools.tree;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,9 +24,9 @@ import javax.swing.JTextArea;
 
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
-import net.ikarus_systems.icarus.search_tools.SearchNode;
 import net.ikarus_systems.icarus.search_tools.standard.GraphValidationResult;
 import net.ikarus_systems.icarus.search_tools.standard.GraphValidator;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.util.Options;
@@ -60,6 +60,12 @@ public final class TreeUtils {
 			}
 		}
 		
+		if(matcher.getOptions()!=null) {
+			for(Matcher option : matcher.getOptions()) {
+				id = Math.max(id, getMaxId(option));
+			}
+		}
+		
 		return id;
 	}
 	
@@ -84,6 +90,7 @@ public final class TreeUtils {
 		collectMatchers0(matcher.getAlternate(), buffer);
 		collectMatchers0(matcher.getNext(), buffer);
 		collectMatchers0(matcher.getExclusions(), buffer);
+		collectMatchers0(matcher.getOptions(), buffer);
 	}
 	
 	private static void collectMatchers0(Matcher[] matchers, Set<Matcher> buffer) {
@@ -113,6 +120,10 @@ public final class TreeUtils {
 	}
 
 	public static boolean validateTree(SearchGraph graph) {
+		if(SearchUtils.isEmpty(graph)) {
+			return false;
+		}
+		
 		Options options = new Options();
 		options.put(GraphValidator.ALLOW_CYCLES, false);
 		options.put(GraphValidator.ALLOW_LINKS, false);
@@ -128,9 +139,8 @@ public final class TreeUtils {
 		
 		if(!result.isEmpty()) {
 			
-			JPanel panel = new JPanel(new BorderLayout(0, 7));
+			final JPanel panel = new JPanel(new BorderLayout(0, 7));
 			
-			String title = ResourceManager.getInstance().get("plugins.searchTools.graphValidation.title"); //$NON-NLS-1$
 			String message = ResourceManager.getInstance().get(result.getErrorCount()>0 ?
 					"plugins.searchTools.graphValidation.errorMessage" //$NON-NLS-1$
 					: "plugins.searchTools.graphValidation.warningMessage"); //$NON-NLS-1$
@@ -160,9 +170,18 @@ public final class TreeUtils {
 			
 			JScrollPane scrollPane = new JScrollPane(outputLabel);
 			panel.add(scrollPane, BorderLayout.NORTH);
+			scrollPane.setPreferredSize(new Dimension(400, 250));
 			
-			DialogFactory.getGlobalFactory().showGenericDialog(
-					null, title, null, panel, true);
+			UIUtil.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					DialogFactory.getGlobalFactory().showGenericDialog(
+							null, 
+							"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
+							null, panel, true, "ok"); //$NON-NLS-1$
+				}
+			});
 		}
 		
 		return result.getErrorCount()==0;

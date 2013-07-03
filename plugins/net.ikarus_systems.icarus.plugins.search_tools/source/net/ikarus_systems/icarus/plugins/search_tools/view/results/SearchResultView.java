@@ -120,8 +120,6 @@ public class SearchResultView extends View {
 		
 		registerActionCallbacks();
 		
-		refreshActions();
-		
 		showInfo(null);
 	}
 	
@@ -141,7 +139,8 @@ public class SearchResultView extends View {
 		actionManager.setEnabled(hasResult, 
 				"plugins.searchTools.searchResultView.refreshAction",  //$NON-NLS-1$
 				"plugins.searchTools.searchResultView.viewSearchAction",  //$NON-NLS-1$
-				"plugins.searchTools.searchResultView.saveResultAction"); //$NON-NLS-1$
+				"plugins.searchTools.searchResultView.saveResultAction",  //$NON-NLS-1$
+				"plugins.searchTools.searchResultView.clearViewAction"); //$NON-NLS-1$
 	}
 	
 	private void registerActionCallbacks() {
@@ -161,6 +160,8 @@ public class SearchResultView extends View {
 				callbackHandler, "saveResult"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchResultView.openResultAction",  //$NON-NLS-1$
 				callbackHandler, "openResult"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchResultView.clearViewAction",  //$NON-NLS-1$
+				callbackHandler, "clearView"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -201,6 +202,14 @@ public class SearchResultView extends View {
 	}
 	
 	public static SearchResultPresenter getPresenter(SearchResult searchResult) {
+		
+		// Check if result is to be displayed in plain form first
+		if(Boolean.TRUE.equals(searchResult.getProperty(
+				SearchResult.FORCE_SIMPLE_OUTLINE_PROPERTY))) {
+			return getFalbackPresenter(searchResult);
+		}
+		
+		// Result requires regular visualization, so find a presenter
 		List<Extension> availablePresenters = SearchManager.getResultPresenterExtensions(
 				searchResult.getContentType(), searchResult.getDimension());
 		
@@ -270,7 +279,8 @@ public class SearchResultView extends View {
 			}
 			if(!useFallback) {
 				MutableBoolean check = new MutableBoolean(false);
-				useFallback = DialogFactory.getGlobalFactory().showCheckedConfirm(null, check, 
+				useFallback = DialogFactory.getGlobalFactory().showCheckedConfirm(
+						getFrame(), check, 
 						"plugins.searchTools.searchResultView.dialogs.title",  //$NON-NLS-1$
 						null,
 						"plugins.searchTools.searchResultView.dialogs.useFallbackPresenter", //$NON-NLS-1$
@@ -332,7 +342,7 @@ public class SearchResultView extends View {
 			return;
 		}
 		
-		infoLabel.setVisible(false);
+		contentPanel.remove(infoLabel);
 		
 		// Switch visible components if required
 		if(this.resultPresenter!=null) {
@@ -360,6 +370,8 @@ public class SearchResultView extends View {
 		
 		contentPanel.removeAll();
 		contentPanel.add(infoLabel, BorderLayout.NORTH);
+		contentPanel.revalidate();
+		contentPanel.repaint();
 		
 		if(resultPresenter!=null) {
 			resultPresenter.close();
@@ -367,6 +379,7 @@ public class SearchResultView extends View {
 		}
 		
 		refreshHitCount();
+		refreshActions();
 	}
 	
 	private void refreshHitCount() {
@@ -511,6 +524,16 @@ public class SearchResultView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open result", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+		
+		public void clearView(ActionEvent e) {			
+			try {
+				reset();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to clear view", ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
 		}

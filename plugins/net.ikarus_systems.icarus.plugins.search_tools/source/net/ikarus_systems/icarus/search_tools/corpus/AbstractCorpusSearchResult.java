@@ -18,6 +18,7 @@ import net.ikarus_systems.icarus.search_tools.annotation.AnnotationBuffer;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
+import net.ikarus_systems.icarus.util.CompactProperties;
 import net.ikarus_systems.icarus.util.SubstitutionSupport;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
@@ -36,9 +37,13 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 	protected SearchConstraint[] groupConstraints;
 	protected int[] groupIndexMap;
 	
+	protected CompactProperties properties;
+	
 	protected AnnotationBuffer annotationBuffer;
 	
 	protected boolean finalized = false;
+	
+	protected final Object lock = new Object();
 
 	protected AbstractCorpusSearchResult(Search search, SearchConstraint[] groupConstraints) {
 		/*if(search==null)
@@ -73,7 +78,28 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 			}
 		}
 	}
-	
+
+	@Override
+	public Object getProperty(String key) {
+		return properties==null ? null : properties.get(key);
+	}
+
+	@Override
+	public void setProperty(String key, Object value) {
+		if(properties==null) {
+			properties = new CompactProperties();
+		}
+		properties.put(key, value);
+	}
+
+	public AnnotationBuffer getAnnotationBuffer() {
+		return annotationBuffer;
+	}
+
+	public void setAnnotationBuffer(AnnotationBuffer annotationBuffer) {
+		this.annotationBuffer = annotationBuffer;
+	}
+
 	public SentenceDataList getTarget() {
 		return (SentenceDataList) search.getTarget();
 	}
@@ -188,5 +214,10 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 	@Override
 	public AnnotatedData getAnnotatedEntry(ResultEntry entry) {
 		return annotationBuffer==null ? null : annotationBuffer.getAnnotatedData(entry);
+	}
+
+	@Override
+	public ContentType getAnnotationType() {
+		return annotationBuffer==null ? null : annotationBuffer.getAnnotationType();
 	}
 }

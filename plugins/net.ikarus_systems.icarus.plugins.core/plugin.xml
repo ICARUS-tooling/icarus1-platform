@@ -48,7 +48,7 @@
 				<doc>
 					<doc-text>
 						Fully qualified name of a non-serializable class that
-						has to be wrapped by the aformentioned adapter.
+						has to be wrapped by the aforementioned adapter.
 					</doc-text>
 				</doc>
 			</parameter-def>
@@ -586,6 +586,11 @@
 	
 	
 	<!-- Standard Extensions -->
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.util.annotation.HighlightType" />
+		<parameter id="class" value="net.ikarus_systems.icarus.util.annotation.AnnotationDisplayMode" />
+	</extension>
 	
 	<!-- PERSPECTIVES AND VIEWS -->
 	

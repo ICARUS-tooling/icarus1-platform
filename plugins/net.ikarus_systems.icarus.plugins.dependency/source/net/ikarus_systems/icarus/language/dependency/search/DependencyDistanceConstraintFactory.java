@@ -22,11 +22,11 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyDistanceContraintFactory extends AbstractConstraintFactory {
+public class DependencyDistanceConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "distance"; //$NON-NLS-1$
 
-	public DependencyDistanceContraintFactory() {
+	public DependencyDistanceConstraintFactory() {
 		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.distance.description"); //$NON-NLS-1$
 	}

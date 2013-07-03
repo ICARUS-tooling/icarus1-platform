@@ -166,8 +166,8 @@ public final class CollectionUtils {
 
 	
 	public static int min(int...values) {
-		if(values.length<2)
-			throw new IllegalArgumentException();
+		/*if(values.length<2)
+			throw new IllegalArgumentException();*/
 		
 		int min = Integer.MAX_VALUE;
 		
@@ -179,8 +179,8 @@ public final class CollectionUtils {
 	}
 	
 	public static int max(int...values) {
-		if(values.length<2)
-			throw new IllegalArgumentException();
+		/*if(values.length<2)
+			throw new IllegalArgumentException();*/
 		
 		int max = Integer.MIN_VALUE;
 		

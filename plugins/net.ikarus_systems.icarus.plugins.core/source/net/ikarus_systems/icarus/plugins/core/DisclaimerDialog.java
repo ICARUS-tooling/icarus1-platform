@@ -9,7 +9,6 @@
  */
 package net.ikarus_systems.icarus.plugins.core;
 
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -33,13 +32,13 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 import javax.swing.border.EtchedBorder;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
-import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 
 /**
  * @author Gregor Thiele
@@ -51,27 +50,12 @@ public class DisclaimerDialog extends JDialog {
 
 	private static final long serialVersionUID = -5245394732102753579L;
 	
-	
-    final String GPL = "Elevplan checker version \n" //$NON-NLS-1$
-            + "Copyright (C) 2013  Philip Jakobsen \n" //$NON-NLS-1$
-            + "This program is free software: you can redistribute it and/or modify \n" //$NON-NLS-1$
-            + "it under the terms of the GNU General Public License as published by \n" //$NON-NLS-1$
-            + "the Free Software Foundation, either version 3 of the License, or \n" //$NON-NLS-1$
-            + "(at your option) any later version. \n" //$NON-NLS-1$
-            + "This program is distributed in the hope that it will be useful, \n" //$NON-NLS-1$
-            + "but WITHOUT ANY WARRANTY; without even the implied warranty of \n" //$NON-NLS-1$
-            + "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the \n" //$NON-NLS-1$
-            + "GNU General Public License for more details. \n" //$NON-NLS-1$
-            + "You should have received a copy of the GNU General Public License \n" //$NON-NLS-1$
-            + "along with this program.  If not, see \n" //$NON-NLS-1$
-            + "http://www.gnu.org/licenses";  //$NON-NLS-1$
-	
-	
 	protected JPanel disclaimerPanel;
 	protected JCheckBox showOnStart;
 	protected JScrollPane jsp;
 	protected JButton accept;
 
+	protected boolean accepted = false;
 	
 	public DisclaimerDialog(){
 		disclaimerPanel = new JPanel(new GridBagLayout());
@@ -95,30 +79,28 @@ public class DisclaimerDialog extends JDialog {
 	}
 	
 	
-	public static void showDialog(Component parent) {	
+	public static boolean showDialog() {
+		
 		DisclaimerDialog dd = new DisclaimerDialog();
 		dd.setTitle(ResourceManager.getInstance()
 				.get("plugins.core.disclaimer.eula")); //$NON-NLS-1$
 		dd.setVisible(true);
 
+		return dd.isAccepted();
 	}
 	
+	protected boolean isAccepted() {
+		return accepted;
+	}
 	
-	@SuppressWarnings("static-access")
 	protected void addSeperator(JPanel panel, GridBagConstraints gbc){
 		//seperator
-		gbc.fill = gbc.HORIZONTAL;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.insets = new Insets(5, 5, 5, 5);
 		gbc.gridx = 0;
 		panel.add(new JSeparator(JSeparator.HORIZONTAL), gbc);
 	}
 	
-	
-	
-	/**
-	 * 
-	 */
-	@SuppressWarnings("static-access")
 	private void buildDisclaimer() {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc = GridBagUtil.makeGbc(0, 0, 0, 1, 1);
@@ -142,9 +124,16 @@ public class DisclaimerDialog extends JDialog {
 		//License Text
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 1);
 		gbc.gridwidth=5;
-//		JTextArea jta = new JTextArea(ResourceManager.getInstance()
-//								.get("plugins.core.disclaimerDialog.lilcenseText")); //$NON-NLS-1$
-		JTextArea jta = new JTextArea(GPL + GPL + GPL, 25, 70);
+
+		String license = Core.getLicenseText();
+		if(license==null) {
+			license = "Failed to load license text.\n" + //$NON-NLS-1$
+					"\n" + //$NON-NLS-1$
+					"Please check the 'license.txt' file in your ICARUS folder}n" + //$NON-NLS-1$
+					"or contact the authors if the file is missing."; //$NON-NLS-1$
+		}
+		
+		JTextArea jta = new JTextArea(license, 25, 70);
 		jta.setEditable(false);
 		jta.setLineWrap(true);
 		jta.setWrapStyleWord(true);
@@ -170,7 +159,7 @@ public class DisclaimerDialog extends JDialog {
 		//accept button
 		accept = new JButton(ResourceManager.getInstance()
 								.get("plugins.core.disclaimerDialog.accept")); //$NON-NLS-1$
-		accept.setName("accept"); //$NON-NLS-1$
+		accept.setActionCommand("accept"); //$NON-NLS-1$
 		accept.addActionListener(new LicenseActionListener());
 		accept.setEnabled(false);
 		
@@ -178,7 +167,7 @@ public class DisclaimerDialog extends JDialog {
 		//decline button
 		JButton decline = new JButton(ResourceManager.getInstance()
 								.get("plugins.core.disclaimerDialog.decline")); //$NON-NLS-1$
-		decline.setName("decline"); //$NON-NLS-1$
+		decline.setActionCommand("decline"); //$NON-NLS-1$
 		decline.addActionListener(new LicenseActionListener());
 			
 		
@@ -220,7 +209,7 @@ public class DisclaimerDialog extends JDialog {
 	        
 	        // System.out.println("Value: " + current + " Max: " + max);
 	        
-	        // enable accept only if reachd end of scrollpane
+	        // enable accept only if reached end of scroll-pane
 	        // (user read the complete EULA)
 	        if(current==max){
 	        	accept.setEnabled(true);
@@ -235,32 +224,16 @@ public class DisclaimerDialog extends JDialog {
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if("accept".equals(e.getActionCommand())){ //$NON-NLS-1$
+				
+				ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+				Handle ch = config.getHandle("general.eula"); //$NON-NLS-1$
+				config.setValue(ch, showOnStart.isSelected());
 
-			if (e.getSource() instanceof JButton){
-				JButton button = (JButton) e.getSource();
-				
-				//System.out.println(button.getName());
-				
-				if(button.getName().equals("accept")){ //$NON-NLS-1$
-					
-					ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
-					Handle ch = config.getChildHandle("general", "eula"); //$NON-NLS-1$ //$NON-NLS-2$
-					config.setValue(ch, showOnStart.isSelected());
-	
-					dialogExitAction();
-				}
-				
-				if(button.getName().equals("decline")){ //$NON-NLS-1$
-					
-					boolean exit = DialogFactory.getGlobalFactory().showWarningConfirm(getParent(),
-							"plugins.core.disclaimerDialog.decline.dialogTitle", //$NON-NLS-1$
-							"plugins.core.disclaimerDialog.decline.dialogMessage", //$NON-NLS-1$
-							null,null);
-					if(exit){
-						System.exit(0);		
-					}
-				}
+				accepted = true;
 			}
+
+			dialogExitAction();
 		}
 		
 	}

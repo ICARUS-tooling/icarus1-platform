@@ -26,6 +26,7 @@
 	<action-list id="core.helpers.navigationControl.toolBarList">
 		<item type="custom" value="leftContent" />
 		<item type="glue" />
+		<item type="custom" value="titleLabel" />
 		<item type="action" value="core.helpers.navigationControl.firstElementAction" />
 		<item type="action" value="core.helpers.navigationControl.previousElementAction" />
 		<item type="custom" value="centerContent" />

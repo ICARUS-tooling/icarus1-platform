@@ -51,8 +51,8 @@ public class DummyTextPane extends JTextPane {
 	@Override
 	protected void firePropertyChange(String propertyName, Object oldValue,
 			Object newValue) {
-		if (propertyName == "document" || propertyName == "font"
-				|| propertyName == "highlighter") {
+		if (propertyName == "document" || propertyName == "font" //$NON-NLS-1$ //$NON-NLS-2$
+				|| propertyName == "highlighter") { //$NON-NLS-1$
 			super.firePropertyChange(propertyName, oldValue, newValue);
 		}
 	}

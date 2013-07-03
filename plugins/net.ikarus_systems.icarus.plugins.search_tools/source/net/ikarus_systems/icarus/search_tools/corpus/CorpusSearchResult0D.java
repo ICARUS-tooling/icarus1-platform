@@ -33,6 +33,7 @@ import net.ikarus_systems.icarus.util.data.DataList;
 public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 	
 	protected List<ResultEntry> entries;
+	protected int hitCount = 0;
 	protected EntryList wrapper;
 	
 	public static final int DEFAULT_START_SIZE = 1000;
@@ -145,6 +146,7 @@ public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 	
 	private synchronized void commit(ResultEntry entry) {
 		entries.add(entry);
+		hitCount += entry.getHitCount();
 	}
 
 	/**
@@ -156,6 +158,11 @@ public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 			throw new IllegalStateException("Result is already final - clearing not possible"); //$NON-NLS-1$
 		
 		entries.clear();
+	}
+
+	@Override
+	public int getTotalHitCount() {
+		return hitCount;
 	}
 	
 	protected class Result0DCache implements GroupCache {

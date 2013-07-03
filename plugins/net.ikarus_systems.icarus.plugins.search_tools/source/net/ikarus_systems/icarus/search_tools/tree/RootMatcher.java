@@ -30,87 +30,81 @@ public class RootMatcher extends Matcher {
 		int nodeCount = targetTree.size();
 					
 		boolean matched = false;
-		boolean excluded = false;
+		
+		int minIndex = getMinIndex();
+		int maxIndex = getMaxIndex();
 		
 		indexIterator.setMax(nodeCount-1);
 		
-		while(indexIterator.hasNext()) {
-			targetTree.viewNode(indexIterator.next());
-			
-			// Honor locked nodes that are allocated to other matchers!
-			if(targetTree.isNodeLocked()) {
-				continue;
-			}
-			
-			// Check for structural constraints 
-			if(targetTree.getDescendantCount()<descendantCount
-					|| targetTree.getHeight()<height) {
-				continue;
-			}
-			
-			// Check for required number of children
-			if(targetTree.getEdgeCount()<node.getChildCount()) {
-				continue;
-			}
-			
-			// Check if the current node is a potential match
-			if(!matchesConstraints()) {
-				continue;
-			}
-			
-			// Lock allocation
-			allocate();
-			
-			// Search for child matchers that serve as exclusions
-			excluded = false;
-			if(exclusions!=null) {
-				for(Matcher matcher : exclusions) {
-					if(matcher.matches()) {
-						excluded = true; 
-						break;
-					}
+		if(minIndex<=maxIndex) {
+			while(indexIterator.hasNext()) {
+				targetTree.viewNode(indexIterator.next());
+				
+				// Check for precedence constraints
+				if(targetTree.getNodeIndex()<minIndex
+						|| targetTree.getNodeIndex()>maxIndex) {
+					continue;
 				}
-			}
-			
-			if(!excluded) {
-				// Delegate further search to the next matcher
-				// or otherwise commit current match
-				if(next!=null) {
-					matched |= next.matches();
-				} else if(!exclusionMember) {
-					cacheHits();
-					if(searchMode==SearchMode.INDEPENDENT_HITS) {
-						commit();
-					}
-					matched = true;
+				
+				// Honor locked nodes that are allocated to other matchers!
+				if(targetTree.isNodeLocked()) {
+					continue;
 				}
-			}
 
-			// Release lock
-			deallocate();
-			
-			// Stop search if only one successful hit is required
-			// This is the case when either a non-exhaustive search
-			// takes place or the matcher is a part of a sub-tree
-			// serving as exclusion
-			if(matched && (exclusionMember || !exhaustive)) {
-				break;
+				// Check for type constraints
+				if(!matchesType()) {
+					continue;
+				}
+				
+				// Check for structural constraints 
+				if(targetTree.getDescendantCount()<descendantCount
+						|| targetTree.getHeight()<height) {
+					continue;
+				}
+				
+				// Check for required number of children
+				if(targetTree.getEdgeCount()<childCount) {
+					continue;
+				}
+				
+				// Check if the current node is a potential match
+				if(!matchesConstraints()) {
+					continue;
+				}
+				
+				// Lock allocation
+				allocate();
+				
+				// Search for child matchers that serve as exclusions
+				if(!matchesExclusions()) {
+					// Delegate further search to the next matcher
+					// or otherwise commit current match
+					matched |= matchesNext();
+				}
+	
+				// Release lock
+				deallocate();
+				
+				// Stop search if only one successful hit is required.
+				// This is the case when either a non-exhaustive search
+				// takes place or the matcher is a part of a sub-tree
+				// serving as exclusion
+				if(matched && (exclusionMember || !exhaustive)) {
+					break;
+				}
 			}
 		}
-		
+			
 		// If unsuccessful and part of a disjunction let the 
 		// alternate matcher have a try.
 		if(!matched) {
-			if(exclusionMember) {
-				commit();
-			} else if(alternate!=null) {
+			if(alternate!=null) {
 				matched = alternate.matches();
 			}
-		} else if(searchMode!=SearchMode.INDEPENDENT_HITS) {
+		} else if(!exclusionMember && searchMode!=SearchMode.INDEPENDENT_HITS) {
 			commit();
 		}
 		
 		return matched;
 	}
-
 }

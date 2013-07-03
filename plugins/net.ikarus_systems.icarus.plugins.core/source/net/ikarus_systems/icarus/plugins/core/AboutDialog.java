@@ -26,27 +26,24 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.WindowConstants;
-import javax.swing.event.ListDataListener;
 
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 
 import org.java.plugin.registry.PluginDescriptor;
 
@@ -95,22 +92,16 @@ public class AboutDialog extends JDialog {
 		ad.setTitle(ResourceManager.getInstance()
 				.get("plugins.core.aboutDialog.aboutIcarus")); //$NON-NLS-1$
 		ad.setVisible(true);
-//		
-//		DisclaimerDialog dd = new DisclaimerDialog();
-//		dd.setVisible(true);
-
 	}
 	
-	@SuppressWarnings("static-access")
 	protected void addSeperator(JPanel panel, GridBagConstraints gbc){
 		//seperator
-		gbc.fill = gbc.HORIZONTAL;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.insets = new Insets(5, 5, 5, 5);
 		gbc.gridx = 0;
 		panel.add(new JSeparator(JSeparator.HORIZONTAL), gbc);
 	}
 	
-	@SuppressWarnings("static-access")
 	protected void buildAbout() {	
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -184,42 +175,14 @@ public class AboutDialog extends JDialog {
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
 									.get("plugins.core.aboutDialog.plugins")), gbc); //$NON-NLS-1$
 
-		//adds all available plugin names
-		buildPluginsList(gbc);
-		
-		
-		List<PluginDescriptor> installedPlugins = new ArrayList<>();
-		for(Iterator<PluginDescriptor> i = PluginUtil.getPluginManager()
-			.getRegistry().getPluginDescriptors().iterator(); i.hasNext();){
-			PluginDescriptor pd = i.next();
-//			System.out.println("ID: " + pd.getId() +" "
-//					+" Vendor " + pd.getVendor()
-//					+" UniqueID " + pd.getUniqueId()
-//					+" Version " + pd.getVersion()
-//					+" Class " + pd.getClass()
-//					+" Reg " + pd.getRegistry());
-//			JLabel pluginName = new JLabel(pd.getId()
-//					 + " (" //$NON-NLS-1$
-//					 + pd.getVersion()
-//					 + " )"); //$NON-NLS-1$
-//			
-//			
-//			
-//			gbc = GridBagUtil.makeGbc(1, gbc.gridy, 0, 1, 0);
-//			aboutPanel.add(pluginName, gbc);
-//			gbc.gridy++;
-			
-			
-			installedPlugins.add(pd);
-			
-		}
-		
 		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 1);
 		gbc.gridwidth = 2;
-		JList<Object> plugins = new JList<Object>();
-		plugins.setModel(new PluginsListModel(installedPlugins));
+		JList<PluginDescriptor> plugins = new JList<>(
+				new Vector<>(PluginUtil.getPluginRegistry().getPluginDescriptors()));
 		plugins.setCellRenderer(new PluginsListCellRenderer());
+		plugins.setBorder(UIUtil.defaultContentBorder);
 		JScrollPane pluginsJSP = new JScrollPane(plugins);
+		UIUtil.defaultSetUnitIncrement(pluginsJSP);
 		aboutPanel.add(pluginsJSP, gbc);
 		gbc.gridy++;
 		
@@ -246,19 +209,11 @@ public class AboutDialog extends JDialog {
 		//close Button
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		gbc.gridwidth = 3;
-		gbc.anchor = gbc.CENTER;
+		gbc.anchor = GridBagConstraints.CENTER;
 		aboutPanel.add(bclose,gbc);
 
 		this.add(aboutPanel);
 
-	}
-	
-	/**
-	 * @param gbc
-	 */
-	private void buildPluginsList(GridBagConstraints gbc) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	// DialogExitAction
@@ -299,20 +254,17 @@ public class AboutDialog extends JDialog {
 		public void mouseClicked(MouseEvent evt) {
 			JLabel l = (JLabel) evt.getSource();
 			try {
-				Desktop desktop = java.awt.Desktop.getDesktop();
+				Desktop desktop = Desktop.getDesktop();
 				URI uri = new URI(getPlainLink(l.getText()));
 				desktop.browse(uri);
 			} catch (URISyntaxException use) {
 				throw new AssertionError(use);
 			} catch (IOException ioe) {
-				ioe.printStackTrace();
-				JOptionPane.showMessageDialog(
-					null,
-					ResourceManager.getInstance()
-					.get("plugins.core.aboutDialog.urlError") //$NON-NLS-1$
-					,ResourceManager.getInstance()
-					.get("plugins.core.aboutDialog.urlErrorTitle") //$NON-NLS-1$
-					, JOptionPane.ERROR_MESSAGE);
+				DialogFactory.getGlobalFactory().showDetailedError(
+						null, 
+						"plugins.core.aboutDialog.urlErrorTitle",  //$NON-NLS-1$
+						"plugins.core.aboutDialog.urlError",  //$NON-NLS-1$
+						ioe);
 			}
 		}
 	}
@@ -357,17 +309,8 @@ public class AboutDialog extends JDialog {
 				JList<? extends Object> list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus) {
 			
-		      if (isSelected) {
-		          setBackground(list.getSelectionBackground());
-		         // text.setForeground(list.getSelectionForeground());
-		        } else {
-		          // the color returned from list.getBackground() is pure white
-		          setBackground(list.getBackground());
-		          // THIS works -- but is obviously hardcoded
-		          // setBackground(Color.WHITE);
-		          //text.setForeground(list.getForeground());
-		        }
-
+			setBackground(list.getBackground());
+			
 			PluginDescriptor pd = (PluginDescriptor) value;
 			String text = pd.getId()
 					 + "   (" //$NON-NLS-1$
@@ -378,54 +321,5 @@ public class AboutDialog extends JDialog {
 			
 			return this;
 		}
-		
 	}
-	
-	public class PluginsListModel implements ListModel<Object> {
-		
-		List<PluginDescriptor> installedPlugins;
-		/**
-		 * @param installedPlugins
-		 */
-		public PluginsListModel(List<PluginDescriptor> installedPlugins) {
-			this.installedPlugins = installedPlugins;
-		}
-
-		/**
-		 * @see javax.swing.ListModel#getElementAt(int)
-		 */
-		@Override
-		public PluginDescriptor getElementAt(int index) {
-			return installedPlugins.get(index);
-		}
-
-		/**
-		 * @see javax.swing.ListModel#getSize()
-		 */
-		@Override
-		public int getSize() {
-			return installedPlugins.size();
-		}
-
-		/**
-		 * @see javax.swing.ListModel#addListDataListener(javax.swing.event.ListDataListener)
-		 */
-		@Override
-		public void addListDataListener(ListDataListener l) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		/**
-		 * @see javax.swing.ListModel#removeListDataListener(javax.swing.event.ListDataListener)
-		 */
-		@Override
-		public void removeListDataListener(ListDataListener l) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-	}
-	
-	
 }

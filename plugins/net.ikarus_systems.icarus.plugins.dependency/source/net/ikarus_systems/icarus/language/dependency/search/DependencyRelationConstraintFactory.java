@@ -20,11 +20,11 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyRelationContraintFactory extends AbstractConstraintFactory {
+public class DependencyRelationConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "relation"; //$NON-NLS-1$
 
-	public DependencyRelationContraintFactory() {
+	public DependencyRelationConstraintFactory() {
 		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.relation.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.relation.description"); //$NON-NLS-1$
 	}

@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.ikarus_systems.icarus.search_tools.EdgeType;
@@ -40,10 +42,13 @@ public class MatcherBuilder {
 	protected Map<Matcher, Matcher> cloneMap;
 	protected Map<SearchNode, Integer> idMap;
 	
+	protected Map<SearchNode, List<Matcher>> nodeMap;
+	
 	protected AtomicInteger idGen;
 	
 	protected Matcher rootMatcher;
-	protected Matcher lastMatcher;
+	
+	protected MatcherLinker linker;
 
 	public MatcherBuilder(Search search) {
 		if(search==null)
@@ -52,10 +57,19 @@ public class MatcherBuilder {
 		this.search = search;
 	}
 	
+	protected MatcherLinker getLinker() {
+		if(linker==null) {
+			linker = new MatcherLinker();
+		}
+		
+		return linker;
+	}
+	
 	public Matcher createRootMatcher() {
 		matcherMap = new HashMap<>();
 		idMap = new HashMap<>();
 		idGen = new AtomicInteger();
+		nodeMap = new HashMap<>();
 		
 		SearchGraph graph = search.getQuery().getSearchGraph();
 		graph = SearchUtils.instantiate(graph, 
@@ -80,30 +94,109 @@ public class MatcherBuilder {
 			createMatcher0(null, tree.getChildAt(i), false);
 		}
 		
-		// Now link matchers starting from root nodes
+		// Resolve and link precedence edges
+		if(graph.getEdges()!=null) {
+			for(SearchEdge edge : graph.getEdges()) {
+				if(edge.getEdgeType()==EdgeType.PRECEDENCE) {
+					resolvePrecedenceEdge(edge);
+				}
+			}
+		}
+		
+		getLinker().clear();
+		
+		List<TreeNode> negatedRoots = tree.getNegatedChildren();
+		List<TreeNode> unnegatedRoots = tree.getUnnegatedChildren();
+		
+		// Now link matchers starting from root nodes		
+		if(unnegatedRoots!=null) {
+			rootMatcher = createSimpleRootMatcher(unnegatedRoots, isDisjunction);
+		}
+		if(negatedRoots!=null) {
+			rootMatcher = createProxyRootMatcher(negatedRoots, isDisjunction, rootMatcher);
+		}
+		
+		return rootMatcher;
+	}
+	
+	protected Matcher createSimpleRootMatcher(List<TreeNode> roots, boolean isDisjunction) {
 		if(isDisjunction) {
 			Matcher last = null;
-			for(TreeNode root : tree.getChildren()) {
+			for(TreeNode root : roots) {
 				Matcher matcher = matcherMap.get(root);
 				if(last!=null) {
 					last.setAlternate(matcher);
 				}
 				last = matcher;
 				
-				lastMatcher = null;
+				getLinker().clear();
 				linkMatcher0(root);
 			}
 		} else {
-			for(TreeNode root : tree.getChildren()) {
+			for(TreeNode root : roots) {
 				linkMatcher0(root);
 			}
 		}
 		
-		rootMatcher = matcherMap.get(tree.getChildAt(0));
-		
-		return rootMatcher;
+		return matcherMap.get(roots.get(0));
 	}
 	
+	protected Matcher createProxyRootMatcher(List<TreeNode> negatedRoots, 
+			boolean isDisjunction, Matcher unnegatedRootMatcher) {
+		if(isDisjunction) {
+			// Create a proxy for every negated root, linked
+			// as alternates
+			Matcher[] proxies = new Matcher[negatedRoots.size()];
+			
+			for(int i=0; i<proxies.length; i++) {
+				getLinker().clear();
+				TreeNode exclusion = negatedRoots.get(i);
+				linkMatcher0(exclusion);
+				Matcher[] exclusions = {
+					matcherMap.get(exclusion),	
+				};
+				
+				Matcher proxy = new ProxyRootMatcher();
+				proxy.setExclusions(exclusions);
+				if(i>0) {
+					proxies[i-1].setAlternate(proxy);
+				}
+				//proxy.setNext(unnegatedRootMatcher);
+				
+				proxies[i] = proxy;
+			}
+			
+			// If there exists at least one other root
+			// node that is not negated it will be wrapped
+			// in a matcher that holds all such nodes and has
+			// no alternates
+			if(unnegatedRootMatcher!=null) {
+				Matcher lastProxy = proxies[proxies.length-1];
+				lastProxy.setAlternate(unnegatedRootMatcher);
+			}
+			
+			return proxies[0];
+		} else {
+			// Create a single proxy matcher with all the negated
+			// nodes as exclusions
+			Matcher proxy = new ProxyRootMatcher();
+			
+			proxy.setNext(unnegatedRootMatcher);
+			
+			Matcher[] exclusions = new Matcher[negatedRoots.size()];
+			for(int i=0; i<exclusions.length; i++) {
+				getLinker().clear();
+				TreeNode exclusion = negatedRoots.get(i);
+				exclusions[i] = matcherMap.get(exclusion);
+				linkMatcher0(exclusion);
+			}
+			
+			proxy.setExclusions(exclusions);
+			
+			return proxy;
+		}
+	}
+		
 	protected TreeNode createTree0(TreeNode parent, SearchNode node, SearchEdge head) {
 		TreeNode treeNode = new TreeNode(parent);
 		treeNode.setSearchNode(node);
@@ -112,6 +205,7 @@ public class MatcherBuilder {
 		int edgeCount = node.getOutgoingEdgeCount();
 		for(int i=0; i<edgeCount; i++) {
 			SearchEdge edge = node.getOutgoingEdgeAt(i);
+			// Skip link and precedence edges
 			if(edge.getEdgeType()==EdgeType.LINK
 					|| edge.getEdgeType()==EdgeType.PRECEDENCE) {
 				continue;
@@ -126,7 +220,7 @@ public class MatcherBuilder {
 	protected void optimizeTree(TreeNode tree) {
 		
 		// Ensure each node has at most one disjunction child
-		TreeNode disjunction = null;
+		/*TreeNode disjunction = null;
 		for(int i=0; i<tree.getChildCount(); i++) {
 			TreeNode child = tree.getChildAt(i);
 			
@@ -144,7 +238,7 @@ public class MatcherBuilder {
 					disjunction.addChildren(child.getChildren());
 				}
 			}
-		}
+		}*/
 
 		// Now process child nodes
 		for(int i=0; i<tree.getChildCount(); i++) {
@@ -156,7 +250,7 @@ public class MatcherBuilder {
 			List<TreeNode> negatedChildren = tree.getNegatedChildren();
 			List<TreeNode> unnegatedChildren = tree.getUnnegatedChildren();
 			
-			int index = tree.indexInParent();
+			/*int index = tree.indexInParent();
 			TreeNode lastAlternate = tree.getParent();
 			int alternateCount = 0;
 
@@ -175,14 +269,14 @@ public class MatcherBuilder {
 					
 					alternateCount++;
 				}
-			}
+			}*/
 			
 			// If the disjunction contained unnegated members
 			// simply add them as a list of alternates
 			if(unnegatedChildren!=null) {
-				TreeNode leader = createAlternateSet(unnegatedChildren);
+				TreeNode leader = linkAlternates(unnegatedChildren);
 
-				if(alternateCount>0) {
+				/*if(alternateCount>0) {
 					TreeNode nextAlternate = lastAlternate.clone();
 					lastAlternate.setAlternate(nextAlternate);
 					lastAlternate = nextAlternate;
@@ -190,12 +284,16 @@ public class MatcherBuilder {
 				
 				lastAlternate.setChild(index, leader);
 				
-				alternateCount++;
+				alternateCount++;*/
+				tree.removeChildren(unnegatedChildren);
+				tree.insertChildAt(0, leader);
+				
+				leader.setParent(tree);
 			}
 		}
 	}
 	
-	protected TreeNode createAlternateSet(List<TreeNode> alternates) {
+	protected TreeNode linkAlternates(List<TreeNode> alternates) {
 		if(alternates==null || alternates.isEmpty()) {
 			return null;
 		}
@@ -212,54 +310,99 @@ public class MatcherBuilder {
 		Matcher matcher = matcherMap.get(tree);
 		
 		// Append matcher to pre-order list
-		if(lastMatcher!=null) {
-			lastMatcher.setNext(matcher);
+		getLinker().link(matcher);
+		// Only include non-disjunctive trees, since disjunctive
+		// ones link to their chilren via their options list!
+		if(!tree.isDisjunction()) {
+			getLinker().add(matcher);
 		}
-		lastMatcher = matcher;
 		
 		matcher.setId(getId(matcher.getNode()));
 		
 		// Create exclusion list
 		List<TreeNode> negatedChildren = tree.getNegatedChildren();
 		if(negatedChildren!=null) {
-			Matcher tmp = lastMatcher;
+			getLinker().save();
 			
 			Matcher[] exclusions = new Matcher[negatedChildren.size()];
 			for(int i=0; i<negatedChildren.size(); i++) {
-				lastMatcher = null;
+				getLinker().clear();
+				
 				exclusions[i] = linkMatcher0(negatedChildren.get(i));
 			}
 			matcher.setExclusions(exclusions);
 			
-			lastMatcher = tmp;
-			
-			tree.removeChildren(negatedChildren);
+			getLinker().load();
 		}
 		
-		// ALl remaining children are unnegated regular nodes
-		for(int i=0; i<tree.getChildCount(); i++) {
-			linkMatcher0(tree.getChildAt(i));
+		// Link non-disjunctive unnegated children
+		List<TreeNode> unnegatedChildren = tree.getUnnegatedChildren();
+		if(unnegatedChildren!=null) {
+			if(tree.isDisjunction()) {
+				// For disjunctions we save the children in a special
+				// options list
+				
+				Matcher[] options = new Matcher[unnegatedChildren.size()];
+				for(int i=0; i<unnegatedChildren.size(); i++) {
+					getLinker().save();
+					options[i] = linkMatcher0(unnegatedChildren.get(i));
+					getLinker().merge();
+					getLinker().load();
+				}
+				matcher.setOptions(options);
+			} else {
+				// For regular matchers simply perform the default linking
+				for(int i=0; i<unnegatedChildren.size(); i++) {
+					linkMatcher0(unnegatedChildren.get(i));
+				}
+			}
+		}
+
+		// Finally link disjunctive children
+		List<TreeNode> disjunctionChildren = tree.getDisjunctiveChildren();
+		if(disjunctionChildren!=null) {
+			if(tree.isDisjunction())
+				throw new IllegalStateException("Nested disjunction"); //$NON-NLS-1$
+			
+			for(int i=0; i<disjunctionChildren.size(); i++) {
+				//getLinker().save();
+				
+				linkMatcher0(disjunctionChildren.get(i));
+				
+				//getLinker().merge();
+				//getLinker().load();
+			}
 		}
 		
 		TreeNode alternate = tree.getAlternate();
 		if(alternate!=null) {
 			// Force clean entry point for alternate tree
-			Matcher tmp = lastMatcher;
-			lastMatcher = null;
+			getLinker().save();
 			
 			matcher.setAlternate(linkMatcher0(alternate));
 			
-			lastMatcher = tmp;
+			getLinker().merge();
+			getLinker().load();
 		}
 		
 		matcher.setHeight(tree.getHeight());
 		matcher.setDescendantCount(tree.getDescendantCount());
+		
+		// Special double-linking for disjunctions:
+		// The matcher needs to be linked with all its optional
+		// children and the next matcher in a possible sequence
+		if(tree.isDisjunction()) {
+			getLinker().add(matcher);
+		}
 		
 		return matcher;
 	}
 	
 	protected Matcher createMatcher0(Matcher parent, TreeNode treeNode, 
 			boolean exclusionMember) {
+		
+		if(matcherMap.containsKey(treeNode))
+			throw new IllegalStateException("Duplicate creation attempt for tree"); //$NON-NLS-1$
 		
 		SearchNode node = treeNode.getSearchNode();
 		SearchEdge edge = treeNode.getSearchEdge();
@@ -270,13 +413,23 @@ public class MatcherBuilder {
 		}
 	
 		Matcher matcher;
-		if(edge==null) {
+		if(treeNode.isDisjunction()) {
+			matcher = new DisjunctionMatcher(node, edge);
+		} else if(edge==null) {
 			matcher = new RootMatcher(node);
 		} else if(edge.getEdgeType()==EdgeType.TRANSITIVE) {
 			matcher = new TransitiveMatcher(node, edge);
 		} else {
 			matcher = new Matcher(node, edge);
 		}
+		
+		// Save node-to-matcher mapping
+		List<Matcher> list = nodeMap.get(node);
+		if(list==null) {
+			list = new ArrayList<>();
+			nodeMap.put(node, list);
+		}
+		list.add(matcher);
 		
 		// Load constraints
 		List<SearchConstraint> constraints = new ArrayList<>();
@@ -294,6 +447,7 @@ public class MatcherBuilder {
 		matcher.setExclusionMember(exclusionMember);
 		matcher.setParent(parent);
 		
+		// Save tree to matcher mapping
 		matcherMap.put(treeNode, matcher);
 		
 		// Build exclusion list if required
@@ -309,12 +463,37 @@ public class MatcherBuilder {
 			treeNode.removeChildren(negatedChildren);
 		}
 		
-		// Process child nodes
+		// Process child nodes (only unnegated children left)
 		for(int i=0; i<treeNode.getChildCount(); i++) {
 			createMatcher0(matcher, treeNode.getChildAt(i), exclusionMember);
 		}
 		
+		if(treeNode.getAlternate()!=null) {
+			createMatcher0(parent, treeNode.getAlternate(), exclusionMember);
+		}
+		
 		return matcher;
+	}
+	
+	protected void resolvePrecedenceEdge(SearchEdge edge) {
+		List<Matcher> sources = nodeMap.get(edge.getSource());
+		List<Matcher> targets = nodeMap.get(edge.getTarget());
+		
+		if(sources==null || targets==null) {
+			// TODO error msg?
+			return;
+		}
+		
+		Matcher[] before = sources.toArray(new Matcher[0]);
+		Matcher[] after = targets.toArray(new Matcher[0]);
+		
+		for(Matcher matcher : before) {
+			matcher.setAfter(after);
+		}
+		
+		for(Matcher matcher : after) {
+			matcher.setBefore(before);
+		}
 	}
 	
 	protected int getId(SearchNode node) {
@@ -353,9 +532,12 @@ public class MatcherBuilder {
 			clone.setParent(cloneMatcher0(matcher.getParent()));
 			clone.setNext(cloneMatcher0(matcher.getNext()));
 			clone.setAlternate(cloneMatcher0(matcher.getAlternate()));
+			clone.setExclusions(cloneMatchers(matcher.getExclusions()));
 			
 			clone.setAfter(cloneMatchers(matcher.getAfter()));
 			clone.setBefore(cloneMatchers(matcher.getBefore()));
+			
+			clone.setOptions(cloneMatchers(matcher.getOptions()));
 		}
 		return clone;
 	}
@@ -389,6 +571,11 @@ public class MatcherBuilder {
 		
 		public TreeNode() {
 			// no-op
+		}
+		
+		@Override
+		public String toString() {
+			return searchNode!=null ? searchNode.toString() : super.toString();
 		}
 		
 		public TreeNode(TreeNode parent) {
@@ -576,7 +763,7 @@ public class MatcherBuilder {
 			List<TreeNode> result = null;
 			
 			for(TreeNode child : children) {
-				if(child.isNegated()) {
+				if(child.isNegated() && !child.isDisjunction()) {
 					if(result==null) {
 						result = new ArrayList<>();
 					}
@@ -595,7 +782,26 @@ public class MatcherBuilder {
 			List<TreeNode> result = null;
 			
 			for(TreeNode child : children) {
-				if(!child.isNegated()) {
+				if(!child.isNegated() && !child.isDisjunction()) {
+					if(result==null) {
+						result = new ArrayList<>();
+					}
+					result.add(child);
+				}
+			}
+			
+			return result;
+		}
+		
+		public List<TreeNode> getDisjunctiveChildren() {
+			if(children==null) {
+				return null;
+			}
+			
+			List<TreeNode> result = null;
+			
+			for(TreeNode child : children) {
+				if(child.isDisjunction()) {
 					if(result==null) {
 						result = new ArrayList<>();
 					}
@@ -610,11 +816,22 @@ public class MatcherBuilder {
 			if(height==-1) {
 				int value = 0;
 				if(children!=null) {
-					for(TreeNode child : children) {
-						value = Math.max(value, child.getHeight());
+					if(isDisjunction()) {
+						value = Integer.MAX_VALUE;
+						for(TreeNode child : children) {
+							value = Math.min(value, child.getHeight());
+						}
+					} else if(!isNegated()) {
+						for(TreeNode child : children) {
+							value = Math.max(value, child.getHeight());
+						}
+						value++;
 					}
 				}
-				height = value + 1;
+				height = value;
+				if(!isDisjunction()) {
+					height++;
+				}
 			}
 			
 			return height;
@@ -625,10 +842,18 @@ public class MatcherBuilder {
 				int value = 0;
 				
 				if(children!=null) {
-					value = children.size();
-					
-					for(TreeNode child : children) {
-						value += child.getDescendantCount();
+					if(isDisjunction()) {
+						value = Integer.MAX_VALUE;
+						for(TreeNode child : children) {
+							value = Math.min(value, child.getDescendantCount());
+						}
+						value++;
+					} else if(!isNegated()) {
+						value = children.size();
+						
+						for(TreeNode child : children) {
+							value += child.getDescendantCount();
+						}
 					}
 				}
 				
@@ -676,6 +901,63 @@ public class MatcherBuilder {
 
 		public SearchNode getTarget() {
 			return target;
+		}
+	}
+	
+	protected static class MatcherLinker {
+		protected Stack<List<Matcher>> stack = new Stack<>();
+		protected List<Matcher> buffer;
+		
+		public void add(Matcher matcher) {
+			if(buffer==null) {
+				buffer = newBuffer();
+			}
+			buffer.add(matcher);
+		}
+		
+		protected List<Matcher> newBuffer() {
+			return new LinkedList<>();
+		}
+		
+		public void link(Matcher target) {
+			if(buffer==null || buffer.isEmpty()) {
+				return;
+			}
+			
+			for(Matcher matcher : buffer) {
+				matcher.setNext(target);
+			}
+			
+			buffer.clear();
+		}
+		
+		public void clear() {
+			if(buffer!=null) {
+				buffer.clear();
+			}
+		}
+		
+		public void save() {
+			if(buffer==null) {
+				buffer = newBuffer();
+			}
+			stack.push(buffer);
+			buffer = null;
+		}
+		
+		public void load() {
+			if(stack.isEmpty())
+				throw new IllegalStateException();
+			
+			buffer = stack.pop();
+		}
+		
+		public void merge() {
+			if(stack.isEmpty() || buffer==null) {
+				return;
+			}
+			
+			stack.peek().addAll(buffer);
 		}
 	}
 }

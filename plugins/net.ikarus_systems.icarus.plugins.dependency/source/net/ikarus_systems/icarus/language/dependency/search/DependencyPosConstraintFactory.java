@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.language.dependency.search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.standard.AbstractConstraintFactory;
+import net.ikarus_systems.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint;
 import net.ikarus_systems.icarus.util.Options;
 
@@ -20,11 +21,11 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyPosContraintFactory extends AbstractConstraintFactory {
+public class DependencyPosConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "pos"; //$NON-NLS-1$
 
-	public DependencyPosContraintFactory() {
+	public DependencyPosConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.pos.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.pos.description"); //$NON-NLS-1$
 	}
@@ -60,7 +61,7 @@ public class DependencyPosContraintFactory extends AbstractConstraintFactory {
 		}
 	}
 
-	private static class DependencyPosCIConstraint extends DefaultConstraint {
+	private static class DependencyPosCIConstraint extends DefaultCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = 4933479883479834272L;
 

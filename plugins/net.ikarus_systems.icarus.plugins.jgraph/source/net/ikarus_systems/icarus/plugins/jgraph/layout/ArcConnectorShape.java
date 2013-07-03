@@ -75,6 +75,10 @@ public class ArcConnectorShape extends mxConnectorShape implements GraphLayoutCo
 			}
 
 			Graphics2D g = canvas.getGraphics();
+			
+			/*g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_ON);*/
+			
 			mxPoint ps = pts.get(0);
 			mxPoint pe = pts.get(pts.size() - 1);
 			if (ps.getX() > pe.getX()) {

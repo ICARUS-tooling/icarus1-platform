@@ -60,6 +60,8 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		this.list = list;
 		list.addMouseMotionListener(this);
 		list.addMouseListener(this);
+		
+		UIUtil.disableHtml(this);
 
 		setTable(table);
 	}
@@ -85,8 +87,9 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	}
 
 	protected int getOffsetForUI() {
-		if (getUI() instanceof WindowsTableHeaderUI)
+		if (getUI() instanceof WindowsTableHeaderUI) {
 			return UIUtil.isWindowsClassicLAF() ? 1 : 2;
+		}
 
 		// TODO test with more LaF implementations?
 

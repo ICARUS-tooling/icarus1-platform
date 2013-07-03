@@ -35,7 +35,7 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 		comboBox = new JComboBox<>(model);
 		comboBox.setEditable(editable);
 		comboBox.setSelectedItem(null);
-		comboBox.setRenderer(new TooltipListCellRenderer());
+		comboBox.setRenderer(TooltipListCellRenderer.getSharedInstance());
 		
 		setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
 	}

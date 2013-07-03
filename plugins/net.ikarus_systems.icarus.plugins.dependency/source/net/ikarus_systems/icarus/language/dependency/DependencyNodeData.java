@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import net.ikarus_systems.icarus.language.LanguageConstants;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
 import net.ikarus_systems.icarus.util.CloneableObject;
@@ -342,5 +343,9 @@ public class DependencyNodeData implements CloneableObject, Cloneable,
 	
 	public boolean isRoot() {
 		return head==LanguageUtils.DATA_HEAD_ROOT;
+	}
+	
+	public boolean isProjective() {
+		return isFlagSet(LanguageConstants.FLAG_PROJECTIVE);
 	}
 }

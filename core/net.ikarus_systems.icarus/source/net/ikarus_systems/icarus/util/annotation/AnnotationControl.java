@@ -31,7 +31,6 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.ui.NavigationControl;
 import net.ikarus_systems.icarus.ui.NavigationControl.ArrowStyle;
 import net.ikarus_systems.icarus.ui.NavigationControl.ElementType;
-import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.PropertyChangeSource;
@@ -50,13 +49,19 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 	
 	private static ActionManager sharedActionManager;
 	
-	protected ArrowStyle arrowStyle = NavigationControl.MINI_ARROW_STYLE;
+	protected ArrowStyle arrowStyle;
 
 	protected static final String selectModeActionId = "core.helpers.annotationControl.selectModeAction"; //$NON-NLS-1$
 	protected static final String firstActionId = "core.helpers.annotationControl.firstElementAction"; //$NON-NLS-1$
 	protected static final String previousActionId = "core.helpers.annotationControl.previousElementAction"; //$NON-NLS-1$
 	protected static final String nextActionId = "core.helpers.annotationControl.nextElementAction"; //$NON-NLS-1$
 	protected static final String lastActionId = "core.helpers.annotationControl.lastElementAction"; //$NON-NLS-1$
+	
+	protected static final String modeAllActionId = "core.helpers.annotationControl.modeAllAction"; //$NON-NLS-1$
+	protected static final String modeNoneActionId = "core.helpers.annotationControl.modeNoneAction"; //$NON-NLS-1$
+	protected static final String modeFirstActionId = "core.helpers.annotationControl.modeFirstAction"; //$NON-NLS-1$
+	protected static final String modeLastActionId = "core.helpers.annotationControl.modeLastAction"; //$NON-NLS-1$
+	protected static final String modeSelectedActionId = "core.helpers.annotationControl.modeSelectedAction"; //$NON-NLS-1$
 	
 	protected JLabel navigationLabel;
 	protected JButton[] navigationButtons;
@@ -69,10 +74,12 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 	public AnnotationControl(boolean allowSelection) {
 		this.allowSelection = allowSelection;
 		
-		registerActionCallbacks();		
+		setArrowStyle(NavigationControl.MINI_ARROW_STYLE);
 		
 		buildComponents();
 		setEnabled(false);
+		
+		refreshActions();
 	}
 
 	public AnnotationControl() {
@@ -96,19 +103,24 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		
 		if(allowSelection) {
 			navigationButtons = new JButton[4];
-			navigationButtons[0] = new JButton(actionManager.getAction(
-					"core.helpers.annotationControl.firstElementAction")); //$NON-NLS-1$
-			navigationButtons[1] = new JButton(actionManager.getAction(
-					"core.helpers.annotationControl.previousElementAction")); //$NON-NLS-1$
-			navigationButtons[2] = new JButton(actionManager.getAction(
-					"core.helpers.annotationControl.nextElementAction")); //$NON-NLS-1$
-			navigationButtons[3] = new JButton(actionManager.getAction(
-					"core.helpers.annotationControl.lastElementAction")); //$NON-NLS-1$
+			navigationButtons[0] = createNavigationButton(actionManager.getAction(firstActionId)); 
+			navigationButtons[1] = createNavigationButton(actionManager.getAction(previousActionId)); 
+			navigationButtons[2] = createNavigationButton(actionManager.getAction(nextActionId)); 
+			navigationButtons[3] = createNavigationButton(actionManager.getAction(lastActionId)); 
 		}
 		
 		navigationLabel = new JLabel();
 		navigationLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		UIUtil.resizeComponent(navigationLabel, 30, 40, 50, 21, 21, 26);
+		//UIUtil.resizeComponent(navigationLabel, 30, 40, 50, 21, 21, 26);
+	}
+	
+	protected JButton createNavigationButton(Action action) {
+		JButton b = new JButton(action);
+		b.setFocusable(false);
+		b.setFocusPainted(false);
+		b.setHideActionText(true);
+		
+		return b;
 	}
 
 	public ArrowStyle getArrowStyle() {
@@ -178,20 +190,11 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		actionManager.addHandler(nextActionId, this, "navigate"); //$NON-NLS-1$
 		actionManager.addHandler(lastActionId, this, "navigate"); //$NON-NLS-1$
 
-		actionManager.addHandler("core.helpers.annotationControl.modeAllAction",  //$NON-NLS-1$
-				this, "selectMode"); //$NON-NLS-1$
-		actionManager.addHandler("core.helpers.annotationControl.modeNoneAction",  //$NON-NLS-1$
-				this, "selectMode"); //$NON-NLS-1$
-		actionManager.addHandler("core.helpers.annotationControl.modeFirstAction",  //$NON-NLS-1$
-				this, "selectMode"); //$NON-NLS-1$
-		actionManager.addHandler("core.helpers.annotationControl.modeLastAction",  //$NON-NLS-1$
-				this, "selectMode"); //$NON-NLS-1$
-		actionManager.addHandler("core.helpers.annotationControl.modeSelectedAction",  //$NON-NLS-1$
-				this, "selectMode"); //$NON-NLS-1$
-	}
-	
-	protected boolean hasAnnotation() {
-		return annotationManager!=null && annotationManager.getAnnotation()!=null;
+		actionManager.addHandler(modeAllActionId, this, "selectMode"); //$NON-NLS-1$
+		actionManager.addHandler(modeNoneActionId, this, "selectMode"); //$NON-NLS-1$
+		actionManager.addHandler(modeFirstActionId, this, "selectMode"); //$NON-NLS-1$
+		actionManager.addHandler(modeLastActionId, this, "selectMode"); //$NON-NLS-1$
+		actionManager.addHandler(modeSelectedActionId, this, "selectMode"); //$NON-NLS-1$
 	}
 	
 	public void selectMode(boolean b) {
@@ -199,7 +202,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 	}
 	
 	public void selectMode(ActionEvent e) {
-		if(!hasAnnotation()) {
+		if(annotationManager==null) {
 			return;
 		}
 		
@@ -223,7 +226,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 			displayMode = AnnotationDisplayMode.NONE;
 			break;
 
-		case "select": //$NON-NLS-1$
+		case "selected": //$NON-NLS-1$
 			displayMode = AnnotationDisplayMode.SELECTED;
 			break;
 		}
@@ -248,62 +251,59 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 	}
 
 	public void navigate(ActionEvent e) {
-		if(!hasAnnotation()) {
+		if(annotationManager==null || !annotationManager.hasAnnotation()) {
 			return;
 		}
 		
 		String command = e.getActionCommand();
 		ElementType type = ElementType.parse(command);
 		
-		int maxIndex = annotationManager.getMaxTraversalIndex();
-		int selectedIndex = annotationManager.getTraversalIndex();
-		
 		switch (type) {
 		case FIRST_ELEMENT:
-			selectedIndex = 0;
+			annotationManager.first();
 			break;
 			
 		case PREVIOUS_ELEMENT:
-			selectedIndex--;
+			annotationManager.previous();
 			break;
 			
 		case NEXT_ELEMENT:
-			selectedIndex++;
+			annotationManager.next();
 			break;
 			
 		case LAST_ELEMENT:
-			selectedIndex = maxIndex;
+			annotationManager.last();
 			break;
 		}
-		
-		if(selectedIndex<0 || selectedIndex>=maxIndex) {
-			LoggerFactory.log(this, Level.WARNING, 
-					"Invalid action state - selection index is out of bounds: "+selectedIndex, new Throwable()); //$NON-NLS-1$
-			return;
-		}
-		
-		annotationManager.setTraversalIndex(selectedIndex);
 	}
 	
 	protected void refreshActions() {
-		if(!hasAnnotation()) {
+		if(annotationManager==null) {
 			return;
 		}
-		int maxIndex = annotationManager.getMaxTraversalIndex();
-		int selectedIndex = annotationManager.getTraversalIndex();
+		int maxPosition = annotationManager.getMaxPosition();
+		int position = annotationManager.getPosition();
 		
-		boolean selected = selectedIndex!=Annotation.BEFORE_FIRST;
+		boolean selected = position!=Annotation.BEFORE_FIRST
+				&& position!=Annotation.AFTER_LAST;
 		
-		boolean firstEnabled = selected && selectedIndex>0;
-		boolean previousEnabled = selected && selectedIndex>0;
-		boolean nextEnabled = selected && selectedIndex<maxIndex;
-		boolean lastEnabled = selected && selectedIndex<maxIndex;
+		boolean firstEnabled = selected && position>0;
+		boolean previousEnabled = selected && position>0;
+		boolean nextEnabled = selected && position<maxPosition;
+		boolean lastEnabled = selected && position<maxPosition;
 		
 		ActionManager actionManager = getActionManager();
 		actionManager.setEnabled(firstEnabled, firstActionId);
 		actionManager.setEnabled(previousEnabled, previousActionId);
 		actionManager.setEnabled(nextEnabled, nextActionId);
 		actionManager.setEnabled(lastEnabled, lastActionId);
+		
+		AnnotationDisplayMode displayMode = annotationManager.getDisplayMode();
+		actionManager.setSelected(displayMode==AnnotationDisplayMode.ALL, modeAllActionId);
+		actionManager.setSelected(displayMode==AnnotationDisplayMode.NONE, modeNoneActionId);
+		actionManager.setSelected(displayMode==AnnotationDisplayMode.FIRST_ONLY, modeFirstActionId);
+		actionManager.setSelected(displayMode==AnnotationDisplayMode.LAST_ONLY, modeLastActionId);
+		actionManager.setSelected(displayMode==AnnotationDisplayMode.SELECTED, modeSelectedActionId);
 	}
 
 	/**
@@ -333,8 +333,10 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		
 		if(this.annotationManager!=null) {
 			this.annotationManager.addPropertyChangeListener(this);
-			updateDisplayMode();
 		}
+		
+		updateDisplayMode();
+		refreshActions();
 		
 		firePropertyChange("annotationManager", oldValue, annotationManager); //$NON-NLS-1$
 	}
@@ -342,15 +344,25 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 	public void setEnabled(boolean enabled) {
 		navigationLabel.setEnabled(enabled);
 		menuButton.setEnabled(enabled);
-		if(navigationButtons!=null) {
+		/*if(navigationButtons!=null) {
 			for(JButton button : navigationButtons) {
 				button.setEnabled(enabled);
 			}
-		}
+		}*/
+		
+		updateDisplayMode();
 	}
 	
 	protected void updateDisplayMode() {
-		if(!hasAnnotation()) {
+		if(annotationManager==null) {
+			if(allowSelection) {
+				navigationButtons[0].setVisible(false);
+				navigationButtons[1].setVisible(false);
+				navigationButtons[2].setVisible(false);
+				navigationButtons[3].setVisible(false);
+				navigationLabel.setIcon(null);
+				navigationLabel.setVisible(false);
+			}
 			return;
 		}
 		
@@ -363,6 +375,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 			navigationButtons[2].setVisible(navMode);
 			navigationButtons[3].setVisible(navMode);
 		}
+		navigationLabel.setVisible(true);
 		
 		if(navMode) {
 			navigationLabel.setIcon(null);
@@ -371,11 +384,10 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 			navigationLabel.setText(displayMode.getName());
 			navigationLabel.setIcon(displayMode.getIcon());
 		}
-			
 	}
 
 	protected void updateNavigationLabel() {
-		if(!hasAnnotation()) {
+		if(annotationManager==null) {
 			return;
 		}
 		
@@ -383,11 +395,11 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 			return;
 		}
 		
-		int index = annotationManager.getTraversalIndex();
+		int position = annotationManager.getPosition();
 		String text = "- / -"; //$NON-NLS-1$
-		if (index != Annotation.BEFORE_FIRST) {
-			text = String.format("%d / %d", index + 1,  //$NON-NLS-1$
-					annotationManager.getMaxTraversalIndex()+1);
+		if (position != Annotation.BEFORE_FIRST && position != Annotation.AFTER_LAST) {
+			text = String.format("%d / %d", position + 1,  //$NON-NLS-1$
+					annotationManager.getMaxPosition()+1);
 		}
 		navigationLabel.setText(text);
 	}
@@ -396,12 +408,13 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 	public void propertyChange(PropertyChangeEvent evt) {
 		if("displayMode".equals(evt.getPropertyName())) { //$NON-NLS-1$
 			updateDisplayMode();
-		} else if("traversalIndex".equals(evt.getPropertyName()) //$NON-NLS-1$
-				|| "annotation".equals(evt.getPropertyName())) { //$NON-NLS-1$
+		} else if("position".equals(evt.getPropertyName())) { //$NON-NLS-1$
 			updateNavigationLabel();
 		} else if("annotation".equals(evt.getPropertyName())) { //$NON-NLS-1$
-			setEnabled(annotationManager.getAnnotation()!=null);
+			setEnabled(annotationManager!=null);
+			updateNavigationLabel();
 		}
+		refreshActions();
 	}
 	
 	public Component[] getComponents() {

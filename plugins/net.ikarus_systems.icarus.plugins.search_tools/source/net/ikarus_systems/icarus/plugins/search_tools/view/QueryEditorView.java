@@ -99,7 +99,6 @@ public class QueryEditorView extends View {
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 		
 		graphPresenter = new ConstraintGraphPresenter();
-		graphPresenter.init();
 
 		queryPane = new JTextPane(){
 

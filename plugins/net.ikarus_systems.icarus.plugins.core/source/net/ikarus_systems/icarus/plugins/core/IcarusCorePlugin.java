@@ -271,6 +271,11 @@ public final class IcarusCorePlugin extends Plugin {
 			}
 		}
 		
+		boolean hideDisclaimer = config.getBoolean("general.eula"); //$NON-NLS-1$
+		if(!hideDisclaimer) {
+			DisclaimerDialog.showDialog();
+		}
+		
 		// Show first frame
 		FrameManager.getInstance().newFrame();
 	}

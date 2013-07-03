@@ -52,7 +52,7 @@ public class SearchResult1DTableModel extends SearchResultTableModel {
 	
 	@Override
 	public SearchResult getSubResultAt(int row, int column) {
-		return resultData.getSubResult(getRowIndex(row));
+		return resultData.getSubResult(translateRowIndex(row));
 	}
 	
 	@Override
@@ -62,6 +62,6 @@ public class SearchResult1DTableModel extends SearchResultTableModel {
 
 	@Override
 	public Integer getValueAt(int row, int column) {
-		return resultData.getMatchCount(getRowIndex(row));
+		return resultData.getMatchCount(translateRowIndex(row));
 	}
 }

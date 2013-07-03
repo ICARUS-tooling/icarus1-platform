@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
@@ -64,6 +65,18 @@ public final class IOUtil {
 		
 		return null;
 	}
+	
+    public static void copyStream(final InputStream in, final OutputStream out,
+            int bufferSize) throws IOException {
+    	if(bufferSize==0) {
+    		bufferSize = 4096;
+    	}
+        byte[] buf = new byte[bufferSize];
+        int len;
+        while ((len = in.read(buf)) != -1) {
+            out.write(buf, 0, len);
+        }
+    }
 
 	public static boolean isLocalFile(URL url) {
 		String scheme = url.getProtocol();

@@ -9,6 +9,7 @@ import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.CollectionUtils;
+import net.ikarus_systems.icarus.util.CompactProperties;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
@@ -27,6 +28,8 @@ public class SubResult implements SearchResult {
 	protected int[][] groupTranslate;
 	
 	protected int[][] groupMatchCounts;
+	
+	protected CompactProperties properties;
 
 	public SubResult(SearchResult base, int... groupInstances) {
 		if(base==null)
@@ -148,13 +151,13 @@ public class SubResult implements SearchResult {
 				return new CorpusSearchResult0D(getSource(), list);
 			}
 		} else if (getDimension() >= groupInstances.length) {
-			// Combine group-instance arrays and create new
-			// SubResult based on current base result
+			// Combine group-instance arrays and let base create new
+			// SubResult
 			int[] combinedInstances = new int[fixedDimensions+groupInstances.length];
 			System.arraycopy(indexBuffer, 0, combinedInstances, 0, fixedDimensions);
 			System.arraycopy(groupInstances, 0, combinedInstances, fixedDimensions, groupInstances.length);
 			
-			return new SubResult(base, combinedInstances);
+			return base.getSubResult(combinedInstances);
 		}
 		return null;
 	}
@@ -453,5 +456,40 @@ public class SubResult implements SearchResult {
 	@Override
 	public AnnotatedData getAnnotatedEntry(ResultEntry entry) {
 		return base.getAnnotatedEntry(entry);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.annotation.AnnotationContainer#getAnnotationType()
+	 */
+	@Override
+	public ContentType getAnnotationType() {
+		return base.getAnnotationType();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getTotalHitCount()
+	 */
+	@Override
+	public int getTotalHitCount() {
+		return 0;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#setProperty(java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public void setProperty(String key, Object value) {
+		if(properties==null) {
+			properties = new CompactProperties();
+		}
+		properties.put(key, value);
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getProperty(java.lang.String)
+	 */
+	@Override
+	public Object getProperty(String key) {
+		return properties==null ? base.getProperty(key) : properties.get(key);
 	}
 }

@@ -22,11 +22,11 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyFeaturesContraintFactory extends AbstractConstraintFactory {
+public class DependencyFeaturesConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "features"; //$NON-NLS-1$
 
-	public DependencyFeaturesContraintFactory() {
+	public DependencyFeaturesConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.features.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.features.description"); //$NON-NLS-1$
 	}

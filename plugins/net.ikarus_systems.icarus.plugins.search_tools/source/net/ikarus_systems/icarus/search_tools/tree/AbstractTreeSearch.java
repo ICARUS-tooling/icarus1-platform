@@ -11,7 +11,12 @@ package net.ikarus_systems.icarus.search_tools.tree;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
@@ -26,10 +31,10 @@ import net.ikarus_systems.icarus.search_tools.SearchFactory;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
 import net.ikarus_systems.icarus.search_tools.SearchMode;
 import net.ikarus_systems.icarus.search_tools.SearchQuery;
-import net.ikarus_systems.icarus.search_tools.annotation.ResultAnnotator;
 import net.ikarus_systems.icarus.search_tools.result.EntryBuilder;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Orientation;
@@ -47,13 +52,15 @@ public abstract class AbstractTreeSearch extends Search {
 	protected SearchResult result;
 	
 	protected DataList<?> source;
-	
-	protected Batch lastBatch;
 	protected int processed;
-
-	protected int batchSize = 100;
 	
-	protected List<SearchWorker> workers = new ArrayList<>();
+	protected List<SearchWorker> workers = Collections.synchronizedList(new ArrayList<SearchWorker>());
+	protected Set<Integer> pendingIndices = Collections.synchronizedSet(new HashSet<Integer>());
+	protected Queue<ItemBuffer> pendingItems = new LinkedList<>();
+	
+	protected final Object notifer = new Object();
+	
+	protected int nextItemIndex = 0;
 	
 	protected final int resultLimit;
 	protected final SearchMode searchMode;
@@ -74,13 +81,32 @@ public abstract class AbstractTreeSearch extends Search {
 	
 	@Override
 	public void init() {
-		result = createResult();
+		if(!validateTree())
+			throw new IllegalStateException("Invalid search tree"); //$NON-NLS-1$
+		
 		baseRootMatcher = new MatcherBuilder(this).createRootMatcher();
+		if(baseRootMatcher==null)
+			throw new IllegalStateException("Invalid root matcher created"); //$NON-NLS-1$
+		
+		result = createResult();
+		if(result==null)
+			throw new IllegalStateException("Invalid result created"); //$NON-NLS-1$
+		
 		source = createSource(getTarget());
+		if(source==null)
+			throw new IllegalStateException("Invalid source created"); //$NON-NLS-1$
+		
+		// Now init those objects
+		baseRootMatcher.setLeftToRight(SearchUtils.isLeftToRightSearch(this));
 	}
 
 	@Override
 	protected void innerCancel() {
+		// Allow all workers to properly finish their last cycle
+		synchronized (notifer) {
+			notifer.notifyAll();
+		}
+		
 		for(SearchWorker worker : workers) {
 			worker.cancel();
 		}
@@ -91,37 +117,99 @@ public abstract class AbstractTreeSearch extends Search {
 		return getQuery().getSearchGraph();
 	}
 	
-	protected synchronized Batch nextBatch() {
+	protected boolean nextItem(ItemBuffer buffer) {
 		if(isCancelled()) {
-			return null;
+			return false;
 		}
 		
-		int start = 0;
-		if(lastBatch!=null) {
-			start = lastBatch.getStart()+lastBatch.getSize();
+		synchronized (result) {
+			if(resultLimit>0 && result.getTotalMatchCount()>=resultLimit) {
+				return false;
+			}
 		}
 		
-		int sourceSize = source.size();
+		// Check cached items
+		synchronized (pendingItems) {
+			ItemBuffer cached = pendingItems.poll();
+			if(cached!=null) {
+				buffer.copy(cached);
+				return true;
+			}
+		}
 		
-		if(start<sourceSize) {
-			int size = Math.min(batchSize, sourceSize-start);
-			lastBatch = new Batch(start, size);
-			return lastBatch;
-		} else {
-			return null;
+		synchronized (this) {
+			int sourceSize = source.size();
+			int index = nextItemIndex++;
+			
+			if(index<sourceSize) {
+				Object data = getTargetItem(index);
+				
+				if(data!=null) {
+					buffer.set(index, data);
+					return true;
+				} else {
+					pendingIndices.add(index);
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean hasUnprocessedItems() {
+		if(isCancelled()) {
+			return false;
+		}
+		
+		synchronized (pendingItems) {
+			if(!pendingItems.isEmpty()) {
+				return true;
+			}
+		}
+		
+		synchronized (this) {
+			if(nextItemIndex<source.size()) {
+				return true;
+			}
+		}
+		
+		return !pendingIndices.isEmpty();
+	}
+	
+	protected void awaitItem() throws InterruptedException {
+		synchronized (notifer) {
+			notifer.wait();
 		}
 	}
 	
-	protected synchronized void batchProcessed(Batch batch) {
-		processed += batch.getSize();
-		double total = source.size();
-		setProgress((int)(processed/total * 100d));
-		
-		//System.out.println("batch processed: "+batch+" progress="+getProgress());
+	protected void itemProcessed(ItemBuffer buffer) {
+		synchronized (this) {
+			processed++;
+			double total = source.size();
+			setProgress((int)(processed/total * 100d));
+		}
 	}
 	
-	protected synchronized Object getTargetItem(int index) {
+	/**
+	 * Tries to fetch an item from the target list. If the
+	 * item is currently not available (indicated by a return
+	 * value of {@code null}) the index will be stored as pending.
+	 */
+	protected Object getTargetItem(int index) {
 		return source.get(index);
+	}
+	
+	protected void offerItem(int index, Object data) {
+		synchronized (pendingItems) {
+			pendingItems.add(new ItemBuffer(index, data));
+		}
+		
+		pendingIndices.remove(index);
+		
+		synchronized (notifer) {
+			// TODO should we notify more than one worker?
+			notifer.notify();
+		}
 	}
 	
 	protected synchronized void finalizeResult(boolean broken) {
@@ -144,13 +232,15 @@ public abstract class AbstractTreeSearch extends Search {
 		return result.createCache();
 	}
 	
+	protected boolean validateTree() {
+		return TreeUtils.validateTree(getSearchGraph());
+	}
+	
 	protected abstract TargetTree createTargetTree();
 	
 	protected abstract DataList<?> createSource(Object target);
 
 	protected abstract SearchResult createResult();
-	
-	protected abstract ResultAnnotator createAnnotator();
 	
 	protected SearchWorker createWorker(int id) {
 		return new SearchWorker(id);
@@ -249,26 +339,42 @@ public abstract class AbstractTreeSearch extends Search {
 		return result;
 	}
 	
-	protected static class Batch {
-		final int start;
-		final int size;
+	protected static class ItemBuffer {
+		private int index;
+		private Object data;
 		
-		public Batch(int start, int size) {
-			this.start = start;
-			this.size = size;
-		}
-
-		public int getStart() {
-			return start;
-		}
-
-		public int getSize() {
-			return size;
+		public ItemBuffer() {
+			// no-op
 		}
 		
-		@Override
-		public String toString() {
-			return String.format("Batch [%d:%d]", start, start+size); //$NON-NLS-1$
+		public ItemBuffer(int index, Object data) {
+			set(index, data);
+		}
+		
+		public void set(int index, Object data) {
+			this.index = index;
+			this.data = data;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public Object getData() {
+			return data;
+		}
+
+		public void setIndex(int index) {
+			this.index = index;
+		}
+
+		public void setData(Object data) {
+			this.data = data;
+		}
+		
+		public void copy(ItemBuffer source) {
+			index = source.index;
+			data = source.data;
 		}
 	}
 	
@@ -279,7 +385,9 @@ public abstract class AbstractTreeSearch extends Search {
 		 */
 		@Override
 		public void run() {
-			finish();
+			if(!isDone()) {
+				finish();
+			}
 			finalizeResult(false);
 		}
 	}
@@ -291,7 +399,7 @@ public abstract class AbstractTreeSearch extends Search {
 		protected final EntryBuilder entryBuilder;
 		protected final Matcher rootMatcher;
 
-		protected Batch currentBatch;
+		protected ItemBuffer buffer;
 		
 		protected boolean cancelled = false;
 		
@@ -311,6 +419,8 @@ public abstract class AbstractTreeSearch extends Search {
 			rootMatcher.setCache(cache);
 			rootMatcher.setTargetTree(targetTree);
 			rootMatcher.setEntryBuilder(entryBuilder);
+			
+			buffer = new ItemBuffer();
 		}
 		
 		public String getId() {
@@ -347,38 +457,35 @@ public abstract class AbstractTreeSearch extends Search {
 			// Save reference to current thread
 			thread = Thread.currentThread();
 			
-			while((currentBatch=nextBatch()) != null) {
-				if(isCancelled()) {
-					break;
+			try {
+				while(!isCancelled() && hasUnprocessedItems()) {
+					if(nextItem(buffer)) {
+						// Init utilities
+						targetTree.reload(buffer.getData());
+						entryBuilder.setIndex(buffer.getIndex());
+						
+						// Let matcher do its part
+						rootMatcher.matches();
+						
+						// Notify search of processed item
+						itemProcessed(buffer);
+					} else {
+						try {
+							awaitItem();
+						} catch (InterruptedException e) {
+							break;
+						}
+					}
 				}
 				
-				//System.out.println("processing batch: "+currentBatch);
-				
-				int size = currentBatch.getSize();
-				int startIndex = currentBatch.getStart();
-				for(int i=0; i<size; i++) {
-					// Limited cancel check
-					if(cancelled) {
-						break;
-					}
-					if(resultLimit>0 && result.getTotalMatchCount()>=resultLimit) {
-						break;
-					}
-					
-					int index = startIndex+i;
-					
-					// Prepare target tree
-					targetTree.reload(getTargetItem(index));
-					entryBuilder.setIndex(index);
-					
-					// Let matcher do its part
-					rootMatcher.matches();
-				}
-				
-				batchProcessed(currentBatch);
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unexpected error during search", e); //$NON-NLS-1$
+				AbstractTreeSearch.this.cancel();
+			} finally {
+				rootMatcher.close();
+				targetTree.close();
 			}
-			
-			targetTree.close();
 			
 			try {
 				getBarrier().await(DEFAULT_BARRIER_TIMEOUT_SECONDS, TimeUnit.SECONDS);

@@ -87,6 +87,7 @@ import net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.config.ConfigDialog;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
@@ -94,9 +95,11 @@ import net.ikarus_systems.icarus.ui.helper.Configurable;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
+import net.ikarus_systems.icarus.util.annotation.AnnotationControl;
 import net.ikarus_systems.icarus.util.annotation.AnnotationManager;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
@@ -162,7 +165,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	
 	protected ActionManager actionManager;
 	
-	protected AnnotationManager annotationManager;
+	//protected AnnotationManager annotationManager;
+	protected AnnotationControl annotationControl;
 	
 	protected GraphLayout graphLayout;
 	protected GraphStyle graphStyle;
@@ -272,8 +276,11 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		
 		setData(data, options);
 		
+		AnnotationManager annotationManager = getAnnotationManager();
 		if(annotationManager!=null && data instanceof AnnotatedData) {
+			annotationManager.removePropertyChangeListener(getHandler());
 			annotationManager.setAnnotation(((AnnotatedData)data).getAnnotation());
+			annotationManager.addPropertyChangeListener(getHandler());
 		}
 		
 		rebuildGraph();
@@ -334,7 +341,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		return handler;
 	}
 	
-	public void init() {
+	protected void init() {
 		initGraphComponentInternals();
 		
 		installUtilities();
@@ -372,6 +379,16 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			configDelegate.addChangeListener(getHandler());
 			
 			configDelegate.reload();
+		}
+		
+		annotationControl = createAnnotationControl();
+		if(annotationControl!=null) {
+			annotationControl.addPropertyChangeListener("annotationManager", getHandler()); //$NON-NLS-1$
+		}
+		
+		AnnotationManager annotationManager = getAnnotationManager();
+		if(annotationManager!=null) {
+			annotationManager.addPropertyChangeListener(getHandler());
 		}
 		
 		setGraphLayout(createDefaultGraphLayout());
@@ -488,11 +505,23 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		feedSelector(options, SELECT_RENDERER_COMMAND);
 		options.put("multiline", true); //$NON-NLS-1$
 		
+		if(annotationControl!=null) {
+			List<Object> items = new ArrayList<>();
+			items.add(EntryType.SEPARATOR);
+			CollectionUtils.feedItems(items, (Object[])annotationControl.getComponents());
+			
+			options.put("annotationControl", items.toArray()); //$NON-NLS-1$
+		}
+		
 		String actionListId = isEditable() ? editableMainToolBarListId : uneditableMainToolBarListId;
 		JToolBar toolBar = actionManager.createToolBar(actionListId, options);
 		//toolBar.setLayout(new ModifiedFlowLayout(FlowLayout.LEFT, 1, 3));
 				
 		return toolBar;
+	}
+	
+	protected AnnotationControl createAnnotationControl() {
+		return new AnnotationControl(true);
 	}
 	
 	protected JComboBox<Extension> feedSelector(Options options, final String command) {
@@ -971,6 +1000,11 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		setData(null, null);
 		clearGraph();
 		clearUndoHistory();
+		
+		AnnotationManager annotationManager = getAnnotationManager();
+		if(annotationManager!=null) {
+			annotationManager.setAnnotation(null);
+		}
 	}
 
 	/**
@@ -993,6 +1027,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	@Override
 	public Component getPresentingComponent() {
 		if(presentingComponent==null) {
+			init();
+			
 			presentingComponent = createPresentingComponent();
 		}
 		
@@ -1097,16 +1133,30 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	}
 	
 	public AnnotationManager getAnnotationManager() {
-		return annotationManager;
+		return annotationControl==null ? null : annotationControl.getAnnotationManager();
 	}
 
 	public void setAnnotationManager(AnnotationManager annotationManager) {
-		if(this.annotationManager==annotationManager) {
+		if(annotationControl==null) {
 			return;
 		}
 		
-		AnnotationManager oldValue = this.annotationManager;
-		this.annotationManager = annotationManager;
+		AnnotationManager oldValue = getAnnotationManager();
+		if(oldValue==annotationManager) {
+			return;
+		}
+		
+		if(oldValue!=null) {
+			oldValue.removePropertyChangeListener(getHandler());
+		}
+		
+		if(annotationControl!=null) {
+			annotationControl.setAnnotationManager(annotationManager);
+		}
+		
+		if(annotationManager!=null) {
+			annotationManager.addPropertyChangeListener(getHandler());
+		}
 		
 		firePropertyChange("annotationManager", oldValue, annotationManager); //$NON-NLS-1$
 	}
@@ -2096,6 +2146,25 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		 */
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
+			if(evt.getSource() instanceof AnnotationManager) {
+				// OBSOLETE
+				// Discard all cell states cause highlighters are allowed to alter
+				// them during rendering and we want no artifacts
+				//getGraph().getView().reload();
+				//getGraphControl().repaint();
+				
+				// Since highlighting of annotations influences so many other
+				// operations like layout compression and styling we need to refresh all
+				if(isCompressEnabled()) {
+					rebuildGraph();
+				} else {
+					getGraph().getView().reload();
+					refreshAll();
+				}
+				
+				return;
+			}
+			
 			if("view".equals(evt.getPropertyName())) { //$NON-NLS-1$
 				mxGraphView oldView = (mxGraphView)evt.getOldValue();
 				mxGraphView newView = (mxGraphView)evt.getNewValue();
@@ -2117,6 +2186,17 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				
 				if(newModel!=null) {
 					newModel.addListener(mxEvent.UNDO, this);
+				}
+			} else if("annotationManager".equals(evt.getPropertyName())) { //$NON-NLS-1$
+				AnnotationManager oldManager = (AnnotationManager)evt.getOldValue();
+				AnnotationManager newManager = (AnnotationManager)evt.getNewValue();
+				
+				if(oldManager!=null) {
+					oldManager.removePropertyChangeListener(this);
+				}
+				
+				if(newManager!=null) {
+					newManager.addPropertyChangeListener(this);
 				}
 			}
 		}

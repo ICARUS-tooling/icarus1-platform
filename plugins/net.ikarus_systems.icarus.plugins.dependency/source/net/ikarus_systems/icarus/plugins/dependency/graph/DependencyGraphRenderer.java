@@ -9,24 +9,34 @@
  */
 package net.ikarus_systems.icarus.plugins.dependency.graph;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.util.Map;
 
 import net.ikarus_systems.icarus.config.ConfigDelegate;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyNodeData;
 import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
+import net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotationManager;
+import net.ikarus_systems.icarus.language.dependency.annotation.DependencyHighlighting;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.ui.view.TextRenderer;
 import net.ikarus_systems.icarus.util.HtmlUtils.HtmlTableBuilder;
+import net.ikarus_systems.icarus.util.annotation.AnnotationDisplayMode;
 
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.shape.mxITextShape;
-import com.mxgraph.util.mxRectangle;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 
 /**
@@ -38,7 +48,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	
 	protected TextRenderer renderer = new TextRenderer();
 	
-	protected ConfigDelegate configDelegate;
+	protected GraphPresenter presenter;
 	
 	protected HtmlTableBuilder tableBuilder = new HtmlTableBuilder(500);
 	
@@ -54,7 +64,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	@Override
 	public void install(Object target) {
 		if(target instanceof GraphPresenter) {
-			configDelegate = ((GraphPresenter)target).getConfigDelegate();
+			presenter = (GraphPresenter)target;
 		}
 	}
 
@@ -63,22 +73,19 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	 */
 	@Override
 	public void uninstall(Object target) {
-		configDelegate = null;
+		presenter = null;
 	}
 	
 	protected boolean isTrue(String key) {
+		ConfigDelegate configDelegate = presenter==null ? null : presenter.getConfigDelegate();
 		return configDelegate==null ? false : configDelegate.getBoolean(key);
-	}
-
-	@Override
-	public mxRectangle getPreferredSizeForCell(GraphOwner owner, Object cell) {
-		// TODO Auto-generated method stub
-		return super.getPreferredSizeForCell(owner, cell);
 	}
 	
 	protected String normalize(String s) {
 		return s==null || s.isEmpty() ? "-" : s; //$NON-NLS-1$
 	}
+	
+	protected static final char DISTANCE_SYMBOL = 0x0394; // greek capital delta
 
 	@Override
 	public String convertValueToString(GraphOwner owner, Object cell) {
@@ -114,13 +121,13 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			boolean showFeatures = isTrue("showFeatures"); //$NON-NLS-1$
 			boolean markRoot = isTrue("markRoot"); //$NON-NLS-1$
 			
-			// Ensure somthing to be displayed
+			// Ensure something to be displayed
 			if(!showForm && !showLemma && !showFeatures && !showPos) {
 				showForm = true;
 			}
 						
 			if (showIndex) {
-				sb.append(String.valueOf(nodeData.getIndex()+1)).append(": "); //$NON-NLS-1$
+				sb.append(String.valueOf(nodeData.getIndex()+1)).append(":\n"); //$NON-NLS-1$
 			}
 			if(showForm) {
 				sb.append(normalize(DependencyUtils.getForm(nodeData))).append("\n"); //$NON-NLS-1$
@@ -141,15 +148,19 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			boolean showRelation = isTrue("showRelation"); //$NON-NLS-1$
 			boolean showDistance = isTrue("showDistance"); //$NON-NLS-1$
 			boolean showDirection = isTrue("showDirection"); //$NON-NLS-1$
+			boolean markNonProjective = isTrue("markNonProjective"); //$NON-NLS-1$
 
 			if(showRelation) {
 				sb.append(normalize(DependencyUtils.getRelation(nodeData))).append("\n"); //$NON-NLS-1$
 			}
 			if(showDirection) {
-				sb.append(normalize(DependencyUtils.getDirection(nodeData)));
+				sb.append(normalize(DependencyUtils.getDirection(nodeData))).append("\n"); //$NON-NLS-1$
 			}
 			if(showDistance) {
-				sb.append(" (").append(String.valueOf(Math.abs(nodeData.getIndex()-nodeData.getHead()))).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(DISTANCE_SYMBOL).append(String.valueOf(Math.abs(nodeData.getIndex()-nodeData.getHead()))).append("\n"); //$NON-NLS-1$
+			}
+			if(markNonProjective && !nodeData.isProjective()) {
+				sb.append("(non-projective)"); //$NON-NLS-1$
 			}
 		}
 		
@@ -236,25 +247,302 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 
 	@Override
 	public mxITextShape getTextShape(Map<String, Object> style, boolean html) {
-		return super.getTextShape(style, html);
-				
-		// TODO DEBUG
-		
-		//return html ? textShapes.get(TEXT_SHAPE_HTML) : this;
+		return html ? textShapes.get(TEXT_SHAPE_HTML) : this;
 	}
 	
-	protected void prepareRenderer(mxCellState state) {
+	protected void refreshCellStyle(mxCellState state) {
+		if(presenter==null) {
+			return;
+		}
+		if(presenter.getAnnotationManager()==null) {
+			return;
+		}
+		DependencyAnnotationManager annotationManager = (DependencyAnnotationManager) presenter.getAnnotationManager();
 		
+		if(annotationManager.getDisplayMode()==AnnotationDisplayMode.NONE) {
+			return;
+		}
+		
+		mxIGraphModel model = state.getView().getGraph().getModel();
+		Object cell = state.getCell();
+		boolean isNode = model.isVertex(cell);
+		if(!isNode) {
+			cell = model.getTerminal(cell, false);
+		}
+		Object value = model.getValue(cell);
+		
+		if(!(value instanceof DependencyNodeData)) {
+			return;
+		}
+		DependencyNodeData data = (DependencyNodeData)value;
+		
+		if(!annotationManager.hasAnnotation()) {
+			return;
+		}
+		
+		long highlight = annotationManager.getHighlight(data.getIndex());
+		
+		//System.out.println(data.getIndex()+":"+DependencyHighlighting.dumpHighlight(highlight));
+		
+		Color color = null;
+		int groupId = isNode ?
+				DependencyHighlighting.getNodeGroupId(highlight) 
+				: DependencyHighlighting.getEdgeGroupId(highlight);
+		if(groupId!=-1) {
+			color = Grouping.getGrouping(groupId).getColor();
+		} else {
+			color = isNode ?
+					DependencyHighlighting.getNodeHighlightColor(highlight)
+					: DependencyHighlighting.getEdgeHighlightColor(highlight);
+		}
+		
+		if(color!=null) {
+			Map<String, Object> style = state.getStyle();
+			style.put(mxConstants.STYLE_STROKECOLOR, mxUtils.hexString(color));
+		}
+	}
+
+	@Override
+	public Object drawCell(mxCellState state) {
+		refreshCellStyle(state);
+		
+		return super.drawCell(state);
 	}
 
 	/**
-	 * @see com.mxgraph.shape.mxITextShape#paintShape(com.mxgraph.canvas.mxGraphics2DCanvas, java.lang.String, com.mxgraph.view.mxCellState, java.util.Map)
+	 * @see com.mxgraph.shape.mxITextShape#paintShape(com.mxgraph.canvas.mxGraphics2DCanvas,
+	 *      java.lang.String, com.mxgraph.view.mxCellState, java.util.Map)
 	 */
 	@Override
 	public void paintShape(mxGraphics2DCanvas canvas, String text,
 			mxCellState state, Map<String, Object> style) {
-		// TODO Auto-generated method stub
-		
-	}
+		Rectangle rect = state.getLabelBounds().getRectangle();
+		Graphics2D g = canvas.getGraphics();
 
+		if (g.getClipBounds() == null || g.getClipBounds().intersects(rect)) {
+			
+			// BEGIN ORIGINAL
+			boolean horizontal = mxUtils.isTrue(style,
+					mxConstants.STYLE_HORIZONTAL, true);
+			double scale = canvas.getScale();
+			int x = rect.x;
+			int y = rect.y;
+			int w = rect.width;
+			int h = rect.height;
+
+			if (!horizontal) {
+				g.rotate(-Math.PI / 2, x + w / 2, y + h / 2);
+				g.translate(w / 2 - h / 2, h / 2 - w / 2);
+			}
+
+			Color fontColor = mxUtils.getColor(style,
+					mxConstants.STYLE_FONTCOLOR, Color.black);
+			g.setColor(fontColor);
+
+			// Shifts the y-coordinate down by the ascent plus a workaround
+			// for the line not starting at the exact vertical location
+			Font scaledFont = mxUtils.getFont(style, scale);
+			g.setFont(scaledFont);
+			int fontSize = mxUtils.getInt(style, mxConstants.STYLE_FONTSIZE,
+					mxConstants.DEFAULT_FONTSIZE);
+			FontMetrics fm = g.getFontMetrics();
+			int scaledFontSize = scaledFont.getSize();
+			double fontScaleFactor = ((double) scaledFontSize)
+					/ ((double) fontSize);
+			// This factor is the amount by which the font is smaller/
+			// larger than we expect for the given scale. 1 means it's
+			// correct, 0.8 means the font is 0.8 the size we expected
+			// when scaled, etc.
+			double fontScaleRatio = fontScaleFactor / scale;
+			// The y position has to be moved by (1 - ratio) * height / 2
+			y += 2 * fm.getMaxAscent() - fm.getHeight()
+					+ mxConstants.LABEL_INSET * scale;
+
+			Object vertAlign = mxUtils.getString(style,
+					mxConstants.STYLE_VERTICAL_ALIGN, mxConstants.ALIGN_MIDDLE);
+			double vertAlignProportion = 0.5;
+
+			if (vertAlign.equals(mxConstants.ALIGN_TOP)) {
+				vertAlignProportion = 0;
+			} else if (vertAlign.equals(mxConstants.ALIGN_BOTTOM)) {
+				vertAlignProportion = 1.0;
+			}
+
+			y += (1.0 - fontScaleRatio) * h * vertAlignProportion;
+
+			// Gets the alignment settings
+			Object align = mxUtils.getString(style, mxConstants.STYLE_ALIGN,
+					mxConstants.ALIGN_CENTER);
+
+			if (align.equals(mxConstants.ALIGN_LEFT)) {
+				x += mxConstants.LABEL_INSET * scale;
+			} else if (align.equals(mxConstants.ALIGN_RIGHT)) {
+				x -= mxConstants.LABEL_INSET * scale;
+			}
+			
+			// END ORIGINAL
+
+			// Try to paint the text in annotated form
+			if(paintAnnotatedText(text, state, g, fm, x, y, w, h, align, horizontal)) {
+				return;
+			}
+			
+			// If annotating the text failed paint it in plain form
+			paintText(text, state, g, fm, x, y, w, h, align, horizontal);
+		}
+	}
+	
+	private String[] nodeTokens = {
+		null,
+		"form", //$NON-NLS-1$
+		"lemma", //$NON-NLS-1$
+		"pos", //$NON-NLS-1$
+		"features", //$NON-NLS-1$
+		null,
+	};
+	private boolean[] nodeVisibility = new boolean[nodeTokens.length];
+	
+	private String[] edgeTokens = {
+		"relation", //$NON-NLS-1$
+		"direction", //$NON-NLS-1$
+		"distance", //$NON-NLS-1$
+		"projectivity", //$NON-NLS-1$
+	};
+	private boolean[] edgeVisibility = new boolean[edgeTokens.length];
+
+	protected boolean paintAnnotatedText(String text, mxCellState state, Graphics2D g, FontMetrics fm, 
+			int x, int y, int w, int h, Object align, boolean horizontal) {
+
+		if(presenter==null) {
+			return false;
+		}
+		if(presenter.getAnnotationManager()==null) {
+			return false;
+		}
+		DependencyAnnotationManager annotationManager = (DependencyAnnotationManager) presenter.getAnnotationManager();
+		
+		if(annotationManager.getDisplayMode()==AnnotationDisplayMode.NONE) {
+			return false;
+		}
+		
+		mxIGraphModel model = state.getView().getGraph().getModel();
+		Object cell = state.getCell();
+		boolean isNode = model.isVertex(cell);
+		if(!isNode) {
+			cell = model.getTerminal(cell, false);
+		}
+		Object value = model.getValue(cell);
+		
+		if(!(value instanceof DependencyNodeData)) {
+			return false;
+		}
+		DependencyNodeData data = (DependencyNodeData)value;
+		
+		
+		if(!annotationManager.hasAnnotation()) {
+			return false;
+		}
+		
+		long highlight = annotationManager.getHighlight(data.getIndex());
+		if(highlight==0L) {
+			return false;
+		}
+		
+		String[] lines = text.split("\n"); //$NON-NLS-1$
+		
+		Color[] colors = new Color[lines.length];
+		boolean[] vis;
+		String[] tokens;
+		
+		if(isNode) {
+			vis = nodeVisibility;
+			vis[0] = isTrue("showIndex"); //$NON-NLS-1$
+			vis[1] = isTrue("showForm"); //$NON-NLS-1$
+			vis[2] = isTrue("showLemma"); //$NON-NLS-1$
+			vis[3] = isTrue("showPos"); //$NON-NLS-1$
+			vis[4] = isTrue("showFeatures"); //$NON-NLS-1$
+			vis[5] = isTrue("markRoot"); //$NON-NLS-1$
+			
+			// Ensure something to be displayed
+			if(!vis[1] && !vis[2] && !vis[3] && !vis[4]) {
+				vis[1] = true;
+			}
+			tokens = nodeTokens;
+		} else {
+			vis = edgeVisibility;
+			vis[0] = isTrue("showRelation"); //$NON-NLS-1$
+			vis[1] = isTrue("showDirection"); //$NON-NLS-1$
+			vis[2] = isTrue("showDistance"); //$NON-NLS-1$
+			vis[3] = isTrue("markNonProjective"); //$NON-NLS-1$
+			
+			tokens = edgeTokens;
+		}
+		
+		int index = 0;
+		for(int i=0; i<tokens.length; i++) {
+			if(vis[i]) {
+				String token = tokens[i];
+				if(token!=null) {
+					colors[index] = DependencyHighlighting.getHighlightColor(highlight, token);
+				}
+				index++;
+			}
+		}
+
+		Color c = g.getColor();
+		for (int i = 0; i < lines.length; i++) {
+			int dx = 0;
+
+			if (align.equals(mxConstants.ALIGN_CENTER)) {
+				int sw = fm.stringWidth(lines[i]);
+
+				if (horizontal) {
+					dx = (w - sw) / 2;
+				} else {
+					dx = (h - sw) / 2;
+				}
+			} else if (align.equals(mxConstants.ALIGN_RIGHT)) {
+				int sw = fm.stringWidth(lines[i]);
+				dx = ((horizontal) ? w : h) - sw;
+			}
+			
+			Color col = colors[i];
+			if(col==null) {
+				col = c;
+			}
+
+			g.setColor(col);
+			g.drawString(lines[i], x + dx, y);
+			y += fm.getHeight() + mxConstants.LINESPACING;
+		}
+		g.setColor(c);
+		
+		return true;
+	}
+	
+	protected void paintText(String text, mxCellState state, Graphics2D g, FontMetrics fm, 
+			int x, int y, int w, int h, Object align, boolean horizontal) {
+		// Draws the text line by line
+		String[] lines = text.split("\n"); //$NON-NLS-1$
+
+		for (int i = 0; i < lines.length; i++) {
+			int dx = 0;
+
+			if (align.equals(mxConstants.ALIGN_CENTER)) {
+				int sw = fm.stringWidth(lines[i]);
+
+				if (horizontal) {
+					dx = (w - sw) / 2;
+				} else {
+					dx = (h - sw) / 2;
+				}
+			} else if (align.equals(mxConstants.ALIGN_RIGHT)) {
+				int sw = fm.stringWidth(lines[i]);
+				dx = ((horizontal) ? w : h) - sw;
+			}
+
+			g.drawString(lines[i], x + dx, y);
+			y += fm.getHeight() + mxConstants.LINESPACING;
+		}
+	}
 }

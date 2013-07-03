@@ -26,6 +26,10 @@
 	<action id="plugins.searchTools.searchResultView.openResultAction"
 		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
 		
+	<!-- Clear View -->
+	<action id="plugins.searchTools.searchResultView.clearViewAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.searchTools.searchResultView.toolBarList">
 		<item type="action" value="plugins.searchTools.searchResultView.openPreferencesAction" />
@@ -38,6 +42,8 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchResultView.saveResultAction" />
 		<item type="action" value="plugins.searchTools.searchResultView.openResultAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchResultView.clearViewAction" />
 		<separator />
 	</action-list>
 	

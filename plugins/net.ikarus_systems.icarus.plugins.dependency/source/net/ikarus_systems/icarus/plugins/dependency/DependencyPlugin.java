@@ -9,6 +9,8 @@
  */
 package net.ikarus_systems.icarus.plugins.dependency;
 
+import net.ikarus_systems.icarus.language.dependency.annotation.DependencyHighlighting;
+
 import org.java.plugin.Plugin;
 
 /**
@@ -27,7 +29,7 @@ public class DependencyPlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
-		// no-op
+		DependencyHighlighting.loadConfig();
 	}
 
 	/**

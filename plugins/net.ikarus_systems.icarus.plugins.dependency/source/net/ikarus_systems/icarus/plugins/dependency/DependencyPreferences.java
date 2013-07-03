@@ -13,9 +13,12 @@ import net.ikarus_systems.icarus.config.ConfigBuilder;
 import net.ikarus_systems.icarus.config.ConfigConstants;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.config.ConfigRegistry.EntryType;
+import net.ikarus_systems.icarus.language.dependency.annotation.DependencyHighlighting;
 import net.ikarus_systems.icarus.plugins.jgraph.JGraphPreferences;
+import net.ikarus_systems.icarus.ui.helper.TooltipListCellRenderer;
 import net.ikarus_systems.icarus.ui.table.ColumnInfo;
 import net.ikarus_systems.icarus.ui.table.ColumnListHandler;
+import net.ikarus_systems.icarus.util.annotation.HighlightType;
 
 /**
  * @author Markus Gärtner
@@ -67,6 +70,26 @@ public class DependencyPreferences {
 				ConfigConstants.HANDLER, new ColumnListHandler());
 		builder.back();
 		// END APPEARANCE GROUP
+		
+		// HIGHLIGHTING GROUP
+		builder.addGroup("highlighting", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showCorpusIndex", false); //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+		builder.setProperties(builder.addOptionsEntry("groupHighlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+		builder.addBooleanEntry("markMultipleAnnotations", true); //$NON-NLS-1$
+		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("edgeHighlight", DependencyHighlighting.getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("transitiveHighlight", DependencyHighlighting.getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
+		for(String token : DependencyHighlighting.getTokens()) {
+			builder.addColorEntry(token+"Highlight", DependencyHighlighting.getHighlightColor(token).getRGB()); //$NON-NLS-1$
+		}
+		builder.back();
+		// END HIGHLIGHTING GROUP
 		
 		builder.back();
 		// END GENERAL DEPENDENCY GROUP

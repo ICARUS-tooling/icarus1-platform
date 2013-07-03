@@ -12,6 +12,7 @@ package net.ikarus_systems.icarus.search_tools.annotation;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
+import net.ikarus_systems.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
@@ -21,4 +22,6 @@ import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
 public interface ResultAnnotator {
 
 	AnnotatedData annotate(SearchResult searchResult, Object data, ResultEntry entry);
+	
+	ContentType getAnnotationType();
 }

@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.util.annotation;
 
+
 /**
  * Marks an object as the owner of an {@code AnnotationManager}.
  * Generally this dedicated object is solely in charge of controlling

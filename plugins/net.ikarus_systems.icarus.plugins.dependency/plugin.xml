@@ -54,6 +54,29 @@
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.table.TablePresenter" />
 	</extension>
 	
+	<extension id="DependencyAnnotationManager" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Annotation manager implementation to be used with DependencyAnnotation
+				objects.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotationManager" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyAnnotationContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.util.annotation.AnnotationManager" />
+	</extension>
+	
+	<extension id="DependencyListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.list.DependencyListCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
 	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
 		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.DependencyNodeData" />
 		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.SimpleDependencyData" />
@@ -68,6 +91,15 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyData" />
+	</extension>
+	
+	<extension id="DependencyAnnotationContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotation
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotation" />
 	</extension>
 	
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
@@ -85,14 +117,14 @@
 		<parameter id="token" value="direction" />
 		<parameter id="token" value="projectivity" />
 		<parameter id="factories">
-			<parameter id="form" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFormContraintFactory" />
-			<parameter id="lemma" value="net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaContraintFactory" />
-			<parameter id="pos" value="net.ikarus_systems.icarus.language.dependency.search.DependencyPosContraintFactory" />
-			<parameter id="features" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesContraintFactory" />
-			<parameter id="relation" value="net.ikarus_systems.icarus.language.dependency.search.DependencyRelationContraintFactory" />
-			<parameter id="distance" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceContraintFactory" />
-			<parameter id="direction" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionContraintFactory" />
-			<parameter id="projectivity" value="net.ikarus_systems.icarus.language.dependency.search.DependencyProjectivityContraintFactory" />
+			<parameter id="form" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFormConstraintFactory" />
+			<parameter id="lemma" value="net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaConstraintFactory" />
+			<parameter id="pos" value="net.ikarus_systems.icarus.language.dependency.search.DependencyPosConstraintFactory" />
+			<parameter id="features" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesConstraintFactory" />
+			<parameter id="relation" value="net.ikarus_systems.icarus.language.dependency.search.DependencyRelationConstraintFactory" />
+			<parameter id="distance" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceConstraintFactory" />
+			<parameter id="direction" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionConstraintFactory" />
+			<parameter id="projectivity" value="net.ikarus_systems.icarus.language.dependency.search.DependencyProjectivityConstraintFactory" />
 		</parameter>
 	</extension>
 	

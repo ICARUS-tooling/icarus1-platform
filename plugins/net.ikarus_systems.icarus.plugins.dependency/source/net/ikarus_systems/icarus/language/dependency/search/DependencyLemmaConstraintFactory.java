@@ -21,11 +21,11 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyLemmaContraintFactory extends AbstractConstraintFactory {
+public class DependencyLemmaConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "lemma"; //$NON-NLS-1$
 
-	public DependencyLemmaContraintFactory() {
+	public DependencyLemmaConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.lemma.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.lemma.description"); //$NON-NLS-1$
 	}

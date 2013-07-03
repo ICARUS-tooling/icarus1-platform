@@ -18,6 +18,7 @@ import java.awt.Font;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
@@ -39,9 +40,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import net.ikarus_systems.icarus.io.IOUtil;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
@@ -211,6 +215,16 @@ public class Core {
 			throw new Error("Unable to define log file: "+logFile.getAbsolutePath(), e); //$NON-NLS-1$
 		} catch (IOException e) {
 			throw new Error("Unable to access log file: "+logFile.getAbsolutePath(), e); //$NON-NLS-1$
+		}
+		
+		// Ensure license file
+		File licenseFile = new File(rootFolder, "license.txt"); //$NON-NLS-1$
+		try {
+			if(!licenseFile.exists() && licenseFile.createNewFile()) {
+				IOUtil.copyStream(getLicense(), new FileOutputStream(licenseFile), 0);
+			}
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, "Failed to export license file", ex); //$NON-NLS-1$
 		}
 		
 		// From here on we can use our logger
@@ -601,6 +615,43 @@ public class Core {
 		
 		DialogFactory.getGlobalFactory().showGenericDialog(
 				null, "Coming...", null, label, false); //$NON-NLS-1$
+	}
+	
+	private static InputStream getLicense() {
+		return Core.class.getResourceAsStream("license.txt"); //$NON-NLS-1$
+	}
+	
+	public static String getLicenseText() {
+		InputStream in = getLicense();
+		try {
+			return IOUtil.readStream(in);
+		} catch (IOException e) {
+			LoggerFactory.log(Core.class, Level.SEVERE, 
+					"Failed to load license file", e); //$NON-NLS-1$
+			
+			return null;
+		}
+	}
+	
+	public static Icon getLicenseIcon() {
+		return new ImageIcon(Core.class.getResource("cc-by-nc-sa.png")); //$NON-NLS-1$
+	}
+	
+	private static ImageIcon logo_16;
+	private static ImageIcon logo_32;
+	
+	public static ImageIcon getSmallIcon() {
+		if(logo_16==null) {
+			logo_16 = new ImageIcon(Core.class.getResource("logo_16x16.png")); //$NON-NLS-1$
+		}
+		return logo_16;
+	}
+	
+	public static ImageIcon getLargeIcon() {
+		if(logo_32==null) {
+			logo_32 = new ImageIcon(Core.class.getResource("logo_32x32.png")); //$NON-NLS-1$
+		}
+		return logo_32;
 	}
 	
 	/**

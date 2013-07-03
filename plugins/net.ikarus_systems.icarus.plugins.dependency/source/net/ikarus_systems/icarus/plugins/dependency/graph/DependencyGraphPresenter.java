@@ -31,7 +31,9 @@ import net.ikarus_systems.icarus.language.dependency.DependencyNodeData;
 import net.ikarus_systems.icarus.language.dependency.DependencyUtils;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData;
 import net.ikarus_systems.icarus.language.dependency.SimpleDependencyData;
+import net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotationManager;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayoutConstants;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphRenderer;
 import net.ikarus_systems.icarus.plugins.jgraph.util.CellBuffer;
@@ -39,8 +41,11 @@ import net.ikarus_systems.icarus.plugins.jgraph.util.GraphUtils;
 import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
+import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Order;
+import net.ikarus_systems.icarus.util.annotation.AnnotationControl;
+import net.ikarus_systems.icarus.util.annotation.AnnotationManager;
 import net.ikarus_systems.icarus.util.data.ContentType;
 
 import com.mxgraph.model.mxCell;
@@ -71,6 +76,19 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	public DependencyGraphPresenter() {
 		setAllowCycles(false);
 		setEnforceTree(true);
+	}
+
+	@Override
+	protected AnnotationControl createAnnotationControl() {
+		AnnotationControl annotationControl = super.createAnnotationControl();
+		annotationControl.setAnnotationManager(new DependencyAnnotationManager());
+		
+		return annotationControl;
+	}
+
+	@Override
+	public DependencyAnnotationManager getAnnotationManager() {
+		return (DependencyAnnotationManager) super.getAnnotationManager();
 	}
 
 	/**
@@ -189,7 +207,14 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	@Override
 	protected Options createLayoutOptions() {
 		if(isCompressEnabled()) {
-			return new Options(GraphLayoutConstants.CELL_MERGER_KEY, new DependencyCellMerger());
+			Options options = new Options(GraphLayoutConstants.CELL_MERGER_KEY, new DependencyCellMerger());
+			
+			AnnotationManager annotationManager = getAnnotationManager();
+			if(annotationManager!=null && annotationManager.hasAnnotation()) {
+				options.put(GraphLayoutConstants.CELL_FILTER_KEY, new AnnotatedCellFilter());
+			}
+			
+			return options;
 		} else {
 			return null;
 		}
@@ -723,6 +748,33 @@ public class DependencyGraphPresenter extends GraphPresenter {
 			// TODO
 		} finally {
 			model.endUpdate();
+		}
+	}
+	
+	/**
+	 * Cell filter to be passed to {@link GraphLayout} instances
+	 * to filter out vertices that are not to be merged into others.
+	 * <p>
+	 * Does rely on the fact that the majority of modifications on
+	 * a {@code GraphPresenter} ought to be performed on the 
+	 * <i>Event-Dispatch-Thread</i>. Exploiting this and the fact that
+	 * this class is only instantiated when an actual annotation is
+	 * present, there are no additional checks for validity of
+	 * annotation data or the annotation manager in general!
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	protected class AnnotatedCellFilter implements Filter {
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.Filter#accepts(java.lang.Object)
+		 */
+		@Override
+		public boolean accepts(Object cell) {
+			DependencyNodeData data = (DependencyNodeData) graph.getModel().getValue(cell);
+			return getAnnotationManager().isHighlighted(data.getIndex());
 		}
 	}
 

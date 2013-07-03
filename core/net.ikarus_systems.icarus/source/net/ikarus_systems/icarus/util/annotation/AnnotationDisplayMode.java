@@ -10,9 +10,11 @@
 package net.ikarus_systems.icarus.util.annotation;
 
 import javax.swing.Icon;
+import javax.xml.bind.annotation.XmlEnum;
 
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.IconRegistry;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * 
@@ -20,10 +22,11 @@ import net.ikarus_systems.icarus.ui.IconRegistry;
  * @version $Id$
  *
  */
-public enum AnnotationDisplayMode {
+@XmlEnum
+public enum AnnotationDisplayMode implements Identity {
 
 	ALL("allAnnotations", "all"), //$NON-NLS-1$ //$NON-NLS-2$
-	NONE("noAnnotation", "none"), //$NON-NLS-1$ //$NON-NLS-2$
+	NONE("noAnnotations", "none"), //$NON-NLS-1$ //$NON-NLS-2$
 	FIRST_ONLY("firstAnnotation", "first"), //$NON-NLS-1$ //$NON-NLS-2$
 	LAST_ONLY("lastAnnotation", "last"), //$NON-NLS-1$ //$NON-NLS-2$
 	SELECTED("selectedAnnotation", "selected"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -61,5 +64,21 @@ public enum AnnotationDisplayMode {
 	
 	public Icon getIcon() {
 		return IconRegistry.getGlobalRegistry().getIcon(token+".gif"); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
+	 */
+	@Override
+	public String getId() {
+		return getClass().getSimpleName();
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 }

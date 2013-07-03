@@ -256,5 +256,37 @@ public final class ResultDummies {
 		public AnnotatedData getAnnotatedEntry(ResultEntry entry) {
 			return null;
 		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.util.annotation.AnnotationContainer#getAnnotationType()
+		 */
+		@Override
+		public ContentType getAnnotationType() {
+			return null;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getTotalHitCount()
+		 */
+		@Override
+		public int getTotalHitCount() {
+			return 0;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#setProperty(java.lang.String, java.lang.Object)
+		 */
+		@Override
+		public void setProperty(String key, Object value) {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getProperty(java.lang.String)
+		 */
+		@Override
+		public Object getProperty(String key) {
+			return null;
+		}
 	}
 }

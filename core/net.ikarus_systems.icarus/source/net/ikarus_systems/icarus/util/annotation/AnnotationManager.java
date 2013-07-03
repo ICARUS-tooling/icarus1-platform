@@ -9,13 +9,10 @@
  */
 package net.ikarus_systems.icarus.util.annotation;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.lang.ref.WeakReference;
-
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.PropertyChangeSource;
 import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 /**
  * 
@@ -31,76 +28,39 @@ public abstract class AnnotationManager
 	
 	protected AnnotationDisplayMode displayMode;
 	
-	protected int traversalIndex = Annotation.AFTER_LAST;
+	protected int position = Annotation.AFTER_LAST;
+	
+	protected Object delegate;
 	
 	protected AnnotationManager() {
-	}
-	
-	protected AnnotationManager(AnnotationManager parent) {
-		Exceptions.testNullArgument(parent, "parent"); //$NON-NLS-1$
-		
-		parent.addPropertyChangeListener(new ParentPropertyListener(this));
-		
-		copyState(parent);
-	}
-	
-	protected void copyState(AnnotationManager source) {
-		Object oldAnnotation = annotation;
-		AnnotationDisplayMode oldDisplayMode = displayMode;
-		int oldTraversalIndex = traversalIndex;
-		
-		annotation = source.annotation;
-		displayMode = source.displayMode;
-		traversalIndex = source.traversalIndex;
-		
-		annotationChanged();
-		displayModeChanged();
-		traversalIndexChanged();
-		
-		if(oldAnnotation != annotation)
-			firePropertyChange("annotation", oldAnnotation, annotation); //$NON-NLS-1$
-		if(oldDisplayMode != displayMode)
-			firePropertyChange("displayMode", oldDisplayMode, displayMode); //$NON-NLS-1$
-		if(oldTraversalIndex != traversalIndex)
-			firePropertyChange("traversalIndex", oldTraversalIndex, traversalIndex); //$NON-NLS-1$
+		setDisplayMode(AnnotationDisplayMode.FIRST_ONLY);
 	}
 
-	/**
-	 * @return the annotation
-	 */
 	public Annotation getAnnotation() {
 		return annotation;
 	}
 
-	/**
-	 * @param annotation the annotation to set
-	 */
 	public void setAnnotation(Annotation annotation) {
-		Exceptions.testNullArgument(annotation, "annotation"); //$NON-NLS-1$
+		if(annotation!=null) {
+			ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(annotation);
+			if(contentType==null || !supportsAnnotation(contentType))
+				throw new IllegalArgumentException("Unsupported annotation type: "+annotation.getClass()); //$NON-NLS-1$
+		}
 		
-		if(!annotation.equals(this.annotation)) {
-			
+		if(annotation!=this.annotation) {
 			Object oldValue = this.annotation;
 			this.annotation = annotation;
 			
-			annotationChanged();
+			position = annotation==null ? Annotation.AFTER_LAST : 0;
 			
 			firePropertyChange("annotation", oldValue, annotation); //$NON-NLS-1$
 		}
 	}
-	
-	protected abstract void annotationChanged();
 
-	/**
-	 * @return the displayMode
-	 */
 	public AnnotationDisplayMode getDisplayMode() {
 		return displayMode;
 	}
 
-	/**
-	 * @param displayMode the displayMode to set
-	 */
 	public void setDisplayMode(AnnotationDisplayMode displayMode) {
 		Exceptions.testNullArgument(displayMode, "displayMode"); //$NON-NLS-1$
 		
@@ -109,30 +69,33 @@ public abstract class AnnotationManager
 			Object oldValue = this.displayMode;
 			this.displayMode = displayMode;
 			
-			displayModeChanged();
+			delegate = createDelegate(displayMode);
 			
 			firePropertyChange("displayMode", oldValue, displayMode); //$NON-NLS-1$
 		}
 	}
 	
-	protected abstract void displayModeChanged();
+	protected Object createDelegate(AnnotationDisplayMode displayMode) {
+		return null;
+	}
+	
+	public boolean hasAnnotation() {
+		return annotation!=null && annotation.getAnnotationCount()>0;
+	}
 
-	/**
-	 * @return the traversalIndex
-	 */
-	public int getTraversalIndex() {
+	public int getPosition() {
 		switch (getDisplayMode()) {
 		case FIRST_ONLY:
 			return 0;
 			
 		case LAST_ONLY:
-			return getMaxTraversalIndex();
+			return getMaxPosition();
 			
 		case ALL:
 			return Annotation.AFTER_LAST;
 			
 		case SELECTED:
-			return traversalIndex;
+			return position;
 			
 		case NONE:
 			return Annotation.BEFORE_FIRST;
@@ -142,86 +105,78 @@ public abstract class AnnotationManager
 		}
 	}
 	
-	private void checkIndex(int index) {
-		if(index<0 || index>=getMaxTraversalIndex())
+	private void checkPosition(int position) {
+		if(position<0 || position>getMaxPosition())
 			throw new IndexOutOfBoundsException();
 	}
 
-	/**
-	 * @param traversalIndex the traversalIndex to set
-	 */
-	public void setTraversalIndex(int traversalIndex) {
-		if(traversalIndex != this.traversalIndex) {
-			checkIndex(traversalIndex);
+	public void setPosition(int position) {
+		if(position != this.position) {
+			checkPosition(position);
 			
-			int oldValue = this.traversalIndex;
-			this.traversalIndex = traversalIndex;
+			int oldValue = this.position;
+			this.position = position;
 			
-			traversalIndexChanged();
-			
-			firePropertyChange("traversalIndex", oldValue, traversalIndex); //$NON-NLS-1$
+			firePropertyChange("position", oldValue, position); //$NON-NLS-1$
 		}
 	}
 	
-	protected abstract void traversalIndexChanged();
-	
-	public abstract int getMaxTraversalIndex();
+	public int getMaxPosition() {
+		return annotation==null ? -1 : annotation.getAnnotationCount()-1;
+	}
 	
 	public void previous() {
 		if(!isFirst()) {
-			int oldValue = traversalIndex;
-			traversalIndex--;
-			
-			traversalIndexChanged();
+			int oldValue = position;
+			position--;
 
-			firePropertyChange("traversalIndex", oldValue, traversalIndex); //$NON-NLS-1$
+			firePropertyChange("position", oldValue, position); //$NON-NLS-1$
 		}
 	}
 	
 	public void next() {
 		if(!isLast()) {
-			int oldValue = traversalIndex;
-			traversalIndex++;
-			
-			traversalIndexChanged();
+			int oldValue = position;
+			position++;
 
-			firePropertyChange("traversalIndex", oldValue, traversalIndex); //$NON-NLS-1$
+			firePropertyChange("position", oldValue, position); //$NON-NLS-1$
 		}
 	}
 	
 	public void first() {
 		if(!isFirst()) {
-			int oldValue = traversalIndex;
-			traversalIndex = 0;
-			
-			traversalIndexChanged();
+			int oldValue = position;
+			position = 0;
 
-			firePropertyChange("traversalIndex", oldValue, traversalIndex); //$NON-NLS-1$
+			firePropertyChange("position", oldValue, position); //$NON-NLS-1$
 		}
 	}
 	
 	public void last() {
 		if(!isLast()) {
-			int oldValue = traversalIndex;
-			traversalIndex = getMaxTraversalIndex();
-			
-			traversalIndexChanged();
+			int oldValue = position;
+			position = getMaxPosition();
 
-			firePropertyChange("traversalIndex", oldValue, traversalIndex); //$NON-NLS-1$
+			firePropertyChange("position", oldValue, position); //$NON-NLS-1$
 		}
 	}
 	
 	public boolean isLast() {
-		return traversalIndex == getMaxTraversalIndex(); 
+		return position == getMaxPosition(); 
 	}
 	
 	public boolean isFirst() {
-		return traversalIndex == 0; 
+		return position == 0; 
 	}
 	
-	public abstract AnnotationManager linkedCopy();
+	public abstract ContentType getAnnotationType();
 	
-	public abstract boolean supportsAnnotation(ContentType contentType);
+	public boolean supportsAnnotation(ContentType contentType) {
+		if(contentType==null) {
+			return false;
+		}
+		return ContentTypeRegistry.isCompatible(getAnnotationType(), contentType);
+	}
 	
 	/**
 	 * Returns the total number of 'hits' the underlying
@@ -235,34 +190,24 @@ public abstract class AnnotationManager
 	 * annotated can be smaller).
 	 * @return
 	 */
-	public abstract int getDisplayedAnnotationCount();
-	
-	/**
-	 * 
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	protected static class ParentPropertyListener implements PropertyChangeListener {
-		
-		private final WeakReference<AnnotationManager> ref;
-		
-		ParentPropertyListener(AnnotationManager manager) {
-			Exceptions.testNullArgument(manager, "manager"); //$NON-NLS-1$
-			
-			this.ref = new WeakReference<AnnotationManager>(manager);
-		}
-
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			
-			AnnotationManager parent = (AnnotationManager)evt.getSource();
-			
-			if(ref.get()==null)
-				parent.removePropertyChangeListener(this);
-			else 
-				ref.get().copyState(parent);
+	public int getDisplayedAnnotationCount() {
+		if(annotation==null || annotation.getAnnotationCount()==0) {
+			return 0;
 		}
 		
+		switch (displayMode) {
+		case ALL:
+			return annotation.getAnnotationCount();
+		case NONE:
+			return 0;
+		case FIRST_ONLY:
+			return 1;
+		case LAST_ONLY:
+			return 1;
+		case SELECTED:
+			return 1;
+		}
+		
+		return 0;
 	}
 }

@@ -32,6 +32,7 @@ import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
@@ -165,10 +166,10 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		
 		this.searchResult = searchResult;
 		
-		displayResult();
+		displayResult(options);
 	}
 	
-	protected abstract void displayResult();
+	protected abstract void displayResult(Options options);
 	
 	public abstract void refresh();
 	
@@ -189,7 +190,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	 */
 	@Override
 	public void close() {
-		setSearchResult(null, null);
+		// for subclasses
 	}
 
 	/**
@@ -240,22 +241,17 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		int total = result.getTotalMatchCount();
 		int groups = result.getDimension();
 		
-		String format = "%d %s - %d %s"; //$NON-NLS-1$
-		/*if(result.isFinal()) {
-			format += " (%s)"; //$NON-NLS-1$
-		}*/
+		String format = "%d %s - %s %s"; //$NON-NLS-1$
 		
-		String hitString = total==1 ?
-				rm.get("plugins.searchTools.searchResultView.labels.hitSg") //$NON-NLS-1$
-				: rm.get("plugins.searchTools.searchResultView.labels.hitPl"); //$NON-NLS-1$
+		String matchString = total==1 ?
+				rm.get("plugins.searchTools.labels.matchSg") //$NON-NLS-1$
+				: rm.get("plugins.searchTools.labels.matchPl"); //$NON-NLS-1$
 				
 		String groupString = groups==1 ?
-				rm.get("plugins.searchTools.searchResultView.labels.groupSg") //$NON-NLS-1$
-				: rm.get("plugins.searchTools.searchResultView.labels.groupPl"); //$NON-NLS-1$
+				rm.get("plugins.searchTools.labels.groupSg") //$NON-NLS-1$
+				: rm.get("plugins.searchTools.labels.groupPl"); //$NON-NLS-1$
 				
-		String finalString = rm.get("plugins.searchTools.searchResultView.labels.final"); //$NON-NLS-1$
-				
-		return String.format(format, groups, groupString, total, hitString, finalString);
+		return String.format(format, groups, groupString, StringUtil.formatDecimal(total), matchString);
 	}
 
 	protected class Handler extends MouseAdapter  {

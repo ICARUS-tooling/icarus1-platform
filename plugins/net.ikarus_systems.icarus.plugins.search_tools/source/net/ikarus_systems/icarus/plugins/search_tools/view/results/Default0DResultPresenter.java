@@ -196,7 +196,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
 	 */
 	@Override
-	protected void displayResult() {
+	protected void displayResult(Options options) {
 		if(searchResult==null) {
 			showInfo(null);
 			return;
@@ -216,9 +216,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		if(detailsPresenter==null || !PresenterUtils.presenterSupports(detailsPresenter, entryType)) {
 			// Try graph presenter first
 			detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphPresenter.class, entryType, true, false);
-			if(detailsPresenter!=null) {
-				((GraphPresenter)detailsPresenter).init();
-			} else {
+			if(detailsPresenter==null) {
 				detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(AWTPresenter.class, entryType, true, true);
 			}
 		}
@@ -233,7 +231,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		
 		// Now present data
 		try {
-			listPresenter.present(listWrapper, null);
+			listPresenter.present(listWrapper, options);
 		} catch (UnsupportedPresentationDataException e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to present data list: "+listWrapper, e); //$NON-NLS-1$

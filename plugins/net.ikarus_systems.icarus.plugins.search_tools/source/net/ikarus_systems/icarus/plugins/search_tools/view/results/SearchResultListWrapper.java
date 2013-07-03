@@ -14,6 +14,7 @@ import javax.swing.event.ChangeListener;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
+import net.ikarus_systems.icarus.util.annotation.AnnotationContainer;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -22,7 +23,7 @@ import net.ikarus_systems.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public class SearchResultListWrapper implements DataList<Object> {
+public class SearchResultListWrapper implements DataList<Object>, AnnotationContainer {
 
 	private final SearchResult searchResult;
 	
@@ -82,6 +83,14 @@ public class SearchResultListWrapper implements DataList<Object> {
 	@Override
 	public void removeChangeListener(ChangeListener listener) {
 		// no-op
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.util.annotation.AnnotationContainer#getAnnotationType()
+	 */
+	@Override
+	public ContentType getAnnotationType() {
+		return searchResult.getAnnotationType();
 	}
 
 }

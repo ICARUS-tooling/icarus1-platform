@@ -11,6 +11,8 @@ package net.ikarus_systems.icarus.search_tools.tree;
 
 import java.util.Iterator;
 
+import net.ikarus_systems.icarus.search_tools.EdgeType;
+import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
@@ -47,14 +49,18 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	protected Matcher[] before;
 	protected Matcher[] after;
 	
+	protected Matcher[] options;
+	
 	protected TargetTree targetTree;
 	protected GroupCache cache;
 	protected EntryBuilder entryBuilder;
 	
-	protected int allocation;
+	protected int allocation = -1;
 	
 	protected int height;
 	protected int descendantCount;
+	protected int childCount;
+	protected NodeType type;
 			
 	protected boolean exhaustive = false;
 	protected SearchMode searchMode = SearchMode.MATCHES;
@@ -68,6 +74,20 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		
 		this.node = node;
 		this.edge = edge;
+		
+		// Refresh childCount
+		if(node!=null) {
+			for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
+				EdgeType type = node.getOutgoingEdgeAt(i).getEdgeType();
+				if(type==EdgeType.PRECEDENCE || type==EdgeType.LINK) {
+					continue;
+				}
+				
+				childCount++;
+			}
+			
+			type = node.getNodeType();
+		}
 	}
 	
 	public boolean matches() {					
@@ -75,85 +95,68 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		targetTree.viewNode(parentAllocation);
 		indexIterator.setMax(targetTree.getEdgeCount()-1);
 		
-		boolean matched = false;
-		boolean excluded = false;
-		
 		int minIndex = getMinIndex();
 		int maxIndex = getMaxIndex();
-				
-		while(indexIterator.hasNext()) {
-			targetTree.viewNode(parentAllocation);
-			targetTree.viewChild(indexIterator.next());
-			
-			// Honor locked nodes that are allocated to other matchers!
-			if(targetTree.isNodeLocked()) {
-				continue;
-			}
-			
-			// Check for structural constraints 
-			if(targetTree.getDescendantCount()<descendantCount
-					|| targetTree.getHeight()<height) {
-				continue;
-			}
-			
-			// Check for required number of children
-			if(targetTree.getEdgeCount()<node.getChildCount()) {
-				continue;
-			}
-			
-			// Check for precedence constraints
-			if(targetTree.getNodeIndex()<minIndex
-					|| targetTree.getNodeIndex()>maxIndex) {
-				continue;
-			}
-			
-			// Check if the current node is a potential match
-			if(!matchesConstraints()) {
-				continue;
-			}
-			
-			// Lock allocation
-			allocate();
-			
-			// Search for child matchers that serve as exclusions
-			excluded = false;
-			if(exclusions!=null) {
-				for(Matcher matcher : exclusions) {
-					if(matcher.matches()) {
-						excluded = true; 
-						break;
-					}
-				}
-			}
-			
-			if(!excluded) {
-				// Delegate further search to the next matcher
-				// or otherwise commit current match
-				if(next!=null) {
-					matched |= next.matches();
-				} else if(!exclusionMember) {
-					// ONLY cache here if this matcher is not a
-					// member of a sub-tree that serves as exclusion
-					cacheHits();
-					
-					// Commit if every hit should be reported independently
-					if(searchMode==SearchMode.INDEPENDENT_HITS) {
-						commit();
-					}
-					
-					matched = true;
-				}
-			}
+		
+		boolean matched = false;
+		
+		if(minIndex<=maxIndex) {
+			while(indexIterator.hasNext()) {
+				targetTree.viewNode(parentAllocation);
+				targetTree.viewChild(indexIterator.next());
 
-			// Release lock
-			deallocate();
-			
-			// Stop search if only one successful hit is required
-			// This is the case when either a non-exhaustive search
-			// takes place or the matcher is a part of a sub-tree
-			// serving as exclusion
-			if(matched && (exclusionMember || !exhaustive)) {
-				break;
+				// Check for precedence constraints
+				if(targetTree.getNodeIndex()<minIndex
+						|| targetTree.getNodeIndex()>maxIndex) {
+					continue;
+				}
+				
+				// Honor locked nodes that are allocated to other matchers!
+				if(targetTree.isNodeLocked()) {
+					continue;
+				}
+
+				// Check for type constraints
+				if(!matchesType()) {
+					continue;
+				}
+				
+				// Check for structural constraints 
+				if(targetTree.getDescendantCount()<descendantCount
+						|| targetTree.getHeight()<height) {
+					continue;
+				}
+				
+				// Check for required number of children
+				if(targetTree.getEdgeCount()<childCount) {
+					continue;
+				}
+				
+				// Check if the current node is a potential match
+				if(!matchesConstraints()) {
+					continue;
+				}
+
+				// Lock allocation
+				allocate();
+
+				// Search for child matchers that serve as exclusions			
+				if(!matchesExclusions()) {
+					// Delegate further search to the next matcher
+					// or otherwise commit current match
+					matched |= matchesNext();
+				}
+	
+				// Release lock
+				deallocate();
+				
+				// Stop search if only one successful hit is required
+				// This is the case when either a non-exhaustive search
+				// takes place or the matcher is a part of a sub-tree
+				// serving as exclusion
+				if(matched && (exclusionMember || !exhaustive)) {
+					break;
+				}
 			}
 		}
 		
@@ -167,6 +170,57 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		}
 		
 		return matched;
+	}
+	
+	/**
+	 * Returns {@code true} if at least on of the
+	 * {@code Matcher} instances registered as exclusions
+	 * returns a successful match.
+	 */
+	protected boolean matchesExclusions() {
+		if(exclusions!=null) {
+			for(Matcher matcher : exclusions) {
+				if(matcher.matches()) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean matchesType() {
+		switch (type) {
+		case LEAF:
+			return targetTree.getEdgeCount()==0;
+		case ROOT:
+			return targetTree.getNodeIndex()==targetTree.getRootIndex();
+		case INTERMEDIATE:
+			return targetTree.getEdgeCount()>0;
+
+		default:
+			return true;
+		}
+	}
+	
+	protected boolean matchesNext() {
+		if(next!=null) {
+			return next.matches();
+		} else if(!exclusionMember) {
+			// ONLY cache here if this matcher is not a
+			// member of a sub-tree that serves as exclusion
+			cacheHits();
+			
+			// Commit if every hit should be reported independently
+			if(searchMode==SearchMode.INDEPENDENT_HITS) {
+				commit();
+			}
+			
+			//return true;
+		}
+		
+		// return false
+		return true;
 	}
 	
 	protected boolean matchesConstraints() {
@@ -212,13 +266,17 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	 * considering the allocation of all previous matchers.
 	 */
 	public int getMinIndex() {
-		int min = 0;
+		int min = -1;
 		
 		if(before!=null) {
 			for(Matcher matcher : before) {
-				min = Math.max(min, matcher.getAllocation());
+				int alloc = matcher.getAllocation();
+				if(alloc!=-1) {
+					min = Math.max(min, alloc);
+				}
 			}
 		}
+		min++;
 		
 		return min;
 	}
@@ -228,15 +286,23 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	 * considering the allocation of all previous matchers.
 	 */
 	public int getMaxIndex() {
-		int max = targetTree.size()-1;
+		int max = targetTree.size();
 		
 		if(after!=null) {
-			for(Matcher matcher :after) {
-				max = Math.min(max, matcher.getAllocation());
+			for(Matcher matcher : after) {
+				int alloc = matcher.getAllocation();
+				if(alloc!=-1) {
+					max = Math.min(max, alloc);
+				}
 			}
 		}
+		max--;
 		
 		return max;
+	}
+	
+	public int getChildCount() {
+		return childCount;
 	}
 
 	public SearchNode getNode() {
@@ -326,6 +392,11 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				matcher.setLeftToRight(leftToRight);
 			}
 		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.setLeftToRight(leftToRight);
+			}
+		}
 	}
 
 	public void setId(int id) {
@@ -354,6 +425,14 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 
 	public void setAfter(Matcher[] after) {
 		this.after = after;
+	}
+
+	public Matcher[] getOptions() {
+		return options;
+	}
+
+	public void setOptions(Matcher[] options) {
+		this.options = options;
 	}
 
 	public void setHeight(int height) {
@@ -413,6 +492,11 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				matcher.setTargetTree(targetTree);
 			}
 		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.setTargetTree(targetTree);
+			}
+		}
 	}
 
 	public void setCache(GroupCache cache) {
@@ -451,6 +535,11 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				matcher.setEntryBuilder(entryBuilder);
 			}
 		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.setEntryBuilder(entryBuilder);
+			}
+		}
 	}
 
 	public void setSearchMode(SearchMode searchMode) {
@@ -471,6 +560,42 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				matcher.setSearchMode(searchMode);
 			}
 		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.setSearchMode(searchMode);
+			}
+		}
+	}
+	
+	protected void innerClose() {
+		// for subclasses
+	}
+
+	public void close() {
+		if(next!=null) {
+			next.close();
+		}
+		if(alternate!=null) {
+			alternate.close();
+		}
+		if(exclusions!=null) {
+			for(Matcher matcher : exclusions) {
+				matcher.close();
+			}
+		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.close();
+			}
+		}
+	}
+
+	/**
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(Matcher other) {
+		return id-other.id;
 	}
 	
 	public Matcher clone() {
@@ -488,6 +613,8 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	protected static abstract class IndexIterator implements Iterator<Integer> {
 
 		public abstract void setMax(int max);
+		
+		public abstract int getRange();
 
 		/**
 		 * @see java.util.Iterator#remove()
@@ -496,6 +623,8 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		public void remove() {
 			// no-op
 		}
+		
+		public abstract IndexIterator clone();
 	}
 	
 	protected static class LTRIterator extends IndexIterator {
@@ -524,13 +653,31 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		public Integer next() {
 			return ++current;
 		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.tree.Matcher.IndexIterator#clone()
+		 */
+		@Override
+		public IndexIterator clone() {
+			return new LTRIterator();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.tree.Matcher.IndexIterator#getRange()
+		 */
+		@Override
+		public int getRange() {
+			return Math.max(max, 0);
+		}
 	}
 	
 	protected static class RTLIterator extends IndexIterator {
 		
 		private int current = -1;
+		private int max = -1;
 		
 		public void setMax(int max) {
+			this.max = max;
 			current = max+1;
 		}
 
@@ -549,13 +696,21 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		public Integer next() {
 			return --current;
 		}
-	}
 
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Matcher other) {
-		return id-other.id;
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.tree.Matcher.IndexIterator#clone()
+		 */
+		@Override
+		public IndexIterator clone() {
+			return new RTLIterator();
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.tree.Matcher.IndexIterator#getRange()
+		 */
+		@Override
+		public int getRange() {
+			return Math.max(max, 0);
+		}
 	}
 }

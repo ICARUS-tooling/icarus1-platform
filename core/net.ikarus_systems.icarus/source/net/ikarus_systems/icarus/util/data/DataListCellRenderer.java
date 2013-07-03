@@ -23,6 +23,15 @@ import net.ikarus_systems.icarus.ui.helper.TooltipListCellRenderer;
 public class DataListCellRenderer extends TooltipListCellRenderer {
 
 	private static final long serialVersionUID = -3488624857141838661L;
+	
+	private static DataListCellRenderer sharedInstance;
+	
+	public static DataListCellRenderer getSharedIntance() {
+		if(sharedInstance==null) {
+			sharedInstance = new DataListCellRenderer();
+		}
+		return sharedInstance;
+	}
 
 	public DataListCellRenderer() {
 		// no-op

@@ -89,6 +89,8 @@ public class ConstraintUnifier {
 		
 		List<SearchConstraint> groupConstraints = new ArrayList<>();
 		
+		feedConstraints(groupConstraints, node.getConstraints());
+		
 		for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
 			SearchEdge edge = node.getOutgoingEdgeAt(i);
 			if(edge.getEdgeType()==EdgeType.PRECEDENCE

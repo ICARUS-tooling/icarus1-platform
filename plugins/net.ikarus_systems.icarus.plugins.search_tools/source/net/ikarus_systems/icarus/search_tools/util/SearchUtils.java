@@ -39,6 +39,7 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultGraphNode;
 import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchGraph;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Orientation;
+import net.ikarus_systems.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -51,6 +52,22 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		// no-op
 	}
 	
+	public static boolean isExhaustiveSearch(Search search) {
+		return search.getParameters().get(SEARCH_MODE, DEFAULT_SEARCH_MODE).isExhaustive();
+	}
+	
+	public static boolean isLeftToRightSearch(Search search) {
+		return search.getParameters().get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION)==Orientation.LEFT_TO_RIGHT;
+	}
+	
+	public static boolean isOptimizedSearch(Search search) {
+		return search.getParameters().getBoolean(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH);
+	}
+	
+	public static boolean isCaseSensitiveSearch(Search search) {
+		return search.getParameters().getBoolean(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE);
+	}
+	
 	/**
 	 * Returns an exact copy of the given {@code SearchGraph} with
 	 * all its constraints contained within nodes and edges instantiated
@@ -59,7 +76,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	 * to the factories so one can create a copy of an existing search graph
 	 * with new settings.
 	 * <p>
-	 * it is recommended that {@link SearchFactory} implementations make use
+	 * It is recommended that {@link SearchFactory} implementations make use
 	 * of this method when creating the actual {@link Search} object so they
 	 * can be sure that all constraints are properly instantiated and not
 	 * plain instances of {@link DefaultConstraint}.
@@ -111,6 +128,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		}
 		
 		DefaultSearchGraph result = new DefaultSearchGraph();
+		result.setRootOperator(graph.getRootOperator());
 		
 		result.setRootNodes(roots.toArray(new SearchNode[0]));
 		result.setNodes(nodes.toArray(new SearchNode[0]));
@@ -148,16 +166,22 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		
 		StringBuilder sb = new StringBuilder();
 		int groupCount = searchResult.getDimension();
-		sb.append(groupCount).append(" "); //$NON-NLS-1$
+		sb.append(StringUtil.formatDecimal(groupCount)).append(" "); //$NON-NLS-1$
 		sb.append(ResourceManager.getInstance().get(
 				groupCount==1 ? "plugins.searchTools.labels.groupSg"  //$NON-NLS-1$
 						: "plugins.searchTools.labels.groupPl")); //$NON-NLS-1$
 		
-		int hitCount = searchResult.getTotalMatchCount();
-		sb.append(", ").append(hitCount).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+		int matchCount = searchResult.getTotalMatchCount();
+		sb.append(", ").append(StringUtil.formatDecimal(matchCount)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(ResourceManager.getInstance().get(
-				groupCount==1 ? "plugins.searchTools.labels.entrySg"  //$NON-NLS-1$
+				matchCount==1 ? "plugins.searchTools.labels.entrySg"  //$NON-NLS-1$
 						: "plugins.searchTools.labels.entryPl")); //$NON-NLS-1$
+		
+		int hitCount = searchResult.getTotalHitCount();
+		sb.append(", ").append(StringUtil.formatDecimal(hitCount)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(ResourceManager.getInstance().get(
+				hitCount==1 ? "plugins.searchTools.labels.hitSg"  //$NON-NLS-1$
+						: "plugins.searchTools.labels.hitPl")); //$NON-NLS-1$
 		
 		return sb.toString();
 	}
@@ -381,6 +405,36 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	
 	public static boolean isEmpty(SearchGraph graph) {
 		return graph==null || graph.getRootNodes()==null || graph.getRootNodes().length==0;
+	}
+	
+	public static boolean isUndefined(SearchConstraint[] constraints) {
+		if(constraints==null) {
+			return true;
+		}
+		
+		for(SearchConstraint constraint : constraints) {
+			if(!constraint.isUndefined()) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public static boolean isUndefined(SearchEdge edge) {
+		if(edge==null) {
+			return true;
+		}
+		
+		return isUndefined(edge.getConstraints());
+	}
+	
+	public static boolean isUndefined(SearchNode node) {
+		if(node==null) {
+			return true;
+		}
+		
+		return isUndefined(node.getConstraints());
 	}
 	
 	public static boolean searchIsReady(Search search) {

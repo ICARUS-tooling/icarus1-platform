@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
 
-import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.io.Loadable;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
@@ -407,7 +406,7 @@ public final class SearchManager {
 			try {
 				get();
 			} catch(InterruptedException | CancellationException e) {
-				// ignore
+				cancelSearch();
 			} catch(Exception e) {
 				// TODO show error dialog
 				LoggerFactory.log(this, Level.SEVERE, 

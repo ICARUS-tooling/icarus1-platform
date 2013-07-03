@@ -1097,6 +1097,8 @@ public final class UIUtil {
 				setEnabled(!empty);
 			} else if (DefaultEditorKit.pasteAction.equals(actionID)) {
 				setEnabled(true);
+			} else if ("clear".equals(actionID)) { //$NON-NLS-1$
+				setEnabled(!empty);
 			} else {
 				setEnabled(!empty && selected);
 			}

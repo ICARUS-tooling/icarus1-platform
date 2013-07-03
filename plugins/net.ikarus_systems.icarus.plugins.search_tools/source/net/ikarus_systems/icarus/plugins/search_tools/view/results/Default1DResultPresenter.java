@@ -16,7 +16,6 @@ import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -37,6 +36,7 @@ import net.ikarus_systems.icarus.ui.NumberDisplayMode;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
+import net.ikarus_systems.icarus.ui.list.RowHeaderList;
 import net.ikarus_systems.icarus.ui.table.TableRowHeaderRenderer;
 import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
@@ -58,7 +58,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	protected SearchResult1DTableModel tableModel;
 	protected ResultCountTableCellRenderer cellRenderer;
 	protected TableRowHeaderRenderer rowHeaderRenderer;
-	protected JList<String> rowHeader;
+	protected RowHeaderList rowHeader;
 	protected JTable table;
 
 	public Default1DResultPresenter() {
@@ -77,7 +77,12 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
 	 */
 	@Override
-	protected void displayResult() {
+	protected void displayResult(Options options) {
+		SearchResult searchResult = this.searchResult;
+		if(searchResult==null) {
+			searchResult = ResultDummies.dummyResult1D;
+		}
+		
 		tableModel.setResultData(searchResult);
 		cellRenderer.setSearchResult(searchResult);
 		displaySelectedSubResult(tableModel.getRowCount()==0 ? -1 : 0);
@@ -120,11 +125,14 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
 		header.setResizingAllowed(false);
-		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header
-				.getDefaultRenderer();
+		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
 		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
-		
-		rowHeader = new JList<>(tableModel.getRowHeaderModel());
+		UIUtil.disableHtml(renderer);
+
+		rowHeader = new RowHeaderList(tableModel.getRowHeaderModel());
+		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
+		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
+		rowHeader.setResizingAllowed(true);
 		rowHeader.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		rowHeader.setFixedCellHeight(table.getRowHeight());
 		rowHeader.setBackground(contentPanel.getBackground());
@@ -241,6 +249,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 			try {
 				int index = table.rowAtPoint(e.getPoint());
 				if(index>=-1) {
+					index = tableModel.translateRowIndex(index);
 					displaySelectedSubResult(index);
 				}
 			} catch(Exception ex) {
@@ -287,8 +296,13 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 				SearchResult subResult = get();
 				if(subResult!=null) {
 					
+					Object label = searchResult.getInstanceLabel(0, index);
+					String title = ResourceManager.getInstance().get(
+							"plugins.searchTools.default1DResultPresenter.instanceTitle", //$NON-NLS-1$
+							label);
+					
 					Options options = new Options();
-					options.put(Options.TITLE, searchResult.getInstanceLabel(0, index));
+					options.put(Options.TITLE, title);
 					
 					subResultPresenter.present(subResult, options);
 				}

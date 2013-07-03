@@ -19,13 +19,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionContraintFactory;
-import net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceContraintFactory;
-import net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesContraintFactory;
-import net.ikarus_systems.icarus.language.dependency.search.DependencyFormContraintFactory;
-import net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaContraintFactory;
-import net.ikarus_systems.icarus.language.dependency.search.DependencyPosContraintFactory;
-import net.ikarus_systems.icarus.language.dependency.search.DependencyRelationContraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionConstraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceConstraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesConstraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyFormConstraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaConstraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyPosConstraintFactory;
+import net.ikarus_systems.icarus.language.dependency.search.DependencyRelationConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
 import net.ikarus_systems.icarus.search_tools.EdgeType;
@@ -33,6 +33,7 @@ import net.ikarus_systems.icarus.search_tools.NodeType;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.SearchEdge;
 import net.ikarus_systems.icarus.search_tools.SearchGraph;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchNode;
 import net.ikarus_systems.icarus.search_tools.SearchOperator;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
@@ -76,20 +77,41 @@ public class DefaultQueryParser {
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
+
+		SearchOperator.register(DefaultSearchOperator.EQUALS);
+		SearchOperator.register(DefaultSearchOperator.EQUALS_NOT);
+		SearchOperator.register(DefaultSearchOperator.MATCHES);
+		SearchOperator.register(DefaultSearchOperator.MATCHES_NOT);
+		SearchOperator.register(DefaultSearchOperator.CONTAINS);
+		SearchOperator.register(DefaultSearchOperator.CONTAINS_NOT);
+		SearchOperator.register(DefaultSearchOperator.LESS_THAN);
+		SearchOperator.register(DefaultSearchOperator.LESS_OR_EQUAL);
+		SearchOperator.register(DefaultSearchOperator.GREATER_THAN);
+		SearchOperator.register(DefaultSearchOperator.GREATER_OR_EQUAL);
+		SearchOperator.register(DefaultSearchOperator.GROUPING);
+		
 		ConstraintContext context = new ConstraintContext(
 				ContentTypeRegistry.getInstance().getTypeForClass(String.class));
 		
-		context.registerFactory("form", DependencyFormContraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("pos", DependencyPosContraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("lemma", DependencyLemmaContraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("features", DependencyFeaturesContraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("relation", DependencyRelationContraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("distance", DependencyDistanceContraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("direction", DependencyDirectionContraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("form", DependencyFormConstraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("pos", DependencyPosConstraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("lemma", DependencyLemmaConstraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("features", DependencyFeaturesConstraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("relation", DependencyRelationConstraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("distance", DependencyDistanceConstraintFactory.class); //$NON-NLS-1$
+		context.registerFactory("direction", DependencyDirectionConstraintFactory.class); //$NON-NLS-1$
+		
+		context.addToken("form");
+		context.addToken("pos");
+		context.addToken("lemma");
+		context.addToken("features");
+		context.addToken("relation");
+		context.addToken("distance");
+		context.addToken("direction");
 		
 		DefaultQueryParser parser = new DefaultQueryParser(context, null);
 		
-		String query = "[form=bla [lemma~'%sfg&'] {[! form#foo][]}]"; //$NON-NLS-1$
+		String query = "[form=The] [! form=the]"; //$NON-NLS-1$
 		
 		// [form=bla [(id=node_3) , lemma~"%sfg&" ]{[! (node_3=before, node_6=before) , form#foo ][(id=node_6)  ]}]
 		
@@ -214,7 +236,8 @@ public class DefaultQueryParser {
 		return current();
 	}
 	protected char tryNext() {
-		return hasNext() ? next() : '\0';
+		index++;
+		return !isEOS() ? current() : '\0';
 	}
 	
 	/**
@@ -286,13 +309,10 @@ public class DefaultQueryParser {
 				parseNode();
 			} else if(c==CURLYBRAKET_CLOSING && rootOperator==SearchGraph.OPERATOR_DISJUNCTION) {
 				closed = true;
+				break;
 			} else
 				throw new ParseException(errorMessage(
 						"Illegal character at index "+index), index); //$NON-NLS-1$
-			
-			if(closed) {
-				break;
-			}
 		}
 		
 		if(!closed)
@@ -587,16 +607,16 @@ public class DefaultQueryParser {
 			
 			s += current();
 			
-			// Max length of any operator is 3 (GROUPING <*>)
-			if(s.length()>=3) {
-				break;
-			}
-			
 			if(!hasNext()) {
 				break;
 			}
 			
 			next();
+			
+			// Max length of any operator is 3 (GROUPING <*>)
+			if(s.length()>=3) {
+				break;
+			}
 		}
 
 		SearchOperator operator = null;
@@ -649,7 +669,9 @@ public class DefaultQueryParser {
 			value = parseUnquotedText();
 		}
 		
-		if(context!=null) {
+		if(SearchManager.isGroupingOperator(operator)) {
+			value = Integer.parseInt((String)value)-1;
+		} else if(context!=null) {
 			ConstraintFactory factory = context.getFactory(token);
 			value = factory.labelToValue(value);
 		}
@@ -992,7 +1014,9 @@ public class DefaultQueryParser {
 			
 			Object value = constraint.getValue();
 			String label;
-			if(context!=null) {
+			if(SearchManager.isGroupingOperator(constraint.getOperator())) {
+				label = String.valueOf((int) value + 1);
+			} else if(context!=null) {
 				ConstraintFactory factory = context.getFactory(constraint.getToken());
 				label = String.valueOf(factory.valueToLabel(value));
 			} else {

@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
@@ -89,6 +90,8 @@ public class IcarusFrame extends JFrame {
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
+		
+		setIconImage(Core.getSmallIcon().getImage());
 		
 		currentPerspective = readPerspectiveOption(options);
 		
@@ -1031,10 +1034,10 @@ public class IcarusFrame extends JFrame {
 				init();
 			}
 			
+			toolBarDelegate.add(comboBox);
+			//toolBarDelegate.addSeparator();
 			toolBarDelegate.addAction(getActionManager(), 
 					"plugins.core.icarusFrame.openPerspectiveDialogAction"); //$NON-NLS-1$
-			toolBarDelegate.addSeparator();
-			toolBarDelegate.add(comboBox);
 		}
 		
 		private void init() {

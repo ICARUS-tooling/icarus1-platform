@@ -80,15 +80,22 @@
 
 	<!-- Mode Popup Menu List -->
 	<action-list id="core.helpers.annotationControl.modePopupMenuList">
-		<item type="action" value="core.helpers.annotationControl.modeAllAction" />
-		<item type="action" value="core.helpers.annotationControl.modeNoneAction" />
-		<item type="action" value="core.helpers.annotationControl.modeFirstAction" />
-		<item type="action" value="core.helpers.annotationControl.modeLastAction" />
-		<item type="action" value="core.helpers.annotationControl.modeSelectedAction" />
+		<group id="core.helpers.annotationControl.dispalyModeGroup">
+			<action idref="core.helpers.annotationControl.modeAllAction" />
+			<action idref="core.helpers.annotationControl.modeNoneAction" />
+			<action idref="core.helpers.annotationControl.modeFirstAction" />
+			<action idref="core.helpers.annotationControl.modeLastAction" />
+			<action idref="core.helpers.annotationControl.modeSelectedAction" />
+		</group>
 	</action-list>
 
 	<!-- Limited Mode Popup Menu List -->
 	<action-list id="core.helpers.annotationControl.limitedModePopupMenuList">
-		<item type="action-set" value="core.helpers.annotationControl.dispalyModeSet" />
+		<group id="core.helpers.annotationControl.dispalyModeGroup">
+			<action idref="core.helpers.annotationControl.modeAllAction" />
+			<action idref="core.helpers.annotationControl.modeNoneAction" />
+			<action idref="core.helpers.annotationControl.modeFirstAction" />
+			<action idref="core.helpers.annotationControl.modeLastAction" />
+		</group>
 	</action-list>
 </actions>

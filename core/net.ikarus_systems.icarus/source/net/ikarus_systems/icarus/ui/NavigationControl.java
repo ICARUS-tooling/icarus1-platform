@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -52,6 +53,7 @@ public class NavigationControl implements ListSelectionListener,
 	public static final String LEFT_CONTENT_OPTION = "leftContent"; //$NON-NLS-1$
 	public static final String CENTER_CONTENT_OPTION = "centerContent"; //$NON-NLS-1$
 	public static final String RIGHT_CONTENT_OPTION = "rightContent"; //$NON-NLS-1$
+	public static final String TITLE_LABEL_OPTION = "titleLabel"; //$NON-NLS-1$
 	
 	public static enum ElementType {
 		
@@ -125,6 +127,7 @@ public class NavigationControl implements ListSelectionListener,
 	protected static final String lastActionId = "core.helpers.navigationControl.lastElementAction"; //$NON-NLS-1$
 	
 	protected final JList<?> list;
+	protected JLabel titleLabel;
 	protected JFormattedTextField indexField;
 	
 	protected ArrowStyle arrowStyle = DEFAULT_ARROW_STYLE;
@@ -144,6 +147,8 @@ public class NavigationControl implements ListSelectionListener,
 		list.getModel().addListDataListener(this);
 		list.addPropertyChangeListener("model", this); //$NON-NLS-1$
 		list.addPropertyChangeListener("selectionModel", this); //$NON-NLS-1$
+		
+		titleLabel = new JLabel();
 		
 		toolBar = createToolBar(options);
 		
@@ -179,6 +184,10 @@ public class NavigationControl implements ListSelectionListener,
 				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.NEXT_ELEMENT));
 		actionManager.getAction(lastActionId).putValue( 
 				Action.SMALL_ICON, arrowStyle.getIcon(ElementType.LAST_ELEMENT));
+	}
+	
+	public void setTitle(String title) {
+		titleLabel.setText(title);
 	}
 	
 	protected static synchronized final ActionManager getSharedActionManager() {
@@ -217,6 +226,7 @@ public class NavigationControl implements ListSelectionListener,
 		
 		indexField = createIndexField();
 		options.put(CENTER_CONTENT_OPTION, indexField);
+		options.putIfAbsent(TITLE_LABEL_OPTION, titleLabel);
 		
 		return getActionManager().createToolBar(
 				"core.helpers.navigationControl.toolBarList", options); //$NON-NLS-1$

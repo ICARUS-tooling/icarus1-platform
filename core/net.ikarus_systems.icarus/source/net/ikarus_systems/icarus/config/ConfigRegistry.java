@@ -1226,6 +1226,40 @@ public class ConfigRegistry implements ConfigConstants {
 		return (O) (value);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <O extends Object> O getValue(Handle handle, O defaultValue) {
+		Exceptions.testNullArgument(handle, "handle"); //$NON-NLS-1$
+		
+		ConfigItem item = getItem(handle);
+		Object value = null;
+		if(item!=null && item instanceof ConfigEntry) {
+			value = ((ConfigEntry)item).value;
+		}
+		
+		if(value==null) {
+			value = defaultValue;
+		}
+
+		return (O) (value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <O extends Object> O getValue(String path, O defaultValue) {
+		Exceptions.testNullArgument(path, "path"); //$NON-NLS-1$
+		
+		ConfigItem item = getItemByPath(path);
+		Object value = null;
+		if(item!=null && item instanceof ConfigEntry) {
+			value = ((ConfigEntry)item).value;
+		}
+		
+		if(value==null) {
+			value = defaultValue;
+		}
+
+		return (O) (value);
+	}
+	
 	public Object getValue(Handle handle) {
 		Exceptions.testNullArgument(handle, "handle"); //$NON-NLS-1$
 		

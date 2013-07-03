@@ -27,6 +27,7 @@ import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -39,6 +40,7 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 
 	protected Map<String, List<ResultEntry>> entries;
 	protected List<ResultEntry> totalEntries;
+	protected int hitCount = 0;
 	protected final int[] indexBuffer;
 	
 	protected int[][] groupMatchCounts;
@@ -62,6 +64,8 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		super(search, groupConstraints);
 		
 		indexPermutator = new int[getDimension()];
+		CollectionUtils.fillAscending(indexPermutator);
+		
 		indexBuffer = new int[getDimension()];
 		groupMatchCounts = new int[getDimension()][];
 		
@@ -93,7 +97,10 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		
 		if(dif==0) {
 			List<ResultEntry> list = getRawEntryList(groupInstances);
-			return new CorpusSearchResult0D(getSource(), list);
+			CorpusSearchResult0D subResult = new CorpusSearchResult0D(getSource(), list);
+			subResult.setAnnotationBuffer(getAnnotationBuffer());
+			
+			return subResult;
 		} else {
 			return new SubResult(this, groupInstances);
 		}
@@ -190,7 +197,12 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 	private synchronized void commit(ResultEntry entry, ResultNDCache cache) {
 		
 		for (int i = 0; i < indexBuffer.length; i++) {
-			int index = groupInstances[i].substitute(cache.instanceBuffer[indexPermutator[i]]);;
+			// TODO use a dummy value for null instances in buffer?
+			String value = cache.instanceBuffer[indexPermutator[i]];
+			if(value==null) {
+				value = DUMMY_INSTANCE;
+			}
+			int index = groupInstances[i].substitute(value);
 			indexBuffer[i] = index; 
 			
 			int[] counts = groupMatchCounts[i];
@@ -215,6 +227,8 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		// finally add the currently processed entry to the result list
 		list.add(entry);
 		totalEntries.add(entry);
+		
+		hitCount += entry.getHitCount();
 	}
 
 	/**
@@ -227,6 +241,11 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		
 		entries.clear();
 		totalEntries.clear();
+	}
+
+	@Override
+	public int getTotalHitCount() {
+		return hitCount;
 	}
 
 	/**

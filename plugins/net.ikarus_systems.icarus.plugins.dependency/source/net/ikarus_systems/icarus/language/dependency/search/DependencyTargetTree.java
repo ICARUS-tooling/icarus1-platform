@@ -327,6 +327,22 @@ public class DependencyTargetTree implements TargetTree {
 	}
 
 	/**
+	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#getChildIndexAt(int, int)
+	 */
+	@Override
+	public int getChildIndexAt(int nodeIndex, int index) {
+		if(nodeIndex<0 || nodeIndex>=size)
+			throw new IndexOutOfBoundsException("Node index out of bounds: "+nodeIndex); //$NON-NLS-1$
+		
+		int[] list = edges[nodeIndex];
+		
+		if(list==null || index<0 || index>=list[0])
+			throw new IndexOutOfBoundsException("Child index out of bounds: "+index); //$NON-NLS-1$
+		
+		return list[1+index];
+	}
+
+	/**
 	 * @see net.ikarus_systems.icarus.search_tools.tree.TargetTree#viewParent()
 	 */
 	@Override

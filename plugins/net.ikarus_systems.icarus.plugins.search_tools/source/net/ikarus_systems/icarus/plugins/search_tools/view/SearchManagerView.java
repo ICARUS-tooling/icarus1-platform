@@ -430,7 +430,7 @@ public class SearchManagerView extends View {
 				refreshActions();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to cancel search", ex); //$NON-NLS-1$
+						"Failed to execute search", ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
 		}

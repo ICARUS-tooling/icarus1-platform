@@ -16,6 +16,7 @@ import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
 import net.ikarus_systems.icarus.util.annotation.AnnotatedData;
+import net.ikarus_systems.icarus.util.annotation.AnnotationContainer;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.DataList;
 
@@ -24,9 +25,20 @@ import net.ikarus_systems.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public interface SearchResult {
+public interface SearchResult extends AnnotationContainer {
 	
+	public static final String DUMMY_INSTANCE = "<none>"; //$NON-NLS-1$
+	
+	/**
+	 * Marks a result that should be visualized without any
+	 * special presenter and be displayed only as a plain
+	 * list of matches.
+	 */
 	public static final String FORCE_SIMPLE_OUTLINE_PROPERTY = "forceSimpleOutline"; //$NON-NLS-1$
+	
+	void setProperty(String key, Object value);
+	
+	Object getProperty(String key);
 
 	/**
 	 * Returns the total number of groupings in the result
@@ -43,6 +55,14 @@ public interface SearchResult {
 	 * Returns the total count of reported matches in this result  
 	 */
 	int getTotalMatchCount();
+
+	/**
+	 * Returns the total count of reported hits in this result.
+	 * <p>
+	 * Note that an arbitrary number of hits can be wrapped into a single
+	 * match!  
+	 */
+	int getTotalHitCount();
 	
 	/**
 	 * Returns the number of matches reported for the given combination

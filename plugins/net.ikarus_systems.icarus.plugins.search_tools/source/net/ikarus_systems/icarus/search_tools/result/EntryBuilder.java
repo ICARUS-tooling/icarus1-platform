@@ -23,6 +23,8 @@ public class EntryBuilder {
 	protected List<Hit> hits = new ArrayList<>();
 	protected int index;
 	
+	protected static final Hit[] EMPTY_HITS = new Hit[0];
+	
 	protected final int[] allocation;
 	
 	public EntryBuilder(int size) {
@@ -39,7 +41,7 @@ public class EntryBuilder {
 	}
 	
 	public void commitAllocation() {
-		addHit(new Hit(allocation));
+		addHit(new Hit(allocation.clone()));
 	}
 	
 	public void addHit(Hit hit) {
@@ -52,7 +54,7 @@ public class EntryBuilder {
 
 	public ResultEntry toEntry() {
 		if(hits.size()==0) {
-			return null;
+			return new ResultEntry(index, EMPTY_HITS);
 		}
 		
 		ResultEntry entry = new ResultEntry(index, hits.toArray(new Hit[hits.size()]));

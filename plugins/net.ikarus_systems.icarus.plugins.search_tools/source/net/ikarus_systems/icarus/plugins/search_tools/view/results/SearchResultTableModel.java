@@ -15,8 +15,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import javax.swing.AbstractListModel;
-import javax.swing.JComponent;
-import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableColumnModelEvent;
@@ -65,14 +63,6 @@ public class SearchResultTableModel extends AbstractTableModel
 		columnModel = new ColumnModel();
 
 		setResultData(resultData);
-	}
-	
-	public void install(JTable table, JComponent owner) {
-		if(table==null)
-			throw new IllegalArgumentException("Invalid table"); //$NON-NLS-1$
-		
-		table.setModel(this);
-		table.setColumnModel(getColumnModel());
 	}
 	
 	public int getSupportedDimensions() {
@@ -157,12 +147,12 @@ public class SearchResultTableModel extends AbstractTableModel
 	@Override
 	public String getColumnName(int column) {
 		return resultData.getInstanceLabel(columnDimension, 
-				getColumnIndex(column)).toString();
+				translateColumnIndex(column)).toString();
 	}
 
 	public String getRowName(int row) {
 		return resultData.getInstanceLabel(rowDimension, 
-				getRowIndex(row)).toString();
+				translateRowIndex(row)).toString();
 	}
 
 	@Override
@@ -175,24 +165,24 @@ public class SearchResultTableModel extends AbstractTableModel
 		return Integer.class;
 	}
 	
-	protected int getRowIndex(int rowIndex) {
+	protected int translateRowIndex(int rowIndex) {
 		if(rowTransform!=null && rowTransform.length==getRowCount())
 			rowIndex = rowTransform[rowIndex];
 		return rowIndex;
 	}
 	
-	protected int getColumnIndex(int columnIndex) {
+	protected int translateColumnIndex(int columnIndex) {
 		if(columnTransform!=null && columnTransform.length==getColumnCount())
 			columnIndex = columnTransform[columnIndex];
 		return columnIndex;
 	}
 	
 	public int translateRowIndex(int row, int column) {
-		return getRowIndex(isFlipped() ? column : row);
+		return translateRowIndex(isFlipped() ? column : row);
 	}
 	
 	public int translateColumnIndex(int row, int column) {
-		return getColumnIndex(isFlipped() ? row : column);
+		return translateColumnIndex(isFlipped() ? row : column);
 	}
 
 	@Override
@@ -413,7 +403,7 @@ public class SearchResultTableModel extends AbstractTableModel
 			String header = getRowName(index);
 			if(displayMode==NumberDisplayMode.PERCENTAGE && resultData.getDimension()>rowDimension) {
 				
-				double p = (double)resultData.getGroupMatchCount(rowDimension, getRowIndex(index)) 
+				double p = (double)resultData.getGroupMatchCount(rowDimension, translateRowIndex(index)) 
 						/ (double)resultData.getTotalMatchCount() * 100d;
 				header = String.format("%s (%1.2f%%)", header, p); //$NON-NLS-1$
 			}
@@ -465,7 +455,7 @@ public class SearchResultTableModel extends AbstractTableModel
 				if(displayMode==NumberDisplayMode.PERCENTAGE && resultData.getDimension()>columnDimension) {
 					
 					double p = (double)resultData.getGroupMatchCount(
-							columnDimension, SearchResultTableModel.this.getColumnIndex(i)) 
+							columnDimension, SearchResultTableModel.this.translateColumnIndex(i)) 
 							/ (double)resultData.getTotalMatchCount() * 100d;
 					header = String.format("%s (%1.2f%%)", header, p); //$NON-NLS-1$
 				}

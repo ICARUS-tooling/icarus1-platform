@@ -53,9 +53,7 @@ import net.ikarus_systems.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public final class TaskManager { 
-	
-	private static final int MAX_WORKER_THREADS = 10;
+public final class TaskManager {
 
 	private static ExecutorService executorService;
 	
@@ -75,8 +73,6 @@ public final class TaskManager {
 	private TaskObserver taskObserver = new TaskObserver();
 	
 	private static TaskManager instance;
-	
-	private static final boolean DEFAULT_UNIQUE = true;
 	
 	public static TaskManager getInstance() {
 		if(instance==null) {

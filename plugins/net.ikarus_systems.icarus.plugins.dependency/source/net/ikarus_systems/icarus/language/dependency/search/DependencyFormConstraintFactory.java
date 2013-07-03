@@ -21,11 +21,11 @@ import net.ikarus_systems.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyFormContraintFactory extends AbstractConstraintFactory {
+public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "form"; //$NON-NLS-1$
 
-	public DependencyFormContraintFactory() {
+	public DependencyFormConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.form.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.form.description"); //$NON-NLS-1$
 	}

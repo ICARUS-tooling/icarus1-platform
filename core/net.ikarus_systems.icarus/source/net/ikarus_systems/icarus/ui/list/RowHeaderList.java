@@ -7,15 +7,13 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.ui.table;
+package net.ikarus_systems.icarus.ui.list;
 
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
-import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 
 /**
@@ -23,21 +21,33 @@ import javax.swing.ListModel;
  * @version $Id$
  *
  */
-public class TableRowHeader extends JList<String> {
+public class RowHeaderList extends JList<String> {
 
 	private static final long serialVersionUID = -4756968440956663052L;
 
 	private boolean resizingAllowed = false;
 	private ResizeHandler resizeHandler;
 	
-	private Dimension preferredScrollableViewportSize;
+	private int minimumCellWidth = -1;
 	
-	public TableRowHeader() {
+	public RowHeaderList() {
 		// no-op
 	}
 	
-	public TableRowHeader(ListModel<String> model) {
+	public RowHeaderList(ListModel<String> model) {
 		super(model);
+	}
+
+	public int getMinimumCellWidth() {
+		return minimumCellWidth;
+	}
+
+	public void setMinimumCellWidth(int minimumCellWidth) {
+		this.minimumCellWidth = minimumCellWidth;
+		
+		if(minimumCellWidth>getFixedCellWidth()) {
+			setFixedCellWidth(minimumCellWidth);
+		}
 	}
 
 	public boolean isResizingAllowed() {
@@ -55,20 +65,6 @@ public class TableRowHeader extends JList<String> {
 		refreshResizeHandler();
 		
 		firePropertyChange("resizingAllowed", oldValue, resizingAllowed); //$NON-NLS-1$
-	}
-
-	@Override
-	public Dimension getPreferredScrollableViewportSize() {
-		if(preferredScrollableViewportSize!=null) {
-			return preferredScrollableViewportSize;
-		} else {
-			return super.getPreferredScrollableViewportSize();
-		}
-	}
-
-	public void setPreferredScrollableViewportSize(
-			Dimension preferredScollableViewportSize) {
-		this.preferredScrollableViewportSize = preferredScollableViewportSize;
 	}
 
 	private void refreshResizeHandler() {
@@ -103,7 +99,8 @@ public class TableRowHeader extends JList<String> {
 			if(getCursor()==RESIZE_CURSOR || true) {
 				pressedX = e.getX();
 				resizing = true;
-				startWidth = getPreferredScrollableViewportSize().width;
+				//startWidth = getPreferredScrollableViewportSize().width;
+				startWidth = getWidth();
 			}
 		}
 
@@ -120,14 +117,13 @@ public class TableRowHeader extends JList<String> {
 		public void mouseDragged(MouseEvent e) {
 			if(resizing) {				
 				int width =  startWidth + e.getX() - pressedX;
-				width = Math.max(width, getFixedCellWidth());
 				
-				setPreferredScrollableViewportSize(new Dimension(width, 50));
-
-		        JScrollPane scrollPane = (JScrollPane)getParent().getParent();
-		        scrollPane.revalidate();
-		        
-		        // TODO somehow dead slow repaint?
+				if(minimumCellWidth!=-1) {
+					width = Math.max(width, minimumCellWidth);
+				}
+				
+				setFixedCellWidth(width);
+				revalidate();
 			}
 		}
 
