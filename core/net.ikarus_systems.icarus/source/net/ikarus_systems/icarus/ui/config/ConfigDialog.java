@@ -90,6 +90,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.config.ConfigConstants;
 import net.ikarus_systems.icarus.config.ConfigEvent;
 import net.ikarus_systems.icarus.config.ConfigListener;
@@ -178,7 +179,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         pack();
-        this.setMinimumSize(new Dimension(800, 650));
+        //this.setMinimumSize(new Dimension(800, 650));
         config.addListener(new CfgListener(starthandle));
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -186,6 +187,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             	dialogExitAction();
               }
             } );
+        this.setIconImage(Core.getSmallIcon().getImage());
         this.setLocationRelativeTo(null);
 	}
 	
@@ -235,7 +237,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         pack();
-        this.setMinimumSize(new Dimension(800, 650));
+        //this.setMinimumSize(new Dimension(800, 650));
         config.addListener(new CfgListener(handle));
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -243,6 +245,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             	dialogExitAction();
               }
             } );
+        this.setIconImage(Core.getSmallIcon().getImage());
         this.setLocationRelativeTo(null);
 	}
 	
@@ -286,7 +289,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         pack();
-        this.setMinimumSize(new Dimension(800, 650));    
+        //this.setMinimumSize(new Dimension(800, 650));    
 		config.addListener(new CfgListener(handle));
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -294,6 +297,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             	dialogExitAction();
               }
             } );
+        
+        this.setIconImage(Core.getSmallIcon().getImage());
         this.setLocationRelativeTo(null);
 	}
 

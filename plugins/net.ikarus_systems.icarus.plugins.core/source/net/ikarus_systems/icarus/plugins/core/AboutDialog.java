@@ -36,8 +36,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
@@ -77,6 +79,7 @@ public class AboutDialog extends JDialog {
 		this.pack();
 		this.setMinimumSize(new Dimension(600, 450));
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setIconImage(Core.getSmallIcon().getImage());
 		
 		//center jdialog
 		this.setLocationRelativeTo(null);
@@ -99,7 +102,7 @@ public class AboutDialog extends JDialog {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.insets = new Insets(5, 5, 5, 5);
 		gbc.gridx = 0;
-		panel.add(new JSeparator(JSeparator.HORIZONTAL), gbc);
+		panel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
 	}
 	
 	protected void buildAbout() {	
