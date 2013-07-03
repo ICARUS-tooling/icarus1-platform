@@ -26,18 +26,23 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
 import javax.swing.WindowConstants;
+import javax.swing.event.ListDataListener;
 
-import net.ikarus_systems.icarus.config.ConfigRegistry;
-import net.ikarus_systems.icarus.config.ConfigRegistry.Handle;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.ui.GridBagUtil;
@@ -105,6 +110,7 @@ public class AboutDialog extends JDialog {
 		panel.add(new JSeparator(JSeparator.HORIZONTAL), gbc);
 	}
 	
+	@SuppressWarnings("static-access")
 	protected void buildAbout() {	
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -179,6 +185,10 @@ public class AboutDialog extends JDialog {
 									.get("plugins.core.aboutDialog.plugins")), gbc); //$NON-NLS-1$
 
 		//adds all available plugin names
+		buildPluginsList(gbc);
+		
+		
+		List<PluginDescriptor> installedPlugins = new ArrayList<>();
 		for(Iterator<PluginDescriptor> i = PluginUtil.getPluginManager()
 			.getRegistry().getPluginDescriptors().iterator(); i.hasNext();){
 			PluginDescriptor pd = i.next();
@@ -188,17 +198,30 @@ public class AboutDialog extends JDialog {
 //					+" Version " + pd.getVersion()
 //					+" Class " + pd.getClass()
 //					+" Reg " + pd.getRegistry());
-			JLabel pluginName = new JLabel(pd.getId()
-					 + " (" //$NON-NLS-1$
-					 + pd.getVersion()
-					 + " )"); //$NON-NLS-1$
+//			JLabel pluginName = new JLabel(pd.getId()
+//					 + " (" //$NON-NLS-1$
+//					 + pd.getVersion()
+//					 + " )"); //$NON-NLS-1$
+//			
+//			
+//			
+//			gbc = GridBagUtil.makeGbc(1, gbc.gridy, 0, 1, 0);
+//			aboutPanel.add(pluginName, gbc);
+//			gbc.gridy++;
 			
-			gbc = GridBagUtil.makeGbc(1, gbc.gridy, 0, 1, 0);
-			aboutPanel.add(pluginName, gbc);
-			gbc.gridy++;	
+			
+			installedPlugins.add(pd);
 			
 		}
-	
+		
+		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 1);
+		gbc.gridwidth = 2;
+		JList<Object> plugins = new JList<Object>();
+		plugins.setModel(new PluginsListModel(installedPlugins));
+		plugins.setCellRenderer(new PluginsListCellRenderer());
+		JScrollPane pluginsJSP = new JScrollPane(plugins);
+		aboutPanel.add(pluginsJSP, gbc);
+		gbc.gridy++;
 		
 		if (isBrowsingSupported()) {
 			makeLinkable(url, new LinkMouseListener());
@@ -215,18 +238,29 @@ public class AboutDialog extends JDialog {
             }  
         });
         
-		
+		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 1);
+		gbc.gridwidth = 3;
 		addSeperator(aboutPanel, gbc);
 		gbc.gridy++;
 		
 		//close Button
-		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 0);
+		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
+		gbc.gridwidth = 3;
+		gbc.anchor = gbc.CENTER;
 		aboutPanel.add(bclose,gbc);
 
 		this.add(aboutPanel);
 
 	}
 	
+	/**
+	 * @param gbc
+	 */
+	private void buildPluginsList(GridBagConstraints gbc) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	// DialogExitAction
 	protected void dialogExitAction() {
 		this.setVisible(false);
@@ -302,6 +336,95 @@ public class AboutDialog extends JDialog {
 	// no further escaping
 	private static String htmlIfy(String s) {
 		return HTML.concat(s).concat(HTML_END);
+	}
+	
+	
+	public class PluginsListCellRenderer extends JLabel implements ListCellRenderer<Object>{
+
+		private static final long serialVersionUID = -6517753002122477794L;
+
+
+		public PluginsListCellRenderer(){
+	         setOpaque(true);
+	     }
+		
+		
+		/**
+		 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+		 */
+		@Override
+		public Component getListCellRendererComponent(
+				JList<? extends Object> list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus) {
+			
+		      if (isSelected) {
+		          setBackground(list.getSelectionBackground());
+		         // text.setForeground(list.getSelectionForeground());
+		        } else {
+		          // the color returned from list.getBackground() is pure white
+		          setBackground(list.getBackground());
+		          // THIS works -- but is obviously hardcoded
+		          // setBackground(Color.WHITE);
+		          //text.setForeground(list.getForeground());
+		        }
+
+			PluginDescriptor pd = (PluginDescriptor) value;
+			String text = pd.getId()
+					 + "   (" //$NON-NLS-1$
+					 + pd.getVersion()
+					 + " )"; //$NON-NLS-1$
+			
+			setText(text);
+			
+			return this;
+		}
+		
+	}
+	
+	public class PluginsListModel implements ListModel<Object> {
+		
+		List<PluginDescriptor> installedPlugins;
+		/**
+		 * @param installedPlugins
+		 */
+		public PluginsListModel(List<PluginDescriptor> installedPlugins) {
+			this.installedPlugins = installedPlugins;
+		}
+
+		/**
+		 * @see javax.swing.ListModel#getElementAt(int)
+		 */
+		@Override
+		public PluginDescriptor getElementAt(int index) {
+			return installedPlugins.get(index);
+		}
+
+		/**
+		 * @see javax.swing.ListModel#getSize()
+		 */
+		@Override
+		public int getSize() {
+			return installedPlugins.size();
+		}
+
+		/**
+		 * @see javax.swing.ListModel#addListDataListener(javax.swing.event.ListDataListener)
+		 */
+		@Override
+		public void addListDataListener(ListDataListener l) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		/**
+		 * @see javax.swing.ListModel#removeListDataListener(javax.swing.event.ListDataListener)
+		 */
+		@Override
+		public void removeListDataListener(ListDataListener l) {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}
 	
 	
