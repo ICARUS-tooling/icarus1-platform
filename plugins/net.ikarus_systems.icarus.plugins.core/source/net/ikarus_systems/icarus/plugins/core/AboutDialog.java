@@ -9,6 +9,7 @@
  */
 package net.ikarus_systems.icarus.plugins.core;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dialog;
@@ -28,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -109,11 +111,14 @@ public class AboutDialog extends JDialog {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc = GridBagUtil.makeGbc(0, 0, 0, 1, 1);
-		//gbc.weightx = 0;
+		gbc.insets = new Insets(5, 5, 5, 5);
 		
-			
-		aboutPanel.add(new JLabel(IconRegistry.getGlobalRegistry()
-				.getIcon("icarus_logo_small.png")), gbc); //$NON-NLS-1$
+		JLabel logo = new JLabel(IconRegistry.getGlobalRegistry()
+							.getIcon("ICARUS_logo_small.png")); //$NON-NLS-1$
+		logo.setBorder(BorderFactory.createLineBorder(new Color(41, 79, 157)));
+		logo.setBackground(Color.white);
+		logo.setOpaque(true);
+		aboutPanel.add(logo, gbc);
 	
 		gbc.gridy = 1;
 		

@@ -32,7 +32,11 @@
 		
 	<!-- Edit Query -->
 	<action id="plugins.errorMining.errorMiningView.editQueryAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />		
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />	
+
+	<!-- Select Factory -->
+	<action id="plugins.errorMining.errorMiningView.selectFactoryAction"
+		name="${id}.name" desc="${id}.description" icon="debugtt_obj.gif" />	
 		
 	<!-- Select Target -->
 	<action id="plugins.errorMining.errorMiningView.selectTargetAction"

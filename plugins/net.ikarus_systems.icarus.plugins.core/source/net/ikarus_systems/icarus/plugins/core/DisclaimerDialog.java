@@ -29,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EtchedBorder;
 
@@ -99,7 +101,7 @@ public class DisclaimerDialog extends JDialog {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.insets = new Insets(5, 5, 5, 5);
 		gbc.gridx = 0;
-		panel.add(new JSeparator(JSeparator.HORIZONTAL), gbc);
+		panel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
 	}
 	
 	private void buildDisclaimer() {
@@ -142,7 +144,7 @@ public class DisclaimerDialog extends JDialog {
 		jsp = new JScrollPane(jta);
 		jsp.setMinimumSize(new Dimension (600,400));
 		jsp.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
-		jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		jsp.getVerticalScrollBar().addAdjustmentListener(new VAdjustmentListener());
 		UIUtil.defaultSetUnitIncrement(jsp);
 		disclaimerPanel.add(jsp, gbc);

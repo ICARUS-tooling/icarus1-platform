@@ -11,23 +11,31 @@ package net.ikarus_systems.icarus.plugins.errormining;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.Action;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
@@ -35,25 +43,40 @@ import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.language.SentenceDataList;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.ExtensionListCellRenderer;
+import net.ikarus_systems.icarus.plugins.ExtensionListModel;
+import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.plugins.matetools.conll.CONLL09SentenceDataReader;
+import net.ikarus_systems.icarus.plugins.search_tools.view.SearchHistory;
+import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.search_tools.Search;
+import net.ikarus_systems.icarus.search_tools.SearchDescriptor;
+import net.ikarus_systems.icarus.search_tools.SearchFactory;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
+import net.ikarus_systems.icarus.search_tools.SearchTargetSelector;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
+import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.dialog.FormBuilder;
 import net.ikarus_systems.icarus.ui.dialog.SelectFormEntry;
 import net.ikarus_systems.icarus.ui.helper.Editor;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
 import net.ikarus_systems.icarus.util.Options;
+import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.UnsupportedFormatException;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.data.DataContainer;
 import net.ikarus_systems.icarus.util.location.DefaultFileLocation;
 import net.ikarus_systems.icarus.util.location.UnsupportedLocationException;
 import net.ikarus_systems.icarus.util.mpi.Commands;
 import net.ikarus_systems.icarus.util.mpi.Message;
 import ngram_tools.NGramDataList;
-import ngram_tools.NGramDescriptor;
+
+import org.java.plugin.registry.Extension;
 
 /**
  * @author Gregor Thiele
@@ -62,17 +85,19 @@ import ngram_tools.NGramDescriptor;
  */
 public class ErrorMiningView extends View {
 	
-	protected JTree ngramHistoryTree;
-	protected NGramHistoryTreeModel ngramHistoryTreeModel;
+	protected JList<SearchDescriptor> searchHistoryList;
+	protected SearchHistory searchHistory;
 	
 	protected NGramEditor currentNGramEditor;
-	
-	private JPopupMenu popupMenu;
 
 	private Handler handler;
 	
 	private CallbackHandler callbackHandler;
 	
+	
+	//gui
+	protected JTree ngramHistoryTree;
+	protected NGramHistoryTreeModel ngramHistoryTreeModel;	
 	private SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Void> worker;
 	
 	public ErrorMiningView(){
@@ -176,6 +201,8 @@ public class ErrorMiningView extends View {
 				callbackHandler, "editQuery"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.errorMining.errorMiningView.viewResultAction",  //$NON-NLS-1$
 				callbackHandler, "viewResult"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.errorMining.errorMiningView.selectTargetAction",  //$NON-NLS-1$
+				callbackHandler, "selectTarget"); //$NON-NLS-1$
 		
 	}
 	
@@ -362,24 +389,83 @@ public class ErrorMiningView extends View {
 			Core.showNotice();
 		}
 		
+		public void selectTarget(ActionEvent e) {
+			
+			if(currentNGramEditor.getEditingItem()==null) {
+				return;
+			}
+			
+			SearchFactory factory = currentNGramEditor.getEditingItem().getSearchFactory();
+			if(factory==null) {
+				UIUtil.beep();
+				return;
+			}
+			
+			try {
+				ContentType contentType = factory.getConstraintContext().getContentType();
+				SearchTargetDialog dialog = new SearchTargetDialog(contentType);
+				dialog.showDialog();
+				
+				Object target = dialog.getTarget();
+				if(target==null) {
+					return;
+				}
+				
+				boolean compatible = false;
+				if(target instanceof DataContainer) {
+					// If target is a container allow checking against its internal content type
+					compatible = ContentTypeRegistry.isCompatible(contentType, 
+							((DataContainer)target).getContentType());
+				} else {
+					// No information about content type accessible, so
+					// just do a plain check (will fail often?)
+					compatible = ContentTypeRegistry.isCompatible(contentType, target);
+				}
+				
+				if(!compatible) {
+					DialogFactory.getGlobalFactory().showError(null, 
+							"plugins.searchTools.searchManagerView.dialogs.selectTarget.title",  //$NON-NLS-1$
+							"plugins.searchTools.searchManagerView.dialogs.selectTarget.incompatible",  //$NON-NLS-1$
+							target.getClass().getName(), contentType.getName());
+					return;
+				}
+
+				currentNGramEditor.getEditingItem().setTarget(target);
+				//currentNGramEditor.refresh();
+
+				refreshActions();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to select target for current search", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+		
 		
 	}
 	
 	
 	
 	
-	protected class NGramEditor implements Editor<NGramDescriptor>{
+	protected class NGramEditor implements Editor<SearchDescriptor>{
 		
-		protected NGramDescriptor descriptor;
+		protected SearchDescriptor descriptor;
 		
 		protected FormBuilder formBuilder;
+				
+		protected Timer timer;
+		
 		
 		protected NGramEditor(){
 			
 			Action a;
 			
 			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
-			
+			// Factory
+			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectFactoryAction"); //$NON-NLS-1$
+			formBuilder.addEntry("factory", new SelectFormEntry( //$NON-NLS-1$
+					"plugins.errorMining.errorMiningView.nGramEditor.labels.factory", null, a)); //$NON-NLS-1$
+						
 			// Target
 			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectTargetAction"); //$NON-NLS-1$
 			formBuilder.addEntry("target", new SelectFormEntry( //$NON-NLS-1$
@@ -406,30 +492,40 @@ public class ErrorMiningView extends View {
 			return formBuilder.getContainer();
 		}
 		
+		
+		public void refresh() {
+			SearchDescriptor descriptor = getEditingItem();
+			if (descriptor != null) {
+				setEditingItem(descriptor);
+			}
+		}
+		
+
+		
 		/**
 		 * @see net.ikarus_systems.icarus.ui.helper.Editor#setEditingItem(java.lang.Object)
 		 */
 		@Override
-		public void setEditingItem(NGramDescriptor item) {
+		public void setEditingItem(SearchDescriptor item) {
 			// TODO Auto-generated method stub
-			
+		
 		}
 
 		/**
 		 * @see net.ikarus_systems.icarus.ui.helper.Editor#getEditingItem()
 		 */
 		@Override
-		public NGramDescriptor getEditingItem() {
+		public SearchDescriptor getEditingItem() {
 			return descriptor;
 		}
+		
 
 		/**
 		 * @see net.ikarus_systems.icarus.ui.helper.Editor#resetEdit()
 		 */
 		@Override
 		public void resetEdit() {
-			// TODO Auto-generated method stub
-			
+			//noop			
 		}
 
 		/**
@@ -437,8 +533,7 @@ public class ErrorMiningView extends View {
 		 */
 		@Override
 		public void applyEdit() {
-			// TODO Auto-generated method stub
-			
+			//noop
 		}
 
 		/**
@@ -446,7 +541,6 @@ public class ErrorMiningView extends View {
 		 */
 		@Override
 		public boolean hasChanges() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -459,6 +553,271 @@ public class ErrorMiningView extends View {
 		}
 		
 	}
+	
+	
+	
+	
+	protected static class SearchTargetDialog implements ActionListener {
+		protected final ContentType contentType;
+		
+		protected Object target;
+		protected JPanel panel;
+		
+		protected Map<Extension, SearchTargetSelector> selectorInstances;
+		
+		public SearchTargetDialog(ContentType contentType) {
+			if(contentType==null)
+				throw new IllegalArgumentException("Invalid content-type"); //$NON-NLS-1$
+			
+			this.contentType = contentType;
+		}
+		
+		public void showDialog() {
+			Collection<Extension> extensions = SearchManager.getInstance().availableTargetSelectors();
+			if(extensions==null || extensions.isEmpty()) 
+				throw new IllegalStateException("No target selectors available"); //$NON-NLS-1$
+			
+			panel = new JPanel(new BorderLayout());
+			
+			JToolBar toolBar = ActionManager.globalManager().createEmptyToolBar();;
+			
+			JLabel label = new JLabel();
+			label.setText(ResourceManager.getInstance().get(
+					"plugins.errorMining.errorMiningView.dialogs.selectTarget.label")); //$NON-NLS-1$
+			label.setBorder(new EmptyBorder(1, 5, 1, 10));
+			toolBar.add(label);
+			
+			JComboBox<Extension> cb = new JComboBox<>(
+					new ExtensionListModel(extensions, true));
+			cb.setEditable(false);
+			cb.setRenderer(new ExtensionListCellRenderer());
+			UIUtil.fitToContent(cb, 150, 250, 22);
+			cb.addActionListener(this);
+			toolBar.add(cb);
+			
+			panel.add(toolBar, BorderLayout.NORTH);
+			panel.setPreferredSize(new Dimension(400, 300));
+
+			cb.setSelectedIndex(0);
+			
+			target = null;
+			if(DialogFactory.getGlobalFactory().showGenericDialog(null, 
+					"plugins.searchTools.searchManagerView.dialogs.selectTarget.title",  //$NON-NLS-1$
+					null, panel, true, "ok", "cancel")) { //$NON-NLS-1$ //$NON-NLS-2$
+				Extension extension = (Extension) cb.getSelectedItem();
+				if(extension!=null) {
+					target = getSelector(extension).getSelectedItem();
+				}
+			}
+		}
+		
+		public Object getTarget() {
+			return target;
+		}
+		
+		protected SearchTargetSelector getSelector(Extension extension) {
+			if(extension==null)
+				throw new NullPointerException();
+			
+			if(selectorInstances==null) {
+				selectorInstances = new HashMap<>();
+			}
+			
+			SearchTargetSelector selector = selectorInstances.get(extension);
+			if(selector==null) {
+				try {
+					selector = (SearchTargetSelector) PluginUtil.instantiate(extension);
+					selector.setAllowedContentType(contentType);
+					selectorInstances.put(extension, selector);
+				} catch (Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to instantiate target selector: "+extension.getUniqueId(), e); //$NON-NLS-1$
+				}
+			}
+			
+			return selector;
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JComboBox<?> cb = (JComboBox<?>) e.getSource();
+			
+			Extension extension = (Extension) cb.getSelectedItem();
+			if(extension==null) {
+				return;
+			}
+			
+			SearchTargetSelector selector = getSelector(extension);
+			if(selector==null) {
+				UIUtil.beep();
+				return;
+			}
+			
+			if(panel.getComponentCount()>1) {
+				panel.remove(1);
+			}
+			panel.add(selector.getSelectorComponent(), BorderLayout.CENTER);
+			panel.revalidate();
+			panel.repaint();
+			selector.getSelectorComponent().requestFocusInWindow();
+		}
+	}
+	
+	
+	
+	protected class SearchEditor implements Editor<SearchDescriptor>, ActionListener {
+		protected SearchDescriptor descriptor;
+		
+		protected FormBuilder formBuilder;
+		
+		protected Timer timer;
+		
+		protected SearchEditor() {
+			Action a;
+			
+			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
+			// Factory
+			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectFactoryAction"); //$NON-NLS-1$
+			formBuilder.addEntry("factory", new SelectFormEntry( //$NON-NLS-1$
+					"plugins.searchTools.searchManagerView.searchEditor.labels.factory", null, a)); //$NON-NLS-1$
+			// Target
+			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectTargetAction"); //$NON-NLS-1$
+			formBuilder.addEntry("target", new SelectFormEntry( //$NON-NLS-1$
+					"plugins.searchTools.searchManagerView.searchEditor.labels.target", null, a)); //$NON-NLS-1$
+			// Query
+			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editQueryAction"); //$NON-NLS-1$
+			formBuilder.addEntry("query", new SelectFormEntry( //$NON-NLS-1$
+					"plugins.searchTools.searchManagerView.searchEditor.labels.query", null, a)); //$NON-NLS-1$
+			// Parameters
+			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editParametersAction"); //$NON-NLS-1$
+			formBuilder.addEntry("parameters", new SelectFormEntry( //$NON-NLS-1$
+					"plugins.searchTools.searchManagerView.searchEditor.labels.parameters", null, a)); //$NON-NLS-1$
+			
+			formBuilder.buildForm();
+			((JComponent)formBuilder.getContainer()).setBorder(UIUtil.topLineBorder);
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#getEditorComponent()
+		 */
+		@Override
+		public Component getEditorComponent() {
+			return formBuilder.getContainer();
+		}
+		
+		public void refresh() {
+			SearchDescriptor descriptor = getEditingItem();
+			if(descriptor!=null) {
+				setEditingItem(descriptor);
+			}
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#setEditingItem(java.lang.Object)
+		 */
+		@Override
+		public void setEditingItem(SearchDescriptor item) {
+			if(item==null)
+				throw new IllegalArgumentException("Invalid search-descriptor"); //$NON-NLS-1$
+						
+			descriptor = item;
+			
+			Search search = descriptor.getSearch();
+			if(search!=null && search.isRunning()) {
+				if(timer==null) {
+					timer = new Timer(1000, this);
+				}
+				timer.start();
+			} else if(timer!=null) {
+				timer.stop();
+			}
+			
+			// Factory
+			formBuilder.setValue("factory", PluginUtil.getIdentity(descriptor.getFactoryExtension())); //$NON-NLS-1$
+			
+			// Target
+			String name = StringUtil.getName(descriptor.getTarget());
+			if(name==null || name.isEmpty()) {
+				name = ResourceManager.getInstance().get("plugins.searchTools.undefinedStats"); //$NON-NLS-1$
+			}
+			formBuilder.setValue("target", name); //$NON-NLS-1$
+			
+			// Query
+			String query = SearchUtils.getQueryStats(descriptor.getQuery());
+			if(query==null || query.isEmpty()) {
+				query = ResourceManager.getInstance().get("plugins.searchTools.emptyStats"); //$NON-NLS-1$
+			}
+			formBuilder.setValue("query", query); //$NON-NLS-1$
+			
+			// Result
+			/*String result = SearchUtils.getResultStats(descriptor.getSearchResult());
+			if(result==null || result.isEmpty()) {
+				result = ResourceManager.getInstance().get("plugins.searchTools.emptyStats"); //$NON-NLS-1$
+			}
+			formBuilder.setValue("result", result); //$NON-NLS-1$*/
+			
+			// Parameters
+			// TODO provide any kind of textual representation?
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#getEditingItem()
+		 */
+		@Override
+		public SearchDescriptor getEditingItem() {
+			return descriptor;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#resetEdit()
+		 */
+		@Override
+		public void resetEdit() {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#applyEdit()
+		 */
+		@Override
+		public void applyEdit() {
+			// no-op
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#hasChanges()
+		 */
+		@Override
+		public boolean hasChanges() {
+			return false;
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.helper.Editor#close()
+		 */
+		@Override
+		public void close() {
+			// no-op
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SearchDescriptor descriptor = getEditingItem();
+			if(descriptor!=null) {
+				setEditingItem(descriptor);
+			} else if(timer!=null) {
+				timer.stop();
+			}
+		}
+	}
+	
+
 
 
 
