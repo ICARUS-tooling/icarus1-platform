@@ -16,7 +16,7 @@
 		
 	<!-- View Search -->
 	<action id="plugins.searchTools.searchResultView.viewSearchAction"
-		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		name="${id}.name" desc="${id}.description" icon="occ_read.gif" />
 		
 	<!-- Save Result -->
 	<action id="plugins.searchTools.searchResultView.saveResultAction"

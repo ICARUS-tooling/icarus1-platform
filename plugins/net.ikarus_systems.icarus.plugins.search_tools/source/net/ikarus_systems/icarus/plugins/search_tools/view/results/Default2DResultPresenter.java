@@ -11,40 +11,34 @@ package net.ikarus_systems.icarus.plugins.search_tools.view.results;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
-import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.result.ResultDummies;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.CompoundMenuButton;
 import net.ikarus_systems.icarus.ui.NumberDisplayMode;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
-import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.list.RowHeaderList;
 import net.ikarus_systems.icarus.ui.tab.ButtonTabComponent;
 import net.ikarus_systems.icarus.ui.tab.TabController;
@@ -53,7 +47,7 @@ import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.id.Identity;
+import net.ikarus_systems.icarus.util.cache.LRUCache;
 
 /**
  * @author Markus Gärtner
@@ -61,6 +55,8 @@ import net.ikarus_systems.icarus.util.id.Identity;
  *
  */
 public class Default2DResultPresenter extends SearchResultTablePresenter {
+	
+	public static final int SUPPORTED_DIMENSIONS = 2;
 	
 	// TODO allow sub-result creation for cells, rows and columns (0D and 1D respectively)
 	
@@ -86,8 +82,20 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 	 */
 	@Override
 	public int getSupportedDimensions() {
-		return 2;
+		return SUPPORTED_DIMENSIONS;
 	}
+
+	@Override
+	protected void updateGroupPainters() {
+		int id1 = SearchUtils.getGroupId(getSearchResult(), 0);
+		int id2 = SearchUtils.getGroupId(getSearchResult(), 1);
+		
+		if(tableModel.isFlipped()) {
+			Grouping.setGroupIds(table, id2, id1);
+		} else {
+			Grouping.setGroupIds(table, id1, id2);
+		}
+ 	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
@@ -136,25 +144,27 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 
 	@Override
 	protected void sortTable(TableSortMode sortMode) {
-		if(sortTableJob!=null) {
+		if(hasCurrentTask()) {
 			return;
 		}
 		
-		sortTableJob = new SortTableJob(sortMode){
+		SortTableJob job = new SortTableJob(sortMode){
 			@Override
 			protected Object doInBackground() throws Exception {
 				tableModel.sort(getSortMode());
 				return null;
 			}
 		};
-		TaskManager.getInstance().schedule(sortTableJob, 
-				TaskPriority.DEFAULT, true);
-		TaskManager.getInstance().setIndeterminate(sortTableJob, true);
+		setCurrentTask(job);
+		TaskManager.getInstance().schedule(job, TaskPriority.DEFAULT, true);
+		TaskManager.getInstance().setIndeterminate(job, true);
 	}
 
 	@Override
 	protected void flipTable() {
 		tableModel.flip();
+		
+		updateGroupPainters();
 	}
 
 	@Override
@@ -208,7 +218,7 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 			throw new IllegalArgumentException("invalid sub result"); //$NON-NLS-1$
 		
 		if(subResults==null) {
-			subResults = new HashMap<>();
+			subResults = new LRUCache<>();
 		}
 		
 		subResults.put(Arrays.toString(indices), new WeakReference<>(subResult));
@@ -267,51 +277,18 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		cellRenderer = new ResultCountTableCellRenderer();
 		
 		tableModel = new SearchResultTableModel(ResultDummies.dummyResult2D);
-		table = new JTable(tableModel, tableModel.getColumnModel());
-		table.setDefaultRenderer(Integer.class, cellRenderer);
-		table.setFillsViewportHeight(true);
-		table.setRowSelectionAllowed(false);
-		table.setColumnSelectionAllowed(false);
-		table.setRowHeight(DEFAULT_CELL_HEIGHT);
-		table.setIntercellSpacing(new Dimension(4, 4));
+		table = createTable(tableModel, cellRenderer, false);
 		table.addMouseListener(getHandler());
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-		JTableHeader header = table.getTableHeader();
-		header.setReorderingAllowed(false);
-		//header.setResizingAllowed(false);
-		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
-		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
-		UIUtil.disableHtml(renderer);
 		
-		rowHeader = new RowHeaderList(tableModel.getRowHeaderModel());
-		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
-		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
-		rowHeader.setResizingAllowed(true);
-		rowHeader.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowHeader.setFixedCellHeight(table.getRowHeight());
-		rowHeader.setBackground(contentPanel.getBackground());
-		rowHeader.setForeground(table.getForeground());		
-		rowHeaderRenderer = new TableRowHeaderRenderer(rowHeader, table);
-		rowHeader.setCellRenderer(rowHeaderRenderer);
+		rowHeader = createRowHeader(tableModel.getRowHeaderModel(), table, contentPanel);
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setRowHeaderView(rowHeader);
 		scrollPane.setBorder(UIUtil.topLineBorder);
+		Grouping.decorate(scrollPane, true);
 		
-		ActionManager actionManager = getActionManager();
-		CompoundMenuButton menuButtonRows = new CompoundMenuButton(
-				0, CompoundMenuButton.HORIZONTAL,
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsAscAlphaAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsDescAlphaAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsAscNumAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsDescNumAction")); //$NON-NLS-1$
-		CompoundMenuButton menuButtonCols = new CompoundMenuButton(
-				0, CompoundMenuButton.HORIZONTAL,
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsAscAlphaAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsDescAlphaAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsAscNumAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsDescNumAction")); //$NON-NLS-1$
+		CompoundMenuButton menuButtonRows = createCompoundButton(SORT_ROWS_BUTTON);
+		CompoundMenuButton menuButtonCols = createCompoundButton(SORT_COLUMNS_BUTTON);
 		
 		Options options = new Options();
 		options.put("sortButtons", new Object[]{ //$NON-NLS-1$
@@ -341,16 +318,12 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		 */
 		@Override
 		public boolean closeTab(Component comp) {
-			if(tabbedPane==null) {
-				return false;
-			}
-			
 			if(comp instanceof SubResultContainer) {
 				SubResultContainer container = (SubResultContainer) comp;
 				container.close();
 			}
 			
-			tabbedPane.remove(comp);
+			remove(comp);
 			checkViewMode(false);
 			
 			return true;
@@ -482,28 +455,16 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		
 	}
 	
-	protected class SubResultDisplayJob extends SwingWorker<SearchResult, Object>
-			implements Identity {
+	protected class SubResultDisplayJob extends AbstractResultJob {
 		
 		protected final int[] indices;
 		protected final String label;
 		
 		public SubResultDisplayJob(int[] indices, String label) {
+			super("subResultJob"); //$NON-NLS-1$
+			
 			this.indices = indices;
 			this.label = label;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof SubResultDisplayJob) {
-				return owner()==((SubResultDisplayJob)obj).owner();
-			}
-			
-			return false;
-		}
-		
-		private Object owner() {
-			return Default2DResultPresenter.this;
 		}
 
 		/**
@@ -518,7 +479,7 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		@Override
 		protected void done() {
 			try {
-				SearchResult subResult = get();
+				SearchResult subResult = (SearchResult) get();
 				if(subResult!=null) {
 					cacheSubResult(indices, subResult);
 					displaySelectedSubResult(indices, label);
@@ -533,46 +494,9 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 			}
 		}
 
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
-		 */
 		@Override
-		public String getId() {
-			return getClass().getSimpleName();
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
-		 */
-		@Override
-		public String getName() {
-			return ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.subResultJob.name"); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
-		 */
-		@Override
-		public String getDescription() {
-			return ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.subResultJob.description", indices); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
-		 */
-		@Override
-		public Icon getIcon() {
-			return null;
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
-		 */
-		@Override
-		public Object getOwner() {
-			return this;
+		protected Object[] getDescriptionParams() {
+			return new Object[]{Arrays.toString(indices)};
 		}
 	}
 }

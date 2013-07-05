@@ -131,7 +131,7 @@ public final class TreeUtils {
 		options.put(GraphValidator.ALLOW_NEGATED_TRANSITIVES, false);
 		options.put(GraphValidator.MAX_INCOMING_EDGES, 1);
 		options.put(GraphValidator.ALLOW_UNDEFINED_GRAPH, true);
-		options.put(GraphValidator.ALLOW_NEGATED_DISJUNCTIONS, false);
+		options.put(GraphValidator.ALLOW_NEGATED_DISJUNCTIONS, true);
 		
 		GraphValidator validator = new GraphValidator();
 		
@@ -172,16 +172,10 @@ public final class TreeUtils {
 			panel.add(scrollPane, BorderLayout.NORTH);
 			scrollPane.setPreferredSize(new Dimension(400, 250));
 			
-			UIUtil.invokeLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					DialogFactory.getGlobalFactory().showGenericDialog(
-							null, 
-							"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
-							null, panel, true, "ok"); //$NON-NLS-1$
-				}
-			});
+			DialogFactory.getGlobalFactory().showGenericDialog(
+					null, 
+					"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
+					null, panel, true, "ok"); //$NON-NLS-1$
 		}
 		
 		return result.getErrorCount()==0;

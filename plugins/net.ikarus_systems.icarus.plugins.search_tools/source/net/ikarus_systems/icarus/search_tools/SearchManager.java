@@ -411,6 +411,7 @@ public final class SearchManager {
 				// TODO show error dialog
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to execute search", e); //$NON-NLS-1$
+				cancelSearch();
 				UIUtil.beep();
 			} finally {
 				searchJobMap.remove(search);

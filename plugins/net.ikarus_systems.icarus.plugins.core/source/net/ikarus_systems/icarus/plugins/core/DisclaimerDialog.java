@@ -66,6 +66,7 @@ public class DisclaimerDialog extends JDialog {
 		this.pack();
 		this.setMinimumSize(new Dimension(700, 650));
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setIconImage(Core.getSmallIcon().getImage());
 		
 		//center jdialog
 		this.setLocationRelativeTo(null);

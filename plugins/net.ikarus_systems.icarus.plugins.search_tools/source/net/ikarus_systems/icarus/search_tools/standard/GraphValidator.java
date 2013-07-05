@@ -141,6 +141,10 @@ public class GraphValidator {
 				result.addError("plugins.searchTools.graphValidation.missingRoot", rootIdx); //$NON-NLS-1$
 				continue;
 			}
+			if(root.getNodeType()==NodeType.DISJUNCTION) {
+				result.addError("plugins.searchTools.graphValidation.illegalRootType",  //$NON-NLS-1$
+						root.getId(), root.getNodeType().getName());
+			}
 			roots.add(root);
 		}
 		

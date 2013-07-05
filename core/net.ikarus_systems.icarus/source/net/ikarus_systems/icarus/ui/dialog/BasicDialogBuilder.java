@@ -15,6 +15,7 @@ import javax.swing.Icon;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import net.ikarus_systems.icarus.Core;
 import net.ikarus_systems.icarus.resources.ResourceDomain;
 import net.ikarus_systems.icarus.util.Exceptions;
 import net.ikarus_systems.icarus.util.Options;
@@ -170,6 +171,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 		}
 		
 		JDialog dialog = optionPane.createDialog(parent, title);
+		dialog.setIconImage(Core.getSmallIcon().getImage());
 		
 		// Apply options
 		dialog.setResizable(options.get(RESIZABLE_OPTION, false));

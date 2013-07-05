@@ -306,6 +306,16 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		}
 	}
 	
+	public static int getGroupId(SearchResult searchResult, int index) {
+		if(searchResult==null) {
+			return -1;
+		}
+		
+		SearchConstraint constraint = searchResult.getGroupConstraint(index);
+		
+		return constraint==null ? -1 : (int) constraint.getValue();
+	}
+	
 	public interface Visitor {
 		void visit(SearchNode node);
 		

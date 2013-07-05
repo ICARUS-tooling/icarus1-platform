@@ -263,30 +263,6 @@ public abstract class AbstractTreeSearch extends Search {
 	@Override
 	public boolean innerExecute() throws Exception {
 		
-		// TODO DEBUG
-		/*TaskManager.getInstance().execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				for(int i=0; i<100; i++) {
-					progress = i;
-					
-					if(isDone()) {
-						return;
-					}
-					
-					try {
-						Thread.sleep(350);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-				finish();
-			}
-		});*/
-		
 		if(result==null) {
 			return false;
 		}

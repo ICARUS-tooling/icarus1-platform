@@ -43,7 +43,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	
 	protected Matcher parent;
 	protected Matcher[] exclusions;
-	protected Matcher next;
+	protected Matcher next, previous;
 	protected Matcher alternate;
 	
 	protected Matcher[] before;
@@ -403,6 +403,14 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		this.id = id;
 	}
 
+	public Matcher getPrevious() {
+		return previous;
+	}
+
+	public void setPrevious(Matcher previous) {
+		this.previous = previous;
+	}
+
 	public void setParent(Matcher parent) {
 		this.parent = parent;
 	}
@@ -586,6 +594,26 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		if(options!=null) {
 			for(Matcher option : options) {
 				option.close();
+			}
+		}
+	}
+	
+	public void link() {
+		if(next!=null) {
+			next.setPrevious(this);
+			next.link();
+		}
+		if(alternate!=null) {
+			alternate.link();
+		}
+		if(exclusions!=null) {
+			for(Matcher matcher : exclusions) {
+				matcher.link();
+			}
+		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.link();
 			}
 		}
 	}

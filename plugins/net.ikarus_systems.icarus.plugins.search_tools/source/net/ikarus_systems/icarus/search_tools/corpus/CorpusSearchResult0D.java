@@ -144,7 +144,7 @@ public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
 		return 0;
 	}
 	
-	private synchronized void commit(ResultEntry entry) {
+	protected synchronized void commit(ResultEntry entry) {
 		entries.add(entry);
 		hitCount += entry.getHitCount();
 	}

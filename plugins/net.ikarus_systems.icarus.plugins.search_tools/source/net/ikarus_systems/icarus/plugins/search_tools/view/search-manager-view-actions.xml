@@ -32,7 +32,7 @@
 		
 	<!-- Edit Query -->
 	<action id="plugins.searchTools.searchManagerView.editQueryAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="variable_tab.gif" />
 		
 	<!-- Select Factory -->
 	<action id="plugins.searchTools.searchManagerView.selectFactoryAction"
@@ -46,13 +46,13 @@
 	<action id="plugins.searchTools.searchManagerView.viewResultAction"
 		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
 		
-	<!-- View Result -->
+	<!-- Edit Parameters -->
 	<action id="plugins.searchTools.searchManagerView.editParametersAction"
 		name="${id}.name" desc="${id}.description" icon="debugtt_obj.gif" />
 		
 	<!-- Edit Search -->
-	<action id="plugins.searchTools.searchManagerView.editSearchAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+	<action id="plugins.searchTools.searchManagerView.viewSearchAction"
+		name="${id}.name" desc="${id}.description" icon="occ_read.gif" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.searchTools.searchManagerView.toolBarList">
@@ -70,7 +70,7 @@
 		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
 		<separator />
-		<item type="action" value="plugins.searchTools.searchManagerView.editSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.viewSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.cancelSearchAction" />

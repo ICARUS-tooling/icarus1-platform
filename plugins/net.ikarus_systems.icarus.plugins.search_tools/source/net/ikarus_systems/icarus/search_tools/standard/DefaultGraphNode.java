@@ -82,11 +82,12 @@ public class DefaultGraphNode implements SearchNode {
 		setId(node.getId());
 		setNegated(node.isNegated());
 
-		
+		// TODO maintain source value of edge
 		for(int i=0; i<node.getIncomingEdgeCount(); i++) {
 			addEdge(node.getIncomingEdgeAt(i), true);
 		}
-		
+
+		// TODO maintain source value of edge
 		for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
 			addEdge(node.getOutgoingEdgeAt(i), false);
 		}

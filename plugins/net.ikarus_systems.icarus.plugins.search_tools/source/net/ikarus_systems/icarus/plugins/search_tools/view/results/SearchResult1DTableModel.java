@@ -25,6 +25,11 @@ public class SearchResult1DTableModel extends SearchResultTableModel {
 		super(resultData);
 	}
 
+	public SearchResult1DTableModel(SearchResult resultData,
+			boolean ommitDimensionCheck) {
+		super(resultData, ommitDimensionCheck);
+	}
+
 	@Override
 	public int getSupportedDimensions() {
 		return 1;

@@ -54,17 +54,32 @@ public class SearchResultTableModel extends AbstractTableModel
 
 	public static final int DEFAULT_ROW_DIMENSION = 0;
 	public static final int DEFAULT_COLUMN_DIMENSION = 1;
+	
+	protected boolean ommitDimensionCheck = false;
 
 	protected int rowDimension = 0;
 	protected int columnDimension = 1;
-
 	public SearchResultTableModel(SearchResult resultData) {
+		this(resultData, false);
+	}
+
+	public SearchResultTableModel(SearchResult resultData, boolean ommitDimensionCheck) {
+		setOmmitDimensionCheck(ommitDimensionCheck);
+		
 		rowHeaderModel = new RowHeaderModel();
 		columnModel = new ColumnModel();
 
 		setResultData(resultData);
 	}
 	
+	public boolean isOmmitDimensionCheck() {
+		return ommitDimensionCheck;
+	}
+
+	public void setOmmitDimensionCheck(boolean ommitDimensionCheck) {
+		this.ommitDimensionCheck = ommitDimensionCheck;
+	}
+
 	public int getSupportedDimensions() {
 		return 2;
 	}
@@ -128,7 +143,7 @@ public class SearchResultTableModel extends AbstractTableModel
 	public void setResultData(SearchResult resultData) {
 		if(resultData==null)
 			throw new IllegalArgumentException("Invalid result data"); //$NON-NLS-1$
-		if(resultData.getDimension()!=getSupportedDimensions())
+		if(!isOmmitDimensionCheck() && resultData.getDimension()!=getSupportedDimensions())
 			throw new IllegalArgumentException("Unsupported result dimension: "+resultData.getDimension()); //$NON-NLS-1$
 		
 		this.resultData = resultData;
@@ -165,13 +180,13 @@ public class SearchResultTableModel extends AbstractTableModel
 		return Integer.class;
 	}
 	
-	protected int translateRowIndex(int rowIndex) {
+	public int translateRowIndex(int rowIndex) {
 		if(rowTransform!=null && rowTransform.length==getRowCount())
 			rowIndex = rowTransform[rowIndex];
 		return rowIndex;
 	}
 	
-	protected int translateColumnIndex(int columnIndex) {
+	public int translateColumnIndex(int columnIndex) {
 		if(columnTransform!=null && columnTransform.length==getColumnCount())
 			columnIndex = columnTransform[columnIndex];
 		return columnIndex;
@@ -417,7 +432,7 @@ public class SearchResultTableModel extends AbstractTableModel
 		}
 
 		public void fireModelChanged() {
-			fireContentsChanged(this, 0, getSize() - 1);
+			fireContentsChanged(this, 0, Math.max(0, getSize() - 1));
 		}
 
 		@Override

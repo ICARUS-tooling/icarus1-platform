@@ -288,5 +288,13 @@ public final class ResultDummies {
 		public Object getProperty(String key) {
 			return null;
 		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#canReorder()
+		 */
+		@Override
+		public boolean canReorder() {
+			return false;
+		}
 	}
 }

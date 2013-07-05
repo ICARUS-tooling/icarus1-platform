@@ -84,9 +84,9 @@ public interface SearchResult extends AnnotationContainer {
 	
 	/**
 	 * Returns the {@code SearchConstraint} that declared the grouping
-	 * for index {@code groupId}
+	 * for the given index
 	 */
-	SearchConstraint getGroupConstraint(int groupId);
+	SearchConstraint getGroupConstraint(int index);
 	
 	/**
 	 * Returns the {@code ContentType} representing the entries in this
@@ -138,6 +138,8 @@ public interface SearchResult extends AnnotationContainer {
 	 * Returns {@code true} in case the reordering was successful
 	 */
 	boolean reorder(int[] permutation);
+	
+	boolean canReorder();
 	
 	/**
 	 * Returns a list-oriented view of all the entries for the

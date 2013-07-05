@@ -110,6 +110,11 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 		return false;
 	}
 
+	@Override
+	public boolean canReorder() {
+		return false;
+	}
+
 	/**
 	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#getDimension()
 	 */

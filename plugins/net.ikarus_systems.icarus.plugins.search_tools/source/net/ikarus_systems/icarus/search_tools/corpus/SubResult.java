@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchConstraint;
+import net.ikarus_systems.icarus.search_tools.annotation.AnnotationBuffer;
 import net.ikarus_systems.icarus.search_tools.result.ResultEntry;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.standard.GroupCache;
@@ -78,6 +79,8 @@ public class SubResult implements SearchResult {
 	 */
 	@Override
 	public int getGroupMatchCount(int groupId, int index) {
+		checkSize();
+		
 		if(groupTranslate[groupId]==null) {
 			return base.getGroupMatchCount(groupId + fixedDimensions, index); 
 		} else {
@@ -138,6 +141,14 @@ public class SubResult implements SearchResult {
 		prepareIndices(indices);
 		return base.getMatchCount(indexBuffer);
 	}
+	
+	public AnnotationBuffer getAnnotationBuffer() {
+		if(base instanceof AbstractCorpusSearchResult) {
+			return ((AbstractCorpusSearchResult)base).getAnnotationBuffer();
+		} else {
+			return null;
+		}
+	}
 
 	@Override
 	public SearchResult getSubResult(int... groupInstances) {
@@ -148,7 +159,10 @@ public class SubResult implements SearchResult {
 			prepareIndices(groupInstances);
 			List<ResultEntry> list = base.getRawEntryList(indexBuffer);
 			if(list!=null) {
-				return new CorpusSearchResult0D(getSource(), list);
+				CorpusSearchResult0D subResult = new CorpusSearchResult0D(getSource(), list);
+				subResult.setAnnotationBuffer(getAnnotationBuffer());
+				
+				return subResult;
 			}
 		} else if (getDimension() >= groupInstances.length) {
 			// Combine group-instance arrays and let base create new
@@ -182,10 +196,10 @@ public class SubResult implements SearchResult {
 		int[] list = groupMatchCounts[groupId];
 		
 		if(list==null) {
-			list = new int[index*2];
+			list = new int[Math.max(10, index*2)];
 			groupMatchCounts[groupId] = list;
 		} else if(list.length<=index) {
-			list = Arrays.copyOf(list, index*2);
+			list = Arrays.copyOf(list, Math.max(10, index*2));
 			groupMatchCounts[groupId] = list;
 		}
 		
@@ -320,14 +334,18 @@ public class SubResult implements SearchResult {
 		
 		baseSize = base.getTotalMatchCount();
 	}
-
-	@Override
-	public int getTotalMatchCount() {
+	
+	private void checkSize() {
 		if(baseSize!=base.getTotalMatchCount()) {
 			synchronized (this) {
 				refreshSize();
 			}
 		}
+	}
+
+	@Override
+	public int getTotalMatchCount() {
+		checkSize();
 		
 		return size;
 	}
@@ -374,6 +392,15 @@ public class SubResult implements SearchResult {
 
 	@Override
 	public boolean reorder(int[] permutation) {
+		// no reordering of sub results!
+		return false;
+	}
+
+	/**
+	 * @see net.ikarus_systems.icarus.search_tools.result.SearchResult#canReorder()
+	 */
+	@Override
+	public boolean canReorder() {
 		// no reordering of sub results!
 		return false;
 	}

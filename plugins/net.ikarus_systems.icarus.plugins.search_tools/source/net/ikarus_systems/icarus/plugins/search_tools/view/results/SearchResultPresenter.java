@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 
+import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import javax.swing.SwingWorker;
 
 import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
@@ -35,6 +37,7 @@ import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.StringUtil;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -51,6 +54,8 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	
 	protected Handler handler;
 	protected CallbackHandler callbackHandler;
+	
+	protected SwingWorker<?, ?> currentTask;
 	
 	public static final int DEFAULT_REFRESH_DELAY = 1000;
 	
@@ -103,6 +108,18 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	
 	protected void refreshActions() {
 		// no-op
+	}
+	
+	protected void setCurrentTask(SwingWorker<? extends Object, ? extends Object> task) {
+		currentTask = task;
+	}
+	
+	protected boolean hasCurrentTask() {
+		return currentTask!=null;
+	}
+	
+	protected SwingWorker<?, ?> getCurrentTask() {
+		return currentTask;
 	}
 	
 	public void exportToolBarItems(JToolBar toolBar) {
@@ -167,6 +184,8 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		this.searchResult = searchResult;
 		
 		displayResult(options);
+		
+		updateGroupPainters();
 	}
 	
 	protected abstract void displayResult(Options options);
@@ -183,6 +202,9 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	@Override
 	public void clear() {
 		setSearchResult(null, null);
+		if(hasCurrentTask()) {
+			getCurrentTask().cancel(true);
+		}
 	}
 
 	/**
@@ -190,7 +212,9 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	 */
 	@Override
 	public void close() {
-		// for subclasses
+		if(hasCurrentTask()) {
+			getCurrentTask().cancel(true);
+		}
 	}
 
 	/**
@@ -210,6 +234,10 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	}
 	
 	protected abstract void buildContentPanel();
+	
+	protected void updateGroupPainters() {
+		// for subclasses
+	}
 
 	/**
 	 * @see net.ikarus_systems.icarus.ui.view.AWTPresenter#getPresentingComponent()
@@ -276,6 +304,66 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		
 		public void toggleNumberDisplayMode(ActionEvent e) {
 			// ignore
+		}
+	}
+	
+	protected abstract class AbstractResultJob extends SwingWorker<Object, Object> implements Identity {
+		
+		private final String key;
+		
+		protected AbstractResultJob(String key) {
+			if(key==null)
+				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+			
+			this.key = key;
+		}
+
+		@Override
+		public String getId() {
+			return getClass().getSimpleName();
+		}
+
+		@Override
+		public String getName() {
+			return ResourceManager.getInstance().get(
+					"plugins.searchTools.searchResultPresenter."+key+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		protected Object[] getDescriptionParams() {
+			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			return ResourceManager.getInstance().get(
+					"plugins.searchTools.searchResultPresenter."+key+".description", getDescriptionParams()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		@Override
+		public Icon getIcon() {
+			return null;
+		}
+
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+		
+		protected final Object owner() {
+			return SearchResultPresenter.this;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof AbstractResultJob) {
+				return ((AbstractResultJob)obj).owner()==owner();
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return getName();
 		}
 	}
 }

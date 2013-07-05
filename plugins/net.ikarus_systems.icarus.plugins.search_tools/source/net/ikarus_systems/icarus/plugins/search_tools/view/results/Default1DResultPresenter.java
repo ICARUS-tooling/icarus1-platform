@@ -15,34 +15,29 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
-import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.result.ResultDummies;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.CompoundMenuButton;
 import net.ikarus_systems.icarus.ui.NumberDisplayMode;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
-import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.list.RowHeaderList;
 import net.ikarus_systems.icarus.ui.table.TableRowHeaderRenderer;
 import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -71,6 +66,12 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	@Override
 	public int getSupportedDimensions() {
 		return SUPPORTED_DIMENSIONS;
+	}
+
+	@Override
+	protected void updateGroupPainters() {
+		int groupId = SearchUtils.getGroupId(getSearchResult(), 0);
+		Grouping.setGroupId(table, groupId);
 	}
 
 	/**
@@ -114,51 +115,25 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		cellRenderer = new ResultCountTableCellRenderer();
 		
 		tableModel = new SearchResult1DTableModel(ResultDummies.dummyResult1D);
-		table = new JTable(tableModel, tableModel.getColumnModel());
-		table.setDefaultRenderer(Integer.class, cellRenderer);
-		table.setFillsViewportHeight(true);
-		//table.setRowSelectionAllowed(false);
-		//table.setColumnSelectionAllowed(false);
-		table.setRowHeight(DEFAULT_CELL_HEIGHT);
+		table = createTable(tableModel, cellRenderer, true);
 		table.addMouseListener(getHandler());
 
-		JTableHeader header = table.getTableHeader();
-		header.setReorderingAllowed(false);
-		header.setResizingAllowed(false);
-		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
-		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
-		UIUtil.disableHtml(renderer);
-
-		rowHeader = new RowHeaderList(tableModel.getRowHeaderModel());
-		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
-		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
-		rowHeader.setResizingAllowed(true);
-		rowHeader.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowHeader.setFixedCellHeight(table.getRowHeight());
-		rowHeader.setBackground(contentPanel.getBackground());
-		rowHeader.setForeground(table.getForeground());		
-		rowHeaderRenderer = new TableRowHeaderRenderer(rowHeader, table);
-		rowHeader.setCellRenderer(rowHeaderRenderer);
+		rowHeader = createRowHeader(tableModel.getRowHeaderModel(), table, contentPanel);
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setRowHeaderView(rowHeader);
-		scrollPane.setBorder(UIUtil.topLineBorder);
+		scrollPane.setBorder(UIUtil.topLineBorder);		
+		Grouping.decorate(scrollPane, false);
 		
 		JPanel leftPanel = new JPanel(new BorderLayout());
 		
-		ActionManager actionManager = getActionManager();
-		CompoundMenuButton menuButton = new CompoundMenuButton(
-				0, CompoundMenuButton.HORIZONTAL,
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsAscAlphaAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsDescAlphaAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsAscNumAction"), //$NON-NLS-1$
-				actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsDescNumAction")); //$NON-NLS-1$
+		CompoundMenuButton menuButton = createCompoundButton(SORT_ROWS_BUTTON);
 		
 		Options options = new Options();
 		options.put("sortButtons", new Object[]{ //$NON-NLS-1$
 				EntryType.SEPARATOR,
 				menuButton, 
-				menuButton.getOpenButton()
+				menuButton.getOpenButton(),
 		});
 		options.put("multiline", true); //$NON-NLS-1$
 		JToolBar toolBar = getActionManager().createToolBar(
@@ -171,6 +146,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		subResultPresenter.getPresentingComponent().setMinimumSize(minSize);
 		
 		JSplitPane splitPane = new JSplitPane();
+		splitPane.setContinuousLayout(true);
 		splitPane.setLeftComponent(leftPanel);
 		splitPane.setRightComponent(subResultPresenter.getPresentingComponent());
 		splitPane.setResizeWeight(0);
@@ -207,20 +183,20 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 
 	@Override
 	protected void sortTable(TableSortMode sortMode) {
-		if(sortTableJob!=null) {
+		if(hasCurrentTask()) {
 			return;
 		}
 		
-		sortTableJob = new SortTableJob(sortMode){
+		SortTableJob job = new SortTableJob(sortMode){
 			@Override
 			protected Object doInBackground() throws Exception {
 				tableModel.sort(getSortMode());
 				return null;
 			}
 		};
-		TaskManager.getInstance().schedule(sortTableJob, 
-				TaskPriority.DEFAULT, true);
-		TaskManager.getInstance().setIndeterminate(sortTableJob, true);
+		setCurrentTask(job);
+		TaskManager.getInstance().schedule(job, TaskPriority.DEFAULT, true);
+		TaskManager.getInstance().setIndeterminate(job, true);
 	}
 
 	@Override
@@ -259,26 +235,13 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		}		
 	}
 	
-	protected class SubResultDisplayJob extends SwingWorker<SearchResult, Object>
-			implements Identity {
+	protected class SubResultDisplayJob extends AbstractResultJob {
 		
 		protected final int index;
 		
 		public SubResultDisplayJob(int index) {
+			super("subResultJob"); //$NON-NLS-1$
 			this.index = index;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof SubResultDisplayJob) {
-				return owner()==((SubResultDisplayJob)obj).owner();
-			}
-			
-			return false;
-		}
-		
-		private Default1DResultPresenter owner() {
-			return Default1DResultPresenter.this;
 		}
 
 		/**
@@ -293,7 +256,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		@Override
 		protected void done() {
 			try {
-				SearchResult subResult = get();
+				SearchResult subResult = (SearchResult) get();
 				if(subResult!=null) {
 					
 					Object label = searchResult.getInstanceLabel(0, index);
@@ -316,46 +279,9 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 			}
 		}
 
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
-		 */
 		@Override
-		public String getId() {
-			return getClass().getSimpleName();
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
-		 */
-		@Override
-		public String getName() {
-			return ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.subResultJob.name"); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
-		 */
-		@Override
-		public String getDescription() {
-			return ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.subResultJob.description", index); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
-		 */
-		@Override
-		public Icon getIcon() {
-			return null;
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
-		 */
-		@Override
-		public Object getOwner() {
-			return this;
+		protected Object[] getDescriptionParams() {
+			return new Object[]{index};
 		}
 	}
 }

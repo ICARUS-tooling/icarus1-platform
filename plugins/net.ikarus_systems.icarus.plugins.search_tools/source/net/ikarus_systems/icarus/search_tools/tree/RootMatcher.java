@@ -101,7 +101,7 @@ public class RootMatcher extends Matcher {
 			if(alternate!=null) {
 				matched = alternate.matches();
 			}
-		} else if(!exclusionMember && searchMode!=SearchMode.INDEPENDENT_HITS) {
+		} else if(!exclusionMember && previous==null && searchMode!=SearchMode.INDEPENDENT_HITS) {
 			commit();
 		}
 		

@@ -207,7 +207,7 @@ public class SearchManagerView extends View {
 		actionManager.setEnabled(searchHistory.getSize()>0, 
 				"plugins.searchTools.searchManagerView.clearHistoryAction"); //$NON-NLS-1$
 		actionManager.setEnabled(selected, 
-				"plugins.searchTools.searchManagerView.editSearchAction",  //$NON-NLS-1$
+				"plugins.searchTools.searchManagerView.viewSearchAction",  //$NON-NLS-1$
 				"plugins.searchTools.searchManagerView.removeSearchAction"); //$NON-NLS-1$
 	}
 	
@@ -240,8 +240,8 @@ public class SearchManagerView extends View {
 				callbackHandler, "viewResult"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchManagerView.editParametersAction",  //$NON-NLS-1$
 				callbackHandler, "editParameters"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.searchTools.searchManagerView.editSearchAction",  //$NON-NLS-1$
-				callbackHandler, "editSearch"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchManagerView.viewSearchAction",  //$NON-NLS-1$
+				callbackHandler, "viewSearch"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -605,7 +605,7 @@ public class SearchManagerView extends View {
 			}
 		}
 		
-		public void editSearch(ActionEvent e) {
+		public void viewSearch(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;

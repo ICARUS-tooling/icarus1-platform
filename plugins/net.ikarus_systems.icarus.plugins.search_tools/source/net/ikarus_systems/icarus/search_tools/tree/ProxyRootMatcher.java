@@ -40,6 +40,11 @@ public class ProxyRootMatcher extends Matcher {
 	}
 
 	@Override
+	public int getAllocation() {
+		return -1;
+	}
+
+	@Override
 	protected boolean matchesNext() {
 		return false;
 	}

@@ -13,8 +13,10 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.event.ChangeListener;
 
@@ -194,10 +196,9 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		return new ResultNDCache();
 	}
 
-	private synchronized void commit(ResultEntry entry, ResultNDCache cache) {
+	protected synchronized void commit(ResultEntry entry, ResultNDCache cache) {
 		
 		for (int i = 0; i < indexBuffer.length; i++) {
-			// TODO use a dummy value for null instances in buffer?
 			String value = cache.instanceBuffer[indexPermutator[i]];
 			if(value==null) {
 				value = DUMMY_INSTANCE;
@@ -257,6 +258,74 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		return (counts==null || counts.length<=index) ? 0 : counts[index];
 	}
 
+	@Override
+	public boolean canReorder() {
+		return getDimension()>2;
+	}
+
+	@Override
+	public synchronized boolean reorder(int[] permutation) {
+		if(permutation==null || permutation.length==0)
+			throw new IllegalArgumentException("Invalid permutation"); //$NON-NLS-1$
+		
+		/*System.out.printf("reorder call: perm=%s dim=%d\n",  //$NON-NLS-1$
+				Arrays.toString(permutation), getDimension());*/
+		
+		int dimension = getDimension();
+		if(permutation.length!=dimension)
+			throw new IllegalArgumentException();
+		
+		// we only allow reordering from 3 dimensions on 
+		if(dimension<3) {
+			return false;
+		}
+		
+		// nothing to do when permutation array is sorted
+		if(CollectionUtils.isAscending(permutation))
+			return true;
+		
+		// generate an easy way to reshape key strings
+		int[] tmp = new int[dimension];
+		CollectionUtils.fillAscending(tmp);
+		CollectionUtils.permutate(tmp, permutation);
+		String pattern = "", replacement = ""; //$NON-NLS-1$ //$NON-NLS-2$
+		for(int i=0; i<dimension; i++) {
+			pattern += "(\\d+)"; //$NON-NLS-1$
+			replacement += "$"+(tmp[i]+1); //$NON-NLS-1$
+			if(i==dimension-1)
+				break;
+			pattern += "_"; //$NON-NLS-1$
+			replacement += "_"; //$NON-NLS-1$
+		}
+		
+		/*System.out.printf("reordering result: pattern='%s' replacement='%s'\n", //$NON-NLS-1$
+				pattern, replacement);*/
+		
+		// Entry buffer, preserves order
+		Map<String, List<ResultEntry>> buffer = 
+			new LinkedHashMap<String, List<ResultEntry>>(entries.size());
+		
+		// Relink all entry lists
+		String key;
+		for(Entry<String, List<ResultEntry>> entry : entries.entrySet()) {
+			key = entry.getKey().replaceAll(pattern, replacement);
+			buffer.put(key, entry.getValue());
+		}
+		
+		// Copy them back
+		entries.clear();
+		entries.putAll(buffer);
+		
+		// Apply permutation to the internal arrays
+		CollectionUtils.permutate(indexPermutator, permutation);
+		CollectionUtils.permutate(groupConstraints, permutation);
+		CollectionUtils.permutate(groupMatchCounts, permutation);
+		CollectionUtils.permutate(groupInstances, permutation);
+		CollectionUtils.permutate(groupTokens, permutation);
+		
+		return true;
+	}
+
 	protected class ResultNDCache implements GroupCache {
 
 		protected final String[] instanceBuffer = new String[getDimension()];
@@ -269,7 +338,7 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		@Override
 		public void cacheGroupInstance(int id, Object value) {
 			if(!locked) {
-				instanceBuffer[id] = String.valueOf(value);
+				instanceBuffer[groupIndexMap[id]] = String.valueOf(value);
 			}
 		}
 		

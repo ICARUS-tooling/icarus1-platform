@@ -9,7 +9,6 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.results;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 
@@ -18,7 +17,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.ui.NumberDisplayMode;
-import net.ikarus_systems.icarus.util.Exceptions;
 
 /**
  * 
@@ -56,9 +54,9 @@ public class ResultCountTableCellRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		
-		if(value==null || (Integer) value == 0)
+		if(value==null || (Integer) value == 0) {
 			value = null;
-		else if(displayMode==NumberDisplayMode.PERCENTAGE 
+		} else if(displayMode==NumberDisplayMode.PERCENTAGE 
 				&& searchResult!=null) {
 			double p = (Integer)value/(double)searchResult.getTotalMatchCount() * 100d;
 			value = p<ResultCountUtils.getMinPercentage() ? 0 : String.format("%1.2f%%", p); //$NON-NLS-1$

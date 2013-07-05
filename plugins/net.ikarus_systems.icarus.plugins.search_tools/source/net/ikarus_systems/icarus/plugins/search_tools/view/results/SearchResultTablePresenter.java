@@ -9,19 +9,26 @@
  */
 package net.ikarus_systems.icarus.plugins.search_tools.view.results;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 
-import javax.swing.Icon;
-import javax.swing.SwingWorker;
+import javax.swing.JComponent;
+import javax.swing.JTable;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.ui.CompoundMenuButton;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
+import net.ikarus_systems.icarus.ui.list.RowHeaderList;
+import net.ikarus_systems.icarus.ui.table.TableRowHeaderRenderer;
 import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
-import net.ikarus_systems.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -30,8 +37,6 @@ import net.ikarus_systems.icarus.util.id.Identity;
  */
 public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 	
-	protected SortTableJob sortTableJob;
-
 	protected static final String[] SORT_ACTIONS = { 
 		"plugins.searchTools.searchResultPresenter.sortColsAscAlphaAction",  //$NON-NLS-1$
 		"plugins.searchTools.searchResultPresenter.sortColsDescAlphaAction",  //$NON-NLS-1$
@@ -74,11 +79,11 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 		
 		ActionManager actionManager = getActionManager();
 		
-		boolean isSorting = sortTableJob!=null;
+		boolean canExecute = !hasCurrentTask();
 		
-		actionManager.setEnabled(!isSorting, SORT_ACTIONS);
+		actionManager.setEnabled(canExecute, SORT_ACTIONS);
 		
-		actionManager.setEnabled(!isSorting, 
+		actionManager.setEnabled(canExecute, 
 				"plugins.searchTools.searchResultPresenter.flipTableAction", //$NON-NLS-1$
 				"plugins.searchTools.searchResultPresenter.resetTableAction"); //$NON-NLS-1$
 	}
@@ -94,24 +99,85 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 	protected void resetTable() {
 		// for subclasses
 	}
+	
+	public JTable createTable(SearchResultTableModel model, 
+			TableCellRenderer cellRenderer, boolean resize) {
+		JTable table = new JTable(model, model.getColumnModel());
+		table.setDefaultRenderer(Integer.class, cellRenderer);
+		table.setFillsViewportHeight(true);
+		table.setRowSelectionAllowed(false);
+		table.setColumnSelectionAllowed(false);
+		table.setRowHeight(DEFAULT_CELL_HEIGHT);
+		table.setIntercellSpacing(new Dimension(4, 4));
+		table.setAutoResizeMode(resize ? JTable.AUTO_RESIZE_ALL_COLUMNS : JTable.AUTO_RESIZE_OFF);
 
-	@Override
-	public void clear() {
-		super.clear();
-		if(sortTableJob!=null) {
-			sortTableJob.cancel(true);
-		}
+		JTableHeader header = table.getTableHeader();
+		header.setReorderingAllowed(false);
+		//header.setResizingAllowed(false);
+		DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
+		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
+		UIUtil.disableHtml(renderer);
+		
+		return table;
 	}
+	
+	public RowHeaderList createRowHeader(ListModel<String> model, 
+			JTable table, JComponent container) {
 
-	@Override
-	public void close() {
-		super.close();
-		if(sortTableJob!=null) {
-			sortTableJob.cancel(true);
+		RowHeaderList rowHeader = new RowHeaderList(model);
+		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
+		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
+		rowHeader.setResizingAllowed(true);
+		rowHeader.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		rowHeader.setFixedCellHeight(table.getRowHeight());
+		rowHeader.setBackground(container.getBackground());
+		rowHeader.setForeground(table.getForeground());		
+		TableRowHeaderRenderer rowHeaderRenderer = new TableRowHeaderRenderer(rowHeader, table);
+		rowHeader.setCellRenderer(rowHeaderRenderer);
+		
+		return rowHeader;
+	}
+	
+	public static final int SORT_COLUMNS_BUTTON = 0;
+	public static final int SORT_FIXED_DIMENSION_BUTTON = 1;
+	public static final int SORT_ROWS_BUTTON = 2;
+	
+	public CompoundMenuButton createCompoundButton(int type) {
+		ActionManager actionManager = getActionManager();
+		switch (type) {
+		case SORT_COLUMNS_BUTTON:
+			return new CompoundMenuButton(
+					0, CompoundMenuButton.HORIZONTAL,
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsAscAlphaAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsDescAlphaAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsAscNumAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortColsDescNumAction")); //$NON-NLS-1$
+
+		case SORT_ROWS_BUTTON:
+			return new CompoundMenuButton(
+					0, CompoundMenuButton.HORIZONTAL,
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsAscAlphaAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsDescAlphaAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsAscNumAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortRowsDescNumAction")); //$NON-NLS-1$
+
+		case SORT_FIXED_DIMENSION_BUTTON:
+			return new CompoundMenuButton(
+					0, CompoundMenuButton.HORIZONTAL,
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortFixedDimensionAscAlphaAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortFixedDimensionDescAlphaAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortFixedDimensionAscNumAction"), //$NON-NLS-1$
+					actionManager.getAction("plugins.searchTools.searchResultPresenter.sortFixedDimensionDescNumAction")); //$NON-NLS-1$
 		}
+		
+		return null;
 	}
 
 	public class TableCallbackHandler extends CallbackHandler {
+		
+		protected TableCallbackHandler() {
+			// no-op
+		}
 		
 		public void sortTable(ActionEvent e) {
 			try {
@@ -121,7 +187,7 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 				refreshActions();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to sort", ex); //$NON-NLS-1$
+						"Failed to sort table", ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
 		}
@@ -147,73 +213,26 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 		}
 	}
 	
-	protected abstract class SortTableJob extends SwingWorker<Object, Object> implements Identity {
+	protected abstract class SortTableJob extends AbstractResultJob {
 
 		private final TableSortMode sortMode;
 		
 		public SortTableJob(TableSortMode sortMode) {
+			super("sortTableJob"); //$NON-NLS-1$
+			
 			if(sortMode==null)
 				throw new IllegalArgumentException("Invalid sort mode"); //$NON-NLS-1$
 			
 			this.sortMode = sortMode;
 		}
 		
-		private Object owner() {
-			return SearchResultTablePresenter.this;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof SortTableJob) {
-				return owner()==((SortTableJob)obj).owner();
-			}
-			return false;
-		}
-		
 		protected TableSortMode getSortMode() {
 			return sortMode;
 		}
 
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getId()
-		 */
 		@Override
-		public String getId() {
-			return getClass().getSimpleName();
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getName()
-		 */
-		@Override
-		public String getName() {
-			return ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.sortTableJob.name"); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getDescription()
-		 */
-		@Override
-		public String getDescription() {
-			return ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.sortTableJob.description", sortMode.getName()); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getIcon()
-		 */
-		@Override
-		public Icon getIcon() {
-			return null;
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.util.id.Identity#getOwner()
-		 */
-		@Override
-		public Object getOwner() {
-			return this;
+		protected Object[] getDescriptionParams() {
+			return new Object[]{sortMode.getName()};
 		}
 
 		@Override
@@ -223,7 +242,7 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 			}
 			
 			TaskManager.getInstance().setIndeterminate(this, false);
-			sortTableJob = null;
+			setCurrentTask(null);
 			refreshActions();
 		}
 	}

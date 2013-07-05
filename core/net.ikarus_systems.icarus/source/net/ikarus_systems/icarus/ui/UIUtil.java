@@ -49,7 +49,6 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -170,6 +169,7 @@ public final class UIUtil {
 	public static final Border defaultBoxBorder = BorderFactory.createLineBorder(defaultBorderColor, 1);
 	
 	public static final Border topLineBorder = new SeparatingBorder(true, false, false, false);
+	public static final Border emptyBorder = new EmptyBorder(0, 0, 0, 0);
 	
 	public static final Border defaultContentBorder = new EmptyBorder(1, 3, 1, 3);
 	
@@ -650,8 +650,9 @@ public final class UIUtil {
 		infoLabel.setLineWrap(true);
 		infoLabel.setEditable(false);
 		infoLabel.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));new JLabel();
+		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		UIUtil.disableHtml(infoLabel);
+		infoLabel.setMinimumSize(new Dimension(50, 50));
 		
 		return infoLabel;
 	}
