@@ -1,0 +1,464 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.languageTools" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.language_tools.LanguageToolsPlugin">
+	
+	<doc>
+		<doc-text>
+			Collection of general purpose language tools.
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/language_tools/icons/" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+	</requires>
+	
+	<!-- Extension-Points -->
+			
+	<extension-point id="Grammar" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter-def id="class" multiplicity="one">
+			<doc>
+				<doc-text>
+					The 'grammar' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.Grammar interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Tokenizer" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Point of registration for all tokenizer implementations that desire
+				to be included when the user is presented a list of usable tokenizers.
+				Note that this extension-point extends the abstract 'Localizable'
+				point but it does not require all the features inherited. In fact
+				connected extensions can completely ommit the usage of those
+				parameters in which case the corresponding tokenizer implementations
+				will be identified solely by their id as declared in the plugin-xml.
+			</doc-text>
+		</doc>
+		<parameter-def id="class" multiplicity="one">
+			<doc>
+				<doc-text>
+					The 'tokenizer' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.tokenizer.Tokenizer interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Treebank" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Entry point to define access to certain type of treebank resources
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'treebank' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.treebank.Treebank interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="grammar" multiplicity="any">
+			<doc>
+				<doc-text>
+					Identifies the grammar object associated with
+					this treebank. Used to thin out the number of
+					treebanks being displayed. Treebanks that
+					reference an unknown grammar are ignored.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SentenceDataReader" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Helper object for reading a certain type of 'sentence format'
+				from an arbitrary location.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'reader' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.SentenceDataReader interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="grammar" multiplicity="none-or-one">
+			<doc>
+				<doc-text>
+					Identifies the grammar object associated with this reader. 
+					Used to thin out the number of available readers being displayed. 
+					Readers that reference an unknown grammar are ignored.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SentenceDataWriter" parent-point-id="Localizable" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Helper object for saving a certain type of 'sentence format'
+				to an arbitrary location.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'writer' itself as a java class.
+					Required to have no-args constructor and implement
+					net.ikarus_systems.icarus.language.SentenceDataWriter interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="grammar" multiplicity="none-or-one">
+			<doc>
+				<doc-text>
+					Identifies the grammar object associated with this writer 
+					Used to thin out the number of writers being displayed. 
+					Writers that reference an unknown grammar are ignored. If a 
+					writer is able to handle more than one grammar it should
+					be connected to this extension-point once for every grammar
+					it supports so that different instances are created for each.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="LanguageToolsView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that only want to
+				contribute language tool like capabilities. Typically a perspective
+				that holds a collection of language tools will add all extensions
+				to this extension-point to its default list of views.
+			</doc-text>
+		</doc>
+	</extension-point>
+			
+	<extension-point id="TreebankManagementView" parent-point-id="View" 
+			parent-plugin-id="net.ikarus_systems.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that should only
+				be used in the treebank management context.
+			</doc-text>
+		</doc>
+	</extension-point>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PROPERTIES AND VIEWS -->
+	
+	<extension id="TreebankManagerPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				Perspective that allows the management of treebank instances.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.treebankManagerPerspective.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankManagerPerspective.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankManagerPerspective" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-manager-perspective.gif" />
+	</extension>
+	
+	<extension id="TextInputView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="LanguageToolsView">
+		<doc>
+			<doc-text>
+				Plain simple text input.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.textInputView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.textInputView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.input.TextInputView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/input/text-input-view.gif" />
+		<parameter id="alignment" value="bottom" />
+		<parameter id="priority" value="high" />
+		<parameter id="requiresTab" value="false" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="set-text" />
+			<parameter id="get-text" />
+			<parameter id="append" value="StringContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="TreebankEditView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
+		<doc>
+			<doc-text>
+				Editor for treebanksora using registered Editor helper implementations
+				to perform the actual editing.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.treebankEditView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankEditView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankEditView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-edit-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="high" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="edit" value="TreebankContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="TreebankExplorerView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
+		<doc>
+			<doc-text>
+				Default explorer to browse treebank categories and instances.
+				Allows basic management: add, delete, rename
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.treebankExplorerView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankExplorerView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankExplorerView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-explorer-view.gif" />
+		<parameter id="alignment" value="left" />
+		<parameter id="priority" value="high" />
+	</extension>
+	
+	<extension id="TreebankPropertiesView" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="TreebankManagementView">
+		<doc>
+			<doc-text>
+				Outline view to display treebank fields (name, editable, type, ...)
+				and properties. If meta-data information is available for the
+				currently displayed treebank it will be shown as well. Supports
+				export and copy functions for property and/or meta-data entries. 
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.treebankPropertiesView.identity.name" />
+		<parameter id="description" value="plugins.languageTools.treebankPropertiesView.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.TreebankPropertiesView" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/language_tools/treebank/treebank-properties-view.gif" />
+		<parameter id="alignment" value="right" />
+		<parameter id="priority" value="standard" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="display" value="TreebankContentType" />
+		</parameter>
+	</extension>
+	
+	<!-- TREEBANKS -->
+	
+	<extension id="DefaultSimpleTreebank" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Treebank">
+		<doc>
+			<doc-text>
+				A simple synchronous treebank implementation that relies on
+				SentenceDataReader objects to handle the actual loading
+				of its content data. This implementation will suffice for
+				most small or medium sized treebanks.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DefaultSimpleTreebank" />
+	</extension>
+	
+	<extension id="FilteredTreebank" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Treebank">
+		<doc>
+			<doc-text>
+				Wrapper implementation for derived treebanks that are "filtered" by 
+				an array of integers. Those indices mark the data items in the base
+				treebank that are to be included in the "filtered" treebank. This
+				implementation reflects the type and properties of its base treebank and
+				forwards all listener related method calls to it.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.FilteredTreebank" />
+	</extension>
+	
+	<!-- HELPERS -->
+	
+	<extension id="DefaultSimpleTreebankEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Default editor usable for basically any type of Treebank
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DefaultSimpleTreebankEditor" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
+	</extension>
+	
+	<extension id="DerivedTreebankEditor" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Editor used for derived treebanks that enables the
+				selection of a base treebank.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.treebank.DerivedTreebankEditor" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@DerivedTreebankContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.helper.Editor" />
+	</extension>
+	
+	<extension id="TreebankListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Renderer to be used for treebank objects displayed in JList and JComboBox implementations.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankListCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="TreebankTreeCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Renderer to be used for treebank objects displayed in JTree implementations.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankTreeCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
+		<parameter id="interface" value="javax.swing.tree.TreeCellRenderer" />
+	</extension>
+	
+	<extension id="TreebankListModel" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				ListModel implementation as frontend for the TreebankRegistry.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.swing.TreebankListModel" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@TreebankContentType" />
+		<parameter id="interface" value="javax.swing.ListModel" />
+		<parameter id="interface" value="javax.swing.ComboBoxModel" />
+	</extension>
+	
+	<extension id="SentenceDataListModel" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				DataListModel implementation for net.ikarus_systems.icarus.language.SentenceData content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListModel" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.util.data.DataListModel" />
+	</extension>
+	
+	<extension id="SentenceDataListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Simple renderer for net.ikarus_systems.icarus.language.SentenceData list content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="SentenceDataListPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				ListPresenter implementation for net.ikarus_systems.icarus.language.SentenceDataList content.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.helper.SentenceDataListPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataListContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.ListPresenter" />
+	</extension>
+	
+	<extension id="DefaultTokenizer" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="Tokenizer">
+		<doc>
+			<doc-text>
+				Naive tokenizer implementation relying on the java.util.StringTokenizer
+				class to carry out the actual tokenization. Not that this implementation
+				should be regarded a kind of fall-back in case no 'real' tokenizer
+				can be found since the tokenization performed might not be sufficient
+				for many use cases (the input has to be aware of the delimiter).
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.languageTools.defaultTokenizer.identity.name" />
+		<parameter id="description" value="plugins.languageTools.defaultTokenizer.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.language_tools.resources.language_tools" />
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.language_tools.input.DefaultTokenizer" />
+	</extension>
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.TreebankDescriptor" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.treebank.TreebankInfo" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="TreebankContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.treebank.Treebank
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.treebank.Treebank" />
+	</extension>
+	
+	<extension id="DerivedTreebankContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.treebank.DerivedTreebank
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.treebank.DerivedTreebank" />
+	</extension>
+	
+	<extension id="SentenceDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.SentenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.SentenceData" />
+	</extension>
+	
+	<extension id="MutableSentenceDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.MutableSentenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.MutableSentenceData" />
+	</extension>
+	
+	<extension id="SentenceDataListContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.SentenceDataList
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.SentenceDataList" />
+	</extension>
+	
+</plugin>

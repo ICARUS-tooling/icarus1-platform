@@ -1,0 +1,161 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="net.ikarus_systems.icarus.dependency" version="0.0.1"
+	class="net.ikarus_systems.icarus.plugins.dependency.DependencyPlugin">
+	
+	<doc>
+		<doc-text>
+			The base plug-in for all dependency related tools. Offers definitions for
+			dependency based data structures and related tools. Provides basic visualization
+			helpers for tabular, graphical and testual representation.
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.dependency.resources.dependency" />
+		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/dependency/icons/" />
+		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.dependency.DependencyPreferences" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="net.ikarus_systems.icarus.core" />
+		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="net.ikarus_systems.icarus.searchTools" />
+		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
+	</requires>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PROPERTIES AND VIEWS -->
+	
+	<!-- HELPERS -->
+	
+	<extension id="DependencyGraphPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				GraphPresenter implementation for use with arbitrary sentence data that implements
+				the net.ikarus_systems.icarus.language.dependency.DependencyData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.graph.DependencyGraphPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter" />
+	</extension>
+	
+	<extension id="DependencyTablePresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TablePresenter implementation for use with arbitrary sentence data that implements
+				the net.ikarus_systems.icarus.language.dependency.DependencyData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.table.DependencyTablePresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.table.TablePresenter" />
+	</extension>
+	
+	<extension id="DependencyAnnotationManager" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Annotation manager implementation to be used with DependencyAnnotation
+				objects.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotationManager" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyAnnotationContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.util.annotation.AnnotationManager" />
+	</extension>
+	
+	<extension id="DependencyListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.list.DependencyListCellRenderer" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="DependencyCellConverter" plugin-id="net.ikarus_systems.icarus.core" point-id="DataConverter">
+		<doc>
+			<doc-text>
+				Converter to transform DependencyNodeData objects into constraint sets usable for the constraint graph editor (nodes)
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.graph.DependencyCellConverter" />
+		<parameter id="accuracy" value="1" />
+		<parameter id="inputType" value="net.ikarus_systems.icarus.dependency@DependencyNodeDataContentType" />
+		<parameter id="outputType" value="net.ikarus_systems.icarus.searchTools@ConstraintCellDataContentType" />
+	</extension>
+	
+	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.DependencyNodeData" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.SimpleDependencyData" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="DependencyDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.dependency.DependencyData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyData" />
+	</extension>
+	
+	<extension id="DependencyAnnotationContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotation
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotation" />
+	</extension>
+	
+	<extension id="DependencyNodeDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.dependency.DependencyNodeData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyNodeData" />
+	</extension>
+	
+	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
+	
+	<extension id="DependencyConstraintContext" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="token" value="form" />
+		<parameter id="token" value="lemma" />
+		<parameter id="token" value="pos" />
+		<parameter id="token" value="features" />
+		<parameter id="token" value="relation">
+			<parameter id="alias" value="label" />
+		</parameter>
+		<parameter id="token" value="distance" />
+		<parameter id="token" value="direction" />
+		<parameter id="token" value="projectivity" />
+		<parameter id="factories">
+			<parameter id="form" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFormConstraintFactory" />
+			<parameter id="lemma" value="net.ikarus_systems.icarus.language.dependency.search.DependencyLemmaConstraintFactory" />
+			<parameter id="pos" value="net.ikarus_systems.icarus.language.dependency.search.DependencyPosConstraintFactory" />
+			<parameter id="features" value="net.ikarus_systems.icarus.language.dependency.search.DependencyFeaturesConstraintFactory" />
+			<parameter id="relation" value="net.ikarus_systems.icarus.language.dependency.search.DependencyRelationConstraintFactory" />
+			<parameter id="distance" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDistanceConstraintFactory" />
+			<parameter id="direction" value="net.ikarus_systems.icarus.language.dependency.search.DependencyDirectionConstraintFactory" />
+			<parameter id="projectivity" value="net.ikarus_systems.icarus.language.dependency.search.DependencyProjectivityConstraintFactory" />
+		</parameter>
+	</extension>
+	
+	<extension id="DependencySearchFactory" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="net.ikarus_systems.icarus.dependency@DependencyDataContentType" />
+		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.search.DependencySearchFactory" />
+		<parameter id="name" value="plugins.dependency.dependencySearchFactory.identity.name" />
+		<parameter id="description" value="plugins.dependency.dependencySearchFactory.identity.description" />
+		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.dependency.resources.dependency" />
+		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/dependency/search/dependency-search-factory.gif" />
+	</extension>
+	
+</plugin>
