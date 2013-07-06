@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 import net.ikarus_systems.icarus.language.LanguageConstants;
+import net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData;
+import net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData;
+import net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.ConstraintContext;
 import net.ikarus_systems.icarus.search_tools.ConstraintFactory;
@@ -40,6 +43,8 @@ import net.ikarus_systems.icarus.search_tools.standard.DefaultSearchGraph;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.Orientation;
 import net.ikarus_systems.icarus.util.StringUtil;
+import net.ikarus_systems.icarus.util.data.ContentType;
+import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner
@@ -50,6 +55,26 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 
 	private SearchUtils() {
 		// no-op
+	}
+	
+	public static ContentType getConstraintNodeContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(ConstraintNodeData.class);
+	}
+	
+	public static ContentType getConstraintEdgeContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(ConstraintEdgeData.class);
+	}
+	
+	public static ContentType getConstraintCellContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(ConstraintCellData.class);
+	}
+	
+	public static ContentType getSearchNodeContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(SearchNode.class);
+	}
+	
+	public static ContentType getSearchEdgeContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(SearchEdge.class);
 	}
 	
 	public static boolean isExhaustiveSearch(Search search) {

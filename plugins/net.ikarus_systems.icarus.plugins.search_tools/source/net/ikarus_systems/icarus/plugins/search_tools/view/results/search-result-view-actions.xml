@@ -45,6 +45,8 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchResultView.clearViewAction" />
 		<separator />
+		<item type="custom" value="groupLabels" />
+		<separator />
 	</action-list>
 	
 </actions>

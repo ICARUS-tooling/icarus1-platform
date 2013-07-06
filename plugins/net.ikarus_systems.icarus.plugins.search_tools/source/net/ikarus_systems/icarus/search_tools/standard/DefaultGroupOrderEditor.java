@@ -27,6 +27,8 @@ import net.ikarus_systems.icarus.ui.GridBagUtil;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.util.CollectionUtils;
+import net.ikarus_systems.icarus.util.HtmlUtils;
+import net.ikarus_systems.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -115,6 +117,9 @@ public class DefaultGroupOrderEditor {
 		
 		return result;
 	}
+	
+	protected static final String defaultFormat = 
+			"<html>[%d]&nbsp;<font color=\"%s\">%s</font>:&nbsp;%s"; //$NON-NLS-1$
 
 	protected class GroupListRenderer extends JPanel implements ActionListener {
 		
@@ -126,6 +131,7 @@ public class DefaultGroupOrderEditor {
 		
 		private final int index;
 		
+		
 		public GroupListRenderer(int index) {
 			super(new GridBagLayout());
 			
@@ -133,7 +139,7 @@ public class DefaultGroupOrderEditor {
 			
 			label = new JLabel();
 			label.setHorizontalAlignment(SwingConstants.LEFT);
-			UIUtil.disableHtml(label);
+			//UIUtil.disableHtml(label);
 			
 			upButton = createButton("up"); //$NON-NLS-1$
 			downButton = createButton("down"); //$NON-NLS-1$
@@ -166,9 +172,11 @@ public class DefaultGroupOrderEditor {
 			int index = permutation[this.index];
 			
 			int groupId = SearchUtils.getGroupId(getSearchResult(), index);
-			label.setForeground(Grouping.getGrouping(groupId).getColor());
 			
-			String text = String.format("[%d] %s", groupId, getSearchResult().getGroupLabel(index)); //$NON-NLS-1$
+			String text = String.format(defaultFormat, groupId,
+					HtmlUtils.hexString(Grouping.getGrouping(groupId).getColor()),
+					HtmlUtils.escapeHTML(getSearchResult().getGroupLabel(index).toString()),
+					StringUtil.formatDecimal(getSearchResult().getInstanceCount(index)));
 			label.setText(text);
 		}
 

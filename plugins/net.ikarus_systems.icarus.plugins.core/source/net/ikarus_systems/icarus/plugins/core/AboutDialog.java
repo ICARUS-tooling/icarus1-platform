@@ -58,7 +58,6 @@ import org.java.plugin.registry.PluginDescriptor;
  *
  */
 public class AboutDialog extends JDialog {
-	
 
 	private static final long serialVersionUID = 7752834817128092360L;
 
@@ -70,12 +69,12 @@ public class AboutDialog extends JDialog {
 	private static final String HTML = "<html>"; //$NON-NLS-1$
 	private static final String HTML_END = "</html>"; //$NON-NLS-1$
 
-
-	
 	public AboutDialog() {
 		aboutPanel = new JPanel(new GridBagLayout());
 		
-		buildAbout();			
+		buildAbout();	
+		
+		setIconImages(Core.getIconImages());
 
 		this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 		this.pack();

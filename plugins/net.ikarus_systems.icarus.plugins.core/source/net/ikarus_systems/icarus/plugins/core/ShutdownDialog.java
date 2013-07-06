@@ -40,6 +40,7 @@ public final class ShutdownDialog {
 
 	public synchronized void shutdown() {
 		// TODO create dialog and invoke shutdown calls on various frameworks
-		
+	
+		System.exit(0);
 	}
 }

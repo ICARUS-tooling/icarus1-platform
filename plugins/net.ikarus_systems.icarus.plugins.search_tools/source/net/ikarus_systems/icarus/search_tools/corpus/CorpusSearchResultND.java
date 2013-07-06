@@ -200,7 +200,7 @@ public class CorpusSearchResultND extends AbstractCorpusSearchResult {
 		
 		for (int i = 0; i < indexBuffer.length; i++) {
 			String value = cache.instanceBuffer[indexPermutator[i]];
-			if(value==null) {
+			if(value==null || "".equals(value)) { //$NON-NLS-1$
 				value = DUMMY_INSTANCE;
 			}
 			int index = groupInstances[i].substitute(value);

@@ -36,6 +36,20 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 	private Handler handler;
 	
 	private Timer timer;
+	
+	private static SearchHistory sharedInstance;
+	
+	public static SearchHistory getSharedInstance() {
+		if(sharedInstance==null) {
+			synchronized (SearchHistory.class) {
+				if(sharedInstance==null) {
+					sharedInstance = new SearchHistory();
+				}
+			}
+		}
+		
+		return sharedInstance;
+	}
 
 	public SearchHistory() {
 		// no-op

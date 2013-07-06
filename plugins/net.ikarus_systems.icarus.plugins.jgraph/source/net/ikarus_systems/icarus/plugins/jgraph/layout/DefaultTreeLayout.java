@@ -45,9 +45,15 @@ public class DefaultTreeLayout implements GraphLayout {
 	
 	protected mxRectangle layoutCell(GraphOwner owner, Object cell, 
 			Set<Object> allowedCells, double x, double y, double vGap, double hGap) {
+		mxGraph graph = owner.getGraph();
 		mxRectangle bounds;
+
+		// Refresh cell size if graph is auto-sizing
+		if(graph.isAutoSizeCell(cell)) {
+			graph.cellSizeUpdated(cell, false);
+		}
 		
-		mxIGraphModel model = owner.getGraph().getModel();
+		mxIGraphModel model = graph.getModel();
 		mxGeometry geometry = model.getGeometry(cell);
 		geometry.setX(x);
 		geometry.setY(y);

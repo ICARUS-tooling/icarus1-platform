@@ -10,15 +10,10 @@
 package net.ikarus_systems.icarus.language.coref.text;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Element;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -29,6 +24,7 @@ import net.ikarus_systems.icarus.language.coref.CoreferenceUtils;
 import net.ikarus_systems.icarus.language.coref.Span;
 import net.ikarus_systems.icarus.language.coref.helper.SpanBuffer;
 import net.ikarus_systems.icarus.plugins.coref.view.CoreferenceStyling;
+import net.ikarus_systems.icarus.ui.text.BatchDocument;
 import net.ikarus_systems.icarus.util.Filter;
 import net.ikarus_systems.icarus.util.cache.LRUCache;
 
@@ -37,7 +33,7 @@ import net.ikarus_systems.icarus.util.cache.LRUCache;
  * @version $Id$
  *
  */
-public class CoreferenceDocument extends DefaultStyledDocument {
+public class CoreferenceDocument extends BatchDocument {
 
 	private static final long serialVersionUID = -5717201692774979302L;
 	
@@ -54,10 +50,6 @@ public class CoreferenceDocument extends DefaultStyledDocument {
 	private HighlightType highlightType = HighlightType.BACKGROUND;
 	
 	private Filter filter;
-	
-	private List<ElementSpec> batch;
-	
-    private static final char[] EOL_ARRAY = { '\n' };
 
 	public static final String PARAM_CLUSTER_ID = "clusterId"; //$NON-NLS-1$
 
@@ -84,7 +76,7 @@ public class CoreferenceDocument extends DefaultStyledDocument {
 	// END unused
 	
 	public CoreferenceDocument() {
-		batch = new ArrayList<>();
+		// no-op
 	}
 	
 	public void copySettings(CoreferenceDocument source) {
@@ -250,42 +242,6 @@ public class CoreferenceDocument extends DefaultStyledDocument {
 		appendBatchLineFeed(null);
 		appendBatchString(CoreferenceUtils.getDocumentHeader(data), HEADER);
 		appendBatchLineFeed(null);
-	}
-	
-	public void appendBatchString(String str, AttributeSet attr) {
-        batch.add(new ElementSpec(attr, ElementSpec.ContentType, str.toCharArray(), 0, str.length()));
-	}
-	
-	public void appendBatchLineFeed(AttributeSet attr) {
-        batch.add(new ElementSpec(attr, ElementSpec.ContentType, EOL_ARRAY, 0, 1));
-
-        // Then add attributes for element start/end tags. Ideally 
-        // we'd get the attributes for the current position, but we 
-        // don't know what those are yet if we have unprocessed 
-        // batch inserts. Alternatives would be to get the last 
-        // paragraph element (instead of the first), or to process 
-        // any batch changes when a linefeed is inserted.
-        Element paragraph = getParagraphElement(0);
-        AttributeSet pattr = paragraph.getAttributes();
-        batch.add(new ElementSpec(null, ElementSpec.EndTagType));
-        batch.add(new ElementSpec(pattr, ElementSpec.StartTagType));
-	}
-
-    public void applyBatchUpdates(int offset) throws BadLocationException {
-        ElementSpec[] inserts = new ElementSpec[batch.size()];
-        batch.toArray(inserts);
-        batch.clear();
-
-        // Process all of the inserts in bulk
-        insert(offset, inserts);
-    }
-	
-	public void clear() {
-		try {
-			remove(0, getLength());
-		} catch (BadLocationException e) {
-			// ignore, should never happen
-		}
 	}
 
 	public boolean isMarkSpans() {

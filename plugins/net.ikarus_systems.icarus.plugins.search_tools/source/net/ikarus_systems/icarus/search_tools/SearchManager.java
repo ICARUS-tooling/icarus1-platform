@@ -360,6 +360,8 @@ public final class SearchManager {
 		 */
 		@Override
 		protected Object doInBackground() throws Exception {
+			//search.addPropertyChangeListener(this);
+			
 			firePropertyChange("indeterminate", false, true); //$NON-NLS-1$
 
 			search.execute();
@@ -431,12 +433,12 @@ public final class SearchManager {
 		 */
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			// TODO really forward all property changes?
 			//firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
 		}
 	}
 	
-	private static class LoadTargetJob implements Runnable, Identity {
+	private static class LoadTargetJob extends SwingWorker<Loadable, Object> 
+			implements Identity {
 		
 		private final Search search;
 		
@@ -494,36 +496,48 @@ public final class SearchManager {
 		public Object getOwner() {
 			return this;
 		}
+		
+		private void cancelSearch() {
+			try {
+				search.cancel();
+			} catch(Exception ex) {
+				// ignore
+			}
+		}
 
 		/**
-		 * @see java.lang.Runnable#run()
+		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
 		@Override
-		public void run() {
-			Loadable loadable = null;
+		protected Loadable doInBackground() throws Exception {
 			
-			try {
-				loadable = (Loadable)search.getTarget();
+			firePropertyChange("indeterminate", false, true); //$NON-NLS-1$
+			
+			Loadable loadable = (Loadable)search.getTarget();
+			if(!loadable.isLoaded()) {
 				loadable.load();
+			}
+
+			firePropertyChange("indeterminate", true, false); //$NON-NLS-1$
+			
+			return loadable;
+		}
+
+		@Override
+		protected void done() {
+			Loadable loadable = null;
+			try {
+				loadable = get();
 				
-				// Switch back to EDT for continuing the search
-				if(loadable!=null && loadable.isLoaded()) {
-					UIUtil.invokeLater(new Runnable() {
-						
-						@Override
-						public void run() {
-							SearchManager.getInstance().executeSearch(search);
-						}
-					});
-				}
-			} catch(InterruptedException e) {
-				// ignore
+				SearchManager.getInstance().executeSearch(search);
+			} catch(InterruptedException | CancellationException e) {
+				cancelSearch();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to load search target: "+loadable, e); //$NON-NLS-1$
+						"Failed to load search target: "+String.valueOf(loadable), e); //$NON-NLS-1$
+				cancelSearch();
 				UIUtil.beep();
 			}
 		}
-		
 	}
 }

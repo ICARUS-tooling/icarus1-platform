@@ -171,7 +171,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 		}
 		
 		JDialog dialog = optionPane.createDialog(parent, title);
-		dialog.setIconImage(Core.getSmallIcon().getImage());
+		dialog.setIconImages(Core.getIconImages());
 		
 		// Apply options
 		dialog.setResizable(options.get(RESIZABLE_OPTION, false));

@@ -89,20 +89,42 @@ public class ArcConnectorShape extends mxConnectorShape implements GraphLayoutCo
 
 			if (pts.size() > 2) {
 				mxPoint pc = pts.get(pts.size() / 2);
+				double ctrlY;
 
 				double base = ps.getY() < pe.getY() ? ps.getY() : pe.getY();
 				if(pc.getY()<base) {
-					base = pc.getY() - (base - pc.getY())
+					ctrlY = pc.getY() - (base - pc.getY())
 							+ ARC_BASE_OFFSET;
 				} else {
-					base = base + (pc.getY() - base)
+					ctrlY = base + (pc.getY() - base)
 							- ARC_BASE_OFFSET;
 				}
-
-				QuadCurve2D.Double curve = new QuadCurve2D.Double(ps.getX(), ps
-						.getY(), pc.getX(), base+ARC_TOP_EXTEND, 
+				
+				ctrlY += ARC_TOP_EXTEND;
+				
+				// FIXME very strange bug, see comment below
+				
+				// When commenting out the above block and replacing the 
+				// curve creation with it the rendering produces a single
+				// horizontal line on a particular dependency data in every
+				// graph. (index 258 in conll09 english-train corpus)
+				// SENTENCE: One , co - sponsored by Sen. Sam Nunn ( D. , Ga . ) and Rep. Dave McCurdy ( D. , Okla. ) , would have restricted federal college subsidies to students who had served .
+				//
+				// Apparently incrementing the ctrlY value by one or simply 
+				// rounding down all coordinates solves the issue (needs further checking?)
+				/* QuadCurve2D.Double curve = new QuadCurve2D.Double(
+						ps.getX(), ps.getY(), 
+						pc.getX(), ctrlY,
 						pe.getX(), pe.getY());
+				 */
 
+				QuadCurve2D.Double curve = new QuadCurve2D.Double(
+						Math.floor(ps.getX()), Math.floor(ps.getY()), 
+						Math.floor(pc.getX()), Math.floor(ctrlY), 
+						Math.floor(pe.getX()), Math.floor(pe.getY()));
+
+				//System.out.printf("curve: start=%s ctrl=%s end=%s extend=%1.0f\n", ps, pc, pe, ctrlY);
+				
 				g.draw(curve);
 			} else {
 				g.drawLine((int) ps.getX(), (int) ps.getY(), (int) pe.getX(),

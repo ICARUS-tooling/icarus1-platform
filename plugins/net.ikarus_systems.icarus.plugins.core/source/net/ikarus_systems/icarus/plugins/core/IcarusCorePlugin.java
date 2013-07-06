@@ -66,7 +66,7 @@ public final class IcarusCorePlugin extends Plugin {
 		// Build config
 		initConfig();
 		
-		// Register content types
+		// Register content types and converters
 		registerContentTypes();
 		
 		// Register ui-helper objects
@@ -271,13 +271,18 @@ public final class IcarusCorePlugin extends Plugin {
 			}
 		}
 		
+		boolean showFrame = true;
 		boolean hideDisclaimer = config.getBoolean("general.eula"); //$NON-NLS-1$
 		if(!hideDisclaimer) {
-			DisclaimerDialog.showDialog();
+			showFrame = DisclaimerDialog.showDialog();
 		}
 		
 		// Show first frame
-		FrameManager.getInstance().newFrame();
+		if(showFrame) {
+			FrameManager.getInstance().newFrame();
+		} else {
+			ShutdownDialog.getDialog().shutdown();
+		}
 	}
 
 	/**

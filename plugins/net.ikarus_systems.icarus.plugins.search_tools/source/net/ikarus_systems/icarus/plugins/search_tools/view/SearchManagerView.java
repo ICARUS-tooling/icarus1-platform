@@ -156,7 +156,7 @@ public class SearchManagerView extends View {
 				"plugins.searchTools.searchManagerView.historyToolBarList", options); //$NON-NLS-1$
 		
 		// History
-		searchHistory = new SearchHistory();
+		searchHistory = SearchHistory.getSharedInstance();
 		searchHistoryList = new JList<>(searchHistory);
 		searchHistoryList.setBorder(UIUtil.defaultContentBorder);
 		searchHistoryList.setCellRenderer(new SearchHistoryListCellRenderer());
@@ -668,7 +668,10 @@ public class SearchManagerView extends View {
 				
 				// Maintain selected index to allow for more fluent
 				// use of selection related actions
-				if(index!=-1 && index<searchHistory.getSize()) {
+				if(index==-1 || index>=searchHistory.getSize()) {
+					index = searchHistory.getSize()-1;
+				}
+				if(index!=-1) {
 					searchHistoryList.setSelectedIndex(index);
 				} else {
 					refreshActions();

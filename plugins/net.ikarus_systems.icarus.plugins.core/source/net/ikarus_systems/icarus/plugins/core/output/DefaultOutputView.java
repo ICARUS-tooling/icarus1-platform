@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import net.ikarus_systems.icarus.config.ConfigRegistry;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.core.ManagementConstants;
 import net.ikarus_systems.icarus.plugins.core.View;
@@ -31,6 +32,7 @@ import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.helper.UIHelperRegistry;
+import net.ikarus_systems.icarus.ui.text.Console;
 import net.ikarus_systems.icarus.ui.view.AWTPresenter;
 import net.ikarus_systems.icarus.ui.view.PresenterUtils;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
@@ -66,6 +68,23 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		
 		addBroadcastListener(ManagementConstants.EXPLORER_SELECTION_CHANGED, handler);
 		addBroadcastListener(ManagementConstants.LOG_SELECTION_CHANGED, handler);
+		
+		if(ConfigRegistry.getGlobalRegistry().getBoolean(
+				"general.appearance.showSystemStreams")) { //$NON-NLS-1$
+			Console console = Console.getInstance();
+			
+			// Display sys.out redirect
+			Options options = new Options();			
+			options.put(Options.TITLE, "System.out"); //$NON-NLS-1$
+			displayData(console.getOutputDocument(), console, options);
+			
+			if(!console.isMergeStreams()) {
+				// Display sys.err redirect
+				options = new Options();
+				options.put(Options.TITLE, "System.err"); //$NON-NLS-1$
+				displayData(console.getErrorDocument(), console, options);
+			}
+		}
 	}
 
 	/**

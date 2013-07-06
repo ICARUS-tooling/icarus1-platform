@@ -11,6 +11,7 @@ package net.ikarus_systems.icarus.language.dependency.search;
 
 import java.util.Arrays;
 
+import net.ikarus_systems.icarus.language.LanguageConstants;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.DependencyData;
 import net.ikarus_systems.icarus.search_tools.tree.TargetTree;
@@ -442,8 +443,8 @@ public class DependencyTargetTree implements TargetTree {
 	// EDGE METHODS
 	
 	public String getRelation() {
-		if(edgePointer==-1)
-			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
+		/*if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
@@ -451,21 +452,30 @@ public class DependencyTargetTree implements TargetTree {
 	}
 	
 	public int getDistance() {
-		if(edgePointer==-1)
-			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
+		/*if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
-		return (int) Math.abs(nodePointer - edges[nodePointer][1+edgePointer]);
+		int head = heads[nodePointer];
+		
+		return head==LanguageConstants.DATA_HEAD_ROOT ?
+				LanguageConstants.DATA_UNDEFINED_VALUE : Math.abs(head-nodePointer);
 	}
 	
 	public int getDirection() {
-		if(edgePointer==-1)
-			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
+		/*if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
-		return nodePointer>edges[nodePointer][1+edgePointer] ? 
+		int head = heads[nodePointer];
+		
+		if(head==LanguageConstants.DATA_HEAD_ROOT) {
+			return LanguageConstants.DATA_UNDEFINED_VALUE;
+		}
+		
+		return nodePointer<head ? 
 				LanguageUtils.DATA_LEFT_VALUE : LanguageUtils.DATA_RIGHT_VALUE;
 	}
 	

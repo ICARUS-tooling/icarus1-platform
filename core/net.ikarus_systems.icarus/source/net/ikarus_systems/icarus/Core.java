@@ -15,6 +15,7 @@ package net.ikarus_systems.icarus;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -639,6 +640,7 @@ public class Core {
 	
 	private static ImageIcon logo_16;
 	private static ImageIcon logo_32;
+	private static ImageIcon logo_64;
 	
 	public static ImageIcon getSmallIcon() {
 		if(logo_16==null) {
@@ -648,11 +650,29 @@ public class Core {
 	}
 	
 	public static ImageIcon getLargeIcon() {
+		if(logo_64==null) {
+			logo_64 = new ImageIcon(Core.class.getResource("logo_64x64.png")); //$NON-NLS-1$
+		}
+		return logo_64;
+	}
+	
+	public static ImageIcon getMediumIcon() {
 		if(logo_32==null) {
 			logo_32 = new ImageIcon(Core.class.getResource("logo_32x32.png")); //$NON-NLS-1$
 		}
 		return logo_32;
 	}
+	
+	public static List<Image> getIconImages() {
+		List<Image> images = new ArrayList<>(3);
+		
+		images.add(getSmallIcon().getImage());
+		images.add(getMediumIcon().getImage());
+		images.add(getLargeIcon().getImage());
+		
+		return images;
+	}
+	
 	
 	/**
 	 * Command line argument wrapper

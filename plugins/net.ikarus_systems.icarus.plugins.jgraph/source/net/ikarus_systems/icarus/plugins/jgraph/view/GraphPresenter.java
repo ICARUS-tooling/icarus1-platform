@@ -1817,12 +1817,20 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			
 			// Adjust size
 			if(minimumNodeSize!=null) {
-				size.setWidth(Math.max(size.getWidth(), minimumNodeSize.getWidth()));
-				size.setHeight(Math.max(size.getHeight(), minimumNodeSize.getHeight()));
+				if(size==null) {
+					size = new mxRectangle(0, 0, minimumNodeSize.width, minimumNodeSize.height);
+				} else {
+					size.setWidth(Math.max(size.getWidth(), minimumNodeSize.getWidth()));
+					size.setHeight(Math.max(size.getHeight(), minimumNodeSize.getHeight()));
+				}
 			}
 			if(maximumNodeSize!=null) {
-				size.setWidth(Math.min(size.getWidth(), maximumNodeSize.getWidth()));
-				size.setHeight(Math.min(size.getHeight(), maximumNodeSize.getHeight()));
+				if(size==null) {
+					size = new mxRectangle(0, 0, maximumNodeSize.width, maximumNodeSize.height);
+				} else {
+					size.setWidth(Math.min(size.getWidth(), maximumNodeSize.getWidth()));
+					size.setHeight(Math.min(size.getHeight(), maximumNodeSize.getHeight()));
+				}
 			}
 			
 			return size;

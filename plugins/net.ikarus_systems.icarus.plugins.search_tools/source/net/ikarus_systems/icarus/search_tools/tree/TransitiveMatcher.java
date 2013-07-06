@@ -137,6 +137,8 @@ public class TransitiveMatcher extends Matcher {
 			}
 		}
 		
+		targetTree.lockNode(index);
+		
 		// Continue recursive
 		targetTree.viewNode(index);
 		IndexIterator iterator = newIterator();
@@ -148,6 +150,8 @@ public class TransitiveMatcher extends Matcher {
 				break;
 			}
 		}
+		
+		targetTree.unlockNode(index);
 		
 		recycleIterator(iterator);
 	}

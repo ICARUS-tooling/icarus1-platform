@@ -11,7 +11,9 @@ package net.ikarus_systems.icarus.plugins.jgraph.layout;
 
 import net.ikarus_systems.icarus.util.Options;
 
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
+import com.mxgraph.view.mxGraph;
 
 /**
  * @author Markus Gärtner
@@ -58,7 +60,24 @@ public class DefaultGraphLayout implements GraphLayout {
 	@Override
 	public mxRectangle layoutGraph(GraphOwner owner, Object[] cells,
 			Options options) {
-		return owner.getGraph().getBoundsForCells(cells, true, true, true);
+		mxGraph graph = owner.getGraph();
+		mxIGraphModel model = graph.getModel();
+		
+		mxRectangle bounds = new mxRectangle();
+
+		model.beginUpdate();
+		try {
+			for(int i=0; i<cells.length; i++) {
+				Object cell = cells[i];
+				if(graph.isAutoSizeCell(cell)) {
+					graph.cellSizeUpdated(cell, false);
+				}
+			}
+		} finally {
+			model.endUpdate();
+		}
+		
+		return bounds;
 	}
 
 	/**

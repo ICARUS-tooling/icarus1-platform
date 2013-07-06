@@ -14,10 +14,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
@@ -47,25 +44,19 @@ import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.list.RowHeaderList;
-import net.ikarus_systems.icarus.ui.tab.ButtonTabComponent;
 import net.ikarus_systems.icarus.ui.tab.TabController;
 import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.cache.LRUCache;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class Default3DResultPresenter extends SearchResultTablePresenter {
-	
-	protected JTabbedPane tabbedPane;
-	
-	protected JPanel overviewPanel;
+public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 	
 	protected JPanel subResultPanel;
 	protected JTextArea infoLabel;
@@ -83,8 +74,6 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 	protected ResultCountTableCellRenderer dynCellRenderer;
 	
 	protected SearchResult dynResult;
-	
-	protected Map<Object, Reference<SearchResult>> subResults;
 
 	protected static final String[] SORT_FIXED_ACTIONS = {
 		"plugins.searchTools.searchResultPresenter.sortFixedDimensionAscAlphaAction",  //$NON-NLS-1$
@@ -208,35 +197,6 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 	
 	public SearchResult getDynSearchResult() {
 		return dynResult;
-	}
-
-	protected void checkViewMode(boolean instertionPending) {
-		int tabCount = tabbedPane==null ? 0 : tabbedPane.getTabCount();
-		
-		if(tabCount==0 && instertionPending) {
-			// Expand
-			if(tabbedPane==null) {
-				tabbedPane = createTabbedPane();
-			}
-			String title = ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.labels.overview"); //$NON-NLS-1$
-
-			contentPanel.remove(overviewPanel);
-			tabbedPane.insertTab(title, null, overviewPanel, null, 0);
-			
-			contentPanel.add(tabbedPane, BorderLayout.CENTER);
-		} else if(tabCount==1 && !instertionPending) {
-			// Shrink
-			for(int i=1; i<tabbedPane.getTabCount(); i++) {
-				SubResultContainer container = (SubResultContainer)tabbedPane.getComponentAt(i);
-				container.close();
-			}
-			tabbedPane.removeAll();
-			contentPanel.remove(tabbedPane);
-			
-			contentPanel.add(overviewPanel, BorderLayout.CENTER);
-			tabbedPane = null;
-		}
 	}
 
 	/**
@@ -363,44 +323,6 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 		contentPanel.add(overviewPanel, BorderLayout.CENTER);
 	}
 	
-	protected JTabbedPane createTabbedPane() {
-		return new ClosableTabbedPane();
-	}
-	
-	protected SearchResult getCachedSubResult(int...indices) {
-		if(subResults==null) {
-			return null;
-		}
-		Reference<SearchResult> ref = subResults.get(Arrays.toString(indices));
-		return ref==null ? null : ref.get();
-	}
-	
-	protected void cacheSubResult(int[] indices, SearchResult subResult) {
-		if(subResult==null)
-			throw new IllegalArgumentException("invalid sub result"); //$NON-NLS-1$
-		
-		if(subResults==null) {
-			subResults = new LRUCache<>();
-		}
-		
-		subResults.put(Arrays.toString(indices), new WeakReference<>(subResult));
-	}
-	
-	protected int getSubResultIndex(SearchResult subResult) {
-		if(tabbedPane==null) {
-			return -1;
-		}
-		
-		for(int i=1; i<tabbedPane.getTabCount(); i++) {
-			SubResultContainer container = (SubResultContainer) tabbedPane.getComponentAt(i);
-			if(subResult==container.getSubResult()) {
-				return i;
-			}
-		}
-				
-		return -1;
-	}
-	
 	protected void displaySelectedDynResult(int index) {
 		JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, dynTable);
 		scrollPane.setVisible(index!=-1);
@@ -409,8 +331,7 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 		if(index!=-1) {
 			SearchResult subResult = getCachedSubResult(index);
 			if(subResult==null) {
-				TaskManager.getInstance().schedule(new SubResultDisplayJob(
-						true, String.valueOf(index), index), TaskPriority.DEFAULT, true);
+				TaskManager.getInstance().schedule(new DynResultDisplayJob(index), TaskPriority.DEFAULT, true);
 				return;
 			}
 			
@@ -423,32 +344,9 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 		dynModel.setResultData(dynResult);
 	}
 	
-	protected void displaySelectedSubResult(int[] indices, String label) {
-		if(indices==null)
-			throw new IllegalArgumentException("Invalid indices"); //$NON-NLS-1$
-		
-		SearchResult subResult = getCachedSubResult(indices);
-		if(subResult==null) {
-			TaskManager.getInstance().schedule(new SubResultDisplayJob(
-					false, label, indices), TaskPriority.DEFAULT, true);
-			return;
-		}
-		
-		checkViewMode(true);
-		
-		int index = getSubResultIndex(subResult);
-		if(index==-1) {
-			index = tabbedPane.getTabCount();
-			
-			SubResultContainer container = new SubResultContainer(label, subResult);
-			
-			container.init();
-			
-			tabbedPane.insertTab(label, null, container, null, index);
-			tabbedPane.setTabComponentAt(index, new ButtonTabComponent(tabbedPane));
-		}
-
-		tabbedPane.setSelectedIndex(index);
+	@Override
+	protected SearchResult getMainResult() {
+		return getDynSearchResult();
 	}
 	
 	public void reorderResult() {
@@ -543,7 +441,7 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 		public void init() {
 			resultPresenter = SearchResultView.getPresenter(getSubResult());
 			if(resultPresenter==null) {
-				resultPresenter = SearchResultView.getFalbackPresenter(getSubResult());
+				resultPresenter = SearchResultView.getFallbackPresenter(getSubResult());
 			}
 			
 			try {
@@ -710,18 +608,16 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 		}
 	}
 	
-	protected class SubResultDisplayJob extends AbstractResultJob {
+	protected class DynResultDisplayJob extends AbstractResultJob {
 		
 		protected final int[] indices;
 		protected final String label;
-		protected final boolean dynJob;
 		
-		public SubResultDisplayJob(boolean dynJob, String label, int...indices) {
+		public DynResultDisplayJob(int index) {
 			super("subResultJob"); //$NON-NLS-1$
 			
-			this.dynJob = dynJob;
-			this.indices = indices;
-			this.label = label;
+			this.indices = new int[]{index};
+			this.label = String.valueOf(index);
 		}
 
 		/**
@@ -731,8 +627,7 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 		protected SearchResult doInBackground() throws Exception {
 			firePropertyChange("indeterminate", false, true); //$NON-NLS-1$
 			
-			SearchResult searchResult = dynJob ? getSearchResult() : dynResult;
-			return searchResult.getSubResult(indices);
+			return getSearchResult().getSubResult(indices);
 		}
 
 		@Override
@@ -740,13 +635,9 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 			try {
 				SearchResult subResult = (SearchResult) get();
 				if(subResult!=null) {
-					cacheSubResult(indices, subResult);
+					cacheSubResult(subResult, indices);
 					
-					if(dynJob) {
-						displaySelectedDynResult(indices[0]);
-					} else {
-						displaySelectedSubResult(indices, label);
-					}
+					displaySelectedDynResult(indices[0]);
 				}
 			} catch(InterruptedException | CancellationException e) {
 				// ignore
@@ -791,6 +682,9 @@ public class Default3DResultPresenter extends SearchResultTablePresenter {
 			try {
 				dynCellRenderer.setSearchResult(ResultDummies.dummyResult2D);
 				dynModel.setResultData(ResultDummies.dummyResult2D);
+				
+				shrinkView();
+				
 				refresh();
 				
 				updateGroupPainters();

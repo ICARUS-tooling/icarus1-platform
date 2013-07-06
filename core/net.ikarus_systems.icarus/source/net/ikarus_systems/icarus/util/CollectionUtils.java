@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -332,6 +333,23 @@ public final class CollectionUtils {
 				sb.append(delimiter);
 			}
 		}
+		
+		return sb.toString();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static String toString(Map map) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append('[');
+		for(Iterator<Entry> i = map.entrySet().iterator(); i.hasNext();) {
+			Entry entry = i.next();
+			sb.append(entry.getKey()).append('=').append(entry.getValue());
+			if(i.hasNext()) {
+				sb.append(", "); //$NON-NLS-1$
+			}
+		}
+		sb.append(']');
 		
 		return sb.toString();
 	}

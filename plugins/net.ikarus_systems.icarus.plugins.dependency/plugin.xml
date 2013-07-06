@@ -77,6 +77,18 @@
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
 	
+	<extension id="DependencyCellConverter" plugin-id="net.ikarus_systems.icarus.core" point-id="DataConverter">
+		<doc>
+			<doc-text>
+				Converter to transform DependencyNodeData objects into constraint sets usable for the constraint graph editor (nodes)
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.plugins.dependency.graph.DependencyCellConverter" />
+		<parameter id="accuracy" value="1" />
+		<parameter id="inputType" value="net.ikarus_systems.icarus.dependency@DependencyNodeDataContentType" />
+		<parameter id="outputType" value="net.ikarus_systems.icarus.searchTools@ConstraintCellDataContentType" />
+	</extension>
+	
 	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
 		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.DependencyNodeData" />
 		<parameter id="class" value="net.ikarus_systems.icarus.language.dependency.SimpleDependencyData" />
@@ -100,6 +112,15 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotation" />
+	</extension>
+	
+	<extension id="DependencyNodeDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.language.dependency.DependencyNodeData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.language.dependency.DependencyNodeData" />
 	</extension>
 	
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->

@@ -10,6 +10,8 @@
 package net.ikarus_systems.icarus.plugins.search_tools.view.results;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -26,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import net.ikarus_systems.icarus.config.ConfigRegistry;
@@ -33,16 +36,20 @@ import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.plugins.core.View;
 import net.ikarus_systems.icarus.resources.ResourceManager;
+import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.Search;
 import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
+import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.IconRegistry;
 import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
+import net.ikarus_systems.icarus.ui.Updatable;
 import net.ikarus_systems.icarus.ui.actions.ActionManager;
 import net.ikarus_systems.icarus.ui.dialog.DialogFactory;
 import net.ikarus_systems.icarus.ui.view.UnsupportedPresentationDataException;
 import net.ikarus_systems.icarus.util.CorruptedStateException;
+import net.ikarus_systems.icarus.util.HtmlUtils;
 import net.ikarus_systems.icarus.util.MutablePrimitives.MutableBoolean;
 import net.ikarus_systems.icarus.util.Options;
 import net.ikarus_systems.icarus.util.mpi.Commands;
@@ -73,6 +80,8 @@ public class SearchResultView extends View {
 	
 	private Handler handler;
 	private CallbackHandler callbackHandler;
+	
+	private CountLabelSet countLabelSet;
 
 	public SearchResultView() {
 		// no-op
@@ -112,6 +121,8 @@ public class SearchResultView extends View {
 		contentPanel = new JPanel(new BorderLayout());
 		contentPanel.setBorder(UIUtil.topLineBorder);
 		
+		countLabelSet = new CountLabelSet(3);
+		
 		toolBar = getDefaultActionManager().createEmptyToolBar();
 		feedToolBar();
 		
@@ -126,6 +137,7 @@ public class SearchResultView extends View {
 	private void feedToolBar() {		
 		Options options = new Options();
 		options.put("countLabel", hitCountLabel); //$NON-NLS-1$
+		options.put("groupLabels", countLabelSet.getComponents()); //$NON-NLS-1$
 		options.put("multiline", true); //$NON-NLS-1$
 		getDefaultActionManager().feedToolBar("plugins.searchTools.searchResultView.toolBarList",  //$NON-NLS-1$
 				toolBar, options);
@@ -163,6 +175,10 @@ public class SearchResultView extends View {
 		actionManager.addHandler("plugins.searchTools.searchResultView.clearViewAction",  //$NON-NLS-1$
 				callbackHandler, "clearView"); //$NON-NLS-1$
 	}
+	
+	public SearchResult getSearchResult() {
+		return resultPresenter==null ? null : resultPresenter.getSearchResult();
+	}
 
 	@Override
 	public void close() {
@@ -197,7 +213,7 @@ public class SearchResultView extends View {
 		return sb.toString();
 	}
 	
-	public static SearchResultPresenter getFalbackPresenter(SearchResult searchResult) {
+	public static SearchResultPresenter getFallbackPresenter(SearchResult searchResult) {
 		return new DefaultFallbackResultPresenter();
 	}
 	
@@ -206,7 +222,7 @@ public class SearchResultView extends View {
 		// Check if result is to be displayed in plain form first
 		if(Boolean.TRUE.equals(searchResult.getProperty(
 				SearchResult.FORCE_SIMPLE_OUTLINE_PROPERTY))) {
-			return getFalbackPresenter(searchResult);
+			return getFallbackPresenter(searchResult);
 		}
 		
 		// Result requires regular visualization, so find a presenter
@@ -252,7 +268,7 @@ public class SearchResultView extends View {
 			refreshTimer.stop();
 		}
 		
-		if(toolBarExpanded) {
+		if(toolBarExpanded || countLabelSet.ensureSize(searchResult.getDimension())) {
 			toolBar.removeAll();
 			feedToolBar();
 		}
@@ -294,7 +310,7 @@ public class SearchResultView extends View {
 			}
 			
 			if(useFallback) {
-				resultPresenter = getFalbackPresenter(searchResult);
+				resultPresenter = getFallbackPresenter(searchResult);
 			}
 		}
 		
@@ -308,6 +324,7 @@ public class SearchResultView extends View {
 		
 		// Attempt to present result and abort if it failed
 		try {
+			resultPresenter.clear();
 			resultPresenter.present(searchResult, options);
 		} catch (UnsupportedPresentationDataException e) {
 			LoggerFactory.log(this, Level.SEVERE, 
@@ -400,6 +417,8 @@ public class SearchResultView extends View {
 		hitCountLabel.setIcon(icon);
 		
 		hitCountLabel.setText(s);
+		
+		countLabelSet.update();
 	}
 
 	@Override
@@ -536,6 +555,87 @@ public class SearchResultView extends View {
 						"Failed to clear view", ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
+		}
+	}
+	
+	protected class CountLabelSet implements Updatable {
+		protected JLabel[] labels;
+		protected int size;
+		
+		protected String format = "<html><font color=\"%s\">%s</font>: %s"; //$NON-NLS-1$
+		
+		public CountLabelSet(int size) {
+			this.size = size;
+		}
+		
+		public boolean ensureSize(int size) {
+			if(size>this.size) {
+				this.size = size;
+				buildLabels();
+				return true;
+			}
+			
+			return false;
+		}
+		
+		protected void buildLabels() {
+			if(size==-1) {
+				return;
+			}
+			
+			labels = new JLabel[size];
+			
+			for(int i=0; i<size; i++) {
+				JLabel label = new JLabel();
+				label.setHorizontalAlignment(SwingUtilities.LEFT);
+				label.setBorder(UIUtil.defaultContentBorder);
+				// TODO additional configuration?
+				
+				labels[i] = label;
+			}
+		}
+
+		/**
+		 * @see net.ikarus_systems.icarus.ui.Updatable#update()
+		 */
+		@Override
+		public boolean update() {
+			if(labels==null) {
+				return false;
+			}
+			
+			SearchResult searchResult = getSearchResult();
+			
+			for(int i=0; i<labels.length; i++) {
+				JLabel label = labels[i];
+				
+				if(searchResult==null || i>=searchResult.getDimension()) {
+					label.setVisible(false);
+					continue;
+				}
+				
+				int groupId = SearchUtils.getGroupId(searchResult, i);
+				Color color = Grouping.getGrouping(groupId).getColor();
+				int count = searchResult.getInstanceCount(i);
+				String token = String.valueOf(searchResult.getGroupLabel(i));
+				
+				String  text = String.format(format, 
+						HtmlUtils.hexString(color),
+						HtmlUtils.escapeHTML(token),
+						count);
+				
+				label.setText(text);
+				label.setVisible(true);
+			}
+			
+			return true;
+		}
+		
+		public Component[] getComponents() {
+			if(labels==null) {
+				buildLabels();
+			}
+			return labels;
 		}
 	}
 }

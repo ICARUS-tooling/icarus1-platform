@@ -10,18 +10,11 @@
 package net.ikarus_systems.icarus.plugins.search_tools.view.results;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.MouseEvent;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -29,40 +22,31 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.search_tools.result.ResultDummies;
 import net.ikarus_systems.icarus.search_tools.result.SearchResult;
 import net.ikarus_systems.icarus.search_tools.util.SearchUtils;
 import net.ikarus_systems.icarus.ui.CompoundMenuButton;
 import net.ikarus_systems.icarus.ui.NumberDisplayMode;
-import net.ikarus_systems.icarus.ui.UIDummies;
 import net.ikarus_systems.icarus.ui.UIUtil;
 import net.ikarus_systems.icarus.ui.actions.ActionList.EntryType;
 import net.ikarus_systems.icarus.ui.list.RowHeaderList;
-import net.ikarus_systems.icarus.ui.tab.ButtonTabComponent;
-import net.ikarus_systems.icarus.ui.tab.TabController;
 import net.ikarus_systems.icarus.ui.table.TableRowHeaderRenderer;
 import net.ikarus_systems.icarus.ui.table.TableSortMode;
 import net.ikarus_systems.icarus.ui.tasks.TaskManager;
 import net.ikarus_systems.icarus.ui.tasks.TaskPriority;
 import net.ikarus_systems.icarus.util.Options;
-import net.ikarus_systems.icarus.util.cache.LRUCache;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class Default2DResultPresenter extends SearchResultTablePresenter {
+public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	
 	public static final int SUPPORTED_DIMENSIONS = 2;
 	
 	// TODO allow sub-result creation for cells, rows and columns (0D and 1D respectively)
-	
-	protected JTabbedPane tabbedPane;
-	
-	protected JPanel overviewPanel;
 	
 	protected JTable table;
 	
@@ -70,8 +54,6 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 	protected TableRowHeaderRenderer rowHeaderRenderer;
 	protected SearchResultTableModel tableModel;
 	protected ResultCountTableCellRenderer cellRenderer;
-	
-	protected Map<Object, Reference<SearchResult>> subResults;
 
 	public Default2DResultPresenter() {
 		buildContentPanel();
@@ -172,101 +154,6 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		tableModel.clear(true, true);
 	}
 
-	protected void checkViewMode(boolean instertionPending) {
-		int tabCount = tabbedPane==null ? 0 : tabbedPane.getTabCount();
-		
-		if(tabCount==0 && instertionPending) {
-			// Expand
-			if(tabbedPane==null) {
-				tabbedPane = createTabbedPane();
-			}
-			String title = ResourceManager.getInstance().get(
-					"plugins.searchTools.searchResultPresenter.labels.overview"); //$NON-NLS-1$
-
-			contentPanel.remove(overviewPanel);
-			tabbedPane.insertTab(title, null, overviewPanel, null, 0);
-			
-			contentPanel.add(tabbedPane, BorderLayout.CENTER);
-		} else if(tabCount==1 && !instertionPending) {
-			// Shrink
-			for(int i=1; i<tabbedPane.getTabCount(); i++) {
-				SubResultContainer container = (SubResultContainer)tabbedPane.getComponentAt(i);
-				container.close();
-			}
-			tabbedPane.removeAll();
-			contentPanel.remove(tabbedPane);
-			
-			contentPanel.add(overviewPanel, BorderLayout.CENTER);
-			tabbedPane = null;
-		}
-	}
-	
-	protected JTabbedPane createTabbedPane() {
-		return new ClosableTabbedPane();
-	}
-	
-	protected SearchResult getCachedSubResult(int[] indices) {
-		if(subResults==null) {
-			return null;
-		}
-		Reference<SearchResult> ref = subResults.get(Arrays.toString(indices));
-		return ref==null ? null : ref.get();
-	}
-	
-	protected void cacheSubResult(int[] indices, SearchResult subResult) {
-		if(subResult==null)
-			throw new IllegalArgumentException("invalid sub result"); //$NON-NLS-1$
-		
-		if(subResults==null) {
-			subResults = new LRUCache<>();
-		}
-		
-		subResults.put(Arrays.toString(indices), new WeakReference<>(subResult));
-	}
-	
-	protected int getSubResultIndex(SearchResult subResult) {
-		if(tabbedPane==null) {
-			return -1;
-		}
-		
-		for(int i=1; i<tabbedPane.getTabCount(); i++) {
-			SubResultContainer container = (SubResultContainer) tabbedPane.getComponentAt(i);
-			if(subResult==container.getSubResult()) {
-				return i;
-			}
-		}
-				
-		return -1;
-	}
-	
-	protected void displaySelectedSubResult(int[] indices, String label) {
-		if(indices==null)
-			throw new IllegalArgumentException("Invalid indices"); //$NON-NLS-1$
-		
-		SearchResult subResult = getCachedSubResult(indices);
-		if(subResult==null) {
-			TaskManager.getInstance().schedule(new SubResultDisplayJob(
-					indices, label), TaskPriority.DEFAULT, true);
-			return;
-		}
-		
-		checkViewMode(true);
-		
-		int index = getSubResultIndex(subResult);
-		if(index==-1) {
-			index = tabbedPane.getTabCount();
-			
-			SubResultContainer container = new SubResultContainer(label, subResult);
-			
-			container.init();
-			
-			tabbedPane.insertTab(label, null, container, null, index);
-			tabbedPane.setTabComponentAt(index, new ButtonTabComponent(tabbedPane));
-		}
-
-		tabbedPane.setSelectedIndex(index);
-	}
-
 	/**
 	 * @see net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter#buildContentPanel()
 	 */
@@ -307,101 +194,6 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 		overviewPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		contentPanel.add(overviewPanel, BorderLayout.CENTER);
-	}
-	
-	protected class ClosableTabbedPane extends JTabbedPane implements TabController {
-
-		private static final long serialVersionUID = -8989316268794923006L;
-
-		/**
-		 * @see net.ikarus_systems.icarus.ui.tab.TabController#closeTab(java.awt.Component)
-		 */
-		@Override
-		public boolean closeTab(Component comp) {
-			if(comp instanceof SubResultContainer) {
-				SubResultContainer container = (SubResultContainer) comp;
-				container.close();
-			}
-			
-			remove(comp);
-			checkViewMode(false);
-			
-			return true;
-		}
-
-		/**
-		 * @see net.ikarus_systems.icarus.ui.tab.TabController#closeChildren(java.awt.Component)
-		 */
-		@Override
-		public boolean closeChildren(Component comp) {
-			// Not supported
-			return false;
-		}
-	}
-	
-	protected class SubResultContainer extends JPanel {
-
-		private static final long serialVersionUID = -124096642718184615L;
-		
-		private final SearchResult subResult;
-		private SearchResultPresenter resultPresenter;
-		private final String title;
-
-		public SubResultContainer(String title, SearchResult subResult) {
-			super(new BorderLayout());
-			if(title==null) 
-				throw new IllegalArgumentException("Invalid title"); //$NON-NLS-1$
-			if(subResult==null) 
-				throw new IllegalArgumentException("Invalid sub-result"); //$NON-NLS-1$
-			
-			this.title = title;
-			this.subResult = subResult;
-		}
-		
-		public SearchResult getSubResult() {
-			return subResult;
-		}
-		
-		public SearchResultPresenter getResultPresenter() {
-			return resultPresenter;
-		}
-		
-		public String getTitle() {
-			return title;
-		}
-		
-		public void init() {
-			resultPresenter = SearchResultView.getPresenter(getSubResult());
-			if(resultPresenter==null) {
-				resultPresenter = SearchResultView.getFalbackPresenter(getSubResult());
-			}
-			
-			try {
-				String title = ResourceManager.getInstance().get(
-						"plugins.searchTools.default2DResultPresenter.instancesTitle", //$NON-NLS-1$
-						getTitle());
-				
-				Options options = new Options();
-				options.put(Options.TITLE, title);
-				resultPresenter.present(getSubResult(), options);
-				
-				add(resultPresenter.getPresentingComponent(), BorderLayout.CENTER);
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to init presenter for sub-result", e); //$NON-NLS-1$
-				
-				UIDummies.createDefaultErrorOutput(this, e);
-			}
-		}
-		
-		public void close() {
-			try {
-				getResultPresenter().close();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to close presenter tab for sub-result: "+getTitle(), e); //$NON-NLS-1$
-			}
-		}
 	}
 
 	protected class Handler2D extends Handler implements ChangeListener {
@@ -453,50 +245,5 @@ public class Default2DResultPresenter extends SearchResultTablePresenter {
 			
 		}
 		
-	}
-	
-	protected class SubResultDisplayJob extends AbstractResultJob {
-		
-		protected final int[] indices;
-		protected final String label;
-		
-		public SubResultDisplayJob(int[] indices, String label) {
-			super("subResultJob"); //$NON-NLS-1$
-			
-			this.indices = indices;
-			this.label = label;
-		}
-
-		/**
-		 * @see javax.swing.SwingWorker#doInBackground()
-		 */
-		@Override
-		protected SearchResult doInBackground() throws Exception {
-			firePropertyChange("indeterminate", false, true); //$NON-NLS-1$
-			return searchResult.getSubResult(indices);
-		}
-
-		@Override
-		protected void done() {
-			try {
-				SearchResult subResult = (SearchResult) get();
-				if(subResult!=null) {
-					cacheSubResult(indices, subResult);
-					displaySelectedSubResult(indices, label);
-				}
-			} catch(InterruptedException | CancellationException e) {
-				// ignore
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to display sub-result: "+label, e); //$NON-NLS-1$
-			} finally {
-				firePropertyChange("indeterminate", true, false); //$NON-NLS-1$
-			}
-		}
-
-		@Override
-		protected Object[] getDescriptionParams() {
-			return new Object[]{Arrays.toString(indices)};
-		}
 	}
 }

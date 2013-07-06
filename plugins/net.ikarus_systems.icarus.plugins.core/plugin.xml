@@ -445,7 +445,7 @@
 			</doc>
 		</parameter-def>
 		<parameter-def id="inputType" type="extension-id"
-				custom-data="net.ikarus_systems.icarus.plugins.core@ContentType">
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
 			<doc>
 				<doc-text>
 					Input content type.
@@ -453,7 +453,7 @@
 			</doc>
 		</parameter-def>
 		<parameter-def id="outputType" type="extension-id"
-				custom-data="net.ikarus_systems.icarus.plugins.core@ContentType">
+				custom-data="net.ikarus_systems.icarus.core@ContentType">
 			<doc>
 				<doc-text>
 					Result content type.
@@ -778,6 +778,18 @@
 		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.AWTPresenter" />
 	</extension>
 	
+	<extension id="DocumentPresenter" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Presenter implementation to directly display supplied Document objects.
+				Primarily used for redirection of console output.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="net.ikarus_systems.icarus.ui.text.DocumentPresenter" />
+		<parameter id="contentType" value="net.ikarus_systems.icarus.core@DocumentContentType" />
+		<parameter id="interface" value="net.ikarus_systems.icarus.ui.view.AWTPresenter" />
+	</extension>
+	
 	<extension id="ExtensionListCellRenderer" plugin-id="net.ikarus_systems.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
@@ -845,6 +857,15 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="org.java.plugin.registry.Documentable" />
+	</extension>
+	
+	<extension id="DocumentContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the javax.swing.text.Document content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="javax.swing.text.Document" />
 	</extension>
 	
 	<extension id="ExtensionContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">

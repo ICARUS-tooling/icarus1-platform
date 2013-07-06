@@ -14,6 +14,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.Collections;
 import java.util.Map;
 
 import net.ikarus_systems.icarus.config.ConfigDelegate;
@@ -29,10 +30,12 @@ import net.ikarus_systems.icarus.plugins.jgraph.view.GraphPresenter;
 import net.ikarus_systems.icarus.resources.ResourceManager;
 import net.ikarus_systems.icarus.search_tools.Grouping;
 import net.ikarus_systems.icarus.ui.view.TextRenderer;
+import net.ikarus_systems.icarus.util.CollectionUtils;
 import net.ikarus_systems.icarus.util.HtmlUtils.HtmlTableBuilder;
 import net.ikarus_systems.icarus.util.annotation.AnnotationDisplayMode;
 
 import com.mxgraph.canvas.mxGraphics2DCanvas;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.shape.mxITextShape;
 import com.mxgraph.util.mxConstants;
@@ -305,6 +308,10 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	@Override
 	public Object drawCell(mxCellState state) {
 		refreshCellStyle(state);
+		
+		/*System.out.println(((mxCell)state.getCell()).getValue());
+		System.out.print(CollectionUtils.toString(state.getStyle()));
+		System.out.println();*/
 		
 		return super.drawCell(state);
 	}

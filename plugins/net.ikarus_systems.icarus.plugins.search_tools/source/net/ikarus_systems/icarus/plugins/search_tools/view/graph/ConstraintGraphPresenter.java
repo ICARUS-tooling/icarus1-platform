@@ -10,6 +10,7 @@
 package net.ikarus_systems.icarus.plugins.search_tools.view.graph;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -24,7 +25,9 @@ import java.util.logging.Level;
 import net.ikarus_systems.icarus.config.ConfigDelegate;
 import net.ikarus_systems.icarus.language.LanguageManager;
 import net.ikarus_systems.icarus.logging.LoggerFactory;
-import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultGraphLayout;
+import net.ikarus_systems.icarus.plugins.jgraph.cells.CompoundGraphNode;
+import net.ikarus_systems.icarus.plugins.jgraph.cells.GraphCell;
+import net.ikarus_systems.icarus.plugins.jgraph.layout.DefaultTreeLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayout;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphLayoutConstants;
 import net.ikarus_systems.icarus.plugins.jgraph.layout.GraphOwner;
@@ -55,6 +58,8 @@ import net.ikarus_systems.icarus.util.Order;
 import net.ikarus_systems.icarus.util.annotation.AnnotationControl;
 import net.ikarus_systems.icarus.util.data.ContentType;
 import net.ikarus_systems.icarus.util.data.ContentTypeRegistry;
+import net.ikarus_systems.icarus.util.data.DataConversionException;
+import net.ikarus_systems.icarus.util.data.DataConverter;
 
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
@@ -176,7 +181,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 	@Override
 	protected GraphLayout createDefaultGraphLayout() {
-		return new DefaultGraphLayout();
+		return new DefaultTreeLayout();
 	}
 
 	@Override
@@ -590,8 +595,24 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 	@Override
 	public void importCells(CellBuffer buffer) {
-		// TODO Auto-generated method stub
-		super.importCells(buffer);
+		Object[] cells = CellBuffer.buildCells(buffer);
+		if(cells==null) {
+			return;
+		}
+		
+		importCells(cells, 0, 0, null, null);
+	}
+
+	@Override
+	public Object[] importCells(Object[] cells, double dx, double dy,
+			Object target, Point location) {
+		Object[] result = super.importCells(cells, dx, dy, target, location);
+		
+		if(result!=null) {
+			refreshAll();
+		}
+		
+		return result;
 	}
 
 	@Override
@@ -781,6 +802,17 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		public ConstraintGraph() {
 			super(new mxGraphModel());
 		}
+		
+		protected Object createValue(Object cell, Object data, Map<String, Integer> constraintMap) {
+			if(data==null) {
+				return model.isVertex(cell) ?
+						createNodeData() : createEdgeData();
+			} else if(model.isVertex(cell)) {
+				return createNodeData((SearchNode) data, constraintMap);
+			} else {
+				return createEdgeData((SearchEdge) data, constraintMap);
+			}
+		}
 
 		@Override
 		public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges) {
@@ -789,7 +821,53 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			}
 			
 			// Skip entire cloning if there are invalid types contained
-			// TODO check content and convert
+			Map<Object, Object> originalValues = new HashMap<>();
+			for(Object cell : cells) {
+				originalValues.put(cell, model.getValue(cell));
+			}
+
+			Options options = new Options();
+			options.put(Options.CONTEXT, getConstraintContext());
+			
+			for(Object cell : cells) {
+				Object value = originalValues.get(cell);
+				if(value instanceof ConstraintCellData) {
+					continue;
+				}
+				
+				if(model.isEdge(cell)) {
+					Object targetValue = originalValues.get(model.getTerminal(cell, false));
+					if(targetValue instanceof CompoundGraphNode) {
+						value = targetValue;
+					}
+				}
+				
+				Map<String, Integer> constraintMap = getConstraintMap();
+				
+				Object newValue = null;
+				
+				if(value instanceof GraphCell) {
+					ContentType inputType = ContentTypeRegistry.getInstance().getEnclosingType(value);
+					ContentType resultType = SearchUtils.getConstraintCellContentType();
+					DataConverter converter = ContentTypeRegistry.getInstance().getConverter(inputType, resultType);
+					
+					if(converter!=null) {
+						options.put("isVertex", model.isVertex(cell)); //$NON-NLS-1$
+						try {
+							newValue = converter.convert(value, options);
+						} catch (DataConversionException e) {
+							LoggerFactory.log(this, Level.SEVERE, 
+									"Failed to convert cell value: "+String.valueOf(value), e); //$NON-NLS-1$
+						}
+					}
+				}
+				
+				if(value==newValue) {
+					continue;
+				}
+				
+				model.setValue(cell, createValue(cell, newValue, constraintMap));
+			}
 			
 			// Content check successful -> proceed with regular cloning
 			return super.cloneCells(cells, allowInvalidEdges);

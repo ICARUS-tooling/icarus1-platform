@@ -91,7 +91,8 @@ public class IcarusFrame extends JFrame {
 			options = Options.emptyOptions;
 		}
 		
-		setIconImage(Core.getSmallIcon().getImage());
+		setIconImages(Core.getIconImages());
+		//setIconImage(Core.getSmallIcon().getImage());
 		
 		currentPerspective = readPerspectiveOption(options);
 		

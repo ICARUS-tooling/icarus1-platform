@@ -270,16 +270,19 @@ public abstract class AbstractTreeSearch extends Search {
 			return false;
 		}
 		
-		Object target = getTarget();
+		/*Object target = getTarget();
 		if(target instanceof Loadable && !((Loadable)target).isLoaded()) {
 			try {
+				firePropertyChange("indeterminate", false, true);
 				((Loadable)target).load();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to load search target: "+target, e); //$NON-NLS-1$
-				throw new IOException("Could not load traget - aborting", e); //$NON-NLS-1$
+				throw new IOException("Could not load target - aborting", e); //$NON-NLS-1$
+			} finally {
+				firePropertyChange("indeterminate", true, false);
 			}
-		}
+		}*/
 
 		// Obtain number of possible concurrent workers
 		int cores = ConfigRegistry.getGlobalRegistry().getInteger("plugins.searchTools.maxCores"); //$NON-NLS-1$

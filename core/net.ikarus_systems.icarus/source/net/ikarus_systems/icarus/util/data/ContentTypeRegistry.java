@@ -19,9 +19,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.Icon;
 
+import net.ikarus_systems.icarus.logging.LoggerFactory;
+import net.ikarus_systems.icarus.plugins.PluginUtil;
 import net.ikarus_systems.icarus.ui.events.EventListener;
 import net.ikarus_systems.icarus.ui.events.EventObject;
 import net.ikarus_systems.icarus.ui.events.Events;
@@ -33,6 +36,7 @@ import net.ikarus_systems.icarus.util.id.DuplicateIdentifierException;
 import net.ikarus_systems.icarus.util.id.UnknownIdentifierException;
 
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.PluginDescriptor;
 
 /**
  * @author Markus Gärtner
@@ -71,7 +75,7 @@ public final class ContentTypeRegistry {
 	 * all converters that have not been created by this framework
 	 * as an result of <i>conversion expansion</i>
 	 */
-	private Set<DataConverter> rawConverters = new LinkedHashSet<>();
+	private Set<DataConverter> rawConverters;
 	
 	/**
 	 * Mapping of all existing conversion chains for fast lookup.
@@ -528,9 +532,27 @@ public final class ContentTypeRegistry {
 		eventSource.fireEvent(new EventObject(Events.ADDED, "filter", extension)); //$NON-NLS-1$
 	}
 	
+	private synchronized void checkConverters() {
+		if(rawConverters==null) {
+			rawConverters = new LinkedHashSet<>();
+			
+			PluginDescriptor descriptor = PluginUtil.getCorePlugin();
+			for(Extension extension : descriptor.getExtensionPoint("DataConverter").getConnectedExtensions()) { //$NON-NLS-1$
+				try {
+					ContentTypeRegistry.getInstance().addConverter((DataConverter) PluginUtil.instantiate(extension));
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to register data converter: "+extension.getUniqueId(), e); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+	
 	public void addConverter(DataConverter converter) {
 		if(converter==null)
 			throw new IllegalArgumentException("Invalid converter"); //$NON-NLS-1$
+		
+		checkConverters();
 		
 		rawConverters.add(converter);
 
@@ -540,15 +562,18 @@ public final class ContentTypeRegistry {
 	}
 	
 	public List<DataConverter> availableConverters() {
+		checkConverters();
+		
 		return new ArrayList<>(rawConverters);
 	}
 	
 	public int availableConverterCount() {
+		checkConverters();
+		
 		return rawConverters.size();
 	}
 	
 	private void addConverter0(DataConverter newConverter) {
-		
 		// Try to directly replace an existing one
 		DataConverter oldConverter = getConverter0(
 				newConverter.getInputType(), newConverter.getResultType());
@@ -598,6 +623,8 @@ public final class ContentTypeRegistry {
 	}
 	
 	public DataConverter[] getConvertersForInputType(ContentType inputType) {
+		checkConverters();
+		
 		if(converterLookup==null) {
 			return new DataConverter[0];
 		}
@@ -613,6 +640,8 @@ public final class ContentTypeRegistry {
 	}
 	
 	public DataConverter[] getConvertersForResultType(ContentType resultType) {
+		checkConverters();
+		
 		if(converterLookup==null) {
 			return new DataConverter[0];
 		}
@@ -663,6 +692,8 @@ public final class ContentTypeRegistry {
 			throw new IllegalArgumentException("Need more specific input type than 'object'"); //$NON-NLS-1$
 		if(resultType.getContentClass()==Object.class)
 			throw new IllegalArgumentException("Need more specific result type than 'object'"); //$NON-NLS-1$
+
+		checkConverters();
 		
 		return getConverter0(inputType, resultType);
 	}

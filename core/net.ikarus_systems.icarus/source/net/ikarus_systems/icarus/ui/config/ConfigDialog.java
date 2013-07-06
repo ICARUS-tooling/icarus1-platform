@@ -144,7 +144,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		
 		this.config = config;
 		
-        this.setTitle(ResourceManager.getInstance().get("config.PreferencesTitle.title"));  //$NON-NLS-1$
+        this.setTitle(ResourceManager.getInstance().get("config.preferencesTitle.title"));  //$NON-NLS-1$
         
 		actions = createActions();        
 		tree = createTree(config);	
@@ -152,7 +152,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		masterhandle = starthandle;
 		
 		configHeaderPanel.setLayout(new BorderLayout());
-		createHeader(ResourceManager.getInstance().get("config.PreferencesTitle.title"));	 //$NON-NLS-1$
+		createHeader(ResourceManager.getInstance().get("config.preferencesTitle.title"));	 //$NON-NLS-1$
 		configOptionsPanel.setLayout(new GridBagLayout());	
 		iniButtons();
 		iniOptionPanel(convertHandleToTreePath(starthandle));	
@@ -198,7 +198,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		
 		this.config = config;
 		
-        this.setTitle(ResourceManager.getInstance().get("config.PreferencesTitle.title"));  //$NON-NLS-1$
+        this.setTitle(ResourceManager.getInstance().get("config.preferencesTitle.title"));  //$NON-NLS-1$
         
 		actions = createActions();        
 		tree = createTree(config);	
@@ -206,7 +206,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		masterhandle = config.getHandle(startpath);
 		
 		configHeaderPanel.setLayout(new BorderLayout());
-		createHeader(ResourceManager.getInstance().get("config.PreferencesTitle.title"));	 //$NON-NLS-1$
+		createHeader(ResourceManager.getInstance().get("config.preferencesTitle.title"));	 //$NON-NLS-1$
 		configOptionsPanel.setLayout(new GridBagLayout());				
 		
 		Handle handle = config.getHandle(startpath);
@@ -256,7 +256,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		
 		this.config = config;
 		
-        this.setTitle(ResourceManager.getInstance().get("config.PreferencesTitle.title"));  //$NON-NLS-1$
+        this.setTitle(ResourceManager.getInstance().get("config.preferencesTitle.title"));  //$NON-NLS-1$
         
 		actions = createActions();        
 		tree = createTree(config);	
@@ -264,7 +264,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		masterhandle = treeMap.entrySet().iterator().next().getKey();
 		
 		configHeaderPanel.setLayout(new BorderLayout());
-		createHeader(ResourceManager.getInstance().get("config.PreferencesTitle.title"));	 //$NON-NLS-1$
+		createHeader(ResourceManager.getInstance().get("config.preferencesTitle.title"));	 //$NON-NLS-1$
 		configOptionsPanel.setLayout(new GridBagLayout());	
 
 		Handle handle = treeMap.entrySet().iterator().next().getKey();

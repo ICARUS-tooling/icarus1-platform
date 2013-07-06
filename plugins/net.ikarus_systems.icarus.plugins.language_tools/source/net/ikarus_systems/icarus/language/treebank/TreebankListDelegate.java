@@ -182,6 +182,12 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject, Load
 		}
 	}
 	
+	@Override
+	public String toString() {
+		Treebank treebank = getTreebank();
+		return treebank==null ? "<empty>" : treebank.getName(); //$NON-NLS-1$
+	}
+	
 	private void fireChangeEvent() {
 		if(changeListeners==null || changeListeners.isEmpty()) {
 			return;

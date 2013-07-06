@@ -24,6 +24,8 @@ import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.SentenceData;
 import net.ikarus_systems.icarus.language.dependency.annotation.DependencyAnnotation;
 import net.ikarus_systems.icarus.language.treebank.Treebank;
+import net.ikarus_systems.icarus.search_tools.ConstraintContext;
+import net.ikarus_systems.icarus.search_tools.SearchManager;
 import net.ikarus_systems.icarus.search_tools.SearchMode;
 import net.ikarus_systems.icarus.search_tools.SearchParameters;
 import net.ikarus_systems.icarus.util.Exceptions;
@@ -291,12 +293,20 @@ public class DependencyUtils implements DependencyConstants {
 		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
 	}
 
+	public static ContentType getDependencyNodeContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyNodeData.class);
+	}
+
 	public static ContentType getDependencyAnnotationType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyAnnotation.class);
 	}
 	
 	public static String getForm(DependencyNodeData item) {
 		return item.hasChildren() ? item.getForm2() : item.getForm();
+	}
+	
+	public static ConstraintContext getDependencyContext() {
+		return SearchManager.getInstance().getConstraintContext(getDependencyContentType());
 	}
 	
 	public static String getForms(DependencyNodeData[] items) {
@@ -397,6 +407,14 @@ public class DependencyUtils implements DependencyConstants {
 		if(item.hasHead()) {
 			return item.getHead()<item.getIndex() ? 
 					LanguageUtils.DATA_RIGHT_LABEL : LanguageUtils.DATA_LEFT_LABEL;
+		} else {
+			return ""; //$NON-NLS-1$
+		}
+	}
+	
+	public static String getDistance(DependencyNodeData item) {
+		if(item.hasHead()) {
+			return String.valueOf(Math.abs(item.getHead()-item.getIndex()));
 		} else {
 			return ""; //$NON-NLS-1$
 		}

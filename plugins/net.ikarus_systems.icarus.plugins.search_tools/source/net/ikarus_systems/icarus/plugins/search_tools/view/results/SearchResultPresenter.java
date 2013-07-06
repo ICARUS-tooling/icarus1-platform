@@ -244,7 +244,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	 */
 	@Override
 	public Component getPresentingComponent() {
-		if(contentPanel==null) {
+		if(contentPanel==null) {			
 			buildContentPanel();
 			
 			refresh();

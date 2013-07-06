@@ -816,9 +816,6 @@ public class MatcherBuilder {
 					}
 				}
 				height = value;
-				if(!isDisjunction()) {
-					height++;
-				}
 			}
 			
 			return height;

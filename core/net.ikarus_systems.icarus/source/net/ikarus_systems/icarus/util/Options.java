@@ -188,6 +188,7 @@ public class Options extends HashMap<String, Object> {
 	public static final String TITLE = "title"; //$NON-NLS-1$
 	public static final String CONTENT_TYPE = "contentType"; //$NON-NLS-1$
 	public static final String CONVERTER = "converter"; //$NON-NLS-1$
+	public static final String CONTEXT = "context"; //$NON-NLS-1$
 	public static final String LOCATION = "location"; //$NON-NLS-1$
 	public static final String LANGUAGE = "language"; //$NON-NLS-1$
 	public static final String ID = "id"; //$NON-NLS-1$

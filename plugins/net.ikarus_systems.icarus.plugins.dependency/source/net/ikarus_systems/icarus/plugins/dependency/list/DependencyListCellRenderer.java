@@ -11,8 +11,6 @@ package net.ikarus_systems.icarus.plugins.dependency.list;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.JList;
@@ -20,11 +18,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import javax.swing.text.Highlighter.HighlightPainter;
 import javax.swing.text.Style;
@@ -39,6 +34,7 @@ import net.ikarus_systems.icarus.language.dependency.annotation.DependencyHighli
 import net.ikarus_systems.icarus.logging.LoggerFactory;
 import net.ikarus_systems.icarus.search_tools.annotation.ResultAnnotation;
 import net.ikarus_systems.icarus.ui.DummyTextPane;
+import net.ikarus_systems.icarus.ui.text.BatchDocument;
 import net.ikarus_systems.icarus.util.Installable;
 import net.ikarus_systems.icarus.util.annotation.Annotation;
 import net.ikarus_systems.icarus.util.annotation.AnnotationController;
@@ -61,14 +57,14 @@ public class DependencyListCellRenderer extends DummyTextPane
 	
 	protected AnnotationController annotationSource;
 	
-	protected DependencyDocument offlineDocument;
+	protected BatchDocument offlineDocument;
 	protected StringBuilder buffer;
 	
 	protected static Border noFocusBorder; 
 	
 	public DependencyListCellRenderer() {
 		setHighlighter(createHighlighter());
-		setDocument(new DependencyDocument());
+		setDocument(new BatchDocument());
 	}
 
 	/**
@@ -133,7 +129,7 @@ public class DependencyListCellRenderer extends DummyTextPane
         setBorder(border);
     	
     	if(offlineDocument==null) {
-    		offlineDocument = new DependencyDocument();
+    		offlineDocument = new BatchDocument();
     	} else {
     		offlineDocument.clear();
     	}
@@ -143,29 +139,34 @@ public class DependencyListCellRenderer extends DummyTextPane
     	} else {
     		buffer.setLength(0);
     	}
+    	
+    	if(value==null) {
+    		setText("-"); //$NON-NLS-1$
+    	} else {
         
-        boolean annotated = false;
-		
-		if(value instanceof AnnotatedDependencyData && getAnnotationManager()!=null
-				&& getAnnotationManager().getDisplayMode()!=AnnotationDisplayMode.NONE) {
-			annotated = annotate(list, (AnnotatedDependencyData) value, index, isSelected, cellHasFocus);
-		} 
-		
-		if(!annotated){
-			plain(value, index, isSelected, cellHasFocus);
-		}
-		
-		try {
-			offlineDocument.applyBatchUpdates(0);
-		} catch (BadLocationException e) {
-			LoggerFactory.log(this, Level.SEVERE,  
-					"Unexpected exception on list rendering", e); //$NON-NLS-1$
-		}
-		
-		DependencyDocument doc = offlineDocument;
-		offlineDocument = (DependencyDocument) getDocument();
-		
-		setDocument(doc);
+	        boolean annotated = false;
+			
+			if(value instanceof AnnotatedDependencyData && getAnnotationManager()!=null
+					&& getAnnotationManager().getDisplayMode()!=AnnotationDisplayMode.NONE) {
+				annotated = annotate(list, (AnnotatedDependencyData) value, index, isSelected, cellHasFocus);
+			} 
+			
+			if(!annotated){
+				plain(value, index, isSelected, cellHasFocus);
+			}
+			
+			try {
+				offlineDocument.applyBatchUpdates(0);
+			} catch (BadLocationException e) {
+				LoggerFactory.log(this, Level.SEVERE,  
+						"Unexpected exception on list rendering", e); //$NON-NLS-1$
+			}
+			
+			BatchDocument doc = offlineDocument;
+			offlineDocument = (BatchDocument) getDocument();
+			
+			setDocument(doc);
+    	}
 
         return this;
 	}
@@ -289,12 +290,13 @@ public class DependencyListCellRenderer extends DummyTextPane
 					painter = applyHighlightType(highlightType, style, col);
 				}
 				
-				// add the form string
+				// Add the form string
 				int off0 = offset;
 				offset += offlineDocument.appendBatchString(data.getForm(i), style);
 				int off1 = offset;
 				
-				// mark multiple annotations if desired
+				// Mark multiple annotations if desired
+				// TODO mark all concurrent annotations or only "real" ones (hosted in different annotation layers) ?
 				if(markMultiple && DependencyHighlighting.isConcurrentHighlight(highlight)) {
 					style = DependencyHighlighting.getStyleContext().getStyle("multiple"); //$NON-NLS-1$
 					offset += offlineDocument.appendBatchString(" ", style); //$NON-NLS-1$
@@ -344,53 +346,5 @@ public class DependencyListCellRenderer extends DummyTextPane
 		offlineDocument.appendBatchString(buffer.toString(), defaultStyle);
 		
 		buffer.setLength(0);
-    }
-    
-    protected static class DependencyDocument extends DefaultStyledDocument {
-
-		private static final long serialVersionUID = -4128539534922746201L;
-
-	    private static final char[] EOL_ARRAY = { '\n' };
-
-		private List<ElementSpec> batch = new ArrayList<>();
-		
-		public int appendBatchString(String str, AttributeSet attr) {
-	        batch.add(new ElementSpec(attr, ElementSpec.ContentType, str.toCharArray(), 0, str.length()));
-	        return str.length();
-		}
-		
-		public int appendBatchLineFeed(AttributeSet attr) {
-	        batch.add(new ElementSpec(attr, ElementSpec.ContentType, EOL_ARRAY, 0, 1));
-
-	        // Then add attributes for element start/end tags. Ideally 
-	        // we'd get the attributes for the current position, but we 
-	        // don't know what those are yet if we have unprocessed 
-	        // batch inserts. Alternatives would be to get the last 
-	        // paragraph element (instead of the first), or to process 
-	        // any batch changes when a linefeed is inserted.
-	        Element paragraph = getParagraphElement(0);
-	        AttributeSet pattr = paragraph.getAttributes();
-	        batch.add(new ElementSpec(null, ElementSpec.EndTagType));
-	        batch.add(new ElementSpec(pattr, ElementSpec.StartTagType));
-	        
-	        return EOL_ARRAY.length;
-		}
-
-	    public void applyBatchUpdates(int offset) throws BadLocationException {
-	        ElementSpec[] inserts = new ElementSpec[batch.size()];
-	        batch.toArray(inserts);
-	        batch.clear();
-
-	        // Process all of the inserts in bulk
-	        insert(offset, inserts);
-	    }
-	    
-	    public void clear() {
-	    	try {
-				remove(0, getLength());
-			} catch (BadLocationException e) {
-				// ignore
-			}
-	    }
     }
 }

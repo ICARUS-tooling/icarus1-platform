@@ -111,6 +111,7 @@ public class QueryEditorView extends View {
 			
 		};
 		queryPane.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
+		UIUtil.disableHtml(queryPane);
 		UIUtil.createUndoSupport(queryPane, 40);
 		UIUtil.addPopupMenu(queryPane, UIUtil.createDefaultTextMenu(queryPane, true));
 		queryPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));

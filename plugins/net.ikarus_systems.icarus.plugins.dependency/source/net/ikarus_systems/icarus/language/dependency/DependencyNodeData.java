@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import net.ikarus_systems.icarus.language.LanguageConstants;
 import net.ikarus_systems.icarus.language.LanguageUtils;
 import net.ikarus_systems.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
+import net.ikarus_systems.icarus.plugins.jgraph.cells.CompoundGraphNode;
 import net.ikarus_systems.icarus.util.CloneableObject;
 import net.ikarus_systems.icarus.util.Exceptions;
 
@@ -36,7 +37,7 @@ import net.ikarus_systems.icarus.util.Exceptions;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class DependencyNodeData implements CloneableObject, Cloneable,
-		Serializable {
+		Serializable, CompoundGraphNode {
 
 	private static final long serialVersionUID = -2234983923334922206L;
 

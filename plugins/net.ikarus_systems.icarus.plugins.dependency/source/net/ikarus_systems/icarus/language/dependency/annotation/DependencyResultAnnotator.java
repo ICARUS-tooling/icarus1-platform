@@ -58,8 +58,10 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 			ResultEntry entry) {
 		if(data instanceof DependencyData) {
 			return new LazyAnnotatedDependencyData((DependencyData) data, entry);
-		} else
+		} else if(data!=null)
 			throw new IllegalArgumentException("Unable to annotate unsupported data: "+data.getClass()); //$NON-NLS-1$
+		
+		return null;
 	}
 
 	/**

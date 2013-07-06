@@ -147,11 +147,11 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	 */
 	public final void cancel() {
 		synchronized (lock) {
-			SearchState state = getState();
+			/*SearchState state = getState();
 			if(state==SearchState.BLANK)
 				throw new IllegalStateException("Search not started yet!"); //$NON-NLS-1$
 			if(state!=SearchState.RUNNING)
-				throw new IllegalStateException("Search not running!"); //$NON-NLS-1$
+				throw new IllegalStateException("Search not running!"); //$NON-NLS-1$*/
 			if(!cancelled.compareAndSet(false, true))
 				throw new IllegalStateException("Search already cancelled!"); //$NON-NLS-1$
 			

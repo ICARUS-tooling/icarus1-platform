@@ -306,6 +306,33 @@
 		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.result.SearchResult" />
 	</extension>
 	
+	<extension id="ConstraintNodeDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
+	</extension>
+	
+	<extension id="ConstraintCellDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData" />
+	</extension>
+	
+	<extension id="ConstraintEdgeDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
+	</extension>
+	
 	<!-- HELPERS -->
 	
 	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
