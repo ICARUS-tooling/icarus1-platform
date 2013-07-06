@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package net.ikarus_systems.icarus.launcher;
+package de.ims.icarus.launcher;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 

@@ -1,13 +1,13 @@
 /*
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 7 $
+ * $Date: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/launcher/de.ims.icarus/source/net/ikarus_systems/icarus/launcher/LauncherErrorDialog.java $
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
- * $LastChangedBy$
+ * $LastChangedDate: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $ 
+ * $LastChangedRevision: 7 $ 
+ * $LastChangedBy: mcgaerty $
  */
-package net.ikarus_systems.icarus.launcher;
+package de.ims.icarus.launcher;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -20,7 +20,7 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: LauncherErrorDialog.java 7 2013-02-27 13:18:56Z mcgaerty $
  *
  */
 class LauncherErrorDialog extends JFrame {

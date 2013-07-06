@@ -1,13 +1,13 @@
 /*
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 39 $
+ * $Date: 2013-05-17 15:19:31 +0200 (Fr, 17 Mai 2013) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/launcher/de.ims.icarus/source/net/ikarus_systems/icarus/launcher/SplashWindow.java $
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
- * $LastChangedBy$
+ * $LastChangedDate: 2013-05-17 15:19:31 +0200 (Fr, 17 Mai 2013) $ 
+ * $LastChangedRevision: 39 $ 
+ * $LastChangedBy: mcgaerty $
  */
-package net.ikarus_systems.icarus.launcher;
+package de.ims.icarus.launcher;
 
 import java.io.File;
 import java.net.URL;
@@ -17,7 +17,7 @@ import java.net.URLClassLoader;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: SplashWindow.java 39 2013-05-17 13:19:31Z mcgaerty $
  *
  */
 public class SplashWindow {
@@ -25,8 +25,8 @@ public class SplashWindow {
 	private static SplashDelegate splashDelegate;
 	
 	private static String[] delegateClasses = {
-		"net.ikarus_systems.icarus.launcher.NativeSplashDelegate", //$NON-NLS-1$
-		"net.ikarus_systems.icarus.launcher.AWTSplashDelegate", //$NON-NLS-1$
+		"de.ims.icarus.launcher.NativeSplashDelegate", //$NON-NLS-1$
+		"de.ims.icarus.launcher.AWTSplashDelegate", //$NON-NLS-1$
 	};
 	
 	static void splash(URL imageURL) {
@@ -89,7 +89,7 @@ public class SplashWindow {
 			t.printStackTrace();
 			
 			// Load and show dialog instance
-			Class.forName("net.ikarus_systems.icarus.launcher.LauncherErrorDialog") //$NON-NLS-1$
+			Class.forName("de.ims.icarus.launcher.LauncherErrorDialog") //$NON-NLS-1$
 				.getConstructor(Throwable.class).newInstance(t);
 		} catch (Exception e) {
 			e.printStackTrace();

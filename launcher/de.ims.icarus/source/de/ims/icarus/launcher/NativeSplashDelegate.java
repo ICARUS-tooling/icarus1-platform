@@ -1,13 +1,13 @@
 /*
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 7 $
+ * $Date: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/launcher/de.ims.icarus/source/net/ikarus_systems/icarus/launcher/NativeSplashDelegate.java $
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
- * $LastChangedBy$
+ * $LastChangedDate: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $ 
+ * $LastChangedRevision: 7 $ 
+ * $LastChangedBy: mcgaerty $
  */
-package net.ikarus_systems.icarus.launcher;
+package de.ims.icarus.launcher;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,11 +17,12 @@ import java.awt.Rectangle;
 import java.awt.SplashScreen;
 import java.net.URL;
 
-import net.ikarus_systems.icarus.launcher.SplashWindow.SplashDelegate;
+import de.ims.icarus.launcher.SplashWindow.SplashDelegate;
+
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: NativeSplashDelegate.java 7 2013-02-27 13:18:56Z mcgaerty $
  *
  */
 class NativeSplashDelegate implements SplashDelegate {
@@ -65,7 +66,7 @@ class NativeSplashDelegate implements SplashDelegate {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.launcher.SplashWindow.SplashDelegate#dispose()
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#dispose()
 	 */
 	@Override
 	public void dispose() {
@@ -94,7 +95,7 @@ class NativeSplashDelegate implements SplashDelegate {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.launcher.SplashWindow.SplashDelegate#setProgress(int)
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#setProgress(int)
 	 */
 	@Override
 	public void setProgress(int value) {
@@ -107,7 +108,7 @@ class NativeSplashDelegate implements SplashDelegate {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.launcher.SplashWindow.SplashDelegate#setMaxProgress(int)
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#setMaxProgress(int)
 	 */
 	@Override
 	public void setMaxProgress(int maxValue) {
@@ -120,7 +121,7 @@ class NativeSplashDelegate implements SplashDelegate {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.launcher.SplashWindow.SplashDelegate#setText(java.lang.String)
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#setText(java.lang.String)
 	 */
 	@Override
 	public void setText(String text) {
@@ -139,7 +140,7 @@ class NativeSplashDelegate implements SplashDelegate {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.launcher.SplashWindow.SplashDelegate#isVisible()
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#isVisible()
 	 */
 	@Override
 	public boolean isVisible() {
