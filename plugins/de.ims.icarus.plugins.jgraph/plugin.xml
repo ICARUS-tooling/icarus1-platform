@@ -1,0 +1,354 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="de.ims.icarus.jgraph" version="0.0.1"
+	class="de.ims.icarus.plugins.jgraph.JGraphPlugin">
+	
+	<doc>
+		<doc-text>
+			Interface to the jGraph graph-visualization framework
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/jgraph/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.jgraph.JGraphPreferences" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
+	</requires>
+	
+	<runtime>
+		<library id="jGraphLib" path="lib/jgraphx.jar" type="code">
+			<doc>
+				<doc-text>
+					jGraph library version 1.10.1.4
+				</doc-text>
+			</doc>
+		</library>
+	</runtime>
+	
+	<!-- Extension-Points -->
+			
+	<extension-point id="GraphLayout" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of layout object, has to implement the de.ims.icarus.plugins.jgraph.layout.GraphLayout interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="de.ims.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Supported content type(s). Used to filter out layouts when presenting
+					choice dialog or other means of selection capabilities to the user. If
+					parameter is missing then the layout is assumed to be not depending on
+					content of a graph. Examples for such "general" layouts are the default
+					implementations for DefaultArcLayout and DefaultTreeLayout.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="GraphStyle" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of style object, has to implement the de.ims.icarus.plugins.jgraph.layout.GraphStyle interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="de.ims.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Supported content type(s). Used to filter out styles when presenting
+					choice dialog or other means of selection capabilities to the user. If
+					parameter is missing then the style is assumed to be not depending on
+					content of a graph.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="GraphRenderer" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Advanced type of canvas originally used by mxGraphComponent to paint
+				cells and labels. GraphPresenter uses GraphRenderer implementations to
+				determine the actual label-string and the tooltip-text for cells.
+				Implementations are free to apply content specific coloring and or highlighting.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of renderer object, has to implement the de.ims.icarus.plugins.jgraph.layout.GraphRenderer interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id" multiplicity="any"
+				custom-data="de.ims.icarus.plugins.core.IcarusCorePlugin@ContentType">
+			<doc>
+				<doc-text>
+					Supported content type(s). Used to filter out renderers when presenting
+					choice dialog or other means of selection capabilities to the user. If
+					parameter is missing then the renderer is assumed to be not depending on
+					content of a graph.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Shape">
+		<doc>
+			<doc-text>
+				Special type of renderer used by the jGraph framework to render
+				arbitrary types of shapes. Every implementation of com.mxgraph.shape.mxIShape
+				is responsible for a certain type of shape.
+			</doc-text>
+		</doc>
+		<parameter-def id="name">
+			<doc>
+				<doc-text>
+					Identifier used for style definitions.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of shape object, has to implement the com.mxgraph.shape.mxIShape interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="TextShape">
+		<doc>
+			<doc-text>
+				Special type of renderer used by the jGraph framework to render
+				arbitrary types of text. Every implementation of com.mxgraph.shape.mxITextShape
+				is responsible for a certain type of text like html or plain-text.
+			</doc-text>
+		</doc>
+		<parameter-def id="name">
+			<doc>
+				<doc-text>
+					Identifier used for style definitions.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of text-shape object, has to implement the com.mxgraph.shape.mxITextShape interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="EdgeStyle">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter-def id="name">
+			<doc>
+				<doc-text>
+					Identifier used for registration at com.mxgraph.view.mxStyleRegistry.
+					In case of duplicate name declaration only the first edge-style will be registered!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of text-shape object, has to implement the com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PERSPECTIVES AND VIEWS -->
+	
+	<extension id="GraphView" plugin-id="de.ims.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Generic graph view that uses GraphPresenter objects to delegate
+				the actual presentation work to.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.graphView.identity.name" />
+		<parameter id="description" value="plugins.jgraph.graphView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.view.GraphView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/jgraph/view/graph-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="present" />
+			<parameter id="display" />
+		</parameter>
+	</extension>
+	
+	<extension id="ListGraphView" plugin-id="de.ims.icarus.core" point-id="View">
+		<doc>
+			<doc-text>
+				Specialized view consisting of two generic presenters:
+				The ListPresenter implementation is responsible for presenting
+				the list style choice to the user and is placed in the lower area of a vertical
+				JSplitPane.
+				The GraphPresenter implementation handles content type specific presentation
+				of the currently selected sentence data object in the aforementioned list.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.listGraphView.identity.name" />
+		<parameter id="description" value="plugins.jgraph.listGraphView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.view.ListGraphView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/jgraph/view/list-graph-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="select" />
+			<parameter id="present" value="ListDataContentType" />
+			<parameter id="display" value="ListDataContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="ListGraphViewLink" plugin-id="de.ims.icarus.core" point-id="Link">
+		<parameter id="extension" value="de.ims.icarus.jgraph@ListGraphView" />
+		<parameter id="extension-point" value="de.ims.icarus.languageTools@TreebankManagementView" />
+	</extension>
+	
+	<!-- HELPER -->
+	
+	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.util.CellBuffer" />
+	</extension>
+	
+	<!-- GRAPH UTILITIES -->
+	
+	<extension id="DefaultGraphLayout" plugin-id="de.ims.icarus.jgraph" point-id="GraphLayout">
+		<doc>
+			<doc-text>
+				'Empty' layout that does not alter the current appearance of the graph.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultGraphLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultGraphLayout.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="icon" value="de/ims/icarus/plugins/jgraph/icons/graph_default.gif" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.DefaultGraphLayout" />
+	</extension>
+	
+	<extension id="DefaultArcLayout" plugin-id="de.ims.icarus.jgraph" point-id="GraphLayout">
+		<doc>
+			<doc-text>
+				Layout that orders vertices horizontally with edges shaped as arcs. Regular edges are placed
+				above vertices and order edges below.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultArcLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultArcLayout.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="icon" value="de/ims/icarus/plugins/jgraph/icons/graph_arc.gif" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.DefaultArcLayout" />
+	</extension>
+	
+	<extension id="DefaultTreeLayout" plugin-id="de.ims.icarus.jgraph" point-id="GraphLayout">
+		<doc>
+			<doc-text>
+				Layout that generates a simple tree view.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultTreeLayout.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultTreeLayout.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="icon" value="de/ims/icarus/plugins/jgraph/icons/graph_tree.gif" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.DefaultTreeLayout" />
+	</extension>
+	
+	<extension id="DefaultGraphRenderer" plugin-id="de.ims.icarus.jgraph" point-id="GraphRenderer">
+		<doc>
+			<doc-text>
+				Simple renderer that uses the default label generation methods as defined in the
+				abstract de.ims.icarus.plugins.jgraph.layout.GraphRenderer class.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultGraphRenderer.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultGraphRenderer.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.DefaultGraphRenderer" />
+	</extension>
+	
+	<extension id="DefaultGraphStyle" plugin-id="de.ims.icarus.jgraph" point-id="GraphStyle">
+		<doc>
+			<doc-text>
+				Empty style that just ensures that edges and vertices are assigned
+				their respective default styles.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.defaultGraphStyle.identity.name" />
+		<parameter id="description" value="plugins.jgraph.defaultGraphStyle.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.DefaultGraphStyle" />
+	</extension>
+	
+	<extension id="ArcConnectorShape" plugin-id="de.ims.icarus.jgraph" point-id="Shape">
+		<doc>
+			<doc-text>
+				A simple connector shape that draws arc shaped connection lines between vertices.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="arc" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.ArcConnectorShape" />
+	</extension>
+	
+	<extension id="TopArcEdgeStyle" plugin-id="de.ims.icarus.jgraph" point-id="EdgeStyle">
+		<doc>
+			<doc-text>
+				Generates the points used to construct an arc shape above two connected vertices..
+			</doc-text>
+		</doc>
+		<parameter id="name" value="topArcEdgeStyle" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.TopArcEdgeStyle" />
+	</extension>
+	
+	<extension id="BottomArcEdgeStyle" plugin-id="de.ims.icarus.jgraph" point-id="EdgeStyle">
+		<doc>
+			<doc-text>
+				Generates the points used to construct an arc shape below two connected vertices..
+			</doc-text>
+		</doc>
+		<parameter id="name" value="bottomArcEdgeStyle" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.BottomArcEdgeStyle" />
+	</extension>
+</plugin>

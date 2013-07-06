@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		ICARUS FRAME ACTIONS
+	-->
+	
+	<action id="plugins.core.icarusFrame.openPerspectiveDialogAction"
+		name="${id}.name" desc="${id}.description" icon="new_persp.gif" />
+
+	<!-- Menu Bar -->
+	<action-list id="plugins.core.icarusFrame.menuBarList">
+		<action-list id="plugins.core.icarusFrame.fileMenuAction" name="${id}.name">
+			<item type="custom" value="fileMenuItems" />
+			<separator />
+			<item type="action" value="plugins.core.icarusCorePlugin.exitAction" />				
+		</action-list>
+		<item type="custom" value="customMenus" />
+		<action-list id="plugins.core.icarusFrame.windowMenuAction" name="${id}.name">
+			<action id="plugins.core.icarusFrame.closeFrameAction" name="${id}.name" desc="${id}.description" />
+			<action id="plugins.core.icarusFrame.newFrameAction" name="${id}.name" desc="${id}.description" />
+			<action id="plugins.core.icarusFrame.copyFrameAction" name="${id}.name" desc="${id}.description" />
+			<separator />
+			<item type="custom" value="windowMenuItems" />
+			<separator />
+			<action-list id="plugins.core.icarusFrame.openPerspectivesAction" name="${id}.name">
+				<item type="custom" value="perspectives" />
+				<item type="action" value="plugins.core.icarusFrame.openPerspectiveDialogAction" />
+			</action-list>
+			<action id="plugins.core.icarusFrame.closePerspectiveAction" name="${id}.name" desc="${id}.description" />
+			<action id="plugins.core.icarusFrame.closeAllPerspectivesAction" name="${id}.name" desc="${id}.description" />
+			<action id="plugins.core.icarusFrame.resetPerspectiveAction" name="${id}.name" desc="${id}.description" />
+			<separator />
+			<item type="action" value="plugins.core.icarusCorePlugin.openPreferencesAction" />
+		</action-list>	
+		<action-list id="plugins.core.icarusFrame.helpMenuAction" name="${id}.name">
+			<item type="custom" value="helpMenuItems" />
+			<separator />
+			<item type="action" value="plugins.core.icarusCorePlugin.aboutAction" />
+		</action-list>			
+	</action-list>
+
+</actions>

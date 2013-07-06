@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		EXTENSION POINT VIEW
+	-->
+	
+	<!-- Show Declaring Plug-In -->
+	<action id="plugins.core.extensionPointOutlineView.showPluginAction"
+		name="${id}.name" desc="${id}.description" icon="ext_point_obj.gif" />
+	
+	<!-- Popup Menu List -->
+	<action-list id="plugins.core.extensionPointOutlineView.popupMenuList">
+		<item type="action" value="plugins.core.extensionPointOutlineView.showPluginAction" />
+	</action-list>
+	
+</actions>

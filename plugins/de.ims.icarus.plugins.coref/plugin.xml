@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="de.ims.icarus.language.coref" version="0.0.1"
+	class="de.ims.icarus.plugins.coref.CoreferencePlugin">
+	
+	<doc>
+		<doc-text>
+			TODO
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/coref/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.coref.CoreferencePreferences" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.searchTools" />
+		<import plugin-id="de.ims.icarus.jgraph" />
+	</requires>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PERSPECTIVES AND VIEWS -->
+	
+	<extension id="CoreferencePerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.coref.coreferencePerspective.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferencePerspective.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.CoreferencePerspective" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/coreference-perspective.gif" />
+		<parameter id="preview" value="de/ims/icarus/plugins/coref/coreference-perspective-preview.jpg" />
+	</extension>
+	
+	<!-- HELPERS -->
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="CoreferenceDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.CoreferenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceData" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.CoreferenceDocumentData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceDocumentData" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentSetContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.CoreferenceDocumentSet
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceDocumentSet" />
+	</extension>
+	
+</plugin>

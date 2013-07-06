@@ -1,0 +1,161 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="de.ims.icarus.dependency" version="0.0.1"
+	class="de.ims.icarus.plugins.dependency.DependencyPlugin">
+	
+	<doc>
+		<doc-text>
+			The base plug-in for all dependency related tools. Offers definitions for
+			dependency based data structures and related tools. Provides basic visualization
+			helpers for tabular, graphical and testual representation.
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.dependency.resources.dependency" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/dependency/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.dependency.DependencyPreferences" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.searchTools" />
+		<import plugin-id="de.ims.icarus.jgraph" />
+	</requires>
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PROPERTIES AND VIEWS -->
+	
+	<!-- HELPERS -->
+	
+	<extension id="DependencyGraphPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				GraphPresenter implementation for use with arbitrary sentence data that implements
+				the de.ims.icarus.language.dependency.DependencyData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.dependency.graph.DependencyGraphPresenter" />
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="de.ims.icarus.plugins.jgraph.view.GraphPresenter" />
+	</extension>
+	
+	<extension id="DependencyTablePresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TablePresenter implementation for use with arbitrary sentence data that implements
+				the de.ims.icarus.language.dependency.DependencyData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.dependency.table.DependencyTablePresenter" />
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="de.ims.icarus.ui.table.TablePresenter" />
+	</extension>
+	
+	<extension id="DependencyAnnotationManager" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Annotation manager implementation to be used with DependencyAnnotation
+				objects.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.language.dependency.annotation.DependencyAnnotationManager" />
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyAnnotationContentType" />
+		<parameter id="interface" value="de.ims.icarus.util.annotation.AnnotationManager" />
+	</extension>
+	
+	<extension id="DependencyListCellRenderer" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.dependency.list.DependencyListCellRenderer" />
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="DependencyCellConverter" plugin-id="de.ims.icarus.core" point-id="DataConverter">
+		<doc>
+			<doc-text>
+				Converter to transform DependencyNodeData objects into constraint sets usable for the constraint graph editor (nodes)
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.dependency.graph.DependencyCellConverter" />
+		<parameter id="accuracy" value="1" />
+		<parameter id="inputType" value="de.ims.icarus.dependency@DependencyNodeDataContentType" />
+		<parameter id="outputType" value="de.ims.icarus.searchTools@ConstraintCellDataContentType" />
+	</extension>
+	
+	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
+		<parameter id="class" value="de.ims.icarus.language.dependency.DependencyNodeData" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.SimpleDependencyData" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="DependencyDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.dependency.DependencyData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.dependency.DependencyData" />
+	</extension>
+	
+	<extension id="DependencyAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.dependency.annotation.DependencyAnnotation
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.dependency.annotation.DependencyAnnotation" />
+	</extension>
+	
+	<extension id="DependencyNodeDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.dependency.DependencyNodeData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.dependency.DependencyNodeData" />
+	</extension>
+	
+	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
+	
+	<extension id="DependencyConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="token" value="form" />
+		<parameter id="token" value="lemma" />
+		<parameter id="token" value="pos" />
+		<parameter id="token" value="features" />
+		<parameter id="token" value="relation">
+			<parameter id="alias" value="label" />
+		</parameter>
+		<parameter id="token" value="distance" />
+		<parameter id="token" value="direction" />
+		<parameter id="token" value="projectivity" />
+		<parameter id="factories">
+			<parameter id="form" value="de.ims.icarus.language.dependency.search.DependencyFormConstraintFactory" />
+			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.DependencyLemmaConstraintFactory" />
+			<parameter id="pos" value="de.ims.icarus.language.dependency.search.DependencyPosConstraintFactory" />
+			<parameter id="features" value="de.ims.icarus.language.dependency.search.DependencyFeaturesConstraintFactory" />
+			<parameter id="relation" value="de.ims.icarus.language.dependency.search.DependencyRelationConstraintFactory" />
+			<parameter id="distance" value="de.ims.icarus.language.dependency.search.DependencyDistanceConstraintFactory" />
+			<parameter id="direction" value="de.ims.icarus.language.dependency.search.DependencyDirectionConstraintFactory" />
+			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.DependencyProjectivityConstraintFactory" />
+		</parameter>
+	</extension>
+	
+	<extension id="DependencySearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.search.DependencySearchFactory" />
+		<parameter id="name" value="plugins.dependency.dependencySearchFactory.identity.name" />
+		<parameter id="description" value="plugins.dependency.dependencySearchFactory.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.dependency.resources.dependency" />
+		<parameter id="icon" value="de/ims/icarus/plugins/dependency/search/dependency-search-factory.gif" />
+	</extension>
+	
+</plugin>

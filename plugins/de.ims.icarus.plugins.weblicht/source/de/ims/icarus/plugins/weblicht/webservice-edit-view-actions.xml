@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		WEBSERVICE EDIT VIEW
+	-->
+		
+	<!-- Reset Edit -->
+	<action id="plugins.weblicht.webserviceEditView.resetEditAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Apply Edit -->
+	<action id="plugins.weblicht.webserviceEditView.applyEditAction"
+		name="${id}.name" desc="${id}.description" />
+	
+</actions>

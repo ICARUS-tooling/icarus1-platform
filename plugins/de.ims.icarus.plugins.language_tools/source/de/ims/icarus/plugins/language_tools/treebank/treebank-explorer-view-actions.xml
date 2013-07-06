@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		TREEBANK EXPLORER VIEW
+	-->
+		
+	<!-- New Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.newTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="newclass_wiz.gif" />
+		
+	<!-- Delete Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.deleteTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		
+	<!-- Clone Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.cloneTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		
+	<!-- Rename Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.renameTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="wordassist_co.gif" />
+		
+	<!-- Open Location -->
+	<action id="plugins.languageTools.treebankExplorerView.openLocationAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Edit Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.editTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
+	<!-- Inspect Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.inspectTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		
+	<!-- Load Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.loadTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="refresh_remote.gif" />
+		
+	<!-- Free Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.freeTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="release_rls.gif" />
+		
+	<!-- Export Treebank -->
+	<action id="plugins.languageTools.treebankExplorerView.exportTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- Export Treebanks -->
+	<action id="plugins.languageTools.treebankExplorerView.exportTreebanksAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- Import Treebanks -->
+	<action id="plugins.languageTools.treebankExplorerView.importTreebanksAction"
+		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.languageTools.treebankExplorerView.toolBarList">
+		<item type="action" value="plugins.languageTools.treebankExplorerView.newTreebankAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.deleteTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.renameTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.editTreebankAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.inspectTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.loadTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.freeTreebankAction" />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup Menu List -->
+	<action-list id="plugins.languageTools.treebankExplorerView.popupMenuList">
+		<item type="action" value="plugins.languageTools.treebankExplorerView.newTreebankAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.deleteTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.cloneTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.renameTreebankAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.openLocationAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.inspectTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.loadTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.freeTreebankAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.editTreebankAction" />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.exportTreebankAction" />
+	</action-list>
+	
+</actions>

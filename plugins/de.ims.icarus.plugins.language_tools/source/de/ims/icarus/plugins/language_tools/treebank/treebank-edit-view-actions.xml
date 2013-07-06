@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		TREEBANK EDIT VIEW
+	-->
+		
+	<!-- Reset Edit -->
+	<action id="plugins.languageTools.treebankEditView.resetEditAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- ApplyEdit -->
+	<action id="plugins.languageTools.treebankEditView.applyEditAction"
+		name="${id}.name" desc="${id}.description" />
+	
+</actions>

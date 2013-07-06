@@ -1,0 +1,222 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		GRAPH PRESENTER
+	-->
+		
+	<!-- Clone Cells -->
+	<action id="plugins.jgraph.graphPresenter.cloneCellsAction"
+		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		
+	<!-- Copy Cells -->
+	<action id="plugins.jgraph.graphPresenter.copyCellsAction"
+		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+		
+	<!-- Paste Cells -->
+	<action id="plugins.jgraph.graphPresenter.pasteCellsAction"
+		name="${id}.name" desc="${id}.description" icon="paste_edit.gif" />
+		
+	<!-- Move Cells North -->
+	<action id="plugins.jgraph.graphPresenter.moveCellsNorthAction"
+		name="${id}.name" desc="${id}.description" command="north" icon="navi_up.gif" />
+		
+	<!-- Move Cells South -->
+	<action id="plugins.jgraph.graphPresenter.moveCellsSouthAction"
+		name="${id}.name" desc="${id}.description" command="south" icon="navi_down.gif" />
+		
+	<!-- Move Cells West -->
+	<action id="plugins.jgraph.graphPresenter.moveCellsWestAction"
+		name="${id}.name" desc="${id}.description" command="west" icon="navi_left.gif" />
+		
+	<!-- Move Cells East -->
+	<action id="plugins.jgraph.graphPresenter.moveCellsEastAction"
+		name="${id}.name" desc="${id}.description" command="east" icon="navi_right.gif" />
+		
+	<!-- Delete Cells -->
+	<action id="plugins.jgraph.graphPresenter.deleteCellsAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		
+	<!-- Print Graph -->
+	<action id="plugins.jgraph.graphPresenter.printGraphAction"
+		name="${id}.name" desc="${id}.description" icon="print_edit.gif" />
+		
+	<!-- Clear Graph -->
+	<action id="plugins.jgraph.graphPresenter.clearGraphAction"
+		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+		
+	<!-- Add Cell -->
+	<action id="plugins.jgraph.graphPresenter.addNodeAction"
+		name="${id}.name" desc="${id}.description" icon="add_obj.gif" />
+		
+	<!-- Add Edge -->
+	<action id="plugins.jgraph.graphPresenter.addEdgeAction"
+		name="${id}.name" desc="${id}.description" icon="skip_breakpoint_ov.gif" />
+		
+	<!-- Add Order-Edge -->
+	<action id="plugins.jgraph.graphPresenter.addOrderEdgeAction"
+		name="${id}.name" desc="${id}.description" icon="stepover_co.gif" />
+		
+	<!-- Edit Cell -->
+	<action id="plugins.jgraph.graphPresenter.editCellAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		
+	<!-- Import Cells -->
+	<action id="plugins.jgraph.graphPresenter.importCellsAction"
+		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
+		
+	<!-- Export Cells -->
+	<action id="plugins.jgraph.graphPresenter.exportCellsAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		
+	<!-- Undo Edit -->
+	<action id="plugins.jgraph.graphPresenter.undoEditAction"
+		name="${id}.name" desc="${id}.description" icon="undo_edit.gif" />
+		
+	<!-- Redo Edit -->
+	<action id="plugins.jgraph.graphPresenter.redoEditAction"
+		name="${id}.name" desc="${id}.description" icon="redo_edit.gif" />
+		
+	<!-- Zoom In -->
+	<action id="plugins.jgraph.graphPresenter.zoomInAction"
+		name="${id}.name" desc="${id}.description" icon="zoomin.gif" />
+		
+	<!-- Zoom Out -->
+	<action id="plugins.jgraph.graphPresenter.zoomOutAction"
+		name="${id}.name" desc="${id}.description" icon="zoomout.gif" />
+		
+	<!-- Reset Zoom -->
+	<action id="plugins.jgraph.graphPresenter.resetZoomAction"
+		name="${id}.name" desc="${id}.description" icon="zoom.gif" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.jgraph.graphPresenter.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		
+	<!-- Rebuild Graph -->
+	<action id="plugins.jgraph.graphPresenter.rebuildGraphAction"
+		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		
+	<!-- Collapse Cells -->
+	<action id="plugins.jgraph.graphPresenter.collapseCellsAction"
+		name="${id}.name" desc="${id}.description" icon="del_stat.gif" />
+		
+	<!-- Expand Cells -->
+	<action id="plugins.jgraph.graphPresenter.expandCellsAction"
+		name="${id}.name" desc="${id}.description" icon="add_stat.gif" />
+		
+	<!-- Toggle Auto Zoom -->
+	<action id="plugins.jgraph.graphPresenter.toggleAutoZoomAction"
+		name="${id}.name" desc="${id}.description" icon="autofit.gif" type="toggle" />
+		
+	<!-- Toggle Compress -->
+	<action id="plugins.jgraph.graphPresenter.toggleCompressAction"
+		name="${id}.name" desc="${id}.description" icon="collapseall.gif" type="toggle" />
+		
+	<!-- Main ToolBar List for editable graph -->
+	<action-list id="plugins.jgraph.graphPresenter.editableMainToolBarList">
+		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
+		<separator />
+		<item type="custom" value="selectLayoutLabel" />
+		<item type="custom" value="selectLayout" />
+		<item type="custom" value="selectStyleLabel" />
+		<item type="custom" value="selectStyle" />
+		<item type="custom" value="selectRendererLabel" />
+		<item type="custom" value="selectRenderer" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.clearGraphAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.importCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.printGraphAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.addNodeAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.addEdgeAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.cloneCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.rebuildGraphAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.zoomInAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		<item type="custom" value="annotationControl" />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Main ToolBar List for uneditable graph -->
+	<action-list id="plugins.jgraph.graphPresenter.uneditableMainToolBarList">
+		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
+		<separator />
+		<item type="custom" value="selectLayoutLabel" />
+		<item type="custom" value="selectLayout" />
+		<item type="custom" value="selectStyleLabel" />
+		<item type="custom" value="selectStyle" />
+		<item type="custom" value="selectRendererLabel" />
+		<item type="custom" value="selectRenderer" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.printGraphAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.zoomInAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		<item type="custom" value="annotationControl" />
+		<separator />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup Menu List for editable graphs -->
+	<action-list id="plugins.jgraph.graphPresenter.editablePopupMenuList">
+		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.addNodeAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.addEdgeAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+	</action-list>
+		
+	<!-- Popup Menu List for uneditable graphs -->
+	<action-list id="plugins.jgraph.graphPresenter.uneditablePopupMenuList">
+		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+	</action-list>
+	
+</actions>
