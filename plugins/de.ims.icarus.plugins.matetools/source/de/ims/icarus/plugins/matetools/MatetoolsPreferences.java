@@ -55,6 +55,8 @@ public class MatetoolsPreferences {
 				"models", EntryType.CUSTOM), //$NON-NLS-1$
 				ConfigConstants.HANDLER, sharedStorageEditor,
 				ConfigConstants.RENDERER, modelStorageRenderer);
+		builder.addOptionsEntry("conll09reader", 0, //$NON-NLS-1$
+				"gold", "system"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 		// TODO add config items for readers/writers?
 	}

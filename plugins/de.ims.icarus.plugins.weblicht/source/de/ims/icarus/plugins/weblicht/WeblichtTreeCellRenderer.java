@@ -101,10 +101,68 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 				row, hasFocus);
 		
 		//FIXME set max width of Tooltip
-		setToolTipText(UIUtil.toSwingTooltip(tooltip));
+		setToolTipText(UIUtil.toSwingTooltip(formatTooltip(tooltip,60)));
 		setIcon(icon);
 		
 		return this;
 	}
 
+	
+	private String formatTooltip(String tooltip, int mod){
+		
+		if(tooltip==null || tooltip.isEmpty()) {
+			return null;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		int startIndex = 0;
+		boolean splitNext = false;
+		
+		
+		for(int i = 0; i < tooltip.length()-1; i++){
+			
+			//split when reach border
+			if (i % mod == 0){
+				if(isWordend(tooltip.charAt(i+1))){
+					sb.append(tooltip.substring(startIndex, i+1)).append("\n"); //$NON-NLS-1$
+					startIndex = i+1;
+					splitNext = false;
+				} else {
+ 					splitNext = true;
+				}
+					
+			}
+			
+			//missed a split (not at the end of a word) split nes possible position
+			if (splitNext && isWordend(tooltip.charAt(i+1))){
+				sb.append(tooltip.substring(startIndex, i+1)).append("\n"); //$NON-NLS-1$
+				startIndex = i+1;
+				splitNext = false;
+			}
+
+		}
+		sb.append(tooltip.substring(startIndex,tooltip.length()));
+		return sb.toString();
+		
+	}
+
+	/**
+	 * @param tooltip
+	 * @param i
+	 * @return 
+	 */
+	private boolean isWordend(char c) {
+		if(c == ' ') return true;
+		if(c == ',') return true;
+		if(c == ';') return true;
+		if(c == ':') return true;
+		if(c == '.') return true;
+		if(c == '-') return true;
+		else{
+			return false;
+		}
+		
+	}
+	
+	
 }
