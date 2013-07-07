@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="net.ikarus_systems.icarus.errormining" version="0.0.1"
-	class="net.ikarus_systems.icarus.plugins.errormining.ErrorMiningPlugin">
+<plugin id="de.ims.icarus.errormining" version="0.0.1"
+	class="de.ims.icarus.plugins.errormining.ErrorMiningPlugin">
 	
 	<doc>
 		<doc-text>
@@ -10,21 +10,21 @@
 	</doc>
 	
 	<attributes>
-		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.errormining.resources.errormining" />
-		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/errormining/icons/" />
-		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.errormining.ErrorMiningPreferences" />	
+		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/errormining/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.errormining.ErrorMiningPreferences" />	
 	</attributes>
 	
 	<requires>
-		<import plugin-id="net.ikarus_systems.icarus.core" />
-		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
-		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.jgraph" />
+		<import plugin-id="de.ims.icarus.languageTools" />
 	</requires>
 	
 	<!-- Extension-Points -->
 	
 	<extension-point id="ErrorMiningManagementView" parent-point-id="View" 
-			parent-plugin-id="net.ikarus_systems.icarus.core">
+			parent-plugin-id="de.ims.icarus.core">
 		<doc>
 			<doc-text>
 				Special entry point for 'View' extensions that should only
@@ -36,12 +36,12 @@
 	
 	<!-- Standard Extensions -->
 	
-	<extension id="ListGraphViewLink" plugin-id="net.ikarus_systems.icarus.core" point-id="Link">
-		<parameter id="extension" value="net.ikarus_systems.icarus.jgraph@ListGraphView" />
-		<parameter id="extension-point" value="net.ikarus_systems.icarus.errormining@ErrorMiningManagementView" />
+	<extension id="ListGraphViewLink" plugin-id="de.ims.icarus.core" point-id="Link">
+		<parameter id="extension" value="de.ims.icarus.jgraph@ListGraphView" />
+		<parameter id="extension-point" value="de.ims.icarus.errormining@ErrorMiningManagementView" />
 	</extension>
 	
-	<extension id="ErrorMiningPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+	<extension id="ErrorMiningPerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
 				Perspective that allows the management of the ErrorMining Service
@@ -49,13 +49,13 @@
 		</doc>
 		<parameter id="name" value="plugins.errormining.errorMiningPerspective.identity.name" />
 		<parameter id="description" value="plugins.errormining.errorMiningPerspective.identity.description" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.errormining.resources.errormining" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.errormining.ErrorMiningPerspective" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/errormining/errormining-perspective.gif" />
-		<parameter id="preview" value="net/ikarus_systems/icarus/plugins/errormining/errormining-preview.jpg" />	
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.ErrorMiningPerspective" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/errormining-perspective.gif" />
+		<parameter id="preview" value="de/ims/icarus/plugins/errormining/errormining-preview.jpg" />	
 	</extension>
 	
-	<extension id="ErrorMiningView" plugin-id="net.ikarus_systems.icarus.errormining" point-id="ErrorMiningManagementView">
+	<extension id="ErrorMiningView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
 		<doc>
 			<doc-text>
 				Collection of basic ngram Stuff / Algorithms
@@ -63,15 +63,15 @@
 		</doc>
 		<parameter id="name" value="plugins.errormining.errorMiningView.identity.name" />
 		<parameter id="description" value="plugins.errormining.errorMiningView.identity.description" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.errormining.resources.errormining" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.errormining.ErrorMiningView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/errormining/icons/link_package.gif" />
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.ErrorMiningView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/icons/link_package.gif" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="high" />
 	</extension>
 	
 
-	<extension id="NGramResultView" plugin-id="net.ikarus_systems.icarus.errormining" point-id="ErrorMiningManagementView">
+	<extension id="NGramResultView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
 		<doc>
 			<doc-text>
 				Show all ngrams found during NGram Process.
@@ -79,9 +79,9 @@
 		</doc>
 		<parameter id="name" value="plugins.errormining.nGramResultView.identity.name" />
 		<parameter id="description" value="plugins.errormining.nGramResultView.identity.description" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.errormining.resources.errormining" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.errormining.NGramResultView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/errormining/webservice-edit-view.gif" />
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.NGramResultView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/webservice-edit-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="standard" />
 	</extension>

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="net.ikarus_systems.icarus.searchTools" version="0.0.1"
-	class="net.ikarus_systems.icarus.plugins.search_tools.SearchToolsPlugin">
+<plugin id="de.ims.icarus.searchTools" version="0.0.1"
+	class="de.ims.icarus.plugins.search_tools.SearchToolsPlugin">
 	
 	<doc>
 		<doc-text>
@@ -11,15 +11,15 @@
 	</doc>
 	
 	<attributes>
-		<attribute id="net.ikarus_systems.icarus.resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
-		<attribute id="net.ikarus_systems.icarus.icons" value="net/ikarus_systems/icarus/plugins/search_tools/icons/" />
-		<attribute id="net.ikarus_systems.icarus.preferences" value="net.ikarus_systems.icarus.plugins.search_tools.SearchToolsPreferences" />
+		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/search_tools/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.search_tools.SearchToolsPreferences" />
 	</attributes>
 	
 	<requires>
-		<import plugin-id="net.ikarus_systems.icarus.core" />
-		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
-		<import plugin-id="net.ikarus_systems.icarus.jgraph" />
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.jgraph" />
 	</requires>
 	
 	<!-- Extension-Points -->
@@ -33,7 +33,7 @@
 			</doc-text>
 		</doc>
 		<parameter-def id="contentType" type="extension-id"
-				custom-data="net.ikarus_systems.icarus.core@ContentType">
+				custom-data="de.ims.icarus.core@ContentType">
 			<doc>
 				<doc-text>
 					Content type this context should be associated with.
@@ -68,14 +68,14 @@
 					'id' represents the token to be mapped.
 					'value' is required to be the fully qualified name of the
 					factory that must have a no-args constructor and implement
-					net.ikarus_systems.icarus.plugins.searchTools.ConstraintFactory interface!
+					de.ims.icarus.plugins.searchTools.ConstraintFactory interface!
 				</doc-text>
 			</doc>
 		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="SearchFactory" parent-point-id="Localizable" 
-			parent-plugin-id="net.ikarus_systems.icarus.core">
+			parent-plugin-id="de.ims.icarus.core">
 		<doc>
 			<doc-text>
 				The search factory used in the search process is responsible
@@ -87,7 +87,7 @@
 			</doc-text>
 		</doc>
 		<parameter-def id="contentType" type="extension-id"
-				custom-data="net.ikarus_systems.icarus.core@ContentType">
+				custom-data="de.ims.icarus.core@ContentType">
 			<doc>
 				<doc-text>
 					Hint for the search framework to determine what registered
@@ -100,14 +100,14 @@
 			<doc>
 				<doc-text>
 					Factory class itself, required to have no-args constructor and
-					implement net.ikarus_systems.icarus.search_tools.SearchFactory!
+					implement de.ims.icarus.search_tools.SearchFactory!
 				</doc-text>
 			</doc>
 		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="SearchResultPresenter" parent-point-id="Localizable" 
-			parent-plugin-id="net.ikarus_systems.icarus.core">
+			parent-plugin-id="de.ims.icarus.core">
 		<doc>
 			<doc-text>
 				Highly specialized version of regular AWTPresenter implementations
@@ -119,7 +119,7 @@
 			</doc-text>
 		</doc>
 		<parameter-def id="contentType" type="extension-id" multiplicity="any"
-				custom-data="net.ikarus_systems.icarus.core@ContentType">
+				custom-data="de.ims.icarus.core@ContentType">
 			<doc>
 				<doc-text>
 					Content types this presenter is able to handle. If no content type is
@@ -141,14 +141,14 @@
 			<doc>
 				<doc-text>
 					Presenter class itself, required to have no-args constructor and
-					extend net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultPresenter!
+					extend de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter!
 				</doc-text>
 			</doc>
 		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="SearchTargetSelector" parent-point-id="Localizable" 
-			parent-plugin-id="net.ikarus_systems.icarus.core">
+			parent-plugin-id="de.ims.icarus.core">
 		<doc>
 			<doc-text>
 				Helper class for the search framework to allow inclusion of arbitrary
@@ -159,7 +159,7 @@
 			<doc>
 				<doc-text>
 					Selector class itself, required to have no-args constructor and
-					implement net.ikarus_systems.icarus.search_tools.SearchTargetSelector!
+					implement de.ims.icarus.search_tools.SearchTargetSelector!
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -175,14 +175,14 @@
 			<doc>
 				<doc-text>
 					Operator class itself, required to have no-args constructor and
-					extend net.ikarus_systems.icarus.search_tools.SearchOperator!
+					extend de.ims.icarus.search_tools.SearchOperator!
 				</doc-text>
 			</doc>
 		</parameter-def>
 	</extension-point>
 			
 	<extension-point id="SearchToolsView" parent-point-id="View" 
-			parent-plugin-id="net.ikarus_systems.icarus.core">
+			parent-plugin-id="de.ims.icarus.core">
 		<doc>
 			<doc-text>
 				Special entry point for 'View' extensions that only want to
@@ -197,7 +197,7 @@
 	
 	<!-- PERSPECTIVES AND VIEWS -->
 	
-	<extension id="SearchPerspective" plugin-id="net.ikarus_systems.icarus.core" point-id="Perspective">
+	<extension id="SearchPerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
 				Test-perspective for search stuff
@@ -205,12 +205,12 @@
 		</doc>
 		<parameter id="name" value="plugins.searchTools.searchPerspective.identity.name" />
 		<parameter id="description" value="plugins.searchTools.searchPerspective.identity.description" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.SearchPerspective" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-perspective.gif" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.SearchPerspective" />
+		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/search-perspective.gif" />
 	</extension>
 	
-	<extension id="QueryEditorView" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchToolsView">
+	<extension id="QueryEditorView" plugin-id="de.ims.icarus.searchTools" point-id="SearchToolsView">
 		<doc>
 			<doc-text>
 				Compound view containing a graph editor and a text-area for editing a search graph
@@ -219,9 +219,9 @@
 		</doc>
 		<parameter id="name" value="plugins.searchTools.queryEditorView.identity.name" />
 		<parameter id="description" value="plugins.searchTools.queryEditorView.identity.name" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.QueryEditorView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/query-editor-view.gif" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.QueryEditorView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/query-editor-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
 		
@@ -233,7 +233,7 @@
 		</parameter>
 	</extension>
 	
-	<extension id="SearchManagerView" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchToolsView">
+	<extension id="SearchManagerView" plugin-id="de.ims.icarus.searchTools" point-id="SearchToolsView">
 		<doc>
 			<doc-text>
 				Central management point for search related tasks. Allows the creation and
@@ -242,9 +242,9 @@
 		</doc>
 		<parameter id="name" value="plugins.searchTools.searchManagerView.identity.name" />
 		<parameter id="description" value="plugins.searchTools.searchManagerView.identity.name" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.SearchManagerView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-manager-view.gif" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.SearchManagerView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/search-manager-view.gif" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="high" />
 		
@@ -254,7 +254,7 @@
 		</parameter>
 	</extension>
 	
-	<extension id="SearchResultView" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchToolsView">
+	<extension id="SearchResultView" plugin-id="de.ims.icarus.searchTools" point-id="SearchToolsView">
 		<doc>
 			<doc-text>
 				Generic outline view for search results. Relies on special presenter
@@ -263,9 +263,9 @@
 		</doc>
 		<parameter id="name" value="plugins.searchTools.searchResultView.identity.name" />
 		<parameter id="description" value="plugins.searchTools.searchResultView.identity.name" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.SearchResultView" />
-		<parameter id="icon" value="net/ikarus_systems/icarus/plugins/search_tools/view/search-result-view.gif" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.results.SearchResultView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/search-result-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="default" />
 		
@@ -278,116 +278,116 @@
 	
 	<!-- CONTENT TYPES -->
 	
-	<extension id="SearchQueryContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+	<extension id="SearchQueryContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on net.ikarus_systems.icarus.search_tools.SearchQuery
+				Content type based on de.ims.icarus.search_tools.SearchQuery
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.SearchQuery" />
+		<parameter id="contentClass" value="de.ims.icarus.search_tools.SearchQuery" />
 	</extension>
 	
 	
-	<extension id="SearchGraphContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+	<extension id="SearchGraphContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on net.ikarus_systems.icarus.search_tools.SearchGraph
+				Content type based on de.ims.icarus.search_tools.SearchGraph
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.SearchGraph" />
+		<parameter id="contentClass" value="de.ims.icarus.search_tools.SearchGraph" />
 	</extension>
 	
-	<extension id="SearchResultContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+	<extension id="SearchResultContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on net.ikarus_systems.icarus.search_tools.result.SearchResult
+				Content type based on de.ims.icarus.search_tools.result.SearchResult
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="net.ikarus_systems.icarus.search_tools.result.SearchResult" />
+		<parameter id="contentClass" value="de.ims.icarus.search_tools.result.SearchResult" />
 	</extension>
 	
-	<extension id="ConstraintNodeDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+	<extension id="ConstraintNodeDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData
+				Content type based on de.ims.icarus.plugins.search_tools.view.graph.ConstraintNodeData
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
+		<parameter id="contentClass" value="de.ims.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
 	</extension>
 	
-	<extension id="ConstraintCellDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+	<extension id="ConstraintCellDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData
+				Content type based on de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintCellData" />
+		<parameter id="contentClass" value="de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData" />
 	</extension>
 	
-	<extension id="ConstraintEdgeDataContentType" plugin-id="net.ikarus_systems.icarus.core" point-id="ContentType">
+	<extension id="ConstraintEdgeDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData
+				Content type based on de.ims.icarus.plugins.search_tools.view.graph.ConstraintEdgeData
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
+		<parameter id="contentClass" value="de.ims.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
 	</extension>
 	
 	<!-- HELPERS -->
 	
-	<extension id="SerializableElements" plugin-id="net.ikarus_systems.icarus.core" point-id="Serializable">
-		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultConstraint" />
-		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultGraphEdge" />
-		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.standard.DefaultGraphNode" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
+	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
+		<parameter id="class" value="de.ims.icarus.search_tools.standard.DefaultConstraint" />
+		<parameter id="class" value="de.ims.icarus.search_tools.standard.DefaultGraphEdge" />
+		<parameter id="class" value="de.ims.icarus.search_tools.standard.DefaultGraphNode" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.graph.ConstraintEdgeData" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.graph.ConstraintNodeData" />
 	</extension>
 	
-	<extension id="TreebankTargetSelector" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchTargetSelector">
-		<parameter id="class" value="net.ikarus_systems.icarus.search_tools.corpus.TreebankTargetSelector" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+	<extension id="TreebankTargetSelector" plugin-id="de.ims.icarus.searchTools" point-id="SearchTargetSelector">
+		<parameter id="class" value="de.ims.icarus.search_tools.corpus.TreebankTargetSelector" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="name" value="plugins.searchTools.treebankTargetSelector.identity.name" />
 		<parameter id="description" value="plugins.searchTools.treebankTargetSelector.identity.description" />
 	</extension>
 	
 	<!-- RESULT PRESENTERS -->
 	
-	<extension id="Default0DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+	<extension id="Default0DResultPresenter" plugin-id="de.ims.icarus.searchTools" point-id="SearchResultPresenter">
 		<parameter id="dimension" value="0" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default0DResultPresenter" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.results.Default0DResultPresenter" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="name" value="plugins.searchTools.default0DResultPresenter.identity.name" />
 		<parameter id="description" value="plugins.searchTools.default0DResultPresenter.identity.description" />
 	</extension>
 	
-	<extension id="Default1DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+	<extension id="Default1DResultPresenter" plugin-id="de.ims.icarus.searchTools" point-id="SearchResultPresenter">
 		<parameter id="dimension" value="1" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default1DResultPresenter" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.results.Default1DResultPresenter" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="name" value="plugins.searchTools.default1DResultPresenter.identity.name" />
 		<parameter id="description" value="plugins.searchTools.default1DResultPresenter.identity.description" />
 	</extension>
 	
-	<extension id="Default2DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+	<extension id="Default2DResultPresenter" plugin-id="de.ims.icarus.searchTools" point-id="SearchResultPresenter">
 		<parameter id="dimension" value="2" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default2DResultPresenter" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.results.Default2DResultPresenter" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="name" value="plugins.searchTools.default2DResultPresenter.identity.name" />
 		<parameter id="description" value="plugins.searchTools.default2DResultPresenter.identity.description" />
 	</extension>
 	
-	<extension id="Default3DResultPresenter" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="SearchResultPresenter">
+	<extension id="Default3DResultPresenter" plugin-id="de.ims.icarus.searchTools" point-id="SearchResultPresenter">
 		<parameter id="dimension" value="3" />
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.search_tools.view.results.Default3DResultPresenter" />
-		<parameter id="resources" value="net.ikarus_systems.icarus.plugins.search_tools.resources.search_tools" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.results.Default3DResultPresenter" />
+		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="name" value="plugins.searchTools.default3DResultPresenter.identity.name" />
 		<parameter id="description" value="plugins.searchTools.default3DResultPresenter.identity.description" />
 	</extension>
 	
 	<!-- CONSTRAINT CONTEXT -->
 	
-	<extension id="DefaultConstraintContext" plugin-id="net.ikarus_systems.icarus.searchTools" point-id="ConstraintContext">
-		<parameter id="contentType" value="net.ikarus_systems.icarus.languageTools@SentenceDataContentType" />
+	<extension id="DefaultConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
 		<parameter id="token" value="form" />
 		<parameter id="factories" />
 	</extension>

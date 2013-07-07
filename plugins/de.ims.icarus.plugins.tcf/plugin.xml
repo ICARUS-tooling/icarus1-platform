@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="net.ikarus_systems.icarus.tcf" version="0.0.1"
-	class="net.ikarus_systems.icarus.plugins.tcf.TCFPlugin">
+<plugin id="de.ims.icarus.tcf" version="0.0.1"
+	class="de.ims.icarus.plugins.tcf.TCFPlugin">
 	
 	<doc>
 		<doc-text>
@@ -10,8 +10,8 @@
 	</doc>
 	
 	<requires>
-		<import plugin-id="net.ikarus_systems.icarus.core" />
-		<import plugin-id="net.ikarus_systems.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
 	</requires>
 	
 	<runtime>
@@ -26,12 +26,12 @@
 	
 	<!-- Extensions -->
 	
-	<extension id="TCF04SentenceDataReader" plugin-id="net.ikarus_systems.icarus.languageTools" point-id="SentenceDataReader">
+	<extension id="TCF04SentenceDataReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
 		<doc>
 			<doc-text>
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="class" value="net.ikarus_systems.icarus.plugins.tcf.tcf04.TCF04SentenceDataReader" />
+		<parameter id="class" value="de.ims.icarus.plugins.tcf.tcf04.TCF04SentenceDataReader" />
 	</extension>
 </plugin>
