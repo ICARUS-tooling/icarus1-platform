@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ICARUS core build file"
+         default="help"
+         basedir=".">
+
+	<property name="core.main-class" value="de.ims.icarus.Core" />
+	<property name="core.splash-image" value="de.ims.icarus/ICARUS_Splash.png" />
+	<property name="core.jar.name" value="de.ims.icarus.core.jar" />
+
+	<target name="help">
+		<echo>
+			<![CDATA[
+ICARUS launcher build file:
+Use top-level project build file to build application.
+]]>
+		</echo>
+	</target>
+
+	<target name="build">
+		<echo>Building ICARUS launcher to folder ${plugin.home}</echo>
+		<mkdir dir="${basedir}/classes" />
+		<manifest file="${basedir}/manifest.mf">
+			<attribute name="Class-Path" value="." />
+			<attribute name="Main-Class" value="${core.main-class}" />
+			<attribute name="SplashScreen-Image" value="${core.splash-image}" />
+			<attribute name="Implementation-Version" value="${implementation.version}" />
+			<attribute name="Implementation-Vendor" value="${implementation.vendor}" />
+			<attribute name="Built-Date" value="${dt-stamp}" />
+			<!-- TODO: additional attributes should go here -->
+		</manifest>
+		<javac srcdir="${basedir}/source" 
+			destdir="${basedir}/classes" executable="javac"
+			optimize="false" debug="on" includeantruntime="true"/>
+		<copy todir="${basedir}/classes">
+			<fileset dir="${basedir}/source"
+			         includes="**/*"
+			         excludes="**/.*,**/*.java" />
+		</copy>
+		<jar jarfile="${build.home}/${core.jar.name}" basedir="${basedir}/classes" 
+			index="true" manifest="${basedir}/manifest.mf" />
+	</target>
+	
+</project>
