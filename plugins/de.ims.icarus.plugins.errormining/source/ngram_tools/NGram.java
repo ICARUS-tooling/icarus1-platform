@@ -11,7 +11,8 @@ package ngram_tools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import net.ikarus_systems.icarus.util.PropertyChangeSource;
+import de.ims.icarus.util.PropertyChangeSource;
+
 
 /**
  * @author Gregor Thiele
