@@ -28,12 +28,13 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.config.ConfigDialog;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
-import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.ErrorFormatter;
 import de.ims.icarus.util.Exceptions;
+import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.LazyExtensionContentType;
 import de.ims.icarus.xml.jaxb.JAXBUtils;
@@ -53,8 +54,9 @@ public final class IcarusCorePlugin extends Plugin {
 	 * @see org.java.plugin.Plugin#doStart()
 	 */
 	@Override
-	protected void doStart() throws Exception {
-		SwingUtilities.invokeLater(new Dispatcher());
+	protected synchronized void doStart() throws Exception {
+		// Crucial condition: plug-in has to be activated for dependent plug-ins to acess its classes
+		new Loader().start();
 	}
 	
 	private void initConfig() {
@@ -235,7 +237,7 @@ public final class IcarusCorePlugin extends Plugin {
 		// no-op
 	}
 	
-	private void doInit() throws Exception {
+	private synchronized void doInit() throws Exception {
 		// Delegate all uncaught exceptions to the default logging facility
 		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
@@ -297,25 +299,24 @@ public final class IcarusCorePlugin extends Plugin {
 		});
 	}
 	
-	private class Dispatcher implements Runnable {
+	private class Loader extends Thread {
+		
+		Loader() {
+			super("Icarus-core-loader"); //$NON-NLS-1$
+		}
 
 		/**
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
 		public void run() {
-			if(SwingUtilities.isEventDispatchThread()) {
-				TaskManager.getInstance().execute(this);
-			} else {
-				try {
-					doInit();
-				} catch (Exception e) {
-					LoggerFactory.log(this, Level.SEVERE, 
-							"Failed to init core plug-in", e); //$NON-NLS-1$
-				}
+			try {
+				doInit();
+			} catch (Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to init core plug-in", e); //$NON-NLS-1$
 			}
 		}
-		
 	}
 
 	/**
@@ -331,6 +332,21 @@ public final class IcarusCorePlugin extends Plugin {
 		}
 		
 		public void exit(ActionEvent e) {
+			boolean exitWoP = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"general.appearance.exitWithoutPrompt"); //$NON-NLS-1$
+			if(!exitWoP) {
+				MutableBoolean result = new MutableBoolean(exitWoP);
+				if(!DialogFactory.getGlobalFactory().showCheckedConfirm(
+						null, result, 
+						"plugins.core.icarusFrame.dialogs.confirmTitle",  //$NON-NLS-1$
+						"plugins.core.icarusFrame.dialogs.confirmInfo",  //$NON-NLS-1$
+						"plugins.core.icarusFrame.dialogs.confirmMessage")) { //$NON-NLS-1$
+					return;
+				}
+				ConfigRegistry.getGlobalRegistry().setValue(
+						"general.appearance.exitWithoutPrompt", result.getValue()); //$NON-NLS-1$
+			}
+			
 			ShutdownDialog.getDialog().shutdown();
 		}
 		

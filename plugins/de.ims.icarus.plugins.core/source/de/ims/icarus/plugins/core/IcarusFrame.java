@@ -898,7 +898,9 @@ public class IcarusFrame extends JFrame {
 		
 		public void closeFrame(ActionEvent e) {
 			try {
-				FrameManager.getInstance().closeFrame(IcarusFrame.this);
+				if(isClosable()) {
+					FrameManager.getInstance().closeFrame(IcarusFrame.this);
+				}
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to close frame", ex); //$NON-NLS-1$

@@ -113,7 +113,7 @@ public class AboutDialog extends JDialog {
 		gbc.insets = new Insets(5, 5, 5, 5);
 		
 		JLabel logo = new JLabel(IconRegistry.getGlobalRegistry()
-							.getIcon("ICARUS_logo_small.png")); //$NON-NLS-1$
+							.getIcon("icarus_logo_small.png")); //$NON-NLS-1$
 		logo.setBorder(BorderFactory.createLineBorder(new Color(41, 79, 157)));
 		logo.setBackground(Color.white);
 		logo.setOpaque(true);

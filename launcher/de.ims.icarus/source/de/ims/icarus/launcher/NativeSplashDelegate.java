@@ -82,7 +82,8 @@ class NativeSplashDelegate implements SplashDelegate {
 			screenGraphics.fill(progressArea);
 			
 			if(maxProgress>-1) {
-				int barWidth = progress * progressArea.width / maxProgress;
+				double ratio = (double) progress / (double) maxProgress;
+				int barWidth = (int) (ratio * progressArea.width);
 				barWidth = Math.min(barWidth, progressArea.width-2);
 
 				screenGraphics.setPaint(barColor);
@@ -144,6 +145,18 @@ class NativeSplashDelegate implements SplashDelegate {
 	@Override
 	public boolean isVisible() {
 		return screen.isVisible();
+	}
+
+	/**
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#step()
+	 */
+	@Override
+	public void step() {
+		if(progress>=maxProgress)
+			throw new IllegalStateException();
+
+		progress++;
+		refresh();
 	}
 
 }

@@ -29,14 +29,12 @@ Use top-level project build file to build application.
 		</delete>		
 		<mkdir dir="${basedir}/classes" />
 		<javac destdir="${basedir}/classes"
-		       srcdir="${basedir}/source"
-		       classpathref="plugin.classpath"
-		       excludes=""
-		       target="1.7"
-		       debug="true"
-		       optimize="false"
-			   includeantruntime="true">
-		</javac>
+			srcdir="${basedir}/source"
+		    classpathref="plugin.classpath"
+			debug="${compile.debug}"
+			deprecation="${compile.deprecation}"
+			optimize="${compile.optimize}"
+			includeantruntime="false" />
 		<copy todir="${basedir}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"

@@ -1779,6 +1779,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			setHtmlLabels(false);
 			setGridEnabled(true);
 			setSplitEnabled(false);
+			setCellsCloneable(true);
+			setCellsMovable(true);
 
 			getSelectionModel().setSingleSelection(false);
 		}
@@ -1959,11 +1961,11 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			mxICell cell = (mxICell) super.createCell(startState, style);
 			
 			if(graphStyle!=null) {
-				cell.setStyle(graphStyle.getStyle(GraphPresenter.this, cell, null));
+				cell.setStyle(graphStyle.getStyle(GraphPresenter.this, cell, createStyleOptions()));
 			}
 			
 			if(graphLayout!=null) {
-				cell.setStyle(graphLayout.getEdgeStyle(GraphPresenter.this, cell, null));
+				cell.setStyle(graphLayout.getEdgeStyle(GraphPresenter.this, cell, createLayoutOptions()));
 			}
 			
 			return cell;

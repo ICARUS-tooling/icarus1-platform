@@ -862,7 +862,7 @@ public final class TaskManager {
 			
 			executorService.shutdownNow();
 			
-			// TODO await termination?
+			executorService.awaitTermination(5, TimeUnit.SECONDS);
 		}
 		
 	}

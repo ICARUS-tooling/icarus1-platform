@@ -157,6 +157,14 @@ class AWTSplashDelegate extends Window implements SplashDelegate {
 		return super.isVisible();
 	}
 
+	/**
+	 * @see de.ims.icarus.launcher.SplashWindow.SplashDelegate#step()
+	 */
+	@Override
+	public void step() {
+		progressBar.step();
+	}
+
 	private class ProgressBar extends Component {
 
 		private static final long serialVersionUID = -1661482562081031389L;
@@ -221,6 +229,17 @@ class AWTSplashDelegate extends Window implements SplashDelegate {
 			
 			int oldValue = this.value;
 			this.value = value;
+			firePropertyChange("value", oldValue, value); //$NON-NLS-1$
+			
+			recalcProgress();
+		}
+		
+		public void step() {
+			if(value<=maxValue)
+				throw new IllegalStateException();
+
+			int oldValue = value;
+			value++;
 			firePropertyChange("value", oldValue, value); //$NON-NLS-1$
 			
 			recalcProgress();

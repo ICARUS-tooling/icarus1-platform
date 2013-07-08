@@ -302,6 +302,7 @@ public class PerspectiveChooser {
 		});
 		
 		JLabel label = new JLabel();
+		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setIcon(IconRegistry.getGlobalRegistry().getIcon("ajax-loader_32.gif")); //$NON-NLS-1$
 		
 		container.removeAll();

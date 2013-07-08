@@ -133,8 +133,6 @@ public class SplashWindow {
 				splashDelegate.dispose();
 			} catch(Exception e) {
 				// Ignore error
-				// FIXME DEBUG
-				e.printStackTrace();
 			}
 		}
 	}
@@ -145,8 +143,6 @@ public class SplashWindow {
 				splashDelegate.setText(text);
 			} catch(Exception e) {
 				// Ignore error
-				// FIXME DEBUG
-				e.printStackTrace();
 			}
 		}
 	}
@@ -157,8 +153,6 @@ public class SplashWindow {
 				splashDelegate.setMaxProgress(maxValue);
 			} catch(Exception e) {
 				// Ignore error
-				// FIXME DEBUG
-				e.printStackTrace();
 			}
 		}
 	}
@@ -169,8 +163,16 @@ public class SplashWindow {
 				splashDelegate.setProgress(value);
 			} catch(Exception e) {
 				// Ignore error
-				// FIXME DEBUG
-				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void step() {
+		if(splashDelegate!=null) {
+			try {
+				splashDelegate.step();
+			} catch(Exception e) {
+				// Ignore error
 			}
 		}
 	}
@@ -195,6 +197,13 @@ public class SplashWindow {
 		 * or {@code value}&gt;{@code maxValue}
 		 */
 		void setProgress(int value);
+		
+		/**
+		 * Increments the progress by one.
+		 * @throws IllegalStateException if the current progress
+		 * has already reached the maximum allowed value
+		 */
+		void step();
 		
 		/**
 		 * Change the maximum progress value to the given argument

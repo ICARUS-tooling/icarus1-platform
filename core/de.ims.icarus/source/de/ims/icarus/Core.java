@@ -137,17 +137,22 @@ public class Core {
 				throw new IllegalStateException("Core already started!"); //$NON-NLS-1$
 						
 			core = new Core(args);
+			
+			SplashWindow.setMaxProgress(7);
 
 			SplashWindow.setText("Collecting plug-ins"); //$NON-NLS-1$
+			SplashWindow.step();
 			// Collect plug-ins and verify integrity
 			core.collectPlugins();
 
 			SplashWindow.setText("Collecting properties"); //$NON-NLS-1$
+			SplashWindow.step();
 			// Collect properties defined by plug-ins
 			// (this might technically override system settings)
 			core.collectProperties();
 
 			SplashWindow.setText("Launching core plug-in"); //$NON-NLS-1$
+			SplashWindow.step();
 			// Launch core plug-in
 			core.launchCorePlugin();
 			
@@ -190,6 +195,7 @@ public class Core {
 		logger = Logger.getLogger("icarus.launcher"); //$NON-NLS-1$
 		
 		SplashWindow.setText("Processing options"); //$NON-NLS-1$
+		SplashWindow.step();
 		// Init options
 		options = new CoreOptions(args);
 
@@ -238,6 +244,7 @@ public class Core {
 		}
 
 		SplashWindow.setText("Starting logger"); //$NON-NLS-1$
+		SplashWindow.step();
 		// Init default log file
 		File logFile = new File(logFolder, "launcher.log"); //$NON-NLS-1$
 		try {
@@ -249,6 +256,7 @@ public class Core {
 		}
 
 		SplashWindow.setText("Ensuring license file"); //$NON-NLS-1$
+		SplashWindow.step();
 		// Ensure license file
 		File licenseFile = new File(rootFolder, "license.txt"); //$NON-NLS-1$
 		try {
@@ -260,6 +268,7 @@ public class Core {
 		}
 
 		SplashWindow.setText("Loading plugin registry"); //$NON-NLS-1$
+		SplashWindow.step();
 		// From here on we can use our logger
 		try {
 			PluginUtil.load(logger);

@@ -28,8 +28,6 @@ import de.ims.icarus.language.coref.text.CoreferenceEditorKit;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.DummyTextPane;
 
-import sun.swing.DefaultLookup;
-
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -134,8 +132,8 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
                 && dropLocation.getRow() == row
                 && dropLocation.getColumn() == column) {
 
-            fg = DefaultLookup.getColor(this, ui, "Table.dropCellForeground"); //$NON-NLS-1$
-            bg = DefaultLookup.getColor(this, ui, "Table.dropCellBackground"); //$NON-NLS-1$
+            fg = UIManager.getColor("Table.dropCellForeground"); //$NON-NLS-1$
+            bg = UIManager.getColor("Table.dropCellBackground"); //$NON-NLS-1$
 
             isSelected = true;
         }
@@ -150,7 +148,7 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
                                     ? unselectedBackground
                                     : table.getBackground();
             if (background == null || background instanceof javax.swing.plaf.UIResource) {
-                Color alternateColor = DefaultLookup.getColor(this, ui, "Table.alternateRowColor"); //$NON-NLS-1$
+                Color alternateColor = UIManager.getColor("Table.alternateRowColor"); //$NON-NLS-1$
                 if (alternateColor != null && row % 2 != 0) {
                     background = alternateColor;
                 }
@@ -166,20 +164,20 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
         if (hasFocus) {
             Border border = null;
             if (isSelected) {
-                border = DefaultLookup.getBorder(this, ui, "Table.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
+                border = UIManager.getBorder("Table.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
             }
             if (border == null) {
-                border = DefaultLookup.getBorder(this, ui, "Table.focusCellHighlightBorder"); //$NON-NLS-1$
+                border = UIManager.getBorder("Table.focusCellHighlightBorder"); //$NON-NLS-1$
             }
             setBorder(border);
 
             if (!isSelected && table.isCellEditable(row, column)) {
                 Color col;
-                col = DefaultLookup.getColor(this, ui, "Table.focusCellForeground"); //$NON-NLS-1$
+                col = UIManager.getColor("Table.focusCellForeground"); //$NON-NLS-1$
                 if (col != null) {
                     super.setForeground(col);
                 }
-                col = DefaultLookup.getColor(this, ui, "Table.focusCellBackground"); //$NON-NLS-1$
+                col = UIManager.getColor("Table.focusCellBackground"); //$NON-NLS-1$
                 if (col != null) {
                     super.setBackground(col);
                 }

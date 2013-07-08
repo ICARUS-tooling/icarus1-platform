@@ -617,6 +617,11 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	}
 
 	@Override
+	public void cloneCells(Object[] cells) {
+		importCells(cells, 40, 40, null, null);
+	}
+
+	@Override
 	public void addNode() {
 
 		mxIGraphModel model = graph.getModel();

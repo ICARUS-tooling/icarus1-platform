@@ -78,41 +78,6 @@ public class CorefTest extends JFrame {
 		getContentPane().add(comp);
 	}
 	
-	void test2() throws Exception {
-		JTextPane pane = new JTextPane();
-		pane.setEditable(false);
-		//pane.setDocument(new CoreferenceDocument());
-		pane.setEditorKit(new CoreferenceEditorKit());
-		
-		String[] forms = new String[] {
-				"This", //$NON-NLS-1$
-				"is", //$NON-NLS-1$
-				"a", //$NON-NLS-1$
-				"test", //$NON-NLS-1$
-				"and", //$NON-NLS-1$
-				"nothing", //$NON-NLS-1$
-				"else", //$NON-NLS-1$
-				",", //$NON-NLS-1$
-				"or", //$NON-NLS-1$
-				"is", //$NON-NLS-1$
-				"it", //$NON-NLS-1$
-				"?", //$NON-NLS-1$
-		};
-		Span[] mentions = new Span[] {
-				new Span(1, 4, 23),
-				new Span(2, 2, 7),
-				new Span(5, 6, 12),
-		};
-		
-		CoreferenceData data = new DefaultCoreferenceData(forms, mentions);
-		
-		CoreferenceDocument doc = (CoreferenceDocument)pane.getDocument();
-		doc.insertCoreferenceData(doc.getLength(), data);
-		
-		pane.setMinimumSize(new Dimension(300, 150));
-		getContentPane().add(pane);
-	}
-	
 	void test3() throws Exception {
 		JTextPane pane = new JTextPane();
 		pane.setEditable(false);
@@ -141,49 +106,6 @@ public class CorefTest extends JFrame {
 		
 		pane.setMinimumSize(new Dimension(300, 150));
 		getContentPane().add(pane);
-	}
-	
-	void test4() throws Exception {
-		Location location = Locations.getFileLocation("data/coref/eng_dev_v4_auto_conll.gz");
-		CONLL12DocumentReader reader = new CONLL12DocumentReader();
-		reader.init(location, null);
-		CoreferenceDocumentData documentData;
-		if((documentData=reader.next())==null) {
-			return;
-		}
-		
-
-		final JTextPane pane = new JTextPane() {
-
-			@Override
-			public boolean getScrollableTracksViewportWidth() {
-				//return super.getScrollableTracksViewportWidth();
-				return true;
-			}
-			
-		};
-		
-		pane.setEditable(false);
-		pane.setEditorKit(new CoreferenceEditorKit());
-		//UIUtil.enableToolTip(pane);
-		
-		CoreferenceDocument doc = (CoreferenceDocument)pane.getDocument(); 
-		for(int i=0; i<documentData.size(); i++) {
-			doc.insertCoreferenceData(documentData.get(i));
-			doc.newLine();
-		}
-		
-		JScrollPane scrollPane = new JScrollPane(pane);
-		scrollPane.setMinimumSize(new Dimension(300, 150));
-		scrollPane.getViewport().addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				pane.repaint(pane.getVisibleRect());
-			}
-		});
-		
-		getContentPane().add(scrollPane);
 	}
 	
 	void test5() throws Exception {

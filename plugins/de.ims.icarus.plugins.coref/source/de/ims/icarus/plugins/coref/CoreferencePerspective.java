@@ -10,11 +10,17 @@
 package de.ims.icarus.plugins.coref;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.util.logging.Level;
 
 import javax.swing.JComponent;
 
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.view.mxGraph;
+
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentSetPresenter;
@@ -39,11 +45,24 @@ public class CoreferencePerspective extends Perspective {
 	@Override
 	public void init(JComponent container) {
 		try {
-			test(container);
+			//test(container);
+			textGraph(container);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerFactory.log(this, Level.SEVERE, "Failed to test", e);
 		}
+	}
+	
+	private void textGraph(JComponent container) {
+		container.setLayout(new BorderLayout());
+		
+		mxGraph graph = new mxGraph();
+		mxGraphComponent comp = new mxGraphComponent(graph);
+		comp.getGraphControl().setBackground(Color.white);
+		
+		graph.insertVertex(null, null, "test1", 30, 30, 100, 100);
+		
+		container.add(comp, BorderLayout.CENTER);
+		
 	}
 
 	private void test(JComponent container) throws Exception {

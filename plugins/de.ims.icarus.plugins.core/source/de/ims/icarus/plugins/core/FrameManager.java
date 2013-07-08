@@ -20,7 +20,9 @@ import de.ims.icarus.config.ConfigEvent;
 import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.BiDiMap;
+import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.Options;
 
 
@@ -65,6 +67,23 @@ public final class FrameManager {
 	}
 	
 	public synchronized void closeFrame(IcarusFrame frame) {
+		if(frames.size()==1) {
+			boolean exitWoP = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"general.appearance.exitWithoutPrompt"); //$NON-NLS-1$
+			if(!exitWoP) {
+				MutableBoolean result = new MutableBoolean(exitWoP);
+				if(!DialogFactory.getGlobalFactory().showCheckedConfirm(
+						frame, result, 
+						"plugins.core.icarusFrame.dialogs.confirmTitle",  //$NON-NLS-1$
+						"plugins.core.icarusFrame.dialogs.confirmInfo",  //$NON-NLS-1$
+						"plugins.core.icarusFrame.dialogs.confirmMessage")) { //$NON-NLS-1$
+					return;
+				}
+				ConfigRegistry.getGlobalRegistry().setValue(
+						"general.appearance.exitWithoutPrompt", result.getValue()); //$NON-NLS-1$
+			}
+		}
+				
 		try {
 			frame.close();
 			frame.setVisible(false);
@@ -120,6 +139,9 @@ public final class FrameManager {
 	}
 	
 	public synchronized void shutdown() {
+		if(isShutdownActive) {
+			return;
+		}
 		isShutdownActive = true;
 		
 		Queue<IcarusFrame> frames = new LinkedList<>(this.frames.keySet());
@@ -127,7 +149,9 @@ public final class FrameManager {
 		
 		while((frame = frames.poll())!=null) {
 			try {
-				closeFrame(frame);
+				frame.close();
+				frame.setVisible(false);
+				frame.dispose();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to close frame: "+frame.getTitle(), e); //$NON-NLS-1$
@@ -145,6 +169,7 @@ public final class FrameManager {
 				throw new IllegalArgumentException("Not a valid IcarusFrame: "+e.getSource()); //$NON-NLS-1$
 			
 			IcarusFrame frame = (IcarusFrame) e.getSource();
+			
 			try {
 				if(frame.isClosable()) {
 					closeFrame(frame);
@@ -153,11 +178,6 @@ public final class FrameManager {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to handle close request for frame: "+frame.getTitle(), ex); //$NON-NLS-1$
 			}
-		}
-
-		@Override
-		public void windowClosed(WindowEvent e) {
-			// TODO clear
 		}
 
 		/**

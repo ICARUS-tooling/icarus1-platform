@@ -29,8 +29,11 @@ Use top-level project build file to build application.
 			<!-- TODO: additional attributes should go here -->
 		</manifest>
 		<javac srcdir="${basedir}/source" 
-			destdir="${basedir}/classes" executable="javac"
-			optimize="false" debug="on" includeantruntime="true"/>
+			destdir="${basedir}/classes"
+			debug="${compile.debug}"
+			deprecation="${compile.deprecation}"
+			optimize="${compile.optimize}"
+			includeantruntime="false" />
 		<copy todir="${basedir}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"

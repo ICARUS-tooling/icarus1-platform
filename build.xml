@@ -15,6 +15,10 @@
 		
 	<property name="plugins.home" value="${basedir}/plugins" />
 	<property name="plugins.build" value="${build.home}/plugins" />
+
+	<property name="compile.debug"       value="true"/>
+	<property name="compile.deprecation" value="false"/>
+	<property name="compile.optimize"    value="true"/>
 	
 	<property name="temp.dir" value="${basedir}/temp" />
 	
@@ -64,8 +68,8 @@ test  - runs some tests
 		<ant dir="plugins/de.ims.icarus.plugins.matetools" target="${target}" />
 		<ant dir="plugins/de.ims.icarus.plugins.tcf" target="${target}" />
 		<ant dir="plugins/de.ims.icarus.plugins.weblicht" target="${target}" />
-		<!--<ant dir="plugins/de.ims.icarus.plugins.coref" target="${target}" />-->
-		<!--<ant dir="plugins/de.ims.icarus.plugins.errormining" target="${target}" />-->
+		<ant dir="plugins/de.ims.icarus.plugins.coref" target="${target}" />
+		<ant dir="plugins/de.ims.icarus.plugins.errormining" target="${target}" />
 		<!-- TODO insert calls to sub build-files here -->
 	</target>
 

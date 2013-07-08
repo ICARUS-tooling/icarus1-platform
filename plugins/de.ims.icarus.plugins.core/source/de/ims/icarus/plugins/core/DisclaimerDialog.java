@@ -159,6 +159,7 @@ public class DisclaimerDialog extends JDialog {
 		//Buttons		
 		showOnStart = new JCheckBox(ResourceManager.getInstance()
 				.get("plugins.core.disclaimerDialog.showOnStart")); //$NON-NLS-1$
+		showOnStart.setFocusable(false);
 		
 		//accept button
 		accept = new JButton(ResourceManager.getInstance()
