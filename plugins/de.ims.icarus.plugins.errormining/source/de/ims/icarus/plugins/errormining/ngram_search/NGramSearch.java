@@ -11,6 +11,8 @@ package de.ims.icarus.plugins.errormining.ngram_search;
 
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyUtils;
+import de.ims.icarus.language.dependency.annotation.DependencyResultAnnotator;
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
 import de.ims.icarus.search_tools.corpus.AbstractCorpusSearch;
@@ -38,12 +40,12 @@ public class NGramSearch extends AbstractCorpusSearch {
 	}
 
 	/**
-	 * @see de.ims.icarus.search_tools.corpus.AbstractCorpusSearch#createAnnotator()
+	 * @see de.ims.icarus.search_tools.tree.AbstractTreeSearch#createTargetTree()
 	 */
 	@Override
-	protected ResultAnnotator createAnnotator() {
-		// TODO Auto-generated method stub
-		return null;
+	protected TargetTree createTargetTree() {
+		//TODO other formats?
+		return new DependencyTargetTree();
 	}
 
 	/**
@@ -63,12 +65,12 @@ public class NGramSearch extends AbstractCorpusSearch {
 	}
 
 	/**
-	 * @see de.ims.icarus.search_tools.tree.AbstractTreeSearch#createTargetTree()
+	 * @see de.ims.icarus.search_tools.corpus.AbstractCorpusSearch#createAnnotator()
 	 */
 	@Override
-	protected TargetTree createTargetTree() {
-		// TODO Auto-generated method stub
-		return null;
+	protected ResultAnnotator createAnnotator() {
+		// TODO fix annotator
+		return new DependencyResultAnnotator(baseRootMatcher);
 	}
 
 }

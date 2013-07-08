@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		NGram QUERY VIEW
+	-->
+
+	<!-- Add Q -->
+	<action id="plugins.errorMining.nGramQueryView.newQueryAction"
+		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+		
+	<!-- Edit Q -->
+	<action id="plugins.errorMining.nGramQueryView.editQueryAction"
+		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />		
+		
+	<!-- Remove Q -->
+	<action id="plugins.errorMining.nGramQueryView.removeQueryAction"
+		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+
+</actions>

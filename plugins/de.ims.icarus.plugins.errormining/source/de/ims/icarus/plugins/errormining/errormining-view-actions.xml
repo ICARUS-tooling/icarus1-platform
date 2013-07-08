@@ -14,9 +14,6 @@
 	<action id="plugins.errorMining.errorMiningView.executeNGramAction"
 		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
 		
-	<!-- Cancel NGram -->
-	<action id="plugins.errorMining.errorMiningView.cancelNGramAction"
-		name="${id}.name" desc="${id}.description" icon="nav_stop.gif" />
 		
 	<!-- Remove NGram -->
 	<action id="plugins.errorMining.errorMiningView.removeNGramAction"
@@ -55,7 +52,6 @@
 		<item type="action" value="plugins.errorMining.errorMiningView.newNGramAction" />
 		<separator />
 		<item type="action" value="plugins.errorMining.errorMiningView.executeNGramAction" />
-		<item type="action" value="plugins.errorMining.errorMiningView.cancelNGramAction" />
 	</action-list>
 	
 </actions>

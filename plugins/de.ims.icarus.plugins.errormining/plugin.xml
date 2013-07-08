@@ -19,6 +19,7 @@
 		<import plugin-id="de.ims.icarus.core" reverse-lookup="true" />
 		<import plugin-id="de.ims.icarus.jgraph" reverse-lookup="true" />
 		<import plugin-id="de.ims.icarus.languageTools" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.searchTools" reverse-lookup="true" />
 	</requires>
 	
 	<runtime>
@@ -91,6 +92,50 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="standard" />
 	</extension>
+	
+<!--
+	<extension id="NGramQueryView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
+		<doc>
+			<doc-text>
+				Edit Tag Classes for Query
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.errormining.nGramQueryView.identity.name" />
+		<parameter id="description" value="plugins.errormining.nGramQueryView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.NGramQueryView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/webservice-edit-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="standard" />
+	</extension>
+-->
+
+	
+	
+	<!-- CONTENT TYPES -->
+<!--	
+	<extension id="NGramSentenceDataDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.errormining.ngram_tools.NGramSentenceData.java
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.errormining.ngram_tools.NGramSentenceData" />
+	</extension>
+-->	
+	
+	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
+
+<!--		
+	<extension id="NGramSearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="de.ims.icarus.errormining@NGramSentenceDataDataContentTyp" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.ngram_search.NGramSearchFactory" />
+		<parameter id="name" value="plugins.errormining.nGgramSearchFactory.identity.name" />
+		<parameter id="description" value="plugins.errormining.nGramSearchFactory.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/ngram_search/ngram-search-factory.gif" />
+	</extension>
+-->
 
 
 </plugin>

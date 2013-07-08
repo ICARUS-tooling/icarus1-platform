@@ -32,6 +32,9 @@ public interface ErrorMiningConstants {
 	// View IDs
 	public static final String NGRAM_RESULT_VIEW_ID = 
 			ERRORMINING_PLUGIN_ID+"@NGramResultView"; //$NON-NLS-1$
+	
+	public static final String NGRAM_QUERY_VIEW_ID = 
+			ERRORMINING_PLUGIN_ID+"@NGramQueryView"; //$NON-NLS-1$
 
 
 }

@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -39,11 +40,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import ngram_tools.NGramDataList;
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.logging.LoggerFactory;
@@ -51,6 +51,7 @@ import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.core.View;
+import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataReader;
 import de.ims.icarus.plugins.search_tools.view.SearchHistory;
 import de.ims.icarus.resources.ResourceManager;
@@ -96,7 +97,7 @@ public class ErrorMiningView extends View {
 	private CallbackHandler callbackHandler;
 	
 	
-	//gui
+	//gui output used
 	protected JTree ngramHistoryTree;
 	protected NGramHistoryTreeModel ngramHistoryTreeModel;	
 	private SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Void> worker;
@@ -110,6 +111,7 @@ public class ErrorMiningView extends View {
 	 */
 	@Override
 	public void init(JComponent container) {
+		
 
 		// Load actions
 		URL actionLocation = ErrorMiningView.class
@@ -190,8 +192,6 @@ public class ErrorMiningView extends View {
 				callbackHandler, "newNGram"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.errorMining.errorMiningView.executeNGramAction",  //$NON-NLS-1$
 				callbackHandler, "executeNGram"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.errorMining.errorMiningView.cancelNGramAction",  //$NON-NLS-1$
-				callbackHandler, "cancelNGram"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.errorMining.errorMiningView.removeNGramAction",  //$NON-NLS-1$
 				callbackHandler, "removeNGram"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.errorMining.errorMiningView.clearHistoryAction",  //$NON-NLS-1$
@@ -268,7 +268,10 @@ public class ErrorMiningView extends View {
 			
 			int sentencesToRead = 18;
 			
-			File file = new File(inputFileName);	
+			File file = new File(inputFileName);
+			
+			
+			List<SentenceData> corpus = new ArrayList<SentenceData>();
 			
 			Options on = new Options();
 			on.put("FringeSTART", 3); //$NON-NLS-1$
@@ -284,9 +287,8 @@ public class ErrorMiningView extends View {
 			
 			int sentenceNr = 1;
 			for(int i = 0; i < sentencesToRead; i++){
-				DependencyData dd;
-				dd = (DependencyData) conellReader.next();
-				ngrams.initializeUniGrams(dd, sentenceNr);
+				SentenceData sd = conellReader.next();
+				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
 				sentenceNr++;				
 			}
 			
@@ -327,14 +329,13 @@ public class ErrorMiningView extends View {
 
 						ngList = new NGramDataList(get());
 
-											
-//						Message message = new Message(this, Commands.DISPLAY, ngList, options);
-//						sendRequest(null, message);
+//						Message messageUser = new Message(this, Commands.DISPLAY, ngList, null);
+//						sendRequest(null, messageUser);
 						
-						
+						//Algorithm Results
 						Message message = new Message(this, Commands.DISPLAY, get(), null);
 						sendRequest(ErrorMiningConstants.NGRAM_RESULT_VIEW_ID, message);
-						
+
 
 						System.out.println("Worker c/done " + isCancelled() + isDone()); //$NON-NLS-1$
 
@@ -359,11 +360,7 @@ public class ErrorMiningView extends View {
 
 			//Core.showNotice();
 		}
-		
-		public void cancelNGram(ActionEvent e) {
-			// TODO
-			Core.showNotice();
-		}
+
 		
 		public void removeNGram(ActionEvent e) {
 			// TODO
@@ -445,6 +442,8 @@ public class ErrorMiningView extends View {
 		
 	}
 	
+	
+
 	
 	
 	

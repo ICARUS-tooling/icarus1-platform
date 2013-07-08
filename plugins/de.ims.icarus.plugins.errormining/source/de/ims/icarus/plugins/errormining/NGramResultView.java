@@ -46,6 +46,7 @@ import javax.swing.table.AbstractTableModel;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
+import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
@@ -55,8 +56,6 @@ import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
-
-import ngram_tools.NGramDataList;
 
 /**
  * @author Gregor Thiele
@@ -289,9 +288,9 @@ public class NGramResultView<JListModel> extends View{
 	private void initializeDetailed() {
 		
 		nucleiCount = new JLabel(ResourceManager.getInstance()
-						.get("plugins.weblicht.labels.errormining.NucleiCount")); //$NON-NLS-1$
+						.get("plugins.errormining.labels.NucleiCount")); //$NON-NLS-1$
 		nucleiName = new JLabel(ResourceManager.getInstance()
-						.get("plugins.weblicht.labels.errormining.NucleiName")); //$NON-NLS-1$
+						.get("plugins.errormining.labels.NucleiName")); //$NON-NLS-1$
 		
 		ngramTableModel = new NGramResultViewTableModel();
 		ngramTable = new JTable(ngramTableModel);		
@@ -504,7 +503,7 @@ public class NGramResultView<JListModel> extends View{
 		protected ArrayList<ItemInNuclei> iinList = null;
 		protected Map<Integer, String> tmpMap;
 		
-		String[] keySplitted = null; //$NON-NLS-1$
+		String[] keySplitted = null;
 		
 		boolean multinuclei = false;
 		int itemsAdded;
@@ -574,15 +573,15 @@ public class NGramResultView<JListModel> extends View{
 
 		      switch (columnIndex) {
 		            case 1: return ResourceManager.getInstance().get(
-		            		"plugins.weblicht.labels.errormining.Tag"); //$NON-NLS-1$
+		            		"plugins.errormining.labels.Tag"); //$NON-NLS-1$
 		            case 2: return ResourceManager.getInstance().get(
-		            		"plugins.weblicht.labels.errormining.Count"); //$NON-NLS-1$
+		            		"plugins.errormining.labels.Count"); //$NON-NLS-1$
 		            case 3: return ResourceManager.getInstance().get(
-		            		"plugins.weblicht.labels.errormining.NucleiCount"); //$NON-NLS-1$
+		            		"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
 		            case 4: return ResourceManager.getInstance().get(
-		            		"plugins.weblicht.labels.errormining.NucleiIndex"); //$NON-NLS-1$
+		            		"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
 		            case 5: return ResourceManager.getInstance().get(
-		            		"plugins.weblicht.labels.errormining.SentenceNR"); //$NON-NLS-1$
+		            		"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
 		            default: break;
 		        }
 		        return null;
