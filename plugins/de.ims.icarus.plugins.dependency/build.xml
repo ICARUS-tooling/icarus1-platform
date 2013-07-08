@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="de.ims.icarus.plugins.core plug-in build file"
+<project name="de.ims.icarus.plugins.dependency plug-in build file"
          default="help"
          basedir=".">
 	<jpf-info manifest="${basedir}/plugin.xml"
@@ -10,14 +10,8 @@
 
 	<path id="plugin.classpath">
 		<fileset dir="${lib.home}" includes="*.jar" />
-		<fileset dir="${build.home}" includes="*.jar" />
+		<fileset dir="${build.home}" includes="**/*.jar" />
 	</path>
-	<jpf-path pathidref="plugin.classpath" pluginid="${plugin.id}">
-		<fileset dir="${plugin.home}/.."
-		         includes="*/plugin*.xml"
-		         excludes="${plugin.id}/**" />
-		<fileset file="plugin.xml" />
-	</jpf-path>
 
 	<target name="help">
 		<echo>

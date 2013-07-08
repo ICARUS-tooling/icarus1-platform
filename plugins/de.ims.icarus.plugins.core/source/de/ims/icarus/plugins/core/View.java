@@ -13,7 +13,6 @@ import java.awt.Frame;
 
 import javax.swing.JComponent;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.plugins.PluginUtil;

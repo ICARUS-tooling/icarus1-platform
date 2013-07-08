@@ -60,7 +60,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
@@ -73,6 +72,7 @@ import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.GridBagUtil;
+import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.Filter;
@@ -86,6 +86,8 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
  *
  */
 public class PerspectiveChooser {
+	
+	private JComponent container;
 	
 	private Filter filter;
 	private Extension selectedPerspective;
@@ -270,6 +272,8 @@ public class PerspectiveChooser {
 		container.add(contentPanel, BorderLayout.CENTER);
 		
 		perspectiveList.setSelectedIndex(0);
+		
+		this.container = container;
 	}
 	
 	private void setSelectedPerspective(Extension selectedPerspective) {
@@ -296,6 +300,14 @@ public class PerspectiveChooser {
 				}
 			}
 		});
+		
+		JLabel label = new JLabel();
+		label.setIcon(IconRegistry.getGlobalRegistry().getIcon("ajax-loader_32.gif")); //$NON-NLS-1$
+		
+		container.removeAll();
+		container.add(label, BorderLayout.CENTER);
+		container.revalidate();
+		container.repaint();
 		
 		UIUtil.invokeLater(new Runnable() {
 			

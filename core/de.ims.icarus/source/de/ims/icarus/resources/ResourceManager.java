@@ -23,7 +23,6 @@ import java.util.WeakHashMap;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.ims.icarus.language.LanguageManager;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Exceptions;
 
@@ -59,7 +58,7 @@ public final class ResourceManager {
 
 	public static ResourceManager getInstance() {
 		if(instance==null) {
-			synchronized (LanguageManager.class) {
+			synchronized (ResourceManager.class) {
 				if(instance==null) {
 					instance= new ResourceManager();
 					instance.globalDomain.addResource("de.ims.icarus.ui.resources.ui"); //$NON-NLS-1$

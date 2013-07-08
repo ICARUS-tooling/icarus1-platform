@@ -45,21 +45,21 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		
 	}
 	
-	private static boolean equals(Object value, Object constraint) {
+	private static boolean equals0(Object value, Object constraint) {
 		return value.equals(constraint);
 	}
 	
-	private static boolean contains(Object value, Object constraint) {
+	private static boolean contains0(Object value, Object constraint) {
 		return ((String)value).contains((String)constraint);
 	}
 	
-	private static boolean matches(Object value, Object constraint) {
+	private static boolean matches0(Object value, Object constraint) {
 		Pattern pattern = SearchManager.getPattern((String)constraint);
 		return pattern==null ? false : pattern.matcher((String)value).find();
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static int compare(Object value, Object constraint) {
+	private static int compare0(Object value, Object constraint) {
 		return ((Comparable)value).compareTo((Comparable)constraint);
 	}
 	
@@ -85,7 +85,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return equals(value, constraint);
+			return equals0(value, constraint);
 		}		
 	};
 	
@@ -98,7 +98,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return !equals(value, constraint);
+			return !equals0(value, constraint);
 		}		
 	};
 	
@@ -111,7 +111,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return matches(value, constraint);
+			return matches0(value, constraint);
 		}		
 	};
 	
@@ -124,7 +124,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return !matches(value, constraint);
+			return !matches0(value, constraint);
 		}		
 	};
 	
@@ -137,7 +137,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return contains(value, constraint);
+			return contains0(value, constraint);
 		}		
 	};
 	
@@ -150,7 +150,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return !contains(value, constraint);
+			return !contains0(value, constraint);
 		}		
 	};
 	
@@ -163,7 +163,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return compare(value, constraint)<0;
+			return compare0(value, constraint)<0;
 		}		
 	};
 	
@@ -176,7 +176,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return compare(value, constraint)<=0;
+			return compare0(value, constraint)<=0;
 		}		
 	};
 	
@@ -189,7 +189,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return compare(value, constraint)>0;
+			return compare0(value, constraint)>0;
 		}		
 	};
 	
@@ -202,7 +202,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		 */
 		@Override
 		public boolean apply(Object value, Object constraint) {
-			return compare(value, constraint)>=0;
+			return compare0(value, constraint)>=0;
 		}		
 	};
 	

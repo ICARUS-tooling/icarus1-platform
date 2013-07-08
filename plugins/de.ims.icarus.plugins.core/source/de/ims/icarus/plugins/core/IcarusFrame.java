@@ -35,7 +35,6 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 
@@ -114,13 +113,9 @@ public class IcarusFrame extends JFrame {
 		if(perspective instanceof Extension) {
 			Extension extension = (Extension) perspective;
 			perspectiveExtension = extension;
-			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
-			if(param==null)
-				throw new IllegalArgumentException("Provided extension does not declare a class"); //$NON-NLS-1$
-			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			try {
-				perspective = loader.loadClass(param.valueAsString());
-			} catch(ClassNotFoundException e) {
+				perspective = PluginUtil.instantiate(extension);
+			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to load class for perspective extension: "+extension.getUniqueId(), e); //$NON-NLS-1$
 				throw new IllegalArgumentException("Not a valid perspective class: "+perspective, e); //$NON-NLS-1$
@@ -384,15 +379,10 @@ public class IcarusFrame extends JFrame {
 			}*/
 			perspectiveExtension = extension;
 			
-			PluginUtil.activatePlugin(perspectiveExtension);
-			
-			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
-			if(param==null)
-				throw new IllegalArgumentException("Provided extension does not declare a class"); //$NON-NLS-1$
-			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			try {				
-				data = loader.loadClass(param.valueAsString());
-			} catch(ClassNotFoundException e) {
+				PluginUtil.activatePlugin(extension);
+				data = PluginUtil.loadClass(extension);
+			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to load class for perspective extension: "+extension.getUniqueId(), e); //$NON-NLS-1$
 				throw e;

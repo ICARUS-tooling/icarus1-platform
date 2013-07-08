@@ -27,7 +27,6 @@ import de.ims.icarus.plugins.PluginUtil;
 public final class ClassProxy {
 	
 	private final String className;
-	
 	private final ClassLoader classLoader;
 	
 	private Map<String, Object> properties;

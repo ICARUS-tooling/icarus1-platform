@@ -31,6 +31,8 @@ public interface ContentType extends Identity, Filter {
 	 */
 	Class<?> getContentClass();
 	
+	String getContentClassName();
+	
 	/**
 	 * Returns a read-only collection of properties in the form of
 	 * a key-value mapping. If this {@code ContentType} does not

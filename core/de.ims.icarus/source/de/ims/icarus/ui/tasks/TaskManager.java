@@ -635,10 +635,13 @@ public final class TaskManager {
 				
 				SwingWorker<?, ?> worker = getWorker(task);
 				
-				currentWorker = worker;			
-				worker.addPropertyChangeListener(this);
+				currentWorker = worker;
 				
-				worker.execute();
+				if(worker!=null) {
+					worker.addPropertyChangeListener(this);
+					
+					worker.execute();
+				}
 				
 				eventSource.fireEvent(new EventObject(
 						TaskConstants.ACTIVE_TASK_CHANGED));

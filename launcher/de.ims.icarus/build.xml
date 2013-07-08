@@ -4,7 +4,7 @@
          basedir=".">
 	
 	<property name="launcher.main-class" value="de.ims.icarus.launcher.Launcher" />
-	<property name="launcher.splash-image" value="de.ims.icarus.launcher/ICARUS_Splash.png" />
+	<property name="launcher.splash-image" value="de/ims/icarus/launcher/ICARUS_Splash.png" />
 	<property name="launcher.jar.name" value="icarus.jar" />
 
 	<target name="help">
@@ -17,10 +17,10 @@ Use top-level project build file to build application.
 	</target>
 
 	<target name="build">
-		<echo>Building ICARUS launcher to folder ${plugin.home}</echo>
+		<echo>Building ICARUS launcher to folder ${build.home}</echo>
 		<mkdir dir="${basedir}/classes" />
 		<manifest file="${basedir}/manifest.mf">
-			<attribute name="Class-Path" value="." />
+			<attribute name="Class-Path" value="lib/icarus.core.jar" />
 			<attribute name="Main-Class" value="${launcher.main-class}" />
 			<attribute name="SplashScreen-Image" value="${launcher.splash-image}" />
 			<attribute name="Implementation-Version" value="${implementation.version}" />

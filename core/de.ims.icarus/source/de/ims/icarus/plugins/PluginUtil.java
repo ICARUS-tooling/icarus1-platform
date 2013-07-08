@@ -34,7 +34,6 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-
 import org.java.plugin.ObjectFactory;
 import org.java.plugin.PathResolver;
 import org.java.plugin.PluginLifecycleException;
@@ -46,7 +45,6 @@ import org.java.plugin.registry.PluginAttribute;
 import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.PluginElement;
 import org.java.plugin.registry.PluginRegistry;
-import org.java.plugin.standard.StandardObjectFactory;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
@@ -275,13 +273,14 @@ public final class PluginUtil {
 			throw new IllegalStateException("Plug-in manager object already loaded"); //$NON-NLS-1$
 		
 		// Init plug-in management objects
-		ObjectFactory objectFactory = StandardObjectFactory.newInstance();
+		ObjectFactory objectFactory = ObjectFactory.newInstance();
 		logger.info("Using object factory: "+objectFactory); //$NON-NLS-1$
 		
 		pluginRegistry = objectFactory.createRegistry();
 		logger.info("Using plugin registry: "+pluginRegistry); //$NON-NLS-1$
 		
-		pathResolver = objectFactory.createPathResolver();
+		//pathResolver = objectFactory.createPathResolver();
+		pathResolver = new LibPathResolver();
 		logger.info("Using path resolver: "+pathResolver); //$NON-NLS-1$
 		
 		pluginManager = objectFactory.createManager(pluginRegistry, pathResolver);
@@ -429,6 +428,44 @@ public final class PluginUtil {
 		ClassLoader loader = getClassLoader(extension);
 		Class<?> clazz = loader.loadClass(param.valueAsString());
 		return clazz.newInstance();
+	}
+	
+	public static Class<?> loadClass(Extension extension) throws ClassNotFoundException {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		try {
+			activatePlugin(extension);
+		} catch (PluginLifecycleException e) {
+			LoggerFactory.log(PluginUtil.class, Level.SEVERE, "Failed to activate plug-in: "+extension.getDeclaringPluginDescriptor().getId(), e); //$NON-NLS-1$
+			
+			throw new IllegalStateException("Plug-in not active for extension: "+extension.getUniqueId());  //$NON-NLS-1$
+		}
+		
+		Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
+		if(param==null)
+			throw new IllegalArgumentException("Extension does not declare class parameter: "+extension.getUniqueId()); //$NON-NLS-1$
+		
+		ClassLoader loader = getClassLoader(extension);
+		return loader.loadClass(param.valueAsString());
+	}
+	
+	public static Class<?> loadClass(Extension.Parameter param) throws ClassNotFoundException {
+		if(param==null)
+			throw new IllegalArgumentException("Invalid parameter"); //$NON-NLS-1$
+		
+		Extension extension = param.getDeclaringExtension();
+		
+		try {
+			activatePlugin(extension);
+		} catch (PluginLifecycleException e) {
+			LoggerFactory.log(PluginUtil.class, Level.SEVERE, "Failed to activate plug-in: "+extension.getDeclaringPluginDescriptor().getId(), e); //$NON-NLS-1$
+			
+			throw new IllegalStateException("Plug-in not active for extension: "+extension.getUniqueId());  //$NON-NLS-1$
+		}
+		
+		ClassLoader loader = getClassLoader(extension);
+		return loader.loadClass(param.valueAsString());
 	}
 	
 	public static boolean isExtensionOf(Extension extension, ExtensionPoint extensionPoint) {

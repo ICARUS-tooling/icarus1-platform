@@ -41,8 +41,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
-import net.ikarus_systems.hermes.util.IoUtil;
-
 import org.java.plugin.Plugin;
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
@@ -54,6 +52,7 @@ import org.java.plugin.registry.PluginElement;
 import org.java.plugin.registry.PluginFragment;
 import org.java.plugin.registry.PluginPrerequisite;
 
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.core.IcarusCorePlugin;
@@ -756,7 +755,7 @@ public class PluginExplorerView extends View {
 			}
 			
 			// Resolve local file
-			File targetFile = IoUtil.urlToFile(location);
+			File targetFile = IOUtil.urlToFile(location);
 			// Switch to parent directory if necessary
 			if(targetFile!=null && targetFile.isFile()) {
 				targetFile = targetFile.getParentFile();

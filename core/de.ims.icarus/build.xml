@@ -5,7 +5,7 @@
 
 	<property name="core.main-class" value="de.ims.icarus.Core" />
 	<property name="core.splash-image" value="de.ims.icarus/ICARUS_Splash.png" />
-	<property name="core.jar.name" value="de.ims.icarus.core.jar" />
+	<property name="core.jar.name" value="icarus.core.jar" />
 
 	<target name="help">
 		<echo>
@@ -17,10 +17,10 @@ Use top-level project build file to build application.
 	</target>
 
 	<target name="build">
-		<echo>Building ICARUS launcher to folder ${plugin.home}</echo>
+		<echo>Building ICARUS core to folder ${build.home}</echo>
 		<mkdir dir="${basedir}/classes" />
 		<manifest file="${basedir}/manifest.mf">
-			<attribute name="Class-Path" value="." />
+			<attribute name="Class-Path" value="jpf.jar" />
 			<attribute name="Main-Class" value="${core.main-class}" />
 			<attribute name="SplashScreen-Image" value="${core.splash-image}" />
 			<attribute name="Implementation-Version" value="${implementation.version}" />
@@ -36,7 +36,11 @@ Use top-level project build file to build application.
 			         includes="**/*"
 			         excludes="**/.*,**/*.java" />
 		</copy>
-		<jar jarfile="${build.home}/${core.jar.name}" basedir="${basedir}/classes" 
+		
+		<mkdir dir="${build.home}/lib" />
+		<copy todir="${build.home}/lib" file="${lib.home}/jpf.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/commons-logging.jar" overwrite="true"/>
+		<jar jarfile="${build.home}/lib/${core.jar.name}" basedir="${basedir}/classes" 
 			index="true" manifest="${basedir}/manifest.mf" />
 	</target>
 	

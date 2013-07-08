@@ -16,8 +16,6 @@ import java.util.logging.Level;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import net.ikarus_systems.hermes.util.IoUtil;
-
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
@@ -27,6 +25,7 @@ import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.PluginElement;
 import org.java.plugin.registry.PluginFragment;
 
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.resources.DefaultResourceLoader;
@@ -228,13 +227,13 @@ public class PluginElementProxy implements Wrapper<Object> {
 			
 			// Resolve library location
 			URL libLocation = pluginManager.getPathResolver().resolvePath(library, library.getPath());
-			boolean libExists = IoUtil.isResourceExists(libLocation);
+			boolean libExists = IOUtil.isResourceExists(libLocation);
 			File libFile = null;
 			
 			String baseIconName = null;
 			if(!libExists) {
 				baseIconName = "disabled_co.gif"; //$NON-NLS-1$
-			} else if((libFile = IoUtil.urlToFile(libLocation))==null) {
+			} else if((libFile = IOUtil.urlToFile(libLocation))==null) {
 				// Not a local library
 				baseIconName = "url.gif"; //$NON-NLS-1$
 			} else if(libFile.isDirectory()) {

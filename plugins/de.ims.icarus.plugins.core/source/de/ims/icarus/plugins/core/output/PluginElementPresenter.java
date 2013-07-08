@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 
-
 import org.java.plugin.registry.Documentable;
 import org.java.plugin.registry.Documentation;
 import org.java.plugin.registry.Extension;
@@ -38,8 +37,8 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.view.AbstractEditorPanePresenter;
 import de.ims.icarus.ui.view.MalformedTemplateException;
 import de.ims.icarus.ui.view.Template;
-import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.ui.view.Template.SubTemplateCache;
+import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.cache.LRUCache;
 import de.ims.icarus.util.data.ContentType;
@@ -228,7 +227,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 					.getCodeSource().getLocation();
 			
 			try {
-				baseURL = new URL(jarLocation, "net/ikarus_systems/icarus/plugins/core/icons/"); //$NON-NLS-1$
+				baseURL = new URL(jarLocation, "de/ims/icarus/plugins/core/icons/"); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
 				LoggerFactory.log(PluginElementPresenter.class, Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e); //$NON-NLS-1$
 			}

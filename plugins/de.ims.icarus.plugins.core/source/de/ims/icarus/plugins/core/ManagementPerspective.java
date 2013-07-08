@@ -15,7 +15,6 @@ import java.util.logging.Level;
 
 import javax.swing.JComponent;
 
-
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;

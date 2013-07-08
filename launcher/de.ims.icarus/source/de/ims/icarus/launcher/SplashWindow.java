@@ -12,6 +12,10 @@ package de.ims.icarus.launcher;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 
 /**
@@ -43,12 +47,14 @@ public class SplashWindow {
 			} catch (Exception e) {
 				// Ignore exception
 				// FIXME DEBUG
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	}
 	
 	static void invokeMain(String jarName, String className, String[] args) {
+		setText("Invoking ICARUS core");; //$NON-NLS-1$
+		
 		try {
 			// If we can access class directly then don't bother
 			// with the jar file
@@ -57,12 +63,36 @@ public class SplashWindow {
 			// Class not accessible directly, so we have to use
 			// an additional class loader using the specified jar file
 			if(clazz==null) {
-				File jarFile = new File(jarName);
-				URL jarURL = jarFile.toURI().toURL();
+				JarFile jarFile = new JarFile(jarName);
 				
+				File file = new File(jarName);
+				File dir = file.getParentFile();
+				
+				int urlCount = 1;
+				URL[] urls = new URL[10];
+				urls[0] = file.toURI().toURL();
+				
+				try {
+					Manifest manifest = jarFile.getManifest();
+					if(manifest!=null) {
+						Attributes attr = manifest.getMainAttributes();
+						if(attr!=null && attr.containsKey(Attributes.Name.CLASS_PATH)) {
+							String cp = attr.getValue(Attributes.Name.CLASS_PATH);
+							if(cp!=null) {
+								for(String path : cp.split(" ")) { //$NON-NLS-1$
+									urls[urlCount++] = new File(dir, path).toURI().toURL();
+								}
+							}
+						}
+					}
+				} finally {
+					jarFile.close();
+				}
+				
+				urls = Arrays.copyOf(urls, urlCount);
+								
 				@SuppressWarnings("resource")
-				ClassLoader loader = new URLClassLoader(new URL[]{jarURL}, 
-						SplashWindow.class.getClassLoader());
+				ClassLoader loader = new URLClassLoader(urls, SplashWindow.class.getClassLoader());
 				clazz = loader.loadClass(className);
 			}
 			
@@ -86,7 +116,7 @@ public class SplashWindow {
 	private static void showError(Throwable t) {
 		try {
 			// FIXME DEBUG
-			t.printStackTrace();
+			//t.printStackTrace();
 			
 			// Load and show dialog instance
 			Class.forName("de.ims.icarus.launcher.LauncherErrorDialog") //$NON-NLS-1$
@@ -109,7 +139,7 @@ public class SplashWindow {
 		}
 	}
 	
-	public void setText(String text) {
+	public static void setText(String text) {
 		if(splashDelegate!=null) {
 			try {
 				splashDelegate.setText(text);
@@ -121,7 +151,7 @@ public class SplashWindow {
 		}
 	}
 	
-	public void setMaxProgress(int maxValue) {
+	public static void setMaxProgress(int maxValue) {
 		if(splashDelegate!=null) {
 			try {
 				splashDelegate.setMaxProgress(maxValue);
@@ -133,7 +163,7 @@ public class SplashWindow {
 		}
 	}
 	
-	public void setProgress(int value) {
+	public static void setProgress(int value) {
 		if(splashDelegate!=null) {
 			try {
 				splashDelegate.setProgress(value);

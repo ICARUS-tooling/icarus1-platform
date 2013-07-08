@@ -19,7 +19,6 @@ import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-
 import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
@@ -30,12 +29,13 @@ import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
+import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.ErrorFormatter;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.data.ContentTypeRegistry;
-import de.ims.icarus.util.data.ExtensionContentType;
+import de.ims.icarus.util.data.LazyExtensionContentType;
 import de.ims.icarus.xml.jaxb.JAXBUtils;
 
 /**
@@ -54,65 +54,7 @@ public final class IcarusCorePlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
-		// Delegate all uncaught exceptions to the default logging facility
-		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
-
-		LoggerFactory.registerLogFile("de.ims.icarus.plugins", "icarus.plugins"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		// Register serializables before any other loading happens!
-		// This is to enable proper use of the shared JAXBContext
-		// by the config registry and all other facilities
-		registerSerializables();
-		
-		// Build config
-		initConfig();
-		
-		// Register content types and converters
-		registerContentTypes();
-		
-		// Register ui-helper objects
-		registerUIHelpers();
-		
-		// Register error formatters
-		registerErrorFormatters();
-		
-
-		// Define some global actions
-		URL actionLocation = IcarusCorePlugin.class.getResource(
-				"icarus-core-plugin-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: icarus-core-plugin-actions.xml"); //$NON-NLS-1$
-		ActionManager actionManager = ActionManager.globalManager();
-		try {
-			actionManager.loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
-			throw e;
-		}
-		
-		// Register global callbacks
-		callbackHandler = new CallbackHandler();
-		actionManager.addHandler("plugins.core.icarusCorePlugin.exitAction",  //$NON-NLS-1$
-				callbackHandler, "exit"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.core.icarusCorePlugin.aboutAction",  //$NON-NLS-1$
-				callbackHandler, "about"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.core.icarusCorePlugin.openPreferencesAction",  //$NON-NLS-1$
-				callbackHandler, "openPreferences"); //$NON-NLS-1$
-		
-		
-		// Show ui elements
-		SwingUtilities.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					initAndShowGUI();
-				} catch (Exception e) {
-					LoggerFactory.log(this, Level.SEVERE, 
-							"Failed to init core plug-in interface", e); //$NON-NLS-1$
-				}
-			}
-		});
+		SwingUtilities.invokeLater(new Dispatcher());
 	}
 	
 	private void initConfig() {
@@ -175,7 +117,7 @@ public final class IcarusCorePlugin extends Plugin {
 	private void registerContentTypes() {
 		for(Extension extension : getDescriptor().getExtensionPoint("ContentType").getConnectedExtensions()) { //$NON-NLS-1$
 			try {
-				ContentTypeRegistry.getInstance().addType(new ExtensionContentType(extension));
+				ContentTypeRegistry.getInstance().addType(new LazyExtensionContentType(extension));
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to register content type: "+extension.getUniqueId(), e); //$NON-NLS-1$
@@ -212,12 +154,10 @@ public final class IcarusCorePlugin extends Plugin {
 	 */
 	private void registerSerializables() {
 		for(Extension extension : getDescriptor().getExtensionPoint("Serializable").getConnectedExtensions()) { //$NON-NLS-1$
-			ClassLoader loader = PluginUtil.getClassLoader(extension);
 			
 			for(Extension.Parameter param : extension.getParameters("class")) { //$NON-NLS-1$
 				try {
-					Class<?> clazz = loader.loadClass(param.valueAsString());
-					JAXBUtils.registerClass(clazz);
+					JAXBUtils.registerClass(PluginUtil.loadClass(param));
 					
 				} catch(Exception e) {
 					LoggerFactory.log(this, Level.SEVERE, 
@@ -227,7 +167,8 @@ public final class IcarusCorePlugin extends Plugin {
 			
 			for(Extension.Parameter param : extension.getParameters("adapter")) { //$NON-NLS-1$
 				try {
-					Class<?> clazz = loader.loadClass(param.valueAsString());
+					Class<?> clazz = PluginUtil.loadClass(param);
+					ClassLoader loader = PluginUtil.getClassLoader(extension);
 					
 					for(Extension.Parameter subParam : param.getSubParameters("class")) { //$NON-NLS-1$
 						JAXBUtils.registerAdapter(clazz, new ClassProxy(
@@ -291,8 +232,90 @@ public final class IcarusCorePlugin extends Plugin {
 	 */
 	@Override
 	protected void doStop() throws Exception {
-		// TODO Auto-generated method stub
+		// no-op
+	}
+	
+	private void doInit() throws Exception {
+		// Delegate all uncaught exceptions to the default logging facility
+		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
+		LoggerFactory.registerLogFile("de.ims.icarus.plugins", "icarus.plugins"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		// Register content types and converters
+		registerContentTypes();
+
+		// Register serializables before any other loading happens!
+		// This is to enable proper use of the shared JAXBContext
+		// by the config registry and all other facilities
+		registerSerializables();
+		
+		// Build config
+		initConfig();
+		
+		// Register ui-helper objects
+		registerUIHelpers();
+		
+		// Register error formatters
+		registerErrorFormatters();
+		
+
+		// Define some global actions
+		URL actionLocation = IcarusCorePlugin.class.getResource(
+				"icarus-core-plugin-actions.xml"); //$NON-NLS-1$
+		if(actionLocation==null)
+			throw new CorruptedStateException("Missing resources: icarus-core-plugin-actions.xml"); //$NON-NLS-1$
+		ActionManager actionManager = ActionManager.globalManager();
+		try {
+			actionManager.loadActions(actionLocation);
+		} catch (IOException e) {
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
+			throw e;
+		}
+		
+		// Register global callbacks
+		callbackHandler = new CallbackHandler();
+		actionManager.addHandler("plugins.core.icarusCorePlugin.exitAction",  //$NON-NLS-1$
+				callbackHandler, "exit"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.core.icarusCorePlugin.aboutAction",  //$NON-NLS-1$
+				callbackHandler, "about"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.core.icarusCorePlugin.openPreferencesAction",  //$NON-NLS-1$
+				callbackHandler, "openPreferences"); //$NON-NLS-1$
+		
+		
+		// Show ui elements
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					initAndShowGUI();
+				} catch (Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to init core plug-in interface", e); //$NON-NLS-1$
+				}
+			}
+		});
+	}
+	
+	private class Dispatcher implements Runnable {
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			if(SwingUtilities.isEventDispatchThread()) {
+				TaskManager.getInstance().execute(this);
+			} else {
+				try {
+					doInit();
+				} catch (Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to init core plug-in", e); //$NON-NLS-1$
+				}
+			}
+		}
+		
 	}
 
 	/**

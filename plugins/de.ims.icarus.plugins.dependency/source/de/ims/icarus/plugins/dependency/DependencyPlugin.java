@@ -12,8 +12,6 @@ package de.ims.icarus.plugins.dependency;
 
 import org.java.plugin.Plugin;
 
-import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
-
 /**
  * @author Markus Gärtner 
  * @version $Id$
@@ -30,7 +28,7 @@ public class DependencyPlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
-		DependencyHighlighting.loadConfig();
+		// no-op
 	}
 
 	/**

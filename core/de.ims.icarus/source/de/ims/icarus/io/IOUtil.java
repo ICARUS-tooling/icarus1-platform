@@ -11,12 +11,17 @@ package de.ims.icarus.io;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.jar.JarFile;
 
 import de.ims.icarus.util.Options;
 
@@ -141,4 +146,125 @@ public final class IOUtil {
 	public static Charset getCharset(Options options) {
 		return getCharset(options, null);
 	}
+
+    /**
+     * Checks if resource exist and can be opened.
+     * @param url absolute URL which points to a resource to be checked
+     * @return <code>true</code> if given URL points to an existing resource
+     */
+    public static boolean isResourceExists(final URL url) {
+        File file = urlToFile(url);
+        if (file != null) {
+            return file.canRead();
+        }
+        if ("jar".equalsIgnoreCase(url.getProtocol())) { //$NON-NLS-1$
+            return isJarResourceExists(url);
+        }
+        return isUrlResourceExists(url);
+    }
+
+    /**
+     * Checks if resource URL exist and can be opened.
+     * @param url absolute URL which points to a resource to be checked
+     * @return <code>true</code> if given URL points to an existing resource
+     */
+    public static boolean isUrlResourceExists(final URL url) {
+        try {
+            InputStream is = url.openStream();
+            try {
+                is.close();
+            } catch (IOException ioe) {
+                // ignore
+            }
+            return true;
+        } catch (IOException ioe) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if resource jar exist and can be opened.
+     * @param url absolute URL which points to a jar resource to be checked
+     * @return <code>true</code> if given URL points to an existing resource
+     */
+    public static boolean isJarResourceExists(final URL url) {
+        try {
+            String urlStr = url.toExternalForm();
+            int p = urlStr.indexOf("!/"); //$NON-NLS-1$
+            if (p == -1) {// this is invalid JAR file URL
+                return false;
+            }
+            URL fileUrl = new URL(urlStr.substring(4, p));
+            File file = urlToFile(fileUrl);
+            if (file == null) {// this is non-local JAR file URL
+                return isUrlResourceExists(url);
+            }
+            if (!file.canRead()) {
+                return false;
+            }
+            if (p == urlStr.length() - 2) {// URL points to the root entry of JAR file
+                return true;
+            }
+            JarFile jarFile = new JarFile(file);
+            try {
+                return jarFile.getEntry(urlStr.substring(p + 2)) != null;
+            } finally {
+                jarFile.close();
+            }
+        } catch (IOException ioe) {
+            return false;
+        }
+    }
+
+    /**
+     * Utility method to convert local URL to a {@link File} object.
+     * @param url an URL
+     * @return file object for given URL or <code>null</code> if URL is not
+     *         local
+     */
+    @SuppressWarnings("deprecation")
+    public static File urlToFile(final URL url) {
+        String prot = url.getProtocol();
+        if ("jar".equalsIgnoreCase(prot)) { //$NON-NLS-1$
+            if (url.getFile().endsWith("!/")) { //$NON-NLS-1$
+                String urlStr = url.toExternalForm();
+                try {
+                    return urlToFile(
+                            new URL(urlStr.substring(4, urlStr.length() - 2)));
+                } catch (MalformedURLException mue) {
+                    // ignore
+                }
+            }
+            return null;
+        }
+        if (!"file".equalsIgnoreCase(prot)) { //$NON-NLS-1$
+            return null;
+        }
+        try {
+            // Method URL.toURI() may produce URISyntaxException for some
+            // "valid" URL's that contain spaces or other "illegal" characters.
+            //return new File(url.toURI());
+            return new File(URLDecoder.decode(url.getFile(), "UTF-8")); //$NON-NLS-1$
+        } catch (UnsupportedEncodingException e) {
+            return new File(URLDecoder.decode(url.getFile()));
+        }
+    }
+    
+    /**
+     * Utility method to convert a {@link File} object to a local URL.
+     * @param file a file object
+     * @return absolute URL that points to the given file
+     * @throws MalformedURLException if file can't be represented as URL for
+     *         some reason
+     */
+    public static URL fileToUrl(final File file) throws MalformedURLException {
+        try {
+            return file.getCanonicalFile().toURI().toURL();
+        } catch (MalformedURLException mue) {
+            throw mue;
+        } catch (IOException ioe) {
+            throw new MalformedURLException("unable to create canonical file: "  //$NON-NLS-1$
+            		+ file + " " + ioe); //$NON-NLS-1$
+        }
+    }
 }

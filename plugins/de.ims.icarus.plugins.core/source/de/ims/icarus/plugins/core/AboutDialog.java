@@ -41,7 +41,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-
 import org.java.plugin.registry.PluginDescriptor;
 
 import de.ims.icarus.Core;

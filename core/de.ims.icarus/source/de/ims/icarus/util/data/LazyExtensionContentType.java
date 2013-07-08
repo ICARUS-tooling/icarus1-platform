@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import javax.swing.Icon;
 
 
+import org.java.plugin.PluginLifecycleException;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;
@@ -29,7 +30,7 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public class ExtensionContentType implements ContentType {
+public class LazyExtensionContentType implements ContentType {
 	
 	private final Extension extension;
 	
@@ -40,20 +41,13 @@ public class ExtensionContentType implements ContentType {
 	private final String filterClass;
 	private Filter filter;
 	
-	private final Class<?> contentClass;
+	private Class<?> contentClass;
 	
-	public ExtensionContentType(Extension extension) throws ClassNotFoundException {
+	public LazyExtensionContentType(Extension extension) {
 		if(extension==null)
 			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
 		
 		this.extension = extension;
-		
-		// Normally we would lazily load the content class the first
-		// time it is requested. But since that would not be the right
-		// time to throw a ClassNotFoundException we need to do it here.
-		String contentClassName = extension.getParameter("contentClass").valueAsString(); //$NON-NLS-1$
-		ClassLoader loader = PluginUtil.getClassLoader(extension);
-		contentClass = loader.loadClass(contentClassName);
 		
 		Extension.Parameter filterParam = null;
 		try {
@@ -117,6 +111,27 @@ public class ExtensionContentType implements ContentType {
 	 */
 	@Override
 	public Class<?> getContentClass() {
+		if(contentClass==null) {
+
+			try {
+				PluginUtil.activatePlugin(extension);
+			} catch (PluginLifecycleException ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to activate plugin: "+extension.getUniqueId(), ex); //$NON-NLS-1$
+				
+				throw new IllegalStateException(ex);
+			}
+			String contentClassName = extension.getParameter("contentClass").valueAsString(); //$NON-NLS-1$
+			ClassLoader loader = PluginUtil.getClassLoader(extension);
+			try {
+				contentClass = loader.loadClass(contentClassName);
+			} catch (ClassNotFoundException ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to load content class: "+extension.getUniqueId(), ex); //$NON-NLS-1$
+				
+				throw new IllegalStateException(ex);
+			}
+		}
 		return contentClass;
 	}
 
@@ -159,6 +174,7 @@ public class ExtensionContentType implements ContentType {
 		}
 		if(filter==null) {
 			try {
+				PluginUtil.activatePlugin(extension);
 				ClassLoader loader = PluginUtil.getClassLoader(extension);
 				Class<?> clazz = loader.loadClass(filterClass);
 				filter = (Filter) clazz.newInstance();
@@ -185,6 +201,14 @@ public class ExtensionContentType implements ContentType {
 		} else {
 			return getContentClass().isAssignableFrom((Class<?>) obj);
 		}
+	}
+
+	/**
+	 * @see de.ims.icarus.util.data.ContentType#getContentClassName()
+	 */
+	@Override
+	public String getContentClassName() {
+		return extension.getParameter("contentClass").valueAsString(); //$NON-NLS-1$
 	}
 	
 }

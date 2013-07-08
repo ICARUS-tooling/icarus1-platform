@@ -301,7 +301,7 @@ public final class ContentTypeRegistry {
 	 * Note that the default {@code ContentType} implementations for common
 	 * java data types do a pure {@code Object#equals(Object)} check on the
 	 * two {@code Class} objects in question. Implementations of type
-	 * {@code ExtensionContentType} honor the {@link ContentType#STRICT_INHERITANCE}
+	 * {@code LazyExtensionContentType} honor the {@link ContentType#STRICT_INHERITANCE}
 	 * property and either check for class equality or assignability via
 	 * {@link Class#isAssignableFrom(Class)}. Custom implementations are free
 	 * to use whatever mechanics they seem fit. 
@@ -447,7 +447,7 @@ public final class ContentTypeRegistry {
 	
 	private void addType0(ContentType type) {
 		contentTypes.put(type.getId(), type);
-		classMap.put(type.getContentClass().getName(), type);
+		classMap.put(type.getContentClassName(), type);
 	}
 	
 	public void addType(ContentType type) {
@@ -456,7 +456,7 @@ public final class ContentTypeRegistry {
 		if(contentTypes.containsKey(type.getId()))
 			throw new DuplicateIdentifierException("Content type id already in use: "+type.getId()); //$NON-NLS-1$
 		
-		String className = type.getContentClass().getName();
+		String className = type.getContentClassName();
 		if(classMap.containsKey(className))
 			throw new IllegalArgumentException("Duplicate content type for class: "+className); //$NON-NLS-1$
 		
@@ -812,6 +812,14 @@ public final class ContentTypeRegistry {
 		@Override
 		public boolean accepts(Object obj) {
 			return getContentClass().equals(obj);
+		}
+
+		/**
+		 * @see de.ims.icarus.util.data.ContentType#getContentClassName()
+		 */
+		@Override
+		public String getContentClassName() {
+			return getContentClass().getName();
 		}
 		
 	}

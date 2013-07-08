@@ -18,7 +18,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 
-import de.ims.icarus.language.SentenceDataListener;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
@@ -30,7 +29,7 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public abstract class TablePresenter implements AWTPresenter, SentenceDataListener {
+public abstract class TablePresenter implements AWTPresenter {
 	
 	protected JTable table;
 	

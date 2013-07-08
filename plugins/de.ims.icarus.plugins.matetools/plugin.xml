@@ -15,19 +15,23 @@
 	</attributes>
 	
 	<requires>
-		<import plugin-id="de.ims.icarus.core" />
-		<import plugin-id="de.ims.icarus.languageTools" />
-		<import plugin-id="de.ims.icarus.dependency" />
-		<import plugin-id="de.ims.icarus.jgraph" />
+		<import plugin-id="de.ims.icarus.core" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.languageTools" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.dependency" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.jgraph" reverse-lookup="true" />
 	</requires>
-	
+		
 	<runtime>
+		<library id="source" path="." type="code">
+			<export prefix="*" />
+		</library>
 		<library id="mate-tools" path="lib/anna-3.3-d8.jar" type="code">
 			<doc>
 				<doc-text>
 					matetools library version 3.3-d8 (SFB732-D8 Project Version)
 				</doc-text>
 			</doc>
+			<export prefix="*" />
 		</library>
 	</runtime>
 			

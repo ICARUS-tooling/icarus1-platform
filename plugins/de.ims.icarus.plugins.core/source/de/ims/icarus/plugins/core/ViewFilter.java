@@ -12,7 +12,6 @@ package de.ims.icarus.plugins.core;
 import java.util.Collection;
 import java.util.logging.Level;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;
@@ -193,9 +192,7 @@ public abstract class ViewFilter {
 			// the extension.
 			if(viewClazz==null) {
 				try {
-					String className = extension.getParameter("class").valueAsString(); //$NON-NLS-1$
-					ClassLoader loader = PluginUtil.getClassLoader(extension);
-					viewClazz = loader.loadClass(className);
+					viewClazz = PluginUtil.loadClass(extension);
 				} catch(Exception e) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Unable to load extension view class: "+extension, e); //$NON-NLS-1$

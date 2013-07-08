@@ -16,6 +16,12 @@
 		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.core.IcarusCorePreferences" />
 	</attributes>
 	
+	<runtime>
+		<library id="source" path="." type="code">
+			<export prefix="*" />
+		</library>
+	</runtime>
+	
 	<!-- Extension-Points -->
 			
 	<extension-point id="Serializable" extension-multiplicity="one-per-plugin">

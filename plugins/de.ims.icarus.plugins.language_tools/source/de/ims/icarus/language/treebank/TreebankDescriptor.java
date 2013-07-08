@@ -89,11 +89,7 @@ public class TreebankDescriptor implements Comparable<TreebankDescriptor> {
 		if(treebank!=null)
 			throw new IllegalStateException("Treebank already instantiated: "+id); //$NON-NLS-1$
 
-		ClassLoader loader = PluginUtil.getClassLoader(extension);
-		String className = extension.getParameter("class").valueAsString(); //$NON-NLS-1$
-		Class<?> clazz = loader.loadClass(className);
-		
-		treebank = (Treebank) clazz.newInstance();
+		treebank = (Treebank) PluginUtil.instantiate(extension);
 		
 		syncToTreebank();
 	}

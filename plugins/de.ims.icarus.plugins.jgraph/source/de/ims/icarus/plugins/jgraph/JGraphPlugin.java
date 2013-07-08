@@ -11,7 +11,6 @@ package de.ims.icarus.plugins.jgraph;
 
 import java.util.logging.Level;
 
-
 import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
 
@@ -88,5 +87,4 @@ public class JGraphPlugin extends Plugin {
 	protected void doStop() throws Exception {
 		// TODO Auto-generated method stub
 	}
-
 }

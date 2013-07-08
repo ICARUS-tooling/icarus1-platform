@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,6 +59,7 @@ import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.standard.StandardPluginLocation;
 
 import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.launcher.SplashWindow;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -133,20 +135,24 @@ public class Core {
 		try {
 			if(core!=null)
 				throw new IllegalStateException("Core already started!"); //$NON-NLS-1$
-			
+						
 			core = new Core(args);
-			
+
+			SplashWindow.setText("Collecting plug-ins"); //$NON-NLS-1$
 			// Collect plug-ins and verify integrity
 			core.collectPlugins();
-			
+
+			SplashWindow.setText("Collecting properties"); //$NON-NLS-1$
 			// Collect properties defined by plug-ins
 			// (this might technically override system settings)
 			core.collectProperties();
-			
+
+			SplashWindow.setText("Launching core plug-in"); //$NON-NLS-1$
 			// Launch core plug-in
 			core.launchCorePlugin();
+			
 		} catch(Throwable e) {
-			new CoreErrorDialog(e).setVisible(true);
+			new CoreErrorDialog(e);
 		}
 	}
 	
@@ -183,9 +189,11 @@ public class Core {
 	private Core(String[] args) {
 		logger = Logger.getLogger("icarus.launcher"); //$NON-NLS-1$
 		
+		SplashWindow.setText("Processing options"); //$NON-NLS-1$
 		// Init options
 		options = new CoreOptions(args);
-		
+
+		SplashWindow.setText("Checking folders"); //$NON-NLS-1$
 		// init folders
 		rootFolder = new File(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -208,7 +216,28 @@ public class Core {
 		tempFolder = new File(rootFolder, "temp"); //$NON-NLS-1$
 		if(!tempFolder.isDirectory() && !tempFolder.mkdir())
 			throw new Error("Unable to create temp directory"); //$NON-NLS-1$
+		
+		// Redirect default output
+		File outFile = new File(logFolder, "out.txt"); //$NON-NLS-1$
+		PrintStream defaultOut = System.out;
+		PrintStream defaultErr = System.err;
+		try {
+			if(!outFile.isFile()) {
+				outFile.createNewFile();
+			}
+			PrintStream ps = new PrintStream(new FileOutputStream(outFile), 
+				true, "UTF-8"); //$NON-NLS-1$
+			
+			System.setOut(ps);
+			System.setErr(ps);
+		} catch(Exception e) {
+			System.setOut(defaultOut);
+			System.setErr(defaultErr);
+			
+			e.printStackTrace(defaultOut);
+		}
 
+		SplashWindow.setText("Starting logger"); //$NON-NLS-1$
 		// Init default log file
 		File logFile = new File(logFolder, "launcher.log"); //$NON-NLS-1$
 		try {
@@ -218,7 +247,8 @@ public class Core {
 		} catch (IOException e) {
 			throw new Error("Unable to access log file: "+logFile.getAbsolutePath(), e); //$NON-NLS-1$
 		}
-		
+
+		SplashWindow.setText("Ensuring license file"); //$NON-NLS-1$
 		// Ensure license file
 		File licenseFile = new File(rootFolder, "license.txt"); //$NON-NLS-1$
 		try {
@@ -228,7 +258,8 @@ public class Core {
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "Failed to export license file", ex); //$NON-NLS-1$
 		}
-		
+
+		SplashWindow.setText("Loading plugin registry"); //$NON-NLS-1$
 		// From here on we can use our logger
 		try {
 			PluginUtil.load(logger);
@@ -362,7 +393,7 @@ public class Core {
     }
 
     private void processFolder(final File folder, final List<PluginLocation> result) {
-        logger.fine("processing folder - " + folder); //$NON-NLS-1$
+    	logger.fine("processing folder - " + folder); //$NON-NLS-1$
         try {
             PluginLocation pluginLocation = StandardPluginLocation.create(folder);
             if (pluginLocation != null) {
@@ -387,7 +418,7 @@ public class Core {
     }
     
     private void processFile(final File file, final List<PluginLocation> result) {
-        logger.fine("processing file - " + file); //$NON-NLS-1$
+    	logger.fine("processing file - " + file); //$NON-NLS-1$
         try {
             PluginLocation pluginLocation = StandardPluginLocation.create(file);
             if (pluginLocation != null) {

@@ -11,6 +11,7 @@ package de.ims.icarus.launcher;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,7 +28,7 @@ class LauncherErrorDialog extends JFrame {
 
 	private static final long serialVersionUID = 5220411322554143465L;
 
-	LauncherErrorDialog(Throwable t) {
+	public LauncherErrorDialog(Throwable t) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		Container container = getContentPane();
@@ -55,9 +56,11 @@ class LauncherErrorDialog extends JFrame {
         textArea.setBackground(container.getBackground());
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
+        scrollPane.setPreferredSize(new Dimension(400, 400));
         textArea.setCaretPosition(0);
         
 		pack();
 		setLocationRelativeTo(null);
+		setVisible(true);
 	}
 }

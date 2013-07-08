@@ -11,6 +11,7 @@ package de.ims.icarus;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -55,9 +56,11 @@ class CoreErrorDialog extends JFrame {
         textArea.setBackground(container.getBackground());
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
+        scrollPane.setPreferredSize(new Dimension(400, 400));
         textArea.setCaretPosition(0);
         
 		pack();
 		setLocationRelativeTo(null);
+		setVisible(true);
 	}
 }

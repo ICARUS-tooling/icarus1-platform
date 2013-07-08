@@ -126,7 +126,6 @@ class NativeSplashDelegate implements SplashDelegate {
 	@Override
 	public void setText(String text) {
 		if (screen.isVisible()) {
-
 			screenGraphics.setPaint(bgColor);
 			screenGraphics.fill(textArea);
 

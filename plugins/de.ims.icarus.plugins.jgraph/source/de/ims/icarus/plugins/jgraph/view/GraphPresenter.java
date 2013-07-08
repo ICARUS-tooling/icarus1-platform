@@ -67,10 +67,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-
 import org.java.plugin.registry.Extension;
 
-import com.mxgraph.examples.swing.editor.DefaultFileFilter;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
@@ -114,11 +112,12 @@ import de.ims.icarus.plugins.jgraph.util.CellBuffer;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
+import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.helper.Configurable;
+import de.ims.icarus.ui.helper.DefaultFileFilter;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;

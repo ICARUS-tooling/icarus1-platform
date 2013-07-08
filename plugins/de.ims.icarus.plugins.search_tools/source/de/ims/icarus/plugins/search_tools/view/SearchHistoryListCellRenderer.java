@@ -21,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
@@ -32,12 +33,10 @@ import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
+import de.ims.icarus.ui.ProgressBar;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.id.Identity;
-
-import net.ikarus_systems.hermes.ui.awt.ProgressBar;
-import sun.swing.DefaultLookup;
 
 /**
  * @author Markus Gärtner
@@ -78,7 +77,7 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 
 
     private Border getNoFocusBorder() {
-        Border border = DefaultLookup.getBorder(this, ui, "List.cellNoFocusBorder"); //$NON-NLS-1$
+        Border border = UIManager.getBorder("List.cellNoFocusBorder"); //$NON-NLS-1$
         return border==null ? noFocusBorder : border;
     }
     
@@ -100,10 +99,10 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
         Border border = null;
         if (cellHasFocus) {
             if (isSelected) {
-                border = DefaultLookup.getBorder(this, ui, "List.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
+                border = UIManager.getBorder("List.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
             }
             if (border == null) {
-                border = DefaultLookup.getBorder(this, ui, "List.focusCellHighlightBorder"); //$NON-NLS-1$
+                border = UIManager.getBorder("List.focusCellHighlightBorder"); //$NON-NLS-1$
             }
         } else {
             border = getNoFocusBorder();

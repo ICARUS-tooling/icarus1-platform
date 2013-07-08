@@ -38,23 +38,18 @@ public final class ActionBinder {
 		Exceptions.testNullArgument(owner, "owner"); //$NON-NLS-1$
 		Exceptions.testNullArgument(extension, "extension"); //$NON-NLS-1$
 
-		// fetch lcass information
-		Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
-		if(param==null)
-			throw new IllegalArgumentException("Extension does not define 'class' parameter"); //$NON-NLS-1$
-		
-		// load and instantiate bindable action
-		ClassLoader loader = PluginUtil.getClassLoader(extension);
-		BindableAction action = (BindableAction) loader.loadClass(param.valueAsString()).newInstance();
+		BindableAction action = (BindableAction) PluginUtil.instantiate(extension);
 		
 		// load properties
 		Map<String, Object> properties = null;
-		param = extension.getParameter("properties"); //$NON-NLS-1$
-		if(param!=null)
+		Extension.Parameter param = extension.getParameter("properties"); //$NON-NLS-1$
+		if(param!=null) {
 			properties = readProperties(param);
+		}
 		
-		if(properties==null)
+		if(properties==null) {
 			properties = emptyProperties;
+		}
 		
 		// bind and return action
 		return action.bind(owner, properties);

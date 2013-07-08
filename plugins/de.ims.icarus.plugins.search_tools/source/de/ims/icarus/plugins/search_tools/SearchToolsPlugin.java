@@ -102,6 +102,7 @@ public class SearchToolsPlugin extends Plugin {
 					}
 				}
 				
+				PluginUtil.activatePlugin(extension);
 				ClassLoader loader = PluginUtil.getClassLoader(extension);
 				
 				for(Extension.Parameter factoryParam : extension.getParameter("factories").getSubParameters()) {  //$NON-NLS-1$

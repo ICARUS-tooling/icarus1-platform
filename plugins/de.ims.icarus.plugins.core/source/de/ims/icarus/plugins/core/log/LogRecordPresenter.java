@@ -95,7 +95,7 @@ public class LogRecordPresenter extends AbstractEditorPanePresenter<LogRecord> {
 					.getCodeSource().getLocation();
 			
 			try {
-				baseURL = new URL(jarLocation, "net/ikarus_systems/icarus/plugins/core/icons/"); //$NON-NLS-1$
+				baseURL = new URL(jarLocation, "de/ims/icarus/plugins/core/icons/"); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
 				LoggerFactory.log(LogRecordPresenter.class, Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e); //$NON-NLS-1$
 			}

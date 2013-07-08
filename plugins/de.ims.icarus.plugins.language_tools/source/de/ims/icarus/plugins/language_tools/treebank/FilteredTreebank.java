@@ -10,8 +10,6 @@
 package de.ims.icarus.plugins.language_tools.treebank;
 
 
-import com.sun.xml.internal.txw2.IllegalSignatureException;
-
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
@@ -61,7 +59,7 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	
 	public void setBase(Treebank base) {
 		if(base==null)
-			throw new IllegalSignatureException("Invalid base"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid base"); //$NON-NLS-1$
 		
 		if(base.equals(this.base)) {
 			return;

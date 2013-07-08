@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Exceptions;
 
@@ -47,7 +48,7 @@ public final class IconRegistry {
 				if(globalRegistry==null) {
 					globalRegistry= new IconRegistry(null);
 					globalRegistry.addSearchPath(IconRegistry.class.getClassLoader(), 
-							"net/ikarus_systems/icarus/ui/icons/"); //$NON-NLS-1$
+							"de/ims/icarus/ui/icons/"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -127,7 +128,7 @@ public final class IconRegistry {
 			throw new IllegalArgumentException("Either loader or prefix has to be defined!"); //$NON-NLS-1$
 		
 		if(loader==null)
-			loader = getClass().getClassLoader();
+			loader = Core.class.getClassLoader();
 		
 		if(prefix==null)
 			prefix = ""; //$NON-NLS-1$

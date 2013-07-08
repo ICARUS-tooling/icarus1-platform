@@ -19,13 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import de.ims.icarus.language.dependency.search.DependencyDirectionConstraintFactory;
-import de.ims.icarus.language.dependency.search.DependencyDistanceConstraintFactory;
-import de.ims.icarus.language.dependency.search.DependencyFeaturesConstraintFactory;
-import de.ims.icarus.language.dependency.search.DependencyFormConstraintFactory;
-import de.ims.icarus.language.dependency.search.DependencyLemmaConstraintFactory;
-import de.ims.icarus.language.dependency.search.DependencyPosConstraintFactory;
-import de.ims.icarus.language.dependency.search.DependencyRelationConstraintFactory;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.EdgeType;
@@ -43,7 +36,6 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Order;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.UnsupportedFormatException;
-import de.ims.icarus.util.data.ContentTypeRegistry;
 
 
 /**
@@ -75,51 +67,6 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  *
  */
 public class DefaultQueryParser {
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args) throws Exception {
-
-		SearchOperator.register(DefaultSearchOperator.EQUALS);
-		SearchOperator.register(DefaultSearchOperator.EQUALS_NOT);
-		SearchOperator.register(DefaultSearchOperator.MATCHES);
-		SearchOperator.register(DefaultSearchOperator.MATCHES_NOT);
-		SearchOperator.register(DefaultSearchOperator.CONTAINS);
-		SearchOperator.register(DefaultSearchOperator.CONTAINS_NOT);
-		SearchOperator.register(DefaultSearchOperator.LESS_THAN);
-		SearchOperator.register(DefaultSearchOperator.LESS_OR_EQUAL);
-		SearchOperator.register(DefaultSearchOperator.GREATER_THAN);
-		SearchOperator.register(DefaultSearchOperator.GREATER_OR_EQUAL);
-		SearchOperator.register(DefaultSearchOperator.GROUPING);
-		
-		ConstraintContext context = new ConstraintContext(
-				ContentTypeRegistry.getInstance().getTypeForClass(String.class));
-		
-		context.registerFactory("form", DependencyFormConstraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("pos", DependencyPosConstraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("lemma", DependencyLemmaConstraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("features", DependencyFeaturesConstraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("relation", DependencyRelationConstraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("distance", DependencyDistanceConstraintFactory.class); //$NON-NLS-1$
-		context.registerFactory("direction", DependencyDirectionConstraintFactory.class); //$NON-NLS-1$
-		
-		context.addToken("form");
-		context.addToken("pos");
-		context.addToken("lemma");
-		context.addToken("features");
-		context.addToken("relation");
-		context.addToken("distance");
-		context.addToken("direction");
-		
-		DefaultQueryParser parser = new DefaultQueryParser(context, null);
-		
-		String query = "[form=The] [! form=the]"; //$NON-NLS-1$
-		
-		// [form=bla [(id=node_3) , lemma~"%sfg&" ]{[! (node_3=before, node_6=before) , form#foo ][(id=node_6)  ]}]
-		
-		SearchGraph graph = parser.parseQuery(query, null);
-		
-		System.out.println("done"); //$NON-NLS-1$
-	}
 	
 	public static final String EXPAND_TOKENS_OPTION = "expandTokens"; //$NON-NLS-1$
 

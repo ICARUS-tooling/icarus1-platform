@@ -16,17 +16,21 @@
 	</attributes>
 	
 	<requires>
-		<import plugin-id="de.ims.icarus.core" />
-		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.core" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.languageTools" reverse-lookup="true" />
 	</requires>
-	
+		
 	<runtime>
+		<library id="source" path="." type="code">
+			<export prefix="*" />
+		</library>
 		<library id="jGraphLib" path="lib/jgraphx.jar" type="code">
 			<doc>
 				<doc-text>
 					jGraph library version 1.10.1.4
 				</doc-text>
 			</doc>
+			<export prefix="*" />
 		</library>
 	</runtime>
 	
