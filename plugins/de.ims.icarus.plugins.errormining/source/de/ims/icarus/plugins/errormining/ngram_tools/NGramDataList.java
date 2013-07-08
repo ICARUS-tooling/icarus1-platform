@@ -7,7 +7,7 @@
  * $LastChangedRevision$  
  * $LastChangedBy$ 
  */
-package ngram_tools;
+package de.ims.icarus.plugins.errormining.ngram_tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,6 @@ import de.ims.icarus.language.dependency.MutableDependencyData.DependencyDataEnt
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.data.ContentType;
-
 
 /**
  * @author Gregor Thiele
@@ -80,7 +79,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 
 
 	/**
-	 * @see de.ims.icarus.util.data.DataList#size()
+	 * @see net.ikarus_systems.icarus.util.data.DataList#size()
 	 */
 	@Override
 	public int size() {
@@ -88,7 +87,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.util.data.DataList#get(int)
+	 * @see net.ikarus_systems.icarus.util.data.DataList#get(int)
 	 */
 	@Override
 	public SentenceData get(int index) {
@@ -96,7 +95,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.util.data.DataList#getContentType()
+	 * @see net.ikarus_systems.icarus.util.data.DataList#getContentType()
 	 */
 	@Override
 	public ContentType getContentType() {
@@ -104,7 +103,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.util.data.DataList#addChangeListener(javax.swing.event.ChangeListener)
+	 * @see net.ikarus_systems.icarus.util.data.DataList#addChangeListener(javax.swing.event.ChangeListener)
 	 */
 	@Override
 	public void addChangeListener(ChangeListener listener) {
@@ -113,7 +112,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.util.data.DataList#removeChangeListener(javax.swing.event.ChangeListener)
+	 * @see net.ikarus_systems.icarus.util.data.DataList#removeChangeListener(javax.swing.event.ChangeListener)
 	 */
 	@Override
 	public void removeChangeListener(ChangeListener listener) {
@@ -122,7 +121,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.SentenceDataList#supportsType(de.ims.icarus.language.DataType)
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#supportsType(net.ikarus_systems.icarus.language.DataType)
 	 */
 	@Override
 	public boolean supportsType(DataType type) {
@@ -130,7 +129,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.SentenceDataList#get(int, de.ims.icarus.language.DataType)
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType)
 	 */
 	@Override
 	public SentenceData get(int index, DataType type) {
@@ -141,7 +140,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.SentenceDataList#get(int, de.ims.icarus.language.DataType, de.ims.icarus.language.AvailabilityObserver)
+	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType, net.ikarus_systems.icarus.language.AvailabilityObserver)
 	 */
 	@Override
 	public SentenceData get(int index, DataType type,
@@ -177,7 +176,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 		
 
 		/**
-		 * @see de.ims.icarus.language.SentenceData#getForm(int)
+		 * @see net.ikarus_systems.icarus.language.SentenceData#getForm(int)
 		 */
 		@Override
 		public String getForm(int index) {
@@ -185,7 +184,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.SentenceData#isEmpty()
+		 * @see net.ikarus_systems.icarus.language.SentenceData#isEmpty()
 		 */
 		@Override
 		public boolean isEmpty() {
@@ -193,7 +192,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.SentenceData#length()
+		 * @see net.ikarus_systems.icarus.language.SentenceData#length()
 		 */
 		@Override
 		public int length() {
@@ -201,7 +200,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.SentenceData#getSourceGrammar()
+		 * @see net.ikarus_systems.icarus.language.SentenceData#getSourceGrammar()
 		 */
 		@Override
 		public Grammar getSourceGrammar() {
@@ -209,7 +208,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.annotation.AnnotatedSentenceData#getAnnotation()
+		 * @see net.ikarus_systems.icarus.language.annotation.AnnotatedSentenceData#getAnnotation()
 		 */
 		@Override
 		public Annotation getAnnotation() {
@@ -218,7 +217,7 @@ public class NGramDataList implements SentenceDataList, ListModel<Object> {
 
 
 		/**
-		 * @see de.ims.icarus.ui.helper.TextItem#getText()
+		 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
 		 */
 		@Override
 		public String getText() {

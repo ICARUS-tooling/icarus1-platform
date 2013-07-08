@@ -7,12 +7,11 @@
  * $LastChangedRevision$  
  * $LastChangedBy$ 
  */
-package ngram_tools;
+package de.ims.icarus.plugins.errormining.ngram_tools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.ims.icarus.util.PropertyChangeSource;
-
 
 /**
  * @author Gregor Thiele
