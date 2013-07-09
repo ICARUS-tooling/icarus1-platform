@@ -10,6 +10,7 @@
 package de.ims.icarus.plugins.weblicht.webservice;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -37,11 +38,13 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -311,8 +314,25 @@ public class WebchainEditor implements Editor<Webchain> {
 		
 		
 		webserviceInputGroup = new ButtonGroup();
-		webserviceInputArea = new JTextArea();
+		webserviceInputArea = new JTextArea() {
+
+			private static final long serialVersionUID = 24354678798765432L;
+
+			/**
+			 * @see javax.swing.JTextArea#getScrollableTracksViewportWidth()
+			 */
+			@Override
+			public boolean getScrollableTracksViewportWidth() {
+				return true;
+			}
+			
+		};
+		webserviceInputArea.setLineWrap(true);
+		webserviceInputArea.setWrapStyleWord(true);
 		webserviceInputArea.setBorder(UIUtil.defaultContentBorder);
+		JScrollPane scrollPane = new JScrollPane(webserviceInputArea);
+		scrollPane.setBorder(UIUtil.defaultAreaBorder);
+		scrollPane.setPreferredSize(new Dimension(400, 150));
 		
 		WebchainRegistry.getInstance().addListener(Events.REMOVED, handler);
 		WebchainRegistry.getInstance().addListener(Events.CHANGED, handler);
@@ -502,7 +522,7 @@ public class WebchainEditor implements Editor<Webchain> {
 		WebchainRegistry.getInstance().setWebchainElements(webchain,
 								webchainElementListModel.webchainElements);
 		
-		
+
 		// Save InputType
 //		WebchainRegistry.getInstance().setWebserviceInput(webchain,
 //					getNameFromSelectedButton(),
@@ -952,7 +972,7 @@ public class WebchainEditor implements Editor<Webchain> {
 			
 			builder.setTitle(title);
 			builder.addMessage(inputPanel);
-			builder.addMessage(webserviceInputArea);
+			builder.addMessage(SwingUtilities.getAncestorOfClass(JScrollPane.class, webserviceInputArea));
 
 			builder.setPlainType();
 			builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -974,7 +994,7 @@ public class WebchainEditor implements Editor<Webchain> {
 			
 			builder.setTitle(title);
 			builder.addMessage(inputPanel);
-			builder.addMessage(webserviceInputArea);
+			builder.addMessage(SwingUtilities.getAncestorOfClass(JScrollPane.class, webserviceInputArea));
 
 			builder.setPlainType();
 			builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$

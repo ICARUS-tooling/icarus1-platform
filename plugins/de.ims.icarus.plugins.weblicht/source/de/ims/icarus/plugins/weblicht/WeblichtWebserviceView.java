@@ -127,6 +127,32 @@ public class WeblichtWebserviceView extends View {
 		
 	}
 	
+	
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean isClosable() {
+		
+		if(WebserviceRegistry.getInstance().isHasChanges()){
+			if(DialogFactory.getGlobalFactory().showWarningConfirm(null,
+					"plugins.weblicht.weblichtWebserviceView.dialogs.unsavedWebservices.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtWebserviceView.dialogs.unsavedWebservices.message")){ //$NON-NLS-1$
+				try {
+					WebserviceRegistry.getInstance().saveWebservices();
+				} catch (Exception e) {
+						LoggerFactory.log(this, Level.SEVERE, "Failed to save Webservices", e); //$NON-NLS-1$
+				}
+			};
+				
+		}
+		return true;
+	}
+	
+	
 	private void showPopup(MouseEvent trigger) {
 		if (popupMenu == null) {
 			// Create new popup menu

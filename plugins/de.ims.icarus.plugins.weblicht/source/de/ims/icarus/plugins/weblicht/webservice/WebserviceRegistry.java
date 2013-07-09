@@ -60,9 +60,12 @@ import de.ims.icarus.util.id.StaticIdentity;
 public class WebserviceRegistry {
 
 	// protected LinkedHashMap<String, Webservice> webserviceHashMap;
-	protected List<Webservice> webserviceList;
+	private List<Webservice> webserviceList;
 	// protected List<String> uniqueIDList;
 	// protected Webservice webservice;
+	
+	
+	private boolean hasChanges;
 
 	// --
 	private EventSource eventSource;
@@ -351,6 +354,17 @@ public class WebserviceRegistry {
 	
 
 
+	// protected List<String> uniqueIDList;
+	// protected Webservice webservice;
+	
+	
+	/**
+	 * @return the hasChanges
+	 */
+	public boolean isHasChanges() {
+		return hasChanges;
+	}
+
 	public Webservice getWebserviceFromUniqueID(String uniqueID) {
 		Webservice webservice = null;
 		for (int i = 0; i < webserviceList.size(); i++) {
@@ -383,6 +397,7 @@ public class WebserviceRegistry {
 		webservice.setOutput(webserviceOld.getOutput());
 		webserviceList.add(webservice);
 		int index = indexOfWebservice(webservice);
+		hasChanges=true;
 		eventSource.fireEvent(new EventObject(Events.ADDED,
 				"webservice", webservice, //$NON-NLS-1$
 				"index", index));//$NON-NLS-1$
@@ -395,6 +410,7 @@ public class WebserviceRegistry {
 	public void addNewWebservice(Webservice webservice) {
 		webserviceList.add(webservice);
 		int index = indexOfWebservice(webservice);
+		hasChanges=true;
 		eventSource.fireEvent(new EventObject(Events.ADDED,
 				"webservice", webservice, //$NON-NLS-1$
 				"index", index));//$NON-NLS-1$
@@ -403,6 +419,7 @@ public class WebserviceRegistry {
 	public void deleteWebservice(Webservice webservice) {
 		int index = indexOfWebservice(webservice);
 		if (webserviceList.remove(webservice)) {
+			hasChanges=true;
 			eventSource.fireEvent(new EventObject(Events.REMOVED,
 					"webservice", webservice, //$NON-NLS-1$
 					"index", index)); //$NON-NLS-1$
@@ -530,6 +547,14 @@ public class WebserviceRegistry {
 		return webservice.getOutput();
 	}
 
+	private void reportChange(Webservice webservice){
+		int index = indexOfWebservice(webservice);
+		hasChanges = true;
+		eventSource.fireEvent(new EventObject(Events.CHANGED,
+				"webservice", webservice, //$NON-NLS-1$
+				"index", index));//$NON-NLS-1$
+	}
+
 	/**
 	 * @param webservice
 	 * @param newName
@@ -542,10 +567,7 @@ public class WebserviceRegistry {
 		}
 		StaticIdentity identity = (StaticIdentity) webservice.getIdentity();
 		identity.setName(name);
-		int index = indexOfWebservice(webservice);
-		eventSource.fireEvent(new EventObject(Events.CHANGED,
-				"webservice", webservice, //$NON-NLS-1$
-				"index", index));//$NON-NLS-1$
+		reportChange(webservice);
 
 	}
 
@@ -561,7 +583,7 @@ public class WebserviceRegistry {
 		}
 		StaticIdentity identity = (StaticIdentity) webservice.getIdentity();
 		identity.setDescription(description);
-
+		reportChange(webservice);
 	}
 
 	/**
@@ -576,6 +598,7 @@ public class WebserviceRegistry {
 			return;
 		}
 		webservice.setWebresourceFormat(webresourceFormat);
+		reportChange(webservice);
 	}
 
 	/**
@@ -589,7 +612,7 @@ public class WebserviceRegistry {
 			return;
 		}
 		webservice.setCreator(creator);
-
+		reportChange(webservice);
 	}
 
 	/**
@@ -603,7 +626,7 @@ public class WebserviceRegistry {
 			return;
 		}
 		webservice.setContact(contact);
-
+		reportChange(webservice);
 	}
 
 	/**
@@ -617,7 +640,7 @@ public class WebserviceRegistry {
 			return;
 		}
 		webservice.setURL(url);
-
+		reportChange(webservice);
 	}
 
 	/**
@@ -631,9 +654,9 @@ public class WebserviceRegistry {
 			return;
 		}
 		webservice.setServiceID(serviceID);
-
+		reportChange(webservice);
 	}
-
+	
 	/**
 	 * @param webservice
 	 * @param newInput
@@ -651,6 +674,7 @@ public class WebserviceRegistry {
 
 		// lists are different replace old proxy list
 		webservice.input = newInput;
+		reportChange(webservice);
 	}
 
 	/**
@@ -670,6 +694,7 @@ public class WebserviceRegistry {
 
 		// lists are different replace old proxy list
 		webservice.output = newOutput;
+		reportChange(webservice);
 	}
 
 	/**

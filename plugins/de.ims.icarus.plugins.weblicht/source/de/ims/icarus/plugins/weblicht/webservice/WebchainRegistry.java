@@ -52,6 +52,8 @@ public class WebchainRegistry {
 	protected List<Webchain> webchainList;
 	protected WebchainInputType defaultInputType;
 	
+	private boolean hasChanges;
+	
 	//protected Webservice webservice;
 	
 	private EventSource eventSource;
@@ -347,6 +349,13 @@ public class WebchainRegistry {
 		return e.getElementsByTagName(s).item(0).getAttributes().getNamedItem(item).getNodeValue();
 	}
 	
+	/**
+	 * @return the hasChanges
+	 */
+	public boolean isHasChanges() {
+		return hasChanges;
+	}
+	
 	
 	/**
 	 * 
@@ -356,6 +365,7 @@ public class WebchainRegistry {
 	public void addNewWebchain(Webchain webchain){
 		webchainList.add(webchain);
 		int index = indexOfWebchain(webchain);
+		hasChanges=true;
 		eventSource.fireEvent(new EventObject(Events.ADDED,
 				"webchain",webchain, //$NON-NLS-1$
 				"index",index));//$NON-NLS-1$
@@ -364,6 +374,7 @@ public class WebchainRegistry {
 	public void deleteWebchain(Webchain webchain){
 		int index = indexOfWebchain(webchain);
 		if (webchainList.remove(webchain)){
+			hasChanges=true;
 			eventSource.fireEvent(new EventObject(Events.REMOVED,
 					"webchain",webchain, //$NON-NLS-1$
 					"index",index)); //$NON-NLS-1$
@@ -430,7 +441,15 @@ public class WebchainRegistry {
 	}
 	
 	
-
+	protected void hasChange(Webchain webchain){
+		int index = indexOfWebchain(webchain);
+		hasChanges=true;
+		eventSource.fireEvent(new EventObject(Events.CHANGED,
+				"webchain",webchain //$NON-NLS-1$
+				,"index",index));//NON-NLS-1$ //$NON-NLS-1$
+		
+	}
+	
 	public void setName(Webchain webchain, String name) {
 		if(name==null)
 			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
@@ -439,10 +458,7 @@ public class WebchainRegistry {
 		}
 		
 		webchain.setName(name);
-		int index = indexOfWebchain(webchain);
-		eventSource.fireEvent(new EventObject(Events.CHANGED,
-				"webchain",webchain //$NON-NLS-1$
-				,"index",index));//NON-NLS-1$ //$NON-NLS-1$
+		hasChange(webchain);
 	}
 	
 	
@@ -461,13 +477,9 @@ public class WebchainRegistry {
 			
 		//lists are different replace old webchainelement list
 		webchain.setNewChainlist(webchainElements);
-		
-		int index = indexOfWebchain(webchain);
 
 		//fire event to refresh webchaintree with the latest data
-		eventSource.fireEvent(new EventObject(Events.CHANGE,
-				"webchain",webchain, //$NON-NLS-1$
-				"index",index));//$NON-NLS-1$
+		hasChange(webchain);
 	}
 	
 	
@@ -486,7 +498,7 @@ public class WebchainRegistry {
 		chainInput.setInputType(type);
 		chainInput.setInputTypeValue(value);
 		webchain.setWebchainInputType(chainInput);
-		
+		hasChange(webchain);
 	}
 
 	//compare 2 webservice element lists

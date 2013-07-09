@@ -39,6 +39,7 @@ import de.ims.icarus.plugins.weblicht.webservice.Webchain;
 import de.ims.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import de.ims.icarus.plugins.weblicht.webservice.Webservice;
 import de.ims.icarus.plugins.weblicht.webservice.WebserviceProxy;
+import de.ims.icarus.plugins.weblicht.webservice.WebserviceRegistry;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
@@ -71,7 +72,7 @@ public class WeblichtChainView extends View {
 	private Handler handler;
 	private CallbackHandler callbackHandler;
 
-	
+
 	@SuppressWarnings("static-access")
 	@Override
 	public void init(JComponent container) {
@@ -144,6 +145,19 @@ public class WeblichtChainView extends View {
 
 	@Override
 	public boolean isClosable() {
+		
+		if(WebchainRegistry.getInstance().isHasChanges()){
+			if(DialogFactory.getGlobalFactory().showWarningConfirm(null,
+					"plugins.weblicht.weblichtChainView.dialogs.unsavedWebchains.title", //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.unsavedWebchains.message")){ //$NON-NLS-1$
+				try {
+					WebserviceRegistry.getInstance().saveWebservices();
+				} catch (Exception e) {
+						LoggerFactory.log(this, Level.SEVERE, "Failed to save Webchains", e); //$NON-NLS-1$
+				}
+			};
+				
+		}
 		return true;
 	}
 
