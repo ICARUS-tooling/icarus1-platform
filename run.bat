@@ -1,0 +1,1 @@
+start javaw -jar -Xms500m -Xmx2g icarus.jar
