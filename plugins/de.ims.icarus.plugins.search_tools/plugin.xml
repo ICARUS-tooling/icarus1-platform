@@ -17,9 +17,9 @@
 	</attributes>
 	
 	<requires>
-		<import plugin-id="de.ims.icarus.core" reverse-lookup="true" />
-		<import plugin-id="de.ims.icarus.languageTools" reverse-lookup="true" />
-		<import plugin-id="de.ims.icarus.jgraph" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.jgraph" />
 	</requires>
 	
 	<runtime>

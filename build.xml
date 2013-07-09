@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ICARUS main build file" default="help" basedir=".">
 	<property name="app.name" value="ICARUS" />
+	<property name="app.version" value="1.0.0" />
 	
-	<property name="implementation.version" value="1.0.0" />
+	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />
 
 	<property name="home" value="${basedir}" />
@@ -16,6 +17,7 @@
 	<property name="plugins.home" value="${basedir}/plugins" />
 	<property name="plugins.build" value="${build.home}/plugins" />
 
+	<!--================= COMPILER OPTIONS =================-->
 	<property name="compile.debug"       value="true"/>
 	<property name="compile.deprecation" value="false"/>
 	<property name="compile.optimize"    value="true"/>
@@ -91,8 +93,6 @@ test  - runs some tests
 		<antcall target="-build-plugins">
 			<param name="target" value="build" />
 		</antcall>
-		
-		<!-- TODO  -->
 	</target>
 
 	<target name="run" depends="build" description="Runs application">
@@ -124,27 +124,12 @@ test  - runs some tests
 	</target>
 
 	<target name="dist"
-	        depends="clean,build,docs"
+	        depends="clean,build"
 	        description="Prepares distribution packages">
-		<jpf-zip basedir="${build.home}/plugins"
-		         includes="*/plugin.xml,*/plugin-fragment.xml"
-		         destdir="${build.home}/plugins" />
-		<delete includeemptydirs="true">
-			<fileset dir="${build.home}/plugins">
-				<include name="**/*" />
-				<exclude name="*.zip" />
-			</fileset>
-		</delete>
 		<zip destfile="${build.home}/${app.name}-bin-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">
 			<fileset dir="${build.home}" includes="**/*" />
-		</zip>
-		<zip destfile="${build.home}/${app.name}-src-${app.version}.zip"
-		     duplicate="fail"
-		     update="false">
-			<fileset dir="${basedir}"
-			         excludes="build,**/classes/**,.check*,.fb*,nbproject/private/**,build/**,logs/**,data/**,temp/**,*.zip,todo.txt,plugins/org.jpf.demo.toolbox.ftpmonitor/**" />
 		</zip>
 		<delete includeemptydirs="true">
 			<fileset dir="${build.home}">

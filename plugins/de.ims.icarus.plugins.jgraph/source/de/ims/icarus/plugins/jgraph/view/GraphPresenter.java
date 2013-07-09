@@ -16,6 +16,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.FlavorEvent;
 import java.awt.datatransfer.FlavorListener;
 import java.awt.datatransfer.Transferable;
@@ -47,6 +48,7 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.ActionMap;
 import javax.swing.ComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -76,8 +78,10 @@ import com.mxgraph.model.mxIGraphModel.mxAtomicGraphModelChange;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxConnectPreview;
 import com.mxgraph.swing.handler.mxConnectionHandler;
+import com.mxgraph.swing.handler.mxGraphTransferHandler;
 import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.util.mxGraphActions;
+import com.mxgraph.swing.util.mxGraphTransferable;
 import com.mxgraph.swing.view.mxInteractiveCanvas;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxEvent;
@@ -3015,6 +3019,36 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle 'compressEnabled' state", ex); //$NON-NLS-1$
 			}
+		}
+	}
+	
+	protected class GraphTransferHandler extends mxGraphTransferHandler {
+		
+	}
+	
+	protected class GraphTransferable extends mxGraphTransferable {
+
+		public GraphTransferable(Object[] cells, mxRectangle bounds,
+				ImageIcon image) {
+			super(cells, bounds, image);
+		}
+
+		@Override
+		protected DataFlavor[] getRicherFlavors() {
+			// TODO Auto-generated method stub
+			return super.getRicherFlavors();
+		}
+		
+	}
+	
+	static {
+		 try {
+			mxGraphTransferable.dataFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType
+					+ "; class=com.mxgraph.swing.util.mxGraphTransferable", null, //$NON-NLS-1$
+					mxGraphTransferable.class.getClassLoader());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

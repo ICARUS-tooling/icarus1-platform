@@ -10,8 +10,8 @@
 	</doc>
 	
 	<requires>
-		<import plugin-id="de.ims.icarus.core" reverse-lookup="true" />
-		<import plugin-id="de.ims.icarus.languageTools" reverse-lookup="true" />
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
 	</requires>
 	
 	<runtime>

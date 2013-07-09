@@ -18,6 +18,9 @@ Use top-level project build file to build application.
 
 	<target name="build">
 		<echo>Building ICARUS core to folder ${build.home}</echo>
+		<delete includeEmptyDirs="true">
+			<fileset dir="${basedir}/classes" includes="**/*" />
+		</delete>
 		<mkdir dir="${basedir}/classes" />
 		<manifest file="${basedir}/manifest.mf">
 			<attribute name="Class-Path" value="jpf.jar" />
@@ -28,12 +31,17 @@ Use top-level project build file to build application.
 			<attribute name="Built-Date" value="${dt-stamp}" />
 			<!-- TODO: additional attributes should go here -->
 		</manifest>
-		<javac srcdir="${basedir}/source" 
+		<javac srcdir="${basedir}/source"
 			destdir="${basedir}/classes" 
 			debug="${compile.debug}"
 			deprecation="${compile.deprecation}"
 			optimize="${compile.optimize}"
-			includeantruntime="false" />
+			includeantruntime="false">
+			<classpath>
+				<fileset file="${build.home}/icarus.jar" />
+				<fileset dir="${lib.home}" includes="**/*.jar" />
+			</classpath>
+		</javac>
 		<copy todir="${basedir}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
