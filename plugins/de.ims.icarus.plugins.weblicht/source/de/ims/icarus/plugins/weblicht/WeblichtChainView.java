@@ -151,7 +151,7 @@ public class WeblichtChainView extends View {
 					"plugins.weblicht.weblichtChainView.dialogs.unsavedWebchains.title", //$NON-NLS-1$
 					"plugins.weblicht.weblichtChainView.dialogs.unsavedWebchains.message")){ //$NON-NLS-1$
 				try {
-					WebserviceRegistry.getInstance().saveWebservices();
+					WebchainRegistry.getInstance().saveWebchains();
 				} catch (Exception e) {
 						LoggerFactory.log(this, Level.SEVERE, "Failed to save Webchains", e); //$NON-NLS-1$
 				}
