@@ -48,7 +48,6 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.ActionMap;
 import javax.swing.ComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -78,7 +77,6 @@ import com.mxgraph.model.mxIGraphModel.mxAtomicGraphModelChange;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxConnectPreview;
 import com.mxgraph.swing.handler.mxConnectionHandler;
-import com.mxgraph.swing.handler.mxGraphTransferHandler;
 import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.swing.util.mxGraphTransferable;
@@ -314,6 +312,12 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		return new DelegatingConnectionHandler();
 	}
 	
+	/*@Override
+	protected TransferHandler createTransferHandler() {
+		//return new GraphTransferHandler();
+		return super.createTransferHandler();
+	}*/
+
 	protected mxConnectPreview createConnectPreview() {
 		return new DelegatingConnectPreview();
 	}
@@ -3022,11 +3026,103 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 	}
 	
-	protected class GraphTransferHandler extends mxGraphTransferHandler {
+	/*protected class GraphTransferHandler extends mxGraphTransferHandler {
+
+		@Override
+		public void setDragImage(Image img) {
+			try {
+				System.out.println("setDragImage: img="+String.valueOf(img));
+				super.setDragImage(img);
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public Image getDragImage() {
+			Image img = super.getDragImage();
+			System.out.println("getDragImage: img="+String.valueOf(img));
+			
+			return img;
+		}
+
+		@Override
+		public void setDragImageOffset(Point p) {
+			try {
+				System.out.println("setDragImageOffset: p="+String.valueOf(p));
+				super.setDragImageOffset(p);
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public Point getDragImageOffset() {
+			Point p = super.getDragImageOffset();
+			System.out.println("getDragImageOffset: img="+String.valueOf(p));
+			
+			return p;
+		}
+
+		@Override
+		public void exportAsDrag(JComponent comp, InputEvent e, int action) {
+			try {
+				System.out.printf("exportAsDrag: comp=%s event=%s action=%d\n",
+						String.valueOf(comp), String.valueOf(e), action);
+				super.exportAsDrag(comp, e, action);
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		@Override
+		public void exportToClipboard(JComponent comp, Clipboard clip,
+				int action) throws IllegalStateException {
+			try {
+				System.out.printf("exportToClipboard: comp=%s clip=%s action=%d\n",
+						String.valueOf(comp), String.valueOf(clip), action);
+				super.exportToClipboard(comp, clip, action);
+			} catch(IllegalStateException ex) {
+				ex.printStackTrace();
+				throw ex;
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		@Override
+		public boolean importData(TransferSupport support) {
+			boolean result =  super.importData(support);
+			
+			System.out.printf("importData: support=%s result=%b\n",
+					String.valueOf(support), result);
+			
+			return result;
+		}
+
+		@Override
+		public boolean canImport(TransferSupport support) {
+			boolean result = super.canImport(support);
+
+			System.out.printf("canImport: support=%s result=%b\n",
+					String.valueOf(support), result);
+			
+			return result;
+		}
+
+		@Override
+		public Icon getVisualRepresentation(Transferable t) {
+			Icon icon = super.getVisualRepresentation(t);
+			
+			System.out.printf("getVisualRepresentation: transferable=%s icon=%s\n",
+					String.valueOf(t), String.valueOf(icon));
+			
+			return icon;
+		}
 		
-	}
+	}*/
 	
-	protected class GraphTransferable extends mxGraphTransferable {
+	/*protected class GraphTransferable extends mxGraphTransferable {
 
 		public GraphTransferable(Object[] cells, mxRectangle bounds,
 				ImageIcon image) {
@@ -3039,7 +3135,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return super.getRicherFlavors();
 		}
 		
-	}
+	}*/
 	
 	static {
 		 try {
@@ -3047,8 +3143,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 					+ "; class=com.mxgraph.swing.util.mxGraphTransferable", null, //$NON-NLS-1$
 					mxGraphTransferable.class.getClassLoader());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerFactory.log(GraphPresenter.class, Level.SEVERE, 
+					"Failed to adjust class-loader of DnD support", e); //$NON-NLS-1$
 		}
 	}
 }

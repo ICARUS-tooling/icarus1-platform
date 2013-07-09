@@ -98,9 +98,8 @@ public class DocumentStream extends ByteArrayOutputStream implements ActionListe
 	}
 	
 	protected void addBatch(String s) {
-		if(EOL.equals(s)) {
-			document.appendBatchLineFeed(defaultStyle);
-		} else {
+		document.appendBatchLineFeed(defaultStyle);
+		if(!EOL.equals(s)) {
 			document.appendBatchString(s, defaultStyle);
 		}
 	}
@@ -122,6 +121,11 @@ public class DocumentStream extends ByteArrayOutputStream implements ActionListe
 		}
 		
 		addBatch(s);
+		
+		if(alternateStream!=null) {
+			alternateStream.print(s);
+			alternateStream.flush();
+		}
 		
 		Timer timer = getTimer();
 		if(!timer.isRunning()) {

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
@@ -712,6 +713,40 @@ public class Core {
 		images.add(getLargeIcon().getImage());
 		
 		return images;
+	}
+
+	public void ensureResource(String filename,	String path, ClassLoader loader) {
+		ensureResource(null, filename, path, loader);
+	}
+
+	public void ensureResource(String foldername, String filename, 
+			String path, ClassLoader loader) {
+		try {
+			File folder = dataFolder;
+			if(foldername!=null) {
+				folder = new File(folder, foldername);
+				if(!folder.exists()) {
+					folder.mkdir();
+				}
+			}
+			
+			File file = new File(folder, filename);
+			if(file.isFile()) {
+				return;
+			}
+			
+			file.createNewFile();
+			
+			System.out.println(path);
+			
+			InputStream in = loader.getResourceAsStream(path);
+			OutputStream out = new FileOutputStream(file);
+			
+			IOUtil.copyStream(in, out, 4096);
+			
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, "Failed to ensure resource: "+filename, e); //$NON-NLS-1$
+		}
 	}
 	
 	

@@ -12,6 +12,8 @@ package de.ims.icarus.plugins.language_tools;
 
 import org.java.plugin.Plugin;
 
+import de.ims.icarus.Core;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -30,7 +32,20 @@ public class LanguageToolsPlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
-		// no-op
+		
+		// Ensure some default treebank files
+		ClassLoader loader = LanguageToolsPlugin.class.getClassLoader();
+		String[] resources = {
+			"CoNLL2009-ST-English-development.txt", //$NON-NLS-1$
+			"tiger_release_aug07.corrected.conll09_small.txt", //$NON-NLS-1$
+		};
+		String root = "de/ims/icarus/plugins/language_tools/resources/"; //$NON-NLS-1$
+		String folder = "treebanks"; //$NON-NLS-1$
+		
+		for(String resource : resources) {
+			String path = root+resource;
+			Core.getCore().ensureResource(folder, resource, path, loader);
+		}
 	}
 
 	/**
