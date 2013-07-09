@@ -303,7 +303,8 @@ public class WebserviceRegistry {
 	private void saveXMLToFile (StreamResult result) throws Exception{
         //writing to file
         FileOutputStream fop = null;
-        File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht_out.xml"); //$NON-NLS-1$
+        //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht_out.xml"); //$NON-NLS-1$
+        File  file = new File(Core.getCore().getDataFolder(), "weblicht.xml");  //$NON-NLS-1$
         fop = new FileOutputStream(file);
 
         // if file doesnt exists, then create it

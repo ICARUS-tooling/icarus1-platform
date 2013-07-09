@@ -200,8 +200,8 @@ public class WebchainRegistry {
         
         //debug
         //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain_out.xml"); //$NON-NLS-1$
-        File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
-       
+        //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
+        File  file = new File(Core.getCore().getDataFolder(), "webchain.xml"); //$NON-NLS-1$
         fop = new FileOutputStream(file);
 
         // if file doesnt exists, then create it
