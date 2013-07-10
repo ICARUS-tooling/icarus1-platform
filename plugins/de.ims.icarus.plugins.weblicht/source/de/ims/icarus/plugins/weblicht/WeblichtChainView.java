@@ -36,11 +36,9 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.weblicht.webservice.TCFDataList;
 import de.ims.icarus.plugins.weblicht.webservice.WebExecutionService;
 import de.ims.icarus.plugins.weblicht.webservice.Webchain;
-import de.ims.icarus.plugins.weblicht.webservice.WebchainOutputType;
 import de.ims.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import de.ims.icarus.plugins.weblicht.webservice.Webservice;
 import de.ims.icarus.plugins.weblicht.webservice.WebserviceProxy;
-import de.ims.icarus.plugins.weblicht.webservice.WebserviceRegistry;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
@@ -426,6 +424,9 @@ public class WeblichtChainView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new webchain: "+name, ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}		
 			
 		}
@@ -454,6 +455,9 @@ public class WeblichtChainView extends View {
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Unable to delete webchain: "+webchain.getName(), ex); //$NON-NLS-1$
+					UIUtil.beep();
+					
+					showError(ex);
 				}
 			}
 			
@@ -494,6 +498,9 @@ public class WeblichtChainView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to clone webchain: "+name, ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 			
 		}
@@ -509,11 +516,22 @@ public class WeblichtChainView extends View {
 			}
 			
 			if(selectedObject instanceof Webchain){
-			
 				Webchain webchain = (Webchain)selectedObject;
-			
-				Message message = new Message(this, Commands.EDIT, webchain, null);
-				sendRequest(WeblichtConstants.WEBLICHT_EDIT_VIEW_ID, message);
+				try {
+										
+					Message message = new Message(this, Commands.EDIT, webchain, null);
+					sendRequest(WeblichtConstants.WEBLICHT_EDIT_VIEW_ID, message);
+					
+				} catch (Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Unable to edit webchain: "+webchain.getName(), ex); //$NON-NLS-1$
+					UIUtil.beep();
+					
+					showError(ex);
+				}
+
+
+
 			}
 
 		}
@@ -531,10 +549,20 @@ public class WeblichtChainView extends View {
 			
 			WebserviceProxy webserviceproxy = (WebserviceProxy)selectedObject;
 			Webservice webservice = webserviceproxy.get();
-			//System.out.println(webservice.getName() + " " + webservice.getUID());
 			
-			Message message = new Message(this, Commands.DISPLAY, webservice, null);
-			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
+			try {				
+				//System.out.println(webservice.getName() + " " + webservice.getUID());
+				
+				Message message = new Message(this, Commands.DISPLAY, webservice, null);
+				sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to show webservice info: " + webservice.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
+
 		}
 
 		/**
@@ -568,6 +596,9 @@ public class WeblichtChainView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to rename treebank "+currentName+" to "+newName, ex); //$NON-NLS-1$ //$NON-NLS-2$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 			
 		}
@@ -616,6 +647,9 @@ public class WeblichtChainView extends View {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Failed open File " + filename //$NON-NLS-1$
 							+ " " + webchain.getName(), ex); //$NON-NLS-1$;
+					UIUtil.beep();
+					
+					showError(ex);
 				}
 							
 			}
@@ -652,7 +686,10 @@ public class WeblichtChainView extends View {
 						.log(this,
 								Level.SEVERE,
 								"Failed to execute chain list " + webchain.getName(), ex); //$NON-NLS-1$
-
+				UIUtil.beep();
+				
+				showError(ex);
+			
 			}
 
 		}
@@ -669,6 +706,9 @@ public class WeblichtChainView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to save Webchains: ", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}			
 		}
 		

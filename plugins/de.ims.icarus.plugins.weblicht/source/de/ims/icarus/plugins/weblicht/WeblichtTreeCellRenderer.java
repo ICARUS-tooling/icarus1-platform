@@ -100,15 +100,14 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
 				row, hasFocus);
 		
-		//FIXME set max width of Tooltip
-		//setToolTipText(UIUtil.toSwingTooltip(formatTooltip(tooltip,60)));
-		setToolTipText(tooltip);
+		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 		setIcon(icon);
 		
 		return this;
 	}
 
 	
+	@SuppressWarnings("unused")
 	private String formatTooltip(String tooltip, int mod){
 		
 		if(tooltip==null || tooltip.isEmpty()) {
@@ -154,11 +153,11 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 	 */
 	private boolean isWordend(char c) {
 		if(c == ' ') return true;
-		if(c == ',') return true;
-		if(c == ';') return true;
-		if(c == ':') return true;
-		if(c == '.') return true;
-		if(c == '-') return true;
+//		if(c == ',') return true;
+//		if(c == ';') return true;
+//		if(c == ':') return true;
+//		if(c == '.') return true;
+//		if(c == '-') return true;
 		else{
 			return false;
 		}

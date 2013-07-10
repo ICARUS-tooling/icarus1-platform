@@ -97,7 +97,7 @@ public class WebserviceDialogs {
 		
 		textArea.putClientProperty("container", container);		 //$NON-NLS-1$
 		textArea.setText(null);
-		textArea.setToolTipText(null);
+		textArea.setToolTipText(UIUtil.toSwingTooltip(null));
 		
 		return textArea;
 	}
@@ -771,7 +771,8 @@ public class WebserviceDialogs {
 				"wsres " + wswebresourceFormat+" ");
 		*/
 		
-		webresourceFormat.setToolTipText(ResourceManager.getInstance().get("plugins.weblicht.dialog.hint.webserviceResource")); //$NON-NLS-1$
+		webresourceFormat.setToolTipText(UIUtil.toSwingTooltip(
+				ResourceManager.getInstance().get("plugins.weblicht.dialog.hint.webserviceResource"))); //$NON-NLS-1$
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory().getResourceDomain());
 

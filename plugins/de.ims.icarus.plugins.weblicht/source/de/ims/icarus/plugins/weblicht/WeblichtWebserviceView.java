@@ -354,6 +354,10 @@ public class WeblichtWebserviceView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new webservice: "+webservice.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			
 			}
 			
 			//System.out.println("WSCount " + WebserviceRegistry.getInstance().getWebserviceCount());
@@ -398,6 +402,10 @@ public class WeblichtWebserviceView extends View {
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Unable to delete webservice: "+webservice.getName(), ex); //$NON-NLS-1$
+					UIUtil.beep();
+					
+					showError(ex);
+				
 				}
 			}
 		}
@@ -453,6 +461,10 @@ public class WeblichtWebserviceView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new webservice: "+webservice.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+				
 			}
 		}
 
@@ -468,11 +480,20 @@ public class WeblichtWebserviceView extends View {
 			}	
 			
 			Webservice webservice = (Webservice)selectedObject;
-			
-			//System.out.println(webservice.getName() + " " + webservice.getUID());
-			
-			Message message = new Message(this, Commands.EDIT, webservice, null);
-			sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
+			try {
+				//System.out.println(webservice.getName() + " " + webservice.getUID());
+				
+				Message message = new Message(this, Commands.EDIT, webservice, null);
+				sendRequest(WeblichtConstants.WEBSERVICE_EDIT_VIEW_ID, message);
+				
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to edit webservice: "+webservice.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
+
 		}
 		
 		/**
@@ -485,17 +506,38 @@ public class WeblichtWebserviceView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to save Webservices: ", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}			
 		}
 		
 		
 		public void ascWebserviceSortAction(ActionEvent e) {
-			WebserviceRegistry.getInstance().sortEvent(webserviceViewListModel,true);
+			try {
+				WebserviceRegistry.getInstance().sortEvent(webserviceViewListModel,true);
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to sort webservices (asc) ", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
+			
 		}
 		
 		
 		public void descWebserviceSortAction(ActionEvent e) {
-			WebserviceRegistry.getInstance().sortEvent(webserviceViewListModel,false);
+			
+			try {
+				WebserviceRegistry.getInstance().sortEvent(webserviceViewListModel,false);
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Unable to sort webservices (desc)", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 	}

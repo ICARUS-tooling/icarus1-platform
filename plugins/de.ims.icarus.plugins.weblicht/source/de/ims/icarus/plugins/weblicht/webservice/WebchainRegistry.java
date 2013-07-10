@@ -481,12 +481,23 @@ public class WebchainRegistry {
 		if (webchainElements==null){			
 			return;
 		}
-			
+		
+		
+		boolean refreshAll = webchain.getElementsCount() != webchainElements.size();
+		System.out.println(refreshAll);
 		//lists are different replace old webchainelement list
 		webchain.setNewChainlist(webchainElements);
 
 		//fire event to refresh webchaintree with the latest data
-		hasChange(webchain);
+		if (refreshAll){
+			int index = indexOfWebchain(webchain);
+			hasChanges=true;
+			eventSource.fireEvent(new EventObject(Events.ADDED,
+					"webchain",webchain //$NON-NLS-1$
+					,"index",index));//NON-NLS-1$ //$NON-NLS-1$
+		} else {
+			hasChange(webchain);
+		}
 	}
 	
 	

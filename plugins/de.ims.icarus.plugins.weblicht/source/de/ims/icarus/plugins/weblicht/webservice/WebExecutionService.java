@@ -124,11 +124,36 @@ public class WebExecutionService {
 								"plugins.weblicht.weblichtWebserviceView.dialogs.error401.message", //$NON-NLS-1$
 								webservice.getURL());
 				return null;
+				
+			case 405:
+			DialogFactory
+					.getGlobalFactory()
+					.showError(
+							null,
+							"plugins.weblicht.weblichtWebserviceView.dialogs.error405.title", //$NON-NLS-1$
+							"plugins.weblicht.weblichtWebserviceView.dialogs.error405.message", //$NON-NLS-1$
+							webservice.getURL());
+			return null;
+			
+			case 415:
+			DialogFactory
+					.getGlobalFactory()
+					.showError(
+							null,
+							"plugins.weblicht.weblichtWebserviceView.dialogs.error415.title", //$NON-NLS-1$
+							"plugins.weblicht.weblichtWebserviceView.dialogs.error415.message", //$NON-NLS-1$
+							webservice.getURL());
+			return null;	
+			
+				
 			}
+			
+
+		
 
 			
-//			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
-//					+ " " + response.getStatus()); //$NON-NLS-1$
+			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
+					+ " " + response.getStatus()); //$NON-NLS-1$
 
 			
 			// we use only the latest input type for our query!

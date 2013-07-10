@@ -156,7 +156,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		createHeader(ResourceManager.getInstance().get("config.preferencesTitle.title"));	 //$NON-NLS-1$
 		configOptionsPanel.setLayout(new GridBagLayout());	
 		iniButtons();
-		iniOptionPanel(convertHandleToTreePath(starthandle));	
+		iniOptionPanel(convertHandleToTreePath(starthandle));
 		
 		//treeexpand works only if last node isnt leaf, workaround, expand to parent
 		if (tree.getExpandedDescendants(convertHandleToTreePath(starthandle)) == null){
@@ -169,8 +169,10 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         		    @Override public void valueChanged( TreeSelectionEvent e ){
         		    
         		      TreePath path = e.getNewLeadSelectionPath();
-        		      if (path != null && path.getPathCount() > 1){
+        		      
+        		      if (path != null && path.getPathCount() > 1){ 
         		    	  iniOptionPanel(path);
+
         		      }
         		    }
         		  }
@@ -213,7 +215,6 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		Handle handle = config.getHandle(startpath);
 		iniButtons();
 		iniOptionPanel(convertHandleToTreePath(handle));
-		
 		
 		//treeexpand works only if last node isnt leaf, workaround, expand to parent
 		if (tree.getExpandedDescendants(convertHandleToTreePath(handle)) == null){
@@ -270,7 +271,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 		Handle handle = treeMap.entrySet().iterator().next().getKey();
 		iniButtons();
-		iniOptionPanel(convertHandleToTreePath(handle));
+		iniOptionPanel(convertHandleToTreePath(handle));		
 
         //Selection Listener
         tree.getSelectionModel().addTreeSelectionListener(
@@ -278,8 +279,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         		    @Override public void valueChanged( TreeSelectionEvent e ){
         		      TreePath path = e.getNewLeadSelectionPath();
         		      if (path != null && path.getPathCount() > 1){
-        		    	  //rebuildOptionPanel(path);
-        		    	  iniOptionPanel(path);
+        		    	  iniOptionPanel(path);        		    	  
         		      }
 
         		    }
@@ -346,6 +346,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	 * @param firstpath
 	 */
 	private void iniOptionPanel(TreePath firstpath) {
+		  tree.setSelectionPath(firstpath);
 	      tree.expandPath(firstpath);
 	      rebuildOptionPanel(firstpath);
 	}
@@ -479,18 +480,20 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
             public Component getTreeCellRendererComponent(JTree tree, Object value,
             		boolean sel, boolean expanded, boolean leaf,
             		int row, boolean hasFocus) {
-                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-
-                TreePath path = tree.getPathForRow(row);
+            	
+            	
+                TreePath path = tree.getPathForRow(row);  
                 
-                if (path != null) {
+                if (path != null) {               	
                     String loca = getQueryFromTreePath(path);
                 	Handle h = config.getHandle(loca); 
-                    //System.out.println(config.getHandle(loca)); 
                     if (h != null){
-                    	this.setText(localizationName(h));
-                    }
-                }                
+                    	value = localizationName(h);
+                    }    
+                }
+            	
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
                 return this;
             }
         };
@@ -836,7 +839,6 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	
 	
 	protected void rebuildOptionPanel(TreePath path) {
-		
 		State state = new State();
 		state.setStatePanel(configOptionsPanel);
 			
@@ -1093,8 +1095,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 				spTree, rightView);
 		spMain.setMinimumSize(new Dimension(200,200));
 		
-		//expand complete vonfig tree
-		UIUtil.expandAll(tree, true);
+		//expand complete config tree
+		//UIUtil.expandAll(tree, true);
         
         this.add(spMain); 
      }
@@ -1211,8 +1213,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		
 		JLabel jn = new JLabel(localizationName(handle));
 		//jn.setPreferredSize((new Dimension(170, 15)));
-		jn.setToolTipText(localizationDesc(handle));
-		
+		jn.setToolTipText(UIUtil.toSwingTooltip(localizationDesc(handle)));
 		gbc.fill = GridBagConstraints.NONE;	
 
 		//seperator needed?
@@ -1299,8 +1300,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		//JCheckBox checkBox = new JCheckBox(localizationName(handle));
 		JCheckBox checkBox = new JCheckBox();
 		if (!((config.getProperty(handle, DESCRIPTION_KEY))==null)){
-			checkBox.setToolTipText(config.getProperty
-					(handle, DESCRIPTION_KEY).toString());
+			checkBox.setToolTipText(UIUtil.toSwingTooltip(config.getProperty
+					(handle, DESCRIPTION_KEY).toString()));
 		}
 		
 		if (config.getValue(handle) != null){
@@ -1337,7 +1338,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			colorPanel.setPreferredSize((new Dimension(45, 15)));
 			colorPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 			JButton colorButton = new JButton(ResourceManager.getInstance().get("config.chooseColor.desc")); //$NON-NLS-1$
-			colorButton.setToolTipText(ResourceManager.getInstance().get("config.chooseColor.desc")); //$NON-NLS-1$
+			colorButton.setToolTipText(	UIUtil.toSwingTooltip(
+					ResourceManager.getInstance().get("config.chooseColor.desc"))); //$NON-NLS-1$
 			//colorButton.setPreferredSize((new Dimension(50, 25)));
 			colorButton.addActionListener(new ColorChooseAction(handle, colorPanel));
 			if (config.isLocked(handle))colorButton.setEnabled(false);	
@@ -1372,8 +1374,9 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 		JButton pathButton = new JButton(
 				ResourceManager.getInstance().get("config.choosePath.name")); //$NON-NLS-1$
-		pathButton.setToolTipText(ResourceManager.getInstance()
-				.get("config.choosePath.desc")); //$NON-NLS-1$
+		pathButton.setToolTipText(UIUtil.toSwingTooltip(
+				ResourceManager.getInstance()
+				.get("config.choosePath.desc"))); //$NON-NLS-1$
 		pathButton.setPreferredSize((new Dimension(70, 20)));
 
 		pathButton.addActionListener(new PathChooseAction(handle,
@@ -1652,7 +1655,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		slider.setPaintLabels(true);
 		slider.setPaintTicks(true);
 		slider.setSnapToTicks(true);
-		slider.setToolTipText(String.valueOf(slider.getValue()));
+		slider.setToolTipText(UIUtil.toSwingTooltip(
+				String.valueOf(slider.getValue())));
 		slider.addChangeListener(new sliderChanged(handle,sliderval));
 
 		if (config.isLocked(handle))slider.setEnabled(false);
@@ -1816,7 +1820,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		
 		JLabel jn = new JLabel(localizationName(handle));
 		jn.setPreferredSize((new Dimension(170, 36)));
-		jn.setToolTipText(localizationDesc(handle));
+		jn.setToolTipText(UIUtil.toSwingTooltip(localizationDesc(handle)));
 		
 		gbc.fill = GridBagConstraints.NONE;	
 
@@ -2163,17 +2167,20 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		JPanel pAll = new JPanel();
 		pAll.setLayout(new BorderLayout());
 	    JButton newE = new JButton(ResourceManager.getInstance().get("config.listNew.name")); //$NON-NLS-1$
-	    newE.setToolTipText(ResourceManager.getInstance().get("config.listNew.desc")); //$NON-NLS-1$
+	    newE.setToolTipText(UIUtil.toSwingTooltip(
+	    		ResourceManager.getInstance().get("config.listNew.desc"))); //$NON-NLS-1$
 	    newE.addActionListener(new TableAction(table, dtm, true, handle,pAll,1));
 	    //newE.setEnabled(false);
 	    
 	    JButton editE = new JButton(ResourceManager.getInstance().get("config.listEdit.name")); //$NON-NLS-1$
-	    editE.setToolTipText(ResourceManager.getInstance().get("config.listEdit.desc")); //$NON-NLS-1$
+	    editE.setToolTipText(UIUtil.toSwingTooltip(
+	    		ResourceManager.getInstance().get("config.listEdit.desc"))); //$NON-NLS-1$
 	    editE.addActionListener(new TableAction(table, dtm, false, handle, pAll,0));
 	    //editE.setEnabled(false);
 	    
 	    JButton deleteE = new JButton(ResourceManager.getInstance().get("config.listDelete.name")); //$NON-NLS-1$
-	    deleteE.setToolTipText(ResourceManager.getInstance().get("config.listDelete.desc"));	 //$NON-NLS-1$
+	    deleteE.setToolTipText(UIUtil.toSwingTooltip(
+	    		ResourceManager.getInstance().get("config.listDelete.desc")));	 //$NON-NLS-1$
 	    deleteE.addActionListener(new TableAction(table, dtm, false, handle, pAll,-1));
 	    //deleteE.setEnabled(false);		
 	      
@@ -2376,17 +2383,20 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		JPanel pAll = new JPanel();
 		pAll.setLayout(new BorderLayout());
 	    JButton newE = new JButton(ResourceManager.getInstance().get("config.listNew.name")); //$NON-NLS-1$
-	    newE.setToolTipText(ResourceManager.getInstance().get("config.listNew.desc")); //$NON-NLS-1$
+	    newE.setToolTipText(UIUtil.toSwingTooltip(
+	    		ResourceManager.getInstance().get("config.listNew.desc"))); //$NON-NLS-1$
 	    newE.addActionListener(new ListAction(jl,dlm, 1,handle));
 	    newE.setEnabled(true);
 	    
 	    JButton editE = new JButton(ResourceManager.getInstance().get("config.listEdit.name")); //$NON-NLS-1$
-	    editE.setToolTipText(ResourceManager.getInstance().get("config.listEdit.desc")); //$NON-NLS-1$
+	    editE.setToolTipText(UIUtil.toSwingTooltip(
+	    		ResourceManager.getInstance().get("config.listEdit.desc"))); //$NON-NLS-1$
 	    editE.addActionListener(new ListAction(jl,dlm, 0,handle));
 	    editE.setEnabled(false);
 	    
 	    JButton deleteE = new JButton(ResourceManager.getInstance().get("config.listDelete.name")); //$NON-NLS-1$
-	    deleteE.setToolTipText(ResourceManager.getInstance().get("config.listDelete.desc")); //$NON-NLS-1$
+	    deleteE.setToolTipText(UIUtil.toSwingTooltip(
+	    		ResourceManager.getInstance().get("config.listDelete.desc"))); //$NON-NLS-1$
 	    deleteE.addActionListener(new ListAction(jl,dlm, -1,handle));
 	    deleteE.setEnabled(false);
 		
@@ -3253,11 +3263,13 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	    public void stateChanged(ChangeEvent ce) {
 	        JSlider slider = (JSlider)ce.getSource();
 	        if (slider.getValueIsAdjusting()) {
-	        	slider.setToolTipText(String.valueOf(slider.getValue()));
+	        	slider.setToolTipText(UIUtil.toSwingTooltip(
+	        			String.valueOf(slider.getValue())));
 	        	sliderval.setText(String.valueOf(slider.getValue()));	
 	        }
 	        if (!slider.getValueIsAdjusting()) {
-	        	slider.setToolTipText(String.valueOf(slider.getValue()));
+	        	slider.setToolTipText(UIUtil.toSwingTooltip(
+	        			String.valueOf(slider.getValue())));
 	        	changesMap.put(handle,slider.getValue());
 	        	configBottomPanel.getComponent(0).setEnabled(true);
 	        }
@@ -3447,7 +3459,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			pathChooser.setCurrentDirectory(new File(lastdir));
 			pathChooser.setDialogTitle(ResourceManager.getInstance().get("config.choosePathDialog.title")); //$NON-NLS-1$
 			pathChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			pathChooser.setToolTipText("null"); //$NON-NLS-1$
+			pathChooser.setToolTipText(UIUtil.toSwingTooltip("null")); //$NON-NLS-1$
 		}
 		
 		public String getPath(){			

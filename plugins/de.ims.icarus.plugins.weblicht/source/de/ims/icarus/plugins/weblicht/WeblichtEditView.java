@@ -22,6 +22,7 @@ import de.ims.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import de.ims.icarus.plugins.weblicht.webservice.WebserviceRegistry;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
+import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
@@ -341,6 +342,9 @@ public class WeblichtEditView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to reset editor: " + getWebchain(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 
@@ -358,6 +362,9 @@ public class WeblichtEditView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to apply edit: " + getWebchain(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 			
 			header.setText(getWebchain().getName());

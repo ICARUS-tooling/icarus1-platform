@@ -183,7 +183,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 			case Events.CHANGED:
 				childIndex = WebchainRegistry.getInstance().indexOfWebchain(webchain);
 				for (WeblichtTreeModel model : models) {
-					model.fireChildChanged(parentPath, childIndex, webchain);
+					//model.fireChildChanged(parentPath, childIndex, webchain);
+					model.fireStructureChanged();
 				}
 				break;
 				
