@@ -95,8 +95,18 @@ test  - runs some tests
 		</antcall>
 	</target>
 
+	<target name="build_ims" depends="build" description="Builds entire project (for IMS internal staff members)">
+		<mkdir dir="${build.home}/data"/>
+		<copy todir="${build.home}/data">
+			<fileset dir="${basedir}/data">
+				<include name="weblicht.xml"/>
+				<include name="webchain.xml"/>
+			</fileset>
+		</copy>
+	</target>
+
 	<target name="run" depends="build" description="Runs application">
-		<java jar="${build.home}/lib/jpf-boot.jar"
+		<java jar="${build.home}/icarus.jar"
 		      dir="${build.home}"
 		      fork="true" />
 	</target>
@@ -135,6 +145,22 @@ test  - runs some tests
 			<fileset dir="${build.home}">
 				<include name="**/*" />
 				<exclude name="${app.name}-???-${app.version}.zip" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="dist_ims"
+	        depends="clean,build_ims"
+	        description="Prepares distribution packages (for IMS internal staff members)">
+		<zip destfile="${build.home}/${app.name}-bin-${app.version}-ims.zip"
+		     duplicate="fail"
+		     update="false">
+			<fileset dir="${build.home}" includes="**/*" />
+		</zip>
+		<delete includeemptydirs="true">
+			<fileset dir="${build.home}">
+				<include name="**/*" />
+				<exclude name="${app.name}-???-${app.version}-???.zip" />
 			</fileset>
 		</delete>
 	</target>

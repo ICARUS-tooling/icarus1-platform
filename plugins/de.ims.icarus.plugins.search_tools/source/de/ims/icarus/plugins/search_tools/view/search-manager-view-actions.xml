@@ -75,5 +75,16 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.cancelSearchAction" />
 	</action-list>
+		
+	<!-- Popup-Menu list for history list -->
+	<action-list id="plugins.searchTools.searchManagerView.historyPopupMenuList">
+		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.viewSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.cancelSearchAction" />
+	</action-list>
 	
 </actions>

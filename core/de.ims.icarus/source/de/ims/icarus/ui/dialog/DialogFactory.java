@@ -13,6 +13,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -29,9 +31,9 @@ import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.KeyValuePair;
+import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
-import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 
 
 /**
@@ -42,6 +44,8 @@ import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 public final class DialogFactory {
 	
 	private static DialogFactory globalFactory;
+	
+	public static final int DEFAULT_TEXT_WIDTH = 300;
 	
 	public static DialogFactory getGlobalFactory() {
 		if(globalFactory==null) {
@@ -54,6 +58,29 @@ public final class DialogFactory {
 		
 		return globalFactory;
 	}
+	
+	private static final Map<Integer, Object[]> _options = new HashMap<>();
+	
+	private static Object[] getOptions(int id) {
+		return _options.get(id);
+	}
+	
+	public synchronized static int registerOptions(Object...options) {
+		if(options==null || options.length==0)
+			throw new IllegalArgumentException("Invalid options"); //$NON-NLS-1$
+		int id = _options.size();
+		
+		_options.put(id, options);
+		
+		return id;
+	}
+		
+	public static final int YES_NO_OPTION = registerOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$;
+	public static final int YES_OPTION = registerOptions("yes"); //$NON-NLS-1$
+	public static final int CONTINUE_OPTION = registerOptions("continue", "cancel");; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final int CONTINUE_CANCEL_OPTION = registerOptions("cancel");; //$NON-NLS-1$
+	public static final int OK_OPTION = registerOptions("ok"); //$NON-NLS-1$
+	public static final int OK_CANCEL_OPTION = registerOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private JFileChooser sharedFileChooser;
 	
@@ -86,18 +113,28 @@ public final class DialogFactory {
 
 	public void showError(Component parent, String title, 
 			String message, Object...params) {
+		showError(parent, OK_OPTION, title, message, params);
+	}
+
+	public void showError(Component parent, int options, String title, 
+			String message, Object...params) {
 		
-		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
+		BasicDialogBuilder builder = newBuilder();
 		
 		builder.setTitle(title);
 		builder.setMessage(message, params);
 		builder.setErrorType();
-		builder.setOptions("ok"); //$NON-NLS-1$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 	}
 
 	public void showDetailedError(Component parent, String title, 
+			String message, Throwable t, Object...params) {
+		showDetailedError(parent, OK_OPTION, title, message, t, params);
+	}
+
+	public void showDetailedError(Component parent, int options, String title, 
 			String message, Throwable t, Object...params) {
 		
 		JPanel dummy = new JPanel();
@@ -109,7 +146,7 @@ public final class DialogFactory {
 		builder.setMessage(message, params);
 		builder.addMessage(dummy);
 		builder.setErrorType();
-		builder.setOptions("ok"); //$NON-NLS-1$
+		builder.setOptions(getOptions(options));
 		
 		// TODO
 		
@@ -118,18 +155,28 @@ public final class DialogFactory {
 
 	public void showPlain(Component parent, String title, 
 			String message, Object... params) {
+		showPlain(parent, OK_OPTION, title, message, params);
+	}
+
+	public void showPlain(Component parent, int options, String title, 
+			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
 		
 		builder.setTitle(title);
 		builder.setMessage(message, params);
 		builder.setPlainType();
-		builder.setOptions("ok"); //$NON-NLS-1$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 	}
 
 	public void showInfo(Component parent, String title, 
+			String message, Object... params) {
+		showInfo(parent, OK_OPTION, title, message, params);
+	}
+
+	public void showInfo(Component parent, int options, String title, 
 			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -137,12 +184,17 @@ public final class DialogFactory {
 		builder.setTitle(title);
 		builder.setMessage(message, params);
 		builder.setInfoType();
-		builder.setOptions("ok"); //$NON-NLS-1$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 	}
 
 	public void showWarning(Component parent, String title, 
+			String message, Object... params) {
+		showWarning(parent, OK_OPTION, title, message, params);
+	}
+
+	public void showWarning(Component parent, int options, String title, 
 			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -150,12 +202,17 @@ public final class DialogFactory {
 		builder.setTitle(title);
 		builder.setMessage(message, params);
 		builder.setWarningType();
-		builder.setOptions("ok"); //$NON-NLS-1$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 	}
 
 	public boolean showConfirm(Component parent, String title, 
+			String message, Object... params) {
+		return showConfirm(parent, YES_NO_OPTION, title, message, params);
+	}
+
+	public boolean showConfirm(Component parent, int options, String title, 
 			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -163,7 +220,7 @@ public final class DialogFactory {
 		builder.setTitle(title);
 		builder.setMessage(message, params);
 		builder.setQuestionType();
-		builder.setOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		
@@ -171,6 +228,11 @@ public final class DialogFactory {
 	}
 
 	public boolean showCheckedConfirm(Component parent, MutableBoolean output, 
+			String title, String info, String message, Object... params) {
+		return showCheckedConfirm(parent, YES_NO_OPTION, output, title, info, message, params);
+	}
+
+	public boolean showCheckedConfirm(Component parent, int options, MutableBoolean output, 
 			String title, String info, String message, Object... params) {
 
 		if(info!=null && resourceDomain!=null) {
@@ -190,7 +252,7 @@ public final class DialogFactory {
 		builder.setMessage(message, params);
 		builder.addMessage(checkBox);
 		builder.setQuestionType();
-		builder.setOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		output.setValue(checkBox.isSelected());
@@ -200,17 +262,26 @@ public final class DialogFactory {
 
 	public boolean showWarningConfirm(Component parent, String title, 
 			String message, Object... params) {
+		return showWarningConfirm(parent, YES_NO_OPTION, title, message, params);
+	}
+
+	public boolean showWarningConfirm(Component parent, int options, String title, 
+			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
 		
 		builder.setTitle(title);
 		builder.setMessage(message, params);
 		builder.setWarningType();
-		builder.setOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		
 		return builder.isYesValue();
+	}
+	public boolean showGenericDialog(Component parent, int options, String title,
+			String message, Component comp, boolean resizable) {
+		return showGenericDialog(parent, title, message, comp, resizable, getOptions(options));
 	}
 	
 	public boolean showGenericDialog(Component parent, String title,
@@ -233,6 +304,10 @@ public final class DialogFactory {
 	}
 	
 	public boolean showOverwriteFileDialog(Component parent, File file) {
+		return showOverwriteFileDialog(parent, YES_NO_OPTION, file);
+	}
+	
+	public boolean showOverwriteFileDialog(Component parent, int options, File file) {
 		String path = file.getAbsolutePath();
 		path = StringUtil.fit(path, 50);
 		
@@ -241,7 +316,7 @@ public final class DialogFactory {
 		builder.setTitle("dialogs.overwriteFile.title"); //$NON-NLS-1$
 		builder.addMessage("dialogs.overwriteFile.message", path); //$NON-NLS-1$
 		builder.setPlainType();
-		builder.setOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		
@@ -284,6 +359,11 @@ public final class DialogFactory {
 	
 	public String showTextInputDialog(Component parent, String title, 
 			String message, Object...params) {
+		return showTextInputDialog(parent, OK_CANCEL_OPTION, title, message, params);
+	}
+	
+	public String showTextInputDialog(Component parent, int options, String title, 
+			String message, Object...params) {
 
 		JTextArea textArea = createTextArea();
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -292,7 +372,7 @@ public final class DialogFactory {
 		builder.setMessage(message, params);
 		builder.addMessage(getContainer(textArea));
 		builder.setPlainType();
-		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		
@@ -303,6 +383,11 @@ public final class DialogFactory {
 	
 	public void showTextOutputDialog(Component parent, String title, 
 			String message, String content, Object...params) {
+		showTextOutputDialog(parent, YES_OPTION, title, message, content, params);
+	}
+	
+	public void showTextOutputDialog(Component parent, int options, String title, 
+			String message, String content, Object...params) {
 
 		JTextArea textArea = createTextArea();
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -311,14 +396,21 @@ public final class DialogFactory {
 		builder.setMessage(message, params);
 		builder.addMessage(getContainer(textArea));
 		builder.setPlainType();
-		builder.setOptions("ok"); //$NON-NLS-1$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 	}
 	
 	public KeyValuePair<String, String> showPropertyEditDialog(
 			Component parent, String title, String message, 
-			String key, String value, Object params) {
+			String key, String value, Object...params) {
+		return showPropertyEditDialog(parent, OK_CANCEL_OPTION, 
+				title, message,	key, value, params);
+	}
+	
+	public KeyValuePair<String, String> showPropertyEditDialog(
+			Component parent, int options, String title, String message, 
+			String key, String value, Object...params) {
 
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
 		
@@ -334,7 +426,7 @@ public final class DialogFactory {
 		builder.addMessage("value"); //$NON-NLS-1$
 		builder.addMessage(getContainer(valueArea));
 		builder.setPlainType();
-		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		
@@ -349,7 +441,12 @@ public final class DialogFactory {
 	}
 	
 	public String showInputDialog(Component parent, String title, String message, 
-			String text, Object params) {
+			String text, Object...params) {
+		return showInputDialog(parent, OK_CANCEL_OPTION, title, message, text, params);
+	}
+	
+	public String showInputDialog(Component parent, int options, String title, 
+			String message,	String text, Object...params) {
 
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
 		
@@ -360,7 +457,7 @@ public final class DialogFactory {
 		builder.setMessage(message, params);
 		builder.addMessage(textField);
 		builder.setPlainType();
-		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		
@@ -372,7 +469,7 @@ public final class DialogFactory {
 		
 		return text;
 	}
-	
+
 	public File showDestinationFileDialog(Component parent, String title, 
 			File directory) {
 		JFileChooser fileChooser = getFileChooser();
@@ -424,6 +521,11 @@ public final class DialogFactory {
 	
 	public <T extends Object> boolean showEditorDialog(Component parent, 
 			T data, Editor<T> editor, String title) {
+		return showEditorDialog(parent, OK_CANCEL_OPTION, data, editor, title);
+	}
+	
+	public <T extends Object> boolean showEditorDialog(Component parent, int options, 
+			T data, Editor<T> editor, String title) {
 
 		editor.setEditingItem(data);
 
@@ -432,7 +534,7 @@ public final class DialogFactory {
 		builder.setTitle(title);
 		builder.setMessage(editor.getEditorComponent());
 		builder.setPlainType();
-		builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
 		

@@ -131,7 +131,7 @@ public class NavigationControl implements ListSelectionListener,
 	protected JLabel titleLabel;
 	protected JFormattedTextField indexField;
 	
-	protected ArrowStyle arrowStyle = DEFAULT_ARROW_STYLE;
+	protected ArrowStyle arrowStyle;
 	
 	protected ActionManager actionManager;
 	
@@ -152,6 +152,8 @@ public class NavigationControl implements ListSelectionListener,
 		titleLabel = new JLabel();
 		
 		toolBar = createToolBar(options);
+		
+		setArrowStyle(DEFAULT_ARROW_STYLE);
 		
 		refreshActions();
 	}

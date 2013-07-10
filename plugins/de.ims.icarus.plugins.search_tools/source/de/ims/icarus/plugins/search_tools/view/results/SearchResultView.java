@@ -297,7 +297,7 @@ public class SearchResultView extends View {
 			if(!useFallback) {
 				MutableBoolean check = new MutableBoolean(false);
 				useFallback = DialogFactory.getGlobalFactory().showCheckedConfirm(
-						getFrame(), check, 
+						getFrame(), DialogFactory.CONTINUE_CANCEL_OPTION, check, 
 						"plugins.searchTools.searchResultView.dialogs.title",  //$NON-NLS-1$
 						null,
 						"plugins.searchTools.searchResultView.dialogs.useFallbackPresenter", //$NON-NLS-1$

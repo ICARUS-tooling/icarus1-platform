@@ -37,6 +37,7 @@ public class LanguageToolsPlugin extends Plugin {
 		ClassLoader loader = LanguageToolsPlugin.class.getClassLoader();
 		String[] resources = {
 			"CoNLL2009-ST-English-development.txt", //$NON-NLS-1$
+			"CoNLL2009-ST-Chinese-development.txt", //$NON-NLS-1$
 			"tiger_release_aug07.corrected.conll09_small.txt", //$NON-NLS-1$
 		};
 		String root = "de/ims/icarus/plugins/language_tools/resources/"; //$NON-NLS-1$

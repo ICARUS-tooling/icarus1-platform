@@ -5,6 +5,6 @@ Main-Class: de.ims.icarus.launcher.Launcher
 SplashScreen-Image: de/ims/icarus/launcher/ICARUS_Splash.png
 Implementation-Version: 1.0.0
 Implementation-Vendor: Markus Gaertner, Gregor Thiele
-Built-Date: 2013-07-09-03-54
+Built-Date: 2013-07-10-09-53
 Class-Path: lib/icarus.core.jar
 

@@ -12,8 +12,11 @@ package de.ims.icarus.plugins.search_tools.view;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -29,20 +32,20 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.io.Loadable;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
@@ -51,19 +54,12 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.search_tools.SearchToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Search;
-import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchDescriptor;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.SearchTargetSelector;
-import de.ims.icarus.search_tools.corpus.CorpusSearchResultND;
-import de.ims.icarus.search_tools.result.Hit;
-import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.result.SearchResult;
-import de.ims.icarus.search_tools.standard.DefaultConstraint;
-import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
-import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
@@ -98,6 +94,8 @@ public class SearchManagerView extends View {
 	protected Handler handler;
 	
 	protected CallbackHandler callbackHandler;
+	
+	protected JPopupMenu popupMenu;
 
 	public SearchManagerView() {
 		// no-op
@@ -163,10 +161,12 @@ public class SearchManagerView extends View {
 		searchHistoryList.setCellRenderer(new SearchHistoryListCellRenderer());
 		searchHistoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		searchHistoryList.addListSelectionListener(handler);
+		searchHistoryList.addMouseListener(handler);
 		UIUtil.enableToolTip(searchHistoryList);
 		JScrollPane scrollPane = new JScrollPane(searchHistoryList);
 		scrollPane.setBorder(UIUtil.topLineBorder);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
+		UIUtil.enableRighClickListSelection(searchHistoryList);
 		
 		JPanel historyPanel = new JPanel(new BorderLayout());
 		historyPanel.setBorder(UIUtil.topLineBorder);
@@ -210,6 +210,26 @@ public class SearchManagerView extends View {
 		actionManager.setEnabled(selected, 
 				"plugins.searchTools.searchManagerView.viewSearchAction",  //$NON-NLS-1$
 				"plugins.searchTools.searchManagerView.removeSearchAction"); //$NON-NLS-1$
+	}
+	
+	protected void showPopup(MouseEvent trigger) {
+		if(popupMenu==null) {
+			// Create new popup menu
+			
+			Options options = new Options();
+			popupMenu = getDefaultActionManager().createPopupMenu(
+					"plugins.searchTools.searchManagerView.historyPopupMenuList", options); //$NON-NLS-1$
+			
+			if(popupMenu!=null) {
+				popupMenu.pack();
+			} else {
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
+			}
+		}
+		
+		if(popupMenu!=null) {
+			popupMenu.show(searchHistoryList, trigger.getX(), trigger.getY());
+		}
 	}
 	
 	protected void registerActionCallbacks() {
@@ -290,65 +310,63 @@ public class SearchManagerView extends View {
 		return descriptor;
 	}
 
-	private void debugShowResult() throws Exception {
-		SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
-		descriptor.createSearch();
-		
-		Object target = descriptor.getTarget();
-		if(target instanceof Loadable && !((Loadable)target).isLoaded()) {
-			try {
-				((Loadable)target).load();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		SearchConstraint[] groupConstraints = {
-				new DefaultConstraint("form", 1, DefaultSearchOperator.GROUPING),
-				new DefaultConstraint("pos", 3, DefaultSearchOperator.GROUPING),
-		};
-		CorpusSearchResultND result = new CorpusSearchResultND(descriptor.getSearch(), groupConstraints);
-		GroupCache cache = result.createCache();
-		Hit[] hits;
-		
-		hits = new Hit[]{
-			new Hit(new int[]{0, 3, 7}),
-		};
-		cache.cacheGroupInstance(0, "test");
-		cache.cacheGroupInstance(1, "x");
-		cache.commit(new ResultEntry(12, hits));
-		
-		cache.cacheGroupInstance(0, "bla");
-		cache.cacheGroupInstance(1, "x");
-		cache.commit(new ResultEntry(11, hits));
-		
-		cache.cacheGroupInstance(0, "test2");
-		cache.cacheGroupInstance(1, "y");
-		cache.commit(new ResultEntry(7, hits));
-		
-		cache.cacheGroupInstance(0, "test2");
-		cache.cacheGroupInstance(1, "xy");
-		cache.commit(new ResultEntry(14, hits));
-		
-		//result.finish();
-		
-		descriptor.setSearchResult(result);
-		
-		currentSearchEditor.setEditingItem(descriptor);
-		
-		Options options = new Options();
-		Message message = new Message(this, Commands.PRESENT, result, options);
-		
-		sendRequest(SearchToolsConstants.SEARCH_RESULT_VIEW_ID, message);
-	}
-
-	protected class Handler implements ListSelectionListener, PropertyChangeListener {
+	protected class Handler extends MouseAdapter implements ListSelectionListener, PropertyChangeListener {
 		
 		protected Search observedSearch;
 		
 		protected Handler() {
 			// no-op
+		}
+		
+		protected void maybeShowPopup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				showPopup(e);
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.getClickCount()!=2 || !SwingUtilities.isLeftMouseButton(e)) {
+				return;
+			}
+			
+			int index = searchHistoryList.locationToIndex(e.getPoint());
+			if(index==-1) {
+				return;
+			}
+			Rectangle bounds = searchHistoryList.getCellBounds(index, index);
+			if(!bounds.contains(e.getPoint())) {
+				return;
+			}
+			
+			SearchDescriptor descriptor = searchHistoryList.getModel().getElementAt(index);
+			
+			try {
+				SearchResult result = descriptor.getSearchResult();
+				
+				if(result==null) {
+					return;
+				}
+				
+				Options options = new Options();
+				Message message = new Message(this, Commands.PRESENT, result, options);
+				
+				sendRequest(SearchToolsConstants.SEARCH_RESULT_VIEW_ID, message);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to view result for search at index: "+index, ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
 		}
 
 		/**

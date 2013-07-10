@@ -9,6 +9,7 @@
  */
 package de.ims.icarus.util;
 
+import java.awt.FontMetrics;
 import java.text.DecimalFormat;
 import java.util.Set;
 import java.util.logging.Level;
@@ -148,5 +149,40 @@ public final class StringUtil {
 		while(Character.isWhitespace(sb.charAt(sb.length()-1))) {
 			sb.delete(sb.length()-1, sb.length());
 		}
+	}
+	
+	public static String wrap(String s, FontMetrics fm, int width) {
+		if(fm==null)
+			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
+		if(width<50)
+			throw new IllegalArgumentException("Width must not be less than 50 pixels"); //$NON-NLS-1$
+		
+		if(s==null || s.length()==0) {
+			return s;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		
+		int size = s.length();
+		boolean wrap = false;
+		int len = 0;
+		for(int i=0; i<size; i++) {
+			char c = s.charAt(i);
+			if(c=='\r') {
+				continue;
+			} else if(c=='\n') {
+				sb.append(c);
+				len = 0;
+			} else if(wrap && (Character.isWhitespace(c) || !Character.isLetterOrDigit(c))) {
+				sb.append('\n');
+				len = 0;
+			} else {
+				sb.append(c);
+				len += fm.charWidth(c);
+			}
+			wrap = len>=width;
+		}
+		
+		return sb.toString();
 	}
 }

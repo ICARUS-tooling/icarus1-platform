@@ -12,6 +12,8 @@ package de.ims.icarus.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -49,6 +51,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -93,6 +96,7 @@ import de.ims.icarus.ui.actions.Actions;
 import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.HtmlUtils;
+import de.ims.icarus.util.StringUtil;
 
 
 /**
@@ -112,6 +116,18 @@ public final class UIUtil {
 	private UIUtil() {
 		// no-op
 	}
+	
+	private static JLabel textDummy;
+	
+	private static JLabel getTextDummy() {
+		if(textDummy==null) {
+			textDummy = new JLabel();
+		}
+		
+		return textDummy;
+	}
+	
+	public static final int DEFAULT_TOOLTIP_WIDTH = 300;
 	
 	private static String[] fontNames;
 	
@@ -293,6 +309,10 @@ public final class UIUtil {
 		if(tooltip==null || tooltip.isEmpty()) {
 			return null;
 		}
+		
+		Font font = UIManager.getFont("ToolTip.font"); //$NON-NLS-1$
+		FontMetrics fm = getTextDummy().getFontMetrics(font);
+		tooltip = StringUtil.wrap(tooltip, fm, DEFAULT_TOOLTIP_WIDTH);
 		
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$

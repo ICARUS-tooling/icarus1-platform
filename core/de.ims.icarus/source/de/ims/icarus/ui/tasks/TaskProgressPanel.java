@@ -161,9 +161,11 @@ public class TaskProgressPanel extends JPanel implements ActionListener, Propert
 	
 	public void setIndeterminate(boolean value) {
 		progressBar.setIndeterminate(value);
+		progressBar.repaint();
 	}
 	
 	public void setProgress(int value) {
 		progressBar.setValue(value);
+		progressBar.repaint();
 	}
 }

@@ -47,8 +47,7 @@ public final class IconRegistry {
 			synchronized (IconRegistry.class) {
 				if(globalRegistry==null) {
 					globalRegistry= new IconRegistry(null);
-					globalRegistry.addSearchPath(IconRegistry.class.getClassLoader(), 
-							"de/ims/icarus/ui/icons/"); //$NON-NLS-1$
+					globalRegistry.addSearchPath("de/ims/icarus/ui/icons/"); //$NON-NLS-1$
 				}
 			}
 		}

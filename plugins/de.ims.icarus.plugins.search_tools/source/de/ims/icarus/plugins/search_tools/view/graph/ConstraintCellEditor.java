@@ -507,7 +507,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			operatorSelect.setRenderer(sharedRenderer);
 			operatorSelect.setMaximumRowCount(operators.length);
 			operatorSelect.addActionListener(this);
-			UIUtil.resizeComponent(operatorSelect, 60, 20);
+			UIUtil.fitToContent(operatorSelect, 60, 100, 20);
 			
 			Object[] labelSet = factory.getLabelSet();
 			Class<?> valueClass = factory.getValueClass();

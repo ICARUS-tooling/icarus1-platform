@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.DefaultComboBoxModel;
@@ -537,14 +539,37 @@ public class MatetoolsParserInputView extends TextInputView {
 				if(data!=null) {
 					appendResult(data);
 				}
-			} catch (Exception e) {
+			} catch(InterruptedException | CancellationException e) {
+				// ignore
+			} catch (Throwable e) {
+				if(e instanceof ExecutionException) {
+					e = e.getCause();
+				}
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unexpected exception while obtaining final pipeline computation result", e); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showErrorDialog(e);
 			} finally {			
 				MatetoolsPipeline.releasePipeline(pipelineOwner);
 			
 				refreshActions();
 			}
+		}
+		
+		private void showErrorDialog(Throwable e) {
+			String title = "plugins.matetools.matetoolsParserInputView.errorTitle"; //$NON-NLS-1$
+			
+			String message = null;
+			if(e instanceof OutOfMemoryError) {
+				message = "plugins.matetools.matetoolsParserInputView.outOfMemoryError"; //$NON-NLS-1$
+			}
+			
+			if(message==null) {
+				message = "plugins.matetools.matetoolsParserInputView.generalError"; //$NON-NLS-1$
+			}
+			
+			DialogFactory.getGlobalFactory().showError(getFrame(), title, message);
 		}
 
 		/**

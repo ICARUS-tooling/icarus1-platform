@@ -38,6 +38,7 @@ import de.ims.icarus.plugins.search_tools.SearchToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.data.ContentType;
@@ -410,15 +411,35 @@ public final class SearchManager {
 				get();
 			} catch(InterruptedException | CancellationException e) {
 				cancelSearch();
-			} catch(Exception e) {
-				// TODO show error dialog
+			} catch(Throwable e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to execute search", e); //$NON-NLS-1$
 				cancelSearch();
 				UIUtil.beep();
+				
+				showErrorDialog(e);
 			} finally {
 				searchJobMap.remove(search);
 			}
+		}
+		
+		private void showErrorDialog(Throwable e) {
+			String title = "plugins.searchTools.searchManager.loadTargetJob.title"; //$NON-NLS-1$
+			String message = null;
+			
+			// Set message based on error type
+			if(e instanceof OutOfMemoryError) {
+				message = "plugins.searchTools.searchManager.loadTargetJob.outOfMemoryError"; //$NON-NLS-1$
+			} else if(e instanceof InvalidSearchGraphException) {
+				message = "plugins.searchTools.searchManager.loadTargetJob.invalidSearchGraph"; //$NON-NLS-1$
+			}
+			
+			// Ensure valid message string
+			if(message==null) {
+				message = "plugins.searchTools.searchManager.loadTargetJob.generalError"; //$NON-NLS-1$
+			}
+			
+			DialogFactory.getGlobalFactory().showError(null, title, message);
 		}
 		
 		private void cancelSearch() {

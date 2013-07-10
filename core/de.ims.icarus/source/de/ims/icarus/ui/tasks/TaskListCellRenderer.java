@@ -266,6 +266,8 @@ public class TaskListCellRenderer extends JPanel implements
 			showTask(task);
 			break;
 		}
+		
+		progressBar.repaint();
 	}
 
 	/**

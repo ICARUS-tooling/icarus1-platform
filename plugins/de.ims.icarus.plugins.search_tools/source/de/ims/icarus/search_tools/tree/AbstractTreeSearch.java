@@ -9,7 +9,6 @@
  */
 package de.ims.icarus.search_tools.tree;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,8 +23,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.io.Loadable;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.search_tools.InvalidSearchGraphException;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchGraph;
@@ -82,8 +81,10 @@ public abstract class AbstractTreeSearch extends Search {
 	
 	@Override
 	public void init() {
+		if(SearchUtils.isEmpty(getSearchGraph()))
+			throw new InvalidSearchGraphException("Graph is empty"); //$NON-NLS-1$
 		if(!validateTree())
-			throw new IllegalStateException("Invalid search tree"); //$NON-NLS-1$
+			throw new InvalidSearchGraphException("Graph validation failed"); //$NON-NLS-1$
 		
 		baseRootMatcher = new MatcherBuilder(this).createRootMatcher();
 		if(baseRootMatcher==null)

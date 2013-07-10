@@ -26,6 +26,7 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.EdgeType;
+import de.ims.icarus.search_tools.InvalidSearchGraphException;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchEdge;
@@ -109,7 +110,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	 */
 	public static SearchGraph instantiate(SearchGraph graph, ConstraintContext context, Options options) {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new InvalidSearchGraphException("Graph is null"); //$NON-NLS-1$
 		if(context==null)
 			throw new IllegalArgumentException("Invalid context"); //$NON-NLS-1$
 		
