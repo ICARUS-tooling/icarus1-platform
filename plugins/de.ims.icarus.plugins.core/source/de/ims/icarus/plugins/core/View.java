@@ -17,6 +17,7 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.actions.ActionManager;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
@@ -342,6 +343,13 @@ public abstract class View implements Identifiable {
 	 */
 	public void focusView() {
 		getContainer().requestFocusInWindow();
+	}
+	
+	protected void showError(Throwable t) {
+		DialogFactory.getGlobalFactory().showError(getFrame(), 
+				"plugins.core.icarusCorePlugin.errorDialog.title",  //$NON-NLS-1$
+				"plugins.core.icarusCorePlugin.errorDialog.message",  //$NON-NLS-1$
+				t.getMessage());
 	}
 	
 	public interface ViewEvents {

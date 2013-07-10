@@ -80,11 +80,13 @@ public abstract class AbstractTreeSearch extends Search {
 	}
 	
 	@Override
-	public void init() {
+	public boolean init() {
 		if(SearchUtils.isEmpty(getSearchGraph()))
 			throw new InvalidSearchGraphException("Graph is empty"); //$NON-NLS-1$
-		if(!validateTree())
-			throw new InvalidSearchGraphException("Graph validation failed"); //$NON-NLS-1$
+		if(!validateTree()) {
+			// Validation already shows a dialog
+			return false;
+		}
 		
 		baseRootMatcher = new MatcherBuilder(this).createRootMatcher();
 		if(baseRootMatcher==null)
@@ -100,6 +102,8 @@ public abstract class AbstractTreeSearch extends Search {
 		
 		// Now init those objects
 		baseRootMatcher.setLeftToRight(SearchUtils.isLeftToRightSearch(this));
+		
+		return true;
 	}
 
 	@Override

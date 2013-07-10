@@ -352,6 +352,12 @@ public class SearchManagerView extends View {
 			SearchDescriptor descriptor = searchHistoryList.getModel().getElementAt(index);
 			
 			try {
+				// Display search
+				SearchDescriptor clone = descriptor.cloneShallow();
+				currentSearchEditor.setEditingItem(clone);
+				refreshActions();
+				
+				// Display result
 				SearchResult result = descriptor.getSearchResult();
 				
 				if(result==null) {
@@ -416,6 +422,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to create new search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -437,9 +445,11 @@ public class SearchManagerView extends View {
 				// TODO allow for execution of already running searches
 				
 				// Create a new descriptor without a search object
-				SearchDescriptor clone = descriptor.cloneFlat();
+				SearchDescriptor clone = descriptor.cloneShallow();
 				// Let factory create a blank new search object
-				clone.createSearch();
+				if(!clone.createSearch()) {
+					return;
+				}
 				//currentSearchEditor.setEditingItem(clone);
 				
 				searchHistory.addSearch(clone);
@@ -451,6 +461,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to execute search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -462,6 +474,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -490,6 +504,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to forward editing of query", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 			
 		}
@@ -517,6 +533,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to select new search factory", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -568,6 +586,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to select target for current search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -591,6 +611,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to edit paramters", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -621,6 +643,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to view result of selected search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -631,7 +655,7 @@ public class SearchManagerView extends View {
 			}
 			
 			try {
-				SearchDescriptor clone = descriptor.cloneFlat();
+				SearchDescriptor clone = descriptor.cloneShallow();
 				currentSearchEditor.setEditingItem(clone);
 
 				refreshActions();
@@ -639,6 +663,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to edit selected search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -659,6 +685,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to cancel selected search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -699,6 +727,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to remove selected search from history", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -721,6 +751,8 @@ public class SearchManagerView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to clear search history", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 	}

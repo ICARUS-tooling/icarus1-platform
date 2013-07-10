@@ -328,6 +328,8 @@ public class QueryEditorView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to commit query", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -338,6 +340,8 @@ public class QueryEditorView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to synchronize query", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -348,6 +352,8 @@ public class QueryEditorView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to synchronize graph", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 	}

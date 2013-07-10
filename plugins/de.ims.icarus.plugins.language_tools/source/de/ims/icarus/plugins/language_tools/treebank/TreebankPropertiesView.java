@@ -658,15 +658,25 @@ public class TreebankPropertiesView extends View {
 			if(treebank==null) {
 				return;
 			}
-			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(Treebank.class);
 			
-			Options options = new Options();
-			options.put(Options.CONTENT_TYPE, contentType);
-			
-			TreebankListDelegate delegate = TreebankRegistry.getInstance().getListDelegate(treebank);
-			
-			Message message = new Message(this, Commands.DISPLAY, delegate, options);
-			sendRequest(null, message);
+			try {
+				ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(Treebank.class);
+				
+				Options options = new Options();
+				options.put(Options.CONTENT_TYPE, contentType);
+				
+				TreebankListDelegate delegate = TreebankRegistry.getInstance().getListDelegate(treebank);
+				
+				Message message = new Message(this, Commands.DISPLAY, delegate, options);
+				
+				sendRequest(null, message);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to inspect treebank", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 		public void editTreebank(ActionEvent e) {
@@ -675,8 +685,17 @@ public class TreebankPropertiesView extends View {
 				return;
 			}
 			
-			Message message = new Message(this, Commands.EDIT, treebank, null);
-			sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
+			try {
+				Message message = new Message(this, Commands.EDIT, treebank, null);
+				
+				sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit treebank", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 		public void loadTreebank(ActionEvent e) {

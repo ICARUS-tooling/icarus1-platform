@@ -453,6 +453,9 @@ public class MatetoolsParserInputView extends TextInputView {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to start parser-pipeline", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -463,6 +466,9 @@ public class MatetoolsParserInputView extends TextInputView {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 	}

@@ -493,6 +493,8 @@ public class SearchResultView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to refresh result presenter", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -507,6 +509,8 @@ public class SearchResultView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -521,6 +525,8 @@ public class SearchResultView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to view search", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -535,6 +541,8 @@ public class SearchResultView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to save result", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -545,6 +553,8 @@ public class SearchResultView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open result", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -555,6 +565,8 @@ public class SearchResultView extends View {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to clear view", ex); //$NON-NLS-1$
 				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 	}

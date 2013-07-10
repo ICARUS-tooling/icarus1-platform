@@ -70,7 +70,7 @@ public class SearchDescriptor {
 		return search;
 	}
 	
-	public void createSearch() throws Exception {
+	public boolean createSearch() throws Exception {
 		if(search!=null)
 			throw new IllegalStateException("Search already created"); //$NON-NLS-1$
 		
@@ -85,9 +85,13 @@ public class SearchDescriptor {
 		}
 		search = factory.createSearch(getQuery(), getTarget(), options);
 		
-		search.init();
+		if(!search.init()) {
+			return false;
+		}
 		
 		searchResult = search.getResult();
+		
+		return true;
 	}
 
 	public SearchFactory getSearchFactory() {
@@ -185,7 +189,7 @@ public class SearchDescriptor {
 
 	@Override
 	public SearchDescriptor clone() {
-		SearchDescriptor clone = cloneFlat();
+		SearchDescriptor clone = cloneShallow();
 		clone.search = search;
 		clone.searchResult = searchResult;
 		
@@ -204,7 +208,7 @@ public class SearchDescriptor {
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public SearchDescriptor cloneFlat() {
+	public SearchDescriptor cloneShallow() {
 		SearchDescriptor clone = new SearchDescriptor();
 		clone.factoryExtension = factoryExtension;
 		clone.searchFactory = searchFactory;

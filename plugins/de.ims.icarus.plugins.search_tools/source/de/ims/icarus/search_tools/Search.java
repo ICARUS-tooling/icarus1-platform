@@ -60,8 +60,8 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 		this.parameters = parameters.clone();
 	}
 	
-	public void init() {
-		// for subclasses
+	public boolean init() {
+		return true;
 	}
 
 	final void setState(SearchState state) {

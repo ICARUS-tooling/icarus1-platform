@@ -516,6 +516,9 @@ public class TreebankExplorerView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new treebank: "+name, ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -561,6 +564,9 @@ public class TreebankExplorerView extends View {
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Unable to delete treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+					UIUtil.beep();
+					
+					showError(ex);
 				}
 			}
 		}
@@ -594,6 +600,9 @@ public class TreebankExplorerView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new treebank: "+name, ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -634,6 +643,9 @@ public class TreebankExplorerView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to rename treebank "+currentName+" to "+uniqueName, ex); //$NON-NLS-1$ //$NON-NLS-2$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -665,6 +677,9 @@ public class TreebankExplorerView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to open treebank location: "+treebank.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -688,7 +703,16 @@ public class TreebankExplorerView extends View {
 			TreebankListDelegate delegate = TreebankRegistry.getInstance().getListDelegate(treebank);
 			
 			Message message = new Message(this, Commands.DISPLAY, delegate, options);
-			sendRequest(null, message);
+			
+			try {
+				sendRequest(null, message);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to inspect treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 		public void loadTreebank(ActionEvent e) {	
@@ -708,6 +732,9 @@ public class TreebankExplorerView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to schedule load-task for treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -728,6 +755,9 @@ public class TreebankExplorerView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to schedule free-task for treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -740,7 +770,16 @@ public class TreebankExplorerView extends View {
 			Treebank treebank = (Treebank)selectedObject;
 			
 			Message message = new Message(this, Commands.EDIT, treebank, null);
-			sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
+			
+			try {
+				sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 		public void exportTreebank(ActionEvent e) {
@@ -802,6 +841,8 @@ public class TreebankExplorerView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to export treebanks to file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.ioException",  //$NON-NLS-1$
@@ -847,6 +888,8 @@ public class TreebankExplorerView extends View {
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Cannot import treebank data from file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
 				DialogFactory.getGlobalFactory().showError(getFrame(), 
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.invalidContent",  //$NON-NLS-1$

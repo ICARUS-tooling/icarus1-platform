@@ -151,6 +151,10 @@ public final class StringUtil {
 		}
 	}
 	
+	/**
+	 * Wraps a given {@code String} so that its lines do not exceed
+	 * the specified {@code width} value in length. 
+	 */
 	public static String wrap(String s, FontMetrics fm, int width) {
 		if(fm==null)
 			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
@@ -165,17 +169,20 @@ public final class StringUtil {
 		
 		int size = s.length();
 		boolean wrap = false;
+		boolean ignoreWS = false;
 		int len = 0;
 		for(int i=0; i<size; i++) {
 			char c = s.charAt(i);
 			if(c=='\r') {
 				continue;
-			} else if(c=='\n') {
-				sb.append(c);
-				len = 0;
-			} else if(wrap && (Character.isWhitespace(c) || !Character.isLetterOrDigit(c))) {
+			} else if(c=='\n' || (wrap &&
+					(Character.isWhitespace(c) || !Character.isLetterOrDigit(c)))) {
 				sb.append('\n');
 				len = 0;
+				ignoreWS = true;
+			} else if(ignoreWS && Character.isWhitespace(c)) {
+				ignoreWS = false;
+				continue;
 			} else {
 				sb.append(c);
 				len += fm.charWidth(c);

@@ -367,6 +367,9 @@ public class TreebankEditView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to reset editor: "+getTreebank(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 		}
 		
@@ -383,6 +386,9 @@ public class TreebankEditView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to apply edit: "+getTreebank(), ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
 			}
 			
 			header.setText(getTreebank().getName());
