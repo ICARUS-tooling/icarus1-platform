@@ -18,10 +18,10 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
-		<library id="tcf-04" path="lib/wlfxb-0_4.jar" type="code">
+		<library id="wlfxb" path="lib/wlfxb-0_4.jar" type="code">
 			<doc>
 				<doc-text>
-					tcf04 other bibs?
+					wlfxb library version 0_4
 				</doc-text>
 			</doc>
 			<export prefix="*" />

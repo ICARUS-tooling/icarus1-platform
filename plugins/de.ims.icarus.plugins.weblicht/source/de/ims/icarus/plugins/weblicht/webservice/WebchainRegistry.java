@@ -192,7 +192,7 @@ public class WebchainRegistry {
         
 
         saveXMLToFile(result);
-        
+        hasChanges=false;
 	}
 	
 	
@@ -311,8 +311,14 @@ public class WebchainRegistry {
 								webchain.addWebservice(uniqueID);
 							}
 						}
-					}
+					}					
+										
 					addNewWebchain(webchain);
+					
+					
+					// reset change flag after loading chains - otherwise we will
+					// get unsaved changes dialog even after loading chains from file
+					hasChanges = false;
 				}
 			}			
 	}
@@ -355,6 +361,7 @@ public class WebchainRegistry {
 	public boolean isHasChanges() {
 		return hasChanges;
 	}
+	
 	
 	
 	/**

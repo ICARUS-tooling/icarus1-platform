@@ -101,7 +101,8 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 				row, hasFocus);
 		
 		//FIXME set max width of Tooltip
-		setToolTipText(UIUtil.toSwingTooltip(formatTooltip(tooltip,60)));
+		//setToolTipText(UIUtil.toSwingTooltip(formatTooltip(tooltip,60)));
+		setToolTipText(tooltip);
 		setIcon(icon);
 		
 		return this;

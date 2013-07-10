@@ -94,6 +94,7 @@ public class WebchainEditor implements Editor<Webchain> {
 	protected ButtonModel  latestGroupSelection;
 	protected JTextArea	   webserviceInputArea;
 	protected JPanel 	   inputPanel;
+	protected JPanel 	   outputPanel;
 	
 	
 	protected JList<Object> webchainElementList;
@@ -194,24 +195,34 @@ public class WebchainEditor implements Editor<Webchain> {
 		gbcInput.gridy++;
 		gbcInput.gridheight = GridBagConstraints.REMAINDER;
 		gbcInput.anchor = GridBagConstraints.NORTH;
+		
+		//input (static - dynamic - location)
 		inputPanel = new JPanel(new GridLayout(3, 2));
 		inputPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
+		
+
 	    		
 		webserviceInputGroup.add(webserviceStaticInput);
 		webserviceInputGroup.add(webserviceLocationInput);
 		webserviceInputGroup.add(webserviceDynamicInput);
+		
+		//static
 		JLabel staticImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("addrepo_rep.gif")); //$NON-NLS-1$
 	    inputPanel.add(staticImage);
 		inputPanel.add(webserviceStaticInput);
 		
+		//location = file
 		JLabel locationImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("history_rep.gif")); //$NON-NLS-1$
 	    inputPanel.add(locationImage);
 		inputPanel.add(webserviceLocationInput);
+
 		
+		//dynamic = system
 		JLabel dynamicImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("newconnect_wiz.gif")); //$NON-NLS-1$
 	    inputPanel.add(dynamicImage);
 		inputPanel.add(webserviceDynamicInput);
-		//panel.add(inputPanel,gbcInput);
+		//panel.add(inputPanel,gbcInput);		
+	
 		
 		gbcInput.gridx++;
 		gbcInput.gridy++;
@@ -932,11 +943,23 @@ public class WebchainEditor implements Editor<Webchain> {
 		protected void editIOElement(WebchainElements chainelement, int index){
 			
 			//System.out.println("Selectedindex: " +  index);
+			WebchainElements element = null;
 			
-			WebchainElements element = showEditIOElements(null, 
-					"plugins.weblicht.weblichtChainView.dialogs.editIO.title",  //$NON-NLS-1$
-					"plugins.weblicht.weblichtChainView.dialogs.editIO.message",  //$NON-NLS-1$
+			if (chainelement instanceof WebchainInputType){
+				element = showEditIOElement(null, 
+					"plugins.weblicht.weblichtChainView.dialogs.editInput.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.editInput.message",  //$NON-NLS-1$
 					chainelement, inputPanel, webserviceInputArea, null);
+			
+			}
+			
+			if (chainelement instanceof WebchainOutputType){
+				element = showEditIOElement(null, 
+					"plugins.weblicht.weblichtChainView.dialogs.editOutput.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.editOutput.message",  //$NON-NLS-1$
+					chainelement, inputPanel, webserviceInputArea, null);
+			
+			}
 
 			// Cancelled by user
 			if(element==null) {
@@ -948,7 +971,46 @@ public class WebchainEditor implements Editor<Webchain> {
 		}
 		
 		
-		private WebchainElements showEditIOElements(Component parent, String title, 
+		private WebchainElements showEditIOElement(Component parent, String title, 
+				String message, WebchainElements chainelement, Object...params) {		
+
+			BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
+																	.getResourceDomain());
+						
+			latestGroupSelection = getSelectedIOType(chainelement);
+			
+			webserviceInputGroup.setSelected(latestGroupSelection, true);
+			
+			if(chainelement instanceof WebchainInputType){
+				builder.addMessage("plugins.weblicht.labels.webservice.WebchainInput"); //$NON-NLS-1$
+				WebchainInputType wi = (WebchainInputType) chainelement;
+				webserviceInputArea.setText(wi.getInputTypeValue());
+				builder.setTitle(title);
+				builder.addMessage(inputPanel);
+			}
+			
+			if(chainelement instanceof WebchainOutputType){
+				WebchainOutputType wo = (WebchainOutputType) chainelement;
+				builder.addMessage("plugins.weblicht.labels.webservice.WebchainOutput"); //$NON-NLS-1$
+				webserviceInputArea.setText(wo.getOutputTypeValue());
+				builder.setTitle(title);
+				builder.addMessage(outputPanel);
+				
+			}
+
+			builder.addMessage(SwingUtilities.getAncestorOfClass(JScrollPane.class, webserviceInputArea));
+
+			builder.setPlainType();
+			builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			builder.showDialog(parent);
+			
+			return builder.isYesValue() ? editedIOField(chainelement) : null;
+		}
+		
+		
+		
+		private WebchainElements showEditOutputElement(Component parent, String title, 
 				String message, WebchainElements chainelement, Object...params) {		
 
 			BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
@@ -981,7 +1043,6 @@ public class WebchainEditor implements Editor<Webchain> {
 			
 			return builder.isYesValue() ? editedIOField(chainelement) : null;
 		}
-		
 		
 		
 		private WebchainElements showAddOutputElements(Component parent, String title, 

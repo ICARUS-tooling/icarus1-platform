@@ -95,6 +95,9 @@ public class WebserviceRegistry {
 
 	}
 
+	
+	
+	@SuppressWarnings("unused")
 	private void loadWebserviceExtensions() {
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
 				.getPluginDescriptor("de.ims.icarus.weblicht"); //$NON-NLS-1$
@@ -116,8 +119,13 @@ public class WebserviceRegistry {
 					"WebserviceFormat")); //$NON-NLS-1$
 			// TODO in/out
 
-			webserviceList.add(webservice);
-			// TODO existing ID
+			
+			
+			addNewWebservice(webservice);
+			
+			// reset change flag after loading services - otherwise we will
+			// get unsaved changes dialog even after loading services from file
+			hasChanges = false;
 
 		}
 	}
@@ -221,7 +229,14 @@ public class WebserviceRegistry {
 
 				//webserviceHashMap.put(eElement.getAttribute("uid"), webservice); //$NON-NLS-1$
 				// webserviceList.add(webservice);
+				
+				
+				
 				addNewWebservice(webservice);
+				
+				// reset change flag after loading services - otherwise we will
+				// get unsaved changes dialog even after loading services from file
+				hasChanges = false;
 			}
 		}
 	}
@@ -299,7 +314,7 @@ public class WebserviceRegistry {
         
 
         saveXMLToFile(result);
-        
+        hasChanges=false;
 	}
 	
 	

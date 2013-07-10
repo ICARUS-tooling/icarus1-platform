@@ -38,6 +38,8 @@ import javax.swing.event.ChangeListener;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 
+import com.apple.eawt.Application;
+
 import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
@@ -93,6 +95,16 @@ public class IcarusFrame extends JFrame {
 		
 		setIconImages(Core.getIconImages());
 		//setIconImage(Core.getSmallIcon().getImage());
+		
+		//MacOSX Dock Icon
+		try {
+			Application.getApplication().setDockIconImage(
+		            Core.getLargeIcon().getImage());
+		} catch (RuntimeException e) {
+			LoggerFactory.log(Core.class, Level.SEVERE, 
+					"MacOS Icon Workaround ", e); //$NON-NLS-1$
+		}
+
 		
 		currentPerspective = readPerspectiveOption(options);
 		

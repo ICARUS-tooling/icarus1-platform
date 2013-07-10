@@ -57,6 +57,7 @@ public class DisclaimerDialog extends JDialog {
 	protected JCheckBox showOnStart;
 	protected JScrollPane jsp;
 	protected JButton accept;
+	protected static boolean licenseShowOnly;
 
 	protected boolean accepted = false;
 	
@@ -77,14 +78,14 @@ public class DisclaimerDialog extends JDialog {
 			public void windowClosing(WindowEvent e) {
 				dialogExitAction();
 			}
-		});
-		
+		});		
 		
 	}
+
 	
 	
 	public static boolean showDialog() {
-		
+		licenseAcceptDecline();
 		DisclaimerDialog dd = new DisclaimerDialog();
 		dd.setTitle(ResourceManager.getInstance()
 				.get("plugins.core.disclaimer.eula")); //$NON-NLS-1$
@@ -93,6 +94,25 @@ public class DisclaimerDialog extends JDialog {
 		return dd.isAccepted();
 	}
 	
+
+	public static void showDialogLicenseOnly() {
+		licenseShow();
+		DisclaimerDialog dd = new DisclaimerDialog();
+		dd.setTitle(ResourceManager.getInstance()
+				.get("plugins.core.disclaimer.eula")); //$NON-NLS-1$
+		dd.setVisible(true);		
+	}
+	
+	private static void licenseAcceptDecline(){
+		licenseShowOnly = false;
+	}
+	
+	private static void licenseShow(){
+		licenseShowOnly = true;
+	}
+
+
+
 	protected boolean isAccepted() {
 		return accepted;
 	}
@@ -156,40 +176,54 @@ public class DisclaimerDialog extends JDialog {
 //		addSeperator(disclaimerPanel, gbc);
 //		gbc.gridy++;
 		
-		//Buttons		
-		showOnStart = new JCheckBox(ResourceManager.getInstance()
-				.get("plugins.core.disclaimerDialog.showOnStart")); //$NON-NLS-1$
-		showOnStart.setFocusable(false);
 		
-		//accept button
-		accept = new JButton(ResourceManager.getInstance()
-								.get("plugins.core.disclaimerDialog.accept")); //$NON-NLS-1$
-		accept.setActionCommand("accept"); //$NON-NLS-1$
-		accept.addActionListener(new LicenseActionListener());
-		accept.setEnabled(false);
-		
-		
-		//decline button
-		JButton decline = new JButton(ResourceManager.getInstance()
-								.get("plugins.core.disclaimerDialog.decline")); //$NON-NLS-1$
-		decline.setActionCommand("decline"); //$NON-NLS-1$
-		decline.addActionListener(new LicenseActionListener());
+		//Buttons	
+		if(!licenseShowOnly){				
+			showOnStart = new JCheckBox(ResourceManager.getInstance()
+					.get("plugins.core.disclaimerDialog.showOnStart")); //$NON-NLS-1$
+			showOnStart.setFocusable(false);
 			
+			gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 1);
+			disclaimerPanel.add(showOnStart, gbc);
+			
+			//accept button
+			accept = new JButton(ResourceManager.getInstance()
+									.get("plugins.core.disclaimerDialog.accept")); //$NON-NLS-1$
+			accept.setActionCommand("accept"); //$NON-NLS-1$
+			accept.addActionListener(new LicenseActionListener());
+			accept.setEnabled(false);
+			gbc = GridBagUtil.makeGbc(2, gbc.gridy, 1, 1, 1);
+			disclaimerPanel.add(accept, gbc);
+			
+			//decline button		
+			JButton decline = new JButton(ResourceManager.getInstance().get(
+					"plugins.core.disclaimerDialog.decline")); //$NON-NLS-1$
+			decline.setActionCommand("decline"); //$NON-NLS-1$
+			decline.addActionListener(new LicenseActionListener());
+
+			gbc = GridBagUtil.makeGbc(3, gbc.gridy, 1, 1, 1);
+			disclaimerPanel.add(decline, gbc);			
+		}
 		
-		//addbutton stuff to panel
-		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 1);
-		disclaimerPanel.add(showOnStart, gbc);
 		
-		gbc = GridBagUtil.makeGbc(2, gbc.gridy, 1, 1, 1);
-		disclaimerPanel.add(accept, gbc);
+		else {
+		//accept button only (only show text)
+			
+			accept = new JButton(ResourceManager.getInstance()
+									.get("close")); //$NON-NLS-1$
+			accept.setActionCommand("accept"); //$NON-NLS-1$
+			accept.addActionListener(new LicenseActionListener());
+			gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
+			gbc.gridwidth = 5;
+			gbc.anchor = GridBagConstraints.CENTER;
+	
+			disclaimerPanel.add(accept, gbc);
+		}
 		
-		gbc = GridBagUtil.makeGbc(3, gbc.gridy, 1, 1, 1);
-		disclaimerPanel.add(decline, gbc);
+
 		
 		//add everything to jdialog
 		this.add(disclaimerPanel);
-
-		
 	}
 
 
@@ -229,13 +263,14 @@ public class DisclaimerDialog extends JDialog {
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if("accept".equals(e.getActionCommand())){ //$NON-NLS-1$
-				
-				ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
-				Handle ch = config.getHandle("general.eula"); //$NON-NLS-1$
-				config.setValue(ch, showOnStart.isSelected());
 
-				accepted = true;
+			if("accept".equals(e.getActionCommand())){ //$NON-NLS-1$				
+				if(!licenseShowOnly){
+					ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+					Handle ch = config.getHandle("general.eula"); //$NON-NLS-1$
+					config.setValue(ch, showOnStart.isSelected());
+					accepted = true;
+				}
 			}
 
 			dialogExitAction();

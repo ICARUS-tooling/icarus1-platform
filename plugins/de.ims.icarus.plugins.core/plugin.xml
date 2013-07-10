@@ -20,6 +20,15 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
+		<library id="AppleJavaExtensions" path="lib/AppleJavaExtensions.jar" type="code">
+			<doc>
+				<doc-text>
+					AppleJavaExtensions library version 1.6
+					(http://developer.apple.com/library/mac/#/legacy/library/samplecode/AppleJavaExtensions/Introduction/Intro.html)
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
 	</runtime>
 	
 	<!-- Extension-Points -->

@@ -37,6 +37,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
@@ -193,6 +194,26 @@ public class AboutDialog extends JDialog {
 		aboutPanel.add(pluginsJSP, gbc);
 		gbc.gridy++;
 		
+		
+		//license Button
+		JButton license = new JButton(ResourceManager.getInstance().get(
+				"plugins.core.aboutDialog.ShowlicenseText")); //$NON-NLS-1$
+		license.setFocusable(false);
+		
+		license.addActionListener(new ActionListener() {  
+            public void actionPerformed(ActionEvent e) {
+            	DisclaimerDialog.showDialogLicenseOnly(); 
+            } 
+        });
+		
+		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
+		aboutPanel.add(new JLabel(ResourceManager.getInstance().get(
+				"plugins.core.aboutDialog.licenseText")),gbc); //$NON-NLS-1$
+		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 0);
+		aboutPanel.add(license,gbc);
+		gbc.gridy++;
+		
+		
 		if (isBrowsingSupported()) {
 			makeLinkable(url, new LinkMouseListener());
 			makeLinkable(eMailMarkus, new LinkMouseListener());
@@ -200,7 +221,7 @@ public class AboutDialog extends JDialog {
 		}
 		
 		
-		JButton bclose = new JButton(ResourceManager.getInstance().get("ok")); //$NON-NLS-1$
+		JButton bclose = new JButton(ResourceManager.getInstance().get("close")); //$NON-NLS-1$
 		
 		bclose.addActionListener(new ActionListener() {  
             public void actionPerformed(ActionEvent e) {  

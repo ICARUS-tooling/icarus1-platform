@@ -36,6 +36,7 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.weblicht.webservice.TCFDataList;
 import de.ims.icarus.plugins.weblicht.webservice.WebExecutionService;
 import de.ims.icarus.plugins.weblicht.webservice.Webchain;
+import de.ims.icarus.plugins.weblicht.webservice.WebchainOutputType;
 import de.ims.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import de.ims.icarus.plugins.weblicht.webservice.Webservice;
 import de.ims.icarus.plugins.weblicht.webservice.WebserviceProxy;
@@ -778,6 +779,24 @@ public class WeblichtChainView extends View {
 					Message message = new Message(this,
 							Commands.DISPLAY, tcfList, options);
 					sendRequest(null, message);
+					
+					
+					//TODO change status for dynamic location (save operation)
+//					WebchainOutputType wio = null;
+//					for (int i = 0 ; i < webchain.getElementsCount();i++){
+//						if (webchain.getElementAt(i) instanceof WebchainOutputType){
+//							wio = (WebchainOutputType) webchain.getElementAt(i);							
+//						}							
+//					}
+//					if (wio != null){
+//						if (wio.getIsOutputUsed()){
+//							System.out.println(wio.getOutputType());
+//							System.out.println(get());
+//							
+//						}
+//						
+//					}
+					
 				}
 
 

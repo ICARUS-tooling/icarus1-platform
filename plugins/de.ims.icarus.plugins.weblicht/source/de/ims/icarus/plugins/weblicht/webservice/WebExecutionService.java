@@ -138,7 +138,7 @@ public class WebExecutionService {
 			response.close();
 
 		}
-		//System.out.println("Webresult: " + result);		
+		//System.out.println("Webresult: " + result);
 		return createTCFfromString(result, getReadableLayerTags(query));
 	}
 

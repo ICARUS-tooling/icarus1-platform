@@ -25,6 +25,30 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
+		<library id="jersey-client" path="lib/jersey-client-1.16.jar" type="code">
+			<doc>
+				<doc-text>
+					jersey-client library version 1.16
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
+		<library id="jersey-core" path="lib/jersey-core-1.16.jar" type="code">
+			<doc>
+				<doc-text>
+					jersey-core library version 1.16
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
+		<library id="wlfxb" path="lib/wlfxb-0_4.jar" type="code">
+			<doc>
+				<doc-text>
+					wlfxb library version 0_4
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
 	</runtime>
 	
 	<!-- Extension-Points -->
