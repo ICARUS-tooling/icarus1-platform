@@ -749,21 +749,21 @@ public class NGrams {
 			String key = i.next();
 			ArrayList<ItemInNuclei> arrItem = inputNGram.get(key);
 			
-			System.out.println("\n### Wordform: " + key + " ###");
-			for (int j = 0; j < arrItem.size();j++){
-				ItemInNuclei iin = arrItem.get(j);
-				System.out.println("PoSTag: "+ iin.getPosTag() +
-								  "  PoSCount: " + iin.getCount());
-				
-				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
-					System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
-					System.out.print(" | NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
-					System.out.print(" NucleiIndex: " + iin.getSentenceInfoAt(k).getNucleiIndex());
-					System.out.print(" NucleiPos: "); printNuclei(iin.getSentenceInfoAt(k));
-					System.out.print(" Begin: " + iin.getSentenceInfoAt(k).getSentenceBegin());
-					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
-				}
-			}
+//			System.out.println("\n### Wordform: " + key + " ###");
+//			for (int j = 0; j < arrItem.size();j++){
+//				ItemInNuclei iin = arrItem.get(j);
+//				System.out.println("PoSTag: "+ iin.getPosTag() +
+//								  "  PoSCount: " + iin.getCount());
+//				
+//				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
+//					System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
+//					System.out.print(" | NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
+//					System.out.print(" NucleiIndex: " + iin.getSentenceInfoAt(k).getNucleiIndex());
+//					System.out.print(" NucleiPos: "); printNuclei(iin.getSentenceInfoAt(k));
+//					System.out.print(" Begin: " + iin.getSentenceInfoAt(k).getSentenceBegin());
+//					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
+//				}
+//			}
 		}
 	}
 	
@@ -784,26 +784,26 @@ public class NGrams {
 		removeItemsLengthOne(nGramCache);
 		System.out.println("Remaining " + nGramCache.size() + " filtered uniGrams");
 		
-		for(Iterator<String> i = nGramCache.keySet().iterator(); i.hasNext();){
-			String key = i.next();
-			ArrayList<ItemInNuclei> arrItem = nGramCache.get(key);
-			
-			System.out.println("\n### Wordform: " + key + " ###");
-			for (int j = 0; j < arrItem.size();j++){
-				ItemInNuclei iin = arrItem.get(j);
-				System.out.println("PoSTag: "+ iin.getPosTag() +
-								  " PoSCount: " + iin.getCount());
-				
-				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
-					System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
-					System.out.print(" NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
-					System.out.print(" NucleiIndex: " + iin.getSentenceInfoAt(k).getNucleiIndex());
-					System.out.print(" NucleiPos: "); printNuclei(iin.getSentenceInfoAt(k));
-					System.out.print(" Begin: " + iin.getSentenceInfoAt(k).getSentenceBegin());
-					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
-				}
-			}
-		}
+//		for(Iterator<String> i = nGramCache.keySet().iterator(); i.hasNext();){
+//			String key = i.next();
+//			ArrayList<ItemInNuclei> arrItem = nGramCache.get(key);
+//			
+//			System.out.println("\n### Wordform: " + key + " ###");
+//			for (int j = 0; j < arrItem.size();j++){
+//				ItemInNuclei iin = arrItem.get(j);
+//				System.out.println("PoSTag: "+ iin.getPosTag() +
+//								  " PoSCount: " + iin.getCount());
+//				
+//				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
+//					System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
+//					System.out.print(" NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
+//					System.out.print(" NucleiIndex: " + iin.getSentenceInfoAt(k).getNucleiIndex());
+//					System.out.print(" NucleiPos: "); printNuclei(iin.getSentenceInfoAt(k));
+//					System.out.print(" Begin: " + iin.getSentenceInfoAt(k).getSentenceBegin());
+//					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
+//				}
+//			}
+//		}
 		
 		//TODO change false false
 		createNGrams(nGramCache, false, false);

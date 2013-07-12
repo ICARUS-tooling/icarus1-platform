@@ -12,6 +12,7 @@ package de.ims.icarus.plugins.errormining;
 import java.awt.Color;
 
 import de.ims.icarus.config.ConfigBuilder;
+import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.config.ConfigUtils;
 
 
@@ -30,6 +31,8 @@ public class ErrorMiningPreferences {
 		builder.addGroup("errorMining", true); //$NON-NLS-1$
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
+		builder.addStringEntry("filepath", "E:\\test_small_modded.txt");
+		builder.addIntegerEntry("limit",10);
 		
 		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$

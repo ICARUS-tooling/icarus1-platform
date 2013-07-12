@@ -54,7 +54,8 @@ public class ErrorMiningPerspective extends Perspective {
 		
 		// Collect all extensions that are connected to the ErrorMiningManagementView point
 		// -> might result in redundant adds, so we use a Set<Extension>
-		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("ErrorMiningManagementView"); //$NON-NLS-1$
+		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint(
+					"ErrorMiningManagementView"); //$NON-NLS-1$
 		if(managementViewPoint!=null) {
 			newExtensions.addAll(PluginUtil.getExtensions(
 					managementViewPoint, true, true, null));

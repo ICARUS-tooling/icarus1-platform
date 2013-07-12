@@ -219,7 +219,7 @@ public class NGramResultView<JListModel> extends View{
 	 * @param data
 	 */
 	private void showResults(NGramDataList data) {
-		for(int i = 0; i < data.getSize(); i++){
+		for(int i = 0; i < data.size(); i++){
 			System.out.println(data.get(i).toString());
 			SentenceData sd = data.get(i);
 			System.out.println(sd.getForm(i));
@@ -276,9 +276,6 @@ public class NGramResultView<JListModel> extends View{
 		
 		//TODO Detailed Stuff
 		initializeDetailed();
-
-		
-		
 	}
 
 
@@ -766,3 +763,4 @@ public class NGramResultView<JListModel> extends View{
 	}
 	
 }
+

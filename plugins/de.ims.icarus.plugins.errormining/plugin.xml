@@ -19,6 +19,7 @@
 		<import plugin-id="de.ims.icarus.core" />
 		<import plugin-id="de.ims.icarus.jgraph" />
 		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.matetools" />
 		<import plugin-id="de.ims.icarus.searchTools" />
 	</requires>
 	
@@ -81,7 +82,7 @@
 	<extension id="NGramResultView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
 		<doc>
 			<doc-text>
-				Show all ngrams found during NGram Process.
+				Show all ngrams found during NGram Process (Debug).
 			</doc-text>
 		</doc>
 		<parameter id="name" value="plugins.errormining.nGramResultView.identity.name" />
@@ -91,6 +92,22 @@
 		<parameter id="icon" value="de/ims/icarus/plugins/errormining/webservice-edit-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="standard" />
+	</extension>
+	
+
+	<extension id="NGramResultSentenceView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
+		<doc>
+			<doc-text>
+				Show all ngrams User View
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.errormining.nGramResultSentenceView.identity.name" />
+		<parameter id="description" value="plugins.errormining.nGramResultSentenceView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.NGramResultSentenceView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/webservice-edit-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="low" />
 	</extension>
 	
 <!--

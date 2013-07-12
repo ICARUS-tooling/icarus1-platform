@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -43,6 +45,7 @@ import javax.swing.event.TreeSelectionListener;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyData;
@@ -250,8 +253,14 @@ public class ErrorMiningView extends View {
 		public void executeNGram(ActionEvent e) {
 			// TODO rework
 			
-			//18 Sentences
-			String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
+			ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+			System.out.println("Filepath: "  //$NON-NLS-1$
+					+ config.getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
+			
+			String inputFileName = config.getString("plugins.errorMining.appearance.filepath"); //$NON-NLS-1$
+			
+			//18 Sentences			
+			//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
 			
 			//CONLL Training English (1334 Sentences)
 			//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
@@ -265,13 +274,13 @@ public class ErrorMiningView extends View {
 			//CONLL Training German 50472 Sentences (Aug)
 			//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
 
-			
-			int sentencesToRead = 18;
+			//int sentencesToRead = 18;
+			int sentencesToRead = config.getInteger("plugins.errorMining.appearance.limit");
 			
 			File file = new File(inputFileName);
 			
 			
-			List<SentenceData> corpus = new ArrayList<SentenceData>();
+			final List<SentenceData> corpus = new ArrayList<SentenceData>();
 			
 			Options on = new Options();
 			on.put("FringeSTART", 3); //$NON-NLS-1$
@@ -286,13 +295,34 @@ public class ErrorMiningView extends View {
 				conellReader.init(dloc, o);
 			
 			int sentenceNr = 1;
+			//System.out.println("ReadSentences: " + sentencesToRead);
 			for(int i = 0; i < sentencesToRead; i++){
 				SentenceData sd = conellReader.next();
+				corpus.add(sd);
 				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
 				sentenceNr++;				
 			}
 			
+//			SentenceData sd = conellReader.next();
+//			
+//			while (sd != null) {				
+//				System.out.println(sentenceNr + " - " + sd.getText());
+//				corpus.add(sd);
+//				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
+//				sd = conellReader.next();
+//				sentenceNr++;				
+//			}
+			
+			
 			ngrams.nGramResults();
+			System.out.println("Corpussize: " + corpus.size());
+			
+//			List<String> tmpKey = new ArrayList<String>(ngrams.getResult().keySet());
+//			Collections.reverse(tmpKey);
+//			for(int j = 0; j < tmpKey.size(); j++){				
+//				System.out.println("key" + tmpKey.get(j));
+//			}
+			
 			
 			}catch (UnsupportedLocationException | IOException | UnsupportedFormatException ex) {
 				// TODO Auto-generated catch block
@@ -327,16 +357,23 @@ public class ErrorMiningView extends View {
 						// immutable data objects?
 						NGramDataList ngList;
 
-						ngList = new NGramDataList(get());
+						ngList = new NGramDataList(get(), corpus);
 
-//						Message messageUser = new Message(this, Commands.DISPLAY, ngList, null);
-//						sendRequest(null, messageUser);
+						Message messageUser = new Message(this, Commands.DISPLAY, ngList, null);
+						sendRequest(null, messageUser);
 						
-						//Algorithm Results
-						Message message = new Message(this, Commands.DISPLAY, get(), null);
-						sendRequest(ErrorMiningConstants.NGRAM_RESULT_VIEW_ID, message);
+						//Algorithm Results (Debug)
+						Message messageDebug = new Message(this, Commands.DISPLAY, get(), null);
+						sendRequest(ErrorMiningConstants.NGRAM_RESULT_VIEW_ID, messageDebug);
+						
 
+						Message corpusData = new Message(this, Commands.SET, corpus, null);	
+						sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, corpusData);
+						
+						Message messageSentences = new Message(this, Commands.DISPLAY, get(), null);
+						sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, messageSentences);
 
+						
 						System.out.println("Worker c/done " + isCancelled() + isDone()); //$NON-NLS-1$
 
 						if (isDone()) {
