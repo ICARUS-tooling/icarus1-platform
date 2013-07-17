@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		COREFERENCE GRAPH PRESENTER
+	-->
+		
+	<!-- Toggle 'markFalseEdges' -->
+	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'showGoldEdges' -->
+	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'showGoldVertices' -->
+	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'filterSingletons' -->
+	<action id="plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Main ToolBar List for editable graph -->
+	<action-list id="plugins.coref.corefGraphPresenter.editableMainToolBarList">
+		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.clearGraphAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.importCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.printGraphAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.rebuildGraphAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.zoomInAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		<separator />
+		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction" />
+		<item type="action" value="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction" />
+		<item type="action" value="plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction" />
+		<item type="action" value="plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction" />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup Menu List for editable graphs -->
+	<action-list id="plugins.coref.corefGraphPresenter.editablePopupMenuList">
+		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+	</action-list>
+	
+</actions>

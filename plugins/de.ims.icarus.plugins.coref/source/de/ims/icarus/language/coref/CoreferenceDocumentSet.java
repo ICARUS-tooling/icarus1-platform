@@ -9,12 +9,17 @@
  */
 package de.ims.icarus.language.coref;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import de.ims.icarus.util.CompactProperties;
-import de.ims.icarus.util.data.AbstractDataList;
+import de.ims.icarus.io.Reader;
+import de.ims.icarus.util.Options;
+import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.id.DuplicateIdentifierException;
+import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.location.UnsupportedLocationException;
 
 
 /**
@@ -22,49 +27,33 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentSet extends AbstractDataList<CoreferenceDocumentData> {
+public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentData> {
 	
-	private List<CoreferenceDocumentData> items;
+	private Map<String, CoreferenceDocumentData> idMap;
 	
-	private CompactProperties properties;
-
-	/**
-	 * @see de.ims.icarus.util.data.DataList#size()
-	 */
-	@Override
-	public int size() {
-		return items==null ? 0 : items.size();
-	}
-
-	/**
-	 * @see de.ims.icarus.util.data.DataList#get(int)
-	 */
-	@Override
-	public CoreferenceDocumentData get(int index) {
-		return items==null ? null : items.get(index);
-	}
-	
-	public Object getProperty(String key) {
-		return properties==null ? null : properties.get(key);
-	}
-	
-	public void setProperty(String key, Object value) {
-		if(properties==null) {
-			properties = new CompactProperties();
-		}
+	private CoreferenceAllocation allocation;
+	private CoreferenceAllocation defaultAllocation = new CoreferenceAllocation();
 		
-		properties.put(key, value);
+	public CoreferenceDocumentData getDocument(String documentId) {
+		return idMap==null ? null : idMap.get(documentId);
 	}
 	
 	public void add(CoreferenceDocumentData data) {
-		if(data==null)
-			throw new IllegalArgumentException("Invalid document data"); //$NON-NLS-1$
-		
-		if(items==null) {
-			items = new ArrayList<>();
+		if(idMap==null) {
+			idMap = new HashMap<>();
 		}
+		if(idMap.containsKey(data.getDocumentIndex()))
+			throw new DuplicateIdentifierException("Duplicate document id: "+data.getDocumentIndex()); //$NON-NLS-1$
+		idMap.put(data.getId(), data);
 		
-		items.add(data);
+		super.add(data);
+	}
+	
+	public CoreferenceDocumentData newDocument(String id) {
+		CoreferenceDocumentData data = new CoreferenceDocumentData(this, size());
+		data.setId(id);
+		add(data);
+		return data;
 	}
 
 	/**
@@ -75,4 +64,28 @@ public class CoreferenceDocumentSet extends AbstractDataList<CoreferenceDocument
 		return CoreferenceUtils.getCoreferenceDocumentContentType();
 	}
 
+	public CoreferenceAllocation getAllocation() {
+		return allocation==null ? getDefaultAllocation() : allocation;
+	}
+
+	public void setAllocation(CoreferenceAllocation allocation) {
+		this.allocation = allocation;
+	}
+
+	public CoreferenceAllocation getDefaultAllocation() {
+		return defaultAllocation;
+	}
+	
+	public static CoreferenceDocumentSet loadDocumentSet(Reader<CoreferenceDocumentData> reader,
+			Location location, Options options) throws IOException, UnsupportedLocationException, 
+				UnsupportedFormatException {
+
+		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
+		options.put("documentSet", documentSet); //$NON-NLS-1$
+		reader.init(location, options);
+		
+		while(reader.next()!=null);
+		
+		return documentSet;
+	}
 }

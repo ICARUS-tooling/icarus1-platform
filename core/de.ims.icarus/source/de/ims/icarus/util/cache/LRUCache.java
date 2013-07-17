@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: LRUCache.java 7 2013-02-27 13:18:56Z mcgaerty $
+ * @version $Id$
  *
  * @param <K>
  * @param <V>

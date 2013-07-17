@@ -17,7 +17,6 @@ import javax.swing.text.Highlighter.HighlightPainter;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-import de.ims.icarus.language.coref.helper.SpanBuffer;
 import de.ims.icarus.language.coref.text.CoreferenceEditorKit;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.annotation.HighlightType;
@@ -36,6 +35,14 @@ public final class CoreferenceStyling {
 	private CoreferenceStyling() {
 		// no-op
 	}
+	
+	public static final HighlightType[] supportedHighlightTypes = {
+		HighlightType.BACKGROUND,
+		HighlightType.FOREGROUND,
+		HighlightType.UNDERLINED,
+		HighlightType.ITALIC,
+		HighlightType.BOLD,
+	};
 	
 	private static CoreferenceEditorKit editorKit;
 	

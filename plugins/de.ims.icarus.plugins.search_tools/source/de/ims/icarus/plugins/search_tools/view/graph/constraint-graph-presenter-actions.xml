@@ -51,6 +51,9 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
+		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
 		<separator />

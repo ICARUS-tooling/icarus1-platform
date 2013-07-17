@@ -33,6 +33,7 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.config.ConfigDelegate;
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceDataEvent;
 import de.ims.icarus.language.SentenceDataListener;
@@ -77,6 +78,15 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	public DependencyGraphPresenter() {
 		setAllowCycles(false);
 		setEnforceTree(true);
+	}
+	
+	@Override
+	protected void loadPreferences() {
+		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+		setAutoZoomEnabled(config.getBoolean(
+				"plugins.jgraph.appearance.dependency.autoZoom")); //$NON-NLS-1$
+		setCompressEnabled(config.getBoolean(
+				"plugins.jgraph.appearance.dependency.compressGraph")); //$NON-NLS-1$
 	}
 
 	@Override

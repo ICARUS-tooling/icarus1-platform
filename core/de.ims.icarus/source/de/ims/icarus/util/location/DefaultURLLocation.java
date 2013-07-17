@@ -1,11 +1,11 @@
 /*
- * $Revision: 46 $
- * $Date: 2013-06-13 12:32:58 +0200 (Do, 13 Jun 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/location/DefaultURLLocation.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-06-13 12:32:58 +0200 (Do, 13 Jun 2013) $ 
- * $LastChangedRevision: 46 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util.location;
 
@@ -23,7 +23,7 @@ import de.ims.icarus.io.IOUtil;
 
 /**
  * @author Markus Gärtner
- * @version $Id: DefaultURLLocation.java 46 2013-06-13 10:32:58Z mcgaerty $
+ * @version $Id$
  *
  */
 public class DefaultURLLocation extends Location {

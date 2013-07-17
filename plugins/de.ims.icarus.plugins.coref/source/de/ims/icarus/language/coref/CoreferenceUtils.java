@@ -9,7 +9,13 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.util.Filter;
@@ -27,6 +33,8 @@ public final class CoreferenceUtils {
 	private CoreferenceUtils() {
 		// no-op
 	}
+	
+	public static final CoreferenceData emptySentence = new DefaultCoreferenceData(null, new String[0]);
 
 	public static ContentType getCoreferenceContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceData.class);
@@ -36,8 +44,37 @@ public final class CoreferenceUtils {
 		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentData.class);
 	}
 
+	public static ContentType getEdgeSetContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(EdgeSet.class);
+	}
+
 	public static ContentType getCoreferenceDocumentSetContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentSet.class);
+	}
+	
+	public static Collection<Edge> removeSingletons(Collection<Edge> edges) {
+		if(edges==null)
+			throw new IllegalArgumentException("Invalid edge collection"); //$NON-NLS-1$
+		if(edges.isEmpty()) {
+			return edges;
+		}
+			
+		Set<Span> intermediates = new HashSet<>();
+		for(Edge edge : edges) {
+			if(!edge.getSource().isROOT()) {
+				intermediates.add(edge.getSource());
+			}
+		}
+		
+		Collection<Edge> result = new LinkedHashSet<>();
+		
+		for(Edge edge : edges) {
+			if(!edge.getSource().isROOT() || intermediates.contains(edge.getTarget())) {
+				result.add(edge);
+			}
+		}
+		
+		return result;
 	}
 	
 	public static boolean containsSpan(CoreferenceData data, Span span) {
@@ -116,13 +153,48 @@ public final class CoreferenceUtils {
 		StringBuilder sb = new StringBuilder(50);
 		sb.append(CONLL12Utils.BEGIN_DOCUMENT).append(" "); //$NON-NLS-1$
 		
-		String header = (String) data.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
+		String header = data.getId();
+		if(header==null) {
+			header = (String) data.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
+		}
 		if(header==null) {
 			header = "<unnamed>"; //$NON-NLS-1$
 		}
 		sb.append(header);
 		
 		return sb.toString();
+	}
+	
+	/**
+	 * Creates and returns an {@code EdgeSet} by simply linking
+	 * all spans in the given {@code SpanSet} based on their
+	 * <i>cluster-id</i> in order of appearance.
+	 */
+	public static EdgeSet defaultBuildEdgeSet(SpanSet spanSet) {
+		if(spanSet==null)
+			throw new IllegalArgumentException("Invaldi span set"); //$NON-NLS-1$
+		
+		EdgeSet edgeSet = new EdgeSet();
+		
+		Map<Integer, Span> heads = new HashMap<>();
+		
+		for(Span span : spanSet.getSpans()) {
+			int clusterId = span.getClusterId();
+			if(clusterId==-1) {
+				edgeSet.addEdge(new Edge(Span.ROOT, span));
+			} else {
+				Span source = heads.get(clusterId);
+				if(source==null) {
+					source = Span.ROOT;
+				}
+				
+				edgeSet.addEdge(new Edge(source, span));
+				
+				heads.put(clusterId, span);
+			}
+		}
+		
+		return edgeSet;
 	}
 	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {

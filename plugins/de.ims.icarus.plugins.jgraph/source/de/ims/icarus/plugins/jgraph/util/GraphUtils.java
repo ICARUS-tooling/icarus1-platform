@@ -15,6 +15,7 @@ import java.util.List;
 
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
@@ -32,6 +33,15 @@ public final class GraphUtils {
 
 	private GraphUtils() {
 		// no-op
+	}
+
+	public static void translatePoint(List<mxPoint> points, int index, mxPoint offset) {
+		if (offset != null) {
+			mxPoint pt = (mxPoint) points.get(index).clone();
+			pt.setX(pt.getX() + offset.getX());
+			pt.setY(pt.getY() + offset.getY());
+			points.set(index, pt);
+		}
 	}
 	
 	public static Object getEdgeValue(GraphOwner owner, Object cell) {

@@ -1,11 +1,11 @@
 /*
- * $Revision: 58 $
- * $Date: 2013-07-05 02:31:01 +0200 (Fr, 05 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/UIUtil.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-05 02:31:01 +0200 (Fr, 05 Jul 2013) $ 
- * $LastChangedRevision: 58 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui;
 
@@ -101,7 +101,7 @@ import de.ims.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner 
- * @version $Id: UIUtil.java 58 2013-07-05 00:31:01Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class UIUtil {
@@ -749,7 +749,7 @@ public final class UIUtil {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: UIUtil.java 58 2013-07-05 00:31:01Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class IconlessButton extends JButton {

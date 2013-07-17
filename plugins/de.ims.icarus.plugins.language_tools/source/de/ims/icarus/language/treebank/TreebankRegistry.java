@@ -600,6 +600,11 @@ public class TreebankRegistry {
 		public SentenceData get(int index) {
 			return null;
 		}
+
+		@Override
+		public boolean isLoading() {
+			return false;
+		}
 	};
 	
 	public static final Comparator<Treebank> TREEBANK_NAME_COMPARATOR = new Comparator<Treebank>() {

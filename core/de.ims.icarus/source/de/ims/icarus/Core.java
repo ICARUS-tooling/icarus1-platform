@@ -1,11 +1,11 @@
 /*
- * $Revision: 60 $
- * $Date: 2013-07-06 18:59:47 +0200 (Sa, 06 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/Core.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-06 18:59:47 +0200 (Sa, 06 Jul 2013) $ 
- * $LastChangedRevision: 60 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 
 /**
@@ -170,6 +170,9 @@ public class Core {
 	private final File dataFolder;
 	private final File tempFolder;
 	
+	public static final String IGNORE_STREAM_REDIRECT_PROPERTY = 
+			"de.ims.icarus.ignoreStreamRedirect"; //$NON-NLS-1$
+	
 	private static final String DEFAULT_CORE_PLUGIN_ID = 
 			"de.ims.icarus.core"; //$NON-NLS-1$
 	
@@ -225,23 +228,25 @@ public class Core {
 			throw new Error("Unable to create temp directory"); //$NON-NLS-1$
 		
 		// Redirect default output
-		File outFile = new File(logFolder, "out.txt"); //$NON-NLS-1$
-		PrintStream defaultOut = System.out;
-		PrintStream defaultErr = System.err;
-		try {
-			if(!outFile.isFile()) {
-				outFile.createNewFile();
+		if(!ignoreRedirect()) {
+			File outFile = new File(logFolder, "out.txt"); //$NON-NLS-1$
+			PrintStream defaultOut = System.out;
+			PrintStream defaultErr = System.err;
+			try {
+				if(!outFile.isFile()) {
+					outFile.createNewFile();
+				}
+				PrintStream ps = new PrintStream(new FileOutputStream(outFile), 
+					true, "UTF-8"); //$NON-NLS-1$
+				
+				System.setOut(ps);
+				System.setErr(ps);
+			} catch(Exception e) {
+				System.setOut(defaultOut);
+				System.setErr(defaultErr);
+				
+				e.printStackTrace(defaultOut);
 			}
-			PrintStream ps = new PrintStream(new FileOutputStream(outFile), 
-				true, "UTF-8"); //$NON-NLS-1$
-			
-			System.setOut(ps);
-			System.setErr(ps);
-		} catch(Exception e) {
-			System.setOut(defaultOut);
-			System.setErr(defaultErr);
-			
-			e.printStackTrace(defaultOut);
 		}
 
 		SplashWindow.setText("Starting logger"); //$NON-NLS-1$
@@ -278,6 +283,11 @@ public class Core {
 		}
 		
 		PluginUtil.getPluginManager().registerListener(new PluginManagerLog());
+	}
+	
+	private static boolean ignoreRedirect() {
+		String ignore = System.getProperty(IGNORE_STREAM_REDIRECT_PROPERTY);
+		return ignore!=null && Boolean.parseBoolean(ignore);
 	}
 	
 	// prevent multiple deserialization
@@ -754,7 +764,7 @@ public class Core {
 	 * Command line argument wrapper
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: Core.java 60 2013-07-06 16:59:47Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public class CoreOptions {
@@ -831,7 +841,7 @@ public class Core {
 	 * 
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: Core.java 60 2013-07-06 16:59:47Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static interface NamedRunnable {

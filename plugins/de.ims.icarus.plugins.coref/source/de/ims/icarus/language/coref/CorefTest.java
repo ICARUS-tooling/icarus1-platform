@@ -30,6 +30,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.language.coref.io.AllocationReader;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.language.coref.text.CoreferenceEditorKit;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
@@ -53,7 +54,7 @@ public class CorefTest extends JFrame {
 	}
 	
 	public CorefTest() throws Exception {
-		test3();
+		test1();
 		
 		
 		pack();
@@ -61,21 +62,12 @@ public class CorefTest extends JFrame {
 		setVisible(true);
 	}
 
-	void test1() {
-		final AttributedString as = new AttributedString("Test 1[2bla2]1 test");
-		as.addAttribute(TextAttribute.BACKGROUND, Color.green, 5, 14);
-		as.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER, 5, 6);
+	void test1() throws Exception {
+		String path = "E:\\Tasks\\Diplomarbeit\\resources\\out.GOLD.icarus"; //$NON-NLS-1$
+		AllocationReader reader = new AllocationReader();
+		reader.init(Locations.getFileLocation(path), null, null);
 		
-		JComponent comp = new JComponent() {
-
-			@Override
-			protected void paintComponent(Graphics g) {
-				g.drawString(as.getIterator(), 10, 30);
-			}
-			
-		};
-		comp.setPreferredSize(new Dimension(300, 200));
-		getContentPane().add(comp);
+		CoreferenceAllocation alloc = reader.readAllocation();
 	}
 	
 	void test3() throws Exception {
@@ -99,17 +91,17 @@ public class CorefTest extends JFrame {
 		StyleConstants.setSubscript(subscript, true);
 		
 		doc.remove(0, doc.getLength());
-		doc.insertString(doc.getLength(), "test ", empty);
-		doc.insertString(doc.getLength(), "23", superscript);
-		doc.insertString(doc.getLength(), "test ", empty);
-		doc.insertString(doc.getLength(), "5", subscript);
+		doc.insertString(doc.getLength(), "test ", empty); //$NON-NLS-1$
+		doc.insertString(doc.getLength(), "23", superscript); //$NON-NLS-1$
+		doc.insertString(doc.getLength(), "test ", empty); //$NON-NLS-1$
+		doc.insertString(doc.getLength(), "5", subscript); //$NON-NLS-1$
 		
 		pane.setMinimumSize(new Dimension(300, 150));
 		getContentPane().add(pane);
 	}
 	
 	void test5() throws Exception {
-		Location location = Locations.getFileLocation("data/coref/eng_dev_v4_auto_conll.gz");
+		Location location = Locations.getFileLocation("data/coref/eng_dev_v4_auto_conll.gz"); //$NON-NLS-1$
 		CONLL12DocumentReader reader = new CONLL12DocumentReader();
 		reader.init(location, null);
 		CoreferenceDocumentData documentData;

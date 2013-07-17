@@ -1,18 +1,18 @@
 /*
- * $Revision: 33 $
- * $Date: 2013-05-13 14:33:31 +0200 (Mo, 13 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/mpi/ResultMessage.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-13 14:33:31 +0200 (Mo, 13 Mai 2013) $ 
- * $LastChangedRevision: 33 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util.mpi;
 
 
 /**
  * @author Markus Gärtner
- * @version $Id: ResultMessage.java 33 2013-05-13 12:33:31Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ResultMessage {

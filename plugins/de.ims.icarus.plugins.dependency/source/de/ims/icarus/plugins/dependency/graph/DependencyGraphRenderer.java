@@ -14,12 +14,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.util.Collections;
 import java.util.Map;
 
-
 import com.mxgraph.canvas.mxGraphics2DCanvas;
-import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.shape.mxITextShape;
 import com.mxgraph.util.mxConstants;
@@ -39,7 +36,6 @@ import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Grouping;
 import de.ims.icarus.ui.view.TextRenderer;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.HtmlUtils.HtmlTableBuilder;
 import de.ims.icarus.util.annotation.AnnotationDisplayMode;
 

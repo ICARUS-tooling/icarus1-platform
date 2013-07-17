@@ -1,11 +1,11 @@
 /*
- * $Revision: 17 $
- * $Date: 2013-03-25 01:44:03 +0100 (Mo, 25 Mrz 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/resources/DefaultResourceLoader.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-03-25 01:44:03 +0100 (Mo, 25 Mrz 2013) $ 
- * $LastChangedRevision: 17 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.resources;
 
@@ -22,7 +22,7 @@ import de.ims.icarus.util.Exceptions;
  * of a certain {@code Class} to load resources.
  * 
  * @author Markus Gärtner 
- * @version $Id: DefaultResourceLoader.java 17 2013-03-25 00:44:03Z mcgaerty $
+ * @version $Id$
  *
  */
 public class DefaultResourceLoader implements ResourceLoader {

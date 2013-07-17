@@ -1,11 +1,11 @@
 /*
- * $Revision: 40 $
- * $Date: 2013-05-20 02:11:51 +0200 (Mo, 20 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/helper/Configurable.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-20 02:11:51 +0200 (Mo, 20 Mai 2013) $ 
- * $LastChangedRevision: 40 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.helper;
 
@@ -22,7 +22,7 @@ package de.ims.icarus.ui.helper;
  * this interface in case it features configuration possibilities.
  * 
  * @author Markus Gärtner
- * @version $Id: Configurable.java 40 2013-05-20 00:11:51Z mcgaerty $
+ * @version $Id$
  *
  */
 public interface Configurable {

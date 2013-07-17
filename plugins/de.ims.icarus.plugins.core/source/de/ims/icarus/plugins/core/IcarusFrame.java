@@ -96,16 +96,6 @@ public class IcarusFrame extends JFrame {
 		setIconImages(Core.getIconImages());
 		//setIconImage(Core.getSmallIcon().getImage());
 		
-		//MacOSX Dock Icon
-		try {
-			Application.getApplication().setDockIconImage(
-		            Core.getLargeIcon().getImage());
-		} catch (RuntimeException e) {
-			LoggerFactory.log(Core.class, Level.SEVERE, 
-					"MacOS Icon Workaround ", e); //$NON-NLS-1$
-		}
-
-		
 		currentPerspective = readPerspectiveOption(options);
 		
 		refreshTitle();
@@ -165,7 +155,7 @@ public class IcarusFrame extends JFrame {
 	void init() throws Exception {
 		
 		// DEBUG
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		
 		// Load actions
 		URL actionLocation = IcarusFrame.class.getResource(
@@ -184,14 +174,25 @@ public class IcarusFrame extends JFrame {
 			return;
 		}
 		
+		//MacOSX Dock Icon
+		try {
+			Application.getApplication().setDockIconImage(
+		            Core.getLargeIcon().getImage());
+		} catch (Exception e) {
+			// TODO maybe ignore this exception when on another OS?
+			if(!"Unimplemented".equals(e.getMessage())) { //$NON-NLS-1$
+				LoggerFactory.log(Core.class, Level.SEVERE, 
+						"MacOS Icon Workaround failed", e); //$NON-NLS-1$
+			}
+		}
+		
 		rootPanel = new JPanel();
 		menuDelegate = new MenuDelegate("plugins.core.icarusFrame.menuBarList"); //$NON-NLS-1$
 		menuDelegate.setActionManager(getActionManager());
 		
 		toolBarDelegate = new ToolBarDelegate();
 
-		// TODO read config to get default perspective?
-		
+		// Fetch default perspective if defined
 		Object defaultPerspective = ConfigRegistry.getGlobalRegistry().getValue(
 				"general.appearance.defaultPerspective"); //$NON-NLS-1$
 		
@@ -228,13 +229,12 @@ public class IcarusFrame extends JFrame {
 		pack();
 		
 		setMinimumSize(new Dimension(500, 400));
+		// TODO determine dynamic size based on screen resolution and OS?
 		setSize(new Dimension(1000, 650));
 		// DEBUG DUMMY
 		//setSize(new Dimension(800, 461));
 		
-		// TODO find out why setLocationByPlatform moves the frame southwards
 		setLocationRelativeTo(null);
-		//setLocationByPlatform(true);
 		
 		registerActionCallbacks();
 	}

@@ -1,11 +1,11 @@
 /*
- * $Revision: 44 $
- * $Date: 2013-05-27 15:59:58 +0200 (Mo, 27 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/helper/UIHelperRegistry.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-27 15:59:58 +0200 (Mo, 27 Mai 2013) $ 
- * $LastChangedRevision: 44 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.helper;
 
@@ -29,7 +29,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner 
- * @version $Id: UIHelperRegistry.java 44 2013-05-27 13:59:58Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class UIHelperRegistry {

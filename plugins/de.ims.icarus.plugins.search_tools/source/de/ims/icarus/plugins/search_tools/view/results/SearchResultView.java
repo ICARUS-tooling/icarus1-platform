@@ -299,7 +299,7 @@ public class SearchResultView extends View {
 				useFallback = DialogFactory.getGlobalFactory().showCheckedConfirm(
 						getFrame(), DialogFactory.CONTINUE_CANCEL_OPTION, check, 
 						"plugins.searchTools.searchResultView.dialogs.title",  //$NON-NLS-1$
-						null,
+						"config.alwaysUseFallbackPresenter", //$NON-NLS-1$
 						"plugins.searchTools.searchResultView.dialogs.useFallbackPresenter", //$NON-NLS-1$
 						searchResult.getDimension());
 				

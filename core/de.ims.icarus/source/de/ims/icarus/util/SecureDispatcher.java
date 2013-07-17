@@ -1,11 +1,11 @@
 /*
- * $Revision: 32 $
- * $Date: 2013-05-07 12:09:34 +0200 (Di, 07 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/SecureDispatcher.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-07 12:09:34 +0200 (Di, 07 Mai 2013) $ 
- * $LastChangedRevision: 32 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util;
 
@@ -18,7 +18,7 @@ package de.ims.icarus.util;
  * 
  * 
  * @author Markus Gärtner
- * @version $Id: SecureDispatcher.java 32 2013-05-07 10:09:34Z mcgaerty $
+ * @version $Id$
  *
  */
 public abstract class SecureDispatcher implements Runnable {

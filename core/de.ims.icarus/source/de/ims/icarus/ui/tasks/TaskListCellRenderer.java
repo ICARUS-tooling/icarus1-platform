@@ -1,11 +1,11 @@
 /*
- * $Revision: 49 $
- * $Date: 2013-06-22 00:08:17 +0200 (Sa, 22 Jun 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/tasks/TaskListCellRenderer.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-06-22 00:08:17 +0200 (Sa, 22 Jun 2013) $ 
- * $LastChangedRevision: 49 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.tasks;
 
@@ -41,7 +41,7 @@ import de.ims.icarus.ui.events.EventObject;
 
 /**
  * @author Markus Gärtner
- * @version $Id: TaskListCellRenderer.java 49 2013-06-21 22:08:17Z mcgaerty $
+ * @version $Id$
  *
  */
 public class TaskListCellRenderer extends JPanel implements

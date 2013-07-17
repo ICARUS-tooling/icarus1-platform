@@ -1,11 +1,11 @@
 /*
- * $Revision: 29 $
- * $Date: 2013-05-03 20:03:21 +0200 (Fr, 03 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/logging/LoggerFactory.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-03 20:03:21 +0200 (Fr, 03 Mai 2013) $ 
- * $LastChangedRevision: 29 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.logging;
 
@@ -23,7 +23,7 @@ import de.ims.icarus.util.Exceptions;
 
 /**
  * @author Markus Gärtner 
- * @version $Id: LoggerFactory.java 29 2013-05-03 18:03:21Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class LoggerFactory {

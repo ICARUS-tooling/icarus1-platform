@@ -291,7 +291,7 @@ public class PropertiesFormEntry extends LabeledFormEntry<PropertiesFormEntry> i
 		KeyValuePair<String, String> entry = DialogFactory.getGlobalFactory().showPropertyEditDialog(null, 
 				"dialogs.addProperty.title",  //$NON-NLS-1$
 				"dialogs.addProperty.message",  //$NON-NLS-1$
-				key, value, null);
+				key, value);
 		
 		// Cancelled by user
 		if(entry==null) {

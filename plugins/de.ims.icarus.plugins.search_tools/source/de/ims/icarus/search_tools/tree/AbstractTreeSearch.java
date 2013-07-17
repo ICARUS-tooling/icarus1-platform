@@ -93,8 +93,9 @@ public abstract class AbstractTreeSearch extends Search {
 			throw new IllegalStateException("Invalid root matcher created"); //$NON-NLS-1$
 		
 		result = createResult();
-		if(result==null)
-			throw new IllegalStateException("Invalid result created"); //$NON-NLS-1$
+		if(result==null) {
+			return false;
+		}
 		
 		source = createSource(getTarget());
 		if(source==null)

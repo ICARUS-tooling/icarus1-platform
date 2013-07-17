@@ -15,6 +15,7 @@ import java.io.IOException;
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -31,7 +32,7 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 
 	private BufferedReader reader;
-	private int documentId = 0;
+	private CoreferenceDocumentSet documentSet;
 	
 	public CONLL12DocumentReader() {
 		// no-op
@@ -46,6 +47,7 @@ public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 		if(location==null)
 			throw new IllegalArgumentException("Invalid location"); //$NON-NLS-1$
 		
+		documentSet = (CoreferenceDocumentSet) options.get("documentSet"); //$NON-NLS-1$
 		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));
 	}
 
@@ -54,7 +56,7 @@ public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 	 */
 	@Override
 	public CoreferenceDocumentData next() throws IOException, UnsupportedFormatException {
-		return CONLL12Utils.readDocumentData(reader, documentId++);
+		return CONLL12Utils.readDocumentData(documentSet, reader);
 	}
 
 	/**

@@ -42,7 +42,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
@@ -193,7 +195,13 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected boolean editable = true;
 	protected boolean enforceTree = false;
 	protected boolean allowCycles = true;
-
+	
+	protected boolean markIncomingEdges = false;
+	protected boolean markOutgoingEdges = false;
+	
+	protected Color incomingEdgeColor;
+	protected Color outgoingEdgeColor;
+	
 	protected int ignoreDataChange = 0;
 	protected int ignoreGraphChange = 0;
 	protected int ignoreModCount = 0;
@@ -204,6 +212,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected int lastRebuildModCount = modCount;
 	
 	protected ConfigDelegate configDelegate;
+	protected EdgeHighlightHandler edgeHighlightHandler;
 	
 	protected Component presentingComponent;
 	
@@ -325,6 +334,14 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected ConfigDelegate createConfigDelegate() {
 		return new GraphConfigDelegate("plugins.jgraph.appearance.default", null); //$NON-NLS-1$
 	}
+	
+	protected EdgeHighlightHandler createEdgeHighlightHandler() {
+		return new EdgeHighlightHandler();
+	}
+	
+	public EdgeHighlightHandler getEdgeHighlightHandler() {
+		return edgeHighlightHandler;
+	}
 
 	/**
 	 * Hook for subclasses to check if the underlying data is mutable
@@ -356,6 +373,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		
 		installKeyboardActions();
 		
+		loadPreferences();
+		
 		registerActionCallbacks();
 	}
 	
@@ -374,6 +393,14 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 
 		setAntiAlias(true);
 		setTextAntiAlias(true);
+	}
+	
+	protected void loadPreferences() {
+		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+		setAutoZoomEnabled(config.getBoolean(
+				"plugins.jgraph.appearance.default.autoZoom")); //$NON-NLS-1$
+		setCompressEnabled(config.getBoolean(
+				"plugins.jgraph.appearance.default.compressGraph")); //$NON-NLS-1$
 	}
 	
 	protected void installUtilities() {		
@@ -398,6 +425,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		if(annotationManager!=null) {
 			annotationManager.addPropertyChangeListener(getHandler());
 		}
+		
+		edgeHighlightHandler = createEdgeHighlightHandler();
 		
 		setGraphLayout(createDefaultGraphLayout());
 		setGraphStyle(createDefaultGraphStyle());
@@ -653,6 +682,10 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				"plugins.jgraph.graphPresenter.toggleAutoZoomAction"); //$NON-NLS-1$
 		actionManager.setSelected(isCompressEnabled(), 
 				"plugins.jgraph.graphPresenter.toggleCompressAction"); //$NON-NLS-1$
+		actionManager.setSelected(isMarkIncomingEdges(), 
+				"plugins.jgraph.graphPresenter.toggleMarkIncomingAction"); //$NON-NLS-1$
+		actionManager.setSelected(isMarkOutgoingEdges(), 
+				"plugins.jgraph.graphPresenter.toggleMarkOutgoingAction"); //$NON-NLS-1$
 		
 		// Register callback functions
 		actionManager.addHandler(
@@ -736,6 +769,12 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		actionManager.addHandler(
 				"plugins.jgraph.graphPresenter.toggleCompressAction",  //$NON-NLS-1$
 				callbackHandler, "toggleCompress"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.toggleMarkIncomingAction",  //$NON-NLS-1$
+				callbackHandler, "toggleMarkIncoming"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.jgraph.graphPresenter.toggleMarkOutgoingAction",  //$NON-NLS-1$
+				callbackHandler, "toggleMarkOutgoing"); //$NON-NLS-1$
 	}
 	
 	protected void refreshActions() {
@@ -917,6 +956,64 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		this.wheelZoomEnabled = wheelZoomEnabled;
 		
 		firePropertyChange("wheelZoomEnabled", oldValue, wheelZoomEnabled); //$NON-NLS-1$
+	}
+
+	public boolean isMarkIncomingEdges() {
+		return markIncomingEdges;
+	}
+
+	public boolean isMarkOutgoingEdges() {
+		return markOutgoingEdges;
+	}
+
+	public void setMarkIncomingEdges(boolean markIncomingEdges) {
+		if(markIncomingEdges==this.markIncomingEdges) {
+			return;
+		}
+		
+		boolean oldValue = this.markIncomingEdges;
+		this.markIncomingEdges = markIncomingEdges;
+
+		if(edgeHighlightHandler!=null) {
+			edgeHighlightHandler.reload();
+		}
+
+		refreshEdges();
+		
+		firePropertyChange("markIncomingEdges", oldValue, markIncomingEdges); //$NON-NLS-1$
+	}
+
+	public void setMarkOutgoingEdges(boolean markOutgoingEdges) {
+		if(markOutgoingEdges==this.markOutgoingEdges) {
+			return;
+		}
+		
+		boolean oldValue = this.markOutgoingEdges;
+		this.markOutgoingEdges = markOutgoingEdges;
+
+		if(edgeHighlightHandler!=null) {
+			edgeHighlightHandler.reload();
+		}
+		
+		refreshEdges();
+		
+		firePropertyChange("markOutgoingEdges", oldValue, markOutgoingEdges); //$NON-NLS-1$
+	}
+
+	public Color getIncomingEdgeColor() {
+		return incomingEdgeColor;
+	}
+
+	public Color getOutgoingEdgeColor() {
+		return outgoingEdgeColor;
+	}
+
+	public void setIncomingEdgeColor(Color incomingEdgeColor) {
+		this.incomingEdgeColor = incomingEdgeColor;
+	}
+
+	public void setOutgoingEdgeColor(Color outgoingEdgeColor) {
+		this.outgoingEdgeColor = outgoingEdgeColor;
 	}
 
 	public GraphUndoManager getUndoManager() {
@@ -1375,6 +1472,14 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected Options createStyleOptions() {
 		return null;
 	}
+
+	public void refreshEdges() {
+		refreshCells(graph.getChildEdges(graph.getDefaultParent()));
+	}
+
+	public void refreshVertices() {
+		refreshCells(graph.getChildVertices(graph.getDefaultParent()));
+	}
 	
 	public void refreshCells(Object...cells) {
 		if(graphLayout==null && graphStyle==null) {
@@ -1709,6 +1814,14 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		return ignoreModCount>0;
 	}
 	
+	public boolean isHighlightedIncomingEdge(Object edge) {
+		return edgeHighlightHandler!=null && edgeHighlightHandler.isIncomingHighlighted(edge);
+	}
+	
+	public boolean isHighlightedOutgoingEdge(Object edge) {
+		return edgeHighlightHandler!=null && edgeHighlightHandler.isOutgoingHighlighted(edge);
+	}
+	
 	/**
 	 * Hook for subclasses to allow renderers or layouts to determine
 	 * whether a given cell can be expanded and should therefore be decorated
@@ -1886,7 +1999,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				value = graphRenderer.getToolTipForCell(GraphPresenter.this, cell);
 			}
 			if(value==null) {
-				value = super.getToolTipForCell(cell);
+				value = UIUtil.toSwingTooltip(super.getToolTipForCell(cell));
 			}
 			
 			return value;
@@ -1995,6 +2108,16 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		 */
 		@Override
 		public void invoke(Object sender, mxEventObject evt) {
+			
+			// Refresh highlight info for edges
+			if(sender==graph.getSelectionModel()) {
+				EdgeHighlightHandler edgeHighlightHandler = getEdgeHighlightHandler();
+				if(edgeHighlightHandler!=null) {
+					edgeHighlightHandler.reload();
+				}
+				
+				refreshEdges();
+			}
 			
 			// Keep actions synchronized with graph
 			refreshActions();
@@ -2385,14 +2508,64 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			// by GraphStyle or GraphLayout implementations!
 			
 			setGridVisible(getBoolean("gridVisible")); //$NON-NLS-1$
+			getGraph().setGridEnabled(getBoolean("gridEnabled")); //$NON-NLS-1$
 			getGraph().setGridSize(getInteger("gridSize")); //$NON-NLS-1$
 			setGridStyle(getInteger("gridStyle")); //$NON-NLS-1$
 			setGridColor(new Color(getInteger("gridColor"))); //$NON-NLS-1$
 			
-			// Those values should only be regared as "default startup" values
+			// Highlighting of incoming/outgoing edges is a basic graph
+			// presenter feature and as such the related properties are
+			// stored and processed on the presenter itself rather then
+			// on GraphStyle or GraphLayout implementations! 
+			setIncomingEdgeColor(new Color(getInteger("incomingEdgeColor"))); //$NON-NLS-1$
+			setOutgoingEdgeColor(new Color(getInteger("outgoingEdgeColor"))); //$NON-NLS-1$
+			
+			// Those values should only be regarded as "default startup" values
 			// so no need to mess with users current decision on graph level!
 			//setAutoZoomEnabled(getValue("autoZoom", isAutoZoomEnabled())); //$NON-NLS-1$
 			//setCompressEnabled(getValue("compressGraph", isCompressEnabled())); //$NON-NLS-1$
+		}
+	}
+	
+	public class EdgeHighlightHandler {
+		protected Set<Object> outgoing = new HashSet<>();
+		protected Set<Object> incoming = new HashSet<>();
+		
+		protected void reload() {
+			outgoing.clear();
+			incoming.clear();
+			if(graph==null || graph.getSelectionCount()==0) {
+				return;
+			}
+			
+			if(!isMarkIncomingEdges() && !isMarkOutgoingEdges()) {
+				return;
+			}
+			
+			Object[] vertices = getSelectionVertices();
+			if(vertices==null || vertices.length==0) {
+				return;
+			}
+			
+			Set<Object> selection = CollectionUtils.asSet(vertices);
+			
+			mxIGraphModel model = graph.getModel();
+			for(Object edge : graph.getAllEdges(vertices)) {
+				boolean isIncoming = selection.contains(model.getTerminal(edge, false));
+				if(isMarkIncomingEdges() && isIncoming) {
+					incoming.add(edge);
+				} else if(isMarkOutgoingEdges() && !isIncoming) {
+					outgoing.add(edge);
+				}
+			}
+		}
+		
+		public boolean isOutgoingHighlighted(Object edge) {
+			return outgoing.contains(edge);
+		}
+		
+		public boolean isIncomingHighlighted(Object edge) {
+			return incoming.contains(edge);
 		}
 	}
 	
@@ -3022,6 +3195,42 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				UIUtil.beep();
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle 'compressEnabled' state", ex); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleMarkIncoming(ActionEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see GraphPresenter#setMarkIncomingEdges(boolean)
+		 * @see GraphPresenter#isMarkIncomingEdges()
+		 */
+		public void toggleMarkIncoming(boolean b) {
+			try {
+				setMarkIncomingEdges(b);
+			} catch(Exception ex) {
+				UIUtil.beep();
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'markIncoming' state", ex); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleMarkOutgoing(ActionEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see GraphPresenter#setMarkOutgoingEdges(boolean)
+		 * @see GraphPresenter#isMarkOutgoingEdges()
+		 */
+		public void toggleMarkOutgoing(boolean b) {
+			try {
+				setMarkOutgoingEdges(b);
+			} catch(Exception ex) {
+				UIUtil.beep();
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'markOutgoing' state", ex); //$NON-NLS-1$
 			}
 		}
 	}

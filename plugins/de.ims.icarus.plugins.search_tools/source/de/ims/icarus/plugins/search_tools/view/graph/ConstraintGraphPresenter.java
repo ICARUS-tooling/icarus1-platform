@@ -34,6 +34,7 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.config.ConfigDelegate;
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.LanguageManager;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.jgraph.cells.CompoundGraphNode;
@@ -148,6 +149,15 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	@Override
 	protected CallbackHandler createCallbackHandler() {
 		return new CCallbackHandler();
+	}
+	
+	@Override
+	protected void loadPreferences() {
+		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+		setAutoZoomEnabled(config.getBoolean(
+				"plugins.jgraph.appearance.constraints.autoZoom")); //$NON-NLS-1$
+		setCompressEnabled(config.getBoolean(
+				"plugins.jgraph.appearance.constraints.compressGraph")); //$NON-NLS-1$
 	}
 
 	@Override

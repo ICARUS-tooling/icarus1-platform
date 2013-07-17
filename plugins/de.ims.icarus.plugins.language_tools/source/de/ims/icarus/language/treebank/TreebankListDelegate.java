@@ -173,6 +173,15 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject, Load
 	}
 
 	/**
+	 * @see de.ims.icarus.io.Loadable#isLoading()
+	 */
+	@Override
+	public boolean isLoading() {
+		Treebank treebank = getTreebank();
+		return treebank==null ? false : treebank.isLoading();
+	}
+
+	/**
 	 * @see de.ims.icarus.io.Loadable#load()
 	 */
 	@Override

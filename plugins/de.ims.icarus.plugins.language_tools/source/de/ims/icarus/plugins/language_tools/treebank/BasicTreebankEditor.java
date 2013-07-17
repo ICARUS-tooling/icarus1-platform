@@ -78,7 +78,8 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 	protected void initForm() {
 		formBuilder.addInputFormEntry("name", "labels.name"); //$NON-NLS-1$ //$NON-NLS-2$
 		formBuilder.addLocationFormEntry("location", "labels.location"); //$NON-NLS-1$ //$NON-NLS-2$
-		formBuilder.addPropertiesFormEntry("properties").setPropertyFilter(handler); //$NON-NLS-1$
+		formBuilder.addPropertiesFormEntry("properties") //$NON-NLS-1$
+			.setLabel("labels.properties").setPropertyFilter(handler); //$NON-NLS-1$
 	}
 	
 	protected String getTreebankName() {

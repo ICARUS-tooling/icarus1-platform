@@ -1,5 +1,5 @@
 /**
- * $Id: EventObject.java 44 2013-05-27 13:59:58Z mcgaerty $
+ * $Id$
  * Copyright (c) 2007, Gaudenz Alder
  */
 package de.ims.icarus.ui.events;

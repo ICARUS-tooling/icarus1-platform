@@ -18,14 +18,36 @@ import java.util.List;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
+import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanSet;
 
 
 /**
+ * 
+ * CONLL 2012 shared task data format:
+ * <p>
+ * Column 	Type 	Description
+ * 1 	Document ID 	This is a variation on the document filename
+ * 2 	Part number 	Some files are divided into multiple parts numbered as 000, 001, 002, ... etc.
+ * 3 	Word number 	
+ * 4 	Word itself 	This is the token as segmented/tokenized in the Treebank. Initially the *_skel file contain the placeholder [WORD] which gets replaced by the actual token from the Treebank which is part of the OntoNotes release.
+ * 5 	Part-of-Speech 	
+ * 6 	Parse bit 	This is the bracketed structure broken before the first open parenthesis in the parse, and the word/part-of-speech leaf replaced with a *. The full parse can be created by substituting the asterix with the "([pos] [word])" string (or leaf) and concatenating the items in the rows of that column.
+ * 7 	Predicate lemma 	The predicate lemma is mentioned for the rows for which we have semantic role information. All other rows are marked with a "-"
+ * 8 	Predicate Frameset ID 	This is the PropBank frameset ID of the predicate in Column 7.
+ * 9 	Word sense 	This is the word sense of the word in Column 3.
+ * 10 	Speaker/Author 	This is the speaker or author name where available. Mostly in Broadcast Conversation and Web Log data.
+ * 11 	Named Entities 	These columns identifies the spans representing various named entities.
+ * 12:N 	Predicate Arguments 	There is one column each of predicate argument structure information for the predicate mentioned in Column 7.
+ * N 	Coreference 	Coreference chain information encoded in a parenthesis structure.
+ * 
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -58,13 +80,13 @@ public final class CONLL12Utils {
 	public static final String BEGIN_DOCUMENT = "#begin document"; //$NON-NLS-1$
 	public static final String END_DOCUMENT = "#end document"; //$NON-NLS-1$
 	
-	public static DefaultCoreferenceData readData(BufferedReader reader, int sentenceId) throws IOException {
+	public static DefaultCoreferenceData readData(CoreferenceDocumentData document, BufferedReader reader) throws IOException {
 		DefaultCoreferenceData result = null;
 		List<String> lines = new ArrayList<>();
 		String line;
 		while((line = reader.readLine()) != null) {
 			if(line.isEmpty()) {
-				result = createData(lines, sentenceId);
+				result = createData(document, lines);
 				break;
 			}
 			
@@ -74,7 +96,7 @@ public final class CONLL12Utils {
 		return result;
 	}
 	
-	public static CoreferenceDocumentData readDocumentData(BufferedReader reader, int documentId) throws IOException {
+	public static CoreferenceDocumentData readDocumentData(CoreferenceDocumentSet documentSet, BufferedReader reader) throws IOException {
 		String header = reader.readLine();
 		if(header==null) {
 			return null;
@@ -85,14 +107,13 @@ public final class CONLL12Utils {
 		
 		header = header.substring(BEGIN_DOCUMENT.length()).trim();
 		
-		CoreferenceDocumentData result = new CoreferenceDocumentData();
+		CoreferenceDocumentData result = documentSet.newDocument(header);
 		List<String> lines = new ArrayList<>();
-		int sentenceId = 0;
 		boolean closed = false;
 		String line;
 		while((line = reader.readLine()) != null) {
 			if(line.isEmpty()) {
-				result.add(createData(lines, sentenceId++));
+				createData(result, lines);
 				lines.clear();
 			} else {
 				lines.add(line);
@@ -105,10 +126,14 @@ public final class CONLL12Utils {
 		}
 		
 		if(!closed)
-			throw new IllegalArgumentException("Missing '#end document' statement"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Missing '"+END_DOCUMENT+"' statement"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		result.setProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY, header);
-		result.setProperty(CoreferenceDocumentData.DOCUMENT_ID_PROPERTY, documentId);
+		SpanSet spanSet = result.getDefaultSpanSet();
+		if(spanSet!=null) {
+			CoreferenceAllocation allocation = result.getDocumentSet().getDefaultAllocation();
+			EdgeSet edgeSet = CoreferenceUtils.defaultBuildEdgeSet(spanSet);
+			allocation.setEdgeSet(result.getId(), edgeSet);
+		}
 		
 		return result;
 	}
@@ -132,7 +157,7 @@ public final class CONLL12Utils {
 	 * N 	Coreference 	Coreference chain information encoded in a parenthesis structure.
 	 * 
 	 */
-	private static DefaultCoreferenceData createData(List<String> lines, int sentenceId) {
+	private static DefaultCoreferenceData createData(CoreferenceDocumentData document, List<String> lines) {
 		int size = lines.size();
 		String[] forms = new String[size];
 		LinkedList<Span> spanBuffer = new LinkedList<>();
@@ -166,7 +191,7 @@ public final class CONLL12Utils {
 						// Start of span definition
 						int clusterId = Integer.parseInt(chunk.endsWith(CBR) ? 
 								chunk.substring(1, chunk.length()-1) : chunk.substring(1));
-						spanStack.push(new Span(i, i, clusterId));
+						spanStack.push(new Span(i, i, document.size(), clusterId));
 					}
 					if(chunk.endsWith(CBR)) {
 						// End of span definition
@@ -187,16 +212,17 @@ public final class CONLL12Utils {
 		if(!spanStack.isEmpty())
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 		
-		
+		DefaultCoreferenceData result = document.newData(forms);
+		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);
+		result.setProperty(CoreferenceData.PART_ID_PROPERTY, partId);
+
 		Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
 		if(spans!=null) {
 			Arrays.sort(spans, CoreferenceUtils.SPAN_SIZE_REVERSE_SORTER);
+			
+			CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
+			allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
 		}
-		
-		DefaultCoreferenceData result = new DefaultCoreferenceData(forms, spans);
-		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);
-		result.setProperty(CoreferenceData.PART_ID_PROPERTY, partId);
-		result.setProperty(CoreferenceData.SENTENCE_ID_PROPERTY, sentenceId);
 		
 		return result;
 	}

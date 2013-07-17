@@ -85,4 +85,13 @@
 		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceDocumentSet" />
 	</extension>
 	
+	<extension id="CoreferenceEdgeSetContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.EdgeSet
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.EdgeSet" />
+	</extension>
+	
 </plugin>

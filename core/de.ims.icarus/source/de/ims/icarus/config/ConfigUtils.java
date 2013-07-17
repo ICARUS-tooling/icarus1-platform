@@ -1,11 +1,11 @@
 /*
- * $Revision: 46 $
- * $Date: 2013-06-13 12:32:58 +0200 (Do, 13 Jun 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/config/ConfigUtils.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-06-13 12:32:58 +0200 (Do, 13 Jun 2013) $ 
- * $LastChangedRevision: 46 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.config;
 
@@ -40,7 +40,7 @@ import de.ims.icarus.util.Exceptions;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ConfigUtils implements ConfigConstants {
@@ -222,7 +222,7 @@ public class ConfigUtils implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class ColorEntryHandler implements EntryHandler {
@@ -274,7 +274,7 @@ public class ConfigUtils implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class StringEntryHandler implements EntryHandler {
@@ -330,7 +330,7 @@ public class ConfigUtils implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 * @param <N>
 	 */
@@ -433,7 +433,7 @@ public class ConfigUtils implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class StringMapHandler extends StringEntryHandler implements MapHandler {
@@ -491,7 +491,7 @@ public class ConfigUtils implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 * @param <N>
 	 */
@@ -552,7 +552,7 @@ public class ConfigUtils implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigUtils.java 46 2013-06-13 10:32:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class ColorMapHandler extends ColorEntryHandler implements MapHandler {

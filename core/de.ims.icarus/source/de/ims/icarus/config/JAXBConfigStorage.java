@@ -33,7 +33,7 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: JAXBConfigStorage.java 44 2013-05-27 13:59:58Z mcgaerty $
+ * @version $Id$
  *
  */
 public class JAXBConfigStorage extends AbstractConfigStorage {
@@ -123,7 +123,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: JAXBConfigStorage.java 44 2013-05-27 13:59:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	@XmlRootElement(name="properties")
@@ -168,7 +168,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: JAXBConfigStorage.java 44 2013-05-27 13:59:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
@@ -213,7 +213,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: JAXBConfigStorage.java 44 2013-05-27 13:59:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
@@ -255,7 +255,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: JAXBConfigStorage.java 44 2013-05-27 13:59:58Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)

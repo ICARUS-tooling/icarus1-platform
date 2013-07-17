@@ -74,6 +74,7 @@ public class Console {
 		if(outStream!=null || outDoc==null) {
 			return;
 		}
+		
 		outStream = new DocumentStream(outDoc, defaultOut);
 		System.setOut(new PrintStream(outStream, true));
 	}
@@ -86,7 +87,9 @@ public class Console {
 			
 			if(isMergeStreams()) {
 				redirectErr();
-				errStream.setDocument(outDoc);
+				if(errStream!=null) {
+					errStream.setDocument(outDoc);
+				}
 			}
 		}
 		
@@ -98,6 +101,7 @@ public class Console {
 		if(errStream!=null || doc==null) {
 			return;
 		}
+		
 		errStream = new DocumentStream(doc, defaultErr, Color.red);
 		System.setErr(new PrintStream(errStream, true));
 	}

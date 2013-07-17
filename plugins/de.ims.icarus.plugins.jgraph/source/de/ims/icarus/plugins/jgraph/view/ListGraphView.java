@@ -10,6 +10,10 @@
 package de.ims.icarus.plugins.jgraph.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.logging.Level;
 
 import javax.swing.JComponent;
@@ -75,6 +79,7 @@ public class ListGraphView extends View implements Outline {
 		splitPane.setDividerSize(5);
 		splitPane.setBorder(null);
 		splitPane.setResizeWeight(1);
+		splitPane.addComponentListener(handler);
 		container.add(splitPane, BorderLayout.CENTER);
 		
 		showInfo(null);
@@ -117,7 +122,9 @@ public class ListGraphView extends View implements Outline {
 		if(this.listPresenter!=null) {
 			this.listPresenter.getSelectionModel().addListSelectionListener(handler);
 			
-			splitPane.setRightComponent(listPresenter.getPresentingComponent());
+			Component comp = listPresenter.getPresentingComponent();
+			comp.setPreferredSize(new Dimension(100, 100));
+			splitPane.setRightComponent(comp);
 		} else {
 			showInfo(null);
 		}
@@ -220,7 +227,7 @@ public class ListGraphView extends View implements Outline {
 		setListPresenter(listPresenter);
 		setGraphPresenter(graphPresenter);
 		
-		try {
+		/*try {
 			displaySelectedData();
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
@@ -230,6 +237,12 @@ public class ListGraphView extends View implements Outline {
 					"plugins.jgraph.listGraphView.presentationFailed", entryType.getId()); //$NON-NLS-1$
 			showGraphInfo(text);
 			return;
+		}*/
+		
+		if(dataList.size()>0) {
+			listPresenter.getSelectionModel().setSelectionInterval(0, 0);
+		} else {
+			listPresenter.getSelectionModel().clearSelection();
 		}
 		
 		infoLabel.setVisible(false);
@@ -351,8 +364,10 @@ public class ListGraphView extends View implements Outline {
 		}
 	}
 	
-	protected class Handler implements ListSelectionListener {
+	protected class Handler extends ComponentAdapter implements ListSelectionListener {
 
+		protected boolean trackResizing = true;
+		
 		/**
 		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
 		 */
@@ -365,6 +380,32 @@ public class ListGraphView extends View implements Outline {
 						"Failed to handle change in selection: "+e, ex); //$NON-NLS-1$
 			}
 		}
-		
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentResized(ComponentEvent e) {
+			if(!trackResizing) {
+				return;
+			}
+			
+			int height = splitPane.getHeight();
+			if(height==0) {
+				return;
+			}
+			
+			splitPane.setDividerLocation(Math.max(height/2, height-100));
+			
+			trackResizing = false;
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentHidden(ComponentEvent e) {
+			trackResizing = true;
+		}
 	}
 }

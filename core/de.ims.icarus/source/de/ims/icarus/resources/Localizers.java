@@ -1,11 +1,11 @@
 /*
- * $Revision: 39 $
- * $Date: 2013-05-17 15:19:31 +0200 (Fr, 17 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/resources/Localizers.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-17 15:19:31 +0200 (Fr, 17 Mai 2013) $ 
- * $LastChangedRevision: 39 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.resources;
 
@@ -34,7 +34,7 @@ import de.ims.icarus.util.Exceptions;
  * various objects.
  * 
  * @author Markus Gärtner 
- * @version $Id: Localizers.java 39 2013-05-17 13:19:31Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class Localizers {
@@ -380,7 +380,7 @@ public final class Localizers {
 	 * object in terms of localization.
 	 * 
 	 * @author Markus Gärtner 
-	 * @version $Id: Localizers.java 39 2013-05-17 13:19:31Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class LocalizationAccessDescriptor {

@@ -37,7 +37,7 @@ public class SearchToolsPreferences {
 		builder.addGroup("constraints", true); //$NON-NLS-1$
 		builder.addColorEntry("linkStrokeColor", Color.green.getRGB()); //$NON-NLS-1$
 		builder.addIntegerEntry("linkStrokeWidth", 1, 1, 5); //$NON-NLS-1$
-		JGraphPreferences.buildDefaultGraphConfig(builder);
+		JGraphPreferences.buildDefaultGraphConfig(builder, null);
 		
 		builder.reset();
 
@@ -46,6 +46,7 @@ public class SearchToolsPreferences {
 		// SEARCHTOOLS GROUP
 		builder.addGroup("searchTools", true); //$NON-NLS-1$
 		builder.addBooleanEntry("alwaysUseFallbackPresenter", false); //$NON-NLS-1$
+		builder.addBooleanEntry("alwaysUnifyNonAggregatedConstraints", false); //$NON-NLS-1$
 		builder.addIntegerEntry("searchTimeout", 60); //$NON-NLS-1$
 		builder.setProperties(builder.addIntegerEntry("maxCores", 0),  //$NON-NLS-1$
 				ConfigConstants.NOTE_KEY, "config.searchTools.maxCores.note"); //$NON-NLS-1$

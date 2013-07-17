@@ -16,6 +16,7 @@ import java.util.logging.Level;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
@@ -31,6 +32,7 @@ import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.tree.AbstractTreeSearch;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -79,10 +81,28 @@ public abstract class AbstractCorpusSearch extends AbstractTreeSearch {
 		 * without aggregation check
 		 */
 		if(groupConstraints==null) {
-			if(DialogFactory.getGlobalFactory().showConfirm(null, 
-					"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
-					"plugins.searchTools.graphValidation.ununifiedGroups")) { //$NON-NLS-1$
+			boolean doPlainUnify = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"plugins.searchTools.alwaysUnifyNonAggregatedConstraints"); //$NON-NLS-1$
+			
+			if(!doPlainUnify) {
+				MutableBoolean check = new MutableBoolean(false);
+				doPlainUnify = DialogFactory.getGlobalFactory().showCheckedConfirm(
+						null, DialogFactory.CONTINUE_CANCEL_OPTION, check, 
+						"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
+						"config.alwaysUnifyNonAggregatedConstraints", //$NON-NLS-1$
+						"plugins.searchTools.graphValidation.ununifiedGroups"); //$NON-NLS-1$
+				
+				if(check.getValue()) {
+					ConfigRegistry.getGlobalRegistry().setValue(
+							"plugins.searchTools.alwaysUnifyNonAggregatedConstraints",  //$NON-NLS-1$
+							true);
+				}
+			}
+			
+			if(doPlainUnify) {
 				groupConstraints = ConstraintUnifier.collectUnunifiedGroupConstraints(getSearchGraph());
+			} else {
+				return null;
 			}
 		}
 		
@@ -102,7 +122,7 @@ public abstract class AbstractCorpusSearch extends AbstractTreeSearch {
 		List<Extension> presenters = SearchManager.getResultPresenterExtensions(
 				entryType, dimension);
 		if(presenters==null || presenters.isEmpty()) {
-			if(!DialogFactory.getGlobalFactory().showConfirm(null, 
+			if(!DialogFactory.getGlobalFactory().showConfirm(null, DialogFactory.CONTINUE_CANCEL_OPTION, 
 					"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
 					"plugins.searchTools.graphValidation.groupLimitExceeded",  //$NON-NLS-1$
 					dimension)) {

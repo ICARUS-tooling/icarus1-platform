@@ -11,27 +11,28 @@ package de.ims.icarus.language.coref;
 
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.util.CompactProperties;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultCoreferenceData implements CoreferenceData {
+public class DefaultCoreferenceData extends CorefMember implements CoreferenceData {
 
 	private static final long serialVersionUID = 1641469565583964051L;
 	
-	protected String[] forms;
-	protected CompactProperties properties;
-	protected Span[] spans;
+	protected final String[] forms;
 	
-	public DefaultCoreferenceData(String[] forms, Span[] spans) {
+	protected CoreferenceDocumentData document;
+	
+	protected int sentenceIndex = -1;
+	
+	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
 		if(forms==null)
 			throw new IllegalArgumentException("Invalid forms array"); //$NON-NLS-1$
 		
 		this.forms = forms;
-		this.spans = spans;
+		setDocument(document);
 	}
 
 	/**
@@ -67,35 +68,18 @@ public class DefaultCoreferenceData implements CoreferenceData {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceData#getProperty(java.lang.String)
-	 */
-	@Override
-	public Object getProperty(String key) {
-		return properties==null ? null : properties.get(key);
-	}
-
-	public void setProperty(String key, Object value) {
-		if(properties==null) {
-			properties = new CompactProperties();
-		}
-		
-		properties.put(key, value);
-	}
-
-	/**
 	 * @see de.ims.icarus.language.coref.CoreferenceData#getSpans()
 	 */
 	@Override
 	public Span[] getSpans() {
-		return spans;
+		return sentenceIndex==-1 ? null
+				: getDocument().getSpanSet().getSpans(sentenceIndex);
 	}
 
 	@Override
 	public CoreferenceData clone() {
-		DefaultCoreferenceData clone = new DefaultCoreferenceData(forms, spans);
-		if(properties!=null) {
-			clone.properties = properties.clone();
-		}
+		DefaultCoreferenceData clone = new DefaultCoreferenceData(document, forms);
+		clone.setProperties(cloneProperties());
 		
 		return clone;
 	}
@@ -111,5 +95,28 @@ public class DefaultCoreferenceData implements CoreferenceData {
 	@Override
 	public String getText() {
 		return LanguageUtils.combine(this);
+	}
+
+	public CoreferenceDocumentData getDocument() {
+		return document;
+	}
+
+	public void setDocument(CoreferenceDocumentData document) {
+		if(forms!=null && forms.length==0) {
+			return;
+		}
+		
+		if(document==null)
+			throw new IllegalArgumentException("Invalid document"); //$NON-NLS-1$
+		
+		this.document = document;
+	}
+
+	public int getSentenceIndex() {
+		return sentenceIndex;
+	}
+
+	public void setSentenceIndex(int sentenceIndex) {
+		this.sentenceIndex = sentenceIndex;
 	}
 }

@@ -23,6 +23,8 @@ import de.ims.icarus.ui.helper.TextItem;
  *
  */
 public interface SentenceData extends Serializable, TextItem {
+	
+	public static final int ROOT_INDEX = -1;
 
 	/**
 	 * Creates a copy of this {@code SentenceData} object

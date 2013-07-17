@@ -18,12 +18,16 @@ import javax.swing.JComponent;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.io.AllocationReader;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentSetPresenter;
+import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter;
+import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
 
@@ -45,8 +49,8 @@ public class CoreferencePerspective extends Perspective {
 	@Override
 	public void init(JComponent container) {
 		try {
-			//test(container);
-			textGraph(container);
+			test2(container);
+			//textGraph(container);
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to test", e);
 		}
@@ -69,15 +73,9 @@ public class CoreferencePerspective extends Perspective {
 
 		Location location = Locations.getFileLocation("data/coref/eng_dev_v4_auto_conll.gz");
 		CONLL12DocumentReader reader = new CONLL12DocumentReader();
-		reader.init(location, null);
-		CoreferenceDocumentSet set = new CoreferenceDocumentSet();
-		CoreferenceDocumentData documentData;
-		while((documentData=reader.next())!=null) {
-			set.add(documentData);
-			/*if(set.size()>20) {
-				break;
-			}*/
-		}
+		
+		CoreferenceDocumentSet set = CoreferenceDocumentSet.loadDocumentSet(
+				reader, location, new Options());
 		
 		CoreferenceDocumentSetPresenter presenter = new CoreferenceDocumentSetPresenter();
 		
@@ -85,5 +83,37 @@ public class CoreferencePerspective extends Perspective {
 		
 		container.setLayout(new BorderLayout());
 		container.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
+	}
+
+	private void test2(JComponent container) throws Exception {
+
+		Location location = Locations.getFileLocation(
+				"data/coref/eng_dev_v4_auto_conll.gz");
+		CONLL12DocumentReader reader = new CONLL12DocumentReader();
+		
+		CoreferenceDocumentSet set = CoreferenceDocumentSet.loadDocumentSet(
+				reader, location, new Options());
+		
+		String path = "E:\\Tasks\\Diplomarbeit\\resources\\out.GOLD.icarus"; //$NON-NLS-1$
+		AllocationReader r = new AllocationReader();
+		r.init(Locations.getFileLocation(path), null, set);		
+		CoreferenceAllocation gold = r.readAllocation();
+		
+		path = "E:\\Tasks\\Diplomarbeit\\resources\\out.PRED.icarus"; //$NON-NLS-1$
+		r = new AllocationReader();
+		r.init(Locations.getFileLocation(path), null, set);		
+		CoreferenceAllocation predicted = r.readAllocation();		
+		
+		CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
+		
+		container.setLayout(new BorderLayout());
+		container.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
+
+		CoreferenceDocumentData document = set.get(0);
+		Options options = new Options();
+		options.put("edges", predicted.getEdgeSet(document.getId()));
+		options.put("goldEdges", gold.getEdgeSet(document.getId()));
+		presenter.present(document, options);
+		
 	}
 }

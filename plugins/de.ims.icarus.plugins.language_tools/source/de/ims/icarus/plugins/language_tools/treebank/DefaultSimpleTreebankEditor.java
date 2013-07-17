@@ -9,19 +9,35 @@
  */
 package de.ims.icarus.plugins.language_tools.treebank;
 
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.swing.ComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 
+import de.ims.icarus.language.SentenceDataReader;
 import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.language_tools.LanguageToolsConstants;
+import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.dialog.ChoiceFormEntry;
+import de.ims.icarus.ui.dialog.FormBuilder;
+import de.ims.icarus.ui.helper.Configurable;
+import de.ims.icarus.util.PropertyOwner;
 
 /**
  * @author Markus Gärtner
@@ -57,9 +73,8 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 		ComboBoxModel<Extension> model = new ExtensionListModel(
 				extensionPoint.getConnectedExtensions(), true);
 		
-		ChoiceFormEntry entry = new ChoiceFormEntry(
+		ChoiceFormEntry entry = new ReaderChoiceFormEntry(
 				"plugins.languageTools.labels.reader", model); //$NON-NLS-1$
-		entry.getComboBox().setRenderer(new ExtensionListCellRenderer());
 		formBuilder.insertEntry("reader", entry, "location"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -124,5 +139,150 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 	@Override
 	protected boolean isPropertyKeyAllowed(String key) {
 		return !DefaultSimpleTreebank.READER_EXTENSION_PROPERTY.equals(key);
+	}
+	
+	protected static boolean isConfigurablePropertyOwner(Object obj) {
+		return obj instanceof Configurable && obj instanceof PropertyOwner;
+	}
+	
+	protected Map<String, Object> extractReaderProperties(Map<String, Object> source) {
+		Map<String, Object> result = new HashMap<>();
+		
+		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
+		
+		if(source!=null) {
+			for(Entry<String, Object> entry : source.entrySet()) {
+				if(entry.getKey().startsWith(prefix)) {
+					String key = entry.getKey().substring(prefix.length());
+					result.put(key, entry.getValue());
+				}
+			}
+		}
+		
+		return result;
+	}
+
+	protected void addReaderProperties(Map<String, Object> source,
+			Map<String, Object> readerProperties) {
+		if(source==null)
+			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+		
+		if(readerProperties==null || readerProperties.isEmpty()) {
+			return;
+		}
+		
+		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
+
+		for(Entry<String, Object> entry : readerProperties.entrySet()) {
+			String key = prefix+entry.getKey();
+			source.put(key, entry.getValue());
+		}
+	}
+
+	protected void removeReaderProperties(Map<String, Object> properties,
+			Map<String, Object> readerProperties) {
+		if(properties==null)
+			throw new IllegalArgumentException("Invalid properties"); //$NON-NLS-1$
+
+		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
+		
+		for(Iterator<Entry<String, Object>> i = properties.entrySet().iterator(); i.hasNext();) {
+			if(i.next().getKey().startsWith(prefix)) {
+				i.remove();
+			}
+		}
+	}
+	
+	
+	protected class ReaderChoiceFormEntry extends ChoiceFormEntry implements ActionListener {
+		
+		protected JButton openConfigButton;
+
+		public ReaderChoiceFormEntry(String label, ComboBoxModel<?> model) {
+			super(label, model);
+			
+			setRenderer(new ExtensionListCellRenderer());
+			
+			openConfigButton = new JButton();
+			openConfigButton.setFocusable(false);
+			openConfigButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("settings.gif")); //$NON-NLS-1$
+			openConfigButton.addActionListener(this);
+			openConfigButton.setPreferredSize(new Dimension(20, 20));
+			
+			comboBox.addActionListener(this);
+		}
+		
+		protected void refreshButtonEnabled() {
+			DefaultSimpleTreebank treebank = getEditingItem();
+			boolean enabled = treebank!=null;
+			if(enabled) {
+				enabled = treebank.getReader()!=null;
+			}
+			if(enabled) {
+				enabled = isConfigurablePropertyOwner(treebank.getSentenceDataReader());
+			}
+			openConfigButton.setEnabled(enabled);
+		}
+		
+		public JButton getOpenConfigButton() {
+			return openConfigButton;
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource() instanceof JComboBox) {
+				refreshButtonEnabled();
+				return;
+			}
+			
+			DefaultSimpleTreebank treebank = getEditingItem();
+			if(treebank==null) {
+				return;
+			}
+			if(treebank.getReader()==null) {
+				return;
+			}
+			
+			SentenceDataReader reader = treebank.getSentenceDataReader();
+			if(reader==null) {
+				return;
+			}
+			
+			if(reader instanceof Configurable) {
+				try {
+					((Configurable)reader).openConfig();
+				} catch(Exception ex) {
+					// TODO
+				}
+			}
+		}
+
+		@Override
+		public void addComponents(FormBuilder builder) {
+			super.addComponents(builder);
+			builder.feedComponent(openConfigButton, new Insets(0, 5, 0, 0));
+		}
+
+		@Override
+		public ReaderChoiceFormEntry setValue(Object value) {
+			super.setValue(value);
+			
+			refreshButtonEnabled();
+			
+			return this;
+		}
+
+		@Override
+		public ReaderChoiceFormEntry clear() {
+			super.clear();
+			
+			refreshButtonEnabled();
+			
+			return this;
+		}
+		
 	}
 }

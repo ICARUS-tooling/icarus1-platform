@@ -1,11 +1,11 @@
 /*
- * $Revision: 49 $
- * $Date: 2013-06-22 00:08:17 +0200 (Sa, 22 Jun 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/dialog/DialogFactory.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-06-22 00:08:17 +0200 (Sa, 22 Jun 2013) $ 
- * $LastChangedRevision: 49 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.dialog;
 
@@ -38,7 +38,7 @@ import de.ims.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner 
- * @version $Id: DialogFactory.java 49 2013-06-21 22:08:17Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class DialogFactory {
@@ -76,9 +76,10 @@ public final class DialogFactory {
 	}
 		
 	public static final int YES_NO_OPTION = registerOptions("yes", "no"); //$NON-NLS-1$ //$NON-NLS-2$;
+	public static final int YES_NO_CANCEL_OPTION = registerOptions("yes", "no", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$;
 	public static final int YES_OPTION = registerOptions("yes"); //$NON-NLS-1$
-	public static final int CONTINUE_OPTION = registerOptions("continue", "cancel");; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final int CONTINUE_CANCEL_OPTION = registerOptions("cancel");; //$NON-NLS-1$
+	public static final int CONTINUE_OPTION = registerOptions("constinue"); //$NON-NLS-1$
+	public static final int CONTINUE_CANCEL_OPTION = registerOptions("continue", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
 	public static final int OK_OPTION = registerOptions("ok"); //$NON-NLS-1$
 	public static final int OK_CANCEL_OPTION = registerOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
 	

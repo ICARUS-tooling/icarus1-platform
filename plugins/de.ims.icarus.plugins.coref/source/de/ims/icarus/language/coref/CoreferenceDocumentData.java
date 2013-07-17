@@ -9,15 +9,10 @@
  */
 package de.ims.icarus.language.coref;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.util.CompactProperties;
-import de.ims.icarus.util.data.AbstractDataList;
 import de.ims.icarus.util.data.ContentType;
 
 
@@ -26,32 +21,20 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentData extends AbstractDataList<SentenceData> implements SentenceDataList {
+public class CoreferenceDocumentData extends CorefListMember<SentenceData> implements SentenceDataList {
 
 	public static final String DOCUMENT_ID_PROPERTY = "documentId"; //$NON-NLS-1$
 	public static final String DOCUMENT_HEADER_PROPERTY = "documentHeader"; //$NON-NLS-1$
 	
-	protected List<CoreferenceData> items;
-	protected CompactProperties properties;
+	protected CoreferenceDocumentSet documentSet;
 	
-	public Object getProperty(String key) {
-		return properties==null ? null : properties.get(key);
-	}
+	protected final int documentIndex;
 	
-	public void setProperty(String key, Object value) {
-		if(properties==null) {
-			properties = new CompactProperties();
-		}
-		
-		properties.put(key, value);
-	}
-
-	/**
-	 * @see de.ims.icarus.util.data.DataList#size()
-	 */
-	@Override
-	public int size() {
-		return items==null ? 0 : items.size();
+	protected String id;
+	
+	public CoreferenceDocumentData(CoreferenceDocumentSet documentSet, int documentIndex) {		
+		setDocumentSet(documentSet);
+		this.documentIndex = documentIndex;
 	}
 
 	/**
@@ -59,18 +42,19 @@ public class CoreferenceDocumentData extends AbstractDataList<SentenceData> impl
 	 */
 	@Override
 	public CoreferenceData get(int index) {
-		return items==null ? null : items.get(index);
+		return (CoreferenceData) super.get(index);
 	}
 	
 	public void add(CoreferenceData data) {
-		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+		super.add(data);
+	}
+	
+	public DefaultCoreferenceData newData(String[] forms) {
+		DefaultCoreferenceData data = new DefaultCoreferenceData(this, forms);
+		data.setSentenceIndex(size());
+		add(data);
 		
-		if(items==null) {
-			items = new ArrayList<>();
-		}
-		
-		items.add(data);
+		return data;
 	}
 
 	/**
@@ -104,5 +88,44 @@ public class CoreferenceDocumentData extends AbstractDataList<SentenceData> impl
 	public CoreferenceData get(int index, DataType type,
 			AvailabilityObserver observer) {
 		return get(index);
+	}
+
+	public CoreferenceDocumentSet getDocumentSet() {
+		return documentSet;
+	}
+
+	public void setDocumentSet(CoreferenceDocumentSet documentSet) {
+		if(documentSet==null)
+			throw new IllegalArgumentException("Invalid document set"); //$NON-NLS-1$
+		
+		this.documentSet = documentSet;
+	}
+	
+	public SpanSet getSpanSet() {
+		return getDocumentSet().getAllocation().getSpanSet(getId());
+	}
+	
+	public EdgeSet getEdgeSet() {
+		return getDocumentSet().getAllocation().getEdgeSet(getId());
+	}
+	
+	public SpanSet getDefaultSpanSet() {
+		return getDocumentSet().getDefaultAllocation().getSpanSet(getId());
+	}
+	
+	public EdgeSet getDefaultEdgeSet() {
+		return getDocumentSet().getDefaultAllocation().getEdgeSet(getId());
+	}
+
+	public int getDocumentIndex() {
+		return documentIndex;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }

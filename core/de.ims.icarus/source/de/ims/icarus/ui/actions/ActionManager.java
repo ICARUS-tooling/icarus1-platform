@@ -1,11 +1,11 @@
 /*
- * $Revision: 49 $
- * $Date: 2013-06-22 00:08:17 +0200 (Sa, 22 Jun 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/actions/ActionManager.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-06-22 00:08:17 +0200 (Sa, 22 Jun 2013) $ 
- * $LastChangedRevision: 49 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.actions;
 
@@ -72,7 +72,7 @@ import de.ims.icarus.util.id.UnknownIdentifierException;
 
 /**
  * @author Markus Gärtner
- * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ActionManager {
@@ -948,7 +948,7 @@ public class ActionManager {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	protected static class ToggleActionPropertyChangeListener implements PropertyChangeListener {
@@ -1053,7 +1053,7 @@ public class ActionManager {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	class ActionAttributes {
@@ -1194,7 +1194,7 @@ public class ActionManager {
     /**
      * 
      * @author Markus Gärtner
-     * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+     * @version $Id$
      *
      */
 	protected class XmlActionHandler extends DefaultHandler {
@@ -1359,7 +1359,7 @@ public class ActionManager {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	protected interface ComponentHandler {
@@ -1375,7 +1375,7 @@ public class ActionManager {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	protected class MenuHandler implements ComponentHandler {
@@ -1450,7 +1450,7 @@ public class ActionManager {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	protected class PopupMenuHandler implements ComponentHandler {
@@ -1592,7 +1592,7 @@ public class ActionManager {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ActionManager.java 49 2013-06-21 22:08:17Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	protected class ToolBarHandler implements ComponentHandler {

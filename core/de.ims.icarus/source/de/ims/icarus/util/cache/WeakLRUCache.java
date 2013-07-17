@@ -1,11 +1,11 @@
 /*
- * $Revision: 11 $
- * $Date: 2013-03-06 14:36:15 +0100 (Mi, 06 Mrz 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/cache/WeakLRUCache.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-03-06 14:36:15 +0100 (Mi, 06 Mrz 2013) $ 
- * $LastChangedRevision: 11 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util.cache;
 
@@ -15,7 +15,7 @@ import java.util.WeakHashMap;
 
 /**
  * @author Markus Gärtner
- * @version $Id: WeakLRUCache.java 11 2013-03-06 13:36:15Z mcgaerty $
+ * @version $Id$
  *
  */
 public class WeakLRUCache<K, V> extends WeakHashMap<K, V> implements Cache<K, V> {

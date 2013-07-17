@@ -18,5 +18,7 @@ public interface Loadable {
 
 	boolean isLoaded();
 	
+	boolean isLoading();
+	
 	void load() throws Exception;
 }

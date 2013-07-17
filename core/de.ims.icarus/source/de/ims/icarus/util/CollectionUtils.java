@@ -1,11 +1,11 @@
 /*
- * $Revision: 60 $
- * $Date: 2013-07-06 18:59:47 +0200 (Sa, 06 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/CollectionUtils.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-06 18:59:47 +0200 (Sa, 06 Jul 2013) $ 
- * $LastChangedRevision: 60 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util;
 
@@ -24,7 +24,7 @@ import java.util.Stack;
 
 /**
  * @author Markus Gärtner
- * @version $Id: CollectionUtils.java 60 2013-07-06 16:59:47Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class CollectionUtils {

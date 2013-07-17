@@ -241,4 +241,12 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 			AvailabilityObserver observer) {
 		return getBase().get(filter==null ? index : filter[index], type, observer);
 	}
+
+	/**
+	 * @see de.ims.icarus.io.Loadable#isLoading()
+	 */
+	@Override
+	public boolean isLoading() {
+		return getBase().isLoading();
+	}
 }

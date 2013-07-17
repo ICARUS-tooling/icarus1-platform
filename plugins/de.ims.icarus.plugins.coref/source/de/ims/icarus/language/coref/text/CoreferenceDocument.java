@@ -26,6 +26,7 @@ import de.ims.icarus.language.coref.helper.SpanBuffer;
 import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.ui.text.BatchDocument;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.cache.LRUCache;
 
 
@@ -381,6 +382,9 @@ public class CoreferenceDocument extends BatchDocument {
 			case ITALIC:
 				StyleConstants.setItalic(content, true);
 				break;
+				
+			default:
+				throw new IllegalArgumentException("Highlight type not supported: "+highlightType); //$NON-NLS-1$
 			}
 		}
 		

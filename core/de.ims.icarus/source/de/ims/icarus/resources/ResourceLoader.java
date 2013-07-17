@@ -1,11 +1,11 @@
 /*
- * $Revision: 7 $
- * $Date: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/resources/ResourceLoader.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $ 
- * $LastChangedRevision: 7 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.resources;
 
@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
  * of a resource bundle available over the Internet).
  * 
  * @author Markus Gärtner 
- * @version $Id: ResourceLoader.java 7 2013-02-27 13:18:56Z mcgaerty $
+ * @version $Id$
  *
  */
 public interface ResourceLoader {

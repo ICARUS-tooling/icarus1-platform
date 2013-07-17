@@ -24,6 +24,7 @@ import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
+import de.ims.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -44,17 +45,32 @@ public class JGraphPreferences {
 		// DEFAULT GROUP
 		builder.addGroup("default", true); //$NON-NLS-1$
 		
-		buildDefaultGraphConfig(builder);
+		buildDefaultGraphConfig(builder, null);
 	}
 	
-	public static void buildDefaultGraphConfig(ConfigBuilder builder) {
-
-		builder.addBooleanEntry("compressGraph", false); //$NON-NLS-1$
-		builder.addBooleanEntry("autoZoom", false); //$NON-NLS-1$
-		builder.addBooleanEntry("gridVisible", false); //$NON-NLS-1$
+	public static void buildDefaultGraphConfig(ConfigBuilder builder, Options options) {
+		
+		if(options==null) {
+			options = Options.emptyOptions;
+		}
+		
+		builder.addBooleanEntry("compressGraph",  //$NON-NLS-1$
+				options.get("compressGraph", false)); //$NON-NLS-1$
+		builder.addBooleanEntry("autoZoom",  //$NON-NLS-1$
+				options.get("autoZoom", false)); //$NON-NLS-1$
+		builder.addBooleanEntry("gridVisible",  //$NON-NLS-1$
+				options.get("gridVisible", false)); //$NON-NLS-1$
+		builder.addBooleanEntry("gridEnabled",  //$NON-NLS-1$
+				options.get("gridEnabled", true)); //$NON-NLS-1$
 		builder.addIntegerEntry("gridSize", 10, 5, 50, 1); //$NON-NLS-1$
-		builder.addColorEntry("gridColor", Color.black.getRGB()); //$NON-NLS-1$
-		builder.setProperties(builder.addOptionsEntry("gridStyle", 0,  //$NON-NLS-1$
+		builder.addColorEntry("incomingEdgeColor",  //$NON-NLS-1$
+				options.get("incomingEdgeColor", new Color(255, 127, 42).getRGB())); //$NON-NLS-1$
+		builder.addColorEntry("outgoingEdgeColor",  //$NON-NLS-1$
+				options.get("outgoingEdgeColor", new Color(85, 212, 255).getRGB())); //$NON-NLS-1$
+		builder.addColorEntry("gridColor",  //$NON-NLS-1$
+				options.get("gridColor", Color.black.getRGB())); //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("gridStyle",  //$NON-NLS-1$
+				options.get("selectedGridStyle", 0),  //$NON-NLS-1$
 				mxGraphComponent.GRID_STYLE_DOT, 
 				mxGraphComponent.GRID_STYLE_CROSS, 
 				mxGraphComponent.GRID_STYLE_LINE, 
@@ -63,7 +79,8 @@ public class JGraphPreferences {
 		
 		// VERTEX SUBGROUP
 		builder.addGroup("vertex", true); //$NON-NLS-1$
-		builder.setProperties(builder.addOptionsEntry("shape", 0,  //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("shape",  //$NON-NLS-1$
+				options.get("selectedVertexShape", 0),  //$NON-NLS-1$
 				"rectangle", //$NON-NLS-1$
 				"ellipse", //$NON-NLS-1$
 				"doubleEllipse", //$NON-NLS-1$
@@ -71,37 +88,46 @@ public class JGraphPreferences {
 				"hexagon", //$NON-NLS-1$
 				"rhombus"), //$NON-NLS-1$
 				ConfigConstants.RENDERER, shapeRenderer);
-		builder.addBooleanEntry("shapeRounded", false); //$NON-NLS-1$
-		builder.addOptionsEntry("direction", 0,  //$NON-NLS-1$
+		builder.addBooleanEntry("shapeRounded",  //$NON-NLS-1$
+				options.get("vertexShapeRounded", false)); //$NON-NLS-1$
+		builder.addOptionsEntry("direction",  //$NON-NLS-1$
+				options.get("selectedVertexDirection", 0),  //$NON-NLS-1$
 				"east", //$NON-NLS-1$
 				"west", //$NON-NLS-1$
 				"north", //$NON-NLS-1$
 				"south"); //$NON-NLS-1$
-		builder.setProperties(builder.addOptionsEntry("perimeter", 0,  //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("perimeter",  //$NON-NLS-1$
+				options.get("selectedVertexPerimeter", 0),  //$NON-NLS-1$
 				"rectanglePerimeter", //$NON-NLS-1$
 				"ellipsePerimeter", //$NON-NLS-1$
 				"trianglePerimeter", //$NON-NLS-1$
 				"hexagonPerimeter", //$NON-NLS-1$
 				"rhombusPerimeter"), //$NON-NLS-1$
 				ConfigConstants.RENDERER, shapeRenderer);
-		builder.addOptionsEntry("align", 1,  //$NON-NLS-1$
+		builder.addOptionsEntry("align",  //$NON-NLS-1$
+				options.get("selectedVertexAlign", 1),  //$NON-NLS-1$
 				"left", //$NON-NLS-1$
 				"center", //$NON-NLS-1$
 				"right"); //$NON-NLS-1$
-		builder.addOptionsEntry("verticalAlign", 1,  //$NON-NLS-1$
+		builder.addOptionsEntry("verticalAlign",  //$NON-NLS-1$
+				options.get("selectedVertexVerticalALign", 1),  //$NON-NLS-1$
 				"top", //$NON-NLS-1$
 				"middle", //$NON-NLS-1$
 				"bottom"); //$NON-NLS-1$
-		builder.addOptionsEntry("labelPosition", 1,  //$NON-NLS-1$
+		builder.addOptionsEntry("labelPosition",  //$NON-NLS-1$
+				options.get("selectedVertexLabelPosition", 1),  //$NON-NLS-1$
 				"left", //$NON-NLS-1$
 				"center", //$NON-NLS-1$
 				"right"); //$NON-NLS-1$
-		builder.addOptionsEntry("verticalLabelPosition", 1,  //$NON-NLS-1$
+		builder.addOptionsEntry("verticalLabelPosition",  //$NON-NLS-1$
+				options.get("selectedVertexVerticalLabelPosition", 1),  //$NON-NLS-1$
 				"top", //$NON-NLS-1$
 				"middle", //$NON-NLS-1$
 				"bottom"); //$NON-NLS-1$
-		builder.addColorEntry("strokeColor", Color.blue.getRGB()); //$NON-NLS-1$
-		builder.addColorEntry("fillColor", Color.white.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("strokeColor",  //$NON-NLS-1$
+				options.get("vertexStrokeColor", Color.blue.getRGB())); //$NON-NLS-1$
+		builder.addColorEntry("fillColor",  //$NON-NLS-1$
+				options.get("vertexFillColor", Color.white.getRGB())); //$NON-NLS-1$
 		builder.addIntegerEntry("strokeWidth", 1, 1, 5); //$NON-NLS-1$
 		//builder.addIntegerEntry("perimeterSpacing", 0, 0, 8);
 		builder.addIntegerEntry("spacing", 3, 0, 25); //$NON-NLS-1$
@@ -112,7 +138,8 @@ public class JGraphPreferences {
 		// VERTEX FONT SUBGROUP
 		builder.addGroup("font", true); //$NON-NLS-1$
 		builder.virtual();
-		ConfigUtils.buildDefaultFontConfig(builder, "Dialog"); //$NON-NLS-1$
+		ConfigUtils.buildDefaultFontConfig(builder, 
+				options.get("vertexFont", "Dialog")); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.addBooleanEntry("underline", false); //$NON-NLS-1$
 		builder.addBooleanEntry("shadow", false); //$NON-NLS-1$
 		builder.back();
@@ -122,29 +149,34 @@ public class JGraphPreferences {
 		
 		// EDGE SUBGROUP
 		builder.addGroup("edge", true); //$NON-NLS-1$
-		builder.addOptionsEntry("startArrow", 0, //$NON-NLS-1$
+		builder.addOptionsEntry("startArrow",  //$NON-NLS-1$
+				options.get("selectedEdgeStartArrow", 0), //$NON-NLS-1$
 				"none", //$NON-NLS-1$
 				"classic", //$NON-NLS-1$
 				"block", //$NON-NLS-1$
 				"open", //$NON-NLS-1$
 				"oval", //$NON-NLS-1$
 				"diamond"); //$NON-NLS-1$
-		builder.addOptionsEntry("endArrow", 1, //$NON-NLS-1$
+		builder.addOptionsEntry("endArrow",  //$NON-NLS-1$
+				options.get("selectedEdgeEndArrow", 1), //$NON-NLS-1$
 				"none", //$NON-NLS-1$
 				"classic", //$NON-NLS-1$
 				"block", //$NON-NLS-1$
 				"open", //$NON-NLS-1$
 				"oval", //$NON-NLS-1$
 				"diamond"); //$NON-NLS-1$
-		builder.addOptionsEntry("align", 1,  //$NON-NLS-1$
+		builder.addOptionsEntry("align",  //$NON-NLS-1$
+				options.get("selectedEdgeAlign", 1),  //$NON-NLS-1$
 				"top", //$NON-NLS-1$
 				"center", //$NON-NLS-1$
 				"bottom"); //$NON-NLS-1$
-		builder.addOptionsEntry("verticalAlign", 1,  //$NON-NLS-1$
+		builder.addOptionsEntry("verticalAlign",  //$NON-NLS-1$
+				options.get("selectedEdgeVerticalAlign", 1),  //$NON-NLS-1$
 				"top", //$NON-NLS-1$
 				"middle", //$NON-NLS-1$
 				"bottom"); //$NON-NLS-1$
-		builder.addColorEntry("strokeColor", Color.black.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("strokeColor",  //$NON-NLS-1$
+				options.get("edgeStrokeColor", Color.black.getRGB())); //$NON-NLS-1$
 		builder.addIntegerEntry("strokeWidth", 1, 1, 5); //$NON-NLS-1$
 		builder.addIntegerEntry("sourcePerimeterSpacing", 0, 0, 8); //$NON-NLS-1$
 		builder.addIntegerEntry("targetPerimeterSpacing", 0, 0, 8); //$NON-NLS-1$
@@ -152,7 +184,8 @@ public class JGraphPreferences {
 		// EDGE FONT SUBGROUP
 		builder.addGroup("font", true); //$NON-NLS-1$
 		builder.virtual();
-		ConfigUtils.buildDefaultFontConfig(builder, "Dialog"); //$NON-NLS-1$
+		ConfigUtils.buildDefaultFontConfig(builder, 
+				options.get("edgeFont", "Dialog")); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.addBooleanEntry("underline", false); //$NON-NLS-1$
 		builder.addBooleanEntry("shadow", false); //$NON-NLS-1$
 		builder.back();

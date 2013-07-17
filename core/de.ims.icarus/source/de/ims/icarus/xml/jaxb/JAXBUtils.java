@@ -32,7 +32,7 @@ import de.ims.icarus.util.location.Location;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: JAXBUtils.java 49 2013-06-21 22:08:17Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class JAXBUtils {

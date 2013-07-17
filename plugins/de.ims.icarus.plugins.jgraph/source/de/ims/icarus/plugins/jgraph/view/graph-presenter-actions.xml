@@ -48,7 +48,7 @@
 		
 	<!-- Add Cell -->
 	<action id="plugins.jgraph.graphPresenter.addNodeAction"
-		name="${id}.name" desc="${id}.description" icon="add_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="add_node.gif" />
 		
 	<!-- Add Edge -->
 	<action id="plugins.jgraph.graphPresenter.addEdgeAction"
@@ -114,6 +114,14 @@
 	<action id="plugins.jgraph.graphPresenter.toggleCompressAction"
 		name="${id}.name" desc="${id}.description" icon="collapseall.gif" type="toggle" />
 		
+	<!-- Toggle Mark Incoming -->
+	<action id="plugins.jgraph.graphPresenter.toggleMarkIncomingAction"
+		name="${id}.name" desc="${id}.description" icon="mark_incoming.png" type="toggle" />
+		
+	<!-- Toggle Mark Outgoing -->
+	<action id="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction"
+		name="${id}.name" desc="${id}.description" icon="mark_outgoing.png" type="toggle" />
+		
 	<!-- Main ToolBar List for editable graph -->
 	<action-list id="plugins.jgraph.graphPresenter.editableMainToolBarList">
 		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
@@ -150,6 +158,9 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
+		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
 		<separator />
@@ -177,6 +188,9 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.zoomInAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />

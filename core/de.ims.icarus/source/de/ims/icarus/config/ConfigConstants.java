@@ -15,7 +15,7 @@ import de.ims.icarus.config.ConfigRegistry.ValueFilter;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: ConfigConstants.java 7 2013-02-27 13:18:56Z mcgaerty $
+ * @version $Id$
  *
  */
 public interface ConfigConstants {

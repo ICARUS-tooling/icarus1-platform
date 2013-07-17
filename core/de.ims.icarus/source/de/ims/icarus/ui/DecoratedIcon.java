@@ -1,11 +1,11 @@
 /*
- * $Revision: 7 $
- * $Date: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/DecoratedIcon.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $ 
- * $LastChangedRevision: 7 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui;
 
@@ -29,7 +29,7 @@ import de.ims.icarus.util.Exceptions;
  * occur on the event dispatch thread only!
  * 
  * @author Markus Gärtner
- * @version $Id: DecoratedIcon.java 7 2013-02-27 13:18:56Z mcgaerty $
+ * @version $Id$
  *
  */
 public class DecoratedIcon implements Icon {

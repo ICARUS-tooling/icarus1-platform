@@ -15,6 +15,7 @@ import java.io.IOException;
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.SentenceDataReader;
 import de.ims.icarus.language.coref.CoreferenceData;
+import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -49,7 +50,7 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 public class CONLL12Reader implements SentenceDataReader {
 	
 	private BufferedReader reader;
-	private int sentenceCount = 0;
+	private CoreferenceDocumentData document;
 
 	public CONLL12Reader() {
 		// no-op
@@ -64,6 +65,7 @@ public class CONLL12Reader implements SentenceDataReader {
 		if(location==null)
 			throw new IllegalArgumentException("Invalid location"); //$NON-NLS-1$
 		
+		document = (CoreferenceDocumentData) options.firstSet("documentData"); //$NON-NLS-1$
 		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));
 	}
 
@@ -72,7 +74,7 @@ public class CONLL12Reader implements SentenceDataReader {
 	 */
 	@Override
 	public CoreferenceData next() throws IOException, UnsupportedFormatException {
-		return CONLL12Utils.readData(reader, sentenceCount++);
+		return CONLL12Utils.readData(document, reader);
 	}
 
 	/**

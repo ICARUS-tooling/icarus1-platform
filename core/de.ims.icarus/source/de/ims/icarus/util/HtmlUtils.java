@@ -1,11 +1,11 @@
 /*
- * $Revision: 40 $
- * $Date: 2013-05-20 02:11:51 +0200 (Mo, 20 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/HtmlUtils.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-20 02:11:51 +0200 (Mo, 20 Mai 2013) $ 
- * $LastChangedRevision: 40 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util;
 
@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: HtmlUtils.java 40 2013-05-20 00:11:51Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class HtmlUtils {

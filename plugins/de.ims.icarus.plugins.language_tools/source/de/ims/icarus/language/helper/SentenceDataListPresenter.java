@@ -12,11 +12,13 @@ package de.ims.icarus.language.helper;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JList;
 
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -111,8 +113,22 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 			
 			this.dataType = dataType;
 			
-			// TODO set tool-tips and icons
-			setText(dataType.name().substring(0, 1));
+			Icon icon = null;
+			switch (dataType) {
+			case GOLD:
+				icon = IconRegistry.getGlobalRegistry().getIcon("datatype_gold.png"); //$NON-NLS-1$
+				break;
+
+			case USER:
+				icon = IconRegistry.getGlobalRegistry().getIcon("datatype_user.png"); //$NON-NLS-1$
+				break;
+
+			case SYSTEM:
+				icon = IconRegistry.getGlobalRegistry().getIcon("datatype_system.png"); //$NON-NLS-1$
+				break;
+			}
+			
+			setIcon(icon);
 		}
 		
 		public DataType getDataType() {

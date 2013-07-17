@@ -9,6 +9,7 @@
  */
 package de.ims.icarus.util;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,7 +21,9 @@ import java.util.Map.Entry;
  * @version $Id$
  *
  */
-public class CompactProperties {
+public class CompactProperties implements Cloneable, Serializable {
+
+	private static final long serialVersionUID = -492641053997637443L;
 
 	protected Object table;
 	
@@ -68,6 +71,10 @@ public class CompactProperties {
 		}
 		
 		this.table = table;
+	}
+	
+	protected void clear() {
+		table = null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -159,7 +166,12 @@ public class CompactProperties {
 	@SuppressWarnings("unchecked")
 	@Override
 	public CompactProperties clone() {
-		CompactProperties clone = new CompactProperties();
+		CompactProperties clone = null;
+		try {
+			clone = (CompactProperties) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// ignore
+		}
 		
 		if(table instanceof Object[]) {
 			clone.table = ((Object[])table).clone();

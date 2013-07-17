@@ -1,11 +1,11 @@
 /*
- * $Revision: 23 $
- * $Date: 2013-04-17 14:39:04 +0200 (Mi, 17 Apr 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/util/mpi/DataReceiver.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-04-17 14:39:04 +0200 (Mi, 17 Apr 2013) $ 
- * $LastChangedRevision: 23 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.util.mpi;
 
@@ -13,7 +13,7 @@ import de.ims.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
- * @version $Id: DataReceiver.java 23 2013-04-17 12:39:04Z mcgaerty $
+ * @version $Id$
  *
  */
 public interface DataReceiver<O extends Object> {

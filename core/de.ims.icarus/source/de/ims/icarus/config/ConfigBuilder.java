@@ -1,11 +1,11 @@
 /*
- * $Revision: 41 $
- * $Date: 2013-05-21 00:46:47 +0200 (Di, 21 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/config/ConfigBuilder.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-21 00:46:47 +0200 (Di, 21 Mai 2013) $ 
- * $LastChangedRevision: 41 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.config;
 
@@ -22,7 +22,7 @@ import de.ims.icarus.util.Exceptions;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: ConfigBuilder.java 41 2013-05-20 22:46:47Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ConfigBuilder implements ConfigConstants {
@@ -381,7 +381,7 @@ public class ConfigBuilder implements ConfigConstants {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: ConfigBuilder.java 41 2013-05-20 22:46:47Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class IllegalBuilderOperationException extends RuntimeException {

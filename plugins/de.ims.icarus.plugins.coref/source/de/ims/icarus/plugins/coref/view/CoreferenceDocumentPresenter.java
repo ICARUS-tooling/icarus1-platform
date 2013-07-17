@@ -43,13 +43,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 			return false;
 		}
 		
-		int size = data.size();
-		for(int i=0; i<size; i++) {
-			if(Thread.currentThread().isInterrupted()) {
-				return false;
-			}
-			doc.appendBatchCoreferenceData(data.get(i));
-		}
+		doc.appendBatchCoreferenceDocumentData(data);
 		
 		doc.applyBatchUpdates(0);
 		

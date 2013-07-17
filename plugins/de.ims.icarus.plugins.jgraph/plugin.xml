@@ -336,6 +336,16 @@
 		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.ArcConnectorShape" />
 	</extension>
 	
+	<extension id="CurveConnectorShape" plugin-id="de.ims.icarus.jgraph" point-id="Shape">
+		<doc>
+			<doc-text>
+				A simple connector shape that draws curved connection lines between vertices.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="curveConnector" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.layout.CurveConnectorShape" />
+	</extension>
+	
 	<extension id="TopArcEdgeStyle" plugin-id="de.ims.icarus.jgraph" point-id="EdgeStyle">
 		<doc>
 			<doc-text>

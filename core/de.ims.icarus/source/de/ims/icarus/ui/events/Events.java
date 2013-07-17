@@ -1,17 +1,17 @@
 /*
- * $Revision: 33 $
- * $Date: 2013-05-13 14:33:31 +0200 (Mo, 13 Mai 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/events/Events.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-05-13 14:33:31 +0200 (Mo, 13 Mai 2013) $ 
- * $LastChangedRevision: 33 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.events;
 
 /**
  * @author Markus Gärtner
- * @version $Id: Events.java 33 2013-05-13 12:33:31Z mcgaerty $
+ * @version $Id$
  *
  */
 public interface Events {

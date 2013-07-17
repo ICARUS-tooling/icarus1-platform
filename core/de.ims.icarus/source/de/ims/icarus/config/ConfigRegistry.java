@@ -1,11 +1,11 @@
 /*
- * $Revision: 56 $
- * $Date: 2013-07-03 18:16:44 +0200 (Mi, 03 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/config/ConfigRegistry.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-03 18:16:44 +0200 (Mi, 03 Jul 2013) $ 
- * $LastChangedRevision: 56 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.config;
 
@@ -34,7 +34,7 @@ import de.ims.icarus.util.Exceptions;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: ConfigRegistry.java 56 2013-07-03 16:16:44Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ConfigRegistry implements ConfigConstants {

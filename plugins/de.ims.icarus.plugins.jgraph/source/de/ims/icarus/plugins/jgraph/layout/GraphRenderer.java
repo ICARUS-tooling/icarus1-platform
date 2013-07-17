@@ -14,6 +14,7 @@ import com.mxgraph.swing.view.mxInteractiveCanvas;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
+import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.Installable;
 
 /**
@@ -61,6 +62,6 @@ public abstract class GraphRenderer extends mxInteractiveCanvas implements Insta
 	 * The default implementation delegates to {@link #convertValueToString(GraphOwner, Object)}
 	 */
 	public String getToolTipForCell(GraphOwner owner, Object cell) {
-		return convertValueToString(owner, cell);
+		return UIUtil.toSwingTooltip(convertValueToString(owner, cell));
 	}
 }

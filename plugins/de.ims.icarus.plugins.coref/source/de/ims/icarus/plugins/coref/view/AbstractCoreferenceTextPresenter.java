@@ -45,11 +45,10 @@ import javax.swing.text.Element;
 import de.ims.icarus.config.ConfigEvent;
 import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.config.ConfigRegistry.Handle;
+import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
-import de.ims.icarus.language.coref.text.HighlightType;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
@@ -64,6 +63,7 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.Identity;
@@ -267,7 +267,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		
 		CoreferenceDocument doc = (CoreferenceDocument)textPane.getDocument();
 		
-		JComboBox<HighlightType> cb = new JComboBox<>(HighlightType.values());
+		JComboBox<HighlightType> cb = new JComboBox<>(
+				CoreferenceStyling.supportedHighlightTypes);
 		cb.setSelectedItem(doc.getHighlightType());
 		cb.addActionListener(getHandler());
 		cb.setEditable(false);
@@ -313,6 +314,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		JScrollPane scrollPane = new JScrollPane(textPane);
 		scrollPane.getViewport().addChangeListener(getHandler());
 		UIUtil.defaultSetUnitIncrement(scrollPane);
+		scrollPane.setBorder(UIUtil.emptyBorder);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
 		JToolBar toolBar = createToolBar();

@@ -1,11 +1,11 @@
 /*
- * $Revision: 7 $
- * $Date: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/net/ikarus_systems/icarus/ui/view/BasicLabelRenderer.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-02-27 14:18:56 +0100 (Mi, 27 Feb 2013) $ 
- * $LastChangedRevision: 7 $ 
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.view;
 
@@ -17,7 +17,7 @@ import javax.swing.SwingConstants;
 /**
  * 
  * @author Markus Gärtner
- * @version $Id: BasicLabelRenderer.java 7 2013-02-27 13:18:56Z mcgaerty $
+ * @version $Id$
  *
  */
 public class BasicLabelRenderer extends JLabel {

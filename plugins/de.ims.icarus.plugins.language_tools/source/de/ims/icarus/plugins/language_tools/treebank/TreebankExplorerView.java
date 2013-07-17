@@ -162,7 +162,7 @@ public class TreebankExplorerView extends View {
 		TreebankRegistry.getInstance().addListener(Events.REMOVED, handler);
 		
 		registerActionCallbacks();
-		refreshActions(null);
+		refreshActions();
 	}
 
 	/**
@@ -275,12 +275,15 @@ public class TreebankExplorerView extends View {
 		}
 	}
 	
-	private void refreshActions(Object selectedObject) {
+	private void refreshActions() {
+		Object selectedObject = getSelectedObject();
 		ActionManager actionManager = getDefaultActionManager();
 		
 		boolean isTreebank = selectedObject instanceof Treebank;
 		boolean isExtension = selectedObject instanceof Extension;
-		boolean isLoaded = isTreebank && ((Treebank)selectedObject).isLoaded();
+		boolean isLoading = isTreebank && ((Treebank)selectedObject).isLoading();
+		boolean isLoaded = isTreebank && ((Treebank)selectedObject).isLoaded()
+					&& !isLoading;
 		
 		actionManager.setEnabled(isTreebank || isExtension, 
 				"plugins.languageTools.treebankExplorerView.newTreebankAction");  //$NON-NLS-1$
@@ -297,7 +300,7 @@ public class TreebankExplorerView extends View {
 				"plugins.languageTools.treebankExplorerView.inspectTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.freeTreebankAction"); //$NON-NLS-1$
 		
-		actionManager.setEnabled(isTreebank && !isLoaded, 
+		actionManager.setEnabled(isTreebank && !isLoaded && !isLoading, 
 				"plugins.languageTools.treebankExplorerView.loadTreebankAction"); //$NON-NLS-1$
 		
 		actionManager.setEnabled(TreebankRegistry.getInstance().availableTreebankCount()>0, 
@@ -345,10 +348,7 @@ public class TreebankExplorerView extends View {
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
-			if(TreebankEvents.LOADED.equals(event.getName())
-					|| TreebankEvents.FREED.equals(event.getName())) {
-				refreshActions(getSelectedObject());
-			}
+			refreshActions();
 		}
 		
 		void unregister() {
@@ -388,7 +388,7 @@ public class TreebankExplorerView extends View {
 			Object[] path = getSelectionPath();
 			Object selectedObject = (path==null || path.length==0) ? null : path[path.length-1];
 	
-			refreshActions(selectedObject);
+			refreshActions();
 			
 			if(selectedObject instanceof Treebank) {
 				loadTracker.register((Treebank) selectedObject);
@@ -483,7 +483,7 @@ public class TreebankExplorerView extends View {
 		@Override
 		public void invoke(Object sender, EventObject event) {
 			showTreebankInfo();
-			refreshActions(getSelectedObject());
+			refreshActions();
 		}
 	}
 	

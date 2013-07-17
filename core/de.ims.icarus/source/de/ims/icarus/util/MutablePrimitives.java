@@ -12,7 +12,7 @@ public class MutablePrimitives {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: MutablePrimitives.java 7 2013-02-27 13:18:56Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class MutableBoolean {
@@ -38,7 +38,7 @@ public class MutablePrimitives {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: MutablePrimitives.java 7 2013-02-27 13:18:56Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class MutableInteger {
@@ -64,7 +64,7 @@ public class MutablePrimitives {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: MutablePrimitives.java 7 2013-02-27 13:18:56Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class MutableFloat {
@@ -90,7 +90,7 @@ public class MutablePrimitives {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: MutablePrimitives.java 7 2013-02-27 13:18:56Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class MutableDouble {
@@ -116,7 +116,7 @@ public class MutablePrimitives {
 	/**
 	 * 
 	 * @author Markus Gärtner
-	 * @version $Id: MutablePrimitives.java 7 2013-02-27 13:18:56Z mcgaerty $
+	 * @version $Id$
 	 *
 	 */
 	public static class MutableLong {

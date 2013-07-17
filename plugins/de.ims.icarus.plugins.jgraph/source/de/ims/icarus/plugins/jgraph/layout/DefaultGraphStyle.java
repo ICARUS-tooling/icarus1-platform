@@ -15,7 +15,7 @@ import java.util.Map;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxStylesheet;
@@ -34,6 +34,7 @@ import de.ims.icarus.util.Options;
 public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 	
 	protected mxStylesheet stylesheet;
+	protected GraphPresenter presenter;
 
 	public DefaultGraphStyle() {
 		// no-op
@@ -45,7 +46,8 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 	@Override
 	public void install(Object target) {
 		if(target instanceof GraphPresenter) {
-			ConfigDelegate configDelegate = ((GraphPresenter) target).getConfigDelegate();
+			presenter = (GraphPresenter) target;
+			ConfigDelegate configDelegate = presenter.getConfigDelegate();
 			if(configDelegate!=null) {
 				configDelegate.addChangeListener(this);
 			}
@@ -63,6 +65,11 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 				configDelegate.removeChangeListener(this);
 			}
 		}
+		presenter = null;
+	}
+	
+	protected GraphPresenter getPresenter() {
+		return presenter;
 	}
 
 	/**
@@ -82,6 +89,10 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 			}
 		}
 		
+		return stylesheet;
+	}
+	
+	public mxStylesheet getStylesheet() {
 		return stylesheet;
 	}
 	
@@ -200,7 +211,20 @@ public class DefaultGraphStyle implements GraphStyle, ChangeListener {
 	 */
 	@Override
 	public String getStyle(GraphOwner owner, Object cell, Options options) {
-		return owner.getGraph().getModel().isVertex(cell) ? "defaultVertex" : "defaultEdge"; //$NON-NLS-1$ //$NON-NLS-2$
+		String style = null;
+		mxIGraphModel model = owner.getGraph().getModel();
+		if(owner instanceof GraphPresenter && model.isEdge(cell)) {
+			style = "defaultEdge"; //$NON-NLS-1$
+			GraphPresenter presenter = (GraphPresenter) owner;
+			if(presenter.isHighlightedIncomingEdge(cell)) {
+				style += ";strokeColor="+mxUtils.getHexColorString(presenter.getIncomingEdgeColor()); //$NON-NLS-1$
+			} else if(presenter.isHighlightedOutgoingEdge(cell)) {
+				style += ";strokeColor="+mxUtils.getHexColorString(presenter.getOutgoingEdgeColor()); //$NON-NLS-1$
+			}
+		} else {
+			style = model.isVertex(cell) ? "defaultVertex" : "defaultEdge"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return style; 
 	}
 
 	/**

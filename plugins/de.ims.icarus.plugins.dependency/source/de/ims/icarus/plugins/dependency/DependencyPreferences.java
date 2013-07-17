@@ -49,7 +49,7 @@ public class DependencyPreferences {
 		builder.addBooleanEntry("showDistance", false); //$NON-NLS-1$
 		builder.addBooleanEntry("markRoot", true); //$NON-NLS-1$
 		builder.addBooleanEntry("markNonProjective", false); //$NON-NLS-1$
-		JGraphPreferences.buildDefaultGraphConfig(builder);
+		JGraphPreferences.buildDefaultGraphConfig(builder, null);
 		builder.reset();
 		
 		// PLUGINS GROUP

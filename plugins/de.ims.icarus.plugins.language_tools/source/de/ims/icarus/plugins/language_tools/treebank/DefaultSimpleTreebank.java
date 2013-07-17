@@ -46,20 +46,22 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 
 	public static final String READER_EXTENSION_PROPERTY = "DefaultSimpleTreebank::reader_extension"; //$NON-NLS-1$
 	
+	public static final String READER_PROPERTY_PREFIX = "DefaultSimpleTreebank::reader::"; //$NON-NLS-1$
+	
 	protected List<SentenceData> buffer;
 	
 	protected boolean editable = false;
 	
 	protected Grammar grammar;
 	
-	protected AtomicBoolean loading = new AtomicBoolean();
+	protected final AtomicBoolean loading = new AtomicBoolean();
 	protected boolean loaded = false;
 	
 	protected transient SentenceDataReader reader;
 	
 	protected Extension readerExtension;
 	
-	protected TreebankMetaData metaData;
+	protected TreebankMetaData metaData; 
 	
 	public DefaultSimpleTreebank() {
 		// no-op
@@ -110,7 +112,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 		return readerExtension;
 	}
 	
-	protected SentenceDataReader getSentenceDataReader() {
+	public SentenceDataReader getSentenceDataReader() {
 		if(reader!=null) {
 			return reader;
 		}
@@ -194,6 +196,14 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	}
 
 	/**
+	 * @see de.ims.icarus.io.Loadable#isLoading()
+	 */
+	@Override
+	public boolean isLoading() {
+		return loading.get();
+	}
+
+	/**
 	 * @see de.ims.icarus.language.treebank.Treebank#load()
 	 */
 	@Override
@@ -229,11 +239,14 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 				metaData = metaDataBuilder.buildMetaData();
 			}
 		} finally {			
-			loading.set(false);			
-			reader.close();
+			loading.set(false);	
+			try {
+				reader.close();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, "Failed to close reader for treebank: "+getName(), e); //$NON-NLS-1$
+			}
+			eventSource.fireEvent(new EventObject(TreebankEvents.LOADED));
 		}
-		
-		eventSource.fireEvent(new EventObject(TreebankEvents.LOADED));
 	}
 
 	/**
