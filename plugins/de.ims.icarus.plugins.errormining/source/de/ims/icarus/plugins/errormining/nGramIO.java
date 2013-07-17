@@ -81,6 +81,119 @@ public class nGramIO {
         fop.close();
 	}
 	
+	/**
+	 * @param nGramCache2
+	 * @throws Exception 
+	 */
+	public void nGramsToXMLDependency(Map<String, ArrayList<DependencyItemInNuclei>> nGramResult) throws Exception {
+		String root = "nGrams"; //$NON-NLS-1$
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+				.newInstance();
+		
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		Document document = documentBuilder.newDocument();
+
+		Element rootElement = document.createElement(root);
+
+		document.appendChild(rootElement);
+		
+		for(Iterator<String> i = nGramResult.keySet().iterator(); i.hasNext();){
+			String wordform = i.next();
+			
+			// "\\s+" equals " "
+			String[] keyArray = wordform.split("\\s+"); //$NON-NLS-1$
+
+			ArrayList<DependencyItemInNuclei> arrItem = nGramResult.get(wordform);
+			
+			//System.out.println("\n### Wordform: " + key + " ###");
+			
+			//rootElement.appendChild(generateElement(document, "WordForm", wordform));
+			//Element emWordform = generateElement(document, "WordForm", wordform); //$NON-NLS-1$
+			//rootElement.appendChild(emWordform);
+			
+			Element emWordform = generateElement(document, "WordForm", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			emWordform.setAttribute("nGram", String.valueOf(keyArray.length)); //$NON-NLS-1$
+			emWordform.setAttribute("form", wordform); //$NON-NLS-1$
+			
+			rootElement.appendChild(emWordform);
+			for (int j = 0; j < arrItem.size();j++){	
+				
+				DependencyItemInNuclei iin = arrItem.get(j);				
+				
+				String posTag = iin.getPosTag();
+				String posCount = String.valueOf(iin.getCount());	
+				
+				
+				//System.out.println("PoSTag: "+ iin.getPosTag() + "  PoSCount: " + iin.getCount());
+				String elementPoSTag = "PoSTag"; //$NON-NLS-1$
+				Element emPoS = document.createElement(elementPoSTag);				
+				
+				emPoS.setAttribute("tag", posTag); //$NON-NLS-1$
+				emPoS.setAttribute("count", posCount); //$NON-NLS-1$
+				
+				
+				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
+					
+					DependencySentenceInfo si = iin.getSentenceInfoAt(k);
+					
+
+					Element emSentence = document.createElement("Sentence"); //$NON-NLS-1$
+					
+					//emSentence.appendChild(document.createTextNode(String.valueOf(si.getSentenceNr())));
+					
+					String sentenceNR  = String.valueOf(si.getSentenceNr());
+					String nucleiCount = String.valueOf(si.getNucleiIndexListSize());
+					String nucleiIndex = String.valueOf(si.getNucleiIndex());
+					String headIndex = String.valueOf(si.getSentenceHeadIndex());
+					String sStart = String.valueOf(si.getSentenceBegin());
+					String sEnd = String.valueOf(si.getSentenceEnd());
+					
+					emSentence.setAttribute("sentenceNr", sentenceNR); //$NON-NLS-1$
+					emSentence.setAttribute("nucleiCount", nucleiCount); //$NON-NLS-1$
+					emSentence.setAttribute("nucleiStartIndex", nucleiIndex); //$NON-NLS-1$
+					emSentence.setAttribute("headIndex", headIndex); //$NON-NLS-1$
+					emSentence.setAttribute("begin", sStart); //$NON-NLS-1$
+					emSentence.setAttribute("end", sEnd); //$NON-NLS-1$
+					
+					//when more than one nuclei in string
+					String elementNucleiNr = "NucleiIndex"; //$NON-NLS-1$					
+					
+					
+					//TODO only add if nucleicount > 1
+					for(int n = 0; n < si.getNucleiIndexListSize(); n++){
+						Element emNuclei = document.createElement(elementNucleiNr);
+						String nucleiNr = String.valueOf(si.getNucleiIndexListAt(n));
+						emNuclei.appendChild(document.createTextNode(nucleiNr));
+						emSentence.appendChild(emNuclei);
+					}					
+					
+					emPoS.appendChild(emSentence);					
+					emWordform.appendChild(emPoS);
+					
+				}
+				
+			}
+			
+			//rootElement.appendChild(emWordform);
+		}
+		
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		
+        //format output
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", //$NON-NLS-1$
+        								"2"); //$NON-NLS-1$
+		DOMSource source = new DOMSource(document);
+		//StreamResult result = new StreamResult(System.out);
+		StreamResult result =  new StreamResult(new StringWriter());
+		transformer.transform(source, result);
+
+        
+
+        saveXMLToFile(result);
+	}
+	
 	
 
 	/**
