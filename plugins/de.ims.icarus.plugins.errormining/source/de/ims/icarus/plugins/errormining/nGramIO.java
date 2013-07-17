@@ -143,7 +143,7 @@ public class nGramIO {
 					
 					//emSentence.appendChild(document.createTextNode(String.valueOf(si.getSentenceNr())));
 					
-					String sentenceNR  = String.valueOf(si.getSentenceNr()-1);
+					String sentenceNR  = String.valueOf(si.getSentenceNr());
 					String nucleiCount = String.valueOf(si.getNucleiIndexListSize());
 					String nucleiIndex = String.valueOf(si.getNucleiIndex());
 					String sStart = String.valueOf(si.getSentenceBegin());

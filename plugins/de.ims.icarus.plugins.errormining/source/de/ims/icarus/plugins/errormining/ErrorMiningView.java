@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -275,7 +273,7 @@ public class ErrorMiningView extends View {
 			//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
 
 			//int sentencesToRead = 18;
-			int sentencesToRead = config.getInteger("plugins.errorMining.appearance.limit");
+			int sentencesToRead = config.getInteger("plugins.errorMining.appearance.limit"); //$NON-NLS-1$
 			
 			File file = new File(inputFileName);
 			
@@ -315,7 +313,7 @@ public class ErrorMiningView extends View {
 			
 			
 			ngrams.nGramResults();
-			System.out.println("Corpussize: " + corpus.size());
+			System.out.println("Corpussize: " + corpus.size()); //$NON-NLS-1$
 			
 //			List<String> tmpKey = new ArrayList<String>(ngrams.getResult().keySet());
 //			Collections.reverse(tmpKey);
@@ -366,7 +364,7 @@ public class ErrorMiningView extends View {
 						Message messageDebug = new Message(this, Commands.DISPLAY, get(), null);
 						sendRequest(ErrorMiningConstants.NGRAM_RESULT_VIEW_ID, messageDebug);
 						
-
+						//TODO fix worker more worker no freeze no duplicated lists
 						Message corpusData = new Message(this, Commands.SET, corpus, null);	
 						sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, corpusData);
 						
@@ -393,7 +391,7 @@ public class ErrorMiningView extends View {
 			// Execute the SwingWorker; the GUI will not freeze
 			worker.execute();
 			
-			System.out.println("Finished " + ngrams.getResult().size());
+			System.out.println("Finished " + ngrams.getResult().size()); //$NON-NLS-1$
 
 			//Core.showNotice();
 		}
