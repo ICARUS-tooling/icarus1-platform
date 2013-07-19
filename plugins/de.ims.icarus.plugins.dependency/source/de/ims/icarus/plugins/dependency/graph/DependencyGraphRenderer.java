@@ -139,6 +139,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 				sb.append(normalize(DependencyUtils.getPos(nodeData))).append("\n"); //$NON-NLS-1$
 			}
 			if(showFeatures) {
+				// TODO enable compact view of features
 				sb.append(normalize(DependencyUtils.getFeatures(nodeData))).append("\n"); //$NON-NLS-1$
 			}
 			if(markRoot && nodeData.isRoot()) {
@@ -267,6 +268,12 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 		Object cell = state.getCell();
 		boolean isNode = model.isVertex(cell);
 		if(!isNode) {
+			
+			if(presenter.isHighlightedIncomingEdge(cell)
+					|| presenter.isHighlightedOutgoingEdge(cell)) {
+				return;
+			}
+			
 			cell = model.getTerminal(cell, false);
 		}
 		Object value = model.getValue(cell);

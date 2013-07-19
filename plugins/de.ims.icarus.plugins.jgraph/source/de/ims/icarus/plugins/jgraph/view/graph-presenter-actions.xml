@@ -48,7 +48,7 @@
 		
 	<!-- Add Cell -->
 	<action id="plugins.jgraph.graphPresenter.addNodeAction"
-		name="${id}.name" desc="${id}.description" icon="add_node.gif" />
+		name="${id}.name" desc="${id}.description" icon="add_node.png" />
 		
 	<!-- Add Edge -->
 	<action id="plugins.jgraph.graphPresenter.addEdgeAction"
@@ -143,6 +143,8 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.cloneCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
@@ -156,13 +158,11 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
 		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
-		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
-		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
@@ -189,11 +189,11 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
 		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
-		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
-		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
+		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
+		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
@@ -211,13 +211,13 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
-		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />

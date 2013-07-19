@@ -187,6 +187,10 @@ public final class ContentTypeRegistry {
 		if(data==null)
 			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
 		
+		if(data instanceof Content) {
+			return ((Content)data).getEnclosingType();
+		}
+		
 		Class<?> clazz = data instanceof Class ? (Class<?>)data : data.getClass();
 		
 		ContentType type = findEnclosingType(clazz);

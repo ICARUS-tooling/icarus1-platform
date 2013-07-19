@@ -1165,12 +1165,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return;
 		}
 		
-		graph.getModel().beginUpdate();
-		try {
-			executeChange(new LayoutChange(layout));
-		} finally {
-			graph.getModel().endUpdate();
-		}
+		executeChange(new LayoutChange(layout));
 	}
 	
 	public GraphStyle getGraphStyle() {
@@ -1185,12 +1180,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return;
 		}
 		
-		graph.getModel().beginUpdate();
-		try {
-			executeChange(new StyleChange(style));
-		} finally {
-			graph.getModel().endUpdate();
-		}
+		executeChange(new StyleChange(style));
 	}
 	
 	public GraphLayout getGraphLayout() {
@@ -1209,12 +1199,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return;
 		}
 		
-		graph.getModel().beginUpdate();
-		try {
-			executeChange(new RendererChange(renderer));
-		} finally {
-			graph.getModel().endUpdate();
-		}
+		executeChange(new RendererChange(renderer));
 	}
 
 	public void setCanvas(mxInteractiveCanvas canvas) {
@@ -1395,12 +1380,15 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	
 	public void refreshAll() {
 		mxIGraphModel model = graph.getModel();
+		
+		pauseGraphChangeHandling();
 		model.beginUpdate();
 		try {
 			refreshStyles();
 			refreshLayout();
 		} finally {
 			model.endUpdate();
+			resumeGraphChangeHandling();
 		}
 	}
 	
@@ -1490,10 +1478,12 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 		
 		mxIGraphModel model = graph.getModel();
+		pauseGraphChangeHandling();
 		model.beginUpdate();
-		Options styleOptions = createStyleOptions();
-		Options layoutOptions = createLayoutOptions();
 		try {
+			Options styleOptions = createStyleOptions();
+			Options layoutOptions = createLayoutOptions();
+			
 			for(Object cell : cells) {
 				model.setStyle(cell, graphStyle.getStyle(this, cell, styleOptions));
 				if(model.isVertex(cell)) {
@@ -1505,6 +1495,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			}
 		} finally {
 			model.endUpdate();
+			resumeGraphChangeHandling();
 		}
 	}
 	
@@ -1739,12 +1730,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		}
 		
 		// Perform undo
-		graph.getModel().beginUpdate();
-		try {
-			undoManager.undo();
-		} finally {
-			graph.getModel().endUpdate();
-		}
+		undoManager.undo();
 	}
 	
 	public void redo() {
@@ -1752,13 +1738,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			return;
 		}
 		
-		// Perform redo
-		graph.getModel().beginUpdate();
-		try {
-			undoManager.redo();
-		} finally {
-			graph.getModel().endUpdate();
-		}
+		// Perform redo 
+		undoManager.redo();
 	}
 	
 	@Override

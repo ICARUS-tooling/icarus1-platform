@@ -8,7 +8,7 @@
 		
 	<!-- Add Disjunction -->
 	<action id="plugins.searchTools.constraintGraphPresenter.addDisjunctionAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" />
+		name="${id}.name" desc="${id}.description" icon="add_disjunction.png" />
 		
 	<!-- Toggle Root Operator -->
 	<action id="plugins.searchTools.constraintGraphPresenter.toggleRootOperatorAction"
@@ -36,6 +36,8 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.cloneCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
@@ -48,11 +50,6 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.zoomInAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.resetZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.zoomOutAction" />
-		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
-		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
-		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
@@ -74,13 +71,13 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.addOrderEdgeAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />
 		<separator />
+		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
+		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.pasteCellsAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
-		<separator />
-		<item type="action" value="plugins.jgraph.graphPresenter.editCellAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />

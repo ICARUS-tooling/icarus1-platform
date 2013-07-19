@@ -11,7 +11,6 @@ package de.ims.icarus.plugins.jgraph.view;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.logging.Level;
@@ -123,7 +122,6 @@ public class ListGraphView extends View implements Outline {
 			this.listPresenter.getSelectionModel().addListSelectionListener(handler);
 			
 			Component comp = listPresenter.getPresentingComponent();
-			comp.setPreferredSize(new Dimension(100, 100));
 			splitPane.setRightComponent(comp);
 		} else {
 			showInfo(null);

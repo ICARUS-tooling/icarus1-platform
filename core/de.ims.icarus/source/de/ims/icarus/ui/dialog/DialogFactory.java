@@ -62,7 +62,7 @@ public final class DialogFactory {
 	private static final Map<Integer, Object[]> _options = new HashMap<>();
 	
 	private static Object[] getOptions(int id) {
-		return _options.get(id);
+		return _options.get(id).clone();
 	}
 	
 	public synchronized static int registerOptions(Object...options) {

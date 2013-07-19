@@ -36,6 +36,7 @@ import de.ims.icarus.search_tools.annotation.ResultAnnotation;
 import de.ims.icarus.ui.DummyTextPane;
 import de.ims.icarus.ui.text.BatchDocument;
 import de.ims.icarus.util.Installable;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationDisplayMode;
@@ -251,14 +252,14 @@ public class DependencyListCellRenderer extends DummyTextPane
 		
 		// Show index
 		if(config.getBoolean("plugins.dependency.highlighting.showIndex")) { //$NON-NLS-1$
-			buffer.append((index+1)+": "); //$NON-NLS-1$
+			buffer.append(StringUtil.formatDecimal(index+1)+": "); //$NON-NLS-1$
 		}
 		
 		// Show corpus index if available
 		if(config.getBoolean("plugins.dependency.highlighting.showCorpusIndex") //$NON-NLS-1$
 				&& annotation instanceof ResultAnnotation) {
-			buffer.append(String.format("(%d) ",  //$NON-NLS-1$
-					((ResultAnnotation)annotation).getResultEntry().getIndex()+1));
+			buffer.append("(").append(StringUtil.formatDecimal( //$NON-NLS-1$
+					((ResultAnnotation)annotation).getResultEntry().getIndex()+1)).append(") "); //$NON-NLS-1$
 		}
 		
 		for(int i=0; i<data.length(); i++) {
@@ -334,7 +335,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 		// Show index
 		if(ConfigRegistry.getGlobalRegistry().getValue(
 				"plugins.dependency.highlighting.showIndex", true)) { //$NON-NLS-1$
-			buffer.append((index+1)+": "); //$NON-NLS-1$
+			buffer.append(StringUtil.formatDecimal(index+1)+": "); //$NON-NLS-1$
 		}
 		
 		for(int i=0; i<data.length(); i++) {

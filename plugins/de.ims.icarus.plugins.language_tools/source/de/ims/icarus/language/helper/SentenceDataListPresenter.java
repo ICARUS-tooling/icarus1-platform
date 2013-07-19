@@ -9,17 +9,22 @@
  */
 package de.ims.icarus.language.helper;
 
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JList;
+import javax.swing.JToggleButton;
 
 import de.ims.icarus.language.DataType;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
+import de.ims.icarus.ui.list.DynamicWidthList;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.DataListModel;
@@ -34,6 +39,7 @@ import de.ims.icarus.util.data.DataListPresenter;
 public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	
 	protected DataTypeButton[] dataTypeButtons;
+	protected ButtonGroup buttonGroup;
 	
 	public SentenceDataListPresenter() {
 		// no-op
@@ -49,16 +55,34 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	}
 
 	@Override
-	protected JList<SentenceData> createList() {
-		JList<SentenceData> list = super.createList();
+	protected DynamicWidthList<SentenceData> createList() {
+		DynamicWidthList<SentenceData> list = super.createList();
 		list.setCellRenderer(new SentenceDataListCellRenderer());
+		
+		// Crucial performance settings:
+		// First let the list compute the fixed cell height based
+		// on some dummy input, then limit the width to some arbitrary
+		// 200px and finally clear the prototype value since later
+		// changes made to the cell renderer would cause errors when
+		// a new renderer is unable to handle the dummy object!
+		//
+		// DO NOT deactivate this settings or lists with dozens
+		// of thousands of rows will cause the UI to freeze for ages!
+		list.setPrototypeCellValue(LanguageUtils.dummySentenceData);
+		//list.setFixedCellWidth(200);
+		list.setPrototypeCellValue(null);
 		
 		return list;
 	}
 
 	@Override
 	protected DataListModel<SentenceData> createListModel() {
-		return new SentenceDataListModel();
+		SentenceDataListModel model = new SentenceDataListModel();
+		
+		DataType dataType = model.getDataType();
+		getDataTypeButton(dataType).setSelected(true);
+		
+		return model;
 	}
 	
 	@Override
@@ -70,14 +94,34 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	}
 	
 	@Override
+	protected void refreshUtilities() {
+		SentenceDataListModel model = getDataListModel();
+		for(DataType dataType : DataType.values()) {
+			getDataTypeButton(dataType).setEnabled(
+					model.isDataTypeSupported(dataType));
+		}
+		
+		getDataTypeButton(model.getDataType()).setSelected(true);
+	}
+
+	@Override
 	protected Object leftNavigationContent() {
 		return new Object[] {
 				getOutlineToggleButton(),
+				EntryType.SEPARATOR,
+				getWidthToggleButton(),
 				EntryType.SEPARATOR,
 				getDataTypeButton(DataType.SYSTEM),
 				getDataTypeButton(DataType.USER),
 				getDataTypeButton(DataType.GOLD),
 		};
+	}
+	
+	protected ButtonGroup getButtonGroup() {
+		if(buttonGroup==null) {
+			buttonGroup = new ButtonGroup();
+		}
+		return buttonGroup;
 	}
 	
 	protected DataTypeButton getDataTypeButton(DataType dataType) {
@@ -89,10 +133,26 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 		DataTypeButton button = dataTypeButtons[index];
 		if(button==null) {
 			button = new DataTypeButton(dataType);
+			getButtonGroup().add(button);
 			dataTypeButtons[index] = button;
 		}
 		
 		return button;
+	}
+	
+	@Override
+	protected int getEstimatedWidth(FontMetrics fm, SentenceData item) {
+		int width = 0;
+		int size = item.length();
+		
+		for(int i=0; i<size; i++) {
+			if(i>0) {
+				width += fm.charWidth(' ');
+			}
+			width += fm.stringWidth(item.getForm(i));
+		}
+		
+		return width;
 	}
 	
 	/**
@@ -101,7 +161,7 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	 * @version $Id$
 	 *
 	 */
-	protected class DataTypeButton extends JButton implements ActionListener {
+	protected class DataTypeButton extends JToggleButton implements ActionListener {
 
 		private static final long serialVersionUID = 2032467669223802186L;
 		
@@ -129,6 +189,15 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 			}
 			
 			setIcon(icon);
+			setFocusable(false);
+			setFocusPainted(false);
+			setRolloverEnabled(false);
+			
+			String key = StringUtil.capitalize(dataType.name().toLowerCase());
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(this, 
+					null,
+					"plugins.languageTools.selectDataType"+key+"Action.description"); //$NON-NLS-1$ //$NON-NLS-2$
+			ResourceManager.getInstance().getGlobalDomain().addComponent(this);
 		}
 		
 		public DataType getDataType() {

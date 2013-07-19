@@ -16,6 +16,7 @@ import javax.swing.JList;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.ui.helper.TooltipListCellRenderer;
 import de.ims.icarus.util.Installable;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.AnnotationController;
 
 
@@ -46,7 +47,7 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 			SentenceData data = (SentenceData) value;
 			StringBuilder sb = new StringBuilder(data.length()*20);
 			
-			sb.append(index+1).append(": "); //$NON-NLS-1$
+			sb.append(StringUtil.formatDecimal(index+1)).append(": "); //$NON-NLS-1$
 			
 			for(int i=0; i<data.length(); i++) {
 				if(i>0) {
@@ -57,7 +58,10 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 			
 			value = sb.toString();
 		} else {
-			value = (index+1)+": "+value; //$NON-NLS-1$
+			if(value==null) {
+				value = "loading..."; //$NON-NLS-1$
+			}
+			value = StringUtil.formatDecimal(index+1)+": "+value; //$NON-NLS-1$
 		}
 		
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

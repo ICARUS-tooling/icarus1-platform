@@ -15,6 +15,9 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  * @author Markus Gärtner
@@ -30,12 +33,46 @@ public class RowHeaderList extends JList<String> {
 	
 	private int minimumCellWidth = -1;
 	
+	private ListSelectionModel targetSelectionModel;
+	private SelectionSynchronizer selectionSynchronizer;
+	
 	public RowHeaderList() {
 		// no-op
 	}
 	
 	public RowHeaderList(ListModel<String> model) {
 		super(model);
+	}
+	
+	public RowHeaderList(ListModel<String> model, ListSelectionModel targetSelectionModel) {
+		this(model);
+		
+		setTargetSelectionModel(targetSelectionModel);
+	}
+
+	public ListSelectionModel getTargetSelectionModel() {
+		return targetSelectionModel;
+	}
+	
+	private SelectionSynchronizer getSelectionSynchronizer() {
+		if(selectionSynchronizer==null) {
+			selectionSynchronizer = new SelectionSynchronizer();
+		}
+		
+		return selectionSynchronizer;
+	}
+
+	public void setTargetSelectionModel(ListSelectionModel targetSelectionModel) {
+		
+		if(this.targetSelectionModel!=null) {
+			this.targetSelectionModel.removeListSelectionListener(getSelectionSynchronizer());
+		}
+		
+		this.targetSelectionModel = targetSelectionModel;
+		
+		if(this.targetSelectionModel!=null) {
+			this.targetSelectionModel.addListSelectionListener(getSelectionSynchronizer());
+		}
 	}
 
 	public int getMinimumCellWidth() {
@@ -144,6 +181,18 @@ public class RowHeaderList extends JList<String> {
 				}
 				defaultCursor = null;
 			}
+		}		
+	}
+	
+	private class SelectionSynchronizer implements ListSelectionListener {
+
+		/**
+		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+		 */
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}

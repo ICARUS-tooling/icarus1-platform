@@ -600,9 +600,13 @@ public class SearchManagerView extends View {
 				SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
 				
 				Editor<Options> editor = descriptor.getSearchFactory().createParameterEditor();
+				Options parameters = descriptor.getParameters();
+				if(parameters==null) {
+					parameters = new Options();
+				}
 				
 				if(DialogFactory.getGlobalFactory().showEditorDialog(
-						getFrame(), descriptor.getParameters(), editor, 
+						getFrame(), parameters, editor, 
 						"plugins.searchTools.searchManagerView.dialogs.editParameters.title")) { //$NON-NLS-1$
 					descriptor.setParameters(editor.getEditingItem());
 				}

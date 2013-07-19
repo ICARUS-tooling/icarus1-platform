@@ -57,7 +57,8 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 				"plugins.searchTools.labels.optimize"); //$NON-NLS-1$
 		
 		entry = new InputFormEntry(
-				"plugins.searchTools.labels.resultLimit").setDocument(new NumberDocument()); //$NON-NLS-1$
+				"plugins.searchTools.labels.resultLimit") //$NON-NLS-1$
+			.setDocument(new NumberDocument());
 		formBuilder.addEntry(SEARCH_RESULT_LIMIT, entry);
 			
 		return formBuilder;

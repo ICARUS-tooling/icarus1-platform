@@ -16,10 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
 import de.ims.icarus.config.ConfigRegistry;
@@ -34,6 +30,7 @@ import de.ims.icarus.search_tools.result.EntryBuilder;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.search_tools.util.SearchUtils;
+import de.ims.icarus.ui.dialog.DialogDispatcher;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Orientation;
@@ -54,6 +51,7 @@ public abstract class AbstractTreeSearch extends Search {
 	protected DataList<?> source;
 	protected int processed;
 	
+	protected int pendingWorkers;
 	protected List<SearchWorker> workers = Collections.synchronizedList(new ArrayList<SearchWorker>());
 	protected Set<Integer> pendingIndices = Collections.synchronizedSet(new HashSet<Integer>());
 	protected Queue<ItemBuffer> pendingItems = new LinkedList<>();
@@ -65,8 +63,6 @@ public abstract class AbstractTreeSearch extends Search {
 	protected final int resultLimit;
 	protected final SearchMode searchMode;
 	protected final Orientation orientation;
-	
-	protected CyclicBarrier barrier;
 	
 	protected static final int DEFAULT_BARRIER_TIMEOUT_SECONDS = 60;
 	
@@ -109,14 +105,16 @@ public abstract class AbstractTreeSearch extends Search {
 
 	@Override
 	protected void innerCancel() {
+		
+		for(SearchWorker worker : workers) {
+			worker.cancel();
+		}
+		
 		// Allow all workers to properly finish their last cycle
 		synchronized (notifer) {
 			notifer.notifyAll();
 		}
 		
-		for(SearchWorker worker : workers) {
-			worker.cancel();
-		}
 		workers.clear();
 	}
 	
@@ -124,14 +122,14 @@ public abstract class AbstractTreeSearch extends Search {
 		return getQuery().getSearchGraph();
 	}
 	
-	protected boolean nextItem(ItemBuffer buffer) {
+	protected ItemRequestResult nextItem(ItemBuffer buffer) {
 		if(isCancelled()) {
-			return false;
+			return ItemRequestResult.SEARCH_FINISHED;
 		}
 		
 		synchronized (result) {
 			if(resultLimit>0 && result.getTotalMatchCount()>=resultLimit) {
-				return false;
+				return ItemRequestResult.RESULT_FILLED;
 			}
 		}
 		
@@ -140,7 +138,7 @@ public abstract class AbstractTreeSearch extends Search {
 			ItemBuffer cached = pendingItems.poll();
 			if(cached!=null) {
 				buffer.copy(cached);
-				return true;
+				return ItemRequestResult.ITEM_AVAILABLE;
 			}
 		}
 		
@@ -153,14 +151,15 @@ public abstract class AbstractTreeSearch extends Search {
 				
 				if(data!=null) {
 					buffer.set(index, data);
-					return true;
+					return ItemRequestResult.ITEM_AVAILABLE;
 				} else {
 					pendingIndices.add(index);
+					return ItemRequestResult.ITEM_PENDING;
 				}
 			}
 		}
 		
-		return false;
+		return ItemRequestResult.NO_MORE_ITEMS;
 	}
 	
 	protected boolean hasUnprocessedItems() {
@@ -231,10 +230,6 @@ public abstract class AbstractTreeSearch extends Search {
 		result.finish();
 	}
 	
-	protected final CyclicBarrier getBarrier() {
-		return barrier;
-	}
-	
 	protected GroupCache createCache() {
 		return result.createCache();
 	}
@@ -263,6 +258,30 @@ public abstract class AbstractTreeSearch extends Search {
 	protected EntryBuilder createEntryBuilder() {
 		return new EntryBuilder(TreeUtils.getMaxId(baseRootMatcher)+1);
 	}
+	
+	protected synchronized void workerFinished(SearchWorker worker) {
+		pendingWorkers--;
+		if(pendingWorkers>0) {
+			return;
+		}
+		
+		// Properly finish search
+		if(!isDone()) {
+			finish();
+		}
+		finalizeResult(false);
+	}
+	
+	protected int getMaxWorkerCount() {
+		int cores = ConfigRegistry.getGlobalRegistry().getInteger("plugins.searchTools.maxCores"); //$NON-NLS-1$
+		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
+		if(cores>0) {
+			cores = Math.min(cores, availableCores);
+		}
+		cores = Math.max(cores, 1);
+		
+		return cores;
+	}
 
 	/**
 	 * @see de.ims.icarus.search_tools.Search#execute()
@@ -276,30 +295,13 @@ public abstract class AbstractTreeSearch extends Search {
 		if(source.size()==0) {
 			return false;
 		}
-		
-		/*Object target = getTarget();
-		if(target instanceof Loadable && !((Loadable)target).isLoaded()) {
-			try {
-				firePropertyChange("indeterminate", false, true);
-				((Loadable)target).load();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to load search target: "+target, e); //$NON-NLS-1$
-				throw new IOException("Could not load target - aborting", e); //$NON-NLS-1$
-			} finally {
-				firePropertyChange("indeterminate", true, false);
-			}
-		}*/
 
 		// Obtain number of possible concurrent workers
-		int cores = ConfigRegistry.getGlobalRegistry().getInteger("plugins.searchTools.maxCores"); //$NON-NLS-1$
-		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
-		if(cores>0) {
-			cores = Math.min(cores, availableCores);
-		}
-		cores = Math.max(cores, 1);
+		int cores = getMaxWorkerCount();
 		
-		barrier = new CyclicBarrier(cores, new ResultFinalizer());
+		LoggerFactory.log(this, Level.FINE, "Executing search "+getClass().getSimpleName()+" on "+cores+" cores"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		pendingWorkers = cores;
 		
 		for(int i=0; i<cores; i++) {
 			TaskManager.getInstance().execute(createWorker(i));
@@ -323,6 +325,14 @@ public abstract class AbstractTreeSearch extends Search {
 	@Override
 	public SearchResult getResult() {
 		return result;
+	}
+	
+	protected static enum ItemRequestResult {
+		ITEM_AVAILABLE,
+		ITEM_PENDING,
+		NO_MORE_ITEMS,
+		RESULT_FILLED,
+		SEARCH_FINISHED;
 	}
 	
 	protected static class ItemBuffer {
@@ -361,20 +371,6 @@ public abstract class AbstractTreeSearch extends Search {
 		public void copy(ItemBuffer source) {
 			index = source.index;
 			data = source.data;
-		}
-	}
-	
-	protected class ResultFinalizer implements Runnable {
-
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			if(!isDone()) {
-				finish();
-			}
-			finalizeResult(false);
 		}
 	}
 
@@ -444,42 +440,52 @@ public abstract class AbstractTreeSearch extends Search {
 			thread = Thread.currentThread();
 			
 			try {
-				while(!isCancelled() && hasUnprocessedItems()) {
-					if(nextItem(buffer)) {
-						// Init utilities
-						targetTree.reload(buffer.getData());
-						entryBuilder.setIndex(buffer.getIndex());
-						
-						// Let matcher do its part
-						rootMatcher.matches();
-						
-						// Notify search of processed item
-						itemProcessed(buffer);
-					} else {
+				search_loop : while(!isCancelled() && hasUnprocessedItems()) {
+					switch (nextItem(buffer)) {
+					case ITEM_AVAILABLE: {
+							// Init utilities
+							targetTree.reload(buffer.getData());
+							entryBuilder.setIndex(buffer.getIndex());
+							
+							// Let matcher do its part
+							rootMatcher.matches();
+							
+							// Notify search of processed item
+							itemProcessed(buffer);
+						}
+						break;
+					case ITEM_PENDING:
 						try {
 							awaitItem();
 						} catch (InterruptedException e) {
-							break;
+							break search_loop;
 						}
+						break;
+
+					default:
+						break search_loop;
 					}
 				}
 				
-			} catch(Exception e) {
+			} catch(Throwable t) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Unexpected error during search", e); //$NON-NLS-1$
+						"Unexpected error during search", t); //$NON-NLS-1$
 				AbstractTreeSearch.this.cancel();
+				
+				String message = "plugins.searchTools.tools.dialogs.generalError"; //$NON-NLS-1$
+				if(t instanceof OutOfMemoryError) {
+					message = "plugins.searchTools.tools.dialogs.outOfMemoryError"; //$NON-NLS-1$
+				}
+				DialogDispatcher dispatcher = new DialogDispatcher(null, 
+						"plugins.searchTools.tools.dialogs.errorTitle",  //$NON-NLS-1$
+						message, t);
+				dispatcher.showAsError();
 			} finally {
 				rootMatcher.close();
 				targetTree.close();
 			}
 			
-			try {
-				getBarrier().await(DEFAULT_BARRIER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-			} catch (InterruptedException | TimeoutException e) {
-				// ignore
-			} catch (BrokenBarrierException e) {
-				finalizeResult(true);
-			}
+			workerFinished(this);
 		}
 	}
 }

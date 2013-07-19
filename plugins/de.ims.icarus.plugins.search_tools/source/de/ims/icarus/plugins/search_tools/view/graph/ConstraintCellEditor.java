@@ -495,7 +495,6 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		
 		private ConstraintFactory factory;
 		private boolean displayingGroups = false;
-		private Object buffer;
 		
 		ConstraintFormEntry(ConstraintFactory factory) {
 			this.factory = factory;
@@ -535,7 +534,6 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		 */
 		@Override
 		public ConstraintFormEntry setValue(Object value) {
-			buffer = null;
 			displayingGroups = false;
 			
 			SearchConstraint constraint = (SearchConstraint)value;
@@ -635,7 +633,6 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		private void displayGroups(int groupId) {
 			displayingGroups = true;
 			valueSelect.setRenderer(sharedGroupingRenderer);
-			buffer = valueSelect.getSelectedItem();
 			
 			DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) valueSelect.getModel();
 			model.removeAllElements();
@@ -657,8 +654,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 				displayGroups(0);
 			} else if(!SearchManager.isGroupingOperator(operator) && displayingGroups) {
 				// Switch to old mode
-				displayValue(buffer);
-				buffer = null;
+				displayValue(null);
 			}
 		}
 	}

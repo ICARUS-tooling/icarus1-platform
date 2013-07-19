@@ -20,6 +20,7 @@ import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.util.data.DataList;
 import de.ims.icarus.util.data.DataListModel;
 
 
@@ -51,6 +52,24 @@ public class SentenceDataListModel extends DataListModel<SentenceData>
 	public DataType getDataType() {
 		return dataType;
 	}
+	
+	public boolean isDataTypeSupported(DataType dataType) {
+		SentenceDataList dataList = getDataList();
+		return dataList!=null && dataList.supportsType(dataType);
+	}
+
+	@Override
+	public SentenceDataList getDataList() {
+		return (SentenceDataList) super.getDataList();
+	}
+
+	@Override
+	public void setDataList(DataList<SentenceData> dataList) {
+		if(dataList!=null && !(dataList instanceof SentenceDataList))
+			throw new IllegalArgumentException("Unsupported data-list class: "+dataList.getClass()); //$NON-NLS-1$
+		
+		super.setDataList(dataList);
+	}
 
 	public void setDataType(DataType dataType) {
 		if(this.dataType==dataType) {
@@ -67,7 +86,7 @@ public class SentenceDataListModel extends DataListModel<SentenceData>
 	 */
 	@Override
 	public SentenceData getElementAt(int index) {
-		SentenceDataList dataList = (SentenceDataList)this.dataList;
+		SentenceDataList dataList = getDataList();
 		return dataList==null ? null : dataList.get(index, dataType, this);
 	}
 
@@ -91,7 +110,8 @@ public class SentenceDataListModel extends DataListModel<SentenceData>
 	}
 
 	/**
-	 * Only ever runs on the Event-Dispatch-Thread
+	 * Only ever runs on the Event-Dispatch-Thread so no additional
+	 * synchronizations are performed!
 	 * 
 	 * @see java.lang.Runnable#run()
 	 */

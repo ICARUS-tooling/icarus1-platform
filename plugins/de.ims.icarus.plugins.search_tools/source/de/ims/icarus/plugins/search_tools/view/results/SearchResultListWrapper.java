@@ -24,7 +24,7 @@ import de.ims.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public class SearchResultListWrapper implements DataList<Object>, AnnotationContainer {
+public class SearchResultListWrapper<T extends Object> implements DataList<T>, AnnotationContainer {
 
 	private final SearchResult searchResult;
 	
@@ -33,6 +33,10 @@ public class SearchResultListWrapper implements DataList<Object>, AnnotationCont
 			throw new IllegalArgumentException("Invalid search result"); //$NON-NLS-1$
 		
 		this.searchResult = searchResult;
+	}
+	
+	public SearchResult getSearchResult() {
+		return searchResult;
 	}
 
 	/**
@@ -46,12 +50,13 @@ public class SearchResultListWrapper implements DataList<Object>, AnnotationCont
 	/**
 	 * @see de.ims.icarus.util.data.DataList#get(int)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object get(int index) {
+	public T get(int index) {
 		ResultEntry entry = searchResult.getRawEntry(index);
 		AnnotatedData annotatedData = searchResult.getAnnotatedEntry(entry);
 		
-		return annotatedData==null ? searchResult.getPlainEntry(entry) : annotatedData;
+		return (T) (annotatedData==null ? searchResult.getPlainEntry(entry) : annotatedData);
 	}
 	
 	public Object getPlain(int index) {

@@ -161,6 +161,12 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	}
 
 	@Override
+	protected EdgeHighlightHandler createEdgeHighlightHandler() {
+		// Edge highlighting not supported
+		return null;
+	}
+
+	@Override
 	protected CallbackHandler createCallbackHandler() {
 		return new CorefCallbackHandler();
 	}

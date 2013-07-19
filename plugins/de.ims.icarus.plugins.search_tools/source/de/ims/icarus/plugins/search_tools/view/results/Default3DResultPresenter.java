@@ -10,7 +10,6 @@
 package de.ims.icarus.plugins.search_tools.view.results;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
@@ -21,7 +20,6 @@ import java.util.logging.Level;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
@@ -38,13 +36,11 @@ import de.ims.icarus.search_tools.standard.DefaultGroupOrderEditor;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.CompoundMenuButton;
 import de.ims.icarus.ui.NumberDisplayMode;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
+import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.list.RowHeaderList;
-import de.ims.icarus.ui.tab.TabController;
 import de.ims.icarus.ui.table.TableSortMode;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
@@ -58,6 +54,8 @@ import de.ims.icarus.util.Options;
  *
  */
 public class Default3DResultPresenter extends SearchResultTabbedPresenter {
+
+	public static final int SUPPORTED_DIMENSIONS = 2;
 	
 	protected JPanel subResultPanel;
 	protected JTextArea infoLabel;
@@ -178,7 +176,7 @@ public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 	 */
 	@Override
 	public int getSupportedDimensions() {
-		return 3;
+		return SUPPORTED_DIMENSIONS;
 	}
 
 	@Override
@@ -362,10 +360,11 @@ public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 		DefaultGroupOrderEditor editor = new DefaultGroupOrderEditor(searchResult);
 		
 		if(!DialogFactory.getGlobalFactory().showGenericDialog(
-				null, 
+				null,
+				DialogFactory.OK_CANCEL_OPTION,
 				"plugins.searchTools.default3DResultPresenter.reorderDialog.title",  //$NON-NLS-1$
 				"plugins.searchTools.default3DResultPresenter.reorderDialog.message",  //$NON-NLS-1$
-				editor.getContentPanel(), true, "ok", "cancel")) { //$NON-NLS-1$ //$NON-NLS-2$
+				editor.getContentPanel(), true)) {
 			return;
 		}
 		
@@ -378,101 +377,6 @@ public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 				permutation), TaskPriority.DEFAULT, true);
 	}
 	
-	protected class ClosableTabbedPane extends JTabbedPane implements TabController {
-
-		private static final long serialVersionUID = 7196584031856895830L;
-
-		/**
-		 * @see de.ims.icarus.ui.tab.TabController#closeTab(java.awt.Component)
-		 */
-		@Override
-		public boolean closeTab(Component comp) {
-			if(comp instanceof SubResultContainer) {
-				SubResultContainer container = (SubResultContainer) comp;
-				container.close();
-			}
-			
-			remove(comp);
-			checkViewMode(false);
-			
-			return true;
-		}
-
-		/**
-		 * @see de.ims.icarus.ui.tab.TabController#closeChildren(java.awt.Component)
-		 */
-		@Override
-		public boolean closeChildren(Component comp) {
-			// Not supported
-			return false;
-		}
-	}
-	
-	protected class SubResultContainer extends JPanel {
-
-		private static final long serialVersionUID = -124096642718184615L;
-		
-		private final SearchResult subResult;
-		private SearchResultPresenter resultPresenter;
-		private final String title;
-
-		public SubResultContainer(String title, SearchResult subResult) {
-			super(new BorderLayout());
-			if(title==null) 
-				throw new IllegalArgumentException("Invalid title"); //$NON-NLS-1$
-			if(subResult==null) 
-				throw new IllegalArgumentException("Invalid sub-result"); //$NON-NLS-1$
-			
-			this.title = title;
-			this.subResult = subResult;
-		}
-		
-		public SearchResult getSubResult() {
-			return subResult;
-		}
-		
-		public SearchResultPresenter getResultPresenter() {
-			return resultPresenter;
-		}
-		
-		public String getTitle() {
-			return title;
-		}
-		
-		public void init() {
-			resultPresenter = SearchResultView.getPresenter(getSubResult());
-			if(resultPresenter==null) {
-				resultPresenter = SearchResultView.getFallbackPresenter(getSubResult());
-			}
-			
-			try {
-				String title = ResourceManager.getInstance().get(
-						"plugins.searchTools.default2DResultPresenter.instancesTitle", //$NON-NLS-1$
-						getTitle());
-				
-				Options options = new Options();
-				options.put(Options.TITLE, title);
-				resultPresenter.present(getSubResult(), options);
-				
-				add(resultPresenter.getPresentingComponent(), BorderLayout.CENTER);
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to init presenter for sub-result", e); //$NON-NLS-1$
-				
-				UIDummies.createDefaultErrorOutput(this, e);
-			}
-		}
-		
-		public void close() {
-			try {
-				getResultPresenter().close();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to close presenter tab for sub-result: "+getTitle(), e); //$NON-NLS-1$
-			}
-		}
-	}
-
 	protected class Handler3D extends Handler implements ChangeListener {
 		
 		protected void fixedTableClicked(MouseEvent e) {

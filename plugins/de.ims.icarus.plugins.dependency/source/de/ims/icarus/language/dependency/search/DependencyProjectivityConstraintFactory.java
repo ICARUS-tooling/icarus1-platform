@@ -87,7 +87,8 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
+			return LanguageUtils.getBooleanValue(
+					((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE));
 		}
 
 		@Override

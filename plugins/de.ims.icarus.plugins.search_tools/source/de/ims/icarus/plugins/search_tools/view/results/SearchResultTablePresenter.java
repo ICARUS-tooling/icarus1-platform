@@ -125,7 +125,7 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 	public RowHeaderList createRowHeader(ListModel<String> model, 
 			JTable table, JComponent container) {
 
-		RowHeaderList rowHeader = new RowHeaderList(model);
+		RowHeaderList rowHeader = new RowHeaderList(model, table.getSelectionModel());
 		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
 		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
 		rowHeader.setResizingAllowed(true);

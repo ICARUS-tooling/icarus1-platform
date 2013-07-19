@@ -46,7 +46,7 @@ public class DependencyHighlighting {
 	public static final long EDGE_HIGHLIGHT = (1 << 2);
 	public static final long TRANSITIVE_HIGHLIGHT = (1 << 4);
 
-	private static final long HEADER_MASK = 0x0F;
+	private static final long HEADER_MASK = 0x1F;
 	
 	private static final long GROUP_MASK = 0x0F;
 	private static final long BLOCK_MASK = 0x1F;

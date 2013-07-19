@@ -47,8 +47,10 @@ public class AnnotationBuffer implements AnnotationContainer {
 		
 		if(annotatedData==null) {
 			Object data = searchResult.getPlainEntry(entry);
-			annotatedData = annotator.annotate(searchResult, data, entry);
-			cache.put(entry, annotatedData);
+			if(data!=null) {
+				annotatedData = annotator.annotate(searchResult, data, entry);
+				cache.put(entry, annotatedData);
+			}
 		}
 		
 		return annotatedData;

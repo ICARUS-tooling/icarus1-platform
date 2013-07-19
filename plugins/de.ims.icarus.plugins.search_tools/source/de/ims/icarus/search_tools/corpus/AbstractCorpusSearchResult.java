@@ -9,6 +9,11 @@
  */
 package de.ims.icarus.search_tools.corpus;
 
+import javax.swing.event.ChangeListener;
+
+import de.ims.icarus.language.AvailabilityObserver;
+import de.ims.icarus.language.DataType;
+import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
@@ -28,7 +33,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public abstract class AbstractCorpusSearchResult implements SearchResult {
+public abstract class AbstractCorpusSearchResult implements SearchResult, SentenceDataList {
 	
 	protected transient final Search search;
 	
@@ -224,5 +229,42 @@ public abstract class AbstractCorpusSearchResult implements SearchResult {
 	@Override
 	public ContentType getAnnotationType() {
 		return annotationBuffer==null ? null : annotationBuffer.getAnnotationType();
+	}
+
+	@Override
+	public int size() {
+		return getTotalMatchCount();
+	}
+
+	@Override
+	public SentenceData get(int index) {
+		return get(index, DataType.SYSTEM, null);
+	}
+
+	@Override
+	public void addChangeListener(ChangeListener listener) {
+		// no-op
+	}
+
+	@Override
+	public void removeChangeListener(ChangeListener listener) {
+		// no-op
+	}
+
+	@Override
+	public boolean supportsType(DataType type) {
+		return getTarget().supportsType(type);
+	}
+
+	@Override
+	public SentenceData get(int index, DataType type) {
+		return get(index, type, null);
+	}
+
+	@Override
+	public SentenceData get(int index, DataType type,
+			AvailabilityObserver observer) {
+		ResultEntry entry = getRawEntry(index);
+		return getTarget().get(entry.getIndex(), type, observer);
 	}
 }

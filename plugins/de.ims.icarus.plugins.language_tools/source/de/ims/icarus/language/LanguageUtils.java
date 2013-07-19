@@ -84,6 +84,10 @@ public final class LanguageUtils implements LanguageConstants {
 		else
 			return DATA_NO_VALUE;
 	}
+	
+	public static int getBooleanValue(boolean value) {
+		return value ? DATA_YES_VALUE : DATA_NO_VALUE;
+	}
 
 	public static String getHeadLabel(int head) {
 		switch (head) {
@@ -171,18 +175,17 @@ public final class LanguageUtils implements LanguageConstants {
 
 	public static boolean isProjectiveSentence(short[] heads){
 		for(int i=0;i<heads.length;++i){
-			if(!isProjective(i,heads))
+			if(!isProjective(i, heads[i], heads))
 				return false;
 		}
 		return true;
 	}
 	
 	public static boolean isProjective(int index,short heads[]){
-		int parent=heads[index];
-		return isProjective(index,parent,heads);
+		return isProjective(index,heads[index],heads);
 	}
 	
-	static boolean isProjective(int dep,int head,short[] heads){
+	public static boolean isProjective(int dep,int head,short[] heads){
 		if(head==DATA_HEAD_ROOT)
 			return true;
 		int min=dep;
@@ -204,5 +207,45 @@ public final class LanguageUtils implements LanguageConstants {
 		return true;
 	}
 
-
+	public static final SentenceData dummySentenceData = new SentenceData() {
+		
+		private static final long serialVersionUID = 1565778089185335895L;
+		
+		private final String[] tokens = {
+			"This", //$NON-NLS-1$
+			"is", //$NON-NLS-1$
+			"a", //$NON-NLS-1$
+			"test", //$NON-NLS-1$
+		};
+		
+		@Override
+		public String getText() {
+			return combine(this);
+		}
+		
+		@Override
+		public int length() {
+			return tokens.length;
+		}
+		
+		@Override
+		public boolean isEmpty() {
+			return false;
+		}
+		
+		@Override
+		public Grammar getSourceGrammar() {
+			return null;
+		}
+		
+		@Override
+		public String getForm(int index) {
+			return tokens[index];
+		}
+		
+		@Override
+		public SentenceData clone() {
+			return this;
+		}
+	};
 }

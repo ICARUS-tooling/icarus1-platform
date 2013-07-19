@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
@@ -151,6 +150,12 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		return new CCallbackHandler();
 	}
 	
+	@Override
+	protected EdgeHighlightHandler createEdgeHighlightHandler() {
+		// No edge highlighting and therefore no need for caching those infos
+		return null;
+	}
+
 	@Override
 	protected void loadPreferences() {
 		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
@@ -742,12 +747,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			return;
 		}
 		
-		graph.getModel().beginUpdate();
-		try {
-			executeChange(new ContextChange(context));
-		} finally {
-			graph.getModel().endUpdate();
-		}
+		executeChange(new ContextChange(context));
 	}
 
 	public SearchGraph getData() {

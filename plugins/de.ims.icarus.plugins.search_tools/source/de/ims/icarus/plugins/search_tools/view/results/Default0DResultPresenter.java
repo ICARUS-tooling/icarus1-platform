@@ -10,6 +10,8 @@
 package de.ims.icarus.plugins.search_tools.view.results;
 
 import java.awt.BorderLayout;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.logging.Level;
 
 import javax.swing.JLabel;
@@ -22,9 +24,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
 import de.ims.icarus.ui.view.AWTPresenter;
@@ -34,7 +38,6 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataList;
-import de.ims.icarus.util.data.DataListPresenter;
 
 
 /**
@@ -49,7 +52,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 	protected ListPresenter listPresenter;
 	protected AWTPresenter detailsPresenter;
 	
-	protected DataList<Object> listWrapper;
+	protected DataList<? extends Object> listWrapper;
 	
 	protected JTextArea infoLabel;
 	protected JSplitPane splitPane;
@@ -83,6 +86,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		splitPane.setDividerSize(5);
 		splitPane.setBorder(null);
 		splitPane.setResizeWeight(1);
+		splitPane.addComponentListener(getHandler());
 		contentPanel.add(splitPane, BorderLayout.CENTER);
 
 		showInfo(null);
@@ -192,6 +196,14 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			listPresenter.getPresentingComponent().repaint();
 		}
 	}
+	
+	protected DataList<? extends Object> createListWrapper(SearchResult searchResult) {
+		if(searchResult instanceof SentenceDataList) {
+			return new SearchResultSentenceDataListWrapper(searchResult);
+		} else {
+			return new SearchResultListWrapper<>(searchResult);
+		}
+	}
 
 	/**
 	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
@@ -203,13 +215,13 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			return;
 		}
 		
-		listWrapper = new SearchResultListWrapper(searchResult);
+		listWrapper = createListWrapper(searchResult);
 		ContentType entryType = listWrapper.getContentType();
 		
 		// Ensure list presenter
 		ListPresenter listPresenter = this.listPresenter;
-		if(listPresenter==null) {
-			listPresenter = new DataListPresenter<>();
+		if(listPresenter==null || !PresenterUtils.presenterSupports(listPresenter, listWrapper)) {
+			listPresenter = UIHelperRegistry.globalRegistry().findHelper(ListPresenter.class, listWrapper);
 		}
 		
 		// Ensure details presenter
@@ -246,7 +258,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		setListPresenter(listPresenter);
 		setDetailPresenter(detailsPresenter);
 		
-		try {
+		/*try {
 			displaySelectedData();
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
@@ -256,6 +268,12 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 					"plugins.jgraph.listGraphView.presentationFailed", entryType.getId()); //$NON-NLS-1$
 			showDetailInfo(text);
 			return;
+		}*/
+		
+		if(listWrapper.size()>0) {
+			listPresenter.getSelectionModel().setSelectionInterval(0, 0);
+		} else {
+			listPresenter.getSelectionModel().clearSelection();
 		}
 		
 		infoLabel.setVisible(false);
@@ -293,8 +311,10 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		detailsPresenter.present(selectedObject, options);
 	}
 	
-	protected class Handler0D extends Handler implements ListSelectionListener {
+	protected class Handler0D extends Handler implements ListSelectionListener, ComponentListener {
 
+		protected boolean trackResizing = true;
+		
 		/**
 		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
 		 */
@@ -307,6 +327,48 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 						"Failed to handle change in selection: "+e, ex); //$NON-NLS-1$
 			}
 		}
-		
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentResized(ComponentEvent e) {
+			if(!trackResizing) {
+				return;
+			}
+			
+			int height = splitPane.getHeight();
+			if(height==0) {
+				return;
+			}
+			
+			splitPane.setDividerLocation(Math.max(height/2, height-100));
+			
+			trackResizing = false;
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentHidden(ComponentEvent e) {
+			trackResizing = true;
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentMoved(ComponentEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentShown(ComponentEvent e) {
+			// no-op
+		}
 	}
 }

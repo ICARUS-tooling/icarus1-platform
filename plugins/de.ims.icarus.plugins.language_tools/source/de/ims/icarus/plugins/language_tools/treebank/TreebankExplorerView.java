@@ -339,7 +339,7 @@ public class TreebankExplorerView extends View {
 				callbackHandler, "importTreebanks"); //$NON-NLS-1$
 	}
 	
-	private class LoadTracker implements EventListener {
+	private class LoadTracker implements EventListener, Runnable {
 		
 		private Treebank treebank;
 
@@ -348,7 +348,7 @@ public class TreebankExplorerView extends View {
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
-			refreshActions();
+			SwingUtilities.invokeLater(this);
 		}
 		
 		void unregister() {
@@ -374,6 +374,14 @@ public class TreebankExplorerView extends View {
 				this.treebank.addListener(TreebankEvents.FREEING, this);
 				this.treebank.addListener(TreebankEvents.FREED, this);
 			}
+		}
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			refreshActions();
 		}
 	}
 	

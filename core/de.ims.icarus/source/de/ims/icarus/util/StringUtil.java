@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.ui.helper.TextItem;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
 
@@ -48,6 +49,18 @@ public final class StringUtil {
 		}
 		if(obj instanceof Identity) {
 			return ((Identity)obj).getName();
+		}
+		
+		return obj.toString();
+	}
+	
+	public static String asText(Object obj) {
+		if(obj==null) {
+			return null;
+		}
+		
+		if(obj instanceof TextItem) {
+			return ((TextItem)obj).getText();
 		}
 		
 		return obj.toString();
@@ -186,10 +199,18 @@ public final class StringUtil {
 			} else {
 				sb.append(c);
 				len += fm.charWidth(c);
+				ignoreWS = false;
 			}
 			wrap = len>=width;
 		}
 		
 		return sb.toString();
+	}
+	
+	public static String capitalize(String s) {
+		if(s==null || s.length()<2)
+			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+		
+		return Character.toUpperCase(s.charAt(0))+s.substring(1);
 	}
 }

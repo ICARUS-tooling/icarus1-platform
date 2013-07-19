@@ -11,6 +11,8 @@ package de.ims.icarus.util.data;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -20,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
@@ -28,7 +31,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -36,9 +38,9 @@ import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
 
 import org.java.plugin.registry.Extension;
 
@@ -54,6 +56,7 @@ import de.ims.icarus.ui.helper.Editable;
 import de.ims.icarus.ui.helper.FilteredListModel;
 import de.ims.icarus.ui.helper.TextItem;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
+import de.ims.icarus.ui.list.DynamicWidthList;
 import de.ims.icarus.ui.view.ListPresenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CollectionUtils;
@@ -80,7 +83,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected AnnotationManager annotationManager;
 	protected AnnotationControl annotationControl;
 	
-	protected JList<?> list;
+	protected DynamicWidthList<T> list;
 	protected ListSelectionModel listSelectionModel;
 	
 	protected Filter filter;
@@ -92,6 +95,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected JComboBox<Object> filterSelect;
 	protected JButton filterEditButton;
 	protected JToggleButton outlineToggleButton;
+	protected JToggleButton widthToggleButton;
 	protected Map<Extension, Filter> filterInstances;
 	protected NavigationControl navigationControl;
 	
@@ -100,6 +104,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected final String dummyEntry = "minus"; //$NON-NLS-1$
 	
 	protected Handler handler;
+	
+	protected PrototypeSearchJob prototypeSearchJob;
 
 	public DataListPresenter() {
 		// no-op
@@ -110,6 +116,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		
 		list = createList();
 		list.addListSelectionListener(getHandler());
+		list.addPropertyChangeListener("trackViewportWidth", getHandler()); //$NON-NLS-1$
 		annotationControl = createAnnotationControl();
 		
 		navigationControl = createNavigationControl();
@@ -137,10 +144,11 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		return panel;
 	}
 	
-	protected JList<T> createList() {
-		JList<T> list = new JList<>(getFilteredListModel());
+	protected DynamicWidthList<T> createList() {
+		DynamicWidthList<T> list = new DynamicWidthList<>(getFilteredListModel());
 		list.setSelectionModel(getSelectionModel());
 		list.setBorder(UIUtil.defaultContentBorder);
+		list.setTrackViewportWidth(true);
 		
 		return list;
 	}
@@ -161,6 +169,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected Object leftNavigationContent() {
 		List<Object> items = new ArrayList<>();
 		items.add(getOutlineToggleButton());
+		items.add(EntryType.SEPARATOR);
+		items.add(getWidthToggleButton());
 		
 		return items.toArray();
 	}
@@ -195,18 +205,37 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		if(outlineToggleButton==null) {
 			outlineToggleButton = new JToggleButton();
 			ResourceManager.getInstance().getGlobalDomain().prepareComponent(outlineToggleButton, 
-					"core.helpers.navigationControl.toggleOutlineAction.name",  //$NON-NLS-1$
-					"core.helpers.navigationControl.toggleOutlineAction.description"); //$NON-NLS-1$
+					"core.helpers.dataListPresenter.toggleOutlineAction.name",  //$NON-NLS-1$
+					"core.helpers.dataListPresenter.toggleOutlineAction.description"); //$NON-NLS-1$
 			ResourceManager.getInstance().getGlobalDomain().addComponent(outlineToggleButton);
-			outlineToggleButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("externalize.gif")); //$NON-NLS-1$
-			outlineToggleButton.setSelectedIcon(IconRegistry.getGlobalRegistry().getIcon("hide_externalized.gif")); //$NON-NLS-1$
+			outlineToggleButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("hide_externalized.gif")); //$NON-NLS-1$
+			outlineToggleButton.setSelectedIcon(IconRegistry.getGlobalRegistry().getIcon("externalize.gif")); //$NON-NLS-1$
 			outlineToggleButton.setFocusable(false);
 			outlineToggleButton.setFocusPainted(false);
 			outlineToggleButton.addActionListener(getHandler());
-			outlineToggleButton.setVisible(false);
+			outlineToggleButton.setEnabled(false);
 		}
 		
 		return outlineToggleButton;
+	}
+	
+	protected JToggleButton getWidthToggleButton() {
+		if(widthToggleButton==null) {
+			widthToggleButton = new JToggleButton();
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(widthToggleButton, 
+					"core.helpers.dataListPresenter.toggleWidthAction.name",  //$NON-NLS-1$
+					"core.helpers.dataListPresenter.toggleWidthAction.description"); //$NON-NLS-1$
+			ResourceManager.getInstance().getGlobalDomain().addComponent(widthToggleButton);
+			// TODO get specialized icons for this toggle button!
+			widthToggleButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("sized_content.png")); //$NON-NLS-1$
+			widthToggleButton.setSelectedIcon(IconRegistry.getGlobalRegistry().getIcon("sized_fixed.png")); //$NON-NLS-1$
+			widthToggleButton.setFocusable(false);
+			widthToggleButton.setFocusPainted(false);
+			widthToggleButton.addActionListener(getHandler());
+			widthToggleButton.setSelected(list.isTrackViewportWidth());
+		}
+		
+		return widthToggleButton;
 	}
 	
 	protected JComboBox<Object> getFilterSelect() {
@@ -267,6 +296,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		title = (String) options.get(Options.TITLE);
 		
 		if(contentPanel!=null) {
+			cancelPrototypeComputation();
+			
 			refresh();
 			
 			if(index!=-1) {
@@ -304,13 +335,14 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		if(renderer==null) {
 			renderer = new DefaultListCellRenderer();
 		}
-		if(renderer instanceof Installable) {
-			((Installable)renderer).install(this);
-		}
 		
 		ListCellRenderer oldRenderer = list.getCellRenderer();
 		if(oldRenderer instanceof Installable) {
 			((Installable)oldRenderer).uninstall(this);
+		}
+		
+		if(renderer instanceof Installable) {
+			((Installable)renderer).install(this);
 		}
 		
 		list.setCellRenderer(renderer);
@@ -323,15 +355,20 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		ContentType entryType = getContentType();
 		ContentType textType = ContentTypeRegistry.getInstance().getTypeForClass(TextItem.class);
 		if(entryType==null || !ContentTypeRegistry.isCompatible(textType, entryType)) {
-			getOutlineToggleButton().setVisible(false);
+			getOutlineToggleButton().setEnabled(false);
 		} else {
-			getOutlineToggleButton().setVisible(true);
+			getOutlineToggleButton().setEnabled(true);
 		}
 		
 		navigationControl.setTitle(title);
 		
 		refreshFilterOptions();
 		refreshTextOutline();
+		refreshUtilities();
+	}
+	
+	protected void refreshUtilities() {
+		// for subclasses
 	}
 	
 	protected DataListModel<T> createListModel() {
@@ -373,6 +410,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		}
 		model.setSelectedItem(dummyEntry);
 		
+		// TODO give some love to the filter stuff
 		boolean enabled = model.getSize()>1;
 		filterSelect.setEnabled(enabled);
 		filterEditButton.setEnabled(enabled);
@@ -412,11 +450,51 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			filterEditButton.setEnabled(filter instanceof Editable);
 		}
 		
+		if(!list.isTrackViewportWidth()) {
+			computeListCellPrototype();
+		}
+		
 		firePropertyChange("filter", oldValue, filter); //$NON-NLS-1$
 	}
 	
 	public Filter getFilter() {
 		return filter;
+	}
+	
+	protected PrototypeSearchJob createPrototypeSearchJob() {
+		return new PrototypeSearchJob();
+	}
+	
+	protected void computeListCellPrototype() {
+		if(prototypeSearchJob!=null) {
+			return;
+		}
+		
+		getWidthToggleButton().setEnabled(false);
+		
+		prototypeSearchJob = createPrototypeSearchJob();
+		prototypeSearchJob.execute();
+	}
+	
+	protected void cancelPrototypeComputation() {
+		if(prototypeSearchJob==null || prototypeSearchJob.isDone()) {
+			return;
+		}
+		
+		prototypeSearchJob.cancel(true);
+	}
+	
+	protected void listCellPrototypeComputationCompleted(T prototype) {
+		try {
+			if(prototype!=null) {
+				list.setPrototypeCellValue(prototype);
+				list.setPrototypeCellValue(null);
+				list.setTrackViewportWidth(false);
+			}
+		} finally {
+			prototypeSearchJob = null;
+			getWidthToggleButton().setEnabled(true);
+		}
 	}
 
 	/**
@@ -506,7 +584,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	 * @see de.ims.icarus.ui.view.ListPresenter#getListModel()
 	 */
 	@Override
-	public ListModel<?> getListModel() {
+	public ListModel<T> getListModel() {
 		return getFilteredListModel();
 	}
 
@@ -528,6 +606,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	@Override
 	public ContentType getContentType() {
 		return dataList==null ?	null : dataList.getContentType();
+	}
+	
+	protected int getEstimatedWidth(FontMetrics fm, T item) {
+		return fm.stringWidth(item.toString());
 	}
 	
 	protected Filter getFilter(Extension extension) {
@@ -563,7 +645,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(filterSelect==null || filterEditButton==null
-					|| outlineToggleButton==null) {
+					|| outlineToggleButton==null || widthToggleButton==null) {
 				return;
 			}
 			
@@ -571,6 +653,14 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 				//TODO Show edit dialog
 			} else if(e.getSource()==outlineToggleButton) {
 				refreshTextOutline();
+			} else if(e.getSource()==widthToggleButton) {
+				//list.setTrackViewportWidth(widthToggleButton.isSelected());
+				if(widthToggleButton.isSelected()) {
+					list.setTrackViewportWidth(true);
+					cancelPrototypeComputation();
+				} else {
+					computeListCellPrototype();
+				}
 			} else if(e.getSource()==filterSelect) {
 				Filter filter = null;
 				Object selectedValue = filterSelect.getSelectedItem();
@@ -595,7 +685,64 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		 */
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			list.repaint(list.getVisibleRect());
+			if("trackViewportWidth".equals(evt.getPropertyName())) { //$NON-NLS-1$
+				widthToggleButton.setSelected(list.isTrackViewportWidth());
+			} else {
+				list.repaint(list.getVisibleRect());
+			}
+		}
+	}
+	
+	protected class PrototypeSearchJob extends SwingWorker<T, T> {
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected T doInBackground() throws Exception {
+			Font font = list.getFont();
+			FontMetrics fm = list.getFontMetrics(font);
+			
+			int maxWidth = 0;
+			T prototype = null;
+			
+			ListModel<T> model = getListModel();
+			for(int i=0; i<model.getSize(); i++) {
+				if(isCancelled() || Thread.currentThread().isInterrupted()) {
+					return null;
+				}
+				
+				T item = model.getElementAt(i);
+				int width = getEstimatedWidth(fm, item);
+				
+				if(width>maxWidth) {
+					maxWidth = width;
+					prototype = item;
+				}
+			}
+			
+			return prototype;
+		}
+
+		@Override
+		protected void process(List<T> chunks) {
+			list.setPrototypeCellValue(chunks.get(chunks.size()-1));
+			list.setPrototypeCellValue(null);
+		}
+
+		@Override
+		protected void done() {
+			T prototype = null;
+			try {
+				prototype = get();
+			} catch(CancellationException | InterruptedException e) {
+				// ignore
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to compute prototype cell value for list", e); //$NON-NLS-1$
+			} finally {
+				listCellPrototypeComputationCompleted(prototype);
+			}
 		}
 	}
 }

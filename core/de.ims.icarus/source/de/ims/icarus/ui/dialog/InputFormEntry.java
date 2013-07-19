@@ -56,7 +56,7 @@ public class InputFormEntry extends LabeledFormEntry<InputFormEntry> {
 	 */
 	@Override
 	protected void addComponents(FormBuilder builder) {
-		builder.feedComponent(input);
+		builder.feedComponent(input, null, getResizeMode());
 	}
 
 	public JTextField getInput() {

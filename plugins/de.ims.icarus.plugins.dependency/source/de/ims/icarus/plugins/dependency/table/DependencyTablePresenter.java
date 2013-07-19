@@ -35,6 +35,7 @@ import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.table.TablePresenter;
 import de.ims.icarus.ui.table.TooltipTableCellRenderer;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -260,7 +261,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 			
 			switch (columnIndex) {
 			case DependencyConstants.TABLE_INDEX_INDEX:
-				return rowIndex+1;
+				return StringUtil.formatDecimal(rowIndex+1);
 				
 			case DependencyConstants.TABLE_INDEX_FORM:
 				return entry.getForm();

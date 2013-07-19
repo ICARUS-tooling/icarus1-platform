@@ -40,6 +40,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.StringUtil;
 
 
 /**
@@ -431,9 +432,9 @@ public class NavigationControl implements ListSelectionListener,
 			}
 			
 			int index = (int)value;
-			String indexString = index<0 ? "-" : String.valueOf(index); //$NON-NLS-1$
+			String indexString = index<0 ? "-" : StringUtil.formatDecimal(index); //$NON-NLS-1$
 			
-			return String.format("%s / %d", indexString, size); //$NON-NLS-1$
+			return String.format("%s / %s", indexString, StringUtil.formatDecimal(size)); //$NON-NLS-1$
 		}
 		
 	}

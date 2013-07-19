@@ -433,13 +433,11 @@ public class DependencyUtils implements DependencyConstants {
 	 * <a href="http://ufal.mff.cuni.cz:8080/pub/files/havelka2005.pdf">Havelka 2005</a>
 	 * 
 	 * Naive approach used for now instead!
-	 * <p>
-	 * Note that all projectivity flags are assumed to be <b>not</b> set
-	 * when passed to this method!
 	 */
 	public static void fillProjectivityFlags(short[] heads, long[] flags) {
 		for(int i=0; i<heads.length; i++) {
-			if(LanguageUtils.isProjective(i, heads)) {
+			flags[i] &= ~LanguageConstants.FLAG_PROJECTIVE;
+			if(LanguageUtils.isProjective(i, heads[i], heads)) {
 				flags[i] |= LanguageConstants.FLAG_PROJECTIVE;
 			}
 		}
