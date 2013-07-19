@@ -213,7 +213,7 @@
 		<parameter id="description" value="plugins.searchTools.searchPerspective.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.SearchPerspective" />
-		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/search-perspective.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/search-perspective.png" />
 	</extension>
 	
 	<extension id="QueryEditorView" plugin-id="de.ims.icarus.searchTools" point-id="SearchToolsView">

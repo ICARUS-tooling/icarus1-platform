@@ -8,19 +8,19 @@
 		
 	<!-- New Search -->
 	<action id="plugins.searchTools.searchManagerView.newSearchAction"
-		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+		name="${id}.name" desc="${id}.description" icon="search_new.png" />
 		
 	<!-- Execute Search -->
 	<action id="plugins.searchTools.searchManagerView.executeSearchAction"
-		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		name="${id}.name" desc="${id}.description" icon="search_start.png" />
 		
 	<!-- Cancel Search -->
 	<action id="plugins.searchTools.searchManagerView.cancelSearchAction"
-		name="${id}.name" desc="${id}.description" icon="nav_stop.gif" />
+		name="${id}.name" desc="${id}.description" icon="search_cancel.png" />
 		
 	<!-- Remove Search -->
 	<action id="plugins.searchTools.searchManagerView.removeSearchAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="search_delete.png" />
 		
 	<!-- Clear History -->
 	<action id="plugins.searchTools.searchManagerView.clearHistoryAction"
@@ -44,7 +44,7 @@
 		
 	<!-- View Result -->
 	<action id="plugins.searchTools.searchManagerView.viewResultAction"
-		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		name="${id}.name" desc="${id}.description" icon="search_viewresult.png" />
 		
 	<!-- Edit Parameters -->
 	<action id="plugins.searchTools.searchManagerView.editParametersAction"
@@ -52,7 +52,7 @@
 		
 	<!-- Edit Search -->
 	<action id="plugins.searchTools.searchManagerView.viewSearchAction"
-		name="${id}.name" desc="${id}.description" icon="occ_read.gif" />
+		name="${id}.name" desc="${id}.description" icon="search_view.png" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.searchTools.searchManagerView.toolBarList">

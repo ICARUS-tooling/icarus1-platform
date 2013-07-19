@@ -108,7 +108,7 @@
 		
 	<!-- Toggle Auto Zoom -->
 	<action id="plugins.jgraph.graphPresenter.toggleAutoZoomAction"
-		name="${id}.name" desc="${id}.description" icon="autofit.gif" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="autofit.png" type="toggle" />
 		
 	<!-- Toggle Compress -->
 	<action id="plugins.jgraph.graphPresenter.toggleCompressAction"

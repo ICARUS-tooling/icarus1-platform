@@ -28,11 +28,11 @@
 	
 	<!-- Sort ascending Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.ascWebserviceSortAction"
-		name="${id}.name" desc="${id}.description" icon="sort_rows_asc_alph.gif" />
+		name="${id}.name" desc="${id}.description" icon="webservice_sortasc.png" />
 	
 	<!-- Sort descending Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.descWebserviceSortAction"
-		name="${id}.name" desc="${id}.description" icon="sort_rows_desc_alph.gif" />
+		name="${id}.name" desc="${id}.description" icon="webservice_sortdesc.png" />
 	
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.weblicht.weblichtWebserviceView.toolBarList">
