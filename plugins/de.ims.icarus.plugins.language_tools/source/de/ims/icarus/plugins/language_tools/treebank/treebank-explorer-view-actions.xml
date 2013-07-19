@@ -8,19 +8,19 @@
 		
 	<!-- New Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.newTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="newclass_wiz.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_add.png" />
 		
 	<!-- Delete Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.deleteTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_delete.png" />
 		
 	<!-- Clone Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.cloneTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_clone.png" />
 		
 	<!-- Rename Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.renameTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="wordassist_co.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_rename.png" />
 		
 	<!-- Open Location -->
 	<action id="plugins.languageTools.treebankExplorerView.openLocationAction"
@@ -28,19 +28,19 @@
 		
 	<!-- Edit Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.editTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_edit.png" />
 		
 	<!-- Inspect Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.inspectTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_inspect.png" />
 		
 	<!-- Load Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.loadTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="refresh_remote.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_load.png" />
 		
 	<!-- Free Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.freeTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="release_rls.gif" />
+		name="${id}.name" desc="${id}.description" icon="treebank_free.png" />
 		
 	<!-- Export Treebank -->
 	<action id="plugins.languageTools.treebankExplorerView.exportTreebankAction"

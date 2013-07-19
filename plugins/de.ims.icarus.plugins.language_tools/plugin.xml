@@ -229,7 +229,7 @@
 		<parameter id="description" value="plugins.languageTools.treebankEditView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.language_tools.resources.language_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.TreebankEditView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-edit-view.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-edit-view.png" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
 		

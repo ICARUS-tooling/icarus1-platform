@@ -54,7 +54,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 			value = chain.getName();
 			tooltip = chain.getName();
 			if (webchainIcon == null){
-				webchainIcon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("link_obj_dark.gif")); //$NON-NLS-1$
+				webchainIcon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("webchain_big.png")); //$NON-NLS-1$
 			}
 			if (WebchainRegistry.getInstance().hasChainOutput(chain)) {
 				webchainIcon.setBottomLeftOverlay(null);
@@ -75,7 +75,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 			value = ResourceManager.getInstance().get("output") //$NON-NLS-1$
 					+ wo.getOutputType();			
 			if (outputIcon == null){
-				outputIcon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("outrepo_rep.gif")); //$NON-NLS-1$
+				outputIcon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("type_output.png")); //$NON-NLS-1$
 			}
 			if (wo.getIsOutputUsed()) {
 				outputIcon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("task_complete")); //$NON-NLS-1$
@@ -90,7 +90,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 			WebchainInputType wit = (WebchainInputType)value;
 			value = ResourceManager.getInstance().get("input") //$NON-NLS-1$
 					+ wit.getInputType();
-			icon = IconRegistry.getGlobalRegistry().getIcon("addrepo_rep.gif"); //$NON-NLS-1$
+			icon = IconRegistry.getGlobalRegistry().getIcon("type_input.png"); //$NON-NLS-1$
 			tooltip = ResourceManager.getInstance().get("input")  //$NON-NLS-1$
 					+ wit.getInputType();
 		}

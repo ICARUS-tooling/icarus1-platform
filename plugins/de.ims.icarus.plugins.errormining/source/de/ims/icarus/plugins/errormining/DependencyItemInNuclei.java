@@ -82,12 +82,14 @@ public class DependencyItemInNuclei {
 		sentenceInfo.setNucleiIndex(positionNR);
 		//sentenceInfo.setNucleiSentencePos(positionNR);
 		sentenceInfo.setSentenceBegin(positionNR);
+		sentenceInfo.setSentenceEnd(positionNR);
 		
-		if(positionNR < headIndex){
-			sentenceInfo.setSentenceEnd(headIndex);
-		} else {
-			sentenceInfo.setSentenceEnd(positionNR);
-		}
+//		//TODO Workaround needed?
+//		if(positionNR < headIndex){
+//			sentenceInfo.setSentenceEnd(headIndex);
+//		} else {
+//			sentenceInfo.setSentenceEnd(positionNR);
+//		}
 		
 		
 		sentenceInfo.setSentenceHeadIndex(headIndex);

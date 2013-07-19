@@ -154,7 +154,7 @@
 		<parameter id="description" value="plugins.weblicht.weblichtChainView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.weblicht.resources.weblicht" />
 		<parameter id="class" value="de.ims.icarus.plugins.weblicht.WeblichtChainView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/icons/link_package.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/icons/package_webchain.png" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="high" />
 	</extension>
@@ -169,7 +169,7 @@
 		<parameter id="description" value="plugins.weblicht.weblichtWebserviceView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.weblicht.resources.weblicht" />
 		<parameter id="class" value="de.ims.icarus.plugins.weblicht.WeblichtWebserviceView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/icons/webservice_package.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/icons/package_webservice.png" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="standard" />
 	</extension>
@@ -185,7 +185,7 @@
 		<parameter id="description" value="plugins.weblicht.webserviceEditView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.weblicht.resources.weblicht" />
 		<parameter id="class" value="de.ims.icarus.plugins.weblicht.WebserviceEditView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/webservice-edit-view.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/webservice-edit-view.png" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="standard" />
 	</extension>
@@ -200,7 +200,7 @@
 		<parameter id="description" value="plugins.weblicht.weblichtEditView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.weblicht.resources.weblicht" />
 		<parameter id="class" value="de.ims.icarus.plugins.weblicht.WeblichtEditView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/weblicht-edit-view.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/weblicht/weblicht-edit-view.png" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
 	</extension>

@@ -8,36 +8,36 @@
 	
 	<!-- Save Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.saveWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="save_webchain.gif" />
+		name="${id}.name" desc="${id}.description" icon="save_webchain.png" />
 
 		
 	<!-- New Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.newWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="new_link_obj_dark.gif" />
+		name="${id}.name" desc="${id}.description" icon="add_webchain.png" />
 		
 	<!-- Delete Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.deleteWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="delete_webchain.png" />
 		
 	<!-- Clone Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.cloneWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		name="${id}.name" desc="${id}.description" icon="clone_webchain.png" />
 		
 	<!-- Rename Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.renameWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="wordassist_co.gif" />
+		name="${id}.name" desc="${id}.description" icon="webchain_rename.png" />
 		
 	<!-- Edit Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.editWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="edit_webchain.png" />
 	
 	<!-- Info Webservice -->
 	<action id="plugins.weblicht.weblichtChainView.webserviceInfo"
-		name="${id}.name" desc="${id}.description" icon="help_contents.gif" />
+		name="${id}.name" desc="${id}.description" icon="inspect_webservice.png" />
 	
 	<!-- Run Webchain -->
 	<action id="plugins.weblicht.weblichtChainView.runWebchainAction"
-		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		name="${id}.name" desc="${id}.description" icon="run_webchain.png" />
 	
 	
 	<!-- ToolBar List for header area -->

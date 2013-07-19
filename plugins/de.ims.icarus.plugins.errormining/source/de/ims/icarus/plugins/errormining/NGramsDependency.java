@@ -111,7 +111,7 @@ public class NGramsDependency {
 	 */
 	protected DependencySentenceInfo returnDependencySentenceInfoNREqual(ArrayList<DependencyItemInNuclei> l1,
 										int sentenceNR){
-		
+
 		for (int i = 0; i < l1.size(); i++){
 			DependencyItemInNuclei item = l1.get(i);
 			
@@ -204,7 +204,7 @@ public class NGramsDependency {
 		
 		for (int wordIndex = 0; wordIndex < dd.length(); wordIndex++) {
 			String currentWord = dd.getForm(wordIndex);
-			System.out.print(currentWord + " "); //$NON-NLS-1$
+			//System.out.print(currentWord + " "); //$NON-NLS-1$
 			
 			int headIndex = dd.getHead(wordIndex);
 
@@ -224,24 +224,23 @@ public class NGramsDependency {
 //				System.out.println("RLabel " + dd.getRelation(wordIndex)
 //						+ " Head " + head + " " + dd.getForm(head)
 //						+ " WIndex " + wordIndex);
-				addedword = currentWord; //$NON-NLS-1$
+				addedword = currentWord + " " + dd.getForm(headIndex); //$NON-NLS-1$
 				sb.append("<").append(addedword).append(" {")
 				.append(tag)
 				.append("}>");
-				System.out.println(sb.toString());
 				
 			} else {
 				sb.append("<").append(addedword).append(" {")
 				.append(dd.getRelation(wordIndex))
-				.append("}>");
-				System.out.println(sb.toString());				
+				.append("}>");				
 			}
+			//System.out.println(sb.toString());
 
 			// item already in list? only add new tags
 			if (nGramCache.containsKey(addedword)) { //$NON-NLS-1$
 
 				ArrayList<DependencyItemInNuclei> items = nGramCache.get(addedword);
-				System.out.println("Tag " + tag);
+				//System.out.println("#Tag: " + tag);
 				boolean knownTag = false;
 				
 				for (int i = 0; i < items.size(); i++) {
@@ -377,6 +376,15 @@ public class NGramsDependency {
 		return false;
 	}
 	
+	private StringBuilder rebuildGapTag(int startIndex, DependencySentenceInfo si, DependencyData dd){
+		StringBuilder sb = new StringBuilder();
+		for (int i = startIndex; i < si.getSentenceHeadIndex(); i++){
+			sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+		}
+		
+		return sb;
+	}
+	
 
 	private void createNGrams(Map<String, ArrayList<DependencyItemInNuclei>> inputNGram,
 									boolean lb, boolean rb){
@@ -390,28 +398,41 @@ public class NGramsDependency {
 			String key = it.next();
 			ArrayList<DependencyItemInNuclei> iiArr = inputNGram.get(key);
 			
+			//System.out.println("CreateNGRAMS: " + key);
+			
 			for (int tagSize = 0 ; tagSize < iiArr.size(); tagSize++){
 				
 				DependencyItemInNuclei iin = iiArr.get(tagSize);
-			
+							
 				for (int s = 0 ; s < iin.getSentenceInfoSize(); s++){
 					
 					DependencySentenceInfo si = (DependencySentenceInfo) iin.getSentenceInfoAt(s);
+					
+//					System.out.println("head: " + si.getSentenceHeadIndex()
+//										+ " nuclei " +si.getNucleiIndex()
+//										+ " end " +si.getSentenceEnd()
+//										+ " begin " +si.getSentenceBegin());
+					
 					
 					//start sentencecount at 1 so decrement
 					DependencyData dd = corpus.get(si.getSentenceNr()-1);
 					int startIndex = si.getSentenceBegin()-1;
 					int endIndex = si.getSentenceEnd()-1;
 					
-					//System.out.println("Startindex " + startIndex);				
-
-					/*
-					System.out.println("Sentence: " + si.getSentenceNr() +
-										" NucleiPos " + si.getNucleiIndexListSize() + 
-										" NucleiForm " + dd.getForm(si.getNucleiIndexListAt(0)-1));
-					*/
+					boolean hasGap = si.getSentenceEnd()+1 < si.getSentenceHeadIndex();
+					//System.out.println("HasGap " +hasGap);
 					
-					//StringBuilder posTagBuilder = new StringBuilder();
+					// there are words between dependenca nodepair, first fill gap
+					// between nodes before continue adding surrounding items
+//					if (si.getSentenceEnd()+1 < si.getSentenceHeadIndex()){
+//						StringBuilder sb = new StringBuilder();
+//						
+//						for (int i = startIndex; i < si.getSentenceHeadIndex(); i++){
+//							sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+//						}					
+//						System.out.println(sb.toString() + hasGap);
+//					}
+					
 					
 					/* 
 					 * *************************************************************
@@ -421,6 +442,7 @@ public class NGramsDependency {
 					 * *************************************************************
 					 */	
 					if (!reachedLeftBoarder) {
+						//System.out.println("left<<<<<<<<<<<<<<" + key);
 
 						StringBuilder leftKey = new StringBuilder();
 						
@@ -431,11 +453,20 @@ public class NGramsDependency {
 							//String leftPOS = dd.getPos(startIndex - 1);
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
-							boolean addNewNuclei = nGramCache.containsKey(leftForm);
-							
-							leftKey.append(leftForm).append(" ").append(key); //$NON-NLS-1$
-							//posTagBuilder.append(leftPOS).append(" ").append(iin.getPosTag()); //$NON-NLS-1$
-							//System.out.println("Left: "+ leftForm + " " + leftPOS);
+							//boolean addNewNuclei = nGramCache.containsKey(leftForm);
+							boolean addNewNuclei = newNucleiCheck(startIndex-1, dd);
+
+							//leftKey.append(leftForm).append(" ").append(key); //$NON-NLS-1$
+						
+							if (hasGap){
+								leftKey = rebuildGapTag(startIndex, si, dd);
+							} else {
+								leftKey.append(leftForm).append(" ").append(key); //$NON-NLS-1$
+							}
+							//System.out.println("GRAM " + nGramCount + " " +leftKey.toString());
+//							System.out.println(leftKey
+//									+ " FORM "  + leftForm
+//									+ " LEFT "  + addNewNuclei);
 							
 							// extend existing gram with values
 							if (outputNGram.containsKey(leftKey.toString())) {	
@@ -452,7 +483,9 @@ public class NGramsDependency {
 									
 									if (item.getPosTag().equals(iin.getPosTag())) {
 										if (addNewNuclei){											
-											DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
+											String nucleiKey = getNucleiForm(startIndex-1, dd);
+											DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
+											//DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 											addNucleiLeft(item, iin.getPosTag(), si, sitemp, true);
 											knownTag = true;
 										} else {
@@ -470,8 +503,10 @@ public class NGramsDependency {
 								if (!knownTag) {
 									DependencyItemInNuclei item = new DependencyItemInNuclei();
 									//already an unigram
-									if (addNewNuclei){										
-										DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
+									if (addNewNuclei){	
+										String nucleiKey = getNucleiForm(startIndex-1, dd);
+										DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
+										//DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 										addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
 										itemsTemp.add(item);
 									} else {
@@ -485,20 +520,28 @@ public class NGramsDependency {
 								DependencyItemInNuclei item = new DependencyItemInNuclei();
 								
 								//already an unigram
-								if (addNewNuclei){									
-									DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
+								if (addNewNuclei){
+									String nucleiKey = getNucleiForm(startIndex-1, dd);
+									System.out.println(nucleiKey);
+									System.out.println(leftKey.toString());
+									DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
+									//DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 									addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
 									items.add(item);
 								} else {
 									addSentenceInfoLeft(item, iin.getPosTag(), si, false);
 									items.add(item);
 								}
+								System.out.println("NEWITEM ~~~~~~~ "+leftKey
+										+ " " + item.getSentenceInfoAt(0).sentenceBegin
+										+ " " + item.getSentenceInfoAt(0).sentenceEnd);
+								
 								outputNGram.put(leftKey.toString(), items);
 							}
 		
 							
 						} else {
-							reachedLeftBoarder = true;
+							//reachedLeftBoarder = true;
 						}
 					}
 					
@@ -522,16 +565,22 @@ public class NGramsDependency {
 //								&& (!inputNGram.containsKey("getRWord"))) {
 
 						
-						if (endIndex < sentenceSize) {
+						if (endIndex < sentenceSize-1) {
 
-							String rightForm = dd.getForm(endIndex + 1);
-							//String rightPOS = dd.getPos(endIndex + 1);
+							String rightForm = dd.getForm(endIndex + 2);
+							//String rightPOS = dd.getPos(endIndex + 2);
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
-							boolean addNewNuclei = nGramCache.containsKey(rightForm);							
+							//FIXME
+							//boolean addNewNuclei = nGramCache.containsKey(rightForm);
 							
-							rightKey.append(key).append(" ").append(rightForm); //$NON-NLS-1$
-							//posTagBuilder.append(iin.getPosTag()).append(" ").append(rightPOS); //$NON-NLS-1$
+							boolean addNewNuclei = newNucleiCheck(endIndex+2, dd);
+
+							if (hasGap){
+								rightKey = rebuildGapTag(startIndex, si, dd);
+							} else {
+								rightKey.append(key).append(" ").append(rightForm); //$NON-NLS-1$
+							}
 							
 							// extend existing gram with values
 							if (outputNGramR.containsKey(rightKey.toString())) {	
@@ -552,8 +601,9 @@ public class NGramsDependency {
 
 									if (item.getPosTag().equals(iin.getPosTag())) {
 										//int oldCount = item.getCount();
-										if (addNewNuclei){											
-											DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
+										if (addNewNuclei){
+											String nucleiKey = getNucleiForm(endIndex+2, dd);
+											DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
 											addNucleiRigth(item, iin.getPosTag(), si, sitemp, true);
 											knownTag = true;
 										} else {											
@@ -569,7 +619,8 @@ public class NGramsDependency {
 									DependencyItemInNuclei item = new DependencyItemInNuclei();
 									//already an unigram
 									if (addNewNuclei){										
-										DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
+										String nucleiKey = getNucleiForm(endIndex+2, dd);
+										DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
 										addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
 										itemsTemp.add(item);
 									} else {		
@@ -584,7 +635,10 @@ public class NGramsDependency {
 								
 								//already an unigram
 								if (addNewNuclei){									
-									DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
+									String nucleiKey = getNucleiForm(endIndex+2, dd);
+									
+									System.out.println(nucleiKey + " >>>" + rightForm);
+									DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
 									addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
 									items.add(item);
 								} else {
@@ -598,7 +652,7 @@ public class NGramsDependency {
 							
 							
 						} else {
-							reachedRightBoarder = true;
+							//reachedRightBoarder = true;
 						}
 					}
 					
@@ -662,6 +716,55 @@ public class NGramsDependency {
 	
 	
 	/**
+	 * @param i
+	 * @param dd
+	 * @return
+	 */
+	private String getNucleiForm(int i, DependencyData dd) {
+		int headIndex = dd.getHead(i);
+		String nucleiTag = null;
+		
+		if (headIndex > 0 ){
+			nucleiTag = dd.getForm(i) + " " + dd.getForm(headIndex); //$NON-NLS-1$
+		
+		
+//		System.out.println("NUCLEI: " + dd.getForm(i)
+////					+ " Index " + i 
+////					+ " Head " + dd.getHead(i) 
+//					+ " TAG " + nucleiTag
+//					+ " " + nGramCache.containsKey(nucleiTag));
+		}
+		
+		return nucleiTag;
+	}
+
+
+	/**
+	 * @param i
+	 * @param dd 
+	 */
+	private boolean newNucleiCheck(int i, DependencyData dd) {
+		int headIndex = dd.getHead(i);
+		String nucleiTag = null;
+		
+		if (headIndex > 0 ){
+			nucleiTag = dd.getForm(i) + " " + dd.getForm(headIndex); //$NON-NLS-1$
+		
+		//TODO
+//		System.out.println("NUCLEI: " + dd.getForm(i)
+////					+ " Index " + i 
+////					+ " Head " + dd.getHead(i) 
+//					+ " TAG " + nucleiTag
+//					+ " " + nGramCache.containsKey(nucleiTag));
+			
+		}
+		
+		return nGramCache.containsKey(nucleiTag);
+		
+	}
+
+
+	/**
 	 * Continue until no new NGram found or until NGram Limit is reached
 	 * @return
 	 */
@@ -688,8 +791,9 @@ public class NGramsDependency {
 			item.setCount(oldCount + 1);	
 		}
 		//item.setPosTag(ensureValid(rigthPOS + " "+ iin.getPosTag()));
+		System.out.println("NUCLEI TAG>>>>>>>>> "+posTag);
 		item.setPosTag(ensureValid(posTag));
-		item.addNewNucleiToSentenceInfoRight(si, sitemp);		
+		item.addNewNucleiToSentenceInfoRight(si, sitemp);	
 	}
 
 
@@ -708,7 +812,8 @@ public class NGramsDependency {
 		}
 		//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));
 		item.setPosTag(ensureValid(posTag));
-		item.addNewNucleiToSentenceInfoLeft(si, sitemp);		
+		item.addNewNucleiToSentenceInfoLeft(si, sitemp);
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<nucleiLEFT");
 	}
 
 
@@ -850,7 +955,7 @@ public class NGramsDependency {
 			}
 		}
 		
-		//TODO change false false
+		//TODO change false false (running both sides)
 		createNGrams(nGramCache, false, false);
 	}
 	

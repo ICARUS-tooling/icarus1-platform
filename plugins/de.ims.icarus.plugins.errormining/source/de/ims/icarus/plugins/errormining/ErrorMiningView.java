@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -51,8 +52,10 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
+import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataReader;
 import de.ims.icarus.plugins.search_tools.view.SearchHistory;
 import de.ims.icarus.resources.ResourceManager;
@@ -69,6 +72,8 @@ import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.dialog.SelectFormEntry;
 import de.ims.icarus.ui.helper.Editor;
+import de.ims.icarus.ui.tasks.TaskManager;
+import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
@@ -76,6 +81,7 @@ import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.DataContainer;
+import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.mpi.Commands;
@@ -100,8 +106,7 @@ public class ErrorMiningView extends View {
 	
 	//gui output used
 	protected JTree ngramHistoryTree;
-	protected NGramHistoryTreeModel ngramHistoryTreeModel;	
-	private SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Void> worker;
+	protected NGramHistoryTreeModel ngramHistoryTreeModel;
 	
 	public ErrorMiningView(){
 		//noop
@@ -328,69 +333,8 @@ public class ErrorMiningView extends View {
 			}
 			
 			
-			//~~~~~~~~
-			
-			// Construct a new SwingWorker
-			worker = new SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Void>() {
-
-				@Override
-				protected Map<String, ArrayList<ItemInNuclei>> doInBackground()
-						throws Exception {
-					//return NGramsExecution.getInstance().runNGrams();
-					return ngrams.getResult();
-				}
-				
-				@Override
-				protected void done() {
-					try {
-						ContentType contentType = ContentTypeRegistry
-								.getInstance().getTypeForClass(
-										SentenceDataList.class);
-
-						Options options = new Options();
-						options.put(Options.CONTENT_TYPE, contentType);
-						// TODO send some kind of hint that we want the
-						// presenter not to modify content?
-						// -> Should be no problem since we only contain
-						// immutable data objects?
-						NGramDataList ngList;
-
-						ngList = new NGramDataList(get(), corpus);
-
-						Message messageUser = new Message(this, Commands.DISPLAY, ngList, null);
-						sendRequest(null, messageUser);
-						
-						//Algorithm Results (Debug)
-						Message messageDebug = new Message(this, Commands.DISPLAY, get(), null);
-						sendRequest(ErrorMiningConstants.NGRAM_RESULT_VIEW_ID, messageDebug);
-						
-						//TODO fix worker more worker no freeze no duplicated lists
-						Message corpusData = new Message(this, Commands.SET, corpus, null);	
-						sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, corpusData);
-						
-						Message messageSentences = new Message(this, Commands.DISPLAY, get(), null);
-						sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, messageSentences);
-
-						
-						System.out.println("Worker c/done " + isCancelled() + isDone()); //$NON-NLS-1$
-
-						if (isDone()) {
-							// ActionManager.globalManager()
-						}
-						
-
-					} catch (InterruptedException e) {
-						LoggerFactory.log(this,Level.SEVERE, "NGram Execution Interrupted ", e); //$NON-NLS-1$
-					} catch (ExecutionException e) {
-						LoggerFactory.log(this,Level.SEVERE, "NGram Execution Exception ", e); //$NON-NLS-1$
-					}				
-						
-				}			
-			};
-			
-			// Execute the SwingWorker; the GUI will not freeze
-			worker.execute();
-			
+			//Execute the SwingWorker; the GUI will not freeze
+			TaskManager.getInstance().schedule(new ErrorMiningJob(ngrams, corpus), TaskPriority.DEFAULT, true);
 			System.out.println("Finished " + ngrams.getResult().size()); //$NON-NLS-1$
 
 			//Core.showNotice();
@@ -589,6 +533,130 @@ public class ErrorMiningView extends View {
 		
 	}
 	
+	/**
+	 * 
+	 * @author Gregor Thiele
+	 * @version $Id$
+	 *
+	 */
+	
+	protected class ErrorMiningJob extends SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Object>
+	implements Identity {
+
+		protected NGrams ngrams;
+		protected List<SentenceData> corpus;
+		
+		public ErrorMiningJob(NGrams ngrams,
+				List<SentenceData> corpus){
+			this.ngrams = ngrams;
+			this.corpus = corpus;
+		}
+
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getId()
+		 */
+		@Override
+		public String getId() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getName()
+		 */
+		@Override
+		public String getName() {
+			return "ErrorMining"; //$NON-NLS-1$
+		}
+
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getIcon()
+		 */
+		@Override
+		public Icon getIcon() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getOwner()
+		 */
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected Map<String,ArrayList<ItemInNuclei>> doInBackground() throws Exception {
+			return ngrams.getResult();
+		}
+		
+		@Override
+		protected void done() {
+			try {
+				ContentType contentType = ContentTypeRegistry
+						.getInstance().getTypeForClass(
+								SentenceDataList.class);
+
+				Options options = new Options();
+				options.put(Options.CONTENT_TYPE, contentType);
+				// TODO send some kind of hint that we want the
+				// presenter not to modify content?
+				// -> Should be no problem since we only contain
+				// immutable data objects?
+				
+				NGramDataList ngList = new NGramDataList(get(), corpus);
+	
+
+				if (isDone()) {
+					//TODO Algorithm Results (Debug)
+					Message messageDebug = new Message(this, Commands.DISPLAY, ngList, null);
+					sendRequest(ErrorMiningConstants.NGRAM_RESULT_VIEW_ID, messageDebug);
+
+					
+					//TODO Algorithm List View
+//					Message corpusData = new Message(this, Commands.SET, corpus, null);	
+//					sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, corpusData);
+//					Message ngListData = new Message(this, Commands.SET, ngList, null);	
+//					sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, ngListData);
+					
+					Message messageSentences = new Message(this, Commands.DISPLAY, ngList, null);
+					sendRequest(ErrorMiningConstants.NGRAM_RESULT_SENTENCE_VIEW_ID, messageSentences);
+
+					
+//					//TODO Dependency View				
+					Message messageUser = new Message(this, Commands.DISPLAY, ngList, null);
+					sendRequest(null, messageUser);				
+					
+					
+					System.out.println("Worker c/done " + isCancelled() + isDone()); //$NON-NLS-1$
+				}
+				
+
+			} catch (InterruptedException e) {
+				LoggerFactory.log(this,Level.SEVERE, "NGram Execution Interrupted ", e); //$NON-NLS-1$
+			} catch (ExecutionException e) {
+				LoggerFactory.log(this,Level.SEVERE, "NGram Execution Exception ", e); //$NON-NLS-1$
+			}				
+				
+		}			
+	
+
+		
+		
+	}
 	
 	
 	

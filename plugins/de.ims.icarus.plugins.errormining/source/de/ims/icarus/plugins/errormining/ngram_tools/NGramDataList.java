@@ -42,6 +42,37 @@ import de.ims.icarus.util.mpi.Message;
 public class NGramDataList implements SentenceDataList {
 	
 	
+	/**
+	 * @return the nGramMap
+	 */
+	public Map<String, ArrayList<ItemInNuclei>> getnGramMap() {
+		return nGramMap;
+	}
+
+	/**
+	 * @param nGramMap the nGramMap to set
+	 */
+	public void setnGramMap(Map<String, ArrayList<ItemInNuclei>> nGramMap) {
+		this.nGramMap = nGramMap;
+	}
+
+	/**
+	 * @return the corpus
+	 */
+	public List<SentenceData> getCorpus() {
+		return corpus;
+	}
+
+	/**
+	 * @param corpus the corpus to set
+	 */
+	public void setCorpus(List<SentenceData> corpus) {
+		this.corpus = corpus;
+	}
+
+
+
+
 	protected Map<String,ArrayList<ItemInNuclei>> nGramMap;
 	protected int index;
 	protected List<Integer> sentences;

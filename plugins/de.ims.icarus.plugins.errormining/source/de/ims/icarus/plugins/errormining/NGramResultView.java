@@ -155,27 +155,31 @@ public class NGramResultView<JListModel> extends View{
 		nucleiName = new JLabel();
 
 		JPanel detailedView = new JPanel();
-		
-		
-		JSplitPane jsp = new JSplitPane();
+		detailedView.setLayout(new GridLayout(1, 2));
+		detailedView.add(nucleiName);
+		detailedView.add(nucleiCount);
 
 		
 		// Detailed Scrollpane
 		scrollPaneDetailed = new JScrollPane();
 		scrollPaneDetailed.setBorder(null);	
 		UIUtil.defaultSetUnitIncrement(scrollPaneDetailed);
+		
+		JSplitPane jsp = new JSplitPane(
+				JSplitPane.VERTICAL_SPLIT,
+				scrollPane,
+				scrollPaneDetailed);
+		Dimension minimumSize = new Dimension(300, 150);
+		scrollPane.setMinimumSize(minimumSize);
+		scrollPaneDetailed.setMinimumSize(minimumSize);
 				
 		
-		detailedView.setLayout(new GridLayout(1, 2));
-		detailedView.add(nucleiName);
-		detailedView.add(nucleiCount);
+
 		
 		
 		container.setLayout(new BorderLayout());
 		container.add(header, BorderLayout.NORTH);
-		container.add(scrollPane, BorderLayout.CENTER);
-		container.add(jsp, BorderLayout.EAST);
-		container.add(scrollPaneDetailed, BorderLayout.EAST);
+		container.add(jsp, BorderLayout.CENTER);
 		container.add(detailedView, BorderLayout.SOUTH);
 		
 		showDefaultInfo();
@@ -296,6 +300,7 @@ public class NGramResultView<JListModel> extends View{
 	}
 
 
+	
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		if(Commands.DISPLAY.equals(message.getCommand())) {			
 			
@@ -307,8 +312,9 @@ public class NGramResultView<JListModel> extends View{
 //				refreshActions();
 //				return message.successResult(this, null);
 //			}
-			if(data!=null) {
-				nGramResult = (Map<String, ArrayList<ItemInNuclei>>) data;
+			System.out.println(data.toString());
+			if (data != null && (data instanceof NGramDataList)) {
+				nGramResult = ((NGramDataList) data).getnGramMap();
 				showResults(data);
 				refreshActions();
 				return message.successResult(this, null);
@@ -447,8 +453,8 @@ public class NGramResultView<JListModel> extends View{
 
 			String text =	"<html>"  //$NON-NLS-1$
 							+ (index + 1) + ") "  //$NON-NLS-1$
-							+ colorString(s) 
-							+ " (" + s.length + "-Gram)" //$NON-NLS-1$ //$NON-NLS-2$
+							+ " (" + s.length + "-Gram) "  //$NON-NLS-1$//$NON-NLS-2$
+							+ colorString(s)
 							+ "</html>"; //$NON-NLS-1$
 
 		      if (isSelected) {
@@ -620,10 +626,10 @@ public class NGramResultView<JListModel> extends View{
 //			System.out.println(multinuclei + " MULTI" 
 //								+ " " + getNucleis(iin));
 			
-			System.out.println("PosTag: " + iin.posTag +  
-								"RowIndex: " + rowIndex +
-								"ColIndex: " + columnIndex);
-			System.out.println(tmpMap.toString());
+//			System.out.println("PosTag: " + iin.posTag +  
+//								"RowIndex: " + rowIndex +
+//								"ColIndex: " + columnIndex);
+//			System.out.println(tmpMap.toString());
 			
 			//TODO really needed? better check nuclei size instead?!
 //			if (iin.getSentenceInfoSize() == 1) {
@@ -749,8 +755,8 @@ public class NGramResultView<JListModel> extends View{
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < iin.getSentenceInfoSize(); i++){
 			//FIXME -1 needed?
-			sb.append(iin.getSentenceInfoAt(i).getSentenceNr()-1);
-			if (i < iin.getSentenceInfoSize()-1){
+			sb.append(iin.getSentenceInfoAt(i).getSentenceNr());
+			if (i < iin.getSentenceInfoSize()){
 				sb.append(", "); //$NON-NLS-1$
 			}			
 		}

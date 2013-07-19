@@ -220,42 +220,38 @@ public class NGramResultSentenceView extends View {
 		if(Commands.DISPLAY.equals(message.getCommand())) {			
 			
 			Object data = message.getData();
-
-			// We allow null values since this is a way to clear the editor view
-//			if(data==null || data instanceof NGramDataList) {
-//				showResults((NGramDataList) data);
-//				refreshActions();
-//				return message.successResult(this, null);
-//			}
-			if(data!=null) {
-				nGramResult = (Map<String, ArrayList<ItemInNuclei>>) data;
-				ngList = new NGramDataList(nGramResult, corpus);
+			
+			if (data != null && (data instanceof NGramDataList)) {
+				nGramResult = ((NGramDataList) data).getnGramMap();
+				corpus = ((NGramDataList) data).getCorpus();
+				ngList = (NGramDataList) data;
 				corpusList = ngList.getCorpusList();
-				//TODO
-//				for (int i = 0; i < corpusList.size(); i++){
-//				System.out.println(corpusList.get(i).getSentence());
-//				}
-
 				showResults(ngList);
 				refreshActions();
 				return message.successResult(this, null);
 			} else {
 				return message.unsupportedDataResult(this);
 			}
+
 		}
-		if(Commands.SET.equals(message.getCommand())) {
-			Object data = message.getData();
-			if(data != null){
-				this.corpus = (List<SentenceData>) data;
-				return message.successResult(this, null);
-			} else {
-				return message.unsupportedDataResult(this);
-			}
-			
-		}else {
+//		if(Commands.SET.equals(message.getCommand())) {
+//			Object data = message.getData();
+//			
+//			if(data != null){
+//				if (data instanceof NGramDataList){
+//					ngList = (NGramDataList) data;
+//					corpusList = ngList.getCorpusList();					
+//				} else {
+//					this.corpus = (List<SentenceData>) data;
+//				}
+//				return message.successResult(this, null);
+//			} else {
+//				return message.unsupportedDataResult(this);
+//			}
+//			
+		else {
 			return message.unknownRequestResult(this);
 		}
-	
 	}
 	
 	
@@ -400,7 +396,7 @@ public class NGramResultSentenceView extends View {
 		 */
 		@Override
 		public Object getElementAt(int index) {
-			System.out.println("Corpusindex " + corpusList.get(index).getSentence());
+			//System.out.println("Corpusindex " + corpusList.get(index).getSentence());
 			//return keys[index];
 			return corpus.get(corpusList.get(index).getSentence()).getText();
 		}
@@ -437,7 +433,7 @@ public class NGramResultSentenceView extends View {
 			      boolean isSelected, boolean cellHasFocus) {
 			String[] s = ((String) value).split(" "); //$NON-NLS-1$
 			
-			String[] gram = corpusList.get(index).getKey().split(" ");
+			String[] gram = corpusList.get(index).getKey().split(" "); //$NON-NLS-1$
 			
 			
 			ArrayList<ItemInNuclei> tmp = nGramResult.get(corpusList.get(index).getKey());
@@ -459,8 +455,8 @@ public class NGramResultSentenceView extends View {
 
 			String text =	"<html>"  //$NON-NLS-1$
 					+ (index + 1) + ") "  //$NON-NLS-1$
-					+ colorStringContext(s,start,end) 
-					+ " (" + gram.length + "-Gram)" //$NON-NLS-1$ //$NON-NLS-2$
+					+ " (" + gram.length + "-Gram) " //$NON-NLS-1$ //$NON-NLS-2$
+					+ colorStringContext(s,start,end) 					
 					+ "</html>"; //$NON-NLS-1$
 
 		      if (isSelected) {
@@ -597,7 +593,7 @@ public class NGramResultSentenceView extends View {
 		 */
 		@Override
 		public int getColumnCount() {
-			return 4;
+			return 5;
 		}
 		
 		
@@ -615,14 +611,12 @@ public class NGramResultSentenceView extends View {
 		            		"plugins.errormining.labels.Count"); //$NON-NLS-1$
 					case 3:
 							return ResourceManager.getInstance().get(
-			            		"plugins.errormining.labels.Sentence"); //$NON-NLS-1$
+			            		"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
 //		            case 3: return ResourceManager.getInstance().get(
 //		            		"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
-//		            case 4: return ResourceManager.getInstance().get(
-//		            		"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
-//		            case 5: return ResourceManager.getInstance().get(
-//		            		"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
-//		            default: break;
+		            case 4: return ResourceManager.getInstance().get(
+		            		"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
+		            default: break;
 		        }
 		        return null;
 		}
@@ -682,10 +676,8 @@ public class NGramResultSentenceView extends View {
 					return sentenceOccurences(iin);
 //				case 3:
 //					return nucleiCount;
-//				case 4:
-//					return getNucleis(iin);
-//				case 5:
-//					return sentenceOccurences(iin);
+				case 4:
+					return getNucleis(iin);
 				default:
 					break;
 				}
@@ -708,10 +700,8 @@ public class NGramResultSentenceView extends View {
 					return sentenceOccurences(iin);
 //				case 3:
 //					return iin.getSentenceInfoAt(0).getNucleiIndexListSize();
-//				case 4:
-//					return getNucleis(iin);
-//				case 5:
-//					return sentenceOccurences(iin);
+				case 4:
+					return getNucleis(iin);
 				default:
 					break;
 				}
@@ -808,9 +798,8 @@ public class NGramResultSentenceView extends View {
 	protected Object sentenceOccurences(ItemInNuclei iin) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < iin.getSentenceInfoSize(); i++){
-			//FIXME -1 needed?
-			sb.append(iin.getSentenceInfoAt(i).getSentenceNr()-1);
-			if (i < iin.getSentenceInfoSize()-1){
+			sb.append(iin.getSentenceInfoAt(i).getSentenceNr());
+			if (i < iin.getSentenceInfoSize()){
 				sb.append(", "); //$NON-NLS-1$
 			}			
 		}

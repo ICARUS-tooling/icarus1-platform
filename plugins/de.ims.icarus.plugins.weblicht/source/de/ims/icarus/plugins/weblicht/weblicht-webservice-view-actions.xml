@@ -8,23 +8,23 @@
 	
 	<!-- Save Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.saveWebserviceAction"
-		name="${id}.name" desc="${id}.description" icon="save_webservice.gif" />
+		name="${id}.name" desc="${id}.description" icon="save_webservice.png" />
 		
 	<!-- New Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.newWebserviceAction"
-		name="${id}.name" desc="${id}.description" icon="new_webservice.gif" />
+		name="${id}.name" desc="${id}.description" icon="add_webservice.png" />
 		
 	<!-- Delete Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.deleteWebserviceAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="delete_webservice.png" />
 	
 	<!-- Clone Webchain -->
 	<action id="plugins.weblicht.weblichtWebserviceView.cloneWebserviceAction"
-		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		name="${id}.name" desc="${id}.description" icon="clone_webservice.png" />
 		
 	<!-- Edit Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.editWebserviceAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="edit_webservice.png" />
 	
 	<!-- Sort ascending Webservice -->
 	<action id="plugins.weblicht.weblichtWebserviceView.ascWebserviceSortAction"
