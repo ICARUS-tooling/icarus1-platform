@@ -62,4 +62,18 @@ public class ResultEntry {
 	public int getHitCount() {
 		return hits.length;
 	}
+
+	@Override
+	public int hashCode() {
+		return (index+1) * (hits.length+1);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof ResultEntry) {
+			ResultEntry other = (ResultEntry) obj;
+			return other.index==index && Arrays.equals(hits, other.hits);
+		}
+		return false;
+	}
 }

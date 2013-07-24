@@ -74,6 +74,7 @@ public class DisjunctionMatcher extends Matcher {
 
 	@Override
 	public boolean matches() {
+		
 		boolean matched = false;
 		
 		// Check exclusions

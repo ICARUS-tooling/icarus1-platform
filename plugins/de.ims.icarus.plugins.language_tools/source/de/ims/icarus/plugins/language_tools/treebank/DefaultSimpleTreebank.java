@@ -33,6 +33,7 @@ import de.ims.icarus.language.treebank.TreebankMetaDataBuilder;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
@@ -219,7 +220,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 
 		eventSource.fireEvent(new EventObject(TreebankEvents.LOADING));
 		try {
-			reader.init(location, null);
+			reader.init(location, new Options(getProperties()));
 			List<SentenceData> buffer = new ArrayList<>(200);
 			TreebankMetaDataBuilder metaDataBuilder = new TreebankMetaDataBuilder();
 			SentenceData item;

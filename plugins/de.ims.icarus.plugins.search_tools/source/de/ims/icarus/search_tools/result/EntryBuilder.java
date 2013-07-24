@@ -51,6 +51,10 @@ public class EntryBuilder {
 	public void setIndex(int index) {
 		this.index = index;
 	}
+	
+	public int getIndex() {
+		return index;
+	}
 
 	public ResultEntry toEntry() {
 		if(hits.size()==0) {
@@ -60,7 +64,7 @@ public class EntryBuilder {
 		ResultEntry entry = new ResultEntry(index, hits.toArray(new Hit[hits.size()]));
 		
 		hits.clear();
-		Arrays.fill(allocation, -1);
+		//Arrays.fill(allocation, -1);
 		
 		return entry;
 	}

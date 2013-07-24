@@ -832,7 +832,7 @@ public class MatcherBuilder {
 						for(TreeNode child : children) {
 							value = Math.min(value, child.getDescendantCount());
 						}
-						value++;
+						//value++;
 					} else if(!isNegated()) {
 						value = children.size();
 						

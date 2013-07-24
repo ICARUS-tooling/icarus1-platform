@@ -15,6 +15,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import de.ims.icarus.util.CollectionUtils;
+
 
 /**
  * 
@@ -55,5 +57,35 @@ public class Hit {
 	@Override
 	public String toString() {
 		return Arrays.toString(indices);
+	}
+
+	@Override
+	public int hashCode() {
+		return CollectionUtils.hashCode(indices);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Hit) {
+			Hit other = (Hit) obj;
+			int i0 = 0;
+			int i1 = 0;
+			
+			while(i0<indices.length && i1<other.indices.length) {
+				if(indices[i0]==-1) {
+					i0++;
+				} else if(other.indices[i1]==-1) {
+					i1++;
+				} else if(indices[i0]!=other.indices[i1]) {
+					return false;
+				} else {
+					i0++;
+					i1++;
+				}
+			}
+			
+			return true;
+		}
+		return false;
 	}
 }

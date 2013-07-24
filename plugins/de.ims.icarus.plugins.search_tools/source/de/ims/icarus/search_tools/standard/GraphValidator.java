@@ -80,6 +80,7 @@ public class GraphValidator {
 	public static final String ALLOW_LINKS = "allowLinks";  //$NON-NLS-1$
 	public static final String ALLOW_TRANSITIVES = "allowTransitives";  //$NON-NLS-1$
 	public static final String ALLOW_DOUBLE_NEGATIVE = "allowDoubleNegation";  //$NON-NLS-1$
+	public static final String MIN_DISJUNCTION_MEMBER_COUNT = "minDisjunctionMemberCount";  //$NON-NLS-1$
 
 	public GraphValidator() {
 		// no-op
@@ -134,6 +135,7 @@ public class GraphValidator {
 		int minOutEdgeCount = options.get(MIN_OUTGOING_EDGES, 0);
 		int maxOutEdgeCount = options.get(MAX_OUTGOING_EDGES, 0);
 		int maxTotalEdgeCount = options.get(MAX_TOTAL_EDGES, 0);
+		int minDisjunctionmemberCount = options.get(MIN_DISJUNCTION_MEMBER_COUNT, 2);
 		
 		// Validate roots
 		for(int rootIdx = 0; rootIdx<graph.getRootNodes().length; rootIdx++) {
@@ -231,10 +233,16 @@ public class GraphValidator {
 				result.addError("plugins.searchTools.graphValidation.invalidRoot", id); //$NON-NLS-1$
 			}
 			
-			// Check
+			// Check for negated disjunctions
 			if(node.getNodeType()==NodeType.DISJUNCTION && node.isNegated()
 					&& !options.get(ALLOW_NEGATED_DISJUNCTIONS, false)) {
 				result.addWarning("plugins.searchTools.graphValidation.negatedDisjunctionNode", id); //$NON-NLS-1$
+			}
+			
+			// Check child count for disjunctions 
+			if(node.getNodeType()==NodeType.DISJUNCTION && 
+					outEdgeCount < minDisjunctionmemberCount) {
+				result.addError("plugins.searchTools.graphValidation.insufficientDisjunctionMembers", node.getId(), minDisjunctionmemberCount); //$NON-NLS-1$
 			}
 		}
 

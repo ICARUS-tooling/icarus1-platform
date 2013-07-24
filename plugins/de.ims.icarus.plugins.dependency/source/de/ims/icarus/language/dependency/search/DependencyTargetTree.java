@@ -92,6 +92,11 @@ public class DependencyTargetTree implements TargetTree {
 		unlockAll();
 	}
 
+	@Override
+	public DependencyData getSource() {
+		return data;
+	}
+
 	/**
 	 * @see de.ims.icarus.search_tools.tree.TargetTree#reload(java.lang.Object)
 	 */

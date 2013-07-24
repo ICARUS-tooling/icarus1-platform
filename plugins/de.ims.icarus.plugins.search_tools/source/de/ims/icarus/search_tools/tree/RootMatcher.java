@@ -27,6 +27,7 @@ public class RootMatcher extends Matcher {
 
 	@Override
 	public boolean matches() {
+		
 		int nodeCount = targetTree.size();
 					
 		boolean matched = false;
@@ -97,11 +98,13 @@ public class RootMatcher extends Matcher {
 			
 		// If unsuccessful and part of a disjunction let the 
 		// alternate matcher have a try.
-		if(!matched) {
+		if(!matched || exhaustive) {
 			if(alternate!=null) {
-				matched = alternate.matches();
+				matched |= alternate.matches();
 			}
-		} else if(!exclusionMember && previous==null && searchMode!=SearchMode.INDEPENDENT_HITS) {
+		}
+		
+		if(matched && !exclusionMember && previous==null && searchMode!=SearchMode.INDEPENDENT_HITS) {
 			commit();
 		}
 		

@@ -218,4 +218,26 @@ public final class StringUtil {
 		
 		return Character.toUpperCase(s.charAt(0))+s.substring(1);
 	}
+	
+	public static String join(String[] tokens) {
+		return join(tokens, ", ", '[', ']'); //$NON-NLS-1$
+	}
+	
+	public static String join(String[] tokens, String separator, char start, char end) {
+		if(tokens==null || tokens.length==0) {
+			return ""; //$NON-NLS-1$
+		}
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(start);		
+		for(int i=0; i<tokens.length; i++) {
+			if(i>0) {
+				sb.append(separator);
+			}
+			sb.append(tokens[i]);
+		}
+		sb.append(end);
+		
+		return sb.toString();
+	}
 }

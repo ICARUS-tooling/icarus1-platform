@@ -89,6 +89,7 @@ import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
+import com.mxgraph.util.mxUndoManager;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxCellState;
@@ -2104,7 +2105,8 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			refreshActions();
 			
 			// Keep data synchronized with graph
-			if(!isIgnoringGraphChanges() && sender instanceof mxIGraphModel) {
+			if(!isIgnoringGraphChanges() && (sender instanceof mxIGraphModel
+					|| sender instanceof mxUndoManager)) {
 				// Sync to data
 				pauseChangeHandling();
 				try {

@@ -45,6 +45,8 @@ public interface TargetTree {
 	 */
 	void reload(Object source);
 	
+	Object getSource();
+	
 	/**
 	 * Returns the index of the node currently being viewed or
 	 * {@code -1} if the current scope is not pointed on a node.

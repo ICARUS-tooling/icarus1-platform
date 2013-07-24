@@ -225,7 +225,7 @@ public class DefaultQueryParser {
 		}
 		
 		reset();
-		this.query = query;
+		this.query = query.trim();
 		
 		skipWS();
 		

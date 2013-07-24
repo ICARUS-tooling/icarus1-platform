@@ -91,7 +91,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		}
 	}
 	
-	public boolean matches() {					
+	public boolean matches() {		
 		int parentAllocation = parent.getAllocation();
 		targetTree.viewNode(parentAllocation);
 		indexIterator.setMax(targetTree.getEdgeCount()-1);
@@ -105,6 +105,10 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			while(indexIterator.hasNext()) {
 				targetTree.viewNode(parentAllocation);
 				targetTree.viewChild(indexIterator.next());
+				
+				if(entryBuilder.getIndex()==49 && targetTree.getNodeIndex()==15) {
+					System.out.println();
+				}
 
 				// Check for precedence constraints
 				if(targetTree.getNodeIndex()<minIndex
@@ -166,8 +170,8 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		
 		// If unsuccessful and part of a disjunction let the 
 		// alternate matcher have a try.
-		if(!matched && alternate!=null) {
-			matched = alternate.matches();
+		if((!matched || exhaustive) && alternate!=null) {
+			matched |= alternate.matches();
 		}
 		
 		return matched;
@@ -524,6 +528,11 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		if(exclusions!=null) {
 			for(Matcher matcher : exclusions) {
 				matcher.setCache(cache);
+			}
+		}
+		if(options!=null) {
+			for(Matcher option : options) {
+				option.setCache(cache);
 			}
 		}
 	}

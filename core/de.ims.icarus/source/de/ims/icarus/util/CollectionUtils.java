@@ -353,4 +353,20 @@ public final class CollectionUtils {
 		
 		return sb.toString();
 	}
+	
+	public static int hashCode(Iterable<? extends Object> source) {
+		int hc = 1;
+		for(Iterator<?> i = source.iterator(); i.hasNext();) {
+			hc *= (i.next().hashCode()+1);
+		}
+		return hc;
+	}
+	
+	public static int hashCode(int[] source) {
+		int hc = 1;
+		for(int i : source) {
+			hc *= (i+1);
+		}
+		return hc;
+	}
 }

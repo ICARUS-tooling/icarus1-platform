@@ -11,22 +11,19 @@ package de.ims.icarus.plugins.coref.view.grid;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
 import javax.swing.JComponent;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.table.TableCellRenderer;
 
 import sun.swing.DefaultLookup;
-
-import de.ims.icarus.plugins.coref.view.grid.labels.DefaultLabelSource;
-import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelSource;
-import de.ims.icarus.ui.table.TooltipTableCellRenderer;
+import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
 
 /**
  * @author Markus Gärtner
@@ -39,10 +36,18 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 	
 	protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
-    private Color unselectedForeground;
-    private Color unselectedBackground;
+	protected Color unselectedForeground;
+    protected Color unselectedBackground;
+    
+    protected Color missingGoldNodeColor;
+    protected Color falseNodeColor;
+    
+    protected EntityGridNode node;
+    
+    // If true the renderer will only display the number
+    protected boolean showCompactLabel = false;
 	
-	protected GridLabelSource labelSource = new DefaultLabelSource();
+	protected GridLabelBuilder labelBuilder = null;
 
 	public EntityGridCellRenderer() {
 		// no-op
@@ -70,8 +75,8 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
                 && dropLocation.getRow() == row
                 && dropLocation.getColumn() == column) {
 
-            fg = DefaultLookup.getColor(this, ui, "Table.dropCellForeground");
-            bg = DefaultLookup.getColor(this, ui, "Table.dropCellBackground");
+            fg = DefaultLookup.getColor(this, ui, "Table.dropCellForeground"); //$NON-NLS-1$
+            bg = DefaultLookup.getColor(this, ui, "Table.dropCellBackground"); //$NON-NLS-1$
 
             isSelected = true;
         }
@@ -86,7 +91,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
                                     ? unselectedBackground
                                     : table.getBackground();
             if (background == null || background instanceof javax.swing.plaf.UIResource) {
-                Color alternateColor = DefaultLookup.getColor(this, ui, "Table.alternateRowColor");
+                Color alternateColor = DefaultLookup.getColor(this, ui, "Table.alternateRowColor"); //$NON-NLS-1$
                 if (alternateColor != null && row % 2 != 0) {
                     background = alternateColor;
                 }
@@ -102,20 +107,20 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
         if (hasFocus) {
             Border border = null;
             if (isSelected) {
-                border = DefaultLookup.getBorder(this, ui, "Table.focusSelectedCellHighlightBorder");
+                border = DefaultLookup.getBorder(this, ui, "Table.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
             }
             if (border == null) {
-                border = DefaultLookup.getBorder(this, ui, "Table.focusCellHighlightBorder");
+                border = DefaultLookup.getBorder(this, ui, "Table.focusCellHighlightBorder"); //$NON-NLS-1$
             }
             setBorder(border);
 
             if (!isSelected && table.isCellEditable(row, column)) {
                 Color col;
-                col = DefaultLookup.getColor(this, ui, "Table.focusCellForeground");
+                col = DefaultLookup.getColor(this, ui, "Table.focusCellForeground"); //$NON-NLS-1$
                 if (col != null) {
                     super.setForeground(col);
                 }
-                col = DefaultLookup.getColor(this, ui, "Table.focusCellBackground");
+                col = DefaultLookup.getColor(this, ui, "Table.focusCellBackground"); //$NON-NLS-1$
                 if (col != null) {
                     super.setBackground(col);
                 }
@@ -127,6 +132,14 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
         setValue(value);
 
         return this;
+	}
+	
+	protected void setValue(Object value) {
+		if(value instanceof EntityGridNode) {
+			node = (EntityGridNode) value;
+		} else {
+			node = null;
+		}
 	}
 	
 	@Override
@@ -143,8 +156,37 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		// TODO Auto-generated method stub
-		super.paintComponent(g);
+		if(node==null) {
+			return;
+		}
+		
+		if(isShowCompactLabel()) {
+			paintCompactLabel(g);
+		} else {
+			paintCompleteLabel(g);
+		}
+	}
+	
+	protected void paintCompactLabel(Graphics g) {
+		
+	}
+	
+	protected void paintCompleteLabel(Graphics g) {
+		
+		int w = getWidth();
+		int h = getHeight();
+		
+		Font f = getFont();
+		FontMetrics fm = getFontMetrics(f);
+		
+		int width = 0;
+		int count = node.getSpanCount();
+		String[] tokens = new String[node.getSpanCount()];
+		
+		// Calculate required total width
+		for(int i=0; i<count; i++) {
+			tokens[i] =  
+		}
 	}
 	
     @Override
@@ -198,7 +240,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 
     @Override
     protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-        if (propertyName == "font" || propertyName == "foreground") {
+        if (propertyName == "font" || propertyName == "foreground") { //$NON-NLS-1$ //$NON-NLS-2$
             super.firePropertyChange(propertyName, oldValue, newValue);
         }
     }
@@ -207,5 +249,21 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
     public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { 
     	// no-op
     }
+
+	public boolean isShowCompactLabel() {
+		return showCompactLabel;
+	}
+
+	public GridLabelBuilder getLabelBuilder() {
+		return labelBuilder;
+	}
+
+	public void setShowCompactLabel(boolean showCompactLabel) {
+		this.showCompactLabel = showCompactLabel;
+	}
+
+	public void setLabelBuilder(GridLabelBuilder labelBuilder) {
+		this.labelBuilder = labelBuilder;
+	}
     
 }

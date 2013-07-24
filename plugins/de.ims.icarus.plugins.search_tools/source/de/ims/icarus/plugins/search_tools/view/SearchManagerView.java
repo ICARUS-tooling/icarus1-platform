@@ -663,6 +663,9 @@ public class SearchManagerView extends View {
 				currentSearchEditor.setEditingItem(clone);
 
 				refreshActions();
+				
+				// Forward to query editor directly
+				editQuery(e);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to edit selected search", ex); //$NON-NLS-1$

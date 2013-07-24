@@ -10,6 +10,7 @@
 package de.ims.icarus.search_tools.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import de.ims.icarus.search_tools.SearchMode;
 import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.SearchParameters;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultGraphEdge;
@@ -489,6 +491,36 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		}
 		
 		return !search.isRunning() && !search.isDone();
+	}
+	
+	public static Collection<ResultEntry> diffResults(SearchResult resultA, SearchResult resultB) {
+		Set<ResultEntry> entriesA = getEntries(resultA);
+		Set<ResultEntry> entriesB = getEntries(resultB);
+		
+		//System.out.println("entriesA ("+entriesA.size()+"): "+Arrays.toString(entriesA.toArray()));
+		//System.out.println("entriesB ("+entriesB.size()+"): "+Arrays.toString(entriesB.toArray()));
+		
+		Set<ResultEntry> result = null;
+		if(entriesA.size()>entriesB.size()) {
+			entriesA.removeAll(entriesB);
+			result = entriesA;
+		} else {
+			entriesB.removeAll(entriesA);
+			result = entriesB;
+		}
+		
+		return result;
+	}
+	
+	public static Set<ResultEntry> getEntries(SearchResult searchResult) {
+		int size = searchResult.getTotalMatchCount();
+		Set<ResultEntry> entries = new HashSet<>(size);
+		
+		for(int i=0; i<size; i++) {
+			entries.add(searchResult.getRawEntry(i));
+		}
+		
+		return entries;
 	}
 		
 	public static final Comparator<SearchNode> nodeIdSorter = new Comparator<SearchNode>() {

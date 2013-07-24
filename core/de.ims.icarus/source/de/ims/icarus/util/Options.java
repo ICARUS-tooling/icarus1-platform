@@ -4,6 +4,7 @@
 package de.ims.icarus.util;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -34,6 +35,10 @@ public class Options extends HashMap<String, Object> {
 	}
 
 	public Options(Options source) {
+		putAll(source);
+	}
+
+	public Options(Map<String, Object> source) {
 		putAll(source);
 	}
 

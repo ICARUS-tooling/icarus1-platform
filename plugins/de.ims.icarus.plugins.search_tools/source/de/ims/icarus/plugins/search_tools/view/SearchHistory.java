@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -21,6 +23,9 @@ import javax.swing.Timer;
 
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchDescriptor;
+import de.ims.icarus.search_tools.result.ResultEntry;
+import de.ims.icarus.search_tools.result.SearchResult;
+import de.ims.icarus.search_tools.util.SearchUtils;
 
 
 /**
@@ -110,6 +115,29 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 		}
 	}
 	
+	private void diffWithLast() {
+		if(descriptors==null || descriptors.size()<2) {
+			return;
+		}
+		
+		SearchResult resultA = descriptors.get(descriptors.size()-2).getSearchResult();
+		SearchResult resultB = descriptors.get(descriptors.size()-1).getSearchResult();
+		
+		if(resultA==null || !resultA.isFinal() 
+				|| resultB==null || !resultB.isFinal()) {
+			return;
+		}
+		
+		Collection<ResultEntry> diff = SearchUtils.diffResults(resultA, resultB);
+		
+		if(diff==null || diff.isEmpty()) {
+			System.out.println("No diff"); //$NON-NLS-1$
+		} else {
+			System.out.println("Diff: "+diff.size()); //$NON-NLS-1$
+			System.out.println(Arrays.toString(diff.toArray()));
+		}
+	}
+	
 	public void removeSearch(SearchDescriptor descriptor) {
 		if(descriptor==null)
 			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
@@ -175,6 +203,14 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 			} else {
 				fireContentsChanged(SearchHistory.this, index, index);
 			}
+			
+			/*SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					diffWithLast();
+				}
+			})*/;
 		}
 
 		/**

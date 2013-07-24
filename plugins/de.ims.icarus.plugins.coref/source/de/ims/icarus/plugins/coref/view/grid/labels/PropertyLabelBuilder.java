@@ -17,11 +17,11 @@ import de.ims.icarus.plugins.coref.view.grid.EntityGridNode;
  * @version $Id$
  *
  */
-public class PropertyLabelSource extends AbstractListingLabelSource {
+public class PropertyLabelBuilder implements GridLabelBuilder {
 	
 	private final String key;
 
-	public PropertyLabelSource(String key) {
+	public PropertyLabelBuilder(String key) {
 		if(key==null)
 			throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
 		
@@ -29,11 +29,11 @@ public class PropertyLabelSource extends AbstractListingLabelSource {
 	}
 
 	/**
-	 * @see de.ims.icarus.plugins.coref.view.grid.labels.AbstractListingLabelSource#getSpanLabel(de.ims.icarus.language.coref.Span, de.ims.icarus.language.coref.CoreferenceData)
+	 * @see de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder#getLabel(de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
 	 */
 	@Override
-	protected String getSpanLabel(EntityGridNode node, int index) {
-		Span span = node.getSpan(index);
+	public String getLabel(EntityGridNode node, int spanIndex) {
+		Span span = node.getSpan(spanIndex);
 		Object value = span.getProperty(key);
 		return value==null ? "-" : value.toString();  //$NON-NLS-1$
 	}

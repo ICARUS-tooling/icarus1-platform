@@ -16,7 +16,7 @@ import de.ims.icarus.plugins.coref.view.grid.EntityGridNode;
  * @version $Id$
  *
  */
-public interface GridLabelSource {
+public interface GridLabelBuilder {
 
-	public String getLabel(EntityGridNode node);
+	public String getLabel(EntityGridNode node, int spanIndex);
 }
