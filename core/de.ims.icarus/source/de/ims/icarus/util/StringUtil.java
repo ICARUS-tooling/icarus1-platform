@@ -9,6 +9,7 @@
  */
 package de.ims.icarus.util;
 
+import java.awt.Component;
 import java.awt.FontMetrics;
 import java.text.DecimalFormat;
 import java.util.Set;
@@ -162,6 +163,10 @@ public final class StringUtil {
 		while(Character.isWhitespace(sb.charAt(sb.length()-1))) {
 			sb.delete(sb.length()-1, sb.length());
 		}
+	}
+
+	public static String wrap(String s, Component comp, int width) {
+		return wrap(s, comp.getFontMetrics(comp.getFont()), width);
 	}
 	
 	/**

@@ -48,6 +48,14 @@ public final class CoreferenceUtils {
 		return ContentTypeRegistry.getInstance().getTypeForClass(EdgeSet.class);
 	}
 
+	public static ContentType getSpanContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(Span.class);
+	}
+
+	public static ContentType getEdgeContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(Edge.class);
+	}
+
 	public static ContentType getCoreferenceDocumentSetContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentSet.class);
 	}
@@ -75,6 +83,35 @@ public final class CoreferenceUtils {
 		}
 		
 		return result;
+	}
+	
+	public static int getSpanLength(Span span, CoreferenceDocumentData document) {
+		CoreferenceData sentence = document.get(span.getSentenceIndex());
+		int length = 0;
+		for(int i=span.getBeginIndex(); i<=span.getEndIndex(); i++) {
+			if(i>0) {
+				// Whitespace!
+				length++;
+			}
+			
+			length += sentence.getForm(i).length();
+		}
+		
+		return length;
+	}
+	
+	public static String getSpanText(Span span, CoreferenceDocumentData document) {
+		CoreferenceData sentence = document.get(span.getSentenceIndex());
+		StringBuilder sb = new StringBuilder();
+		for(int i=span.getBeginIndex(); i<=span.getEndIndex(); i++) {
+			if(i>0) {
+				sb.append(' ');
+			}
+			
+			sb.append(sentence.getForm(i));
+		}
+		
+		return sb.toString();
 	}
 	
 	public static boolean containsSpan(CoreferenceData data, Span span) {
@@ -181,11 +218,11 @@ public final class CoreferenceUtils {
 		for(Span span : spanSet.getSpans()) {
 			int clusterId = span.getClusterId();
 			if(clusterId==-1) {
-				edgeSet.addEdge(new Edge(Span.ROOT, span));
+				edgeSet.addEdge(new Edge(Span.getROOT(), span));
 			} else {
 				Span source = heads.get(clusterId);
 				if(source==null) {
-					source = Span.ROOT;
+					source = Span.getROOT();
 				}
 				
 				edgeSet.addEdge(new Edge(source, span));
@@ -194,6 +231,46 @@ public final class CoreferenceUtils {
 			}
 		}
 		
+		return edgeSet;
+	}
+	
+	public static SpanSet getSpanSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+		SpanSet spanSet = allocation==null ? null : allocation.getSpanSet(document.getId());
+		if(spanSet==null) {
+			spanSet = document.getSpanSet();
+		}
+		if(spanSet==null) {
+			spanSet = document.getDefaultSpanSet();
+		}
+		return spanSet;
+	}
+	
+	public static EdgeSet getEdgeSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+		EdgeSet edgeSet = allocation==null ? null : allocation.getEdgeSet(document.getId());
+		if(edgeSet==null) {
+			edgeSet = document.getEdgeSet();
+		}
+		if(edgeSet==null) {
+			edgeSet = document.getDefaultEdgeSet();
+		}
+		return edgeSet;
+	}
+	
+	public static SpanSet getGoldSpanSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+		SpanSet spanSet = allocation==null ? null : allocation.getSpanSet(document.getId());
+		
+		if(spanSet==null) {
+			spanSet = document.getDefaultSpanSet();
+		}
+		return spanSet;
+	}
+	
+	public static EdgeSet getGoldEdgeSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+		EdgeSet edgeSet = allocation==null ? null : allocation.getEdgeSet(document.getId());
+		
+		if(edgeSet==null) {
+			edgeSet = document.getDefaultEdgeSet();
+		}
 		return edgeSet;
 	}
 	

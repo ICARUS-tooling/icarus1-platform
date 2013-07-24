@@ -26,15 +26,52 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
-		<library id="jGraphLib" path="lib/jgraphx.jar" type="code">
-			<doc>
-				<doc-text>
-					jGraph library version 1.10.1.4
-				</doc-text>
-			</doc>
+		<library id="args4j" path="lib/args4j-20120919.jar" type="code">
+			<export prefix="*" />
+		</library>
+		<library id="ims-hotcoref" path="lib/ims-hotcoref-src.jar" type="code">
+			<export prefix="*" />
+		</library>
+		<library id="jaws" path="lib/jaws-bin.jar" type="code">
+			<export prefix="*" />
+		</library>
+		<library id="liblinear" path="lib/liblinear-1.8.jar" type="code">
+			<export prefix="*" />
+		</library>
+		<library id="mallet-deps" path="lib/mallet-deps.jar" type="code">
+			<export prefix="*" />
+		</library>
+		<library id="mallet" path="lib/mallet.jar" type="code">
+			<export prefix="*" />
+		</library>
+		<library id="trove" path="lib/trove-3.0.3.jar" type="code">
 			<export prefix="*" />
 		</library>
 	</runtime>
+	
+	<!-- Extension-Points -->
+			
+	<extension-point id="CoreferencePresenter" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Member of the coreference visualization framework. Extensions
+				of this point are responsible for providing a highly specialized
+				view for a single corefference document. Usually a view relying
+				on such presenters will provide the user with options to select
+				the presenter he considers most useful for the task at hand.
+				It is recommended that extensions make use of all the optional
+				parameter fields of parent point 'Localizable'! 
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of presenter object, has to implement the de.ims.icarus.ui.view.AWTPresenter interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
 	
 	<!-- Standard Extensions -->
 	
@@ -92,6 +129,24 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="de.ims.icarus.language.coref.EdgeSet" />
+	</extension>
+	
+	<extension id="CoreferenceSpanContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.Span
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.Span" />
+	</extension>
+	
+	<extension id="CoreferenceEdgeContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.Edge
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.Edge" />
 	</extension>
 	
 </plugin>

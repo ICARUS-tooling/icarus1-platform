@@ -13,6 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+
+import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.logging.LoggerFactory;
 
 /**
  * @author Markus Gärtner
@@ -32,11 +36,13 @@ public final class Locations {
 		
 		try {
 			File file = new File(path);
+			file = IOUtil.toRelativeFile(file);
 			if(file.exists()) {
 				return new DefaultFileLocation(file.getCanonicalFile());
 			}
 		} catch(IOException e) {
-			// no-op
+			LoggerFactory.log(Locations.class, Level.WARNING, 
+					"Failed to generate location for path: "+path, e); //$NON-NLS-1$
 		}
 		
 		return new DefaultURLLocation(new URL(path));
@@ -48,11 +54,13 @@ public final class Locations {
 		
 		try {
 			File file = new File(path);
+			file = IOUtil.toRelativeFile(file);
 			if(file.exists()) {
 				return new DefaultFileLocation(file.getCanonicalFile());
 			}
 		} catch(IOException e) {
-			// no-op
+			LoggerFactory.log(Locations.class, Level.WARNING, 
+					"Failed to generate file location for path: "+path, e); //$NON-NLS-1$
 		}
 		
 		return null;

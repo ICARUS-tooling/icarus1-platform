@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.coref.view;
+package de.ims.icarus.plugins.coref.view.text;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,6 +50,7 @@ import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;

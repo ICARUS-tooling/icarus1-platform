@@ -13,50 +13,50 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import de.ims.icarus.util.data.ContentType;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class EdgeSet extends CorefMember {
+public class EdgeSet extends CorefListMember<Edge> {
 	
-	private List<Edge> edges;
-
 	public EdgeSet() {
 		// no-op
 	}
 	
-	public int size() {
-		return edges==null ? 0 : edges.size();
-	}
-	
-	public Edge getEdgeAt(int index) {
-		return edges==null ? null : edges.get(index);
-	}
-	
 	public void addEdge(Edge edge) {
-		if(edges==null) {
-			edges = new ArrayList<>();
+		if(items==null) {
+			items = new ArrayList<>();
 		}
 		
-		edges.add(edge);
+		items.add(edge);
 	}
 	
 	/**
 	 * Returns a read-only view of all the edges in this {@code EdgeSet}
 	 */
 	public List<Edge> getEdges() {
-		return Collections.unmodifiableList(edges);
+		return Collections.unmodifiableList(items);
 	}
 	
 	@Override
 	public EdgeSet clone() {
 		EdgeSet clone = new EdgeSet();
 		clone.setProperties(cloneProperties());
-		if(edges!=null) {
-			clone.edges = new ArrayList<>(edges);
+		if(items!=null) {
+			clone.items = new ArrayList<>(items);
 		}
 		
 		return clone;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.data.DataList#getContentType()
+	 */
+	@Override
+	public ContentType getContentType() {
+		return CoreferenceUtils.getEdgeContentType();
 	}
 }

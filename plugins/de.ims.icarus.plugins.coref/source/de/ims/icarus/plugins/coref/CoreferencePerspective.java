@@ -14,6 +14,7 @@ import java.awt.Color;
 import java.util.logging.Level;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
@@ -25,8 +26,9 @@ import de.ims.icarus.language.coref.io.AllocationReader;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
-import de.ims.icarus.plugins.coref.view.CoreferenceDocumentSetPresenter;
 import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter;
+import de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter;
+import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentSetPresenter;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
@@ -104,16 +106,18 @@ public class CoreferencePerspective extends Perspective {
 		r.init(Locations.getFileLocation(path), null, set);		
 		CoreferenceAllocation predicted = r.readAllocation();		
 		
-		CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
+		//CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
+		EntityGridPresenter presenter = new EntityGridPresenter();
 		
 		container.setLayout(new BorderLayout());
 		container.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
 
 		CoreferenceDocumentData document = set.get(0);
 		Options options = new Options();
-		options.put("edges", predicted.getEdgeSet(document.getId()));
-		options.put("goldEdges", gold.getEdgeSet(document.getId()));
+		options.put("allocation", predicted);
+		options.put("goldAllocation", gold);
 		presenter.present(document, options);
 		
+		//container.add(new JLabel("footer"), BorderLayout.SOUTH);
 	}
 }

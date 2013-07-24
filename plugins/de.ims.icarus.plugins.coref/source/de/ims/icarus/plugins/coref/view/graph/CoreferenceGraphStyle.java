@@ -10,8 +10,8 @@
 package de.ims.icarus.plugins.coref.view.graph;
 
 import java.awt.Color;
-import java.util.Map;
 
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxUtils;
 
 import de.ims.icarus.config.ConfigRegistry;
@@ -33,14 +33,14 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 		// no-op
 	}
 
-	@Override
+	/*@Override
 	protected void initStylesheet() {
 		super.initStylesheet();
 		
 		Map<String, Object> style = getStylesheet().getDefaultEdgeStyle();
 		style.put("entryX", 0.5f); //$NON-NLS-1$
 		style.put("entryY", 0.0f); //$NON-NLS-1$
-	}
+	}*/
 
 	@Override
 	protected CoreferenceGraphPresenter getPresenter() {
@@ -57,21 +57,34 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 
 	@Override
 	public String getStyle(GraphOwner owner, Object cell, Options options) {
-		Object value = owner.getGraph().getModel().getValue(cell);
+		mxIGraphModel model = owner.getGraph().getModel();
+		Object value = model.getValue(cell);
 		if(value instanceof CorefNodeData) {
 			return "defaultVertex"; //$NON-NLS-1$
 		} else if(value instanceof CorefEdgeData) {
 			CorefEdgeData data = (CorefEdgeData) value;
-			String style = "defaultEdge"; //$NON-NLS-1$
+			StringBuilder style = new StringBuilder("defaultEdge"); //$NON-NLS-1$
 			if(data.getEdge().getSource().isROOT()) {
-				style += ";shape=curveConnector"; //$NON-NLS-1$
+				style.append(";shape=curveConnector"); //$NON-NLS-1$
 			}
 			if(data.isFalsePredictedEdge() && getPresenter().isMarkFalseEdges()) {
-				style += ";strokeColor="+mxUtils.getHexColorString(falseEdgeColor); //$NON-NLS-1$
-			} else if(data.isMissingGoldEdge() && getPresenter().isShowGoldEdges()) {
-				style += ";dashed=1"; //$NON-NLS-1$
+				style.append(";strokeColor=") //$NON-NLS-1$
+				.append(mxUtils.getHexColorString(falseEdgeColor)); 
 			}
-			return style;
+			if(data.isMissingGoldEdge()) {
+				style.append(";dashed=1"); //$NON-NLS-1$
+			} 
+			if(!data.isMissingGoldEdge() || data.getEdge().getSource().isROOT()) {
+				style.append(";entryX=0.5;entryY=0"); //$NON-NLS-1$
+			}
+			if(getPresenter().isHighlightedIncomingEdge(cell)) {
+				style.append(";strokeColor=") //$NON-NLS-1$
+				.append(mxUtils.getHexColorString(getPresenter().getIncomingEdgeColor())); 
+			} else if(getPresenter().isHighlightedOutgoingEdge(cell)) {
+				style.append(";strokeColor=") //$NON-NLS-1$
+				.append(mxUtils.getHexColorString(getPresenter().getOutgoingEdgeColor())); 
+			}
+			return style.toString();
 		} else {
 			return super.getStyle(owner, cell, options);
 		}

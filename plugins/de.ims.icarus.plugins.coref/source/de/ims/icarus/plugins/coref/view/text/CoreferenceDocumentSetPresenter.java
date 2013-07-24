@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.coref.view;
+package de.ims.icarus.plugins.coref.view.text;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -31,6 +31,7 @@ import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.coref.view.DocumentListCellRenderer;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.Options;
@@ -97,7 +98,7 @@ public class CoreferenceDocumentSetPresenter extends
 	}
 
 	/**
-	 * @see de.ims.icarus.plugins.coref.view.AbstractCoreferenceTextPresenter#getContentType()
+	 * @see de.ims.icarus.plugins.coref.view.text.AbstractCoreferenceTextPresenter#getContentType()
 	 */
 	@Override
 	public ContentType getContentType() {
@@ -105,7 +106,7 @@ public class CoreferenceDocumentSetPresenter extends
 	}
 
 	/**
-	 * @see de.ims.icarus.plugins.coref.view.AbstractCoreferenceTextPresenter#setData(java.lang.Object)
+	 * @see de.ims.icarus.plugins.coref.view.text.AbstractCoreferenceTextPresenter#setData(java.lang.Object)
 	 */
 	@Override
 	protected void setData(Object data) {

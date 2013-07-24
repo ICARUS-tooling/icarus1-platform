@@ -22,7 +22,10 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 
+import de.ims.icarus.Core;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
 
 
@@ -266,5 +269,31 @@ public final class IOUtil {
             throw new MalformedURLException("unable to create canonical file: "  //$NON-NLS-1$
             		+ file + " " + ioe); //$NON-NLS-1$
         }
+    }
+    
+    public static File toRelativeFile(File f) {
+    	if(f==null) {
+    		return f;
+    	}
+    	
+    	String root = Core.getCore().getRootFolder().getAbsolutePath();
+    	String path = null;
+    	try {
+    		path = f.getCanonicalPath();
+    	} catch(Exception e) {
+    		LoggerFactory.log(IOUtil.class, Level.WARNING, 
+    				"Error converting file to canonical path: "+f.getAbsolutePath(), e); //$NON-NLS-1$
+    	}
+    	
+    	if(path==null) {
+    		return f;
+    	}
+    	
+    	if(path.startsWith(root)) {
+    		path = path.substring(root.length()+1);
+    		return new File(path);
+    	} else {
+    		return f;
+    	}
     }
 }

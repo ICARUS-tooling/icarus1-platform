@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
@@ -470,15 +471,21 @@ public final class DialogFactory {
 		
 		return text;
 	}
-
+	
 	public File showDestinationFileDialog(Component parent, String title, 
 			File directory) {
+		return showDestinationFileDialog(parent, title, directory, null);
+	}
+
+	public File showDestinationFileDialog(Component parent, String title, 
+			File directory, FileFilter filter) {
 		JFileChooser fileChooser = getFileChooser();
 		fileChooser.setCurrentDirectory(directory);
 		fileChooser.setSelectedFile(null);
 		fileChooser.setDialogTitle(resourceDomain.get(title));
 		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 		fileChooser.setApproveButtonText(resourceDomain.get("select")); //$NON-NLS-1$
+		fileChooser.setFileFilter(filter);
 		
 		while(true) {
 			int result = fileChooser.showDialog(parent, null);
@@ -505,12 +512,18 @@ public final class DialogFactory {
 	
 	public File showSourceFileDialog(Component parent, String title, 
 			File directory) {
+		return showSourceFileDialog(parent, title, directory, null);
+	}
+	
+	public File showSourceFileDialog(Component parent, String title, 
+			File directory, FileFilter filter) {
 		JFileChooser fileChooser = getFileChooser();
 		fileChooser.setCurrentDirectory(directory);
 		fileChooser.setSelectedFile(null);
 		fileChooser.setDialogTitle(resourceDomain.get(title));
 		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		fileChooser.setApproveButtonText(resourceDomain.get("select")); //$NON-NLS-1$
+		fileChooser.setFileFilter(filter);
 		
 		int result = fileChooser.showDialog(parent, null);
 		if(result==JFileChooser.CANCEL_OPTION) {

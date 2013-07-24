@@ -99,18 +99,13 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
         }
         setBorder(border);
         
-        showData(value);
+        setData(value);
 
         return this;
 	}
 	
-	
-    // We need a place to store the color the JLabel should be returned
-    // to after its foreground and background colors have been set
-    // to the selection background color.
-    // These ivars will be made protected when their names are finalized.
-    private Color unselectedForeground;
-    private Color unselectedBackground;
+    protected Color unselectedForeground;
+    protected Color unselectedBackground;
 
 	/**
 	 * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
@@ -186,15 +181,15 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
             setBorder(getNoFocusBorder());
         }
         
-        showData((CoreferenceData) value);
+        setData((CoreferenceData) value);
         
         return this;
 	}
 	
-	protected void showData(CoreferenceData data) {		
+	public void setData(CoreferenceData data) {		
 		try {
 			CoreferenceDocument doc = (CoreferenceDocument) getStyledDocument();
-			doc.remove(0, doc.getLength());
+			doc.clear();
 			
 			//doc.insertString(0, index+": ", null); //$NON-NLS-1$
 			doc.appendBatchCoreferenceData(data);

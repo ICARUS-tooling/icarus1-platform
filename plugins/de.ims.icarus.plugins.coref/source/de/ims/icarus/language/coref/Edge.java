@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * @version $Id$
  *
  */
-public class Edge extends CorefMember implements Cloneable, Serializable {
+public class Edge extends CorefMember implements Cloneable, Serializable, Comparable<Edge> {
 	
 	private static final long serialVersionUID = 598886774121859964L;
 	
@@ -141,5 +141,18 @@ public class Edge extends CorefMember implements Cloneable, Serializable {
 		if(source==null)
 			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
 		this.target = target;
+	}
+
+	/**
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(Edge other) {
+		int result = source.compareTo(other.source);
+		if(result==0) {
+			result = target.compareTo(other.target);
+		}
+		return result;
+		
 	}
 }

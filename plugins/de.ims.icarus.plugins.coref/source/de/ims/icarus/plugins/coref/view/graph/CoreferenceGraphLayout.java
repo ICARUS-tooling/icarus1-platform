@@ -11,6 +11,7 @@ package de.ims.icarus.plugins.coref.view.graph;
 
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxIGraphLayout;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
@@ -61,7 +62,8 @@ public class CoreferenceGraphLayout implements GraphLayout {
 	 */
 	@Override
 	public String getEdgeStyle(GraphOwner owner, Object edge, Options options) {
-		return "defaultEdge"; //$NON-NLS-1$
+		String style = owner.getGraph().getModel().getStyle(edge);
+		return style==null ? "defaultEdge" : style; //$NON-NLS-1$
 	}
 
 	/**
@@ -77,7 +79,16 @@ public class CoreferenceGraphLayout implements GraphLayout {
 		mxGraph graph = owner.getGraph();
 		Object parent = graph.getDefaultParent();
 		
-		layout.execute(parent);
+		graph.getModel().beginUpdate();
+		try {
+			layout.execute(parent);
+			
+			double offset = graph.getGridSize()*2;
+			
+			graph.moveCells(cells, offset, offset);
+		} finally {
+			graph.getModel().endUpdate();
+		}
 		
 		return graph.getGraphBounds();
 	}
@@ -116,10 +127,15 @@ public class CoreferenceGraphLayout implements GraphLayout {
 			boolean ignored = super.isEdgeIgnored(edge);
 			
 			if(!ignored) {
-				Object value = graph.getModel().getValue(edge);
+				mxIGraphModel model = graph.getModel();
+				Object value = model.getValue(edge);
 				if(value instanceof CorefEdgeData) {
 					CorefEdgeData data = (CorefEdgeData) value;
-					ignored = !data.getEdge().getSource().isROOT()
+					Object target = model.getTerminal(edge, false);
+					// Ensure that leaf nodes that only occur in the gold
+					// graph are not excluded.
+					boolean isSoleLeaf = model.getEdgeCount(target)==1;
+					ignored = !isSoleLeaf  && !data.getEdge().getSource().isROOT()
 							&& data.isMissingGoldEdge();
 				}
 			}

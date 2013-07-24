@@ -29,26 +29,31 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	private int beginIndex;
 	private int endIndex;
 	
-	private int clusterId = LanguageConstants.DATA_UNDEFINED_VALUE;
+	private boolean root = false;
+	
+	private Cluster cluster;
 	
 	public static final String ROOT_ID = "ROOT"; //$NON-NLS-1$
 	
-	public static final Span ROOT = new Span(
-			LanguageConstants.DATA_UNDEFINED_VALUE,
-			LanguageConstants.DATA_UNDEFINED_VALUE,
-			LanguageConstants.DATA_UNDEFINED_VALUE);
+	private static Span sharedRoot;
+	
+	public static Span getROOT() {
+		if(sharedRoot==null) {
+			sharedRoot = new Span();
+			sharedRoot.setROOT(true);
+		}
+		return sharedRoot;
+	}
 
-	protected Span(int beginIndex, int endIndex, int clusterId) {
+	protected Span(int beginIndex, int endIndex) {
 		this.beginIndex = beginIndex;
 		this.endIndex = endIndex;
-		this.clusterId = clusterId;
 	}
 	
-	public Span(int beginIndex, int endIndex, int sentenceId, int clusterId) {
+	public Span(int beginIndex, int endIndex, int sentenceId) {
 		this.beginIndex = beginIndex;
 		this.endIndex = endIndex;
 		this.sentenceIndex = sentenceId;
-		this.clusterId = clusterId;
 	}
 	
 	public Span() {
@@ -80,18 +85,24 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	}
 
 	public int getClusterId() {
-		return clusterId;
-	}
-
-	public void setClusterId(int clusterId) {
-		this.clusterId = clusterId;
+		return cluster==null ? LanguageConstants.DATA_UNDEFINED_VALUE : cluster.getId();
 	}
 	
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
+	}
+
 	@Override
 	public Span clone() {
-		Span clone = new Span(beginIndex, endIndex, clusterId);
-		clone.setSentenceIndex(sentenceIndex);
+		Span clone = new Span(getBeginIndex(), getEndIndex());
+		clone.setCluster(getCluster());
+		clone.setSentenceIndex(getSentenceIndex());
 		clone.setProperties(cloneProperties());
+		clone.setROOT(isROOT());
 		
 		return clone;
 	}
@@ -110,7 +121,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	}
 	
 	public static String asString(Span span) {
-		if(span==ROOT) {
+		if(span.isROOT()) {
 			return ROOT_ID;
 		}
 		return String.format("%d-%d-%d", span.sentenceIndex,  //$NON-NLS-1$
@@ -139,7 +150,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
 		
 		if(s.startsWith("ROOT")) { //$NON-NLS-1$
-			return ROOT;
+			return getROOT();
 		} else {
 			Matcher m = getPattern().matcher(s);
 			if(!m.find())
@@ -159,14 +170,14 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		if(obj instanceof Span) {
 			Span other = (Span) obj;
 			return sentenceIndex==other.sentenceIndex && beginIndex==other.beginIndex
-					&& endIndex==other.endIndex && clusterId==other.clusterId;
+					&& endIndex==other.endIndex;
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return (sentenceIndex+1) * (beginIndex+1) * (endIndex+1) * (clusterId+2);
+		return (sentenceIndex+1) * (beginIndex+1) * (endIndex+1);
 	}
 
 	/**
@@ -192,7 +203,11 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		return endIndex - beginIndex;
 	}
 	
+	public void setROOT(boolean root) {
+		this.root = root;
+	}
+	
 	public boolean isROOT() {
-		return ROOT==this;
+		return root;
 	}
 }

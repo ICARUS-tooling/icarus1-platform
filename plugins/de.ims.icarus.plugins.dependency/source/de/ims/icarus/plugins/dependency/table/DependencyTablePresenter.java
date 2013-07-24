@@ -37,7 +37,6 @@ import de.ims.icarus.ui.table.TooltipTableCellRenderer;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.ContentTypeRegistry;
 
 
 /**
@@ -48,16 +47,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
 public class DependencyTablePresenter extends TablePresenter implements SentenceDataListener {
 
 	protected MutableDependencyData data;
-	
-	/**
-	 * @see de.ims.icarus.ui.view.Presenter#supports(java.lang.Object)
-	 */
-	@Override
-	public boolean supports(ContentType type) {
-		return ContentTypeRegistry.isCompatible(
-				DependencyUtils.getDependencyContentType(), type);
-	}
-	
+		
 	public ContentType getContentType() {
 		return DependencyUtils.getDependencyContentType();
 	}

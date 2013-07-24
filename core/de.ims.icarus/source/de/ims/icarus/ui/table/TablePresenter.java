@@ -12,16 +12,18 @@ package de.ims.icarus.ui.table;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 
+import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.ContentTypeRegistry;
 
 
 /**
@@ -39,7 +41,7 @@ public abstract class TablePresenter implements AWTPresenter {
 		// no-op
 	}
 	
-	public void init() {
+	protected void init() {
 		// for subclasses
 	}
 	
@@ -54,8 +56,7 @@ public abstract class TablePresenter implements AWTPresenter {
 		
 		JTable table = getTable();
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder());
-		//scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setBorder(UIUtil.emptyBorder);
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		JToolBar toolBar = createToolBar();
@@ -108,9 +109,20 @@ public abstract class TablePresenter implements AWTPresenter {
 	@Override
 	public Component getPresentingComponent() {
 		if(contentPanel==null) {
+			init();
+			
 			buildPanel();
 		}
 		return contentPanel;
 	}
 
+	/**
+	 * @see de.ims.icarus.ui.view.Presenter#supports(de.ims.icarus.util.data.ContentType)
+	 */
+	@Override
+	public boolean supports(ContentType type) {
+		return ContentTypeRegistry.isCompatible(getContentType(), type);
+	}
+	
+	protected abstract ContentType getContentType();
 }

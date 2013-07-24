@@ -7,7 +7,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.coref.view;
+package de.ims.icarus.plugins.coref.view.text;
 
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;

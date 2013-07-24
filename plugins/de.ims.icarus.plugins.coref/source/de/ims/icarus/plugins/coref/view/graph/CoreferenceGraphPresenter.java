@@ -30,6 +30,7 @@ import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.config.ConfigDelegate;
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
@@ -57,8 +58,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	private static final long serialVersionUID = -6564065119073757454L;
 	
 	protected CoreferenceDocumentData document;
-	protected EdgeSet edgeSet;
-	protected EdgeSet goldSet;
+	protected CoreferenceAllocation allocation;
+	protected CoreferenceAllocation goldAllocation;
 	
 	protected boolean showGoldEdges = false;
 	protected boolean showGoldNodes = false;
@@ -143,8 +144,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
-		edgeSet = (EdgeSet) options.get("edges"); //$NON-NLS-1$
-		goldSet = (EdgeSet) options.get("goldEdges"); //$NON-NLS-1$
+		allocation = (CoreferenceAllocation) options.get("allocation"); //$NON-NLS-1$
+		goldAllocation = (CoreferenceAllocation) options.get("goldAllocation"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -160,11 +161,11 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 		editablePopupMenuListId = "plugins.coref.corefGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
 	}
 
-	@Override
+	/*@Override
 	protected EdgeHighlightHandler createEdgeHighlightHandler() {
 		// Edge highlighting not supported
 		return null;
-	}
+	}*/
 
 	@Override
 	protected CallbackHandler createCallbackHandler() {
@@ -175,7 +176,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	protected ActionManager createActionManager() {
 		ActionManager actionManager = super.createActionManager();
 
-		// Load default actions
+		// Load coreference graph actions
 		URL actionLocation = CoreferenceGraphPresenter.class.getResource(
 				"coref-graph-presenter-actions.xml"); //$NON-NLS-1$
 		if(actionLocation==null)
@@ -264,27 +265,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 				return;
 			}
 			
-			// If no EdgeSet is set then fetch the one directly 
-			// allocated to the document
-			if(edgeSet==null) {
-				edgeSet = document.getEdgeSet();
-			}
-			
-			// Still no EdgeSet available -> take the default allocation
-			if(edgeSet==null) {
-				edgeSet = document.getDefaultEdgeSet();
-			}
-			
-			// Abort if there are no edges to visualize
-			if(edgeSet==null || edgeSet.size()==0) {
-				return;
-			}
-			
-			// Use the default allocation if there is no gold
-			// EdgeSet defined
-			if(goldSet==null) {
-				goldSet = document.getDefaultEdgeSet();
-			}
+			EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(document, allocation);
+			EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, allocation);
 			
 			// Clear gold set if it is the same as the one displayed
 			if(edgeSet==goldSet) {
@@ -353,6 +335,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 					if(!isShowGoldNodes() && (cellS==null || cellT==null)) {
 						continue;
 					}
+					if(!isShowGoldEdges() && !spanS.isROOT()) {
+						continue;
+					}
 					
 					if(cellS==null) {
 						cellS = createVertex(spanS);
@@ -373,9 +358,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 					}
 					Object cellE = createEdge(edge, cellS, cellT, CorefEdgeData.MISSING_GOLD_EDGE);
 					
-					//if(isShowGoldEdges() || spanS.isROOT()) {
-						model.add(parent, cellE, model.getChildCount(parent));
-					//}
+					model.add(parent, cellE, model.getChildCount(parent));
 				}
 			}
 			

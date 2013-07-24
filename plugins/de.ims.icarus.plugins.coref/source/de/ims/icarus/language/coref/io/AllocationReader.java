@@ -12,9 +12,14 @@ package de.ims.icarus.language.coref.io;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
@@ -215,6 +220,31 @@ public class AllocationReader {
 					"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 					END_EDGES, BEGIN_EDGES, beginLine));
 		
+		allocateClusters(edgeSet);
+		
 		return edgeSet;
+	}
+	
+	private void allocateClusters(EdgeSet edgeSet) {
+		Queue<Edge> pending = new LinkedList<>(edgeSet.getEdges());
+		Map<Integer, Cluster> clusterMap = new HashMap<>();
+		Map<Span, Cluster> heads = new HashMap<>();
+		while(!pending.isEmpty()) {
+			Edge edge = pending.poll();
+			if(edge.getSource().isROOT()) {
+				int clusterId = clusterMap.size();
+				Cluster cluster = new Cluster(clusterId, edge.getTarget());
+				clusterMap.put(clusterId, cluster);
+				edge.getTarget().setCluster(cluster);
+				heads.put(edge.getTarget(), cluster);
+			} else if(heads.containsKey(edge.getSource())) {
+				Cluster cluster = heads.get(edge.getSource());
+				cluster.addSpan(edge.getTarget(), edge);
+				edge.getTarget().setCluster(cluster);
+				heads.put(edge.getTarget(), cluster);
+			} else {
+				pending.offer(edge);
+			}
+		}
 	}
 }

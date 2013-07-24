@@ -13,11 +13,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -86,7 +89,7 @@ public final class CONLL12Utils {
 		String line;
 		while((line = reader.readLine()) != null) {
 			if(line.isEmpty()) {
-				result = createData(document, lines);
+				result = createData(document, lines, null);
 				break;
 			}
 			
@@ -108,12 +111,13 @@ public final class CONLL12Utils {
 		header = header.substring(BEGIN_DOCUMENT.length()).trim();
 		
 		CoreferenceDocumentData result = documentSet.newDocument(header);
+		Map<Integer, Cluster> clusterMap = new HashMap<>();
 		List<String> lines = new ArrayList<>();
 		boolean closed = false;
 		String line;
 		while((line = reader.readLine()) != null) {
 			if(line.isEmpty()) {
-				createData(result, lines);
+				createData(result, lines, clusterMap);
 				lines.clear();
 			} else {
 				lines.add(line);
@@ -157,7 +161,8 @@ public final class CONLL12Utils {
 	 * N 	Coreference 	Coreference chain information encoded in a parenthesis structure.
 	 * 
 	 */
-	private static DefaultCoreferenceData createData(CoreferenceDocumentData document, List<String> lines) {
+	private static DefaultCoreferenceData createData(CoreferenceDocumentData document, 
+			List<String> lines, Map<Integer, Cluster> clusterMap) {
 		int size = lines.size();
 		String[] forms = new String[size];
 		LinkedList<Span> spanBuffer = new LinkedList<>();
@@ -191,7 +196,19 @@ public final class CONLL12Utils {
 						// Start of span definition
 						int clusterId = Integer.parseInt(chunk.endsWith(CBR) ? 
 								chunk.substring(1, chunk.length()-1) : chunk.substring(1));
-						spanStack.push(new Span(i, i, document.size(), clusterId));
+						Span span = new Span(i, i, document.size());
+						
+						if(clusterMap!=null) {
+							Cluster cluster = clusterMap.get(clusterId);
+							if (cluster==null) {
+								cluster = new Cluster(clusterId);
+								clusterMap.put(clusterId, cluster);
+							}
+							cluster.add(span);
+							span.setCluster(cluster);
+						}
+						
+						spanStack.push(span);
 					}
 					if(chunk.endsWith(CBR)) {
 						// End of span definition

@@ -1470,7 +1470,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	}
 	
 	public void refreshCells(Object...cells) {
-		if(graphLayout==null && graphStyle==null) {
+		if(graphStyle==null) {
 			return;
 		}
 		if(cells==null || cells.length==0) {
