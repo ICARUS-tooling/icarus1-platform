@@ -12,11 +12,18 @@ package de.ims.icarus.plugins.errormining;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
 
@@ -32,17 +39,34 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
+import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.GridBagUtil;
+import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.BasicDialogBuilder;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 
 /**
  * @author Gregor Thiele
@@ -63,7 +87,8 @@ public class NGramQueryView extends View {
 	protected JButton qtAddButton;
 	protected JButton qtEditButton;
 	protected JButton qtRemoveButton;
-	
+	protected JButton qtIncludeButton;
+
 	private JLabel header;
 	private JLabel infoLabel;
 
@@ -89,15 +114,22 @@ public class NGramQueryView extends View {
 		if (actionLocation == null)
 			throw new CorruptedStateException(
 					"Missing resources: query-view-actions.xml"); //$NON-NLS-1$
-
+		
+		ActionManager actionManager = getDefaultActionManager();
 		try {
-			getDefaultActionManager().loadActions(actionLocation);
+			actionManager.loadActions(actionLocation);
 		} catch (IOException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
+		
+		localizedComponents = new ArrayList<>();
+		
+		contentPanel = new JPanel();
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
 
 		handler = createHandler();
 		
@@ -115,27 +147,73 @@ public class NGramQueryView extends View {
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 		
 		
+		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
+		
+		//Buttons (Add/Edit/Remove)
+		qtAddButton = new JButton();
+		qtAddButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("add_obj.gif")); //$NON-NLS-1$
+		resourceDomain.prepareComponent(qtAddButton, "add", null); //$NON-NLS-1$
+		resourceDomain.addComponent(qtAddButton);
+		localizedComponents.add(qtAddButton);
+		qtAddButton.addActionListener(handler);
+		
+		qtEditButton = new JButton();
+		qtEditButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("write_obj.gif")); //$NON-NLS-1$
+		resourceDomain.prepareComponent(qtEditButton, "edit", null); //$NON-NLS-1$
+		resourceDomain.addComponent(qtEditButton);
+		localizedComponents.add(qtEditButton);
+		qtEditButton.addActionListener(handler);
+		
+		qtRemoveButton = new JButton();
+		qtRemoveButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("delete_obj.gif")); //$NON-NLS-1$
+		resourceDomain.prepareComponent(qtRemoveButton, "delete", null); //$NON-NLS-1$
+		resourceDomain.addComponent(qtRemoveButton);
+		localizedComponents.add(qtRemoveButton);
+		qtRemoveButton.addActionListener(handler);
+		
+		qtIncludeButton = new JButton();
+		qtIncludeButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("include_on-off.png")); //$NON-NLS-1$
+		resourceDomain.prepareComponent(qtIncludeButton, "include", null); //$NON-NLS-1$
+		resourceDomain.addComponent(qtIncludeButton);
+		localizedComponents.add(qtIncludeButton);
+		qtIncludeButton.addActionListener(handler);	
+
+		
+		
 		// Description Scrollpane
 		scrollPane = new JScrollPane();
 		scrollPane.setBorder(null);	
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		scrollPane.setPreferredSize(new Dimension(400, 400));
 
+		// Footer area
+		JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+		footer.setBorder(new EmptyBorder(5, 20, 5, 20));
+		footer.add(new JButton(actionManager.getAction(
+				"plugins.errorMining.nGramQueryView.loadQueryAction"))); //$NON-NLS-1$
+		footer.add(new JButton(actionManager.getAction(
+				"plugins.errorMining.nGramQueryView.saveQueryAction"))); //$NON-NLS-1$	
+		footer.add(new JButton(actionManager.getAction(
+				"plugins.errorMining.nGramQueryView.resetQueryAction"))); //$NON-NLS-1$	
+
 		
-		container.add(new JLabel("FUCKCK"));
+
 		//put all on viewcontainer
 		container.setLayout(new BorderLayout());
 		container.add(header, BorderLayout.NORTH);
 		container.add(scrollPane, BorderLayout.CENTER);
-		
-		showDefaultInfo();
+		container.add(footer, BorderLayout.SOUTH);
 		
 		registerActionCallbacks();
+				
+		showDefaultInfo();	
+					
+		
+		buildDialog();
+		
+		
 		refreshActions();
 		
-		
-		
-		// buildDialog();
 	}
 	
 	
@@ -148,10 +226,47 @@ public class NGramQueryView extends View {
 	
 
 	protected void refreshActions() {
-		// no-op
+		//nullcheck
+		if(qt == null){
+			qtAddButton.setEnabled(true);
+			qtEditButton.setEnabled(false);
+			qtRemoveButton.setEnabled(false);
+		}
+		
+		//empty no items inside -> only allow adding new 
+		System.out.println(qt.getRowCount());
+		if (qt.getRowCount() == 0){
+			qtAddButton.setEnabled(true);
+			qtEditButton.setEnabled(false);
+			qtRemoveButton.setEnabled(false);
+			qtIncludeButton.setEnabled(false);
+		} else {
+			qtAddButton.setEnabled(true);
+			qtEditButton.setEnabled(true);
+			qtRemoveButton.setEnabled(true);
+			qtIncludeButton.setEnabled(true);
+		}
 	}
+	
+
 
 	public void buildDialog() {
+		
+		
+		//Buttons
+		JPanel buttonPanel = new JPanel(new GridLayout(4, 1));
+		buttonPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
+		buttonPanel.add(qtAddButton);
+		buttonPanel.add(qtEditButton);
+		buttonPanel.add(qtRemoveButton);
+		buttonPanel.add(qtIncludeButton);
+		
+		
+		//Table
+		JScrollPane scrollPaneTable = new JScrollPane();
+		scrollPaneTable.setBorder(null);	
+		UIUtil.defaultSetUnitIncrement(scrollPaneTable);
+		scrollPaneTable.setPreferredSize(new Dimension(500, 300));
 		qtm = new NGramQTableModel();
 		qt = new JTable(qtm);
 		qt.setBorder(UIUtil.defaultContentBorder);
@@ -160,11 +275,28 @@ public class NGramQueryView extends View {
 		qt.getSelectionModel().addListSelectionListener(handler);
 		qt.addMouseListener(handler);
 		qt.setIntercellSpacing(new Dimension(4, 4));
-		scrollPane.setViewportView(qt);
-	}
+		scrollPaneTable.setViewportView(qt);
 	
 
-	protected void addQueryInput() {
+		JPanel jp = new JPanel(new GridBagLayout());
+		//GridBagConstraints gbc = GridBagUtil.makeGbcN(0, 1, 1, 1);
+		
+		jp.add(header, GridBagUtil.makeGbcN(0, 0, 1, 1));
+		jp.add(buttonPanel, GridBagUtil.makeGbcN(0, 1, 1, 1));
+		jp.add(scrollPaneTable, GridBagUtil.makeGbcN(1, 1, 1, 1));		
+		
+		
+		
+//		contentPanel.add(buttonPanel);
+//		contentPanel.add(scrollPaneTable);
+//		contentPanel.add(jp);
+		scrollPane.setViewportView(jp);
+		
+	}
+	
+	
+
+	private void addQueryInput() {
 
 		NGramQAttributes att = showEditQAttributes(null,
 				"plugins.errormining.dialogs.addInput.title", //$NON-NLS-1$
@@ -175,25 +307,27 @@ public class NGramQueryView extends View {
 			return;
 		}
 
-		// empty attributenaim will fail later
+		// return cuz of empty attributename
 		if (att.getKey().equals("")) { //$NON-NLS-1$
 			return;
-		}
+		}		
+
 
 		// System.out.println(wio.getAttributename() + " " +
 		// wio.getAttributevalues());
 		// -1 create item
 		qtm.setQueryAttributes(att, -1);
-
+		
+		refreshActions();
 	}
 
-	protected void editQueryInput(String attribute, String attributevalue,
+	private void editQueryInput(String attribute, String attributevalue,
 			int index) {
 
 		NGramQAttributes att = showEditQAttributes(null,
 				"plugins.errormining.dialogs.editInput.title", //$NON-NLS-1$
 				"plugins.errormining.dialogs.editInput.message", //$NON-NLS-1$
-				null, null);
+				attribute, attributevalue);
 
 		// empty attributename will fail later / not allowed
 		if (att.getKey().equals("")) { //$NON-NLS-1$
@@ -207,15 +341,29 @@ public class NGramQueryView extends View {
 		// System.out.println(wio.getAttributename() + " " +
 		// wio.getAttributevalues());
 		qtm.setQueryAttributes(att, index);
+		refreshActions();
 	}
 
-	protected void deleteQueryInput(String attribute, int itemIndex) {
+	private void deleteQueryInput(String attribute, int itemIndex) {
 		if (DialogFactory.getGlobalFactory().showConfirm(null,
 				"plugins.errormining.dialogs.deleteInput.title", //$NON-NLS-1$
 				"plugins.errormining.dialogs.deleteInput.message", //$NON-NLS-1$
 				attribute)) {
 			qtm.deleteQueryAttribute(itemIndex);
+			refreshActions();
 		}
+	}
+
+	/**
+	 * @param row 
+	 * @param attributevalue 
+	 * @param attribute 
+	 * 
+	 */
+	private void includeQueryTag(int row) {
+		qtm.setInclueQueryAttribute(row);
+		refreshActions();
+		
 	}
 
 	protected void registerActionCallbacks() {
@@ -226,14 +374,14 @@ public class NGramQueryView extends View {
 		ActionManager actionManager = getDefaultActionManager();
 
 		actionManager.addHandler(
-				"plugins.errorMining.nGramQueryView.newQueryAction", //$NON-NLS-1$
-				callbackHandler, "addQuery"); //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryView.loadQueryAction", //$NON-NLS-1$
+				callbackHandler, "loadQuery"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.errorMining.nGramQueryView.editQueryAction", //$NON-NLS-1$
-				callbackHandler, "editQuery"); //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryView.saveQueryAction", //$NON-NLS-1$
+				callbackHandler, "saveQuery"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.errorMining.nGramQueryView.deleteQueryAction", //$NON-NLS-1$
-				callbackHandler, "deleteQuery"); //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryView.resetQueryAction", //$NON-NLS-1$
+				callbackHandler, "resetQuery"); //$NON-NLS-1$
 
 	}
 
@@ -243,6 +391,116 @@ public class NGramQueryView extends View {
 
 	protected CallbackHandler createCallbackHandler() {
 		return new CallbackHandler();
+	}
+	
+	private void loadQueryXML(File fXmlFile) throws Exception {		
+		//File fXmlFile = new File(Core.getCore().getDataFolder(), "ngramquery.xml"); //$NON-NLS-1$
+		
+		if(!fXmlFile.exists() || fXmlFile.length()==0) {
+			return;
+		}
+		
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(fXmlFile);
+
+		doc.getDocumentElement().normalize();
+		
+		ArrayList<NGramQAttributes>  qList = new ArrayList<NGramQAttributes>();
+		
+		NodeList itemList = doc.getElementsByTagName("Queryitem"); //$NON-NLS-1$
+
+		for (int i = 0; i < itemList.getLength(); i++) {
+			Node sNode = itemList.item(i);
+			
+			if (sNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element eElement = (Element) sNode;
+				
+				NGramQAttributes qatt = new NGramQAttributes();
+				qatt.setKey(eElement.getAttribute("Tagclass")); //$NON-NLS-1$
+				qatt.setValue(eElement.getAttribute("Value")); //$NON-NLS-1$
+				
+//				System.out.print(eElement.getAttribute("Tagclass"));
+//				System.out.println(+ " " + eElement.getAttribute("Value"));
+				qList.add(qatt);				
+			}
+		}
+		qtm.reload(qList);
+	}
+	
+	
+	
+	private void saveQueryXML(File file) throws Exception{
+		String root = "NGram-Query"; //$NON-NLS-1$
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+				.newInstance();
+		
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		Document document = documentBuilder.newDocument();
+
+		Element rootElement = document.createElement(root);
+
+		document.appendChild(rootElement);
+		
+		for (int i = 0; i < qt.getRowCount(); i++){
+			Element query = document.createElement("Queryitem"); //$NON-NLS-1$
+			Boolean include = (Boolean) qt.getModel().getValueAt(i, 0);
+			String key = (String) qt.getModel().getValueAt(i, 1);
+			String val = (String) qt.getModel().getValueAt(i, 2);
+			// System.out.println(key + " " + val);
+			query.setAttribute("Include", include.toString()); //$NON-NLS-1$
+			query.setAttribute("Tagclass", key); //$NON-NLS-1$
+			query.setAttribute("Value", val); //$NON-NLS-1$
+			System.out.println(include);
+			rootElement.appendChild(query);
+		}
+		
+	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        
+        //format output
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", //$NON-NLS-1$
+        								"2"); //$NON-NLS-1$
+        DOMSource source = new DOMSource(document);
+        StreamResult result =  new StreamResult(new StringWriter());
+        transformer.transform(source, result);
+        
+
+        saveXMLToFile(result, file);
+	}
+	
+	private void saveXMLToFile (StreamResult result, File file) throws Exception{
+
+//		if (file.getName().equalsIgnoreCase("xml")) {
+//		    // filename is OK as-is
+//		} else {
+//		    file = new File(file.toString() + ".xml");  // append .xml if "foo.jpg.xml" is OK
+//		    file = new File(file.getParentFile(), FilenameUtils.getBaseName(file.getName())+".xml"); // ALTERNATIVELY: remove the extension (if any) and replace it with ".xml"
+//		}
+		
+		
+		//writing to file
+        FileOutputStream fop = null;
+        
+        //debug        
+        //File file = new File("E:/ngramquery.xml"); //$NON-NLS-1$
+        //File  file = new File(Core.getCore().getDataFolder(), "ngramquery.xml"); //$NON-NLS-1$
+        fop = new FileOutputStream(file);
+
+        // if file doesnt exists, then create it
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        // get the content in bytes
+        String xmlString = result.getWriter().toString();
+        // System.out.println(xmlString);
+        byte[] contentInBytes = xmlString.getBytes();
+
+        fop.write(contentInBytes);
+        fop.flush();
+        fop.close();
 	}
 
 	protected class Handler extends MouseAdapter implements ActionListener,
@@ -258,7 +516,6 @@ public class NGramQueryView extends View {
 
 				try {
 					if (e.getSource() == qtAddButton) {
-						// addQueryInput(getWebserviceName());
 						addQueryInput();
 					}
 
@@ -277,8 +534,8 @@ public class NGramQueryView extends View {
 					return;
 				}
 
-				String attribute = (String) qt.getValueAt(row, 0);
-				String attributevalue = (String) qt.getValueAt(row, 1);
+				String attribute = (String) qt.getValueAt(row, 1);
+				String attributevalue = (String) qt.getValueAt(row, 2);
 
 				try {
 					editQueryInput(attribute, attributevalue, row);
@@ -297,16 +554,37 @@ public class NGramQueryView extends View {
 					return;
 				}
 
-				String attribute = (String) qt.getValueAt(row, 0);
+				String message = (String) qt.getValueAt(row, 1)
+						+ " = " //$NON-NLS-1$
+						+ (String) qt.getValueAt(row, 2);
 
 				// System.out.println("DelRow " + inputTableModel.getRowCount()
-				// + " " + attribute);
+				// + " " + message);
 
 				try {
-					deleteQueryInput(attribute, row);
+					deleteQueryInput(message, row);
 				} catch (Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,
 							"Failed to delete attribute", ex); //$NON-NLS-1$
+				}
+				return;
+			}
+			
+			
+			// Include Y/N
+			if (e.getSource() == qtIncludeButton) {
+				int row = qt.getSelectedRow();
+				
+				//no selection
+				if (row == -1) {
+					return;
+				}
+
+				try {
+					includeQueryTag(row);
+				} catch (Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Failed to edit input attribute", ex); //$NON-NLS-1$
 				}
 				return;
 			}
@@ -324,6 +602,7 @@ public class NGramQueryView extends View {
 				qtAddButton.setEnabled(enabled);
 				qtEditButton.setEnabled(enabled);
 				qtRemoveButton.setEnabled(enabled);
+				qtIncludeButton.setEnabled(enabled);
 			}
 
 		}
@@ -370,19 +649,70 @@ public class NGramQueryView extends View {
 			// no-op
 		}
 
-		public void addQuery() {
-			// TODO
-			Core.showNotice();
+		public void loadQuery(ActionEvent e) {
+			try {
+	            FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter(
+	                    "xml files (*.xml)", //$NON-NLS-1$
+	                    "xml"); //$NON-NLS-1$
+				File file = DialogFactory.getGlobalFactory().showSourceFileDialog(
+						null,
+						"plugins.errormining.dialogs.selectQueryLoadFile.title", //$NON-NLS-1$
+						Core.getCore().getDataFolder()
+						,xmlfilter);
+				//user cancelled
+				if (file == null){
+					return;
+				}
+				
+				loadQueryXML(file);
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to load query from file", ex); //$NON-NLS-1$
+			}
 		}
 
-		public void editQuery() {
-			// TODO
-			Core.showNotice();
+		public void saveQuery(ActionEvent e) {
+			try {
+	            FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter(
+	                    "xml files (*.xml)", //$NON-NLS-1$
+	                    "xml"); //$NON-NLS-1$
+				File file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+						null,
+						"plugins.errormining.dialogs.selectQuerySaveFile.title", //$NON-NLS-1$
+						Core.getCore().getDataFolder(),
+						xmlfilter);
+				
+				//user cancelled
+				if(file == null){
+					return;
+				}
+				
+				
+				//workaround to ensure .xml / .XML file ending
+				String fname = file.getAbsolutePath();
+	            //if(!fname.toLowerCase().endsWith(".xml")) { //$NON-NLS-1$
+	            if(!fname.endsWith(".xml")) { //$NON-NLS-1$
+	                file = new File(fname + ".xml"); //$NON-NLS-1$
+	            }
+				//System.out.println(file.getName());
+				
+				saveQueryXML(file);
+				
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to save query to file", ex); //$NON-NLS-1$
+			}
 		}
 
-		public void deleteQuery() {
-			// TODO
-			Core.showNotice();
+		public void resetQuery(ActionEvent e) {
+			boolean reset = DialogFactory.getGlobalFactory().showConfirm(
+					null,
+					"plugins.errormining.dialogs.resetQuery.title", //$NON-NLS-1$
+					"plugins.errormining.dialogs.resetQuery.message"); //$NON-NLS-1$
+			
+			if (reset){
+				qtm.removeAllQueryAttributes();				
+			}
 		}
 
 	}

@@ -23,6 +23,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -56,6 +57,9 @@ public class WebExecutionService {
 	private WebExecutionService() {
 		ClientConfig config = new DefaultClientConfig();
 		client = Client.create(config);
+		
+		//Debug Messages
+		//client.addFilter(new LoggingFilter(System.out));
 	}
 
 	public TextCorpusStreamed runWebchain(Webchain webchain, String input) {
@@ -82,6 +86,11 @@ public class WebExecutionService {
 
 			WebResource webresource = client.resource(webservice.getURL());
 			ClientResponse response = webresource.get(ClientResponse.class);
+
+			
+//			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
+//					+ " " + response.getStatus() + " " + webservice.getWebresourceFormat()); //$NON-NLS-1$
+
 
 			// http://de.wikipedia.org/wiki/HTTP-Statuscode#4xx_.E2.80.93_Client-Fehler
 			switch (response.getStatus()) {
@@ -125,15 +134,18 @@ public class WebExecutionService {
 								webservice.getURL());
 				return null;
 				
-			case 405:
-			DialogFactory
-					.getGlobalFactory()
-					.showError(
-							null,
-							"plugins.weblicht.weblichtWebserviceView.dialogs.error405.title", //$NON-NLS-1$
-							"plugins.weblicht.weblichtWebserviceView.dialogs.error405.message", //$NON-NLS-1$
-							webservice.getURL());
-			return null;
+			// FIXME New weblicht services do not support getting clientstatus
+			// via get; post run into 500 error -> so just ignore 405 as workaround?
+				
+//			case 405:
+//			DialogFactory
+//					.getGlobalFactory()
+//					.showError(
+//							null,
+//							"plugins.weblicht.weblichtWebserviceView.dialogs.error405.title", //$NON-NLS-1$
+//							"plugins.weblicht.weblichtWebserviceView.dialogs.error405.message", //$NON-NLS-1$
+//							webservice.getURL());
+//			return null;
 			
 			case 415:
 			DialogFactory
@@ -152,12 +164,14 @@ public class WebExecutionService {
 		
 
 			
-			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
-					+ " " + response.getStatus()); //$NON-NLS-1$
+//			System.out.println("Status: " + webservice.getURL() //$NON-NLS-1$
+//					+ " " + response.getStatus() + " " + webservice.getWebresourceFormat()); //$NON-NLS-1$
 
 			
 			// we use only the latest input type for our query!
-			result = webresource.accept(webservice.getWebresourceFormat())
+			result = webresource
+					.type(webservice.getWebresourceFormat())
+					.accept(webservice.getWebresourceFormat())
 					.post(String.class, result);
 
 			response.close();

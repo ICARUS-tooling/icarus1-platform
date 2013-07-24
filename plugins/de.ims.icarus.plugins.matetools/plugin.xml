@@ -12,6 +12,7 @@
 	<attributes>
 		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.matetools.resources.matetools" />
 		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.matetools.MatetoolsPreferences" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/matetools/icons/" />
 	</attributes>
 	
 	<requires>
@@ -57,7 +58,7 @@
 		<parameter id="description" value="plugins.matetools.matetoolsParserPerspective.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.matetools.resources.matetools" />
 		<parameter id="class" value="de.ims.icarus.plugins.matetools.parser.MatetoolsParserPerspective" />
-		<parameter id="icon" value="de/ims/icarus/plugins/matetools/parser/matetools-parser-perspective.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/matetools/parser/matetools-parser-perspective.png" />
 	</extension>
 	
 	<extension id="MatetoolsParserInputView" plugin-id="de.ims.icarus.matetools" point-id="MatetoolsView">

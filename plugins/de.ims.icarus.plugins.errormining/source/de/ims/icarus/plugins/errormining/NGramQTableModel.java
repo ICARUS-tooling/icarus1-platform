@@ -15,6 +15,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.dialog.DialogFactory;
 
 /**
  * @author Gregor Thiele
@@ -47,7 +48,7 @@ public class NGramQTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getColumnCount() {
-		return 2;
+		return 3;
 	}
 	
 	
@@ -58,9 +59,11 @@ public class NGramQTableModel extends AbstractTableModel {
 	public String getColumnName(int columnIndex) {
 
 	      switch (columnIndex) {
-	            case 0: return ResourceManager.getInstance().get(
-	            		"plugins.errormining.labels.Key"); //$NON-NLS-1$
+		        case 0: return ResourceManager.getInstance().get(
+		          		"plugins.errormining.labels.Included"); //$NON-NLS-1$
 	            case 1: return ResourceManager.getInstance().get(
+	            		"plugins.errormining.labels.Key"); //$NON-NLS-1$
+	            case 2: return ResourceManager.getInstance().get(
 	            		"plugins.errormining.labels.Value"); //$NON-NLS-1$
 	            default: break;
 	        }
@@ -86,8 +89,9 @@ public class NGramQTableModel extends AbstractTableModel {
 		}
         switch (columnIndex)
         {
-            case 0: return qList.get(rowIndex).getKey();
-            case 1: return qList.get(rowIndex).getValue();
+        	case 0: return qList.get(rowIndex).isInclude();
+            case 1: return qList.get(rowIndex).getKey();
+            case 2: return qList.get(rowIndex).getValue();
             default: break;
         }
         return null;
@@ -113,11 +117,28 @@ public class NGramQTableModel extends AbstractTableModel {
 		return false;
 	}
 	
+	private boolean checkDuplicateEntry(NGramQAttributes att){
+		return qList.contains(att);
+		
+	}
+	
 	
 	/**
 	 * @param wio
 	 */
 	public void addQueryAttribute(NGramQAttributes att) {
+		//TODO needed?
+		if (qList == null){
+			qList = new ArrayList<NGramQAttributes>();
+		}
+		if (checkDuplicateEntry(att)){
+			DialogFactory.getGlobalFactory().showError(
+					null,
+					"plugins.errormining.dialogs.duplicateEntry.title", //$NON-NLS-1$
+					"plugins.errormining.dialogs.duplicateEntry.message", //$NON-NLS-1$
+					att.getKey());
+			return;
+		}
 		qList.add(att);
 		fireTableDataChanged();
 	}
@@ -128,6 +149,15 @@ public class NGramQTableModel extends AbstractTableModel {
 	 */
 	public void deleteQueryAttribute(int index) {
 		qList.remove(qList.get(index));
+		fireTableDataChanged();	
+	}
+	
+	/**
+	 * @param key
+	 * @param object
+	 */
+	public void removeAllQueryAttributes() {
+		qList.clear();
 		fireTableDataChanged();	
 	}
 
@@ -141,9 +171,27 @@ public class NGramQTableModel extends AbstractTableModel {
 			addQueryAttribute(att);
 		}
 		else {
+			if (checkDuplicateEntry(att)){
+				DialogFactory.getGlobalFactory().showError(
+						null,
+						"plugins.errormining.dialogs.duplicateEntry.title", //$NON-NLS-1$
+						"plugins.errormining.dialogs.duplicateEntry.message", //$NON-NLS-1$
+						att.getKey());
+				return;
+			}
 			qList.get(index).setKey(att.getKey());
 			qList.get(index).setValue(att.getValue());
 		}
+		fireTableDataChanged();
+		
+	}
+
+	/**
+	 * @param row
+	 */
+	public void setInclueQueryAttribute(int index) {
+		boolean include = qList.get(index).isInclude();
+		qList.get(index).setInclude(!include);
 		fireTableDataChanged();
 		
 	}

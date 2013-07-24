@@ -213,7 +213,7 @@ public class WebchainRegistry {
 
         // get the content in bytes
         String xmlString = result.getWriter().toString();
-        System.out.println(xmlString);
+        // System.out.println(xmlString);
         byte[] contentInBytes = xmlString.getBytes();
 
         fop.write(contentInBytes);

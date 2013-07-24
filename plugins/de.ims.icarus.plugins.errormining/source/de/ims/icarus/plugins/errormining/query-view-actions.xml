@@ -6,16 +6,16 @@
 		NGram QUERY VIEW
 	-->
 
-	<!-- Add Q -->
-	<action id="plugins.errorMining.nGramQueryView.newQueryAction"
-		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+	<!-- Load Query -->
+	<action id="plugins.errorMining.nGramQueryView.loadQueryAction"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
 		
-	<!-- Edit Q -->
-	<action id="plugins.errorMining.nGramQueryView.editQueryAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />		
+	<!-- Save Query -->
+	<action id="plugins.errorMining.nGramQueryView.saveQueryAction"
+		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />		
 		
-	<!-- Remove Q -->
-	<action id="plugins.errorMining.nGramQueryView.removeQueryAction"
+	<!-- Reset Query -->
+	<action id="plugins.errorMining.nGramQueryView.resetQueryAction"
 		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
 
 </actions>

@@ -110,7 +110,7 @@
 		<parameter id="priority" value="low" />
 	</extension>
 	
-<!--
+
 	<extension id="NGramQueryView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
 		<doc>
 			<doc-text>
@@ -125,7 +125,7 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="standard" />
 	</extension>
--->
+
 
 	
 	

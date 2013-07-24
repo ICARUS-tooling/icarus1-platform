@@ -8,7 +8,7 @@
 		
 	<!-- Start Pipeline -->
 	<action id="plugins.matetools.matetoolsParserInputView.startPipelineAction"
-		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		name="${id}.name" desc="${id}.description" icon="matetools_run.png" />
 		
 	<!-- Open Preferences -->
 	<action id="plugins.matetools.matetoolsParserInputView.openPreferencesAction"
