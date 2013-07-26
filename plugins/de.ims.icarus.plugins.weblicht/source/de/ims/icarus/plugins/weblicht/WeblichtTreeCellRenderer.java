@@ -77,7 +77,7 @@ public class WeblichtTreeCellRenderer extends DefaultTreeCellRenderer{
 			if (outputIcon == null){
 				outputIcon = new CompoundIcon(IconRegistry.getGlobalRegistry().getIcon("type_output.png")); //$NON-NLS-1$
 			}
-			if (wo.getIsOutputUsed()) {
+			if (wo.isOutputUsed()) {
 				outputIcon.setBottomLeftOverlay(IconRegistry.getGlobalRegistry().getIcon("task_complete")); //$NON-NLS-1$
 				tooltip = ResourceManager.getInstance().get("enabledOutput"); //$NON-NLS-1$
 			} else {

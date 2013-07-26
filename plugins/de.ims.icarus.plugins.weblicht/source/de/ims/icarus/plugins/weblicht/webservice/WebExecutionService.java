@@ -10,6 +10,8 @@
 package de.ims.icarus.plugins.weblicht.webservice;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -17,13 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.LoggingFilter;
 
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -62,7 +62,7 @@ public class WebExecutionService {
 		//client.addFilter(new LoggingFilter(System.out));
 	}
 
-	public TextCorpusStreamed runWebchain(Webchain webchain, String input) {
+	public TextCorpusStreamed runWebchain(Webchain webchain, String input) throws Exception {
 
 		// empty data cant be processed
 		if (input == null) {
@@ -177,6 +177,27 @@ public class WebExecutionService {
 			response.close();
 
 		}
+		
+		//TODO enable more option for different types of processing states in webchain.
+		
+		WebchainOutputType wot = null;
+		//get last outputtype
+		for (int j = 0; j < webchain.getElementsCount(); j++){
+			if (webchain.getElementAt(j) instanceof WebchainOutputType){
+				wot = (WebchainOutputType) webchain.getElementAt(j);
+			}			
+		}
+		
+		//check if outputexists, and if results should be saved to location
+		if (wot != null){
+			if(wot.isOutputUsed() && wot.getOutputType().equals("location")){ //$NON-NLS-1$
+				//System.out.println(wot.getOutputTypeValue());
+				File file = new File(wot.getOutputTypeValue());
+				writeResultXMLFile(result, file);	
+			}
+		}
+		
+
 		//System.out.println("Webresult: " + result);
 		return createTCFfromString(result, getReadableLayerTags(query));
 	}
@@ -265,6 +286,27 @@ public class WebExecutionService {
 		return layers2Read;
 
 	}
+	
+	private void writeResultXMLFile(String input, File file) throws Exception{
+		//File file = new File("E:/pos.xml");
+		
+		//writing to file
+        FileOutputStream fop = null;
+        
+        fop = new FileOutputStream(file);
+		
+        // if file doesnt exists, then create it
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+         System.out.println(input);
+        byte[] contentInBytes = input.getBytes();
+
+        fop.write(contentInBytes);
+        fop.flush();
+        fop.close();
+	}
 
 	private TextCorpusStreamed createTCFfromString(String input,
 			EnumSet<TextCorpusLayerTag> layersToRead) {
@@ -279,13 +321,30 @@ public class WebExecutionService {
 			// see WebLichtAdapter wlfxb
 			//	System.out.println(tcs.getTokensLayer());
 			//	System.out.println(tcs.getAntonymyLayer());
+	    	
+			tcs.close();
+			
 		} catch (WLFormatException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"TextCorpusFormat Exception", e); //$NON-NLS-1$
 		}
 		
+		
 		//return format for message
-		return tcs;
 
+		return tcs;
 	}
+}
+
+class TcfXmlType {
+	
+	String xml;
+		TextCorpusStreamed tsc;
+
+	public TcfXmlType(String xml, TextCorpusStreamed tsc) {
+		this.xml = xml;
+		this.tsc = tsc;
+	}
+	
+	
 }

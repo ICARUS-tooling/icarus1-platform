@@ -191,7 +191,7 @@
 		<parameter id="description" value="plugins.languageTools.treebankManagerPerspective.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.language_tools.resources.language_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.TreebankManagerPerspective" />
-		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-manager-perspective.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-manager-perspective.png" />
 	</extension>
 	
 	<extension id="TextInputView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
@@ -251,7 +251,7 @@
 		<parameter id="description" value="plugins.languageTools.treebankExplorerView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.language_tools.resources.language_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.TreebankExplorerView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-explorer-view.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-explorer-view.png" />
 		<parameter id="alignment" value="left" />
 		<parameter id="priority" value="high" />
 	</extension>
@@ -269,7 +269,7 @@
 		<parameter id="description" value="plugins.languageTools.treebankPropertiesView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.language_tools.resources.language_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.TreebankPropertiesView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-properties-view.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-properties-view.png" />
 		<parameter id="alignment" value="right" />
 		<parameter id="priority" value="standard" />
 		

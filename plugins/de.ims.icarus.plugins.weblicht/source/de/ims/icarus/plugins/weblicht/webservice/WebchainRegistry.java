@@ -164,7 +164,7 @@ public class WebchainRegistry {
 				}
 				if (webchain.getElementAt(j) instanceof WebchainOutputType){
 					WebchainOutputType wo = (WebchainOutputType) webchain.getElementAt(j);
-					String used = new Boolean(wo.getIsOutputUsed()).toString();
+					String used = new Boolean(wo.isOutputUsed()).toString();
 					chain.appendChild(
 							generateChainOutputElement(document, "chainelement", //$NON-NLS-1$
 													wo.getOutputType(),
@@ -529,11 +529,10 @@ public class WebchainRegistry {
 			//same listsize we need to check items
 			for (int i = 0; i < w1.size(); i++){
 				
-				//TODO Check of equal = false replace with return?!
+				//TODO Check equal = replace with return?! - should also work that way
 				if (w1.get(i) instanceof WebserviceProxy
 						&& w2.get(i) instanceof WebserviceProxy) {
 					
-					//TODO check auf webservice bzw output und jeweilige typen
 					if (!(((WebserviceProxy) w1.get(i)).getServiceID()
 							.equals(((WebserviceProxy) w2.get(i)).getServiceID()))){
 						equal = false;
@@ -544,21 +543,20 @@ public class WebchainRegistry {
 				//Check Input
 				if (w1.get(i) instanceof WebchainInputType
 						&& w2.get(i) instanceof WebchainInputType) {
-					
-					equal= compareWebchainInputType(
+					equal = compareWebchainInputType(
 								(WebchainInputType) w1.get(i), 
 								(WebchainInputType) w2.get(i));
 					//System.out.println("wio" + equal);
 				}
 				
-				//Check Output
+				// Check Output
 				if (w1.get(i) instanceof WebchainOutputType
-						&& w2.get(i) instanceof WebchainOutputType) {	
-					
-						equal = compareWebchainOutputType(
-								(WebchainOutputType) w1.get(i), 
-								(WebchainOutputType) w2.get(i));
-						//System.out.println("wot" + equal);
+						&& w2.get(i) instanceof WebchainOutputType) {
+
+					equal = compareWebchainOutputType(
+							(WebchainOutputType) w1.get(i),
+							(WebchainOutputType) w2.get(i));
+					// System.out.println("wot" + equal);
 				}
 				
 				if(!equal){
@@ -578,8 +576,7 @@ public class WebchainRegistry {
 	 * @return
 	 */
 	public boolean compareWebchainInputType(WebchainInputType t1, WebchainInputType t2){
-		if (t1.getInputType().equals(t2.getInputType())
-				&& t1.getInputTypeValue().equals(t2.getInputTypeValue())){
+		if (t1.equals(t2)){
 			return true;			
 		}
 		return false;
@@ -588,16 +585,14 @@ public class WebchainRegistry {
 	
 	
 	/**
-	 * Compare 2 Webchain Input Types
+	 * Compare 2 Webchain Output Types
 	 * @param t1
 	 * @param t2
 	 * @return
 	 */
 	public boolean compareWebchainOutputType(WebchainOutputType t1, WebchainOutputType t2){
 		//same type, value and activatestatus
-		if (t1.getOutputType().equals(t2.getOutputType())
-				&& t1.getOutputTypeValue().equals(t2.getOutputTypeValue())
-				&& (t1.getIsOutputUsed() == t2.getIsOutputUsed())){
+		if (t1.equals(t2)){
 			return true;			
 		}
 		return false;

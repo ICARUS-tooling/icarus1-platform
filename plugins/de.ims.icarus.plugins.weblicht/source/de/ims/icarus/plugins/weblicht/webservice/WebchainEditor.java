@@ -199,8 +199,6 @@ public class WebchainEditor implements Editor<Webchain> {
 		//input (static - dynamic - location)
 		inputPanel = new JPanel(new GridLayout(3, 2));
 		inputPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
-		
-
 	    		
 		webserviceInputGroup.add(webserviceStaticInput);
 		webserviceInputGroup.add(webserviceLocationInput);
@@ -221,7 +219,21 @@ public class WebchainEditor implements Editor<Webchain> {
 		JLabel dynamicImage = new JLabel(IconRegistry.getGlobalRegistry().getIcon("newconnect_wiz.gif")); //$NON-NLS-1$
 	    inputPanel.add(dynamicImage);
 		inputPanel.add(webserviceDynamicInput);
-		//panel.add(inputPanel,gbcInput);		
+		//panel.add(inputPanel,gbcInput);
+		
+		//TODO Nicer GUI
+		outputPanel = new JPanel(new GridLayout(3, 2));
+		outputPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
+		
+
+		//location = file
+		//outputPanel.add(locationImage);
+		outputPanel.add(webserviceLocationInput);
+
+		
+		//dynamic = system
+		//outputPanel.add(dynamicImage);
+		outputPanel.add(webserviceDynamicInput);
 	
 		
 		gbcInput.gridx++;
@@ -278,7 +290,7 @@ public class WebchainEditor implements Editor<Webchain> {
 				
 		
 		changeOutputUsedStatusButton = new JButton();
-		changeOutputUsedStatusButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("outrepo_rep.gif")); //$NON-NLS-1$
+		changeOutputUsedStatusButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("type_output.png")); //$NON-NLS-1$
 		resourceDomain.prepareComponent(changeOutputUsedStatusButton, "changeStatus", null); //$NON-NLS-1$
 		resourceDomain.addComponent(changeOutputUsedStatusButton);
 		localizedComponents.add(changeOutputUsedStatusButton);
@@ -392,25 +404,53 @@ public class WebchainEditor implements Editor<Webchain> {
 	}
 
 	protected void refreshWebchainActions() {
-		boolean enabled = webchainElementList.getSelectedIndex()!=-1;
+		int selection = webchainElementList.getSelectedIndex();
+		boolean enabled = selection!=-1;
 		webserviceRemoveButton.setEnabled(enabled);
-		ioEditButton.setEnabled(enabled);		
 		changeOutputUsedStatusButton.setEnabled(enabled);
+		addOutputButton.setEnabled(enabled);
+		ioEditButton.setEnabled(enabled);	
 		
-		
-		int lastitem = webchainElementListModel.getSize();
-		//TODO fixme at least input + one webservice needed to create output
-		//System.out.println(lastitem);
-		if (lastitem > 1) {
-			WebchainElements element = webchainElementListModel.getKey(lastitem-1);	
-			if(element instanceof WebchainOutputType) {
+		if (enabled){			
+			WebchainElements element = webchainElementListModel.getKey(selection);
+
+			if(element instanceof WebchainInputType) {
+				webserviceRemoveButton.setEnabled(false);
+				changeOutputUsedStatusButton.setEnabled(false);
 				addOutputButton.setEnabled(false);
-			}else {
-				addOutputButton.setEnabled(true);
+				ioEditButton.setEnabled(true);	
 			}
-		}else {
+			if(element instanceof WebchainOutputType) {
+				webserviceRemoveButton.setEnabled(false);
+				changeOutputUsedStatusButton.setEnabled(true);
 				addOutputButton.setEnabled(false);
+				ioEditButton.setEnabled(true);	
+			}
+			
+			else {
+				webserviceRemoveButton.setEnabled(true);
+				changeOutputUsedStatusButton.setEnabled(false);
+				addOutputButton.setEnabled(true);				
+				ioEditButton.setEnabled(false);	
+			}
+			
 		}
+		
+		
+//		int lastitem = webchainElementListModel.getSize();
+//
+//		//at least 1 input + 1 webservice before create output
+//		//System.out.println(lastitem);
+//		if (lastitem > 1) {
+//			WebchainElements element = webchainElementListModel.getKey(lastitem-1);	
+//			if(element instanceof WebchainOutputType) {
+//				addOutputButton.setEnabled(false);
+//			}else {
+//				addOutputButton.setEnabled(true);
+//			}
+//		}else {
+//				addOutputButton.setEnabled(false);
+//		}
 
 	}
 
@@ -543,8 +583,10 @@ public class WebchainEditor implements Editor<Webchain> {
 	
 
 	/**
+	 * Debug Print
 	 * @param webchainElements
 	 */
+	@SuppressWarnings("unused")
 	private void printelement(List<WebchainElements> webchainElements) {
 		for ( int i = 0 ; i < webchainElements.size(); i++){
 			if (webchainElements.get(i) instanceof WebchainOutputType){
@@ -560,55 +602,37 @@ public class WebchainEditor implements Editor<Webchain> {
 	 */
 	@Override
 	public boolean hasChanges() {
+		
 		if(contentPanel==null) {
 			return false;
 		}
+		
 		if(webchain==null) {
 			return false;
 		}
+		//System.out.println(webchain.getName() + " Chain not NULL");
 		
 		// Compare name
 		if(!nameInput.getText().equals(webchain.getName())) {
 			return true;
 		}
-
+		//System.out.println(webchain.getName() + " Name Equal");
 		
 		//Compare Webservices in Webchain		
 		List<WebchainElements> webchainElementList = webchainElementListModel.webchainElements;
 		if(webchainElementList.size() != webchain.getElementsCount()) {
 			return true;
 		}
+		//System.out.println(webchain.getName() + " Element Count Equal");
 
-		/*
-		for(int i = 0; i < webchainElementList.size(); i++) {				
-			if ((webchainElementList.get(i)).equals(webchain.getElementAt(i))){
-				return true;
-			}
-		}
-		*/
 
+		//check all elements
 		if (!(WebchainRegistry.getInstance().equalElements(webchainElementList,
 				webchain.webchainElementsList))){
-			return true;
-			
-		}
-		
-		
-		/*
-		//compare input 
-		if(!webchain.getWebchainInputType().getInputType()
-				.equals(getNameFromSelectedButton()) ){
 			return true;			
-		} 
-		//inputtype equal valueschanged
-		else {
-			if(!webchain.getWebchainInputType().getInputTypeValue()
-					.equals(webserviceInputArea.getText())){
-				return true;
-			}
 		}
-		*/
-		
+		//System.out.println(webchain.getName() + " Elements Equal");
+	
 		
 		return false;
 	}
@@ -890,8 +914,8 @@ public class WebchainEditor implements Editor<Webchain> {
 		protected void addOutputElement(){
 			
 			WebchainElements element = showAddOutputElements(null, 
-					"plugins.weblicht.weblichtChainView.dialogs.editIO.title",  //$NON-NLS-1$
-					"plugins.weblicht.weblichtChainView.dialogs.editIO.message",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.addOutput.title",  //$NON-NLS-1$
+					"plugins.weblicht.weblichtChainView.dialogs.addOutput.message",  //$NON-NLS-1$
 					inputPanel, webserviceInputArea, null);
 
 			// Cancelled by user
@@ -925,13 +949,12 @@ public class WebchainEditor implements Editor<Webchain> {
 		}
 		
 		protected void changeOutputStatus(WebchainElements chainelement, int index){			
-			
 			WebchainOutputType wo = (WebchainOutputType) chainelement;
-			boolean changOutputStatus = wo.getIsOutputUsed();
+			boolean changOutputStatus = wo.isOutputUsed();
 			wo.setOutputUsed(!changOutputStatus);
 			
 			webchainElementListModel.editElement(chainelement, index);	
-			printelement(webchainElementListModel.webchainElements);
+			//Debug printelement(webchainElementListModel.webchainElements);
 		}
 		
 		
@@ -946,7 +969,7 @@ public class WebchainEditor implements Editor<Webchain> {
 			WebchainElements element = null;
 			
 			if (chainelement instanceof WebchainInputType){
-				element = showEditIOElement(null, 
+				element = showEditInputElement(null, 
 					"plugins.weblicht.weblichtChainView.dialogs.editInput.title",  //$NON-NLS-1$
 					"plugins.weblicht.weblichtChainView.dialogs.editInput.message",  //$NON-NLS-1$
 					chainelement, inputPanel, webserviceInputArea, null);
@@ -954,7 +977,7 @@ public class WebchainEditor implements Editor<Webchain> {
 			}
 			
 			if (chainelement instanceof WebchainOutputType){
-				element = showEditIOElement(null, 
+				element = showEditOutputElement(null, 
 					"plugins.weblicht.weblichtChainView.dialogs.editOutput.title",  //$NON-NLS-1$
 					"plugins.weblicht.weblichtChainView.dialogs.editOutput.message",  //$NON-NLS-1$
 					chainelement, inputPanel, webserviceInputArea, null);
@@ -1009,8 +1032,7 @@ public class WebchainEditor implements Editor<Webchain> {
 		}
 		
 		
-		
-		private WebchainElements showEditOutputElement(Component parent, String title, 
+		private WebchainElements showEditInputElement(Component parent, String title, 
 				String message, WebchainElements chainelement, Object...params) {		
 
 			BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
@@ -1026,6 +1048,33 @@ public class WebchainEditor implements Editor<Webchain> {
 				webserviceInputArea.setText(wi.getInputTypeValue());
 			}
 			
+			builder.setTitle(title);
+			builder.setMessage(message);
+			
+			builder.addMessage(webserviceStaticInput);
+			builder.addMessage(webserviceLocationInput);
+			builder.addMessage(webserviceDynamicInput);
+			builder.addMessage(SwingUtilities.getAncestorOfClass(JScrollPane.class, webserviceInputArea));
+
+			builder.setPlainType();
+			builder.setOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			builder.showDialog(parent);
+			
+			return builder.isYesValue() ? editedIOField(chainelement) : null;
+		}
+		
+		
+		private WebchainElements showEditOutputElement(Component parent, String title, 
+				String message, WebchainElements chainelement, Object...params) {		
+
+			BasicDialogBuilder builder = new BasicDialogBuilder(DialogFactory.getGlobalFactory()
+																	.getResourceDomain());
+						
+			latestGroupSelection = getSelectedIOType(chainelement);
+			
+			webserviceInputGroup.setSelected(latestGroupSelection, true);
+			
 			if(chainelement instanceof WebchainOutputType){
 				WebchainOutputType wo = (WebchainOutputType) chainelement;
 				builder.addMessage("plugins.weblicht.labels.webservice.WebchainOutput"); //$NON-NLS-1$
@@ -1033,7 +1082,10 @@ public class WebchainEditor implements Editor<Webchain> {
 			}
 			
 			builder.setTitle(title);
-			builder.addMessage(inputPanel);
+			builder.setMessage(message);
+			
+			builder.addMessage(webserviceLocationInput);
+			builder.addMessage(webserviceDynamicInput);
 			builder.addMessage(SwingUtilities.getAncestorOfClass(JScrollPane.class, webserviceInputArea));
 
 			builder.setPlainType();
@@ -1054,7 +1106,11 @@ public class WebchainEditor implements Editor<Webchain> {
 			WebchainElements element = (WebchainElements) new WebchainOutputType();
 			
 			builder.setTitle(title);
-			builder.addMessage(inputPanel);
+			builder.setMessage(message);
+			
+			builder.addMessage(webserviceLocationInput);
+			builder.addMessage(webserviceDynamicInput);
+			//builder.addMessage(outputPanel);
 			builder.addMessage(SwingUtilities.getAncestorOfClass(JScrollPane.class, webserviceInputArea));
 
 			builder.setPlainType();
@@ -1110,7 +1166,7 @@ public class WebchainEditor implements Editor<Webchain> {
 				} else {
 					webchainElements = new ArrayList<>(getWebelementsFromChain(webchain));
 				}
-				
+
 				/*
 				System.out.println("WebchainEditorReload: "
 						+ webchain.getName()
@@ -1118,6 +1174,9 @@ public class WebchainEditor implements Editor<Webchain> {
 						webservices.size());
 				*/
 				fireContentsChanged(webchain, 0, webchainElements.size());
+				
+				//clear selection (index = -1) for refreshAction 
+				webchainElementList.clearSelection();
 			}
 			
 			/*

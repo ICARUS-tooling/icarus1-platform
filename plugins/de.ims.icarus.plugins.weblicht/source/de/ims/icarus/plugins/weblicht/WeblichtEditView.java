@@ -254,8 +254,7 @@ public class WeblichtEditView extends View {
 			this.editor.close();
 		}
 
-		this.editor = editor;
-		
+		this.editor = editor;		
 		
 		editor.setEditingItem(webchain);
 		scrollPane.setViewportView(editor.getEditorComponent());
@@ -271,7 +270,8 @@ public class WeblichtEditView extends View {
 			Object data = message.getData();
 			// We allow null values since this is a way to clear the editor view
 			if(data==null || data instanceof Webchain) {
-				editWebchain((Webchain) data);
+				Webchain chain =(Webchain) data;
+				editWebchain(chain);
 				refreshActions();
 				return message.successResult(this, null);				
 			} else {

@@ -109,6 +109,7 @@ public class WeblichtChainView extends View {
 		weblichtTree.addTreeSelectionListener(handler);
 		weblichtTree.addMouseListener(handler);
 		weblichtTree.getModel().addTreeModelListener(handler);
+		//weblichtTree.setToggleClickCount(0);
 		
 		//UIUtil.enableTooltip
 		ToolTipManager.sharedInstance().registerComponent(weblichtTree);
@@ -344,8 +345,19 @@ public class WeblichtChainView extends View {
 		 */
 		@Override
 		public void treeNodesChanged(TreeModelEvent e) {
-			// no-op
-			UIUtil.expandAll(weblichtTree, true);
+			final TreePath parentpath = e.getTreePath();
+			
+			if (parentpath == null) {
+				return;
+			}
+			//System.out.println("NodeChanged " + parentpath);
+			
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					weblichtTree.expandPath(parentpath);
+					weblichtTree.setSelectionPath(parentpath);			
+				}
+			});;
 		}
 
 		/**
@@ -353,13 +365,23 @@ public class WeblichtChainView extends View {
 		 */
 		@Override
 		public void treeNodesInserted(TreeModelEvent e) {
-			TreePath path = e.getTreePath();			
-			if (path == null) {
+			final Object child = e.getChildren()[0];
+			final TreePath parentpath = e.getTreePath();	
+			
+			
+			if (parentpath == null) {
 				return;
 			}
-			//weblichtTree.expandPath(path);
-			//System.out.println("Inserted " + path);
-			UIUtil.expandAll(weblichtTree, true);
+			
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					TreePath path = parentpath.pathByAddingChild(child);
+					weblichtTree.expandPath(path);
+					weblichtTree.setSelectionPath(path);
+					callbackHandler.editWebchain(null);					
+				}
+			});
+		
 		}
 
 		/**
@@ -375,15 +397,19 @@ public class WeblichtChainView extends View {
 		 */
 		@Override
 		public void treeStructureChanged(TreeModelEvent e) {
-			TreePath path = e.getTreePath();
-
-			System.out.println("Changed " + path); //$NON-NLS-1$
-			if (path == null) {
+			final TreePath parentpath = e.getTreePath();
+			
+			if (parentpath == null) {
 				return;
 			}
-			//weblichtTree.expandPath(path);
-			weblichtTree.getComponentCount();
-			UIUtil.expandAll(weblichtTree, true);
+			
+			//System.out.println("StructureChanged " + parentpath);
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					weblichtTree.expandPath(parentpath);
+					weblichtTree.setSelectionPath(parentpath);				
+				}
+			});
 		}
 		
 
@@ -417,10 +443,12 @@ public class WeblichtChainView extends View {
 			if (webchain == null){
 				return;
 			}
+			
 			//name = WebchainRegistry.getInstance().getUniqueName("New "+name); //$NON-NLS-1$
 			
 			try {
-				WebchainRegistry.getInstance().addNewWebchain(webchain);
+				WebchainRegistry.getInstance().addNewWebchain(webchain);				
+				//WebchainRegistry.getInstance().saveWebchains();
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new webchain: "+name, ex); //$NON-NLS-1$
@@ -529,9 +557,6 @@ public class WeblichtChainView extends View {
 					
 					showError(ex);
 				}
-
-
-
 			}
 
 		}
@@ -675,7 +700,7 @@ public class WeblichtChainView extends View {
 
 			
 			try {
-				// WebExecutionService.getInstance().runWebchain(webchain, inputText);
+				
 				final String input = inputText;
 			
 				// Execute the SwingWorker; the GUI will not freeze
@@ -819,6 +844,14 @@ public class WeblichtChainView extends View {
 					Message message = new Message(this,
 							Commands.DISPLAY, tcfList, options);
 					sendRequest(null, message);
+					
+					
+					TextCorpusStreamed tcs = get();
+					
+					System.out.println(tcs.getTextLayer());
+					for(int i = 0; i < tcs.getLayers().size();i++){
+						tcs.getLayers().get(i).toString();
+					}
 					
 					
 					//TODO change status for dynamic location (save operation)

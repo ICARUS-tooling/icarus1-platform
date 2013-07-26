@@ -77,7 +77,7 @@ public class TreebankTreeCellRenderer extends DefaultTreeCellRenderer {
 			value = identity.getName();
 			icon = identity.getIcon();
 			if(icon==null) {
-				icon = IconRegistry.getGlobalRegistry().getIcon("class_obj.gif"); //$NON-NLS-1$
+				icon = IconRegistry.getGlobalRegistry().getIcon("treebank_co.png"); //$NON-NLS-1$
 			}
 		}
 		

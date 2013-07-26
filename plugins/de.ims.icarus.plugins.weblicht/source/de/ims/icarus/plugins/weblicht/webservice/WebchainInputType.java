@@ -50,7 +50,25 @@ public class WebchainInputType implements WebchainElements {
 	public void setInputTypeValue(String inputTypeValue) {
 		this.inputTypeValue = inputTypeValue;
 	}
-	
 
-
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object other) {
+	    if(!(other instanceof WebchainInputType)){
+	    	return false;
+	    }
+	    
+	    //check fields
+	    WebchainInputType wi = (WebchainInputType)other;
+	    
+	    if(!(this.inputType == wi.getInputType())){
+	    	return false;
+	    }	
+	    if(!(this.inputTypeValue == wi.getInputTypeValue())){
+	    	return false;
+	    }	
+	    return true;
+	}
 }

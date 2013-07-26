@@ -87,7 +87,7 @@ public class NGramQueryView extends View {
 	protected JButton qtAddButton;
 	protected JButton qtEditButton;
 	protected JButton qtRemoveButton;
-	protected JButton qtIncludeButton;
+	//protected JButton qtIncludeButton;
 
 	private JLabel header;
 	private JLabel infoLabel;
@@ -171,12 +171,12 @@ public class NGramQueryView extends View {
 		localizedComponents.add(qtRemoveButton);
 		qtRemoveButton.addActionListener(handler);
 		
-		qtIncludeButton = new JButton();
-		qtIncludeButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("include_on-off.png")); //$NON-NLS-1$
-		resourceDomain.prepareComponent(qtIncludeButton, "include", null); //$NON-NLS-1$
-		resourceDomain.addComponent(qtIncludeButton);
-		localizedComponents.add(qtIncludeButton);
-		qtIncludeButton.addActionListener(handler);	
+//		qtIncludeButton = new JButton();
+//		qtIncludeButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("include_on-off.png")); //$NON-NLS-1$
+//		resourceDomain.prepareComponent(qtIncludeButton, "include", null); //$NON-NLS-1$
+//		resourceDomain.addComponent(qtIncludeButton);
+//		localizedComponents.add(qtIncludeButton);
+//		qtIncludeButton.addActionListener(handler);	
 
 		
 		
@@ -239,12 +239,12 @@ public class NGramQueryView extends View {
 			qtAddButton.setEnabled(true);
 			qtEditButton.setEnabled(false);
 			qtRemoveButton.setEnabled(false);
-			qtIncludeButton.setEnabled(false);
+			//qtIncludeButton.setEnabled(false);
 		} else {
 			qtAddButton.setEnabled(true);
 			qtEditButton.setEnabled(true);
 			qtRemoveButton.setEnabled(true);
-			qtIncludeButton.setEnabled(true);
+			//qtIncludeButton.setEnabled(true);
 		}
 	}
 	
@@ -259,7 +259,7 @@ public class NGramQueryView extends View {
 		buttonPanel.add(qtAddButton);
 		buttonPanel.add(qtEditButton);
 		buttonPanel.add(qtRemoveButton);
-		buttonPanel.add(qtIncludeButton);
+		//buttonPanel.add(qtIncludeButton);
 		
 		
 		//Table
@@ -268,7 +268,13 @@ public class NGramQueryView extends View {
 		UIUtil.defaultSetUnitIncrement(scrollPaneTable);
 		scrollPaneTable.setPreferredSize(new Dimension(500, 300));
 		qtm = new NGramQTableModel();
+		
 		qt = new JTable(qtm);
+		qt.setRowHeight(25);
+
+		//qt.setDefaultRenderer(Object.class, new NGramQTableCellRenderer());
+		qt.getColumnModel().getColumn(0).setCellRenderer(qt.getDefaultRenderer(Boolean.class));
+		qt.getColumnModel().getColumn(0).setCellEditor(qt.getDefaultEditor(Boolean.class));
 		qt.setBorder(UIUtil.defaultContentBorder);
 		qt.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		qt.getTableHeader().setReorderingAllowed(false);
@@ -571,23 +577,23 @@ public class NGramQueryView extends View {
 			}
 			
 			
-			// Include Y/N
-			if (e.getSource() == qtIncludeButton) {
-				int row = qt.getSelectedRow();
-				
-				//no selection
-				if (row == -1) {
-					return;
-				}
-
-				try {
-					includeQueryTag(row);
-				} catch (Exception ex) {
-					LoggerFactory.log(this, Level.SEVERE,
-							"Failed to edit input attribute", ex); //$NON-NLS-1$
-				}
-				return;
-			}
+//			// Include Y/N
+//			if (e.getSource() == qtIncludeButton) {
+//				int row = qt.getSelectedRow();
+//				
+//				//no selection
+//				if (row == -1) {
+//					return;
+//				}
+//
+//				try {
+//					includeQueryTag(row);
+//				} catch (Exception ex) {
+//					LoggerFactory.log(this, Level.SEVERE,
+//							"Failed to edit input attribute", ex); //$NON-NLS-1$
+//				}
+//				return;
+//			}
 
 		}
 
@@ -602,7 +608,7 @@ public class NGramQueryView extends View {
 				qtAddButton.setEnabled(enabled);
 				qtEditButton.setEnabled(enabled);
 				qtRemoveButton.setEnabled(enabled);
-				qtIncludeButton.setEnabled(enabled);
+				//qtIncludeButton.setEnabled(enabled);
 			}
 
 		}

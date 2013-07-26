@@ -29,6 +29,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
@@ -659,7 +660,13 @@ public class WebserviceDialogs {
 	public Webchain showNewWebchain(Component parent, String title, 
 			String message, Object...params) {
 		
-		JTextField name = new JTextField(30);
+		final JTextField name = new JTextField(30);
+		
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				name.requestFocus();
+			}
+		});
 
 		name.getDocument().addDocumentListener(requiredFieldsListener);
 		name.getDocument().putProperty("field", name); //$NON-NLS-1$

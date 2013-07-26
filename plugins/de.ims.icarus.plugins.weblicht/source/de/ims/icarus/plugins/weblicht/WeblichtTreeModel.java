@@ -58,8 +58,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 			//child = ((Webchain) parent).getWebserviceAt(index);
 			child = ((Webchain) parent).getElementAt(index);
 		}
-		// System.out.println("getChild@ parent: "+parent +" child: " +child +
-		// " index: " +index);
+//		 System.out.println("getChild@ parent: "+parent +" child: " +child +
+//		 " index: " +index);
 		return child;
 	}
 
@@ -75,8 +75,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 			//childCount = ((Webchain) parent).getWebserviceCount();
 			childCount = ((Webchain) parent).getElementsCount();
 		}
-		// System.out.println("getChildCount@ parent: "+parent +" childc: "
-		// +childCount);
+//		 System.out.println("getChildCount@ parent: "+parent +" childc: "
+//		 +childCount);
 		return childCount;
 	}
 
@@ -114,8 +114,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 			//childIndex = ((Webchain) parent).indexOfWebservice((WebserviceProxy) child);
 			childIndex = ((Webchain) parent).indexOfElement((WebchainElements) child);
 		}
-		// System.out.println("getIndexOfChild@ parent: "+parent +" child: "
-		// +child + " cindex: " +childIndex);
+//		 System.out.println("getIndexOfChild@ parent: "+parent +" child: "
+//		 +child + " cindex: " +childIndex);
 		return childIndex;
 
 	}
@@ -137,6 +137,7 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 		return childs;
 	}
 	
+	
 
 	protected static class WebchainLoaderListener implements EventListener {
 
@@ -157,6 +158,7 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 
 			//parent path always root, webchains will be added later in chaineditor
 			TreePath parentPath = new TreePath(new Object[] {root});
+			
 
 			// parent + exakte element
 			List<WeblichtTreeModel> models = new ArrayList<>(instances.keySet());
@@ -168,9 +170,9 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 
 			switch (event.getName()) {
 			case Events.ADDED:
-				for (WeblichtTreeModel model : models) {					
-					//model.fireChildAdded(parentPath, childIndex, webchain);
-					model.fireStructureChanged();
+				for (WeblichtTreeModel model : models) {
+					model.fireChildAdded(parentPath, childIndex, webchain);
+					//model.fireStructureChanged();
 				}
 				break;
 				
@@ -183,8 +185,8 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 			case Events.CHANGED:
 				childIndex = WebchainRegistry.getInstance().indexOfWebchain(webchain);
 				for (WeblichtTreeModel model : models) {
-					//model.fireChildChanged(parentPath, childIndex, webchain);
-					model.fireStructureChanged();
+					model.fireChildChanged(parentPath.pathByAddingChild(webchain), childIndex, webchain);
+					//model.fireStructureChanged();
 				}
 				break;
 				

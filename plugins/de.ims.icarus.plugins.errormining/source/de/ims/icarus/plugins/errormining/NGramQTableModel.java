@@ -39,7 +39,16 @@ public class NGramQTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		return String.class;
+        switch (columnIndex) {
+        case 0:
+            return Boolean.class;
+        case 1:
+            return String.class;
+        case 2:
+            return String.class;
+        default:
+            return String.class;
+        }
 	}
 	
 	
@@ -98,6 +107,60 @@ public class NGramQTableModel extends AbstractTableModel {
 	}
 	
 	
+	/**
+	 * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
+	 */
+	@Override
+    public void setValueAt(Object value, int rowIndex, int columnIndex) {  
+        if(columnIndex == 0){  
+            //boolean isIncluded = (Boolean)value; 
+            setInclueQueryAttribute(rowIndex); 
+        }
+        else {
+        	NGramQAttributes att = new NGramQAttributes();
+	        //key
+	        if(columnIndex == 1){
+	        	String keynew = (String) value;
+	        	
+	        	//no Changes
+	        	if (keynew.equals(qList.get(rowIndex).getKey())){
+	        		return;
+	        	}
+	        	
+	        	att.setKey(keynew);
+	        	att.setValue(getValueAt(rowIndex, columnIndex+1).toString());
+	            setQueryAttributes(att, rowIndex);
+	        }
+	        //value
+	        if(columnIndex == 2){
+	        	String valnew = (String) value;
+	        	
+	        	//no Changes
+	        	if (valnew.equals(qList.get(rowIndex).getValue())){
+	        		return;
+	        	}
+	        	
+	        	att.setKey(getValueAt(rowIndex, columnIndex-1).toString());
+	        	att.setValue(valnew); 
+	        	setQueryValue(att, rowIndex);
+	        }
+        }
+
+        super.setValueAt(value, rowIndex, columnIndex);  
+    } 
+
+	/**
+	 * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+	 */
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+//        if(columnIndex == 0){  
+//            return true;  
+//        }  
+//		return super.isCellEditable(rowIndex, columnIndex);
+		return true; 
+	}
+
 	public void reload(List<NGramQAttributes> list) {		
 		if(list==null) {
 				qList = null;
@@ -117,7 +180,11 @@ public class NGramQTableModel extends AbstractTableModel {
 		return false;
 	}
 	
-	private boolean checkDuplicateEntry(NGramQAttributes att){
+	
+	private boolean checkDuplicateEntry(NGramQAttributes att, int index){
+		if (qList.contains(att) && index == qList.indexOf(att)){
+			return false;
+		}
 		return qList.contains(att);
 		
 	}
@@ -126,12 +193,12 @@ public class NGramQTableModel extends AbstractTableModel {
 	/**
 	 * @param wio
 	 */
-	public void addQueryAttribute(NGramQAttributes att) {
+	public void addQueryAttribute(NGramQAttributes att, int index) {
 		//TODO needed?
 		if (qList == null){
 			qList = new ArrayList<NGramQAttributes>();
 		}
-		if (checkDuplicateEntry(att)){
+		if (checkDuplicateEntry(att, index)){
 			DialogFactory.getGlobalFactory().showError(
 					null,
 					"plugins.errormining.dialogs.duplicateEntry.title", //$NON-NLS-1$
@@ -168,18 +235,33 @@ public class NGramQTableModel extends AbstractTableModel {
 	public void setQueryAttributes(NGramQAttributes att, int index) {
 
 		if (index == -1){
-			addQueryAttribute(att);
+			addQueryAttribute(att, index);
 		}
 		else {
-			if (checkDuplicateEntry(att)){
+	
+			if (checkDuplicateEntry(att, index)){
 				DialogFactory.getGlobalFactory().showError(
 						null,
 						"plugins.errormining.dialogs.duplicateEntry.title", //$NON-NLS-1$
 						"plugins.errormining.dialogs.duplicateEntry.message", //$NON-NLS-1$
 						att.getKey());
 				return;
+			
 			}
 			qList.get(index).setKey(att.getKey());
+			qList.get(index).setValue(att.getValue());
+		}
+		fireTableDataChanged();
+		
+	}
+	
+	public void setQueryValue(NGramQAttributes att, int index) {
+
+		if (index == -1){
+			addQueryAttribute(att,index);
+		}
+		
+		else {
 			qList.get(index).setValue(att.getValue());
 		}
 		fireTableDataChanged();

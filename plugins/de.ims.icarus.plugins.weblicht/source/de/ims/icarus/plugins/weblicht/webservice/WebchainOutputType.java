@@ -60,7 +60,7 @@ public class WebchainOutputType implements WebchainElements{
 	/**
 	 * @return the isOutputUsed
 	 */
-	public boolean getIsOutputUsed() {
+	public boolean isOutputUsed() {
 		return isOutputUsed;
 	}
 	
@@ -74,6 +74,31 @@ public class WebchainOutputType implements WebchainElements{
 	 */
 	public void setOutputUsed(boolean isOutputUsed) {
 		this.isOutputUsed = isOutputUsed;
+	}
+	
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object other) {
+	    if(!(other instanceof WebchainOutputType)){
+	    	return false;
+	    }
+	    
+	    //check fields
+	    WebchainOutputType wo = (WebchainOutputType)other;
+	    
+	    if(!(this.outputType == wo.getOutputType())){
+	    	return false;
+	    }
+	    if(!(this.outputTypeValue == wo.getOutputTypeValue())){
+	    	return false;
+	    }
+	    if(!(this.isOutputUsed == wo.isOutputUsed())){
+	    	return false;
+	    }
+	    
+	    return true;
 	}
 
 
