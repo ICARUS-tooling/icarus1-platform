@@ -240,4 +240,30 @@ public final class StringUtil {
 		
 		return sb.toString();
 	}
+	
+	public static int compareNumberAwareIgnoreCase(String s1, String s2) {
+		try {
+			int i1 = Integer.parseInt(s1);
+			int i2 = Integer.parseInt(s2);
+			
+			return i1-i2;
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+		
+		return s1.compareToIgnoreCase(s2);
+	}
+	
+	public static int compareNumberAware(String s1, String s2) {
+		try {
+			int i1 = Integer.parseInt(s1);
+			int i2 = Integer.parseInt(s2);
+			
+			return i1-i2;
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+		
+		return s1.compareToIgnoreCase(s2);
+	}
 }

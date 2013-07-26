@@ -29,6 +29,7 @@ import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.ui.table.TableSortMode;
 import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.StringUtil;
 
 
 /**
@@ -286,7 +287,7 @@ public class SearchResultTableModel extends AbstractTableModel
 			CollectionUtils.fillAscending(rowTransform);
 			try {
 				Arrays.sort(rowTransform, new Comparator<Integer>(){
-					int result = rowsAscending ? -1 : 1;
+					int result = rowsAscending ? 1 : -1;
 					int dimension = rowDimension;	
 	
 					@Override
@@ -309,7 +310,7 @@ public class SearchResultTableModel extends AbstractTableModel
 			CollectionUtils.fillAscending(columnTransform);
 			try {
 				Arrays.sort(columnTransform, new Comparator<Integer>(){
-					int result = columnsAscending ? 1 : -1;
+					int result = columnsAscending ? -1 : 1;
 					int dimension = columnDimension;
 	
 					@Override
@@ -352,9 +353,10 @@ public class SearchResultTableModel extends AbstractTableModel
 						if(Thread.currentThread().isInterrupted())
 							throw new IllegalStateException();
 						
-						return rowsAscending ? 
-								-getRowName(o1).compareToIgnoreCase(getRowName(o2))
-								: getRowName(o1).compareToIgnoreCase(getRowName(o2));
+						int result = StringUtil.compareNumberAwareIgnoreCase(
+								getRowName(o1), getRowName(o2));
+						
+						return rowsAscending ? result : -result;
 					}});
 			} catch(IllegalStateException e) {
 				throw new InterruptedException();
@@ -379,9 +381,10 @@ public class SearchResultTableModel extends AbstractTableModel
 						if(Thread.currentThread().isInterrupted())
 							throw new IllegalStateException();
 						
-						return rowsAscending ? 
-								getColumnName(o1).compareToIgnoreCase(getColumnName(o2))
-								: -getColumnName(o1).compareToIgnoreCase(getColumnName(o2));
+						int result = StringUtil.compareNumberAwareIgnoreCase(
+								getColumnName(o1), getColumnName(o2));
+						
+						return rowsAscending ? result : -result;
 					}});
 			} catch(IllegalStateException e) {
 				throw new InterruptedException();

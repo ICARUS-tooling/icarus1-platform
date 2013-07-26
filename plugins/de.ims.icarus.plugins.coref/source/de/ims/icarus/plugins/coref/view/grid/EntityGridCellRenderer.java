@@ -18,11 +18,11 @@ import java.awt.Rectangle;
 
 import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
-import sun.swing.DefaultLookup;
 import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
 
 /**
@@ -54,7 +54,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 	}
 
     protected Border getNoFocusBorder() {
-        Border border = DefaultLookup.getBorder(this, ui, "Table.cellNoFocusBorder"); //$NON-NLS-1$
+        Border border = UIManager.getBorder("Table.cellNoFocusBorder"); //$NON-NLS-1$
         return border==null ? noFocusBorder : border;
     }
 
@@ -75,8 +75,8 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
                 && dropLocation.getRow() == row
                 && dropLocation.getColumn() == column) {
 
-            fg = DefaultLookup.getColor(this, ui, "Table.dropCellForeground"); //$NON-NLS-1$
-            bg = DefaultLookup.getColor(this, ui, "Table.dropCellBackground"); //$NON-NLS-1$
+            fg = UIManager.getColor("Table.dropCellForeground"); //$NON-NLS-1$
+            bg = UIManager.getColor("Table.dropCellBackground"); //$NON-NLS-1$
 
             isSelected = true;
         }
@@ -91,7 +91,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
                                     ? unselectedBackground
                                     : table.getBackground();
             if (background == null || background instanceof javax.swing.plaf.UIResource) {
-                Color alternateColor = DefaultLookup.getColor(this, ui, "Table.alternateRowColor"); //$NON-NLS-1$
+                Color alternateColor = UIManager.getColor("Table.alternateRowColor"); //$NON-NLS-1$
                 if (alternateColor != null && row % 2 != 0) {
                     background = alternateColor;
                 }
@@ -107,20 +107,20 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
         if (hasFocus) {
             Border border = null;
             if (isSelected) {
-                border = DefaultLookup.getBorder(this, ui, "Table.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
+                border = UIManager.getBorder("Table.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
             }
             if (border == null) {
-                border = DefaultLookup.getBorder(this, ui, "Table.focusCellHighlightBorder"); //$NON-NLS-1$
+                border = UIManager.getBorder("Table.focusCellHighlightBorder"); //$NON-NLS-1$
             }
             setBorder(border);
 
             if (!isSelected && table.isCellEditable(row, column)) {
                 Color col;
-                col = DefaultLookup.getColor(this, ui, "Table.focusCellForeground"); //$NON-NLS-1$
+                col = UIManager.getColor("Table.focusCellForeground"); //$NON-NLS-1$
                 if (col != null) {
                     super.setForeground(col);
                 }
-                col = DefaultLookup.getColor(this, ui, "Table.focusCellBackground"); //$NON-NLS-1$
+                col = UIManager.getColor("Table.focusCellBackground"); //$NON-NLS-1$
                 if (col != null) {
                     super.setBackground(col);
                 }
