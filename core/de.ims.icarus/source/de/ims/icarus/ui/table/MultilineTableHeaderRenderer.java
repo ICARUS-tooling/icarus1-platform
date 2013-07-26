@@ -15,12 +15,14 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.AbstractListModel;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
+import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.StringUtil;
 
@@ -45,6 +47,9 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 	    setForeground(UIManager.getColor("TableHeader.foreground")); //$NON-NLS-1$
 	    setBackground(UIManager.getColor("TableHeader.background")); //$NON-NLS-1$
 	    setBorder(UIManager.getBorder("TableHeader.cellBorder")); //$NON-NLS-1$
+	    
+	    JComponent renderer = (JComponent) getCellRenderer();
+	    UIUtil.disableHtml(renderer);
 	}
 	
 	public void setHorizontalAlignment(int alignment) {
@@ -81,6 +86,8 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 			model.addLine(tokenizer.nextToken());
 		}
 		//model.fireContentChange();
+		
+		setToolTipText(str);
 		
 		return this;
 	}

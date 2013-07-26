@@ -64,4 +64,22 @@ public class EntityGridNode {
 	public boolean isMissingGoldSpan(int index) {
 		return types[index]==MISSING_GOLD_SPAN;
 	}
+	
+	public boolean hasFalsePredictedSpan() {
+		for(short type : types) {
+			if(type==FALSE_PREDICTED_SPAN) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean hasMissingGoldSpan() {
+		for(short type : types) {
+			if(type==MISSING_GOLD_SPAN) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

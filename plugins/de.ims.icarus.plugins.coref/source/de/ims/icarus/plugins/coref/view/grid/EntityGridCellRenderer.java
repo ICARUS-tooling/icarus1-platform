@@ -39,8 +39,8 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 	protected Color unselectedForeground;
     protected Color unselectedBackground;
     
-    protected Color missingGoldNodeColor;
-    protected Color falseNodeColor;
+    protected Color missingGoldNodeColor = Color.red;
+    protected Color falseNodeColor = Color.green;
     
     protected EntityGridNode node;
     
@@ -156,11 +156,16 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 
 	@Override
 	protected void paintComponent(Graphics g) {
+		Color c = g.getColor();
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
+		g.setColor(c);
+		
 		if(node==null) {
 			return;
 		}
 		
-		if(isShowCompactLabel()) {
+		if(isShowCompactLabel() || labelBuilder==null) {
 			paintCompactLabel(g);
 		} else {
 			paintCompleteLabel(g);
@@ -168,7 +173,40 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 	}
 	
 	protected void paintCompactLabel(Graphics g) {
+
+		int w = getWidth();
+		int h = getHeight();
 		
+		Font f = getFont();
+		FontMetrics fm = getFontMetrics(f);
+		
+		String label = String.valueOf(node.getSpanCount());
+		
+		int width = fm.charWidth('[')+fm.stringWidth(label)+fm.charWidth(']');
+		int height = fm.getHeight();
+
+		int x = Math.max(1, (w-width)/2);
+		int y = Math.max(0, (h-height)/2);
+		y += fm.getAscent();
+		
+		Color col = g.getColor();
+		g.drawString("[", x, y); //$NON-NLS-1$
+		x += fm.charWidth('[');
+		
+		Color c = null;
+		if(node.hasMissingGoldSpan()) {
+			c = missingGoldNodeColor;
+		} else if(node.hasFalsePredictedSpan()) {
+			c = falseNodeColor;
+		}
+		if(c!=null) {
+			g.setColor(c);
+		}
+		g.drawString(label, x, y);
+		x += fm.stringWidth(label);
+		
+		g.setColor(col);
+		g.drawString("]", x, y); //$NON-NLS-1$
 	}
 	
 	protected void paintCompleteLabel(Graphics g) {
@@ -180,28 +218,60 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		FontMetrics fm = getFontMetrics(f);
 		
 		int width = 0;
+		int height = fm.getHeight();
 		int count = node.getSpanCount();
 		String[] tokens = new String[node.getSpanCount()];
 		
 		// Calculate required total width
+		width += fm.charWidth('[');
 		for(int i=0; i<count; i++) {
-			tokens[i] =  
+			if(i>0) {
+				width += fm.charWidth(',');
+			}
+			tokens[i] = labelBuilder.getLabel(node, i);
+			width += fm.stringWidth(tokens[i]);
 		}
+		width += fm.charWidth(']');
+		
+		int x = Math.max(1, (w-width)/2);
+		int y = Math.max(0, (h-height)/2);
+		y += fm.getAscent();
+		
+		// Now draw the entire string with highlight colors
+		Color col = g.getColor();
+		g.drawString("[", x, y); //$NON-NLS-1$
+		x += fm.charWidth('[');
+		
+		for(int i=0; i<count; i++) {
+			if(i>0) {
+				g.setColor(col);
+				g.drawString(",", x, y); //$NON-NLS-1$
+				x += fm.charWidth(',');
+			}
+			
+			Color c = null;
+			if(node.isMissingGoldSpan(i)) {
+				c = missingGoldNodeColor;
+			} else if(node.isFalsePredictedSpan(i)) {
+				c = falseNodeColor;
+			}
+			
+			if(c==null) {
+				c = col;
+			}
+			
+			g.setColor(col);
+			g.drawString(tokens[i], x, y);
+			x += fm.stringWidth(tokens[i]);
+		}
+		
+		g.setColor(col);
+		g.drawString("]", x, y); //$NON-NLS-1$
 	}
 	
     @Override
     public boolean isOpaque() {
-        Color back = getBackground();
-        Component p = getParent();
-        if (p != null) {
-            p = p.getParent();
-        }
-
-        // p should now be the JTable.
-        boolean colorMatch = (back != null) && (p != null) &&
-            back.equals(p.getBackground()) &&
-                        p.isOpaque();
-        return !colorMatch && super.isOpaque();
+        return true;
     }
 
     @Override

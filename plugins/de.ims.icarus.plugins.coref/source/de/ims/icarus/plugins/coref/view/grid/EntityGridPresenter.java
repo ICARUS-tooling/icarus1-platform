@@ -10,17 +10,28 @@
 package de.ims.icarus.plugins.coref.view.grid;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
+import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.plugins.coref.view.CoreferenceCellRenderer;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.list.RowHeaderList;
+import de.ims.icarus.ui.table.TableIndexListModel;
 import de.ims.icarus.ui.table.TablePresenter;
+import de.ims.icarus.ui.table.TableRowHeaderRenderer;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 
@@ -35,13 +46,16 @@ public class EntityGridPresenter extends TablePresenter {
 	protected CoreferenceAllocation allocation;
 	protected CoreferenceAllocation goldAllocation;
 	
-	protected boolean showGoldNodes = false;
+	protected boolean showGoldNodes = true;
 	protected boolean markFalseNodes = true;
 	protected boolean filterSingletons = true;
 	
 	protected EntityGridTableModel gridModel = new EntityGridTableModel();
 	protected CoreferenceCellRenderer outline;
 	protected EntityGridCellRenderer cellRenderer;
+	
+	protected static final int DEFAULT_CELL_HEIGHT = 20;
+	protected static final int DEFAULT_CELL_WIDTH = 75;
 
 	public EntityGridPresenter() {
 		// no-op
@@ -60,7 +74,20 @@ public class EntityGridPresenter extends TablePresenter {
 
 	@Override
 	protected void buildPanel() {
-		super.buildPanel();
+		contentPanel = new JPanel(new BorderLayout());
+		
+		JTable table = createTable();
+		TableIndexListModel indexModel = new TableIndexListModel(gridModel);
+		RowHeaderList rowHeader = createRowHeader(indexModel, table, contentPanel);
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setRowHeaderView(rowHeader);
+		scrollPane.setBorder(UIUtil.emptyBorder);
+		contentPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		JToolBar toolBar = createToolBar();
+		if(toolBar!=null) {
+			contentPanel.add(toolBar, BorderLayout.NORTH);
+		}
 		
 		outline = new CoreferenceCellRenderer();
 		outline.setBorder(UIUtil.defaultContentBorder);
@@ -111,10 +138,39 @@ public class EntityGridPresenter extends TablePresenter {
 		JTable table = new JTable(gridModel, gridModel.getColumnModel());
 		
 		table.setDefaultRenderer(EntityGridNode.class, cellRenderer);
+		table.setFillsViewportHeight(true);
+		table.setRowSelectionAllowed(false);
+		table.setColumnSelectionAllowed(false);
+		table.setRowHeight(DEFAULT_CELL_HEIGHT);
+		table.setIntercellSpacing(new Dimension(4, 4));
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+		JTableHeader header = table.getTableHeader();
+		header.setReorderingAllowed(false);
+		EntityGridTableHeaderRenderer renderer = new EntityGridTableHeaderRenderer();
+		header.setDefaultRenderer(renderer);
+		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
 		
 		return table;
 	}
 
+	protected RowHeaderList createRowHeader(ListModel<String> model, 
+			JTable table, JComponent container) {
+
+		RowHeaderList rowHeader = new RowHeaderList(model, table.getSelectionModel());
+		rowHeader.setFixedCellWidth(DEFAULT_CELL_WIDTH);
+		rowHeader.setMinimumCellWidth(DEFAULT_CELL_WIDTH/2);
+		rowHeader.setResizingAllowed(true);
+		rowHeader.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		rowHeader.setFixedCellHeight(table.getRowHeight());
+		rowHeader.setBackground(container.getBackground());
+		rowHeader.setForeground(table.getForeground());		
+		TableRowHeaderRenderer rowHeaderRenderer = new TableRowHeaderRenderer(rowHeader, table);
+		rowHeader.setCellRenderer(rowHeaderRenderer);
+		
+		return rowHeader;
+	}
+	
 	/**
 	 * @see de.ims.icarus.ui.table.TablePresenter#setData(java.lang.Object, de.ims.icarus.util.Options)
 	 */

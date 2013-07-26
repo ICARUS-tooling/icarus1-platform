@@ -20,6 +20,8 @@ import de.ims.icarus.plugins.core.View;
  */
 public class CoreferenceDocumentView extends View {
 
+	
+
 	public CoreferenceDocumentView() {
 		// no-op
 	}
@@ -32,5 +34,4 @@ public class CoreferenceDocumentView extends View {
 		// TODO Auto-generated method stub
 
 	}
-
 }

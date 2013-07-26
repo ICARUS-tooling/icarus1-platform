@@ -10,6 +10,7 @@
 package de.ims.icarus.plugins.coref.view.grid;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -147,12 +148,17 @@ public class EntityGridTableModel extends AbstractTableModel {
 		
 		// Create lookup for those spans that appear in the regular set
 		// but not in the gold set
-		failLookup.addAll(tmp);
-		failLookup.removeAll(goldLookup);
+		if(!goldLookup.isEmpty()) {
+			failLookup.addAll(tmp);
+			failLookup.removeAll(goldLookup);
+		}
 		
 		// Ensure gold lookup only contains those spans that
 		// exist solely in the gold set (missing in the regular set)
 		goldLookup.removeAll(tmp);
+		
+		//System.out.println("fails: "+Arrays.toString(failLookup.toArray()));
+		//System.out.println("golds: "+Arrays.toString(goldLookup.toArray()));
 		
 		// Finally merge all edges into one list
 		List<Span> spans = new ArrayList<>(tmp.size()+goldLookup.size());
