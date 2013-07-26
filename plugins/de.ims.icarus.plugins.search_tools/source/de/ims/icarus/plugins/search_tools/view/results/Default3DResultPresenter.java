@@ -55,7 +55,7 @@ import de.ims.icarus.util.Options;
  */
 public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 
-	public static final int SUPPORTED_DIMENSIONS = 2;
+	public static final int SUPPORTED_DIMENSIONS = 3;
 	
 	protected JPanel subResultPanel;
 	protected JTextArea infoLabel;
