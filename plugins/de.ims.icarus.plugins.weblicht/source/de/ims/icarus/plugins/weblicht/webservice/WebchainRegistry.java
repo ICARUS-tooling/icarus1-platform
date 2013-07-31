@@ -492,7 +492,8 @@ public class WebchainRegistry {
 		if (refreshAll){
 			int index = indexOfWebchain(webchain);
 			hasChanges=true;
-			eventSource.fireEvent(new EventObject(Events.ADDED,
+			//TODO correct Event
+			eventSource.fireEvent(new EventObject(Events.CHANGE,
 					"webchain",webchain //$NON-NLS-1$
 					,"index",index));//NON-NLS-1$ //$NON-NLS-1$
 		} else {

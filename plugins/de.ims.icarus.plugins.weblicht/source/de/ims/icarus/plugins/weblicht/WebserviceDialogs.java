@@ -143,13 +143,15 @@ public class WebserviceDialogs {
 
 		for (int i = 0; i < webservicesCount; i++) {
 			Webservice webservice = WebserviceRegistry.getInstance().getWebserviceAt(i);
+			
+			
 			if (!(webservices.contains(WebserviceRegistry.getInstance().getWebserviceAt(i)))){
-				
-				List<WebserviceIOAttributes> wio = webservice.getInput();
-				for(int j = 0; j < wio.size(); j++){
-					WebserviceIOAttributes wa = wio.get(j);
+
+				for(int j = 0; j < webservice.getInputAttributesSize(); j++){
+					WebserviceIOAttributes wa = webservice.getInputAttributesAt(j);
 					if (wa.getAttributename().equals(key) &&
 							wa.getAttributevalues().equals(value)){
+						//System.out.println(webservice.getName());
 						filtered.add(webservice);
 					};
 				}
@@ -516,6 +518,13 @@ public class WebserviceDialogs {
 		
 		Webservice webserviceSel = (Webservice) webserviceList.getSelectedValue();
 		
+		//prevent null fail when no more services can be added and user presses ok
+		if (builder.isYesValue()){
+			if (webserviceList.getSelectedValue() == null){
+				return null;
+			}			
+		}
+		
 		return builder.isYesValue() ? webserviceSel.getUID() : null;
 	}
 	
@@ -748,13 +757,19 @@ public class WebserviceDialogs {
 		uniqueID.setText(uID);
 		uniqueID.setEditable(false);
 		
-		JTextField name = new JTextField(30);
+		final JTextField name = new JTextField(30);
 		JTextArea description = createTextArea();
 		JTextField creator = new JTextField(30);
 		JTextField contact = new JTextField(30);
 		JTextField url = new JTextField(60);
 		JTextField serviceID = new JTextField(30);
 		JTextField webresourceFormat = new JTextField(30);
+		
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				name.requestFocus();
+			}
+		});
 		
 		//required fields
 		fillRequiredFields(name, wsname);

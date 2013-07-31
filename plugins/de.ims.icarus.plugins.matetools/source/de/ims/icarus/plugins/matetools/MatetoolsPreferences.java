@@ -56,9 +56,9 @@ public class MatetoolsPreferences {
 				ConfigConstants.HANDLER, sharedStorageEditor,
 				ConfigConstants.RENDERER, modelStorageRenderer);
 		
-		builder.addGroup("conll09reader", true); //$NON-NLS-1$
-		builder.addOptionsEntry("inputType", 0, //$NON-NLS-1$
-				"gold", "system"); //$NON-NLS-1$ //$NON-NLS-2$
+//		builder.addGroup("conll09reader", true); //$NON-NLS-1$
+//		builder.addOptionsEntry("inputType", 0, //$NON-NLS-1$
+//				"gold", "system"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 		// TODO add config items for readers/writers?
 	}

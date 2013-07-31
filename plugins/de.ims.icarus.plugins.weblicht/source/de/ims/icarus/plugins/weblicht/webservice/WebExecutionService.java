@@ -24,6 +24,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -92,6 +93,7 @@ public class WebExecutionService {
 //					+ " " + response.getStatus() + " " + webservice.getWebresourceFormat()); //$NON-NLS-1$
 
 
+
 			// http://de.wikipedia.org/wiki/HTTP-Statuscode#4xx_.E2.80.93_Client-Fehler
 			switch (response.getStatus()) {
 			case 500:
@@ -123,6 +125,17 @@ public class WebExecutionService {
 								"plugins.weblicht.weblichtWebserviceView.dialogs.error404.message", //$NON-NLS-1$
 								webservice.getURL());
 				return null;
+				
+//			case 400:
+//				DialogFactory
+//						.getGlobalFactory()
+//						.showError(
+//								null,
+//								"plugins.weblicht.weblichtWebserviceView.dialogs.error400.title", //$NON-NLS-1$
+//								"plugins.weblicht.weblichtWebserviceView.dialogs.error400.message", //$NON-NLS-1$
+//								webservice.getURL());
+//				return null;	
+				
 
 			case 401:
 				DialogFactory

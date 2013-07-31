@@ -164,7 +164,7 @@ public class TCFDataList implements SentenceDataList {
 		private String[] forms;
 
 		public TCFSentenceData(int index) {
-
+			
 			// Get Sentence Layer
 			sentence = tcs.getSentencesLayer().getSentence(index);
 			// Extract Tokens from Sentence Layer
@@ -174,12 +174,11 @@ public class TCFDataList implements SentenceDataList {
 			short[] heads = new short[size];
 			flags = new long[size];
 			forms = new String[size];
-			
 			for(int i = 0; i < size; i++){
 				heads[i] = (short) getHead(i);
 				forms[i] = getForm(i);
 			}
-			this.sentenceIndex = index;
+			sentenceIndex = index;
 
 			DependencyUtils.fillProjectivityFlags(heads, flags);
 
@@ -241,10 +240,34 @@ public class TCFDataList implements SentenceDataList {
 		@Override
 		public String getRelation(int index) {
 			
+			
+			
 			// dependency stuff
-			if (tcs.getDependencyParsingLayer() != null) {
+			if (tcs.getDependencyParsingLayer() != null) {	
+				
 				Dependency[] dep = tcs.getDependencyParsingLayer()
 						.getParse(sentenceIndex).getDependencies();
+				
+				
+				//workaround for wrong index, recalculate to be save
+				// see getHead for more information
+				boolean undefinedVal = true;
+				for (int i = 0; i < dep.length; i++) {
+					Token[] tmpTok = tcs.getDependencyParsingLayer()
+							.getDependentTokens(dep[i]);
+					Sentence toksentence = tcs.getSentencesLayer().getSentence(
+							tmpTok[0]);
+					Token[] tokenOffset = tcs.getSentencesLayer().getTokens(							toksentence);
+					
+					if ((tmpTok[0].getOrder()-tokenOffset[0].getOrder()) == index) {
+						index = i;
+						undefinedVal = false;
+					}
+				}				
+				if (undefinedVal) {
+					return "";
+				}
+				
 				return ensureValid(dep[index].getFunction());
 			} else {
 				return ""; //$NON-NLS-1$
@@ -294,42 +317,72 @@ public class TCFDataList implements SentenceDataList {
 		@Override
 		public int getHead(int index) {
 			if (tcs.getDependencyParsingLayer() != null) {
+
 				Dependency[] dep4 = tcs.getDependencyParsingLayer()
 						.getParse(sentenceIndex).getDependencies();
+
+
+				/* wrong index check if appropiate candidate in dep list,
+				 * some parser output may not recognize all tokens
+				 * 
+				 * workaround for this issue: we check everytime if the dependency
+				 * arraylist has a token with the current index (tmpTok[0].getOrder)
+				 * if we a match we just have to set the correct (new) index, otherwise
+				 * we assume that the data has an undefined value.
+				 */
+				boolean undefinedVal = true;
+				for (int i = 0; i < dep4.length; i++) {					
+					Token[] tmpTok = tcs.getDependencyParsingLayer()
+							.getDependentTokens(dep4[i]);
+					
+					//again offset numbercrunching
+					Sentence toksentence = tcs.getSentencesLayer().getSentence(
+							tmpTok[0]);
+					Token[] tokenOffset = tcs.getSentencesLayer().getTokens(							toksentence);
+					
+					if ((tmpTok[0].getOrder()-tokenOffset[0].getOrder()) == index) {
+						index = i;
+						undefinedVal = false;
+					}
+				}
+				
+				if (undefinedVal) {
+					return LanguageConstants.DATA_UNDEFINED_VALUE;
+				}
 
 				// check if dependent or root
 				if (tcs.getDependencyParsingLayer().getGovernorTokens(
 						dep4[index]) != null) {
-					//System.out.println("is no root" + index);
-					
+
+					// System.out.println("is no root" + index);
 					Token[] tSource = tcs.getDependencyParsingLayer()
 							.getGovernorTokens(dep4[index]);
+
 
 					/*
 					 * workaround, we count dependency per sentence in our
 					 * simple dependency data, tcf use global counting for
-					 * dependencys: tSource[0].getOrder() - tokenOffset[0].getOrder
-					 * will give us the correct index
+					 * dependencys: tSource[0].getOrder() -
+					 * tokenOffset[0].getOrder will give us the correct index
 					 */
 					Sentence toksentence = tcs.getSentencesLayer().getSentence(
 							tSource[0]);
 					Token[] tokenOffset = tcs.getSentencesLayer().getTokens(
 							toksentence);
-					// System.out.println(st[0].getOrder());
+//					 System.out.println("govID " + tSource[0].getOrder()
+//					 + " Offset " + tokenOffset[0].getOrder());
 
 					return (short) (tSource[0].getOrder() - tokenOffset[0]
 							.getOrder());
 
 				} else {
 					// is root node
-					//System.out.println("is root " + index);
+					// System.out.println("is root " + index);
 					return LanguageConstants.DATA_HEAD_ROOT;
-				}				
-			} else {
-				// default value when sentence invalid
-				return LanguageConstants.DATA_UNDEFINED_VALUE;
+				}
 			}
-
+			// default value when sentence invalid
+			return LanguageConstants.DATA_UNDEFINED_VALUE;
 		}
 
 		/**

@@ -191,7 +191,7 @@ public class WeblichtTreeModel extends AbstractTreeModel {
 				break;
 				
 			case Events.CHANGE:
-				for (WeblichtTreeModel model : models) {
+				for (WeblichtTreeModel model : models) {					
 					//model.fireTreeStructureChanged(parentPath);
 					model.fireStructureChanged();
 				}				
