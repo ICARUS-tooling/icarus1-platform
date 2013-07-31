@@ -11,8 +11,6 @@ package de.ims.icarus.plugins.tcf;
 
 import org.java.plugin.Plugin;
 
-import de.ims.icarus.Core;
-
 /**
  * 
  * @author Gregor Thiele
@@ -32,7 +30,7 @@ public class TCFPlugin extends Plugin {
 	protected void doStart() throws Exception {
 		
 		// Ensure some default treebank files
-		ClassLoader loader = TCFPlugin.class.getClassLoader();
+		/*ClassLoader loader = TCFPlugin.class.getClassLoader();
 		String[] resources = {
 			"tcf04-karin-wl.xml", //$NON-NLS-1$
 		};
@@ -42,7 +40,7 @@ public class TCFPlugin extends Plugin {
 		for(String resource : resources) {
 			String path = root+resource;
 			Core.getCore().ensureResource(folder, resource, path, loader);
-		}
+		}*/
 	}
 
 	/**

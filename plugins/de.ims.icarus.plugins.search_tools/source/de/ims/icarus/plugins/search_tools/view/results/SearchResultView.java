@@ -50,6 +50,7 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
@@ -621,7 +622,7 @@ public class SearchResultView extends View {
 				String  text = String.format(format, 
 						HtmlUtils.hexString(color),
 						HtmlUtils.escapeHTML(token),
-						count);
+						StringUtil.formatDecimal(count));
 				
 				label.setText(text);
 				label.setVisible(true);
