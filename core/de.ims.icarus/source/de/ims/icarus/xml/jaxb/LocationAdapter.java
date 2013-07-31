@@ -31,6 +31,6 @@ public class LocationAdapter extends XmlAdapter<String, Location> {
 	}
 
 	public String marshal(Location loc) {
-		return Locations.getPath(loc);
+		return Locations.getRelativePath(loc);
 	}
 }

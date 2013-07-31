@@ -290,8 +290,18 @@ public class TreebankRegistry {
 	}
 	
 	public void deleteTreebank(Treebank treebank) {
-		TreebankDescriptor descriptor = treebankMap.remove(treebank);
-		if(descriptor!=null) {			
+		TreebankDescriptor descriptor = treebankMap.get(treebank);
+		if(descriptor!=null) {	
+			
+			// Release treebank resources
+			try {
+				treebank.free();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$
+			}
+			
+			treebankMap.remove(treebank);
 			descriptorMap.remove(descriptor.getId());
 			if(delegateMap!=null) {
 				delegateMap.remove(descriptor.getId());
@@ -301,14 +311,6 @@ public class TreebankRegistry {
 			List<DerivedTreebank> derivedTreebanks = getDerived(treebank);
 			for(DerivedTreebank derivedTreebank : derivedTreebanks) {
 				derivedTreebank.setBase(DUMMY_TREEBANK);
-			}
-			
-			// Release treebank resources
-			try {
-				treebank.free();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$
 			}
 			
 			// Finally notify listeners

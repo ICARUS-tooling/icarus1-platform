@@ -77,6 +77,17 @@ public final class Locations {
 		}
 	}
 	
+	public static String getRelativePath(Location location) {
+		if(location==null) {
+			return null;
+		}
+		if(location.isLocal()) {
+			return IOUtil.toRelativeFile(location.getFile()).getPath();
+		} else {
+			return location.getURL().toString();
+		}
+	}
+	
 	public static boolean equals(Location l1, Location l2) {
 		if(l1==null && l2==null) {
 			return true;
