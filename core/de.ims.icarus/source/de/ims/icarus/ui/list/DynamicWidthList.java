@@ -101,14 +101,21 @@ public class DynamicWidthList<E extends Object> extends JList<E> {
 	}
 	
 	protected class SizeTracker extends ComponentAdapter {
+		
+		boolean ignoreResize = false;
 
 		@Override
 		public void componentResized(ComponentEvent e) {
 			if(!isSynchronizeFixedCellWidth() || getWidth()==0) {
 				return;
 			}
-			
-			setFixedCellWidth(getWidth());
+			try {
+				if(!ignoreResize) {
+					setFixedCellWidth(getWidth());
+				}
+			} finally {
+				ignoreResize = !ignoreResize;
+			}
 		}
 	}
 }

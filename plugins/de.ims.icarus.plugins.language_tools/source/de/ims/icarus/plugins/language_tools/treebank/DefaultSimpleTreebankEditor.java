@@ -201,7 +201,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 		public ReaderChoiceFormEntry(String label, ComboBoxModel<?> model) {
 			super(label, model);
 			
-			setRenderer(new ExtensionListCellRenderer());
+			setRenderer(ExtensionListCellRenderer.getSharedInstance());
 			
 			openConfigButton = new JButton();
 			openConfigButton.setFocusable(false);

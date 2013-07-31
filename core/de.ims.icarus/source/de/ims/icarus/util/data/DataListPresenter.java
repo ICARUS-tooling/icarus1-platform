@@ -243,7 +243,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			filterSelect = new JComboBox<>(new DefaultComboBoxModel<>());
 			filterSelect.setEditable(false);
 			filterSelect.setFocusable(false);
-			filterSelect.setRenderer(new ExtensionListCellRenderer());
+			filterSelect.setRenderer(ExtensionListCellRenderer.getSharedInstance());
 			filterSelect.addActionListener(getHandler());
 			UIUtil.fitToContent(filterSelect, 80, 150, 20);
 		}
@@ -606,6 +606,24 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	@Override
 	public ContentType getContentType() {
 		return dataList==null ?	null : dataList.getContentType();
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.Updatable#update()
+	 */
+	@Override
+	public boolean update() {
+		if(annotationControl!=null) {
+			annotationControl.update();
+		}
+		if(navigationControl!=null) {
+			navigationControl.update();
+		}
+		if(list!=null) {
+			list.repaint();
+		}
+		
+		return true;
 	}
 	
 	protected int getEstimatedWidth(FontMetrics fm, T item) {

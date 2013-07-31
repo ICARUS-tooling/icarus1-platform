@@ -29,6 +29,19 @@ import de.ims.icarus.util.id.Identity;
 public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 144607075843240899L;
+	
+	private static ExtensionListCellRenderer sharedInstance;
+	
+	public static ExtensionListCellRenderer getSharedInstance() {
+		if(sharedInstance==null) {
+			synchronized (ExtensionListCellRenderer.class) {
+				if(sharedInstance==null) {
+					sharedInstance = new ExtensionListCellRenderer();
+				}
+			}
+		}
+		return sharedInstance;
+	}
 
 	/**
 	 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)

@@ -40,6 +40,9 @@ public class MapAdapter<K, V> extends XmlAdapter<MapImp<K, V>, Map<K, V>> {
 	 */
 	@Override
 	public Map<K, V> unmarshal(MapImp<K, V> v) throws Exception {
+		if(v==null) {
+			return null;
+		}
 		HashMap<K, V> result = new HashMap<K, V>();
 		for (EntryImp<K, V> entry : v.getList()) {
 			if(entry.getValue()!=null) {
@@ -54,6 +57,9 @@ public class MapAdapter<K, V> extends XmlAdapter<MapImp<K, V>, Map<K, V>> {
 	 */
 	@Override
 	public MapImp<K, V> marshal(Map<K, V> v) throws Exception {
+		if(v==null) {
+			return null;
+		}
 		MapImp<K, V> result = new MapImp<K, V>();
 		for (Map.Entry<K, V> entry : v.entrySet()) {
 			if(entry.getValue()!=null) {

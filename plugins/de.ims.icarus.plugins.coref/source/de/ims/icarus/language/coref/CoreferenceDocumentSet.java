@@ -9,17 +9,11 @@
  */
 package de.ims.icarus.language.coref;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.ims.icarus.io.Reader;
-import de.ims.icarus.util.Options;
-import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
-import de.ims.icarus.util.location.Location;
-import de.ims.icarus.util.location.UnsupportedLocationException;
 
 
 /**
@@ -74,18 +68,5 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 
 	public CoreferenceAllocation getDefaultAllocation() {
 		return defaultAllocation;
-	}
-	
-	public static CoreferenceDocumentSet loadDocumentSet(Reader<CoreferenceDocumentData> reader,
-			Location location, Options options) throws IOException, UnsupportedLocationException, 
-				UnsupportedFormatException {
-
-		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
-		options.put("documentSet", documentSet); //$NON-NLS-1$
-		reader.init(location, options);
-		
-		while(reader.next()!=null);
-		
-		return documentSet;
 	}
 }

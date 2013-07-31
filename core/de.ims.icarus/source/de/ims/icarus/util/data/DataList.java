@@ -19,10 +19,6 @@ import javax.swing.event.ChangeListener;
 public interface DataList<T extends Object> extends DataContainer {
 
 
-	/**
-	 * Returns the number of {@code SentenceData} objects that
-	 * this {@code SentenceDataList} currently contains.
-	 */
 	int size();
 
 	T get(int index);
@@ -31,7 +27,7 @@ public interface DataList<T extends Object> extends DataContainer {
 	
 	/**
 	 * Adds a {@code ChangeListener} that will be notified when the number of
-	 * entries in this {@code SentenceDataList} changes.
+	 * entries in this {@code DataList} changes.
 	 */
 	void addChangeListener(ChangeListener listener);
 	

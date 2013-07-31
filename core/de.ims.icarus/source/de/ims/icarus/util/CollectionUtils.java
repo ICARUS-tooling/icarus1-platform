@@ -33,6 +33,14 @@ public final class CollectionUtils {
 		// no-op
 	}
 	
+	public static boolean equals(Object o1, Object o2) {
+		if(o1==null || o2==null) {
+			return false;
+		}
+		
+		return o1.equals(o2);
+	}
+	
 	/**
 	 * Tests whether a specific key maps to some value that represents
 	 * the boolean value {@code true} either directly by being of type

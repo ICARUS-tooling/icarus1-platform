@@ -48,12 +48,12 @@ public class IcarusCorePreferences {
 		builder.addBooleanEntry("useSystemLaF", true); //$NON-NLS-1$
 		builder.setProperties(
 				builder.addOptionsEntry("lookAndFeel", 0, collectAvailableLookAndFeels()), //$NON-NLS-1$
-				ConfigConstants.RENDERER, new ExtensionListCellRenderer());
+				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
 		builder.addBooleanEntry("exitWithoutPrompt", false); //$NON-NLS-1$
 		builder.addBooleanEntry("sortPerspectivesByStatistics", true); //$NON-NLS-1$
 		builder.setProperties(
 				builder.addOptionsEntry("defaultPerspective", 0, collectAvailablePerspectives()), //$NON-NLS-1$
-				ConfigConstants.RENDERER, new ExtensionListCellRenderer());
+				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
 		builder.addBooleanEntry("showSystemStreams", true); //$NON-NLS-1$
 		builder.back();
 		// END APPEARANCE GROUP

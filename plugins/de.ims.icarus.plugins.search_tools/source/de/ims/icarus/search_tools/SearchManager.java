@@ -41,6 +41,7 @@ import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
+import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.Identity;
@@ -238,6 +239,17 @@ public final class SearchManager {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
 				SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchTargetSelector"); //$NON-NLS-1$
 		return Collections.unmodifiableCollection(extensionPoint.getConnectedExtensions());
+	}
+	
+	public static Object getTarget(Search search) {
+		if(search==null)
+			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+		
+		Object target = search.getTarget();
+		if(target instanceof Wrapper) {
+			target = ((Wrapper<?>) target).get();
+		}
+		return target;
 	}
 	
 	private static Map<Search, ExecuteSearchJob> searchJobMap = new WeakHashMap<>();

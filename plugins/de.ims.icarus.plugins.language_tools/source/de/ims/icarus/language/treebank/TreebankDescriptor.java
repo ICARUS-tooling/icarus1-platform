@@ -57,12 +57,12 @@ public class TreebankDescriptor implements Comparable<TreebankDescriptor> {
 	@XmlTransient
 	private Treebank treebank;
 	
-	// 
+	// Location
 	@XmlElement(name="location")
 	@XmlJavaTypeAdapter(LocationAdapter.class)
 	private Location location;
 	
-	@XmlElement(name="properties", nillable=true)
+	@XmlElement(name="properties", required=false)
 	@XmlJavaTypeAdapter(MapAdapter.class)
 	private Map<String, Object> properties;
 	

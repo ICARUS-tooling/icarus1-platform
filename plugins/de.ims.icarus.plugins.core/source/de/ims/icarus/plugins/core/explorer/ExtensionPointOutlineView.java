@@ -14,8 +14,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,12 +47,10 @@ import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.LabelProxy;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
@@ -91,17 +87,7 @@ public class ExtensionPointOutlineView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = ExtensionPointOutlineView.class.getResource(
-				"extension-point-outline-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException(
-					"Missing resources: extension-point-outline-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(ExtensionPointOutlineView.class, "extension-point-outline-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

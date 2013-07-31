@@ -28,6 +28,16 @@ public class CoreferenceAllocation extends CorefMember {
 	public CoreferenceAllocation() {
 		// no-op
 	}
+	
+	public int size() {
+		return spanMap==null ? 0 : spanMap.size(); 
+	}
+	
+	public void free() {
+		spanMap = null;
+		edgeMap = null;
+		properties = null;
+	}
 
 	public SpanSet getSpanSet(String documentId) {
 		return spanMap==null ? null : spanMap.get(documentId);

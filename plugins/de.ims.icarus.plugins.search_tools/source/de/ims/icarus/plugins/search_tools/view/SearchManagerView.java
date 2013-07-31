@@ -19,8 +19,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +59,6 @@ import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.SearchTargetSelector;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.config.ConfigDialog;
@@ -69,7 +66,6 @@ import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.dialog.SelectFormEntry;
 import de.ims.icarus.ui.helper.Editor;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
@@ -120,16 +116,7 @@ public class SearchManagerView extends View {
 		}
 		
 		// Load actions
-		URL actionLocation = SearchManagerView.class.getResource("search-manager-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: search-manager-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(SearchManagerView.class, "search-manager-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		
@@ -797,7 +784,7 @@ public class SearchManagerView extends View {
 			JComboBox<Extension> cb = new JComboBox<>(
 					new ExtensionListModel(extensions, true));
 			cb.setEditable(false);
-			cb.setRenderer(new ExtensionListCellRenderer());
+			cb.setRenderer(ExtensionListCellRenderer.getSharedInstance());
 			UIUtil.fitToContent(cb, 150, 250, 22);
 			cb.addActionListener(this);
 			toolBar.add(cb);

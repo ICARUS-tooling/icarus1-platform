@@ -61,6 +61,12 @@ public abstract class CorefListMember<T extends Object> extends CorefMember impl
 		
 		fireChangeEvent();
 	}
+	
+	public void free() {
+		items = null;
+		properties = null;
+		fireChangeEvent();
+	}
 
 	/**
 	 * @see de.ims.icarus.util.data.DataList#addChangeListener(javax.swing.event.ChangeListener)

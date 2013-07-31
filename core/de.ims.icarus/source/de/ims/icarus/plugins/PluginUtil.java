@@ -583,7 +583,7 @@ public final class PluginUtil {
 		
 		ExtensionListModel model = new ExtensionListModel(extensions, doSort);
 		final JList<Extension> list = new JList<>(model);
-		list.setCellRenderer(new ExtensionListCellRenderer());
+		list.setCellRenderer(ExtensionListCellRenderer.getSharedInstance());
 		
 		final MutableBoolean selectedByClick = new MutableBoolean(false);
 		

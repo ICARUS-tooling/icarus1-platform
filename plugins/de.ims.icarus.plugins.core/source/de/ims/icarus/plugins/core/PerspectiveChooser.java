@@ -168,7 +168,7 @@ public class PerspectiveChooser {
 		Color bg = Color.white; 
 		
 		perspectiveList = new JList<>(new ExtensionListModel(connectedExtensions, false));
-		perspectiveList.setCellRenderer(new ExtensionListCellRenderer());
+		perspectiveList.setCellRenderer(ExtensionListCellRenderer.getSharedInstance());
 		perspectiveList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		perspectiveList.addListSelectionListener(handler);
 		perspectiveList.addMouseListener(handler);

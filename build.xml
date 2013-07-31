@@ -69,10 +69,12 @@ test  - runs some tests
 		<ant dir="plugins/de.ims.icarus.plugins.dependency" target="${target}" />
 		<ant dir="plugins/de.ims.icarus.plugins.matetools" target="${target}" />
 		<ant dir="plugins/de.ims.icarus.plugins.tcf" target="${target}" />
-		<ant dir="plugins/de.ims.icarus.plugins.weblicht" target="${target}" />
+		<ant dir="plugins/de.ims.icarus.plugins.weblicht" target="${target}" />	
+	</target>
+
+	<target name="-build-plugins-ims" depends="-build-plugins">
 		<ant dir="plugins/de.ims.icarus.plugins.coref" target="${target}" />
 		<ant dir="plugins/de.ims.icarus.plugins.errormining" target="${target}" />
-		<!-- TODO insert calls to sub build-files here -->
 	</target>
 
 	<target name="-compile">
@@ -96,6 +98,11 @@ test  - runs some tests
 	</target>
 
 	<target name="build_ims" depends="build" description="Builds entire project (for IMS internal staff members)">
+
+		<antcall target="-build-plugins-ims">
+			<param name="target" value="build" />
+		</antcall>
+		
 		<mkdir dir="${build.home}/data"/>
 		<copy todir="${build.home}/data">
 			<fileset dir="${basedir}/data">

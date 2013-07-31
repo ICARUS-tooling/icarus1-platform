@@ -9,6 +9,7 @@
  */
 package de.ims.icarus.language.dependency.search;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
@@ -87,8 +88,12 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 
 		@Override
 		public Object getInstance(Object value) {
-			return LanguageUtils.getBooleanValue(
-					((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE));
+			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
+		}
+
+		@Override
+		protected Object getConstraint() {
+			return getValue().equals(LanguageConstants.DATA_YES_VALUE);
 		}
 
 		@Override

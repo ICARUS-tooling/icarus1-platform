@@ -18,8 +18,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -48,11 +46,9 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.CompoundIcon;
 import de.ims.icarus.ui.IconRegistry;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.events.EventObject;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.id.DefaultIdentity;
 import de.ims.icarus.util.id.Identity;
@@ -80,7 +76,7 @@ public class LogView extends View {
 	
 	private LogListModel loggingModel;
 	
-	private boolean scrollLock = false;
+	private boolean scrollLock = true;
 	private boolean showOnError = true;
 	private boolean showOnWarning = true;
 	
@@ -175,16 +171,8 @@ public class LogView extends View {
 	@Override
 	public void init(JComponent container) {
 		
-		// load actions
-		URL actionLocation = LogView.class.getResource("log-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: log-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		// Load actions
+		if(!defaultLoadActions(LogView.class, "log-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

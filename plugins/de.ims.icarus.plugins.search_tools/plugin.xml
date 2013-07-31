@@ -214,6 +214,7 @@
 		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.SearchPerspective" />
 		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/search-perspective.png" />
+		<parameter id="preview" value="de/ims/icarus/plugins/search_tools/view/search-perspective-preview.png" />
 	</extension>
 	
 	<extension id="QueryEditorView" plugin-id="de.ims.icarus.searchTools" point-id="SearchToolsView">

@@ -469,6 +469,10 @@ public final class ContentTypeRegistry {
 		eventSource.fireEvent(new EventObject(Events.ADDED, "type", type)); //$NON-NLS-1$
 	}
 	
+	public void addType(Class<?> clazz) {
+		addType(new DefaultContentType(clazz));
+	}
+	
 	public List<ContentType> availableTypes() {
 		return new ArrayList<>(contentTypes.values());
 	}

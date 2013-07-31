@@ -556,6 +556,8 @@ public class IcarusFrame extends JFrame {
 			this.currentPerspective = null;
 		}
 		
+		refreshTitle();
+		
 		getEventSource().fireEvent(new EventObject(IcarusFrameEvents.PERSPECTIVE_CLOSED, 
 				"perspective", perspective)); //$NON-NLS-1$
 	}

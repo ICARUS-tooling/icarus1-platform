@@ -10,9 +10,6 @@
 package de.ims.icarus.plugins.language_tools.input;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
-import java.net.URL;
-import java.util.logging.Level;
 
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
@@ -22,12 +19,9 @@ import javax.swing.JToolBar;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 
-import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
@@ -55,18 +49,9 @@ public class TextInputView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = TextInputView.class.getResource("text-input-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: text-input-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(TextInputView.class, "text-input-view-actions.xml")) { //$NON-NLS-1$
 			return;
-		}		
+		}
 		
 		inputArea = new JTextArea();
 		inputArea.setLineWrap(true);

@@ -19,6 +19,7 @@ import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
+import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
 import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.result.SearchResult;
@@ -106,7 +107,7 @@ public abstract class AbstractCorpusSearchResult implements SearchResult, Senten
 	}
 
 	public SentenceDataList getTarget() {
-		return (SentenceDataList) search.getTarget();
+		return (SentenceDataList) SearchManager.getTarget(search);
 	}
 
 	@Override

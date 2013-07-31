@@ -76,8 +76,8 @@ public class CONLL09SentenceDataReader implements SentenceDataReader {
 		normalize = true;
 		inputFormat = 0;
 
-		gold = options.get(INCLUDE_GOLD_OPTION, false);
-		system = options.get(INCLUDE_SYSTEM_OPTION, false);
+		gold = options.getBoolean(INCLUDE_GOLD_OPTION, false);
+		system = options.getBoolean(INCLUDE_SYSTEM_OPTION, false);
 
 		if (!gold && !system) {
 			system = true;

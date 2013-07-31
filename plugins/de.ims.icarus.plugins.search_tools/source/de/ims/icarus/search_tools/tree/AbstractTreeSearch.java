@@ -24,6 +24,7 @@ import de.ims.icarus.search_tools.InvalidSearchGraphException;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchGraph;
+import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchMode;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.result.EntryBuilder;
@@ -93,7 +94,7 @@ public abstract class AbstractTreeSearch extends Search {
 			return false;
 		}
 		
-		source = createSource(getTarget());
+		source = createSource(SearchManager.getTarget(this));
 		if(source==null)
 			throw new IllegalStateException("Invalid source created"); //$NON-NLS-1$
 		

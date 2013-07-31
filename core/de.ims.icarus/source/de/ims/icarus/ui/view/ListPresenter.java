@@ -12,6 +12,7 @@ package de.ims.icarus.ui.view;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
+import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.util.data.ContentType;
 
 
@@ -20,7 +21,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public interface ListPresenter extends AWTPresenter {
+public interface ListPresenter extends AWTPresenter, Updatable {
 	
 	ListModel<?> getListModel();
 	

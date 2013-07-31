@@ -630,7 +630,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 
 		addPropertyChangeListener(propertyName, listener);
 		
-		comboBox.setRenderer(new ExtensionListCellRenderer());
+		comboBox.setRenderer(ExtensionListCellRenderer.getSharedInstance());
 		comboBox.setEditable(false);
 		comboBox.addActionListener(getHandler());
 		comboBox.setActionCommand(command);

@@ -193,7 +193,8 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		}
 		
 		if(listPresenter!=null) {
-			listPresenter.getPresentingComponent().repaint();
+			//listPresenter.getPresentingComponent().repaint();
+			listPresenter.update();
 		}
 	}
 	

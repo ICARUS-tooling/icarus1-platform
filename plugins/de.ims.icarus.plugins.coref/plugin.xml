@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="de.ims.icarus.language.coref" version="0.0.1"
+<plugin id="de.ims.icarus.coref" version="0.0.1"
 	class="de.ims.icarus.plugins.coref.CoreferencePlugin">
 	
 	<doc>
@@ -72,6 +72,58 @@
 			</doc>
 		</parameter-def>
 	</extension-point>
+			
+	<extension-point id="CoreferenceView" parent-point-id="View" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that only want to
+				contribute to coreference related perspectives.
+			</doc-text>
+		</doc>
+	</extension-point>
+			
+	<extension-point id="DocumentReader" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Helper object for reading a certain type of 'coreference document'
+				from an arbitrary location. Note that this sort of reader is used to
+				read multiple documents from a single large document set file. Therefore
+				each 'read' operation is required to return a complete document object.
+				The surrounding document set will be passed to the Reader.init(Location, Options)
+				method via the options argument with the property name "documentSet".
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'reader' itself as a java class.
+					Required to have no-args constructor and implement
+					de.ims.icarus.io.Reader&lt;CoreferenceDocumentData&gt; interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="AllocationReader" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Helper object for reading doreference allocations, i.e. collections
+				of node and edge declarations annotated with arbitrary attributes.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'reader' itself as a java class.
+					Required to have no-args constructor and implement
+					de.ims.icarus.language.coref.io.AllocationReader interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
 	
 	<!-- Standard Extensions -->
 	
@@ -91,7 +143,82 @@
 		<parameter id="preview" value="de/ims/icarus/plugins/coref/coreference-perspective-preview.jpg" />
 	</extension>
 	
+	<extension id="CoreferenceManagerView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
+		<doc>
+			<doc-text>
+				Tree style view for management of registered coreference document sets and their
+				respective allocations.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.coref.coreferenceManagerView.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferenceManagerView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.manager.CoreferenceManagerView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/view/manager/coreference-manager-view.gif" />
+		<parameter id="alignment" value="left" />
+		<parameter id="priority" value="high" />
+	</extension>
+	
+	<extension id="CoreferenceExplorerView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
+		<doc>
+			<doc-text>
+				Utility view to select a document set and assign actual allocations to it.
+				Features a list style selection capability to allow user selection of a single
+				document that will be forwarded to the CoreferenceDocumentView for final presentation.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.coref.coreferenceExplorerView.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferenceExplorerView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.CoreferenceExplorerView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/view/coreference-explorer-view.gif" />
+		<parameter id="alignment" value="left" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="select" />
+		</parameter>
+	</extension>
+	
+	<extension id="CoreferenceDocumentView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
+		<doc>
+			<doc-text>
+				Presentation view that allows for selection of different visualization
+				types for a single document and its allocations.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.coref.coreferenceDocumentView.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferenceDocumentView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.CoreferenceDocumentView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/view/coreference-document-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="high" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="present" value="CoreferenceDocumentDataContentType" />
+		</parameter>
+	</extension>
+	
 	<!-- HELPERS -->
+	
+	<extension id="DefaultAllocationReader" plugin-id="de.ims.icarus.coref" point-id="AllocationReader">
+		<parameter id="name" value="plugins.coref.defaultAllocationReader.identity.name" />
+		<parameter id="description" value="plugins.coref.defaultAllocationReader.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.language.coref.io.DefaultAllocationReader" />
+	</extension>
+	
+	<extension id="CONLL12DocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
+		<parameter id="name" value="plugins.coref.CONLL12DocumentReader.identity.name" />
+		<parameter id="description" value="plugins.coref.CONLL12DocumentReader.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.io.CONLL12DocumentReader" />
+	</extension>
 	
 	<!-- CONTENT TYPES -->
 	

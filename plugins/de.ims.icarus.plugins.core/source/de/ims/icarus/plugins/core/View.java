@@ -10,12 +10,17 @@
 package de.ims.icarus.plugins.core;
 
 import java.awt.Frame;
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
 
 import javax.swing.JComponent;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
@@ -332,6 +337,25 @@ public abstract class View implements Identifiable {
 	 */
 	protected final ActionManager getDefaultActionManager() {
 		return getPerspective().getActionManager();
+	}
+	
+	protected boolean defaultLoadActions(Class<?> clazz, String path) {
+		if(clazz==null) {
+			clazz = getClass();
+		}
+		// Load actions
+		URL actionLocation = clazz.getResource(path);
+		if(actionLocation==null)
+			throw new CorruptedStateException("Missing resources: "+path); //$NON-NLS-1$
+		
+		try {
+			getDefaultActionManager().loadActions(actionLocation);
+			return true;
+		} catch (IOException e) {
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
+			UIDummies.createDefaultErrorOutput(getContainer(), e);
+			return false;
+		}
 	}
 	
 	/**

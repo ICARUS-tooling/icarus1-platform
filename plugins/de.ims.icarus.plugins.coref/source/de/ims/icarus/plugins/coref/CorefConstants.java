@@ -25,6 +25,8 @@ public interface CorefConstants {
 			COREFERENCE_PLUGIN_ID+"@CoreferencePerspective"; //$NON-NLS-1$
 	
 	// View IDs
+	public static final String COREFERENCE_MANAGER_VIEW_ID = 
+			COREFERENCE_PLUGIN_ID+"@CoreferenceManagerView"; //$NON-NLS-1$
 	public static final String COREFERENCE_EXPLORER_VIEW_ID = 
 			COREFERENCE_PLUGIN_ID+"@CoreferenceExplorerView"; //$NON-NLS-1$
 	public static final String COREFERENCE_DOCUMENT_VIEW_ID = 

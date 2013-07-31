@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		COREFERENCE MANAGER VIEW
+	-->
+		
+	<!-- Expand All -->
+	<action id="plugins.coref.coreferenceManagerView.expandAllAction"
+		name="${id}.name" desc="${id}.description" icon="expandall.png" />
+	
+	<!-- Collapse All -->
+	<action id="plugins.coref.coreferenceManagerView.collapseAllAction"
+		name="${id}.name" desc="${id}.description" icon="collapseall.png" />
+	
+	<!-- Add Document Set -->
+	<action id="plugins.coref.coreferenceManagerView.addDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="coref_add.png" />
+	
+	<!-- Delete Document Set -->
+	<action id="plugins.coref.coreferenceManagerView.deleteDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="coref_delete.png" />
+	
+	<!-- Edit Document Set -->
+	<action id="plugins.coref.coreferenceManagerView.editDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="coref_edit.png" />
+	
+	<!-- Inspect Document Set -->
+	<action id="plugins.coref.coreferenceManagerView.inspectDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="coref_inspect.png" />
+	
+	<!-- Add Allocation -->
+	<action id="plugins.coref.coreferenceManagerView.addAllocationAction"
+		name="${id}.name" desc="${id}.description" icon="alloc_add.png" />
+	
+	<!-- Delete Allocation -->
+	<action id="plugins.coref.coreferenceManagerView.deleteAllocationAction"
+		name="${id}.name" desc="${id}.description" icon="alloc_delete.png" />
+	
+	<!-- Edit Allocation -->
+	<action id="plugins.coref.coreferenceManagerView.editAllocationAction"
+		name="${id}.name" desc="${id}.description" icon="alloc_edit.png" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.coref.coreferenceManagerView.toolBarList">
+		<item type="action" value="plugins.coref.coreferenceManagerView.addDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.deleteDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.editDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.inspectDocumentSetAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.addAllocationAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.deleteAllocationAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.editAllocationAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.collapseAllAction" />
+	</action-list>
+		
+	<!-- Popup-Menu list -->
+	<action-list id="plugins.coref.coreferenceManagerView.popupMenuList">
+		<item type="action" value="plugins.coref.coreferenceManagerView.addDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.deleteDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.editDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.inspectDocumentSetAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.addAllocationAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.deleteAllocationAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.editAllocationAction" />
+	</action-list>
+	
+</actions>

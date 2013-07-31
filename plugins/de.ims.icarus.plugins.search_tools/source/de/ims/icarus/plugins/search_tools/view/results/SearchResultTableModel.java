@@ -310,7 +310,7 @@ public class SearchResultTableModel extends AbstractTableModel
 			CollectionUtils.fillAscending(columnTransform);
 			try {
 				Arrays.sort(columnTransform, new Comparator<Integer>(){
-					int result = columnsAscending ? -1 : 1;
+					int result = columnsAscending ? 1 : -1;
 					int dimension = columnDimension;
 	
 					@Override

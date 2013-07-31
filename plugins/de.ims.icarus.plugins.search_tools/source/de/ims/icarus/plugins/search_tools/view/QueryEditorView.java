@@ -12,8 +12,6 @@ package de.ims.icarus.plugins.search_tools.view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.net.URL;
 import java.util.logging.Level;
 
 import javax.swing.ActionMap;
@@ -38,11 +36,9 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.SearchDescriptor;
 import de.ims.icarus.search_tools.SearchGraph;
 import de.ims.icarus.search_tools.SearchQuery;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
@@ -77,16 +73,7 @@ public class QueryEditorView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = QueryEditorView.class.getResource("query-editor-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: query-editor-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(QueryEditorView.class, "query-editor-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

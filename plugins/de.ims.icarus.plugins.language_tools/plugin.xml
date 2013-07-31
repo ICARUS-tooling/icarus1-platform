@@ -192,6 +192,7 @@
 		<parameter id="resources" value="de.ims.icarus.plugins.language_tools.resources.language_tools" />
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.TreebankManagerPerspective" />
 		<parameter id="icon" value="de/ims/icarus/plugins/language_tools/treebank/treebank-manager-perspective.png" />
+		<parameter id="preview" value="de/ims/icarus/plugins/language_tools/treebank/treebank-manager-perspective-preview.png" />
 	</extension>
 	
 	<extension id="TextInputView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">

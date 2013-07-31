@@ -228,8 +228,12 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 			if(i>0) {
 				width += fm.charWidth(',');
 			}
-			tokens[i] = labelBuilder.getLabel(node, i);
-			width += fm.stringWidth(tokens[i]);
+			
+			String token = labelBuilder.getLabel(node, i);
+			if(token==null) {
+				continue;
+			}
+			width += fm.stringWidth(token);
 		}
 		width += fm.charWidth(']');
 		
@@ -243,6 +247,12 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		x += fm.charWidth('[');
 		
 		for(int i=0; i<count; i++) {
+			String token = tokens[i];
+			
+			if(token==null) {
+				continue;
+			}
+			
 			if(i>0) {
 				g.setColor(col);
 				g.drawString(",", x, y); //$NON-NLS-1$
@@ -261,7 +271,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 			}
 			
 			g.setColor(col);
-			g.drawString(tokens[i], x, y);
+			g.drawString(token, x, y);
 			x += fm.stringWidth(tokens[i]);
 		}
 		

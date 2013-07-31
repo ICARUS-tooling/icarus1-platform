@@ -96,7 +96,7 @@ public class CoreferenceDocumentData extends CorefListMember<SentenceData> imple
 
 	public void setDocumentSet(CoreferenceDocumentSet documentSet) {
 		if(documentSet==null)
-			throw new IllegalArgumentException("Invalid document set"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid document-set"); //$NON-NLS-1$
 		
 		this.documentSet = documentSet;
 	}

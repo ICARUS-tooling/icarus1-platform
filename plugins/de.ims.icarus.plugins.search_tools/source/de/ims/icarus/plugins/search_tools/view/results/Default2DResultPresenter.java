@@ -87,7 +87,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	protected void displayResult(Options options) {
 		SearchResult searchResult = this.searchResult;
 		if(searchResult==null) {
-			searchResult = ResultDummies.dummyResult1D;
+			searchResult = ResultDummies.dummyResult2D;
 		}
 		
 		tableModel.setResultData(searchResult);

@@ -9,6 +9,7 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,10 +18,15 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.ims.icarus.io.Reader;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.Options;
+import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.location.UnsupportedLocationException;
 
 
 /**
@@ -272,6 +278,34 @@ public final class CoreferenceUtils {
 			edgeSet = document.getDefaultEdgeSet();
 		}
 		return edgeSet;
+	}
+	
+	public static CoreferenceDocumentSet loadDocumentSet(Reader<CoreferenceDocumentData> reader,
+			Location location, Options options) throws IOException, UnsupportedLocationException, 
+				UnsupportedFormatException {
+
+		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
+		loadDocumentSet(reader, location, options, documentSet);
+		
+		return documentSet;
+	}
+	
+	public static void loadDocumentSet(Reader<CoreferenceDocumentData> reader,
+			Location location, Options options, CoreferenceDocumentSet target) throws IOException, UnsupportedLocationException, 
+				UnsupportedFormatException {
+
+		options.put("documentSet", target); //$NON-NLS-1$
+		reader.init(location, options);
+		
+		CoreferenceDocumentData document;
+		while((document=reader.next())!=null) {
+			// Only add new document if the reader did not use
+			// the CoreferenceDocumentSet.newDocument(String) method
+			// to create a new document.
+			if(target.size()==0 || target.get(target.size()-1)!=document) {
+				target.add(document);
+			}
+		}
 	}
 	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {

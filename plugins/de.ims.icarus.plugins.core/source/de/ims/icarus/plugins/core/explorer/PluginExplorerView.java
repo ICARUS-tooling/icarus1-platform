@@ -61,12 +61,10 @@ import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.LabelProxy;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventObject;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.mpi.Commands;
@@ -106,16 +104,7 @@ public class PluginExplorerView extends View {
 	public void init(final JComponent container) {
 		
 		// Load actions
-		URL actionLocation = PluginExplorerView.class.getResource("plugin-explorer-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: plugin-explorer-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(PluginExplorerView.class, "plugin-explorer-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

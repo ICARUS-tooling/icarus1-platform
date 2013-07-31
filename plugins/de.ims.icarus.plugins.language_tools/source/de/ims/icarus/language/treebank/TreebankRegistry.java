@@ -11,6 +11,8 @@ package de.ims.icarus.language.treebank;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectStreamException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -121,6 +123,17 @@ public class TreebankRegistry {
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to load treebank list", e); //$NON-NLS-1$
 		}
+	}
+	
+	// prevent multiple deserialization
+	private Object readResolve() throws ObjectStreamException {
+		throw new NotSerializableException();
+	}
+	
+	// prevent cloning
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
 	}
 	
 	public Set<Extension> availableTypes() {

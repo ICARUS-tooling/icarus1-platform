@@ -132,7 +132,7 @@ public final class TreeUtils {
 		options.put(GraphValidator.ALLOW_NEGATED_TRANSITIVES, false);
 		options.put(GraphValidator.MAX_INCOMING_EDGES, 1);
 		options.put(GraphValidator.ALLOW_UNDEFINED_GRAPH, true);
-		options.put(GraphValidator.ALLOW_NEGATED_DISJUNCTIONS, true);
+		options.put(GraphValidator.ALLOW_NEGATED_DISJUNCTIONS, false);
 		
 		GraphValidator validator = new GraphValidator();
 		

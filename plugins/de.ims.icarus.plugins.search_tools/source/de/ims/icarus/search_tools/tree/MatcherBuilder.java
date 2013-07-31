@@ -721,7 +721,18 @@ public class MatcherBuilder {
 		}
 		
 		public boolean isNegated() {
-			return negated || searchNode.isNegated() || (searchEdge!=null && searchEdge.isNegated());
+			// FIXME test new handling 
+			//return negated || searchNode.isNegated() || (searchEdge!=null && searchEdge.isNegated());
+			
+			boolean negated = this.negated;
+			if(searchEdge!=null && searchEdge.isNegated()) {
+				negated = !negated;
+			}
+			if(searchNode.isNegated()) {
+				negated = !negated;
+			}
+			
+			return negated;
 		}
 		
 		public void setNegated(boolean negated) {

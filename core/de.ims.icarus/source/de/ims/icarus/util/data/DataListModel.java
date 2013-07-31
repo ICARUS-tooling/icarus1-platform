@@ -13,6 +13,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
 import javax.swing.AbstractListModel;
+import javax.swing.ComboBoxModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -21,11 +22,13 @@ import javax.swing.event.ChangeListener;
  * @version $Id$
  *
  */
-public class DataListModel<E extends Object> extends AbstractListModel<E> {
+public class DataListModel<E extends Object> extends AbstractListModel<E> implements ComboBoxModel<E> {
 	
 	private static final long serialVersionUID = -3970689300461058008L;
 	
 	protected DataList<E> dataList;
+	
+	protected Object selectedObject;
 	
 	protected OwnedChangeListener ownedChangeListener;
 	
@@ -82,6 +85,28 @@ public class DataListModel<E extends Object> extends AbstractListModel<E> {
 	public void clear() {
 		setDataList(null);
 	}
+
+	/**
+	 * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setSelectedItem(Object anItem) {
+		if((selectedObject!=null && !selectedObject.equals(anItem))
+				|| (selectedObject==null && anItem!=null)) {
+			selectedObject = (E) anItem;
+			
+			fireContentsChanged(this, -1, -1);
+		}
+	}
+
+	/**
+	 * @see javax.swing.ComboBoxModel#getSelectedItem()
+	 */
+	@Override
+	public Object getSelectedItem() {
+		return selectedObject;
+	}
 	
 	/**
 	 * Helper method for the {@code OwnedChangeListener} to delegate
@@ -124,5 +149,4 @@ public class DataListModel<E extends Object> extends AbstractListModel<E> {
 			return false;
 		}
 	}
-
 }

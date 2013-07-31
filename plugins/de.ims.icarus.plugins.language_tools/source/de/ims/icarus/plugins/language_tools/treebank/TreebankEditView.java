@@ -12,8 +12,6 @@ package de.ims.icarus.plugins.language_tools.treebank;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.net.URL;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
@@ -29,7 +27,6 @@ import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -38,7 +35,6 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
@@ -74,17 +70,7 @@ public class TreebankEditView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = TreebankEditView.class.getResource("treebank-edit-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: treebank-edit-view-actions.xml"); //$NON-NLS-1$
-		
-		ActionManager actionManager = getDefaultActionManager();
-		try {
-			actionManager.loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(TreebankEditView.class, "treebank-edit-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		
@@ -105,6 +91,7 @@ public class TreebankEditView extends View {
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 		
 		// Footer area
+		ActionManager actionManager = getDefaultActionManager();
 		JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
 		footer.setBorder(new EmptyBorder(5, 20, 5, 20));
 		footer.add(new JButton(actionManager.getAction(

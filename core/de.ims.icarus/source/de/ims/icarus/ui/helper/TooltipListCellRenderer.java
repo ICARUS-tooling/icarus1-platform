@@ -15,6 +15,8 @@ import java.awt.FontMetrics;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
+import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
 
@@ -51,6 +53,8 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 		String tooltip = null;
 		if(value instanceof Identifiable) {
 			value = ((Identifiable)value).getIdentity();
+		} else if(value instanceof NamedObject) {
+			value = ((NamedObject)value).getName();
 		}
 		if(value instanceof Identity) {
 			Identity identity = (Identity) value;
@@ -76,7 +80,7 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 			tooltip = null;
 		}
 
-		setToolTipText(tooltip);
+		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 		
 		return this;
 	}

@@ -49,7 +49,7 @@ import de.ims.icarus.util.StringUtil;
  *
  */
 public class NavigationControl implements ListSelectionListener, 
-		ListDataListener, ActionListener, PropertyChangeListener {
+		ListDataListener, ActionListener, PropertyChangeListener, Updatable {
 	
 	public static final String ARROW_STYLE_OPTION = "arrowStyle"; //$NON-NLS-1$
 	public static final String LEFT_CONTENT_OPTION = "leftContent"; //$NON-NLS-1$
@@ -402,6 +402,17 @@ public class NavigationControl implements ListSelectionListener,
 			((ListModel<?>)evt.getOldValue()).removeListDataListener(this);
 			((ListModel<?>)evt.getNewValue()).addListDataListener(this);
 		}
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.Updatable#update()
+	 */
+	@Override
+	public boolean update() {
+		refreshDisplayedSize();
+		refreshSelectedIndex();
+		
+		return true;
 	}
 
 	public class DefaultIndexFormatter extends JFormattedTextField.AbstractFormatter {

@@ -17,7 +17,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -44,7 +43,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.treebank.DerivedTreebank;
@@ -64,7 +62,6 @@ import de.ims.icarus.plugins.core.ToolBarDelegate;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.language_tools.LanguageToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.BasicDialogBuilder;
@@ -74,7 +71,6 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
@@ -109,16 +105,7 @@ public class TreebankExplorerView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = TreebankExplorerView.class.getResource("treebank-explorer-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: treebank-explorer-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(TreebankExplorerView.class, "treebank-explorer-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

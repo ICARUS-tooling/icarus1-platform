@@ -11,10 +11,14 @@ package de.ims.icarus.plugins.coref;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.util.logging.Level;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+
+import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
+import org.java.plugin.registry.PluginDescriptor;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
@@ -22,13 +26,16 @@ import com.mxgraph.view.mxGraph;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.io.AllocationReader;
-import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.language.coref.io.DefaultAllocationReader;
+import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
-import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter;
 import de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter;
 import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentSetPresenter;
+import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
@@ -50,14 +57,45 @@ public class CoreferencePerspective extends Perspective {
 	 */
 	@Override
 	public void init(JComponent container) {
-		try {
-			test2(container);
-			//textGraph(container);
-		} catch (Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, "Failed to test", e);
-		}
+		collectViewExtensions();
+		defaultDoLayout(container);
+		
+		focusView(CorefConstants.COREFERENCE_MANAGER_VIEW_ID);
 	}
 	
+	@Override
+	protected void collectViewExtensions() {
+		PluginDescriptor descriptor = getExtension().getDeclaringPluginDescriptor();
+		
+		String[] defaultViewIds = {
+				CorefConstants.COREFERENCE_MANAGER_VIEW_ID,
+				CorefConstants.COREFERENCE_EXPLORER_VIEW_ID,
+				CorefConstants.COREFERENCE_DOCUMENT_VIEW_ID,
+				ManagementConstants.DEFAULT_LOG_VIEW_ID,
+				ManagementConstants.DEFAULT_OUTPUT_VIEW_ID,
+				/*ManagementConstants.TABLE_VIEW_ID,*/
+		};
+		
+		Set<Extension> newExtensions = new HashSet<>();
+		
+		// Collect default extensions and report corrupted state
+		// when one is missing
+		newExtensions.addAll(PluginUtil.getExtensions(defaultViewIds));
+		
+		// Collect all extensions that are connected to the CoreferenceView point
+		// -> might result in redundant adds, so we use a Set<Extension>
+		ExtensionPoint managementViewPoint = descriptor.getExtensionPoint("CoreferenceView"); //$NON-NLS-1$
+		if(managementViewPoint!=null) {
+			newExtensions.addAll(PluginUtil.getExtensions(
+					managementViewPoint, true, true, null));
+		}
+		
+		connectedViews.addAll(newExtensions);
+		
+		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEWS_ADDED, 
+				"extensions", newExtensions.toArray())); //$NON-NLS-1$
+	}
+
 	private void textGraph(JComponent container) {
 		container.setLayout(new BorderLayout());
 		
@@ -76,7 +114,7 @@ public class CoreferencePerspective extends Perspective {
 		Location location = Locations.getFileLocation("data/coref/eng_dev_v4_auto_conll.gz");
 		CONLL12DocumentReader reader = new CONLL12DocumentReader();
 		
-		CoreferenceDocumentSet set = CoreferenceDocumentSet.loadDocumentSet(
+		CoreferenceDocumentSet set = CoreferenceUtils.loadDocumentSet(
 				reader, location, new Options());
 		
 		CoreferenceDocumentSetPresenter presenter = new CoreferenceDocumentSetPresenter();
@@ -93,18 +131,20 @@ public class CoreferencePerspective extends Perspective {
 				"data/coref/eng_dev_v4_auto_conll.gz");
 		CONLL12DocumentReader reader = new CONLL12DocumentReader();
 		
-		CoreferenceDocumentSet set = CoreferenceDocumentSet.loadDocumentSet(
+		CoreferenceDocumentSet set = CoreferenceUtils.loadDocumentSet(
 				reader, location, new Options());
 		
 		String path = "E:\\Tasks\\Diplomarbeit\\resources\\out.GOLD.icarus"; //$NON-NLS-1$
-		AllocationReader r = new AllocationReader();
+		AllocationReader r = new DefaultAllocationReader();
 		r.init(Locations.getFileLocation(path), null, set);		
-		CoreferenceAllocation gold = r.readAllocation();
+		CoreferenceAllocation gold = new CoreferenceAllocation();
+		r.readAllocation(gold);
 		
 		path = "E:\\Tasks\\Diplomarbeit\\resources\\out.PRED.icarus"; //$NON-NLS-1$
-		r = new AllocationReader();
+		r = new DefaultAllocationReader();
 		r.init(Locations.getFileLocation(path), null, set);		
-		CoreferenceAllocation predicted = r.readAllocation();		
+		CoreferenceAllocation predicted = new CoreferenceAllocation();
+		r.readAllocation(predicted);
 		
 		//CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
 		EntityGridPresenter presenter = new EntityGridPresenter();

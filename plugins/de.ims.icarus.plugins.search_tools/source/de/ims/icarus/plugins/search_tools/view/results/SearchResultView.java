@@ -16,8 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -30,7 +28,6 @@ import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
 
 import org.java.plugin.registry.Extension;
 
@@ -45,16 +42,14 @@ import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.IconRegistry;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.HtmlUtils;
-import de.ims.icarus.util.Options;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
+import de.ims.icarus.util.Options;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
@@ -95,16 +90,7 @@ public class SearchResultView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = SearchResultView.class.getResource("search-result-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: search-result-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(SearchResultView.class, "search-result-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

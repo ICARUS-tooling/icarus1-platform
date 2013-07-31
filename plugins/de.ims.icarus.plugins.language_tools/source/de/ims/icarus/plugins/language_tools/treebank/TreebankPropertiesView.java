@@ -16,8 +16,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,14 +49,12 @@ import de.ims.icarus.plugins.language_tools.LanguageToolsConstants;
 import de.ims.icarus.resources.Localizer;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.table.TooltipTableCellRenderer;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -107,16 +103,7 @@ public class TreebankPropertiesView extends View {
 	public void init(JComponent container) {
 		
 		// Load actions
-		URL actionLocation = TreebankPropertiesView.class.getResource("treebank-properties-view-actions.xml"); //$NON-NLS-1$
-		if(actionLocation==null)
-			throw new CorruptedStateException("Missing resources: treebank-properties-view-actions.xml"); //$NON-NLS-1$
-		
-		try {
-			getDefaultActionManager().loadActions(actionLocation);
-		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+		if(!defaultLoadActions(TreebankPropertiesView.class, "treebank-properties-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

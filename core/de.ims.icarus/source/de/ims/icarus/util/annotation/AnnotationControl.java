@@ -31,6 +31,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.NavigationControl;
 import de.ims.icarus.ui.NavigationControl.ArrowStyle;
 import de.ims.icarus.ui.NavigationControl.ElementType;
+import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.PropertyChangeSource;
@@ -42,7 +43,7 @@ import de.ims.icarus.util.PropertyChangeSource;
  * @version $Id$
  *
  */
-public class AnnotationControl extends PropertyChangeSource implements PropertyChangeListener {
+public class AnnotationControl extends PropertyChangeSource implements PropertyChangeListener, Updatable {
 
 	protected AnnotationManager annotationManager;
 	
@@ -449,5 +450,15 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 			toolBar.add(navigationButtons[2]);
 			toolBar.add(navigationButtons[3]);
 		}
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.Updatable#update()
+	 */
+	@Override
+	public boolean update() {
+		updateDisplayMode();
+		updateNavigationLabel();
+		return true;
 	}
 }

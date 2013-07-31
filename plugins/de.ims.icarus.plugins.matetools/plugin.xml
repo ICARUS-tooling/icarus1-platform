@@ -59,6 +59,7 @@
 		<parameter id="resources" value="de.ims.icarus.plugins.matetools.resources.matetools" />
 		<parameter id="class" value="de.ims.icarus.plugins.matetools.parser.MatetoolsParserPerspective" />
 		<parameter id="icon" value="de/ims/icarus/plugins/matetools/parser/matetools-parser-perspective.png" />
+		<parameter id="preview" value="de/ims/icarus/plugins/matetools/parser/matetools-parser-perspective-preview.png" />
 	</extension>
 	
 	<extension id="MatetoolsParserInputView" plugin-id="de.ims.icarus.matetools" point-id="MatetoolsView">

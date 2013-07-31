@@ -180,7 +180,7 @@ public class MatetoolsParserInputView extends TextInputView {
 			Collection<Extension> availableTokenizers = LanguageManager.getAvailableTokenizers();
 			tokenizerSelect = new JComboBox<>(new ExtensionListModel(availableTokenizers, true));
 			tokenizerSelect.setEditable(false);
-			tokenizerSelect.setRenderer(new ExtensionListCellRenderer());
+			tokenizerSelect.setRenderer(ExtensionListCellRenderer.getSharedInstance());
 			
 			UIUtil.fitToContent(tokenizerSelect, 130, 200, 24);
 			
