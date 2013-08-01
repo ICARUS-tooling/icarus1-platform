@@ -97,7 +97,7 @@ test  - runs some tests
 		</antcall>
 	</target>
 
-	<target name="build_ims" depends="build" description="Builds entire project (for IMS internal staff members)">
+	<target name="build-ims" depends="build" description="Builds entire project (for IMS internal staff members)">
 
 		<antcall target="-build-plugins-ims">
 			<param name="target" value="build" />
@@ -112,10 +112,36 @@ test  - runs some tests
 		</copy>
 	</target>
 
-	<target name="run" depends="build" description="Runs application">
-		<java jar="${build.home}/icarus.jar"
-		      dir="${build.home}"
-		      fork="true" />
+	<target name="source" depends="clean,-init" description="Exports source files">
+
+		<ant dir="launcher/de.ims.icarus" target="source" />
+		<ant dir="core/de.ims.icarus" target="source" />		
+		
+		<antcall target="-build-plugins">
+			<param name="target" value="source" />
+		</antcall>
+
+		<zip destfile="${build.home}/${app.name}-src-${app.version}.zip"
+		     duplicate="fail"
+		     update="false">
+			<fileset dir="${build.home}" includes="**/*" />
+		</zip>
+		<delete includeemptydirs="true">
+			<fileset dir="${build.home}">
+				<include name="**/*" />
+				<exclude name="${app.name}-???-${app.version}.zip" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="source-ims" depends="clean,-init" description="Exports source files (for IMS internal staff members)">
+
+		<ant dir="launcher/de.ims.icarus" target="source" />
+		<ant dir="core/de.ims.icarus" target="source" />		
+		
+		<antcall target="-build-plugins-ims">
+			<param name="target" value="source" />
+		</antcall>
 	</target>
 
 	<target name="check"
@@ -156,8 +182,8 @@ test  - runs some tests
 		</delete>
 	</target>
 
-	<target name="dist_ims"
-	        depends="clean,build_ims"
+	<target name="dist-ims"
+	        depends="clean,build-ims"
 	        description="Prepares distribution packages (for IMS internal staff members)">
 		<zip destfile="${build.home}/${app.name}-bin-${app.version}-ims.zip"
 		     duplicate="fail"

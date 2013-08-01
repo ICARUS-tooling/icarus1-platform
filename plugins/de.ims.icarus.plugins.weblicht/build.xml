@@ -64,4 +64,13 @@ Use top-level project build file to build application.
 		         sourcepath="${basedir}/source">
 		</javadoc>
 	</target>
+
+	<target name="source">
+		<echo>Distributing plug-in ${plugin.id} sources to folder ${plugin.home}</echo>
+		<copy todir="${plugin.home}">
+			<fileset dir="${basedir}/source"
+			         includes="**/*"
+			         excludes="**/.*" />
+		</copy>
+	</target>
 </project>

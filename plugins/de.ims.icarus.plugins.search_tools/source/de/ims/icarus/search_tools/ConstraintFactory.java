@@ -60,6 +60,10 @@ public interface ConstraintFactory {
 	 */
 	Class<?> getValueClass();
 	
+	/**
+	 * Returns the value to be used as constraint in the case that
+	 * no user input was made.
+	 */
 	Object getDefaultValue();
 
 	/**
@@ -83,4 +87,7 @@ public interface ConstraintFactory {
 	Object valueToLabel(Object value);
 	
 	int getConstraintType();
+	
+	// TODO add mechanics to create multiple instances of constraint and to 
+	// obtain min and max allowed instance count
 }

@@ -36,7 +36,6 @@ import java.util.logging.Level;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -85,8 +84,6 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	private JList<CoreferenceDocumentData> list;
 	private DataListModel<CoreferenceDocumentData> listModel;
 	
-	private JLabel loadingLabel;
-	
 	private DocumentSetListWrapper documentSetModel;
 	private AllocationListWrapper allocationModel;
 	private AllocationListWrapper goldAllocationModel;
@@ -134,16 +131,16 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		entry.getComboBox().addActionListener(handler);
 		formBuilder.addEntry("documentSet", entry); //$NON-NLS-1$
 		// Allocation selection
+		allocationModel = new AllocationListWrapper(false);
 		entry = new ChoiceFormEntry( 
 				"plugins.coref.labels.allocation", allocationModel, false); //$NON-NLS-1$
 		entry.getComboBox().addActionListener(handler);
-		allocationModel = new AllocationListWrapper(false);
 		formBuilder.addEntry("allocation", entry); //$NON-NLS-1$
 		// Gold allocation selection
+		goldAllocationModel = new AllocationListWrapper(true);
 		entry = new ChoiceFormEntry( 
 				"plugins.coref.labels.goldAllocation", goldAllocationModel, false); //$NON-NLS-1$
 		entry.getComboBox().addActionListener(handler);
-		goldAllocationModel = new AllocationListWrapper(true);
 		formBuilder.addEntry("goldAllocation", entry); //$NON-NLS-1$
 		
 		formBuilder.buildForm();
@@ -461,7 +458,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public Object getSelectedItem() {
-			return descriptor;
+			return descriptor==null ? dummyEntry : descriptor;
 		}
 		
 		/**
@@ -510,7 +507,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			} else if(index==1) {
 				return getDefautlAllocationDescriptor();
 			}
-			return descriptor.get(index-1);
+			return descriptor.get(index-2);
 		}
 
 		/**
@@ -542,7 +539,11 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public Object getSelectedItem() {
-			return gold ? goldAllocation : allocation;
+			Object selectedItem = gold ? goldAllocation : allocation;
+			if(selectedItem==null) {
+				selectedItem = dummyEntry;
+			}
+			return selectedItem;
 		}
 		
 		/**

@@ -63,6 +63,7 @@ import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.Version;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.Core.NamedRunnable;
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.LanguageManager;
@@ -139,6 +140,8 @@ public class TreebankRegistry {
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to load treebank list", e); //$NON-NLS-1$
 		}
+		
+		Core.getCore().addShutdownHook(new ShutdownHook());
 	}
 	
 	// prevent multiple deserialization
@@ -647,37 +650,29 @@ public class TreebankRegistry {
 		
 	};
 	
-	private AtomicBoolean saveCheck = new AtomicBoolean();
-	private AtomicInteger saveCount = new AtomicInteger();
-	private Runnable saveTask;
-	
-	private void saveBackground() {
-		if(saveCheck.compareAndSet(false, true)) {			
-			if(saveTask==null) {
-				saveTask = new Runnable() {
-					
-					@Override
-					public void run() {
-						try {
-							save();
-						} catch (Exception e) {
-							LoggerFactory.log(this, Level.SEVERE, "Failed to save treebank descriptor list", e); //$NON-NLS-1$
-						} finally {
-							saveCheck.set(false);
-						}
-					}
-				};
+	private synchronized void saveBackground() {
+		final TreebankSet treebankSet = new TreebankSet(descriptorMap.values());
+		
+		Runnable saveTask = new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					save(treebankSet);
+				} catch (Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, "Failed to save treebank descriptor list", e); //$NON-NLS-1$
+				}
 			}
-			
-			String title = ResourceManager.getInstance().get(
-					"plugins.languageTools.treebankSaveTask.title"); //$NON-NLS-1$
-			String info = ResourceManager.getInstance().get(
-					"plugins.languageTools.treebankSaveTask.description", availableTreebankCount()); //$NON-NLS-1$
-			Icon icon = IconRegistry.getGlobalRegistry().getIcon("treebank_saveas_edit.gif"); //$NON-NLS-1$
-			
-			TaskManager.getInstance().schedule(saveTask, title, 
-					info, icon, TaskPriority.DEFAULT, true);
-		}
+		};
+		
+		String title = ResourceManager.getInstance().get(
+				"plugins.languageTools.treebankSaveTask.title"); //$NON-NLS-1$
+		String info = ResourceManager.getInstance().get(
+				"plugins.languageTools.treebankSaveTask.description", availableTreebankCount()); //$NON-NLS-1$
+		Icon icon = IconRegistry.getGlobalRegistry().getIcon("treebank_saveas_edit.gif"); //$NON-NLS-1$
+		
+		TaskManager.getInstance().schedule(saveTask, title, 
+				info, icon, TaskPriority.DEFAULT, true);
 	}
 	
 	private static final String list_file = "treebanks.xml"; //$NON-NLS-1$
@@ -704,21 +699,24 @@ public class TreebankRegistry {
 		}
 	}
 	
-	private void save() throws Exception {
-		File file = new File(Core.getCore().getDataFolder(), list_file);
-		if(!file.exists()) {
-			file.createNewFile();
-		}
+	private final Object saveLock = new Object();
+	
+	private void save(TreebankSet treebankSet) throws Exception {
+		synchronized (saveLock) {
+			File file = new File(Core.getCore().getDataFolder(), list_file);
+			if(!file.exists()) {
+				file.createNewFile();
+			}
 
-		for(TreebankDescriptor descriptor : descriptorMap.values()) {
-			descriptor.syncFromTreebank();
-		}
-		TreebankSet treebankSet = new TreebankSet(descriptorMap.values());
+			for(int i=0; i<treebankSet.getItemCount(); i++) {
+				treebankSet.getItem(i).syncFromTreebank();
+			}
 
-		JAXBContext context = JAXBUtils.getSharedJAXBContext();
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		marshaller.marshal(treebankSet, file);
+			JAXBContext context = JAXBUtils.getSharedJAXBContext();
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			marshaller.marshal(treebankSet, file);
+		}
 	}
 	
 	@XmlRootElement
@@ -840,5 +838,26 @@ public class TreebankRegistry {
 		}
 		
 		return result;
+	}
+	
+	private class ShutdownHook implements NamedRunnable {
+
+		/**
+		 * @see de.ims.icarus.Core.NamedRunnable#getName()
+		 */
+		@Override
+		public String getName() {
+			return ResourceManager.getInstance().get(
+					"plugins.languageTools.treebankSaveTask.title"); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see de.ims.icarus.Core.NamedRunnable#run()
+		 */
+		@Override
+		public void run() throws Exception {
+			TreebankSet treebankSet = new TreebankSet(treebankMap.values());
+			save(treebankSet);
+		}
 	}
 }

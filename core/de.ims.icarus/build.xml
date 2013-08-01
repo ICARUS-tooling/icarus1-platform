@@ -54,5 +54,14 @@ Use top-level project build file to build application.
 		<jar jarfile="${build.home}/lib/${core.jar.name}" basedir="${basedir}/classes" 
 			index="true" manifest="${basedir}/manifest.mf" />
 	</target>
+
+	<target name="source">
+		<echo>Distributing ICARUS core sources to folder ${build.home}</echo>
+		<copy todir="${build.home}/core">
+			<fileset dir="${basedir}/source"
+			         includes="**/*"
+			         excludes="**/.*" />
+		</copy>
+	</target>
 	
 </project>
