@@ -27,7 +27,6 @@ package de.ims.icarus.plugins.dependency.graph;
 
 import javax.swing.JComponent;
 
-
 import com.mxgraph.model.mxIGraphModel;
 
 import de.ims.icarus.language.LanguageUtils;

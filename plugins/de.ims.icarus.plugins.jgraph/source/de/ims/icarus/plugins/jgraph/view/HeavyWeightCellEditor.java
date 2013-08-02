@@ -18,7 +18,6 @@ import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.event.MouseInputListener;
 
-
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.view.mxICellEditor;

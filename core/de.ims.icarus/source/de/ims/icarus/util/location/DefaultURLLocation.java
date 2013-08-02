@@ -32,7 +32,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
-
 import org.java.plugin.util.IoUtil;
 
 import de.ims.icarus.io.IOUtil;

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.swing.JComponent;
 
-
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;

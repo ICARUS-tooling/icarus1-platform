@@ -30,7 +30,6 @@ import java.net.URL;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.plugins.PluginUtil;
@@ -85,8 +84,9 @@ public class ExtensionIdentity implements Identity {
 	public String getName() {
 		Extension.Parameter param = extension.getParameter("name"); //$NON-NLS-1$
 		
-		if(param!=null && resources!=null) {
-			return resources.getResource(param.valueAsString());
+		if(param!=null) {
+			String name = param.valueAsString();
+			return resources==null ? name : resources.getResource(name);
 		}
 		
 		return getId();
@@ -99,8 +99,9 @@ public class ExtensionIdentity implements Identity {
 	public String getDescription() {
 		Extension.Parameter param = extension.getParameter("description"); //$NON-NLS-1$
 		
-		if(param!=null && resources!=null) {
-			return resources.getResource(param.valueAsString());
+		if(param!=null) {
+			String desc = param.valueAsString();
+			return resources==null ? desc : resources.getResource(desc);
 		}
 		
 		return null;

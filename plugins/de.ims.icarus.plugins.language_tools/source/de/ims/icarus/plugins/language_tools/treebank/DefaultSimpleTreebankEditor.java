@@ -38,7 +38,6 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
-
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 

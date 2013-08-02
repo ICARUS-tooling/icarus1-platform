@@ -86,22 +86,44 @@
 		</parameter>
 	</extension>
 	
-	<extension id="CONLL09SentenceDataReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+	<extension id="CONLL09SentenceDataGoldReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
 		<doc>
 			<doc-text>
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataReader" />
+		<parameter id="name" value="CoNLL 09 Reader (gold)" />
+		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader" />
 	</extension>
 	
-	<extension id="CONLL09SentenceDataWriter" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataWriter">
+	<extension id="CONLL09SentenceDataPredictedReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
 		<doc>
 			<doc-text>
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataWriter" />
+		<parameter id="name" value="CoNLL 09 Reader (predicted)" />
+		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataPredictedReader" />
+	</extension>
+	
+	<extension id="CONLL09SentenceDataGoldWriter" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataWriter">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="CoNLL 09 Writer (gold)" />
+		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldWriter" />
+	</extension>
+	
+	<extension id="CONLL09SentenceDataPredictedWriter" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataWriter">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="CoNLL 09 Writer (predicted)" />
+		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataPredictedWriter" />
 	</extension>
 	
 	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">

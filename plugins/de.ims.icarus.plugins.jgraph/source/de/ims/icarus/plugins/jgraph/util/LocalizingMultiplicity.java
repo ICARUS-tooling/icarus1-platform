@@ -27,7 +27,6 @@ package de.ims.icarus.plugins.jgraph.util;
 
 import java.util.Collection;
 
-
 import com.mxgraph.view.mxMultiplicity;
 
 import de.ims.icarus.resources.Localizable;

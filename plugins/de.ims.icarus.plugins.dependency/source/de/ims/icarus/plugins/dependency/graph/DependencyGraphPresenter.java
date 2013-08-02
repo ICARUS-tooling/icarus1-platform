@@ -37,7 +37,6 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
-
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;

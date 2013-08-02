@@ -28,7 +28,6 @@ package de.ims.icarus.plugins.jgraph.util;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxPoint;

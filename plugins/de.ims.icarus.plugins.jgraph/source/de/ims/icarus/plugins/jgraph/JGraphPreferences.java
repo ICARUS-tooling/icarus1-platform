@@ -32,7 +32,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-
 import com.mxgraph.swing.mxGraphComponent;
 
 import de.ims.icarus.config.ConfigBuilder;

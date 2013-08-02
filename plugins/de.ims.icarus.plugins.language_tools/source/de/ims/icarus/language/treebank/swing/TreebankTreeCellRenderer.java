@@ -31,7 +31,6 @@ import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.treebank.Treebank;

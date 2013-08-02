@@ -1,6 +1,6 @@
 /* 
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus Gï¿½rtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,10 +34,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.java.plugin.registry.Extension;
+
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.xml.jaxb.ExtensionAdapter;
-
-import org.java.plugin.registry.Extension;
 
 /**
  * @author Gregor Thiele

@@ -43,8 +43,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
@@ -56,7 +54,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
@@ -70,6 +67,7 @@ import de.ims.icarus.language.LanguageManager;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.core.IcarusCorePlugin;
 import de.ims.icarus.plugins.language_tools.LanguageToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
@@ -123,7 +121,6 @@ public class TreebankRegistry {
 	private Map<String, Extension> treebankTypes = new HashMap<>();
 	
 	private Map<String, Reference<TreebankListDelegate>> delegateMap;
-	
 	private TreebankRegistry() {
 		eventSource = new WeakEventSource(this);
 		
@@ -142,6 +139,11 @@ public class TreebankRegistry {
 		}
 		
 		Core.getCore().addShutdownHook(new ShutdownHook());
+		
+		// Show example data if required
+		if(!IcarusCorePlugin.isShowExampleData()) {
+			return;
+		}
 	}
 	
 	// prevent multiple deserialization

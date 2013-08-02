@@ -39,7 +39,6 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
-
 import com.sun.java.swing.plaf.windows.WindowsTableHeaderUI;
 
 import de.ims.icarus.ui.UIUtil;

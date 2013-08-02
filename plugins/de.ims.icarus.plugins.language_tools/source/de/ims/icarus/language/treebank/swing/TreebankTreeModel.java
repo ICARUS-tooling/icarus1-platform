@@ -33,7 +33,6 @@ import java.util.WeakHashMap;
 
 import javax.swing.tree.TreePath;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.treebank.Treebank;

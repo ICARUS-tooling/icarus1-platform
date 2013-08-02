@@ -25,11 +25,11 @@
  */
 package de.ims.icarus.plugins.matetools.conll;
 
+import is2.data.SentenceData09;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
-import is2.data.SentenceData09;
 
 /**
  * @author Markus Gärtner

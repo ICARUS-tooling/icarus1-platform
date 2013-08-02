@@ -25,7 +25,13 @@
  */
 package de.ims.icarus.plugins.coref;
 
+import java.util.Collection;
+
 import org.java.plugin.Plugin;
+import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
+
+import de.ims.icarus.plugins.PluginUtil;
 
 /**
  * @author Markus Gärtner
@@ -55,5 +61,22 @@ public class CoreferencePlugin extends Plugin {
 		// TODO Auto-generated method stub
 
 	}
-
+	
+	public static Collection<Extension> getDocumentReaderExtensions() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				CorefConstants.COREFERENCE_PLUGIN_ID, "DocumentReader"); //$NON-NLS-1$
+		return extensionPoint.getConnectedExtensions();
+	}
+	
+	public static Collection<Extension> getAllocationReaderExtensions() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				CorefConstants.COREFERENCE_PLUGIN_ID, "AllocationReader"); //$NON-NLS-1$
+		return extensionPoint.getConnectedExtensions();
+	}
+	
+	public static Collection<Extension> getCoreferencePresenterExtensions() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				CorefConstants.COREFERENCE_PLUGIN_ID, "CoreferencePresenter"); //$NON-NLS-1$
+		return extensionPoint.getConnectedExtensions();
+	}
 }

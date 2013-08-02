@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
 

@@ -49,7 +49,9 @@ import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
+import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter;
 import de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter;
+import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentPresenter;
 import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentSetPresenter;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.util.Options;
@@ -73,10 +75,16 @@ public class CoreferencePerspective extends Perspective {
 	 */
 	@Override
 	public void init(JComponent container) {
-		collectViewExtensions();
+		/*collectViewExtensions();
 		defaultDoLayout(container);
 		
-		focusView(CorefConstants.COREFERENCE_MANAGER_VIEW_ID);
+		focusView(CorefConstants.COREFERENCE_MANAGER_VIEW_ID);*/
+		try {
+			test2(container);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -163,7 +171,7 @@ public class CoreferencePerspective extends Perspective {
 		r.readAllocation(predicted);
 		
 		//CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
-		EntityGridPresenter presenter = new EntityGridPresenter();
+		CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
 		
 		container.setLayout(new BorderLayout());
 		container.add(presenter.getPresentingComponent(), BorderLayout.CENTER);

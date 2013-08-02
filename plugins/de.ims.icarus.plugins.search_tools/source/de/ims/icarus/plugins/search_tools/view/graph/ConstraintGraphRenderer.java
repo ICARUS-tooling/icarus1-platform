@@ -28,7 +28,6 @@ package de.ims.icarus.plugins.search_tools.view.graph;
 import java.awt.Dimension;
 import java.util.List;
 
-
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
 

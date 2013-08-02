@@ -27,7 +27,6 @@ package de.ims.icarus.util.data;
 
 import java.util.logging.Level;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;

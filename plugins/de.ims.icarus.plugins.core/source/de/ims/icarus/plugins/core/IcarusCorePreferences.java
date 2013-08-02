@@ -71,6 +71,7 @@ public class IcarusCorePreferences {
 				builder.addOptionsEntry("defaultPerspective", 0, collectAvailablePerspectives()), //$NON-NLS-1$
 				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
 		builder.addBooleanEntry("showSystemStreams", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showExampleData", true); //$NON-NLS-1$
 		builder.back();
 		// END APPEARANCE GROUP
 		

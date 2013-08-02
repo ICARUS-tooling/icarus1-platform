@@ -1,6 +1,6 @@
 /* 
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus Gï¿½rtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -89,6 +89,16 @@ public class NGramSearchFactory implements SearchFactory {
 	@Override
 	public Editor<Options> createParameterEditor() {
 		return new DefaultParameterEditor();
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#createExampleSearch()
+	 */
+	@Override
+	public Search createExampleSearch() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

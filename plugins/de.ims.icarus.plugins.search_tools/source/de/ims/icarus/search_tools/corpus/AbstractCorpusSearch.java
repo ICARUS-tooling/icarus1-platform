@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigRegistry;
@@ -47,8 +46,8 @@ import de.ims.icarus.search_tools.annotation.ResultAnnotator;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.tree.AbstractTreeSearch;
 import de.ims.icarus.ui.dialog.DialogFactory;
-import de.ims.icarus.util.Options;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
+import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 

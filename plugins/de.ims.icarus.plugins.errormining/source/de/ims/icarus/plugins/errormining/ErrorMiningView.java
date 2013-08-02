@@ -1,6 +1,6 @@
 /* 
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus Gï¿½rtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,11 +68,9 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
-import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
-import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
-import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataReader;
+import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
 import de.ims.icarus.plugins.search_tools.view.SearchHistory;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Search;
@@ -307,7 +305,7 @@ public class ErrorMiningView extends View {
 			on.put("NGramLIMIT", 0); //$NON-NLS-1$
 			final NGrams ngrams = new NGrams(1, on);
 			
-			CONLL09SentenceDataReader conellReader = new CONLL09SentenceDataReader();	
+			CONLL09SentenceDataGoldReader conellReader = new CONLL09SentenceDataGoldReader();	
 			DefaultFileLocation dloc = new DefaultFileLocation(file);
 			Options o = null;
 			try {

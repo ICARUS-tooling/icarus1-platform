@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
+ * $Revision: 123 $ 
+ * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $ 
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.matetools/source/de/ims/icarus/plugins/matetools/conll/CONLL09SentenceDataWriter.java $ 
  * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $  
+ * $LastChangedRevision: 123 $  
+ * $LastChangedBy: mcgaerty $ 
  */
 package de.ims.icarus.plugins.matetools.conll;
 
@@ -40,25 +40,21 @@ import de.ims.icarus.language.dependency.DependencyConstants;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
-import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 
 
 /**
  * @author Gregor Thiele
- * @version $Id$
+ * @version $Id: CONLL09SentenceDataWriter.java 123 2013-07-31 15:22:01Z mcgaerty $
  * 
  */
-public class CONLL09SentenceDataWriter implements SentenceDataWriter {
+public class CONLL09SentenceDataGoldWriter implements SentenceDataWriter {
 	
 	protected CONLLWriter09 writer;
 	protected boolean writeRoot;
-	protected boolean gold;
-	protected boolean system;
 	protected int outputFormat; // 0 (default) or 1
 
 	/**
@@ -81,12 +77,6 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 		//TODO extend me
 		writeRoot = false;
 
-		gold = options.get(INCLUDE_GOLD_OPTION, false);
-		system = options.get(INCLUDE_SYSTEM_OPTION, false);
-		
-		if (!gold && !system){
-			system = true;
-		}
 		outputFormat = 0;
 
 		writer = new CONLLWriter09(file.toString(), outputFormat);
@@ -116,15 +106,8 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 				sdd = (SimpleDependencyData) data;
 				currentData.init(LanguageUtils.getForms(sdd));
 				
-				if (gold){
-					initGold(currentData, sdd.length());
-				}
+				initGold(currentData, sdd.length());
 				
-				if (system){
-					initSystem(currentData, sdd.length());
-				}
-				
-
 				//Sentence Debug
 				/*
 				for (int j = 0 ; j < sdd.getForms().length;j++){
@@ -144,22 +127,11 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 					*/
 					
 					currentData.forms[i] = sdd.getForm(i);
-					if(system) {
-     					currentData.pheads[i] = sdd.getHead(i) + 1;
-						currentData.ppos[i] = sdd.getPos(i);						
-						currentData.pfeats[i] = sdd.getFeatures(i);
-						currentData.plemmas[i] = sdd.getLemma(i);
-						currentData.plabels[i] = sdd.getRelation(i);
-					}
-					
-					if(gold) {
-						currentData.heads[i] = sdd.getHead(i) + 1;
-						currentData.gpos[i] = sdd.getPos(i);
-						currentData.ofeats[i] = sdd.getFeatures(i);
-						currentData.lemmas[i] = sdd.getLemma(i);
-						currentData.labels[i] = sdd.getRelation(i);
-					}
-
+					currentData.heads[i] = sdd.getHead(i) + 1;
+					currentData.gpos[i] = sdd.getPos(i);
+					currentData.ofeats[i] = sdd.getFeatures(i);
+					currentData.lemmas[i] = sdd.getLemma(i);
+					currentData.labels[i] = sdd.getRelation(i);
 				}
 
 				writer.write(currentData, writeRoot);
@@ -174,16 +146,6 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 			writer.finishWriting();
 		}
 
-	}
-	
-	
-	private void initSystem(SentenceData09 data, int size){
-		if (data.forms == null)		data.forms  = new String[size];
-		if (data.pheads == null)	data.pheads = new int[size];
-		if (data.ppos == null)		data.ppos = new String[size];					
-		if (data.pfeats == null)	data.pfeats = new String[size];
-		if (data.plemmas == null)	data.plemmas = new String[size];
-		if (data.plabels == null)	data.plabels = new String[size];		
 	}
 	
 	private void initGold(SentenceData09 data, int size){
@@ -212,35 +174,4 @@ public class CONLL09SentenceDataWriter implements SentenceDataWriter {
 		return ContentTypeRegistry.getInstance().getType(
 				DependencyConstants.CONTENT_TYPE_ID);
 	}
-
-	public static void main(String[] args) throws UnsupportedFormatException {
-
-		File fileIn = new File("E:\\test_small.txt"); //$NON-NLS-1$		
-		DefaultFileLocation dloc = new DefaultFileLocation(fileIn);
-
-		File fileOut = new File("E:\\test_small_out.txt"); //$NON-NLS-1$		
-		DefaultFileLocation dlocOut = new DefaultFileLocation(fileOut);
-
-		Options o = new Options();
-		o.put(INCLUDE_GOLD_OPTION, true);
-		o.put(INCLUDE_SYSTEM_OPTION, true);
-		CONLL09SentenceDataReader tr = new CONLL09SentenceDataReader();
-		CONLL09SentenceDataWriter tw = new CONLL09SentenceDataWriter();
-		try {
-			tr.init(dloc, o);
-			tw.init(dlocOut, o);
-			SentenceData sd = tr.next();
-			tw.write(sd);
-
-			System.out.println("Finished: Output@ E:\\test_out.xml"); //$NON-NLS-1$
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
 }

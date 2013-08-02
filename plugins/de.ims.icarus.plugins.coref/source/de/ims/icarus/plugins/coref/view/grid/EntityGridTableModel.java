@@ -26,7 +26,6 @@
 package de.ims.icarus.plugins.coref.view.grid;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;

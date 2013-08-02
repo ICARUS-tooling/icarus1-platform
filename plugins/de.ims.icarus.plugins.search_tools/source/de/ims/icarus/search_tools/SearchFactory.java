@@ -50,6 +50,8 @@ public interface SearchFactory {
 	 */
 	Search createSearch(SearchQuery query, Object target, Options options) throws UnsupportedFormatException;
 	
+	Search createExampleSearch() throws Exception;
+	
 	ConstraintContext getConstraintContext();
 	
 	/**

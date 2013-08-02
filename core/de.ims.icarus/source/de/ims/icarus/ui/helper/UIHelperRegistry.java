@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;

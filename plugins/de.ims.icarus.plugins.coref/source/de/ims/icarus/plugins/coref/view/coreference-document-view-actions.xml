@@ -3,97 +3,29 @@
 <actions>
 
 	<!--
-		COREFERENCE TEXT PRESENTER
+		COREFERENCE DOCUMENT VIEW
 	-->
 		
-	<!-- Refresh -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.refreshAction"
+	<!-- Refresh View -->
+	<action id="plugins.coref.coreferenceDocumentView.refreshViewAction"
 		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
 		
-	<!-- Toggle 'markSpans' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleMarkSpansAction"
-		name="${id}.name" desc="${id}.description" icon="highlight.gif" type="toggle" />
-		
-	<!-- Toggle 'showOffset' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction"
-		name="${id}.name" desc="${id}.description" icon="register_view.png" type="toggle" />
-		
-	<!-- Toggle 'showClusterId' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction"
-		name="${id}.name" desc="${id}.description" icon="uddi_registry_cat_node.gif" type="toggle" />
-		
-	<!-- Toggle 'showDocumentHeader' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction"
-		name="${id}.name" desc="${id}.description" icon="EEnum.gif" type="toggle" />
-		
-	<!-- Toggle 'floatingText' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction"
-		name="${id}.name" desc="${id}.description" icon="XSDSimpleEnum.gif" type="toggle" />
-		
-	<!-- Filter Span -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.filterSpanAction"
-		name="${id}.name" desc="${id}.description" icon="filter_tsk.gif" />
-		
-	<!-- Clear Filter -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.clearFilterAction"
+	<!-- Clear View -->
+	<action id="plugins.coref.coreferenceDocumentView.clearViewAction"
 		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
 		
-	<!-- Toggle Document Filter -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleDocumentFilterAction"
-		name="${id}.name" desc="${id}.description" icon="filter_imported_elements.gif" type="toggle" />
-		
 	<!-- Open Preferences -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.openPreferencesAction"
+	<action id="plugins.coref.coreferenceDocumentView.openPreferencesAction"
 		name="${id}.name" desc="${id}.description" icon="settings.gif" />
 		
 	<!-- ToolBar List for header area -->
-	<action-list id="plugins.coref.coreferenceDocumentPresenter.toolBarList">
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.openPreferencesAction" />
+	<action-list id="plugins.coref.coreferenceDocumentView.toolBarList">
+		<item type="action" value="plugins.coref.coreferenceDocumentView.openPreferencesAction" />
 		<separator />
-		<item type="label" value="plugins.coref.coreferenceDocumentPresenter.highlightType" />
-		<item type="custom" value="selectHighlightType" />
+		<item type="label" value="plugins.coref.coreferenceDocumentView.presenter" />
+		<item type="custom" value="selectPresenter" />
 		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkSpansAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
-	</action-list>
-		
-	<!-- Extended Toolbar List for header area -->
-	<action-list id="plugins.coref.coreferenceDocumentPresenter.extendedToolBarList">
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.openPreferencesAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleDocumentFilterAction" />
-		<separator />
-		<item type="label" value="plugins.coref.coreferenceDocumentPresenter.highlightType" />
-		<item type="custom" value="selectHighlightType" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkSpansAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
-	</action-list>
-		
-	<!-- Popup-Menu list -->
-	<action-list id="plugins.coref.coreferenceDocumentPresenter.popupMenuList">
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
-		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
-	</action-list>
-	
+		<item type="action" value="plugins.coref.coreferenceDocumentView.refreshViewAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentView.clearViewAction" />
+	</action-list>	
 </actions>

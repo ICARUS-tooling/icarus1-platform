@@ -57,7 +57,7 @@
 			<doc-text>
 				Member of the coreference visualization framework. Extensions
 				of this point are responsible for providing a highly specialized
-				view for a single corefference document. Usually a view relying
+				view for a single coreference document. Usually a view relying
 				on such presenters will provide the user with options to select
 				the presenter he considers most useful for the task at hand.
 				It is recommended that extensions make use of all the optional

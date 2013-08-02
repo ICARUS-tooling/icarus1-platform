@@ -253,6 +253,11 @@ public final class IcarusCorePlugin extends Plugin {
 		// no-op
 	}
 	
+	public static boolean isShowExampleData() {
+		return ConfigRegistry.getGlobalRegistry().getBoolean(
+				"general.appearance.showExampleData"); //$NON-NLS-1$
+	}
+	
 	private synchronized void doInit() throws Exception {
 		// Delegate all uncaught exceptions to the default logging facility
 		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());

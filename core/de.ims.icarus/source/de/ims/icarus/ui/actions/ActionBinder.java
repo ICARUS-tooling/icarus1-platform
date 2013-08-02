@@ -31,7 +31,6 @@ import java.util.Map;
 
 import javax.swing.Action;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.plugins.PluginUtil;

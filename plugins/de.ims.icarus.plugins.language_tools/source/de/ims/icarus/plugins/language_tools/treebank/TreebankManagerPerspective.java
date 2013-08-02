@@ -27,19 +27,26 @@ package de.ims.icarus.plugins.language_tools.treebank;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.JComponent;
-
 
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 
+import de.ims.icarus.Core;
+import de.ims.icarus.language.treebank.TreebankDescriptor;
+import de.ims.icarus.language.treebank.TreebankRegistry;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.core.IcarusCorePlugin;
 import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.language_tools.LanguageToolsConstants;
+import de.ims.icarus.plugins.language_tools.LanguageToolsPlugin;
 import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.util.location.Locations;
 
 /**
  * @author Markus Gärtner
@@ -50,6 +57,8 @@ public class TreebankManagerPerspective extends Perspective {
 	
 	public static final String PERSPECTIVE_ID = LanguageToolsConstants.TREEBANK_MANAGER_PERSPECTIVE_ID;
 
+	public static final String EXAMPLE_TREEBANK_NAME = "ICARUS example treebank"; //$NON-NLS-1$
+	
 	
 	public TreebankManagerPerspective() {
 		// no-op
@@ -60,10 +69,52 @@ public class TreebankManagerPerspective extends Perspective {
 	 */
 	@Override
 	public void init(JComponent container) {
+		
+		ensureExampleTreebank();
+		
 		collectViewExtensions();
 		defaultDoLayout(container);
 		
 		focusView(LanguageToolsConstants.TREEBANK_EXPLORER_VIEW_ID);
+	}
+	
+	public static void ensureExampleTreebank() {
+		
+		// Ensure some default treebank files if required
+		
+		if(IcarusCorePlugin.isShowExampleData()) {
+			ClassLoader loader = LanguageToolsPlugin.class.getClassLoader();
+			String[] resources = {
+				"icarus.conll09", //$NON-NLS-1$
+			};
+			String root = "de/ims/icarus/plugins/language_tools/resources/"; //$NON-NLS-1$
+			String folder = "treebanks"; //$NON-NLS-1$
+			
+			for(String resource : resources) {
+				String path = root+resource;
+				Core.getCore().ensureResource(folder, resource, path, loader);
+			}
+			
+			String name = EXAMPLE_TREEBANK_NAME;
+			
+			TreebankRegistry registry = TreebankRegistry.getInstance();
+			
+			if(registry.getDescriptorByName(name)==null) {
+				String path = "data/treebanks/icarus.conll09"; //$NON-NLS-1$
+				
+				try {
+					TreebankDescriptor td = registry.newTreebank("DefaultSimpleTreebank", name); //$NON-NLS-1$
+					td.setLocation(Locations.getFileLocation(path));
+					td.getProperties().put(DefaultSimpleTreebank.READER_EXTENSION_PROPERTY,
+							"de.ims.icarus.matetools@CONLL09SentenceDataPredictedReader"); //$NON-NLS-1$
+					
+					td.syncToTreebank();
+				} catch (Exception e) {
+					LoggerFactory.log(TreebankManagerPerspective.class, Level.SEVERE, 
+							"Failed to generate and register example treebank: "+name, e); //$NON-NLS-1$
+				}
+			}
+		}
 	}
 	
 	@Override

@@ -31,7 +31,6 @@ import java.util.logging.Level;
 
 import javax.swing.Icon;
 
-
 import org.java.plugin.PluginLifecycleException;
 import org.java.plugin.registry.Extension;
 

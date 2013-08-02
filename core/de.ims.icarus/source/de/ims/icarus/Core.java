@@ -64,7 +64,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-
 import org.java.plugin.JpfException;
 import org.java.plugin.Plugin;
 import org.java.plugin.PluginLifecycleException;

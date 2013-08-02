@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 import javax.swing.AbstractListModel;
@@ -52,15 +51,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.java.plugin.registry.Extension;
-import org.java.plugin.registry.ExtensionPoint;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.Core.NamedRunnable;
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.PluginUtil;
-import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
@@ -128,6 +125,8 @@ public final class CoreferenceRegistry {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to load document-set list", e); //$NON-NLS-1$
 		}
+		
+		Core.getCore().addShutdownHook(new ShutdownHook());
 	}
 	
 	// prevent multiple deserialization
@@ -474,36 +473,28 @@ public final class CoreferenceRegistry {
 		return StringUtil.getUniqueName(baseName, usedNames);
 	}
 	
-	private AtomicBoolean saveCheck = new AtomicBoolean();
-	private Runnable saveTask;
-	
 	private void saveBackground() {
-		if(saveCheck.compareAndSet(false, true)) {			
-			if(saveTask==null) {
-				saveTask = new Runnable() {
-					
-					@Override
-					public void run() {
-						try {
-							save();
-						} catch (Exception e) {
-							LoggerFactory.log(this, Level.SEVERE, 
-									"Failed to save document-set descriptor list", e); //$NON-NLS-1$
-						} finally {
-							saveCheck.set(false);
-						}
-					}
-				};
+		final DocumentSetBuffer buffer = new DocumentSetBuffer(documentSetList);
+		Runnable saveTask = new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					save(buffer);
+				} catch (Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to save document-set descriptor list", e); //$NON-NLS-1$
+				}
 			}
-			
-			String title = ResourceManager.getInstance().get(
-					"plugins.coref.documentSetSaveTask.title"); //$NON-NLS-1$
-			String info = ResourceManager.getInstance().get(
-					"plugins.coref.documentSetSaveTask.description", documentSetList.size()); //$NON-NLS-1$
-			
-			TaskManager.getInstance().schedule(saveTask, title, 
-					info, null, TaskPriority.DEFAULT, true);
-		}
+		};
+		
+		String title = ResourceManager.getInstance().get(
+				"plugins.coref.documentSetSaveTask.title"); //$NON-NLS-1$
+		String info = ResourceManager.getInstance().get(
+				"plugins.coref.documentSetSaveTask.description", documentSetList.size()); //$NON-NLS-1$
+		
+		TaskManager.getInstance().schedule(saveTask, title, 
+				info, null, TaskPriority.DEFAULT, true);
 	}
 	
 	private static final String list_file = "corefDocuments.xml"; //$NON-NLS-1$
@@ -535,31 +526,22 @@ public final class CoreferenceRegistry {
 		}
 	}
 	
-	private void save() throws Exception {
-		File file = new File(Core.getCore().getDataFolder(), list_file);
-		if(!file.exists()) {
-			file.createNewFile();
+	private final Object saveLock = new Object();
+	
+	private void save(DocumentSetBuffer buffer) throws Exception {
+		synchronized (saveLock) {
+			File file = new File(Core.getCore().getDataFolder(), list_file);
+			if(!file.exists()) {
+				file.createNewFile();
+			}
+
+			JAXBContext context = JAXBUtils.getSharedJAXBContext();
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			marshaller.marshal(buffer, file);
 		}
-
-		DocumentSetBuffer buffer = new DocumentSetBuffer(documentSetList);
-
-		JAXBContext context = JAXBUtils.getSharedJAXBContext();
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		marshaller.marshal(buffer, file);
 	}
 	
-	public static Collection<Extension> getDocumentReaderExtensions() {
-		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
-				CorefConstants.COREFERENCE_PLUGIN_ID, "DocumentReader"); //$NON-NLS-1$
-		return extensionPoint.getConnectedExtensions();
-	}
-	
-	public static Collection<Extension> getAllocationReaderExtensions() {
-		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
-				CorefConstants.COREFERENCE_PLUGIN_ID, "AllocationReader"); //$NON-NLS-1$
-		return extensionPoint.getConnectedExtensions();
-	}
 	@XmlRootElement(name="documentSets")
 	@XmlAccessorType(XmlAccessType.FIELD)
 	static class DocumentSetBuffer {
@@ -666,5 +648,27 @@ public final class CoreferenceRegistry {
 			
 			return loadable;
 		}		
+	}
+	
+	private class ShutdownHook implements NamedRunnable {
+
+		/**
+		 * @see de.ims.icarus.Core.NamedRunnable#getName()
+		 */
+		@Override
+		public String getName() {
+			return ResourceManager.getInstance().get(
+					"plugins.coref.documentSetSaveTask.title"); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see de.ims.icarus.Core.NamedRunnable#run()
+		 */
+		@Override
+		public void run() throws Exception {
+			DocumentSetBuffer buffer = new DocumentSetBuffer(documentSetList);
+			save(buffer);
+		}
+		
 	}
 }

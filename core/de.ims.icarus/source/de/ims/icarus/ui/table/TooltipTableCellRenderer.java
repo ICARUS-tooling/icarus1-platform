@@ -31,6 +31,8 @@ import java.awt.FontMetrics;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import de.ims.icarus.util.StringUtil;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -50,6 +52,10 @@ public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
+		
+		if(value instanceof Integer) {
+			value = StringUtil.formatDecimal((int) value);
+		}
 		
 		super.getTableCellRendererComponent(table, value, isSelected, hasFocus,	row, column);
 		

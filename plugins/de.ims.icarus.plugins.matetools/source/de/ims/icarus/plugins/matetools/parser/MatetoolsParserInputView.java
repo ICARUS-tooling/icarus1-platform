@@ -48,7 +48,6 @@ import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigEvent;

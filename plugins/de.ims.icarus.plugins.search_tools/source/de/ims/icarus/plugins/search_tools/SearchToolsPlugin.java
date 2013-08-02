@@ -27,7 +27,6 @@ package de.ims.icarus.plugins.search_tools;
 
 import java.util.logging.Level;
 
-
 import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
 

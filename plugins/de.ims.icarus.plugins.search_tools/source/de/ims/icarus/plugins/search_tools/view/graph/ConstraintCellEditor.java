@@ -51,7 +51,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
 
-
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
 

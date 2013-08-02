@@ -30,7 +30,6 @@ import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.resources.ResourceManager;

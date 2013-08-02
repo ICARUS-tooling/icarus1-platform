@@ -27,13 +27,13 @@ package de.ims.icarus.search_tools;
 
 import java.util.logging.Level;
 
+import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 
 import org.java.plugin.registry.Extension;
 
@@ -105,6 +105,31 @@ public class SearchDescriptor {
 			return false;
 		}
 		
+		searchResult = search.getResult();
+		
+		return true;
+	}
+	
+	public boolean createExampleSearch() throws Exception {
+		if(search!=null)
+			throw new IllegalStateException("Search already created"); //$NON-NLS-1$
+		
+		SearchFactory factory = getSearchFactory();
+		
+		if(factory==null)
+			throw new IllegalStateException("No valid factory available to create new example search"); //$NON-NLS-1$
+			
+		search = factory.createExampleSearch();
+		
+		if(search==null)
+			throw new OperationNotSupportedException("Factory does not support creation of example search instances"); //$NON-NLS-1$
+		
+		if(!search.init()) {
+			return false;
+		}
+
+		query = search.getQuery();
+		target = search.getTarget();
 		searchResult = search.getResult();
 		
 		return true;

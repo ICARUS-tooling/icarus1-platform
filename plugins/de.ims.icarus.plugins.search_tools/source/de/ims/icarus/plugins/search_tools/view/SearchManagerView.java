@@ -64,6 +64,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.core.IcarusCorePlugin;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.search_tools.SearchToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
@@ -181,6 +182,23 @@ public class SearchManagerView extends View {
 		container.add(historyPanel, BorderLayout.CENTER);
 		
 		registerActionCallbacks();
+		
+		// Show example if required
+		if(IcarusCorePlugin.isShowExampleData()) {			
+			try {
+				SearchDescriptor descriptor = new SearchDescriptor();
+				descriptor.setFactoryExtension(factoryExtensions.iterator().next());
+				
+				descriptor.createExampleSearch();
+				
+				currentSearchEditor.setEditingItem(descriptor);
+				
+				callbackHandler.editQuery(null);
+			} catch (Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to generate example search", e); //$NON-NLS-1$
+			}
+		}
 
 		refreshActions();
 	}

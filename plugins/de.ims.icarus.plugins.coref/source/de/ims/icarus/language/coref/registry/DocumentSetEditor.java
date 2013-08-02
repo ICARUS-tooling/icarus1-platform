@@ -39,6 +39,7 @@ import org.java.plugin.registry.Extension;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
+import de.ims.icarus.plugins.coref.CoreferencePlugin;
 import de.ims.icarus.ui.dialog.ChoiceFormEntry;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.dialog.FormBuilder;
@@ -77,7 +78,7 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 		formBuilder.addLocationFormEntry("location", "labels.location"); //$NON-NLS-1$ //$NON-NLS-2$
 		// READER
 		ComboBoxModel<Extension> model = new ExtensionListModel(
-				CoreferenceRegistry.getDocumentReaderExtensions(), true);		
+				CoreferencePlugin.getDocumentReaderExtensions(), true);		
 		ChoiceFormEntry entry = new ChoiceFormEntry("labels.reader", model); //$NON-NLS-1$
 		entry.getComboBox().setRenderer(ExtensionListCellRenderer.getSharedInstance());
 		formBuilder.addEntry("reader", entry); //$NON-NLS-1$

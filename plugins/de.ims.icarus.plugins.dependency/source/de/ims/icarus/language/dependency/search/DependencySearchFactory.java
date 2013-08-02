@@ -26,6 +26,9 @@
 package de.ims.icarus.language.dependency.search;
 
 import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.treebank.Treebank;
+import de.ims.icarus.language.treebank.TreebankRegistry;
+import de.ims.icarus.plugins.language_tools.treebank.TreebankManagerPerspective;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchFactory;
@@ -85,6 +88,28 @@ public class DependencySearchFactory implements SearchFactory {
 	@Override
 	public Editor<Options> createParameterEditor() {
 		return new DefaultParameterEditor();
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#createExampleSearch()
+	 */
+	@Override
+	public Search createExampleSearch() throws Exception {
+		// Ensure target treebank
+		TreebankManagerPerspective.ensureExampleTreebank();
+		
+		// Generate query
+		SearchQuery query = new DefaultSearchQuery(getContentType());
+		query.parseQueryString("[lemma<*>1[relation=SBJ,lemma<*>2]]"); //$NON-NLS-1$
+		
+		// Fetch target
+		String name = TreebankManagerPerspective.EXAMPLE_TREEBANK_NAME;
+		Treebank treebank = TreebankRegistry.getInstance().getTreebankByName(name);
+		if(treebank==null)
+			throw new IllegalStateException("Missing example treebank: "+name); //$NON-NLS-1$
+		Object target = TreebankRegistry.getInstance().getListDelegate(treebank);
+		
+		return createSearch(query, target, null);
 	}
 
 }

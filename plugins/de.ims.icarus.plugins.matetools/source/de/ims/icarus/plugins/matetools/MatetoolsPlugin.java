@@ -29,7 +29,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.logging.Level;
 
-
 import org.java.plugin.Plugin;
 
 import de.ims.icarus.logging.LoggerFactory;

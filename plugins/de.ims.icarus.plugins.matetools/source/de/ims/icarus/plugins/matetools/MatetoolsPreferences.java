@@ -33,8 +33,8 @@ import javax.swing.ListCellRenderer;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
-import de.ims.icarus.config.EntryHandler;
 import de.ims.icarus.config.ConfigRegistry.EntryType;
+import de.ims.icarus.config.EntryHandler;
 import de.ims.icarus.plugins.matetools.parser.ModelStorage;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.util.location.Location;

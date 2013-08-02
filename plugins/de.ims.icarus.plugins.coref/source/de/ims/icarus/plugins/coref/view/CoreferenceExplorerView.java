@@ -249,10 +249,9 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			
 			Options options = new Options();
 			
-			// Fetch allocations			
-			if(allocation!=null) {
-				options.put("allocation", allocation.getAllocation());
-			}
+			// Fetch allocations	
+			options.put("allocation", allocation); //$NON-NLS-1$
+			options.put("goldAllocation", goldAllocation); //$NON-NLS-1$
 			
 			Message message = new Message(this, Commands.PRESENT, document, options);
 			sendRequest(CorefConstants.COREFERENCE_DOCUMENT_VIEW_ID, message);
@@ -263,10 +262,6 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			UIUtil.beep();
 			showError(e);
 		}
-	}
-	
-	private void forwardDocument(CoreferenceDocumentData document, Options options) {
-		
 	}
 	
 	private DefaultAllocationDescriptor getDefautlAllocationDescriptor() {

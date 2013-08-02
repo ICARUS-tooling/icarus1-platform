@@ -43,7 +43,6 @@ import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
 
-
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 

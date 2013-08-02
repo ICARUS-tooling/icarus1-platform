@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.AvailabilityObserver;
