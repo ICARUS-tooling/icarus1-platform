@@ -121,6 +121,19 @@ test  - runs some tests
 			<param name="target" value="source" />
 		</antcall>
 
+		<copy todir="${build.home}/icarus">
+			<fileset dir="${build.home}">
+				<exclude name="icarus/*" />
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+		<delete includeemptydirs="true">
+			<fileset dir="${build.home}">
+				<include name="**/*" />
+				<exclude name="icarus/**/*" />
+			</fileset>
+		</delete>
+
 		<zip destfile="${build.home}/${app.name}-src-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">
@@ -169,6 +182,11 @@ test  - runs some tests
 	<target name="dist"
 	        depends="clean,build"
 	        description="Prepares distribution packages">
+		<copy todir="${build.home}">
+			<fileset dir="${basedir}/quickstart-guide">
+				<include name="*.pdf"/>
+			</fileset>
+		</copy>
 		<zip destfile="${build.home}/${app.name}-bin-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">
