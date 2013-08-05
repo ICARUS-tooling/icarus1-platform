@@ -4,7 +4,9 @@ OPTIONAL:
 
 TODO:
 
-	-	add end user agreement dialog for clarin plugin asking user to be academic!
+	-	add existence constraint
+	-	add grouping on disjunction level (group over subtrees of the disjunction node)
+	-	add child-count and min-occurrence/max-occurrence constraints
 
 	-	add command line flag to start in management mode:
 		-	only core plug-in active with management perspective
