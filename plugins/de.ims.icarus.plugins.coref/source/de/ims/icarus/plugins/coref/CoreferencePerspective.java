@@ -75,16 +75,16 @@ public class CoreferencePerspective extends Perspective {
 	 */
 	@Override
 	public void init(JComponent container) {
-		/*collectViewExtensions();
+		collectViewExtensions();
 		defaultDoLayout(container);
 		
-		focusView(CorefConstants.COREFERENCE_MANAGER_VIEW_ID);*/
-		try {
+		focusView(CorefConstants.COREFERENCE_MANAGER_VIEW_ID);
+		/*try {
 			test2(container);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 	
 	@Override

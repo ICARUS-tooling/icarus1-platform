@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.plugins.coref.view.graph;
 
-import java.io.Serializable;
-
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.plugins.jgraph.cells.GraphEdge;
 
@@ -35,48 +33,35 @@ import de.ims.icarus.plugins.jgraph.cells.GraphEdge;
  * @version $Id$
  *
  */
-public class CorefEdgeData implements Serializable, GraphEdge {
+public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
 
 	private static final long serialVersionUID = 440883995135005413L;
-
-	public static final int FALSE_PREDICTED_EDGE = 1;
-	public static final int MISSING_GOLD_EDGE = 2; 
-
-	protected Edge edge;
-	protected String label;
-	
-	protected int edgeType = 0;
 	
 	protected CorefEdgeData() {
 		// no-op
 	}
 	
 	public CorefEdgeData(Edge edge) {
-		setEdge(edge);
+		super(edge);
 	}
 	
 	public CorefEdgeData(Edge edge, int edgeType) {
-		setEdge(edge);
-		setEdgeType(edgeType);
+		super(edge, edgeType);
 	}
 
 	public Edge getEdge() {
-		return edge;
+		return data;
 	}
 
 	public void setEdge(Edge edge) {
-		if(edge==null)
-			throw new IllegalArgumentException("Invalid edge"); //$NON-NLS-1$
-		
-		this.edge = edge;
-		label = null;
+		setData(edge);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof CorefEdgeData) {
 			CorefEdgeData other = (CorefEdgeData) obj;
-			return edge.equals(other.getEdge());
+			return data.equals(other.getEdge());
 		}
 		return false;
 	}
@@ -85,33 +70,15 @@ public class CorefEdgeData implements Serializable, GraphEdge {
 	public CorefEdgeData clone() {
 		return new CorefEdgeData(getEdge());
 	}
-	
-	public String getLabel() {
-		if(label==null) {
-			label = edge.toString();
-		}
-		return label;
+
+	@Override
+	protected String createLabel() {
+		return data.toString();
 	}
 
 	@Override
 	public String toString() {
 		//return getLabel();
 		return ""; //$NON-NLS-1$
-	}
-
-	public int getEdgeType() {
-		return edgeType;
-	}
-
-	public void setEdgeType(int edgeType) {
-		this.edgeType = edgeType;
-	}
-
-	public boolean isFalsePredictedEdge() {
-		return edgeType==FALSE_PREDICTED_EDGE;
-	}
-	
-	public boolean isMissingGoldEdge() {
-		return edgeType==MISSING_GOLD_EDGE;
 	}
 }

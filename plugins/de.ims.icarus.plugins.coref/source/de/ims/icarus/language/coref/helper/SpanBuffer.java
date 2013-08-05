@@ -27,7 +27,6 @@ package de.ims.icarus.language.coref.helper;
 
 import java.util.Arrays;
 
-import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.util.CorruptedStateException;
 
@@ -87,15 +86,15 @@ public class SpanBuffer {
 		ids = new int[bufferSize][];
 	}
 	
-	public void rebuild(CoreferenceData data) {
-		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+	public void rebuild(Span[] spans) {
+		if(spans==null)
+			throw new IllegalArgumentException("Invalid span array"); //$NON-NLS-1$
 		
-		if(data.length()>=types.length) {
-			refreshBuffer(data.length()*2);
+		if(spans.length>=types.length) {
+			refreshBuffer(spans.length*2);
 		}
 		
-		size = data.length();
+		size = spans.length;
 		
 		for(int i=0; i<size; i++) {
 			types[i] = SPANTYPE_NONE;
@@ -105,13 +104,13 @@ public class SpanBuffer {
 			}
 		}
 		
-		spans = data.getSpans();
+		this.spans = spans;
 		
-		if(spans==null || spans.length==0) {
+		if(spans==null || size==0) {
 			return;
 		}
 		
-		for(int i=0; i<spans.length; i++) {
+		for(int i=0; i<size; i++) {
 			Span span = spans[i];
 			int start = span.getBeginIndex();
 			int end = span.getEndIndex();

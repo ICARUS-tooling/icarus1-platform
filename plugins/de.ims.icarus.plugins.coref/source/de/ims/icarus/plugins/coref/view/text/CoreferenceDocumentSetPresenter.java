@@ -199,7 +199,7 @@ public class CoreferenceDocumentSetPresenter extends
 		}
 		
 		CoreferenceDocumentData docData = documentListModel.getElementAt(index);
-		doc.appendBatchCoreferenceDocumentData(docData);
+		doc.appendBatchCoreferenceDocumentData(docData, allocation, goldAllocation);
 		
 		doc.applyBatchUpdates(0);
 		

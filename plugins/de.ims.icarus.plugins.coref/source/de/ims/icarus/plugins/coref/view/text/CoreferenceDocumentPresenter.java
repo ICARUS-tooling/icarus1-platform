@@ -59,7 +59,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 			return false;
 		}
 		
-		doc.appendBatchCoreferenceDocumentData(data);
+		doc.appendBatchCoreferenceDocumentData(data, allocation, goldAllocation);
 		
 		doc.applyBatchUpdates(0);
 		

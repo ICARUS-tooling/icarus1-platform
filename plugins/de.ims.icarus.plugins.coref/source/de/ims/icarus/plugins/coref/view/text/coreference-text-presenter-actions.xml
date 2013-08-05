@@ -22,6 +22,18 @@
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction"
 		name="${id}.name" desc="${id}.description" icon="uddi_registry_cat_node.gif" type="toggle" />
 		
+	<!-- Toggle 'markFalseSpans' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'showGoldSpans' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'filterSingletons' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
 	<!-- Toggle 'showDocumentHeader' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction"
 		name="${id}.name" desc="${id}.description" icon="EEnum.gif" type="toggle" />
@@ -60,6 +72,10 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
 		<separator />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
+		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
 		<separator />
@@ -81,6 +97,10 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />

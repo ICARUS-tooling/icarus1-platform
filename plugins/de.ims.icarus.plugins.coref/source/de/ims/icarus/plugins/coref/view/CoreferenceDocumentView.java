@@ -80,7 +80,7 @@ public class CoreferenceDocumentView extends View {
 		
 		// Load actions
 		if(!defaultLoadActions(CoreferenceDocumentView.class, 
-				"coreference-document-view.xml")) { //$NON-NLS-1$
+				"coreference-document-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
 		

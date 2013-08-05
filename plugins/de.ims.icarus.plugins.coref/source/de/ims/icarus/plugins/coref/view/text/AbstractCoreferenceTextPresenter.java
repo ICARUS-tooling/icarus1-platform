@@ -63,6 +63,7 @@ import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
@@ -104,6 +105,9 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	protected JPopupMenu popupMenu;
 	
 	protected Handler handler;
+
+	protected CoreferenceAllocation allocation;
+	protected CoreferenceAllocation goldAllocation;
 	
 	protected CallbackHandler callbackHandler;
 	
@@ -152,6 +156,13 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		if(!PresenterUtils.presenterSupports(this, data))
 			throw new UnsupportedPresentationDataException("Data not supported: "+data.getClass()); //$NON-NLS-1$
 		
+		if(options==null) {
+			options = Options.emptyOptions;
+		}
+		
+		allocation = (CoreferenceAllocation) options.get("allocation"); //$NON-NLS-1$
+		goldAllocation = (CoreferenceAllocation) options.get("goldAllocation"); //$NON-NLS-1$
+		
 		setData(data);
 		
 		if(contentPanel==null) {
@@ -177,6 +188,14 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		TaskManager.getInstance().schedule(job, TaskPriority.DEFAULT, true);
 	}
 	
+	public CoreferenceAllocation getAllocation() {
+		return allocation;
+	}
+
+	public CoreferenceAllocation getGoldAllocation() {
+		return goldAllocation;
+	}
+
 	protected abstract boolean buildDocument(CoreferenceDocument doc) throws Exception;
 	
 	protected static synchronized final ActionManager getSharedActionManager() {
@@ -663,6 +682,66 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle 'floatingText' flag", e); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleMarkFalseSpans(ActionEvent e) {
+			// ignore
+		}
+
+		public void toggleMarkFalseSpans(boolean b) {
+			CoreferenceDocument doc = getDocument();
+			
+			if(doc.isMarkFalseSpans()==b) {
+				return;
+			}
+			
+			try {
+				doc.setMarkFalseSpans(b);
+				AbstractCoreferenceTextPresenter.this.refresh();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'markFalseSpans' flag", e); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleShowGoldSpans(ActionEvent e) {
+			// ignore
+		}
+
+		public void toggleShowGoldSpans(boolean b) {
+			CoreferenceDocument doc = getDocument();
+			
+			if(doc.isShowGoldSpans()==b) {
+				return;
+			}
+			
+			try {
+				doc.setShowGoldSpans(b);
+				AbstractCoreferenceTextPresenter.this.refresh();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'showGoldSpans' flag", e); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleFilterSingletons(ActionEvent e) {
+			// ignore
+		}
+
+		public void toggleFilterSingletons(boolean b) {
+			CoreferenceDocument doc = getDocument();
+			
+			if(doc.isFilterSingletons()==b) {
+				return;
+			}
+			
+			try {
+				doc.setFilterSingletons(b);
+				AbstractCoreferenceTextPresenter.this.refresh();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'filterSingletons' flag", e); //$NON-NLS-1$
 			}
 		}
 

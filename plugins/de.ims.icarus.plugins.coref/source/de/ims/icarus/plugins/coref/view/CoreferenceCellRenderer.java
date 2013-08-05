@@ -208,7 +208,7 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
 			doc.clear();
 			
 			//doc.insertString(0, index+": ", null); //$NON-NLS-1$
-			doc.appendBatchCoreferenceData(data);
+			doc.appendBatchCoreferenceData(data, null, null);
 			doc.applyBatchUpdates(0);
 		} catch (BadLocationException e) {
 			LoggerFactory.log(this, Level.SEVERE, 

@@ -54,6 +54,7 @@ public class CoreferencePreferences {
 		builder.addBooleanEntry("markFalseEdges", true); //$NON-NLS-1$
 		builder.addBooleanEntry("showGoldEdges", false); //$NON-NLS-1$
 		builder.addColorEntry("falseEdgeColor", Color.red.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("falseNodeColor", Color.red.getRGB()); //$NON-NLS-1$
 		builder.addBooleanEntry("filterSingletons", true); //$NON-NLS-1$
 		Options options = new Options();
 		options.put("gridEnabled", false); //$NON-NLS-1$

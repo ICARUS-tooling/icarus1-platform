@@ -10,6 +10,10 @@
 	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"
 		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
 		
+	<!-- Toggle 'markFalseNodes' -->
+	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
 	<!-- Toggle 'showGoldEdges' -->
 	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"
 		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
@@ -54,6 +58,7 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
 		<separator />
 		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction" />
+		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction" />
 		<item type="action" value="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction" />
 		<item type="action" value="plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction" />
 		<item type="action" value="plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction" />

@@ -44,6 +44,7 @@ import de.ims.icarus.util.Options;
 public class CoreferenceGraphStyle extends DefaultGraphStyle {
 	
 	protected Color falseEdgeColor = Color.red;
+	protected Color falseNodeColor = Color.red;
 
 	public CoreferenceGraphStyle() {
 		// no-op
@@ -69,6 +70,7 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 		
 		ConfigRegistry config = handle.getSource();
 		falseEdgeColor = config.getColor(config.getChildHandle(handle, "falseEdgeColor")); //$NON-NLS-1$
+		falseNodeColor = config.getColor(config.getChildHandle(handle, "falseNodeColor")); //$NON-NLS-1$
 	}
 
 	@Override
@@ -76,21 +78,31 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 		mxIGraphModel model = owner.getGraph().getModel();
 		Object value = model.getValue(cell);
 		if(value instanceof CorefNodeData) {
-			return "defaultVertex"; //$NON-NLS-1$
+			CorefNodeData data = (CorefNodeData) value;
+			StringBuilder style = new StringBuilder("defaultVertex"); //$NON-NLS-1$
+
+			if(data.isFalsePredicted() && getPresenter().isMarkFalseNodes()) {
+				style.append(";strokeColor=") //$NON-NLS-1$
+				.append(mxUtils.getHexColorString(falseNodeColor)); 
+			}
+			if(data.isMissingGold()) {
+				style.append(";dashed=1"); //$NON-NLS-1$
+			} 
+			return style.toString();
 		} else if(value instanceof CorefEdgeData) {
 			CorefEdgeData data = (CorefEdgeData) value;
 			StringBuilder style = new StringBuilder("defaultEdge"); //$NON-NLS-1$
 			if(data.getEdge().getSource().isROOT()) {
 				style.append(";shape=curveConnector"); //$NON-NLS-1$
 			}
-			if(data.isFalsePredictedEdge() && getPresenter().isMarkFalseEdges()) {
+			if(data.isFalsePredicted() && getPresenter().isMarkFalseEdges()) {
 				style.append(";strokeColor=") //$NON-NLS-1$
 				.append(mxUtils.getHexColorString(falseEdgeColor)); 
 			}
-			if(data.isMissingGoldEdge()) {
+			if(data.isMissingGold()) {
 				style.append(";dashed=1"); //$NON-NLS-1$
 			} 
-			if(!data.isMissingGoldEdge() || data.getEdge().getSource().isROOT()) {
+			if(!data.isMissingGold() || data.getEdge().getSource().isROOT()) {
 				style.append(";entryX=0.5;entryY=0"); //$NON-NLS-1$
 			}
 			if(getPresenter().isHighlightedIncomingEdge(cell)) {

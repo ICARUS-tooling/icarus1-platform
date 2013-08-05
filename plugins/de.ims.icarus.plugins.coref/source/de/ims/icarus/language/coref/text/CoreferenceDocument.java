@@ -34,10 +34,12 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.language.coref.helper.SpanBuffer;
 import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.ui.text.BatchDocument;
@@ -56,6 +58,7 @@ public class CoreferenceDocument extends BatchDocument {
 	private static final long serialVersionUID = -5717201692774979302L;
 	
 	protected SpanBuffer spanBuffer;
+	protected SpanBuffer goldBuffer;
 	protected Stack<ClusterAttributes> attributeStack;
 	protected StringBuilder builder;
 	
@@ -64,6 +67,10 @@ public class CoreferenceDocument extends BatchDocument {
 	private boolean showOffset = true;
 	private boolean forceLinebreaks = false;
 	private boolean showDocumentHeader = true;
+
+	private boolean showGoldSpans = true;
+	private boolean markFalseSpans = true;
+	private boolean filterSingletons = true;
 	
 	private HighlightType highlightType = HighlightType.BACKGROUND;
 	
@@ -108,20 +115,34 @@ public class CoreferenceDocument extends BatchDocument {
 	}
 	
 	// TODO bug: no space between last and next to last token in span when nested span is filtered out!
-	public void appendBatchCoreferenceData(CoreferenceData data) {
+	public void appendBatchCoreferenceData(CoreferenceData data, 
+			Span[] spans, Span[] goldSpans) {
 		if(data==null)
 			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
 		if(data.length()==0) {
 			return;
 		}
 		
+		if(spans==null) {
+			spans = data.getSpans();
+		}
+		if(spans==goldSpans) {
+			goldSpans = null;
+		}
+		
 		if(spanBuffer==null) {
 			spanBuffer = new SpanBuffer();
+			goldBuffer = new SpanBuffer();
 			attributeStack = new Stack<>();
 			builder = new StringBuilder();
 		}
 		
-		spanBuffer.rebuild(data);
+		spanBuffer.rebuild(spans);
+		if(goldSpans==null) {
+			spanBuffer.clear();
+		} else {
+			spanBuffer.rebuild(goldSpans);
+		}
 		
 		HighlightType highlightType = getHighlightType();
 		Filter filter = getFilter();
@@ -133,7 +154,6 @@ public class CoreferenceDocument extends BatchDocument {
 		if(!batch.isEmpty() && isForceLinebreaks()) {
 			appendBatchLineFeed(null);
 		}
-		
 		
 		for(int index = 0; index <length; index++) {
 			
@@ -238,7 +258,8 @@ public class CoreferenceDocument extends BatchDocument {
 		}
 	}
 	
-	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data) {
+	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data, 
+			CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
 		if(data==null)
 			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
 		
@@ -250,9 +271,14 @@ public class CoreferenceDocument extends BatchDocument {
 			appendBatchDocumentHeader(data);
 		}
 		
+		SpanSet spanSet = CoreferenceUtils.getSpanSet(data, allocation);
+		SpanSet goldSet = CoreferenceUtils.getGoldSpanSet(data, goldAllocation);
+		
 		int size = data.size();
 		for(int i=0; i<size; i++) {
-			appendBatchCoreferenceData(data.get(i));
+			Span[] spans = spanSet.getSpans(i);
+			Span[] goldSpans = goldSet==null ? null : goldSet.getSpans(i);
+			appendBatchCoreferenceData(data.get(i), spans, goldSpans);
 		}
 	}
 	
@@ -312,6 +338,30 @@ public class CoreferenceDocument extends BatchDocument {
 
 	public void setShowDocumentHeader(boolean showDocumentHeader) {
 		this.showDocumentHeader = showDocumentHeader;
+	}
+
+	public boolean isShowGoldSpans() {
+		return showGoldSpans;
+	}
+
+	public boolean isMarkFalseSpans() {
+		return markFalseSpans;
+	}
+
+	public boolean isFilterSingletons() {
+		return filterSingletons;
+	}
+
+	public void setShowGoldSpans(boolean showGoldSpans) {
+		this.showGoldSpans = showGoldSpans;
+	}
+
+	public void setMarkFalseSpans(boolean markFalseSpans) {
+		this.markFalseSpans = markFalseSpans;
+	}
+
+	public void setFilterSingletons(boolean filterSingletons) {
+		this.filterSingletons = filterSingletons;
 	}
 
 	public Filter getFilter() {

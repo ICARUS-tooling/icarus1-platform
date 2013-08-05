@@ -78,8 +78,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	protected CoreferenceAllocation goldAllocation;
 	
 	protected boolean showGoldEdges = false;
-	protected boolean showGoldNodes = false;
+	protected boolean showGoldNodes = true;
 	protected boolean markFalseEdges = true;
+	protected boolean markFalseNodes = true;
 	protected boolean filterSingletons = true;
 
 	public CoreferenceGraphPresenter() {
@@ -215,6 +216,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 		// Init 'selected' states
 		actionManager.setSelected(isMarkFalseEdges(), 
 				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"); //$NON-NLS-1$
+		actionManager.setSelected(isMarkFalseNodes(), 
+				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isShowGoldEdges(), 
 				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isShowGoldNodes(), 
@@ -227,6 +230,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
 				callbackHandler, "markFalseEdges"); //$NON-NLS-1$
 		actionManager.addHandler(
+				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
+				callbackHandler, "markFalseNodes"); //$NON-NLS-1$
+		actionManager.addHandler(
 				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
 				callbackHandler, "showGoldEdges"); //$NON-NLS-1$
 		actionManager.addHandler(
@@ -237,12 +243,12 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 				callbackHandler, "filterSingletons"); //$NON-NLS-1$
 	}
 	
-	protected Object createVertex(Span span) {
+	protected Object createVertex(Span span, int nodeType) {
 		CoreferenceData sentence = span.isROOT() ?
 				CoreferenceUtils.emptySentence
 				: document.get(span.getSentenceIndex());
 		
-		mxCell cell = new mxCell(new CorefNodeData(span, sentence));
+		mxCell cell = new mxCell(new CorefNodeData(span, sentence, nodeType));
 		cell.setVertex(true);
 		cell.setGeometry(new mxGeometry());
 		
@@ -282,16 +288,21 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 			}
 			
 			EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(document, allocation);
-			EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, allocation);
+			EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
 			
 			// Clear gold set if it is the same as the one displayed
 			if(edgeSet==goldSet) {
 				goldSet = null;
 			}
 			
-			Collection<Edge> required = null;
+			Collection<Edge> edgeLookup = null;
 			if(goldSet!=null) {
-				required = new HashSet<>(goldSet.getEdges());
+				edgeLookup = new HashSet<>(goldSet.getEdges());
+			}
+			
+			Collection<Span> spanLookup = null;
+			if(goldSet!=null) {
+				spanLookup = CoreferenceUtils.collectSpans(goldSet);
 			}
 			
 			Map<Span, Object> cellMap = new HashMap<>();
@@ -302,46 +313,55 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 				edges = CoreferenceUtils.removeSingletons(edges);
 			}
 			
+			//System.out.println(Arrays.toString(edges.toArray()));
+			
 			for(Edge edge : edges) {
 				Span spanS = edge.getSource();
 				Span spanT = edge.getTarget();
 				
 				Object cellS = cellMap.get(spanS);
 				if(cellS==null) {
-					cellS = createVertex(spanS);
+					boolean falseNode = spanLookup!=null && !spanLookup.remove(spanS);
+					cellS = createVertex(spanS, falseNode ? CorefCellData.FALSE_PREDICTED : 0);
 					cellMap.put(spanS, cellS);
 					
 					model.add(parent, cellS, model.getChildCount(parent));
+					//System.out.println("added source cell for "+spanS);
 					
 					graph.cellSizeUpdated(cellS, false);
 				}
 				
 				Object cellT = cellMap.get(spanT);
 				if(cellT==null) {
-					cellT = createVertex(spanT);
+					boolean falseNode = spanLookup!=null && !spanLookup.remove(spanT);
+					cellT = createVertex(spanT, falseNode ? CorefCellData.FALSE_PREDICTED : 0);
 					cellMap.put(spanT, cellT);
 					
 					model.add(parent, cellT, model.getChildCount(parent));
+					//System.out.println("added target cell for "+spanT+" false="+falseNode);
 					
 					graph.cellSizeUpdated(cellT, false);
 				}
 				
-				boolean falseEdge = required!=null && !required.remove(edge);
+				boolean falseEdge = edgeLookup!=null && !edgeLookup.remove(edge);
 				
 				Object cellE = createEdge(edge, cellS, cellT, falseEdge ?
-						CorefEdgeData.FALSE_PREDICTED_EDGE : 0);
+						CorefCellData.FALSE_PREDICTED : 0);
 				
 				model.add(parent, cellE, model.getChildCount(parent));
+				//	System.out.println("added edge: "+edge);
 			}
 			
-			// Insert all missing gold edges
+			// Insert all missing gold nodes and edges
 			if((isShowGoldEdges() || isShowGoldNodes()) 
-					&& required!=null && !required.isEmpty()) {
+					&& edgeLookup!=null && !edgeLookup.isEmpty()) {
 				if(isFilterSingletons()) {
-					required = CoreferenceUtils.removeSingletons(required);
+					edgeLookup = CoreferenceUtils.removeSingletons(edgeLookup);
 				}
 				
-				for(Edge edge : required) {
+				for(Edge edge : edgeLookup) {
+					//System.out.println("adding gold edge: "+edge);
+					
 					Span spanS = edge.getSource();
 					Span spanT = edge.getTarget();
 					
@@ -355,8 +375,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 						continue;
 					}
 					
+					boolean isNew = cellS==null || cellT==null;
+					
 					if(cellS==null) {
-						cellS = createVertex(spanS);
+						cellS = createVertex(spanS, CorefCellData.MISSING_GOLD);
 						cellMap.put(spanS, cellS);
 						
 						model.add(parent, cellS, model.getChildCount(parent));
@@ -365,16 +387,19 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 					}
 					
 					if(cellT==null) {
-						cellT = createVertex(spanT);
+						cellT = createVertex(spanT, CorefCellData.MISSING_GOLD);
 						cellMap.put(spanT, cellT);
 						
 						model.add(parent, cellT, model.getChildCount(parent));
 						
 						graph.cellSizeUpdated(cellT, false);
 					}
-					Object cellE = createEdge(edge, cellS, cellT, CorefEdgeData.MISSING_GOLD_EDGE);
 					
-					model.add(parent, cellE, model.getChildCount(parent));
+					if(isShowGoldEdges() || (spanS.isROOT() && isNew)) {
+						Object cellE = createEdge(edge, cellS, cellT, CorefCellData.MISSING_GOLD);
+						
+						model.add(parent, cellE, model.getChildCount(parent));
+					}
 				}
 			}
 			
@@ -401,6 +426,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 
 	public boolean isMarkFalseEdges() {
 		return markFalseEdges;
+	}
+
+	public boolean isMarkFalseNodes() {
+		return markFalseNodes;
 	}
 
 	public boolean isFilterSingletons() {
@@ -455,6 +484,22 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 		firePropertyChange("markFalseEdges", oldValue, markFalseEdges); //$NON-NLS-1$
 	}
 
+	public void setMarkFalseNodes(boolean markFalseNodes) {
+		if(markFalseNodes==this.markFalseNodes) {
+			return;
+		}
+		
+		boolean oldValue = this.markFalseNodes;
+		this.markFalseNodes = markFalseNodes;
+
+		rebuildGraph();
+		
+		getActionManager().setSelected(markFalseNodes, 
+				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
+		
+		firePropertyChange("markFalseNodes", oldValue, markFalseNodes); //$NON-NLS-1$
+	}
+
 	public void setFilterSingletons(boolean filterSingletons) {
 		if(filterSingletons==this.filterSingletons) {
 			return;
@@ -504,6 +549,14 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 		}
 
 		public void markFalseEdges(ActionEvent e) {
+			// ignore
+		}
+
+		public void markFalseNodes(boolean b) {
+			setMarkFalseNodes(b);
+		}
+
+		public void markFalseNodes(ActionEvent e) {
 			// ignore
 		}
 

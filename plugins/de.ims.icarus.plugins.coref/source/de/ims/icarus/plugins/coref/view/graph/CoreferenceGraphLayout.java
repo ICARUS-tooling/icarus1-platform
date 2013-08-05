@@ -152,7 +152,7 @@ public class CoreferenceGraphLayout implements GraphLayout {
 					// graph are not excluded.
 					boolean isSoleLeaf = model.getEdgeCount(target)==1;
 					ignored = !isSoleLeaf  && !data.getEdge().getSource().isROOT()
-							&& data.isMissingGoldEdge();
+							&& data.isMissingGold();
 				}
 			}
 			

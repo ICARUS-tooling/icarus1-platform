@@ -324,6 +324,19 @@ public final class CoreferenceUtils {
 		}
 	}
 	
+	public static Set<Span> collectSpans(EdgeSet edgeSet) {
+		Set<Span> spans = new HashSet<>();
+		
+		for(int i=0; i<edgeSet.size(); i++) {
+			Edge edge = edgeSet.get(i);
+			
+			spans.add(edge.getSource());
+			spans.add(edge.getTarget());
+		}
+		
+		return spans;
+	}
+	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {
 
 		@Override
