@@ -292,6 +292,13 @@ public class SearchManagerView extends View {
 			Object data = message.getData();
 			if(data instanceof SearchDescriptor) {
 				SearchDescriptor descriptor = (SearchDescriptor)data;
+				SearchDescriptor currentDescriptor = currentSearchEditor.getEditingItem();
+				
+				if(currentDescriptor!=null && currentDescriptor!=descriptor) {
+					currentDescriptor.setQuery(descriptor.getQuery());
+					descriptor = currentDescriptor;
+				}
+				
 				currentSearchEditor.setEditingItem(descriptor);
 				searchHistoryList.setSelectedValue(descriptor, true);
 				
@@ -374,7 +381,7 @@ public class SearchManagerView extends View {
 			
 			try {
 				// Display search
-				SearchDescriptor clone = descriptor.cloneShallow();
+				SearchDescriptor clone = descriptor.clone();
 				currentSearchEditor.setEditingItem(clone);
 				refreshActions();
 				
@@ -454,9 +461,15 @@ public class SearchManagerView extends View {
 			}
 			
 			try {
-				syncEditorViews();
 				
-				SearchDescriptor descriptor = currentSearchEditor.getEditingItem(); 
+				syncEditorViews();
+				SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
+				
+				/*SearchDescriptor updatedDescriptor = currentSearchEditor.getEditingItem();
+				if(updatedDescriptor!=null && updatedDescriptor!=descriptor) {
+					descriptor.setQuery(updatedDescriptor.getQuery());
+				}*/
+				
 				Search search = descriptor.getSearch();
 				if(search!=null && search.isRunning()) {
 					UIUtil.beep();
@@ -471,7 +484,7 @@ public class SearchManagerView extends View {
 				if(!clone.createSearch()) {
 					return;
 				}
-				//currentSearchEditor.setEditingItem(clone);
+				currentSearchEditor.setEditingItem(descriptor.clone());
 				
 				searchHistory.addSearch(clone);
 				

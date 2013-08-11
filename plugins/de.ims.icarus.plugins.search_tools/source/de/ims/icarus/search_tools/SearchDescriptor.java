@@ -162,6 +162,14 @@ public class SearchDescriptor {
 		return query;
 	}
 
+	/**
+	 * @param query the query to set
+	 */
+	public void setQuery(SearchQuery query) {
+		this.query = query;
+		queryString = query==null ? null : query.getQueryString();
+	}
+
 	public SearchResult getSearchResult() {
 		if(searchResult==null && search!=null) {
 			searchResult = search.getResult();
