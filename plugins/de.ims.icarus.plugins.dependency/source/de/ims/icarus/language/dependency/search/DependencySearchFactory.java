@@ -29,6 +29,7 @@ import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.plugins.language_tools.treebank.TreebankManagerPerspective;
+import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchFactory;
@@ -110,6 +111,15 @@ public class DependencySearchFactory implements SearchFactory {
 		Object target = TreebankRegistry.getInstance().getListDelegate(treebank);
 		
 		return createSearch(query, target, null);
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getDefaultEditorClass()
+	 */
+	@Override
+	public Class<? extends QueryEditor> getDefaultEditorClass() {
+		// Allow the framework to assign the default editor implementation
+		return null;
 	}
 
 }

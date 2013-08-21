@@ -163,7 +163,7 @@ public class EntityGridPresenter extends TablePresenter {
 		header.setReorderingAllowed(false);
 		EntityGridTableHeaderRenderer renderer = new EntityGridTableHeaderRenderer();
 		header.setDefaultRenderer(renderer);
-		renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
+		//renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
 		
 		return table;
 	}

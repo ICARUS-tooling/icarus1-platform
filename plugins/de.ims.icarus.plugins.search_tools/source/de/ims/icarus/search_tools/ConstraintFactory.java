@@ -41,7 +41,7 @@ public interface ConstraintFactory {
 	public static final int EDGE_CONSTRAINT_TYPE = 1;
 	public static final int NODE_CONSTRAINT_TYPE = 2;
 
-	SearchConstraint createConstraint(Object value, SearchOperator operator, Options options);
+	SearchConstraint createConstraint(Object value, SearchOperator operator, Object specifier, Options options);
 	
 	SearchOperator[] getSupportedOperators();
 	
@@ -90,4 +90,23 @@ public interface ConstraintFactory {
 	
 	// TODO add mechanics to create multiple instances of constraint and to 
 	// obtain min and max allowed instance count
+	
+	/**
+	 * Returns the minimum required count of constraint instances
+	 * created by this factory. A value of {@code -1} allows the
+	 * user interface to make that decision.
+	 */
+	int getMinInstanceCount();
+
+	/**
+	 * Returns the maximum allowed count of constraint instances
+	 * created by this factory. A value of {@code -1} deactivates
+	 * the upper limit and allows the user interface to handle the
+	 * decision. Note that aside from that reserved return value all
+	 * values that are less than the current minimum as obtained from
+	 * {@link #getMinInstanceCount()} will cause exceptions.
+	 */
+	int getMaxInstanceCount();
+	
+	Object[] getSupportedSpecifiers();
 }

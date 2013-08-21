@@ -28,7 +28,6 @@ package de.ims.icarus.plugins.coref.io;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -251,8 +250,6 @@ public final class CONLL12Utils {
 
 		Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
 		if(spans!=null) {
-			Arrays.sort(spans, CoreferenceUtils.SPAN_SIZE_REVERSE_SORTER);
-			
 			CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
 			allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
 		}

@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.search_tools;
 
+import de.ims.icarus.plugins.search_tools.view.editor.DefaultQueryEditor;
+import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -61,4 +63,12 @@ public interface SearchFactory {
 	SearchQuery createQuery();
 	
 	Editor<Options> createParameterEditor();
+	
+	/**
+	 * Returns the class of the {@link QueryEditor} to be used when editing
+	 * queries for this factory. If a  {@code null} value is returned the
+	 * framework assumes the {@link DefaultQueryEditor} implementation to be
+	 * sufficient.
+	 */
+	Class<? extends QueryEditor> getDefaultEditorClass();
 }

@@ -51,7 +51,7 @@ public class DependencyLemmaConstraintFactory extends AbstractConstraintFactory 
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, Options options) {
+			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new DependencyLemmaConstraint(value, operator);
 		else

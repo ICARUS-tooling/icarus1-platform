@@ -28,6 +28,8 @@ package de.ims.icarus.util;
 import java.awt.Component;
 import java.awt.FontMetrics;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -180,6 +182,8 @@ public final class StringUtil {
 			sb.delete(sb.length()-1, sb.length());
 		}
 	}
+	
+	public static final int MIN_WRAP_WIDTH = 50;
 
 	public static String wrap(String s, Component comp, int width) {
 		return wrap(s, comp.getFontMetrics(comp.getFont()), width);
@@ -192,8 +196,8 @@ public final class StringUtil {
 	public static String wrap(String s, FontMetrics fm, int width) {
 		if(fm==null)
 			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
-		if(width<50)
-			throw new IllegalArgumentException("Width must not be less than 50 pixels"); //$NON-NLS-1$
+		if(width<MIN_WRAP_WIDTH)
+			throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if(s==null || s.length()==0) {
 			return s;
@@ -226,6 +230,57 @@ public final class StringUtil {
 		}
 		
 		return sb.toString();
+	}
+	public static String[] split(String s, Component comp, int width) {
+		return split(s, comp.getFontMetrics(comp.getFont()), width);
+	}
+	
+	public static String[] split(String s, FontMetrics fm, int width) {
+		if(fm==null)
+			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
+		if(width<MIN_WRAP_WIDTH)
+			throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		if(s==null || s.length()==0) {
+			return new String[0];
+		}
+		
+		List<String> result = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		
+		int size = s.length();
+		boolean wrap = false;
+		boolean ignoreWS = false;
+		int len = 0;
+		for(int i=0; i<size; i++) {
+			char c = s.charAt(i);
+			if(c=='\r') {
+				continue;
+			} else if(c=='\n' || (wrap &&
+					(Character.isWhitespace(c) || !Character.isLetterOrDigit(c)))) {
+				
+				if(sb.length()>0) {
+					result.add(sb.toString());
+					sb.setLength(0);
+				}
+				len = 0;
+				ignoreWS = true;
+			} else if(ignoreWS && Character.isWhitespace(c)) {
+				ignoreWS = false;
+				continue;
+			} else {
+				sb.append(c);
+				len += fm.charWidth(c);
+				ignoreWS = false;
+			}
+			wrap = len>=width;
+		}
+		
+		if(sb.length()>0) {
+			result.add(sb.toString());
+		}
+		
+		return result.toArray(new String[result.size()]);
 	}
 	
 	public static String capitalize(String s) {

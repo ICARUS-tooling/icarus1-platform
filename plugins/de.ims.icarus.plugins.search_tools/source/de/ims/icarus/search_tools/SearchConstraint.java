@@ -35,9 +35,23 @@ import java.io.Serializable;
  */
 public interface SearchConstraint extends Serializable {
 	
+	/**
+	 * Returns the token used to identify this constraint's
+	 * factory within a certain {@link ConstraintContext}.
+	 */
 	String getToken();
 	
+	/**
+	 * Returns the value this constraint is meant to match
+	 * against.
+	 */
 	Object getValue();
+	
+	/**
+	 * Returns the optional specifier used to further restrict
+	 * the matching process.
+	 */
+	Object getSpecifier();
 
 	SearchOperator getOperator();
 	
@@ -48,4 +62,8 @@ public interface SearchConstraint extends Serializable {
 	Object getInstance(Object value);
 	
 	boolean isUndefined();
+	
+	void setActive(boolean active);
+	
+	boolean isActive();
 }

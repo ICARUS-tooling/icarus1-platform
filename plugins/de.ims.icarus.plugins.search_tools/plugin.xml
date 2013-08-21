@@ -227,7 +227,7 @@
 		<parameter id="name" value="plugins.searchTools.queryEditorView.identity.name" />
 		<parameter id="description" value="plugins.searchTools.queryEditorView.identity.name" />
 		<parameter id="resources" value="de.ims.icarus.plugins.search_tools.resources.search_tools" />
-		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.QueryEditorView" />
+		<parameter id="class" value="de.ims.icarus.plugins.search_tools.view.editor.QueryEditorView" />
 		<parameter id="icon" value="de/ims/icarus/plugins/search_tools/view/query-editor-view.gif" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />

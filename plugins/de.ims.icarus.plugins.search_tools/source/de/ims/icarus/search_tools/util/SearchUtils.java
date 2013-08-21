@@ -51,6 +51,7 @@ import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchGraph;
 import de.ims.icarus.search_tools.SearchMode;
 import de.ims.icarus.search_tools.SearchNode;
+import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.SearchParameters;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.result.ResultEntry;
@@ -111,6 +112,12 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	
 	public static boolean isCaseSensitiveSearch(Search search) {
 		return search.getParameters().getBoolean(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE);
+	}
+	
+	public static Object getDefaultSpecifier(ConstraintFactory factory) {
+		Object[] specifiers = factory.getSupportedSpecifiers();
+		return (specifiers!=null && specifiers.length>0) ?
+				specifiers[0] : null;
 	}
 	
 	/**
@@ -192,16 +199,19 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 			options = Options.emptyOptions;
 		}
 		
-		SearchConstraint[] result = new SearchConstraint[constraints.length];
+		List<SearchConstraint> result = new ArrayList<>();
 		
-		for(int i=0; i<constraints.length; i++) {
-			SearchConstraint constraint = constraints[i];
+		for(SearchConstraint constraint : constraints) {
+			if(constraint==null || constraint.isUndefined() || !constraint.isActive()) {
+				continue;
+			}
 			ConstraintFactory factory = context.getFactory(constraint.getToken());
-			result[i] = factory.createConstraint(
-					constraint.getValue(), constraint.getOperator(), options);
+			result.add(factory.createConstraint(
+					constraint.getValue(), constraint.getOperator(),
+					constraint.getSpecifier(), options));
 		}
 		
-		return result;
+		return toArray(result);
 	}
 	
 	public static String getResultStats(SearchResult searchResult) {
@@ -359,6 +369,56 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		SearchConstraint constraint = searchResult.getGroupConstraint(index);
 		
 		return constraint==null ? -1 : (int) constraint.getValue();
+	}
+
+
+	public static List<SearchConstraint> cloneConstraints(List<SearchConstraint> constraints) {		
+		if(constraints==null) {
+			return null;
+		}
+		
+		List<SearchConstraint> result = new ArrayList<>();
+		
+		for(SearchConstraint constraint : constraints) {
+			result.add(constraint.clone());
+		}
+		
+		return result;
+	}
+	
+	public static SearchConstraint[] toArray(Collection<SearchConstraint> constraints) {
+		return constraints==null ? null : constraints.toArray(
+				new SearchConstraint[constraints.size()]);
+	}
+	
+	public static int getMinInstanceCount(ConstraintFactory factory) {
+		int value = factory.getMinInstanceCount();
+		return value==-1 ? 1 : value;
+	}
+	
+	public static int getMaxInstanceCount(ConstraintFactory factory) {
+		int value = factory.getMaxInstanceCount();
+		return value==-1 ? 9 : value;
+	}
+	
+	public static SearchConstraint[] createDefaultConstraints(List<ConstraintFactory> factories) {
+		List<SearchConstraint> constraints = new ArrayList<>();
+		
+		for(ConstraintFactory factory : factories) {
+			int min = getMinInstanceCount(factory);
+			int max = factory.getMaxInstanceCount();
+			if(max!=-1 && max<min)
+				throw new IllegalArgumentException("Max instance count of factory is too small: "+factory.getClass()); //$NON-NLS-1$
+			
+			SearchOperator operator = factory.getSupportedOperators()[0];
+			
+			for(int i=0; i<min; i++) {
+				constraints.add(new DefaultConstraint(
+						factory.getToken(), factory.getDefaultValue(), operator));
+			}
+		}
+		
+		return toArray(constraints);
 	}
 	
 	public interface Visitor {
@@ -561,6 +621,14 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 
 		@Override
 		public int compare(SearchConstraint o1, SearchConstraint o2) {
+			return o1.getToken().compareTo(o2.getToken());
+		}
+	};
+	
+	public static final Comparator<ConstraintFactory> factorySorter = new Comparator<ConstraintFactory>() {
+
+		@Override
+		public int compare(ConstraintFactory o1, ConstraintFactory o2) {
 			return o1.getToken().compareTo(o2.getToken());
 		}
 	};

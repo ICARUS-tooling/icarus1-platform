@@ -26,7 +26,9 @@
 package de.ims.icarus.plugins.search_tools.view.graph;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -35,8 +37,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.SearchConstraint;
+import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.ConstraintAdapter;
+import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.util.SearchUtils;
 
 
 /**
@@ -52,15 +58,36 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 	@XmlAttribute(required=false)
 	boolean negated = false;
 	
-	@XmlElement
+	@XmlElement(required=false)
 	@XmlJavaTypeAdapter(value=ConstraintAdapter.class)
-	SearchConstraint[] constraints;
+	List<SearchConstraint> constraints;
 	
 	@XmlTransient
 	String id = "<undefined>"; //$NON-NLS-1$
 	
 	protected ConstraintCellData() {
 		// no-op
+	}
+	
+	protected ConstraintCellData(List<ConstraintFactory> factories) {
+		if(factories==null)
+			throw new IllegalArgumentException("Invalid factories"); //$NON-NLS-1$
+		
+		constraints = new ArrayList<>();
+		
+		for(ConstraintFactory factory : factories) {
+			int min = SearchUtils.getMinInstanceCount(factory);
+
+			SearchOperator operator = factory.getSupportedOperators()[0];
+			Object value = factory.getDefaultValue();
+			String token = factory.getToken();
+			Object specifier = SearchUtils.getDefaultSpecifier(factory);
+			
+			for(int i=0; i<min; i++) {
+				constraints.add(new DefaultConstraint(
+						token, value, operator, specifier));
+			}
+		}
 	}
 
 	@Override
@@ -77,18 +104,59 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 	}
 	
 	public void setConstraint(int index, SearchConstraint constraint) {
-		constraints[index] = constraint;
+		if(constraints==null) {
+			constraints = new ArrayList<>();
+		}
+		constraints.set(index, constraint);
 	}
 
 	public SearchConstraint[] getConstraints() {
-		return constraints;
+		if(constraints==null) {
+			return null;
+		}
+		SearchConstraint[] result = new SearchConstraint[constraints.size()];
+		return constraints.toArray(result);
+	}
+	
+	public int getConstraintCount() {
+		return constraints==null ? 0 : constraints.size();
+	}
+	
+	public SearchConstraint getConstraintAt(int index) {
+		return constraints==null ? null : constraints.get(index);
 	}
 
 	public void setConstraints(SearchConstraint[] constraints) {
-		this.constraints = constraints;
+		if(this.constraints==null) {
+			this.constraints = new ArrayList<>();
+		} else {
+			this.constraints.clear();
+		}
+		
+		if(constraints==null) {
+			return;
+		}
+		
+		for(SearchConstraint constraint : constraints) {
+			this.constraints.add(constraint);
+		}
+	}
+
+	public void setConstraints(Collection<SearchConstraint> constraints) {
+		if(this.constraints==null) {
+			this.constraints = new ArrayList<>();
+		} else {
+			this.constraints.clear();
+		}
+		
+		if(constraints==null) {
+			return;
+		}
+		
+		this.constraints.addAll(constraints);
 	}
 	
-	public void setConstraints(SearchConstraint[] constraints, Map<String, Integer> constraintMap) {
+	/*public void setConstraints(SearchConstraint[] constraints, Map<String, Integer> constraintMap) {
 		if(this.constraints==null)
 			throw new IllegalStateException("Cannot assign constraints - not initialized"); //$NON-NLS-1$
 		
@@ -100,10 +168,22 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 			int index = constraintMap.get(constraint.getToken());
 			this.constraints[index] = constraint;
 		}
+	}*/
+	
+	public void addConstraint(SearchConstraint constraint) {
+		if(constraints==null) {
+			constraints = new ArrayList<>();
+		}
+		
+		constraints.add(constraint);
 	}
 	
-	int getConstraintCount() {
-		return constraints==null ? 0 : constraints.length;
+	public void insertConstraint(int index, SearchConstraint constraint) {
+		if(constraints==null) {
+			constraints = new ArrayList<>();
+		}
+		
+		constraints.add(index, constraint);
 	}
 
 	public String getId() {

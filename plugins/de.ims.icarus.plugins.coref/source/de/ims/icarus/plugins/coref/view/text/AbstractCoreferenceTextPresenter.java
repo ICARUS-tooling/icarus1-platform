@@ -38,6 +38,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
@@ -867,18 +868,21 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		}
 
 		@Override
-		protected void done() {			
+		protected void done() {
+			if(textPane==null) {
+				return;
+			}	
+			
 			try {
-				if(textPane==null) {
-					return;
-				}
-				
-				refreshActions();
+				get();
+			} catch(CancellationException | InterruptedException e) {
+				// ignore
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to rebuild document", e); //$NON-NLS-1$
 			} finally {
 				refreshJob = null;
+				refreshActions();
 			}
 		}
 		

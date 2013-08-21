@@ -62,7 +62,7 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 			id = (String) docData.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(id==null) {
-			id = "document "+index; //$NON-NLS-1$
+			id = "document "+StringUtil.formatDecimal(index); //$NON-NLS-1$
 		}
 		if(showRowIndex) {
 			id = StringUtil.formatDecimal(index)+": "+id; //$NON-NLS-1$

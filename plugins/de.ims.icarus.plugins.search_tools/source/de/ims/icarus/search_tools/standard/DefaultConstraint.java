@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -53,12 +54,22 @@ public class DefaultConstraint implements SearchConstraint {
 
 	private Object value;
 	
+	private Object specifier;
+	
+	private boolean active = true;
+	
 	private SearchOperator operator;
 	
 	public DefaultConstraint(String token, Object value, SearchOperator operator) {
 		setToken(token);
 		setValue(value);
 		setOperator(operator);
+	}
+	
+	public DefaultConstraint(String token, Object value, SearchOperator operator, Object specifier) {
+		this(token, value, operator);
+		
+		setSpecifier(specifier);
 	}
 	
 	@SuppressWarnings("unused")
@@ -119,6 +130,7 @@ public class DefaultConstraint implements SearchConstraint {
 
 	@Override
 	public SearchConstraint clone() {
+		// Note that the 'active' state is not cloned!
 		return new DefaultConstraint(token, value, operator);
 	}
 	
@@ -174,6 +186,36 @@ public class DefaultConstraint implements SearchConstraint {
 		if(token==null)
 			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
 		this.token = token;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#setActive(boolean)
+	 */
+	@XmlTransient
+	@Override
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#isActive()
+	 */
+	@Override
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#getSpecifier()
+	 */
+	@Override
+	public Object getSpecifier() {
+		return specifier;
+	}
+
+	@XmlElement(name="specifier", required=false)
+	public void setSpecifier(Object specifier) {
+		this.specifier = specifier;
 	}
 
 }

@@ -53,7 +53,7 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, Options options) {
+			SearchOperator operator, Object specifier, Options options) {
 		return new DependencyProjectivityConstraint(value, operator);
 	}
 

@@ -693,6 +693,24 @@ public final class UIUtil {
 		
 		return infoLabel;
 	}
+	
+	public static JLabel defaultCreateLoadingLabel(JComponent container) {
+		JLabel label = new JLabel();
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setVerticalAlignment(SwingConstants.CENTER);
+		label.setIcon(getLargeLoadingIcon());
+		label.setBorder(new EmptyBorder(5, 10, 5, 10));
+		
+		return label;
+	}
+	
+	public static Icon getSmallLoadingIcon() {
+		return IconRegistry.getGlobalRegistry().getIcon("ajax-loader_16.gif"); //$NON-NLS-1$
+	}
+	
+	public static Icon getLargeLoadingIcon() {
+		return IconRegistry.getGlobalRegistry().getIcon("ajax-loader_32.gif"); //$NON-NLS-1$
+	}
 
 	public static final Border DUMMY_BORDER = BorderFactory.createEmptyBorder(
 			2, 2, 2, 2);

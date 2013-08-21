@@ -36,12 +36,14 @@ import java.util.logging.Level;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -83,6 +85,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	
 	private JList<CoreferenceDocumentData> list;
 	private DataListModel<CoreferenceDocumentData> listModel;
+	
+	private JLabel loadingLabel;
 	
 	private DocumentSetListWrapper documentSetModel;
 	private AllocationListWrapper allocationModel;
@@ -147,15 +151,21 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		JComponent header = (JComponent) formBuilder.getContainer();
 		header.setBorder(UIUtil.defaultContentBorder);
 		
+		loadingLabel = UIUtil.defaultCreateLoadingLabel(container);
+		loadingLabel.setVisible(false);
+		
 		JPanel headerPanel = new JPanel(new BorderLayout());
 		// TODO create tool-bar
 		headerPanel.add(header, BorderLayout.CENTER);
+		headerPanel.add(loadingLabel, BorderLayout.SOUTH);
 		
 		listModel = new DataListModel<>();		
 		list = new JList<>(listModel);
 		list.setCellRenderer(new DocumentListCellRenderer());
 		list.setBorder(UIUtil.defaultContentBorder);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.addMouseListener(handler);
+		list.addListSelectionListener(handler);
 		
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setBorder(UIUtil.topLineBorder);
@@ -186,6 +196,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		
 		if(descriptor!=null && !descriptor.isLoaded()) {
 			listModel.clear();
+			loadingLabel.setVisible(true);
 			
 			final String name = descriptor.getName();
 			
@@ -206,6 +217,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 						showError(e);
 					} finally {
 						update();
+						loadingLabel.setVisible(false);
 					}
 				}				
 			};
@@ -221,6 +233,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		if(descriptor==null) {
 			return false;
 		}
+		loadingLabel.setVisible(descriptor.isLoading());
 		if(!descriptor.isLoaded()) {
 			return false;
 		}
@@ -373,8 +386,11 @@ public class CoreferenceExplorerView extends View implements Updatable {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			// TODO Auto-generated method stub
-			super.mouseClicked(e);
+			if(e.getClickCount()!=2 || !SwingUtilities.isLeftMouseButton(e)) {
+				return;
+			}
+			
+			displaySelectedValue();
 		}
 
 		@Override

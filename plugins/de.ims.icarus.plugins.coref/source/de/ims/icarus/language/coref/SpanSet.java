@@ -26,6 +26,7 @@
 package de.ims.icarus.language.coref;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,6 +63,9 @@ public class SpanSet extends CorefListMember<Span> {
 		if(items==null) {
 			items = new ArrayList<>();
 		}
+
+		// Ensure sorted spans array!
+		Arrays.sort(spans);
 		
 		blockMap.put(sentenceIndex, spans);
 		for(Span span : spans) {

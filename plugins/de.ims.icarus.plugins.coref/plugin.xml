@@ -220,6 +220,27 @@
 		<parameter id="class" value="de.ims.icarus.plugins.coref.io.CONLL12DocumentReader" />
 	</extension>
 	
+	<extension id="CoreferenceGraphPresenter" plugin-id="de.ims.icarus.coref" point-id="CoreferencePresenter">
+		<parameter id="name" value="plugins.coref.coreferenceGraphPresenter.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferenceGraphPresenter.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentPresenter" plugin-id="de.ims.icarus.coref" point-id="CoreferencePresenter">
+		<parameter id="name" value="plugins.coref.coreferenceDocumentPresenter.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferenceDocumentPresenter.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentPresenter" />
+	</extension>
+	
+	<extension id="EntityGridPresenter" plugin-id="de.ims.icarus.coref" point-id="CoreferencePresenter">
+		<parameter id="name" value="plugins.coref.entityGridPresenter.identity.name" />
+		<parameter id="description" value="plugins.coref.entityGridPresenter.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter" />
+	</extension>
+	
 	<!-- CONTENT TYPES -->
 	
 	<extension id="CoreferenceDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">

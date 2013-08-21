@@ -50,7 +50,7 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, Options options) {
+			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new DependencyRelationConstraint(value, operator);
 		else

@@ -133,4 +133,19 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 	public Object valueToLabel(Object value) {
 		return value;
 	}
+
+	@Override
+	public int getMinInstanceCount() {
+		return 1;
+	}
+
+	@Override
+	public int getMaxInstanceCount() {
+		return -1;
+	}
+
+	@Override
+	public Object[] getSupportedSpecifiers() {
+		return null;
+	}
 }

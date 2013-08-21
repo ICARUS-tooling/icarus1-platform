@@ -26,7 +26,6 @@
 package de.ims.icarus.plugins.search_tools.view.graph;
 
 import java.awt.Dimension;
-import java.util.List;
 
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
@@ -113,7 +112,6 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		sb.setLength(0);
 		boolean leaveEmpty = false;
 		
-		List<ConstraintFactory> factories = null;
 		SearchConstraint[] constraints = null;
 		
 		if(value instanceof ConstraintNodeData) {
@@ -135,7 +133,6 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			}
 			
 			// Constraints
-			factories = presenter.getConstraintContext().getNodeFactories();
 			constraints = data.getConstraints();
 		} else if(value instanceof ConstraintEdgeData) {
 			ConstraintEdgeData data = (ConstraintEdgeData)value;
@@ -157,20 +154,21 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			}
 			
 			// Constraints
-			factories = presenter.getConstraintContext().getEdgeFactories();
 			constraints = data.getConstraints();
 		}
 
 		// Constraints
-		if(factories!=null && !factories.isEmpty() && constraints!=null) {
-			for(int i=0; i<constraints.length; i++) {
-				if(!constraints[i].isUndefined()) {
-					SearchOperator operator = constraints[i].getOperator();
-					Object label = SearchManager.isGroupingOperator(operator) ? ""  //$NON-NLS-1$
-							: factories.get(i).valueToLabel(constraints[i].getValue());
-					sb.append("\n").append(factories.get(i).getName()) //$NON-NLS-1$
-					.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
+		if(constraints!=null) {
+			for(SearchConstraint constraint : constraints) {
+				if(!constraint.isActive() || constraint.isUndefined()) {
+					continue;
 				}
+				SearchOperator operator = constraint.getOperator();
+				ConstraintFactory factory = presenter.getConstraintContext().getFactory(constraint.getToken());
+				Object label = SearchManager.isGroupingOperator(operator) ? ""  //$NON-NLS-1$
+						: factory.valueToLabel(constraint.getValue());
+				sb.append("\n").append(factory.getName()) //$NON-NLS-1$
+				.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		

@@ -35,16 +35,26 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -60,6 +70,7 @@ import de.ims.icarus.plugins.jgraph.view.HeavyWeightCellEditor;
 import de.ims.icarus.plugins.search_tools.view.SearchUtilityListCellRenderer;
 import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.EdgeType;
 import de.ims.icarus.search_tools.Grouping;
@@ -68,6 +79,7 @@ import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.dialog.ChoiceFormEntry;
@@ -82,7 +94,9 @@ import de.ims.icarus.util.HtmlUtils.HtmlTableBuilder;
  *
  */
 public class ConstraintCellEditor extends HeavyWeightCellEditor implements PropertyChangeListener {
-
+	
+	private static AtomicInteger idGen = new AtomicInteger();
+	
 	public ConstraintCellEditor(ConstraintGraphPresenter presenter) {
 		super(presenter);
 		
@@ -228,13 +242,15 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 	 */
 	@Override
 	protected Object createVertexEditor() {
-		FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
+		FormBuilder vertexForms = FormBuilder.newLocalizingBuilder();
 		
-		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getNodeFactories();
+		List<ConstraintFactory> factories = new ArrayList<>(
+				getPresenter().getConstraintContext().getNodeFactories());
+		Collections.sort(factories, SearchUtils.factorySorter);
 		
 		if(!factories.isEmpty()) {
 			// NEGATED
-			formBuilder.addToggleFormEntry("negated", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
+			vertexForms.addToggleFormEntry("negated", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// NODE TYPE
 			ChoiceFormEntry entry = new ChoiceFormEntry(
@@ -243,34 +259,40 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			entry.setResizeMode(FormBuilder.RESIZE_REMAINDER);
 			entry.getComboBox().setRenderer(sharedRenderer);
 			UIUtil.resizeComponent(entry.getComboBox(), 100, 20);
-			formBuilder.addEntry("nodeType", entry); //$NON-NLS-1$
-			
-			formBuilder.addSeperator();
+			vertexForms.addEntry("nodeType", entry); //$NON-NLS-1$
 			
 			// CONSTRAINTS
-			for(int i=0; i<factories.size(); i++) {
-				formBuilder.addEntry("constraint_"+i,  //$NON-NLS-1$
-						new ConstraintFormEntry(factories.get(i)));
-			}
+			vertexForms.addEntry("constraints", new ConstraintGroupFormEntry(true)); //$NON-NLS-1$
+//			for(ConstraintFactory factory : factories) {
+//				int min = SearchUtils.getMinInstanceCount(factory);
+//				int max = factory.getMaxInstanceCount();
+//				if(max!=-1 && max<min)
+//					throw new IllegalArgumentException("Max instance count of factory is too small: "+factory.getClass()); //$NON-NLS-1$
+//				
+//				for(int i=0; i<=min; i++) {
+//					vertexForms.addEntry(createConstraintId(),
+//						new ConstraintFormEntry(factory));
+//				}
+//			}
 		}
 		
 		// BUTTONS
-		formBuilder.addEntry("control", new ControlFormEntry( //$NON-NLS-1$
+		vertexForms.addEntry("control", new ControlFormEntry( //$NON-NLS-1$
 				cancelEditingAction, textSubmitAction));
 		
-		formBuilder.buildForm();
+		vertexForms.buildForm();
 		
 		JLabel label = createInfoLabel();
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 2;
+		gbc.gridx = GridBagConstraints.REMAINDER;
 		gbc.gridy = 0;
 		gbc.anchor = GridBagConstraints.NORTHEAST;
 		
-		formBuilder.getContainer().add(label, gbc);
+		vertexForms.getContainer().add(label, gbc);
 		
-		formBuilder.pack();
+		vertexForms.pack();
 		
-		return formBuilder;
+		return vertexForms;
 	}
 
 	/**
@@ -278,13 +300,15 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 	 */
 	@Override
 	protected Object createEdgeEditor() {
-		FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
+		FormBuilder edgeForms = FormBuilder.newLocalizingBuilder();
 		
-		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getEdgeFactories();
+		List<ConstraintFactory> factories = new ArrayList<>(
+				getPresenter().getConstraintContext().getEdgeFactories());
+		Collections.sort(factories, SearchUtils.factorySorter);
 		
 		if(!factories.isEmpty()) {
 			// NEGATED
-			formBuilder.addToggleFormEntry("negated", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
+			edgeForms.addToggleFormEntry("negated", "plugins.searchTools.labels.negated"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			// EDGE TYPE
 			ChoiceFormEntry entry = new ChoiceFormEntry(
@@ -293,32 +317,58 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			entry.setResizeMode(FormBuilder.RESIZE_REMAINDER);
 			entry.getComboBox().setRenderer(sharedRenderer);
 			UIUtil.resizeComponent(entry.getComboBox(), 100, 20);
-			formBuilder.addEntry("edgeType", entry); //$NON-NLS-1$
+			edgeForms.addEntry("edgeType", entry); //$NON-NLS-1$
 			
 			// CONSTRAINTS
-			for(int i=0; i<factories.size(); i++) {
-				formBuilder.addEntry("constraint_"+i,  //$NON-NLS-1$
-						new ConstraintFormEntry(factories.get(i)));
-			}
+			edgeForms.addEntry("constraints", new ConstraintGroupFormEntry(false)); //$NON-NLS-1$
+//			for(ConstraintFactory factory : factories) {
+//				int min = SearchUtils.getMinInstanceCount(factory);
+//				int max = factory.getMaxInstanceCount();
+//				if(max!=-1 && max<min)
+//					throw new IllegalArgumentException("Max instance count of factory is too small: "+factory.getClass()); //$NON-NLS-1$
+//				
+//				for(int i=0; i<=min; i++) {
+//					edgeForms.addEntry(createConstraintId(),
+//						new ConstraintFormEntry(factory));
+//				}
+//			}
 		}
 		
 		// BUTTONS
-		formBuilder.addEntry("control", new ControlFormEntry( //$NON-NLS-1$
+		edgeForms.addEntry("control", new ControlFormEntry( //$NON-NLS-1$
 				cancelEditingAction, textSubmitAction));
 		
-		formBuilder.buildForm();
+		edgeForms.buildForm();
 		
 		JLabel label = createInfoLabel();
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 2;
+		gbc.gridx = GridBagConstraints.REMAINDER;
 		gbc.gridy = 0;
 		gbc.anchor = GridBagConstraints.NORTHEAST;
 		
-		formBuilder.getContainer().add(label, gbc);
+		edgeForms.getContainer().add(label, gbc);
 		
-		formBuilder.pack();
+		edgeForms.pack();
 		
-		return formBuilder;
+		return edgeForms;
+	}
+	
+	public static int getInstanceCount(FormBuilder formBuilder, ConstraintFactory factory) {
+		if(formBuilder==null) {
+			return 0;
+		}
+		
+		int count = 0;
+		for(int i=0; i<formBuilder.getEntryCount(); i++) {
+			FormEntry entry = formBuilder.getEntry(i);
+			if(entry instanceof ConstraintFormEntry) {
+				ConstraintFormEntry constraintEntry = (ConstraintFormEntry) entry;
+				if(constraintEntry.getFactory()==factory) {
+					count++;
+				}
+			}
+		}
+		return count;
 	}
 
 	/**
@@ -333,10 +383,11 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		formBuilder.setValue("negated", nodeData.isNegated()); //$NON-NLS-1$
 		formBuilder.setValue("nodeType", nodeData.getNodeType()); //$NON-NLS-1$
 		
-		SearchConstraint[] constraints = nodeData.getConstraints();
-		for(int i=0; i<constraints.length; i++) {
-			formBuilder.setValue("constraint_"+i, constraints[i]); //$NON-NLS-1$
-		}
+//		SearchConstraint[] constraints = nodeData.getConstraints();
+//		for(int i=0; i<constraints.length; i++) {
+//			formBuilder.setValue("constraint_"+i, constraints[i]); //$NON-NLS-1$
+//		}
+		formBuilder.setValue("constraints", nodeData.getConstraints()); //$NON-NLS-1$
 	}
 
 	/**
@@ -351,10 +402,11 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		formBuilder.setValue("negated", edgeData.isNegated()); //$NON-NLS-1$
 		formBuilder.setValue("edgeType", edgeData.getEdgeType()); //$NON-NLS-1$
 		
-		SearchConstraint[] constraints = edgeData.getConstraints();
-		for(int i=0; i<constraints.length; i++) {
-			formBuilder.setValue("constraint_"+i, constraints[i]); //$NON-NLS-1$
-		}
+//		SearchConstraint[] constraints = edgeData.getConstraints();
+//		for(int i=0; i<constraints.length; i++) {
+//			formBuilder.setValue("constraint_"+i, constraints[i]); //$NON-NLS-1$
+//		}
+		formBuilder.setValue("constraints", edgeData.getConstraints()); //$NON-NLS-1$
 	}
 
 	/**
@@ -378,9 +430,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		nodeData.setNodeType((NodeType) formBuilder.getValue("nodeType")); //$NON-NLS-1$
 		
 		// Constraints
-		for(int i=0; i<factories.size(); i++) {
-			nodeData.setConstraint(i, (SearchConstraint) formBuilder.getValue("constraint_"+i)); //$NON-NLS-1$
-		}
+//		for(int i=0; i<factories.size(); i++) {
+//			nodeData.setConstraint(i, (SearchConstraint) formBuilder.getValue("constraint_"+i)); //$NON-NLS-1$
+//		}
+		nodeData.setConstraints((SearchConstraint[]) formBuilder.getValue("constraints")); //$NON-NLS-1$
 
 		mxGraph graph = getPresenter().getGraph();
 		mxIGraphModel model = graph.getModel();
@@ -415,9 +468,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		edgeData.setEdgeType((EdgeType) formBuilder.getValue("edgeType")); //$NON-NLS-1$
 		
 		// Constraints
-		for(int i=0; i<factories.size(); i++) {
-			edgeData.setConstraint(i, (SearchConstraint) formBuilder.getValue("constraint_"+i)); //$NON-NLS-1$
-		}
+//		for(int i=0; i<factories.size(); i++) {
+//			edgeData.setConstraint(i, (SearchConstraint) formBuilder.getValue("constraint_"+i)); //$NON-NLS-1$
+//		}
+		edgeData.setConstraints((SearchConstraint[]) formBuilder.getValue("constraints")); //$NON-NLS-1$
 
 		mxGraph graph = getPresenter().getGraph();
 		mxIGraphModel model = graph.getModel();
@@ -430,6 +484,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			model.endUpdate();
 		}
 
+	}
+	
+	public static String createConstraintId() {
+		return "constraint_"+idGen.incrementAndGet(); //$NON-NLS-1$
 	}
 	
 	@SuppressWarnings("serial")
@@ -502,16 +560,159 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 	private static GroupingCellRenderer sharedGroupingRenderer =
 			new GroupingCellRenderer();
 	
-	private static class ConstraintFormEntry implements FormEntry, ActionListener {
+	private class ConstraintGroupFormEntry extends FormEntry implements ActionListener {
+		
+		private FormBuilder formBuilder;
+		private JPanel container;
+		private final boolean isVertex;
+
+		ConstraintGroupFormEntry(boolean isVertex) {
+			container = new JPanel();
+			formBuilder = FormBuilder.newLocalizingBuilder(container);
+			this.isVertex = isVertex;
+		}
+		
+		private List<ConstraintFactory> getFactories() {
+			ConstraintContext context = getPresenter().getConstraintContext();
+			return isVertex ? context.getNodeFactories() : context.getEdgeFactories();
+		}
+		
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JButton button = (JButton) e.getSource();
+			ConstraintFormEntry entry = (ConstraintFormEntry) button.getClientProperty("owner"); //$NON-NLS-1$
+			boolean add = Boolean.parseBoolean(e.getActionCommand());
+			
+			if(add) {
+				ConstraintFormEntry newEntry = cloneEntry(entry);
+				formBuilder.insertEntry(createConstraintId(), newEntry, entry.getId());
+				newEntry.refreshButtons();
+			} else {
+				formBuilder.removeEntry(entry);
+			}
+			
+			formBuilder.buildForm();
+			formBuilder.pack();
+			
+			FormBuilder rootBuilder = getBuilder();
+			rootBuilder.pack();
+			rootBuilder.getContainer().revalidate();
+			rootBuilder.getContainer().repaint();
+		}
+		
+		private ConstraintFormEntry cloneEntry(ConstraintFormEntry entry) {
+			return new ConstraintFormEntry(entry.getFactory(), this);
+		}
+		
+		private ConstraintFormEntry newEntry(ConstraintFactory factory) {
+			return new ConstraintFormEntry(factory, this);
+		}
+
+		/**
+		 * @see de.ims.icarus.ui.dialog.FormBuilder.FormEntry#addToForm(de.ims.icarus.ui.dialog.FormBuilder)
+		 */
+		@Override
+		public ConstraintGroupFormEntry addToForm(FormBuilder builder) {
+			builder.feedComponent(container, null, FormBuilder.RESIZE_REMAINDER);
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.ui.dialog.FormBuilder.FormEntry#setValue(java.lang.Object)
+		 */
+		@Override
+		public ConstraintGroupFormEntry setValue(Object value) {
+			
+			formBuilder.removeAllEntries();
+			
+			SearchConstraint[] constraints = (SearchConstraint[])value;
+			if(constraints==null) {
+				constraints = new SearchConstraint[0];
+			}
+			
+			Map<String, List<SearchConstraint>> cmap = new HashMap<>();
+			for(SearchConstraint constraint : constraints) {
+				List<SearchConstraint> list = cmap.get(constraint.getToken());
+				if(list==null) {
+					list = new LinkedList<>();
+					cmap.put(constraint.getToken(), list);
+				}
+				list.add(constraint);
+			}
+			
+			List<ConstraintFactory> factories = getFactories();
+			for(ConstraintFactory factory : factories) {
+				int min = SearchUtils.getMinInstanceCount(factory);
+				int max = SearchUtils.getMaxInstanceCount(factory);
+				List<SearchConstraint> items = cmap.get(factory.getToken());
+				if(items==null) {
+					items = Collections.emptyList();
+				}
+				
+				max = Math.min(max, items.size());
+				min = Math.max(min, max);
+				for(int i=0; i<min; i++) {
+					ConstraintFormEntry entry = newEntry(factory);
+					if(i<items.size()) {
+						entry.setValue(items.get(i));
+					}
+					formBuilder.addEntry(createConstraintId(), entry);
+					entry.refreshButtons();
+				}
+			}
+			
+			formBuilder.buildForm();
+			formBuilder.pack();
+			
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.ui.dialog.FormBuilder.FormEntry#getValue()
+		 */
+		@Override
+		public Object getValue() {
+			List<SearchConstraint> constraints = new ArrayList<>();
+			
+			for(int i=0; i<formBuilder.getEntryCount(); i++) {
+				SearchConstraint constraint = (SearchConstraint) formBuilder.getValue(i);
+				
+				if(constraint!=null) {
+					constraints.add(constraint);
+				}
+			}
+			
+			return SearchUtils.toArray(constraints);
+		}
+
+		/**
+		 * @see de.ims.icarus.ui.dialog.FormBuilder.FormEntry#clear()
+		 */
+		@Override
+		public ConstraintGroupFormEntry clear() {
+			formBuilder.clear();
+			return this;
+		}
+		
+	}
+	
+	private static class ConstraintFormEntry extends FormEntry implements ActionListener {
 		
 		private JComboBox<SearchOperator> operatorSelect;
 		private JComboBox<Object> valueSelect;
+		private JComboBox<Object> specifierSelect;
 		private JLabel label;
+		
+		private JButton addButton, removeButton;
+		private JCheckBox toggleInclude;
 		
 		private ConstraintFactory factory;
 		private boolean displayingGroups = false;
 		
-		ConstraintFormEntry(ConstraintFactory factory) {
+		ConstraintFormEntry(ConstraintFactory factory, ActionListener listener) {
 			this.factory = factory;
 			
 			SearchOperator[] operators = factory.getSupportedOperators();
@@ -522,6 +723,18 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			operatorSelect.setMaximumRowCount(operators.length);
 			operatorSelect.addActionListener(this);
 			UIUtil.fitToContent(operatorSelect, 60, 100, 20);
+			
+			Object[] specifiers = factory.getSupportedSpecifiers();
+			specifierSelect = specifiers==null ? new JComboBox<>() : new JComboBox<>(specifiers);
+			specifierSelect.setEditable(false);
+			specifierSelect.setRenderer(sharedRenderer);
+			UIUtil.fitToContent(specifierSelect, 60, 100, 20);
+			specifierSelect.setVisible(specifiers!=null);
+			
+			addButton = createHelperButton(true, listener);
+			removeButton = createHelperButton(false, listener);
+			
+			toggleInclude = new JCheckBox();
 			
 			Object[] labelSet = factory.getLabelSet();
 			Class<?> valueClass = factory.getValueClass();
@@ -542,6 +755,25 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			UIUtil.resizeComponent(valueSelect, 100, 20);
 			
 			label = new JLabel(factory.getName());
+			
+			refreshButtons();
+		}
+		
+		private JButton createHelperButton(boolean add, ActionListener listener) {
+			JButton b = new JButton();
+			String iconName = add ? "add_stat.gif" : "del_stat.gif"; //$NON-NLS-1$ //$NON-NLS-2$
+			b.setIcon(IconRegistry.getGlobalRegistry().getIcon(iconName));
+			b.setHorizontalAlignment(SwingConstants.CENTER);
+			b.setVerticalAlignment(SwingConstants.CENTER);
+			b.setFocusable(false);
+			b.setFocusPainted(false);
+			b.addActionListener(listener);
+			b.putClientProperty("owner", this); //$NON-NLS-1$
+			b.setActionCommand(String.valueOf(add));
+			
+			UIUtil.resizeComponent(b, 13, 12);
+			
+			return b;
 		}
 
 		/**
@@ -561,6 +793,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			operatorSelect.setSelectedItem(constraint.getOperator());
 			label.setText(factory.getName());
 			label.setToolTipText(factory.getDescription());
+			toggleInclude.setSelected(constraint.isActive());
 			
 			displayingGroups = SearchManager.isGroupingOperator(constraint.getOperator());
 			if(displayingGroups) {
@@ -576,8 +809,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		 * @see de.ims.icarus.ui.dialog.FormBuilder.FormEntry#getValue()
 		 */
 		@Override
-		public Object getValue() {
-			
+		public Object getValue() {			
 			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
 			Object value = null;
 			
@@ -591,7 +823,9 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			}
 			
 			
-			return new DefaultConstraint(factory.getToken(), value, operator);
+			SearchConstraint constraint = new DefaultConstraint(factory.getToken(), value, operator);
+			constraint.setActive(toggleInclude.isSelected());
+			return constraint;
 		}
 
 		/**
@@ -616,11 +850,24 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		@Override
 		public ConstraintFormEntry addToForm(FormBuilder builder) {
 			builder.feedComponent(label);
+			builder.feedComponent(specifierSelect);
 			builder.feedComponent(operatorSelect, new Insets(1, 4, 1, 4));
 			builder.feedComponent(valueSelect, null, FormBuilder.RESIZE_HORIZONTAL);
+			builder.feedComponent(toggleInclude, new Insets(1, 2, 1, 2));
+			builder.feedComponent(removeButton, new Insets(1, 1, 1, 1), GridBagConstraints.CENTER, -1);
+			builder.feedComponent(addButton, new Insets(1, 1, 1, 1), GridBagConstraints.CENTER, -1);
 			builder.newLine();
 			
 			return this;
+		}
+		
+		public void refreshButtons() {
+			int min = SearchUtils.getMinInstanceCount(factory);
+			int max = SearchUtils.getMaxInstanceCount(factory);
+			int current = getInstanceCount(getBuilder(), factory);
+			
+			addButton.setEnabled(current<max);
+			removeButton.setEnabled(current>min);
 		}
 		
 		private void displayValue(Object value) {
@@ -663,14 +910,21 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
-			if(SearchManager.isGroupingOperator(operator) && !displayingGroups) {
-				// Switch to group selection
-				displayGroups(0);
-			} else if(!SearchManager.isGroupingOperator(operator) && displayingGroups) {
-				// Switch to old mode
-				displayValue(null);
+			if(e.getSource()==operatorSelect) {
+				SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
+				if(SearchManager.isGroupingOperator(operator) && !displayingGroups) {
+					// Switch to group selection
+					displayGroups(0);
+				} else if(!SearchManager.isGroupingOperator(operator) && displayingGroups) {
+					// Switch to old mode
+					displayValue(null);
+				}
+				
 			}
+		}
+		
+		public ConstraintFactory getFactory() {
+			return factory;
 		}
 	}
 }

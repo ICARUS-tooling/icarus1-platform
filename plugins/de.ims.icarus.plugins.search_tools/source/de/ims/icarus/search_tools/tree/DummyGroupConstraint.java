@@ -118,4 +118,28 @@ public class DummyGroupConstraint implements SearchConstraint {
 	public boolean isUndefined() {
 		return false;
 	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#setActive(boolean)
+	 */
+	@Override
+	public void setActive(boolean active) {
+		// no-op
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#isActive()
+	 */
+	@Override
+	public boolean isActive() {
+		return true;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#getSpecifier()
+	 */
+	@Override
+	public Object getSpecifier() {
+		return source.getSpecifier();
+	}
 }

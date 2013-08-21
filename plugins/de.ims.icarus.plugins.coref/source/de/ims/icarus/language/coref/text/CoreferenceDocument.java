@@ -112,6 +112,9 @@ public class CoreferenceDocument extends BatchDocument {
 		forceLinebreaks = source.forceLinebreaks;
 		filter = source.filter;
 		highlightType = source.highlightType;
+		showGoldSpans = source.showGoldSpans;
+		markFalseSpans = source.markFalseSpans;
+		filterSingletons = source.filterSingletons;
 	}
 	
 	// TODO bug: no space between last and next to last token in span when nested span is filtered out!
@@ -137,11 +140,18 @@ public class CoreferenceDocument extends BatchDocument {
 			builder = new StringBuilder();
 		}
 		
-		spanBuffer.rebuild(spans);
-		if(goldSpans==null) {
+		if(spans==null) {
 			spanBuffer.clear();
+			// Ensure a non-null spans array!
+			spans = new Span[0];
 		} else {
-			spanBuffer.rebuild(goldSpans);
+			spanBuffer.rebuild(spans);
+		}
+		
+		if(goldSpans==null) {
+			goldBuffer.clear();
+		} else {
+			goldBuffer.rebuild(goldSpans);
 		}
 		
 		HighlightType highlightType = getHighlightType();
@@ -155,7 +165,7 @@ public class CoreferenceDocument extends BatchDocument {
 			appendBatchLineFeed(null);
 		}
 		
-		for(int index = 0; index <length; index++) {
+		for(int index = 0; index<length; index++) {
 			
 			boolean important = isMarkSpans() && spanBuffer.isImportant(index);
 			boolean isLast = index==length-1;

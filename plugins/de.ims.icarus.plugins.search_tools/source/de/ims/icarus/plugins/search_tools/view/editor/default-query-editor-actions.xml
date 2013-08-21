@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		DEFAULT QUERY EDITOR
+	-->
+		
+	<!-- Refresh Preview -->
+	<action id="plugins.searchTools.defaultQueryEditor.refreshPreviewAction"
+		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.searchTools.defaultQueryEditor.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		
+	<!-- Synchronize Graph -->
+	<action id="plugins.searchTools.defaultQueryEditor.synchronizeGraphAction"
+		name="${id}.name" desc="${id}.description" icon="navi_up_stop.png" />
+		
+	<!-- Synchronize Query -->
+	<action id="plugins.searchTools.defaultQueryEditor.synchronizeQueryAction"
+		name="${id}.name" desc="${id}.description" icon="navi_down_stop.png" />
+		
+	<!-- Commit -->
+	<action id="plugins.searchTools.defaultQueryEditor.commitAction"
+		name="${id}.name" desc="${id}.description" icon="ValidateXSD.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.searchTools.defaultQueryEditor.toolBarList">
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.undoAction" />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.redoAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.cutAction" />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.copyAction" />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.pasteAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.selectAllAction" />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.clearAction" />
+		<item type="glue" />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.commitAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.synchronizeGraphAction" />
+		<item type="action" value="plugins.searchTools.defaultQueryEditor.synchronizeQueryAction" />
+	</action-list>
+	
+</actions>

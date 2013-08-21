@@ -166,7 +166,14 @@ public class FormBuilder {
 	}
 
 	public FormEntry removeEntry(String id) {
-		return getEntryMap().remove(id);
+		FormEntry entry = getEntryMap().remove(id);
+		
+		if(entry!=null) {
+			entry.setId(null);
+			entry.setBuilder(null);
+		}
+		
+		return entry;
 	}
 	
 	public FormEntry removeEntry(FormEntry entry) {
@@ -175,11 +182,20 @@ public class FormBuilder {
 			if(getEntryMap().get(id)==entry) {
 				getEntryMap().remove(id);
 				getIds().remove(i);
+
+				entry.setId(null);
+				entry.setBuilder(null);
+				
 				break;
 			}
 		}
 		
 		return entry;
+	}
+	
+	public void removeAllEntries() {
+		getIds().clear();
+		getEntryMap().clear();
 	}
 	
 	public <E extends FormEntry> E insertEntry(String id, E entry, String afterId) {
@@ -207,6 +223,9 @@ public class FormBuilder {
 		if(id!=null) {
 			getEntryMap().put(id, entry);
 		}
+		
+		entry.setId(id);
+		entry.setBuilder(this);
 		
 		return entry;
 	}
@@ -406,18 +425,37 @@ public class FormBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public interface FormEntry {
+	public static abstract class FormEntry {
+		
+		private String id;
+		private FormBuilder builder;
 
-		FormEntry addToForm(FormBuilder builder);
+		public String getId() {
+			return id;
+		}
+
+		void setId(String id) {
+			this.id = id;
+		}
+
+		public FormBuilder getBuilder() {
+			return builder;
+		}
+
+		void setBuilder(FormBuilder builder) {
+			this.builder = builder;
+		}
+
+		public abstract FormEntry addToForm(FormBuilder builder);
 		
-		FormEntry setValue(Object value);
+		public abstract FormEntry setValue(Object value);
 		
-		Object getValue();
+		public abstract Object getValue();
 		
-		FormEntry clear();
+		public abstract FormEntry clear();
 	}
 	
-	public static class SeparatorFormEntry implements FormEntry {
+	public static class SeparatorFormEntry extends FormEntry {
 
 		/**
 		 * @see de.ims.icarus.ui.dialog.FormBuilder.FormEntry#addToForm(de.ims.icarus.ui.dialog.FormBuilder)
@@ -459,7 +497,7 @@ public class FormBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static abstract class AbstractFormEntry<E extends FormEntry> implements FormEntry {
+	public static abstract class AbstractFormEntry<E extends FormEntry> extends FormEntry {
 		
 		protected int resizeMode = RESIZE_NONE;
 

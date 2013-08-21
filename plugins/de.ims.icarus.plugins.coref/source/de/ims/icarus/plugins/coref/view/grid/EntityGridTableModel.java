@@ -359,5 +359,21 @@ public class EntityGridTableModel extends AbstractTableModel {
 			
 			fireColumnAdded(new TableColumnModelEvent(this, 0, size-1));
 		}
+
+		public ClusterLabelType getLabelType() {
+			return labelType;
+		}
+
+		public void setLabelType(ClusterLabelType labelType) {
+			if(labelType==null)
+				throw new IllegalArgumentException("Invalid label type"); //$NON-NLS-1$
+			
+			if(labelType==this.labelType) {
+				return;
+			}
+			
+			this.labelType = labelType;
+			reloadLabels();
+		}
 	}
 }

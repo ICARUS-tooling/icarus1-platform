@@ -109,7 +109,7 @@ public class ConstraintGraphStyle extends DefaultGraphStyle {
 			
 			if(constraints!=null) {
 				for(SearchConstraint constraint : constraints) {
-					if(constraint==null || !SearchManager.isGroupingOperator(constraint.getOperator())) {
+					if(constraint==null || !constraint.isActive() || !SearchManager.isGroupingOperator(constraint.getOperator())) {
 						continue;
 					}
 					

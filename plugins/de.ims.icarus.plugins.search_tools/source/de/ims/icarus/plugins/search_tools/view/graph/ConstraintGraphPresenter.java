@@ -71,8 +71,6 @@ import de.ims.icarus.search_tools.SearchEdge;
 import de.ims.icarus.search_tools.SearchGraph;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchNode;
-import de.ims.icarus.search_tools.SearchOperator;
-import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultGraphEdge;
 import de.ims.icarus.search_tools.standard.DefaultGraphNode;
 import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
@@ -333,13 +331,13 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		List<ConstraintFactory> factories = getConstraintContext().getNodeFactories();
 		
 		ConstraintNodeData nodeData = new ConstraintNodeData(factories.size());
-		for(int i=0; i<factories.size(); i++) {
-			ConstraintFactory factory = factories.get(i);
-			SearchOperator operator = factory.getSupportedOperators()[0];
-			Object value = factory.getDefaultValue();
-			
-			nodeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
-		}
+		nodeData.setConstraints(SearchUtils.createDefaultConstraints(factories));
+//		for(ConstraintFactory factory : factories) {
+//			SearchOperator operator = factory.getSupportedOperators()[0];
+//			Object value = factory.getDefaultValue();
+//			
+//			nodeData.addConstraint(new DefaultConstraint(factory.getToken(), value, operator));
+//		}
 				
 		return nodeData;
 	}
@@ -350,7 +348,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		nodeData.setNegated(source.isNegated());
 		nodeData.setNodeType(source.getNodeType());
 		
-		nodeData.setConstraints(source.getConstraints(), constraintMap);
+		nodeData.setConstraints(source.getConstraints());
 		
 		return nodeData;
 	}
@@ -359,13 +357,14 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		List<ConstraintFactory> factories = getConstraintContext().getEdgeFactories();
 		
 		ConstraintEdgeData edgeData = new ConstraintEdgeData(factories.size());
-		for(int i=0; i<factories.size(); i++) {
-			ConstraintFactory factory = factories.get(i);
-			SearchOperator operator = factory.getSupportedOperators()[0];
-			Object value = factory.getDefaultValue();
-			
-			edgeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
-		}
+		edgeData.setConstraints(SearchUtils.createDefaultConstraints(factories));
+//		for(int i=0; i<factories.size(); i++) {
+//			ConstraintFactory factory = factories.get(i);
+//			SearchOperator operator = factory.getSupportedOperators()[0];
+//			Object value = factory.getDefaultValue();
+//			
+//			edgeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
+//		}
 				
 		return edgeData;
 	}
@@ -376,7 +375,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		edgeData.setNegated(source.isNegated());
 		edgeData.setEdgeType(source.getEdgeType());
 		
-		edgeData.setConstraints(source.getConstraints(), constraintMap);
+		edgeData.setConstraints(source.getConstraints());
 		
 		return edgeData;
 	}

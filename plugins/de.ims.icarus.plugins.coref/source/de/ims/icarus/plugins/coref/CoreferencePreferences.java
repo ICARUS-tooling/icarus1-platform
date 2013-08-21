@@ -28,7 +28,9 @@ package de.ims.icarus.plugins.coref;
 import java.awt.Color;
 
 import de.ims.icarus.config.ConfigBuilder;
+import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
 import de.ims.icarus.util.Options;
 
@@ -73,5 +75,9 @@ public class CoreferencePreferences {
 		
 		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
+		builder.setProperties(
+				builder.addOptionsEntry("defaultDocumentPresenter", 0, CoreferencePlugin.getCoreferencePresenterExtensions().toArray()), //$NON-NLS-1$
+				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
+		
 	}
 }

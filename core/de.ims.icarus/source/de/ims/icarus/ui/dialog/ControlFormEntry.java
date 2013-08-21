@@ -40,7 +40,7 @@ import de.ims.icarus.ui.dialog.FormBuilder.FormEntry;
  * @version $Id$
  *
  */
-public class ControlFormEntry implements FormEntry {
+public class ControlFormEntry extends FormEntry {
 	
 	private final JButton[] buttons;
 

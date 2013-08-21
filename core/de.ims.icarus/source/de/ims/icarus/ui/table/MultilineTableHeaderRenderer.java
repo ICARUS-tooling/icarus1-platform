@@ -27,14 +27,15 @@ package de.ims.icarus.ui.table;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
@@ -66,6 +67,7 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 	    
 	    JComponent renderer = (JComponent) getCellRenderer();
 	    UIUtil.disableHtml(renderer);
+	    setHorizontalAlignment(SwingConstants.CENTER);
 	}
 	
 	public void setHorizontalAlignment(int alignment) {
@@ -93,17 +95,15 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		String str = (value == null) ? "" : value.toString(); //$NON-NLS-1$
 		
 		int width = table.getColumnModel().getColumn(column).getWidth();
-		str = StringUtil.wrap(str, (Component) getCellRenderer(), width);
-		StringTokenizer tokenizer = new StringTokenizer(str, "\n"); //$NON-NLS-1$
+		width = Math.max(width, StringUtil.MIN_WRAP_WIDTH);
+		String[] lines = StringUtil.split(str, (Component) getCellRenderer(), width);
+		
+		System.out.println("----------\n"+Arrays.toString(lines));
 		
 		MultilineListModel model = getModel();
-		model.clear();
-		while(tokenizer.hasMoreTokens()) {
-			model.addLine(tokenizer.nextToken());
-		}
-		//model.fireContentChange();
+		model.setLines(lines);
 		
-		setToolTipText(str);
+		setToolTipText(UIUtil.toSwingTooltip(str));
 		
 		return this;
 	}
@@ -114,19 +114,27 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		
 		private List<String> lines = new ArrayList<>();
 		
+		private int maxLineCount = 3;
+		
 		public void clear() {
 			lines.clear();
 		}
 		
 		public void setLines(String...lines) {
 			clear();
-			CollectionUtils.feedItems(this.lines, lines);
+			
+			int max = Math.min(lines.length, maxLineCount);
+			for(int i=0; i<max; i++) {
+				this.lines.add(lines[i]);
+			}
 			
 			fireContentChange();
 		}
 		
 		public void addLine(String line) {
-			lines.add(line);
+			if(lines.size()<maxLineCount) {
+				lines.add(line);
+			}
 		}
 		
 		public void fireContentChange() {
@@ -147,6 +155,14 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		@Override
 		public String getElementAt(int index) {
 			return lines.get(index);
+		}
+
+		public int getMaxLineCount() {
+			return maxLineCount;
+		}
+
+		public void setMaxLineCount(int maxLineCount) {
+			this.maxLineCount = maxLineCount;
 		}
 		
 	}

@@ -25,15 +25,17 @@
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
 
+import java.util.ArrayList;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.search_tools.EdgeType;
-import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchEdge;
 import de.ims.icarus.search_tools.util.SearchUtils;
+import de.ims.icarus.util.CollectionUtils;
 
 
 /**
@@ -63,7 +65,7 @@ public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
 	}
 
 	public ConstraintEdgeData(int size) {
-		constraints = new SearchConstraint[size];
+		constraints = new ArrayList<>(size);
 	}
 	
 	/**
@@ -82,7 +84,7 @@ public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
 		negated = source.isNegated();
 		edgeType = source.getEdgeType();
 		id = source.getId();
-		constraints = SearchUtils.cloneConstraints(source.getConstraints());
+		constraints = CollectionUtils.asList(SearchUtils.cloneConstraints(source.getConstraints()));
 	}
 
 	/**

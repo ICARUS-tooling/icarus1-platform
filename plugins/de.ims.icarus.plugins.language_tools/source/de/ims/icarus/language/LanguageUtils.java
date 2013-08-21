@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.language;
 
+import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.ContentTypeRegistry;
+
 
 /**
  * @author Markus Gärtner
@@ -221,6 +224,10 @@ public final class LanguageUtils implements LanguageConstants {
 			}
 		}
 		return true;
+	}
+	
+	public static ContentType getSentenceDataContentType() {
+		return ContentTypeRegistry.getInstance().getType("SentenceDataContentType"); //$NON-NLS-1$
 	}
 
 	public static final SentenceData dummySentenceData = new SentenceData() {
