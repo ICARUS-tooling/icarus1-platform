@@ -236,7 +236,21 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		GROUPING,
 	};
 	
+	private static final SearchOperator[] numericalOperators = {
+		EQUALS,
+		EQUALS_NOT,
+		LESS_THAN,
+		LESS_OR_EQUAL,
+		GREATER_THAN,
+		GREATER_OR_EQUAL,
+		GROUPING,
+	};
+	
 	public static SearchOperator[] values() {
 		return operators.clone();
+	}
+	
+	public static SearchOperator[] numerical() {
+		return numericalOperators.clone();
 	}
 }

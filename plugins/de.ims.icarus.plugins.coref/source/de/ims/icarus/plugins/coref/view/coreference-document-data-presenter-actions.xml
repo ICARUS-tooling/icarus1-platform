@@ -25,6 +25,8 @@
 		<item type="label" value="plugins.coref.coreferenceDocumentView.presenter" />
 		<item type="custom" value="selectPresenter" />
 		<separator />
+		<item type="custom" value="headerLabel" />
+		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentView.refreshViewAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentView.clearViewAction" />
 	</action-list>	

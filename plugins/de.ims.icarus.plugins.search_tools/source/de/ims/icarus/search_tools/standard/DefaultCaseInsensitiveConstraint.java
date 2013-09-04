@@ -48,6 +48,11 @@ public class DefaultCaseInsensitiveConstraint extends DefaultConstraint {
 			SearchOperator operator) {
 		super(token, value, operator);
 	}
+
+	public DefaultCaseInsensitiveConstraint(String token, Object value,
+			SearchOperator operator, Object specifier) {
+		super(token, value, operator, specifier);
+	}
 	
 	@Override
 	protected Object getConstraint() {

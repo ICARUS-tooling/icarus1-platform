@@ -49,6 +49,8 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	
 	private Cluster cluster;
 	
+	private static final char TAB_CHAR = '\t';
+	
 	public static final String ROOT_ID = "ROOT"; //$NON-NLS-1$
 	
 	private static Span sharedRoot;
@@ -168,7 +170,12 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		if(s.startsWith("ROOT")) { //$NON-NLS-1$
 			return getROOT();
 		} else {
-			Matcher m = getPattern().matcher(s);
+			int tabIndex = s.indexOf(TAB_CHAR);
+			if(tabIndex==-1) {
+				tabIndex = s.length();
+			}
+			
+			Matcher m = getPattern().matcher(s.substring(0, tabIndex));
 			if(!m.find())
 				throw new IllegalArgumentException("Unrecognized format for span: "+s); //$NON-NLS-1$
 
@@ -176,6 +183,10 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 			span.setSentenceIndex(Integer.parseInt(m.group(1)));
 			span.setBeginIndex(Integer.parseInt(m.group(2))-1);
 			span.setEndIndex(Integer.parseInt(m.group(3))-1);
+			
+			if(tabIndex<s.length()-1) {
+				span.setProperties(CorefProperties.parse(s.substring(tabIndex+1)));
+			}
 			
 			return span;
 		}
@@ -216,7 +227,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	}
 	
 	public int getRange() {
-		return endIndex - beginIndex;
+		return endIndex - beginIndex + 1;
 	}
 	
 	public void setROOT(boolean root) {

@@ -94,6 +94,7 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		
 		return edge;
 	}
+	
 	public static Edge parse(String s, SpanSet spanSet) {
 		if(s==null || s.isEmpty())
 			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
@@ -101,6 +102,9 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 			throw new IllegalArgumentException("Invalid span set"); //$NON-NLS-1$
 		
 		int tabIndex = s.indexOf(TAB_CHAR);
+		if(tabIndex==-1) {
+			tabIndex = s.length();
+		}
 		String[] spans = DIR.split(s.substring(0, tabIndex));
 		
 		Span source = spanSet.getSpan(spans[0]);

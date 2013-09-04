@@ -54,7 +54,7 @@ public abstract class TablePresenter implements AWTPresenter {
 	protected JPanel contentPanel;
 
 	protected TablePresenter() {
-		// no-op
+		init();
 	}
 	
 	protected void init() {
@@ -125,8 +125,6 @@ public abstract class TablePresenter implements AWTPresenter {
 	@Override
 	public Component getPresentingComponent() {
 		if(contentPanel==null) {
-			init();
-			
 			buildPanel();
 		}
 		return contentPanel;

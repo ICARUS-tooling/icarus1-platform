@@ -37,14 +37,12 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 
-import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.ui.NumberDisplayMode;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
@@ -73,6 +71,8 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	protected CallbackHandler callbackHandler;
 	
 	protected SwingWorker<?, ?> currentTask;
+	
+	protected Options options;
 	
 	public static final int DEFAULT_REFRESH_DELAY = 1000;
 	
@@ -200,12 +200,24 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		
 		this.searchResult = searchResult;
 		
-		displayResult(options);
+		setOptions(options);
+		displayResult();
 		
 		updateGroupPainters();
 	}
 	
-	protected abstract void displayResult(Options options);
+	protected Options getOptions() {
+		return options==null ? Options.emptyOptions : options;
+	}
+
+	protected void setOptions(Options options) {
+		if(options!=null) {
+			options = options.clone();
+		}
+		this.options = options;
+	}
+
+	protected abstract void displayResult();
 	
 	public abstract void refresh();
 	
@@ -274,8 +286,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	}
 	
 	public void openPreferences() {
-		new ConfigDialog(ConfigRegistry.getGlobalRegistry(), 
-				"plugins.searchTools").setVisible(true); //$NON-NLS-1$
+		UIUtil.openConfigDialog("plugins.searchTools"); //$NON-NLS-1$
 	}
 	
 	public static String getHitCountString(SearchResult result) {

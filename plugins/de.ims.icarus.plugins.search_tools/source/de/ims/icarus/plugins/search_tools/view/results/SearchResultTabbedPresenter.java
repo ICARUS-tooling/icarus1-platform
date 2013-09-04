@@ -260,6 +260,7 @@ public abstract class SearchResultTabbedPresenter extends SearchResultTablePrese
 				
 				Options options = new Options();
 				options.put(Options.TITLE, title);
+				options.putAll(getOptions());
 				resultPresenter.present(getSubResult(), options);
 				
 				add(resultPresenter.getPresentingComponent(), BorderLayout.CENTER);

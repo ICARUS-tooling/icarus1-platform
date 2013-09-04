@@ -30,9 +30,12 @@ import java.awt.Color;
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
+import de.ims.icarus.ui.helper.TooltipListCellRenderer;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.HighlightType;
 
 
 /**
@@ -78,6 +81,26 @@ public class CoreferencePreferences {
 		builder.setProperties(
 				builder.addOptionsEntry("defaultDocumentPresenter", 0, CoreferencePlugin.getCoreferencePresenterExtensions().toArray()), //$NON-NLS-1$
 				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
-		
+		builder.back();
+		// END APPERANCE GROUP
+
+		// HIGHLIGHTING GROUP
+		builder.addGroup("highlighting", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+		builder.setProperties(builder.addOptionsEntry("groupHighlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+		builder.addBooleanEntry("markMultipleAnnotations", true); //$NON-NLS-1$
+		builder.addColorEntry("nodeHighlight", CoreferenceDocumentHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("edgeHighlight", CoreferenceDocumentHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("transitiveHighlight", CoreferenceDocumentHighlighting.getInstance().getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
+		for(String token : CoreferenceDocumentHighlighting.getInstance().getTokens()) {
+			builder.addColorEntry(token+"Highlight", CoreferenceDocumentHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
+		}
+		builder.back();
+		// END HIGHLIGHTING GROUP
 	}
 }

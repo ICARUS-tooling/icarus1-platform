@@ -23,9 +23,10 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.language.dependency.search.constraints;
 
 import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -38,41 +39,35 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyDistanceConstraintFactory extends AbstractConstraintFactory {
+public class DependencyDirectionConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "distance"; //$NON-NLS-1$
+	public static final String TOKEN = "direction"; //$NON-NLS-1$
 
-	public DependencyDistanceConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.distance.description"); //$NON-NLS-1$
+	public DependencyDirectionConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.direction.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.direction.description"); //$NON-NLS-1$
 	}
 
 	/**
-	 * 
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyDistanceConstraint(value, operator);
-	}
-
-	@Override
-	public SearchOperator[] getSupportedOperators() {
-		return new SearchOperator[] {
-			DefaultSearchOperator.EQUALS,
-			DefaultSearchOperator.EQUALS_NOT,
-			DefaultSearchOperator.LESS_THAN,
-			DefaultSearchOperator.LESS_OR_EQUAL,
-			DefaultSearchOperator.GREATER_THAN,
-			DefaultSearchOperator.GREATER_OR_EQUAL,
-			DefaultSearchOperator.GROUPING,
-		};
+		return new DependencyDirectionConstraint(value, operator);
 	}
 
 	@Override
 	public Class<?> getValueClass() {
-		return Integer.class;
+		return null;
+	}
+
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return new SearchOperator[]{
+				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.GROUPING,
+		};
 	}
 
 	@Override
@@ -82,30 +77,39 @@ public class DependencyDistanceConstraintFactory extends AbstractConstraintFacto
 
 	@Override
 	public Object labelToValue(Object label) {
-		return LanguageUtils.parseLabel((String) label);
+		return LanguageUtils.parseDirectionLabel((String)label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value) {
-		return LanguageUtils.getLabel((int)value);
+		return LanguageUtils.getDirectionLabel((int)value);
 	}
 
-	private static class DependencyDistanceConstraint extends DefaultConstraint {
+	@Override
+	public Object[] getLabelSet() {
+		return new Object[]{
+				LanguageUtils.DATA_UNDEFINED_LABEL,
+				LanguageUtils.DATA_LEFT_LABEL,
+				LanguageUtils.DATA_RIGHT_LABEL,
+		};
+	}
 
-		private static final long serialVersionUID = 4020431284510729498L;
+	private static class DependencyDirectionConstraint extends DefaultConstraint {
 
-		public DependencyDistanceConstraint(Object value, SearchOperator operator) {
+		private static final long serialVersionUID = 8874429868140453623L;
+
+		public DependencyDirectionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getDistance();
+			return ((DependencyTargetTree)value).getDirection();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyDistanceConstraint(getValue(), getOperator());
+			return new DependencyDirectionConstraint(getValue(), getOperator());
 		}
 	}
 }

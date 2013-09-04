@@ -245,10 +245,10 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 				(oldProperties==null || oldProperties.isEmpty())) {
 			return true;
 		}
-		if(properties.size()!= (oldProperties==null ? 0 : oldProperties.size())) {
-			return true;
-		}
 		if(properties!=null) {
+			if(properties.size()!= (oldProperties==null ? 0 : oldProperties.size())) {
+				return true;
+			}
 			for(Entry<String, Object> entry : properties.entrySet()) {
 				Object oldValue = oldProperties.get(entry.getKey());
 				if(oldValue==null && entry.getValue()==null) {

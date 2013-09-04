@@ -82,7 +82,7 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 		} else {
 			StringBuilder sb = new StringBuilder();
 			
-			sb.append(data.getClusterId()+1).append('\n');
+			sb.append(data.getClusterId()).append('\n');
 			
 			int i0 = data.getBeginIndex();
 			int i1 = data.getEndIndex();

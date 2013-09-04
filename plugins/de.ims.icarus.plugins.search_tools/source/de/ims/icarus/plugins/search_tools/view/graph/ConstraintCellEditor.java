@@ -256,7 +256,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			ChoiceFormEntry entry = new ChoiceFormEntry(
 					"plugins.searchTools.labels.nodeType",  //$NON-NLS-1$
 					NodeType.values());
-			entry.setResizeMode(FormBuilder.RESIZE_REMAINDER);
+			entry.setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
 			entry.getComboBox().setRenderer(sharedRenderer);
 			UIUtil.resizeComponent(entry.getComboBox(), 100, 20);
 			vertexForms.addEntry("nodeType", entry); //$NON-NLS-1$
@@ -314,7 +314,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			ChoiceFormEntry entry = new ChoiceFormEntry(
 					"plugins.searchTools.labels.edgeType",  //$NON-NLS-1$
 					EdgeType.values());
-			entry.setResizeMode(FormBuilder.RESIZE_REMAINDER);
+			entry.setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
 			entry.getComboBox().setRenderer(sharedRenderer);
 			UIUtil.resizeComponent(entry.getComboBox(), 100, 20);
 			edgeForms.addEntry("edgeType", entry); //$NON-NLS-1$
@@ -726,7 +726,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			
 			Object[] specifiers = factory.getSupportedSpecifiers();
 			specifierSelect = specifiers==null ? new JComboBox<>() : new JComboBox<>(specifiers);
-			specifierSelect.setEditable(false);
+			specifierSelect.setEditable(true);
 			specifierSelect.setRenderer(sharedRenderer);
 			UIUtil.fitToContent(specifierSelect, 60, 100, 20);
 			specifierSelect.setVisible(specifiers!=null);
@@ -801,6 +801,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			} else {
 				displayValue(currentValue);
 			}
+			specifierSelect.setSelectedItem(constraint.getSpecifier());
 			
 			return this;
 		}
@@ -821,9 +822,11 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			} else {
 				value = valueSelect.getSelectedIndex();
 			}
+
+			Object specifier = specifierSelect.isVisible() ? specifierSelect.getSelectedItem() : null;
 			
-			
-			SearchConstraint constraint = new DefaultConstraint(factory.getToken(), value, operator);
+			SearchConstraint constraint = new DefaultConstraint(
+					factory.getToken(), value, operator, specifier);
 			constraint.setActive(toggleInclude.isSelected());
 			return constraint;
 		}

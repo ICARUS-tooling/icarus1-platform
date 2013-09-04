@@ -105,10 +105,12 @@ import javax.swing.text.JTextComponent;
 import javax.swing.tree.TreePath;
 import javax.swing.undo.UndoManager;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.actions.Actions;
+import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.HtmlUtils;
@@ -618,6 +620,10 @@ public final class UIUtil {
 		comp.setLocation(p.x - (int) (d.width * 0.5), p.y
 				- (int) (d.height * 0.5));
 		return comp;
+	}
+	
+	public static void openConfigDialog(String path) {
+		new ConfigDialog(ConfigRegistry.getGlobalRegistry(), path).setVisible(true);
 	}
 	
 	private static class UndecoratedTabbedPaneUI extends BasicTabbedPaneUI {

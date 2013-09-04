@@ -23,13 +23,15 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.language.dependency.search.constraints;
 
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
 /**
@@ -37,13 +39,13 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
+public class DependencyFeaturesConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "form"; //$NON-NLS-1$
+	public static final String TOKEN = "features"; //$NON-NLS-1$
 
-	public DependencyFormConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.form.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.form.description"); //$NON-NLS-1$
+	public DependencyFeaturesConstraintFactory() {
+		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.features.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.features.description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -53,46 +55,59 @@ public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyFormConstraint(value, operator);
+			return new DependencyFeaturesConstraint(value, operator);
 		else
-			return new DependencyFormCIConstraint(value, operator);
+			return new DependencyFeaturesCIConstraint(value, operator);
 	}
 
-	private static class DependencyFormConstraint extends DefaultConstraint {
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return new SearchOperator[] {
+			DefaultSearchOperator.EQUALS,
+			DefaultSearchOperator.EQUALS_NOT,
+			DefaultSearchOperator.CONTAINS,
+			DefaultSearchOperator.CONTAINS_NOT,
+			DefaultSearchOperator.MATCHES,
+			DefaultSearchOperator.MATCHES_NOT,
+			DefaultSearchOperator.GROUPING,
+		};
+	}
 
-		private static final long serialVersionUID = 2843300705315175039L;
+	private static class DependencyFeaturesConstraint extends DefaultConstraint {
 
-		public DependencyFormConstraint(Object value, SearchOperator operator) {
+		private static final long serialVersionUID = -3346450454270312183L;
+
+		public DependencyFeaturesConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getForm();
+			return ((DependencyTargetTree)value).getFeatures();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyFormConstraint(getValue(), getOperator());
+			return new DependencyFeaturesConstraint(getValue(), getOperator());
 		}
 	}
 
-	private static class DependencyFormCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class DependencyFeaturesCIConstraint extends DefaultCaseInsensitiveConstraint {
 
-		private static final long serialVersionUID = -7737708296328734303L;
+		private static final long serialVersionUID = -3346450454270312183L;
 
-		public DependencyFormCIConstraint(Object value, SearchOperator operator) {
+		public DependencyFeaturesCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getForm().toLowerCase();
+			return ((DependencyTargetTree)value).getFeatures().toLowerCase();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyFormCIConstraint(getValue(), getOperator());
+			return new DependencyFeaturesCIConstraint(getValue(), getOperator());
 		}
 	}
 }

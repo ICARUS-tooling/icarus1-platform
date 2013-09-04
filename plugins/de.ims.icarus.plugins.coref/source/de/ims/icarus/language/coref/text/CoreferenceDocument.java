@@ -40,10 +40,15 @@ import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.helper.SpanBuffer;
 import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.ui.text.BatchDocument;
+import de.ims.icarus.util.Counter;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.annotation.AnnotatedData;
+import de.ims.icarus.util.annotation.Annotation;
+import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.cache.LRUCache;
 
@@ -75,10 +80,15 @@ public class CoreferenceDocument extends BatchDocument {
 	private HighlightType highlightType = HighlightType.BACKGROUND;
 	
 	private Filter filter;
+	
+	private AnnotationManager annotationManager;
+	
+	private SingletonCache singletonCache;
 
 	public static final String PARAM_CLUSTER_ID = "clusterId"; //$NON-NLS-1$
 
-	public static final String PARAM_FILL_COLOR = "highlightColor"; //$NON-NLS-1$
+	public static final String PARAM_HIGHLIGHT_COLOR = "highlightColor"; //$NON-NLS-1$
+	public static final String PARAM_FILL_COLOR = "fillColor"; //$NON-NLS-1$
 	public static final String PARAM_UNDERLINE_COLOR = "highlightType"; //$NON-NLS-1$
 	
 	// BEGIN unused
@@ -126,6 +136,14 @@ public class CoreferenceDocument extends BatchDocument {
 			return;
 		}
 		
+		CoreferenceDocumentAnnotationManager annotationManager = 
+				(CoreferenceDocumentAnnotationManager) getAnnotationManager();
+		Annotation annotation = data instanceof AnnotatedData ? 
+				((AnnotatedData)data).getAnnotation() : null; 
+		if(annotationManager!=null) {
+			annotationManager.setAnnotation(annotation);
+		}
+		
 		if(spans==null) {
 			spans = data.getSpans();
 		}
@@ -165,15 +183,14 @@ public class CoreferenceDocument extends BatchDocument {
 			appendBatchLineFeed(null);
 		}
 		
-		for(int index = 0; index<length; index++) {
-			
+		for(int index = 0; index<length; index++) {			
 			boolean important = isMarkSpans() && spanBuffer.isImportant(index);
 			boolean isLast = index==length-1;
 			String token = data.getForm(index);
 			
 			// Add space 
 			if(index>0 && (builder.length()>0 
-					|| (lastWasImportant && !important) 
+					|| (lastWasImportant /*&& !important*/) // TODO 
 					|| (lastWasClosing && spanBuffer.isStart(index)))) {
 				builder.append(" "); //$NON-NLS-1$
 			}
@@ -196,7 +213,10 @@ public class CoreferenceDocument extends BatchDocument {
 			if(isMarkSpans() && spanBuffer.isStart(index)) {	
 				for(int i=0; i<spanBuffer.getSpanCount(index); i++) {
 					Span span = spanBuffer.getSpan(index, i);
-					if(span.getBeginIndex()!=index) {
+					if(span==null || span.getBeginIndex()!=index) {
+						continue;
+					}
+					if(filterSingletons && getSingletonCache().isSingleton(span)) {
 						continue;
 					}
 					if(filter!=null && !filter.accepts(span)) {
@@ -239,7 +259,10 @@ public class CoreferenceDocument extends BatchDocument {
 			if(isMarkSpans() && spanBuffer.isEnd(index)) {
 				for(int i=spanBuffer.getSpanCount(index)-1; i>-1; i--) {
 					Span span = spanBuffer.getSpan(index, i);
-					if(span.getEndIndex()!=index) {
+					if(span==null || span.getEndIndex()!=index) {
+						continue;
+					}
+					if(filterSingletons && getSingletonCache().isSingleton(span)) {
 						continue;
 					}
 					if(filter!=null && !filter.accepts(span)) {
@@ -284,6 +307,10 @@ public class CoreferenceDocument extends BatchDocument {
 		SpanSet spanSet = CoreferenceUtils.getSpanSet(data, allocation);
 		SpanSet goldSet = CoreferenceUtils.getGoldSpanSet(data, goldAllocation);
 		
+		getSingletonCache().clearSingletonInfo();
+		getSingletonCache().cacheSingletonInfo(spanSet);
+		
+		
 		int size = data.size();
 		for(int i=0; i<size; i++) {
 			Span[] spans = spanSet.getSpans(i);
@@ -296,6 +323,21 @@ public class CoreferenceDocument extends BatchDocument {
 		appendBatchLineFeed(null);
 		appendBatchString(CoreferenceUtils.getDocumentHeader(data), HEADER);
 		appendBatchLineFeed(null);
+	}
+	
+	public SingletonCache getSingletonCache() {
+		if(singletonCache==null) {
+			singletonCache = new SingletonCache();
+		}
+		return singletonCache;
+	}
+
+	public AnnotationManager getAnnotationManager() {
+		return annotationManager;
+	}
+
+	public void setAnnotationManager(AnnotationManager annotationManager) {
+		this.annotationManager = annotationManager;
 	}
 
 	public boolean isMarkSpans() {
@@ -502,6 +544,38 @@ public class CoreferenceDocument extends BatchDocument {
 		public void run() {
 			// TODO Auto-generated method stub
 			
+		}
+	}
+	
+	public static class SingletonCache {
+		private Counter<Integer> counter = new Counter<>();
+		
+		public boolean isSingleton(Span span) {
+			return counter.getCount(span.getClusterId())==1;
+		}
+		
+		public void clearSingletonInfo() {
+			counter.clear();
+		}
+		
+		public void cacheSingletonInfo(SpanSet spanSet) {
+			if(spanSet==null) {
+				return;
+			}
+			
+			for(int i=0; i<spanSet.size(); i++) {
+				counter.increment(spanSet.get(i).getClusterId());
+			}
+		}
+
+		public void cacheSingletonInfo(Span[] spans) {
+			if(spans==null) {
+				return;
+			}
+			
+			for(int i=0; i<spans.length; i++) {
+				counter.increment(spans[i].getClusterId());
+			}
 		}
 	}
 }

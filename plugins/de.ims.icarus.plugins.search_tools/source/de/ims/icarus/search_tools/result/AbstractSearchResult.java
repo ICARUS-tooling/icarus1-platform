@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,35 +23,28 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.search_tools.corpus;
+package de.ims.icarus.search_tools.result;
 
-import javax.swing.event.ChangeListener;
-
-import de.ims.icarus.language.AvailabilityObserver;
-import de.ims.icarus.language.DataType;
-import de.ims.icarus.language.SentenceData;
-import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
-import de.ims.icarus.search_tools.result.ResultEntry;
-import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.SubstitutionSupport;
 import de.ims.icarus.util.annotation.AnnotatedData;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.DataList;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractCorpusSearchResult implements SearchResult, SentenceDataList {
-	
+public abstract class AbstractSearchResult implements SearchResult {
+
 	protected transient final Search search;
 	
 	protected String[] groupTokens;
@@ -67,7 +60,7 @@ public abstract class AbstractCorpusSearchResult implements SearchResult, Senten
 	
 	protected final Object lock = new Object();
 
-	protected AbstractCorpusSearchResult(Search search, SearchConstraint[] groupConstraints) {
+	protected AbstractSearchResult(Search search, SearchConstraint[] groupConstraints) {
 		/*if(search==null)
 			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$*/
 		/*if(!(descriptor.getTarget() instanceof SentenceDataList))
@@ -122,8 +115,8 @@ public abstract class AbstractCorpusSearchResult implements SearchResult, Senten
 		this.annotationBuffer = annotationBuffer;
 	}
 
-	public SentenceDataList getTarget() {
-		return (SentenceDataList) SearchManager.getTarget(search);
+	public DataList<?> getTarget() {
+		return (DataList<?>) SearchManager.getTarget(search);
 	}
 
 	@Override
@@ -246,42 +239,5 @@ public abstract class AbstractCorpusSearchResult implements SearchResult, Senten
 	@Override
 	public ContentType getAnnotationType() {
 		return annotationBuffer==null ? null : annotationBuffer.getAnnotationType();
-	}
-
-	@Override
-	public int size() {
-		return getTotalMatchCount();
-	}
-
-	@Override
-	public SentenceData get(int index) {
-		return get(index, DataType.SYSTEM, null);
-	}
-
-	@Override
-	public void addChangeListener(ChangeListener listener) {
-		// no-op
-	}
-
-	@Override
-	public void removeChangeListener(ChangeListener listener) {
-		// no-op
-	}
-
-	@Override
-	public boolean supportsType(DataType type) {
-		return getTarget().supportsType(type);
-	}
-
-	@Override
-	public SentenceData get(int index, DataType type) {
-		return get(index, type, null);
-	}
-
-	@Override
-	public SentenceData get(int index, DataType type,
-			AvailabilityObserver observer) {
-		ResultEntry entry = getRawEntry(index);
-		return getTarget().get(entry.getIndex(), type, observer);
 	}
 }

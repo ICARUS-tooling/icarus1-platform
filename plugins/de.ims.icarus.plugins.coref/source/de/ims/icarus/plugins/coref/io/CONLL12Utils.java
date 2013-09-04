@@ -190,8 +190,8 @@ public final class CONLL12Utils {
 		for(int i=0; i<size; i++) {
 			String[] cols = WS.split(lines.get(i));
 			
-			if(!String.valueOf(i).equals(cols[WORD_COL]))
-				throw new IllegalArgumentException("Invalid start of sentence - word order out of sync"); //$NON-NLS-1$
+			if(!String.valueOf(i+1).equals(cols[WORD_COL]))
+				throw new IllegalArgumentException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
 			
 			forms[i] = cols[FORM_COL];
 			
@@ -244,7 +244,9 @@ public final class CONLL12Utils {
 		if(!spanStack.isEmpty())
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 		
-		DefaultCoreferenceData result = document.newData(forms);
+		DefaultCoreferenceData result = new DefaultCoreferenceData(document, forms);
+		result.setSentenceIndex(document.size());
+		document.add(result);
 		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);
 		result.setProperty(CoreferenceData.PART_ID_PROPERTY, partId);
 

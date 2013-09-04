@@ -236,7 +236,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		int width = 0;
 		int height = fm.getHeight();
 		int count = node.getSpanCount();
-		String[] tokens = new String[node.getSpanCount()];
+		String[] tokens = new String[count];
 		
 		// Calculate required total width
 		width += fm.charWidth('[');
@@ -250,6 +250,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 				continue;
 			}
 			width += fm.stringWidth(token);
+			tokens[i] = token;
 		}
 		width += fm.charWidth(']');
 		

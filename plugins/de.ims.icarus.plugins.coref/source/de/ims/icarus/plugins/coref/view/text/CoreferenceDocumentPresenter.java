@@ -25,9 +25,22 @@
  */
 package de.ims.icarus.plugins.coref.view.text;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
+import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.annotation.AnnotatedData;
+import de.ims.icarus.util.annotation.AnnotationControl;
+import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -35,12 +48,42 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresenter {
+public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresenter implements AnnotationController {
 	
 	protected CoreferenceDocumentData data;
+	
+	protected CoreferenceDocumentAnnotationManager annotationManager;
+	protected boolean createInitialFilter = false;
 
 	public CoreferenceDocumentPresenter() {
 		// no-op
+	}
+	
+	@Override
+	protected Handler createHandler() {
+		return new DocHandler();
+	}
+
+	@Override
+	protected DocHandler getHandler() {
+		return (DocHandler) super.getHandler();
+	}
+
+	@Override
+	public CoreferenceDocumentAnnotationManager getAnnotationManager() {
+		if(annotationManager==null) {
+			annotationManager = new CoreferenceDocumentAnnotationManager();
+			annotationManager.addPropertyChangeListener("position", getHandler()); //$NON-NLS-1$
+			annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
+		}
+		return annotationManager;
+	}
+
+	@Override
+	protected AnnotationControl createAnnotationControl() {
+		AnnotationControl annotationControl = new AnnotationControl(true);
+		annotationControl.setAnnotationManager(getAnnotationManager());
+		return annotationControl;
 	}
 
 	@Override
@@ -51,12 +94,23 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 	@Override
 	protected void setData(Object data) {
 		this.data = (CoreferenceDocumentData) data;
+		
+		if(data instanceof AnnotatedCoreferenceDocumentData) {
+			getAnnotationManager().setAnnotation(((AnnotatedData)data).getAnnotation());
+		}
+		
+		createInitialFilter = true;
 	}
 
 	@Override
 	protected boolean buildDocument(CoreferenceDocument doc) throws Exception {		
 		if(data==null) {
 			return false;
+		}
+		
+		if(createInitialFilter && data instanceof AnnotatedCoreferenceDocumentData && allocation!=null) {
+			doc.setFilter(new AnnotatedSpanFilter((AnnotatedCoreferenceDocumentData) data));
+			createInitialFilter = false;
 		}
 		
 		doc.appendBatchCoreferenceDocumentData(data, allocation, goldAllocation);
@@ -90,5 +144,66 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		}
 		
 		return (CoreferenceDocument) textPane.getDocument();
+	}
+	
+	protected class DocHandler extends Handler implements PropertyChangeListener {
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			createInitialFilter = true;
+			refresh();
+		}
+		
+	}
+	
+	protected class AnnotatedSpanFilter implements Filter {
+		
+		protected Set<Span> lut;
+		protected final AnnotatedCoreferenceDocumentData data;
+		
+		public AnnotatedSpanFilter(AnnotatedCoreferenceDocumentData data) {
+			if(data==null)
+				throw new IllegalArgumentException("Invalid annotated data"); //$NON-NLS-1$
+			
+			this.data = data;
+			
+			buildLookup();
+		}
+		
+		protected void buildLookup() {
+			if(allocation==null) {
+				return;
+			}
+			
+			CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
+			
+			if(!annotationManager.hasAnnotation()) {
+				return;
+			}
+			
+			SpanSet spanSet = allocation.getSpanSet(data.getId());
+			if(spanSet==null) {
+				return;
+			}
+			
+			lut = new HashSet<>();
+			for(int i=0; i<spanSet.size(); i++) {
+				if(annotationManager.isHighlighted(i)) {
+					lut.add(spanSet.get(i));
+				}
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.util.Filter#accepts(java.lang.Object)
+		 */
+		@Override
+		public boolean accepts(Object obj) {
+			return lut==null || lut.contains(obj);
+		}
+		
 	}
 }

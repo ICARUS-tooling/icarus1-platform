@@ -75,7 +75,6 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.ui.dialog.DialogDispatcher;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.helper.Outline;
@@ -476,8 +475,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		
 		public void openPreferences(ActionEvent e) {
 			try {
-				new ConfigDialog(ConfigRegistry.getGlobalRegistry(), 
-						"plugins.matetools.parser").setVisible(true); //$NON-NLS-1$
+				UIUtil.openConfigDialog("plugins.matetools.parser"); //$NON-NLS-1$
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$

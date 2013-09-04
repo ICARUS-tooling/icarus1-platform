@@ -98,11 +98,11 @@ public class DependencyPreferences {
 				(Object[])HighlightType.values()),
 				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
 		builder.addBooleanEntry("markMultipleAnnotations", true); //$NON-NLS-1$
-		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getNodeHighlightColor().getRGB()); //$NON-NLS-1$
-		builder.addColorEntry("edgeHighlight", DependencyHighlighting.getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
-		builder.addColorEntry("transitiveHighlight", DependencyHighlighting.getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
-		for(String token : DependencyHighlighting.getTokens()) {
-			builder.addColorEntry(token+"Highlight", DependencyHighlighting.getHighlightColor(token).getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("edgeHighlight", DependencyHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("transitiveHighlight", DependencyHighlighting.getInstance().getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
+		for(String token : DependencyHighlighting.getInstance().getTokens()) {
+			builder.addColorEntry(token+"Highlight", DependencyHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
 		}
 		builder.back();
 		// END HIGHLIGHTING GROUP

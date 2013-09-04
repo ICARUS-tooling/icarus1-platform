@@ -23,12 +23,15 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.language.dependency.search.constraints;
 
+import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
 /**
@@ -36,62 +39,66 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyRelationConstraintFactory extends AbstractConstraintFactory {
+public class DependencyDistanceConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "relation"; //$NON-NLS-1$
+	public static final String TOKEN = "distance"; //$NON-NLS-1$
 
-	public DependencyRelationConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.relation.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.relation.description"); //$NON-NLS-1$
+	public DependencyDistanceConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.distance.description"); //$NON-NLS-1$
 	}
 
 	/**
+	 * 
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyRelationConstraint(value, operator);
-		else
-			return new DependencyRelationCIConstraint(value, operator);
+		return new DependencyDistanceConstraint(value, operator);
 	}
 
-	private static class DependencyRelationConstraint extends DefaultConstraint {
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return DefaultSearchOperator.numerical();
+	}
 
-		private static final long serialVersionUID = 1716609613318759367L;
+	@Override
+	public Class<?> getValueClass() {
+		return Integer.class;
+	}
 
-		public DependencyRelationConstraint(Object value, SearchOperator operator) {
+	@Override
+	public Object getDefaultValue() {
+		return LanguageUtils.DATA_UNDEFINED_VALUE;
+	}
+
+	@Override
+	public Object labelToValue(Object label) {
+		return LanguageUtils.parseLabel((String) label);
+	}
+
+	@Override
+	public Object valueToLabel(Object value) {
+		return LanguageUtils.getLabel((int)value);
+	}
+
+	private static class DependencyDistanceConstraint extends DefaultConstraint {
+
+		private static final long serialVersionUID = 4020431284510729498L;
+
+		public DependencyDistanceConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getRelation();
+			return ((DependencyTargetTree)value).getDistance();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyRelationConstraint(getValue(), getOperator());
-		}
-	}
-
-	private static class DependencyRelationCIConstraint extends DefaultConstraint {
-
-		private static final long serialVersionUID = -3611860983057645172L;
-
-		public DependencyRelationCIConstraint(Object value, SearchOperator operator) {
-			super(TOKEN, value, operator);
-		}
-
-		@Override
-		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getRelation().toLowerCase();
-		}
-
-		@Override
-		public DependencyRelationCIConstraint clone() {
-			return new DependencyRelationCIConstraint(getValue(), getOperator());
+			return new DependencyDistanceConstraint(getValue(), getOperator());
 		}
 	}
 }

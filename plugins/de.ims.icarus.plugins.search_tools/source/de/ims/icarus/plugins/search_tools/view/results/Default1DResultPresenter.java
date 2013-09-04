@@ -95,7 +95,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
 	 */
 	@Override
-	protected void displayResult(Options options) {
+	protected void displayResult() {
 		SearchResult searchResult = this.searchResult;
 		if(searchResult==null) {
 			searchResult = ResultDummies.dummyResult1D;
@@ -283,6 +283,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 					
 					Options options = new Options();
 					options.put(Options.TITLE, title);
+					options.putAll(getOptions());
 					
 					subResultPresenter.present(subResult, options);
 				}

@@ -69,14 +69,25 @@ public class Options extends HashMap<String, Object> {
 	}
 
 	public void putAll(Object... args) {
-		if (args == null || args.length % 2 != 0)
+		if (args == null || args.length % 2 != 0) {
 			return;
+		}
 
 		for (int i = 0; i < args.length; i += 2) {
 			put(String.valueOf(args[i]), args[i + 1]);
 		}
 	}
 	
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> m) {
+		// Silently fail when argument is null
+		if(m==null) {
+			return;
+		}
+		
+		super.putAll(m);
+	}
+
 	public void putIfAbsent(String key, Object value) {
 		if(!containsKey(key)) {
 			put(key, value);

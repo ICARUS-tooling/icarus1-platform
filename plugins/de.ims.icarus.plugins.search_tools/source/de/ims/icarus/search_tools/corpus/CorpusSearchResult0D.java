@@ -26,7 +26,6 @@
 package de.ims.icarus.search_tools.corpus;
 
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.event.ChangeListener;
@@ -36,10 +35,9 @@ import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.search_tools.Search;
+import de.ims.icarus.search_tools.result.DefaultSearchResult0D;
 import de.ims.icarus.search_tools.result.ResultEntry;
-import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.DataList;
 
 
 /**
@@ -47,175 +45,73 @@ import de.ims.icarus.util.data.DataList;
  * @version $Id$
  *
  */
-public class CorpusSearchResult0D extends AbstractCorpusSearchResult {
-	
-	protected List<ResultEntry> entries;
-	protected int hitCount = 0;
-	protected EntryList wrapper;
-	
-	public static final int DEFAULT_START_SIZE = 1000;
+public class CorpusSearchResult0D extends DefaultSearchResult0D implements SentenceDataList {
 
-	public CorpusSearchResult0D(Search search) {
-		this(search, DEFAULT_START_SIZE);
-	}
 
 	public CorpusSearchResult0D(Search search, int size) {
-		super(search, null);
-		
-		entries = new ArrayList<>(size);
+		super(search, size);
 	}
 
 	public CorpusSearchResult0D(Search search, List<ResultEntry> entries) {
-		super(search, null);
-		
-		if(entries==null)
-			throw new IllegalArgumentException("Invalid entry list"); //$NON-NLS-1$
-		
-		this.entries = new ArrayList<>(entries);
+		super(search, entries);
 	}
 
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getEntry(int)
-	 */
-	@Override
-	public SentenceData getEntry(int index) {
-		ResultEntry entry = entries.get(index);
-		return getTarget().get(entry.getIndex());
+	public CorpusSearchResult0D(Search search) {
+		super(search);
 	}
 
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getEntryAt(int, int[])
-	 */
 	@Override
-	public SentenceData getEntryAt(int index, int... groupIndices) {
-		return getEntry(index);
+	public int size() {
+		return getTotalMatchCount();
+	}
+
+	@Override
+	public void addChangeListener(ChangeListener listener) {
+		// no-op
+	}
+
+	@Override
+	public void removeChangeListener(ChangeListener listener) {
+		// no-op
+	}
+
+	@Override
+	public boolean supportsType(DataType type) {
+		return getTarget().supportsType(type);
+	}
+
+	@Override
+	public SentenceData get(int index) {
+		return get(index, DataType.SYSTEM, null);
+	}
+
+	@Override
+	public SentenceData get(int index, DataType type) {
+		return get(index, type, null);
+	}
+
+	@Override
+	public SentenceData get(int index, DataType type,
+			AvailabilityObserver observer) {
+		ResultEntry entry = getRawEntry(index);
+		return getTarget().get(entry.getIndex(), type, observer);
+	}
+
+	@Override
+	public SentenceDataList getTarget() {
+		return (SentenceDataList) super.getTarget();
 	}
 
 	/**
 	 * @see de.ims.icarus.search_tools.result.SearchResult#getEntryList(int[])
 	 */
 	@Override
-	public DataList<? extends Object> getEntryList(int... groupIndices) {
+	public SentenceDataList getEntryList(int... groupIndices) {
 		if(wrapper==null) {
 			wrapper = new EntryList();
 		}
 		
-		return wrapper;
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getRawEntry(int)
-	 */
-	@Override
-	public ResultEntry getRawEntry(int index) {
-		return entries.get(index);
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getRawEntryAt(int, int[])
-	 */
-	@Override
-	public ResultEntry getRawEntryAt(int index, int... groupIndices) {
-		return getRawEntry(index);
-	}
-
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getTotalMatchCount()
-	 */
-	@Override
-	public int getTotalMatchCount() {
-		return entries.size();
-	}
-
-
-	/**
-	 * @see de.ims.icarus.search_tools.corpus.AbstractCorpusSearchResult#createCache()
-	 */
-	@Override
-	public GroupCache createCache() {
-		return new Result0DCache();
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getMatchCount(int[])
-	 */
-	@Override
-	public int getMatchCount(int... groupIndices) {
-		return entries.size();
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getRawEntryList(int[])
-	 */
-	@Override
-	public List<ResultEntry> getRawEntryList(int... groupIndices) {
-		return entries;
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#getGroupMatchCount(int, int)
-	 */
-	@Override
-	public int getGroupMatchCount(int groupId, int index) {
-		return 0;
-	}
-	
-	protected synchronized void commit(ResultEntry entry) {
-		entries.add(entry);
-		hitCount += entry.getHitCount();
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.result.SearchResult#clear()
-	 */
-	@Override
-	public void clear() {
-		if(finalized)
-			throw new IllegalStateException("Result is already final - clearing not possible"); //$NON-NLS-1$
-		
-		entries.clear();
-	}
-
-	@Override
-	public int getTotalHitCount() {
-		return hitCount;
-	}
-	
-	protected class Result0DCache implements GroupCache {
-
-		/**
-		 * @see de.ims.icarus.search_tools.standard.GroupCache#cacheGroupInstance(int, java.lang.Object)
-		 */
-		@Override
-		public void cacheGroupInstance(int id, Object value) {
-			// no-op
-		}
-
-		/**
-		 * @see de.ims.icarus.search_tools.standard.GroupCache#lock()
-		 */
-		@Override
-		public void lock() {
-			// no-op
-		}
-
-		/**
-		 * @see de.ims.icarus.search_tools.standard.GroupCache#reset()
-		 */
-		@Override
-		public void reset() {
-			// no-op
-		}
-
-		/**
-		 * @see de.ims.icarus.search_tools.standard.GroupCache#commit(de.ims.icarus.search_tools.result.ResultEntry)
-		 */
-		@Override
-		public void commit(ResultEntry entry) {
-			CorpusSearchResult0D.this.commit(entry);
-		}
-		
+		return (SentenceDataList) wrapper;
 	}
 
 	protected class EntryList extends AbstractList<SentenceData> implements SentenceDataList {

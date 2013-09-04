@@ -62,7 +62,7 @@ public class SpanBuffer {
 	/**
 	 * Span of size {@code 1}
 	 */
-	private static final int SPANTYPE_SINGLETON = (1 << 3);
+	private static final int SPANTYPE_SINGLE = (1 << 3);
 	
 	// Type of token in sentence
 	private int[] types;
@@ -76,7 +76,7 @@ public class SpanBuffer {
 	private int[][] ids;
 	
 	private Span[] spans;
-	
+		
 	// Number of tokens covered by spans
 	private int coveredSize;
 	
@@ -101,10 +101,6 @@ public class SpanBuffer {
 		if(spans==null)
 			throw new IllegalArgumentException("Invalid span array"); //$NON-NLS-1$
 		
-		if(spans.length>=types.length) {
-			refreshBuffer(spans.length*2);
-		}
-		
 		this.spans = spans;
 		
 		int numSpans = spans.length;
@@ -115,6 +111,11 @@ public class SpanBuffer {
 		}
 		coveredSize++;
 		
+		if(coveredSize>=types.length) {
+			refreshBuffer(coveredSize*2);
+		}
+		
+		// Clean up
 		for(int i=0; i<coveredSize; i++) {
 			types[i] = SPANTYPE_NONE;
 			starting[i] = 0;
@@ -132,22 +133,23 @@ public class SpanBuffer {
 		// Cache type informations for tokens
 		for(int i=0; i<numSpans; i++) {
 			Span span = spans[i];
+						
 			int start = span.getBeginIndex();
 			int end = span.getEndIndex();
 			
-			boolean singleton = start==end;
+			boolean single = start==end;
 			
 			// Allow at most one singleton per token
-			if(singleton && (types[start] & SPANTYPE_SINGLETON) != 0)
+			if(single && (types[start] & SPANTYPE_SINGLE) != 0)
 				throw new IllegalArgumentException("Duplicate singleton at index "+start+", span: "+span); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			// Allow at most one span to cover a given range
-			if(!singleton && (types[start] & SPANTYPE_END) != 0
+			if(!single && (types[start] & SPANTYPE_END) != 0
 					&& (types[end] & SPANTYPE_BEGIN) != 0)
 				throw new IllegalArgumentException("Concurrent start and end for span: "+span); //$NON-NLS-1$
 			
-			if(singleton) {
-				types[start] |= SPANTYPE_SINGLETON;
+			if(single) {
+				types[start] |= SPANTYPE_SINGLE;
 				add(start, i);
 			} else {
 				types[start] |= SPANTYPE_BEGIN;
@@ -201,14 +203,14 @@ public class SpanBuffer {
 		if(index>=coveredSize) {
 			return false;
 		}
-		return (types[index] & SPANTYPE_BEGIN)!=0 || (types[index] & SPANTYPE_SINGLETON)!=0;
+		return (types[index] & SPANTYPE_BEGIN)!=0 || (types[index] & SPANTYPE_SINGLE)!=0;
 	}
 	
 	public boolean isEnd(int index) {
 		if(index>=coveredSize) {
 			return false;
 		}
-		return (types[index] & SPANTYPE_END)!=0 || (types[index] & SPANTYPE_SINGLETON)!=0;
+		return (types[index] & SPANTYPE_END)!=0 || (types[index] & SPANTYPE_SINGLE)!=0;
 	}
 	
 	public boolean isStartOrEnd(int index) {
@@ -217,14 +219,11 @@ public class SpanBuffer {
 		}
 		return (types[index] & SPANTYPE_BEGIN)!=0 
 				|| (types[index] & SPANTYPE_END)!=0 
-				|| (types[index] & SPANTYPE_SINGLETON)!=0;
+				|| (types[index] & SPANTYPE_SINGLE)!=0;
 	}
 	
 	public boolean isImportant(int index) {
-		if(index>=coveredSize) {
-			return false;
-		}
-		return types[index]!= SPANTYPE_NONE;
+		return index<coveredSize && types[index]!= SPANTYPE_NONE;
 	}
 	
 	public int getSpanCount(int index) {
@@ -236,6 +235,9 @@ public class SpanBuffer {
 	}
 	
 	public Span getSpan(int index, int i) {
+		if(index>=coveredSize) {
+			return null;
+		}
 		return spans==null ? null : spans[ids[index][1+i]];
 	}
 	

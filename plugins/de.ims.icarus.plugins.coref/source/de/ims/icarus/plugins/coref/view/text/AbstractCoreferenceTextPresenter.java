@@ -34,8 +34,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.CancellationException;
@@ -72,7 +70,6 @@ import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.ui.helper.TooltipListCellRenderer;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
@@ -82,6 +79,7 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -253,6 +251,12 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 				callbackHandler, "toggleForceLinebreaks"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction",  //$NON-NLS-1$
 				callbackHandler, "toggleShowDocumentHeader"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
+				callbackHandler, "toggleMarkFalseSpans"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction",  //$NON-NLS-1$
+				callbackHandler, "toggleShowGoldSpans"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
+				callbackHandler, "toggleFilterSingletons"); //$NON-NLS-1$
 	}
 	
 	protected void refreshActions() {
@@ -266,6 +270,9 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		actionManager.setSelected(doc.isShowClusterId(), "plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isShowDocumentHeader(), "plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isForceLinebreaks(), "plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction"); //$NON-NLS-1$
+		actionManager.setSelected(doc.isMarkFalseSpans(), "plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction"); //$NON-NLS-1$
+		actionManager.setSelected(doc.isShowGoldSpans(), "plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
+		actionManager.setSelected(doc.isFilterSingletons(), "plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		
 		actionManager.setEnabled(doc.getFilter()!=null, "plugins.coref.coreferenceDocumentPresenter.clearFilterAction"); //$NON-NLS-1$
 		actionManager.setEnabled(pendingFilter!=null, "plugins.coref.coreferenceDocumentPresenter.filterSpanAction"); //$NON-NLS-1$
@@ -314,7 +321,16 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		
 		options.put("selectHighlightType", cb); //$NON-NLS-1$
 		
+		AnnotationControl annotationControl = createAnnotationControl();
+		if(annotationControl!=null) {
+			options.put("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
+		}
+		
 		return getActionManager().createToolBar( toolBarListId, options);
+	}
+	
+	protected AnnotationControl createAnnotationControl() {
+		return null;
 	}
 	
 	protected JTextPane createTextPane() {
@@ -351,7 +367,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		JScrollPane scrollPane = new JScrollPane(textPane);
 		scrollPane.getViewport().addChangeListener(getHandler());
 		UIUtil.defaultSetUnitIncrement(scrollPane);
-		scrollPane.setBorder(UIUtil.emptyBorder);
+		scrollPane.setBorder(UIUtil.topLineBorder);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
 		JToolBar toolBar = createToolBar();
@@ -426,7 +442,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			if(popupMenu!=null) {
 				popupMenu.addSeparator();
 				popupMenu.add(new UIUtil.TextAction(DefaultEditorKit.copyAction, textPane));
-				popupMenu.addPropertyChangeListener("visible", getHandler()); //$NON-NLS-1$
 				popupMenu.pack();
 			} else {
 				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
@@ -473,7 +488,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	}
 	
 	protected class Handler extends MouseAdapter implements ChangeListener, 
-			ActionListener, PropertyChangeListener, ConfigListener, CaretListener {
+			ActionListener, ConfigListener, CaretListener {
 		
 		protected void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger() && e.getSource()==textPane) {
@@ -531,22 +546,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to switch highlight type", ex); //$NON-NLS-1$
 			}
-		}
-
-		/**
-		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-		 */
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			
-			// TODO think of a way to quickly dispose of the pending filter in case we don't need it
-			// Clear pending filter when popup gets closed
-			/*if(evt.getSource()==popupMenu) {
-				if("visible".equals(evt.getPropertyName())  //$NON-NLS-1$
-						&& Boolean.FALSE.equals(evt.getNewValue())) {
-					pendingFilter = null;
-				}
-			}*/
 		}
 
 		/**
@@ -638,8 +637,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 
 		public void openPreferences(ActionEvent e) {
 			try {
-				new ConfigDialog(ConfigRegistry.getGlobalRegistry(), 
-						"plugins.coref.appearance").setVisible(true); //$NON-NLS-1$
+				UIUtil.openConfigDialog("plugins.coref.appearance"); //$NON-NLS-1$
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$

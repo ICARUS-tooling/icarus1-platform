@@ -196,41 +196,57 @@ public final class StringUtil {
 	public static String wrap(String s, FontMetrics fm, int width) {
 		if(fm==null)
 			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
-		if(width<MIN_WRAP_WIDTH)
-			throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
+		//if(width<MIN_WRAP_WIDTH)
+		//	throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if(s==null || s.length()==0) {
 			return s;
 		}
 		
 		StringBuilder sb = new StringBuilder();
+		StringBuilder line = new StringBuilder();
+		StringBuilder block = new StringBuilder();
 		
 		int size = s.length();
-		boolean wrap = false;
-		boolean ignoreWS = false;
 		int len = 0;
+		int blen = 0;
 		for(int i=0; i<size; i++) {
 			char c = s.charAt(i);
+			boolean lb = false;
 			if(c=='\r') {
 				continue;
-			} else if(c=='\n' || (wrap &&
-					(Character.isWhitespace(c) || !Character.isLetterOrDigit(c)))) {
-				sb.append('\n');
-				len = 0;
-				ignoreWS = true;
-			} else if(ignoreWS && Character.isWhitespace(c)) {
-				ignoreWS = false;
-				continue;
+			} else if(c=='\n' || isBreakable(c)) {
+				lb = c=='\n';
+				if(!lb) {
+					block.append(c);
+					blen += fm.charWidth(c);
+				}
+				line.append(block);
+				block.setLength(0);
+				len += blen;
+				blen = 0;
 			} else {
-				sb.append(c);
-				len += fm.charWidth(c);
-				ignoreWS = false;
+				block.append(c);
+				blen += fm.charWidth(c);
+				lb = (len+blen) >= width;
 			}
-			wrap = len>=width;
+			
+			if(lb && sb.length()>0) {
+				sb.append('\n');
+			}
+			if(i==size-1) {
+				line.append(block);
+			}
+			if(lb || i==size-1) {
+				sb.append(line.toString().trim());
+				line.setLength(0);
+				len = 0;
+			}
 		}
 		
 		return sb.toString();
 	}
+	
 	public static String[] split(String s, Component comp, int width) {
 		return split(s, comp.getFontMetrics(comp.getFont()), width);
 	}
@@ -238,49 +254,58 @@ public final class StringUtil {
 	public static String[] split(String s, FontMetrics fm, int width) {
 		if(fm==null)
 			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
-		if(width<MIN_WRAP_WIDTH)
-			throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
+		//if(width<MIN_WRAP_WIDTH)
+		//	throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if(s==null || s.length()==0) {
 			return new String[0];
 		}
 		
 		List<String> result = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		StringBuilder line = new StringBuilder();
+		StringBuilder block = new StringBuilder();
 		
 		int size = s.length();
-		boolean wrap = false;
-		boolean ignoreWS = false;
 		int len = 0;
+		int blen = 0;
 		for(int i=0; i<size; i++) {
 			char c = s.charAt(i);
+			boolean lb = false;
 			if(c=='\r') {
 				continue;
-			} else if(c=='\n' || (wrap &&
-					(Character.isWhitespace(c) || !Character.isLetterOrDigit(c)))) {
-				
-				if(sb.length()>0) {
-					result.add(sb.toString());
-					sb.setLength(0);
+			} else if(c=='\n' || isBreakable(c)) {
+				lb = c=='\n';
+				if(!lb) {
+					block.append(c);
+					blen += fm.charWidth(c);
 				}
-				len = 0;
-				ignoreWS = true;
-			} else if(ignoreWS && Character.isWhitespace(c)) {
-				ignoreWS = false;
-				continue;
+				line.append(block);
+				block.setLength(0);
+				len += blen;
+				blen = 0;
 			} else {
-				sb.append(c);
-				len += fm.charWidth(c);
-				ignoreWS = false;
+				block.append(c);
+				blen += fm.charWidth(c);
+				lb = (len+blen) >= width;
 			}
-			wrap = len>=width;
-		}
-		
-		if(sb.length()>0) {
-			result.add(sb.toString());
+			
+			if(i==size-1) {
+				line.append(block);
+				lb = true;
+			}
+			
+			if(lb) {
+				result.add(line.toString().trim());
+				line.setLength(0);
+				len = 0;
+			}
 		}
 		
 		return result.toArray(new String[result.size()]);
+	}
+	
+	private static boolean isBreakable(char c) {
+		return Character.isWhitespace(c) || !Character.isLetterOrDigit(c);
 	}
 	
 	public static String capitalize(String s) {

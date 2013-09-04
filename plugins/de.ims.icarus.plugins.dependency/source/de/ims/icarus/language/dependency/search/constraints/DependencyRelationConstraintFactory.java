@@ -23,12 +23,12 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.language.dependency.search.constraints;
 
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
-import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.util.Options;
 
@@ -37,13 +37,13 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyPosConstraintFactory extends AbstractConstraintFactory {
+public class DependencyRelationConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "pos"; //$NON-NLS-1$
+	public static final String TOKEN = "relation"; //$NON-NLS-1$
 
-	public DependencyPosConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.pos.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.pos.description"); //$NON-NLS-1$
+	public DependencyRelationConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.relation.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.relation.description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -53,46 +53,46 @@ public class DependencyPosConstraintFactory extends AbstractConstraintFactory {
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyPosConstraint(value, operator);
+			return new DependencyRelationConstraint(value, operator);
 		else
-			return new DependencyPosCIConstraint(value, operator);
+			return new DependencyRelationCIConstraint(value, operator);
 	}
 
-	private static class DependencyPosConstraint extends DefaultConstraint {
+	private static class DependencyRelationConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = 18977116270797226L;
+		private static final long serialVersionUID = 1716609613318759367L;
 
-		public DependencyPosConstraint(Object value, SearchOperator operator) {
+		public DependencyRelationConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getPos();
+			return ((DependencyTargetTree)value).getRelation();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyPosConstraint(getValue(), getOperator());
+			return new DependencyRelationConstraint(getValue(), getOperator());
 		}
 	}
 
-	private static class DependencyPosCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class DependencyRelationCIConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = 4933479883479834272L;
+		private static final long serialVersionUID = -3611860983057645172L;
 
-		public DependencyPosCIConstraint(Object value, SearchOperator operator) {
+		public DependencyRelationCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getPos().toLowerCase();
+			return ((DependencyTargetTree)value).getRelation().toLowerCase();
 		}
 
 		@Override
-		public DependencyPosCIConstraint clone() {
-			return new DependencyPosCIConstraint(getValue(), getOperator());
+		public DependencyRelationCIConstraint clone() {
+			return new DependencyRelationCIConstraint(getValue(), getOperator());
 		}
 	}
 }

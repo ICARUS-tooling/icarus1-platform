@@ -65,6 +65,16 @@ public class CompactProperties implements Cloneable, Serializable {
 		}
 	}
 	
+	public int size() {
+		if(table==null) {
+			return 0;
+		} else if(table instanceof Object[]) {
+			return ((Object[])table).length;
+		} else {
+			return ((Map<?, ?>)table).size();
+		}
+	}
+	
 	protected void grow() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		Object[] table = (Object[]) this.table;
@@ -137,6 +147,7 @@ public class CompactProperties implements Cloneable, Serializable {
 				System.arraycopy(table, 0, newTable, 0, size);
 				newTable[size] = key;
 				newTable[size+1] = value;
+				this.table = newTable;
 				
 				if(++size > ARRAY_SIZE_LIMIT) {
 					grow();

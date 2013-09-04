@@ -23,8 +23,9 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.language.dependency.search.constraints;
 
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -37,13 +38,13 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyLemmaConstraintFactory extends AbstractConstraintFactory {
+public class DependencyPosConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "lemma"; //$NON-NLS-1$
+	public static final String TOKEN = "pos"; //$NON-NLS-1$
 
-	public DependencyLemmaConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.lemma.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.lemma.description"); //$NON-NLS-1$
+	public DependencyPosConstraintFactory() {
+		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.pos.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.pos.description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -53,46 +54,46 @@ public class DependencyLemmaConstraintFactory extends AbstractConstraintFactory 
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyLemmaConstraint(value, operator);
+			return new DependencyPosConstraint(value, operator);
 		else
-			return new DependencyLemmaCIConstraint(value, operator);
+			return new DependencyPosCIConstraint(value, operator);
 	}
 
-	private static class DependencyLemmaConstraint extends DefaultConstraint {
+	private static class DependencyPosConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = -2816057046153547371L;
+		private static final long serialVersionUID = 18977116270797226L;
 
-		public DependencyLemmaConstraint(Object value, SearchOperator operator) {
+		public DependencyPosConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getLemma();
+			return ((DependencyTargetTree)value).getPos();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyLemmaConstraint(getValue(), getOperator());
+			return new DependencyPosConstraint(getValue(), getOperator());
 		}
 	}
 
-	private static class DependencyLemmaCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class DependencyPosCIConstraint extends DefaultCaseInsensitiveConstraint {
 
-		private static final long serialVersionUID = -8582367322352411091L;
+		private static final long serialVersionUID = 4933479883479834272L;
 
-		public DependencyLemmaCIConstraint(Object value, SearchOperator operator) {
+		public DependencyPosCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getLemma().toLowerCase();
+			return ((DependencyTargetTree)value).getPos().toLowerCase();
 		}
 
 		@Override
-		public SearchConstraint clone() {
-			return new DependencyLemmaCIConstraint(getValue(), getOperator());
+		public DependencyPosCIConstraint clone() {
+			return new DependencyPosCIConstraint(getValue(), getOperator());
 		}
 	}
 }

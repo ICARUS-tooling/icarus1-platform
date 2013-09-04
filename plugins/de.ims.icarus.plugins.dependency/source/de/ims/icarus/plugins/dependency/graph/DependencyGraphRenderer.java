@@ -309,14 +309,14 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 		
 		Color color = null;
 		int groupId = isNode ?
-				DependencyHighlighting.getNodeGroupId(highlight) 
-				: DependencyHighlighting.getEdgeGroupId(highlight);
+				DependencyHighlighting.getInstance().getNodeGroupId(highlight) 
+				: DependencyHighlighting.getInstance().getEdgeGroupId(highlight);
 		if(groupId!=-1) {
 			color = Grouping.getGrouping(groupId).getColor();
 		} else {
 			color = isNode ?
-					DependencyHighlighting.getNodeHighlightColor(highlight)
-					: DependencyHighlighting.getEdgeHighlightColor(highlight);
+					DependencyHighlighting.getInstance().getNodeHighlightColor(highlight)
+					: DependencyHighlighting.getInstance().getEdgeHighlightColor(highlight);
 		}
 		
 		if(color!=null) {
@@ -510,7 +510,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			if(vis[i]) {
 				String token = tokens[i];
 				if(token!=null) {
-					colors[index] = DependencyHighlighting.getHighlightColor(highlight, token);
+					colors[index] = DependencyHighlighting.getInstance().getHighlightColor(highlight, token);
 				}
 				index++;
 			}

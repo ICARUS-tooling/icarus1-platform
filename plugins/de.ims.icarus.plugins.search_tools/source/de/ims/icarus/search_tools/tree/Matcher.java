@@ -215,7 +215,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		case LEAF:
 			return targetTree.getEdgeCount()==0;
 		case ROOT:
-			return targetTree.getNodeIndex()==targetTree.getRootIndex();
+			return targetTree.isRoot();
 		case INTERMEDIATE:
 			return targetTree.getEdgeCount()>0;
 

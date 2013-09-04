@@ -144,14 +144,14 @@
 		<parameter id="token" value="direction" />
 		<parameter id="token" value="projectivity" />
 		<parameter id="factories">
-			<parameter id="form" value="de.ims.icarus.language.dependency.search.DependencyFormConstraintFactory" />
-			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.DependencyLemmaConstraintFactory" />
-			<parameter id="pos" value="de.ims.icarus.language.dependency.search.DependencyPosConstraintFactory" />
-			<parameter id="features" value="de.ims.icarus.language.dependency.search.DependencyFeaturesConstraintFactory" />
-			<parameter id="relation" value="de.ims.icarus.language.dependency.search.DependencyRelationConstraintFactory" />
-			<parameter id="distance" value="de.ims.icarus.language.dependency.search.DependencyDistanceConstraintFactory" />
-			<parameter id="direction" value="de.ims.icarus.language.dependency.search.DependencyDirectionConstraintFactory" />
-			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.DependencyProjectivityConstraintFactory" />
+			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
+			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.constraints.DependencyLemmaConstraintFactory" />
+			<parameter id="pos" value="de.ims.icarus.language.dependency.search.constraints.DependencyPosConstraintFactory" />
+			<parameter id="features" value="de.ims.icarus.language.dependency.search.constraints.DependencyFeaturesConstraintFactory" />
+			<parameter id="relation" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelationConstraintFactory" />
+			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
+			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
+			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
 		</parameter>
 	</extension>
 	

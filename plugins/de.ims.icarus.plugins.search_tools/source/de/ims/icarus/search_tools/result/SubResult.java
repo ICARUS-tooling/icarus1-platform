@@ -1,4 +1,4 @@
-package de.ims.icarus.search_tools.corpus;
+package de.ims.icarus.search_tools.result;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,8 +6,7 @@ import java.util.List;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
-import de.ims.icarus.search_tools.result.ResultEntry;
-import de.ims.icarus.search_tools.result.SearchResult;
+import de.ims.icarus.search_tools.corpus.CorpusSearchResult0D;
 import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.CompactProperties;
@@ -144,8 +143,8 @@ public class SubResult implements SearchResult {
 	}
 	
 	public AnnotationBuffer getAnnotationBuffer() {
-		if(base instanceof AbstractCorpusSearchResult) {
-			return ((AbstractCorpusSearchResult)base).getAnnotationBuffer();
+		if(base instanceof AbstractSearchResult) {
+			return ((AbstractSearchResult)base).getAnnotationBuffer();
 		} else {
 			return null;
 		}

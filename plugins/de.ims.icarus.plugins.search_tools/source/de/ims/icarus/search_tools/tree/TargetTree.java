@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.search_tools.tree;
 
+import de.ims.icarus.util.Options;
+
 /**
  * A rooted tree view on arbitrary underlying data. This interface
  * is merely a viewport on the data structure and serves as navigable
@@ -59,7 +61,7 @@ public interface TargetTree {
 	 * Rebuild the graph representation based on the given data input.
 	 * This effectively clears all previously set pointers and locks
 	 */
-	void reload(Object source);
+	void reload(Object source, Options options);
 	
 	Object getSource();
 	
@@ -194,6 +196,10 @@ public interface TargetTree {
 	void viewTarget();
 	
 	void viewSource();
+	
+	// Query methods
+	
+	boolean isRoot();
 	
 	// Locking methods
 	

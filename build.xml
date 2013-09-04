@@ -74,7 +74,7 @@ test  - runs some tests
 
 	<target name="-build-plugins-ims" depends="-build-plugins">
 		<ant dir="plugins/de.ims.icarus.plugins.coref" target="${target}" />
-		<ant dir="plugins/de.ims.icarus.plugins.errormining" target="${target}" />
+		<!--<ant dir="plugins/de.ims.icarus.plugins.errormining" target="${target}" />-->
 	</target>
 
 	<target name="-compile">

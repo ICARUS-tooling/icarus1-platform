@@ -40,6 +40,7 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.Highlighter.HighlightPainter;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.SentenceData;
@@ -50,6 +51,7 @@ import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.search_tools.annotation.ResultAnnotation;
 import de.ims.icarus.ui.DummyTextPane;
+import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.text.BatchDocument;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.StringUtil;
@@ -78,11 +80,22 @@ public class DependencyListCellRenderer extends DummyTextPane
 	protected BatchDocument offlineDocument;
 	protected StringBuilder buffer;
 	
-	protected static Border noFocusBorder; 
+	protected static Border noFocusBorder;
+	
+	protected static Style multipleAnnotationStyle;
 	
 	public DependencyListCellRenderer() {
 		setHighlighter(createHighlighter());
 		setDocument(new BatchDocument());
+	}
+	
+	protected static Style getMultipleAnnotationStyle() {
+		if(multipleAnnotationStyle==null) {
+			multipleAnnotationStyle = StyleContext.getDefaultStyleContext().getStyle("multiple"); //$NON-NLS-1$
+			StyleConstants.setIcon(multipleAnnotationStyle, 
+					IconRegistry.getGlobalRegistry().getIcon("multiple_annotation.gif")); //$NON-NLS-1$
+		}
+		return multipleAnnotationStyle;
 	}
 
 	/**
@@ -290,7 +303,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 			}
 			
 			// If it should be highlighted fetch painter and modify style
-			if(DependencyHighlighting.isHighlighted(highlight)) {
+			if(DependencyHighlighting.getInstance().isHighlighted(highlight)) {
 				// Process any pending non-highlighted text stuff
 				if(buffer.length()>0) {
 					offset += offlineDocument.appendBatchString(buffer.toString(), defaultStyle);
@@ -299,12 +312,12 @@ public class DependencyListCellRenderer extends DummyTextPane
 				
 				style = offlineDocument.addStyle(null, null);
 
-				Color col = DependencyHighlighting.getGroupColor(highlight);
+				Color col = DependencyHighlighting.getInstance().getGroupColor(highlight);
 				if(col!=null) {
 					painter = applyHighlightType(groupHighlightType, style, col);
 					StyleConstants.setBold(style, true);
 				} else {
-					col = DependencyHighlighting.getHighlightColor(highlight);
+					col = DependencyHighlighting.getInstance().getHighlightColor(highlight);
 					painter = applyHighlightType(highlightType, style, col);
 				}
 				
@@ -315,8 +328,8 @@ public class DependencyListCellRenderer extends DummyTextPane
 				
 				// Mark multiple annotations if desired
 				// TODO mark all concurrent annotations or only "real" ones (hosted in different annotation layers) ?
-				if(markMultiple && DependencyHighlighting.isConcurrentHighlight(highlight)) {
-					style = DependencyHighlighting.getStyleContext().getStyle("multiple"); //$NON-NLS-1$
+				if(markMultiple && DependencyHighlighting.getInstance().isConcurrentHighlight(highlight)) {
+					style = getMultipleAnnotationStyle();
 					offset += offlineDocument.appendBatchString(" ", style); //$NON-NLS-1$
 				}
 				

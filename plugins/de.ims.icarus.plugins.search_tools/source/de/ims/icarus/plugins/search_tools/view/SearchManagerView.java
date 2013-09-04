@@ -59,7 +59,6 @@ import javax.swing.event.ListSelectionListener;
 
 import org.java.plugin.registry.Extension;
 
-import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
@@ -78,7 +77,6 @@ import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.dialog.SelectFormEntry;
@@ -327,6 +325,16 @@ public class SearchManagerView extends View {
 		refreshActions();
 	}
 	
+	protected void clearEditorViews() {
+		Message message = new Message(this, Commands.CLEAR, null, null);
+		try {
+			sendRequest(SearchToolsConstants.QUERY_EDITOR_VIEW_ID, message);
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to clear editor views", e); //$NON-NLS-1$
+		}
+	}
+	
 	protected SearchDescriptor newDescriptor() {
 		Collection<Extension> factoryExtensions = SearchManager.getSearchFactoryExtensions();
 		if(factoryExtensions==null || factoryExtensions.isEmpty())
@@ -502,8 +510,7 @@ public class SearchManagerView extends View {
 		
 		public void openPreferences(ActionEvent e) {
 			try {
-				new ConfigDialog(ConfigRegistry.getGlobalRegistry(), 
-						"plugins.searchTools").setVisible(true); //$NON-NLS-1$
+				UIUtil.openConfigDialog("plugins.searchTools"); //$NON-NLS-1$
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$
@@ -544,11 +551,7 @@ public class SearchManagerView extends View {
 			
 		}
 		
-		public void selectFactory(ActionEvent e) {
-			if(currentSearchEditor.getEditingItem()==null) {
-				return;
-			}
-			
+		public void selectFactory(ActionEvent e) {			
 			try {
 				Collection<Extension> extensions = SearchManager.getInstance().availableSearchFactories();
 				Extension extension = PluginUtil.showExtensionDialog(getFrame(), 
@@ -559,8 +562,11 @@ public class SearchManagerView extends View {
 					return;
 				}
 				
-				currentSearchEditor.getEditingItem().setFactoryExtension(extension);
-				currentSearchEditor.refresh();
+				SearchDescriptor descriptor = new SearchDescriptor();
+				descriptor.setFactoryExtension(extension);
+				currentSearchEditor.setEditingItem(descriptor);
+				
+				clearEditorViews();
 
 				refreshActions();
 			} catch(Exception ex) {
@@ -985,7 +991,11 @@ public class SearchManagerView extends View {
 			formBuilder.setValue("target", name); //$NON-NLS-1$
 			
 			// Query
-			String query = SearchUtils.getQueryStats(descriptor.getQuery());
+			String query = descriptor.getSearchFactory().getQueryLabel(descriptor.getQuery());
+			// Generate default label if factory does not require a specialized label 
+			if(query==null) {
+				query = SearchUtils.getQueryStats(descriptor.getQuery());
+			}
 			if(query==null || query.isEmpty()) {
 				query = ResourceManager.getInstance().get("plugins.searchTools.emptyStats"); //$NON-NLS-1$
 			}

@@ -65,6 +65,10 @@ public class EntityGridTableModel extends AbstractTableModel {
 	protected Map<String, EntityGridNode> nodes;
 	
 	protected EntityGridColumnModel columnModel = new EntityGridColumnModel();
+
+	protected boolean showGoldSpans = true;
+	protected boolean markFalseSpans = true;
+	protected boolean filterSingletons = true;
 	
 	public EntityGridTableModel() {
 		// no-op
@@ -120,8 +124,7 @@ public class EntityGridTableModel extends AbstractTableModel {
 		fireTableStructureChanged();
 	}
 
-	public void reload(CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation, 
-			boolean filterSingletons, boolean showGoldNodes) {
+	public void reload(CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
 		
 		if(nodes==null) {
 			nodes = new HashMap<>();
@@ -140,7 +143,7 @@ public class EntityGridTableModel extends AbstractTableModel {
 			return;
 		}
 		EdgeSet goldEdges = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
-		if(!showGoldNodes || edgeSet==goldEdges) {
+		if(!showGoldSpans || edgeSet==goldEdges) {
 			goldEdges = null;
 		}
 				
@@ -314,6 +317,30 @@ public class EntityGridTableModel extends AbstractTableModel {
 		return columnModel;
 	}
 
+	public boolean isShowGoldSpans() {
+		return showGoldSpans;
+	}
+
+	public boolean isMarkFalseSpans() {
+		return markFalseSpans;
+	}
+
+	public boolean isFilterSingletons() {
+		return filterSingletons;
+	}
+
+	public void setShowGoldSpans(boolean showGoldNodes) {
+		this.showGoldSpans = showGoldNodes;
+	}
+
+	public void setMarkFalseSpans(boolean markFalseNodes) {
+		this.markFalseSpans = markFalseNodes;
+	}
+
+	public void setFilterSingletons(boolean filterSingletons) {
+		this.filterSingletons = filterSingletons;
+	}
+
 	public class EntityGridColumnModel extends DefaultTableColumnModel {
 
 		private static final long serialVersionUID = -7530784522005750109L;
@@ -321,6 +348,8 @@ public class EntityGridTableModel extends AbstractTableModel {
 		protected List<Cluster> clusters;
 		
 		protected ClusterLabelType labelType = ClusterLabelType.FIRST;
+		
+		protected EntityGridTableHeaderRenderer headerRenderer;
 		
 		public void reload(List<Cluster> clusterList) {
 			clusters = clusterList;
@@ -331,6 +360,7 @@ public class EntityGridTableModel extends AbstractTableModel {
 				TableColumn column = new TableColumn(i);
 				
 				column.setIdentifier(clusters.get(i));
+				column.setPreferredWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 				
 				addColumn(column);
 			}
@@ -355,6 +385,7 @@ public class EntityGridTableModel extends AbstractTableModel {
 				Cluster cluster = (Cluster) column.getIdentifier();
 				
 				column.setHeaderValue(labelType.getLabel(cluster, document));
+				column.setHeaderRenderer(getHeaderRenderer());
 			}
 			
 			fireColumnAdded(new TableColumnModelEvent(this, 0, size-1));
@@ -373,6 +404,19 @@ public class EntityGridTableModel extends AbstractTableModel {
 			}
 			
 			this.labelType = labelType;
+			reloadLabels();
+		}
+
+		public EntityGridTableHeaderRenderer getHeaderRenderer() {
+			return headerRenderer;
+		}
+
+		public void setHeaderRenderer(EntityGridTableHeaderRenderer headerRenderer) {
+			if(this.headerRenderer!=null && this.headerRenderer.equals(headerRenderer)) {
+				return;
+			}
+			
+			this.headerRenderer = headerRenderer;
 			reloadLabels();
 		}
 	}

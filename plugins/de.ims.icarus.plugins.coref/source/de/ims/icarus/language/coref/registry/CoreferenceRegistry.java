@@ -473,6 +473,16 @@ public final class CoreferenceRegistry {
 		return StringUtil.getUniqueName(baseName, usedNames);
 	}
 	
+	public AllocationDescriptor[] getAvailableAllocations(DocumentSetDescriptor descriptor) {
+		Collection<AllocationDescriptor> allocations = new ArrayList<>();
+		
+		for(int i=0; i<descriptor.size(); i++) {
+			allocations.add(descriptor.get(i));
+		}
+		
+		return allocations.toArray(new AllocationDescriptor[allocations.size()]);
+	}
+	
 	private void saveBackground() {
 		final DocumentSetBuffer buffer = new DocumentSetBuffer(documentSetList);
 		Runnable saveTask = new Runnable() {

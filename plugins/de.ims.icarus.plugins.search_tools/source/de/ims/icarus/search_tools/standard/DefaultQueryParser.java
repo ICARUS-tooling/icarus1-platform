@@ -127,6 +127,8 @@ public class DefaultQueryParser {
 	
 	protected static final char COLON = ':';
 	
+	protected static final String SPECIFIER_DELIMITER = "$$"; //$NON-NLS-1$
+	
 	protected String query;
 	
 	protected int index;
@@ -633,6 +635,19 @@ public class DefaultQueryParser {
 			value = parseUnquotedText();
 		}
 		
+		Object specifier = null;
+		if(value instanceof String) {
+			String s = (String)value;
+			int idx = s.indexOf(SPECIFIER_DELIMITER);
+			if(idx>-1) {
+				specifier = s.substring(idx+2);
+				if("".equals(specifier)) { //$NON-NLS-1$
+					specifier = null;
+				}
+				value = s.substring(0, idx);
+			}
+		}
+		
 		if(SearchManager.isGroupingOperator(operator)) {
 			value = Integer.parseInt((String)value)-1;
 		} else if(context!=null) {
@@ -640,7 +655,7 @@ public class DefaultQueryParser {
 			value = factory.labelToValue(value);
 		}
 		
-		nodeStack.pushConstraint(new DefaultConstraint(token, value, operator));
+		nodeStack.pushConstraint(new DefaultConstraint(token, value, operator, specifier));
 	}
 	
 	protected void parseProperties() throws ParseException {
@@ -985,6 +1000,11 @@ public class DefaultQueryParser {
 				label = String.valueOf(factory.valueToLabel(value));
 			} else {
 				label = String.valueOf(value);
+			}
+			
+			Object specifier = constraint.getSpecifier();
+			if(specifier!=null) {
+				label+= SPECIFIER_DELIMITER+String.valueOf(specifier);
 			}
 			
 			appendText(label);

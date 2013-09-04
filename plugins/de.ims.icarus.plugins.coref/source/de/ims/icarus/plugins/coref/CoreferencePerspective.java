@@ -50,8 +50,6 @@ import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.Perspective;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
 import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter;
-import de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter;
-import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentPresenter;
 import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentSetPresenter;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.util.Options;

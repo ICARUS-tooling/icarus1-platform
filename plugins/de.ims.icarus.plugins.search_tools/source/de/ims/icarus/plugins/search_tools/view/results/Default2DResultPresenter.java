@@ -100,7 +100,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
 	 */
 	@Override
-	protected void displayResult(Options options) {
+	protected void displayResult() {
 		SearchResult searchResult = this.searchResult;
 		if(searchResult==null) {
 			searchResult = ResultDummies.dummyResult2D;

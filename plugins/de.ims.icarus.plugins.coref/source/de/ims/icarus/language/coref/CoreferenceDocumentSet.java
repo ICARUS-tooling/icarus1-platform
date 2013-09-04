@@ -60,7 +60,7 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 	}
 	
 	public CoreferenceDocumentData newDocument(String id) {
-		CoreferenceDocumentData data = new CoreferenceDocumentData(this, size());
+		DefaultCoreferenceDocumentData data = new DefaultCoreferenceDocumentData(this, size());
 		data.setId(id);
 		add(data);
 		return data;

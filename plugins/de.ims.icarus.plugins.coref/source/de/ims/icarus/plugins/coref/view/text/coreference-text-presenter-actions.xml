@@ -79,6 +79,8 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
 		<separator />
+		<item type="custom" value="annotationControl" />
+		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
 	</action-list>
 		

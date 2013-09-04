@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		ENTITY GRID PRESENTER
+	-->
+		
+	<!-- Refresh -->
+	<action id="plugins.coref.entityGridPresenter.refreshAction"
+		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+	
+	<!-- Toggle 'markFalseSpans' -->
+	<action id="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'showGoldSpans' -->
+	<action id="plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle 'filterSingletons' -->
+	<action id="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Toggle Label Mode -->
+	<action id="plugins.coref.entityGridPresenter.toggleLabelModeAction"
+		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.coref.entityGridPresenter.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.coref.entityGridPresenter.toolBarList">
+		<item type="action" value="plugins.coref.entityGridPresenter.openPreferencesAction" />
+		<separator />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleShowGoldSpansAction" />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction" />
+		<separator />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleLabelModeAction" />
+		<item type="custom" value="patternSelect" />
+		<separator />
+		<item type="action" value="plugins.coref.entityGridPresenter.refreshAction" />
+	</action-list>
+	
+</actions>

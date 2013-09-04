@@ -115,6 +115,7 @@ public class QueryEditorView extends View {
 		}
 		
 		try {
+			queryEditor.setOwner(this);
 			queryEditor.setEditingItem(searchDescriptor);
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 

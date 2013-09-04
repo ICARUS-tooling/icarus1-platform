@@ -226,7 +226,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
 	 */
 	@Override
-	protected void displayResult(Options options) {
+	protected void displayResult() {
 		if(searchResult==null) {
 			showInfo(null);
 			return;
@@ -324,6 +324,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		Options options = new Options();
 		options.put(Options.INDEX, selectedIndex);
 		options.put(Options.CONTENT_TYPE, listPresenter.getContentType());
+		options.putAll(getOptions());
 		
 		detailsPresenter.present(selectedObject, options);
 	}

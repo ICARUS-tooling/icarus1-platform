@@ -88,11 +88,12 @@ public class CorefProperties extends CompactProperties {
 		}
 		
 		CorefProperties properties = new CorefProperties();
+		int maxIndex = s.length()-1;
 		int startIndex = 0;
-		while(startIndex<s.length()) {
+		while(startIndex<maxIndex) {
 			int offset0 = s.indexOf(ASSIGNMENT_CHAR, startIndex);
 			if(offset0==-1)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Invalid properties source string: "+s); //$NON-NLS-1$
 			int endIndex = s.indexOf(SEPARATOR_CHAR, offset0);
 			if(endIndex==-1) {
 				endIndex = s.length();
@@ -100,7 +101,7 @@ public class CorefProperties extends CompactProperties {
 			properties.put(s.substring(startIndex, offset0), 
 					toValue(s.substring(offset0+1, endIndex)));
 			
-			startIndex = endIndex;
+			startIndex = endIndex+1;
 		}
 		
 		return properties;

@@ -167,8 +167,12 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 				ConstraintFactory factory = presenter.getConstraintContext().getFactory(constraint.getToken());
 				Object label = SearchManager.isGroupingOperator(operator) ? ""  //$NON-NLS-1$
 						: factory.valueToLabel(constraint.getValue());
-				sb.append("\n").append(factory.getName()) //$NON-NLS-1$
-				.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append("\n").append(factory.getName()); //$NON-NLS-1$
+				Object specifier = constraint.getSpecifier();
+				if(specifier!=null) {
+					sb.append('(').append(specifier).append(')');
+				}
+				sb.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		

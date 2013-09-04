@@ -122,4 +122,13 @@ public class DependencySearchFactory implements SearchFactory {
 		return null;
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getQueryLabel(de.ims.icarus.search_tools.SearchQuery)
+	 */
+	@Override
+	public String getQueryLabel(SearchQuery query) {
+		// Allow framework to generate a default label
+		return null;
+	}
+
 }

@@ -71,4 +71,11 @@ public interface SearchFactory {
 	 * sufficient.
 	 */
 	Class<? extends QueryEditor> getDefaultEditorClass();
+	
+	/**
+	 * Generates a context specific label for the given {@code SearchQuery}.
+	 * A return value of {@code null} indicates that the framework should
+	 * generate a default label.
+	 */
+	String getQueryLabel(SearchQuery query);
 }

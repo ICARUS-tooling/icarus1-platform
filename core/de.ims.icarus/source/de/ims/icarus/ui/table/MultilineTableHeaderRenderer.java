@@ -27,7 +27,6 @@ package de.ims.icarus.ui.table;
 
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -40,7 +39,6 @@ import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.StringUtil;
 
 /**
@@ -67,7 +65,7 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 	    
 	    JComponent renderer = (JComponent) getCellRenderer();
 	    UIUtil.disableHtml(renderer);
-	    setHorizontalAlignment(SwingConstants.CENTER);
+	    setHorizontalAlignment(SwingConstants.LEFT);
 	}
 	
 	public void setHorizontalAlignment(int alignment) {
@@ -94,11 +92,11 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		
 		String str = (value == null) ? "" : value.toString(); //$NON-NLS-1$
 		
-		int width = table.getColumnModel().getColumn(column).getWidth();
+		int width = table.getColumnModel().getColumn(column).getWidth()-5;
 		width = Math.max(width, StringUtil.MIN_WRAP_WIDTH);
 		String[] lines = StringUtil.split(str, (Component) getCellRenderer(), width);
 		
-		System.out.println("----------\n"+Arrays.toString(lines));
+		//System.out.println("------------ "+width+"\n"+Arrays.toString(lines));
 		
 		MultilineListModel model = getModel();
 		model.setLines(lines);

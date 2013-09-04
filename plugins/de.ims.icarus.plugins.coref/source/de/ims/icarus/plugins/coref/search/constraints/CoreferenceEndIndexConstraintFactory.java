@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,10 +23,10 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.plugins.coref.search.constraints;
 
-import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.plugins.coref.search.DocumentTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -39,35 +39,33 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyProjectivityConstraintFactory extends AbstractConstraintFactory {
+public class CoreferenceEndIndexConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "projectivity"; //$NON-NLS-1$
+	public static final String TOKEN = "end"; //$NON-NLS-1$
 
-	public DependencyProjectivityConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.projectivity.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.projectivity.description"); //$NON-NLS-1$
+	public CoreferenceEndIndexConstraintFactory() {
+		super(TOKEN, NODE_CONSTRAINT_TYPE, 
+				"plugins.coref.constraints.endIndex.name",  //$NON-NLS-1$
+				"plugins.coref.constraints.endIndex.description"); //$NON-NLS-1$
 	}
 
 	/**
-	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
+	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator, java.lang.Object, de.ims.icarus.util.Options)
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyProjectivityConstraint(value, operator);
-	}
-
-	@Override
-	public Class<?> getValueClass() {
-		return null;
+		return new CoreferenceEndIndexConstraint(value, operator);
 	}
 
 	@Override
 	public SearchOperator[] getSupportedOperators() {
-		return new SearchOperator[]{
-				DefaultSearchOperator.EQUALS,
-				DefaultSearchOperator.GROUPING,
-		};
+		return DefaultSearchOperator.numerical();
+	}
+
+	@Override
+	public Class<?> getValueClass() {
+		return Integer.class;
 	}
 
 	@Override
@@ -77,44 +75,30 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 
 	@Override
 	public Object labelToValue(Object label) {
-		return LanguageUtils.parseBooleanLabel((String)label);
+		return LanguageUtils.parseLabel((String) label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value) {
-		return LanguageUtils.getBooleanLabel((int)value);
+		return LanguageUtils.getLabel((int)value);
 	}
 
-	@Override
-	public Object[] getLabelSet() {
-		return new Object[]{
-				LanguageUtils.DATA_UNDEFINED_LABEL,
-				LanguageUtils.getBooleanLabel(LanguageUtils.DATA_YES_VALUE),
-				LanguageUtils.getBooleanLabel(LanguageUtils.DATA_NO_VALUE),
-		};
-	}
+	private static class CoreferenceEndIndexConstraint extends DefaultConstraint {
 
-	private static class DependencyProjectivityConstraint extends DefaultConstraint {
+		private static final long serialVersionUID = -2573827788768962974L;
 
-		private static final long serialVersionUID = -8096178398923755732L;
-
-		public DependencyProjectivityConstraint(Object value, SearchOperator operator) {
+		public CoreferenceEndIndexConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
-		}
-
-		@Override
-		protected Object getConstraint() {
-			return getValue().equals(LanguageConstants.DATA_YES_VALUE);
+			return ((DocumentTargetTree)value).getEndIndex();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyProjectivityConstraint(getValue(), getOperator());
+			return new CoreferenceEndIndexConstraint(getValue(), getOperator());
 		}
 	}
 }

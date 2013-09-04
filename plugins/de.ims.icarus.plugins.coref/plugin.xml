@@ -241,6 +241,40 @@
 		<parameter id="class" value="de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter" />
 	</extension>
 	
+	<extension id="CoreferenceDocumentDataPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Basic presenter for visualization of coreference document objects that wraps a
+				collection of specialized other presenters that perform the actual presentation.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter" />
+		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentListCellRenderer" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.DocumentListCellRenderer" />
+		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentAnnotationManager" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Annotation manager implementation to be used with CoreferenceDocumenAnnotation objects.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager" />
+		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentAnnotationContentType" />
+		<parameter id="interface" value="de.ims.icarus.util.annotation.AnnotationManager" />
+	</extension>
+	
 	<!-- CONTENT TYPES -->
 	
 	<extension id="CoreferenceDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
@@ -295,6 +329,51 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="de.ims.icarus.language.coref.Edge" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation" />
+	</extension>
+	
+	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
+	
+	<extension id="CoreferenceConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="token" value="begin" />
+		<parameter id="token" value="end" />
+		<parameter id="token" value="range" />
+		<parameter id="token" value="id" />
+		<parameter id="token" value="spanProperty" />
+		<parameter id="token" value="edgeProperty" />
+		<parameter id="factories">
+			<parameter id="begin" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceBeginIndexConstraintFactory" />
+			<parameter id="end" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEndIndexConstraintFactory" />
+			<parameter id="range" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceRangeConstraintFactory" />
+			<parameter id="id" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceClusterIdConstraintFactory" />
+			<parameter id="spanProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceSpanPropertyConstraintFactory" />
+			<parameter id="edgeProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEdgePropertyConstraintFactory" />
+		</parameter>
+	</extension>
+	
+	<extension id="CoreferenceSearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.search.CoreferenceDocumentSearchFactory" />
+		<parameter id="name" value="plugins.coref.corefSearchFactory.identity.name" />
+		<parameter id="description" value="plugins.coref.corefSearchFactory.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/search/coreference-search-factory.gif" />
+	</extension>
+	
+	<extension id="CoreferenceDocumentSetTargetSelector" plugin-id="de.ims.icarus.searchTools" point-id="SearchTargetSelector">
+		<parameter id="class" value="de.ims.icarus.plugins.coref.search.CoreferenceDocumentSetTargetSelector" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="name" value="plugins.coref.coreferenceDocumentSetTargetSelector.identity.name" />
+		<parameter id="description" value="plugins.coref.coreferenceDocumentSetTargetSelector.identity.name" />
 	</extension>
 	
 </plugin>

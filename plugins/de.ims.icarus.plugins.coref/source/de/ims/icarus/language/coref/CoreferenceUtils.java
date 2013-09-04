@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.io.Reader;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
@@ -64,6 +65,10 @@ public final class CoreferenceUtils {
 
 	public static ContentType getCoreferenceDocumentContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentData.class);
+	}
+
+	public static ContentType getCoreferenceDocumentAnnotationContentType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentAnnotation.class);
 	}
 
 	public static ContentType getEdgeSetContentType() {
@@ -354,4 +359,20 @@ public final class CoreferenceUtils {
 		}
 		
 	};
+	
+	private static final String[] defaultSpanPropertyKeys = {
+		// TODO
+	};
+	
+	public static String[] getDefaultSpanPropertyKeys() {
+		return defaultSpanPropertyKeys.clone();
+	}
+	
+	private static final String[] defaultEdgePropertyKeys = {
+		// TODO
+	};
+	
+	public static String[] getDefaultEdgePropertyKeys() {
+		return defaultEdgePropertyKeys.clone();
+	}
 }

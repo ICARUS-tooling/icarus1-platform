@@ -218,7 +218,7 @@ public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult(de.ims.icarus.util.Options)
 	 */
 	@Override
-	protected void displayResult(Options options) {
+	protected void displayResult() {
 		SearchResult searchResult = this.searchResult;
 		if(searchResult==null) {
 			searchResult = ResultDummies.dummyResult3D;

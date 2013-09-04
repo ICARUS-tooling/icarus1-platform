@@ -54,9 +54,9 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Grouping;
 import de.ims.icarus.search_tools.Search;
+import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.result.SearchResult;
-import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.Updatable;
@@ -278,7 +278,12 @@ public class SearchResultView extends View {
 		}
 		
 		if(options==null) {
-			options = Options.emptyOptions;
+			options = new Options();
+		}
+
+		Search search = searchResult.getSource();
+		if(search!=null) {
+			options.putAll(search.getParameters());
 		}
 		
 		SearchResultPresenter resultPresenter = this.resultPresenter;
@@ -351,7 +356,6 @@ public class SearchResultView extends View {
 		toolBarExpanded = toolBarItemCount!=toolBar.getComponentCount();
 		
 		if(!searchResult.isFinal()) {
-			Search search = searchResult.getSource();
 			if(search!=null) {
 				search.removePropertyChangeListener(handler);
 				search.addPropertyChangeListener("state", handler); //$NON-NLS-1$
@@ -629,11 +633,16 @@ public class SearchResultView extends View {
 					label.setVisible(false);
 					continue;
 				}
-				
-				int groupId = SearchUtils.getGroupId(searchResult, i);
+
+				SearchConstraint constraint = searchResult.getGroupConstraint(i);
+				int groupId = constraint==null ? -1 : (int) constraint.getValue();
+				Object specifier = constraint==null ? null : constraint.getSpecifier();
 				Color color = Grouping.getGrouping(groupId).getColor();
 				int count = searchResult.getInstanceCount(i);
 				String token = String.valueOf(searchResult.getGroupLabel(i));
+				if(specifier!=null) {
+					token += "("+StringUtil.fit(specifier.toString(), 20)+")"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
 				
 				String  text = String.format(format, 
 						HtmlUtils.hexString(color),
