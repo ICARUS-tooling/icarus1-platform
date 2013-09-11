@@ -1,6 +1,6 @@
 /* 
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus GÃ¤rtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,11 +27,12 @@ package de.ims.icarus.plugins.errormining.ngram_search;
 
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyUtils;
-import de.ims.icarus.language.dependency.annotation.DependencyResultAnnotator;
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
+import de.ims.icarus.plugins.errormining.annotation.NGramResultAnnotator;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
 import de.ims.icarus.search_tools.corpus.AbstractCorpusSearch;
+import de.ims.icarus.search_tools.standard.AbstractParallelSearch;
 import de.ims.icarus.search_tools.tree.TargetTree;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
@@ -42,7 +43,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class NGramSearch extends AbstractCorpusSearch {
+public class NGramSearch extends AbstractParallelSearch {
 
 	/**
 	 * @param nGramSearchFactory
@@ -54,15 +55,14 @@ public class NGramSearch extends AbstractCorpusSearch {
 			SearchQuery query, Options options, Object target) {
 		super(factory, query, options, target);
 	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.tree.AbstractTreeSearch#createTargetTree()
-	 */
-	@Override
-	protected TargetTree createTargetTree() {
-		//TODO other formats?
-		return new DependencyTargetTree();
+	
+	
+	public NGramSearch(NGramSearchFactoryDependency factory,
+			SearchQuery query, Options options, Object target) {
+		super(factory, query, options, target);
 	}
+
+
 
 	/**
 	 * @see de.ims.icarus.search_tools.corpus.AbstractCorpusSearch#createSource(java.lang.Object)
@@ -80,13 +80,45 @@ public class NGramSearch extends AbstractCorpusSearch {
 		return (SentenceDataList) target;
 	}
 
+
+
 	/**
-	 * @see de.ims.icarus.search_tools.corpus.AbstractCorpusSearch#createAnnotator()
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#validateGraph()
+	 */
+	@Override
+	protected boolean validateGraph() {
+		return true;
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#initEngine()
+	 */
+	@Override
+	protected void initEngine() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#createWorker(int)
+	 */
+	@Override
+	protected Worker createWorker(int id) {
+		Worker w;
+
+		return null;
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#createAnnotator()
 	 */
 	@Override
 	protected ResultAnnotator createAnnotator() {
-		// TODO fix annotator
-		return new DependencyResultAnnotator(baseRootMatcher);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

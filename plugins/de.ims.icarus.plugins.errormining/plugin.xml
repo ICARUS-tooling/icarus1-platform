@@ -109,8 +109,13 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="low" />
 	</extension>
-	
 
+
+
+
+<!--
+	Old Query Editor View not needed in ErrorMiningPerspective 
+	-> moved to Search perspective
 	<extension id="NGramQueryView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
 		<doc>
 			<doc-text>
@@ -125,12 +130,12 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="standard" />
 	</extension>
-
+-->
 
 	
 	
 	<!-- CONTENT TYPES -->
-<!--	
+	
 	<extension id="NGramSentenceDataDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
@@ -139,20 +144,47 @@
 		</doc>
 		<parameter id="contentClass" value="de.ims.icarus.plugins.errormining.ngram_tools.NGramSentenceData" />
 	</extension>
--->	
+
+
+
+	<extension id="NGramAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.language.errormining.annotation.NGramAnnotation
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.errormining.annotation.NGramAnnotation" />
+	</extension>
+
+	
+
 	
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
-
-<!--		
+	
+	<extension id="NGramConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="token" value="tag" />
+		<parameter id="factories">
+			<parameter id="tag" value="de.ims.icarus.plugins.errormining.ngram_search.NGramTagConstraintFactory" />
+		</parameter>
+	</extension>
+		
 	<extension id="NGramSearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
-		<parameter id="contentType" value="de.ims.icarus.errormining@NGramSentenceDataDataContentTyp" />
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
 		<parameter id="class" value="de.ims.icarus.plugins.errormining.ngram_search.NGramSearchFactory" />
 		<parameter id="name" value="plugins.errormining.nGgramSearchFactory.identity.name" />
 		<parameter id="description" value="plugins.errormining.nGramSearchFactory.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
 		<parameter id="icon" value="de/ims/icarus/plugins/errormining/ngram_search/ngram-search-factory.gif" />
 	</extension>
--->
-
-
+	
+	<extension id="NGramSearchFactoryDependency" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.ngram_search.NGramSearchFactoryDependency" />
+		<parameter id="name" value="plugins.errormining.nGramSearchFactoryDependency.identity.name" />
+		<parameter id="description" value="plugins.errormining.nGramSearchFactoryDependency.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
+		<parameter id="icon" value="de/ims/icarus/plugins/errormining/ngram_search/ngram-search-factory.gif" />
+	</extension>
+	
 </plugin>

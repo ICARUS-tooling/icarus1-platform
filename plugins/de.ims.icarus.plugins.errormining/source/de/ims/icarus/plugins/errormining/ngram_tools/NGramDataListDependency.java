@@ -1,6 +1,6 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus G�rtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
+
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_tools;
 
@@ -41,7 +41,7 @@ import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
-import de.ims.icarus.plugins.errormining.ItemInNuclei;
+import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -49,40 +49,40 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class NGramDataList implements SentenceDataList {
+public class NGramDataListDependency implements SentenceDataList {
 	
-	
-	protected Map<String,ArrayList<ItemInNuclei>> nGramMap;
+	protected Map<String,ArrayList<DependencyItemInNuclei>> nGramMap;
 	protected int index;
 	protected List<Integer> sentences;
 	protected List<SentenceData> corpus;
 	protected Map<Integer, NewNGramSentenceData> nGramMapCache;
 	//SentenceView
 	protected List<CorpusType> corpusList;
-
-
-	public NGramDataList(Map<String,ArrayList<ItemInNuclei>> nGramMap,
+	
+	public NGramDataListDependency(Map<String,ArrayList<DependencyItemInNuclei>> nGramMap,
 			List<SentenceData> corpus){
 		if (nGramMap == null)
 			throw new IllegalArgumentException("No Data"); //$NON-NLS-1$
+		
+//		System.out.println("nGramap " + nGramMap.size()
+//							+ " CSize" + corpus.size());
 		
 		this.corpus = corpus;
 		setNGramMap(nGramMap);
 		
 	}
-
-
+	
 	/**
 	 * @return the nGramMap
 	 */
-	public Map<String, ArrayList<ItemInNuclei>> getnGramMap() {
+	public Map<String, ArrayList<DependencyItemInNuclei>> getnGramMap() {
 		return nGramMap;
 	}
 
 	/**
 	 * @param nGramMap the nGramMap to set
 	 */
-	public void setnGramMap(Map<String, ArrayList<ItemInNuclei>> nGramMap) {
+	public void setnGramMap(Map<String, ArrayList<DependencyItemInNuclei>> nGramMap) {
 		this.nGramMap = nGramMap;
 	}
 
@@ -100,31 +100,28 @@ public class NGramDataList implements SentenceDataList {
 		this.corpus = corpus;
 	}
 
-
-
-
 	public List<CorpusType> getCorpusList(){
 		return corpusList;
 	}
 
 	/**
+	 * @param <nGramMapCache>
 	 * @param nGramMap
 	 */
-	void setNGramMap(Map<String, ArrayList<ItemInNuclei>> nGramMap) {
+	void setNGramMap(Map<String, ArrayList<DependencyItemInNuclei>> nGramMap) {
 		if (this.nGramMap != null) {
 			return;
 		}
 		nGramMapCache = new HashMap<Integer, NewNGramSentenceData>();
 
-		//TODO filter results
-		this.nGramMap = nGramMap;
-		
+		// System.out.println(nGramMap.size());
+		// TODO filtering
+		this.nGramMap = nGramMap;		
 		filterNGramMap(nGramMap);
-		
+
 	}
-	
-	
-	private Map<String, ArrayList<ItemInNuclei>> filterNGramMap(Map<String, ArrayList<ItemInNuclei>> nGramMap){
+
+	private Map<String, ArrayList<DependencyItemInNuclei>> filterNGramMap(Map<String, ArrayList<DependencyItemInNuclei>> nGramMap){
 		
 		List<String> tmpKey = new ArrayList<String>(nGramMap.keySet());
 		Collections.reverse(tmpKey);
@@ -132,7 +129,7 @@ public class NGramDataList implements SentenceDataList {
 		corpusList = new ArrayList<CorpusType>();
 		sentences = new ArrayList<Integer>();
 		
-		Map<String, ArrayList<ItemInNuclei>> filterMap = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
+		Map<String, ArrayList<DependencyItemInNuclei>> filterMap = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		
 //		
 //		for(int j = 0; j < tmpKey.size(); j++){
@@ -147,9 +144,9 @@ public class NGramDataList implements SentenceDataList {
 			
 			//System.out.println(key + keysplit.length);
 			
-			ArrayList<ItemInNuclei> value = nGramMap.get(key);
+			ArrayList<DependencyItemInNuclei> value = nGramMap.get(key);
 			for (int j = 0; j < value.size();j++){
-				ItemInNuclei iin = value.get(j);
+				DependencyItemInNuclei iin = value.get(j);
 //				System.out.println("PoSTag: "+ iin.getPosTag() +
 //								  " PoSCount: " + iin.getCount());
 				
@@ -208,17 +205,6 @@ public class NGramDataList implements SentenceDataList {
 		return filterMap;
 	}
 	
-	//no more needed?
-//	private Map<String, ArrayList<ItemInNuclei>> getNGramMap(){
-//		return nGramMap;
-//	}
-//	
-//	
-//	private List<Integer> getSentences(){
-//		return sentences;
-//	}
-	
-	
 	private SentenceData getNGramDataFromIndex(int index) {
 		if (!nGramMapCache.containsKey(index)) {
 			NewNGramSentenceData ngramData = new NewNGramSentenceData(index);
@@ -226,19 +212,19 @@ public class NGramDataList implements SentenceDataList {
 		}
 		return nGramMapCache.get(index);
 	}
+	
 
-
+	
 	/**
-	 * @see net.ikarus_systems.icarus.util.data.DataList#size()
+	 * @see de.ims.icarus.util.data.DataList#size()
 	 */
 	@Override
 	public int size() {
-		//return getNGramMap().size();
 		return sentences.size();
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.util.data.DataList#get(int)
+	 * @see de.ims.icarus.util.data.DataList#get(int)
 	 */
 	@Override
 	public SentenceData get(int index) {
@@ -246,7 +232,7 @@ public class NGramDataList implements SentenceDataList {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.util.data.DataList#getContentType()
+	 * @see de.ims.icarus.util.data.DataList#getContentType()
 	 */
 	@Override
 	public ContentType getContentType() {
@@ -254,23 +240,23 @@ public class NGramDataList implements SentenceDataList {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.util.data.DataList#addChangeListener(javax.swing.event.ChangeListener)
+	 * @see de.ims.icarus.util.data.DataList#addChangeListener(javax.swing.event.ChangeListener)
 	 */
 	@Override
 	public void addChangeListener(ChangeListener listener) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub		
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.util.data.DataList#removeChangeListener(javax.swing.event.ChangeListener)
+	 * @see de.ims.icarus.util.data.DataList#removeChangeListener(javax.swing.event.ChangeListener)
 	 */
 	@Override
 	public void removeChangeListener(ChangeListener listener) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub		
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.SentenceDataList#supportsType(net.ikarus_systems.icarus.language.DataType)
+	 * @see de.ims.icarus.language.SentenceDataList#supportsType(de.ims.icarus.language.DataType)
 	 */
 	@Override
 	public boolean supportsType(DataType type) {
@@ -278,7 +264,7 @@ public class NGramDataList implements SentenceDataList {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType)
+	 * @see de.ims.icarus.language.SentenceDataList#get(int, de.ims.icarus.language.DataType)
 	 */
 	@Override
 	public SentenceData get(int index, DataType type) {
@@ -289,105 +275,13 @@ public class NGramDataList implements SentenceDataList {
 	}
 
 	/**
-	 * @see net.ikarus_systems.icarus.language.SentenceDataList#get(int, net.ikarus_systems.icarus.language.DataType, net.ikarus_systems.icarus.language.AvailabilityObserver)
+	 * @see de.ims.icarus.language.SentenceDataList#get(int, de.ims.icarus.language.DataType, de.ims.icarus.language.AvailabilityObserver)
 	 */
 	@Override
 	public SentenceData get(int index, DataType type,
 			AvailabilityObserver observer) {
 		return get(index, type);
-	}
-	
-	
-	
-	
-//	//data class
-//	private class NewNGramSentenceData implements AnnotatedSentenceData {
-//
-//		private static final long serialVersionUID = 3303973536847711267L;
-//
-//		private List<DependencyDataEntry> items = new ArrayList<>();
-//		
-//		protected Annotation annotation = null; // TODO change to default value?
-//		
-//		DependencyData dd;
-//		
-//		public NewNGramSentenceData(int index){
-//			dd = (DependencyData) corpus.get(index);
-//			
-//			
-//		}
-//		
-//		
-//		//TODO
-//		@Override
-//		public NewNGramSentenceData clone() {
-//			return this;
-//		}
-//		
-//		
-//
-//		/**
-//		 * @see net.ikarus_systems.icarus.language.SentenceData#getForm(int)
-//		 */
-//		@Override
-//		public String getForm(int index) {
-//			//return items.get(index).getForm();
-//			return dd.getForm(index);
-//		}
-//
-//		/**
-//		 * @see net.ikarus_systems.icarus.language.SentenceData#isEmpty()
-//		 */
-//		@Override
-//		public boolean isEmpty() {
-//			//return items.isEmpty();
-//			return dd == null || dd.isEmpty();
-//		}
-//
-//		/**
-//		 * @see net.ikarus_systems.icarus.language.SentenceData#length()
-//		 */
-//		@Override
-//		public int length() {
-//			//return items.size();
-//			return dd.length();
-//		}
-//
-//		/**
-//		 * @see net.ikarus_systems.icarus.language.SentenceData#getSourceGrammar()
-//		 */
-//		@Override
-//		public Grammar getSourceGrammar() {
-//			return DependencyUtils.getDependencyGrammar();
-//		}
-//
-//		/**
-//		 * @see net.ikarus_systems.icarus.language.annotation.AnnotatedSentenceData#getAnnotation()
-//		 */
-//		@Override
-//		public Annotation getAnnotation() {
-//			return annotation;
-//		}
-//
-//
-//		/**
-//		 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
-//		 */
-//		@Override
-//		public String getText() {
-//			return dd.getText();
-//		}
-//
-//	}
-
-	
-	
-	/**
-	 * 
-	 * @author Gregor Thiele
-	 * @version $Id$
-	 *
-	 */
+	}	
 	
 	
 	private class NewNGramSentenceData implements DependencyData {
@@ -503,6 +397,5 @@ public class NGramDataList implements SentenceDataList {
 		}
 		
 	}
-
 
 }

@@ -1,6 +1,6 @@
 /* 
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus GÃ¤rtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,12 +26,15 @@
 package de.ims.icarus.plugins.errormining;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -60,6 +63,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
@@ -115,89 +119,90 @@ public class NGramResultSentenceView extends View {
 
 	private JScrollPane scrollPane;
 	private JScrollPane scrollPaneDetailed;
+	
+	
+	private ConfigRegistry config;
 
 	/**
 	 * @see de.ims.icarus.plugins.core.View#init(javax.swing.JComponent)
 	 */
 	@Override
 	public void init(JComponent container) {
+		
+		//initialize config
+		config = ConfigRegistry.getGlobalRegistry();
+		
 		// Load actions
-				URL actionLocation = ErrorMiningView.class
-						.getResource("errormining-view-actions.xml"); //$NON-NLS-1$
-				if (actionLocation == null)
-					throw new CorruptedStateException(
-							"Missing resources: errormining-view-actions.xml"); //$NON-NLS-1$
+		URL actionLocation = ErrorMiningView.class
+				.getResource("errormining-view-actions.xml"); //$NON-NLS-1$
+		if (actionLocation == null)
+			throw new CorruptedStateException(
+					"Missing resources: errormining-view-actions.xml"); //$NON-NLS-1$
 
-				try {
-					getDefaultActionManager().loadActions(actionLocation);
-				} catch (IOException e) {
-					LoggerFactory.log(this, Level.SEVERE,
-							"Failed to load actions from file", e); //$NON-NLS-1$
-					UIDummies.createDefaultErrorOutput(container, e);
-					return;
-				}
+		try {
+			getDefaultActionManager().loadActions(actionLocation);
+		} catch (IOException e) {
+			LoggerFactory.log(this, Level.SEVERE,
+					"Failed to load actions from file", e); //$NON-NLS-1$
+			UIDummies.createDefaultErrorOutput(container, e);
+			return;
+		}
 
-				handler = createHandler();
-				
-				
-				// Header label
-				header = new JLabel(""); //$NON-NLS-1$
-				header.setBorder(new EmptyBorder(3, 5, 10, 20));
-				header.setFont(header.getFont().deriveFont(header.getFont().getSize2D() + 2));
+		handler = createHandler();
 
-				// Info label
-				infoLabel = new JLabel();
-				infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-				infoLabel.setVerticalAlignment(SwingConstants.TOP);
-				ResourceManager.getInstance().getGlobalDomain()
-						.prepareComponent(infoLabel,"plugins.errormining.nGramResultView.notAvailable", null); //$NON-NLS-1$
-				ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);		
-					
+		// Header label
+		header = new JLabel(""); //$NON-NLS-1$
+		header.setBorder(new EmptyBorder(3, 5, 10, 20));
+		header.setFont(header.getFont().deriveFont(
+				header.getFont().getSize2D() + 2));
 
-				
-				// Description Scrollpane
-				scrollPane = new JScrollPane();
-				scrollPane.setBorder(null);	
-				UIUtil.defaultSetUnitIncrement(scrollPane);
-				scrollPane.setPreferredSize(new Dimension(400, 400));
-				
-				
-				//######
-				nucleiCount = new JLabel();
-				nucleiName = new JLabel();				
-				
+		// Info label
+		infoLabel = new JLabel();
+		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		infoLabel.setVerticalAlignment(SwingConstants.TOP);
+		ResourceManager
+				.getInstance()
+				.getGlobalDomain()
+				.prepareComponent(
+						infoLabel,
+						"plugins.errormining.nGramResultView.notAvailable", null); //$NON-NLS-1$
+		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 
-				
-				// Detailed Scrollpane
-				scrollPaneDetailed = new JScrollPane();
-				scrollPaneDetailed.setBorder(null);	
-				UIUtil.defaultSetUnitIncrement(scrollPaneDetailed);
-						
-				JPanel detailedView = new JPanel();
-				detailedView.setLayout(new GridLayout(2, 1));
-				detailedView.add(nucleiName);
-				detailedView.add(nucleiCount);
-				
+		// Description Scrollpane
+		scrollPane = new JScrollPane();
+		scrollPane.setBorder(null);
+		UIUtil.defaultSetUnitIncrement(scrollPane);
+		scrollPane.setPreferredSize(new Dimension(400, 400));
 
-				
-				JSplitPane jsp = new JSplitPane(
-						JSplitPane.VERTICAL_SPLIT,
-						scrollPane,
-						scrollPaneDetailed);
-				Dimension minimumSize = new Dimension(300, 150);
-				scrollPane.setMinimumSize(minimumSize);
-				scrollPaneDetailed.setMinimumSize(minimumSize);
+		// ######
+		nucleiCount = new JLabel();
+		nucleiName = new JLabel();
 
-				
-				container.setLayout(new BorderLayout());
-				container.add(header, BorderLayout.NORTH);
-				container.add(jsp, BorderLayout.CENTER);
-				container.add(detailedView, BorderLayout.SOUTH);
-				
-				showDefaultInfo();
-				
-				registerActionCallbacks();
-				refreshActions();
+		// Detailed Scrollpane
+		scrollPaneDetailed = new JScrollPane();
+		scrollPaneDetailed.setBorder(null);
+		UIUtil.defaultSetUnitIncrement(scrollPaneDetailed);
+
+		JPanel detailedView = new JPanel();
+		detailedView.setLayout(new GridLayout(2, 1));
+		detailedView.add(nucleiName);
+		detailedView.add(nucleiCount);
+
+		JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane,
+				scrollPaneDetailed);
+		Dimension minimumSize = new Dimension(300, 150);
+		scrollPane.setMinimumSize(minimumSize);
+		scrollPaneDetailed.setMinimumSize(minimumSize);
+
+		container.setLayout(new BorderLayout());
+		container.add(header, BorderLayout.NORTH);
+		container.add(jsp, BorderLayout.CENTER);
+		container.add(detailedView, BorderLayout.SOUTH);
+
+		showDefaultInfo();
+
+		registerActionCallbacks();
+		refreshActions();
 	}
 	
 	private void showDefaultInfo() {
@@ -208,8 +213,7 @@ public class NGramResultSentenceView extends View {
 
 
 	protected void refreshActions() {
-		// TODO Auto-generated method stub
-		
+		// noop		
 	}
 	
 	
@@ -289,7 +293,9 @@ public class NGramResultSentenceView extends View {
 		ngramList.setSelectionModel(selectionModel);
 		ngramList.addListSelectionListener(handler);
 		ngramList.addMouseListener(handler);
+		ngramList.addMouseMotionListener(handler);
 		ngramList.getModel().addListDataListener(handler);
+
 
 		if (nGramResult != null) {
 			ngramListModel.reload();
@@ -302,8 +308,6 @@ public class NGramResultSentenceView extends View {
 		ngramList.setCellRenderer(ngramListRenderer);
 		
 		scrollPane.setViewportView(ngramList);
-		
-		
 		
 		//TODO Detailed Stuff
 		initializeDetailed();
@@ -325,7 +329,73 @@ public class NGramResultSentenceView extends View {
 	}
 	
 	protected class Handler extends MouseAdapter implements ActionListener, 
-	ListSelectionListener, EventListener, ListDataListener {
+	ListSelectionListener, EventListener, ListDataListener, MouseMotionListener {
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseClicked(MouseEvent me) {
+		    if (me.getClickCount() == 2) {
+		        int index = ngramList.locationToIndex(me.getPoint());
+		        System.out.println("Double clicked on Item " + index);
+		        
+		        ngramListModel.getElementAt(index);
+		        //System.out.println(ngramListModel.getElementAt(index));
+		        String key = (String) ngramListModel.getElementAt(index);		        
+
+				Message messageUserDetailed = new Message(this,
+						Commands.DISPLAY, createDetailedResult(key), null);
+				sendRequest(null, messageUserDetailed);	
+		     }
+		}
+
+		/**
+		 * @param arrayList
+		 */
+		private DetailedNGramSentenceDataList createDetailedResult(String key) {
+			
+			List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
+					
+			ArrayList<ItemInNuclei> iinList = null;
+						
+			String[] keySplitted = key.split(" "); //$NON-NLS-1$
+			
+			for(int keyIdx = 0; keyIdx < keySplitted.length; keyIdx++){
+				if(isNuclei(keySplitted[keyIdx])){
+					iinList = ngList.getnGramMap().get(keySplitted[keyIdx]);
+					for(int i = 0; i < iinList.size(); i++){
+						ItemInNuclei iin = iinList.get(i);
+						
+						for (int s = 0; s < iin.getSentenceInfoSize(); s++){
+							SentenceData sentenceData = 
+									corpus.get(iin.getSentenceInfoAt(s)
+											.getSentenceNr()-1);
+							//System.out.println(sentenceData.getText() + "TEXT");
+							sentenceDataDetailedList.add(sentenceData);
+						}
+					}
+				}
+			}
+			
+			DetailedNGramSentenceDataList dsdl = 
+						new DetailedNGramSentenceDataList(sentenceDataDetailedList);
+			return dsdl;
+			
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseMoved(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseMoved(MouseEvent me) {
+
+			int index = ngramList.locationToIndex(me.getPoint());
+			if (-1 < index) {
+				String item = (String) ngramListModel.getElementAt(index);
+				ngramList.setToolTipText(UIUtil.toSwingTooltip(buildToolTip(index)));				
+			}
+		}
 
 		/**
 		 * @see de.ims.icarus.ui.events.EventListener#invoke(java.lang.Object, de.ims.icarus.ui.events.EventObject)
@@ -370,7 +440,7 @@ public class NGramResultSentenceView extends View {
 		 */
 		@Override
 		public void intervalAdded(ListDataEvent arg0) {
-			// TODO Auto-generated method stub
+			// noop
 			
 		}
 
@@ -379,8 +449,7 @@ public class NGramResultSentenceView extends View {
 		 */
 		@Override
 		public void intervalRemoved(ListDataEvent arg0) {
-			// TODO Auto-generated method stub
-			
+			// noop			
 		}
 	
 	}
@@ -453,38 +522,62 @@ public class NGramResultSentenceView extends View {
 			
 			
 			ArrayList<ItemInNuclei> tmp = nGramResult.get(corpusList.get(index).getKey());
-			
+
 			int x = 0;
 			int end = 0;
 			int start = 0;
 			
+			
 			while (tmp.get(x).getSentenceInfoAt(0).getSentenceNr()-1 !=
 					corpusList.get(index).getSentence()){
-				x++;				
+				x++;
 			}
 			
+			//System.out.println(corpusList.get(index).getKey());
+			//System.out.println(" X= " + x + " TSIZE " + tmp.size());
+			
+			//String[] keySplitted = corpusList.get(index).getKey().split(" "); //$NON-NLS-1$
+			//System.out.println(" KeyLength " + keySplitted.length);
+			
+//			if (keySplitted.length > 1){
+//				while (tmp.get(x).getSentenceInfoAt(0).getSentenceNr()-1 !=
+//						corpusList.get(index).getSentence()){
+//							x++;
+//				}
+//			} else {
+//				x = 0;
+//			}
+			
+//			try {
+//				while (tmp.get(x).getSentenceInfoAt(0).getSentenceNr()-1 !=
+//						corpusList.get(index).getSentence()){
+//					x++;
+//				}
+//				end = tmp.get(x).getSentenceInfoAt(0).getSentenceEnd()-1;
+//				start = tmp.get(x).getSentenceInfoAt(0).getSentenceBegin()-1;
+//				//System.out.println(tmp.get(x).getPosTag());
+//				//System.out.println(tmp.get(x).getSentenceInfoAt(0).getNucleiIndex());
+//			}
+//			catch (Exception IndexOutOfBoundsException) {
+//				System.out.println("INDEXFAIL " + index);//				
+//			}
+
+
 			end = tmp.get(x).getSentenceInfoAt(0).getSentenceEnd()-1;
 			start = tmp.get(x).getSentenceInfoAt(0).getSentenceBegin()-1;
-
 			
-//			System.out.println(x + " list" + index + " e "  +end +" s " + start);
+			//System.out.println(x + " list: " + index + " end: "  +end +" start: " + start);
 
-			String text =	"<html>"  //$NON-NLS-1$
-					+ (index + 1) + ") "  //$NON-NLS-1$
-					+ " (" + gram.length + "-Gram) " //$NON-NLS-1$ //$NON-NLS-2$
-					+ colorStringContext(s,start,end) 					
-					+ "</html>"; //$NON-NLS-1$
+			//TODO needed?
+			boolean originalIndex = config.getBoolean(
+					"plugins.errorMining.appearance.showOriginalIndex"); //$NON-NLS-1$
 
-		      if (isSelected) {
-		          setBackground(list.getSelectionBackground());
-		         // text.setForeground(list.getSelectionForeground());
-		        } else {
-		          // the color returned from list.getBackground() is pure white
-		          setBackground(list.getBackground());
-		          // THIS works -- but is obviously hardcoded
-		          // setBackground(Color.WHITE);
-		          //text.setForeground(list.getForeground());
-		        }
+			String	text =	"<html>"  //$NON-NLS-1$
+						+ (index + 1) + ") "  //$NON-NLS-1$
+						+ " (" + gram.length + "-Gram) " //$NON-NLS-1$ //$NON-NLS-2$
+						+ colorStringContext(s,start,end) 					
+						+ "</html>"; //$NON-NLS-1$
+
 			setText(text);
 			
 			return this;
@@ -517,14 +610,21 @@ public class NGramResultSentenceView extends View {
 		
 		private String colorStringContext(String[] s, int b, int e) {
 			StringBuilder sb = new StringBuilder();
+
+			
+			//System.out.println(hex);
 			for (int i = 0; i < s.length ; i++){
 				if(i >=b && i <= e){
 					if (isNuclei(s[i])) {
-						sb.append("<font color=#FF2A00>"); //$NON-NLS-1$
+						Color nuclei = config.getColor("plugins.errorMining.highlighting.nucleiHighlight"); //$NON-NLS-1$
+						String hexNuclei = "#"+Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$
+						sb.append("<font color=" + hexNuclei + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 						sb.append(s[i]);
 						sb.append("</font>"); //$NON-NLS-1$
 					} else {
-						sb.append("<font color=#00FF00>"); //$NON-NLS-1$
+						Color ngram = config.getColor("plugins.errorMining.highlighting.ngramHighlight"); //$NON-NLS-1$
+						String hexNgram = "#"+Integer.toHexString(ngram.getRGB()).substring(2); //$NON-NLS-1$
+						sb.append("<font color=" + hexNgram + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 						sb.append(s[i]);
 						sb.append("</font>"); //$NON-NLS-1$	
 					}
@@ -772,6 +872,34 @@ public class NGramResultSentenceView extends View {
 	
 	
 	
+	/**
+	 * @param elementAt
+	 * @return
+	 */
+	public String buildToolTip(int index) {
+//		System.out.println("index " + index);
+//		System.out.println("Key " + corpusList.get(index).getKey());
+		
+		StringBuilder sb = new StringBuilder();
+
+		String[] keySplitted = corpusList.get(index).getKey().split(" ");	 //$NON-NLS-1$
+		
+		for(int i = 0; i < keySplitted.length; i++){
+			if(isNuclei(keySplitted[i])){
+				//System.out.println("nuclei: " + keySplitted[i]);
+				sb.append("Nuclei: ").append(keySplitted[i]).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+				for (int j = 0; j < nGramResult.get(keySplitted[i]).size(); j++){
+					ItemInNuclei iin = nGramResult.get(keySplitted[i]).get(j);
+					sb.append(iin.getPosTag()).append(" ("); //$NON-NLS-1$
+					sb.append(iin.getCount()).append(") ");	//$NON-NLS-1$
+				}
+				sb.append("\n"); //$NON-NLS-1$
+			}					
+		}		
+		
+		return sb.toString();
+	}
+
 	protected boolean isGram(String key) {
 
 		if (nGramResult.containsKey(key)){
@@ -821,6 +949,5 @@ public class NGramResultSentenceView extends View {
 		}
 		return sb.toString();		
 	}
-
 	
 }

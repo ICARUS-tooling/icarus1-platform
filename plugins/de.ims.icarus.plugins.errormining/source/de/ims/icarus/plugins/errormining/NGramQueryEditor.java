@@ -1,6 +1,6 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus G�rtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
+
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining;
 
@@ -51,7 +51,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -70,12 +70,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.core.View;
+import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchDescriptor;
+import de.ims.icarus.search_tools.SearchNode;
+import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.standard.DefaultGraphNode;
+import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
+import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIDummies;
@@ -84,17 +92,16 @@ import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.BasicDialogBuilder;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.mpi.Commands;
-import de.ims.icarus.util.mpi.Message;
-import de.ims.icarus.util.mpi.ResultMessage;
+import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
-public class NGramQueryView extends View {
-
+public class NGramQueryEditor extends QueryEditor{
+	
 	protected JPanel contentPanel;
 
 	protected Collection<JComponent> localizedComponents;
@@ -110,40 +117,45 @@ public class NGramQueryView extends View {
 	//protected JButton qtIncludeButton;
 
 	private JLabel header;
-	private JLabel infoLabel;
+	//private JLabel infoLabel;
 
 	private Handler handler;
 	private CallbackHandler callbackHandler;
+	
+	private ActionManager actionManager;
 	
 	protected SearchDescriptor searchDescriptor;
 	
 	/**
 	 * Constructor
 	 */
-	public NGramQueryView(){
+	public NGramQueryEditor(){
 		//noop
 	}
+	
+	protected ActionManager getActionManager() {
+		if(actionManager==null) {
+			actionManager = ActionManager.globalManager().derive();
+		}
+		
+		return actionManager;
+	}
 
-	/**
-	 * @see de.ims.icarus.plugins.core.View#init(javax.swing.JComponent)
-	 */
-	@Override
-	public void init(JComponent container) {
+	
+	public void initContentPanel() {
 
 		// Load actions
-		URL actionLocation = ErrorMiningView.class
-				.getResource("query-view-actions.xml"); //$NON-NLS-1$
+		URL actionLocation = NGramQueryEditor.class
+				.getResource("query-editor-actions.xml"); //$NON-NLS-1$
 		if (actionLocation == null)
 			throw new CorruptedStateException(
-					"Missing resources: query-view-actions.xml"); //$NON-NLS-1$
+					"Missing resources: query-editor-actions.xml"); //$NON-NLS-1$
 		
-		ActionManager actionManager = getDefaultActionManager();
 		try {
-			actionManager.loadActions(actionLocation);
+			getActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE,
-					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
+			UIDummies.createDefaultErrorOutput(contentPanel, e);
 			return;
 		}
 		
@@ -161,12 +173,12 @@ public class NGramQueryView extends View {
 		header.setFont(header.getFont().deriveFont(header.getFont().getSize2D() + 2));
 
 		// Info label
-		infoLabel = new JLabel();
-		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		infoLabel.setVerticalAlignment(SwingConstants.TOP);
-		ResourceManager.getInstance().getGlobalDomain()
-				.prepareComponent(infoLabel,"plugins.errormining.nGramQueryView.notAvailable", null); //$NON-NLS-1$
-		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
+//		infoLabel = new JLabel();
+//		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//		infoLabel.setVerticalAlignment(SwingConstants.TOP);
+//		ResourceManager.getInstance().getGlobalDomain()
+//				.prepareComponent(infoLabel,"plugins.errormining.nGramQueryEditor.notAvailable", null); //$NON-NLS-1$
+//		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 		
 		
 		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
@@ -212,23 +224,23 @@ public class NGramQueryView extends View {
 		JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
 		footer.setBorder(new EmptyBorder(5, 20, 5, 20));
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.errorMining.nGramQueryView.loadQueryAction"))); //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryEditor.loadQueryAction"))); //$NON-NLS-1$
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.errorMining.nGramQueryView.saveQueryAction"))); //$NON-NLS-1$	
+				"plugins.errorMining.nGramQueryEditor.saveQueryAction"))); //$NON-NLS-1$	
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.errorMining.nGramQueryView.resetQueryAction"))); //$NON-NLS-1$	
+				"plugins.errorMining.nGramQueryEditor.resetQueryAction"))); //$NON-NLS-1$	
 
 		
 
 		//put all on viewcontainer
-		container.setLayout(new BorderLayout());
-		container.add(header, BorderLayout.NORTH);
-		container.add(scrollPane, BorderLayout.CENTER);
-		container.add(footer, BorderLayout.SOUTH);
+		contentPanel.setLayout(new BorderLayout());
+		contentPanel.add(header, BorderLayout.NORTH);
+		contentPanel.add(scrollPane, BorderLayout.CENTER);
+		contentPanel.add(footer, BorderLayout.SOUTH);
 		
 		registerActionCallbacks();
 				
-		showDefaultInfo();	
+		//showDefaultInfo();	
 					
 		
 		buildDialog();
@@ -240,11 +252,11 @@ public class NGramQueryView extends View {
 	
 	
 	
-	private void showDefaultInfo() {
-		scrollPane.setViewportView(infoLabel);
-		header.setText(""); //$NON-NLS-1$
-	
-	}
+//	private void showDefaultInfo() {
+//		scrollPane.setViewportView(infoLabel);
+//		header.setText(""); //$NON-NLS-1$
+//	
+//	}
 	
 
 	protected void refreshActions() {
@@ -270,9 +282,8 @@ public class NGramQueryView extends View {
 		}
 	}
 	
-
-
-	public void buildDialog() {
+	
+public void buildDialog() {
 		
 		
 		//Buttons
@@ -399,16 +410,16 @@ public class NGramQueryView extends View {
 			callbackHandler = createCallbackHandler();
 		}
 
-		ActionManager actionManager = getDefaultActionManager();
+		ActionManager actionManager = getActionManager();
 
 		actionManager.addHandler(
-				"plugins.errorMining.nGramQueryView.loadQueryAction", //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryEditor.loadQueryAction", //$NON-NLS-1$
 				callbackHandler, "loadQuery"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.errorMining.nGramQueryView.saveQueryAction", //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryEditor.saveQueryAction", //$NON-NLS-1$
 				callbackHandler, "saveQuery"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.errorMining.nGramQueryView.resetQueryAction", //$NON-NLS-1$
+				"plugins.errorMining.nGramQueryEditor.resetQueryAction", //$NON-NLS-1$
 				callbackHandler, "resetQuery"); //$NON-NLS-1$
 
 	}
@@ -417,9 +428,11 @@ public class NGramQueryView extends View {
 		return new Handler();
 	}
 
+	
 	protected CallbackHandler createCallbackHandler() {
 		return new CallbackHandler();
 	}
+	
 	
 	private void loadQueryXML(File fXmlFile) throws Exception {		
 		//File fXmlFile = new File(Core.getCore().getDataFolder(), "ngramquery.xml"); //$NON-NLS-1$
@@ -454,7 +467,7 @@ public class NGramQueryView extends View {
 			}
 		}
 		qtm.reload(qList);
-		setUpQuery();
+		synchronizeQuery();
 	}
 	
 	
@@ -545,7 +558,7 @@ public class NGramQueryView extends View {
 		if(searchQuery==null) {
 			//TODO clear all
 			qtm.removeAllQueryAttributes();
-			infoLabel.setVisible(true);
+			//infoLabel.setVisible(true);
 			return;
 		}
 
@@ -562,7 +575,7 @@ public class NGramQueryView extends View {
 //		}
 
 
-		infoLabel.setVisible(false);
+//		infoLabel.setVisible(false);
 	}
 	
 	
@@ -570,27 +583,8 @@ public class NGramQueryView extends View {
 		return searchDescriptor;
 	}
 	
-	public void setUpQuery() throws Exception {
-		System.out.println("setupquery");
-		if(searchDescriptor==null) {
-			return;
-		}
-					
-		SearchQuery searchQuery = searchDescriptor.getQuery();
-		if(searchQuery==null) {
-			return;
-		}
-
-		String query = "[]";
-		System.out.println(qtm.getQueryList().isEmpty());
-		if(qtm.getQueryList().isEmpty()){
-			return;
-		}
-
-		System.out.println("SetQueryString in Editor " + query); //$NON-NLS-1$
-		searchQuery.parseQueryString(query);
-	}
 	
+	/*
 	public void commitQuery() throws Exception {
 		
 		Message message = new Message(this, Commands.SELECT, 
@@ -600,13 +594,13 @@ public class NGramQueryView extends View {
 	}
 	
 	
-	@Override
+	/*
 	public void reset() {
 		setSearchDescriptor(null);
 	}
 	
 	
-	@Override
+	
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		if(Commands.PRESENT.equals(message.getCommand())
 				|| Commands.DISPLAY.equals(message.getCommand())) {
@@ -628,6 +622,8 @@ public class NGramQueryView extends View {
 			return message.unknownRequestResult(this);
 		}
 	}
+	
+	*/
 	
 
 	protected class Handler extends MouseAdapter implements ActionListener,
@@ -743,9 +739,16 @@ public class NGramQueryView extends View {
 
 		NGramQAttributes att = new NGramQAttributes();
 
-		JTextField attributenameField = new JTextField(30);
+		//set curser in textfield
+		final JTextField attributenameField = new JTextField(30);
 		attributenameField.setText(attributename);
-
+		attributenameField.setCaretPosition(0);
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				attributenameField.requestFocus();
+			}
+		});
+		
 		JTextField attributevaluesField = new JTextField(30);
 		attributevaluesField.setText(attributevalues);
 
@@ -842,6 +845,141 @@ public class NGramQueryView extends View {
 			}
 		}
 
+	}
+	
+	
+	
+	
+	/**
+	 * @see de.ims.icarus.ui.helper.Editor#getEditorComponent()
+	 */
+	@Override
+	public Component getEditorComponent() {
+		if(contentPanel==null) {
+			initContentPanel();
+		}
+		return contentPanel;
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.helper.Editor#setEditingItem(java.lang.Object)
+	 */
+	@Override
+	public void setEditingItem(SearchDescriptor searchDescriptor) {
+		if(contentPanel==null) {
+			initContentPanel();
+		}
+		
+		if(searchDescriptor!=null && searchDescriptor.equals(this.searchDescriptor)) {
+			return;
+		}
+		
+		this.searchDescriptor = searchDescriptor;
+		
+		SearchQuery searchQuery = searchDescriptor==null ? null : searchDescriptor.getQuery();
+		
+		if(searchQuery==null) {
+			qtm.removeAllQueryAttributes();
+			return;
+		}
+		
+		//TODO reload ngramlist
+		//qtm.reload(searchQuery.getQueryString());
+		
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.helper.Editor#applyEdit()
+	 */
+	@Override
+	public void applyEdit() {
+		try {
+			synchronizeQuery();
+		} catch (Exception e) {
+			throw new IllegalStateException("Synchronization of query failed", e); //$NON-NLS-1$
+		}		
+	}
+	
+	
+	
+	public void synchronizeQuery() throws Exception {
+		System.out.println("Sync Query"); //$NON-NLS-1$
+		if(searchDescriptor==null) {
+			return;
+		}
+					
+		SearchQuery searchQuery = searchDescriptor.getQuery();
+		if(searchQuery==null) {
+			return;
+		}
+		
+		//searchQuery.getSearchGraph();
+		
+		//create one DefaultGraphNode with all constraints from table		
+		DefaultGraphNode dgn = new DefaultGraphNode();
+
+		
+		if (qtm.qList == null){
+			return;
+		}
+		
+		int constraintNumber = qtm.qList.size();
+		System.out.println("#Constraints " + constraintNumber);
+		
+//		//Build constraintsset if there are any constraints
+//		if (constraintNumber > 0){
+//			SearchConstraint[] constraints = new SearchConstraint[constraintNumber];
+//	
+//			for(int i = 0; i < constraintNumber; i++){
+//				
+//				String token = (String) qtm.getValueAt(i, 1);
+//				Object value = qtm.getValueAt(i, 2);
+//				
+//				SearchOperator operator = null;
+//				if(qtm.getValueAt(i, 0).equals(true)){
+//					operator = SearchOperator.getOperator("~");
+//					//System.out.println(qtm.getValueAt(i, 1) + " true ");
+//					operator = DefaultSearchOperator.CONTAINS;
+//				} else {
+//					operator = SearchOperator.getOperator("!~");
+//					//System.out.println(qtm.getValueAt(i, 1) + " false ");
+//					operator = DefaultSearchOperator.CONTAINS_NOT;
+//				}
+//				
+//	
+//				constraints[i] = new DefaultConstraint("TAG", qtm.qList,  DefaultSearchOperator.EQUALS);
+//			}
+//			SearchConstraint[] constraints = new SearchConstraint[1];
+//			constraints[0] = new DefaultConstraint("TAG", qtm.qList,  DefaultSearchOperator.EQUALS);
+//			dgn.setConstraints(constraints);
+//		}
+		
+		SearchConstraint[] constraints = new SearchConstraint[1];
+		constraints[0] = new DefaultConstraint("TAG", qtm.qList,  DefaultSearchOperator.EQUALS);
+		dgn.setConstraints(constraints);
+		
+		//default create search node and push the only node into
+		SearchNode[] sn = new SearchNode[1];
+		sn[0] = dgn;
+		
+		//create new graph
+		DefaultSearchGraph graph = new DefaultSearchGraph();
+		graph.setRootNodes(sn);
+		graph.setNodes(sn);
+		
+		
+		searchQuery.setSearchGraph(graph);
+		System.out.println("Graph Added " + searchQuery.getQueryString());
+	}
+
+
+	/**
+	 * @see de.ims.icarus.plugins.search_tools.view.editor.QueryEditor#supports(de.ims.icarus.util.data.ContentType)
+	 */
+	@Override
+	public boolean supports(ContentType contentType) {
+		return ContentTypeRegistry.isCompatible(
+				LanguageUtils.getSentenceDataContentType(), contentType);
 	}
 
 }

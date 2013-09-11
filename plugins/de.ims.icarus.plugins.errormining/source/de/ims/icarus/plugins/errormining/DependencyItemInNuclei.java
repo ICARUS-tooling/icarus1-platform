@@ -1,6 +1,6 @@
 /* 
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
- *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
+ *  Copyright (C) 2012-2013 Markus GÃ¤rtner and Gregor Thiele
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,12 +36,15 @@ import java.util.List;
 public class DependencyItemInNuclei {
 	
 	protected String posTag;
+	//protected ArrayList<String> posTagList;
+
 	protected List<DependencySentenceInfo> sl;
 	protected int count;
 	//protected int nucleiCount;
 	
 	public DependencyItemInNuclei(){
 		List<DependencySentenceInfo> sl = new ArrayList<>();
+		ArrayList<String> posTagList = new ArrayList<>();;
 		this.sl = sl;
 		count = 1; //innitialize with 1 occurences +1 when found
 		count = 1;
@@ -50,6 +53,7 @@ public class DependencyItemInNuclei {
 	
 	public DependencyItemInNuclei(int count, String Tag){
 		List<DependencySentenceInfo> sl = new ArrayList<>();
+		ArrayList<String> posTagList = new ArrayList<>();;
 		this.sl = sl;
 		this.count = count;
 	}
@@ -83,6 +87,10 @@ public class DependencyItemInNuclei {
 	 */
 	public void setPosTag(String posTag) {
 		this.posTag = posTag;
+//		if (posTagList == null){
+//			posTagList = new ArrayList<>();
+//		}
+//		posTagList.add(posTag);
 	}
 	
 	/**
@@ -97,15 +105,23 @@ public class DependencyItemInNuclei {
 		sentenceInfo.addNucleiIndexList(positionNR);
 		sentenceInfo.setNucleiIndex(positionNR);
 		//sentenceInfo.setNucleiSentencePos(positionNR);
-		sentenceInfo.setSentenceBegin(positionNR);
-		sentenceInfo.setSentenceEnd(positionNR);
+//		sentenceInfo.setSentenceBegin(positionNR);
+//		sentenceInfo.setSentenceEnd(positionNR);
 		
 //		//TODO Workaround needed?
-//		if(positionNR < headIndex){
-//			sentenceInfo.setSentenceEnd(headIndex);
-//		} else {
-//			sentenceInfo.setSentenceEnd(positionNR);
-//		}
+		
+		if(positionNR > headIndex){
+			sentenceInfo.setSentenceBegin(headIndex);
+		} else {
+			sentenceInfo.setSentenceBegin(positionNR);
+		}
+		
+
+		if(positionNR < headIndex){
+			sentenceInfo.setSentenceEnd(headIndex);
+		} else {
+			sentenceInfo.setSentenceEnd(positionNR);
+		}
 		
 		
 		sentenceInfo.setSentenceHeadIndex(headIndex);
@@ -209,6 +225,27 @@ public class DependencyItemInNuclei {
 	public int indexOfSentenceInfo(DependencySentenceInfo si){
 		return sl.indexOf(si);
 	}
+	
+	
+//	/**
+//	 * @return the posTagList
+//	 */
+//	public int getposTagListSize(){
+//		return posTagList.size();
+//	}	
+//	
+//	public String getposTagListAt(int i){
+//		return posTagList.get(i);
+//	}
+//
+//	public int indexOfposTagList(String si){
+//		return posTagList.indexOf(si);
+//	}
+//	
+//	
+//	public String posTagListToString(){
+//		return posTagList.toString();
+//	}
 	
 
 }

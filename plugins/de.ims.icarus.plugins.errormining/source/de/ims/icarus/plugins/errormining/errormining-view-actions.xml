@@ -8,12 +8,15 @@
 		
 	<!-- New NGram -->
 	<action id="plugins.errorMining.errorMiningView.newNGramAction"
-		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+		name="${id}.name" desc="${id}.description" icon="ngram_new.png" />
 		
 	<!-- Execute NGram -->
 	<action id="plugins.errorMining.errorMiningView.executeNGramAction"
-		name="${id}.name" desc="${id}.description" icon="nav_go.gif" />
-		
+		name="${id}.name" desc="${id}.description" icon="ngram_start.png" />
+	
+	<!-- Cancel Search -->
+	<action id="plugins.errorMining.errorMiningView.cancelNGramAction"
+		name="${id}.name" desc="${id}.description" icon="ngram_cancel.png" />		
 		
 	<!-- Remove NGram -->
 	<action id="plugins.errorMining.errorMiningView.removeNGramAction"
@@ -41,17 +44,36 @@
 		
 	<!-- View Result -->
 	<action id="plugins.errorMining.errorMiningView.viewResultAction"
-		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		name="${id}.name" desc="${id}.description" icon="ngram_viewresult.png" />
+	
+	<!-- View NGram -->
+	<action id="plugins.errorMining.errorMiningView.viewNGramAction"
+		name="${id}.name" desc="${id}.description" icon="ngram_view.png" />
+	
+	<!-- Edit Parameters -->
+	<action id="plugins.errorMining.errorMiningView.editParameterAction"
+		name="${id}.name" desc="${id}.description" icon="debugtt_obj.gif" />
+	
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.errorMining.errorMiningView.toolBarList">
 		<item type="action" value="plugins.errorMining.errorMiningView.openPreferencesAction" />
 		<separator />
-		<item type="action" value="plugins.errorMining.errorMiningView.clearHistoryAction" />
-		<item type="action" value="plugins.errorMining.errorMiningView.removeNGramAction" />
 		<item type="action" value="plugins.errorMining.errorMiningView.newNGramAction" />
 		<separator />
 		<item type="action" value="plugins.errorMining.errorMiningView.executeNGramAction" />
+	</action-list>
+	
+
+	<!-- ToolBar List for history area -->
+	<action-list id="plugins.errorMining.errorMiningView.historyToolBarList">
+		<item type="action" value="plugins.errorMining.errorMiningView.clearHistoryAction" />
+		<item type="action" value="plugins.errorMining.errorMiningView.removeNGramAction" />
+		<separator />
+		<item type="action" value="plugins.errorMining.errorMiningView.viewNGramAction" />
+		<item type="action" value="plugins.errorMining.errorMiningView.viewResultAction" />
+		<separator />
+		<item type="action" value="plugins.errorMining.errorMiningView.cancelNGramAction" />
 	</action-list>
 	
 </actions>

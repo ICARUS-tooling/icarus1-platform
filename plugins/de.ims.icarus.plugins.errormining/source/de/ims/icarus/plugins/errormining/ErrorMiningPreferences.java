@@ -25,10 +25,9 @@
  */
 package de.ims.icarus.plugins.errormining;
 
-import java.awt.Color;
-
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.plugins.errormining.annotation.NGramHighlighting;
 
 
 /**
@@ -42,15 +41,43 @@ public class ErrorMiningPreferences {
 		
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
-		// JGRAPH GROUP
+		// GENERAL ERRORMINING GROUP
 		builder.addGroup("errorMining", true); //$NON-NLS-1$
-		// APPEARANCE GROUP
-		builder.addGroup("appearance", true); //$NON-NLS-1$
-		builder.addStringEntry("filepath", "E:\\test_small_modded.txt");
-		builder.addIntegerEntry("limit",10);
 		
-		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
+		// APPEARANCE GROUP
+
+		builder.addGroup("appearance", true); //$NON-NLS-1$
+		
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
+		
+		builder.addStringEntry("filepath", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addIntegerEntry("limit",10); //$NON-NLS-1$
+		
+		builder.addBooleanEntry("showOriginalIndex", true); //$NON-NLS-1$
+		
+		builder.back();
+		// END APPEARANCE GROUP
+		
+		
+		// HIGHLIGHTING GROUP
+		builder.addGroup("highlighting", true); //$NON-NLS-1$
+		
+		builder.addColorEntry("nodeHighlight", NGramHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("edgeHighlight", NGramHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("transitiveHighlight", NGramHighlighting.getInstance().getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
+		for(String token : NGramHighlighting.getInstance().getTokens()) {
+			builder.addColorEntry(token+"Highlight", NGramHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
+		}
+		
+		/*
+		Color nuclei = new Color(255,42,0);
+		builder.addColorEntry("nucleiColor", nuclei.getRGB()); //$NON-NLS-1$
+		Color ngram = new Color(0,255,0);
+		builder.addColorEntry("ngramColor", ngram.getRGB()); //$NON-NLS-1$
+		 */
+		
+		builder.back();
+		// END HIGHLIGHTING GROUP
 	}
 
 }

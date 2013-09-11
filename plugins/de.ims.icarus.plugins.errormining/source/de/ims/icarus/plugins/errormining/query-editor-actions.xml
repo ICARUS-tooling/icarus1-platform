@@ -7,15 +7,15 @@
 	-->
 
 	<!-- Load Query -->
-	<action id="plugins.errorMining.nGramQueryView.loadQueryAction"
+	<action id="plugins.errorMining.nGramQueryEditor.loadQueryAction"
 		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
 		
 	<!-- Save Query -->
-	<action id="plugins.errorMining.nGramQueryView.saveQueryAction"
+	<action id="plugins.errorMining.nGramQueryEditor.saveQueryAction"
 		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />		
 		
 	<!-- Reset Query -->
-	<action id="plugins.errorMining.nGramQueryView.resetQueryAction"
+	<action id="plugins.errorMining.nGramQueryEditor.resetQueryAction"
 		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
 
 </actions>

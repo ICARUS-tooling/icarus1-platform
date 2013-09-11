@@ -32,11 +32,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -147,25 +149,22 @@ public class NGramsDependency {
 	
 	
 	
-	
+	//needed?
 	public List<String>  getVariationForTag(String tag){
 		List<String> resultVari = null;
 		
 		if (nGramCache.containsKey(tag)){
 			resultVari = new ArrayList<String>();
-			ArrayList<DependencyItemInNuclei> arri = nGramCache.get(tag);
-			
+			ArrayList<DependencyItemInNuclei> arri = nGramCache.get(tag);			
 			
 			for(int i = 0; i < arri.size(); i++){				
 				DependencyItemInNuclei iin = arri.get(i);
 				resultVari.add(iin.getPosTag());
 			}
-
 		}
 		
 		System.out.println(tag + " : " + resultVari); //$NON-NLS-1$
 		return resultVari;
-
 	}
 	
 	
@@ -240,36 +239,85 @@ public class NGramsDependency {
 //				System.out.println("RLabel " + dd.getRelation(wordIndex)
 //						+ " Head " + head + " " + dd.getForm(head)
 //						+ " WIndex " + wordIndex);
-				addedword = currentWord + " " + dd.getForm(headIndex); //$NON-NLS-1$
-				sb.append("<").append(addedword).append(" {")
+				//TODO doublecheck working correct way? if so no more workaround needed
+				if (wordIndex < headIndex){
+					addedword = currentWord + " " + dd.getForm(headIndex); //$NON-NLS-1$
+				} else {
+					addedword = dd.getForm(headIndex) + " " + currentWord; //$NON-NLS-1$
+				}
+				
+				//addedword = currentWord + " " + dd.getForm(headIndex); //$NON-NLS-1$
+				sb.append("<").append(addedword).append(" {")  //$NON-NLS-1$//$NON-NLS-2$
 				.append(tag)
-				.append("}>");
+				.append("}>"); //$NON-NLS-1$
 				
 			} else {
-				sb.append("<").append(addedword).append(" {")
+				System.out.println("else " + addedword);				
+				sb.append("<").append(addedword).append(" {") //$NON-NLS-1$ //$NON-NLS-2$
 				.append(dd.getRelation(wordIndex))
-				.append("}>");				
+				.append("}>");				 //$NON-NLS-1$
 			}
 			//System.out.println(sb.toString());
 
 			// item already in list? only add new tags
-			if (nGramCache.containsKey(addedword)) { //$NON-NLS-1$
+			// but first check if overlap (same sentence)
+			// Example: showed --do--> char | showed --io--> char
+			// {showed, chair, <do,io>} correct
+			// we want not two nuclei {showed, chair, <do>}, {showed, chair, <io>}
+			if (nGramCache.containsKey(addedword)) {
 
-				ArrayList<DependencyItemInNuclei> items = nGramCache.get(addedword);
+				ArrayList<DependencyItemInNuclei> items = nGramCache.get(addedword);				
+				
 				//System.out.println("#Tag: " + tag);
 				boolean knownTag = false;
+				boolean overlapTag = false;
 				
 				for (int i = 0; i < items.size(); i++) {
 					// increment when tag found again
 					DependencyItemInNuclei item = items.get(i);
 					//System.out.println(item.getPosTag() +" vs "+ tag);
+					for(int k = 0 ; k < item.getSentenceInfoSize(); k++){						
+						
+						if (item.getSentenceInfoAt(k).getSentenceNr()==sentenceNr){	
+							if ((headIndex+1)==item.getSentenceInfoAt(k).getSentenceHeadIndex()){
+//								System.out.println("found same sentence");
+//								System.out.println("Token: " + addedword);
+//								System.out.println("SNR: " + sentenceNr);
+//								System.out.println("WNR: " + wordIndex);
+//								System.out.println("Tag: " + tag + " "
+//										+ item.getPosTag());
+//								System.out.println("Head: "
+//										+ (headIndex + 1)
+//										+ " "
+//										+ item.getSentenceInfoAt(k)
+//												.getSentenceHeadIndex());
+
+								overlapTag = true;
+							}
+						}						
+					}
 					if (item.getPosTag().equals(tag)) {
 						int oldCount = item.getCount();
 						item.setCount(oldCount + 1);
 						item.addNewDependencySentenceInfoUniGrams(sentenceNr, wordIndex+1, headIndex+1);
 						knownTag = true;
 					}
+					
+					//FIXME
+					if (overlapTag && !knownTag) {
+//						System.out.println("overlap");
+//						System.out.println("Token: " + addedword);
+//						System.out.println("SNR: " + sentenceNr);
+//						System.out.println("WNR: " + wordIndex);
+//						System.out.println("tag: " + tag);
+//						item.setPosTag(tag);
+//						item.addNewDependencySentenceInfoUniGrams(sentenceNr, wordIndex+1, headIndex+1);
+//						knownTag = true;
+					}
 				}
+				
+				
+
 
 				// new pos tag found; add to list
 				if (!knownTag) {
@@ -395,10 +443,28 @@ public class NGramsDependency {
 	private StringBuilder rebuildGapTag(int startIndex, DependencySentenceInfo si, DependencyData dd){
 		StringBuilder sb = new StringBuilder();
 		for (int i = startIndex; i < si.getSentenceHeadIndex(); i++){
-			sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+			//sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+			if(i < (si.getSentenceEnd()-1)){
+				sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+			} else {
+				sb.append(dd.getForm(i));
+			}
 		}
 		
 		return sb;
+	}
+	
+	private String rebuildTag(int startIndex, DependencySentenceInfo si, DependencyData dd){
+		StringBuilder sb = new StringBuilder();
+		for (int i = startIndex; i < si.getSentenceEnd(); i++){
+			if(i < (si.getSentenceEnd()-1)){
+				sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+			} else {
+				sb.append(dd.getForm(i));
+			}			
+		}
+		
+		return sb.toString();
 	}
 	
 
@@ -458,15 +524,17 @@ public class NGramsDependency {
 					 * *************************************************************
 					 */	
 					if (!reachedLeftBoarder) {
-						//System.out.println("left<<<<<<<<<<<<<<" + key);
+						//System.out.println("LEFT<<<<<<<<<<<<<< " + key);
 
 						StringBuilder leftKey = new StringBuilder();
 						
 						// new key
 						if (startIndex > 0) {
 
-							String leftForm = dd.getForm(startIndex -1);
+							String leftForm = dd.getForm(startIndex - 1);
+							//System.out.println(leftForm + " " + startIndex);
 							//String leftPOS = dd.getPos(startIndex - 1);
+							
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
 							//boolean addNewNuclei = nGramCache.containsKey(leftForm);
@@ -477,15 +545,18 @@ public class NGramsDependency {
 							if (hasGap){
 								leftKey = rebuildGapTag(startIndex, si, dd);
 							} else {
-								leftKey.append(leftForm).append(" ").append(key); //$NON-NLS-1$
+								String tmp = rebuildTag(startIndex, si, dd);								
+								leftKey.append(leftForm).append(" ").append(tmp); //$NON-NLS-1$
 							}
+							
 							//System.out.println("GRAM " + nGramCount + " " +leftKey.toString());
-//							System.out.println(leftKey
+//							System.out.println("LEFTKEY " + leftKey
 //									+ " FORM "  + leftForm
 //									+ " LEFT "  + addNewNuclei);
 							
 							// extend existing gram with values
-							if (outputNGram.containsKey(leftKey.toString())) {	
+							if (outputNGram.containsKey(leftKey.toString())) {								
+								
 								
 								// leftSide(outputNGram.get(leftKey.toString()), si, leftPOS);
 								ArrayList<DependencyItemInNuclei> itemsTemp = outputNGram.get(leftKey.toString());
@@ -495,8 +566,11 @@ public class NGramsDependency {
 								for (int i = 0; i < itemsTemp.size(); i++) {
 									// increment when tag found again
 									DependencyItemInNuclei item = itemsTemp.get(i);
-									//System.out.println(item.getPosTag() + " vs "+ leftPOS);
 									
+//									System.out.println("leftContains " + leftKey.toString());
+//									System.out.println(item.getPosTag() + " vs "+ iin.getPosTag());
+					
+
 									if (item.getPosTag().equals(iin.getPosTag())) {
 										if (addNewNuclei){											
 											String nucleiKey = getNucleiForm(startIndex-1, dd);
@@ -517,10 +591,13 @@ public class NGramsDependency {
 
 								// new pos tag found; add to list
 								if (!knownTag) {
+									
+									//System.out.println("unknown tag " + iin.getPosTag());
 									DependencyItemInNuclei item = new DependencyItemInNuclei();
 									//already an unigram
 									if (addNewNuclei){	
 										String nucleiKey = getNucleiForm(startIndex-1, dd);
+										System.out.println(nucleiKey);
 										DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
 										//DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 										addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
@@ -529,6 +606,11 @@ public class NGramsDependency {
 										addSentenceInfoLeft(item, iin.getPosTag(), si, false);
 										itemsTemp.add(item);
 									}
+									
+//									System.out.println("EXISTINGITEM ~~~~~~~ "+leftKey
+//											+ " " + item.getPosTag()
+//											+ " " + item.getSentenceInfoAt(0).sentenceBegin
+//											+ " " + item.getSentenceInfoAt(0).sentenceEnd);
 								}
 
 							} else {
@@ -538,8 +620,8 @@ public class NGramsDependency {
 								//already an unigram
 								if (addNewNuclei){
 									String nucleiKey = getNucleiForm(startIndex-1, dd);
-									System.out.println(nucleiKey);
-									System.out.println(leftKey.toString());
+									//System.out.println("NewNuclei: " + nucleiKey);
+									//System.out.println("for Key " +leftKey.toString());
 									DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
 									//DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 									addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
@@ -548,9 +630,11 @@ public class NGramsDependency {
 									addSentenceInfoLeft(item, iin.getPosTag(), si, false);
 									items.add(item);
 								}
-								System.out.println("NEWITEM ~~~~~~~ "+leftKey
-										+ " " + item.getSentenceInfoAt(0).sentenceBegin
-										+ " " + item.getSentenceInfoAt(0).sentenceEnd);
+								
+//								System.out.println("NEWITEM ~~~~~~~ "+leftKey
+//										+ " " + item.getPosTag()
+//										+ " " + item.getSentenceInfoAt(0).sentenceBegin
+//										+ " " + item.getSentenceInfoAt(0).sentenceEnd);
 								
 								outputNGram.put(leftKey.toString(), items);
 							}
@@ -583,7 +667,7 @@ public class NGramsDependency {
 						
 						if (endIndex < sentenceSize-1) {
 
-							String rightForm = dd.getForm(endIndex + 2);
+							String rightForm = dd.getForm(endIndex + 1);
 							//String rightPOS = dd.getPos(endIndex + 2);
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
@@ -595,7 +679,8 @@ public class NGramsDependency {
 							if (hasGap){
 								rightKey = rebuildGapTag(startIndex, si, dd);
 							} else {
-								rightKey.append(key).append(" ").append(rightForm); //$NON-NLS-1$
+								String tmp = rebuildTag(startIndex, si, dd);
+								rightKey.append(tmp).append(" ").append(rightForm); //$NON-NLS-1$
 							}
 							
 							// extend existing gram with values
@@ -611,8 +696,9 @@ public class NGramsDependency {
 									DependencyItemInNuclei item = itemsTemp.get(i);									
 					
 									
-									// System.out.println(item.getPosTag()
-									// +" vs "+ tag);
+									//System.out.println("rigthContains " + rightKey.toString());
+									//System.out.println(item.getPosTag() + " vs "+ iin.getPosTag());
+									//System.out.println("EQTAG: " + item.getPosTag().equals(iin.getPosTag()));
 									
 
 									if (item.getPosTag().equals(iin.getPosTag())) {
@@ -643,7 +729,14 @@ public class NGramsDependency {
 										addSentenceInfoRigth(item, si, iin.getPosTag(), false);
 										itemsTemp.add(item);
 									}
+									
+//									System.out.println("~~~~~~~ EXISTINGITEM "+rightKey
+//											+ " " + item.getPosTag()
+//											+ " " + item.getSentenceInfoAt(0).sentenceBegin
+//											+ " " + item.getSentenceInfoAt(0).sentenceEnd);
 								}
+								
+								
 
 							} else {
 								ArrayList<DependencyItemInNuclei> items = new ArrayList<DependencyItemInNuclei>();
@@ -661,6 +754,11 @@ public class NGramsDependency {
 									addSentenceInfoRigth(item, si, iin.getPosTag(), false);
 									items.add(item);
 								}
+								
+//								System.out.println("~~~~~~~ NEWITEM "+rightKey
+//										+ " " + item.getPosTag()
+//										+ " " + item.getSentenceInfoAt(0).sentenceBegin
+//										+ " " + item.getSentenceInfoAt(0).sentenceEnd);
 
 								//System.out.println("<<<<<<"+rightKey.toString());
 								outputNGramR.put(rightKey.toString(), items);
@@ -679,7 +777,8 @@ public class NGramsDependency {
 		
 	
 		//merge leftSide (outputNGram) with rightSide (outputNGramR)
-		outputNGram.putAll(outputNGramR);
+		outputNGram = mergeResults(outputNGram,outputNGramR);
+		//outputNGram.putAll(outputNGramR);
 
 		
 //		for(Iterator<String> i = outputNGram.keySet().iterator(); i.hasNext();){
@@ -694,14 +793,11 @@ public class NGramsDependency {
 		nGramCount++;
 
 		if (outputNGram.size() > 0) {
-			// TODO remove and endable recursive
 			
 			//items with length one -> no longer variation --> remove
 			outputNGram = removeItemsLengthOne(outputNGram);
 			
 			// remove items at the fringe
-			
-
 			//TODO fixfringe
 			if(nGramCount <= fringeEnd && nGramCount >= fringeStart){
 //				System.out.println(nGramCount + " | " 
@@ -713,7 +809,7 @@ public class NGramsDependency {
 			//add results into Cache
 			nGramCache.putAll(outputNGram);
 			
-			//print to console
+			// print to console
 			nGramResults(outputNGram);			
 			
 			
@@ -721,16 +817,56 @@ public class NGramsDependency {
 			if (continueNGrams()){				
 				createNGrams(outputNGram, false, false);
 			}
-		}				
-		
-	
+		}		
 	}
 	
 	
 	
 	
-	
-	
+	/**
+	 * @param outputNGram
+	 * @param outputNGramR
+	 * @return
+	 */
+	private Map<String, ArrayList<DependencyItemInNuclei>> mergeResults(
+			Map<String, ArrayList<DependencyItemInNuclei>> outputNGram,
+			Map<String, ArrayList<DependencyItemInNuclei>> outputNGramR) {
+
+		Map<String, ArrayList<DependencyItemInNuclei>> result = new LinkedHashMap<String, ArrayList<DependencyItemInNuclei>>();
+		
+		result.putAll(outputNGram);
+		
+//		//results from left side including merge when same key on rigth
+//		for(Iterator<String> it = outputNGram.keySet().iterator(); it.hasNext();){
+//			String key = it.next();
+//			//merge
+//			if (outputNGramR.containsKey(key)){
+//				//System.out.println("key" + key);			
+//				ArrayList<DependencyItemInNuclei> arrL = outputNGram.get(key);
+//				arrL.addAll(outputNGramR.get(key));
+//				result.put(key, arrL);
+//				
+//			} else {
+//				result.put(key, outputNGram.get(key));
+//			}	
+//		}
+		
+		//missing resutls from rigth side
+		for(Iterator<String> it = outputNGramR.keySet().iterator(); it.hasNext();){
+			String key = it.next();
+			if (result.containsKey(key)){
+				System.out.println(key);
+				//need merge
+				result.put(key, outputNGram.get(key));
+			} else {
+				result.put(key, outputNGramR.get(key));			
+			}
+		}
+
+		return result;
+	}
+
+
 	/**
 	 * @param i
 	 * @param dd
@@ -807,7 +943,6 @@ public class NGramsDependency {
 			item.setCount(oldCount + 1);	
 		}
 		//item.setPosTag(ensureValid(rigthPOS + " "+ iin.getPosTag()));
-		System.out.println("NUCLEI TAG>>>>>>>>> "+posTag);
 		item.setPosTag(ensureValid(posTag));
 		item.addNewNucleiToSentenceInfoRight(si, sitemp);	
 	}
@@ -815,7 +950,7 @@ public class NGramsDependency {
 
 	/**
 	 * @param item
-	 * @param posTag
+	 * @param string
 	 * @param si
 	 * @param sitemp
 	 * @param inc
@@ -829,7 +964,6 @@ public class NGramsDependency {
 		//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));
 		item.setPosTag(ensureValid(posTag));
 		item.addNewNucleiToSentenceInfoLeft(si, sitemp);
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<nucleiLEFT");
 	}
 
 
@@ -846,7 +980,7 @@ public class NGramsDependency {
 			int oldCount = item.getCount();
 			item.setCount(oldCount + 1);	
 		}
-		item.setPosTag(ensureValid(posTag));											
+		item.setPosTag(ensureValid(posTag));
 		item.addNewSentenceInfoRigth(si);		
 	}
 
@@ -861,6 +995,7 @@ public class NGramsDependency {
 			int oldCount = item.getCount();
 			item.setCount(oldCount + 1);	
 		}
+
 		item.setPosTag(ensureValid(posTag));											
 		item.addNewSentenceInfoLeft(si);			
 	}
@@ -881,11 +1016,9 @@ public class NGramsDependency {
 		try {
 			io.nGramsToXMLDependency(nGramCache);
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerFactory.log(this,Level.SEVERE, "XML Transform Exeption", e); //$NON-NLS-1$
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerFactory.log(this,Level.SEVERE, "XML Output Exeption", e); //$NON-NLS-1$
 		}
 		
 	}
@@ -971,7 +1104,7 @@ public class NGramsDependency {
 			}
 		}
 		
-		//TODO change false false (running both sides)
+		//TODO change false false (4 running both directions (l/r))
 		createNGrams(nGramCache, false, false);
 	}
 	
@@ -993,7 +1126,9 @@ public class NGramsDependency {
 		
 		
 		//18 Sentences
-		String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
+		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
+		//String  inputFileName = "E:\\test_small_mod_overlap.txt"; //$NON-NLS-1$
+		String  inputFileName = "E:\\overlap_error.txt"; //$NON-NLS-1$
 		
 		//CONLL Training English (1334 Sentences)
 		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
@@ -1020,7 +1155,7 @@ public class NGramsDependency {
 		Options on = new Options();
 		on.put("FringeSTART", 3); //$NON-NLS-1$
 		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
-		on.put("NGramLIMIT", 0); //$NON-NLS-1$
+		on.put("NGramLIMIT", 10); //$NON-NLS-1$
 
 	
 		NGramsDependency ngrams = new NGramsDependency(1, on);
@@ -1047,13 +1182,13 @@ public class NGramsDependency {
 			System.out.println("Finished nGram Processing"); //$NON-NLS-1$
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Main Debug IOExeption"); //$NON-NLS-1$
 			e.printStackTrace();
 		} catch (UnsupportedLocationException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Main Debug UnsupportedLocationException"); //$NON-NLS-1$
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("Main Debug Exception"); //$NON-NLS-1$
 			e.printStackTrace();
 		}
 

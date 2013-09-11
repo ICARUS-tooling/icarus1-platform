@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -14,42 +14,47 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
- */
-package de.ims.icarus.plugins.errormining;
 
-import org.java.plugin.Plugin;
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
+ */
+package de.ims.icarus.plugins.errormining.annotation;
+
+import de.ims.icarus.language.dependency.DependencyUtils;
+import de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager;
+import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
  *
  */
-public class ErrorMiningPlugin extends Plugin{
-
-	/**
-	 * @see org.java.plugin.Plugin#doStart()
-	 */
-	@Override
-	protected void doStart() throws Exception {
-		// no-op
-		
+public class NGramAnnotationManager extends AbstractSearchAnnotationManager {
+	
+	public NGramAnnotationManager(){
+		//noop
 	}
 
 	/**
-	 * @see org.java.plugin.Plugin#doStop()
+	 * @see de.ims.icarus.util.annotation.AnnotationManager#getAnnotationType()
 	 */
 	@Override
-	protected void doStop() throws Exception {
-		// TODO Auto-generated method stub
-		
+	public ContentType getAnnotationType() {
+		// TODO passt dependency anno type?
+		return DependencyUtils.getDependencyAnnotationType();
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager#createCompositeHighlight(long[])
+	 */
+	@Override
+	protected long createCompositeHighlight(long[] highlights) {
+		return NGramHighlighting.getInstance().createCompositeHighlight(highlights);
 	}
 
 }

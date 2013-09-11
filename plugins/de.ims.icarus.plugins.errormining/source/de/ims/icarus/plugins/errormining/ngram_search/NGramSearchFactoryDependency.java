@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
+ * $Revision: 126 $ 
+ * $Date: 2013-08-02 15:07:35 +0200 (Fr, 02 Aug 2013) $ 
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.errormining/source/de/ims/icarus/plugins/errormining/ngram_search/NGramSearchFactory.java $ 
  * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $LastChangedDate: 2013-08-02 15:07:35 +0200 (Fr, 02 Aug 2013) $  
+ * $LastChangedRevision: 126 $  
+ * $LastChangedBy: mcgaerty $ 
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
@@ -43,12 +43,12 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Gregor Thiele
- * @version $Id$
+ * @version $Id: NGramSearchFactory.java 126 2013-08-02 13:07:35Z mcgaerty $
  *
  */
-public class NGramSearchFactory implements SearchFactory {
+public class NGramSearchFactoryDependency implements SearchFactory {
 	
-	public NGramSearchFactory() {
+	public NGramSearchFactoryDependency() {
 		// no-op
 	}
 	
@@ -59,7 +59,6 @@ public class NGramSearchFactory implements SearchFactory {
 	@Override
 	public Search createSearch(SearchQuery query, Object target, Options options)
 			throws UnsupportedFormatException {
-		System.out.println("Create Search " + query.getQueryString());
 		return new NGramSearch(this, query, options, target);
 	}
 	

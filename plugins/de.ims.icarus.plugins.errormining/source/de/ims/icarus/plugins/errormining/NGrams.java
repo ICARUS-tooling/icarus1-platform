@@ -32,11 +32,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -733,18 +735,15 @@ public class NGrams {
 	 * @throws ParserConfigurationException 
 	 * 
 	 */
-	private void outputToFile() {
+	public void outputToFile() {
 		nGramIO io = new nGramIO();
 		try {
 			io.nGramsToXML(nGramCache);
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerFactory.log(this,Level.SEVERE, "XML Transform Exeption", e); //$NON-NLS-1$
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+			LoggerFactory.log(this,Level.SEVERE, "XML Output Exeption", e); //$NON-NLS-1$
+		}		
 	}
 
 
@@ -894,13 +893,13 @@ public class NGrams {
 			System.out.println("Finished nGram Processing"); //$NON-NLS-1$
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Main Debug IOExeption"); //$NON-NLS-1$
 			e.printStackTrace();
 		} catch (UnsupportedLocationException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Main Debug UnsupportedLocationException"); //$NON-NLS-1$
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("Main Debug Exception"); //$NON-NLS-1$
 			e.printStackTrace();
 		}
 

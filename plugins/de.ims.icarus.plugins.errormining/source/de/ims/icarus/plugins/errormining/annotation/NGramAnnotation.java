@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -14,33 +14,24 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
+
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
-package de.ims.icarus.plugins.errormining.ngram_tools;
+package de.ims.icarus.plugins.errormining.annotation;
+
+import de.ims.icarus.search_tools.annotation.ResultAnnotation;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
  *
  */
-public interface NGramParameters {
-	
-	//TODO maybe with heuristics? 
-	public static final String NGRAM_MODE = "ngramMode"; //$NON-NLS-1$ 
-
-	public static final String NGRAM_RESULT_LIMIT = "ngramResultLimit"; //$NON-NLS-1$	
-	
-	public static final boolean USE_FRINGE_HEURISTIC = false;
-	
-	public static final String FRINGE_START = "fringeStart";  //$NON-NLS-1$
-	
-	public static final String FRINGE_END = "fringeEnd"; //$NON-NLS-1$
+public interface NGramAnnotation extends ResultAnnotation{
 
 }
