@@ -31,6 +31,7 @@ import java.util.List;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.annotation.AnnotatedDependencyData;
 import de.ims.icarus.language.dependency.annotation.DependencyAnnotation;
+import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
 import de.ims.icarus.plugins.errormining.NGramQAttributes;
 import de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator;
 import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
@@ -48,6 +49,9 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  */
 public class NGramResultAnnotator extends AbstractLazyResultAnnotator {	
 	
+	private static long nucleiHighlight = DependencyHighlighting.getInstance()
+												.getHighlight("form"); //$NON-NLS-1$
+	private static long ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
 	List<NGramQAttributes> nqList;
 
 	public NGramResultAnnotator(BitmaskHighlighting highlighting, List<NGramQAttributes> nqList) {
@@ -170,23 +174,23 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 		int nuclei = hitArray[2];
 		
 		//only nuclei
-		if((end-start) == 0){
+		if(end == start){
 			indexMap.add(nuclei-1);
-			highlights.add(2L);
+			highlights.add(nucleiHighlight);
 		} else {
-			for(int i = 0; i < end-start+1; i++){
+			for(int i = start-1; i < end; i++){
+				long highlight = 0L;
 				if (i == nuclei-1){
 					//nuclei
-					indexMap.add(nuclei-1);
-					highlights.add(2L);
+					highlight = nucleiHighlight;
 				} else {
-					indexMap.add(i);
-					highlights.add(1L);
+					highlight = ngramHighlight;
 				}
+				
+				indexMap.add(i);
+				highlights.add(highlight);
 			}			
 		}
-		
-		System.out.println("ims " +indexMap.size());	 //$NON-NLS-1$
 		
 		// Create final buffer structures
 		int size = indexMap.size();
@@ -197,7 +201,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 			_highlights[i] = highlights.get(i);
 		}
 		
-		return new Highlight(_indexMap, _highlights);
+		return new DefaultHighlight(_indexMap, _highlights);
 	}
 
 	

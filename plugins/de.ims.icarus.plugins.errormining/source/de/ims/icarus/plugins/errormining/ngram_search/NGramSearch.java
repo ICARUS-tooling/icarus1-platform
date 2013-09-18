@@ -26,6 +26,7 @@
 package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +46,14 @@ import de.ims.icarus.plugins.errormining.annotation.NGramHighlighting;
 import de.ims.icarus.plugins.errormining.annotation.NGramResultAnnotator;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
 import de.ims.icarus.search_tools.SearchConstraint;
+import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
+import de.ims.icarus.search_tools.result.AbstractSearchResult;
 import de.ims.icarus.search_tools.result.EntryBuilder;
+import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.standard.AbstractParallelSearch;
 import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
 import de.ims.icarus.search_tools.standard.GroupCache;
@@ -107,6 +112,47 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 		createXML = getParameters().getBoolean(CREATE_XML_OUTPUT, DEFAULT_CREATE_XML_OUTPUT);
 	}
 
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#init()
+	 */
+	@Override
+	public boolean init() {
+		initEngine();
+		
+		result = createResult();
+		if(result==null) {
+			return false;
+		}
+		
+		source = createSource(SearchManager.getTarget(this));
+		if(source==null)
+			throw new IllegalStateException("Invalid source created"); //$NON-NLS-1$
+		
+		return true;
+	}
+
+	
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#createResult()
+	 */
+	@Override
+	protected SearchResult createResult() {
+		List<SearchConstraint> tmp = Collections.emptyList();
+		SearchResult result = createResult(tmp);
+		
+		
+		ResultAnnotator annotator = createAnnotator();
+		if(annotator!=null && result instanceof AbstractSearchResult) {
+			AnnotationBuffer annotationBuffer = new AnnotationBuffer(
+					result, annotator, ANNOTATION_BUFFER_SIZE);
+			((AbstractSearchResult)result).setAnnotationBuffer(annotationBuffer);
+		}
+		
+		return result;
+	}
 
 
 	/**
