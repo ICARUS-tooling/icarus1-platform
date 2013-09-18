@@ -46,4 +46,6 @@ public interface CoreferenceData extends SentenceData {
 	Span[] getSpans();
 	
 	CoreferenceDocumentData getDocument();
+	
+	CorefProperties getProperties();
 }

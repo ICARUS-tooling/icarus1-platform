@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.plugins.coref.view.text;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,8 +37,6 @@ import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationMana
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.annotation.AnnotatedData;
-import de.ims.icarus.util.annotation.AnnotationControl;
-import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -48,42 +44,12 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresenter implements AnnotationController {
+public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresenter {
 	
 	protected CoreferenceDocumentData data;
-	
-	protected CoreferenceDocumentAnnotationManager annotationManager;
-	protected boolean createInitialFilter = false;
 
 	public CoreferenceDocumentPresenter() {
 		// no-op
-	}
-	
-	@Override
-	protected Handler createHandler() {
-		return new DocHandler();
-	}
-
-	@Override
-	protected DocHandler getHandler() {
-		return (DocHandler) super.getHandler();
-	}
-
-	@Override
-	public CoreferenceDocumentAnnotationManager getAnnotationManager() {
-		if(annotationManager==null) {
-			annotationManager = new CoreferenceDocumentAnnotationManager();
-			annotationManager.addPropertyChangeListener("position", getHandler()); //$NON-NLS-1$
-			annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
-		}
-		return annotationManager;
-	}
-
-	@Override
-	protected AnnotationControl createAnnotationControl() {
-		AnnotationControl annotationControl = new AnnotationControl(true);
-		annotationControl.setAnnotationManager(getAnnotationManager());
-		return annotationControl;
 	}
 
 	@Override
@@ -98,8 +64,6 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		if(data instanceof AnnotatedCoreferenceDocumentData) {
 			getAnnotationManager().setAnnotation(((AnnotatedData)data).getAnnotation());
 		}
-		
-		createInitialFilter = true;
 	}
 
 	@Override
@@ -108,11 +72,15 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 			return false;
 		}
 		
-		if(createInitialFilter && data instanceof AnnotatedCoreferenceDocumentData && allocation!=null) {
+		/*if(createInitialFilter && data instanceof AnnotatedCoreferenceDocumentData && allocation!=null) {
 			doc.setFilter(new AnnotatedSpanFilter((AnnotatedCoreferenceDocumentData) data));
 			createInitialFilter = false;
-		}
+		}*/
 		
+		Filter filter = (Filter) options.get("filter"); //$NON-NLS-1$
+		doc.setFilter(filter);
+		
+		doc.setAnnotationManager(getAnnotationManager());
 		doc.appendBatchCoreferenceDocumentData(data, allocation, goldAllocation);
 		
 		doc.applyBatchUpdates(0);
@@ -145,20 +113,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		
 		return (CoreferenceDocument) textPane.getDocument();
 	}
-	
-	protected class DocHandler extends Handler implements PropertyChangeListener {
-
-		/**
-		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-		 */
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			createInitialFilter = true;
-			refresh();
-		}
 		
-	}
-	
 	protected class AnnotatedSpanFilter implements Filter {
 		
 		protected Set<Span> lut;

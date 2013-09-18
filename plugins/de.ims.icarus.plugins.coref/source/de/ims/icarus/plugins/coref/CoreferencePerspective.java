@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.plugins.coref;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,25 +34,10 @@ import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
-
-import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
-import de.ims.icarus.language.coref.CoreferenceUtils;
-import de.ims.icarus.language.coref.io.AllocationReader;
-import de.ims.icarus.language.coref.io.DefaultAllocationReader;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.core.ManagementConstants;
 import de.ims.icarus.plugins.core.Perspective;
-import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
-import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphPresenter;
-import de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentSetPresenter;
 import de.ims.icarus.ui.events.EventObject;
-import de.ims.icarus.util.Options;
-import de.ims.icarus.util.location.Location;
-import de.ims.icarus.util.location.Locations;
 
 
 /**
@@ -77,12 +60,6 @@ public class CoreferencePerspective extends Perspective {
 		defaultDoLayout(container);
 		
 		focusView(CorefConstants.COREFERENCE_MANAGER_VIEW_ID);
-		/*try {
-			test2(container);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 	}
 	
 	@Override
@@ -116,70 +93,5 @@ public class CoreferencePerspective extends Perspective {
 		
 		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEWS_ADDED, 
 				"extensions", newExtensions.toArray())); //$NON-NLS-1$
-	}
-
-	private void textGraph(JComponent container) {
-		container.setLayout(new BorderLayout());
-		
-		mxGraph graph = new mxGraph();
-		mxGraphComponent comp = new mxGraphComponent(graph);
-		comp.getGraphControl().setBackground(Color.white);
-		
-		graph.insertVertex(null, null, "test1", 30, 30, 100, 100);
-		
-		container.add(comp, BorderLayout.CENTER);
-		
-	}
-
-	private void test(JComponent container) throws Exception {
-
-		Location location = Locations.getFileLocation("data/coref/eng_dev_v4_auto_conll.gz");
-		CONLL12DocumentReader reader = new CONLL12DocumentReader();
-		
-		CoreferenceDocumentSet set = CoreferenceUtils.loadDocumentSet(
-				reader, location, new Options());
-		
-		CoreferenceDocumentSetPresenter presenter = new CoreferenceDocumentSetPresenter();
-		
-		presenter.present(set, null);
-		
-		container.setLayout(new BorderLayout());
-		container.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
-	}
-
-	private void test2(JComponent container) throws Exception {
-
-		Location location = Locations.getFileLocation(
-				"data/coref/eng_dev_v4_auto_conll.gz");
-		CONLL12DocumentReader reader = new CONLL12DocumentReader();
-		
-		CoreferenceDocumentSet set = CoreferenceUtils.loadDocumentSet(
-				reader, location, new Options());
-		
-		String path = "E:\\Tasks\\Diplomarbeit\\resources\\out.GOLD.icarus"; //$NON-NLS-1$
-		AllocationReader r = new DefaultAllocationReader();
-		r.init(Locations.getFileLocation(path), null, set);		
-		CoreferenceAllocation gold = new CoreferenceAllocation();
-		r.readAllocation(gold);
-		
-		path = "E:\\Tasks\\Diplomarbeit\\resources\\out.PRED.icarus"; //$NON-NLS-1$
-		r = new DefaultAllocationReader();
-		r.init(Locations.getFileLocation(path), null, set);		
-		CoreferenceAllocation predicted = new CoreferenceAllocation();
-		r.readAllocation(predicted);
-		
-		//CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
-		CoreferenceGraphPresenter presenter = new CoreferenceGraphPresenter();
-		
-		container.setLayout(new BorderLayout());
-		container.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
-
-		CoreferenceDocumentData document = set.get(0);
-		Options options = new Options();
-		options.put("allocation", predicted);
-		options.put("goldAllocation", gold);
-		presenter.present(document, options);
-		
-		//container.add(new JLabel("footer"), BorderLayout.SOUTH);
 	}
 }

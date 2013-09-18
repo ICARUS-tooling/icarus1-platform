@@ -32,9 +32,11 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
 import javax.swing.event.MouseInputListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
@@ -199,6 +201,11 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		super.updateUI();
 
 		verticalOffset = getOffsetForUI();
+		
+		Object renderer = getDefaultRenderer();
+		if(renderer instanceof JLabel) {
+			((JLabel)renderer).setHorizontalAlignment(SwingConstants.LEFT);
+		}
 	}
 
 	@Override

@@ -51,6 +51,7 @@ import de.ims.icarus.language.coref.registry.DocumentSetEditor;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.coref.CorefConstants;
+import de.ims.icarus.plugins.coref.view.properties.PropertyInfoDialog;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -181,6 +182,9 @@ public class CoreferenceManagerView extends View {
 				callbackHandler, "deleteAllocation"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceManagerView.editAllocationAction",  //$NON-NLS-1$
 				callbackHandler, "editAllocation"); //$NON-NLS-1$
+		
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.showPropertyDialogAction",  //$NON-NLS-1$
+				callbackHandler, "showPropertyDialog"); //$NON-NLS-1$
 	}
 	
 	private void showPopup(MouseEvent trigger) {
@@ -414,7 +418,8 @@ public class CoreferenceManagerView extends View {
 				}
 
 				String name = "New Allocation"; //$NON-NLS-1$
-				name = CoreferenceRegistry.getInstance().getUniqueAllocationName(name);
+				name = CoreferenceRegistry.getInstance().getUniqueAllocationName(
+						descriptor, name);
 				
 				CoreferenceRegistry.getInstance().newAllocation(name, descriptor);
 			} catch(Exception ex) {
@@ -471,6 +476,18 @@ public class CoreferenceManagerView extends View {
 				if(editor!=null) {
 					editor.close();
 				}
+			}
+		}
+		
+		public void showPropertyDialog(ActionEvent e) {
+			try {
+				PropertyInfoDialog.showDialog();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to show property dialog", ex); //$NON-NLS-1$
+				
+				UIUtil.beep();
+				showError(ex);
 			}
 		}
 	}

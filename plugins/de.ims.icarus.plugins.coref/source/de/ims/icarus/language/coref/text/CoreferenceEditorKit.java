@@ -204,6 +204,38 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 			}
 			
 			super.paint(g, a);
+			
+			if(attr.isDefined(CoreferenceDocument.PARAM_HIGHLIGHT_COLOR)) {
+				Color col = (Color) attr.getAttribute(CoreferenceDocument.PARAM_HIGHLIGHT_COLOR);
+				int highlight = (int) attr.getAttribute(CoreferenceDocument.PARAM_HIGHLIGHT_TYPE);
+				Rectangle alloc = a instanceof Rectangle ? (Rectangle)a : a.getBounds();
+
+				if(box==null) {
+					box = findBoxParent();
+				}
+				
+				Rectangle run = box.getCurrentRun();
+				//System.out.printf("alloc=%s run=%s\n", alloc, run);
+				
+				int x = alloc.x-1;
+				int y = run.y;
+				int x2 = x+alloc.width;
+				int y2 = y+run.height-1;
+				
+				Color c = g.getColor();
+				g.setColor(col);
+				// Always draw horizontal lines
+				g.drawLine(x, y, x2, y);
+				g.drawLine(x, y2, x2, y2);
+				// Draw vertical lines if required
+				if(CoreferenceDocument.isHighlightBegin(highlight)) {
+					g.drawLine(x, y, x, y2);
+				}
+				if(CoreferenceDocument.isHighlightEnd(highlight)) {
+					g.drawLine(x2, y, x2, y2);
+				}
+				g.setColor(c);
+			}
 		}
 
 		@Override

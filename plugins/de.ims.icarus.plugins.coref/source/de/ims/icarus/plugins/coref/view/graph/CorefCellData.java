@@ -39,11 +39,12 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 	private static final long serialVersionUID = 5316908730346053116L;
 
 	public static final int FALSE_PREDICTED = 1;
-	public static final int MISSING_GOLD = 2; 
+	public static final int MISSING_GOLD = 2;
 
 	protected String label;
 	
 	protected int type = 0;
+	protected long highlight = 0L;
 	
 	protected E data;
 	
@@ -58,6 +59,12 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 	protected CorefCellData(E data, int type) {
 		setData(data);
 		setType(type);
+	}
+	
+	protected CorefCellData(E data, int type, long highlight) {
+		setData(data);
+		setType(type);
+		setHighlight(highlight);
 	}
 	
 	protected void setData(E data) {
@@ -98,5 +105,13 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 	
 	public boolean isMissingGold() {
 		return type==MISSING_GOLD;
+	}
+
+	public long getHighlight() {
+		return highlight;
+	}
+
+	public void setHighlight(long highlight) {
+		this.highlight = highlight;
 	}
 }

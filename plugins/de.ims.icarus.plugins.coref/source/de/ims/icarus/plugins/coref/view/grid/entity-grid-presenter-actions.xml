@@ -12,19 +12,19 @@
 	
 	<!-- Toggle 'markFalseSpans' -->
 	<action id="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
 	<!-- Toggle 'showGoldSpans' -->
 	<action id="plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
 	<action id="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="filter_singletons.png" type="toggle" />
 		
 	<!-- Toggle Label Mode -->
 	<action id="plugins.coref.entityGridPresenter.toggleLabelModeAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="label_mode.png" type="toggle" />
 		
 	<!-- Open Preferences -->
 	<action id="plugins.coref.entityGridPresenter.openPreferencesAction"
@@ -40,8 +40,16 @@
 		<separator />
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleLabelModeAction" />
 		<item type="custom" value="patternSelect" />
+		<item type="custom" value="patternSelectInfo" />
+		<separator />
+		<item type="custom" value="annotationControl" />
 		<separator />
 		<item type="action" value="plugins.coref.entityGridPresenter.refreshAction" />
+	</action-list>
+		
+	<!-- ToolBar List for Popup-Menu -->
+	<action-list id="plugins.coref.entityGridPresenter.popupMenuList">
+		<item type="custom" value="showInMenu" />
 	</action-list>
 	
 </actions>

@@ -41,6 +41,10 @@
 	<!-- Edit Allocation -->
 	<action id="plugins.coref.coreferenceManagerView.editAllocationAction"
 		name="${id}.name" desc="${id}.description" icon="alloc_edit.png" />
+	
+	<!-- Show Property Dialog -->
+	<action id="plugins.coref.coreferenceManagerView.showPropertyDialogAction"
+		name="${id}.name" desc="${id}.description" icon="container_obj.gif" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.coreferenceManagerView.toolBarList">
@@ -52,6 +56,8 @@
 		<item type="action" value="plugins.coref.coreferenceManagerView.addAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.deleteAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.editAllocationAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.showPropertyDialogAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceManagerView.collapseAllAction" />
 	</action-list>
@@ -66,6 +72,8 @@
 		<item type="action" value="plugins.coref.coreferenceManagerView.addAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.deleteAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.editAllocationAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.showPropertyDialogAction" />
 	</action-list>
 	
 </actions>

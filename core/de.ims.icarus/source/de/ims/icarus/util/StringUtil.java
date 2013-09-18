@@ -175,10 +175,10 @@ public final class StringUtil {
 	}
 	
 	public static void trim(StringBuilder sb) {
-		while(Character.isWhitespace(sb.charAt(0))) {
+		while(sb.length()>0 && Character.isWhitespace(sb.charAt(0))) {
 			sb.delete(0, 1);
 		}
-		while(Character.isWhitespace(sb.charAt(sb.length()-1))) {
+		while(sb.length()>0 && Character.isWhitespace(sb.charAt(sb.length()-1))) {
 			sb.delete(sb.length()-1, sb.length());
 		}
 	}

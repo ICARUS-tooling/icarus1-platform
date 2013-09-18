@@ -25,10 +25,12 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import de.ims.icarus.util.CompactProperties;
+import de.ims.icarus.util.Counter;
 
 /**
  * @author Markus Gärtner
@@ -127,4 +129,83 @@ public class CorefProperties extends CompactProperties {
 		return (CorefProperties) super.clone();
 	}
 	
+	public static void countKeys(CorefProperties properties, 
+			Counter<String> counter) {
+		if(counter==null)
+			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+		
+		if(properties==null || properties.size()==0) {
+			return;
+		}
+		
+		Object table = properties.table;
+		
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				counter.increment(getRawKey((String) items[i]));
+			}
+		} else {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+				
+				counter.increment(getRawKey((String) entry.getKey()));
+			}
+		}
+	}
+	
+	public static void collectKeys(CorefProperties properties, 
+			Collection<String> target) {
+		if(target==null)
+			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+		
+		if(properties==null || properties.size()==0) {
+			return;
+		}
+		
+		Object table = properties.table;
+		
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				target.add(getRawKey((String) items[i]));
+			}
+		} else {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+				
+				target.add(getRawKey((String) entry.getKey()));
+			}
+		}
+	}
+	
+	private static String getRawKey(String key) {
+		int idx = key.lastIndexOf('_');
+		if(idx==-1) {
+			return key;
+		}
+		
+		int len = key.length();
+		for(int i=idx+1; i<len; i++) {
+			if(!Character.isDigit(key.charAt(i))) {
+				return key;
+			}
+		}
+		
+		return key.substring(0, idx);
+	}
 }

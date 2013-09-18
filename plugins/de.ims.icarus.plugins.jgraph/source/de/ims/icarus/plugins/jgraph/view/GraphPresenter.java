@@ -895,15 +895,18 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected String editablePopupMenuListId = "plugins.jgraph.graphPresenter.editablePopupMenuList"; //$NON-NLS-1$
 	protected String uneditablePopupMenuListId = "plugins.jgraph.graphPresenter.uneditablePopupMenuList"; //$NON-NLS-1$
 	
+	protected JPopupMenu createPopupMenu() {
+		
+		String actionListId = isEditable() ? editablePopupMenuListId 
+				: uneditablePopupMenuListId;
+		return getActionManager().createPopupMenu(actionListId, null);
+	}
+	
 	protected void showPopup(MouseEvent trigger) {
 		if(popupMenu==null) {
 			// Create new popup menu
 			
-			String actionListId = isEditable() ? editablePopupMenuListId 
-					: uneditablePopupMenuListId;
-			
-			Options options = new Options();
-			popupMenu = getActionManager().createPopupMenu(actionListId, options);
+			popupMenu = createPopupMenu();
 			
 			if(popupMenu!=null) {
 				popupMenu.pack();

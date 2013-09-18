@@ -26,12 +26,15 @@
 package de.ims.icarus.plugins.coref.view.grid.labels;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.plugins.coref.view.grid.EntityGridNode;
+import de.ims.icarus.util.CollectionUtils;
 
 /**
  * @author Markus Gärtner
@@ -76,11 +79,12 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * <tr><th>Character</th><th>Description</th></tr>
 	 * <tr><td>\</td><td>escaping character to allow for magic characters to be used without substitution</td></tr>
 	 * <tr><td>b</td><td><i>begin index</i> of the {@link Span}</td></tr>
-	 * <tr><td>e</td><td><i>end index</i> of the {@code Span}</td></td></tr>
+	 * <tr><td>e</td><td><i>end index</i> of the {@code Span}</td></tr>
 	 * <tr><td>c</td><td>number of {@code Span}s within the given ones {@link Cluster} in this sentence</td></tr>
 	 * <tr><td>r</td><td><i>range</i> of the given {@code Span}, i.e. the number of tokens it spans across in the surrounding sentence</td></tr>
 	 * <tr><td>l</td><td><i>length</i> of the current {@code Span} in terms of characters (note that whitespace characters are included)</td></tr>
-	 * <tr><td>%...%</td><td>value of the property associated with the given key (%name% would cause the value for the 'name' property to be inserted)</td></tr>
+	 * <tr><td>%...%</td><td>value of the span property associated with the given key (%name% would cause the value for the 'name' property to be inserted)</td></tr>
+	 * <tr><td>$...$</td><td>value of the sentence property associated with the given key (%form% would cause the value for the 'form' property to be inserted)</td></tr>
 	 * </table>
 	 * <p>
 	 * All characters not listed as magic characters remain untouched by the
@@ -94,13 +98,14 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		boolean escaped = false;
 		boolean key = false;
 		int size = pattern.length();
+		char context = '\0';
 		
 		for(int i=0; i<size; i++) {
 			char c = pattern.charAt(i);
 			Element element = null;
 			boolean collectChars = false;
 			
-			if(escaped || (key && c!='%')) {
+			if(escaped || (key && c!='%' && c!='$' && c!='§')) {
 				sb.append(c);
 				escaped = false;
 				continue;
@@ -114,6 +119,26 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 			case '%':
 				if(key) {
 					element = new PropertyElement(sb.toString());
+					sb.setLength(0);
+				} else {
+					collectChars = true;
+				}
+				key = !key;
+				break;
+				
+			case '§':
+				if(key) {
+					element = new HeadPropertyElement(sb.toString());
+					sb.setLength(0);
+				} else {
+					collectChars = true;
+				}
+				key = !key;
+				break;
+				
+			case '$':
+				if(key) {
+					element = new SentencePropertyElement(sb.toString());
 					sb.setLength(0);
 				} else {
 					collectChars = true;
@@ -134,11 +159,11 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 				break;
 
 			case 'r':
-				element = new RangeElement(false);
+				element = new LengthElement(false);
 				break;
 
 			case 'l':
-				element = new RangeElement(true);
+				element = new LengthElement(true);
 				break;
 				
 			default:
@@ -174,10 +199,35 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		return buffer.toString();
 	}
 
+	public static final Map<Object, Object> magicCharacters =
+			Collections.unmodifiableMap(CollectionUtils.asLinkedMap(
+					"\\", "plugins.coref.labelPattern.escape", //$NON-NLS-1$ //$NON-NLS-2$
+					"b", "plugins.coref.labelPattern.beginIndex", //$NON-NLS-1$ //$NON-NLS-2$
+					"e", "plugins.coref.labelPattern.endIndex", //$NON-NLS-1$ //$NON-NLS-2$
+					"c", "plugins.coref.labelPattern.count", //$NON-NLS-1$ //$NON-NLS-2$
+					"r", "plugins.coref.labelPattern.range", //$NON-NLS-1$ //$NON-NLS-2$
+					"l", "plugins.coref.labelPattern.length", //$NON-NLS-1$ //$NON-NLS-2$
+					"%...%", "plugins.coref.labelPattern.spanProperty", //$NON-NLS-1$ //$NON-NLS-2$
+					"$...$", "plugins.coref.labelPattern.sentenceProperty", //$NON-NLS-1$ //$NON-NLS-2$
+					"§...§", "plugins.coref.labelPattern.headProperty" //$NON-NLS-1$ //$NON-NLS-2$
+	));
+
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public interface Element {
 		void append(StringBuilder buffer, EntityGridNode node, int spanIndex);
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class CharacterElement implements Element {
 		private final char[] characters;
 
@@ -198,6 +248,12 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class CountElement implements Element {
 
 		/**
@@ -211,6 +267,12 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class BoundaryElement implements Element {
 		private final boolean isStart;
 
@@ -232,10 +294,16 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 	}
 	
-	public static class RangeElement implements Element {
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public static class LengthElement implements Element {
 
 		private final boolean charLength;
-		public RangeElement(boolean charLength) {
+		public LengthElement(boolean charLength) {
 			this.charLength = charLength;
 		}
 		/**
@@ -263,6 +331,12 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		
 	}
 	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class PropertyElement implements Element {
 
 		private final String key;
@@ -282,7 +356,87 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 				int spanIndex) {
 			Object value = node.getSpan(spanIndex).getProperty(key);
 			buffer.append(value==null ? '-' : value);
-		}
+		}		
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public static class SentencePropertyElement implements Element {
+
+		private final String key;
 		
+		public SentencePropertyElement(String key) {
+			if(key==null || key.isEmpty())
+				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+			
+			this.key = key;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 */
+		@Override
+		public void append(StringBuilder buffer, EntityGridNode node,
+				int spanIndex) {
+			CoreferenceData sentence = node.getSentence();
+			Span span = node.getSpan(spanIndex);
+			
+			int length = buffer.length();
+			
+			int beginIndex = span.getBeginIndex();
+			int endIndex = span.getEndIndex();
+			for(int i=beginIndex; i<=endIndex; i++) {
+				buffer.append(sentence.getProperty(key+'_'+i));
+				if(i<endIndex) {
+					buffer.append(' ');
+				}
+			}
+			
+			if(buffer.length()==length) {
+				buffer.append('-');
+			}
+		}		
+	}
+	
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public static class HeadPropertyElement implements Element {
+
+		private final String key;
+		
+		public HeadPropertyElement(String key) {
+			if(key==null || key.isEmpty())
+				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+			
+			this.key = key;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 */
+		@Override
+		public void append(StringBuilder buffer, EntityGridNode node,
+				int spanIndex) {
+			CoreferenceData sentence = node.getSentence();
+			Span span = node.getSpan(spanIndex);
+			
+			int length = buffer.length();
+			
+			int head = span.getHead();
+			
+			buffer.append(sentence.getProperty(key+'_'+head));
+			
+			if(buffer.length()==length) {
+				buffer.append('-');
+			}
+		}		
 	}
 }

@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +180,19 @@ public final class CollectionUtils {
 	public static Map<Object, Object> asMap(Object...items) {
     	int size = items==null ? 0 : items.length;
 		Map<Object, Object> map = new HashMap<>(Math.min(10, size/2));
+		
+		if(items!=null) {
+			for(int i = 0, len = items.length-1; i<len; i+=2) {
+				map.put(items[i], items[i+1]);
+			}
+		}
+		
+		return map;
+	}
+	
+	public static Map<Object, Object> asLinkedMap(Object...items) {
+    	int size = items==null ? 0 : items.length;
+		Map<Object, Object> map = new LinkedHashMap<>(Math.min(10, size/2));
 		
 		if(items!=null) {
 			for(int i = 0, len = items.length-1; i<len; i+=2) {

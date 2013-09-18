@@ -94,12 +94,17 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 	
 	protected abstract Highlight createHighlight(Object data, Hit hit);
 	
-	public static class Highlight {
+	public interface Highlight {
+
+		public long getHighlight(int index);
+	}
+	
+	public static class DefaultHighlight implements Highlight {
 		protected BitSet highlightedIndices;
 		protected int[] indexMap;
 		protected long[] highlights;
 		
-		public Highlight(int[] indexMap, long[] highlights) {
+		public DefaultHighlight(int[] indexMap, long[] highlights) {
 			int size = CollectionUtils.max(indexMap);
 			highlightedIndices = new BitSet(size);
 			
@@ -113,6 +118,7 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 			}
 		}
 		
+		@Override
 		public long getHighlight(int index) {
 			if(highlightedIndices.get(index)) {
 				for(int i=0; i<indexMap.length; i++) {

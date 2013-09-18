@@ -464,10 +464,13 @@ public final class CoreferenceRegistry {
 		return StringUtil.getUniqueName(baseName, usedNames);
 	}
 	
-	public String getUniqueAllocationName(String baseName) {
-		Set<String> usedNames = new HashSet<>(allocationMap.size());
-		for(AllocationDescriptor descriptor : allocationMap.values()) {
-			usedNames.add(descriptor.getName());
+	public String getUniqueAllocationName(DocumentSetDescriptor documentSet, String baseName) {
+		if(documentSet==null)
+			throw new IllegalArgumentException("Invalid document set"); //$NON-NLS-1$
+		
+		Set<String> usedNames = new HashSet<>();
+		for(int i=0; i<documentSet.size(); i++) {
+			usedNames.add(documentSet.get(i).getName());
 		}
 
 		return StringUtil.getUniqueName(baseName, usedNames);

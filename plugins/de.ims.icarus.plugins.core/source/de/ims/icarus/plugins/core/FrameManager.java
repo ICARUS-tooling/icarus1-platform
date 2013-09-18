@@ -25,10 +25,14 @@
  */
 package de.ims.icarus.plugins.core;
 
+import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.Closeable;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -52,6 +56,8 @@ public final class FrameManager {
 	private static FrameManager instance;
 	
 	private BiDiMap<IcarusFrame, FrameHandle> frames;
+	
+	private Set<Window> windows;
 	
 	private AtomicInteger frameCount = new AtomicInteger();
 	
@@ -154,6 +160,36 @@ public final class FrameManager {
 		return frames==null ? null : frames.get(frame);
 	}
 	
+	public synchronized void registerWindow(Window window) {
+		if(window==null)
+			throw new IllegalArgumentException("invalid window"); //$NON-NLS-1$
+		
+		if(windows==null) {
+			windows = new HashSet<>();
+		}
+		
+		if(windows.contains(window))
+			throw new IllegalArgumentException("Window already registered: "+window.getName()); //$NON-NLS-1$
+		
+		window.addWindowListener(getHandler());
+		windows.add(window);
+	}
+	
+	public synchronized void unregisterWindow(Window window) {
+		if(window==null)
+			throw new IllegalArgumentException("invalid window"); //$NON-NLS-1$
+		
+		if(windows==null) {
+			return;
+		}
+		
+		if(!windows.contains(window))
+			throw new IllegalArgumentException("Window not registered: "+window.getName()); //$NON-NLS-1$
+		
+		window.removeWindowListener(getHandler());
+		windows.remove(window);
+	}
+	
 	public synchronized void shutdown() {
 		if(isShutdownActive) {
 			return;
@@ -173,6 +209,22 @@ public final class FrameManager {
 						"Failed to close frame: "+frame.getTitle(), e); //$NON-NLS-1$
 			}
 		}
+		
+		if(windows!=null) {
+			for(Window window : windows) {
+				try {
+					if(window instanceof Closeable) {
+						((Closeable)window).close();
+					}
+					
+					window.setVisible(false);
+					window.dispose();
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to close external window: "+window.getName(), e); //$NON-NLS-1$
+				}
+			}
+		}
 	}
 	
 	// TODO add methods to open perspective and/or send messages to other frames
@@ -181,18 +233,19 @@ public final class FrameManager {
 
 		@Override
 		public void windowClosing(WindowEvent e) {
-			if(!(e.getSource() instanceof IcarusFrame))
-				throw new IllegalArgumentException("Not a valid IcarusFrame: "+e.getSource()); //$NON-NLS-1$
-			
-			IcarusFrame frame = (IcarusFrame) e.getSource();
-			
-			try {
-				if(frame.isClosable()) {
-					closeFrame(frame);
+			if(e.getWindow() instanceof IcarusFrame) {
+				IcarusFrame frame = (IcarusFrame) e.getWindow();
+				
+				try {
+					if(frame.isClosable()) {
+						closeFrame(frame);
+					}
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to handle close request for frame: "+frame.getTitle(), ex); //$NON-NLS-1$
 				}
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to handle close request for frame: "+frame.getTitle(), ex); //$NON-NLS-1$
+			} else {
+				unregisterWindow(e.getWindow());
 			}
 		}
 

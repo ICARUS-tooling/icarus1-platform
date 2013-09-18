@@ -49,6 +49,10 @@ public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
 		super(edge, edgeType);
 	}
 
+	public CorefEdgeData(Edge data, int type, long highlight) {
+		super(data, type, highlight);
+	}
+
 	public Edge getEdge() {
 		return data;
 	}

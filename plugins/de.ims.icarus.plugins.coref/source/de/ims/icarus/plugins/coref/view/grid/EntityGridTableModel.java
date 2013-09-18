@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.coref.view.grid;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
@@ -49,14 +51,20 @@ import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanCache;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
+import de.ims.icarus.util.Installable;
+import de.ims.icarus.util.annotation.AnnotationController;
+import de.ims.icarus.util.annotation.AnnotationManager;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class EntityGridTableModel extends AbstractTableModel {
+public class EntityGridTableModel extends AbstractTableModel implements Installable {
 
 	private static final long serialVersionUID = 1954436908379655973L;
 	
@@ -70,8 +78,26 @@ public class EntityGridTableModel extends AbstractTableModel {
 	protected boolean markFalseSpans = true;
 	protected boolean filterSingletons = true;
 	
+	protected AnnotationController annotationController;
+	
+	protected SpanCache cache;
+	
 	public EntityGridTableModel() {
 		// no-op
+	}
+
+	@Override
+	public void install(Object target) {
+		if(target instanceof AnnotationController) {
+			annotationController = (AnnotationController) target;
+		} else {
+			annotationController = null;
+		}
+	}
+
+	@Override
+	public void uninstall(Object target) {
+		annotationController = null;
 	}
 
 	/**
@@ -123,6 +149,17 @@ public class EntityGridTableModel extends AbstractTableModel {
 		
 		fireTableStructureChanged();
 	}
+	
+	protected CoreferenceDocumentAnnotationManager getAnnotationManager() {
+		AnnotationManager annotationManager = annotationController==null ? null : 
+			annotationController.getAnnotationManager();
+		
+		if(annotationManager instanceof CoreferenceDocumentAnnotationManager) {
+			return (CoreferenceDocumentAnnotationManager) annotationManager;
+		} else {
+			return null;
+		}
+	}
 
 	public void reload(CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
 		
@@ -156,6 +193,13 @@ public class EntityGridTableModel extends AbstractTableModel {
 		if(spanSet==goldSpans) {
 			goldSpans = null;
 		}
+		
+		if(cache==null) {
+			cache = new SpanCache();
+		} else {
+			cache.clear();
+		}
+		cache.cacheSpans(spanSet);
 		
 		Set<Span> tmp = new HashSet<>();
 		Set<Span> goldLookup = new HashSet<>();
@@ -307,7 +351,28 @@ public class EntityGridTableModel extends AbstractTableModel {
 			}
 			
 			String key = getKey(row, column);
-			EntityGridNode node = new EntityGridNode(sentence, spans, types);
+			Color[] highlightColors = null;
+			
+			CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
+			if(annotationManager!=null && annotationManager.hasAnnotation()) {
+				highlightColors = new Color[size];
+				for(int i=0; i<size; i++) {
+					Span span = spans[i];
+					int index = cache.getIndex(span);
+					long highlight = annotationManager.getHighlight(index);
+					if(!CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
+						continue;
+					}
+					Color c = CoreferenceDocumentHighlighting.getInstance().getGroupColor(highlight);
+					if(c==null) {
+						c = CoreferenceDocumentHighlighting.getInstance().getHighlightColor(highlight);
+					}
+					
+					highlightColors[i] = c;
+				}
+			}
+			
+			EntityGridNode node = new EntityGridNode(sentence, spans, types, highlightColors);
 			
 			nodes.put(key, node);
 		}
@@ -347,8 +412,6 @@ public class EntityGridTableModel extends AbstractTableModel {
 		
 		protected List<Cluster> clusters;
 		
-		protected ClusterLabelType labelType = ClusterLabelType.FIRST;
-		
 		protected EntityGridTableHeaderRenderer headerRenderer;
 		
 		public void reload(List<Cluster> clusterList) {
@@ -380,6 +443,9 @@ public class EntityGridTableModel extends AbstractTableModel {
 				return;
 			}
 			
+			ClusterLabelType labelType = (ClusterLabelType) ConfigRegistry.getGlobalRegistry().getValue(
+					"plugins.coref.appearance.grid.clusterLabelType"); //$NON-NLS-1$
+			
 			for(int i=0; i<size; i++) {
 				TableColumn column = getColumn(i);
 				Cluster cluster = (Cluster) column.getIdentifier();
@@ -389,22 +455,6 @@ public class EntityGridTableModel extends AbstractTableModel {
 			}
 			
 			fireColumnAdded(new TableColumnModelEvent(this, 0, size-1));
-		}
-
-		public ClusterLabelType getLabelType() {
-			return labelType;
-		}
-
-		public void setLabelType(ClusterLabelType labelType) {
-			if(labelType==null)
-				throw new IllegalArgumentException("Invalid label type"); //$NON-NLS-1$
-			
-			if(labelType==this.labelType) {
-				return;
-			}
-			
-			this.labelType = labelType;
-			reloadLabels();
 		}
 
 		public EntityGridTableHeaderRenderer getHeaderRenderer() {

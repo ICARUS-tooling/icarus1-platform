@@ -36,6 +36,7 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.language.coref.Cluster;
+import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -85,10 +86,21 @@ public final class CONLL12Utils {
 	public static final int WORD_COL = 2;
 	public static final int FORM_COL = 3;
 	public static final int TAG_COL = 4;
-	public static final int CFG_COL = 5;
+	public static final int PARSE_COL = 5;
 	public static final int LEMMA_COL = 6;
+	public static final int FRAMESET_COL = 7;
+	public static final int SENSE_COL = 8;
 	public static final int SPEAKER_COL = 9;
-	public static final int NE_COL = 10;
+	public static final int ENTITY_COL = 10;
+	
+	public static final String FORM_KEY = "form"; //$NON-NLS-1$
+	public static final String TAG_KEY = "tag"; //$NON-NLS-1$
+	public static final String PARSE_KEY = "parse"; //$NON-NLS-1$
+	public static final String LEMMA_KEY = "lemma"; //$NON-NLS-1$
+	public static final String FRAMESET_KEY = "frameset"; //$NON-NLS-1$
+	public static final String SENSE_KEY = "sense"; //$NON-NLS-1$
+	public static final String SPEAKER_KEY = "speaker"; //$NON-NLS-1$
+	public static final String ENTITY_KEY = "entity"; //$NON-NLS-1$
 
 	public static final Pattern WS = Pattern.compile("\\s+"); //$NON-NLS-1$
 	public static final Pattern BLANK = Pattern.compile("^(_|-)$"); //$NON-NLS-1$
@@ -186,11 +198,13 @@ public final class CONLL12Utils {
 		String documentId = null;
 		String partId = null;
 		
+		CorefProperties properties = new CorefProperties();
+		
 		// TODO evaluate need to expand storage to cover more than just form and spans
 		for(int i=0; i<size; i++) {
 			String[] cols = WS.split(lines.get(i));
 			
-			if(!String.valueOf(i+1).equals(cols[WORD_COL]))
+			if(!String.valueOf(i).equals(cols[WORD_COL]))
 				throw new IllegalArgumentException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
 			
 			forms[i] = cols[FORM_COL];
@@ -239,12 +253,23 @@ public final class CONLL12Utils {
 					}
 				}
 			}
+			
+			// Assign properties
+			properties.put(FORM_KEY+'_'+i, cols[FORM_COL]);
+			properties.put(TAG_KEY+'_'+i, cols[TAG_COL]);
+			properties.put(PARSE_KEY+'_'+i, cols[PARSE_COL]);
+			properties.put(LEMMA_KEY+'_'+i, cols[LEMMA_COL]);
+			properties.put(FRAMESET_KEY+'_'+i, cols[FRAMESET_COL]);
+			properties.put(SENSE_KEY+'_'+i, cols[SENSE_COL]);
+			properties.put(SPEAKER_KEY+'_'+i, cols[SPEAKER_COL]);
+			properties.put(ENTITY_KEY+'_'+i, cols[ENTITY_COL]);
 		}
 		
 		if(!spanStack.isEmpty())
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 		
 		DefaultCoreferenceData result = new DefaultCoreferenceData(document, forms);
+		result.setProperties(properties);
 		result.setSentenceIndex(document.size());
 		document.add(result);
 		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);

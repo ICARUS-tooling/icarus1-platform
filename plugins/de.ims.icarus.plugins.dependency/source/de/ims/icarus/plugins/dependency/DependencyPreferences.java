@@ -109,6 +109,8 @@ public class DependencyPreferences {
 		
 		builder.back();
 		// END GENERAL DEPENDENCY GROUP
+		
+		DependencyHighlighting.getInstance().loadConfig();
 	}
 
 }

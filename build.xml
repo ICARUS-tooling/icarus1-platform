@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ICARUS main build file" default="help" basedir=".">
 	<property name="app.name" value="ICARUS" />
-	<property name="app.version" value="1.0.0" />
+	<property name="app.version" value="1.0.1" />
 	
 	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />

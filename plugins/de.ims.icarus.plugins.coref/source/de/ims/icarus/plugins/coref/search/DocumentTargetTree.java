@@ -31,6 +31,7 @@ import java.util.Map;
 
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
+import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
@@ -189,5 +190,50 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	
 	public Object getEdgeProperty(String key) {
 		return getEdge().getProperty(key);
+	}
+	
+	// DOCUMENT METHODS
+	
+	public CoreferenceDocumentData getDocument() {
+		return data;
+	}
+	
+	// SENTENCE METHODS
+	
+	public CoreferenceData getSentence() {
+		int sentenceIndex = getSpan().getSentenceIndex();
+		if(sentenceIndex==-1)
+			throw new IllegalStateException("No valid sentence index available on current scope"); //$NON-NLS-1$
+		
+		return getDocument().get(sentenceIndex);
+	}
+	
+	private StringBuilder buffer = new StringBuilder(100);
+	
+	public String getForms() {
+		buffer.setLength(0);
+		
+		CoreferenceData sentence = getSentence();
+		
+		CoreferenceUtils.appendForms(buffer, sentence, getSpan());
+		
+		return buffer.toString();
+	}
+	
+	public String getSentenceProperties(String key) {
+		buffer.setLength(0);
+		
+		CoreferenceData sentence = getSentence();
+		
+		CoreferenceUtils.appendProperties(buffer, key, sentence, getSpan());
+		
+		return buffer.toString();
+	}
+	
+	public Object getHeadProperty(String key) {
+		CoreferenceData sentence = getSentence();
+		Span span = getSpan();
+		int head = span.getHead();
+		return sentence.getProperty(key+'_'+head);
 	}
 }

@@ -85,7 +85,8 @@ public abstract class AbstractAnnotation implements Annotation {
 	 */
 	@Override
 	public void moveToAnnotation(int index) {
-		if(index<0 || index>=getAnnotationCount())
+		if(index!=BEFORE_FIRST && index!=AFTER_LAST
+				&& (index<0 || index>=getAnnotationCount()))
 			throw new IndexOutOfBoundsException("Invalid annotation index: "+index); //$NON-NLS-1$
 		
 		pointer = index;

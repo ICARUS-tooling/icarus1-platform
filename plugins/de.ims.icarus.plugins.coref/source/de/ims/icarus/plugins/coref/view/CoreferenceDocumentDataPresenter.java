@@ -31,7 +31,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
@@ -39,6 +42,8 @@ import java.util.logging.Level;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
@@ -57,6 +62,7 @@ import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.CoreferencePlugin;
+import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
@@ -66,10 +72,12 @@ import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -149,6 +157,10 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 				AWTPresenter presenter = entry.getValue();
 				Extension extension = entry.getKey();
 				try {
+					if(presenter instanceof Installable) {
+						((Installable) presenter).uninstall(this);
+					}
+					
 					presenter.close();
 				} catch(Exception e) {
 					LoggerFactory.log(this, Level.SEVERE, 
@@ -184,7 +196,6 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		}
 		return contentPanel;
 	}
-
 
 	private void buildPanel() {
 		
@@ -311,6 +322,11 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 				presenter = (AWTPresenter) PluginUtil.instantiate(extension);
 				
 				presenterInstances.put(extension, presenter);
+				
+				if(presenter instanceof Installable) {
+					((Installable) presenter).install(this);
+				}
+				
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to instantiate presenter: "+extension.getUniqueId(), e); //$NON-NLS-1$
@@ -330,17 +346,33 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		refresh();
 	}
 	
+	public void togglePresenter(Extension extension, Options options) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		
+		presenterSelect.setSelectedItem(extension);
+		if(this.options==null) {
+			this.options = new Options();
+		}
+		
+		this.options.putAll(options);
+		
+		if(presenter!=null) {
+			presenter.clear();
+		}
+		
+		presenter = null;
+		
+		refresh();
+	}
+	
 	private void refresh() {
 		
 		CoreferenceDocumentData document = this.document;
-		Options options = this.options;
+		Options options = this.options==null ? Options.emptyOptions : this.options.clone();
 		
 		if(document==null) {
 			return;
-		}
-		
-		if(options==null) {
-			options = Options.emptyOptions;
 		}
 		
 		// Check if some allocations need to be loaded
@@ -489,5 +521,61 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 			refresh();
 		}
 		
+	}
+	
+	public static class PresenterMenu extends JMenu implements Localizable {
+		
+		private static final long serialVersionUID = 8029418200178231049L;
+		
+		private List<Extension> extensions;
+		private ActionListener actionListener;
+		
+		public PresenterMenu(AWTPresenter owner, ActionListener actionListener) {
+			if(owner==null)
+				throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+			if(actionListener==null)
+				throw new IllegalArgumentException("Invalid action listener"); //$NON-NLS-1$
+			
+			extensions = new ArrayList<>(CoreferencePlugin.getCoreferencePresenterExtensions());
+			for(int i=0; i<extensions.size(); i++) {
+				if(PluginUtil.isInstance(extensions.get(i), owner)) {
+					extensions.remove(i);
+				}
+			}
+			Collections.sort(extensions, PluginUtil.EXTENSION_COMPARATOR);
+			
+			this.actionListener = actionListener;
+			
+			ResourceManager.getInstance().getGlobalDomain().addItem(this, false);
+			
+			refresh();
+		}
+		
+		public void refresh() {
+			removeAll();
+			
+			for(Extension extension : extensions) {
+				JMenuItem item = new JMenuItem();
+				Identity id = PluginUtil.getIdentity(extension);
+				
+				item.setText(id.getName());
+				item.setActionCommand(extension.getUniqueId());
+				
+				item.addActionListener(actionListener);
+				
+				add(item);
+			}
+			
+			setText(ResourceManager.getInstance().get(
+					"plugins.coref.presenterMenu.title")); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see de.ims.icarus.resources.Localizable#localize()
+		 */
+		@Override
+		public void localize() {
+			refresh();
+		}
 	}
 }

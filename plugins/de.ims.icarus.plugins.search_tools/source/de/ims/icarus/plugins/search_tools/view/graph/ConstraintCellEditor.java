@@ -31,8 +31,6 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -55,7 +53,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
@@ -81,6 +78,7 @@ import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.IconRegistry;
+import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.dialog.ChoiceFormEntry;
 import de.ims.icarus.ui.dialog.ControlFormEntry;
@@ -151,38 +149,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 	protected JLabel createInfoLabel() {
 		
 		final JLabel label = new JLabel();
-		label.addMouseListener(new MouseAdapter() {
-			
-			private int dismissDelayReminder = -1;
-			private int initialDelayReminder = -1;
-			
-			/**
-			 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
-			 */
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				initialDelayReminder = ToolTipManager.sharedInstance().getInitialDelay();
-				dismissDelayReminder = ToolTipManager.sharedInstance().getDismissDelay();
-				
-				ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
-				ToolTipManager.sharedInstance().setInitialDelay(0);
-			}
-			
-			/**
-			 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
-			 */
-			@Override
-			public void mouseExited(MouseEvent e) {
-				if(dismissDelayReminder!=-1) {
-					ToolTipManager.sharedInstance().setDismissDelay(dismissDelayReminder);
-					dismissDelayReminder = -1;
-				}
-				if(initialDelayReminder!=-1) {
-					ToolTipManager.sharedInstance().setInitialDelay(initialDelayReminder);
-					initialDelayReminder = -1;
-				}
-			}
-		});
+		label.addMouseListener(new TooltipFreezer());
 		label.setIcon(IconRegistry.getGlobalRegistry().getIcon("smartmode_co.gif")); //$NON-NLS-1$
 		
 		Localizable localizable = new Localizable() {

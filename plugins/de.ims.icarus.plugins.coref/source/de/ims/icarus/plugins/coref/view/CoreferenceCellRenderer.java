@@ -115,7 +115,7 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
         }
         setBorder(border);
         
-        setData(value);
+        setData(value, index);
 
         return this;
 	}
@@ -197,18 +197,18 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
             setBorder(getNoFocusBorder());
         }
         
-        setData((CoreferenceData) value);
+        setData((CoreferenceData) value, row);
         
         return this;
 	}
 	
-	public void setData(CoreferenceData data) {		
+	public void setData(CoreferenceData data, int index) {		
 		try {
 			CoreferenceDocument doc = (CoreferenceDocument) getStyledDocument();
 			doc.clear();
 			
 			//doc.insertString(0, index+": ", null); //$NON-NLS-1$
-			doc.appendBatchCoreferenceData(data, null, null);
+			doc.appendBatchCoreferenceData(data, index, null, null);
 			doc.applyBatchUpdates(0);
 		} catch (BadLocationException e) {
 			LoggerFactory.log(this, Level.SEVERE, 

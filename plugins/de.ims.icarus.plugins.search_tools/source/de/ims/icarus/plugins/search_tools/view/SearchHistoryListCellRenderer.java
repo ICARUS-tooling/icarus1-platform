@@ -187,6 +187,7 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 		label.setIcon(icon);
 		
 		if(search!=null && !search.isDone()) {
+			//progressBar.setIndeterminate(SearchUtils.isLoading(target));
 			progressBar.setValue(search.getProgress());
 			progressBar.setVisible(true);
 		} else {

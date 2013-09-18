@@ -29,17 +29,19 @@ import java.awt.Component;
 
 import javax.swing.JList;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
+import de.ims.icarus.search_tools.annotation.ResultAnnotation;
 import de.ims.icarus.ui.helper.TooltipListCellRenderer;
 import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.annotation.Annotation;
 
 
 public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 	private static final long serialVersionUID = -7249622078036629896L;
 	
-	private boolean showRowIndex = true;
-
 	@Override
 	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected,
@@ -50,32 +52,39 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 		return super.getListCellRendererComponent(list, value, index, isSelected,
 				cellHasFocus);
 	}
+	
+	protected final StringBuilder sb = new StringBuilder(200);
 
 	protected String getTextForValue(int index, CoreferenceDocumentData docData) {
 		if(docData==null) {
 			return null;
 		}
 		
-		String id = docData.getId();
+		sb.setLength(0);		
+		ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+
+		if(registry.getBoolean("plugins.coref.appearance.showRowIndex")) { //$NON-NLS-1$
+			sb.append(StringUtil.formatDecimal(index)).append(": "); //$NON-NLS-1$
+		}
+		if(registry.getBoolean("plugins.coref.appearance.showSetIndex") //$NON-NLS-1$
+				&& docData instanceof AnnotatedCoreferenceDocumentData) {
+			Annotation annotation = ((AnnotatedCoreferenceDocumentData)docData).getAnnotation();
+			if(annotation instanceof ResultAnnotation) {
+				int setIndex = ((ResultAnnotation)annotation).getResultEntry().getIndex();
+				sb.append(StringUtil.formatDecimal(setIndex));
+			}
+		}
 		
+		String id = docData.getId();		
 		if(id==null) {
 			id = (String) docData.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(id==null) {
 			id = "document "+StringUtil.formatDecimal(index); //$NON-NLS-1$
 		}
-		if(showRowIndex) {
-			id = StringUtil.formatDecimal(index)+": "+id; //$NON-NLS-1$
-		}
+		
+		sb.append(id);
 		
 		return id;
-	}
-
-	public boolean isShowRowIndex() {
-		return showRowIndex;
-	}
-
-	public void setShowRowIndex(boolean showRowIndex) {
-		this.showRowIndex = showRowIndex;
 	}
 }

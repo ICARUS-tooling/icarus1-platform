@@ -26,6 +26,7 @@
 package de.ims.icarus.plugins.coref.view.grid;
 
 import javax.swing.Icon;
+import javax.xml.bind.annotation.XmlEnum;
 
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -40,6 +41,7 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
+@XmlEnum
 public enum ClusterLabelType implements Identity {
 	FIRST("first") { //$NON-NLS-1$
 		@Override

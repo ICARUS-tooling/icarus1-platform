@@ -32,6 +32,7 @@ import com.mxgraph.util.mxUtils;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.jgraph.layout.DefaultGraphStyle;
 import de.ims.icarus.plugins.jgraph.layout.GraphOwner;
 import de.ims.icarus.util.Options;
@@ -77,6 +78,24 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 	public String getStyle(GraphOwner owner, Object cell, Options options) {
 		mxIGraphModel model = owner.getGraph().getModel();
 		Object value = model.getValue(cell);
+		long highlight = 0L;
+				
+		if(value instanceof CorefCellData) {
+			highlight = ((CorefCellData<?>)value).getHighlight();
+		
+			if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
+				Color col = CoreferenceDocumentHighlighting.getInstance().getGroupColor(highlight);
+				if(col==null) {
+					col = CoreferenceDocumentHighlighting.getInstance().getHighlightColor(highlight);
+				}
+				
+				if(col!=null) {
+					return "defaultVertex;strokeColor="+mxUtils.getHexColorString(col); //$NON-NLS-1$
+				}
+			}
+		}
+		// TODO merge color inference from both parts
+		
 		if(value instanceof CorefNodeData) {
 			CorefNodeData data = (CorefNodeData) value;
 			StringBuilder style = new StringBuilder("defaultVertex"); //$NON-NLS-1$

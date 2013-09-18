@@ -211,8 +211,10 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		
 		Color c = null;
 		if(node.hasMissingGoldSpan()) {
+			// False negatives
 			c = missingGoldNodeColor;
 		} else if(node.hasFalsePredictedSpan()) {
+			// False positives
 			c = falseNodeColor;
 		}
 		if(c!=null) {
@@ -277,7 +279,9 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 			}
 			
 			Color c = null;
-			if(node.isMissingGoldSpan(i)) {
+			if(node.isHighlighted(i)) {
+				c = node.getHighlightColor(i);
+			} else if(node.isMissingGoldSpan(i)) {
 				c = missingGoldNodeColor;
 			} else if(node.isFalsePredictedSpan(i)) {
 				c = falseNodeColor;
@@ -287,9 +291,9 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 				c = col;
 			}
 			
-			g.setColor(col);
+			g.setColor(c);
 			g.drawString(token, x, y);
-			x += fm.stringWidth(tokens[i]);
+			x += fm.stringWidth(token);
 		}
 		
 		g.setColor(col);

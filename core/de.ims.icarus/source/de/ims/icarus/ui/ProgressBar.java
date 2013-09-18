@@ -46,6 +46,8 @@ public class ProgressBar extends Component {
 	
 	private double progress = 0d;
 	
+	private boolean indeterminate = false;
+	
 	private Color barColor = Color.BLUE;
 	private Color borderColor = Color.BLACK;
 
@@ -86,11 +88,22 @@ public class ProgressBar extends Component {
 		g.setColor(getBackground());
 		g.fillRect(1, 1, width-2, height-2);
 		
-		int fill = (int) ((width-2) * progress);
-		
-		if(fill>0) {
-			g.setColor(getBarColor());
-			g.fillRect(1, 1, fill, height-2);
+		if(indeterminate) {
+			g.setColor(Color.RED);
+			int x = 1;
+			int w = 5;
+			while(x<width-1) {
+				int x2 = Math.min(x + w, width-1);
+				g.fillRect(x, 1, x2-1, height-2);
+				x = x2+w;
+			}
+		} else {
+			int fill = (int) ((width-2) * progress);
+			
+			if(fill>0) {
+				g.setColor(getBarColor());
+				g.fillRect(1, 1, fill, height-2);
+			}
 		}
 	}
 	
@@ -222,6 +235,14 @@ public class ProgressBar extends Component {
 		
 		if(!value.equals(oldValue))
 			repaint();
+	}
+
+	public boolean isIndeterminate() {
+		return indeterminate;
+	}
+
+	public void setIndeterminate(boolean indeterminate) {
+		this.indeterminate = indeterminate;
 	}
 
 }

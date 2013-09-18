@@ -53,48 +53,72 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 	}
 
 	public int getGroupId(int index) {
+		if(!hasAnnotation()) {
+			return -1;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? -1 : delegate.getGroupId(
 				this, index);
 	}
 	
 	public int getGroupId(int index, String token) {
+		if(!hasAnnotation()) {
+			return -1;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? -1 : delegate.getGroupId(
 				this, index);
 	}
 	
 	public boolean isHighlighted(int index) {
+		if(!hasAnnotation()) {
+			return false;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? false : delegate.isHighlighted(
 				this, index);
 	}
 	
 	public boolean isNodeHighlighted(int index) {
+		if(!hasAnnotation()) {
+			return false;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? false : delegate.isNodeHighlighted(
 				this, index);
 	}
 	
 	public boolean isEdgeHighlighted(int index) {
+		if(!hasAnnotation()) {
+			return false;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? false : delegate.isEdgeHighlighted(
 				this, index);
 	}
 	
 	public boolean isTransitiveHighlighted(int index) {
+		if(!hasAnnotation()) {
+			return false;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? false : delegate.isTransitiveHighlighted(
 				this, index);
 	}
 	
 	public long getHighlight(int index) {
+		if(!hasAnnotation()) {
+			return 0L;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? 0L : delegate.getHighlight(
 				this, index);
 	}
 	
 	public boolean isTokenHighlighted(int index, String token) {
+		if(!hasAnnotation()) {
+			return false;
+		}
 		AnnotationDelegate delegate = getDelegate();
 		return delegate==null ? false : delegate.isTokenHighlighted(
 				this, index, token);

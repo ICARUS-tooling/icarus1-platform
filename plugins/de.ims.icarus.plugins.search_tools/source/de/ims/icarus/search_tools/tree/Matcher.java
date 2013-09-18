@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.search_tools.tree;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import de.ims.icarus.search_tools.EdgeType;
@@ -485,6 +487,8 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			return;
 		}
 		
+		Arrays.sort(constraints, CONSTRAINT_PRIORITY_SORTER);
+		
 		for(int i=0; i<constraints.length; i++) {
 			SearchConstraint constraint = constraints[i];
 			if(constraint instanceof DummyGroupConstraint) {
@@ -496,6 +500,18 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			}
 		}
 	}
+	
+	public static Comparator<SearchConstraint> CONSTRAINT_PRIORITY_SORTER = new Comparator<SearchConstraint>() {
+
+		@Override
+		public int compare(SearchConstraint c1, SearchConstraint c2) {
+			boolean isGrp1 = SearchManager.isGroupingOperator(c1.getOperator());
+			boolean isGrp2 = SearchManager.isGroupingOperator(c2.getOperator());
+			
+			return isGrp1==isGrp2 ? 0 : isGrp1 ? 1 : -1;
+		}
+		
+	};
 
 	public void setConstraints(SearchConstraint[] constraints) {
 		this.constraints = constraints;

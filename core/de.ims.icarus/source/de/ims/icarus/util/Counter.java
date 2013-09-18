@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,5 +77,14 @@ public class Counter<E extends Object> {
 	public int getCount(E data) {
 		Integer c = counts.get(data);
 		return c==null ? 0 : c;
+	}
+	
+	public Collection<E> getItems() {
+		// TODO make returned collection immutable?
+		return counts.keySet();
+	}
+	
+	public boolean isEmpty() {
+		return counts.isEmpty();
 	}
 }

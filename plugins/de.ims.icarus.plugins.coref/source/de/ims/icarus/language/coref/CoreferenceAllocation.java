@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +48,14 @@ public class CoreferenceAllocation extends CorefMember {
 	
 	public int size() {
 		return spanMap==null ? 0 : spanMap.size(); 
+	}
+	
+	public String[] getDocumentIds() {
+		Collection<String> keys = spanMap==null ? null : spanMap.keySet();
+		if(keys==null) {
+			return new String[0];
+		}
+		return keys.toArray(new String[keys.size()]);
 	}
 	
 	public void free() {

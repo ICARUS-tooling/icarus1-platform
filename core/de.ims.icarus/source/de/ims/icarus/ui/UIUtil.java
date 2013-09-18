@@ -75,6 +75,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -260,6 +261,17 @@ public final class UIUtil {
 				} else {
 					list.clearSelection();
 				}
+			} else if(source instanceof JTable) {
+				JTable table = (JTable) source;
+				int row = table.rowAtPoint(e.getPoint());
+				int column = table.columnAtPoint(e.getPoint());
+				
+				if(row==-1 || column==-1) {
+					table.clearSelection();
+				} else {
+					table.setRowSelectionInterval(row, row);
+					table.setColumnSelectionInterval(column, column);
+				}
 			}
 		}
 	};
@@ -279,6 +291,12 @@ public final class UIUtil {
 		Exceptions.testNullArgument(list, "list"); //$NON-NLS-1$
 		
 		list.addMouseListener(rightClickSelectionHandler);
+	}
+	
+	public static void enableRighClickListSelection(JTable table) {
+		Exceptions.testNullArgument(table, "table"); //$NON-NLS-1$
+		
+		table.addMouseListener(rightClickSelectionHandler);
 	}
 	
 	public static int getDirection(String s) {

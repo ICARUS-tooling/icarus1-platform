@@ -164,7 +164,9 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 			// Name
 			String newName = (String)formBuilder.getValue("name"); //$NON-NLS-1$
 			if(!newName.equals(descriptor.getName())) {
-				String uniqueName = CoreferenceRegistry.getInstance().getUniqueAllocationName(newName);
+				DocumentSetDescriptor documentSet = descriptor.getParent();
+				String uniqueName = CoreferenceRegistry.getInstance().getUniqueAllocationName(
+						documentSet, newName);
 				if(!uniqueName.equals(newName)) {
 					DialogFactory.getGlobalFactory().showInfo(null, 
 							"plugins.coref.coreferenceManagerView.dialogs.allocation.title",  //$NON-NLS-1$

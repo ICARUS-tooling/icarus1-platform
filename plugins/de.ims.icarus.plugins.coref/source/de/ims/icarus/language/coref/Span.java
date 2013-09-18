@@ -223,7 +223,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 			return beginIndex-other.beginIndex;
 		}
 		
-		return (endIndex-beginIndex) - (other.endIndex-other.beginIndex);
+		return getRange() - other.getRange();
 	}
 	
 	public int getRange() {
@@ -236,5 +236,11 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	
 	public boolean isROOT() {
 		return root;
+	}
+	
+	public int getHead() {
+		// TODO evaluate need to decrement head value
+		Object hp = getProperty("HEAD"); //$NON-NLS-1$
+		return hp instanceof Integer ? ((int) hp)-1 : getEndIndex();
 	}
 }

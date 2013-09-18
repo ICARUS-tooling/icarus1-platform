@@ -342,6 +342,31 @@ public final class CoreferenceUtils {
 		return spans;
 	}
 	
+	public static void appendProperties(StringBuilder buffer, String key, CoreferenceData sentence, Span span) {
+		int beginIndex = span.getBeginIndex();
+		int endIndex = span.getEndIndex();
+		
+		for(int i=beginIndex; i<=endIndex; i++) {
+			buffer.append(sentence.getProperty(key+'_'+i));
+			// TODO verify need of whitespace delimiter
+			if(i<endIndex) {
+				buffer.append(' ');
+			}
+		}
+	}
+	
+	public static void appendForms(StringBuilder buffer, CoreferenceData sentence, Span span) {
+		int beginIndex = span.getBeginIndex();
+		int endIndex = span.getEndIndex();
+		
+		for(int i=beginIndex; i<=endIndex; i++) {
+			buffer.append(sentence.getForm(i));
+			if(i<endIndex) {
+				buffer.append(' ');
+			}
+		}
+	}
+	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {
 
 		@Override
@@ -374,5 +399,21 @@ public final class CoreferenceUtils {
 	
 	public static String[] getDefaultEdgePropertyKeys() {
 		return defaultEdgePropertyKeys.clone();
+	}
+	
+	private static final String[] defaultSentencePropertyKeys = {
+		// TODO
+	};
+	
+	public static String[] getDefaultSentencePropertyKeys() {
+		return defaultSentencePropertyKeys.clone();
+	}
+	
+	private static final String[] defaultHeadPropertyKeys = {
+		// TODO
+	};
+	
+	public static String[] getDefaultHeadPropertyKeys() {
+		return defaultHeadPropertyKeys.clone();
 	}
 }

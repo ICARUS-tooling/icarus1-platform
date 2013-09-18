@@ -24,19 +24,27 @@
 		
 	<!-- Toggle 'markFalseSpans' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
 	<!-- Toggle 'showGoldSpans' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="filter_singletons.png" type="toggle" />
+		
+	<!-- Toggle 'filterNonHighlighted' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction"
+		name="${id}.name" desc="${id}.description" icon="fields_co.gif" type="toggle" />
 		
 	<!-- Toggle 'showDocumentHeader' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction"
 		name="${id}.name" desc="${id}.description" icon="EEnum.gif" type="toggle" />
+		
+	<!-- Toggle 'showSentenceIndex' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowSentenceIndexAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_desc_num.gif" type="toggle" />
 		
 	<!-- Toggle 'floatingText' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction"
@@ -67,14 +75,16 @@
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkSpansAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowSentenceIndexAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
 		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />
+		<!--<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />-->
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
@@ -95,14 +105,16 @@
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkSpansAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowSentenceIndexAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
 		<separator />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />
+		<!--<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />-->
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />

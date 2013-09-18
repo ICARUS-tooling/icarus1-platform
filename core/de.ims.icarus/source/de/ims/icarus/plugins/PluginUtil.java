@@ -484,6 +484,23 @@ public final class PluginUtil {
 		return loader.loadClass(param.valueAsString());
 	}
 	
+	public static boolean isInstance(Extension extension, Object data) {
+		if(extension==null)
+			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+		if(data==null)
+			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+		
+		Class<?> clazz = data instanceof Class ? (Class<?>)data : data.getClass();
+		
+		try {
+			Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
+			
+			return clazz.getName().equals(param.valueAsString());
+		} catch(Exception e) {
+			return false;
+		}
+	}
+	
 	public static boolean isExtensionOf(Extension extension, ExtensionPoint extensionPoint) {
 		ExtensionPoint target = getPluginRegistry().getPluginDescriptor(
 				extension.getExtendedPluginId()).getExtensionPoint(

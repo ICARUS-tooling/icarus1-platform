@@ -34,6 +34,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.CancellationException;
@@ -63,6 +65,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
@@ -80,6 +83,8 @@ import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationControl;
+import de.ims.icarus.util.annotation.AnnotationController;
+import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -91,19 +96,23 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
+public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, AnnotationController {
 	
 	protected JComponent contentPanel;
 	protected JTextPane textPane;
+
+	protected CoreferenceDocumentAnnotationManager annotationManager;
 	
 	private static ActionManager sharedActionManager;
 
-	protected static final String configPath = "plugins.coref.appearance"; //$NON-NLS-1$
+	protected static final String configPath = "plugins.coref.appearance.text"; //$NON-NLS-1$
 	
 	protected ActionManager actionManager;
 	protected JPopupMenu popupMenu;
 	
 	protected Handler handler;
+	
+	protected Options options;
 
 	protected CoreferenceAllocation allocation;
 	protected CoreferenceAllocation goldAllocation;
@@ -111,9 +120,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	protected CallbackHandler callbackHandler;
 	
 	// Filter to be applied when the user decides to filter certain spans
-	protected Filter pendingFilter = null; 
-	
-	protected RefreshJob refreshJob;
+	protected Filter pendingFilter = null;
 
 	protected AbstractCoreferenceTextPresenter() {
 		// no-op
@@ -162,6 +169,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		allocation = (CoreferenceAllocation) options.get("allocation"); //$NON-NLS-1$
 		goldAllocation = (CoreferenceAllocation) options.get("goldAllocation"); //$NON-NLS-1$
 		
+		this.options = options.clone();	
 		setData(data);
 		
 		if(contentPanel==null) {
@@ -175,14 +183,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	
 	protected abstract void setData(Object data);
 	
-	protected synchronized void refresh() {
-		RefreshJob job = refreshJob;
-		if(job!=null) {
-			return;
-		}
-		
-		job = new RefreshJob();
-		refreshJob = job;
+	protected synchronized void refresh() {		
+		RefreshJob job = new RefreshJob(createNewDocument());
 		
 		TaskManager.getInstance().schedule(job, TaskPriority.DEFAULT, true);
 	}
@@ -193,6 +195,22 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 
 	public CoreferenceAllocation getGoldAllocation() {
 		return goldAllocation;
+	}
+
+	@Override
+	public CoreferenceDocumentAnnotationManager getAnnotationManager() {
+		if(annotationManager==null) {
+			annotationManager = new CoreferenceDocumentAnnotationManager();
+			annotationManager.addPropertyChangeListener("position", getHandler()); //$NON-NLS-1$
+			annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
+		}
+		return annotationManager;
+	}
+
+	protected AnnotationControl createAnnotationControl() {
+		AnnotationControl annotationControl = new AnnotationControl(true);
+		annotationControl.setAnnotationManager(getAnnotationManager());
+		return annotationControl;
 	}
 
 	protected abstract boolean buildDocument(CoreferenceDocument doc) throws Exception;
@@ -257,6 +275,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 				callbackHandler, "toggleShowGoldSpans"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
 				callbackHandler, "toggleFilterSingletons"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction",  //$NON-NLS-1$
+				callbackHandler, "toggleFilterNonHighlighted"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleShowSentenceIndexAction",  //$NON-NLS-1$
+				callbackHandler, "toggleShowSentenceIndex"); //$NON-NLS-1$
 	}
 	
 	protected void refreshActions() {
@@ -273,9 +295,21 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		actionManager.setSelected(doc.isMarkFalseSpans(), "plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isShowGoldSpans(), "plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isFilterSingletons(), "plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
+		actionManager.setSelected(doc.isFilterNonHighlighted(), "plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction"); //$NON-NLS-1$
+		actionManager.setSelected(doc.isShowSentenceIndex(), "plugins.coref.coreferenceDocumentPresenter.toggleShowSentenceIndexAction"); //$NON-NLS-1$
 		
 		actionManager.setEnabled(doc.getFilter()!=null, "plugins.coref.coreferenceDocumentPresenter.clearFilterAction"); //$NON-NLS-1$
 		actionManager.setEnabled(pendingFilter!=null, "plugins.coref.coreferenceDocumentPresenter.filterSpanAction"); //$NON-NLS-1$
+		
+		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
+		actionManager.setEnabled(hasGold, 
+				"plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
+		
+		AnnotationManager annotationManager = getAnnotationManager();
+		boolean hasAnnotation = annotationManager.hasAnnotation();
+		actionManager.setEnabled(hasAnnotation, 
+				"plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction");  //$NON-NLS-1$
 	}
 
 	/**
@@ -283,6 +317,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	 */
 	@Override
 	public void clear() {
+		options = null;
 		setData(null);
 		refresh();
 	}
@@ -327,10 +362,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 		}
 		
 		return getActionManager().createToolBar( toolBarListId, options);
-	}
-	
-	protected AnnotationControl createAnnotationControl() {
-		return null;
 	}
 	
 	protected JTextPane createTextPane() {
@@ -488,7 +519,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	}
 	
 	protected class Handler extends MouseAdapter implements ChangeListener, 
-			ActionListener, ConfigListener, CaretListener {
+			ActionListener, ConfigListener, CaretListener, PropertyChangeListener {
 		
 		protected void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger() && e.getSource()==textPane) {
@@ -566,7 +597,14 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			}
 			refreshActions();
 		}
-		
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			refresh();
+		}
 	}
 
 	public class CallbackHandler {
@@ -664,6 +702,26 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			}
 		}
 
+		public void toggleShowSentenceIndex(ActionEvent e) {
+			// ignore
+		}
+
+		public void toggleShowSentenceIndex(boolean b) {
+			CoreferenceDocument doc = getDocument();
+			
+			if(doc.isShowSentenceIndex()==b) {
+				return;
+			}
+			
+			try {
+				doc.setShowSentenceIndex(b);
+				AbstractCoreferenceTextPresenter.this.refresh();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'showSentenceIndex' flag", e); //$NON-NLS-1$
+			}
+		}
+
 		public void toggleForceLinebreaks(ActionEvent e) {
 			// ignore
 		}
@@ -744,6 +802,26 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			}
 		}
 
+		public void toggleFilterNonHighlighted(ActionEvent e) {
+			// ignore
+		}
+
+		public void toggleFilterNonHighlighted(boolean b) {
+			CoreferenceDocument doc = getDocument();
+			
+			if(doc.isFilterNonHighlighted()==b) {
+				return;
+			}
+			
+			try {
+				doc.setFilterNonHighlighted(b);
+				AbstractCoreferenceTextPresenter.this.refresh();
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle 'filterNonHighlighted' flag", e); //$NON-NLS-1$
+			}
+		}
+
 		public void filterSpan(ActionEvent e) {
 			if(textPane==null) {
 				return;
@@ -753,7 +831,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			}
 			
 			try {
-				getDocument().setFilter(pendingFilter);
+				if(options==null) {
+					options = new Options();
+				}
+				options.put("filter", pendingFilter); //$NON-NLS-1$
 				AbstractCoreferenceTextPresenter.this.refresh();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
@@ -769,7 +850,11 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			}
 			
 			try {
+				if(options!=null) {
+					options.remove("filter"); //$NON-NLS-1$
+				}
 				doc.setFilter(null);
+				getAnnotationManager().first();
 				AbstractCoreferenceTextPresenter.this.refresh();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
@@ -789,11 +874,21 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 	
 	protected class RefreshJob extends SwingWorker<CoreferenceDocument, Integer>
 			implements Identity {
-
+		
+		private final CoreferenceDocument document;
+		
+		public RefreshJob(CoreferenceDocument document) {
+			if(document==null)
+				throw new IllegalArgumentException("Invalid document"); //$NON-NLS-1$
+			
+			this.document = document;
+		}
+		
 		@Override
 		public boolean equals(Object obj) {
 			if(obj instanceof RefreshJob) {
-				return owner()==((RefreshJob)obj).owner();
+				RefreshJob other = (RefreshJob) obj;
+				return owner()==other.owner() && document==other.document;
 			}
 			return false;
 		}
@@ -854,15 +949,14 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 			}
 			
 			TaskManager.getInstance().setIndeterminate(this, true);
-			CoreferenceDocument doc = createNewDocument();
-			boolean done = buildDocument(doc);
+			boolean done = buildDocument(document);
 			TaskManager.getInstance().setIndeterminate(this, false);
 			
 			if(done) {
-				textPane.setDocument(doc);
+				textPane.setDocument(document);
 			}
 			
-			return doc;
+			return document;
 		}
 
 		@Override
@@ -879,7 +973,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to rebuild document", e); //$NON-NLS-1$
 			} finally {
-				refreshJob = null;
 				refreshActions();
 			}
 		}

@@ -8,23 +8,23 @@
 		
 	<!-- Toggle 'markFalseEdges' -->
 	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="false_edge.png" type="toggle" />
 		
 	<!-- Toggle 'markFalseNodes' -->
 	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
 	<!-- Toggle 'showGoldEdges' -->
 	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="gold_edge.png" type="toggle" />
 		
 	<!-- Toggle 'showGoldVertices' -->
 	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
 	<action id="plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction"
-		name="${id}.name" desc="${id}.description" icon="logical_or.png" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="filter_singletons.png" type="toggle" />
 		
 	<!-- Main ToolBar List for editable graph -->
 	<action-list id="plugins.coref.corefGraphPresenter.editableMainToolBarList">
@@ -78,6 +78,8 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		<separator />
+		<item type="custom" value="showInMenu" />
 	</action-list>
 	
 </actions>

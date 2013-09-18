@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData;
 import de.ims.icarus.plugins.search_tools.view.graph.ConstraintEdgeData;
@@ -597,6 +598,10 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		}
 		
 		return entries;
+	}
+	
+	public static boolean isLoading(Object obj) {
+		return obj instanceof Loadable && ((Loadable)obj).isLoading();
 	}
 		
 	public static final Comparator<SearchNode> nodeIdSorter = new Comparator<SearchNode>() {

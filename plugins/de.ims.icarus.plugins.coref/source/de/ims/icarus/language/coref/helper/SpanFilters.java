@@ -25,7 +25,12 @@
  */
 package de.ims.icarus.language.coref.helper;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Filter;
 
 /**
@@ -37,6 +42,32 @@ public final class SpanFilters {
 
 	private SpanFilters() {
 		// no-op
+	}
+	
+	public static class SpanFilter implements Filter {
+		
+		private final Set<Span> spans;
+		
+		public SpanFilter(Span...spans) {
+			this.spans = CollectionUtils.asSet(spans);
+		}
+		
+		
+		public SpanFilter(Collection<Span> spans) {
+			if(spans==null)
+				throw new IllegalArgumentException("Invalid spans"); //$NON-NLS-1$
+			
+			this.spans = new HashSet<>(spans);
+		}
+
+
+		/**
+		 * @see de.ims.icarus.util.Filter#accepts(java.lang.Object)
+		 */
+		@Override
+		public boolean accepts(Object obj) {
+			return spans==null ? true : spans.contains(obj);
+		}
 	}
 
 	public static class ClusterIdFilter implements Filter {

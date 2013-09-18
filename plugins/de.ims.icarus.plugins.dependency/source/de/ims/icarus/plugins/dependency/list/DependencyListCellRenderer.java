@@ -91,7 +91,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 	
 	protected static Style getMultipleAnnotationStyle() {
 		if(multipleAnnotationStyle==null) {
-			multipleAnnotationStyle = StyleContext.getDefaultStyleContext().getStyle("multiple"); //$NON-NLS-1$
+			multipleAnnotationStyle = StyleContext.getDefaultStyleContext().addStyle("multiple", null); //$NON-NLS-1$
 			StyleConstants.setIcon(multipleAnnotationStyle, 
 					IconRegistry.getGlobalRegistry().getIcon("multiple_annotation.gif")); //$NON-NLS-1$
 		}

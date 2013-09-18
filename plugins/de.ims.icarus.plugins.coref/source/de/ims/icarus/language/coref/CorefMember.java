@@ -54,6 +54,10 @@ public abstract class CorefMember {
 		this.properties = properties;
 	}
 	
+	public CorefProperties getProperties() {
+		return properties;
+	}
+
 	protected CorefProperties cloneProperties() {
 		return properties==null ? null : properties.clone();
 	}

@@ -127,6 +127,10 @@
 	
 	<!-- Standard Extensions -->
 	
+	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.grid.ClusterLabelType" />
+	</extension>
+	
 	<!-- PERSPECTIVES AND VIEWS -->
 	
 	<extension id="CoreferencePerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
@@ -350,6 +354,8 @@
 		<parameter id="token" value="id" />
 		<parameter id="token" value="spanProperty" />
 		<parameter id="token" value="edgeProperty" />
+		<parameter id="token" value="sentenceProperty" />
+		<parameter id="token" value="headProperty" />
 		<parameter id="factories">
 			<parameter id="begin" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceBeginIndexConstraintFactory" />
 			<parameter id="end" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEndIndexConstraintFactory" />
@@ -357,6 +363,8 @@
 			<parameter id="id" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceClusterIdConstraintFactory" />
 			<parameter id="spanProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceSpanPropertyConstraintFactory" />
 			<parameter id="edgeProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEdgePropertyConstraintFactory" />
+			<parameter id="sentenceProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceSentencePropertyConstraintFactory" />
+			<parameter id="headProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceHeadPropertyConstraintFactory" />
 		</parameter>
 	</extension>
 	

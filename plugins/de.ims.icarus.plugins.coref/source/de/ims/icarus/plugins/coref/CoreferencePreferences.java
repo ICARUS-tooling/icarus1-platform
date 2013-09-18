@@ -32,6 +32,7 @@ import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
+import de.ims.icarus.plugins.coref.view.grid.ClusterLabelType;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
 import de.ims.icarus.ui.helper.TooltipListCellRenderer;
 import de.ims.icarus.util.Options;
@@ -75,14 +76,31 @@ public class CoreferencePreferences {
 		builder.addGroup("coref", true); //$NON-NLS-1$
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
-		
-		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
-		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.setProperties(
 				builder.addOptionsEntry("defaultDocumentPresenter", 0, CoreferencePlugin.getCoreferencePresenterExtensions().toArray()), //$NON-NLS-1$
 				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
+		builder.addBooleanEntry("showRowIndex", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showSetIndex", false); //$NON-NLS-1$
+		// TEXT SUBGROUP
+		builder.addGroup("text", true); //$NON-NLS-1$
+		builder.virtual();
+		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
+		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.back();
-		// END APPERANCE GROUP
+		// END TEXT SUBGROUP
+		
+		// GRID SUBGROUP
+		builder.addGroup("grid", true); //$NON-NLS-1$
+		builder.virtual();
+		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
+		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
+		builder.addOptionsEntry("clusterLabelType", 0, (Object[])ClusterLabelType.values()); //$NON-NLS-1$
+		builder.addBooleanEntry("usePatternLabel", false); //$NON-NLS-1$
+		builder.addStringEntry("defaultLabelPattern", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.back();
+		// END GRID SUBGROUP
+		builder.back();
+		// END APPEARANCE GROUP
 
 		// HIGHLIGHTING GROUP
 		builder.addGroup("highlighting", true); //$NON-NLS-1$
@@ -102,5 +120,7 @@ public class CoreferencePreferences {
 		}
 		builder.back();
 		// END HIGHLIGHTING GROUP
+		
+		CoreferenceDocumentHighlighting.getInstance().loadConfig();
 	}
 }

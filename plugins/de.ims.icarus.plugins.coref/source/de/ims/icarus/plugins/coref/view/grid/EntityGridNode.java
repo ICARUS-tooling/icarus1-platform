@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.coref.view.grid;
 
+import java.awt.Color;
+import java.util.Arrays;
+
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
 
@@ -41,8 +44,9 @@ public class EntityGridNode {
 	private final CoreferenceData sentence;
 	private final Span[] spans;
 	private final short[] types;
+	private final Color[] highlightColors;
 
-	public EntityGridNode(CoreferenceData sentence, Span[] spans, short[] types) {
+	public EntityGridNode(CoreferenceData sentence, Span[] spans, short[] types, Color[] highlightColors) {
 		if(sentence==null)
 			throw new IllegalArgumentException("Invalid sentence"); //$NON-NLS-1$
 		if(spans==null)
@@ -55,6 +59,7 @@ public class EntityGridNode {
 		this.sentence = sentence;
 		this.spans = spans;
 		this.types = types;
+		this.highlightColors = highlightColors;
 	}
 	
 	public CoreferenceData getSentence() {
@@ -97,5 +102,39 @@ public class EntityGridNode {
 			}
 		}
 		return false;
+	}
+	
+	public Color getHighlightColor(int index) {
+		return highlightColors==null ? null : highlightColors[index];
+	}
+	
+	public boolean isHighlighted(int index) {
+		return highlightColors!=null && highlightColors[index]!=null;
+	}
+	
+	public boolean hasHighlightedSpan() {
+		if(highlightColors==null) {
+			return false;
+		}
+		for(Color col : highlightColors) {
+			if(col!=null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof EntityGridNode) {
+			EntityGridNode other = (EntityGridNode)obj;
+			return Arrays.equals(spans, other.spans);
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.toString(spans);
 	}
 }

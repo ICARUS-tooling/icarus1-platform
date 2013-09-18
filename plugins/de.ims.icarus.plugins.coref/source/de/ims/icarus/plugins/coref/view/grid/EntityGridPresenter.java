@@ -29,13 +29,22 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
@@ -43,14 +52,26 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
 
+import org.java.plugin.registry.Extension;
+
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
+import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.view.CoreferenceCellRenderer;
+import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
 import de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder;
+import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.IconRegistry;
+import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
@@ -60,8 +81,15 @@ import de.ims.icarus.ui.table.TableIndexListModel;
 import de.ims.icarus.ui.table.TablePresenter;
 import de.ims.icarus.ui.table.TableRowHeaderRenderer;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.HtmlUtils;
+import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.Annotation;
+import de.ims.icarus.util.annotation.AnnotationControl;
+import de.ims.icarus.util.annotation.AnnotationController;
+import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -69,7 +97,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class EntityGridPresenter extends TablePresenter {
+public class EntityGridPresenter extends TablePresenter implements AnnotationController, Installable {
 	
 	protected CoreferenceDocumentData document;
 	protected CoreferenceAllocation allocation;
@@ -79,7 +107,14 @@ public class EntityGridPresenter extends TablePresenter {
 	protected CoreferenceCellRenderer outline;
 	protected EntityGridCellRenderer cellRenderer;
 	
+	protected AnnotationManager annotationManager;
+	
 	protected JComboBox<Object> patternSelect;
+	protected JLabel patternSelectInfo;
+	
+	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
+	
+	protected CoreferenceDocumentDataPresenter parent;
 	
 	public static final int DEFAULT_CELL_HEIGHT = 20;
 	public static final int DEFAULT_CELL_WIDTH = 70;
@@ -87,13 +122,18 @@ public class EntityGridPresenter extends TablePresenter {
 	protected ActionManager actionManager;
 	protected CallbackHandler callbackHandler;
 	protected Handler handler;
+	
+	protected JPopupMenu popupMenu;
 
 	public EntityGridPresenter() {
 		// no-op
 	}
 	
-	protected Handler createHandler() {
-		return new Handler();
+	protected Handler getHandler() {
+		if(handler==null) {
+			handler = new Handler();
+		}
+		return handler;
 	}
 	
 	protected CallbackHandler createCallbackHandler() {
@@ -105,6 +145,8 @@ public class EntityGridPresenter extends TablePresenter {
 		cellRenderer = new EntityGridCellRenderer();
 		//cellRenderer.setLabelBuilder(new PatternLabelBuilder("(b-e)"));
 		gridModel = new EntityGridTableModel();
+		
+		presenterMenu = new CoreferenceDocumentDataPresenter.PresenterMenu(this, getHandler());
 	}
 	
 	public ActionManager getActionManager() {
@@ -121,7 +163,6 @@ public class EntityGridPresenter extends TablePresenter {
 		if(callbackHandler==null) {
 			callbackHandler = createCallbackHandler();
 		}
-		
 		actionManager.addHandler("plugins.coref.entityGridPresenter.refreshAction",  //$NON-NLS-1$
 				callbackHandler, "refresh"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.entityGridPresenter.openPreferencesAction",  //$NON-NLS-1$
@@ -146,29 +187,108 @@ public class EntityGridPresenter extends TablePresenter {
 		actionManager.setSelected(model.isShowGoldSpans(), "plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
 		actionManager.setSelected(model.isFilterSingletons(), "plugins.coref.entityGridPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		actionManager.setSelected(patternSelect.isEnabled(), "plugins.coref.entityGridPresenter.toggleLabelModeAction"); //$NON-NLS-1$
+
+		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
+		actionManager.setEnabled(hasGold, 
+				"plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
+				"plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
+	}
+
+	public AnnotationManager getAnnotationManager() {
+		if(annotationManager==null) {
+			annotationManager = new CoreferenceDocumentAnnotationManager();
+		}
+		return annotationManager;
+	}
+
+	public void setAnnotationManager(AnnotationManager annotationManager) {
+		this.annotationManager = annotationManager;
 	}
 
 	@Override
 	protected JToolBar createToolBar() {
 		if(patternSelect==null) {
+			String pattern = ConfigRegistry.getGlobalRegistry().getString(
+					"plugins.coref.appearance.grid.defaultLabelPattern"); //$NON-NLS-1$
+			if(pattern!=null && pattern.trim().isEmpty()) {
+				pattern = null;
+			}
+
 			patternSelect = new JComboBox<>();
+			patternSelect.setSelectedItem(pattern);
+			boolean usePatternLabel = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"plugins.coref.appearance.grid.usePatternLabel"); //$NON-NLS-1$
+			patternSelect.setEnabled(usePatternLabel);
+			
 			patternSelect.setEditable(true);
-			patternSelect.addActionListener(handler);
+			patternSelect.addActionListener(getHandler());
 			UIUtil.resizeComponent(patternSelect, 150, 24);
-			patternSelect.setEnabled(false);
+		}
+		
+		if(patternSelectInfo==null) {
+			final JLabel label = new JLabel();
+			label.addMouseListener(new TooltipFreezer());label.setIcon(IconRegistry.getGlobalRegistry().getIcon("smartmode_co.gif")); //$NON-NLS-1$
+			
+			Localizable localizable = new Localizable() {
+				
+				@Override
+				public void localize() {
+					label.setToolTipText(createPatternSelectTooltip());
+				}
+			};
+			
+			localizable.localize();
+			ResourceManager.getInstance().getGlobalDomain().addItem(localizable);
+			
+			patternSelectInfo = label;
 		}
 		
 		Options options = new Options();
 		options.put("patternSelect", patternSelect); //$NON-NLS-1$
+		options.put("patternSelectInfo", patternSelectInfo); //$NON-NLS-1$
+		AnnotationControl annotationControl = createAnnotationControl();
+		if(annotationControl!=null) {
+			options.put("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
+		}
 		
 		return getActionManager().createToolBar(
 				"plugins.coref.entityGridPresenter.toolBarList", options); //$NON-NLS-1$
+	}
+	
+	protected String createPatternSelectTooltip() {
+		StringBuilder sb = new StringBuilder(300);
+		ResourceManager rm = ResourceManager.getInstance();
+		
+		sb.append("<html>"); //$NON-NLS-1$
+		sb.append("<h3>").append(rm.get("plugins.coref.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("<table>"); //$NON-NLS-1$
+		sb.append("<tr><th>") //$NON-NLS-1$
+			.append(rm.get("plugins.coref.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
+			.append(rm.get("plugins.coref.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Map<Object, Object> mc = PatternLabelBuilder.magicCharacters;
+		for(Entry<Object, Object> entry : mc.entrySet()) {
+			String c = entry.getKey().toString();
+			String key = entry.getValue().toString();
+			
+			sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
+			.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		sb.append("</table>"); //$NON-NLS-1$
+		
+		return sb.toString();
+	}
+
+	protected AnnotationControl createAnnotationControl() {
+		AnnotationControl annotationControl = new AnnotationControl(true);
+		annotationControl.setAnnotationManager(getAnnotationManager());
+		return annotationControl;
 	}
 
 	@Override
 	protected void buildPanel() {
 		contentPanel = new JPanel(new BorderLayout());
-		handler = createHandler();
 		
 		ActionManager actionManager = getActionManager();
 		URL actionLocation = EntityGridPresenter.class.getResource("entity-grid-presenter-actions.xml"); //$NON-NLS-1$
@@ -250,6 +370,7 @@ public class EntityGridPresenter extends TablePresenter {
 	protected JTable createTable() {
 		JTable table = new JTable(gridModel, gridModel.getColumnModel());
 		
+		UIUtil.enableRighClickListSelection(table);
 		table.setDefaultRenderer(EntityGridNode.class, cellRenderer);
 		table.setFillsViewportHeight(true);
 		table.setRowSelectionAllowed(false);
@@ -257,6 +378,7 @@ public class EntityGridPresenter extends TablePresenter {
 		table.setRowHeight(DEFAULT_CELL_HEIGHT);
 		table.setIntercellSpacing(new Dimension(4, 4));
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.addMouseListener(getHandler());
 
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
@@ -302,6 +424,12 @@ public class EntityGridPresenter extends TablePresenter {
 	}
 	
 	public void refresh() {
+		Annotation annotation = null;
+		if(document instanceof AnnotatedCoreferenceDocumentData) {
+			annotation = ((AnnotatedCoreferenceDocumentData)document).getAnnotation();
+		}
+		getAnnotationManager().setAnnotation(annotation);
+		
 		gridModel.setDocument(document);
 		gridModel.reload(allocation, goldAllocation);
 	}
@@ -343,15 +471,124 @@ public class EntityGridPresenter extends TablePresenter {
 	protected EntityGridTableModel getGridModel() {
 		return gridModel;
 	}
+
+	/**
+	 * @see de.ims.icarus.util.Installable#install(java.lang.Object)
+	 */
+	@Override
+	public void install(Object target) {
+		parent = null;
+		if(target instanceof CoreferenceDocumentDataPresenter) {
+			parent = (CoreferenceDocumentDataPresenter) target;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Installable#uninstall(java.lang.Object)
+	 */
+	@Override
+	public void uninstall(Object target) {
+		parent = null;
+	}
 	
-	protected class Handler implements ActionListener {
+	protected void showPopup(MouseEvent e) {
+		if(popupMenu==null) {
+			// Create new popup menu
+			
+			Options options = new Options();
+			options.put("showInMenu", presenterMenu); //$NON-NLS-1$
+			popupMenu = getActionManager().createPopupMenu(
+					"plugins.coref.entityGridPresenter.popupMenuList", options); //$NON-NLS-1$
+			
+			if(popupMenu!=null) {
+				popupMenu.pack();
+			} else {
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
+			}
+		}
+		
+		if(popupMenu!=null) {
+			
+			refreshActions();
+			presenterMenu.refresh();
+			popupMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+	}
+	
+	protected void togglePresenter(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("invalid extension"); //$NON-NLS-1$
+		
+		if(parent==null) {
+			return;
+		}
+		
+		try {
+			Options options = new Options();
+			
+			int row = table.getSelectedRow();
+			int column = table.getSelectedColumn();
+			if(row!=-1 && column!=-1) {
+				EntityGridNode node = (EntityGridNode) table.getValueAt(row, column);
+				if(node!=null) {
+					options.put("filter", createFilterForNode(node)); //$NON-NLS-1$
+				}
+			}
+
+			if(!options.isEmpty()) {
+				parent.togglePresenter(extension, options);
+			}
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to switch to presennter: "+extension.getUniqueId(), e); //$NON-NLS-1$
+		}
+	}
+	
+	protected Filter createFilterForNode(EntityGridNode node) {
+		if(node==null) {
+			return null;
+		}
+		
+		Collection<Span> spans = new ArrayList<>();
+		for(int i=0; i<node.getSpanCount(); i++) {
+			spans.add(node.getSpan(i));
+		}
+		
+		return new SpanFilters.SpanFilter(spans);
+	}
+	
+	protected class Handler extends MouseAdapter implements ActionListener {
+
+		protected void maybeShowPopup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				showPopup(e);
+			}
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
 
 		/**
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			refreshLabelBuilder();
+			if(e.getSource() instanceof JMenuItem) {
+				String uid = e.getActionCommand();
+				Extension extension = PluginUtil.getExtension(uid);
+				if(extension!=null) {
+					togglePresenter(extension);
+				}
+			} else {
+				refreshLabelBuilder();
+			}
 		}
 	}
 

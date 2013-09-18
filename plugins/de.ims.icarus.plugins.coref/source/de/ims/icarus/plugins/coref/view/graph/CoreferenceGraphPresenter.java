@@ -28,6 +28,7 @@ package de.ims.icarus.plugins.coref.view.graph;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import org.java.plugin.registry.Extension;
 
@@ -53,7 +56,13 @@ import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanCache;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
+import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.jgraph.layout.GraphLayout;
 import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.layout.GraphStyle;
@@ -61,7 +70,10 @@ import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -69,9 +81,11 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceGraphPresenter extends GraphPresenter {
+public class CoreferenceGraphPresenter extends GraphPresenter implements Installable {
 
 	private static final long serialVersionUID = -6564065119073757454L;
+
+	protected CoreferenceDocumentDataPresenter parent;
 	
 	protected CoreferenceDocumentData document;
 	protected CoreferenceAllocation allocation;
@@ -83,9 +97,26 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	protected boolean markFalseNodes = true;
 	protected boolean filterSingletons = true;
 
+	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
+	
+	protected SpanCache cache = new SpanCache();
+
 	public CoreferenceGraphPresenter() {
 		// no-op
 	}
+
+	@Override
+	protected JPopupMenu createPopupMenu() {
+		
+		String actionListId = isEditable() ? editablePopupMenuListId 
+				: uneditablePopupMenuListId;
+		
+		Options options = new Options();
+		options.put("showInMenu", presenterMenu); //$NON-NLS-1$
+		
+		return getActionManager().createPopupMenu(actionListId, options);
+	}
+	
 
 	@Override
 	protected GraphLayout createDefaultGraphLayout() {
@@ -100,6 +131,19 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	@Override
 	protected GraphRenderer createDefaultGraphRenderer() {
 		return super.createDefaultGraphRenderer();
+	}
+
+	@Override
+	protected AnnotationControl createAnnotationControl() {
+		AnnotationControl annotationControl = super.createAnnotationControl();
+		annotationControl.setAnnotationManager(new CoreferenceDocumentAnnotationManager());
+		
+		return annotationControl;
+	}
+
+	@Override
+	public CoreferenceDocumentAnnotationManager getAnnotationManager() {
+		return (CoreferenceDocumentAnnotationManager) super.getAnnotationManager();
 	}
 
 	@Override
@@ -176,6 +220,27 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 		
 		editableMainToolBarListId = "plugins.coref.corefGraphPresenter.editableMainToolBarList"; //$NON-NLS-1$
 		editablePopupMenuListId = "plugins.coref.corefGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
+
+		presenterMenu = new CoreferenceDocumentDataPresenter.PresenterMenu(this, getHandler());
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Installable#install(java.lang.Object)
+	 */
+	@Override
+	public void install(Object target) {
+		parent = null;
+		if(target instanceof CoreferenceDocumentDataPresenter) {
+			parent = (CoreferenceDocumentDataPresenter) target;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Installable#uninstall(java.lang.Object)
+	 */
+	@Override
+	public void uninstall(Object target) {
+		parent = null;
 	}
 
 	/*@Override
@@ -243,12 +308,43 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 				callbackHandler, "filterSingletons"); //$NON-NLS-1$
 	}
 	
+	@Override
+	protected void refreshActions() {
+		super.refreshActions();
+		
+		ActionManager actionManager = getActionManager();
+
+		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
+		actionManager.setEnabled(hasGold, 
+				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
+				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+	}
+
+	@Override
+	protected Handler createHandler() {
+		return new CorefHandler();
+	}
+
 	protected Object createVertex(Span span, int nodeType) {
 		CoreferenceData sentence = span.isROOT() ?
 				CoreferenceUtils.emptySentence
 				: document.get(span.getSentenceIndex());
 		
-		mxCell cell = new mxCell(new CorefNodeData(span, sentence, nodeType));
+		long highlight = 0L;
+		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
+		if(annotationManager!=null && annotationManager.hasAnnotation() && !span.isROOT()) {
+			int index = cache.getIndex(span);
+			long hl = getAnnotationManager().getHighlight(index);
+			if(CoreferenceDocumentHighlighting.getInstance().isNodeHighlighted(hl)) {
+				long mask = ~(CoreferenceDocumentHighlighting.getInstance().getEdgeGroupingMask()
+						| CoreferenceDocumentHighlighting.getInstance().getEdgeHighlightMask());
+				highlight |= (hl & mask);
+			}
+		}
+		
+		mxCell cell = new mxCell(new CorefNodeData(span, sentence, nodeType, highlight));
 		cell.setVertex(true);
 		cell.setGeometry(new mxGeometry());
 		
@@ -256,7 +352,20 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 	}
 	
 	protected Object createEdge(Edge edge, Object source, Object target, int edgeType) {
-		mxCell cell = new mxCell(new CorefEdgeData(edge, edgeType));
+
+		long highlight = 0L;
+		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
+		if(annotationManager!=null && annotationManager.hasAnnotation()) {
+			int index = cache.getIndex(edge.getTarget());
+			long hl = getAnnotationManager().getHighlight(index);
+			if(CoreferenceDocumentHighlighting.getInstance().isEdgeHighlighted(hl)) {
+				long mask = ~(CoreferenceDocumentHighlighting.getInstance().getNodeGroupingMask()
+						| CoreferenceDocumentHighlighting.getInstance().getNodeHighlightMask());
+				highlight |= (hl & mask);
+			}
+		}
+		
+		mxCell cell = new mxCell(new CorefEdgeData(edge, edgeType, highlight));
 		cell.setEdge(true);
 		
 		graph.getModel().setTerminal(cell, source, true);
@@ -312,6 +421,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 			if(isFilterSingletons()) {
 				edges = CoreferenceUtils.removeSingletons(edges);
 			}
+			
+			cache.clear();
+			cache.cacheEdges(edges);
 			
 			//System.out.println(Arrays.toString(edges.toArray()));
 			
@@ -514,6 +626,78 @@ public class CoreferenceGraphPresenter extends GraphPresenter {
 				"plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		
 		firePropertyChange("filterSingletons", oldValue, filterSingletons); //$NON-NLS-1$
+	}
+	
+	protected void togglePresenter(Extension extension) {
+		if(extension==null)
+			throw new IllegalArgumentException("invalid extension"); //$NON-NLS-1$
+		
+		if(parent==null) {
+			return;
+		}
+		
+		try {
+			Options options = new Options();
+			
+			Object[] cells = getSelectionCells();
+			if(cells!=null && cells.length>0) {
+				Filter filter = createFilterForCells(cells);
+				if(filter!=null) {
+					options.put("filter", filter); //$NON-NLS-1$
+				}
+			}
+
+			if(!options.isEmpty()) {
+				parent.togglePresenter(extension, options);
+			}
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to switch to presennter: "+extension.getUniqueId(), e); //$NON-NLS-1$
+		}
+	}
+	
+	protected Filter createFilterForCells(Object[] cells) {
+		if(cells==null || cells.length==0) {
+			return null;
+		}
+		
+		Collection<Span> spans = new ArrayList<>();
+		
+		mxIGraphModel model = getGraph().getModel();
+		for(Object cell : cells) {
+			if(model.isEdge(cell)) {
+				continue;
+			}
+			
+			Object value = model.getValue(cell);
+			if(!(value instanceof CorefNodeData)) {
+				continue;
+			}
+			
+			CorefNodeData nodeData = (CorefNodeData) value;
+			
+			spans.add(nodeData.getSpan());
+		}
+		
+		return spans.isEmpty() ? null : new SpanFilters.SpanFilter(spans);
+	}
+	
+	
+	protected class CorefHandler extends Handler {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource() instanceof JMenuItem) {
+				String uid = e.getActionCommand();
+				Extension extension = PluginUtil.getExtension(uid);
+				if(extension!=null) {
+					togglePresenter(extension);
+				}
+			} else {
+				super.actionPerformed(e);
+			}
+		}
+		
 	}
 
 	protected class CorefGraph extends DelegatingGraph {

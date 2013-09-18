@@ -142,6 +142,6 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 			_highlights[i] = highlights.get(i);
 		}
 		
-		return new Highlight(_indexMap, _highlights);
+		return new DefaultHighlight(_indexMap, _highlights);
 	}
 }
