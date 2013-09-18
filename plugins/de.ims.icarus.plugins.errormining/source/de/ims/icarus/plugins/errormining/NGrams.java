@@ -54,14 +54,19 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 public class NGrams {
 	
 	protected int nGramCount;
-	protected int nGramLimit;
 	protected int fringeStart;
 	protected int fringeEnd;
+	protected int nGramLimit;
+	protected boolean useFringe;
+	
 	
 	//protected List<ItemInNuclei> items;
-	protected Map<String,ArrayList<ItemInNuclei>> nGramCache;	
+	protected Map<String, ArrayList<ItemInNuclei>> nGramCache;	
+	protected List<NGramQAttributes> queryList;
+	protected Options options;
 	
 	protected List<DependencyData> corpus;
+
 	
 	
 	private static NGrams instance;
@@ -80,20 +85,44 @@ public class NGrams {
 	
 	//Debug Konstructor
 	public NGrams(){
-		Options options = Options.emptyOptions;
-
-		this.nGramCount = 1; //normally we start with unigrams so n will be 1
+		Options options = new Options();
+		options = Options.emptyOptions;
 		
+		this.nGramCount = 1; //normally we start with unigrams so n will be 1		
 		
 		//0 collect ngrams until no new ngrams are found
 		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
 		this.fringeStart = (int) options.get("FringeSTART", 0);  //$NON-NLS-1$
 		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		this.useFringe = false;
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
 	}
 	
+	
+	public NGrams(Options options, List<NGramQAttributes> queryList){
+		
+		this.options = options;
+		
+		this.nGramCount = 1; //normally we start with unigrams so n will be 1
+		
+		this.queryList = queryList;
+		
+		
+		System.out.println("Options limit " + options.getInteger("NGramLIMIT"));
+		System.out.println("Options fstart " + options.getInteger("FringeSTART"));
+		System.out.println("Options fendli " + options.getInteger("FringeEND"));
+		System.out.println("Options fringe " + options.getBoolean("UseFringe"));
+		
+		this.fringeStart = options.getInteger("FringeSTART"); //$NON-NLS-1$
+		this.fringeEnd = options.getInteger("FringeEND"); //$NON-NLS-1$
+		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
+		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
+				
+		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
+		corpus = new ArrayList<DependencyData>();
+	}
 	
 	
 	public NGrams(int nGramCount, Options options){
@@ -104,6 +133,8 @@ public class NGrams {
 		
 		this.nGramCount = nGramCount; //normally we start with unigrams so n will be 1
 		
+		this.queryList = new ArrayList<NGramQAttributes>();
+		this.useFringe = false;
 		
 		//0 collect ngrams until no new ngrams are found
 		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
@@ -137,7 +168,7 @@ public class NGrams {
 				SentenceInfo si = item.getSentenceInfoAt(j);
 				
 				if(si.getSentenceNr() == sentenceNR){
-					//TODO maybe list?!
+					//maybe list?!
 					//System.out.println("NucleiToBeAdded " + si.getNucleiSentencePositionAt(0));
 					return si;
 				}				
@@ -165,7 +196,8 @@ public class NGrams {
 
 		}
 		
-		System.out.println(tag + " : " + resultVari); //$NON-NLS-1$
+		//Debug
+		//System.out.println(tag + " : " + resultVari); //$NON-NLS-1$
 		return resultVari;
 
 	}
@@ -195,7 +227,7 @@ public class NGrams {
 //		if (!knownTag) {
 //			//System.out.println("faulty Tag@ " + sentenceNr + " " + sentencelength);
 //			ItemInNuclei item = new ItemInNuclei();
-//			//item.setPosTag(ensureValid(dd.getPos(wordIndex)));
+//			//item.setPosTag(ensureValid(getTagQuery(dd.getPos(wordIndex))));
 //			item.addNewSentenceInfoLeft(si);
 //			items.add(item);
 //		}
@@ -216,6 +248,7 @@ public class NGrams {
 	 */
 	public void initializeUniGrams(DependencyData dd, int sentenceNr) {
 		
+		//TODO should be removed later
 		corpus.add(dd);
 		
 		for (int wordIndex = 0; wordIndex < dd.length(); wordIndex++) {
@@ -224,40 +257,42 @@ public class NGrams {
 
 			// item already in list? only add new tags
 			if (nGramCache.containsKey(currentWord)) {
-
-				ArrayList<ItemInNuclei> items = nGramCache.get(currentWord);
-
-				boolean knownTag = false;
-				
-				for (int i = 0; i < items.size(); i++) {
-					// increment when tag found again
-					ItemInNuclei item = items.get(i);
-					//System.out.println(item.getPosTag() +" vs "+ dd.getPos(wordIndex));
-					if (item.getPosTag().equals(dd.getPos(wordIndex))) {
-						int oldCount = item.getCount();
-						item.setCount(oldCount + 1);
+				if (getTagQuery(dd.getPos(wordIndex)) != null){
+					ArrayList<ItemInNuclei> items = nGramCache.get(currentWord);
+	
+					boolean knownTag = false;
+					
+					for (int i = 0; i < items.size(); i++) {
+						// increment when tag found again
+						ItemInNuclei item = items.get(i);
+						//System.out.println(item.getPosTag() +" vs "+ getTagQuery(getTagQuery(dd.getPos(wordIndex))));
+						if (item.getPosTag().equals(getTagQuery(dd.getPos(wordIndex)))) {
+							int oldCount = item.getCount();
+							item.setCount(oldCount + 1);
+							item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
+							knownTag = true;
+						}
+					}
+	
+					// new pos tag found; add to list
+					if (!knownTag) {
+						//System.out.println("faulty Tag@ " + sentenceNr + " " + sentencelength);
+						ItemInNuclei item = new ItemInNuclei();
+						item.setPosTag(ensureValid(getTagQuery(dd.getPos(wordIndex))));
 						item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
-						knownTag = true;
+						items.add(item);
 					}
 				}
-
-				// new pos tag found; add to list
-				if (!knownTag) {
-					//System.out.println("faulty Tag@ " + sentenceNr + " " + sentencelength);
+			} else {
+				if (getTagQuery(dd.getPos(wordIndex)) != null){
+					ArrayList<ItemInNuclei> items = new ArrayList<ItemInNuclei>();
 					ItemInNuclei item = new ItemInNuclei();
-					item.setPosTag(ensureValid(dd.getPos(wordIndex)));
+					item.setPosTag(ensureValid(getTagQuery(dd.getPos(wordIndex))));
 					item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
 					items.add(item);
+	
+					nGramCache.put(currentWord, items);
 				}
-
-			} else {
-				ArrayList<ItemInNuclei> items = new ArrayList<ItemInNuclei>();
-				ItemInNuclei item = new ItemInNuclei();
-				item.setPosTag(ensureValid(dd.getPos(wordIndex)));
-				item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
-				items.add(item);
-
-				nGramCache.put(currentWord, items);
 			}
 		}
 	}
@@ -528,7 +563,7 @@ public class NGrams {
 					
 									
 									// System.out.println(item.getPosTag()
-									// +" vs "+ dd.getPos(wordIndex));
+									// +" vs "+ getTagQuery(dd.getPos(wordIndex)));
 									
 
 									if (item.getPosTag().equals(iin.getPosTag())) {
@@ -612,13 +647,16 @@ public class NGrams {
 			
 			// remove items at the fringe
 			
-
-			if(nGramCount <= fringeEnd && nGramCount >= fringeStart){
-//				System.out.println(nGramCount + " | " 
-//								+ fringeStart + " | " 
-//								+ fringeEnd);
-				outputNGram = distrustFringeHeuristic(outputNGram);
+			if (useFringe) {
+				if(nGramCount <= fringeEnd && nGramCount >= fringeStart){
+//					System.out.println(nGramCount + " | " 
+//									+ fringeStart + " | " 
+//									+ fringeEnd);
+					outputNGram = distrustFringeHeuristic(outputNGram);
+				}				
 			}
+
+
 			
 			//add results into Cache
 			nGramCache.putAll(outputNGram);
@@ -646,6 +684,7 @@ public class NGrams {
 	 * @return
 	 */
 	private boolean continueNGrams() {
+		//0 -> collect all ngrams until algorithm end
 		if(nGramLimit == 0){
 			return true;
 		}
@@ -722,6 +761,41 @@ public class NGrams {
 		}
 		item.setPosTag(ensureValid(posTag));											
 		item.addNewSentenceInfoLeft(si);			
+	}
+	
+	protected String getTagQuery(String qtag){
+		String tag = qtag;
+		for(int i = 0; i < queryList.size(); i++){
+			NGramQAttributes att = queryList.get(i);
+			//System.out.println(tag + " vs " + att.getKey());
+			
+			//is there a key in querylist?
+			if (att.getKey().equals(tag)){
+				//System.out.print("Hit " + tag + " vs " + att.getKey());
+				
+				//shall we use key?
+				if(att.include){
+					
+					if(att.getValue().equals("")){ //$NON-NLS-1$
+						//reuse old tag
+						//System.out.println(" Included Oldtag " + tag);
+						return tag;
+					} else {
+						//use newspecified tag
+						//System.out.println(" Included Newtag " + att.getValue());
+						return att.getValue();
+					}
+					
+				} else {
+					//ignore tag for search
+					//System.out.println(" excluded ");
+					return null;
+				}
+			}
+		}
+		
+		return tag;
+		
 	}
 	
 	
@@ -822,6 +896,7 @@ public class NGrams {
 		
 		//TODO change false false
 		createNGrams(nGramCache, false, false);
+
 	}
 	
 	private void printNuclei(SentenceInfo sentenceInfo){

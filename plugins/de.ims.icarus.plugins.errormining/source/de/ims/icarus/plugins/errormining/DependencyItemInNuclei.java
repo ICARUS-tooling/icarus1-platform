@@ -44,7 +44,7 @@ public class DependencyItemInNuclei {
 	
 	public DependencyItemInNuclei(){
 		List<DependencySentenceInfo> sl = new ArrayList<>();
-		ArrayList<String> posTagList = new ArrayList<>();;
+		ArrayList<String> posTagList = new ArrayList<>();
 		this.sl = sl;
 		count = 1; //innitialize with 1 occurences +1 when found
 		count = 1;
@@ -53,7 +53,7 @@ public class DependencyItemInNuclei {
 	
 	public DependencyItemInNuclei(int count, String Tag){
 		List<DependencySentenceInfo> sl = new ArrayList<>();
-		ArrayList<String> posTagList = new ArrayList<>();;
+		ArrayList<String> posTagList = new ArrayList<>();
 		this.sl = sl;
 		this.count = count;
 	}

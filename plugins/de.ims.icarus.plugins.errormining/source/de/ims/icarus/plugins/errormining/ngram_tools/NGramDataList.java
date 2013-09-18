@@ -61,6 +61,7 @@ public class NGramDataList implements SentenceDataList {
 	protected List<CorpusType> corpusList;
 
 
+	//For Debug with Cprus
 	public NGramDataList(Map<String,ArrayList<ItemInNuclei>> nGramMap,
 			List<SentenceData> corpus){
 		if (nGramMap == null)
@@ -69,6 +70,14 @@ public class NGramDataList implements SentenceDataList {
 		this.corpus = corpus;
 		setNGramMap(nGramMap);
 		
+	}
+	
+	// w/o Corpus for NGramSearch Only
+	public NGramDataList(Map<String,ArrayList<ItemInNuclei>> nGramMap){
+		if (nGramMap == null)
+			throw new IllegalArgumentException("No Data"); //$NON-NLS-1$
+
+		setNGramMap(nGramMap);		
 	}
 
 
@@ -79,12 +88,7 @@ public class NGramDataList implements SentenceDataList {
 		return nGramMap;
 	}
 
-	/**
-	 * @param nGramMap the nGramMap to set
-	 */
-	public void setnGramMap(Map<String, ArrayList<ItemInNuclei>> nGramMap) {
-		this.nGramMap = nGramMap;
-	}
+
 
 	/**
 	 * @return the corpus
@@ -235,6 +239,10 @@ public class NGramDataList implements SentenceDataList {
 	public int size() {
 		//return getNGramMap().size();
 		return sentences.size();
+	}
+	
+	public int getSentenceAtIndex(int i){
+		return sentences.get(i);
 	}
 
 	/**

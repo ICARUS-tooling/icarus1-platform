@@ -481,62 +481,62 @@ public class ErrorMiningView extends View {
 		
 		public void executeNGram(ActionEvent e) {
 
-			if(currentNGramEditor.getEditingItem()==null) {
-				return;
-			}
-			
-			try {
-				
-				syncEditorViews();
-				SearchDescriptor descriptor = currentNGramEditor.getEditingItem();
-				
-				/*
-				SearchDescriptor updatedDescriptor = currentNGramEditor.getEditingItem();
-				if(updatedDescriptor!=null && updatedDescriptor!=descriptor) {
-					descriptor.setQuery(updatedDescriptor.getQuery());
-				}
-				*/
-				
-				Search search = descriptor.getSearch();
-				if(search!=null && search.isRunning()) {
-					UIUtil.beep();
-					return;
-				}
-				
-				// Generate query
-
-				System.out.println("Search " + descriptor.getSearch()); //$NON-NLS-1$
-				System.out.println("SFactory " + descriptor.getSearchFactory()); //$NON-NLS-1$
-				System.out.println("Target " + descriptor.getTarget()); //$NON-NLS-1$
-				System.out.println("Query " + descriptor.getQuery()); //$NON-NLS-1$
-				System.out.println("Parameter " + descriptor.getParameters()); //$NON-NLS-1$
-
-				// Create a new descriptor without a search object
-				SearchDescriptor clone = descriptor.cloneShallow();
-				// Let factory create a blank new search object
-				if(!clone.createSearch()) {
-					return;
-				}
-				currentNGramEditor.setEditingItem(descriptor.clone());
-				
-				searchHistory.addSearch(clone);
-				//SearchManager.getInstance().executeSearch(clone.getSearch());
-				
-				refreshActions();
-				
-				System.out.println("Finished NGRAM");
-				
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to execute search", ex); //$NON-NLS-1$
-				UIUtil.beep();
-				
-				showError(ex);
-			}
+//			if(currentNGramEditor.getEditingItem()==null) {
+//				return;
+//			}
+//			
+//			try {
+//				
+//				syncEditorViews();
+//				SearchDescriptor descriptor = currentNGramEditor.getEditingItem();
+//				
+//				/*
+//				SearchDescriptor updatedDescriptor = currentNGramEditor.getEditingItem();
+//				if(updatedDescriptor!=null && updatedDescriptor!=descriptor) {
+//					descriptor.setQuery(updatedDescriptor.getQuery());
+//				}
+//				*/
+//				
+//				Search search = descriptor.getSearch();
+//				if(search!=null && search.isRunning()) {
+//					UIUtil.beep();
+//					return;
+//				}
+//				
+//				// Generate query
+//
+//				System.out.println("Search " + descriptor.getSearch()); //$NON-NLS-1$
+//				System.out.println("SFactory " + descriptor.getSearchFactory()); //$NON-NLS-1$
+//				System.out.println("Target " + descriptor.getTarget()); //$NON-NLS-1$
+//				System.out.println("Query " + descriptor.getQuery()); //$NON-NLS-1$
+//				System.out.println("Parameter " + descriptor.getParameters()); //$NON-NLS-1$
+//
+//				// Create a new descriptor without a search object
+//				SearchDescriptor clone = descriptor.cloneShallow();
+//				// Let factory create a blank new search object
+//				if(!clone.createSearch()) {
+//					return;
+//				}
+//				currentNGramEditor.setEditingItem(descriptor.clone());
+//				
+//				searchHistory.addSearch(clone);
+//				//SearchManager.getInstance().executeSearch(clone.getSearch());
+//				
+//				refreshActions();
+//				
+//				System.out.println("Finished NGRAM");
+//				
+//			} catch(Exception ex) {
+//				LoggerFactory.log(this, Level.SEVERE, 
+//						"Failed to execute search", ex); //$NON-NLS-1$
+//				UIUtil.beep();
+//				
+//				showError(ex);
+//			}
 			
 			
 			//#############
-			//testPoSNGram();
+			testPoSNGram();
 			//testDepRelNGram();
 			
 			//enable autosave?!

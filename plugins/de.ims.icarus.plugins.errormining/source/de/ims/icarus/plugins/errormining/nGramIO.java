@@ -43,6 +43,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import de.ims.icarus.config.ConfigRegistry;
+
 /**
  * @author Gregor Thiele
  * @version $Id$
@@ -78,7 +80,8 @@ public class nGramIO {
 	private void saveXMLToFile (StreamResult result) throws Exception{
         //writing to file
         FileOutputStream fop = null;
-        File file = new File("E:/nuclei_out.xml"); //$NON-NLS-1$
+
+        File file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
        
         fop = new FileOutputStream(file);
 

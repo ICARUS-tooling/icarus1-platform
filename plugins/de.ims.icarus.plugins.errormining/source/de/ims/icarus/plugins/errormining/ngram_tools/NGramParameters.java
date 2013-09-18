@@ -31,16 +31,27 @@ package de.ims.icarus.plugins.errormining.ngram_tools;
  *
  */
 public interface NGramParameters {
-	
-	//TODO maybe with heuristics? 
-	public static final String NGRAM_MODE = "ngramMode"; //$NON-NLS-1$ 
 
-	public static final String NGRAM_RESULT_LIMIT = "ngramResultLimit"; //$NON-NLS-1$	
+	public static final String NGRAM_RESULT_LIMIT = "resultLimit"; //$NON-NLS-1$	
 	
-	public static final boolean USE_FRINGE_HEURISTIC = false;
+	public static final String USE_FRINGE_HEURISTIC = "fringe"; //$NON-NLS-1$
 	
-	public static final String FRINGE_START = "fringeStart";  //$NON-NLS-1$
-	
+	public static final String FRINGE_START = "fringeStart";  //$NON-NLS-1$	
+
 	public static final String FRINGE_END = "fringeEnd"; //$NON-NLS-1$
-
+	
+	public static final String GRAMS_GREATERX = "gramsGreaterX"; //$NON-NLS-1$
+	
+	public static final String SENTENCE_LIMIT = "sentenceLimit"; //$NON-NLS-1$
+	
+	public static final String CREATE_XML_OUTPUT = "createxmlOutput"; //$NON-NLS-1$
+	
+	//default values
+	public static final int DEFAULT_NGRAM_RESULT_LIMIT = 0;
+	public static final boolean DEFAULT_USE_FRINGE_HEURISTIC = true;
+	public static final int DEFAULT_FRINGE_START = 3;
+	public static final int DEFAULT_FRINGE_END = 5;
+	public static final int DEFAULT_GRAMS_GREATERX = 0;
+	public static final int DEFAULT_SENTENCE_LIMIT = 0;
+	public static final boolean DEFAULT_CREATE_XML_OUTPUT = false;
 }

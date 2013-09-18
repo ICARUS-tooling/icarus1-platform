@@ -23,39 +23,28 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.errormining.annotation;
+package de.ims.icarus.plugins.errormining.view;
 
-import de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager;
-import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.ContentTypeRegistry;
+import java.awt.Color;
+
+import javax.swing.JList;
+import javax.swing.text.Highlighter;
+import javax.swing.text.Highlighter.HighlightPainter;
+import javax.swing.text.Style;
+
+import de.ims.icarus.language.dependency.annotation.AnnotatedDependencyData;
+import de.ims.icarus.plugins.dependency.list.DependencyListCellRenderer;
+import de.ims.icarus.util.annotation.AnnotationManager;
+import de.ims.icarus.util.annotation.HighlightType;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
  *
  */
-public class NGramAnnotationManager extends AbstractSearchAnnotationManager {
-	
-	public NGramAnnotationManager(){
-		//noop
-	}
+public class NGramListCellRenderer extends DependencyListCellRenderer {
 
-	/**
-	 * @see de.ims.icarus.util.annotation.AnnotationManager#getAnnotationType()
-	 */
-	@Override
-	public ContentType getAnnotationType() {
-		// TODO passt dependency anno type?
-		//return DependencyUtils.getDependencyAnnotationType();
-		return ContentTypeRegistry.getInstance().getTypeForClass(NGramAnnotation.class);
-	}
+	private static final long serialVersionUID = 593080989347901189L;
 
-	/**
-	 * @see de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager#createCompositeHighlight(long[])
-	 */
-	@Override
-	protected long createCompositeHighlight(long[] highlights) {
-		return NGramHighlighting.getInstance().createCompositeHighlight(highlights);
-	}
 
 }

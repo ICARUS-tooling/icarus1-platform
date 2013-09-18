@@ -23,39 +23,15 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.errormining.annotation;
+package de.ims.icarus.plugins.errormining;
 
-import de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager;
-import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.language.dependency.DependencyData;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
  *
  */
-public class NGramAnnotationManager extends AbstractSearchAnnotationManager {
-	
-	public NGramAnnotationManager(){
-		//noop
-	}
-
-	/**
-	 * @see de.ims.icarus.util.annotation.AnnotationManager#getAnnotationType()
-	 */
-	@Override
-	public ContentType getAnnotationType() {
-		// TODO passt dependency anno type?
-		//return DependencyUtils.getDependencyAnnotationType();
-		return ContentTypeRegistry.getInstance().getTypeForClass(NGramAnnotation.class);
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager#createCompositeHighlight(long[])
-	 */
-	@Override
-	protected long createCompositeHighlight(long[] highlights) {
-		return NGramHighlighting.getInstance().createCompositeHighlight(highlights);
-	}
+public interface NGramData {
 
 }

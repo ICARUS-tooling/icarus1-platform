@@ -17,10 +17,10 @@
 	
 	<requires>
 		<import plugin-id="de.ims.icarus.core" />
-		<import plugin-id="de.ims.icarus.jgraph" />
 		<import plugin-id="de.ims.icarus.languageTools" />
-		<import plugin-id="de.ims.icarus.matetools" />
 		<import plugin-id="de.ims.icarus.searchTools" />
+		<import plugin-id="de.ims.icarus.jgraph" />		
+		<import plugin-id="de.ims.icarus.matetools" />		
 	</requires>
 	
 	<runtime>
@@ -136,7 +136,7 @@
 	
 	<!-- CONTENT TYPES -->
 	
-	<extension id="NGramSentenceDataDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+	<extension id="NGramSentenceDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
 				Content type based on de.ims.icarus.plugins.errormining.ngram_tools.NGramSentenceData.java
@@ -144,8 +144,6 @@
 		</doc>
 		<parameter id="contentClass" value="de.ims.icarus.plugins.errormining.ngram_tools.NGramSentenceData" />
 	</extension>
-
-
 
 	<extension id="NGramAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
@@ -156,7 +154,15 @@
 		<parameter id="contentClass" value="de.ims.icarus.plugins.errormining.annotation.NGramAnnotation" />
 	</extension>
 
-	
+
+	<extension id="NGramDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.errormining.NGramData.java
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.errormining.NGramData" />
+	</extension>	
 
 	
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
@@ -186,5 +192,32 @@
 		<parameter id="resources" value="de.ims.icarus.plugins.errormining.resources.errormining" />
 		<parameter id="icon" value="de/ims/icarus/plugins/errormining/ngram_search/ngram-search-factory.gif" />
 	</extension>
+	
+<!--
+	<extension id="CoreferenceDocumentDataPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Basic presenter for visualization of coreference document objects that wraps a
+				collection of specialized other presenters that perform the actual presentation.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter" />
+		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter" />
+	</extension>
+
+-->
+
+	<extension id="NGramListCellRenderer" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.errormining.view.NGramListCellRenderer" />
+		<parameter id="contentType" value="de.ims.icarus.errormining@NGramDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+
 	
 </plugin>

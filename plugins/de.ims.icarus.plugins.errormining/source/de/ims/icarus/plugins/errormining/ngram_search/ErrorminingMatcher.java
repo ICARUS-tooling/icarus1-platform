@@ -23,39 +23,39 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.errormining.annotation;
+package de.ims.icarus.plugins.errormining.ngram_search;
 
-import de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager;
-import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.ContentTypeRegistry;
+import java.util.List;
+
+import de.ims.icarus.search_tools.result.EntryBuilder;
+import de.ims.icarus.search_tools.standard.GroupCache;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
  *
  */
-public class NGramAnnotationManager extends AbstractSearchAnnotationManager {
-	
-	public NGramAnnotationManager(){
-		//noop
-	}
+
+public interface ErrorminingMatcher {
 
 	/**
-	 * @see de.ims.icarus.util.annotation.AnnotationManager#getAnnotationType()
+	 * @param helferList
 	 */
-	@Override
-	public ContentType getAnnotationType() {
-		// TODO passt dependency anno type?
-		//return DependencyUtils.getDependencyAnnotationType();
-		return ContentTypeRegistry.getInstance().getTypeForClass(NGramAnnotation.class);
-	}
+	void setSentenceList(List<MappedNGramResult> helferList);
 
 	/**
-	 * @see de.ims.icarus.search_tools.annotation.AbstractSearchAnnotationManager#createCompositeHighlight(long[])
+	 * @param cache
 	 */
-	@Override
-	protected long createCompositeHighlight(long[] highlights) {
-		return NGramHighlighting.getInstance().createCompositeHighlight(highlights);
-	}
+	void setCache(GroupCache cache);
+
+	/**
+	 * @param entryBuilder
+	 */
+	void setEntryBuilder(EntryBuilder entryBuilder);
+
+	/**
+	 * @param index
+	 */
+	void matches(int index);
 
 }

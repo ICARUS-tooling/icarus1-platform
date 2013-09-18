@@ -41,7 +41,8 @@ import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
  *
  */
 public class NGramHighlighting extends BitmaskHighlighting {
-	
+
+
 	private static NGramHighlighting instance;
 	
 	public static NGramHighlighting getInstance() {
@@ -67,6 +68,7 @@ public class NGramHighlighting extends BitmaskHighlighting {
 		registerToken("nuclei", true, new Color(255,42,0)); //$NON-NLS-1$
 	}
 	
+
 	protected ConfigListener configListener;
 
 	/**

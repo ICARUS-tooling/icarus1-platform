@@ -77,8 +77,8 @@ import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchDescriptor;
+import de.ims.icarus.search_tools.SearchEdge;
 import de.ims.icarus.search_tools.SearchNode;
-import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultGraphNode;
@@ -240,14 +240,11 @@ public class NGramQueryEditor extends QueryEditor{
 		
 		registerActionCallbacks();
 				
-		//showDefaultInfo();	
-					
+		//showDefaultInfo();						
 		
-		buildDialog();
+		buildDialog();		
 		
-		
-		refreshActions();
-		
+		refreshActions();		
 	}
 	
 	
@@ -399,6 +396,7 @@ public void buildDialog() {
 	 * @param attribute 
 	 * 
 	 */
+	@SuppressWarnings("unused")
 	private void includeQueryTag(int row) {
 		qtm.setInclueQueryAttribute(row);
 		refreshActions();
@@ -460,7 +458,8 @@ public void buildDialog() {
 				NGramQAttributes qatt = new NGramQAttributes();
 				qatt.setKey(eElement.getAttribute("Tagclass")); //$NON-NLS-1$
 				qatt.setValue(eElement.getAttribute("Value")); //$NON-NLS-1$
-				
+				qatt.setInclude(Boolean.parseBoolean(
+									eElement.getAttribute("Include"))); //$NON-NLS-1$
 //				System.out.print(eElement.getAttribute("Tagclass"));
 //				System.out.println(+ " " + eElement.getAttribute("Value"));
 				qList.add(qatt);				
@@ -493,7 +492,6 @@ public void buildDialog() {
 			query.setAttribute("Include", include.toString()); //$NON-NLS-1$
 			query.setAttribute("Tagclass", key); //$NON-NLS-1$
 			query.setAttribute("Value", val); //$NON-NLS-1$
-			System.out.println(include);
 			rootElement.appendChild(query);
 		}
 		
@@ -915,50 +913,20 @@ public void buildDialog() {
 		
 		//searchQuery.getSearchGraph();
 		
-		//create one DefaultGraphNode with all constraints from table		
+		//create one DefaultGraphNode for all constraints from ngrammaquery table		
 		DefaultGraphNode dgn = new DefaultGraphNode();
-
 		
 		if (qtm.qList == null){
 			return;
-		}
-		
-		int constraintNumber = qtm.qList.size();
-		System.out.println("#Constraints " + constraintNumber);
-		
-//		//Build constraintsset if there are any constraints
-//		if (constraintNumber > 0){
-//			SearchConstraint[] constraints = new SearchConstraint[constraintNumber];
-//	
-//			for(int i = 0; i < constraintNumber; i++){
-//				
-//				String token = (String) qtm.getValueAt(i, 1);
-//				Object value = qtm.getValueAt(i, 2);
-//				
-//				SearchOperator operator = null;
-//				if(qtm.getValueAt(i, 0).equals(true)){
-//					operator = SearchOperator.getOperator("~");
-//					//System.out.println(qtm.getValueAt(i, 1) + " true ");
-//					operator = DefaultSearchOperator.CONTAINS;
-//				} else {
-//					operator = SearchOperator.getOperator("!~");
-//					//System.out.println(qtm.getValueAt(i, 1) + " false ");
-//					operator = DefaultSearchOperator.CONTAINS_NOT;
-//				}
-//				
-//	
-//				constraints[i] = new DefaultConstraint("TAG", qtm.qList,  DefaultSearchOperator.EQUALS);
-//			}
-//			SearchConstraint[] constraints = new SearchConstraint[1];
-//			constraints[0] = new DefaultConstraint("TAG", qtm.qList,  DefaultSearchOperator.EQUALS);
-//			dgn.setConstraints(constraints);
-//		}
+		}		
 		
 		SearchConstraint[] constraints = new SearchConstraint[1];
-		constraints[0] = new DefaultConstraint("TAG", qtm.qList,  DefaultSearchOperator.EQUALS);
+		constraints[0] = new DefaultConstraint("TAG", //$NON-NLS-1$
+												qtm.qList,
+												DefaultSearchOperator.EQUALS);
 		dgn.setConstraints(constraints);
 		
-		//default create search node and push the only node into
+		//default create search node and push the only searchconstraint into it
 		SearchNode[] sn = new SearchNode[1];
 		sn[0] = dgn;
 		
@@ -966,10 +934,13 @@ public void buildDialog() {
 		DefaultSearchGraph graph = new DefaultSearchGraph();
 		graph.setRootNodes(sn);
 		graph.setNodes(sn);
-		
+		//creating empty edges (otherwise unsupportet format thile graph translation
+		graph.setEdges(new SearchEdge[0]);		
 		
 		searchQuery.setSearchGraph(graph);
-		System.out.println("Graph Added " + searchQuery.getQueryString());
+		searchDescriptor.getSearchFactory().getQueryLabel(searchQuery);
+		
+		//System.out.println("Graph Added " + searchQuery.getQueryString()); //$NON-NLS-1$
 	}
 
 

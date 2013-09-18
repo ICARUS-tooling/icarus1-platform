@@ -25,21 +25,26 @@
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
-import de.ims.icarus.language.dependency.DependencyData;
+import java.util.List;
+
+import de.ims.icarus.language.dependency.DependencyUtils;
+import de.ims.icarus.plugins.errormining.NGramQAttributes;
 import de.ims.icarus.plugins.errormining.NGramQueryEditor;
 import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
+import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
+import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
+import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.SearchQuery;
-import de.ims.icarus.search_tools.standard.DefaultParameterEditor;
+import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
 import de.ims.icarus.search_tools.standard.DefaultSearchQuery;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Gregor Thiele
@@ -63,7 +68,8 @@ public class NGramSearchFactoryDependency implements SearchFactory {
 	}
 	
 	public ContentType getContentType() {
-		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
+		//return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
+		return DependencyUtils.getDependencyContentType();
 	}
 
 	/**
@@ -88,7 +94,7 @@ public class NGramSearchFactoryDependency implements SearchFactory {
 	 */
 	@Override
 	public Editor<Options> createParameterEditor() {
-		return new DefaultParameterEditor();
+		return new NGramParameterEditor();
 	}
 
 
@@ -97,7 +103,6 @@ public class NGramSearchFactoryDependency implements SearchFactory {
 	 */
 	@Override
 	public Search createExampleSearch() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -116,8 +121,38 @@ public class NGramSearchFactoryDependency implements SearchFactory {
 	 */
 	@Override
 	public String getQueryLabel(SearchQuery query) {
-		// TODO Auto-generated method stub
-		return null;
+		String queryLabel = ResourceManager.getInstance()
+				.get("plugins.errorMining.nGramQueryEditor.labelNoQuery"); //$NON-NLS-1$
+		
+		//Extract NGramQuerylist  from Search Graph
+		if (query != null){
+
+			DefaultSearchGraph graph = (DefaultSearchGraph) query.getSearchGraph();
+			
+			if (graph.getNodes() != null) {
+				SearchNode[] sn = new SearchNode[1];
+				sn = graph.getNodes();
+				SearchConstraint[] constraints = new SearchConstraint[1];			
+				
+				//holding object list<ngrammattributes>
+				constraints = sn[0].getConstraints();
+				
+				@SuppressWarnings("unchecked")
+				List<NGramQAttributes> nqList = (List<NGramQAttributes>)
+														constraints[0].getValue();
+				if(nqList.size() == 1){
+					queryLabel = ResourceManager.getInstance()
+							.get("plugins.errorMining.nGramQueryEditor.labelOneQuery"); //$NON-NLS-1$
+				} else {
+					queryLabel = nqList.size() + " "+ ResourceManager.getInstance() //$NON-NLS-1$
+							.get("plugins.errorMining.nGramQueryEditor.labelMultiQuery"); //$NON-NLS-1$
+				
+				}
+				//System.out.println("Using #Querys: " + nqList.size()); //$NON-NLS-1$
+			}
+		}
+		
+		return queryLabel;
 	}
 
 }

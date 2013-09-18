@@ -54,12 +54,16 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 public class NGramsDependency {
 	
 	protected int nGramCount;
-	protected int nGramLimit;
+	protected final int nGramLimit;
+	protected final boolean useFringe;
 	protected int fringeStart;
 	protected int fringeEnd;
 	
 	//protected List<DependencyItemInNuclei> items;
 	protected Map<String,ArrayList<DependencyItemInNuclei>> nGramCache;	
+	protected List<NGramQAttributes> queryList;
+	protected Options options;
+	
 	
 	protected List<DependencyData> corpus;
 	
@@ -80,15 +84,38 @@ public class NGramsDependency {
 	
 	//Debug Konstructor
 	public NGramsDependency(){
-		Options options = Options.emptyOptions;
+		Options options = new Options();
+		options = Options.emptyOptions;
 
 		this.nGramCount = 1; //normally we start with unigrams so n will be 1
 		
 		
 		//0 collect ngrams until no new ngrams are found
 		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
+		this.fringeStart = (int) options.get("FringeSTART", 0);  //$NON-NLS-1$
+		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		this.useFringe = false;
+		
+		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
+		corpus = new ArrayList<DependencyData>();
+	}
+
+	
+	public NGramsDependency(Options options, List<NGramQAttributes> queryList){
+		
+		this.options = options;
+		
+		this.nGramCount = 1; //normally we start with unigrams so n will be 1
+		
+		this.queryList = queryList;
+		
+		//0 collect ngrams until no new ngrams are found
+
 		this.fringeStart = (int) options.get("FringeSTART", 3);  //$NON-NLS-1$
 		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		
+		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
+		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
@@ -98,17 +125,17 @@ public class NGramsDependency {
 	
 	public NGramsDependency(int nGramCount, Options options){
 		
-		if (options == null) {
-			options = Options.emptyOptions;
-		}
+		this.options = options;
 		
 		this.nGramCount = nGramCount; //normally we start with unigrams so n will be 1
 		
 		
 		//0 collect ngrams until no new ngrams are found
-		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
 		this.fringeStart = (int) options.get("FringeSTART", 3);  //$NON-NLS-1$
 		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		
+		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
+		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
@@ -137,7 +164,7 @@ public class NGramsDependency {
 				DependencySentenceInfo si = (DependencySentenceInfo) item.getSentenceInfoAt(j);
 				
 				if(si.getSentenceNr() == sentenceNR){
-					//TODO maybe list?!
+					//maybe list?!
 					//System.out.println("NucleiToBeAdded " + si.getNucleiSentencePositionAt(0));
 					return si;
 				}				
@@ -239,14 +266,14 @@ public class NGramsDependency {
 //				System.out.println("RLabel " + dd.getRelation(wordIndex)
 //						+ " Head " + head + " " + dd.getForm(head)
 //						+ " WIndex " + wordIndex);
-				//TODO doublecheck working correct way? if so no more workaround needed
+				//TODO doublecheck working correct way? no more workaround needed
 				if (wordIndex < headIndex){
-					addedword = currentWord + " " + dd.getForm(headIndex); //$NON-NLS-1$
+					addedword = currentWord + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
 				} else {
-					addedword = dd.getForm(headIndex) + " " + currentWord; //$NON-NLS-1$
+					addedword = getTagQueryDependency(dd.getForm(headIndex)) + " " + currentWord; //$NON-NLS-1$
 				}
 				
-				//addedword = currentWord + " " + dd.getForm(headIndex); //$NON-NLS-1$
+				//addedword = currentWord + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
 				sb.append("<").append(addedword).append(" {")  //$NON-NLS-1$//$NON-NLS-2$
 				.append(tag)
 				.append("}>"); //$NON-NLS-1$
@@ -877,7 +904,7 @@ public class NGramsDependency {
 		String nucleiTag = null;
 		
 		if (headIndex > 0 ){
-			nucleiTag = dd.getForm(i) + " " + dd.getForm(headIndex); //$NON-NLS-1$
+			nucleiTag = dd.getForm(i) + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
 		
 		
 //		System.out.println("NUCLEI: " + dd.getForm(i)
@@ -900,7 +927,7 @@ public class NGramsDependency {
 		String nucleiTag = null;
 		
 		if (headIndex > 0 ){
-			nucleiTag = dd.getForm(i) + " " + dd.getForm(headIndex); //$NON-NLS-1$
+			nucleiTag = dd.getForm(i) + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
 		
 		//TODO
 //		System.out.println("NUCLEI: " + dd.getForm(i)
@@ -921,6 +948,7 @@ public class NGramsDependency {
 	 * @return
 	 */
 	private boolean continueNGrams() {
+		//0 -> collect all ngrams until algorithm end
 		if(nGramLimit == 0){
 			return true;
 		}
@@ -1000,6 +1028,39 @@ public class NGramsDependency {
 		item.addNewSentenceInfoLeft(si);			
 	}
 	
+	protected String getTagQueryDependency(String qtag){
+		String tag = qtag;
+		for(int i = 0; i < queryList.size(); i++){
+			NGramQAttributes att = queryList.get(i);
+			//System.out.println(tag + " vs " + att.getKey());
+			
+			//is there a key in querylist?
+			if (att.getKey().equals(tag)){
+				//System.out.print("Hit " + tag + " vs " + att.getKey());
+				
+				//shall we use key?
+				if(att.include){
+					
+					if(att.getValue().equals("")){ //$NON-NLS-1$
+						//reuse old tag
+						//System.out.println(" Included Oldtag " + tag);
+						return tag;
+					} else {
+						//use newspecified tag
+						//System.out.println(" Included Newtag " + att.getValue());
+						return att.getValue();
+					}
+					
+				} else {
+					//ignore tag for search
+					//System.out.println(" excluded ");
+					return null;
+				}
+			}
+		}		
+		return tag;		
+	}
+	
 	
 	public Map<String, ArrayList<DependencyItemInNuclei>> getResult(){
 		return nGramCache;
@@ -1011,7 +1072,7 @@ public class NGramsDependency {
 	 * @throws ParserConfigurationException 
 	 * 
 	 */
-	private void outputToFile() {
+	public void outputToFile() {
 		nGramIO io = new nGramIO();
 		try {
 			io.nGramsToXMLDependency(nGramCache);
