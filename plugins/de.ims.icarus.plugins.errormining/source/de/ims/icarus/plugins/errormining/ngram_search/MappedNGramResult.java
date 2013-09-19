@@ -25,6 +25,11 @@
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.ims.icarus.plugins.errormining.SentenceInfo;
+
 
 /**
  * @author Gregor Thiele
@@ -34,18 +39,90 @@ package de.ims.icarus.plugins.errormining.ngram_search;
 public class MappedNGramResult {
 	
 	protected int index;
-	protected String key;
+	protected List<String> keyList;
+	protected int coverStart;
+	protected int coverEnd;
 	
 	/**
 	 * @param index
 	 * @param key
 	 */
-	public MappedNGramResult(int index, String key) {
+	public MappedNGramResult(int index, String key, SentenceInfo si) {
+		if(keyList == null){
+			keyList = new ArrayList<String>();
+		}
+		
+		addKey(key);
+		
 		this.index = index;
-		this.key = key;
+		this.coverStart = si.getSentenceBegin();
+		this.coverEnd = si.getSentenceEnd();
+	}
+
+
+
+
+
+	public String getKeyAt(int index) {
+		return keyList.get(index);
+	}
+
+
+	public int getKeyListSize() {
+		return keyList.size();
 	}
 	
+	public void addKey(String key) {
+		keyList.add(key);
+	}
 	
+	public int indexOfKex(String key) {
+		return keyList.indexOf(key);
+	}
+
+
+
+
+	/**
+	 * @return the coverStart
+	 */
+	public int getCoverStart() {
+		return coverStart;
+	}
+
+
+
+
+	/**
+	 * @param coverStart the coverStart to set
+	 */
+	public void setCoverStart(int coverStart) {
+		this.coverStart = coverStart;
+	}
+
+
+
+
+	/**
+	 * @return the coverEnd
+	 */
+	public int getCoverEnd() {
+		return coverEnd;
+	}
+
+
+
+
+	/**
+	 * @param coverEnd the coverEnd to set
+	 */
+	public void setCoverEnd(int coverEnd) {
+		this.coverEnd = coverEnd;
+	}
+
+
+
+
 	/**
 	 * @return the index
 	 */
@@ -74,20 +151,20 @@ public class MappedNGramResult {
 	}
 	
 	
-	/**
-	 * @return the key
-	 */
-	public String getKey() {
-		return key;
-	}
-	
-	
-	/**
-	 * @param key the key to set
-	 */
-	public void setKey(String key) {
-		this.key = key;
-	}
+//	/**
+//	 * @return the key
+//	 */
+//	public String getKey() {
+//		return key;
+//	}
+//	
+//	
+//	/**
+//	 * @param key the key to set
+//	 */
+//	public void setKey(String key) {
+//		this.key = key;
+//	}
 	
 	
 	/**

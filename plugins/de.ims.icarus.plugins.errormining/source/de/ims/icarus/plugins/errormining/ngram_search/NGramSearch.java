@@ -26,7 +26,6 @@
 package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +37,12 @@ import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
+import de.ims.icarus.plugins.errormining.DependencySentenceInfo;
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
 import de.ims.icarus.plugins.errormining.NGramQAttributes;
 import de.ims.icarus.plugins.errormining.NGrams;
 import de.ims.icarus.plugins.errormining.NGramsDependency;
+import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.plugins.errormining.annotation.NGramHighlighting;
 import de.ims.icarus.plugins.errormining.annotation.NGramResultAnnotator;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
@@ -70,9 +71,10 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 	
 	protected ErrorminingMatcher matcher;
 	protected final boolean useFringe;
-	protected final int ngramResultLimit;
 	protected final int fringeStart;
 	protected final int fringeEnd;
+	protected final boolean useNumberWildcard;
+	protected final int ngramResultLimit;
 	protected final int gramsGreaterX;
 	protected final int sentenceLimit;
 	protected final boolean createXML;
@@ -89,6 +91,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 			SearchQuery query, Options options, Object target) {
 		super(factory, query, options, target);
 
+		useNumberWildcard = getParameters().getBoolean(USE_NUMBER_WILDCARD, DEFAULT_USE_NUMBER_WILDCARD);
 		useFringe = getParameters().getBoolean(USE_FRINGE_HEURISTIC, DEFAULT_USE_FRINGE_HEURISTIC);
 		fringeStart = getParameters().getInteger(FRINGE_START, DEFAULT_FRINGE_START);
 		fringeEnd = getParameters().getInteger(FRINGE_END, DEFAULT_FRINGE_END);
@@ -103,6 +106,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 			SearchQuery query, Options options, Object target) {
 		super(factory, query, options, target);
 		
+		useNumberWildcard = getParameters().getBoolean(USE_NUMBER_WILDCARD, DEFAULT_USE_NUMBER_WILDCARD);
 		useFringe = getParameters().getBoolean(USE_FRINGE_HEURISTIC, DEFAULT_USE_FRINGE_HEURISTIC);
 		fringeStart = getParameters().getInteger(FRINGE_START, DEFAULT_FRINGE_START);
 		fringeEnd = getParameters().getInteger(FRINGE_END, DEFAULT_FRINGE_END);
@@ -236,10 +240,12 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 	protected Options createOptions() {
 		
 		Options options = new Options();
+		options.put("UseFringe", useFringe); //$NON-NLS-1$
 		options.put("FringeSTART", fringeStart); //$NON-NLS-1$
 		options.put("FringeEND", fringeEnd); //$NON-NLS-1$ // 0 = infinity , number = limit
-		options.put("UseFringe", useFringe); //$NON-NLS-1$
+
 		options.put("NGramLIMIT", ngramResultLimit); //$NON-NLS-1$
+		options.put("UseNumberWildcard", useNumberWildcard); //$NON-NLS-1$
 		return options;
 	}
 	
@@ -380,13 +386,14 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 		//									  " PoSCount: " + iin.getCount());
 							
 								for (int k = 0; k < iin.getSentenceInfoSize(); k++){
-									int sentenceNR = iin.getSentenceInfoAt(k).getSentenceNr()-1;
+									DependencySentenceInfo si = iin.getSentenceInfoAt(k);
+									int sentenceNR = si.getSentenceNr()-1;
 		//							System.out.println(key + " " + sentenceNR);
 		//							System.out.println(
 		//									iin.getSentenceInfoAt(k).getNucleiIndexListSize());
 									
 									MappedNGramResult mapping = 
-											new MappedNGramResult(sentenceNR, key);
+											new MappedNGramResult(sentenceNR, key, si);
 									if(helferList.contains(mapping)){	
 										//donothing
 									} else {
@@ -554,16 +561,24 @@ protected class NGramWorker extends Worker{
 	//									  " PoSCount: " + iin.getCount());
 						
 							for (int k = 0; k < iin.getSentenceInfoSize(); k++){
-								int sentenceNR = iin.getSentenceInfoAt(k)
-														.getSentenceNr()-1;
+								SentenceInfo si = iin.getSentenceInfoAt(k);
+								int sentenceNR = si.getSentenceNr()-1;
 	//							System.out.println(key + " " + sentenceNR);
 	//							System.out.println(
 	//									iin.getSentenceInfoAt(k).getNucleiIndexListSize());
 								
+								//FIXME zwei nuclei im satz aber nicht verschmolzen!
 								MappedNGramResult mapping = 
-										new MappedNGramResult(sentenceNR, key);
+										new MappedNGramResult(sentenceNR, key, si);
 								if(helferList.contains(mapping)){	
 									//donothing
+									//System.out.println(disjunctNuclei(mapping, key, helferList));
+									
+									if(disjunctNuclei(mapping, key, helferList)){
+										//helferList.add(mapping);
+										MappedNGramResult tmp = helferList.get(helferList.indexOf(mapping));
+										tmp.addKey(key);
+									}
 								} else {								
 									helferList.add(mapping);	
 								}
@@ -638,5 +653,46 @@ protected class NGramWorker extends Worker{
 			System.out.println(result.getContentType());
 		}
 		
+	}
+
+
+
+	/**
+	 * we only want every sentence at most once in our results, therefore we have
+	 * to check if for a given key we already created a hit. this is done by simple
+	 * string contains matching. When a ngram contains more than one key this is 
+	 * already represented by two nucleis within the ngram. Otherwise we have a 
+	 * new key which is not covered by the ngram we have added so far and we 
+	 * add the new key to the helferList which contains all keys (larges ngrams) 
+	 * from an given variation nuclei
+	 * 
+	 * @param mapping
+	 * @param ngramsResultMap 
+	 * @param helferList 
+	 * @return 
+	 */
+	public boolean disjunctNuclei(MappedNGramResult mapping, String newKey, List<MappedNGramResult> helferList) {
+		MappedNGramResult tmp = helferList.get(helferList.indexOf(mapping));
+
+		
+		boolean newHit = false;
+		for(int i = 0; i < tmp.getKeyListSize(); i++){
+			if (!tmp.getKeyAt(i).contains(newKey)){
+				newHit = true;
+			}			
+		}
+		
+//		System.out.println(mapping.getCoverStart() + " " + mapping.getCoverEnd());
+//		System.out.println(tmp.getCoverStart() + " " + tmp.getCoverEnd());
+		
+//		if(mapping.getCoverStart() < tmp.getCoverStart()){
+//			newHit = true;
+//		}
+//		
+//		if(mapping.getCoverEnd() > tmp.getCoverEnd()){
+//			newHit = true;
+//		}
+		
+		return newHit;
 	}
 }

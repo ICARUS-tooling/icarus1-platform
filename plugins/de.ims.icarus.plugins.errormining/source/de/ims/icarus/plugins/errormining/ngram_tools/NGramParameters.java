@@ -32,6 +32,8 @@ package de.ims.icarus.plugins.errormining.ngram_tools;
  */
 public interface NGramParameters {
 
+	public static final String USE_NUMBER_WILDCARD = "numberWildcard"; //$NON-NLS-1$
+	
 	public static final String NGRAM_RESULT_LIMIT = "resultLimit"; //$NON-NLS-1$	
 	
 	public static final String USE_FRINGE_HEURISTIC = "fringe"; //$NON-NLS-1$
@@ -47,6 +49,7 @@ public interface NGramParameters {
 	public static final String CREATE_XML_OUTPUT = "createxmlOutput"; //$NON-NLS-1$
 	
 	//default values
+	public static final boolean DEFAULT_USE_NUMBER_WILDCARD = true;
 	public static final int DEFAULT_NGRAM_RESULT_LIMIT = 0;
 	public static final boolean DEFAULT_USE_FRINGE_HEURISTIC = true;
 	public static final int DEFAULT_FRINGE_START = 3;

@@ -20,7 +20,8 @@
 		<import plugin-id="de.ims.icarus.languageTools" />
 		<import plugin-id="de.ims.icarus.searchTools" />
 		<import plugin-id="de.ims.icarus.jgraph" />		
-		<import plugin-id="de.ims.icarus.matetools" />		
+		<import plugin-id="de.ims.icarus.matetools" />
+		<import plugin-id="de.ims.icarus.dependency" />		
 	</requires>
 	
 	<runtime>

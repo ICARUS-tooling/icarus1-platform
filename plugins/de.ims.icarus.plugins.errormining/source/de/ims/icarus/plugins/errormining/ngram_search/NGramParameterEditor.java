@@ -54,6 +54,9 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 	
 	protected FormBuilder createForm() {
 		FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
+		
+		formBuilder.addToggleFormEntry(USE_NUMBER_WILDCARD,
+				"plugins.errormining.labels.numberWildcard"); //$NON-NLS-1$
 				
 		formBuilder.addToggleFormEntry(USE_FRINGE_HEURISTIC,
 				"plugins.errormining.labels.fringe"); //$NON-NLS-1$
@@ -117,6 +120,10 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 		}
 		
 		Options options = data==null ? Options.emptyOptions : data;
+		
+		formBuilder.setValue(USE_NUMBER_WILDCARD,
+				options.get(USE_NUMBER_WILDCARD,
+							DEFAULT_USE_NUMBER_WILDCARD));
 		
 		formBuilder.setValue(USE_FRINGE_HEURISTIC,
 							options.get(USE_FRINGE_HEURISTIC,

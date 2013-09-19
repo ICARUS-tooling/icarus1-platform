@@ -65,79 +65,15 @@ public class NGramResultMatcherPoS implements ErrorminingMatcher, Cloneable, Com
 		
 		for(int i = 0; i < helferList.size(); i++){
 			if(helferList.get(i).containsIntIndex(index)){
-				//System.out.println(helferList.get(i).getKey());
-				ArrayList<ItemInNuclei> iinL = ngramsResultMap.get(helferList.get(i).getKey());
 				
-				
-				/* ******************************************************************
-				 * ausreichend nur ein ItemInNuclei und SentenceInfo object 
-				 * zu nehmen. Warum? Hinter jedem IIN eines satzes liegt zu einem key
-				 * die selben informationen bzgl ngramlänge und ngram nucleis vor. Wenn
-				 * jeder eintrag durchgegangen wird erhalten wir:
-				 * 			-> hits x anzahl PoS einträge = gesamthits
-				 */
-				
-				//TODO LÖSCHEN NICHT LÄNGER BENÖTIGT!!!!!!!
-//				ItemInNuclei iin = iinL.get(0);
-//				SentenceInfo si = iin.getSentenceInfoAt(0);					
-//
-//						
-//				for (int nuclei = 0; nuclei < si.getNucleiIndexListSize(); nuclei++){
-//					
-//					//start - end - nuclei
-//					int[] hitArray = new int[3];
-//					//satzanfang
-//					hitArray[0] = si.getSentenceBegin();
-//					//satzende
-//					hitArray[1] = si.getSentenceEnd();
-//					//nuclei
-//					hitArray[2] = si.getNucleiIndexListAt(nuclei);
-//					
-////					System.out.println(hitArray[0] + " " //$NON-NLS-1$
-////										+ hitArray[1] + " " //$NON-NLS-1$
-////										+ hitArray[2]);
-//					Hit hit = new Hit(hitArray);					
-//					entryBuilder.addHit(hit);
-//				}
-				
-				
-				
-				for (int item = 0; item < iinL.size(); item++) {
-					ItemInNuclei iin = iinL.get(item);
-					// System.out.println("PoSTag: "+ iin.getPosTag() +
-					// " PoSCount: " + iin.getCount());
+				MappedNGramResult mngResult = helferList.get(i);
+				for(int tmp = 0; tmp < mngResult.getKeyListSize(); tmp++){
+					ArrayList<ItemInNuclei> iinL = ngramsResultMap.get(mngResult.getKeyAt(tmp));
+					
+					buildHit(iinL, index);
+					
+				}			
 
-					for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
-						SentenceInfo si = iin.getSentenceInfoAt(s);
-						int sIndex = si.getSentenceNr()-1;
-//						System.out.println("InputSentence: " + index +
-//								" Current " + sIndex);
-						
-						
-						// only if we have the correct sentence index check
-						// nucleis and make hits!
-						if(index == sIndex){
-							for (int nuclei = 0; nuclei < si
-									.getNucleiIndexListSize(); nuclei++) {
-
-								// start - end - nuclei
-								int[] hitArray = new int[3];
-								// satzanfang
-								hitArray[0] = si.getSentenceBegin();
-								// satzende
-								hitArray[1] = si.getSentenceEnd();
-								// nuclei
-								hitArray[2] = si.getNucleiIndexListAt(nuclei);
-
-								// System.out.println(hitArray[0] + " "
-								// + hitArray[1] + " " + hitArray[2]);
-
-								Hit hit = new Hit(hitArray);
-								entryBuilder.addHit(hit);
-							}
-						}
-					}
-				}
 				commit();
 			
 			}
@@ -145,6 +81,51 @@ public class NGramResultMatcherPoS implements ErrorminingMatcher, Cloneable, Com
 	}
 	
 	
+	/**
+	 * @param iinL
+	 * @param index 
+	 */
+	private void buildHit(ArrayList<ItemInNuclei> iinL, int index) {
+		for (int item = 0; item < iinL.size(); item++) {
+			ItemInNuclei iin = iinL.get(item);
+			// System.out.println("PoSTag: "+ iin.getPosTag() +
+			// " PoSCount: " + iin.getCount());
+
+			for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
+				SentenceInfo si = iin.getSentenceInfoAt(s);
+				int sIndex = si.getSentenceNr()-1;
+//				System.out.println("InputSentence: " + index +
+//						" Current " + sIndex);
+				
+				
+				// only if we have the correct sentence index check
+				// nucleis and make hits!
+				if(index == sIndex){
+					for (int nuclei = 0; nuclei < si
+							.getNucleiIndexListSize(); nuclei++) {
+
+						// start - end - nuclei
+						int[] hitArray = new int[3];
+						// satzanfang
+						hitArray[0] = si.getSentenceBegin();
+						// satzende
+						hitArray[1] = si.getSentenceEnd();
+						// nuclei
+						hitArray[2] = si.getNucleiIndexListAt(nuclei);
+
+						// System.out.println(hitArray[0] + " "
+						// + hitArray[1] + " " + hitArray[2]);
+
+						Hit hit = new Hit(hitArray);
+						entryBuilder.addHit(hit);
+					}
+				}
+			}
+		}
+		
+	}
+
+
 	protected void commit() {
 		cache.commit(entryBuilder.toEntry());
 	}
