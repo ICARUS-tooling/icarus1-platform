@@ -349,12 +349,26 @@ public final class UIUtil {
 		Font font = UIManager.getFont("ToolTip.font"); //$NON-NLS-1$
 		FontMetrics fm = getTextDummy().getFontMetrics(font);
 		tooltip = StringUtil.wrap(tooltip, fm, DEFAULT_TOOLTIP_WIDTH);
+		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
+				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
+		if(convertedTooltip.length()!=tooltip.length()) {
+			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$
+		}
+		
+		return tooltip;
+	}
+	
+	public static String toUnwrappedSwingTooltip(String tooltip) {
+		if(tooltip==null || tooltip.isEmpty()) {
+			return null;
+		}
 		
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(convertedTooltip.length()!=tooltip.length()) {
 			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$
 		}
+		
 		return tooltip;
 	}
 	

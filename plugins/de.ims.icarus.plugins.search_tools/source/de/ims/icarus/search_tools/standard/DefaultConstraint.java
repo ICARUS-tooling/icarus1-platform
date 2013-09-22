@@ -218,4 +218,12 @@ public class DefaultConstraint implements SearchConstraint {
 		this.specifier = specifier;
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#getLabel(java.lang.Object)
+	 */
+	@Override
+	public Object getLabel(Object value) {
+		return value;
+	}
+
 }

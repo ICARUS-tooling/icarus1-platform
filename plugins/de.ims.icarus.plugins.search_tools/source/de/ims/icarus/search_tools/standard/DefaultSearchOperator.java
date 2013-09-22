@@ -62,14 +62,17 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 	}
 	
 	private static boolean equals0(Object value, Object constraint) {
-		return value.equals(constraint);
+		return value==null ? constraint==null : value.equals(constraint);
 	}
 	
 	private static boolean contains0(Object value, Object constraint) {
-		return ((String)value).contains((String)constraint);
+		return value==null ? constraint==null : ((String)value).contains((String)constraint);
 	}
 	
 	private static boolean matches0(Object value, Object constraint) {
+		if(value==null) {
+			return constraint==null;
+		}
 		Pattern pattern = SearchManager.getPattern((String)constraint);
 		return pattern==null ? false : pattern.matcher((String)value).find();
 	}

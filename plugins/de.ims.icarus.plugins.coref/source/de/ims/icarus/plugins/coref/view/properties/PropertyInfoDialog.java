@@ -327,7 +327,8 @@ public class PropertyInfoDialog extends JFrame {
 			
 			JTable table = (JTable) e.getSource();
 			int row = table.rowAtPoint(e.getPoint());
-			int col = table.columnAtPoint(e.getPoint());
+			//XXX switched to static column so the entire row acts as source for the property name
+			int col = 1;
 			
 			if(row==-1 || col==-1) {
 				return;

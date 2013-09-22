@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,10 +23,10 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.plugins.coref.search.constraints;
 
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.language.dependency.search.DependencyTargetTree;
+import de.ims.icarus.plugins.coref.search.DocumentTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -39,13 +39,14 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyDirectionConstraintFactory extends AbstractConstraintFactory {
+public class CoreferenceDirectionConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "direction"; //$NON-NLS-1$
 
-	public DependencyDirectionConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.direction.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.direction.description"); //$NON-NLS-1$
+	public CoreferenceDirectionConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, 
+				"plugins.coref.constraints.direction.name",  //$NON-NLS-1$
+				"plugins.coref.constraints.direction.description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class DependencyDirectionConstraintFactory extends AbstractConstraintFact
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyDirectionConstraint(value, operator);
+		return new CoreferenceDirectionConstraint(value, operator);
 	}
 
 	@Override
@@ -94,11 +95,11 @@ public class DependencyDirectionConstraintFactory extends AbstractConstraintFact
 		};
 	}
 
-	private static class DependencyDirectionConstraint extends DefaultConstraint {
+	private static class CoreferenceDirectionConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = 8874429868140453623L;
+		private static final long serialVersionUID = 8673603037633299329L;
 
-		public DependencyDirectionConstraint(Object value, SearchOperator operator) {
+		public CoreferenceDirectionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
@@ -109,12 +110,12 @@ public class DependencyDirectionConstraintFactory extends AbstractConstraintFact
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getDirection();
+			return ((DocumentTargetTree)value).getDirection();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyDirectionConstraint(getValue(), getOperator());
+			return new CoreferenceDirectionConstraint(getValue(), getOperator());
 		}
 	}
 }

@@ -127,7 +127,7 @@ public class DefaultQueryParser {
 	
 	protected static final char COLON = ':';
 	
-	protected static final String SPECIFIER_DELIMITER = "$$"; //$NON-NLS-1$
+	protected static final char SPECIFIER_DELIMITER = '$';
 	
 	protected String query;
 	
@@ -502,7 +502,15 @@ public class DefaultQueryParser {
 		return buffer.toString();
 	}
 	
-	protected String parseIdentifier() throws ParseException {
+	protected String parseText() throws ParseException {
+		if(current()==QUOTATIONMARK || current()==SINGLE_QUOTATIONMARK) {
+			return parseQuotedText();
+		} else {
+			return parseUnquotedText();
+		}
+	}
+	
+	protected String parseId() throws ParseException {
 		if(isEOS())
 			throw new ParseException(errorMessage(
 					"Unexpected end of query string - expected 'identifier'-content"), index); //$NON-NLS-1$
@@ -532,13 +540,29 @@ public class DefaultQueryParser {
 		return buffer.toString();
 	}
 	
+	protected Identifier parseIdentifier() throws ParseException {
+		if(isEOS())
+			throw new ParseException(errorMessage(
+					"Unexpected end of query string - expected 'identifier'-content"), index); //$NON-NLS-1$
+		
+		String token = parseId();
+		String specifier = null;
+		
+		if(current()==SPECIFIER_DELIMITER) {
+			next();
+			specifier = parseText();
+		}
+		
+		return new Identifier(token, specifier);
+	}
+	
 	protected void parseProperty() throws ParseException {
 		if(isEOS())
 			throw new ParseException(errorMessage(
 					"Unexpected end of query string - expected 'property'-content"), index); //$NON-NLS-1$
 		
 		// Parse key
-		String key = parseIdentifier();
+		String key = parseId();
 		skipWS();
 		
 		// ENsure existence of equality sign
@@ -548,12 +572,7 @@ public class DefaultQueryParser {
 		skipWS();
 
 		// Parse value
-		Object value;
-		if(current()==QUOTATIONMARK || current()==SINGLE_QUOTATIONMARK) {
-			value = parseQuotedText();
-		} else {
-			value = parseUnquotedText();
-		}
+		Object value = parseText();
 		
 		nodeStack.pushProperty(key, value);
 	}
@@ -606,8 +625,11 @@ public class DefaultQueryParser {
 			throw new ParseException(errorMessage(
 					"Unexpected end of query string - expected 'constraint'-content"), index); //$NON-NLS-1$
 		
-		// Parse token
-		String fragment = parseIdentifier().toLowerCase();
+		Identifier identifier = parseIdentifier();
+		Object specifier = identifier.getSpecifier();
+		
+		// Process token
+		String fragment = identifier.getToken().toLowerCase();
 		String token = fragment;
 		if(options.get(EXPAND_TOKENS_OPTION, true) && context!=null) {
 			token = context.completeToken(fragment);
@@ -628,25 +650,7 @@ public class DefaultQueryParser {
 		skipWS();
 		
 		// Parse value
-		Object value;
-		if(current()==QUOTATIONMARK || current()==SINGLE_QUOTATIONMARK) {
-			value = parseQuotedText();
-		} else {
-			value = parseUnquotedText();
-		}
-		
-		Object specifier = null;
-		if(value instanceof String) {
-			String s = (String)value;
-			int idx = s.indexOf(SPECIFIER_DELIMITER);
-			if(idx>-1) {
-				specifier = s.substring(idx+2);
-				if("".equals(specifier)) { //$NON-NLS-1$
-					specifier = null;
-				}
-				value = s.substring(0, idx);
-			}
-		}
+		Object value = parseText();
 		
 		if(SearchManager.isGroupingOperator(operator)) {
 			value = Integer.parseInt((String)value)-1;
@@ -989,6 +993,13 @@ public class DefaultQueryParser {
 			}
 			
 			buffer.append(constraint.getToken());
+			
+			String specifier = toString(constraint.getSpecifier());
+			if(specifier!=null) {
+				buffer.append(SPECIFIER_DELIMITER);
+				appendText(specifier);
+			}
+			
 			buffer.append(constraint.getOperator().getSymbol());
 			
 			Object value = constraint.getValue();
@@ -1002,16 +1013,15 @@ public class DefaultQueryParser {
 				label = String.valueOf(value);
 			}
 			
-			Object specifier = constraint.getSpecifier();
-			if(specifier!=null) {
-				label+= SPECIFIER_DELIMITER+String.valueOf(specifier);
-			}
-			
 			appendText(label);
 			definedCount++;
 		}
 		
 		return definedCount>0;
+	}
+	
+	protected String toString(Object obj) {
+		return obj==null ? null : obj.toString();
 	}
 	
 	protected boolean requiresQuote(String s) {
@@ -1042,6 +1052,36 @@ public class DefaultQueryParser {
 	
 	protected boolean isLegalId(char c) {
 		return c==UNDERSCORE || Character.isLetter(c) || Character.isDigit(c);
+	}
+	
+	protected static class Identifier {
+		private String token;
+		private String specifier;
+		
+		public Identifier() {
+			// no-op
+		}
+
+		public Identifier(String token, String specifier) {
+			this.token = token;
+			this.specifier = specifier;
+		}
+		
+		public String getToken() {
+			return token;
+		}
+		
+		public String getSpecifier() {
+			return specifier;
+		}
+		
+		public void setToken(String token) {
+			this.token = token;
+		}
+		
+		public void setSpecifier(String specifier) {
+			this.specifier = specifier;
+		}
 	}
 	
 	protected class NodeStack {

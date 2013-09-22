@@ -26,6 +26,7 @@
 package de.ims.icarus.language.coref;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -127,6 +128,79 @@ public class CorefProperties extends CompactProperties {
 	@Override
 	public CorefProperties clone() {
 		return (CorefProperties) super.clone();
+	}
+	
+	public static CorefProperties subset(CorefProperties source, int index) {
+		if(source==null) {
+			return null;
+		}
+		CorefProperties properties = new CorefProperties();
+
+		String suffix = '_'+String.valueOf(index);
+		
+		Object table = source.table;
+		
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				String key = (String) items[i];
+				if(key.endsWith(suffix)) {
+					key = key.substring(0, key.length()-suffix.length());
+					properties.put(key, items[i+1]);
+				}
+			}
+		} else {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+
+				String key = (String) entry.getKey();
+				if(key.endsWith(suffix)) {
+					key = key.substring(0, key.length()-suffix.length());
+					properties.put(key, entry.getValue());
+				}
+			}
+		}
+		
+		return properties;
+	}
+	
+	public static CorefProperties subset(CorefProperties source, 
+			int index0, int index1) {
+		if(source==null) {
+			return null;
+		}
+		CorefProperties properties = new CorefProperties();
+		
+		Map<String, Object> map = source.asMap();
+		
+		for(int i=index0; i<=index1; i++) {
+			String suffix = '_'+String.valueOf(i);
+			Iterator<Entry<String, Object>> it = map.entrySet().iterator();
+			while(it.hasNext()) {
+				Entry<String, Object> entry = it.next();
+				String key = (String) entry.getKey();
+				
+				if(entry.getValue()==null) {
+					it.remove();
+					continue;
+				}
+
+				if(key.endsWith(suffix)) {
+					key = key.substring(0, key.length()-suffix.length());
+					properties.put(key, entry.getValue());
+					it.remove();
+				}
+			}
+		}
+		
+		return properties;
 	}
 	
 	public static void countKeys(CorefProperties properties, 

@@ -49,6 +49,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -65,10 +66,12 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
+import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
@@ -81,6 +84,7 @@ import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.annotation.AnnotationController;
@@ -96,7 +100,7 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, AnnotationController {
+public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, AnnotationController, Installable {
 	
 	protected JComponent contentPanel;
 	protected JTextPane textPane;
@@ -118,6 +122,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 	protected CoreferenceAllocation goldAllocation;
 	
 	protected CallbackHandler callbackHandler;
+	
+	protected CoreferenceDocumentDataPresenter parent;
 	
 	// Filter to be applied when the user decides to filter certain spans
 	protected Filter pendingFilter = null;
@@ -330,6 +336,20 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		// no-op
 	}
 	
+	@Override
+	public void install(Object target) {
+		parent = null;
+		
+		if(target instanceof CoreferenceDocumentDataPresenter) {
+			parent = (CoreferenceDocumentDataPresenter) target;
+		}
+	}
+
+	@Override
+	public void uninstall(Object target) {
+		target = null;
+	}
+
 	protected CoreferenceDocument getDocument() {
 		// Make sure our components are created
 		if(textPane==null) {
@@ -431,10 +451,11 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		
 		int offset = textPane.viewToModel(p);
 		
-		return offset==-1 ? null : createFilterForOffset(offset);
+		Span span = offset==-1 ? null : getSpanForOffset(offset);
+		return span==null ? null : createFilterForSpan(span);
 	}
 	
-	protected Filter createFilterForOffset(int offset) {
+	protected Span getSpanForOffset(int offset) {
 		if(textPane==null) {
 			return null;
 		}
@@ -450,12 +471,15 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		}
 		
 		AttributeSet attr = elem.getAttributes();
-		if(attr.isDefined(CoreferenceDocument.PARAM_CLUSTER_ID)) {
-			int clusterId = (int) attr.getAttribute(CoreferenceDocument.PARAM_CLUSTER_ID);
-			return new SpanFilters.ClusterIdFilter(clusterId);
+		if(attr.isDefined(CoreferenceDocument.PARAM_SPAN)) {
+			return (Span) attr.getAttribute(CoreferenceDocument.PARAM_SPAN);
 		}
 		
 		return null;
+	}
+	
+	protected Filter createFilterForSpan(Span span) {
+		return new SpanFilters.ClusterIdFilter(span.getClusterId());
 	}
 	
 	protected void showPopup(MouseEvent trigger) {
@@ -516,6 +540,19 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		newDoc.copySettings(oldDoc);
 		
 		return newDoc;
+	}
+	
+	protected void outlineProperties(Span span) {
+		if(parent==null) {
+			return;
+		}
+		
+		try {
+			parent.outlineMember(span, null);
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to outline properties: "+String.valueOf(span), e); //$NON-NLS-1$
+		}
 	}
 	
 	protected class Handler extends MouseAdapter implements ChangeListener, 
@@ -593,7 +630,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		@Override
 		public void caretUpdate(CaretEvent e) {
 			if(e.getDot()!=e.getMark()) {
-				pendingFilter = createFilterForOffset(e.getMark());
+				Span span = getSpanForOffset(e.getMark());
+				pendingFilter = span==null ? null : createFilterForSpan(span);
+				
+				outlineProperties(span);
 			}
 			refreshActions();
 		}
@@ -604,6 +644,18 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			refresh();
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(!SwingUtilities.isLeftMouseButton(e) || e.getClickCount()!=1) {
+				return;
+			}
+			
+			int offset = textPane.viewToModel(e.getPoint());
+			
+			Span span = offset==-1 ? null : getSpanForOffset(offset);
+			outlineProperties(span);
 		}
 	}
 

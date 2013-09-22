@@ -98,7 +98,6 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		boolean escaped = false;
 		boolean key = false;
 		int size = pattern.length();
-		char context = '\0';
 		
 		for(int i=0; i<size; i++) {
 			char c = pattern.charAt(i);

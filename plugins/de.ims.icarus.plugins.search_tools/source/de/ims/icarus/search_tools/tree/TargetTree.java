@@ -134,7 +134,7 @@ public interface TargetTree {
 	/**
 	 * Returns the index of the one single root node in this graph.
 	 */
-	int getRootIndex();
+	//int getRootIndex();
 	
 	/**
 	 * Returns the index of the current node's parent node or {@code -1}

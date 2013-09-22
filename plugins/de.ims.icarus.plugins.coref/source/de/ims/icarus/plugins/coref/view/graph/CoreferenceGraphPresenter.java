@@ -44,11 +44,13 @@ import org.java.plugin.registry.Extension;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.config.ConfigDelegate;
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -68,6 +70,7 @@ import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.layout.GraphStyle;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
+import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
@@ -628,6 +631,27 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		firePropertyChange("filterSingletons", oldValue, filterSingletons); //$NON-NLS-1$
 	}
 	
+	protected void outlineProperties(Object value) {
+		if(parent==null) {
+			return;
+		}
+		
+		try {
+			CorefMember member = null;
+			
+			if(value instanceof CorefNodeData) {
+				member = ((CorefNodeData)value).getSpan();
+			} else if(value instanceof CorefEdgeData) {
+				member = ((CorefEdgeData)value).getEdge();
+			}
+			
+			parent.outlineMember(member, null);
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to outline properties: "+String.valueOf(value), e); //$NON-NLS-1$
+		}
+	}
+	
 	protected void togglePresenter(Extension extension) {
 		if(extension==null)
 			throw new IllegalArgumentException("invalid extension"); //$NON-NLS-1$
@@ -686,6 +710,22 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	protected class CorefHandler extends Handler {
 
 		@Override
+		public void invoke(Object sender, mxEventObject evt) {
+			if(sender==graph.getSelectionModel()) {
+				Object[] selectedCells = graph.getSelectionCells();
+				Object cell = null;
+				if(selectedCells!=null && selectedCells.length>0) {
+					cell = selectedCells[0];
+				}
+				
+				Object value = cell==null ? null : graph.getModel().getValue(cell); 
+				outlineProperties(value);
+			}
+			
+			super.invoke(sender, evt);
+		}
+
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() instanceof JMenuItem) {
 				String uid = e.getActionCommand();
@@ -719,6 +759,21 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			bounds.setHeight(bounds.getHeight()+2);
 			
 			return bounds;
+		}
+
+		@Override
+		public String getToolTipForCell(Object cell) {
+			Object value = getModel().getValue(cell);
+			
+			String tooltip = null;
+			
+			if(value instanceof CorefNodeData) {
+				tooltip = CoreferenceUtils.getSpanTooltip(((CorefNodeData)value).getSpan());
+			} else if(value instanceof CorefEdgeData) {
+				tooltip = CoreferenceUtils.getEdgeTooltip(((CorefEdgeData)value).getEdge());
+			}
+			
+			return tooltip==null ? null : UIUtil.toUnwrappedSwingTooltip(tooltip);
 		}
 	}
 	

@@ -178,7 +178,7 @@ public class ConstraintUnifier {
 		int count = 0;
 		
 		for(SearchConstraint constraint : constraints) {
-			if(SearchManager.isGroupingOperator(constraint.getOperator())) {
+			if(constraint.isActive() && SearchManager.isGroupingOperator(constraint.getOperator())) {
 				list.add(constraint);
 				count++;
 			}
@@ -221,7 +221,7 @@ public class ConstraintUnifier {
 		}
 		
 		for(SearchConstraint constraint : constraints) {
-			if(SearchManager.isGroupingOperator(constraint.getOperator())
+			if(constraint.isActive() && SearchManager.isGroupingOperator(constraint.getOperator())
 					&& !usedIndices.contains((int) constraint.getValue())) {
 				list.add(constraint);
 				usedIndices.add((int) constraint.getValue());

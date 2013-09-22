@@ -68,6 +68,7 @@ public class CoreferenceDocument extends BatchDocument {
 	//protected SpanBuffer goldBuffer;
 	protected Stack<ClusterAttributes> attributeStack;
 	protected Stack<Color> highlightStack;
+	protected Stack<Span> spanStack;
 	protected StringBuilder builder;
 	
 	private boolean markSpans = true;
@@ -90,7 +91,7 @@ public class CoreferenceDocument extends BatchDocument {
 	
 	private SpanCache cache;
 
-	public static final String PARAM_CLUSTER_ID = "clusterId"; //$NON-NLS-1$
+	public static final String PARAM_SPAN = "span"; //$NON-NLS-1$
 
 	public static final String PARAM_HIGHLIGHT_COLOR = "highlightColor"; //$NON-NLS-1$
 	public static final String PARAM_FILL_COLOR = "fillColor"; //$NON-NLS-1$
@@ -175,6 +176,7 @@ public class CoreferenceDocument extends BatchDocument {
 			//goldBuffer = new SpanBuffer();
 			attributeStack = new Stack<>();
 			highlightStack = new Stack<>();
+			spanStack = new Stack<>();
 			builder = new StringBuilder();
 		}
 		
@@ -227,9 +229,9 @@ public class CoreferenceDocument extends BatchDocument {
 				// and plain text outside (needs to be wrapped in start- and end-tag).
 				ClusterAttributes attributes = attributeStack.isEmpty() ? null : attributeStack.peek();
 				AttributeSet attr = attributes==null ? null : attributes.getContentStyle();
-				if(!highlightStack.isEmpty()) {
-					attr = createHighlightedAttr(attr, highlightStack.peek(), 0);
-				}
+				Span span = spanStack.isEmpty() ? null : spanStack.peek();
+				Color col = highlightStack.isEmpty() ? null : highlightStack.peek();
+				attr = createHighlightedAttr(attr, span, col, 0);
 				appendBatchString(builder.toString(), attr);
 				
 				builder.setLength(0);
@@ -265,28 +267,29 @@ public class CoreferenceDocument extends BatchDocument {
 					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
 						continue;
 					}
-					
+										
 					ClusterAttributes attributes = getClusterAttributes(span.getClusterId(), highlightType);
 					AttributeSet attr;
 					
 					// Superscript cluster id
 					if(isShowClusterId()) {
-						attr = createHighlightedAttr(attributes.getSuperscriptStyle(), highlightColor, HIGHLIGHT_TYPE_BEGIN);
+						attr = createHighlightedAttr(attributes.getSuperscriptStyle(), span, highlightColor, HIGHLIGHT_TYPE_BEGIN);
 						appendBatchString(String.valueOf(span.getClusterId()), attr);
 					}
 					
 					// Opening bracket
-					attr = createHighlightedAttr(attributes.getFillerStyle(), highlightColor, 
+					attr = createHighlightedAttr(attributes.getFillerStyle(), span, highlightColor, 
 							isShowClusterId() ? 0 : HIGHLIGHT_TYPE_BEGIN);
 					appendBatchString("[", attr); //$NON-NLS-1$
 
 					// Subscript begin index
 					if(isShowOffset()) {
-						attr = createHighlightedAttr(attributes.getSubscriptStyle(), highlightColor, 0);
+						attr = createHighlightedAttr(attributes.getSubscriptStyle(), span, highlightColor, 0);
 						appendBatchString(String.valueOf(span.getBeginIndex()+1), attr);
 					}
 					
 					attributeStack.push(attributes);
+					spanStack.push(span);
 					if(highlightColor!=null) {
 						highlightStack .push(highlightColor);
 					}
@@ -305,9 +308,9 @@ public class CoreferenceDocument extends BatchDocument {
 			if(builder.length()>0 && (isLast || spanBuffer.isEnd(index))) {
 				ClusterAttributes attributes = attributeStack.isEmpty() ? null : attributeStack.peek();
 				AttributeSet attr = attributes==null ? null : attributes.getContentStyle();
-				if(!highlightStack.isEmpty()) {
-					attr = createHighlightedAttr(attr, highlightStack.peek(), 0);
-				}
+				Span span = spanStack.isEmpty() ? null : spanStack.peek();
+				Color col = highlightStack.isEmpty() ? null : highlightStack.peek();
+				attr = createHighlightedAttr(attr, span, col, 0);
 				appendBatchString(builder.toString(), attr);
 				
 				builder.setLength(0);
@@ -340,6 +343,7 @@ public class CoreferenceDocument extends BatchDocument {
 						continue;
 					}
 					
+					spanStack.pop();					
 					ClusterAttributes attributes = attributeStack.pop();
 					AttributeSet attr;
 					
@@ -348,18 +352,18 @@ public class CoreferenceDocument extends BatchDocument {
 
 					// Subscript begin index
 					if(isShowOffset()) {
-						attr = createHighlightedAttr(attributes.getSubscriptStyle(), highlightColor, 0);
+						attr = createHighlightedAttr(attributes.getSubscriptStyle(), span, highlightColor, 0);
 						appendBatchString(String.valueOf(span.getBeginIndex()+1), attr);
 					}
 					
 					// Closing bracket
-					attr = createHighlightedAttr(attributes.getFillerStyle(), highlightColor, 
+					attr = createHighlightedAttr(attributes.getFillerStyle(), span, highlightColor, 
 							isShowClusterId() ? 0 : HIGHLIGHT_TYPE_END);
 					appendBatchString("]", attr); //$NON-NLS-1$
 
 					// Superscript cluster id
 					if(isShowClusterId()) {
-						attr = createHighlightedAttr(attributes.getSuperscriptStyle(), highlightColor, HIGHLIGHT_TYPE_END);
+						attr = createHighlightedAttr(attributes.getSuperscriptStyle(), span, highlightColor, HIGHLIGHT_TYPE_END);
 						appendBatchString(String.valueOf(span.getClusterId()), attr);
 					}
 					
@@ -535,13 +539,21 @@ public class CoreferenceDocument extends BatchDocument {
 		return new SimpleAttributeSet(attr);
 	}
 	
-	protected AttributeSet createHighlightedAttr(AttributeSet attr, Color col, int type) {
+	protected static MutableAttributeSet cloneAttributes(AttributeSet attr, Span span) {
+		SimpleAttributeSet a = new SimpleAttributeSet(attr);
+		
+		a.addAttribute(PARAM_SPAN, span);
+		
+		return a;
+	}
+	
+	protected AttributeSet createHighlightedAttr(AttributeSet attr, Span span, Color col, int type) {
 		if(col==null && !highlightStack.isEmpty()) {
 			col = highlightStack.peek();
 			type = 0;
 		}
 		if(col!=null && attr!=null) {
-			MutableAttributeSet a = cloneAttributes(attr);
+			MutableAttributeSet a = cloneAttributes(attr, span);
 			a.addAttribute(PARAM_HIGHLIGHT_COLOR, col);
 			Integer v = (Integer) a.getAttribute(PARAM_HIGHLIGHT_TYPE);
 			if(v==null) {
@@ -550,6 +562,8 @@ public class CoreferenceDocument extends BatchDocument {
 			v |= type;
 			a.addAttribute(PARAM_HIGHLIGHT_TYPE, v);
 			attr = a;
+		} else if(span!=null) {
+			attr = cloneAttributes(attr, span);
 		}
 		return attr;
 	}
@@ -591,21 +605,21 @@ public class CoreferenceDocument extends BatchDocument {
 			
 			// Superscript style
 			superscript = new SimpleAttributeSet();
-			superscript.addAttribute(PARAM_CLUSTER_ID, clusterId);
+			//superscript.addAttribute(PARAM_CLUSTER_ID, clusterId);
 			StyleConstants.setSuperscript(superscript, true);
 			
 			// Subscript style
 			subscript = new SimpleAttributeSet();
-			subscript.addAttribute(PARAM_CLUSTER_ID, clusterId);
+			//subscript.addAttribute(PARAM_CLUSTER_ID, clusterId);
 			StyleConstants.setSubscript(subscript, true);
 			
 			// Content style
 			content = new SimpleAttributeSet();
-			content.addAttribute(PARAM_CLUSTER_ID, clusterId);
+			//content.addAttribute(PARAM_CLUSTER_ID, clusterId);
 			
 			// Filler style
 			filler = new SimpleAttributeSet();
-			filler.addAttribute(PARAM_CLUSTER_ID, clusterId);
+			//filler.addAttribute(PARAM_CLUSTER_ID, clusterId);
 			
 			switch (highlightType) {
 			case FOREGROUND:

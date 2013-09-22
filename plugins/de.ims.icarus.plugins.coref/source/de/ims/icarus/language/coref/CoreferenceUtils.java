@@ -26,17 +26,21 @@
 package de.ims.icarus.language.coref;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
+import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -365,6 +369,60 @@ public final class CoreferenceUtils {
 				buffer.append(' ');
 			}
 		}
+	}
+	
+	private static void appendProperties(StringBuilder sb, CorefProperties properties) {
+		if(properties==null || properties.size()==0) {
+			return;
+		}
+		
+		ResourceManager rm = ResourceManager.getInstance();
+		sb.append('\n').append(rm.get("plugins.coref.labels.properties")).append(':'); //$NON-NLS-1$
+		
+		Map<String, Object> map = properties.asMap();
+		List<String> keys = new ArrayList<>(map.keySet());
+		Collections.sort(keys);
+		
+		for(String key : keys) {
+			sb.append('\n').append(key).append(": ").append(map.get(key)); //$NON-NLS-1$
+		}
+	}
+	
+	public static String getSpanTooltip(Span span) {
+		if(span==null) {
+			return null;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		
+		ResourceManager rm = ResourceManager.getInstance();
+		sb.append(rm.get("plugins.coref.labels.span")).append('\n'); //$NON-NLS-1$
+		span.appendTo(sb);
+		
+		appendProperties(sb, span.getProperties());
+		
+		return sb.toString();
+	}
+	
+	public static String getEdgeTooltip(Edge edge) {
+		if(edge==null) {
+			return null;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		
+		ResourceManager rm = ResourceManager.getInstance();
+		sb.append(rm.get("plugins.coref.labels.edge")).append('\n'); //$NON-NLS-1$
+		sb.append(rm.get("plugins.coref.labels.source")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
+		edge.getSource().appendTo(sb);
+		sb.append('\n');
+		sb.append(rm.get("plugins.coref.labels.target")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
+		edge.getTarget().appendTo(sb);
+		
+		appendProperties(sb, edge.getProperties());
+		
+		return sb.toString();
+		
 	}
 	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {

@@ -203,6 +203,8 @@ public final class StringUtil {
 			return s;
 		}
 		
+		// FIXME if input string contains multiple linebreaks the last one will be omitted
+		
 		StringBuilder sb = new StringBuilder();
 		StringBuilder line = new StringBuilder();
 		StringBuilder block = new StringBuilder();

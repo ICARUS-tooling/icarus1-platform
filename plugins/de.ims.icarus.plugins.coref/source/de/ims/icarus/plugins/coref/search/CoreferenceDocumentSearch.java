@@ -28,6 +28,7 @@ package de.ims.icarus.plugins.coref.search;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentResultAnnotator;
+import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
@@ -47,7 +48,13 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 			SearchQuery query, Options parameters, Object target) {
 		super(factory, query, parameters, target);
 		
-		CoreferenceAllocation allocation = getSearchTarget().getAllocation().get();
+		CoreferenceAllocation allocation = null;
+		
+		AllocationDescriptor alloc = getSearchTarget().getAllocation();
+		if(alloc!=null) {
+			allocation = alloc.get();
+		}
+		
 		getParameters().put("goldAllocation", allocation); //$NON-NLS-1$
 		getParameters().put("allocation", allocation); //$NON-NLS-1$
 	}
@@ -92,7 +99,10 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 		Options options = new Options();
 		
 		// Save the selected allocation (not its descriptor!)
-		options.put("allocation", getSearchTarget().getAllocation().get()); //$NON-NLS-1$
+		AllocationDescriptor alloc = getSearchTarget().getAllocation();
+		if(alloc!=null) {
+			options.put("allocation", alloc.get()); //$NON-NLS-1$
+		}
 		
 		return options;
 	}

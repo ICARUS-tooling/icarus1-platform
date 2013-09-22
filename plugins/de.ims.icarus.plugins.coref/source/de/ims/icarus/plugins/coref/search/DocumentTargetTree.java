@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.plugins.coref.search;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,8 +51,9 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	
 	protected SpanSet spanSet;	
 	protected EdgeSet edgeSet;
-	protected Edge[] headMap;
+	//protected Edge[] headMap;
 	protected Map<Span, Integer> indexMap;
+	protected Map<Integer, Edge> headMap;
 	
 	protected CompactTree tree;
 
@@ -91,23 +91,45 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 		}
 
 		int size = fetchSize();
+				
 		for(int i=0; i<size; i++) {
 			indexMap.put(spanSet.get(i), i);
 		}
 		
 		// Generate head lookup
-		if(headMap==null || headMap.length<size) {
-			headMap = new Edge[spanSet.size()];
+//		if(headMap==null || headMap.length<size) {
+//			headMap = new Edge[spanSet.size()];
+//		} else {
+//			Arrays.fill(headMap, 0, Math.max(0, size-1), null);
+//		}
+		if(headMap==null) {
+			headMap = new HashMap<>();
 		} else {
-			Arrays.fill(headMap, 0, size-1, null);
+			headMap.clear();
 		}
+		
+		if(edgeSet==null) {
+			return;
+		}
+		
+//		for(int i=0; i<edgeSet.size(); i++) {
+//			Edge edge = edgeSet.get(i);
+//			// TODO right now we ignore the virtual edge from the generic doc root!
+//			if(!edge.getSource().isROOT()) {
+//				headMap[indexMap.get(edge.getTarget())] = edge;
+//			}
+//		}
 		
 		for(int i=0; i<edgeSet.size(); i++) {
 			Edge edge = edgeSet.get(i);
 			// TODO right now we ignore the virtual edge from the generic doc root!
-			if(!edge.getSource().isROOT()) {
-				headMap[indexMap.get(edge.getTarget())] = edge;
+			if(edge.getSource().isROOT()) {
+				continue;
 			}
+			
+			int index = indexMap.get(edge.getTarget());
+			
+			headMap.put(index, edge);
 		}
 	}
 
@@ -116,7 +138,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	 */
 	@Override
 	protected int fetchSize() {
-		return spanSet.size();
+		return spanSet==null ? 0 : spanSet.size();
 	}
 
 	/**
@@ -125,7 +147,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	@Override
 	protected int fetchHead(int index) {
 		Integer head = null;
-		Edge edge = headMap[index];
+		Edge edge = headMap.get(index);
 		
 		if(edge!=null) {
 			Span parent = edge.getSource();
@@ -180,7 +202,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
-		Edge edge = headMap[nodePointer];
+		Edge edge = headMap.get(nodePointer);
 		
 		if(edge==null)
 			throw new CorruptedStateException("Current node has no head edge"); //$NON-NLS-1$
@@ -190,6 +212,18 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	
 	public Object getEdgeProperty(String key) {
 		return getEdge().getProperty(key);
+	}
+	
+	public int getDirection() {
+		/*if(edgePointer==-1)
+			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
+		if(nodePointer==-1)
+			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
+
+		Edge edge = getEdge();
+		
+		return edge.getTarget().compareTo(edge.getSource())>0 ? 
+				LanguageUtils.DATA_LEFT_VALUE : LanguageUtils.DATA_RIGHT_VALUE;
 	}
 	
 	// DOCUMENT METHODS

@@ -25,7 +25,9 @@
  */
 package de.ims.icarus.search_tools.tree;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.util.CorruptedStateException;
@@ -43,7 +45,8 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	protected int[] heights;
 	protected int[] descendantCounts;
 	
-	protected int rootIndex;
+	protected List<Integer> roots;
+	protected int rootCount = 0;
 	
 	protected int[] heads;
 	
@@ -79,7 +82,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 		heights = null;
 		descendantCounts = null;
 		heads = null;
-		rootIndex = -1;
+		roots = null;
 		
 		data = null;
 		size = 0;
@@ -165,7 +168,10 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 				data = null;
 				throw new IllegalArgumentException("Data contains undefined head at index: "+i); //$NON-NLS-1$
 			} else if (head == LanguageUtils.DATA_HEAD_ROOT) {
-				rootIndex = i;
+				if(roots==null) {
+					roots = new ArrayList<>();
+				}
+				roots.add(i);
 			} else {
 				list = edges[head];
 				if (list == null) {
@@ -195,9 +201,14 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			
 			heads[i] = head;
 		}
+		
+		if(roots==null || roots.isEmpty())
+			throw new IllegalArgumentException("Structure is not a tree - no root defined"); //$NON-NLS-1$
 
 		// refresh descendants counter and depth
-		prepareDescendants0(rootIndex);
+		for(int root : roots) {
+			prepareDescendants0(root);
+		}
 	}
 
 	protected void prepareDescendants0(int index) {
@@ -310,14 +321,6 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 		
 		return edges[nodePointer][1+edgePointer];
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.tree.TargetTree#getRootIndex()
-	 */
-	@Override
-	public int getRootIndex() {
-		return rootIndex;
 	}
 
 	@Override

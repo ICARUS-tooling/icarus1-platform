@@ -705,7 +705,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			
 			Object[] labelSet = factory.getLabelSet();
 			Class<?> valueClass = factory.getValueClass();
-			Object defaultValue = factory.getDefaultValue();
+			Object defaultValue = factory.valueToLabel(factory.getDefaultValue());
 
 			valueSelect = labelSet==null ? new JComboBox<>() : new JComboBox<>(labelSet);
 			
@@ -782,7 +782,8 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			Object value = null;
 			
 			if(!displayingGroups) {
-				value = factory.labelToValue(valueSelect.getSelectedItem());
+				value = valueSelect.getSelectedItem();
+				value = factory.labelToValue(value);
 				if(value instanceof String && Integer.class.equals(factory.getValueClass())) {
 					value = Integer.parseInt((String)value);
 				}

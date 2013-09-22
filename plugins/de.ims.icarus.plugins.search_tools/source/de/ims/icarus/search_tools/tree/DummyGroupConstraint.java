@@ -57,7 +57,7 @@ public class DummyGroupConstraint implements SearchConstraint {
 	 */
 	@Override
 	public boolean matches(Object value) {
-		cache.cacheGroupInstance(getGroupId(), getInstance(value));
+		cache.cacheGroupInstance(getGroupId(), getLabel(getInstance(value)));
 		
 		return true;
 	}
@@ -141,5 +141,13 @@ public class DummyGroupConstraint implements SearchConstraint {
 	@Override
 	public Object getSpecifier() {
 		return source.getSpecifier();
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#getLabel(java.lang.Object)
+	 */
+	@Override
+	public Object getLabel(Object value) {
+		return source.getLabel(value);
 	}
 }

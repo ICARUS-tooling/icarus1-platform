@@ -50,6 +50,8 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
 
 import org.java.plugin.registry.Extension;
@@ -64,7 +66,6 @@ import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationMana
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
-import de.ims.icarus.plugins.coref.view.CoreferenceCellRenderer;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
 import de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder;
@@ -104,7 +105,6 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	protected CoreferenceAllocation goldAllocation;
 		
 	protected EntityGridTableModel gridModel;
-	protected CoreferenceCellRenderer outline;
 	protected EntityGridCellRenderer cellRenderer;
 	
 	protected AnnotationManager annotationManager;
@@ -318,14 +318,6 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			contentPanel.add(toolBar, BorderLayout.NORTH);
 		}
 		
-		outline = new CoreferenceCellRenderer();
-		outline.setBorder(UIUtil.defaultContentBorder);
-		
-		JPanel footer = new JPanel(new BorderLayout());
-		footer.add(outline, BorderLayout.CENTER);
-		footer.setBorder(UIUtil.topLineBorder);
-		contentPanel.add(BorderLayout.SOUTH, footer);
-		
 		registerActionCallbacks();		
 		refreshActions();
 		refreshLabelBuilder();
@@ -379,6 +371,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		table.setIntercellSpacing(new Dimension(4, 4));
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.addMouseListener(getHandler());
+		table.getSelectionModel().addListSelectionListener(getHandler());
+		table.getColumnModel().getSelectionModel().addListSelectionListener(getHandler());
 
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
@@ -515,6 +509,23 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		}
 	}
 	
+	protected void outlineProperties(EntityGridNode node) {
+		if(parent==null) {
+			return;
+		}
+		
+		try {
+			Span span = null;
+			if(node!=null && node.getSpanCount()>0) {
+				span = node.getSpan(0);
+			}
+			parent.outlineMember(span, null);
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to outline properties: "+String.valueOf(node), e); //$NON-NLS-1$
+		}
+	}
+	
 	protected void togglePresenter(Extension extension) {
 		if(extension==null)
 			throw new IllegalArgumentException("invalid extension"); //$NON-NLS-1$
@@ -557,7 +568,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		return new SpanFilters.SpanFilter(spans);
 	}
 	
-	protected class Handler extends MouseAdapter implements ActionListener {
+	protected class Handler extends MouseAdapter implements ActionListener, ListSelectionListener {
 
 		protected void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
@@ -589,6 +600,30 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			} else {
 				refreshLabelBuilder();
 			}
+		}
+
+		/**
+		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+		 */
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if(e.getValueIsAdjusting()) {
+				return;
+			}
+			
+			int row = table.getSelectedRow();
+			int column = table.getSelectedColumn();
+			
+			if(row==-1 || column==-1) {
+				return;
+			}
+			
+			Object value = table.getValueAt(row, column);
+			if(value==null) {
+				return;
+			}
+			
+			outlineProperties((EntityGridNode) value);
 		}
 	}
 

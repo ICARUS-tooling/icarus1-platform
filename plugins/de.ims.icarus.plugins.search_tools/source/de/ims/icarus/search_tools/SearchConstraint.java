@@ -61,6 +61,8 @@ public interface SearchConstraint extends Serializable {
 	
 	Object getInstance(Object value);
 	
+	Object getLabel(Object value);
+	
 	boolean isUndefined();
 	
 	void setActive(boolean active);

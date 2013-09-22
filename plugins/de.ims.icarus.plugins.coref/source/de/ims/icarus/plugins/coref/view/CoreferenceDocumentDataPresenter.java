@@ -45,6 +45,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
@@ -53,6 +54,7 @@ import javax.swing.border.EmptyBorder;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
@@ -89,6 +91,10 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	private CoreferenceDocumentData document;
 	private Options options;
 	private AWTPresenter presenter;
+	private JSplitPane splitPane;
+	
+	private DetailOutline detailOutline;
+	private boolean showPropertyOutline = false;
 	
 	private Map<Extension, AWTPresenter> presenterInstances;
 	
@@ -145,6 +151,8 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		if(presenter!=null) {
 			presenter.clear();
 		}
+		
+		detailOutline.clear();
 	}
 
 	/**
@@ -168,6 +176,8 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 				}
 			}
 		}
+		
+		detailOutline.close();
 	}
 
 	/**
@@ -219,7 +229,15 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		
 		contentPanel = new JPanel(new BorderLayout());
 		
+		detailOutline = new DetailOutline();
+		
 		infoLabel = UIUtil.defaultCreateInfoLabel(contentPanel);
+
+		splitPane = new JSplitPane();
+		splitPane.setResizeWeight(1);
+		splitPane.setBottomComponent(detailOutline.getPresentingComponent());
+		splitPane.setTopComponent(infoLabel);
+		splitPane.setBorder(UIUtil.emptyBorder);
 		
 		loadingLabel = UIUtil.defaultCreateLoadingLabel(contentPanel);
 		
@@ -295,12 +313,17 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		
 		ActionManager actionManager = getActionManager();
 		
+		actionManager.setSelected(showPropertyOutline, 
+				"plugins.coref.coreferenceDocumentView.toggleShowPropertyOutlineAction"); //$NON-NLS-1$
+		
 		actionManager.addHandler("plugins.coref.coreferenceDocumentView.refreshViewAction",  //$NON-NLS-1$
 				callbackHandler, "refreshView"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentView.clearViewAction",  //$NON-NLS-1$
 				callbackHandler, "clearView"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentView.openPreferencesAction", //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentView.toggleShowPropertyOutlineAction", //$NON-NLS-1$
+				callbackHandler, "toggleShowPropertyOutline"); //$NON-NLS-1$
 	}
 	
 	private void refreshActions() {
@@ -343,7 +366,23 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		this.document = document;
 		this.options = options==null ? null : options.clone();
 		
+		detailOutline.setDocument(document);
+		
 		refresh();
+	}
+	
+	public void outlineMember(CorefMember member, Options options) {
+		
+		try  {
+			if(member==null) {
+				detailOutline.clear();
+			} else {
+				detailOutline.present(member, options);
+			}
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to outline properties for: "+String.valueOf(member), e); //$NON-NLS-1$
+		}
 	}
 	
 	public void togglePresenter(Extension extension, Options options) {
@@ -423,12 +462,28 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		headerLabel.setText(header);
 		
 		if(requiresUIUpdate) {
-			contentPanel.removeAll();
-			contentPanel.add(toolBar, BorderLayout.NORTH);
-			contentPanel.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
-			contentPanel.revalidate();
-			contentPanel.repaint();
+			refreshUIState();
 		}
+	}
+	
+	private void refreshUIState() {
+		contentPanel.removeAll();
+		contentPanel.add(toolBar, BorderLayout.NORTH);
+		
+		detailOutline.clear();
+		
+		if(showPropertyOutline) {
+			splitPane.setTopComponent(presenter.getPresentingComponent());
+			splitPane.setBottomComponent(detailOutline.getPresentingComponent());
+			splitPane.setDividerLocation(0.7);
+			
+			contentPanel.add(splitPane, BorderLayout.CENTER);
+		} else {
+			contentPanel.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
+		}
+
+		contentPanel.revalidate();
+		contentPanel.repaint();
 	}
 	
 	private boolean checkAllocation(final Options options, final String key) {
@@ -501,7 +556,21 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		}
 		
 		public void openPreferences(ActionEvent e) {
+			// TODO
+		}
+		
+		public void toggleShowPropertyOutline(boolean b) {
+			showPropertyOutline = b;
 			
+			if(presenter==null) {
+				return;
+			}
+			
+			refreshUIState();
+		}
+		
+		public void toggleShowPropertyOutline(ActionEvent e) {
+			// no-op
 		}
 	}
 	

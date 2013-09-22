@@ -44,6 +44,9 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.Span;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -241,8 +244,9 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 		@Override
 		public String getToolTipText(float x, float y, Shape allocation) {
 			AttributeSet attr = getAttributes();
-			if(attr.isDefined(CoreferenceDocument.PARAM_CLUSTER_ID)) {
-				return String.format("Cluster-Id: %d", attr.getAttribute(CoreferenceDocument.PARAM_CLUSTER_ID)); //$NON-NLS-1$
+			if(attr.isDefined(CoreferenceDocument.PARAM_SPAN)) {
+				Span span = (Span) attr.getAttribute(CoreferenceDocument.PARAM_SPAN);
+				return CoreferenceUtils.getSpanTooltip(span);
 			}
 			return super.getToolTipText(x, y, allocation);
 		}

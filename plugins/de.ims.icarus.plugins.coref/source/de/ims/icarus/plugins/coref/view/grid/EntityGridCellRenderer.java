@@ -39,7 +39,10 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
+import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
+import de.ims.icarus.ui.UIUtil;
 
 /**
  * @author Markus Gärtner
@@ -156,6 +159,14 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		} else {
 			node = null;
 		}
+		
+		String tooltip = null;
+		
+		if(node!=null && node.getSpanCount()>0) {
+			Span span = node.getSpan(0);
+			tooltip = CoreferenceUtils.getSpanTooltip(span);
+		}
+		setToolTipText(UIUtil.toUnwrappedSwingTooltip(tooltip));
 	}
 	
 	@Override
