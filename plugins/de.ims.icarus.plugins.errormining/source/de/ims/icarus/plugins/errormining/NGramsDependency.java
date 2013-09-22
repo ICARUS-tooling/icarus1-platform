@@ -878,7 +878,7 @@ public class NGramsDependency {
 //			}	
 //		}
 		
-		//missing resutls from rigth side
+		//missing results from right side
 		for(Iterator<String> it = outputNGramR.keySet().iterator(); it.hasNext();){
 			String key = it.next();
 			if (result.containsKey(key)){

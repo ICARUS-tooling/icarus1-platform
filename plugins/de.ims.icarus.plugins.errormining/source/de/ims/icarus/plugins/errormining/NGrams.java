@@ -89,30 +89,34 @@ public class NGrams {
 	
 	//Debug Konstructor
 	public NGrams(){
-		Options options = new Options();
-		options = Options.emptyOptions;
-		
-		this.nGramCount = 1; //normally we start with unigrams so n will be 1		
-		
-		//0 collect ngrams until no new ngrams are found
-		this.nGramLimit = (int) options.get("NGramLIMIT", 4);  //$NON-NLS-1$
-		this.fringeStart = (int) options.get("FringeSTART", 0);  //$NON-NLS-1$
-		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
-		this.useFringe = false;
-		
-		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
-		corpus = new ArrayList<DependencyData>();
+//		Options options = new Options();
+//		options = Options.emptyOptions;
+//		
+//		this.nGramCount = 1; //normally we start with unigrams so n will be 1		
+//		
+//		//0 collect ngrams until no new ngrams are found
+//		this.nGramLimit = options.getInteger("NGramLIMIT");  //$NON-NLS-1$
+//		this.fringeStart = options.getInteger("FringeSTART");  //$NON-NLS-1$
+//		this.fringeEnd = options.getInteger("FringeEND");  //$NON-NLS-1$
+//		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
+//		
+//		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
+//		corpus = new ArrayList<DependencyData>();
 	}
 	
 	
+	/**
+	 * Constructor for NGramSearch (main plugin)
+	 * @param options
+	 * @param queryList
+	 */
 	public NGrams(Options options, List<NGramQAttributes> queryList){
 		
 		this.options = options;
 		
 		this.nGramCount = 1; //normally we start with unigrams so n will be 1
 		
-		this.queryList = queryList;
-		
+		this.queryList = queryList;	
 		
 //		System.out.println("Options limit " + options.getInteger("NGramLIMIT"));
 //		System.out.println("Options f-start " + options.getInteger("FringeSTART"));
@@ -141,12 +145,20 @@ public class NGrams {
 		this.nGramCount = nGramCount; //normally we start with unigrams so n will be 1
 		
 		this.queryList = new ArrayList<NGramQAttributes>();
-		this.useFringe = true;
+//		this.useFringe = true;
+		
+//		System.out.println("Options limit " + options.getInteger("NGramLIMIT"));
+//		System.out.println("Options f-start " + options.getInteger("FringeSTART"));
+//		System.out.println("Options f-end " + options.getInteger("FringeEND"));
+//		System.out.println("Options fringe " + options.getBoolean("UseFringe"));
+//		System.out.println("Options NumberWC " + options.getBoolean("UseNumberWildcard"));
 		
 //		//0 collect ngrams until no new ngrams are found
-		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
-		this.fringeStart = (int) options.get("FringeSTART", 3);  //$NON-NLS-1$
-		this.fringeEnd = (int) options.get("FringeEND", 5);  //$NON-NLS-1$
+		this.nGramLimit = options.getInteger("NGramLIMIT");  //$NON-NLS-1$
+		this.fringeStart = options.getInteger("FringeSTART");  //$NON-NLS-1$
+		this.fringeEnd = options.getInteger("FringeEND");  //$NON-NLS-1$
+		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
+		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
@@ -308,11 +320,15 @@ public class NGrams {
 
 	//method used for replace numbers by general number token
 	private String checkForNumber(String currentWord) {
-		if (numberPattern.matcher(currentWord).find()){
-			//System.out.println("ContainsNumber " + currentWord);
-			return numberString;
+		//System.out.print("INput " + currentWord);
+		if (useNumberWildcard){
+			if (numberPattern.matcher(currentWord).find()){
+				//System.out.println(" out " + numberString);
+				return numberString;
+			}
 		}
-		return currentWord;	
+		//System.out.println(" out " + currentWord);
+		return currentWord;
 	}
 
 
@@ -325,32 +341,41 @@ public class NGrams {
 	 */
 
 	private Map<String, ArrayList<ItemInNuclei>> removeItemsLengthOne(Map<String,ArrayList<ItemInNuclei>> input){
-		
 		ArrayList<String> removeFromNGrams = new ArrayList<String>();
 		for(Iterator<String> i = input.keySet().iterator(); i.hasNext();){
 			String key = i.next();
 			ArrayList<ItemInNuclei> arrItem = input.get(key);
-
+			//System.out.print("\n" + key);
 			//only one PoS Tag found -> add to delet list;
-			if (arrItem.size() == 1){
-				
-				removeFromNGrams.add(key);
+			
+			//System.out.println("RL1: >>> " + key + " key " + arrItem.size() );
+			
+			if (arrItem.size() == 1){				
+				ItemInNuclei iin = arrItem.get(0);				
 				
 //				//simple firsat path
-//				if(nGramCount==1){
-//					removeFromNGrams.add(key);
-//				} else {
+				if(nGramCount == 1){
+//					System.out.println(key + " <------ remove  " + iin.getCount() 
+//										+ " NGCOUNT " + nGramCount );
+					removeFromNGrams.add(key);
+				}
+				
+				//FIXME enough to check length?!
+				if (nGramCount > 1) {
+//					System.out.println(key + " <------ remove  " + iin.getCount()
+//										+ " NGCOUNT " + nGramCount );
+					removeFromNGrams.add(key);
+				}				
+				
 //					
 //				//At this point we have exactly ONE sentenceinfo
 //				// otherwise the ArrItemsize wont be 1.....
 //				ItemInNuclei iin = arrItem.get(0);				
-//				
-//				
+//	
 //				int nc = 0;
 //				boolean remove = true;
 //				String[] ks = key.split(" "); //$NON-NLS-1$
-//				System.out.println(key);
-//				
+//
 //
 //				for(int k = 0; k < ks.length; k++){
 //					
@@ -363,7 +388,7 @@ public class NGrams {
 //							}	
 //						nc = Math.max(nc, si.getNucleiIndexListSize());
 //					}	
-//					System.out.println("key "+ ks[k]+" " + tmpTags.toString());
+//					System.out.println("Key+Tagset "+ ks[k]+" " + tmpTags.toString());
 //					//nc = si.getNucleiIndexListSize();
 //					
 //					
@@ -468,7 +493,7 @@ public class NGrams {
 					
 					//new version should work now and only delete fringe
 					// within an ngram wit 2+ nuclei if both are fringe
-					if(!getFringeItem(si)){
+					if(getFringeItem(si)){
 						//System.out.println("FringeKey " + key);
 						if(!removeFringeFromNGrams.contains(key)){
 							//System.out.println("FringeKey " + key);
@@ -494,7 +519,7 @@ public class NGrams {
 				
 		//System.out.println("FringeItems to Remove: " + removeFringeFromNGrams.size());
 		for(int i = 0; i < removeFringeFromNGrams.size(); i++){
-			System.out.println("Remove " + removeFringeFromNGrams.get(i));
+			//System.out.println("Remove " + removeFringeFromNGrams.get(i));
 			input.remove(removeFringeFromNGrams.get(i));
 		}
 
@@ -522,7 +547,7 @@ public class NGrams {
 			
 			if (!fringe) {
 				//System.out.println("Do not delete " + si.getNucleiIndexListAt(n));
-				return true;
+				return fringe;
 			}
 		}
 		return fringe;
@@ -558,7 +583,7 @@ public class NGrams {
 		for(Iterator<String> it = inputNGram.keySet().iterator(); it.hasNext();){
 			String key = it.next();
 			ArrayList<ItemInNuclei> iiArr = inputNGram.get(key);
-
+			//System.out.println(key);
 			
 			for (int tagSize = 0 ; tagSize < iiArr.size(); tagSize++){
 				
@@ -581,7 +606,7 @@ public class NGrams {
 										" NucleiForm " + dd.getForm(si.getNucleiIndexListAt(0)-1));
 					*/
 					
-					//StringBuilder posTagBuilder = new StringBuilder();
+					StringBuilder posTagBuilder = new StringBuilder();
 					
 					/* 
 					 * *************************************************************
@@ -593,19 +618,19 @@ public class NGrams {
 					if (!reachedLeftBoarder) {
 
 						StringBuilder leftKey = new StringBuilder();
-						
 						// new key
 						if (startIndex > 0) {
 
 							String leftForm = checkForNumber(dd.getForm(startIndex -1));
-							//String leftPOS = dd.getPos(startIndex - 1);
+							String leftPOS = getTagQuery(dd.getPos(startIndex - 1));
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
 							boolean addNewNuclei = nGramCache.containsKey(leftForm);
 							
 							leftKey.append(leftForm).append(" ").append(key); //$NON-NLS-1$
-							//posTagBuilder.append(leftPOS).append(" ").append(iin.getPosTag()); //$NON-NLS-1$
+							posTagBuilder.append(leftPOS).append(" ").append(iin.getPosTag()); //$NON-NLS-1$
 							//System.out.println("Left: "+ leftForm + " " + leftPOS);
+							//System.out.println(leftKey + " " + posTagBuilder.toString());
 							
 							// extend existing gram with values
 							if (outputNGram.containsKey(leftKey.toString())) {	
@@ -620,13 +645,13 @@ public class NGrams {
 									ItemInNuclei item = itemsTemp.get(i);
 									//System.out.println(item.getPosTag() + " vs "+ leftPOS);
 									
-									if (item.getPosTag().equals(iin.getPosTag())) {
+									if (item.getPosTag().equals(posTagBuilder.toString())) {
 										if (addNewNuclei){											
 											SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
-											addNucleiLeft(item, iin.getPosTag(), si, sitemp, true);
+											addNucleiLeft(item, posTagBuilder.toString(), si, sitemp, true);
 											knownTag = true;
 										} else {
-											addSentenceInfoLeft(item, iin.getPosTag(), si, true);
+											addSentenceInfoLeft(item, posTagBuilder.toString(), si, true);
 											knownTag = true;
 										}
 									}
@@ -642,10 +667,10 @@ public class NGrams {
 									//already an unigram
 									if (addNewNuclei){										
 										SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
-										addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
+										addNucleiLeft(item, posTagBuilder.toString(), si, sitemp, false);
 										itemsTemp.add(item);
 									} else {
-										addSentenceInfoLeft(item, iin.getPosTag(), si, false);
+										addSentenceInfoLeft(item, posTagBuilder.toString(), si, false);
 										itemsTemp.add(item);
 									}
 								}
@@ -657,10 +682,10 @@ public class NGrams {
 								//already an unigram
 								if (addNewNuclei){									
 									SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
-									addNucleiLeft(item, iin.getPosTag(), si, sitemp, false);
+									addNucleiLeft(item, posTagBuilder.toString(), si, sitemp, false);
 									items.add(item);
 								} else {
-									addSentenceInfoLeft(item, iin.getPosTag(), si, false);
+									addSentenceInfoLeft(item, posTagBuilder.toString(), si, false);
 									items.add(item);
 								}
 								outputNGram.put(leftKey.toString(), items);
@@ -668,7 +693,7 @@ public class NGrams {
 		
 							
 						} else {
-							reachedLeftBoarder = true;
+							//reachedLeftBoarder = true;
 						}
 					}
 					
@@ -695,14 +720,15 @@ public class NGrams {
 						if (endIndex < sentenceSize) {
 
 							String rightForm = checkForNumber(dd.getForm(endIndex + 1));
-							//String rightPOS = dd.getPos(endIndex + 1);
+							String rightPOS = getTagQuery(dd.getPos(endIndex + 1));
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
 							boolean addNewNuclei = nGramCache.containsKey(rightForm);							
 							
 							rightKey.append(key).append(" ").append(rightForm); //$NON-NLS-1$
-							//posTagBuilder.append(iin.getPosTag()).append(" ").append(rightPOS); //$NON-NLS-1$
-							
+							posTagBuilder.delete(0, posTagBuilder.length());
+							posTagBuilder.append(iin.getPosTag()).append(" ").append(rightPOS); //$NON-NLS-1$
+														
 							// extend existing gram with values
 							if (outputNGramR.containsKey(rightKey.toString())) {	
 
@@ -713,21 +739,19 @@ public class NGrams {
 
 								for (int i = 0; i < itemsTemp.size(); i++) {
 									// increment when tag found again
-									ItemInNuclei item = itemsTemp.get(i);									
-					
+									ItemInNuclei item = itemsTemp.get(i);
 									
 									// System.out.println(item.getPosTag()
 									// +" vs "+ getTagQuery(dd.getPos(wordIndex)));
-									
 
-									if (item.getPosTag().equals(iin.getPosTag())) {
+									if (item.getPosTag().equals(posTagBuilder.toString())) {
 										//int oldCount = item.getCount();
 										if (addNewNuclei){											
 											SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
-											addNucleiRigth(item, iin.getPosTag(), si, sitemp, true);
+											addNucleiRigth(item, posTagBuilder.toString(), si, sitemp, true);
 											knownTag = true;
 										} else {											
-											addSentenceInfoRigth(item, si, iin.getPosTag(), true);
+											addSentenceInfoRigth(item, si, posTagBuilder.toString(), true);
 											knownTag = true;
 										}
 									}
@@ -740,10 +764,10 @@ public class NGrams {
 									//already an unigram
 									if (addNewNuclei){										
 										SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
-										addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
+										addNucleiRigth(item, posTagBuilder.toString(), si, sitemp, false);
 										itemsTemp.add(item);
 									} else {		
-										addSentenceInfoRigth(item, si, iin.getPosTag(), false);
+										addSentenceInfoRigth(item, si, posTagBuilder.toString(), false);
 										itemsTemp.add(item);
 									}
 								}
@@ -755,10 +779,10 @@ public class NGrams {
 								//already an unigram
 								if (addNewNuclei){									
 									SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(rightForm), si.getSentenceNr());
-									addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
+									addNucleiRigth(item, posTagBuilder.toString(), si, sitemp, false);
 									items.add(item);
 								} else {
-									addSentenceInfoRigth(item, si, iin.getPosTag(), false);
+									addSentenceInfoRigth(item, si, posTagBuilder.toString(), false);
 									items.add(item);
 								}
 
@@ -768,7 +792,7 @@ public class NGrams {
 							
 							
 						} else {
-							reachedRightBoarder = true;
+							//reachedRightBoarder = true;
 						}
 					}
 					
@@ -779,7 +803,10 @@ public class NGrams {
 		
 	
 		//merge leftSide (outputNGram) with rightSide (outputNGramR)
-		outputNGram.putAll(outputNGramR);
+//		System.out.println("SizeL " + outputNGram.size());
+//		System.out.println("SizeR " + outputNGramR.size());
+		outputNGram = mergeResults(outputNGram, outputNGramR);
+//		System.out.println("SizeMerged " + outputNGram.size());
 
 		
 //		for(Iterator<String> i = outputNGram.keySet().iterator(); i.hasNext();){
@@ -790,48 +817,71 @@ public class NGrams {
 //				System.out.println("ToKeep ---------------> " + key);
 //			}
 //		}
-		
-		nGramCount++;
 
+		
+//		System.out.println("###################");
+//		nGramResults(outputNGramR);
+//		System.out.println("###################");
 		if (outputNGram.size() > 0) {
 			// TODO remove and endable recursive
 			
-			//items with length one -> no longer variation --> remove
-			outputNGram = removeItemsLengthOne(outputNGram);
+			// items with length one -> no longer variation --> remove
+			 outputNGram = removeItemsLengthOne(outputNGram);
 			
-			// remove items at the fringe
 			
 			//FIXME fringe
+			// remove items at the fringe
 			if (useFringe) {
-				//System.out.println("UseFringe");
-				if(nGramCount <= fringeEnd && nGramCount >= fringeStart){
-//					System.out.println(nGramCount + " | " 
-//									+ fringeStart + " | " 
-//									+ fringeEnd);
+
+				if(nGramCount >= fringeStart){
+					if(nGramCount <= fringeEnd){
+					System.out.println("Fringe Triggered [N-Gram " + nGramCount //$NON-NLS-1$
+										+ "| Start " + fringeStart //$NON-NLS-1$
+										+ " | END " + fringeEnd + " ]"); //$NON-NLS-1$ //$NON-NLS-2$
+
 					outputNGram = distrustFringeHeuristic(outputNGram);
+					}
 				}				
 			}
-
-
 			
 			//add results into Cache
 			nGramCache.putAll(outputNGram);
 			
-			//print to console
-			nGramResults(outputNGram);			
-			
 			
 			//continue creating ngrams?
-			if (continueNGrams()){				
+			if (continueNGrams()){	
+				nGramCount++;
+				//TODO print to console
+				nGramResults(outputNGram);	
 				createNGrams(outputNGram, false, false);
 			}
-		}				
-		
-	
+		}
 	}
 	
 	
+	private Map<String, ArrayList<ItemInNuclei>> mergeResults(
+			Map<String, ArrayList<ItemInNuclei>> outputNGram,
+			Map<String, ArrayList<ItemInNuclei>> outputNGramR) {
+
+		Map<String, ArrayList<ItemInNuclei>> result = new LinkedHashMap<String, ArrayList<ItemInNuclei>>();
+		
+		result.putAll(outputNGram);
 	
+	
+	for(Iterator<String> it = outputNGramR.keySet().iterator(); it.hasNext();){
+		String key = it.next();
+		if (result.containsKey(key)){
+//			System.out.println(key + " "+ outputNGram.get(key).get(0).getPosTag());
+//			System.out.println(key + " "+ outputNGramR.get(key).get(0).getPosTag());
+			//need merge
+			result.put(key, outputNGram.get(key));
+		} else {
+			result.put(key, outputNGramR.get(key));			
+		}
+	}
+
+	return result;
+}
 	
 	
 	
@@ -844,7 +894,6 @@ public class NGrams {
 		if(nGramLimit == 0){
 			return true;
 		}
-
 		return (nGramLimit > nGramCount);
 	}
 
@@ -945,7 +994,7 @@ public class NGrams {
 				} else {
 					//ignore tag for search
 					//System.out.println(" excluded ");
-					return null;
+					return "[TagIgnored]"; //$NON-NLS-1$
 				}
 			}
 		}
@@ -990,10 +1039,10 @@ public class NGrams {
 		System.out.print("\n###################################\n"+ nGramCount + "-Gram: ");
 		System.out.println("Found " + inputNGram.size() + " different nGrams");
 		
-		for(Iterator<String> i = inputNGram.keySet().iterator(); i.hasNext();){
-			String key = i.next();
-			ArrayList<ItemInNuclei> arrItem = inputNGram.get(key);
-			
+//		for(Iterator<String> i = inputNGram.keySet().iterator(); i.hasNext();){
+//			String key = i.next();
+//			ArrayList<ItemInNuclei> arrItem = inputNGram.get(key);
+//			
 //			System.out.println("\n### Wordform: " + key + " ###");
 //			for (int j = 0; j < arrItem.size();j++){
 //				ItemInNuclei iin = arrItem.get(j);
@@ -1009,7 +1058,7 @@ public class NGrams {
 //					System.out.println(" End: " + iin.getSentenceInfoAt(k).getSentenceEnd());
 //				}
 //			}
-		}
+//		}
 	}
 	
 	
@@ -1025,7 +1074,6 @@ public class NGrams {
 		
 		System.out.print("NGramsize " + nGramCount + " ");
 		System.out.println("Found " + nGramCache.size() + " uniGrams");
-		//TODO
 		removeItemsLengthOne(nGramCache);
 		System.out.println("Remaining " + nGramCache.size() + " filtered uniGrams");
 		
@@ -1069,9 +1117,9 @@ public class NGrams {
 	public static void main(String[] args) throws UnsupportedFormatException {
 		
 		//18 Sentences
-		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
-		
+		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$		
 		//String  inputFileName = "E:\\test_small_modded_v2.txt"; //$NON-NLS-1$
+		String  inputFileName = "E:\\tiger_release_aug07_short"; //$NON-NLS-1$
 		
 		//CONLL Training English (1334 Sentences)
 		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
@@ -1083,10 +1131,10 @@ public class NGrams {
 		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\tiger_release_aug07.corrected.conll09.txt";
 		
 		//CONLL Training German 50472 Sentences (Aug)
-		String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
+		//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
 
 		
-		int sentencesToRead = 500;
+		int sentencesToRead = 24;
 		
 		File file = new File(inputFileName);		
 		
@@ -1096,9 +1144,11 @@ public class NGrams {
 		
 		
 		Options on = new Options();
-		on.put("FringeSTART", 21); //$NON-NLS-1$
-		on.put("FringeEND", 21); //$NON-NLS-1$ // 0 = infinity , number = limit
+		on.put("FringeSTART", 3); //$NON-NLS-1$
+		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
 		on.put("NGramLIMIT", 0); //$NON-NLS-1$
+		on.put("UseFringe", true); //$NON-NLS-1$
+		on.put("UseNumberWildcard", false); //$NON-NLS-1$
 
 	
 		NGrams ngrams = new NGrams(1, on);
@@ -1121,7 +1171,7 @@ public class NGrams {
 			}
 			ngrams.nGramResults();
 			
-			ngrams.outputToFile();
+			//ngrams.outputToFile();
 
 			System.out.println("Finished nGram Processing"); //$NON-NLS-1$
 			

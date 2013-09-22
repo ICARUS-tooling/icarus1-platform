@@ -85,9 +85,9 @@ public class nGramIO {
         
 
         //FIXME remove debug!
-        File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$
-        //File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
-        
+        //File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$
+        File file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
+
        
         fop = new FileOutputStream(file);
 

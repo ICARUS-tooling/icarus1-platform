@@ -108,6 +108,8 @@ test  - runs some tests
 			<fileset dir="${basedir}/data">
 				<include name="weblicht.xml"/>
 				<include name="webchain.xml"/>
+				<include name="ngramquery.xml"/>
+				<include name="ngramquery_one.xml"/>
 			</fileset>
 		</copy>
 	</target>
