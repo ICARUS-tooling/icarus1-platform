@@ -768,7 +768,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			String tooltip = null;
 			
 			if(value instanceof CorefNodeData) {
-				tooltip = CoreferenceUtils.getSpanTooltip(((CorefNodeData)value).getSpan());
+				Span span = ((CorefNodeData)value).getSpan();
+				CoreferenceData sentence = document.get(span.getSentenceIndex());
+				tooltip = CoreferenceUtils.getSpanTooltip(span, sentence);
 			} else if(value instanceof CorefEdgeData) {
 				tooltip = CoreferenceUtils.getEdgeTooltip(((CorefEdgeData)value).getEdge());
 			}

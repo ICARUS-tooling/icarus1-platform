@@ -246,7 +246,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 			AttributeSet attr = getAttributes();
 			if(attr.isDefined(CoreferenceDocument.PARAM_SPAN)) {
 				Span span = (Span) attr.getAttribute(CoreferenceDocument.PARAM_SPAN);
-				return CoreferenceUtils.getSpanTooltip(span);
+				return CoreferenceUtils.getSpanTooltip(span, null);
 			}
 			return super.getToolTipText(x, y, allocation);
 		}

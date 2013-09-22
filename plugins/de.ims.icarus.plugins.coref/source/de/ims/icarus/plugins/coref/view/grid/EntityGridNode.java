@@ -27,9 +27,11 @@ package de.ims.icarus.plugins.coref.view.grid;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.List;
 
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.util.CollectionUtils;
 
 /**
  * @author Markus Gärtner
@@ -76,6 +78,10 @@ public class EntityGridNode {
 	
 	public short getType(int index) {
 		return types[index];
+	}
+	
+	public List<Span> getSpans() {
+		return CollectionUtils.asList(spans);
 	}
 	
 	public boolean isFalsePredictedSpan(int index) {

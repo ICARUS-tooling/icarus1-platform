@@ -43,6 +43,7 @@ import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -371,6 +372,53 @@ public final class CoreferenceUtils {
 		}
 	}
 	
+	public static String getForms(CoreferenceData sentence, Span span) {
+		StringBuilder buffer = new StringBuilder();
+		int beginIndex = span.getBeginIndex();
+		int endIndex = span.getEndIndex();
+		
+		for(int i=beginIndex; i<=endIndex; i++) {
+			buffer.append(sentence.getForm(i));
+			if(i<endIndex) {
+				buffer.append(' ');
+			}
+		}
+		
+		return buffer.toString();
+	}
+	
+	public static String createTooltip(CoreferenceData sentence, List<Span> spans) {
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i=0; i<spans.size(); i++) {
+			if(i>0) {
+				sb.append("\n\n"); //$NON-NLS-1$
+			}
+			
+			Span span = spans.get(i);
+			span.appendTo(sb);
+			sb.append(":\n"); //$NON-NLS-1$
+			int len = 0;
+			int idx = span.getBeginIndex();
+			sb.append('"');
+			while(len<40 && idx<=span.getEndIndex()) {
+				String form = sentence.getForm(idx); 
+				sb.append(form).append(' ');
+				
+				len += form.length();
+				idx++;
+			}
+			if(idx<span.getEndIndex()) {
+				StringUtil.trim(sb);
+				sb.append(" [...] "); //$NON-NLS-1$
+				sb.append(sentence.getForm(span.getEndIndex()));
+			}
+			sb.append('"');
+		}
+		
+		return sb.toString();
+	}
+	
 	private static void appendProperties(StringBuilder sb, CorefProperties properties) {
 		if(properties==null || properties.size()==0) {
 			return;
@@ -388,7 +436,7 @@ public final class CoreferenceUtils {
 		}
 	}
 	
-	public static String getSpanTooltip(Span span) {
+	public static String getSpanTooltip(Span span, CoreferenceData sentence) {
 		if(span==null) {
 			return null;
 		}
@@ -398,6 +446,28 @@ public final class CoreferenceUtils {
 		ResourceManager rm = ResourceManager.getInstance();
 		sb.append(rm.get("plugins.coref.labels.span")).append('\n'); //$NON-NLS-1$
 		span.appendTo(sb);
+		
+		if(sentence!=null) {
+			sb.append('\n');
+
+			sb.append('"');
+			int len = 0;
+			int idx = span.getBeginIndex();
+			while(len<40 && idx<=span.getEndIndex()) {
+				String form = sentence.getForm(idx); 
+				sb.append(form).append(' ');
+				
+				len += form.length();
+				idx++;
+			}
+			if(idx<span.getEndIndex()) {
+				StringUtil.trim(sb);
+				sb.append(" [...] "); //$NON-NLS-1$
+				sb.append(sentence.getForm(span.getEndIndex()));
+			}
+			sb.append('"');
+		}
+		
 		
 		appendProperties(sb, span.getProperties());
 		
