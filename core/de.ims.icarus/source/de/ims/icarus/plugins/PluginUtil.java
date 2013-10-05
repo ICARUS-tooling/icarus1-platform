@@ -85,7 +85,7 @@ import de.ims.icarus.util.id.StaticIdentity;
  */
 public final class PluginUtil {
 	
-	public static final String CORE_PLUGIN_ID = Core.CORE_PLUGIN_KEY;
+	public static final String CORE_PLUGIN_ID = Core.DEFAULT_CORE_PLUGIN_ID;
 	
 	public static final String PREFERENCES_KEY = 
 			"de.ims.icarus.preferences"; //$NON-NLS-1$

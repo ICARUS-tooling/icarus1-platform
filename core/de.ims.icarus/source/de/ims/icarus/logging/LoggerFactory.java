@@ -221,6 +221,34 @@ public final class LoggerFactory {
 		getLogger(owner).log(record);
 		return record;
 	}
+	
+	public static LogRecord debug(Object owner, String message) {
+		return log(owner, Level.FINE, message);
+	}
+	
+	public static LogRecord debug(Object owner, String message, Throwable t) {
+		return log(owner, Level.FINE, message, t);
+	}
+	
+	public static LogRecord info(Object owner, String message) {
+		return log(owner, Level.INFO, message);
+	}
+	
+	public static LogRecord warning(Object owner, String message) {
+		return log(owner, Level.WARNING, message);
+	}
+	
+	public static LogRecord warning(Object owner, String message, Throwable t) {
+		return log(owner, Level.WARNING, message, t);
+	}
+	
+	public static LogRecord error(Object owner, String message) {
+		return log(owner, Level.SEVERE, message);
+	}
+	
+	public static LogRecord error(Object owner, String message, Throwable t) {
+		return log(owner, Level.SEVERE, message, t);
+	}
 
 	public static void setCallerFields(LogRecord record) {
 		Throwable throwable = new Throwable();

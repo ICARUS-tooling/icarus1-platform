@@ -182,13 +182,14 @@ public class Core {
 	private final File rootFolder;
 	private final File logFolder;
 	private final File pluginFolder;
+	private final File cacheFolder;
 	private final File dataFolder;
 	private final File tempFolder;
 	
 	public static final String IGNORE_STREAM_REDIRECT_PROPERTY = 
 			"de.ims.icarus.ignoreStreamRedirect"; //$NON-NLS-1$
 	
-	private static final String DEFAULT_CORE_PLUGIN_ID = 
+	public static final String DEFAULT_CORE_PLUGIN_ID = 
 			"de.ims.icarus.core"; //$NON-NLS-1$
 	
 	public static final String PROPERTIES_PATH_KEY = 
@@ -201,7 +202,7 @@ public class Core {
 			"de.ims.icarus.ignoreAttributes"; //$NON-NLS-1$
 	
 	public static final String CORE_PLUGIN_KEY =  
-			"de.ims.icarus.core"; //$NON-NLS-1$
+			"de.ims.icarus.corePlugin"; //$NON-NLS-1$
 	
 	private Map<String, String> applicationProperties;
 	private Map<String, String> pluginProperties;
@@ -241,6 +242,11 @@ public class Core {
 		tempFolder = new File(rootFolder, "temp"); //$NON-NLS-1$
 		if(!tempFolder.isDirectory() && !tempFolder.mkdir())
 			throw new Error("Unable to create temp directory"); //$NON-NLS-1$
+
+		// init cache folder
+		cacheFolder = new File(rootFolder, "cache"); //$NON-NLS-1$
+		if(!cacheFolder.isDirectory() && !cacheFolder.mkdir())
+			throw new Error("Unable to create cache directory"); //$NON-NLS-1$
 		
 		// Redirect default output
 		if(!ignoreRedirect()) {
@@ -591,6 +597,13 @@ public class Core {
 	public File getTempFolder() {
 		return tempFolder;
 	}
+
+	/**
+	 * @return the tempFolder
+	 */
+	public File getCacheFolder() {
+		return cacheFolder;
+	}
 	
 	public File createTempFile(String baseName) throws IOException {
 		return File.createTempFile(baseName, "tmp", getTempFolder()); //$NON-NLS-1$
@@ -807,7 +820,7 @@ public class Core {
 					if(deli==-1) {
 						continue;
 					}
-					String key = token.substring(2, deli-1);
+					String key = token.substring(2, deli);
 					String value = token.substring(deli+1);
 					if(value.startsWith("\"") && value.endsWith("\"")) { //$NON-NLS-1$ //$NON-NLS-2$
 						value = value.substring(1, value.length()-1);

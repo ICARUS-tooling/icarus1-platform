@@ -407,4 +407,43 @@ public final class CollectionUtils {
 		}
 		return hc;
 	}
+	
+	public static <E extends Object> boolean equals(Collection<E> c1, Collection<E> c2) {
+		if(c1==null || c2==null) {
+			return c1==c2;
+		}
+		
+		if(c1.size()!=c2.size()) {
+			return false;
+		}
+		
+		Iterator<E> i1 = c1.iterator();
+		Iterator<E> i2 = c2.iterator();
+		
+		while(i1.hasNext() && i2.hasNext()) {
+			if(!i1.next().equals(i2.next())) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public static <K extends Object, V extends Object> boolean equals(Map<K, V> m1, Map<K, V> m2) {
+		if(m1==null || m2==null) {
+			return m1==m2;
+		}
+		
+		if(m1.size()!=m2.size()) {
+			return false;
+		}
+		
+		for(K key : m1.keySet()) {
+			if(!m1.get(key).equals(m2.get(key))) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }
