@@ -36,7 +36,7 @@ public final class ManagedResource {
 	
 	private final String baseName;
 	
-	private final ResourceLoader laoder;
+	private final ResourceLoader loader;
 	
 	private ResourceBundle bundle;
 
@@ -45,11 +45,11 @@ public final class ManagedResource {
 	 */
 	ManagedResource(String baseName, ResourceLoader loader) {
 		this.baseName = baseName;
-		this.laoder = loader;
+		this.loader = loader;
 	}
 
 	public synchronized void reload() {
-		bundle = laoder.loadResource(baseName, ResourceManager.getInstance().getLocale());
+		bundle = loader.loadResource(baseName, ResourceManager.getInstance().getLocale());
 	}
 	
 	synchronized void clear() {
@@ -72,10 +72,10 @@ public final class ManagedResource {
 	}
 
 	/**
-	 * @return the laoder
+	 * @return the loader
 	 */
-	public ResourceLoader getLaoder() {
-		return laoder;
+	public ResourceLoader getLoader() {
+		return loader;
 	}
 
 	/**
@@ -83,5 +83,34 @@ public final class ManagedResource {
 	 */
 	public ResourceBundle getBundle() {
 		return bundle;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return baseName.hashCode() *  loader.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof ManagedResource) {
+			ManagedResource other = (ManagedResource) obj;
+			return baseName.equals(other.baseName) && loader.equals(other.loader);
+		}
+		
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return baseName;
 	}
 }

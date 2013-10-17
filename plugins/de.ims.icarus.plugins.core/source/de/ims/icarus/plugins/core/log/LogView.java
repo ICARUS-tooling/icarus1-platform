@@ -448,7 +448,7 @@ public class LogView extends View {
 		}
 	}
 	
-	public final class CallbackHandler implements ClipboardOwner {
+	public final class CallbackHandler {
 		
 		private CallbackHandler() {
 			// no-op
@@ -494,18 +494,10 @@ public class LogView extends View {
 		public void showOnError(ActionEvent e) {
 			// no-op
 		}
-
-		/**
-		 * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
-		 */
-		@Override
-		public void lostOwnership(Clipboard clipboard, Transferable contents) {
-			// no-op
-		}
 	}
 	
 	private final class Handler extends MouseAdapter implements
-			ListDataListener, ChangeListener, ListSelectionListener, ManagementConstants {
+			ListDataListener, ChangeListener, ListSelectionListener, ManagementConstants, ClipboardOwner {
 
 		private void maybeShowList() {
 			if (contentPanel == null) {
@@ -590,6 +582,14 @@ public class LogView extends View {
 				fireBroadcastEvent(new EventObject(LOG_SELECTION_CHANGED, 
 						"item", selectedRecord, "options", options)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
+		}
+
+		/**
+		 * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
+		 */
+		@Override
+		public void lostOwnership(Clipboard clipboard, Transferable contents) {
+			// no-op
 		}
 	}
 }

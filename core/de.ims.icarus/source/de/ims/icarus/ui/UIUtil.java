@@ -37,6 +37,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -370,6 +371,13 @@ public final class UIUtil {
 		}
 		
 		return tooltip;
+	}
+	
+	public static void pack(Component comp) {
+		Window wnd = SwingUtilities.getWindowAncestor(comp);
+		if(wnd!=null) {
+			wnd.pack();
+		}
 	}
 	
 	public static void invokeLater(final Runnable runnable) {
