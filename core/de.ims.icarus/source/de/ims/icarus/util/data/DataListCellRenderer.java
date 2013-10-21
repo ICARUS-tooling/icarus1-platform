@@ -29,7 +29,7 @@ import java.awt.Component;
 
 import javax.swing.JList;
 
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 
 
 /**

@@ -34,7 +34,7 @@ import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.coref.view.grid.ClusterLabelType;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.HighlightType;
 

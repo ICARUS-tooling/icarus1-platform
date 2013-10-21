@@ -31,7 +31,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.ui.table.ColumnInfo;
 import de.ims.icarus.ui.table.ColumnListHandler;
 import de.ims.icarus.util.annotation.HighlightType;

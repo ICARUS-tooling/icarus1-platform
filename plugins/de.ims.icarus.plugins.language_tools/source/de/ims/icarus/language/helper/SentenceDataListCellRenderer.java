@@ -30,7 +30,7 @@ import java.awt.Component;
 import javax.swing.JList;
 
 import de.ims.icarus.language.SentenceData;
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.AnnotationController;

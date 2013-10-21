@@ -257,6 +257,14 @@ public final class UIUtil {
 			} else if(source instanceof JList) {
 				JList<?> list = (JList<?>) source;
 				int index = list.locationToIndex(e.getPoint());
+				
+				if(index>-1) {
+					Rectangle bounds = list.getCellBounds(index, index);
+					if(!bounds.contains(e.getPoint())) {
+						index = -1;
+					}
+				}
+				
 				if(index>-1) {
 					list.setSelectedIndex(index);
 				} else {
@@ -461,6 +469,11 @@ public final class UIUtil {
 		tree.cancelEditing();
 	    Object root = tree.getModel().getRoot();
 	    expandAll0(tree, new TreePath(root), expand);
+	    
+	    if(!tree.isRootVisible()) {
+		    // Ensure expanded root
+		    tree.expandPath(new TreePath(root));
+	    }
 	}
 	 
 	private static void expandAll0(JTree tree, TreePath parent, boolean expand) {

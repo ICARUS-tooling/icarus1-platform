@@ -123,16 +123,16 @@ test  - runs some tests
 			<param name="target" value="source" />
 		</antcall>
 
-		<copy todir="${build.home}/icarus">
+		<copy todir="${build.home}/${app.name}">
 			<fileset dir="${build.home}">
-				<exclude name="icarus/*" />
+				<exclude name="${app.name}/*" />
 				<include name="**/*"/>
 			</fileset>
 		</copy>
 		<delete includeemptydirs="true">
 			<fileset dir="${build.home}">
 				<include name="**/*" />
-				<exclude name="icarus/**/*" />
+				<exclude name="${app.name}/**/*" />
 			</fileset>
 		</delete>
 
@@ -189,10 +189,18 @@ test  - runs some tests
 				<include name="*.pdf"/>
 			</fileset>
 		</copy>
+		<copy todir="${build.home}/${app.name}">
+			<fileset dir="${build.home}">
+				<exclude name="${app.name}/*" />
+				<include name="**/*"/>
+			</fileset>
+		</copy>
 		<zip destfile="${build.home}/${app.name}-bin-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">
-			<fileset dir="${build.home}" includes="**/*" />
+			<fileset dir="${build.home}">
+				<include name="${app.name}/**/*" />
+			</fileset>
 		</zip>
 		<delete includeemptydirs="true">
 			<fileset dir="${build.home}">
@@ -205,10 +213,23 @@ test  - runs some tests
 	<target name="dist-ims"
 	        depends="clean,build-ims"
 	        description="Prepares distribution packages (for IMS internal staff members)">
+		<copy todir="${build.home}">
+			<fileset dir="${basedir}/quickstart-guide">
+				<include name="*.pdf"/>
+			</fileset>
+		</copy>
+		<copy todir="${build.home}/${app.name}">
+			<fileset dir="${build.home}">
+				<exclude name="${app.name}/*" />
+				<include name="**/*"/>
+			</fileset>
+		</copy>
 		<zip destfile="${build.home}/${app.name}-bin-${app.version}-ims.zip"
 		     duplicate="fail"
 		     update="false">
-			<fileset dir="${build.home}" includes="**/*" />
+			<fileset dir="${build.home}">
+				<include name="${app.name}/**/*" />
+			</fileset>
 		</zip>
 		<delete includeemptydirs="true">
 			<fileset dir="${build.home}">

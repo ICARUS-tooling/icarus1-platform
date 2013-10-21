@@ -15,21 +15,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 123 $
+ * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/de/ims/icarus/ui/helper/TooltipListCellRenderer.java $
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
- * $LastChangedBy$
+ * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $ 
+ * $LastChangedRevision: 123 $ 
+ * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.ui.helper;
+package de.ims.icarus.ui.tree;
 
 import java.awt.Component;
 import java.awt.FontMetrics;
 
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JList;
+import javax.swing.Icon;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.NamedObject;
@@ -39,34 +40,36 @@ import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: TooltipListCellRenderer.java 123 2013-07-31 15:22:01Z mcgaerty $
  *
  */
-public class TooltipListCellRenderer extends DefaultListCellRenderer {
+public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {
 
-	private static final long serialVersionUID = 4283938142282983275L;
+	private static final long serialVersionUID = -28033820708371349L;
 	
-	private static TooltipListCellRenderer sharedInstance;
+	private static TooltipTreeCellRenderer sharedInstance;
 	
-	public static TooltipListCellRenderer getSharedInstance() {
+	public static TooltipTreeCellRenderer getSharedInstance() {
 		if(sharedInstance==null) {
-			sharedInstance = new TooltipListCellRenderer();
+			sharedInstance = new TooltipTreeCellRenderer();
 		}
 		return sharedInstance;
 	}
 
-	public TooltipListCellRenderer() {
+	public TooltipTreeCellRenderer() {
 		// no-op
 	}
 
 	/**
-	 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+	 * @see javax.swing.tree.DefaultTreeCellRenderer#getTreeCellRendererComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int, boolean)
 	 */
 	@Override
-	public Component getListCellRendererComponent(JList<?> list,
-			Object value, int index, boolean isSelected, boolean cellHasFocus) {
-
+	public Component getTreeCellRendererComponent(JTree tree, Object value,
+			boolean sel, boolean expanded, boolean leaf, int row,
+			boolean hasFocus) {
+		
 		String tooltip = null;
+		Icon icon = null;
 		if(value instanceof Identifiable) {
 			value = ((Identifiable)value).getIdentity();
 		} else if(value instanceof NamedObject) {
@@ -76,11 +79,16 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 			Identity identity = (Identity) value;
 			value = identity.getName();
 			tooltip = identity.getDescription();
+			icon = identity.getIcon();
 		}
+
+		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
+				row, hasFocus);
 		
-		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		
-		int columnWidth = list.getWidth();
+		int columnWidth = tree.getWidth();
+		if(icon!=null) {
+			columnWidth -= icon.getIconWidth()+getIconTextGap();
+		}
 		int textWidth = 0;
 		
 		if(tooltip==null) {
@@ -95,10 +103,11 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 		if(textWidth<=columnWidth) {
 			tooltip = null;
 		}
+		
+		setIcon(icon);
 
 		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 		
 		return this;
 	}
-
 }

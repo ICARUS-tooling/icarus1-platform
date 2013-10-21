@@ -30,7 +30,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.ListCellRenderer;
 
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 
 
 

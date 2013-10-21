@@ -33,7 +33,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
 import de.ims.icarus.search_tools.annotation.ResultAnnotation;
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.Annotation;
 

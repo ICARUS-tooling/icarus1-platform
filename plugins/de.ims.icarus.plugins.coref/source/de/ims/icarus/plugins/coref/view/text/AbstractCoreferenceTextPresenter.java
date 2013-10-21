@@ -76,7 +76,7 @@ import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.helper.TooltipListCellRenderer;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.ui.view.AWTPresenter;
