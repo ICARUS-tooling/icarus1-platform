@@ -42,18 +42,8 @@ import de.ims.icarus.ui.helper.AbstractTreeModel;
  */
 public class CoreferenceRegistryTreeModel extends AbstractTreeModel implements EventListener {
 	
-	private static final Object root = new Object();
-
 	public CoreferenceRegistryTreeModel() {
 		CoreferenceRegistry.getInstance().addListener(null, this);
-	}
-
-	/**
-	 * @see javax.swing.tree.TreeModel#getRoot()
-	 */
-	@Override
-	public Object getRoot() {
-		return root;
 	}
 
 	/**
@@ -90,14 +80,6 @@ public class CoreferenceRegistryTreeModel extends AbstractTreeModel implements E
 	@Override
 	public boolean isLeaf(Object node) {
 		return node instanceof AllocationDescriptor;
-	}
-
-	/**
-	 * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
-	 */
-	@Override
-	public void valueForPathChanged(TreePath path, Object newValue) {
-		// no-op
 	}
 
 	/**

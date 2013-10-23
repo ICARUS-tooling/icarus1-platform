@@ -39,8 +39,46 @@ import javax.swing.tree.TreePath;
 public abstract class AbstractTreeModel implements TreeModel {
 
 	protected EventListenerList listeners;
+	
+	protected Object root;
+	
+	protected AbstractTreeModel(Object root) {
+		this.root = root;
+	}
 
 	protected AbstractTreeModel() {
+		this(new Root());
+	}
+
+	/**
+	 * @see javax.swing.tree.TreeModel#getRoot()
+	 */
+	@Override
+	public Object getRoot() {
+		return root;
+	}
+
+	/**
+	 * @see javax.swing.tree.TreeModel#isLeaf(java.lang.Object)
+	 */
+	@Override
+	public boolean isLeaf(Object node) {
+		return getChildCount(node)==0;
+	}
+
+	/**
+	 * @see javax.swing.tree.TreeModel#getIndexOfChild(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public int getIndexOfChild(Object parent, Object child) {
+		return -1;
+	}
+
+	/**
+	 * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
+	 */
+	@Override
+	public void valueForPathChanged(TreePath path, Object newValue) {
 		// no-op
 	}
 
@@ -201,4 +239,15 @@ public abstract class AbstractTreeModel implements TreeModel {
         listeners.remove(TreeModelListener.class, listener);
 	}
 
+	private static class Root {
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "root";
+		}
+		
+	}
 }

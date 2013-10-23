@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ICARUS main build file" default="help" basedir=".">
 	<property name="app.name" value="ICARUS" />
-	<property name="app.version" value="1.0.1" />
+	<property name="app.version" value="1.0.2" />
 	
 	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />
@@ -13,6 +13,8 @@
 	<property name="dist.home" value="${basedir}/dist" />
 	
 	<property name="lib.home" value="${basedir}/lib" />
+
+	<property name="license.file" value="${basedir}/license.txt" />
 		
 	<property name="plugins.home" value="${basedir}/plugins" />
 	<property name="plugins.build" value="${build.home}/plugins" />
@@ -122,6 +124,7 @@ test  - runs some tests
 		<antcall target="-build-plugins">
 			<param name="target" value="source" />
 		</antcall>
+		<copy todir="${build.home}" file="${license.file}" />
 
 		<copy todir="${build.home}/${app.name}">
 			<fileset dir="${build.home}">
@@ -189,6 +192,8 @@ test  - runs some tests
 				<include name="*.pdf"/>
 			</fileset>
 		</copy>
+		<copy todir="${build.home}" file="${license.file}" />
+		
 		<copy todir="${build.home}/${app.name}">
 			<fileset dir="${build.home}">
 				<exclude name="${app.name}/*" />
@@ -218,6 +223,8 @@ test  - runs some tests
 				<include name="*.pdf"/>
 			</fileset>
 		</copy>
+		<copy todir="${build.home}" file="${license.file}" />
+		
 		<copy todir="${build.home}/${app.name}">
 			<fileset dir="${build.home}">
 				<exclude name="${app.name}/*" />

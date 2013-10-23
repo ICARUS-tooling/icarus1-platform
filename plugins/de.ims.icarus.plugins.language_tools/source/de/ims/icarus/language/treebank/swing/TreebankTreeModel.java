@@ -97,14 +97,6 @@ public class TreebankTreeModel extends AbstractTreeModel {
 	}
 
 	/**
-	 * @see javax.swing.tree.TreeModel#getRoot()
-	 */
-	@Override
-	public Object getRoot() {
-		return root;
-	}
-
-	/**
 	 * @see javax.swing.tree.TreeModel#getChild(java.lang.Object, int)
 	 */
 	@Override
@@ -141,14 +133,6 @@ public class TreebankTreeModel extends AbstractTreeModel {
 			return false;
 		}
 		return node instanceof Treebank;
-	}
-
-	/**
-	 * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
-	 */
-	@Override
-	public void valueForPathChanged(TreePath path, Object newValue) {
-		// no-op
 	}
 
 	/**

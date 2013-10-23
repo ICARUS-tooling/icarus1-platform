@@ -59,6 +59,26 @@ public class MutablePrimitives {
 		public void setValue(int value) {
 			this.value = value;
 		}
+		
+		public int increment() {
+			value++;
+			return value;
+		}
+		
+		public int increment(int delta) {
+			value += delta;
+			return value;
+		}
+		
+		public int decrement() {
+			value--;
+			return value;
+		}
+		
+		public int decrement(int delta) {
+			value -= delta;
+			return value;
+		}
 	}
 	
 	/**
