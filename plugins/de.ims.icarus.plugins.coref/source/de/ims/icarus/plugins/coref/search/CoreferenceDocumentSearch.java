@@ -66,7 +66,7 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 	@Override
 	protected DataList<CoreferenceDocumentData> createSource(Object target) {
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		
 		if(!(target instanceof CoreferenceDocumentSearchTarget))
 			throw new IllegalArgumentException("Unsupported target type: "+target.getClass()); //$NON-NLS-1$

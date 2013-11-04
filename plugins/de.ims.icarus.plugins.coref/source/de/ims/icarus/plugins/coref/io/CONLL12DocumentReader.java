@@ -61,7 +61,7 @@ public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
 		if(location==null)
-			throw new IllegalArgumentException("Invalid location"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
 		
 		documentSet = (CoreferenceDocumentSet) options.get("documentSet"); //$NON-NLS-1$
 		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));

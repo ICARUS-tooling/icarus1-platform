@@ -103,6 +103,10 @@ public final class HtmlUtils {
 		return sb.toString();
 	}
 	
+	public static String revertBreaks(String s) {
+		return s.replaceAll("<[bB][rR]>", "\n");
+	}
+	
 	public static abstract class HtmlBuilder {
 		protected StringBuilder builder;
 		

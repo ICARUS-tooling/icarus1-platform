@@ -47,7 +47,7 @@ public abstract class ConfigDelegate implements ConfigListener {
 
 	protected ConfigDelegate(Handle handle) {
 		if(handle==null)
-			throw new IllegalArgumentException("Invalid handle"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid handle"); //$NON-NLS-1$
 		
 		this.handle = handle;
 		
@@ -56,7 +56,7 @@ public abstract class ConfigDelegate implements ConfigListener {
 	
 	protected ConfigDelegate(String path, ConfigRegistry registry) {
 		if(path==null)
-			throw new IllegalArgumentException("Invalid path"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 		
 		if(registry==null) {
 			registry = ConfigRegistry.getGlobalRegistry();

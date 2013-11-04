@@ -361,7 +361,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	
 	private void displayDocument(CoreferenceDocumentData document, Options options) {
 		if(document==null)
-			throw new IllegalArgumentException("Invalid document"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document"); //$NON-NLS-1$
 		
 		this.document = document;
 		this.options = options==null ? null : options.clone();
@@ -387,7 +387,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	
 	public void togglePresenter(Extension extension, Options options) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		presenterSelect.setSelectedItem(extension);
 		if(this.options==null) {
@@ -601,9 +601,9 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		
 		public PresenterMenu(AWTPresenter owner, ActionListener actionListener) {
 			if(owner==null)
-				throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 			if(actionListener==null)
-				throw new IllegalArgumentException("Invalid action listener"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid action listener"); //$NON-NLS-1$
 			
 			extensions = new ArrayList<>(CoreferencePlugin.getCoreferencePresenterExtensions());
 			for(int i=0; i<extensions.size(); i++) {

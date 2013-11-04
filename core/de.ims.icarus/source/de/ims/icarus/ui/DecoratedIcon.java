@@ -138,7 +138,7 @@ public class DecoratedIcon implements Icon {
 	public void addDecoration(int layer, Icon icon, int x, int y) {
 		Exceptions.testNullArgument(icon, "icon"); //$NON-NLS-1$
 		if(layer<0 || layer>2)
-			throw new IllegalArgumentException("Invalid layer: "+layer); //$NON-NLS-1$
+			throw new NullPointerException("Invalid layer: "+layer); //$NON-NLS-1$
 		
 		if(decorations==null) {
 			decorations = new Decoration[3][];
@@ -170,7 +170,7 @@ public class DecoratedIcon implements Icon {
 	public void removeDecoration(int layer, Icon icon, int x, int y) {
 		Exceptions.testNullArgument(icon, "icon"); //$NON-NLS-1$
 		if(layer<0 || layer>2)
-			throw new IllegalArgumentException("Invalid layer: "+layer); //$NON-NLS-1$
+			throw new NullPointerException("Invalid layer: "+layer); //$NON-NLS-1$
 		
 		if(decorations==null || decorations[layer]==null || decorationCounts==null) {
 			return;
@@ -192,7 +192,7 @@ public class DecoratedIcon implements Icon {
 	
 	public void removeDecorations(int layer) {
 		if(layer<0 || layer>2)
-			throw new IllegalArgumentException("Invalid layer: "+layer); //$NON-NLS-1$
+			throw new NullPointerException("Invalid layer: "+layer); //$NON-NLS-1$
 		
 		if(decorations==null || decorations[layer]==null || decorationCounts==null) {
 			return;

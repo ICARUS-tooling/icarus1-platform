@@ -20,19 +20,23 @@
 		
 	<!-- Copy All Properties -->
 	<action id="plugins.languageTools.treebankPropertiesView.copyAllPropertiesAction"
-		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+		template="actions.default.copyAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Export Properties -->
 	<action id="plugins.languageTools.treebankPropertiesView.exportPropertiesAction"
-		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		template="actions.default.exportAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Edit Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.editTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		template="actions.default.editAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Inspect Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.inspectTreebankAction"
-		name="${id}.name" desc="${id}.description" icon="insp_sbook.gif" />
+		template="actions.default.inspectAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Load Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.loadTreebankAction"

@@ -55,7 +55,7 @@ public final class SpanFilters {
 		
 		public SpanFilter(Collection<Span> spans) {
 			if(spans==null)
-				throw new IllegalArgumentException("Invalid spans"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid spans"); //$NON-NLS-1$
 			
 			this.spans = new HashSet<>(spans);
 		}

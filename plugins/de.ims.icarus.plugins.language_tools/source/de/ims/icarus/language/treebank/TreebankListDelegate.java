@@ -57,7 +57,7 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject, Load
 	
 	public TreebankListDelegate(Treebank treebank) {
 		if(treebank==null)
-			throw new IllegalArgumentException("Invalid treebank"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid treebank"); //$NON-NLS-1$
 		
 		setTreebank(treebank);
 	}
@@ -237,7 +237,7 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject, Load
 		
 		OwnedChangeListener(TreebankListDelegate delegate) {
 			if(delegate==null)
-				throw new IllegalArgumentException("Invalid delegate"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid delegate"); //$NON-NLS-1$
 			
 			ref = new WeakReference<>(delegate);
 		}

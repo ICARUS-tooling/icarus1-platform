@@ -208,7 +208,7 @@ public class FormBuilder {
 	
 	public <E extends FormEntry> E insertEntry(String id, E entry, int index) {
 		if(entry==null)
-			throw new IllegalArgumentException("Invalid entry"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid entry"); //$NON-NLS-1$
 		if(id!=null && getEntryMap().containsKey(id))
 			throw new DuplicateIdentifierException("Duplicate id: "+id); //$NON-NLS-1$
 		if(getEntryMap().containsValue(entry))

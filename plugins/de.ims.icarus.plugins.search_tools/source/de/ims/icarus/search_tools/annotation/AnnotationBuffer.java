@@ -45,9 +45,9 @@ public class AnnotationBuffer implements AnnotationContainer {
 
 	public AnnotationBuffer(SearchResult searchResult, ResultAnnotator annotator, int cacheSize) {
 		if(searchResult==null)
-			throw new IllegalArgumentException("Invalid search result"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search result"); //$NON-NLS-1$
 		if(annotator==null)
-			throw new IllegalArgumentException("Invalid result annotator"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid result annotator"); //$NON-NLS-1$
 		
 		this.searchResult = searchResult;
 		this.annotator = annotator;

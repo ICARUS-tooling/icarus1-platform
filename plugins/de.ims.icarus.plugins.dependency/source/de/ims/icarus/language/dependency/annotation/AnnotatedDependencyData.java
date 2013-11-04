@@ -44,7 +44,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 
 	public AnnotatedDependencyData(DependencyData source, Annotation annotation) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		
 		this.source = source;
 		this.annotation = annotation;

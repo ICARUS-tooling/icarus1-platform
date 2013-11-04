@@ -147,7 +147,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 
 	public void setArrowStyle(ArrowStyle arrowStyle) {
 		if(arrowStyle==null)
-			throw new IllegalArgumentException("Invalid arrow style"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid arrow style"); //$NON-NLS-1$
 		
 		if(this.arrowStyle==arrowStyle) {
 			return;

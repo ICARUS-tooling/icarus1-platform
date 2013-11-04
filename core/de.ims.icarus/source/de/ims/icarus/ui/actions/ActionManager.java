@@ -52,6 +52,7 @@ import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -81,6 +82,7 @@ import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.WeakHandler;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
 import de.ims.icarus.ui.helper.ModifiedFlowLayout;
+import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 import de.ims.icarus.util.id.UnknownIdentifierException;
@@ -102,6 +104,9 @@ public class ActionManager {
 	public static final String SEPARATOR_MEDIUM = "medium"; //$NON-NLS-1$
 	public static final String SEPARATOR_WIDE = "wide"; //$NON-NLS-1$
 	
+	public static final String SMALL_SELECTED_ICON_KEY = "IcarusSmallSelectedIcon";
+	public static final String LARGE_SELECTED_ICON_KEY = "IcarusLargeSelectedIcon";
+	
 	private ResourceDomain resourceDomain;
 	private IconRegistry iconRegistry;
 	
@@ -120,8 +125,20 @@ public class ActionManager {
 	public static ActionManager globalManager() {
 		if(instance==null) {
 			synchronized (ActionManager.class) {
-				if(instance==null)
+				if(instance==null) {
 					instance = new ActionManager(null, null, null);
+					
+					URL actionLocation = ActionManager.class.getResource(
+							"default-actions.xml"); //$NON-NLS-1$
+					if(actionLocation==null)
+						throw new CorruptedStateException("Missing resources: default-actions.xml"); //$NON-NLS-1$
+					
+					try {
+						instance.loadActions(actionLocation);
+					} catch (IOException e) {
+						LoggerFactory.error(ActionManager.class, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
+					}
+				}
 			}
 		}
 		
@@ -313,28 +330,57 @@ public class ActionManager {
 			} else {
 				action = new DelegateAction();
 			}
-			configureAction(action, attr, id);
+			configureAction(action, attr, null, id);
 
 			addAction(id, action);
 		}
 		return action;
 	}
 
-	private void configureAction(Action action, ActionAttributes attr, String id) {
-		action.putValue(Action.NAME, attr.getValue(NAME_INDEX));
-		if(attr.getValue(SMALL_ICON_INDEX)!=null) {
-			action.putValue(Action.SMALL_ICON, getIconRegistry().getIcon(attr.getValue(SMALL_ICON_INDEX)));
+	private void configureAction(Action action, ActionAttributes attr, ActionAttributes orig, String id) {
+		if(orig==null) {
+			orig = attr;
 		}
-		if(attr.getValue(LARGE_ICON_INDEX)!=null) {
-			action.putValue(Action.LARGE_ICON_KEY, getIconRegistry().getIcon(attr.getValue(LARGE_ICON_INDEX)));
+		
+		if(attr.hasValue(TEMPLATE_INDEX)) {
+			String templateId = attr.getValue(TEMPLATE_INDEX);
+			ActionAttributes tplAttr = getAttributes(templateId);
+			if(tplAttr==null && !silent) 
+				throw new UnknownIdentifierException("Unknown template id: "+templateId); //$NON-NLS-1$
+			
+			if(tplAttr!=null) {
+				configureAction(action, tplAttr, orig, id);
+			}
+		}
+		
+		action.putValue(Action.NAME, attr.getValue(NAME_INDEX));
+		if(attr.hasValue(SMALL_SELECTED_ICON_INDEX)) {
+			action.putValue(SMALL_SELECTED_ICON_KEY, getIconRegistry().getIcon(
+					attr.getValue(SMALL_SELECTED_ICON_INDEX)));
+		}
+		if(attr.hasValue(SMALL_ICON_INDEX)) {
+			action.putValue(Action.SMALL_ICON, getIconRegistry().getIcon(
+					attr.getValue(SMALL_ICON_INDEX)));
+		}
+		if(attr.hasValue(LARGE_SELECTED_ICON_INDEX)) {
+			action.putValue(LARGE_SELECTED_ICON_KEY, getIconRegistry().getIcon(
+					attr.getValue(LARGE_SELECTED_ICON_INDEX)));
+		}
+		if(attr.hasValue(LARGE_ICON_INDEX)) {
+			action.putValue(Action.LARGE_ICON_KEY, getIconRegistry().getIcon(
+					attr.getValue(LARGE_ICON_INDEX)));
 		}
 		String command = attr.getValue(COMMAND_INDEX);
 		if(command==null) {
 			command = id;
 		}
-		action.putValue(Action.ACTION_COMMAND_KEY, command);
-		action.putValue(Action.SHORT_DESCRIPTION, attr.getValue(DESC_INDEX));
-		action.putValue(Action.LONG_DESCRIPTION, attr.getValue(DESC_INDEX));
+		if(attr.hasValue(COMMAND_INDEX)) {
+			action.putValue(Action.ACTION_COMMAND_KEY, command);
+		}
+		if(attr.hasValue(DESC_INDEX)) {
+			action.putValue(Action.SHORT_DESCRIPTION, attr.getValue(DESC_INDEX));
+			action.putValue(Action.LONG_DESCRIPTION, attr.getValue(DESC_INDEX));
+		}
 		
 		String mnemonic = attr.getValue(MNEMONIC_INDEX);
 		if (mnemonic != null && !mnemonic.equals("")) { //$NON-NLS-1$
@@ -347,8 +393,13 @@ public class ActionManager {
 					KeyStroke.getKeyStroke(accel));
 		}
 		
-		getResourceDomain().prepareAction(action, attr.getValue(NAME_INDEX), attr.getValue(DESC_INDEX));
-		getResourceDomain().addAction(action);
+		// Finally apply localization
+		if(orig==attr) {
+			getResourceDomain().prepareAction(action, 
+					(String)action.getValue(Action.NAME), 
+					(String)action.getValue(Action.SHORT_DESCRIPTION));
+			getResourceDomain().addAction(action);
+		}
 	}
 	
 	public ActionSet getActionSet(String id) {
@@ -937,6 +988,12 @@ public class ActionManager {
 	
 	protected void configureToggleButton(JToggleButton button, Action action) {
 		configureButton(button, action);
+		
+		Icon selectedIcon = (Icon) action.getValue(SMALL_SELECTED_ICON_KEY);
+		if(selectedIcon==null) {
+			selectedIcon = (Icon) action.getValue(LARGE_SELECTED_ICON_KEY);
+		}
+		button.setSelectedIcon(selectedIcon);
 	}
 
 	protected void configureButton(AbstractButton button, Action action) {
@@ -1076,7 +1133,7 @@ public class ActionManager {
 		private String[] array;
 
 		public ActionAttributes(Attributes attrs) {
-			array = new String[10];
+			array = new String[13];
 			setValue(ID_INDEX, attrs.getValue(ID_ATTRIBUTE));
 			setAttributes(attrs);
 		}
@@ -1092,6 +1149,10 @@ public class ActionManager {
 			}
 			return s;
 		}
+		
+		public boolean hasValue(int index) {
+			return array[index]!=null;
+		}
 
 		public void setValue(int index, String value) {
 			// Do not allow 'clearing' of fields
@@ -1104,12 +1165,15 @@ public class ActionManager {
 		}
 
 		public void setAttributes(Attributes attrs) {
+			setValue(TEMPLATE_INDEX, attrs.getValue(TEMPLATE_ATTRIBUTE));
 			setValue(ACCEL_INDEX, attrs.getValue(ACCEL_ATTRIBUTE));
 			setValue(DESC_INDEX, attrs.getValue(DESC_ATTRIBUTE));
 			setValue(LARGE_ICON_INDEX, attrs.getValue(LARGE_ICON_ATTRIBUTE));
+			setValue(LARGE_SELECTED_ICON_INDEX, attrs.getValue(LARGE_SELECTED_ICON_ATTRIBUTE));
 			setValue(MNEMONIC_INDEX, attrs.getValue(MNEMONIC_ATTRIBUTE));
 			setValue(NAME_INDEX, attrs.getValue(NAME_ATTRIBUTE));
 			setValue(SMALL_ICON_INDEX, attrs.getValue(SMALL_ICON_ATTRIBUTE));
+			setValue(SMALL_SELECTED_ICON_INDEX, attrs.getValue(SMALL_SELECTED_ICON_ATTRIBUTE));
 			setValue(TYPE_INDEX, attrs.getValue(TYPE_ATTRIBUTE));
 			setValue(VIRTUAL_INDEX, attrs.getValue(VIRTUAL_ATTRIBUTE));
 			setValue(COMMAND_INDEX, attrs.getValue(COMMAND_ATTRIBUTE));
@@ -1119,26 +1183,32 @@ public class ActionManager {
     private final static String ACCEL_ATTRIBUTE = "accel"; //$NON-NLS-1$
     private final static String DESC_ATTRIBUTE = "desc"; //$NON-NLS-1$
     private final static String LARGE_ICON_ATTRIBUTE = "licon"; //$NON-NLS-1$
+    private final static String LARGE_SELECTED_ICON_ATTRIBUTE = "slicon"; //$NON-NLS-1$
     private final static String ID_ATTRIBUTE = "id"; //$NON-NLS-1$
     private final static String IDREF_ATTRIBUTE = "idref"; //$NON-NLS-1$
     private final static String MNEMONIC_ATTRIBUTE = "mnemonic"; //$NON-NLS-1$
     private final static String NAME_ATTRIBUTE = "name"; //$NON-NLS-1$
     private final static String SMALL_ICON_ATTRIBUTE = "icon"; //$NON-NLS-1$
+    private final static String SMALL_SELECTED_ICON_ATTRIBUTE = "sicon"; //$NON-NLS-1$
     private final static String TYPE_ATTRIBUTE = "type"; //$NON-NLS-1$
     private final static String VALUE_ATTRIBUTE = "value"; //$NON-NLS-1$
     private final static String VIRTUAL_ATTRIBUTE = "virtual"; //$NON-NLS-1$
     private final static String COMMAND_ATTRIBUTE = "command"; //$NON-NLS-1$
+    private final static String TEMPLATE_ATTRIBUTE = "template"; //$NON-NLS-1$
 
     private final static int ACCEL_INDEX = 0;
     private final static int DESC_INDEX = 1;
     private final static int SMALL_ICON_INDEX = 2;
-    private final static int ID_INDEX = 3;
-    private final static int MNEMONIC_INDEX = 4;
-    private final static int NAME_INDEX = 5;
-    private final static int LARGE_ICON_INDEX = 6;
-    private final static int TYPE_INDEX = 7;
-    private final static int VIRTUAL_INDEX = 8;
-    private final static int COMMAND_INDEX = 9;
+    private final static int SMALL_SELECTED_ICON_INDEX = 3;
+    private final static int ID_INDEX = 4;
+    private final static int MNEMONIC_INDEX = 5;
+    private final static int NAME_INDEX = 6;
+    private final static int LARGE_ICON_INDEX = 7;
+    private final static int LARGE_SELECTED_ICON_INDEX = 8;
+    private final static int TYPE_INDEX = 9;
+    private final static int VIRTUAL_INDEX = 10;
+    private final static int COMMAND_INDEX = 11;
+    private final static int TEMPLATE_INDEX = 12;
     
     private static SAXParserFactory parserFactory;
     private XmlActionHandler xmlHandler;

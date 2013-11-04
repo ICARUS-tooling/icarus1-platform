@@ -474,7 +474,7 @@ public class WebchainRegistry {
 	
 	public void setName(Webchain webchain, String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(webchain.getName())) {
 			return;
 		}

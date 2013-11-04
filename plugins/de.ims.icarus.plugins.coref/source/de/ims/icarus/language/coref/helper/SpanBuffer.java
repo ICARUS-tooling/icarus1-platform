@@ -99,7 +99,7 @@ public class SpanBuffer {
 	
 	public void rebuild(Span[] spans) {
 		if(spans==null)
-			throw new IllegalArgumentException("Invalid span array"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid span array"); //$NON-NLS-1$
 		
 		this.spans = spans;
 		

@@ -106,7 +106,7 @@ public class CompoundIcon implements Icon {
 	
 	public void setOverlay(int corner, Icon icon) {
 		if(corner<0 || corner>3)
-			throw new IllegalArgumentException("Invalid corner for overlay icon: "+corner); //$NON-NLS-1$
+			throw new NullPointerException("Invalid corner for overlay icon: "+corner); //$NON-NLS-1$
 		
 		if(overlayIcons==null)
 			overlayIcons = new Icon[4];

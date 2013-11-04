@@ -12,7 +12,7 @@
 		
 	<!-- Open Preferences -->
 	<action id="plugins.searchTools.defaultQueryEditor.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction" />
 		
 	<!-- Synchronize Graph -->
 	<action id="plugins.searchTools.defaultQueryEditor.synchronizeGraphAction"

@@ -64,7 +64,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 		super(search, null);
 		
 		if(entries==null)
-			throw new IllegalArgumentException("Invalid entry list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid entry list"); //$NON-NLS-1$
 		
 		this.entries = new ArrayList<>(entries);
 	}

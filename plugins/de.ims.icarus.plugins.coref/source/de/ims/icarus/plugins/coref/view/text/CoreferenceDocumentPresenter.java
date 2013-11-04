@@ -121,7 +121,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		
 		public AnnotatedSpanFilter(AnnotatedCoreferenceDocumentData data) {
 			if(data==null)
-				throw new IllegalArgumentException("Invalid annotated data"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid annotated data"); //$NON-NLS-1$
 			
 			this.data = data;
 			

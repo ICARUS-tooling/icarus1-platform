@@ -104,7 +104,7 @@ public class GraphValidator {
 
 	public GraphValidationResult validateTree(SearchGraph graph, Options options) {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
 		
 		if(options==null) {
 			options = Options.emptyOptions;
@@ -121,13 +121,13 @@ public class GraphValidator {
 
 	public GraphValidationResult validateGraph(SearchGraph graph, Options options, GraphValidationResult result) {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
 		if(graph.getNodes()==null)
-			throw new IllegalArgumentException("Invalid nodes in graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid nodes in graph"); //$NON-NLS-1$
 		if(graph.getEdges()==null)
-			throw new IllegalArgumentException("Invalid edges in graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid edges in graph"); //$NON-NLS-1$
 		if(graph.getRootNodes()==null)
-			throw new IllegalArgumentException("Invalid roots in graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid roots in graph"); //$NON-NLS-1$
 		
 		
 		if(options==null) {
@@ -383,7 +383,7 @@ public class GraphValidator {
 		for(int i=0; i<edgeCount; i++) {
 			SearchEdge edge = node.getIncomingEdgeAt(i);
 			if(edge==null)
-				throw new IllegalArgumentException("Invalid incoming edge at index "+i+" in node "+node.getId()); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new NullPointerException("Invalid incoming edge at index "+i+" in node "+node.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 			if(edge.getEdgeType()==EdgeType.DOMINANCE || edge.getEdgeType()==EdgeType.TRANSITIVE) {
 				count++;
 			}
@@ -397,7 +397,7 @@ public class GraphValidator {
 		for(int i=0; i<edgeCount; i++) {
 			SearchEdge edge = node.getOutgoingEdgeAt(i);
 			if(edge==null)
-				throw new IllegalArgumentException("Invalid outgoing edge at index "+i+" in node "+node.getId()); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new NullPointerException("Invalid outgoing edge at index "+i+" in node "+node.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 			if(edge.getEdgeType()==EdgeType.DOMINANCE || edge.getEdgeType()==EdgeType.TRANSITIVE) {
 				count++;
 			}

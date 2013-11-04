@@ -40,7 +40,7 @@ public final class ListUtils {
 
 	public static <T extends Object> int indexOf(T item, ListModel<T> model) {
 		if(model==null)
-			throw new IllegalArgumentException("Invalid list model"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid list model"); //$NON-NLS-1$
 		
 		if(item==null) {
 			return -1;

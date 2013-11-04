@@ -180,7 +180,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 	protected void addReaderProperties(Map<String, Object> source,
 			Map<String, Object> readerProperties) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		
 		if(readerProperties==null || readerProperties.isEmpty()) {
 			return;
@@ -197,7 +197,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 	protected void removeReaderProperties(Map<String, Object> properties,
 			Map<String, Object> readerProperties) {
 		if(properties==null)
-			throw new IllegalArgumentException("Invalid properties"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid properties"); //$NON-NLS-1$
 
 		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
 		

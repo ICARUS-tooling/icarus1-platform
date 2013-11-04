@@ -165,7 +165,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	
 	public static Span parse(String s) {
 		if(s==null || s.isEmpty())
-			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 		
 		if(s.startsWith("ROOT")) { //$NON-NLS-1$
 			return getROOT();

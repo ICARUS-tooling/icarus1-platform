@@ -147,13 +147,13 @@ public class DefaultGraphEdge implements SearchEdge {
 
 	public void setSource(SearchNode source) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		this.source = source;
 	}
 
 	public void setTarget(SearchNode target) {
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		this.target = target;
 	}
 
@@ -163,13 +163,13 @@ public class DefaultGraphEdge implements SearchEdge {
 
 	public void setEdgeType(EdgeType edgeType) {
 		if(edgeType==null)
-			throw new IllegalArgumentException("Invalid edgeType"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid edgeType"); //$NON-NLS-1$
 		this.edgeType = edgeType;
 	}
 
 	public String getId() {
 		if(id==null || id.isEmpty())
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		return id;
 	}
 

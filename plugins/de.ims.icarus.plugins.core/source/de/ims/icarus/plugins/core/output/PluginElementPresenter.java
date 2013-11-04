@@ -143,7 +143,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 	
 	private Template loadTemplate(String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid template file name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid template file name"); //$NON-NLS-1$
 		
 		name = name+".tpl"; //$NON-NLS-1$
 		
@@ -184,7 +184,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(data==presentedData) {
 			return;

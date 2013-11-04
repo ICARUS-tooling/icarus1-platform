@@ -80,7 +80,7 @@ public abstract class ViewFilter {
 		 */
 		public ViewIdFilter(String id) {
 			if(id==null)
-				throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 			
 			this.id = id;
 		}
@@ -107,7 +107,7 @@ public abstract class ViewFilter {
 		
 		public ViewCapabilityFilter(Capability...capabilities) {
 			if(capabilities==null || capabilities.length==0)
-				throw new IllegalArgumentException("Invalid capabilities list"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid capabilities list"); //$NON-NLS-1$
 			
 			this.capabilities = capabilities;
 			this.generalize = false;
@@ -115,7 +115,7 @@ public abstract class ViewFilter {
 		
 		public ViewCapabilityFilter(Capability capability, boolean generalize) {
 			if(capability==null)
-				throw new IllegalArgumentException("Invalid capability"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid capability"); //$NON-NLS-1$
 			
 			this.capabilities = new Capability[]{ capability };
 			this.generalize = generalize;
@@ -149,7 +149,7 @@ public abstract class ViewFilter {
 		 */
 		public ViewCategoryFilter(String category) {
 			if(category==null)
-				throw new IllegalArgumentException("Invalid category"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid category"); //$NON-NLS-1$
 			
 			this.category = category;
 		}
@@ -187,7 +187,7 @@ public abstract class ViewFilter {
 
 		public ViewClassFilter(Class<?> clazz, boolean useEquals) {
 			if(clazz==null)
-				throw new IllegalArgumentException("Invalid class"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid class"); //$NON-NLS-1$
 			
 			this.clazz = clazz;
 			this.useEquals = useEquals;

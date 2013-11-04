@@ -179,7 +179,7 @@ public class SearchDescriptor {
 	
 	public void setSearchResult(SearchResult searchResult) {
 		if(searchResult==null)
-			throw new IllegalArgumentException("Invalid search result"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search result"); //$NON-NLS-1$
 		if(this.searchResult==searchResult) {
 			return;
 		}
@@ -205,7 +205,7 @@ public class SearchDescriptor {
 
 	public void setFactoryExtension(Extension factoryExtension) {
 		if(factoryExtension==null)
-			throw new IllegalArgumentException("Invalid factory extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid factory extension"); //$NON-NLS-1$
 		
 		if(this.factoryExtension==factoryExtension) {
 			return;

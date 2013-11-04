@@ -536,7 +536,7 @@ public class IcarusFrame extends JFrame {
 	
 	void closePerspective(Perspective perspective) {
 		if(perspective==null)
-			throw new IllegalArgumentException("Invalid perspective to close"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid perspective to close"); //$NON-NLS-1$
 		
 		Perspective currentPerspective = this.currentPerspective;
 
@@ -885,7 +885,7 @@ public class IcarusFrame extends JFrame {
 		
 		private PerspectiveContainer(Perspective perspective) {
 			if(perspective==null)
-				throw new IllegalArgumentException("Invalid perspective"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid perspective"); //$NON-NLS-1$
 			
 			this.perspective = perspective;
 		}

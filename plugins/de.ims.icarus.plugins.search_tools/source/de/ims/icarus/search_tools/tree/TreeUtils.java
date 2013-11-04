@@ -88,7 +88,7 @@ public final class TreeUtils {
 	
 	public static List<Matcher> collectMatchers(Matcher matcher) {
 		if(matcher==null)
-			throw new IllegalArgumentException("Invalid matcher"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid matcher"); //$NON-NLS-1$
 			
 		Set<Matcher> buffer = new HashSet<>();
 		
@@ -121,7 +121,7 @@ public final class TreeUtils {
 	
 	public static void clearDuplicates(List<Matcher> matchers) {
 		if(matchers==null)
-			throw new IllegalArgumentException("Invalid matcher list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid matcher list"); //$NON-NLS-1$
 		
 		Collections.sort(matchers);
 		

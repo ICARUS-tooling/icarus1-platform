@@ -238,7 +238,7 @@ public abstract class SearchResultTablePresenter extends SearchResultPresenter {
 			super("sortTableJob"); //$NON-NLS-1$
 			
 			if(sortMode==null)
-				throw new IllegalArgumentException("Invalid sort mode"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid sort mode"); //$NON-NLS-1$
 			
 			this.sortMode = sortMode;
 		}

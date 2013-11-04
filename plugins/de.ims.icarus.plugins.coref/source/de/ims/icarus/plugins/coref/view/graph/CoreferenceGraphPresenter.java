@@ -654,7 +654,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	
 	protected void togglePresenter(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		if(parent==null) {
 			return;

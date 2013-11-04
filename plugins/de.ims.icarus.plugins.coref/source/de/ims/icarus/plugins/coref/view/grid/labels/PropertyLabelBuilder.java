@@ -39,7 +39,7 @@ public class PropertyLabelBuilder implements GridLabelBuilder {
 
 	public PropertyLabelBuilder(String key) {
 		if(key==null)
-			throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 		
 		this.key = key;
 	}

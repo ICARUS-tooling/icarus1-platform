@@ -75,7 +75,7 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	
 	public void setBase(Treebank base) {
 		if(base==null)
-			throw new IllegalArgumentException("Invalid base"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid base"); //$NON-NLS-1$
 		
 		if(base.equals(this.base)) {
 			return;

@@ -70,14 +70,14 @@ public class ConstraintContext {
 
 	public ConstraintContext(ContentType contentType) {
 		if(contentType==null)
-			throw new IllegalArgumentException("Invalid content type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content type"); //$NON-NLS-1$
 		
 		this.contentType = contentType;
 	}
 	
 	public void registerFactory(String token, Object factory) {
 		if(token==null || token.isEmpty())
-			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid token"); //$NON-NLS-1$
 		
 		token = token.toLowerCase();
 		
@@ -90,7 +90,7 @@ public class ConstraintContext {
 				|| factory instanceof ClassProxy) {
 			factories.put(token, factory);
 		} else
-			throw new IllegalArgumentException("Invalid factory: "+factory.getClass()+" for token '"+token+"' in context "+contentType.getId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			throw new NullPointerException("Invalid factory: "+factory.getClass()+" for token '"+token+"' in context "+contentType.getId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		nodeFactoryCache = null;
 		edgeFactoryCache = null;
@@ -98,7 +98,7 @@ public class ConstraintContext {
 	
 	public void addToken(String token) {
 		if(token==null || token.isEmpty())
-			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid token"); //$NON-NLS-1$
 		
 		token = token.toLowerCase();
 		
@@ -110,9 +110,9 @@ public class ConstraintContext {
 	
 	public void addAlias(String alias, String token) {
 		if(alias==null || alias.isEmpty())
-			throw new IllegalArgumentException("Invalid alias"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
 		if(token==null || token.isEmpty())
-			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid token"); //$NON-NLS-1$
 		
 		alias = alias.toLowerCase();
 		
@@ -124,7 +124,7 @@ public class ConstraintContext {
 	
 	public boolean isRegistered(String token) {
 		if(token==null || token.isEmpty())
-			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid token"); //$NON-NLS-1$
 		
 		token = token.toLowerCase();
 		
@@ -133,7 +133,7 @@ public class ConstraintContext {
 	
 	public ConstraintFactory getFactory(String token) {
 		if(token==null || token.isEmpty())
-			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid token"); //$NON-NLS-1$
 
 		token = token.toLowerCase();
 		
@@ -180,7 +180,7 @@ public class ConstraintContext {
 	
 	public String getToken(String alias) {
 		if(alias==null || alias.isEmpty())
-			throw new IllegalArgumentException("Invalid alias"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
 		
 		alias = alias.toLowerCase();
 		
@@ -199,7 +199,7 @@ public class ConstraintContext {
 	 */
 	public String completeToken(String fragment) {
 		if(fragment==null || fragment.isEmpty())
-			throw new IllegalArgumentException("Invalid fragment"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid fragment"); //$NON-NLS-1$
 		
 		fragment = fragment.toLowerCase();
 		

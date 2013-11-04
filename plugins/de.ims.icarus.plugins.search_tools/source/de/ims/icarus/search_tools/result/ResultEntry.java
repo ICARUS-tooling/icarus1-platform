@@ -52,7 +52,7 @@ public class ResultEntry {
 	public ResultEntry(int corpusIndex,
 			@XmlElement(name="hits") @XmlList Hit[] hits) {
 		if(hits==null)
-			throw new IllegalArgumentException("Invalid hits"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid hits"); //$NON-NLS-1$
 		
 		this.hits = hits;
 		this.index = corpusIndex;

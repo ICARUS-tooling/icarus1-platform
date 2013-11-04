@@ -232,7 +232,7 @@ public class DefaultQueryParser {
 
 	public SearchGraph parseQuery(String query, Options options) throws ParseException {
 		if(query==null)
-			throw new IllegalArgumentException("Invalid query"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid query"); //$NON-NLS-1$
 		
 		if(query.trim().isEmpty()) {
 			return null;
@@ -826,7 +826,7 @@ public class DefaultQueryParser {
 
 	public String toQuery(SearchGraph graph, Options options) throws UnsupportedFormatException {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
 		if(SearchUtils.isEmpty(graph))
 			throw new IllegalArgumentException("Empty graph"); //$NON-NLS-1$
 		
@@ -1099,16 +1099,16 @@ public class DefaultQueryParser {
 		
 		public void pushConstraint(DefaultConstraint constraint) throws ParseException {
 			if(constraint==null)
-				throw new IllegalArgumentException("Invalid constraint"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid constraint"); //$NON-NLS-1$
 			
 			getFrame().addConstraint(constraint);
 		}
 		
 		public void pushProperty(String key, Object value) throws ParseException {
 			if(key==null)
-				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 			if(value==null)
-				throw new IllegalArgumentException("Invalid value"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid value"); //$NON-NLS-1$
 			
 			if(stack.isEmpty()) {
 				// Root meta-data

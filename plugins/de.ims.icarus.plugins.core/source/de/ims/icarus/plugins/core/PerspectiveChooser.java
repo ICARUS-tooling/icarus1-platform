@@ -122,7 +122,7 @@ public class PerspectiveChooser {
 
 	public PerspectiveChooser(ChangeListener changeListener, Filter filter) {
 		if(changeListener==null)
-			throw new IllegalArgumentException("Invalid change listener"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid change listener"); //$NON-NLS-1$
 		
 		this.changeListener = changeListener;
 		this.filter = filter;
@@ -294,7 +294,7 @@ public class PerspectiveChooser {
 	
 	private void setSelectedPerspective(Extension selectedPerspective) {
 		if(selectedPerspective==null)
-			throw new IllegalArgumentException("Invalid perspective extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid perspective extension"); //$NON-NLS-1$
 		
 		this.selectedPerspective = selectedPerspective;
 		

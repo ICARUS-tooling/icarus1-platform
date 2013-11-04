@@ -232,7 +232,7 @@ public class DefaultGraphNode implements SearchNode {
 
 	public void addEdge(SearchEdge edge, boolean incoming) {
 		if(edge==null)
-			throw new IllegalArgumentException("Invalid edge"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
 		
 		if(incoming) {
 			if(incomingEdges==null) {
@@ -253,7 +253,7 @@ public class DefaultGraphNode implements SearchNode {
 	
 	public void addEdges(Collection<SearchEdge> newEdges, boolean incoming) {
 		if(newEdges==null)
-			throw new IllegalArgumentException("Invalid outgoingEdges"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid outgoingEdges"); //$NON-NLS-1$
 		if(newEdges.isEmpty()) {
 			return;
 		}
@@ -277,7 +277,7 @@ public class DefaultGraphNode implements SearchNode {
 	
 	public void sortEdges(Comparator<SearchEdge> comparator) {
 		if(comparator==null)
-			throw new IllegalArgumentException("Invalid comparator"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid comparator"); //$NON-NLS-1$
 		
 		Collections.sort(outgoingEdges, comparator);
 	}

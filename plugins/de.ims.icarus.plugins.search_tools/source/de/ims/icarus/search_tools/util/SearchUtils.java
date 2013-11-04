@@ -138,7 +138,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		if(graph==null)
 			throw new InvalidSearchGraphException("Graph is null"); //$NON-NLS-1$
 		if(context==null)
-			throw new IllegalArgumentException("Invalid context"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid context"); //$NON-NLS-1$
 		
 		Map<SearchNode, DefaultGraphNode> cloneMap = new HashMap<>();
 		
@@ -430,9 +430,9 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	
 	public static void traverse(SearchGraph graph, Visitor visitor) {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
 		if(visitor==null)
-			throw new IllegalArgumentException("Invalid visitor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid visitor"); //$NON-NLS-1$
 		
 		Set<Object> visited = new HashSet<>();
 		
@@ -443,9 +443,9 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	
 	public static void traverse(SearchNode node, Visitor visitor) {
 		if(node==null)
-			throw new IllegalArgumentException("Invalid node"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
 		if(visitor==null)
-			throw new IllegalArgumentException("Invalid visitor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid visitor"); //$NON-NLS-1$
 		
 		Set<Object> visited = new HashSet<>();
 		
@@ -555,7 +555,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	
 	public static boolean searchIsReady(Search search) {
 		if(search==null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 		
 		if(search.getTarget()==null) {
 			return false;

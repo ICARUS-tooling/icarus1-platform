@@ -97,7 +97,7 @@ public class DefaultAllocationReader implements AllocationReader {
 			}
 			
 			if(!line.startsWith(BEGIN_DOCUMENT))
-				throw new IllegalArgumentException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+line); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+line); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			int startLine = lineCount;
 			String documentId = line.substring(BEGIN_DOCUMENT.length()).trim();

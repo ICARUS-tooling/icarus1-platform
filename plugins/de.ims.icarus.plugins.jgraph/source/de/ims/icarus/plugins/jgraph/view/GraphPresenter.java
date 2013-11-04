@@ -1224,7 +1224,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 
 	public void setCanvas(mxInteractiveCanvas canvas) {
 		if(canvas==null)
-			throw new IllegalArgumentException("Invalid canvas"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid canvas"); //$NON-NLS-1$
 
 		if(this.canvas!=canvas) {
 			mxInteractiveCanvas oldCanvas = this.canvas;

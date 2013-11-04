@@ -25,7 +25,11 @@
  */
 package de.ims.icarus.ui.treetable;
 
-import de.ims.icarus.ui.helper.AbstractTreeModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.EventListenerList;
+
+import de.ims.icarus.ui.tree.AbstractTreeModel;
 
 /**
  * @author Markus Gärtner
@@ -42,4 +46,65 @@ public abstract class AbstractTreeTableModel extends AbstractTreeModel implement
 		super(root);
 	}
 
+	/**
+	 * @see de.ims.icarus.ui.treetable.TreeTableModel#isCellEditable(java.lang.Object, int)
+	 */
+	@Override
+	public boolean isCellEditable(Object node, int column) {
+		// Important to activate TreeExpandListener
+		return column==0;
+	}
+
+	@Override
+	public void setValueAt(Object aValue, Object node, int column) {
+		throw new UnsupportedOperationException("Model is immutable!");
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.treetable.TreeTableModel#addChangeListener(javax.swing.event.ChangeListener)
+	 */
+	@Override
+	public void addChangeListener(ChangeListener listener) {
+		if (listener == null)
+			throw new NullPointerException("Invalid listener"); //$NON-NLS-1$
+
+		if (listeners == null) {
+			listeners = new EventListenerList();
+		}
+        listeners.add(ChangeListener.class, listener);
+	}
+
+	/**
+	 * @see de.ims.icarus.ui.treetable.TreeTableModel#removeChangeListener(javax.swing.event.ChangeListener)
+	 */
+	@Override
+	public void removeChangeListener(ChangeListener listener) {
+		if (listener == null)
+			throw new NullPointerException("Invalid listener"); //$NON-NLS-1$
+
+		if (listeners == null) {
+			return;
+		}
+        listeners.remove(ChangeListener.class, listener);
+	}
+	
+	protected void fireTableStructureChanged() {
+		if(listeners==null) {
+			return;
+		}
+
+		Object[] pairs = listeners.getListenerList();
+
+		ChangeEvent event = null;
+
+		for (int i = pairs.length - 2; i >= 0; i -= 2) {
+			if (pairs[i] == ChangeListener.class) {
+				if (event == null) {
+					event = new ChangeEvent(this);
+				}
+
+				((ChangeListener) pairs[i + 1]).stateChanged(event);
+			}
+		}
+	}
 }

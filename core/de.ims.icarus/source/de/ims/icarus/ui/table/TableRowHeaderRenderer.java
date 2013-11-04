@@ -68,7 +68,7 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 
 	public TableRowHeaderRenderer(JList<String> list, JTable table) {
 		if(list==null)
-			throw new IllegalArgumentException("Invalid list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid list"); //$NON-NLS-1$
 
 		proxyColumn = new TableColumn(0);
 

@@ -53,7 +53,7 @@ public class DefaultSearchQuery implements SearchQuery {
 
 	public DefaultSearchQuery(ContentType contentType) {
 		if(contentType==null)
-			throw new IllegalArgumentException("Invalid content-type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
 		
 		this.contentType = contentType;
 		
@@ -80,7 +80,7 @@ public class DefaultSearchQuery implements SearchQuery {
 	public void parseQueryString(String query)
 			throws UnsupportedFormatException {
 		if(query==null)
-			throw new IllegalArgumentException("Invalid query"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid query"); //$NON-NLS-1$
 		
 		if(this.query!=null && this.query.equals(query)) {
 			return;
@@ -164,7 +164,7 @@ public class DefaultSearchQuery implements SearchQuery {
 	@Override
 	public void setSearchGraph(SearchGraph graph) throws UnsupportedFormatException {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
 		
 		if(this.graph!=null && this.graph.equals(graph)) {
 			return;

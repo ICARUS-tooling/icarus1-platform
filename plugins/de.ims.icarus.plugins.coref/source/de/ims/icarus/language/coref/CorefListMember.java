@@ -67,7 +67,7 @@ public abstract class CorefListMember<T extends Object> extends CorefMember impl
 	
 	public void add(T data) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(items==null) {
 			items = new ArrayList<>();

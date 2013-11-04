@@ -60,7 +60,7 @@ public class LazyExtensionContentType implements ContentType {
 	
 	public LazyExtensionContentType(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		this.extension = extension;
 		

@@ -54,7 +54,7 @@ public class FilterListModel extends AbstractListModel<Boolean> {
 	
 	public void setFilter(BitSet filter) {
 		if(filter==null)
-			throw new IllegalArgumentException("Invalid filter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid filter"); //$NON-NLS-1$
 		if(size==0) 
 			throw new IllegalStateException("Cannot apply new filter to empty model"); //$NON-NLS-1$
 		

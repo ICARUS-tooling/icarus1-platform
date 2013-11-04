@@ -200,7 +200,7 @@ public final class LayoutRegistry {
 	// TODO validate cost of repeatedly performed searches?
 	public Collection<Extension> getCompatibleLayouts(ContentType type, boolean includeCompatibleTypes) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		List<ContentType> contentTypes = new ArrayList<>();
 		contentTypes.add(type);
@@ -234,7 +234,7 @@ public final class LayoutRegistry {
 	// TODO validate cost of repeatedly performed searches?
 	public Collection<Extension> getCompatibleStyles(ContentType type, boolean includeCompatibleTypes) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		List<ContentType> contentTypes = new ArrayList<>();
 		contentTypes.add(type);
@@ -268,7 +268,7 @@ public final class LayoutRegistry {
 	// TODO validate cost of repeatedly performed searches?
 	public Collection<Extension> getCompatibleRenderers(ContentType type, boolean includeCompatibleTypes) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		List<ContentType> contentTypes = new ArrayList<>();
 		contentTypes.add(type);

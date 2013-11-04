@@ -106,7 +106,7 @@ public class NavigationControl implements ListSelectionListener,
 		
 		public ArrowStyle(String suffix) {
 			if(suffix==null)
-				throw new IllegalArgumentException("Invalid suffix"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid suffix"); //$NON-NLS-1$
 			this.suffix = suffix;
 		}
 		
@@ -158,7 +158,7 @@ public class NavigationControl implements ListSelectionListener,
 
 	public NavigationControl(JList<?> list, Options options) {
 		if(list==null)
-			throw new IllegalArgumentException("Invalid list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid list"); //$NON-NLS-1$
 		
 		this.list = list;
 		list.getSelectionModel().addListSelectionListener(this);
@@ -185,7 +185,7 @@ public class NavigationControl implements ListSelectionListener,
 
 	public void setArrowStyle(ArrowStyle arrowStyle) {
 		if(arrowStyle==null)
-			throw new IllegalArgumentException("Invalid arrow style"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid arrow style"); //$NON-NLS-1$
 		
 		if(this.arrowStyle==arrowStyle) {
 			return;

@@ -164,16 +164,16 @@ public final class Capability {
 	
 	public static Capability getCapability(String command, ContentType contentType) {
 		if(contentType==null)
-			throw new IllegalArgumentException("Invalid content type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content type"); //$NON-NLS-1$
 		return getCapability(command, contentType.getId());
 	}
 
 	
 	public static Capability getCapability(String command, String contentTypeId) {
 		if(command==null)
-			throw new IllegalArgumentException("Invalid command"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid command"); //$NON-NLS-1$
 		if(contentTypeId==null)
-			throw new IllegalArgumentException("Invalid content type id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content type id"); //$NON-NLS-1$
 		
 		String token = command+SEPARATOR+contentTypeId;
 		return getCapability(token);

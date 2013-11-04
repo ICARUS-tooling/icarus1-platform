@@ -49,7 +49,7 @@ public final class MenuDelegate {
 
 	MenuDelegate(String menuId) {
 		if(menuId==null)
-			throw new IllegalArgumentException("Invalid menuId"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid menuId"); //$NON-NLS-1$
 		
 		this.menuId = menuId;
 	}

@@ -134,7 +134,7 @@ public abstract class HeavyWeightCellEditor implements mxICellEditor {
 
 	public HeavyWeightCellEditor(GraphPresenter presenter) {
 		if(presenter==null)
-			throw new IllegalArgumentException("Invalid presenter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid presenter"); //$NON-NLS-1$
 
 		this.presenter = presenter;
 		

@@ -152,7 +152,7 @@ public class Default3DResultPresenter extends SearchResultTabbedPresenter {
 	@Override
 	protected void setNumberDisplayMode(NumberDisplayMode mode) {
 		if(mode==null)
-			throw new IllegalArgumentException("Invalid display mode"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid display mode"); //$NON-NLS-1$
 		
 		fixedCellRenderer.setDisplayMode(mode);
 		fixedModel.setDisplayMode(mode);

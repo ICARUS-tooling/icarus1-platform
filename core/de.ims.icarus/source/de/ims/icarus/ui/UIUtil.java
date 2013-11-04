@@ -183,6 +183,22 @@ public final class UIUtil {
 		}
     }
     
+    /**
+     * Generates a color out of a red-green gradient
+     * <p>
+     * 0.0 gets bright red
+     * 1.0 gets bright green
+     * 
+     * @see <a href="http://stackoverflow.com/questions/340209/generate-colors-between-red-and-green-for-a-power-meter">online source</a>
+     */
+    public static Color getColor(double power) {
+        double H = power * 0.4; // Hue (note 0.4 = Green, see huge chart below)
+        double S = 0.9; // Saturation
+        double B = 0.9; // Brightness
+
+        return Color.getHSBColor((float)H, (float)S, (float)B);
+    }
+    
     public static Color generateRandomColor(Color mix) {
         Random random = new Random();
         int red = random.nextInt(256);
@@ -302,7 +318,7 @@ public final class UIUtil {
 		list.addMouseListener(rightClickSelectionHandler);
 	}
 	
-	public static void enableRighClickListSelection(JTable table) {
+	public static void enableRighClickTableSelection(JTable table) {
 		Exceptions.testNullArgument(table, "table"); //$NON-NLS-1$
 		
 		table.addMouseListener(rightClickSelectionHandler);
@@ -328,7 +344,7 @@ public final class UIUtil {
 		} else if("center".equals(s)) { //$NON-NLS-1$
 			return SwingConstants.CENTER;
 		} else
-			throw new IllegalArgumentException("Invalid direction: "+s); //$NON-NLS-1$
+			throw new NullPointerException("Invalid direction: "+s); //$NON-NLS-1$
 	}
 
 	public static void fitToContent(JComboBox<?> comboBox, int minWidth, int maxWidth) {
@@ -350,9 +366,14 @@ public final class UIUtil {
 		comboBox.setMaximumSize(newSize);
 	}
 	
+	private static final String HTML_TAG = "<html>";
+	
 	public static String toSwingTooltip(String tooltip) {
 		if(tooltip==null || tooltip.isEmpty()) {
 			return null;
+		}
+		if(tooltip.startsWith(HTML_TAG)) {
+			return tooltip;
 		}
 		
 		Font font = UIManager.getFont("ToolTip.font"); //$NON-NLS-1$
@@ -361,7 +382,7 @@ public final class UIUtil {
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(convertedTooltip.length()!=tooltip.length()) {
-			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$
+			tooltip = HTML_TAG+convertedTooltip; //$NON-NLS-1$
 		}
 		
 		return tooltip;
@@ -370,6 +391,9 @@ public final class UIUtil {
 	public static String toUnwrappedSwingTooltip(String tooltip) {
 		if(tooltip==null || tooltip.isEmpty()) {
 			return null;
+		}
+		if(tooltip.startsWith(HTML_TAG)) {
+			return tooltip;
 		}
 		
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(

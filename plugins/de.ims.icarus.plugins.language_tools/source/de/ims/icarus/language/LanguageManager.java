@@ -92,7 +92,7 @@ public final class LanguageManager {
 		Exceptions.testNullArgument(grammar, "grammar"); //$NON-NLS-1$
 		
 		if(!(grammar instanceof Grammar) && !(grammar instanceof ClassProxy))
-			throw new IllegalArgumentException("Invalid grammar object: "+grammar); //$NON-NLS-1$
+			throw new NullPointerException("Invalid grammar object: "+grammar); //$NON-NLS-1$
 		
 		synchronized (grammars) {
 			if(grammars.containsKey(id))

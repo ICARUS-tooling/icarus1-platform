@@ -75,7 +75,7 @@ public class ButtonTabComponent extends JPanel implements ChangeListener,
 		// unset default FlowLayout' gaps
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		if(pane==null)
-			throw new IllegalArgumentException("Invalid tabbed pane"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid tabbed pane"); //$NON-NLS-1$
 
 		this.pane = pane;
 		setOpaque(false);

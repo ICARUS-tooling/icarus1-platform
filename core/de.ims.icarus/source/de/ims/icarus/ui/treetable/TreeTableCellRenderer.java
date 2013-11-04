@@ -27,11 +27,14 @@ package de.ims.icarus.ui.treetable;
 
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeModel;
+
+import de.ims.icarus.ui.UIUtil;
 
 /**
  * @author Markus Gärtner
@@ -42,7 +45,7 @@ public class TreeTableCellRenderer extends JTree implements TableCellRenderer {
 
 	private static final long serialVersionUID = -1750976014189553400L;
 
-	/** Die letzte Zeile, die gerendert wurde. */
+	/** last rendered row */
 	protected int visibleRow;
 
 	private TreeTable treeTable;
@@ -51,15 +54,9 @@ public class TreeTableCellRenderer extends JTree implements TableCellRenderer {
 		super(model);
 		this.treeTable = treeTable;
 
-		// Setzen der Zeilenhoehe fuer die JTable
-		// Muss explizit aufgerufen werden, weil treeTable noch
-		// null ist, wenn super(model) setRowHeight aufruft!
 		setRowHeight(getRowHeight());
 	}
 
-	/**
-	 * Tree und Table muessen die gleiche Hoehe haben.
-	 */
 	@Override
 	public void setRowHeight(int rowHeight) {
 		if (rowHeight > 0) {
@@ -70,17 +67,12 @@ public class TreeTableCellRenderer extends JTree implements TableCellRenderer {
 		}
 	}
 
-	/**
-	 * Tree muss die gleiche Hoehe haben wie Table.
-	 */
 	@Override
 	public void setBounds(int x, int y, int w, int h) {
 		super.setBounds(x, 0, w, treeTable.getHeight());
 	}
 
-	/**
-	 * Sorgt fuer die Einrueckung der Ordner.
-	 */
+	@Override
 	public void paint(Graphics g) {
 		g.translate(0, -visibleRow * getRowHeight());
 
@@ -88,8 +80,19 @@ public class TreeTableCellRenderer extends JTree implements TableCellRenderer {
 	}
 
 	/**
-	 * Liefert den Renderer mit der passenden Hintergrundfarbe zurueck.
+	 * @see javax.swing.JTree#getToolTipText(java.awt.event.MouseEvent)
 	 */
+	@Override
+	public String getToolTipText(MouseEvent event) {
+		MouseEvent newEvent = new MouseEvent((Component) event.getSource(), 
+				event.getID(), event.getWhen(), event.getModifiers(), 
+				event.getX(), event.getY()+visibleRow*getRowHeight(), event.getClickCount(), 
+				event.isPopupTrigger(), event.getButton());
+		String tooltip = super.getToolTipText(newEvent);
+		return UIUtil.toSwingTooltip(tooltip);
+	}
+
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		if (isSelected)

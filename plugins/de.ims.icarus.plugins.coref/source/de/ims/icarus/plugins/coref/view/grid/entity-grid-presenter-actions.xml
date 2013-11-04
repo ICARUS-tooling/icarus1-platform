@@ -8,7 +8,7 @@
 		
 	<!-- Refresh -->
 	<action id="plugins.coref.entityGridPresenter.refreshAction"
-		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		template="actions.default.refreshAction" />
 	
 	<!-- Toggle 'markFalseSpans' -->
 	<action id="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction"
@@ -28,7 +28,7 @@
 		
 	<!-- Open Preferences -->
 	<action id="plugins.coref.entityGridPresenter.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.entityGridPresenter.toolBarList">

@@ -47,7 +47,7 @@ public class DefaultURLLocation extends Location {
 
 	public DefaultURLLocation(URL url) {
 		if(url==null)
-			throw new IllegalArgumentException("Invalid url"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid url"); //$NON-NLS-1$
 			
 		this.url = url;
 	}

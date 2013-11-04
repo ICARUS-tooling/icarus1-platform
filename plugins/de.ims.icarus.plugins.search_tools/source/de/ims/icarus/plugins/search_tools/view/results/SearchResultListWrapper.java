@@ -46,7 +46,7 @@ public class SearchResultListWrapper<T extends Object> implements DataList<T>, A
 	
 	public SearchResultListWrapper(SearchResult searchResult) {
 		if(searchResult==null)
-			throw new IllegalArgumentException("Invalid search result"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search result"); //$NON-NLS-1$
 		
 		this.searchResult = searchResult;
 	}

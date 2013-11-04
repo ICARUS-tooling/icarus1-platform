@@ -199,7 +199,7 @@ public class SearchResultView extends View {
 	
 	public static String getTitle(SearchResult searchResult, int[] indices) {
 		if(indices==null)
-			throw new IllegalArgumentException("Invalid indices"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
 		
 		if(indices.length==0) {
 			return "..."; //$NON-NLS-1$
@@ -264,7 +264,7 @@ public class SearchResultView extends View {
 	
 	public void displayResult(SearchResult searchResult, Options options) {
 		if(searchResult==null)
-			throw new IllegalArgumentException("Invalid search-result"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search-result"); //$NON-NLS-1$
 		
 		selectViewTab();
 		

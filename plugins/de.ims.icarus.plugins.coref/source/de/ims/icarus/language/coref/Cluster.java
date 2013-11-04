@@ -60,7 +60,7 @@ public class Cluster extends CorefListMember<Span> implements Comparable<Cluster
 
 	public void addSpan(Span span) {
 		if(span==null)
-			throw new IllegalArgumentException("Invalid span"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid span"); //$NON-NLS-1$
 		
 		if(items==null) {
 			items = new ArrayList<>();
@@ -78,9 +78,9 @@ public class Cluster extends CorefListMember<Span> implements Comparable<Cluster
 
 	public void addSpan(Span span, Edge edge) {
 		if(span==null)
-			throw new IllegalArgumentException("Invalid span"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid span"); //$NON-NLS-1$
 		if(edge==null)
-			throw new IllegalArgumentException("Invalid edge"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
 		
 		if(items==null) {
 			items = new ArrayList<>();
@@ -95,7 +95,7 @@ public class Cluster extends CorefListMember<Span> implements Comparable<Cluster
 	
 	public void addEdge(Edge edge) {
 		if(edge==null)
-			throw new IllegalArgumentException("Invalid egde"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid egde"); //$NON-NLS-1$
 		if(items==null || !items.contains(edge.getTarget()))
 			throw new IllegalArgumentException("Unknown target for edge: "+edge); //$NON-NLS-1$
 		

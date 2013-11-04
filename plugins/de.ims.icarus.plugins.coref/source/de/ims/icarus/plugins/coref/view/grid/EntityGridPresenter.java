@@ -362,7 +362,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	protected JTable createTable() {
 		JTable table = new JTable(gridModel, gridModel.getColumnModel());
 		
-		UIUtil.enableRighClickListSelection(table);
+		UIUtil.enableRighClickTableSelection(table);
 		table.setDefaultRenderer(EntityGridNode.class, cellRenderer);
 		table.setFillsViewportHeight(true);
 		table.setRowSelectionAllowed(false);
@@ -528,7 +528,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	
 	protected void togglePresenter(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		if(parent==null) {
 			return;
@@ -749,14 +749,14 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		
 		public void setPattern(String pattern) {
 			if(pattern==null || pattern.isEmpty())
-				throw new IllegalArgumentException("Invalid pattern"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid pattern"); //$NON-NLS-1$
 			
 			this.pattern = pattern;
 		}
 		
 		public void setKey(String key) {
 			if(key==null || key.isEmpty())
-				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 			
 			this.key = key;
 		}

@@ -164,7 +164,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(!PresenterUtils.presenterSupports(this, data))
 			throw new UnsupportedPresentationDataException("Unsupported data: "+data.getClass()); //$NON-NLS-1$
@@ -341,7 +341,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		
 		protected AbstractResultJob(String key) {
 			if(key==null)
-				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 			
 			this.key = key;
 		}

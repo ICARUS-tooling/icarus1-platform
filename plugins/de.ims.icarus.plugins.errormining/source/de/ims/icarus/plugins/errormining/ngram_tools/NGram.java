@@ -46,7 +46,7 @@ public abstract class NGram extends PropertyChangeSource {
 	
 	protected NGram(NGramDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 		
 		this.descriptor = descriptor;
 	}

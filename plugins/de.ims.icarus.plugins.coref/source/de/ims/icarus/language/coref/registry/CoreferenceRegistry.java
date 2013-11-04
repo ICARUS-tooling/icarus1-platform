@@ -175,7 +175,7 @@ public final class CoreferenceRegistry {
 	
 	public DocumentSetDescriptor newDocumentSet(String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		
 		DocumentSetDescriptor descriptor = new DocumentSetDescriptor();
 		descriptor.setId(UUID.randomUUID().toString());
@@ -197,7 +197,7 @@ public final class CoreferenceRegistry {
 	
 	private void addDocumentSet0(DocumentSetDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 
 		// Ensure uniqueness of ids
 		DocumentSetDescriptor presentDescriptor = documentSetMap.get(descriptor.getId());
@@ -219,7 +219,7 @@ public final class CoreferenceRegistry {
 	
 	public void deleteDocumentSet(DocumentSetDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid document set descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document set descriptor"); //$NON-NLS-1$
 		
 		documentSetMap.remove(descriptor.getId());
 		documentLookup.remove(descriptor.getDocumentSet());
@@ -247,7 +247,7 @@ public final class CoreferenceRegistry {
 	
 	public void deleteDocumentSet(CoreferenceDocumentSet documentSet) {
 		if(documentSet==null)
-			throw new IllegalArgumentException("Invalid document set"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document set"); //$NON-NLS-1$
 			
 		DocumentSetDescriptor descriptor = documentLookup.remove(documentSet);
 		if(descriptor!=null) {	
@@ -257,7 +257,7 @@ public final class CoreferenceRegistry {
 	
 	public void setName(DocumentSetDescriptor descriptor, String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(descriptor.getName())) {
 			return;
 		}
@@ -307,9 +307,9 @@ public final class CoreferenceRegistry {
 	
 	public AllocationDescriptor newAllocation(String name, DocumentSetDescriptor parent) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(parent==null)
-			throw new IllegalArgumentException("Invalid parent"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid parent"); //$NON-NLS-1$
 		
 		AllocationDescriptor descriptor = new AllocationDescriptor(parent);
 		descriptor.setId(UUID.randomUUID().toString());
@@ -333,7 +333,7 @@ public final class CoreferenceRegistry {
 	
 	private void addAllocation0(AllocationDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 
 		// Ensure uniqueness of ids
 		AllocationDescriptor presentDescriptor = allocationMap.get(descriptor.getId());
@@ -350,7 +350,7 @@ public final class CoreferenceRegistry {
 	
 	public void deleteAllocation(AllocationDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 		
 		allocationMap.remove(descriptor.getId());
 		allocationLookup.remove(descriptor.getAllocation());
@@ -381,7 +381,7 @@ public final class CoreferenceRegistry {
 	
 	public void deleteAllocation(CoreferenceAllocation allocation) {
 		if(allocation==null)
-			throw new IllegalArgumentException("Invalid allocation"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid allocation"); //$NON-NLS-1$
 			
 		AllocationDescriptor descriptor = allocationLookup.remove(allocation);
 		if(descriptor!=null) {	
@@ -391,7 +391,7 @@ public final class CoreferenceRegistry {
 	
 	public void setName(AllocationDescriptor descriptor, String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(descriptor.getName())) {
 			return;
 		}
@@ -466,7 +466,7 @@ public final class CoreferenceRegistry {
 	
 	public String getUniqueAllocationName(DocumentSetDescriptor documentSet, String baseName) {
 		if(documentSet==null)
-			throw new IllegalArgumentException("Invalid document set"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document set"); //$NON-NLS-1$
 		
 		Set<String> usedNames = new HashSet<>();
 		for(int i=0; i<documentSet.size(); i++) {
@@ -632,7 +632,7 @@ public final class CoreferenceRegistry {
 		
 		public LoadJob(Loadable loadable) {
 			if(loadable==null) 
-				throw new IllegalArgumentException("Invalid loadable"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid loadable"); //$NON-NLS-1$
 			
 			this.loadable = loadable;
 		}

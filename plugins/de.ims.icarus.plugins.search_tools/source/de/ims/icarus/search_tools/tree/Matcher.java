@@ -89,7 +89,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	
 	public Matcher(SearchNode node, SearchEdge edge) {
 		if(node==null)
-			throw new IllegalArgumentException("Invalid node"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
 		
 		this.node = node;
 		this.edge = edge;
@@ -523,7 +523,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 
 	public void setTargetTree(TargetTree targetTree) {
 		if(targetTree==null)
-			throw new IllegalArgumentException("Invalid target-tree"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target-tree"); //$NON-NLS-1$
 		
 		this.targetTree = targetTree;
 		if(next!=null) {
@@ -546,7 +546,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 
 	public void setCache(GroupCache cache) {
 		if(cache==null)
-			throw new IllegalArgumentException("Invalid cache"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid cache"); //$NON-NLS-1$
 		
 		this.cache = cache;
 		prepareGroupConstraints();
@@ -571,7 +571,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 
 	public void setEntryBuilder(EntryBuilder entryBuilder) {
 		if(entryBuilder==null)
-			throw new IllegalArgumentException("Invalid entry-builder"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid entry-builder"); //$NON-NLS-1$
 		
 		this.entryBuilder = entryBuilder;
 		if(next!=null) {
@@ -594,7 +594,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 
 	public void setSearchMode(SearchMode searchMode) {
 		if(searchMode==null)
-			throw new IllegalArgumentException("Invalid search mode"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search mode"); //$NON-NLS-1$
 		
 		this.searchMode = searchMode;
 		exhaustive = searchMode.isExhaustive();

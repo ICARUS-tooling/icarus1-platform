@@ -60,7 +60,7 @@ public class TCFDataList implements SentenceDataList {
 
 	public TCFDataList(TextCorpusStreamed tcs) {
 		if (tcs == null)
-			throw new IllegalArgumentException("Invalid TCF"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid TCF"); //$NON-NLS-1$
 		setTextCorpusStream(tcs);
 
 	}

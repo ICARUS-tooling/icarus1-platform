@@ -48,14 +48,14 @@ public class ContentTypeListModel extends AbstractListModel<ContentType>
 	
 	public ContentTypeListModel(Collection<ContentType> items) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
 		
 		types.addAll(items);
 	}
 	
 	public ContentTypeListModel(ContentType[] items) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
 		
 		for(ContentType type : items) {
 			types.add(type);
@@ -64,7 +64,7 @@ public class ContentTypeListModel extends AbstractListModel<ContentType>
 	
 	public ContentTypeListModel(String[] ids) {
 		if(ids==null)
-			throw new IllegalArgumentException("Invalid ids"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid ids"); //$NON-NLS-1$
 		
 		for(String id : ids) {
 			types.add(ContentTypeRegistry.getInstance().getType(id));

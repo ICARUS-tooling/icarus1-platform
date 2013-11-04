@@ -160,7 +160,7 @@ public class SearchResultTableModel extends AbstractTableModel
 
 	public void setResultData(SearchResult resultData) {
 		if(resultData==null)
-			throw new IllegalArgumentException("Invalid result data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid result data"); //$NON-NLS-1$
 		if(!isOmmitDimensionCheck() && resultData.getDimension()!=getSupportedDimensions())
 			throw new IllegalArgumentException("Unsupported result dimension: "+resultData.getDimension()); //$NON-NLS-1$
 		

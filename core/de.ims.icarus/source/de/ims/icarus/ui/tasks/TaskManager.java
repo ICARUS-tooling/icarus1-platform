@@ -132,7 +132,7 @@ public final class TaskManager {
 		task = getWorker(task);
 		
 		if(task==null)
-			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task"); //$NON-NLS-1$
 		
 		return states.get(task);
 	}
@@ -240,7 +240,7 @@ public final class TaskManager {
 		}
 		
 		if(task==null)
-			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task"); //$NON-NLS-1$
 		
 		return ((SwingWorker<?, ?>)task).getState();
 	}
@@ -251,14 +251,14 @@ public final class TaskManager {
 		}
 		
 		if(task==null)
-			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task"); //$NON-NLS-1$
 		
 		return ((SwingWorker<?, ?>)task).getProgress();
 	}
 	
 	public synchronized void cancelTask(Object task) {
 		if(task==null)
-			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task"); //$NON-NLS-1$
 		// TODO
 		SwingWorker<?, ?> worker = getWorker(task);
 		
@@ -309,7 +309,7 @@ public final class TaskManager {
 		}
 		
 		if(!(worker instanceof SwingWorker))
-			throw new IllegalArgumentException("Invalid task: "+task); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task: "+task); //$NON-NLS-1$
 				
 		// Save task identity and priority in state object
 		TaskState state = new TaskState(priority, identity);		
@@ -343,7 +343,7 @@ public final class TaskManager {
 		}
 		
 		if(task==null)
-			throw new IllegalArgumentException("Invalid task"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task"); //$NON-NLS-1$
 		
 		return task==currentWorker;
 	}

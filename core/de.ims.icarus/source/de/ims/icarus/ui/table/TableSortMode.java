@@ -62,7 +62,7 @@ public enum TableSortMode implements Identity {
 	
 	public static TableSortMode parseMode(String s) {
 		if(s==null)
-			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 		
 		for(TableSortMode mode : values()) {
 			if(mode.key.equals(s)) {

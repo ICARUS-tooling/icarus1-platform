@@ -72,9 +72,9 @@ public class DefaultIdentity implements Identity {
 
 	protected DefaultIdentity(Identity base, String id, Object owner, ResourceDomain domain) {
 		if(base==null && id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		if(owner==null)
-			throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 		
 		if(domain==null) {
 			domain = ResourceManager.getInstance().getGlobalDomain();

@@ -62,9 +62,9 @@ public abstract class AbstractSearchResult implements SearchResult {
 
 	protected AbstractSearchResult(Search search, SearchConstraint[] groupConstraints) {
 		/*if(search==null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$*/
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$*/
 		/*if(!(descriptor.getTarget() instanceof SentenceDataList))
-			throw new IllegalArgumentException("Invalid target: "+descriptor.getTarget()); //$NON-NLS-1$*/
+			throw new NullPointerException("Invalid target: "+descriptor.getTarget()); //$NON-NLS-1$*/
 		
 		this.search = search;
 		this.groupConstraints = SearchUtils.cloneSimple(groupConstraints);

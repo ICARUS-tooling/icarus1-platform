@@ -84,7 +84,7 @@ public final class DialogFactory {
 	
 	public synchronized static int registerOptions(Object...options) {
 		if(options==null || options.length==0)
-			throw new IllegalArgumentException("Invalid options"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid options"); //$NON-NLS-1$
 		int id = _options.size();
 		
 		_options.put(id, options);

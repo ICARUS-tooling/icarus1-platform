@@ -17,5 +17,10 @@
 	<!-- Open Preferences -->
 	<action id="plugins.core.icarusCorePlugin.openPreferencesAction"
 		name="${id}.name" desc="${id}.description" />
+	
+
+	<!--
+		SHARED TEMPLATES
+	-->
 
 </actions>

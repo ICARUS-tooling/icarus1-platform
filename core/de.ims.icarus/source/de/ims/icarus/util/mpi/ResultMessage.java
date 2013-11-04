@@ -69,11 +69,11 @@ public class ResultMessage {
 
 	public ResultMessage(Object source, ResultType type, Message message, Object data, Throwable throwable) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		if(message==null)
-			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid message"); //$NON-NLS-1$
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		this.source = source;
 		this.message = message;

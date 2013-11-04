@@ -63,7 +63,7 @@ public class MatetoolsPipeline {
 	
 	public static MatetoolsPipeline getPipeline(PipelineOwner owner) {
 		if(owner==null)
-			throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 		
 		PipelineOwner blockingOwner = null;
 		
@@ -93,7 +93,7 @@ public class MatetoolsPipeline {
 	
 	public static void releasePipeline(PipelineOwner owner) {
 		if(owner==null)
-			throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 		
 		synchronized (lock) {
 			PipelineOwner oldOwner = currentOwner;
@@ -125,9 +125,9 @@ public class MatetoolsPipeline {
 	
 	public DependencyData runPipeline(String[] tokens, ModelStorage storage, Options options) throws Exception {
 		if(tokens==null || tokens.length==0)
-			throw new IllegalArgumentException("Invalid tokens"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid tokens"); //$NON-NLS-1$
 		if(storage==null || storage.isEmpty())
-			throw new IllegalArgumentException("Invalid storage"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid storage"); //$NON-NLS-1$
 		
 		if(options==null) {
 			options = Options.emptyOptions;

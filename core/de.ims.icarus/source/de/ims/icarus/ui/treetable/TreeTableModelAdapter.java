@@ -26,8 +26,12 @@
 package de.ims.icarus.ui.treetable;
 
 import javax.swing.JTree;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.TreePath;
 
@@ -36,7 +40,7 @@ import javax.swing.tree.TreePath;
  * @version $Id$
  * 
  */
-public class TreeTableModelAdapter extends AbstractTableModel {
+public class TreeTableModelAdapter extends AbstractTableModel implements TreeModelListener, ChangeListener {
 
 	private static final long serialVersionUID = -7028911094217019439L;
 
@@ -60,6 +64,9 @@ public class TreeTableModelAdapter extends AbstractTableModel {
 				fireTableDataChanged();
 			}
 		});
+		
+		treeTableModel.addChangeListener(this);
+		treeTableModel.addTreeModelListener(this);
 	}
 
 	@Override
@@ -100,5 +107,77 @@ public class TreeTableModelAdapter extends AbstractTableModel {
 	@Override
 	public void setValueAt(Object value, int row, int column) {
 		treeTableModel.setValueAt(value, nodeForRow(row), column);
+	}
+
+	/**
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		fireTableStructureChanged();
+	}
+	
+	protected int[] getRowBounds(TreeModelEvent e) {
+		if(e.getChildIndices()==null) {
+			return null;
+		} else {
+			TreePath parent = e.getTreePath();
+			int index0 = tree.getRowForPath(parent)+1;
+			int[] indices = e.getChildIndices();
+			int min = Integer.MAX_VALUE;
+			int max = Integer.MIN_VALUE;
+			for(int index : indices) {
+				min = Math.min(min, index);
+				max = Math.max(max, index);
+			}
+			return new int[]{index0+min, index0+max};
+		}
+	}
+
+	/**
+	 * @see javax.swing.event.TreeModelListener#treeNodesChanged(javax.swing.event.TreeModelEvent)
+	 */
+	@Override
+	public void treeNodesChanged(TreeModelEvent e) {
+		int[] bounds = getRowBounds(e);
+		if(bounds==null) {
+			fireTableDataChanged();
+		} else {
+			fireTableRowsUpdated(bounds[0], bounds[1]);
+		}
+	}
+
+	/**
+	 * @see javax.swing.event.TreeModelListener#treeNodesInserted(javax.swing.event.TreeModelEvent)
+	 */
+	@Override
+	public void treeNodesInserted(TreeModelEvent e) {
+		int[] bounds = getRowBounds(e);
+		if(bounds==null) {
+			fireTableDataChanged();
+		} else {
+			fireTableRowsInserted(bounds[0], bounds[1]);
+		}
+	}
+
+	/**
+	 * @see javax.swing.event.TreeModelListener#treeNodesRemoved(javax.swing.event.TreeModelEvent)
+	 */
+	@Override
+	public void treeNodesRemoved(TreeModelEvent e) {
+		int[] bounds = getRowBounds(e);
+		if(bounds==null) {
+			fireTableDataChanged();
+		} else {
+			fireTableRowsDeleted(bounds[0], bounds[1]);
+		}
+	}
+
+	/**
+	 * @see javax.swing.event.TreeModelListener#treeStructureChanged(javax.swing.event.TreeModelEvent)
+	 */
+	@Override
+	public void treeStructureChanged(TreeModelEvent e) {
+		fireTableDataChanged();
 	}
 }

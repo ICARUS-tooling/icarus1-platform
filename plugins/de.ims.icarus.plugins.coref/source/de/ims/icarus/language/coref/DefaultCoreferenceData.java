@@ -45,7 +45,7 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 	
 	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
 		if(forms==null)
-			throw new IllegalArgumentException("Invalid forms array"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid forms array"); //$NON-NLS-1$
 		
 		this.forms = forms;
 		setDocument(document);
@@ -123,7 +123,7 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 		}
 		
 		if(document==null)
-			throw new IllegalArgumentException("Invalid document"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document"); //$NON-NLS-1$
 		
 		this.document = document;
 	}

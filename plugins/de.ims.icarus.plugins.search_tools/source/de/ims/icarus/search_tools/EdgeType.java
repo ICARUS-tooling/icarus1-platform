@@ -97,7 +97,7 @@ public enum EdgeType implements Identity {
 	
 	public static EdgeType parseEdgeType(String s) throws ParseException {
 		if(s==null || s.isEmpty())
-			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 		
 		s = s.toLowerCase();
 		

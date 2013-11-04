@@ -59,7 +59,7 @@ public class Range {
 	
 	public void setRange(Range source) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid range"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid range"); //$NON-NLS-1$
 		
 		start = source.getStart();
 		end = source.getEnd();

@@ -51,7 +51,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	
 	public AnnotatedCoreferenceDocumentData(CoreferenceDocumentData source, Annotation annotation) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		
 		this.source = source;
 		this.annotation = annotation;

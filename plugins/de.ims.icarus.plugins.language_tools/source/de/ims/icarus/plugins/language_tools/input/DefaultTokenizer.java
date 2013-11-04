@@ -51,7 +51,7 @@ public class DefaultTokenizer implements Tokenizer {
 	@Override
 	public TokenizationResult tokenize(String input, Options options) {
 		if(input==null)
-			throw new IllegalArgumentException("Invalid input"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid input"); //$NON-NLS-1$
 		
 		if(options==null) {
 			options = Options.emptyOptions;

@@ -504,7 +504,7 @@ public class MatetoolsParserInputView extends TextInputView {
 				
 		PipelineWorker(String[] tokens, ModelStorage storage, Options options) {
 			if(tokens==null)
-				throw new IllegalArgumentException("Invalid tokens array"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid tokens array"); //$NON-NLS-1$
 			
 			this.tokens = tokens;
 			this.storage = storage;

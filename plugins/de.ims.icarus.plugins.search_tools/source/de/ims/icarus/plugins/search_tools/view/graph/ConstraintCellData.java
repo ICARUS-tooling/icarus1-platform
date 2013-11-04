@@ -71,7 +71,7 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 	
 	protected ConstraintCellData(List<ConstraintFactory> factories) {
 		if(factories==null)
-			throw new IllegalArgumentException("Invalid factories"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid factories"); //$NON-NLS-1$
 		
 		constraints = new ArrayList<>();
 		

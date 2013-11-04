@@ -133,7 +133,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	@Override
 	protected void setNumberDisplayMode(NumberDisplayMode mode) {
 		if(mode==null)
-			throw new IllegalArgumentException("Invalid display mode"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid display mode"); //$NON-NLS-1$
 		
 		cellRenderer.setDisplayMode(mode);
 		tableModel.setDisplayMode(mode);

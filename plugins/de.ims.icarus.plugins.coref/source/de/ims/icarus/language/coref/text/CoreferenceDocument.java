@@ -151,7 +151,7 @@ public class CoreferenceDocument extends BatchDocument {
 	public void appendBatchCoreferenceData(CoreferenceData data, int sentenceIndex, 
 			Span[] spans, Span[] goldSpans) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(data.length()==0) {
 			return;
 		}
@@ -378,7 +378,7 @@ public class CoreferenceDocument extends BatchDocument {
 	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data, 
 			CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(!batch.isEmpty()) {
 			appendBatchLineFeed(null);
@@ -461,7 +461,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 	public void setHighlightType(HighlightType highlightType) {
 		if(highlightType==null) {
-			throw new IllegalArgumentException("Invalid highlight type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid highlight type"); //$NON-NLS-1$
 		}
 		
 		this.highlightType = highlightType;

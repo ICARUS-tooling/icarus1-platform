@@ -53,7 +53,7 @@ public abstract class SearchOperator implements Serializable {
 	
 	protected SearchOperator(String symbol) {
 		if(symbol==null)
-			throw new IllegalArgumentException("Invalid symbol"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid symbol"); //$NON-NLS-1$
 		
 		this.symbol = symbol;
 	}
@@ -74,7 +74,7 @@ public abstract class SearchOperator implements Serializable {
 	
 	public static void register(SearchOperator operator) {
 		if(operator==null)
-			throw new IllegalArgumentException("Invalid operator"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid operator"); //$NON-NLS-1$
 		if(available.containsKey(operator.getSymbol()))
 			throw new DuplicateIdentifierException("Duplicate operator symbol: "+operator.getSymbol()); //$NON-NLS-1$
 		

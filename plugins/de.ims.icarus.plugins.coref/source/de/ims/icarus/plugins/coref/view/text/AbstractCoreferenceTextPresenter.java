@@ -164,7 +164,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(!PresenterUtils.presenterSupports(this, data))
 			throw new UnsupportedPresentationDataException("Data not supported: "+data.getClass()); //$NON-NLS-1$
 		
@@ -931,7 +931,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		
 		public RefreshJob(CoreferenceDocument document) {
 			if(document==null)
-				throw new IllegalArgumentException("Invalid document"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid document"); //$NON-NLS-1$
 			
 			this.document = document;
 		}

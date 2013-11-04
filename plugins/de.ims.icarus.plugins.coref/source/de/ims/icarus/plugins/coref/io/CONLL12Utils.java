@@ -205,7 +205,7 @@ public final class CONLL12Utils {
 			String[] cols = WS.split(lines.get(i));
 			
 //			if(!String.valueOf(i).equals(cols[WORD_COL]))
-//				throw new IllegalArgumentException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
+//				throw new NullPointerException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
 			
 			forms[i] = cols[FORM_COL];
 			

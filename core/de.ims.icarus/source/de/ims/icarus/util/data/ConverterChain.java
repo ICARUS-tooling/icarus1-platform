@@ -43,9 +43,9 @@ public class ConverterChain implements DataConverter {
 
 	public ConverterChain(DataConverter converterA, DataConverter converterB) {
 		if(converterA==null)
-			throw new IllegalArgumentException("Invalid first convetrer"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid first convetrer"); //$NON-NLS-1$
 		if(converterB==null)
-			throw new IllegalArgumentException("Invalid second converter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid second converter"); //$NON-NLS-1$
 
 		List<DataConverter> buffer = new ArrayList<>();
 		appendConverter(converterA, buffer);
@@ -58,7 +58,7 @@ public class ConverterChain implements DataConverter {
 
 	public ConverterChain(DataConverter[] converters) {
 		if(converters==null)
-			throw new IllegalArgumentException("Invalid converter array"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid converter array"); //$NON-NLS-1$
 		if(converters.length==0)
 			throw new IllegalArgumentException("Empty converter array"); //$NON-NLS-1$
 		
@@ -74,7 +74,7 @@ public class ConverterChain implements DataConverter {
 
 	public ConverterChain(List<DataConverter> converters) {
 		if(converters==null)
-			throw new IllegalArgumentException("Invalid converter list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid converter list"); //$NON-NLS-1$
 		if(converters.size()==0)
 			throw new IllegalArgumentException("Empty converter list"); //$NON-NLS-1$
 

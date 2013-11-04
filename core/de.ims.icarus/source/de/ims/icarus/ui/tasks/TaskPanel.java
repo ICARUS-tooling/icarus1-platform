@@ -79,7 +79,7 @@ public class TaskPanel extends JToolBar {
 
 	public TaskPanel(TaskManager taskManager) {
 		if(taskManager==null)
-			throw new IllegalArgumentException("Invalid task-manager"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid task-manager"); //$NON-NLS-1$
 		
 		this.taskManager = taskManager;
 		

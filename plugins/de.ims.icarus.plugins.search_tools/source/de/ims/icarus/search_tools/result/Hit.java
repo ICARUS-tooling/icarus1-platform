@@ -53,7 +53,7 @@ public class Hit {
 	
 	public Hit(@XmlList @XmlElement(name="indices") int[] indices) {
 		if(indices==null)
-			throw new IllegalArgumentException("Invalid indices"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
 			
 		this.indices = indices;
 	}

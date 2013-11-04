@@ -48,14 +48,14 @@ public class ConverterListModel extends AbstractListModel<DataConverter> impleme
 	
 	public ConverterListModel(Collection<DataConverter> items) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
 		
 		converters.addAll(items);
 	}
 	
 	public ConverterListModel(DataConverter[] items) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
 		
 		for(DataConverter converter : items) {
 			converters.add(converter);

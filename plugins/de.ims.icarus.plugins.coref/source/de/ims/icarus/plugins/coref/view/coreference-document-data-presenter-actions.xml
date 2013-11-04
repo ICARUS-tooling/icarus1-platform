@@ -8,11 +8,13 @@
 		
 	<!-- Refresh View -->
 	<action id="plugins.coref.coreferenceDocumentView.refreshViewAction"
-		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		template="actions.default.refreshAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Clear View -->
 	<action id="plugins.coref.coreferenceDocumentView.clearViewAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		template="actions.default.clearAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Toggle Property Outline -->
 	<action id="plugins.coref.coreferenceDocumentView.toggleShowPropertyOutlineAction"
@@ -20,7 +22,8 @@
 		
 	<!-- Open Preferences -->
 	<action id="plugins.coref.coreferenceDocumentView.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.coreferenceDocumentView.toolBarList">

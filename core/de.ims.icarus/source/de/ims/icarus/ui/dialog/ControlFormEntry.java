@@ -46,7 +46,7 @@ public class ControlFormEntry extends FormEntry {
 
 	public ControlFormEntry(Action...actions) {
 		if(actions==null || actions.length==0)
-			throw new IllegalArgumentException("Invalid actions list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid actions list"); //$NON-NLS-1$
 		
 		buttons = new JButton[actions.length];
 		

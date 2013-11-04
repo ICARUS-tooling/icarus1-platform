@@ -52,7 +52,7 @@ public class CompoundSentenceData implements SentenceData {
 	
 	public void setData(DataType type, SentenceData data) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		if(items==null) {
 			items = new SentenceData[DataType.values().length];
@@ -63,7 +63,7 @@ public class CompoundSentenceData implements SentenceData {
 	
 	public SentenceData getData(DataType type) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		return items==null ? null : items[type.ordinal()];
 	}

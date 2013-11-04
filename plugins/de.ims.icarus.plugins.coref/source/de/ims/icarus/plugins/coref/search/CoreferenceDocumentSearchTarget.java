@@ -47,7 +47,7 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 	public CoreferenceDocumentSearchTarget(DocumentSetDescriptor documentSet,
 			AllocationDescriptor allocation) {
 		if(documentSet==null)
-			throw new IllegalArgumentException("Invalid document set descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document set descriptor"); //$NON-NLS-1$
 		
 		this.documentSet = documentSet;
 		this.allocation = allocation;

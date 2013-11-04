@@ -50,7 +50,7 @@ public class DefaultFileLocation extends Location {
 
 	public DefaultFileLocation(File file) {
 		if(file==null)
-			throw new IllegalArgumentException("Invalid file"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		
 		this.file = file;
 	}

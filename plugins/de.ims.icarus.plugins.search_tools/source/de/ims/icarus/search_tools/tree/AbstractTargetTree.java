@@ -129,9 +129,9 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	@Override
 	public void reload(Object source, Options options) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source data"); //$NON-NLS-1$
 		if(!supports(source))
-			throw new IllegalArgumentException("Invalid source data: "+source.getClass()); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source data: "+source.getClass()); //$NON-NLS-1$
 		
 		data = (E)source;
 		

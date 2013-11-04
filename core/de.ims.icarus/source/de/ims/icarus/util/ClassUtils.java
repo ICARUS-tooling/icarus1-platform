@@ -29,6 +29,10 @@ public final class ClassUtils {
 	private ClassUtils() {
 		// no-op
 	}
+	
+	public static boolean equals(Object o1, Object o2) {
+		return o1==null ? o2==null : o1.equals(o2);
+	}
 
 	/**
 	 * Get the underlying class for a type, or null if the type is a variable
@@ -81,12 +85,10 @@ public final class ClassUtils {
 				ParameterizedType parameterizedType = (ParameterizedType) type;
 				Class<?> rawType = (Class<?>) parameterizedType.getRawType();
 
-				Type[] actualTypeArguments = parameterizedType
-						.getActualTypeArguments();
+				Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 				TypeVariable<?>[] typeParameters = rawType.getTypeParameters();
 				for (int i = 0; i < actualTypeArguments.length; i++) {
-					resolvedTypes
-							.put(typeParameters[i], actualTypeArguments[i]);
+					resolvedTypes.put(typeParameters[i], actualTypeArguments[i]);
 				}
 
 				if (!rawType.equals(baseClass)) {
@@ -102,8 +104,7 @@ public final class ClassUtils {
 		if (type instanceof Class) {
 			actualTypeArguments = ((Class<?>) type).getTypeParameters();
 		} else {
-			actualTypeArguments = ((ParameterizedType) type)
-					.getActualTypeArguments();
+			actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
 		}
 		List<Class<?>> typeArgumentsAsClasses = new ArrayList<Class<?>>();
 		// resolve types by chasing down type variables.

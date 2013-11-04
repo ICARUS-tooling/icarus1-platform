@@ -147,7 +147,7 @@ public final class PluginUtil {
 
 	public static Identity getIdentity(PluginElement<?> element) {
 		if(element==null)
-			throw new IllegalArgumentException("Invalid element"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid element"); //$NON-NLS-1$
 		
 		if(identityCache==null) {
 			identityCache = Collections.synchronizedMap(
@@ -211,7 +211,7 @@ public final class PluginUtil {
 	
 	public static Collection<Extension> getLinkedExtensions(ExtensionPoint extensionPoint) {
 		if(extensionPoint==null)
-			throw new IllegalArgumentException("Invalid extension-point"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension-point"); //$NON-NLS-1$
 		
 		if(links==null) {
 			loadLinks();
@@ -348,7 +348,7 @@ public final class PluginUtil {
 	
 	public static Map<String, Object> getProperties(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		Extension.Parameter propertiesParam = null;
 		
@@ -427,7 +427,7 @@ public final class PluginUtil {
 	public static Object instantiate(Extension extension) throws InstantiationException, 
 			IllegalAccessException, ClassNotFoundException {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		try {
 			activatePlugin(extension);
@@ -448,7 +448,7 @@ public final class PluginUtil {
 	
 	public static Class<?> loadClass(Extension extension) throws ClassNotFoundException {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		try {
 			activatePlugin(extension);
@@ -468,7 +468,7 @@ public final class PluginUtil {
 	
 	public static Class<?> loadClass(Extension.Parameter param) throws ClassNotFoundException {
 		if(param==null)
-			throw new IllegalArgumentException("Invalid parameter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid parameter"); //$NON-NLS-1$
 		
 		Extension extension = param.getDeclaringExtension();
 		
@@ -486,9 +486,9 @@ public final class PluginUtil {
 	
 	public static boolean isInstance(Extension extension, Object data) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		Class<?> clazz = data instanceof Class ? (Class<?>)data : data.getClass();
 		
@@ -674,7 +674,7 @@ public final class PluginUtil {
 	
 	public static List<Capability> getCapabilities(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		List<Capability> capabilities = new ArrayList<>();
 		Collection<Parameter> params = extractCapabilities(extension);
@@ -703,7 +703,7 @@ public final class PluginUtil {
 	
 	public static boolean hasCapability(Extension extension, Capability...capabilities) {
 		if(capabilities==null || capabilities.length==0)
-			throw new IllegalArgumentException("Invalid or empty capabilities list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid or empty capabilities list"); //$NON-NLS-1$
 
 		Set<Capability> caps = new HashSet<>(getCapabilities(extension));
 		if(caps.isEmpty()) {
@@ -721,7 +721,7 @@ public final class PluginUtil {
 	
 	public static boolean hasAllCapability(Extension extension, Capability...capabilities) {
 		if(capabilities==null || capabilities.length==0)
-			throw new IllegalArgumentException("Invalid or empty capabilities list"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid or empty capabilities list"); //$NON-NLS-1$
 
 		Set<Capability> caps = new HashSet<>(getCapabilities(extension));
 		if(caps.isEmpty()) {

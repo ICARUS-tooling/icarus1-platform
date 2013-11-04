@@ -34,7 +34,7 @@ public class SubResult implements SearchResult {
 
 	public SubResult(SearchResult base, int... groupInstances) {
 		if(base==null)
-			throw new IllegalArgumentException("Invalid base"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid base"); //$NON-NLS-1$
 		if (base.getDimension()-groupInstances.length < 1)
 			throw new IllegalArgumentException(
 					"Dimension of base not high enough"); //$NON-NLS-1$

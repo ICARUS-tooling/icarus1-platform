@@ -150,7 +150,7 @@ public class DefaultConstraint implements SearchConstraint {
 	})
 	public void setValue(Object value) {
 		if(value==null)
-			throw new IllegalArgumentException("Invalid value"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
 		this.value = value;
 	}
 
@@ -158,7 +158,7 @@ public class DefaultConstraint implements SearchConstraint {
 	@XmlAttribute(name="operator")
 	public void setOperator(SearchOperator operator) {
 		if(operator==null)
-			throw new IllegalArgumentException("Invalid operator"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid operator"); //$NON-NLS-1$
 		this.operator = operator;
 	}
 
@@ -184,7 +184,7 @@ public class DefaultConstraint implements SearchConstraint {
 	@XmlAttribute(name="token")
 	public void setToken(String token) {
 		if(token==null)
-			throw new IllegalArgumentException("Invalid token"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid token"); //$NON-NLS-1$
 		this.token = token;
 	}
 

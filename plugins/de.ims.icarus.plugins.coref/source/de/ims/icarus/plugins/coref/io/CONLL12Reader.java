@@ -79,7 +79,7 @@ public class CONLL12Reader implements SentenceDataReader {
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
 		if(location==null)
-			throw new IllegalArgumentException("Invalid location"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
 		
 		document = (CoreferenceDocumentData) options.firstSet("documentData"); //$NON-NLS-1$
 		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));

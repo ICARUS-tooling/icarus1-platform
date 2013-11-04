@@ -69,7 +69,7 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 	
 	protected void setData(E data) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		this.data = data;
 		label = null;

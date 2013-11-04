@@ -59,7 +59,7 @@ public abstract class JAXBGate<B extends Object> {
 	
 	public JAXBGate(File file) {
 		if(file==null)
-			throw new IllegalArgumentException("Invalid file");
+			throw new NullPointerException("Invalid file");
 		
 		this.file = file;
 	}

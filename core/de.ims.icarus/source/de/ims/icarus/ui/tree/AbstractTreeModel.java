@@ -23,7 +23,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.ui.helper;
+package de.ims.icarus.ui.tree;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
@@ -38,7 +38,7 @@ import javax.swing.tree.TreePath;
  */
 public abstract class AbstractTreeModel implements TreeModel {
 
-	protected EventListenerList listeners;
+	protected EventListenerList listeners = new EventListenerList();
 	
 	protected Object root;
 	
@@ -83,10 +83,6 @@ public abstract class AbstractTreeModel implements TreeModel {
 	}
 
 	protected void fireNewRoot() {
-		if(listeners==null) {
-			return;
-		}
-		
         Object[] pairs = listeners.getListenerList();
 
 		TreePath path = new TreePath(getRoot());
@@ -104,7 +100,9 @@ public abstract class AbstractTreeModel implements TreeModel {
 		}
 	}
 
-	
+	/**
+	 * Call when the entire tree structure has changed
+	 */
 	protected void fireStructureChanged() {
 		fireTreeStructureChanged(new TreePath(getRoot()));
 	}
@@ -217,12 +215,9 @@ public abstract class AbstractTreeModel implements TreeModel {
 	@Override
 	public void addTreeModelListener(TreeModelListener listener) {
 		if (listener == null)
-			throw new IllegalArgumentException("Invalid listener"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid listener"); //$NON-NLS-1$
 
-		if (listeners == null) {
-			listeners = new EventListenerList();
-		}
-        listeners.add(TreeModelListener.class, listener);
+		listeners.add(TreeModelListener.class, listener);
 	}
 
 	/**
@@ -231,12 +226,9 @@ public abstract class AbstractTreeModel implements TreeModel {
 	@Override
 	public void removeTreeModelListener(TreeModelListener listener) {
 		if (listener == null)
-			throw new IllegalArgumentException("Invalid listener"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid listener"); //$NON-NLS-1$
 
-		if (listeners == null) {
-			return;
-		}
-        listeners.remove(TreeModelListener.class, listener);
+		listeners.remove(TreeModelListener.class, listener);
 	}
 
 	private static class Root {

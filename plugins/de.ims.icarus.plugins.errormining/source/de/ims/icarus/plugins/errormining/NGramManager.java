@@ -100,7 +100,7 @@ public class NGramManager {
 
 	public void executeSearch(Search search) {
 		if (search == null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 		if (search.isDone())
 			throw new IllegalArgumentException("Search already finished"); //$NON-NLS-1$
 		if (search.isCancelled())
@@ -131,7 +131,7 @@ public class NGramManager {
 
 	public void cancelSearch(Search search) {
 		if (search == null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 
 		ExecuteSearchJob task = searchJobMap.get(search);
 
@@ -153,7 +153,7 @@ public class NGramManager {
 
 		private ExecuteSearchJob(Search search) {
 			if (search == null)
-				throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 
 			this.search = search;
 

@@ -190,7 +190,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	@Override
 	protected void setNumberDisplayMode(NumberDisplayMode mode) {
 		if(mode==null)
-			throw new IllegalArgumentException("Invalid display mode"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid display mode"); //$NON-NLS-1$
 		
 		cellRenderer.setDisplayMode(mode);
 		tableModel.setDisplayMode(mode);

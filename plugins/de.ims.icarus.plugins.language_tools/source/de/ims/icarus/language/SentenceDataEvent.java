@@ -79,7 +79,7 @@ public abstract class SentenceDataEvent {
 				|| type==REMOVE_EVENT || type==UPDATE_EVENT) {
 			this.type = type;
 		} else
-			throw new IllegalArgumentException("Invalid type: "+type); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type: "+type); //$NON-NLS-1$
 	}
 
 	/**

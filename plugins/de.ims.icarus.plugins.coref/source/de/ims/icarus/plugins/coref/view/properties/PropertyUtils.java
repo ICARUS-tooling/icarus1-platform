@@ -49,7 +49,7 @@ public final class PropertyUtils {
 
 	public static void countProperties(Counter<String> counter, CoreferenceData data) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(data==null) {
 			return;
 		}
@@ -59,7 +59,7 @@ public final class PropertyUtils {
 
 	public static void countProperties(Counter<String> counter, CoreferenceDocumentData document) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(document==null || document.size()==0) {
 			return;
 		}
@@ -72,7 +72,7 @@ public final class PropertyUtils {
 
 	public static void countProperties(Counter<String> counter, CoreferenceDocumentSet documentSet) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(documentSet==null || documentSet.size()==0) {
 			return;
 		}
@@ -84,7 +84,7 @@ public final class PropertyUtils {
 
 	public static void countProperties(Counter<String> counter, SpanSet spanSet) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(spanSet==null || spanSet.size()==0) {
 			return;
 		}
@@ -97,7 +97,7 @@ public final class PropertyUtils {
 
 	public static void countProperties(Counter<String> counter, EdgeSet edgeSet) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(edgeSet==null || edgeSet.size()==0) {
 			return;
 		}
@@ -110,7 +110,7 @@ public final class PropertyUtils {
 
 	public static void countProperties(Counter<String> counter, CoreferenceAllocation allocation) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(allocation==null || allocation.size()==0) {
 			return;
 		}
@@ -124,7 +124,7 @@ public final class PropertyUtils {
 
 	public static void countSpanProperties(Counter<String> counter, CoreferenceAllocation allocation) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(allocation==null || allocation.size()==0) {
 			return;
 		}
@@ -137,7 +137,7 @@ public final class PropertyUtils {
 
 	public static void countEdgeProperties(Counter<String> counter, CoreferenceAllocation allocation) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(allocation==null || allocation.size()==0) {
 			return;
 		}

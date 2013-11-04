@@ -8,11 +8,12 @@
 		
 	<!-- Refresh -->
 	<action id="plugins.searchTools.searchResultView.refreshAction"
-		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		template="actions.default.refreshAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Open Preferences -->
 	<action id="plugins.searchTools.searchResultView.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction" />
 		
 	<!-- View Search -->
 	<action id="plugins.searchTools.searchResultView.viewSearchAction"
@@ -20,15 +21,18 @@
 		
 	<!-- Save Result -->
 	<action id="plugins.searchTools.searchResultView.saveResultAction"
-		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		template="actions.default.exportAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Open Result -->
 	<action id="plugins.searchTools.searchResultView.openResultAction"
-		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
+		template="actions.default.importAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Clear View -->
 	<action id="plugins.searchTools.searchResultView.clearViewAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		template="actions.default.clearAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.searchTools.searchResultView.toolBarList">

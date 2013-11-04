@@ -48,7 +48,7 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 	
 	protected AbstractLazyResultAnnotator(BitmaskHighlighting highlighting) {
 		if(highlighting==null)
-			throw new IllegalArgumentException("Invalid highlighting"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid highlighting"); //$NON-NLS-1$
 		
 		this.highlighting = highlighting;
 	}

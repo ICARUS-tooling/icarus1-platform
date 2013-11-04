@@ -185,7 +185,7 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 		
 		public DataTypeButton(DataType dataType) {
 			if(dataType==null)
-				throw new IllegalArgumentException("Invalid data type"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid data type"); //$NON-NLS-1$
 			
 			this.dataType = dataType;
 			

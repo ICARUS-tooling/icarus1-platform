@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.ui.treetable;
 
+import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreeModel;
 
 /**
@@ -79,4 +80,15 @@ public interface TreeTableModel extends TreeModel {
      * @param column Column number
      */
     public void setValueAt(Object aValue, Object node, int column);
+
+	/**
+	 * Used to signal structural changes in the table part of the model
+	 * @param listener
+	 */
+	void addChangeListener(ChangeListener listener);
+
+	/**
+	 * @param listener
+	 */
+	void removeChangeListener(ChangeListener listener);
 }

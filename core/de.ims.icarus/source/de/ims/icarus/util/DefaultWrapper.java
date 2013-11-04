@@ -44,7 +44,7 @@ public class DefaultWrapper<O extends Object> implements Wrapper<O> {
 	
 	public DefaultWrapper(O element, boolean forwardEquals, boolean forwardHashCode) {
 		if(element==null)
-			throw new IllegalArgumentException("invalid element"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid element"); //$NON-NLS-1$
 		
 		this.element = element;
 		this.forwardEquals = forwardEquals;

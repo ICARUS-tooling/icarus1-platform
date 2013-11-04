@@ -12,7 +12,7 @@ import de.ims.icarus.plugins.weblicht.webservice.WebchainRegistry;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
-import de.ims.icarus.ui.helper.AbstractTreeModel;
+import de.ims.icarus.ui.tree.AbstractTreeModel;
 
 
 public class WeblichtTreeModel extends AbstractTreeModel {

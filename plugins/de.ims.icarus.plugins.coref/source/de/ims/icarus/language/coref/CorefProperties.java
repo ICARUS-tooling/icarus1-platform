@@ -96,7 +96,7 @@ public class CorefProperties extends CompactProperties {
 		while(startIndex<maxIndex) {
 			int offset0 = s.indexOf(ASSIGNMENT_CHAR, startIndex);
 			if(offset0==-1)
-				throw new IllegalArgumentException("Invalid properties source string: "+s); //$NON-NLS-1$
+				throw new NullPointerException("Invalid properties source string: "+s); //$NON-NLS-1$
 			int endIndex = s.indexOf(SEPARATOR_CHAR, offset0);
 			if(endIndex==-1) {
 				endIndex = s.length();
@@ -206,7 +206,7 @@ public class CorefProperties extends CompactProperties {
 	public static void countKeys(CorefProperties properties, 
 			Counter<String> counter) {
 		if(counter==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		
 		if(properties==null || properties.size()==0) {
 			return;
@@ -238,7 +238,7 @@ public class CorefProperties extends CompactProperties {
 	public static void collectKeys(CorefProperties properties, 
 			Collection<String> target) {
 		if(target==null)
-			throw new IllegalArgumentException("Invalid counter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		
 		if(properties==null || properties.size()==0) {
 			return;

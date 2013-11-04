@@ -100,7 +100,7 @@ public class DocumentStream extends ByteArrayOutputStream implements ActionListe
 
 	public void setDocument(BatchDocument document) {
 		if(document==null)
-			throw new IllegalArgumentException("Invalid document"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid document"); //$NON-NLS-1$
 		
 		this.document = document;
 	}

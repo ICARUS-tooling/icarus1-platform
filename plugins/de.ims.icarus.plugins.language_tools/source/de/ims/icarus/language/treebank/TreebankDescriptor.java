@@ -119,7 +119,7 @@ public class TreebankDescriptor implements Comparable<TreebankDescriptor> {
 	
 	void setId(String id) {
 		if(id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		
 		this.id = id;
 	}
@@ -141,7 +141,7 @@ public class TreebankDescriptor implements Comparable<TreebankDescriptor> {
 	 */
 	public void setName(String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(this.name)) {
 			return;
 		}

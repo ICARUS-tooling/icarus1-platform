@@ -48,7 +48,7 @@ public final class Locations {
 
 	public static Location getLocation(String path) throws MalformedURLException {
 		if(path==null)
-			throw new IllegalArgumentException("Invalid path"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 		
 		try {
 			File file = new File(path);

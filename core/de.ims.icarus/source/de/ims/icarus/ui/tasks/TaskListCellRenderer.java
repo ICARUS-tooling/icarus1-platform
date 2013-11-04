@@ -86,7 +86,7 @@ public class TaskListCellRenderer extends JPanel implements
 
 	public TaskListCellRenderer(TaskManager manager, JList<?> list) {
 		if(manager==null)
-			throw new IllegalArgumentException("Invalid manager"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid manager"); //$NON-NLS-1$
 		
 		this.manager = manager;
 		this.list = list;

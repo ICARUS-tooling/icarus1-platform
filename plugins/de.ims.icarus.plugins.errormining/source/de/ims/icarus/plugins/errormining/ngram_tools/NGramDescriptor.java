@@ -120,7 +120,7 @@ public class NGramDescriptor {
 
 	public void setFactoryExtension(Extension factoryExtension) {
 		if(factoryExtension==null)
-			throw new IllegalArgumentException("Invalid factory extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid factory extension"); //$NON-NLS-1$
 		
 		if(this.factoryExtension==factoryExtension) {
 			return;

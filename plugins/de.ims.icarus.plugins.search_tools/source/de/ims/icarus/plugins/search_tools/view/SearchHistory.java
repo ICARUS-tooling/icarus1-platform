@@ -109,7 +109,7 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 
 	public void addSearch(SearchDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 		if(descriptor.getSearch()==null)
 			throw new IllegalArgumentException("Missing search object on descriptor: "+descriptor); //$NON-NLS-1$
 		
@@ -156,7 +156,7 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 	
 	public void removeSearch(SearchDescriptor descriptor) {
 		if(descriptor==null)
-			throw new IllegalArgumentException("Invalid descriptor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 		
 		if(descriptors==null) {
 			return;

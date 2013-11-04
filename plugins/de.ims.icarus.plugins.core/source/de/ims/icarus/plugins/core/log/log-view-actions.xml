@@ -8,11 +8,11 @@
 
 	<!-- Clear Log -->
 	<action id="plugins.core.logView.clearLogAction"
-		name="${id}.name" desc="${id}.description" icon="clear_co.gif" />
+		template="actions.default.clearAction" />
 
 	<!-- Copy Record to Clipboard -->
 	<action id="plugins.core.logView.copyRecordAction"
-		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+		template="actions.default.copyAction" />
 
 	<!-- Scroll Lock -->
 	<action id="plugins.core.logView.scrollLockAction"

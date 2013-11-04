@@ -30,7 +30,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.tree.TreePath;
 
-import de.ims.icarus.ui.helper.AbstractTreeModel;
+import de.ims.icarus.ui.tree.AbstractTreeModel;
 
 
 /**

@@ -66,7 +66,7 @@ public final class JAXBUtils {
 	
 	public static synchronized void registerClass(Class<?> clazz) {
 		if(clazz==null || illegalClasses.contains(clazz))
-			throw new IllegalArgumentException("Invalid class"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid class"); //$NON-NLS-1$
 		
 		if(registeredClasses==null) {
 			registeredClasses = new HashSet<>();
@@ -105,9 +105,9 @@ public final class JAXBUtils {
 	
 	public static synchronized void registerAdapter(Class<?> clazz, Object adapter) {
 		if(clazz==null || illegalClasses.contains(clazz))
-			throw new IllegalArgumentException("Invalid target class"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target class"); //$NON-NLS-1$
 		if(adapter==null)
-			throw new IllegalArgumentException("Invalid adapter object"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid adapter object"); //$NON-NLS-1$
 		
 		if(registeredAdapters==null) {
 			registeredAdapters = new HashMap<>();

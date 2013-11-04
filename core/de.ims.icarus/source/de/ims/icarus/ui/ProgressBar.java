@@ -205,7 +205,7 @@ public class ProgressBar extends Component {
 	 */
 	public void setBarColor(Color value) {
 		if(value==null)
-			throw new IllegalArgumentException("invalid barColor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid barColor"); //$NON-NLS-1$
 		
 		Color oldValue = barColor;
 		barColor = value;
@@ -227,7 +227,7 @@ public class ProgressBar extends Component {
 	 */
 	public void setBorderColor(Color value) {
 		if(value==null)
-			throw new IllegalArgumentException("invalid borderColor"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid borderColor"); //$NON-NLS-1$
 		
 		Color oldValue = borderColor;
 		borderColor = value;

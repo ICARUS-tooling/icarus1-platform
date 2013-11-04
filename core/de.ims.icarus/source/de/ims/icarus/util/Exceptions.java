@@ -48,9 +48,9 @@ public final class Exceptions {
 	
 	public static void addFormatter(String throwableClassName, ErrorFormatter formatter) {
 		if(throwableClassName==null)
-			throw new IllegalArgumentException("Invalid throwable class name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid throwable class name"); //$NON-NLS-1$
 		if(formatter==null)
-			throw new IllegalArgumentException("Invalid formatter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid formatter"); //$NON-NLS-1$
 		
 		if(formatters==null) {
 			synchronized (Exceptions.class) {
@@ -86,7 +86,7 @@ public final class Exceptions {
 
 	public static void testNullArgument(Object o, String name) {
 		if (o == null)
-			throw new IllegalArgumentException("Invalid argument: " + name); //$NON-NLS-1$
+			throw new NullPointerException("Invalid argument: " + name); //$NON-NLS-1$
 	}
 
 	public static final void testNonemptyArray(Object[] o, String name) {

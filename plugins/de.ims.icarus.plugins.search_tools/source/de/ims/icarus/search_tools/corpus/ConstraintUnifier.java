@@ -57,7 +57,7 @@ public class ConstraintUnifier {
 
 	public ConstraintUnifier(SearchGraph graph) {
 		if(graph==null)
-			throw new IllegalArgumentException("Invalid graph"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
 		
 		this.graph = graph;
 		

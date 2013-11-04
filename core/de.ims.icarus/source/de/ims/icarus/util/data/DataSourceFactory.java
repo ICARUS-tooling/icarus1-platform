@@ -87,7 +87,7 @@ public final class DataSourceFactory {
 	
 	public DataSource getConfigDataSource(Handle handle, ChangeListener listener) {
 		if(handle==null)
-			throw new IllegalArgumentException("Invalid handle"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid handle"); //$NON-NLS-1$
 				
 		DataSource dataSource = getCachedSource(handle);
 		if(dataSource==null) {
@@ -104,7 +104,7 @@ public final class DataSourceFactory {
 	
 	public DataSource getConfigDataSource(ConfigRegistry registry, String path, ChangeListener listener) {
 		if(path==null)
-			throw new IllegalArgumentException("Invalid path"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 		
 		if(registry==null) {
 			registry = ConfigRegistry.getGlobalRegistry();
@@ -145,6 +145,14 @@ public final class DataSourceFactory {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			fireDataChanged();
+		}
+
+		/**
+		 * @see de.ims.icarus.util.data.DataSource#setData(java.lang.Object)
+		 */
+		@Override
+		public void setData(Object value) {
+			source.setData(value);
 		}
 		
 	}
@@ -195,6 +203,15 @@ public final class DataSourceFactory {
 		public Object getData() {
 			ConfigRegistry registry = handle.getSource();
 			return registry.getValue(handle);
+		}
+
+		/**
+		 * @see de.ims.icarus.util.data.DataSource#setData(java.lang.Object)
+		 */
+		@Override
+		public void setData(Object value) {
+			ConfigRegistry registry = handle.getSource();
+			registry.setValue(handle, value);
 		}
 	}
 	

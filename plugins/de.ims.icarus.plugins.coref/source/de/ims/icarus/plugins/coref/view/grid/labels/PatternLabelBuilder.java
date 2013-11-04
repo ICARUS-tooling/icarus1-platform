@@ -58,7 +58,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 
 	public void setPattern(String pattern) {
 		if(pattern==null)
-			throw new IllegalArgumentException("Invalid pattern"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid pattern"); //$NON-NLS-1$
 		
 		if(pattern.equals(this.pattern)) {
 			return;
@@ -232,7 +232,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 
 		public CharacterElement(char[] characters) {
 			if(characters==null || characters.length==0)
-				throw new IllegalArgumentException("Invalid or empty character array"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid or empty character array"); //$NON-NLS-1$
 			
 			this.characters = characters;
 		}
@@ -342,7 +342,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		
 		public PropertyElement(String key) {
 			if(key==null || key.isEmpty())
-				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 			
 			this.key = key;
 		}
@@ -370,7 +370,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		
 		public SentencePropertyElement(String key) {
 			if(key==null || key.isEmpty())
-				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 			
 			this.key = key;
 		}
@@ -413,7 +413,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		
 		public HeadPropertyElement(String key) {
 			if(key==null || key.isEmpty())
-				throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 			
 			this.key = key;
 		}

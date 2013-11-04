@@ -61,7 +61,7 @@ public class DefaultGroupOrderEditor {
 	
 	public DefaultGroupOrderEditor(SearchResult searchResult) {
 		if(searchResult==null)
-			throw new IllegalArgumentException("Invalid search-result"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search-result"); //$NON-NLS-1$
 		if(searchResult.getDimension()<getMinimumDimension())
 			throw new IllegalArgumentException("Illegal result dimension: "+searchResult.getDimension()); //$NON-NLS-1$
 		

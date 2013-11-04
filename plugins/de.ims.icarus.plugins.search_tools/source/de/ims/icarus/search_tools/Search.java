@@ -60,11 +60,11 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	
 	protected Search(SearchFactory factory, SearchQuery query, Options parameters, Object target) {
 		if(factory==null)
-			throw new IllegalArgumentException("Invalid factory"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid factory"); //$NON-NLS-1$
 		if(query==null)
-			throw new IllegalArgumentException("Invalid query"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid query"); //$NON-NLS-1$
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		
 		if(parameters==null) {
 			parameters = Options.emptyOptions;

@@ -63,7 +63,7 @@ public enum Order {
 
 	public static Order parseOrder(String s) {
 		if(s==null || s.isEmpty())
-			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 		
 		for(Order order : values()) {
 			if(order.name().toLowerCase().startsWith(s)) {

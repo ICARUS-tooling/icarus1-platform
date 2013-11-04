@@ -134,14 +134,14 @@ public class PropertyInfoDialog extends JFrame {
 	
 	protected synchronized static Counter<String> getCachedCounter(Object item) {
 		if(item==null)
-			throw new IllegalArgumentException("Invalid item"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
 		
 		return cache==null ? null : cache.get(item);
 	}
 	
 	protected synchronized static void cacheCounter(Object item, Counter<String> counter) {
 		if(item==null)
-			throw new IllegalArgumentException("Invalid item"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
 		
 		if(counter==null || counter.isEmpty()) {
 			return;

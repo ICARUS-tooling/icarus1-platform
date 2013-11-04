@@ -756,7 +756,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 	public void setConstraintContext(ConstraintContext context) {
 		if(context==null)
-			throw new IllegalArgumentException("Invalid context"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid context"); //$NON-NLS-1$
 		
 		if(this.constraintContext==context) {
 			return;

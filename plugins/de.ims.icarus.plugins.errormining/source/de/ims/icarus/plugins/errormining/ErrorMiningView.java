@@ -1025,7 +1025,7 @@ public class ErrorMiningView extends View {
 		public void setEditingItem(SearchDescriptor item) {
 
 			if (item == null)
-				throw new IllegalArgumentException("Invalid search-descriptor"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid search-descriptor"); //$NON-NLS-1$
 
 			descriptor = item;
 
@@ -1363,7 +1363,7 @@ public class ErrorMiningView extends View {
 		
 		public SearchTargetDialog(ContentType contentType) {
 			if(contentType==null)
-				throw new IllegalArgumentException("Invalid content-type"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
 			
 			this.contentType = contentType;
 		}
@@ -1517,7 +1517,7 @@ public class ErrorMiningView extends View {
 		@Override
 		public void setEditingItem(SearchDescriptor item) {
 			if(item==null)
-				throw new IllegalArgumentException("Invalid search-descriptor"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid search-descriptor"); //$NON-NLS-1$
 						
 			descriptor = item;
 			

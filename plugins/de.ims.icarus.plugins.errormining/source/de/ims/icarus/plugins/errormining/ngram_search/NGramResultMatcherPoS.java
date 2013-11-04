@@ -148,7 +148,7 @@ public class NGramResultMatcherPoS implements ErrorminingMatcher, Cloneable, Com
 	
 	public void setCache(GroupCache cache) {
 		if(cache==null)
-			throw new IllegalArgumentException("Invalid cache"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid cache"); //$NON-NLS-1$
 		
 		this.cache = cache;
 		
@@ -173,7 +173,7 @@ public class NGramResultMatcherPoS implements ErrorminingMatcher, Cloneable, Com
 	
 	public void setEntryBuilder(EntryBuilder entryBuilder) {
 		if(entryBuilder==null)
-			throw new IllegalArgumentException("Invalid entry-builder"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid entry-builder"); //$NON-NLS-1$
 		
 		this.entryBuilder = entryBuilder;
 //		if(next!=null) {

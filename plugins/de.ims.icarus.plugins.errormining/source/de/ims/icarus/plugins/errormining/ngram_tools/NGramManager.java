@@ -65,7 +65,7 @@ public class NGramManager {
 	 */
 	public NGramFactory getFactory(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		if(factoryInstances==null) {
 			factoryInstances = new HashMap<>();

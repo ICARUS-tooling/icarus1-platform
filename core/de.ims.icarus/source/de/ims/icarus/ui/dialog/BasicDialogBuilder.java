@@ -80,7 +80,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 	
 	private static synchronized void recycleLabel(JTextArea label) {
 		if(label==null)
-			throw new IllegalArgumentException("Invalid label"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid label"); //$NON-NLS-1$
 		
 		if(!indicatorValue.equals(label.getClientProperty("builder"))); //$NON-NLS-1$
 		

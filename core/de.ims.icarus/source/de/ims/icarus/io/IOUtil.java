@@ -157,7 +157,7 @@ public final class IOUtil {
 		}
 		
 		if(!(charset instanceof Charset))
-			throw new IllegalArgumentException("Invalid charset: "+charset.getClass()); //$NON-NLS-1$
+			throw new NullPointerException("Invalid charset: "+charset.getClass()); //$NON-NLS-1$
 		
 		return (Charset) charset;
 	}

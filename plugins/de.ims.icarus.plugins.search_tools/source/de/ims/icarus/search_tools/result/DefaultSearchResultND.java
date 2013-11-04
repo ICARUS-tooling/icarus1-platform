@@ -276,7 +276,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	@Override
 	public synchronized boolean reorder(int[] permutation) {
 		if(permutation==null || permutation.length==0)
-			throw new IllegalArgumentException("Invalid permutation"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid permutation"); //$NON-NLS-1$
 		
 		/*System.out.printf("reorder call: perm=%s dim=%d\n",  //$NON-NLS-1$
 				Arrays.toString(permutation), getDimension());*/

@@ -859,7 +859,7 @@ public abstract class Perspective implements Identifiable {
 	
 	final ResultMessage sendRequest(Object sender, Object receiver, Message message) {
 		if(message==null)
-			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid message"); //$NON-NLS-1$
 		
 		ResultMessage result = null;
 		
@@ -895,7 +895,7 @@ public abstract class Perspective implements Identifiable {
 		} else if(receiver instanceof Class) {
 			filter = new ViewFilter.ViewClassFilter((Class<?>) receiver);
 		} else if(receiver != null) {
-			throw new IllegalArgumentException("Invalid receiver: "+receiver); //$NON-NLS-1$
+			throw new NullPointerException("Invalid receiver: "+receiver); //$NON-NLS-1$
 		}
 		
 		for(Extension extension : connectedViews) {
@@ -1002,7 +1002,7 @@ public abstract class Perspective implements Identifiable {
 
 		public ViewContainer(Extension viewExtension, Alignment alignment) {
 			if(viewExtension==null)
-				throw new IllegalArgumentException("Invalid view extension"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid view extension"); //$NON-NLS-1$
 			
 			this.viewExtension = viewExtension;
 			this.alignment = alignment;

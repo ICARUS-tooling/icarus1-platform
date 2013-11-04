@@ -12,7 +12,7 @@
 		
 	<!-- Open Preferences -->
 	<action id="plugins.matetools.matetoolsParserInputView.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.matetools.matetoolsParserInputView.toolBarList">

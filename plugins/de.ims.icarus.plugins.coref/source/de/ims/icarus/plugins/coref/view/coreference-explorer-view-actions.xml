@@ -8,7 +8,8 @@
 		
 	<!-- Refresh -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.refreshAction"
-		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		template="actions.default.refreshAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Toggle 'markSpans' -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleMarkSpansAction"
@@ -36,7 +37,8 @@
 		
 	<!-- Clear Filter -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.clearFilterAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		template="actions.default.removeAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Toggle Document Filter -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleDocumentFilterAction"
@@ -44,7 +46,8 @@
 		
 	<!-- Open Preferences -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.coreferenceDocumentPresenter.toolBarList">

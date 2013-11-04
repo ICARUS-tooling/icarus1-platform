@@ -162,7 +162,7 @@ public final class FrameManager {
 	
 	public synchronized void registerWindow(Window window) {
 		if(window==null)
-			throw new IllegalArgumentException("invalid window"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid window"); //$NON-NLS-1$
 		
 		if(windows==null) {
 			windows = new HashSet<>();
@@ -177,7 +177,7 @@ public final class FrameManager {
 	
 	public synchronized void unregisterWindow(Window window) {
 		if(window==null)
-			throw new IllegalArgumentException("invalid window"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid window"); //$NON-NLS-1$
 		
 		if(windows==null) {
 			return;
@@ -272,7 +272,7 @@ public final class FrameManager {
 		
 		private FrameHandle(String id) {
 			if(id==null)
-				throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 			
 			this.id = id;
 		}

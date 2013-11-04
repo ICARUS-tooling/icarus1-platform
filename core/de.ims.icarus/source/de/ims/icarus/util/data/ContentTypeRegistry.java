@@ -144,7 +144,7 @@ public final class ContentTypeRegistry {
 	
 	public ContentType getTypeForClass(Object data) {
 		if(data==null)
-			throw new IllegalArgumentException("invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		Class<?> clazz = data instanceof Class ? (Class<?>)data : data.getClass();
 		String className = clazz.getName();
@@ -200,7 +200,7 @@ public final class ContentTypeRegistry {
 	
 	public ContentType getEnclosingType(Object data) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(data instanceof Content) {
 			return ((Content)data).getEnclosingType();
@@ -217,7 +217,7 @@ public final class ContentTypeRegistry {
 	
 	public ContentTypeCollection getEnclosingTypes(Object data) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		ContentTypeCollection collection = new ContentTypeCollection();
 		
@@ -242,7 +242,7 @@ public final class ContentTypeRegistry {
 	 */
 	public Collection<ContentType> getAssignableTypes(ContentType target) {
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		
 		if(contentTypes.isEmpty()) {
 			return Collections.emptyList();
@@ -268,7 +268,7 @@ public final class ContentTypeRegistry {
 	 */
 	public Collection<ContentType> getCompatibleTypes(ContentType target) {
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		
 		if(contentTypes.isEmpty()) {
 			return Collections.emptyList();
@@ -304,9 +304,9 @@ public final class ContentTypeRegistry {
 	 */
 	public static boolean isCompatible(ContentType type, Object content) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		if(content==null)
-			throw new IllegalArgumentException("Invalid content"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content"); //$NON-NLS-1$
 		
 		return type.accepts(getClass(content));
 	}
@@ -327,9 +327,9 @@ public final class ContentTypeRegistry {
 	 */
 	public static boolean isCompatible(ContentType type, ContentType target) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		
 		return type.accepts(target.getContentClass());
 	}
@@ -340,9 +340,9 @@ public final class ContentTypeRegistry {
 	 */
 	public static boolean isCompatible(String typeId, ContentType target) {
 		if(typeId==null)
-			throw new IllegalArgumentException("Invalid type id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type id"); //$NON-NLS-1$
 		if(target==null)
-			throw new IllegalArgumentException("Invalid target"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		
 		ContentType type = getInstance().getType(typeId);
 		return isCompatible(type, target);
@@ -350,9 +350,9 @@ public final class ContentTypeRegistry {
 	
 	public static boolean isCompatible(String typeId, Object content) {
 		if(typeId==null)
-			throw new IllegalArgumentException("Invalid type id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type id"); //$NON-NLS-1$
 		if(content==null)
-			throw new IllegalArgumentException("Invalid content"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content"); //$NON-NLS-1$
 		
 		ContentType type = getInstance().getType(typeId);
 		return isCompatible(type, content);
@@ -360,9 +360,9 @@ public final class ContentTypeRegistry {
 	
 	public static boolean isCompatible(ContentTypeCollection collection, String typeId) {
 		if(collection==null)
-			throw new IllegalArgumentException("Invalid collection"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid collection"); //$NON-NLS-1$
 		if(typeId==null)
-			throw new IllegalArgumentException("Invalid type id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type id"); //$NON-NLS-1$
 		
 		ContentType type = getInstance().getType(typeId);
 		return collection.isCompatibleTo(type);
@@ -383,7 +383,7 @@ public final class ContentTypeRegistry {
 	 */
 	public static ContentType getEntryType(Object container) {
 		if(container==null)
-			throw new IllegalArgumentException("Invalid container"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
 		
 		if(container instanceof DataList) {
 			return ((DataList<?>)container).getContentType();
@@ -402,7 +402,7 @@ public final class ContentTypeRegistry {
 	
 	public Collection<ContentType> getConversionTargets(ContentType type, boolean includeCompatible) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		Set<ContentType> targets = new LinkedHashSet<>();
 		
@@ -429,7 +429,7 @@ public final class ContentTypeRegistry {
 	
 	public Object convert(Object data, Object targetType, Options options) throws DataConversionException {
 		if(targetType==null)
-			throw new IllegalArgumentException("Invalid target type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid target type"); //$NON-NLS-1$
 		
 		// Obtain result type
 		ContentType resultType = null;
@@ -471,7 +471,7 @@ public final class ContentTypeRegistry {
 	
 	public void addType(ContentType type) {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		if(contentTypes.containsKey(type.getId()))
 			throw new DuplicateIdentifierException("Content type id already in use: "+type.getId()); //$NON-NLS-1$
 		
@@ -506,7 +506,7 @@ public final class ContentTypeRegistry {
 	
 	public Collection<Extension> getFilters(ContentType contentType, boolean includeCompatible) {
 		if(contentType==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		
 		if(filters==null) {
 			return Collections.emptyList();
@@ -537,7 +537,7 @@ public final class ContentTypeRegistry {
 	 */
 	public void addFilter(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		if(filters==null) {
 			filters = new HashMap<>();
@@ -574,7 +574,7 @@ public final class ContentTypeRegistry {
 	
 	public void addConverter(DataConverter converter) {
 		if(converter==null)
-			throw new IllegalArgumentException("Invalid converter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid converter"); //$NON-NLS-1$
 		
 		checkConverters();
 		
@@ -709,9 +709,9 @@ public final class ContentTypeRegistry {
 	
 	public DataConverter getConverter(ContentType inputType, ContentType resultType) {
 		if(inputType==null)
-			throw new IllegalArgumentException("Invalid input type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid input type"); //$NON-NLS-1$
 		if(resultType==null)
-			throw new IllegalArgumentException("Invalid result type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid result type"); //$NON-NLS-1$
 		if(inputType.getContentClass()==Object.class)
 			throw new IllegalArgumentException("Need more specific input type than 'object'"); //$NON-NLS-1$
 		if(resultType.getContentClass()==Object.class)

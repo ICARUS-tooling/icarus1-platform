@@ -175,7 +175,7 @@ public class TreebankRegistry {
 	
 	public Set<Extension> compatibleTypes(String grammar) {
 		if(grammar==null)
-			throw new IllegalArgumentException("Invalid grammar"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid grammar"); //$NON-NLS-1$
 		
 		Set<Extension> compatibleTypes = new HashSet<>();
 		
@@ -234,7 +234,7 @@ public class TreebankRegistry {
 	
 	public TreebankDescriptor getDescriptorByName(String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		
 		for(Treebank treebank : treebankMap.keySet()) {
 			if(name.equals(treebank.getName())) {
@@ -271,7 +271,7 @@ public class TreebankRegistry {
 	
 	public Treebank getTreebankByName(String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		
 		TreebankDescriptor descriptor = getDescriptorByName(name);
 		return descriptor==null ? null : descriptor.getTreebank();
@@ -349,9 +349,9 @@ public class TreebankRegistry {
 	
 	public TreebankDescriptor newTreebank(Extension type, String name) throws Exception {
 		if(type==null)
-			throw new IllegalArgumentException("Invalid type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		
 		TreebankDescriptor descriptor = new TreebankDescriptor();
 		descriptor.setId(UUID.randomUUID().toString());
@@ -418,7 +418,7 @@ public class TreebankRegistry {
 	
 	public void setProperty(Treebank treebank, String key, Object value) {
 		if(key==null)
-			throw new IllegalArgumentException("Invalid key"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 		
 		Object oldValue = treebank.getProperty(key);
 		if(oldValue==value || (value!=null && value.equals(oldValue))) {
@@ -432,7 +432,7 @@ public class TreebankRegistry {
 	
 	public void setName(Treebank treebank, String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(treebank.getName())) {
 			return;
 		}
@@ -785,9 +785,9 @@ public class TreebankRegistry {
 	
 	public void exportTreebanks(File file, List<Treebank> treebanks) throws IOException, Exception {
 		if(file==null)
-			throw new IllegalArgumentException("Invalid file"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		if(treebanks==null)
-			throw new IllegalArgumentException("Invalid treebanks"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid treebanks"); //$NON-NLS-1$
 		
 		if(treebanks.isEmpty()) {
 			return;
@@ -815,7 +815,7 @@ public class TreebankRegistry {
 	
 	public TreebankImportResult importTreebanks(File file) throws IOException, Exception {
 		if(file==null)
-			throw new IllegalArgumentException("Invalid file"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		
 		if(file.length()==0) {
 			return null;

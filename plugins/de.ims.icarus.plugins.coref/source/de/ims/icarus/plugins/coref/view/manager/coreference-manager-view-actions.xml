@@ -8,11 +8,11 @@
 		
 	<!-- Expand All -->
 	<action id="plugins.coref.coreferenceManagerView.expandAllAction"
-		name="${id}.name" desc="${id}.description" icon="expandall.png" />
+		template="actions.default.expandAllAction" />
 	
 	<!-- Collapse All -->
 	<action id="plugins.coref.coreferenceManagerView.collapseAllAction"
-		name="${id}.name" desc="${id}.description" icon="collapseall.png" />
+		template="actions.default.collapseAllAction" />
 	
 	<!-- Add Document Set -->
 	<action id="plugins.coref.coreferenceManagerView.addDocumentSetAction"

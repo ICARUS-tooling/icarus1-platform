@@ -69,7 +69,7 @@ public class MatcherBuilder {
 
 	public MatcherBuilder(Search search) {
 		if(search==null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 		
 		this.search = search;
 	}

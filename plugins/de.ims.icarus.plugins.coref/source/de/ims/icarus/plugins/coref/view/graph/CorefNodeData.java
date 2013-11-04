@@ -113,7 +113,7 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 
 	public void setSentence(CoreferenceData sentence) {
 		if(sentence==null)
-			throw new IllegalArgumentException("Invalid sentence"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid sentence"); //$NON-NLS-1$
 		
 		this.sentence = sentence;
 		label = null;

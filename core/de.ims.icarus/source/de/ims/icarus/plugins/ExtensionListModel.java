@@ -50,7 +50,7 @@ public class ExtensionListModel extends AbstractListModel<Extension> implements 
 	
 	public ExtensionListModel(Collection<Extension> items, boolean doSort) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items collection"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items collection"); //$NON-NLS-1$
 		
 		extensions.addAll(items);
 		if(doSort) {

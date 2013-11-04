@@ -94,7 +94,7 @@ public class DetailOutline implements AWTPresenter {
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
 		if(data==null)
-			throw new IllegalArgumentException("invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(!(data instanceof Edge)
 			&& !(data instanceof Span))

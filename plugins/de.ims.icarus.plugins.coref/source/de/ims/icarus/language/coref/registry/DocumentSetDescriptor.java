@@ -199,7 +199,7 @@ public class DocumentSetDescriptor implements Loadable,
 
 	public void setName(String name) {
 		if(name==null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(this.name)) {
 			return;
 		}
@@ -209,7 +209,7 @@ public class DocumentSetDescriptor implements Loadable,
 
 	public void setId(String id) {
 		if(id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		if(id.equals(this.id)) {
 			return;
 		}
@@ -311,7 +311,7 @@ public class DocumentSetDescriptor implements Loadable,
 	
 	public void addAllocation(AllocationDescriptor allocation) {
 		if(allocation==null)
-			throw new IllegalArgumentException("Invalid allocation"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid allocation"); //$NON-NLS-1$
 		
 		allocation.setParent(this);
 		allocations.add(allocation);
@@ -332,7 +332,7 @@ public class DocumentSetDescriptor implements Loadable,
 	
 	public int removeAllocation(AllocationDescriptor allocation) {
 		if(allocation==null)
-			throw new IllegalArgumentException("Invalid allocation"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid allocation"); //$NON-NLS-1$
 		
 		if(allocations.isEmpty()) {
 			return -1;

@@ -56,7 +56,7 @@ public class CompactTree {
 
 	public void init(int[] heads) {
 		if(heads==null)
-			throw new IllegalArgumentException("Invalid heads array"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid heads array"); //$NON-NLS-1$
 		
 		if(this.heads==null || this.heads.length<heads.length) {
 			this.heads = new int[heads.length+heads.length];

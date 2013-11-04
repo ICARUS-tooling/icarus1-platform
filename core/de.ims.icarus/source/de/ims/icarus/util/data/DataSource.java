@@ -36,6 +36,8 @@ public interface DataSource {
 
 	Object getData();
 	
+	void setData(Object value);
+	
 	void addChangeListener(ChangeListener l);
 	
 	void removeChangeListener(ChangeListener l);

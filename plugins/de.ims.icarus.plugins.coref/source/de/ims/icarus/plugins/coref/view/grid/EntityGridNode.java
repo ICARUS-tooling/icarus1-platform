@@ -50,11 +50,11 @@ public class EntityGridNode {
 
 	public EntityGridNode(CoreferenceData sentence, Span[] spans, short[] types, Color[] highlightColors) {
 		if(sentence==null)
-			throw new IllegalArgumentException("Invalid sentence"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid sentence"); //$NON-NLS-1$
 		if(spans==null)
-			throw new IllegalArgumentException("Invalid spans array"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid spans array"); //$NON-NLS-1$
 		if(types==null)
-			throw new IllegalArgumentException("Invalid types array"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid types array"); //$NON-NLS-1$
 		if(spans.length!=types.length)
 			throw new IllegalArgumentException("Size mismatch between spans and types"); //$NON-NLS-1$
 		

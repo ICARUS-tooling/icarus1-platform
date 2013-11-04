@@ -322,11 +322,11 @@ public final class GridBagUtil {
 	public static final void attachComponent(Component compSrc,
 			JComponent compDst, GridBagConstraints c) {
 		if (compSrc == null)
-			throw new IllegalArgumentException("Invalid source component."); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source component."); //$NON-NLS-1$
 		if (compDst == null)
-			throw new IllegalArgumentException("Invalid destination component."); //$NON-NLS-1$
+			throw new NullPointerException("Invalid destination component."); //$NON-NLS-1$
 		if (c == null)
-			throw new IllegalArgumentException("Invalid GridBagConstraints."); //$NON-NLS-1$
+			throw new NullPointerException("Invalid GridBagConstraints."); //$NON-NLS-1$
 
 		// First removing the provided component
 		layout.removeLayoutComponent(compSrc);

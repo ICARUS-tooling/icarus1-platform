@@ -165,7 +165,7 @@ public class Grouping {
 	
 	private void setColor(Color c) {
 		if(c==null)
-			throw new IllegalArgumentException("Invalid color"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid color"); //$NON-NLS-1$
 		color = c;
 	}
 
@@ -209,7 +209,7 @@ public class Grouping {
 	
 	public static void setGroupId(Component comp, int groupId) {
 		if(comp==null)
-			throw new IllegalArgumentException("Invalid component"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid component"); //$NON-NLS-1$
 		
 		JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(
 				JScrollPane.class, comp);
@@ -222,7 +222,7 @@ public class Grouping {
 	
 	public static void setGroupIds(Component comp, int id1, int id2) {
 		if(comp==null)
-			throw new IllegalArgumentException("Invalid component"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid component"); //$NON-NLS-1$
 		
 		JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(
 				JScrollPane.class, comp);
@@ -243,7 +243,7 @@ public class Grouping {
 	
 	public static void decorate(JScrollPane scrollPane, boolean dualMode) {
 		if(scrollPane==null)
-			throw new IllegalArgumentException("Invalid scroll pane"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid scroll pane"); //$NON-NLS-1$
 		
 		scrollPane.setCorner(ScrollPaneConstants.UPPER_LEFT_CORNER, newGroupingPainter());
 		scrollPane.setCorner(ScrollPaneConstants.LOWER_LEFT_CORNER, newGroupingPainter());

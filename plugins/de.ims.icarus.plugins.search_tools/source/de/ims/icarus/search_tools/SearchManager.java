@@ -106,7 +106,7 @@ public final class SearchManager {
 	
 	public synchronized ConstraintContext getConstraintContext(ContentType contentType) {
 		if(contentType==null)
-			throw new IllegalArgumentException("Invalid content-type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
 		
 		if(contexts==null) {
 			contexts = new HashMap<>();
@@ -144,7 +144,7 @@ public final class SearchManager {
 		
 	public static ConstraintFactory[] getEdgeConstraintFactories(ConstraintFactory[] items) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
 		
 		List<ConstraintFactory> result = new ArrayList<>();
 		
@@ -159,7 +159,7 @@ public final class SearchManager {
 		
 	public static ConstraintFactory[] getNodeConstraintFactories(ConstraintFactory[] items) {
 		if(items==null)
-			throw new IllegalArgumentException("Invalid items"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
 		
 		List<ConstraintFactory> result = new ArrayList<>();
 		
@@ -230,7 +230,7 @@ public final class SearchManager {
 	
 	public SearchFactory getFactory(Extension extension) {
 		if(extension==null)
-			throw new IllegalArgumentException("Invalid extension"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		
 		if(factoryInstances==null) {
 			factoryInstances = new HashMap<>();
@@ -258,7 +258,7 @@ public final class SearchManager {
 	
 	public static Object getTarget(Search search) {
 		if(search==null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 		
 		Object target = search.getTarget();
 		if(target instanceof Wrapper) {
@@ -271,7 +271,7 @@ public final class SearchManager {
 
 	public void executeSearch(Search search) {
 		if(search==null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 		if(search.isDone())
 			throw new IllegalArgumentException("Search already finished"); //$NON-NLS-1$
 		if(search.isCancelled())
@@ -300,7 +300,7 @@ public final class SearchManager {
 
 	public void cancelSearch(Search search) {
 		if(search==null)
-			throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 		
 		ExecuteSearchJob task = searchJobMap.get(search);
 		
@@ -322,7 +322,7 @@ public final class SearchManager {
 		
 		private ExecuteSearchJob(Search search) {
 			if(search==null)
-				throw new IllegalArgumentException("Invalid search"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid search"); //$NON-NLS-1$
 			
 			this.search = search;
 			

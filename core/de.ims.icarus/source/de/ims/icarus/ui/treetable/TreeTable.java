@@ -28,6 +28,7 @@ package de.ims.icarus.ui.treetable;
 import java.awt.Dimension;
 
 import javax.swing.JTable;
+import javax.swing.table.TableColumnModel;
 
 /**
  * @author Markus Gärtner
@@ -41,8 +42,18 @@ public class TreeTable extends JTable {
 	private TreeTableCellRenderer tree;
 
 	public TreeTable(TreeTableModel treeTableModel) {
-		tree = new TreeTableCellRenderer(this, treeTableModel);
+		this(treeTableModel, null);
+	}
 
+	public TreeTable(TreeTableModel treeTableModel, TableColumnModel columnModel) {
+		//super(null, columnModel);
+		
+		setAutoCreateColumnsFromModel(false);
+		
+		if(columnModel!=null) {
+			setColumnModel(columnModel);
+		}
+		tree = new TreeTableCellRenderer(this, treeTableModel);
 		setModel(new TreeTableModelAdapter(treeTableModel, tree));
 
 		// Link selections
@@ -57,5 +68,9 @@ public class TreeTable extends JTable {
 		// For style reasons disable grid and spacing
 		setShowGrid(false);
 		setIntercellSpacing(new Dimension(0, 0));
+	}
+	
+	public TreeTableCellRenderer getTreeTableCellRenderer() {
+		return tree;
 	}
 }

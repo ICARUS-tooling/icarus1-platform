@@ -511,7 +511,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		if(evt.getSource()!=data)
 			throw new IllegalArgumentException("Foreign change source: "+evt.getSource()); //$NON-NLS-1$
 		if(!(evt instanceof DependencyDataEvent))
-			throw new IllegalArgumentException("Invalid event: "+evt.getClass()); //$NON-NLS-1$
+			throw new NullPointerException("Invalid event: "+evt.getClass()); //$NON-NLS-1$
 		
 		DependencyDataEvent event = (DependencyDataEvent)evt;
 		
@@ -665,7 +665,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		}
 		
 		if(buffer==null)
-			throw new IllegalArgumentException("Invalid cell buffer"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid cell buffer"); //$NON-NLS-1$
 		
 		if(!NODE_DATA_TYPE.equals(buffer.graphType)) {
 			return;

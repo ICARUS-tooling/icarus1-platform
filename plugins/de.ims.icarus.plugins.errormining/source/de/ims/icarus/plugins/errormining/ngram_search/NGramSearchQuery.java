@@ -52,7 +52,7 @@ public class NGramSearchQuery implements SearchQuery {
 	
 	public NGramSearchQuery(ContentType contentType) {
 		if(contentType==null)
-			throw new IllegalArgumentException("Invalid content-type"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
 		
 		this.contentType = contentType;
 		

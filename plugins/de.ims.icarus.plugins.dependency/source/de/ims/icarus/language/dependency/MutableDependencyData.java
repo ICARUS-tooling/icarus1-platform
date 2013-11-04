@@ -209,7 +209,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	@Override
 	public void copyFrom(SentenceData source) {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		if (!(source instanceof DependencyData))
 			throw new UnsupportedSentenceDataException("Unsupported type: "+source.getClass()); //$NON-NLS-1$
 		

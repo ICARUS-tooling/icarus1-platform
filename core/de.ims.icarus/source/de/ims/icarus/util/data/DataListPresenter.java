@@ -554,7 +554,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	public void present(Object data, Options options)
 			throws UnsupportedPresentationDataException {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
 		if(!(data instanceof DataList))
 			throw new UnsupportedPresentationDataException(

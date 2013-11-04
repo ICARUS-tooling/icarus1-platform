@@ -52,7 +52,7 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 
 	public TreebankJob(Treebank treebank, boolean load) {
 		if(treebank==null)
-			throw new IllegalArgumentException("Invalid treebank"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid treebank"); //$NON-NLS-1$
 		
 		this.treebank = treebank;
 		this.load = load;

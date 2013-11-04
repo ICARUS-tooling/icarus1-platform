@@ -130,7 +130,7 @@ public abstract class SearchResultTabbedPresenter extends SearchResultTablePrese
 	
 	protected void cacheSubResult(SearchResult subResult, int...indices) {
 		if(subResult==null)
-			throw new IllegalArgumentException("invalid sub result"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid sub result"); //$NON-NLS-1$
 		
 		if(subResults==null) {
 			subResults = new LRUCache<>();
@@ -160,7 +160,7 @@ public abstract class SearchResultTabbedPresenter extends SearchResultTablePrese
 	
 	protected void displaySelectedSubResult(int[] indices, String label) {
 		if(indices==null)
-			throw new IllegalArgumentException("Invalid indices"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
 		
 		SearchResult subResult = getCachedSubResult(indices);
 		if(subResult==null) {
@@ -227,9 +227,9 @@ public abstract class SearchResultTabbedPresenter extends SearchResultTablePrese
 		public SubResultContainer(String title, SearchResult subResult) {
 			super(new BorderLayout());
 			if(title==null) 
-				throw new IllegalArgumentException("Invalid title"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid title"); //$NON-NLS-1$
 			if(subResult==null) 
-				throw new IllegalArgumentException("Invalid sub-result"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid sub-result"); //$NON-NLS-1$
 			
 			this.title = title;
 			this.subResult = subResult;

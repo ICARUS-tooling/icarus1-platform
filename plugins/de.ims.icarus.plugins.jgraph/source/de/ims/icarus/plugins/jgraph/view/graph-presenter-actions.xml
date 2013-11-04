@@ -8,15 +8,18 @@
 		
 	<!-- Clone Cells -->
 	<action id="plugins.jgraph.graphPresenter.cloneCellsAction"
-		name="${id}.name" desc="${id}.description" icon="breakpoint_view.gif" />
+		template="actions.default.cloneAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Copy Cells -->
 	<action id="plugins.jgraph.graphPresenter.copyCellsAction"
-		name="${id}.name" desc="${id}.description" icon="copy_edit.gif" />
+		template="actions.default.editAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Paste Cells -->
 	<action id="plugins.jgraph.graphPresenter.pasteCellsAction"
-		name="${id}.name" desc="${id}.description" icon="paste_edit.gif" />
+		template="actions.default.pasteAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Move Cells North -->
 	<action id="plugins.jgraph.graphPresenter.moveCellsNorthAction"
@@ -36,15 +39,18 @@
 		
 	<!-- Delete Cells -->
 	<action id="plugins.jgraph.graphPresenter.deleteCellsAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		template="actions.default.removeAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Print Graph -->
 	<action id="plugins.jgraph.graphPresenter.printGraphAction"
-		name="${id}.name" desc="${id}.description" icon="print_edit.gif" />
+		template="actions.default.printAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Clear Graph -->
 	<action id="plugins.jgraph.graphPresenter.clearGraphAction"
-		name="${id}.name" desc="${id}.description" icon="new_icon.gif" />
+		template="actions.default.newAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Add Cell -->
 	<action id="plugins.jgraph.graphPresenter.addNodeAction"
@@ -60,43 +66,47 @@
 		
 	<!-- Edit Cell -->
 	<action id="plugins.jgraph.graphPresenter.editCellAction"
-		name="${id}.name" desc="${id}.description" icon="write_obj.gif" />
+		template="actions.default.editAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Import Cells -->
 	<action id="plugins.jgraph.graphPresenter.importCellsAction"
-		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
+		template="actions.default.importAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Export Cells -->
 	<action id="plugins.jgraph.graphPresenter.exportCellsAction"
-		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		template="actions.default.exportAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Undo Edit -->
 	<action id="plugins.jgraph.graphPresenter.undoEditAction"
-		name="${id}.name" desc="${id}.description" icon="undo_edit.gif" />
+		template="actions.default.undoAction" />
 		
 	<!-- Redo Edit -->
 	<action id="plugins.jgraph.graphPresenter.redoEditAction"
-		name="${id}.name" desc="${id}.description" icon="redo_edit.gif" />
+		template="actions.default.redoAction" />
 		
 	<!-- Zoom In -->
 	<action id="plugins.jgraph.graphPresenter.zoomInAction"
-		name="${id}.name" desc="${id}.description" icon="zoomin.gif" />
+		template="actions.default.zoomInAction" />
 		
 	<!-- Zoom Out -->
 	<action id="plugins.jgraph.graphPresenter.zoomOutAction"
-		name="${id}.name" desc="${id}.description" icon="zoomout.gif" />
+		template="actions.default.zoomOutAction" />
 		
 	<!-- Reset Zoom -->
 	<action id="plugins.jgraph.graphPresenter.resetZoomAction"
-		name="${id}.name" desc="${id}.description" icon="zoom.gif" />
+		template="actions.default.zoomAction" />
 		
 	<!-- Open Preferences -->
 	<action id="plugins.jgraph.graphPresenter.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction" />
 		
 	<!-- Rebuild Graph -->
 	<action id="plugins.jgraph.graphPresenter.rebuildGraphAction"
-		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		template="actions.default.refreshAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Collapse Cells -->
 	<action id="plugins.jgraph.graphPresenter.collapseCellsAction"
@@ -112,7 +122,7 @@
 		
 	<!-- Toggle Compress -->
 	<action id="plugins.jgraph.graphPresenter.toggleCompressAction"
-		name="${id}.name" desc="${id}.description" icon="collapseall.gif" type="toggle" />
+		name="${id}.name" desc="${id}.description" icon="compress.gif" type="toggle" />
 		
 	<!-- Toggle Mark Incoming -->
 	<action id="plugins.jgraph.graphPresenter.toggleMarkIncomingAction"

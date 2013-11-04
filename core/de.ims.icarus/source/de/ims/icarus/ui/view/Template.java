@@ -110,7 +110,7 @@ public final class Template {
 	
 	public static Template compile(String source, Options options) throws MalformedTemplateException {
 		if(source==null)
-			throw new IllegalArgumentException("Invalid source string"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid source string"); //$NON-NLS-1$
 		
 		if(pattern==null)
 			throw new IllegalStateException("No pattern defined for template compilation"); //$NON-NLS-1$
@@ -250,7 +250,7 @@ public final class Template {
 	
 	private void add(Object element) {
 		if(element==null)
-			throw new IllegalArgumentException("Invalid element"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid element"); //$NON-NLS-1$
 		
 		if(elements==null) {
 			elements = new ArrayList<>();
@@ -261,9 +261,9 @@ public final class Template {
 	
 	private void add(String id, SubTemplateCache subTemplate) {
 		if(id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		if(subTemplate==null)
-			throw new IllegalArgumentException("Invalid sub-template"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid sub-template"); //$NON-NLS-1$
 		
 		if(elements==null) {
 			elements = new ArrayList<>();
@@ -323,7 +323,7 @@ public final class Template {
 	
 	public SubTemplateCache getSubTemplate(String id) {
 		if(id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		
 		if(elements==null) {
 			return null;

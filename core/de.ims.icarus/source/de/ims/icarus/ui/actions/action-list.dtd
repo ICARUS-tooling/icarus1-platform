@@ -4,7 +4,7 @@
    The action_attributes parameter entity is a convenient representation
    of the common attributes between an action and an action-list.
 
-   idref - a reference to a previously defined action. 
+   template - a reference to a previously defined action. 
            
    type - if the value is "single" then the action represents a command
           action. If the value is "toggle" then the action is a multi-state
@@ -19,8 +19,14 @@
 
    icon - the relative path to an image in the classpath that represents
             a small icon.
+            
+   sicon - the relative path to an image in the classpath that represents
+            a small icon used as selected icon in toggle actions.
 
    licon - the relative path to an image in the classpath that represents a large icon.
+   
+   slicon - the relative path to an image in the classpath that represents a large icon
+   			used as selected icon in toggle actions.
    
 
    desc - a short description of the action. Used for localization with the same
@@ -46,12 +52,15 @@
            For example, the string "control S" represents the Control-S key.
 -->
 
-<!ENTITY % action_attributes "idref     IDREF #IMPLIED
+<!ENTITY % action_attributes "idref     CDATA #IMPLIED
+          template      CDATA #IMPLIED
           type      (single | toggle) #IMPLIED
           name      CDATA #IMPLIED
           mnemonic  CDATA #IMPLIED
           icon    CDATA #IMPLIED
+          sicon    CDATA #IMPLIED
           licon      CDATA #IMPLIED
+          slicon      CDATA #IMPLIED
           desc      CDATA #IMPLIED
           virtual	(true | false) #IMPLIED
           command    CDATA #IMPLIED

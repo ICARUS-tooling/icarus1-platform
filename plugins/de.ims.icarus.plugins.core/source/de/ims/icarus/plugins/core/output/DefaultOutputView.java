@@ -157,9 +157,9 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	
 	public void displayData(Object data, Object owner, Options options) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(owner==null)
-			throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 		
 		selectViewTab();
 		

@@ -326,7 +326,7 @@ public class DefaultAreaLayout implements AreaLayout {
 		if(root!=null)
 			throw new IllegalStateException("Layout already initialized"); //$NON-NLS-1$
 		if(container==null)
-			throw new IllegalArgumentException("Invalid container"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
 		
 		root = container;
 		

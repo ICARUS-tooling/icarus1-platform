@@ -24,11 +24,12 @@
 		
 	<!-- Clear History -->
 	<action id="plugins.searchTools.searchManagerView.clearHistoryAction"
-		name="${id}.name" desc="${id}.description" icon="clear_co.gif" />
+		template="actions.default.clearAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Open Preferences -->
 	<action id="plugins.searchTools.searchManagerView.openPreferencesAction"
-		name="${id}.name" desc="${id}.description" icon="settings.gif" />
+		template="actions.default.openPreferencesAction" />
 		
 	<!-- Edit Query -->
 	<action id="plugins.searchTools.searchManagerView.editQueryAction"

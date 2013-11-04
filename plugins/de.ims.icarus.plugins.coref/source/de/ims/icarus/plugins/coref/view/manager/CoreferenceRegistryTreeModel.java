@@ -33,7 +33,7 @@ import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
-import de.ims.icarus.ui.helper.AbstractTreeModel;
+import de.ims.icarus.ui.tree.AbstractTreeModel;
 
 /**
  * @author Markus Gärtner

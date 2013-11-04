@@ -94,7 +94,7 @@ public final class CoreferenceUtils {
 	
 	public static Collection<Edge> removeSingletons(Collection<Edge> edges) {
 		if(edges==null)
-			throw new IllegalArgumentException("Invalid edge collection"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid edge collection"); //$NON-NLS-1$
 		if(edges.isEmpty()) {
 			return edges;
 		}
@@ -148,9 +148,9 @@ public final class CoreferenceUtils {
 	
 	public static boolean containsSpan(CoreferenceData data, Span span) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(span==null)
-			throw new IllegalArgumentException("Invalid span"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid span"); //$NON-NLS-1$
 		
 		Span[] spans = data.getSpans();
 		if(spans==null) {
@@ -168,9 +168,9 @@ public final class CoreferenceUtils {
 	
 	public static boolean containsSpan(CoreferenceDocumentData data, Span span) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(span==null)
-			throw new IllegalArgumentException("Invalid span"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid span"); //$NON-NLS-1$
 		
 		int size = data.size();
 		for(int i=0; i<size; i++) {
@@ -184,9 +184,9 @@ public final class CoreferenceUtils {
 	
 	public static boolean containsSpan(CoreferenceData data, Filter filter) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(filter==null)
-			throw new IllegalArgumentException("Invalid filter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid filter"); //$NON-NLS-1$
 		
 		Span[] spans = data.getSpans();
 		if(spans==null) {
@@ -204,9 +204,9 @@ public final class CoreferenceUtils {
 	
 	public static boolean containsSpan(CoreferenceDocumentData data, Filter filter) {
 		if(data==null)
-			throw new IllegalArgumentException("Invalid data"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(filter==null)
-			throw new IllegalArgumentException("Invalid filter"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid filter"); //$NON-NLS-1$
 		
 		int size = data.size();
 		for(int i=0; i<size; i++) {

@@ -591,7 +591,7 @@ public class WebserviceRegistry {
 	 */
 	public void setName(Webservice webservice, String name) {
 		if (name == null)
-			throw new IllegalArgumentException("Invalid name"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if (name.equals(webservice.getName())) {
 			return;
 		}
@@ -623,7 +623,7 @@ public class WebserviceRegistry {
 	public void setWebresourceFormat(Webservice webservice,
 			String webresourceFormat) {
 		if (webresourceFormat == null)
-			throw new IllegalArgumentException("Invalid Webresource Format"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid Webresource Format"); //$NON-NLS-1$
 		if (webresourceFormat.equals(webservice.getWebresourceFormat())) {
 			return;
 		}
@@ -637,7 +637,7 @@ public class WebserviceRegistry {
 	 */
 	public void setCreator(Webservice webservice, String creator) {
 		if (creator == null)
-			throw new IllegalArgumentException("Invalid creator"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid creator"); //$NON-NLS-1$
 		if (creator.equals(webservice.getCreator())) {
 			return;
 		}
@@ -651,7 +651,7 @@ public class WebserviceRegistry {
 	 */
 	public void setContact(Webservice webservice, String contact) {
 		if (contact == null)
-			throw new IllegalArgumentException("Invalid contact"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid contact"); //$NON-NLS-1$
 		if (contact.equals(webservice.getContact())) {
 			return;
 		}
@@ -665,7 +665,7 @@ public class WebserviceRegistry {
 	 */
 	public void setURL(Webservice webservice, String url) {
 		if (url == null)
-			throw new IllegalArgumentException("Invalid URL"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid URL"); //$NON-NLS-1$
 		if (url.equals(webservice.getURL())) {
 			return;
 		}
@@ -679,7 +679,7 @@ public class WebserviceRegistry {
 	 */
 	public void setServiceID(Webservice webservice, String serviceID) {
 		if (serviceID == null)
-			throw new IllegalArgumentException("Invalid serviceID"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid serviceID"); //$NON-NLS-1$
 		if (serviceID.equals(webservice.getServiceID())) {
 			return;
 		}

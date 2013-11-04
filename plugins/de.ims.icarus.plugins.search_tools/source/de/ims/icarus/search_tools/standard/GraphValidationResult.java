@@ -55,7 +55,7 @@ public class GraphValidationResult {
 		if(locked)
 			throw new IllegalStateException("Result is locked"); //$NON-NLS-1$
 		if(message==null)
-			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid message"); //$NON-NLS-1$
 		
 		if(warnings==null) {
 			warnings = new ArrayList<>();
@@ -68,7 +68,7 @@ public class GraphValidationResult {
 		if(locked)
 			throw new IllegalStateException("Result is locked"); //$NON-NLS-1$
 		if(message==null)
-			throw new IllegalArgumentException("Invalid message"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid message"); //$NON-NLS-1$
 		
 		if(errors==null) {
 			errors = new ArrayList<>();

@@ -48,11 +48,13 @@
 		
 	<!-- Export Treebanks -->
 	<action id="plugins.languageTools.treebankExplorerView.exportTreebanksAction"
-		name="${id}.name" desc="${id}.description" icon="export_wiz.gif" />
+		template="actions.default.exportAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Import Treebanks -->
 	<action id="plugins.languageTools.treebankExplorerView.importTreebanksAction"
-		name="${id}.name" desc="${id}.description" icon="import_wiz.gif" />
+		template="actions.default.importAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.languageTools.treebankExplorerView.toolBarList">

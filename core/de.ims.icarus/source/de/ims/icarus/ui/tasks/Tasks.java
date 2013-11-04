@@ -45,14 +45,14 @@ public final class Tasks {
 	
 	public static SwingWorker<?, ?> createWorker(Runnable runnable) {
 		if(runnable==null)
-			throw new IllegalArgumentException("Invalid runnable"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid runnable"); //$NON-NLS-1$
 		
 		return new RunnableWorker(runnable);
 	}
 	
 	public static SwingWorker<?, ?> createWorker(Callable<?> callable) {
 		if(callable==null)
-			throw new IllegalArgumentException("Invalid callable"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid callable"); //$NON-NLS-1$
 		
 		return new CallableWorker(callable);
 	}

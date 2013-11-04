@@ -44,7 +44,7 @@ public class ComboBoxListWrapper<E extends Object> extends AbstractListModel<E> 
 	
 	public ComboBoxListWrapper(ListModel<E> base) {
 		if(base==null)
-			throw new IllegalArgumentException("Invalid base list model"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid base list model"); //$NON-NLS-1$
 		
 		this.base = base;
 	}

@@ -125,9 +125,9 @@ public final class StringUtil {
 	
 	public static String getUniqueName(String baseName, Set<String> usedNames, boolean allowBaseName) {
 		if(baseName==null)
-			throw new IllegalArgumentException("invalid basename"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid basename"); //$NON-NLS-1$
 		if(usedNames==null)
-			throw new IllegalArgumentException("invalid used name set"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid used name set"); //$NON-NLS-1$
 		
 		if(usedNames.isEmpty()) {
 			return baseName;
@@ -195,7 +195,7 @@ public final class StringUtil {
 	 */
 	public static String wrap(String s, FontMetrics fm, int width) {
 		if(fm==null)
-			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid font metrics"); //$NON-NLS-1$
 		//if(width<MIN_WRAP_WIDTH)
 		//	throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -255,7 +255,7 @@ public final class StringUtil {
 	
 	public static String[] split(String s, FontMetrics fm, int width) {
 		if(fm==null)
-			throw new IllegalArgumentException("Invalid font metrics"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid font metrics"); //$NON-NLS-1$
 		//if(width<MIN_WRAP_WIDTH)
 		//	throw new IllegalArgumentException("Width must not be less than "+MIN_WRAP_WIDTH+" pixels"); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -312,7 +312,7 @@ public final class StringUtil {
 	
 	public static String capitalize(String s) {
 		if(s==null || s.length()<2)
-			throw new IllegalArgumentException("Invalid string"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 		
 		return Character.toUpperCase(s.charAt(0))+s.substring(1);
 	}

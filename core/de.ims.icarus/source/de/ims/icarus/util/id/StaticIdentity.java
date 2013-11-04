@@ -49,9 +49,9 @@ public class StaticIdentity implements Identity {
 	 */
 	public StaticIdentity(String id, Object owner) {
 		if(id==null)
-			throw new IllegalArgumentException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		if(owner==null)
-			throw new IllegalArgumentException("Invalid owner"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 
 		this.id = id;
 		this.owner = owner;

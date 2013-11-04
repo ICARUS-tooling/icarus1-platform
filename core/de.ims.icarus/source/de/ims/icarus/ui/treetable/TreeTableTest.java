@@ -36,7 +36,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.tree.TreePath;
 
 /**
  * @author Markus Gärtner
@@ -153,10 +152,8 @@ public class TreeTableTest extends JFrame {
 		static protected Class<?>[] columnTypes = { TreeTableModel.class,
 				String.class, Date.class, Integer.class };
 
-		private DataNode rootNode;
-
 		public DataModel(DataNode rootNode) {
-			this.rootNode = rootNode;
+			super(rootNode);
 		}
 
 		public Object getChild(Object parent, int index) {
@@ -195,46 +192,7 @@ public class TreeTableTest extends JFrame {
 			return null;
 		}
 
-		public boolean isCellEditable(Object node, int column) {
-			return true; // Important to activate TreeExpandListener
-		}
-
 		public void setValueAt(Object aValue, Object node, int column) {
-		}
-
-		/**
-		 * @see javax.swing.tree.TreeModel#getRoot()
-		 */
-		@Override
-		public Object getRoot() {
-			return rootNode;
-		}
-
-		/**
-		 * @see javax.swing.tree.TreeModel#isLeaf(java.lang.Object)
-		 */
-		@Override
-		public boolean isLeaf(Object node) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		/**
-		 * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
-		 */
-		@Override
-		public void valueForPathChanged(TreePath path, Object newValue) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		/**
-		 * @see javax.swing.tree.TreeModel#getIndexOfChild(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int getIndexOfChild(Object parent, Object child) {
-			// TODO Auto-generated method stub
-			return -1;
 		}
 	}
 
