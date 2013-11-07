@@ -33,5 +33,5 @@ import de.ims.icarus.search_tools.annotation.ResultAnnotation;
  *
  */
 public interface CoreferenceDocumentAnnotation extends ResultAnnotation {
-
+	// no-op
 }

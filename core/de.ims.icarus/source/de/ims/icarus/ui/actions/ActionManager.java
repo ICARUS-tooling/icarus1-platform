@@ -104,8 +104,8 @@ public class ActionManager {
 	public static final String SEPARATOR_MEDIUM = "medium"; //$NON-NLS-1$
 	public static final String SEPARATOR_WIDE = "wide"; //$NON-NLS-1$
 	
-	public static final String SMALL_SELECTED_ICON_KEY = "IcarusSmallSelectedIcon";
-	public static final String LARGE_SELECTED_ICON_KEY = "IcarusLargeSelectedIcon";
+	public static final String SMALL_SELECTED_ICON_KEY = "IcarusSmallSelectedIcon"; //$NON-NLS-1$
+	public static final String LARGE_SELECTED_ICON_KEY = "IcarusLargeSelectedIcon"; //$NON-NLS-1$
 	
 	private ResourceDomain resourceDomain;
 	private IconRegistry iconRegistry;

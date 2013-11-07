@@ -434,11 +434,11 @@ public final class CoreferenceRegistry {
 	}
 
 	public void removeListener(EventListener listener) {
-		eventSource.removeListener(listener);
+		eventSource.removeEventListener(listener);
 	}
 
 	public void removeListener(EventListener listener, String eventName) {
-		eventSource.removeListener(listener, eventName);
+		eventSource.removeEventListener(listener, eventName);
 	}
 	
 	public void documentSetChanged(CoreferenceDocumentSet documentSet) {

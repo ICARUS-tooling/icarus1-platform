@@ -342,7 +342,7 @@ public abstract class Perspective implements Identifiable {
 	 * @param listener the {@code EventListener} to be removed
 	 */
 	public void removeListener(EventListener listener) {
-		eventSource.removeListener(listener);
+		eventSource.removeEventListener(listener);
 	}
 
 	/**
@@ -355,7 +355,7 @@ public abstract class Perspective implements Identifiable {
 	 * @param eventName
 	 */
 	public void removeListener(EventListener listener, String eventName) {
-		eventSource.removeListener(listener, eventName);
+		eventSource.removeEventListener(listener, eventName);
 	}
 	
 	public final void openPerspective(Extension extension) throws Exception {
@@ -731,11 +731,11 @@ public abstract class Perspective implements Identifiable {
 	}
 	
 	void removeBroadcastListener(EventListener listener) {
-		broadcastEventSource.removeListener(listener);
+		broadcastEventSource.removeEventListener(listener);
 	}
 	
 	void removeBroadcastListener(EventListener listener, String eventName) {
-		broadcastEventSource.removeListener(listener, eventName);
+		broadcastEventSource.removeEventListener(listener, eventName);
 	}
 	
 	void fireBroadcastEvent(View source, EventObject event) {
@@ -790,7 +790,8 @@ public abstract class Perspective implements Identifiable {
 	            // Activate plug-in that declares extension
 				pluginManager.activatePlugin(extension.getDeclaringPluginDescriptor().getId());
 	            // Get plug-in class loader
-	            ClassLoader classLoader = pluginManager.getPluginClassLoader(
+	            @SuppressWarnings("resource")
+				ClassLoader classLoader = pluginManager.getPluginClassLoader(
 	                    extension.getDeclaringPluginDescriptor());
 	            // Load View class
 	            Class<?> viewCls = classLoader.loadClass(extension.getParameter("class").valueAsString()); //$NON-NLS-1$

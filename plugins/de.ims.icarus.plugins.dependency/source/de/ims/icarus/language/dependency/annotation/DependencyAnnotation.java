@@ -35,4 +35,5 @@ import de.ims.icarus.search_tools.annotation.SearchAnnotation;
  *
  */
 public interface DependencyAnnotation extends SearchAnnotation {
+	// no-op
 }

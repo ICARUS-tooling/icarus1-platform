@@ -125,12 +125,12 @@ public interface Treebank extends SentenceDataList, Identity, Loadable {
 	void addListener(String eventName, EventListener listener);
 
 	/**
-	 * @see de.ims.icarus.ui.events.EventSource#removeListener(de.ims.icarus.ui.events.EventListener)
+	 * @see de.ims.icarus.ui.events.EventSource#removeEventListener(de.ims.icarus.ui.events.EventListener)
 	 */
 	void removeListener(EventListener listener);
 
 	/**
-	 * @see de.ims.icarus.ui.events.EventSource#removeListener(de.ims.icarus.ui.events.EventListener, java.lang.String)
+	 * @see de.ims.icarus.ui.events.EventSource#removeEventListener(de.ims.icarus.ui.events.EventListener, java.lang.String)
 	 */
 	void removeListener(EventListener listener, String eventName);
 }

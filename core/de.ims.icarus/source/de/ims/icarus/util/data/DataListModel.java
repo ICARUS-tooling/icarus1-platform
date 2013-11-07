@@ -137,9 +137,11 @@ public class DataListModel<E extends Object> extends AbstractListModel<E> implem
 	private static class OwnedChangeListener implements ChangeListener {
 		
 		private final Reference<DataListModel> owner;
+		private final int hash;
 		
 		public OwnedChangeListener(DataListModel model) {
 			owner = new WeakReference<>(model);
+			hash = model.hashCode();
 		}
 
 		/**
@@ -163,6 +165,14 @@ public class DataListModel<E extends Object> extends AbstractListModel<E> implem
 				return other.owner.get()==owner.get();
 			}
 			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return hash;
 		}
 	}
 }

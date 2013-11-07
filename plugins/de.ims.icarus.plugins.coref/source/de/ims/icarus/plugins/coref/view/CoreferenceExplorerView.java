@@ -39,7 +39,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -95,13 +94,11 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	private static final Object dummyEntry = "-"; //$NON-NLS-1$
 	
 	private DocumentSetDescriptor descriptor;
-	private AllocationDescriptor allocation;
-	private AllocationDescriptor goldAllocation;
+//	private AllocationDescriptor allocation;
+//	private AllocationDescriptor goldAllocation;
 		
 	private Handler handler;
 	private CallbackHandler callbackHandler;
-	
-	private JPopupMenu popupMenu;
 	
 	private DefaultAllocationDescriptor defaultAllocationDescriptor;
 	
@@ -263,8 +260,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			Options options = new Options();
 			
 			// Fetch allocations	
-			options.put("allocation", allocation); //$NON-NLS-1$
-			options.put("goldAllocation", goldAllocation); //$NON-NLS-1$
+			options.put("allocation", getAllocation(allocationModel, false)); //$NON-NLS-1$
+			options.put("goldAllocation", getAllocation(goldAllocationModel, true)); //$NON-NLS-1$
 			
 			Message message = new Message(this, Commands.PRESENT, document, options);
 			sendRequest(CorefConstants.COREFERENCE_DOCUMENT_VIEW_ID, message);
@@ -275,6 +272,15 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			UIUtil.beep();
 			showError(e);
 		}
+	}
+	
+	private AllocationDescriptor getAllocation(AllocationListWrapper model, boolean gold) {
+		Object selectedItem = model.getSelectedItem();
+		if(selectedItem==dummyEntry || selectedItem==getDefautlAllocationDescriptor()) {
+			selectedItem = null;
+		}
+		
+		return (AllocationDescriptor) selectedItem;
 	}
 	
 	private DefaultAllocationDescriptor getDefautlAllocationDescriptor() {
@@ -333,31 +339,12 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	}
 	
 	private void refreshActions() {
-		
+		// no-op
 	}
 	
 	private void registerActionCallbacks() {
 		if(callbackHandler==null) {
 			callbackHandler = new CallbackHandler();
-		}
-	}
-	
-	private void showPopup(MouseEvent trigger) {
-		if(popupMenu==null) {
-			// Create new popup menu
-			
-			popupMenu = getDefaultActionManager().createPopupMenu(
-					"plugins.coref.coreferenceExplorerView.popupMenuList", null); //$NON-NLS-1$
-			
-			if(popupMenu!=null) {
-				popupMenu.pack();
-			} else {
-				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
-			}
-		}
-		
-		if(popupMenu!=null) {			
-			popupMenu.show(list, trigger.getX(), trigger.getY());
 		}
 	}
 	
@@ -375,13 +362,11 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
-			displaySelectedValue();
-		}
-		
-		private void maybeShowPopup(MouseEvent e) {
-			if(e.isPopupTrigger()) {
-				showPopup(e);
+			if(e.getValueIsAdjusting()) {
+				return;
 			}
+			
+			displaySelectedValue();
 		}
 
 		@Override
@@ -391,16 +376,6 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			}
 			
 			displaySelectedValue();
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e) {
-			maybeShowPopup(e);
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			maybeShowPopup(e);
 		}
 
 		/**
@@ -489,8 +464,12 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		
 		private final boolean gold;
 		
+		private Object selectedItem;
+		
 		public AllocationListWrapper(boolean gold) {
 			this.gold = gold;
+			
+			selectedItem = gold ? dummyEntry : getDefautlAllocationDescriptor();
 		}
 		
 		private boolean isEmpty() {
@@ -502,7 +481,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public int getSize() {
-			return isEmpty() ? 0 : descriptor.size() + 2;
+			int offset = gold ? 2 : 1;
+			return isEmpty() ? 0 : descriptor.size() + offset;
 		}
 
 		/**
@@ -514,11 +494,12 @@ public class CoreferenceExplorerView extends View implements Updatable {
 				return null;
 			}
 			if(index==0) {
-				return dummyEntry;
-			} else if(index==1) {
+				return gold ? dummyEntry : getDefautlAllocationDescriptor();
+			} else if(gold && index==1) {
 				return getDefautlAllocationDescriptor();
 			}
-			return descriptor.get(index-2);
+			int offset = gold ? 2 : 1;
+			return descriptor.get(index-offset);
 		}
 
 		/**
@@ -526,20 +507,15 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public void setSelectedItem(Object anItem) {
-			Object selectedObject = gold ? goldAllocation : allocation;
 			
 			if(anItem==dummyEntry) {
 				anItem = null;
 			}
 			
-			if((selectedObject!=null && !selectedObject.equals(anItem))
-					|| (selectedObject==null && anItem!=null)) {
+			if((selectedItem!=null && !selectedItem.equals(anItem))
+					|| (selectedItem==null && anItem!=null)) {
 				
-				if(gold) {
-					goldAllocation = (AllocationDescriptor) anItem;
-				} else {
-					allocation = (AllocationDescriptor) anItem;
-				}
+				selectedItem = anItem;
 				
 				fireContentsChanged(this, -1, -1);
 			}
@@ -550,11 +526,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public Object getSelectedItem() {
-			Object selectedItem = gold ? goldAllocation : allocation;
-			if(selectedItem==null) {
-				selectedItem = dummyEntry;
-			}
-			return selectedItem;
+			return selectedItem==null ? dummyEntry : selectedItem;
 		}
 		
 		/**
@@ -575,7 +547,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 
 		@Override
 		public String getName() {
-			String name = "Default Allocation"; //$NON-NLS-1$
+			String name = ResourceManager.getInstance().get(
+					"plugins.coref.labels.defaultAllocation"); //$NON-NLS-1$
 			CoreferenceAllocation allocation = getAllocation();
 			if(allocation==null || allocation.size()==0) {
 				name += " (empty)"; //$NON-NLS-1$

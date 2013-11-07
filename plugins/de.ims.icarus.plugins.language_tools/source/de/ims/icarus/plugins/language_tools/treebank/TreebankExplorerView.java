@@ -129,7 +129,7 @@ public class TreebankExplorerView extends View {
 		loadTracker = new LoadTracker();
 
 		// Create and init tree
-		treebanksTree = new JTree(new TreebankTreeModel());
+		treebanksTree = new JTree(TreebankTreeModel.getSharedInstance());
 		UIUtil.enableToolTip(treebanksTree);
 		UIUtil.enableRighClickTreeSelection(treebanksTree);
 		treebanksTree.setCellRenderer(new TreebankTreeCellRenderer());

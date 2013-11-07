@@ -43,7 +43,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -74,6 +73,7 @@ import de.ims.icarus.plugins.matetools.parser.MatetoolsPipeline.PipelineOwner;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogDispatcher;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -187,8 +187,9 @@ public class MatetoolsParserInputView extends TextInputView {
 	}
 
 	@Override
-	protected JToolBar createToolBar() {
-		Options options = new Options();
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getDefaultActionManager());
+		builder.setActionListId("plugins.matetools.matetoolsParserInputView.toolBarList"); //$NON-NLS-1$
 		
 		if(tokenizerSelect==null) {
 			Collection<Extension> availableTokenizers = LanguageManager.getAvailableTokenizers();
@@ -212,13 +213,12 @@ public class MatetoolsParserInputView extends TextInputView {
 			UIUtil.fitToContent(modelStorageSelect, 130, 200, 24);
 		}
 		
-		options.put("selectTokenizer", tokenizerSelect); //$NON-NLS-1$
-		options.put("selectModelSet", modelStorageSelect); //$NON-NLS-1$
+		builder.addOption("selectTokenizer", tokenizerSelect); //$NON-NLS-1$
+		builder.addOption("selectModelSet", modelStorageSelect); //$NON-NLS-1$
 		
 		refreshModelSelect();
 		
-		return getDefaultActionManager().createToolBar(
-				"plugins.matetools.matetoolsParserInputView.toolBarList", options); //$NON-NLS-1$
+		return builder;
 	}
 
 	@Override

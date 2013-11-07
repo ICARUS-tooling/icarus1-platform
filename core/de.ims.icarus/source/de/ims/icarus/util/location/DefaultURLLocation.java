@@ -105,4 +105,12 @@ public class DefaultURLLocation extends Location {
 		return in;
 	}
 
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return url.hashCode();
+	}
+
 }

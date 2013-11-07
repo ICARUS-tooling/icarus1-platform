@@ -89,4 +89,12 @@ public class DefaultResourceLoader implements ResourceLoader {
 		return PropertyResourceBundle.getBundle(name, locale, getLoader(), getControl());
 	}
 
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return classLoader.hashCode();
+	}
+
 }

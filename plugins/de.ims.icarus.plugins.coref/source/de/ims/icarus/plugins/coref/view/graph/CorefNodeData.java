@@ -123,4 +123,12 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 	public CorefNodeData clone() {
 		return new CorefNodeData(getSpan(), getSentence());
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return data.hashCode();
+	}
 }

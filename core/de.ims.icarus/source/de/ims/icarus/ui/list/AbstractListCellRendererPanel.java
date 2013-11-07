@@ -77,8 +77,8 @@ public abstract class AbstractListCellRendererPanel<E extends Object> extends Ab
                 && !dropLocation.isInsert()
                 && dropLocation.getIndex() == index) {
 
-            bg = UIManager.getColor("List.dropCellBackground");
-            fg = UIManager.getColor("List.dropCellForeground");
+            bg = UIManager.getColor("List.dropCellBackground"); //$NON-NLS-1$
+            fg = UIManager.getColor("List.dropCellForeground"); //$NON-NLS-1$
 
             isSelected = true;
         }
@@ -106,10 +106,10 @@ public abstract class AbstractListCellRendererPanel<E extends Object> extends Ab
         Border border = null;
         if (cellHasFocus) {
             if (isSelected) {
-                border = UIManager.getBorder("List.focusSelectedCellHighlightBorder");
+                border = UIManager.getBorder("List.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
             }
             if (border == null) {
-                border = UIManager.getBorder("List.focusCellHighlightBorder");
+                border = UIManager.getBorder("List.focusCellHighlightBorder"); //$NON-NLS-1$
             }
         } else {
             border = noFocusBorder;

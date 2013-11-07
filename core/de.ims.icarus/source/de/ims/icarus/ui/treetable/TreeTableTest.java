@@ -47,7 +47,7 @@ public class TreeTableTest extends JFrame {
 	private static final long serialVersionUID = -5874943290800612022L;
 
 	public TreeTableTest() {
-		super("Tree Table Demo");
+		super("Tree Table Demo"); //$NON-NLS-1$
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -69,59 +69,59 @@ public class TreeTableTest extends JFrame {
 
 	private static DataNode createDataStructure() {
 		List<DataNode> children1 = new ArrayList<DataNode>();
-		children1.add(new DataNode("N12", "C12", new Date(), Integer
+		children1.add(new DataNode("N12", "C12", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(50), null));
-		children1.add(new DataNode("N13", "C13", new Date(), Integer
+		children1.add(new DataNode("N13", "C13", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(60), null));
-		children1.add(new DataNode("N14", "C14", new Date(), Integer
+		children1.add(new DataNode("N14", "C14", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(70), null));
-		children1.add(new DataNode("N15", "C15", new Date(), Integer
+		children1.add(new DataNode("N15", "C15", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(80), null));
 
 		List<DataNode> children2 = new ArrayList<DataNode>();
-		children2.add(new DataNode("N12", "C12", new Date(), Integer
+		children2.add(new DataNode("N12", "C12", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(10), null));
-		children2.add(new DataNode("N13", "C13", new Date(), Integer
+		children2.add(new DataNode("N13", "C13", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(20), children1));
-		children2.add(new DataNode("N14", "C14", new Date(), Integer
+		children2.add(new DataNode("N14", "C14", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(30), null));
-		children2.add(new DataNode("N15", "C15", new Date(), Integer
+		children2.add(new DataNode("N15", "C15", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(40), null));
 
 		List<DataNode> rootNodes = new ArrayList<DataNode>();
-		rootNodes.add(new DataNode("N1", "C1", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N1", "C1", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children2));
-		rootNodes.add(new DataNode("N2", "C2", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N2", "C2", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N3", "C3", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N3", "C3", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children2));
-		rootNodes.add(new DataNode("N4", "C4", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N4", "C4", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N5", "C5", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N5", "C5", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N6", "C6", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N6", "C6", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N7", "C7", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N7", "C7", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N8", "C8", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N8", "C8", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N9", "C9", new Date(), Integer.valueOf(10),
+		rootNodes.add(new DataNode("N9", "C9", new Date(), Integer.valueOf(10), //$NON-NLS-1$ //$NON-NLS-2$
 				children1));
-		rootNodes.add(new DataNode("N10", "C10", new Date(), Integer
+		rootNodes.add(new DataNode("N10", "C10", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(10), children1));
-		rootNodes.add(new DataNode("N11", "C11", new Date(), Integer
+		rootNodes.add(new DataNode("N11", "C11", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(10), children1));
-		rootNodes.add(new DataNode("N12", "C7", new Date(),
+		rootNodes.add(new DataNode("N12", "C7", new Date(), //$NON-NLS-1$ //$NON-NLS-2$
 				Integer.valueOf(10), children1));
-		rootNodes.add(new DataNode("N13", "C8", new Date(),
+		rootNodes.add(new DataNode("N13", "C8", new Date(), //$NON-NLS-1$ //$NON-NLS-2$
 				Integer.valueOf(10), children1));
-		rootNodes.add(new DataNode("N14", "C9", new Date(),
+		rootNodes.add(new DataNode("N14", "C9", new Date(), //$NON-NLS-1$ //$NON-NLS-2$
 				Integer.valueOf(10), children1));
-		rootNodes.add(new DataNode("N15", "C10", new Date(), Integer
+		rootNodes.add(new DataNode("N15", "C10", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(10), children1));
-		rootNodes.add(new DataNode("N16", "C11", new Date(), Integer
+		rootNodes.add(new DataNode("N16", "C11", new Date(), Integer //$NON-NLS-1$ //$NON-NLS-2$
 				.valueOf(10), children1));
-		DataNode root = new DataNode("R1", "R1", new Date(),
+		DataNode root = new DataNode("R1", "R1", new Date(), //$NON-NLS-1$ //$NON-NLS-2$
 				Integer.valueOf(10), rootNodes);
 
 		return root;
@@ -145,8 +145,8 @@ public class TreeTableTest extends JFrame {
 
 	private static class DataModel extends AbstractTreeTableModel {
 		// Spalten Name.
-		static protected String[] columnNames = { "Knotentext", "String",
-				"Datum", "Integer" };
+		static protected String[] columnNames = { "Knotentext", "String", //$NON-NLS-1$ //$NON-NLS-2$
+				"Datum", "Integer" }; //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Spalten Typen.
 		static protected Class<?>[] columnTypes = { TreeTableModel.class,
@@ -193,6 +193,7 @@ public class TreeTableTest extends JFrame {
 		}
 
 		public void setValueAt(Object aValue, Object node, int column) {
+			// no-op
 		}
 	}
 

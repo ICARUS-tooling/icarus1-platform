@@ -30,7 +30,7 @@ package de.ims.icarus.ui.events;
  * @version $Id$
  *
  */
-public interface EventListener {
+public interface EventListener extends java.util.EventListener {
 
 	/**
 	 * Signals the occurrence 

@@ -134,8 +134,8 @@ public class EventSource {
 	 * it was previously registered for.
 	 * @param listener the {@code EventListener} to be removed
 	 */
-	public void removeListener(EventListener listener) {
-		removeListener(listener, null);
+	public void removeEventListener(EventListener listener) {
+		removeEventListener(listener, null);
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class EventSource {
 	 * @param listener
 	 * @param eventName
 	 */
-	public void removeListener(EventListener listener, String eventName) {
+	public void removeEventListener(EventListener listener, String eventName) {
 		if (eventListeners != null) {
 			for (int i = eventListeners.size() - 2; i > -1; i -= 2) {
 				if (eventListeners.get(i + 1) == listener

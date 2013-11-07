@@ -265,7 +265,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		//  When the TableModel changes we need to update the listeners
 		//  and column widths
 
-		if ("model".equals(e.getPropertyName()))
+		if ("model".equals(e.getPropertyName())) //$NON-NLS-1$
 		{
 			TableModel model = (TableModel)e.getOldValue();
 			model.removeTableModelListener( this );
@@ -323,13 +323,13 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 	 */
 	private void installActions()
 	{
-		installColumnAction(true,  true,  "adjustColumn",   "control ADD");
-		installColumnAction(false, true,  "adjustColumns",  "control shift ADD");
-		installColumnAction(true,  false, "restoreColumn",  "control SUBTRACT");
-		installColumnAction(false, false, "restoreColumns", "control shift SUBTRACT");
+		installColumnAction(true,  true,  "adjustColumn",   "control ADD"); //$NON-NLS-1$ //$NON-NLS-2$
+		installColumnAction(false, true,  "adjustColumns",  "control shift ADD"); //$NON-NLS-1$ //$NON-NLS-2$
+		installColumnAction(true,  false, "restoreColumn",  "control SUBTRACT"); //$NON-NLS-1$ //$NON-NLS-2$
+		installColumnAction(false, false, "restoreColumns", "control shift SUBTRACT"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		installToggleAction(true,  false, "toggleDynamic",  "control MULTIPLY");
-		installToggleAction(false, true,  "toggleLarger",   "control DIVIDE");
+		installToggleAction(true,  false, "toggleDynamic",  "control MULTIPLY"); //$NON-NLS-1$ //$NON-NLS-2$
+		installToggleAction(false, true,  "toggleLarger",   "control DIVIDE"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/*

@@ -93,6 +93,7 @@
 		<separator />
 		<item type="custom" value="annotationControl" />
 		<separator />
+		<item type="custom" value="modifiers" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
 	</action-list>
 		

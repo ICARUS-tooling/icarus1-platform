@@ -158,4 +158,12 @@ public class StaticIdentity implements Identity {
 		this.icon = icon;
 	}
 
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
 }

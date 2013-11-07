@@ -107,4 +107,12 @@ public class Range {
 	public String toString() {
 		return String.format("[%d-%d]", start, end); //$NON-NLS-1$
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return start * end;
+	}
 }

@@ -311,6 +311,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	}
 
 	protected class Handler extends MouseAdapter  {
+		// no-op
 	}
 	
 	public class CallbackHandler {

@@ -44,8 +44,11 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.util.Filter;
 
 /**
  * @author Markus Gärtner
@@ -56,7 +59,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 
 	private static final long serialVersionUID = -4650749951539233462L;
 
-	ViewFactory defaultFactory = new CoreferenceViewFactory();
+	static ViewFactory defaultFactory = new CoreferenceViewFactory();
 	
 	public CoreferenceEditorKit() {
 		// no-op
@@ -77,7 +80,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 	 * @version $Id$
 	 *
 	 */
-	public class CoreferenceViewFactory implements ViewFactory {
+	public static class CoreferenceViewFactory implements ViewFactory {
 
 		public CoreferenceViewFactory() {
 			// no-op
@@ -120,7 +123,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 	 * @version $Id$
 	 *
 	 */
-	public class CorefParagraphView extends ParagraphView {
+	public static class CorefParagraphView extends ParagraphView {
 		
 		private Rectangle currentRun = new Rectangle();
 		
@@ -151,9 +154,12 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 	}
 
 
-	public class CorefLabelView extends LabelView {
+	public static class CorefLabelView extends LabelView {
 		
 		private CorefParagraphView box;
+		
+		private Handle markupHandle = ConfigRegistry.getGlobalRegistry().getHandle(
+				"plugins.coref.appearance.text.clusterMarkup"); //$NON-NLS-1$
 		
 	    public CorefLabelView(Element elem) {
 	        super(elem);
@@ -171,9 +177,26 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 	    	return null;
 	    }
 	
+		/**
+		 * @see javax.swing.text.View#getDocument()
+		 */
+		@Override
+		public CoreferenceDocument getDocument() {
+			return (CoreferenceDocument) super.getDocument();
+		}
+
 		@Override
 		public void paint(Graphics g, Shape a) {
 			AttributeSet attr = getAttributes();
+			
+			CoreferenceDocument doc = getDocument();
+			Span span = null;
+			Filter markupFilter = doc.getMarkupFilter();
+
+			if(markupFilter!=null && attr.isDefined(CoreferenceDocument.PARAM_SPAN)) {
+				span = (Span) attr.getAttribute(CoreferenceDocument.PARAM_SPAN);
+			}
+			
 			if(attr.isDefined(CoreferenceDocument.PARAM_FILL_COLOR)) {
 				Color col = (Color) attr.getAttribute(CoreferenceDocument.PARAM_FILL_COLOR);
 				Rectangle alloc = a instanceof Rectangle ? (Rectangle)a : a.getBounds();
@@ -182,18 +205,21 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 					box = findBoxParent();
 				}
 				
-				Rectangle run = box.getCurrentRun();
-				//System.out.printf("alloc=%s run=%s\n", alloc, run);
+				if(box!=null) {
+					Rectangle run = box.getCurrentRun();
+					//System.out.printf("alloc=%s run=%s\n", alloc, run);
+					
+					int x = alloc.x;
+					int y = run.y+1;
+					int w = alloc.width;
+					int h = run.height-2;
+					
+					Color c = g.getColor();
+					g.setColor(col);
+					g.fillRect(x, y, w, h);
+					g.setColor(c);
+				}
 				
-				int x = alloc.x;
-				int y = run.y+1;
-				int w = alloc.width;
-				int h = run.height-2;
-				
-				Color c = g.getColor();
-				g.setColor(col);
-				g.fillRect(x, y, w, h);
-				g.setColor(c);
 			} else if(attr.isDefined(CoreferenceDocument.PARAM_UNDERLINE_COLOR)) {
 				Color col = (Color) attr.getAttribute(CoreferenceDocument.PARAM_UNDERLINE_COLOR);
 				Rectangle alloc = a instanceof Rectangle ? (Rectangle)a : a.getBounds();
@@ -207,9 +233,16 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 			}
 			
 			super.paint(g, a);
+
+			Color highlightColor = null;
 			
-			if(attr.isDefined(CoreferenceDocument.PARAM_HIGHLIGHT_COLOR)) {
-				Color col = (Color) attr.getAttribute(CoreferenceDocument.PARAM_HIGHLIGHT_COLOR);
+			if(span!=null && markupFilter.accepts(span)) {
+				highlightColor = ConfigRegistry.getGlobalRegistry().getColor(markupHandle);
+			} else if(attr.isDefined(CoreferenceDocument.PARAM_HIGHLIGHT_COLOR)) {
+				highlightColor = (Color) attr.getAttribute(CoreferenceDocument.PARAM_HIGHLIGHT_COLOR);
+			}
+			
+			if(highlightColor!=null) {
 				int highlight = (int) attr.getAttribute(CoreferenceDocument.PARAM_HIGHLIGHT_TYPE);
 				Rectangle alloc = a instanceof Rectangle ? (Rectangle)a : a.getBounds();
 
@@ -226,7 +259,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 				int y2 = y+run.height-1;
 				
 				Color c = g.getColor();
-				g.setColor(col);
+				g.setColor(highlightColor);
 				// Always draw horizontal lines
 				g.drawLine(x, y, x2, y);
 				g.drawLine(x, y2, x2, y2);

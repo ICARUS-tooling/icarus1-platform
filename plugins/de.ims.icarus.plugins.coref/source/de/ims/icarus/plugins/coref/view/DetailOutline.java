@@ -219,6 +219,7 @@ public class DetailOutline implements AWTPresenter {
 		
 		panel.add(textArea, BorderLayout.NORTH);
 		panel.add(scrollPane, BorderLayout.CENTER);
+		panel.setPreferredSize(new Dimension(200, 200));
 		
 		return panel;
 	}

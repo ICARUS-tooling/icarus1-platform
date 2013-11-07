@@ -36,19 +36,6 @@ import de.ims.icarus.util.location.Location;
  *
  */
 public interface AllocationReader {
-
-	public static final String BEGIN_DOCUMENT = "#begin document"; //$NON-NLS-1$
-	public static final String END_DOCUMENT = "#end document"; //$NON-NLS-1$
-
-	public static final String BEGIN_NODES = "#begin nodes"; //$NON-NLS-1$
-	public static final String END_NODES = "#end nodes"; //$NON-NLS-1$
-
-	public static final String BEGIN_EDGES = "#begin edges"; //$NON-NLS-1$
-	public static final String END_EDGES = "#end edges"; //$NON-NLS-1$
-	
-	public static final String COMMENT_PREFIX = "#"; //$NON-NLS-1$
-	
-	
 	public void init(Location location, 
 			Options options, CoreferenceDocumentSet documentSet) throws Exception;
 	

@@ -310,6 +310,7 @@ public final class PluginUtil {
 		}
 		
 		try {
+			@SuppressWarnings("resource")
 			ClassLoader classLoader = getPluginManager().getPluginClassLoader(descriptor);
 			
 			// Load resources

@@ -39,7 +39,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
-import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.undo.UndoManager;
@@ -52,6 +51,7 @@ import de.ims.icarus.search_tools.SearchGraph;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
@@ -145,7 +145,7 @@ public class DefaultQueryEditor extends QueryEditor {
 		scrollPane.setPreferredSize(new Dimension(200, 50));
 		
 		JPanel lowerPanel = new JPanel(new BorderLayout());
-		lowerPanel.add(createToolBar(), BorderLayout.NORTH);
+		lowerPanel.add(createToolBar().buildToolBar(), BorderLayout.NORTH);
 		lowerPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, 
@@ -181,9 +181,11 @@ public class DefaultQueryEditor extends QueryEditor {
 				callbackHandler, "commit"); //$NON-NLS-1$
 	}
 	
-	protected JToolBar createToolBar() {
-		return getActionManager().createToolBar(
-				"plugins.searchTools.defaultQueryEditor.toolBarList", null); //$NON-NLS-1$
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
+		builder.setActionListId("plugins.searchTools.defaultQueryEditor.toolBarList"); //$NON-NLS-1$
+		
+		return builder;
 	}
 	
 	protected CallbackHandler createCallbackHandler() {

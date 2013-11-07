@@ -171,11 +171,11 @@ public class BufferedHandler extends Handler {
 	}
 
 	public void removeListener(EventListener listener, String eventName) {
-		eventSource.removeListener(listener, eventName);
+		eventSource.removeEventListener(listener, eventName);
 	}
 
 	public void removeListener(EventListener listener) {
-		eventSource.removeListener(listener);
+		eventSource.removeEventListener(listener);
 	}
 	
 }

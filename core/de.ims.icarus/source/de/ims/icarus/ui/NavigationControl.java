@@ -53,6 +53,7 @@ import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.InternationalFormatter;
 
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
@@ -168,7 +169,7 @@ public class NavigationControl implements ListSelectionListener,
 		
 		titleLabel = new JLabel();
 		
-		toolBar = createToolBar(options);
+		toolBar = createToolBar(options).buildToolBar();
 		
 		setArrowStyle(DEFAULT_ARROW_STYLE);
 		
@@ -239,17 +240,19 @@ public class NavigationControl implements ListSelectionListener,
 		return actionManager;
 	}
 	
-	protected JToolBar createToolBar(Options options) {
-		if(options==null) {
-			options = Options.emptyOptions;
-		}
+	protected ActionComponentBuilder createToolBar(Options options) {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
+		builder.setActionListId("core.helpers.navigationControl.toolBarList"); //$NON-NLS-1$
 		
 		indexField = createIndexField();
-		options.put(CENTER_CONTENT_OPTION, indexField);
-		options.putIfAbsent(TITLE_LABEL_OPTION, titleLabel);
+		builder.addOption(CENTER_CONTENT_OPTION, indexField);
+		builder.addOption(TITLE_LABEL_OPTION, titleLabel);
 		
-		return getActionManager().createToolBar(
-				"core.helpers.navigationControl.toolBarList", options); //$NON-NLS-1$
+		if(options!=null) {
+			builder.addOptions(options);
+		}
+		
+		return builder;
 	}
 	
 	protected JFormattedTextField createIndexField() {

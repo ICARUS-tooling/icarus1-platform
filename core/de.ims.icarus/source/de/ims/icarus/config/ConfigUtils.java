@@ -440,6 +440,7 @@ public class ConfigUtils implements ConfigConstants {
 
 		@Override
 		public void setKey(String key) {
+			// no-op
 		}
 	};
 	

@@ -155,4 +155,12 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 		}
 		return name;
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return documentSet.hashCode() * (allocation==null ? 1 : allocation.hashCode());
+	}
 }

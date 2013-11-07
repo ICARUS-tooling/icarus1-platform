@@ -57,7 +57,7 @@ public abstract class AbstractTreeTableModel extends AbstractTreeModel implement
 
 	@Override
 	public void setValueAt(Object aValue, Object node, int column) {
-		throw new UnsupportedOperationException("Model is immutable!");
+		throw new UnsupportedOperationException("Model is immutable!"); //$NON-NLS-1$
 	}
 
 	/**

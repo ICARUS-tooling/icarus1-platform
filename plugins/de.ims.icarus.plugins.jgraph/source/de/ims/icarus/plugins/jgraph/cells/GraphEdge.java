@@ -31,5 +31,5 @@ package de.ims.icarus.plugins.jgraph.cells;
  *
  */
 public interface GraphEdge extends GraphCell {
-
+	// no-op
 }

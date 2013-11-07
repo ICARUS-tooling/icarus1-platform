@@ -85,6 +85,7 @@ public class CoreferencePreferences {
 		builder.addGroup("text", true); //$NON-NLS-1$
 		builder.virtual();
 		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("clusterMarkup", Color.pink.getRGB()); //$NON-NLS-1$
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.back();
 		// END TEXT SUBGROUP

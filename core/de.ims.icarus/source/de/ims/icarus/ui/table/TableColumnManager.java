@@ -84,12 +84,12 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	
 	public void registerColumn(String id, TableColumn column) {
 		if(column==null)
-			throw new NullPointerException("Invalid column");
+			throw new NullPointerException("Invalid column"); //$NON-NLS-1$
 		
 		if(columnLookup.containsKey(id))
-			throw new DuplicateIdentifierException("Column id already in use: "+id);
+			throw new DuplicateIdentifierException("Column id already in use: "+id); //$NON-NLS-1$
 		if(columnLookup.containsValue(id))
-			throw new IllegalArgumentException("Column already in use: "+id);
+			throw new IllegalArgumentException("Column already in use: "+id); //$NON-NLS-1$
 		
 		column.setIdentifier(id);
 		
@@ -99,11 +99,11 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	
 	public void unregisterColumn(String id) {
 		if(id==null)
-			throw new NullPointerException("Invalid id");
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		
 		TableColumn column = columnLookup.get(id);
 		if(column==null)
-			throw new IllegalArgumentException("Unknown column id: "+id);
+			throw new IllegalArgumentException("Unknown column id: "+id); //$NON-NLS-1$
 		
 		columnLookup.remove(id);
 		availableColumns.remove(column);
@@ -115,11 +115,11 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	
 	public TableColumn getColumn(String id) {
 		if(id==null)
-			throw new NullPointerException("Invalid id");
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		
 		TableColumn column = columnLookup.get(id);
 		if(column==null)
-			throw new IllegalArgumentException("No column registered for id: "+id);
+			throw new IllegalArgumentException("No column registered for id: "+id); //$NON-NLS-1$
 		
 		return column;
 	}
@@ -133,7 +133,7 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	 */
 	public DataSource getDataSource() {
 		if(dataSource==null)
-			throw new IllegalStateException("No data source available");
+			throw new IllegalStateException("No data source available"); //$NON-NLS-1$
 		
 		return dataSource;
 	}
@@ -143,7 +143,7 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	 */
 	public void setDataSource(DataSource dataSource) {
 		if(dataSource==null)
-			throw new NullPointerException("Invalid data source");
+			throw new NullPointerException("Invalid data source"); //$NON-NLS-1$
 		
 		if(this.dataSource==dataSource) {
 			return;
@@ -180,14 +180,14 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	
 	public void rebuild(List<String> ids) {
 		if(ids==null)
-			throw new NullPointerException("Invalid ids");
+			throw new NullPointerException("Invalid ids"); //$NON-NLS-1$
 		
 		visibleColumns.clear();
 		
 		Set<String> availableIds = columnLookup.keySet();
 		for(String id : ids) {
 			if(!availableIds.contains(id)) {
-				LoggerFactory.warning(this, "Unknown column id: "+id);
+				LoggerFactory.warning(this, "Unknown column id: "+id); //$NON-NLS-1$
 				continue;
 			}
 			
@@ -212,7 +212,7 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 		String info = (String) getDataSource().getData();
 		
 		if(info!=null && !info.isEmpty()) {
-			String[] ids = info.split(";");
+			String[] ids = info.split(";"); //$NON-NLS-1$
 			CollectionUtils.feedItems(visibleColumns, ids);
 		}
 		

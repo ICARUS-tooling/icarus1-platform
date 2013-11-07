@@ -113,7 +113,7 @@ public abstract class View implements Identifiable {
 	 * @param listener the {@code EventListener} to be removed
 	 */
 	public void removeListener(EventListener listener) {
-		eventSource.removeListener(listener);
+		eventSource.removeEventListener(listener);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public abstract class View implements Identifiable {
 	 * @param eventName
 	 */
 	public void removeListener(EventListener listener, String eventName) {
-		eventSource.removeListener(listener, eventName);
+		eventSource.removeEventListener(listener, eventName);
 	}
 
 	/**

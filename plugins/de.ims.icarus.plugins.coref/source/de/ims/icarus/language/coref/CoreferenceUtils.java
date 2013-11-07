@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,10 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
@@ -60,6 +63,11 @@ public final class CoreferenceUtils {
 
 	private CoreferenceUtils() {
 		// no-op
+	}
+	
+	public static Color getClusterMarkupColor() {
+		return ConfigRegistry.getGlobalRegistry().getColor(
+				"plugins.coref.appearance.text.clusterMarkup"); //$NON-NLS-1$
 	}
 	
 	public static final CoreferenceData emptySentence = new DefaultCoreferenceData(null, new String[0]);
@@ -291,18 +299,18 @@ public final class CoreferenceUtils {
 	public static SpanSet getGoldSpanSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
 		SpanSet spanSet = allocation==null ? null : allocation.getSpanSet(document.getId());
 		
-		if(spanSet==null) {
-			spanSet = document.getDefaultSpanSet();
-		}
+//		if(spanSet==null) {
+//			spanSet = document.getDefaultSpanSet();
+//		}
 		return spanSet;
 	}
 	
 	public static EdgeSet getGoldEdgeSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
 		EdgeSet edgeSet = allocation==null ? null : allocation.getEdgeSet(document.getId());
 		
-		if(edgeSet==null) {
-			edgeSet = document.getDefaultEdgeSet();
-		}
+//		if(edgeSet==null) {
+//			edgeSet = document.getDefaultEdgeSet();
+//		}
 		return edgeSet;
 	}
 	
@@ -493,6 +501,38 @@ public final class CoreferenceUtils {
 		
 		return sb.toString();
 		
+	}
+	
+	public static Span[] getFalsePositives(Span[] spans, Span[] goldSpans) {
+		if(goldSpans==null || spans==null) {
+			return null;
+		}
+		
+		Set<Span> lookup = CollectionUtils.asSet(spans);
+		for(Span span : goldSpans) {
+			lookup.remove(span);
+		}
+		
+		Span[] result = new Span[lookup.size()];
+		lookup.toArray(result);
+		
+		return result;
+	}
+	
+	public static Span[] getFalseNegatives(Span[] spans, Span[] goldSpans) {
+		if(goldSpans==null || spans==null) {
+			return null;
+		}
+		
+		Set<Span> lookup = CollectionUtils.asSet(goldSpans);
+		for(Span span : spans) {
+			lookup.remove(span);
+		}
+		
+		Span[] result = new Span[lookup.size()];
+		lookup.toArray(result);
+		
+		return result;
 	}
 	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {

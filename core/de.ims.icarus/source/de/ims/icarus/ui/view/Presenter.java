@@ -89,4 +89,24 @@ public interface Presenter {
 	 * {@code false}.
 	 */
 	Object getPresentedData();
+	
+	public interface TableBasedPresenter extends Presenter {
+		// marker interface
+	}
+	
+	public interface ListBasedPresenter extends Presenter {
+		// marker interface
+	}
+	
+	public interface GraphBasedPresenter extends Presenter {
+		// marker interface
+	}
+	
+	public interface TextBasedPresenter extends Presenter {
+		// marker interface
+	}
+	
+	public interface ChartBasedPresenter extends Presenter {
+		// marker interface
+	}
 }

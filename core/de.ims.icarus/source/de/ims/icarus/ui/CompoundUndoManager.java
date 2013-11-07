@@ -21,6 +21,7 @@ import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
 
 
@@ -61,7 +62,7 @@ public class CompoundUndoManager extends UndoManager implements
 	 * Add a DocumentLister before the undo is done so we can position the
 	 * Caret correctly as each edit is undone.
 	 */
-	public void undo() {
+	public synchronized void undo() {
 		textComponent.getDocument().addDocumentListener(this);
 		super.undo();
 		textComponent.getDocument().removeDocumentListener(this);
@@ -71,7 +72,7 @@ public class CompoundUndoManager extends UndoManager implements
 	 * Add a DocumentLister before the redo is done so we can position the
 	 * Caret correctly as each edit is redone.
 	 */
-	public void redo() {
+	public synchronized void redo() {
 		textComponent.getDocument().addDocumentListener(this);
 		super.redo();
 		textComponent.getDocument().removeDocumentListener(this);
@@ -201,6 +202,7 @@ public class CompoundUndoManager extends UndoManager implements
 	}
 
 	public void changedUpdate(DocumentEvent e) {
+		// no-op
 	}
 
 	@Override
@@ -283,6 +285,7 @@ public class CompoundUndoManager extends UndoManager implements
 
 				textComponent.requestFocusInWindow();
 			} catch (CannotUndoException ex) {
+				LoggerFactory.error(this, "Failed to perform undo/redo action", ex); //$NON-NLS-1$
 			}
 
 			updateState();

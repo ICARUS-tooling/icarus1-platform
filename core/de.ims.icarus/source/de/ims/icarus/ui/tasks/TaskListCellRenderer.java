@@ -183,7 +183,7 @@ public class TaskListCellRenderer extends JPanel implements
 		return this;
 	}
 	
-	private Icon getDefaultIcon() {
+	private static Icon getDefaultIcon() {
 		if(defaultIcon==null) {
 			defaultIcon = IconRegistry.getGlobalRegistry().getIcon("task_set.gif"); //$NON-NLS-1$
 		}

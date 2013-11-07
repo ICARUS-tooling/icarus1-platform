@@ -204,7 +204,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 
 	@Override
 	public int hashCode() {
-		return (sentenceIndex+1) * (beginIndex+1) * (endIndex+1);
+		return (sentenceIndex+31) * (beginIndex+31) * (endIndex+31);
 	}
 
 	/**

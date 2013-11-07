@@ -29,20 +29,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
+import de.ims.icarus.language.coref.CoreferenceData;
+import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
 
@@ -90,6 +95,13 @@ public class DefaultAllocationReader implements AllocationReader {
 	
 	@Override
 	public void readAllocation(CoreferenceAllocation allocation) throws Exception {
+		Set<String> ids = new HashSet<>();
+		boolean checkIds = false;
+		if(documentSet!=null) {
+			ids.addAll(documentSet.getDocumentIds());
+			checkIds = true;
+		}
+		
 		main : while(true) {
 			String line = skipEmptyLines();
 			if(line==null) {
@@ -102,9 +114,12 @@ public class DefaultAllocationReader implements AllocationReader {
 			int startLine = lineCount;
 			String documentId = line.substring(BEGIN_DOCUMENT.length()).trim();
 			
-			if(documentSet!=null && documentSet.getDocument(documentId)==null)
+			if(checkIds && !ids.remove(documentId))
 				throw new IllegalArgumentException(String.format(
-						"Unknown document id '%s' at line %d ", lineCount,documentId)); //$NON-NLS-1$
+						"Unknown document id '%s' at line %d ", lineCount, documentId)); //$NON-NLS-1$
+			
+			CoreferenceDocumentData document = documentSet==null ? 
+					null : documentSet.getDocument(documentId);
 			
 			// Read in properties
 			while((line=readLine())!=null) {
@@ -118,7 +133,7 @@ public class DefaultAllocationReader implements AllocationReader {
 			}
 			
 			// Read nodes
-			SpanSet spanSet = readNodes();
+			SpanSet spanSet = readNodes(document);
 			
 			// Read edges
 			EdgeSet edgeSet = readEdges(spanSet);
@@ -131,6 +146,14 @@ public class DefaultAllocationReader implements AllocationReader {
 				throw new IllegalArgumentException(String.format(
 						"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 						END_DOCUMENT, BEGIN_DOCUMENT, startLine));
+		}
+		
+		if(checkIds && !ids.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Missing allocations for documents:\n"); //$NON-NLS-1$
+			sb.append(CollectionUtils.toString(ids));
+			
+			throw new IllegalArgumentException(sb.toString());
 		}
 	}
 	
@@ -151,7 +174,7 @@ public class DefaultAllocationReader implements AllocationReader {
 		return line;
 	}
 	
-	private SpanSet readNodes() throws IOException {
+	private SpanSet readNodes(CoreferenceDocumentData document) throws IOException {
 		String line = null;
 		boolean closed = false;
 		
@@ -184,6 +207,12 @@ public class DefaultAllocationReader implements AllocationReader {
 				
 				buffer.add(span);
 				sentenceId = span.getSentenceIndex();
+				
+				if(document!=null) {
+					CoreferenceData sentence = document.get(sentenceId);
+					if(span.getBeginIndex()<0 || span.getEndIndex()>=sentence.length())
+						throw new IllegalArgumentException("Span range out of bounds: "+span); //$NON-NLS-1$
+				}
 			}
 		}
 		

@@ -63,7 +63,9 @@ public class TextRenderer {
 		if(dummyComponent==null) {
 			synchronized (TextRenderer.class) {
 				if(dummyComponent==null) {
-					dummyComponent = new Component(){};
+					dummyComponent = new Component(){
+						// no-op
+					};
 				}
 			}
 		}
@@ -266,10 +268,12 @@ public class TextRenderer {
 			height = Math.max(height, block.getHeight());
 		}
 		
+		@SuppressWarnings("unused")
 		public int getWidth() {
 			return width;
 		}
 
+		@SuppressWarnings("unused")
 		public int getHeight() {
 			return height;
 		}

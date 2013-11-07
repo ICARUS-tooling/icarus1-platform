@@ -81,7 +81,8 @@ public final class CoreferenceStyling {
 		return col;
 	}
 	
-    private static HighlightPainter applyHighlightType(HighlightType type, Style style, Color col) {
+    @SuppressWarnings("unused")
+	private static HighlightPainter applyHighlightType(HighlightType type, Style style, Color col) {
     	HighlightPainter painter = null;
     	
     	switch (type) {

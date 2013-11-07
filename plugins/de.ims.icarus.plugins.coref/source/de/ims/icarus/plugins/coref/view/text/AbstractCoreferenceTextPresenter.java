@@ -75,11 +75,15 @@ import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.coref.view.CoreferenceStyling;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
+import de.ims.icarus.ui.actions.ActionList.EntryType;
+import de.ims.icarus.ui.events.ListenerProxies;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.ui.view.AWTPresenter;
+import de.ims.icarus.ui.view.Presenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
@@ -100,8 +104,9 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, AnnotationController, Installable {
-	
+public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
+		AnnotationController, Installable, Presenter.TextBasedPresenter {
+		
 	protected JComponent contentPanel;
 	protected JTextPane textPane;
 
@@ -117,9 +122,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 	protected Handler handler;
 	
 	protected Options options;
-
-	protected CoreferenceAllocation allocation;
-	protected CoreferenceAllocation goldAllocation;
 	
 	protected CallbackHandler callbackHandler;
 	
@@ -127,6 +129,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 	
 	// Filter to be applied when the user decides to filter certain spans
 	protected Filter pendingFilter = null;
+	
+	protected JComboBox<CoreferenceDocument.DisplayMode> displayModeSelect;
 
 	protected AbstractCoreferenceTextPresenter() {
 		// no-op
@@ -172,9 +176,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 			options = Options.emptyOptions;
 		}
 		
-		allocation = (CoreferenceAllocation) options.get("allocation"); //$NON-NLS-1$
-		goldAllocation = (CoreferenceAllocation) options.get("goldAllocation"); //$NON-NLS-1$
-		
 		this.options = options.clone();	
 		setData(data);
 		
@@ -196,11 +197,11 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 	}
 	
 	public CoreferenceAllocation getAllocation() {
-		return allocation;
+		return options==null ? null : (CoreferenceAllocation)options.get("allocation"); //$NON-NLS-1$
 	}
 
 	public CoreferenceAllocation getGoldAllocation() {
-		return goldAllocation;
+		return options==null ? null : (CoreferenceAllocation)options.get("goldAllocation"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -298,8 +299,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		actionManager.setSelected(doc.isShowClusterId(), "plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isShowDocumentHeader(), "plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isForceLinebreaks(), "plugins.coref.coreferenceDocumentPresenter.toggleForceLinebreaksAction"); //$NON-NLS-1$
-		actionManager.setSelected(doc.isMarkFalseSpans(), "plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction"); //$NON-NLS-1$
-		actionManager.setSelected(doc.isShowGoldSpans(), "plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isFilterSingletons(), "plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isFilterNonHighlighted(), "plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction"); //$NON-NLS-1$
 		actionManager.setSelected(doc.isShowSentenceIndex(), "plugins.coref.coreferenceDocumentPresenter.toggleShowSentenceIndexAction"); //$NON-NLS-1$
@@ -307,6 +306,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		actionManager.setEnabled(doc.getFilter()!=null, "plugins.coref.coreferenceDocumentPresenter.clearFilterAction"); //$NON-NLS-1$
 		actionManager.setEnabled(pendingFilter!=null, "plugins.coref.coreferenceDocumentPresenter.filterSpanAction"); //$NON-NLS-1$
 		
+		CoreferenceAllocation allocation = getAllocation();
+		CoreferenceAllocation goldAllocation = getGoldAllocation();
 		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
 		actionManager.setEnabled(hasGold, 
 				"plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
@@ -323,6 +324,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 	 */
 	@Override
 	public void clear() {
+		if(!isPresenting()) {
+			return;
+		}
+		
 		options = null;
 		setData(null);
 		refresh();
@@ -359,10 +364,9 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		return (CoreferenceDocument) textPane.getDocument();
 	}
 	
-	protected String toolBarListId = "plugins.coref.coreferenceDocumentPresenter.toolBarList"; //$NON-NLS-1$
-	
-	protected JToolBar createToolBar() {
-		Options options = new Options();
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
+		builder.setActionListId("plugins.coref.coreferenceDocumentPresenter.toolBarList"); //$NON-NLS-1$
 		
 		CoreferenceDocument doc = (CoreferenceDocument)textPane.getDocument();
 		
@@ -374,14 +378,30 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		cb.setRenderer(new TooltipListCellRenderer());
 		UIUtil.fitToContent(cb, 90, 140, 24);
 		
-		options.put("selectHighlightType", cb); //$NON-NLS-1$
+		builder.addOption("selectHighlightType", cb); //$NON-NLS-1$
 		
 		AnnotationControl annotationControl = createAnnotationControl();
 		if(annotationControl!=null) {
-			options.put("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
+			builder.addOption("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
 		}
 		
-		return getActionManager().createToolBar( toolBarListId, options);
+		if(displayModeSelect==null) {
+			displayModeSelect = new JComboBox<>(CoreferenceDocument.DisplayMode.values());
+			displayModeSelect.setEditable(false);
+			displayModeSelect.addActionListener(getHandler());
+			displayModeSelect.setRenderer(TooltipListCellRenderer.getSharedInstance());
+			UIUtil.fitToContent(displayModeSelect, 60, 140, 22);
+		}
+
+		Object[] items = {
+			"plugins.coref.coreferenceDocumentPresenter.displayMode", //$NON-NLS-1$
+			displayModeSelect,
+			EntryType.SEPARATOR,
+		};
+		
+		builder.addOption("modifiers", items); //$NON-NLS-1$
+		
+		return builder;
 	}
 	
 	protected JTextPane createTextPane() {
@@ -403,6 +423,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		textPane.setEditable(false);
 		textPane.setEditorKit(CoreferenceStyling.getSharedEditorKit());
 		textPane.addMouseListener(getHandler());
+		textPane.addMouseMotionListener(getHandler());
 		textPane.addCaretListener(getHandler());
 		textPane.setBorder(UIUtil.defaultContentBorder);
 		UIUtil.disableCaretScroll(textPane);
@@ -421,7 +442,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		scrollPane.setBorder(UIUtil.topLineBorder);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
-		JToolBar toolBar = createToolBar();
+		JToolBar toolBar = createToolBar().buildToolBar();
 		if(toolBar!=null) {
 			panel.add(toolBar, BorderLayout.NORTH);
 		}
@@ -482,6 +503,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		return new SpanFilters.ClusterIdFilter(span.getClusterId());
 	}
 	
+	protected Filter createMarkupFilterForSpan(Span span) {
+		return new SpanFilters.ClusterIdFilter(span.getClusterId());
+	}
+	
 	protected void showPopup(MouseEvent trigger) {
 		if(contentPanel==null) {
 			return;
@@ -538,6 +563,9 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		CoreferenceDocument newDoc = (CoreferenceDocument) textPane.getEditorKit().createDefaultDocument();
 		
 		newDoc.copySettings(oldDoc);
+		
+		newDoc.addPropertyChangeListener("markupFilter", ListenerProxies.getProxy( //$NON-NLS-1$
+				PropertyChangeListener.class, getHandler()));
 		
 		return newDoc;
 	}
@@ -600,19 +628,26 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JComboBox<?> cb = (JComboBox<?>) e.getSource();
-			HighlightType highlightType = (HighlightType) cb.getSelectedItem();
 			
+			Object value = cb.getSelectedItem();
 			CoreferenceDocument doc = getDocument();
-			if(doc.getHighlightType()==highlightType) {
+			
+			if((value instanceof HighlightType && doc.getHighlightType()==value)
+					|| (value instanceof CoreferenceDocument.DisplayMode
+							&& doc.getDisplayMode()==value)) {
 				return;
 			}
 			
 			try {
-				doc.setHighlightType(highlightType);
+				if(value instanceof HighlightType) {
+					doc.setHighlightType((HighlightType) value);
+				} else if(value instanceof CoreferenceDocument.DisplayMode) {
+					doc.setDisplayMode((CoreferenceDocument.DisplayMode)value);
+				}
 				refresh();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to switch highlight type", ex); //$NON-NLS-1$
+						"Failed to handle choice selection: "+value, ex); //$NON-NLS-1$
 			}
 		}
 
@@ -643,7 +678,11 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 		 */
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			refresh();
+			if("markupFilter".equals(evt.getPropertyName())) { //$NON-NLS-1$
+				textPane.repaint();
+			} else {
+				refresh();
+			}
 		}
 
 		@Override
@@ -656,6 +695,18 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 			
 			Span span = offset==-1 ? null : getSpanForOffset(offset);
 			outlineProperties(span);
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseMoved(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseMoved(MouseEvent e) {
+
+			int offset = textPane.viewToModel(e.getPoint());
+			Span span = getSpanForOffset(offset);			
+			Filter markupFilter = span==null ? null : createMarkupFilterForSpan(span);
+			getDocument().setMarkupFilter(markupFilter);
 		}
 	}
 
@@ -791,46 +842,6 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter, 
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle 'floatingText' flag", e); //$NON-NLS-1$
-			}
-		}
-
-		public void toggleMarkFalseSpans(ActionEvent e) {
-			// ignore
-		}
-
-		public void toggleMarkFalseSpans(boolean b) {
-			CoreferenceDocument doc = getDocument();
-			
-			if(doc.isMarkFalseSpans()==b) {
-				return;
-			}
-			
-			try {
-				doc.setMarkFalseSpans(b);
-				AbstractCoreferenceTextPresenter.this.refresh();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to toggle 'markFalseSpans' flag", e); //$NON-NLS-1$
-			}
-		}
-
-		public void toggleShowGoldSpans(ActionEvent e) {
-			// ignore
-		}
-
-		public void toggleShowGoldSpans(boolean b) {
-			CoreferenceDocument doc = getDocument();
-			
-			if(doc.isShowGoldSpans()==b) {
-				return;
-			}
-			
-			try {
-				doc.setShowGoldSpans(b);
-				AbstractCoreferenceTextPresenter.this.refresh();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to toggle 'showGoldSpans' flag", e); //$NON-NLS-1$
 			}
 		}
 

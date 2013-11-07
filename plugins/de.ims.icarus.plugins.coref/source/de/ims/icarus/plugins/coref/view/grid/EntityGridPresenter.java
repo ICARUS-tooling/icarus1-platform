@@ -47,7 +47,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JToolBar;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -75,6 +74,7 @@ import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.list.RowHeaderList;
@@ -206,7 +206,10 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	}
 
 	@Override
-	protected JToolBar createToolBar() {
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
+		builder.setActionListId("plugins.coref.entityGridPresenter.toolBarList"); //$NON-NLS-1$
+		
 		if(patternSelect==null) {
 			String pattern = ConfigRegistry.getGlobalRegistry().getString(
 					"plugins.coref.appearance.grid.defaultLabelPattern"); //$NON-NLS-1$
@@ -243,16 +246,14 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			patternSelectInfo = label;
 		}
 		
-		Options options = new Options();
-		options.put("patternSelect", patternSelect); //$NON-NLS-1$
-		options.put("patternSelectInfo", patternSelectInfo); //$NON-NLS-1$
+		builder.addOption("patternSelect", patternSelect); //$NON-NLS-1$
+		builder.addOption("patternSelectInfo", patternSelectInfo); //$NON-NLS-1$
 		AnnotationControl annotationControl = createAnnotationControl();
 		if(annotationControl!=null) {
-			options.put("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
+			builder.addOption("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
 		}
 		
-		return getActionManager().createToolBar(
-				"plugins.coref.entityGridPresenter.toolBarList", options); //$NON-NLS-1$
+		return builder;
 	}
 	
 	protected String createPatternSelectTooltip() {
@@ -313,9 +314,9 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		scrollPane.setBorder(UIUtil.topLineBorder);
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
 		
-		JToolBar toolBar = createToolBar();
-		if(toolBar!=null) {
-			contentPanel.add(toolBar, BorderLayout.NORTH);
+		ActionComponentBuilder builder = createToolBar();
+		if(builder!=null) {
+			contentPanel.add(builder.buildToolBar(), BorderLayout.NORTH);
 		}
 		
 		registerActionCallbacks();		

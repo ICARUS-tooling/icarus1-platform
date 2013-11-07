@@ -95,15 +95,15 @@ public abstract class AbstractTreeCellRendererPanel extends AbstractRendererPane
                 && dropLocation.getChildIndex() == -1
                 && tree.getRowForPath(dropLocation.getPath()) == row) {
 
-            bg = UIManager.getColor("Tree.dropCellBackground");
-            fg = UIManager.getColor("Tree.dropCellForeground");
+            bg = UIManager.getColor("Tree.dropCellBackground"); //$NON-NLS-1$
+            fg = UIManager.getColor("Tree.dropCellForeground"); //$NON-NLS-1$
 
             selected = true;
         }
 
         if (selected) {
-            bg = (bg == null ? UIManager.getColor("Tree.selectionBackground") : bg);
-            fg = (fg == null ? UIManager.getColor("Tree.selectionForeground") : fg);
+            bg = (bg == null ? UIManager.getColor("Tree.selectionBackground") : bg); //$NON-NLS-1$
+            fg = (fg == null ? UIManager.getColor("Tree.selectionForeground") : fg); //$NON-NLS-1$
         }
         else {
             bg = tree.getBackground();
@@ -123,10 +123,10 @@ public abstract class AbstractTreeCellRendererPanel extends AbstractRendererPane
         Border border = null;
         if (hasFocus) {
             if (selected) {
-                border = UIManager.getBorder("List.focusSelectedCellHighlightBorder");
+                border = UIManager.getBorder("List.focusSelectedCellHighlightBorder"); //$NON-NLS-1$
             }
             if (border == null) {
-                border = UIManager.getBorder("List.focusCellHighlightBorder");
+                border = UIManager.getBorder("List.focusCellHighlightBorder"); //$NON-NLS-1$
             }
         } else {
             border = noFocusBorder;

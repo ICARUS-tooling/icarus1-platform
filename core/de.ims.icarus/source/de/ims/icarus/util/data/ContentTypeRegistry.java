@@ -457,11 +457,11 @@ public final class ContentTypeRegistry {
 	}
 
 	public void removeListener(EventListener listener, String eventName) {
-		eventSource.removeListener(listener, eventName);
+		eventSource.removeEventListener(listener, eventName);
 	}
 
 	public void removeListener(EventListener listener) {
-		eventSource.removeListener(listener);
+		eventSource.removeEventListener(listener);
 	}
 	
 	private void addType0(ContentType type) {

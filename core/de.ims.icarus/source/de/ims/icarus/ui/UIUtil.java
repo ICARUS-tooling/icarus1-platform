@@ -366,7 +366,7 @@ public final class UIUtil {
 		comboBox.setMaximumSize(newSize);
 	}
 	
-	private static final String HTML_TAG = "<html>";
+	private static final String HTML_TAG = "<html>"; //$NON-NLS-1$
 	
 	public static String toSwingTooltip(String tooltip) {
 		if(tooltip==null || tooltip.isEmpty()) {
@@ -382,7 +382,7 @@ public final class UIUtil {
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(convertedTooltip.length()!=tooltip.length()) {
-			tooltip = HTML_TAG+convertedTooltip; //$NON-NLS-1$
+			tooltip = HTML_TAG+convertedTooltip;
 		}
 		
 		return tooltip;
@@ -727,6 +727,8 @@ public final class UIUtil {
 
 				@Override
 				public void setBorder(Border b) {
+					// Undecorated split pane should not draw a 
+					// divider border
 				}
 			};
 		}

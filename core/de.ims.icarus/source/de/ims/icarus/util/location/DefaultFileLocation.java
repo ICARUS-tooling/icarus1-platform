@@ -27,6 +27,7 @@ package de.ims.icarus.util.location;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,11 +111,26 @@ public class DefaultFileLocation extends Location {
 	 */
 	@Override
 	public InputStream openInputStream() throws IOException {
+		if(file==null)
+			throw new IllegalStateException("No file defined"); //$NON-NLS-1$
+		if(!file.exists())
+			throw new FileNotFoundException("File not found: "+file.getAbsolutePath()); //$NON-NLS-1$
+		if(file.length()==0)
+			throw new IOException("File is empty: "+file.getAbsolutePath()); //$NON-NLS-1$
+		
 		InputStream in = new FileInputStream(file);
 		if(IOUtil.isZipSource(file.getName())) {
 			in = new GZIPInputStream(in);
 		}
 		return in;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return file.hashCode();
 	}
 
 }

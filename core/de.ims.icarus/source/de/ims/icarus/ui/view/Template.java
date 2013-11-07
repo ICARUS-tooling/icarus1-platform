@@ -494,5 +494,13 @@ public final class Template {
 		public String toString() {
 			return "wildcard: "+id; //$NON-NLS-1$
 		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return id.hashCode();
+		}
 	}
 }

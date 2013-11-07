@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.coref.registry;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,14 +131,17 @@ public class DocumentSetDescriptor implements Loadable,
 	/**
 	 * @see de.ims.icarus.io.Loadable#load()
 	 */
+	@SuppressWarnings("resource")
 	@Override
 	public void load() throws Exception {
 		if(!loading.compareAndSet(false, true))
 			throw new IllegalStateException("Loading process already started"); //$NON-NLS-1$
+
+		Reader<CoreferenceDocumentData> reader = null;
 		
 		try {
 
-			Reader<CoreferenceDocumentData> reader = createReader();
+			reader = createReader();
 			if(reader==null)
 				throw new IllegalStateException("No valid reader available"); //$NON-NLS-1$
 			
@@ -147,6 +151,15 @@ public class DocumentSetDescriptor implements Loadable,
 			
 			CoreferenceUtils.loadDocumentSet(reader, getLocation(), options, documentSet);
 		} finally {
+			
+			if(reader!=null) {
+				try {
+					reader.close();
+				} catch(IOException e) {
+					LoggerFactory.error(this, "Failed to close reader", e); //$NON-NLS-1$
+				}
+			}
+			
 			loading.set(false);
 		}
 	}

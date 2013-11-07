@@ -769,8 +769,11 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			
 			if(value instanceof CorefNodeData) {
 				Span span = ((CorefNodeData)value).getSpan();
-				CoreferenceData sentence = document.get(span.getSentenceIndex());
-				tooltip = CoreferenceUtils.getSpanTooltip(span, sentence);
+				int sentenceIndex = span.getSentenceIndex();
+				if(sentenceIndex!=-1) {
+					CoreferenceData sentence = document.get(sentenceIndex);
+					tooltip = CoreferenceUtils.getSpanTooltip(span, sentence);
+				}
 			} else if(value instanceof CorefEdgeData) {
 				tooltip = CoreferenceUtils.getEdgeTooltip(((CorefEdgeData)value).getEdge());
 			}

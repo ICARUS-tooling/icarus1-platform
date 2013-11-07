@@ -164,6 +164,7 @@ public final class Actions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			// no-op
 		}
 
 	};

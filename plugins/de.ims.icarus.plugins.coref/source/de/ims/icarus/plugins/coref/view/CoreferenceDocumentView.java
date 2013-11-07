@@ -77,6 +77,8 @@ public class CoreferenceDocumentView extends View {
 				|| Commands.DISPLAY.equals(message.getCommand())) {
 			Object data = message.getData();
 			if(data instanceof CoreferenceDocumentData) {
+				//focusView();
+				selectViewTab();
 				presenter.present(data, message.getOptions());
 				return message.successResult(this, null);
 			} else {

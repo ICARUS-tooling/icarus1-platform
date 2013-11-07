@@ -36,21 +36,15 @@ public class Options extends HashMap<String, Object> {
 	}
 
 	public Options(Options source) {
-		if(source!=null) {
-			putAll(source);
-		}
+		putAll(source);
 	}
 
 	public Options(Map<String, Object> source) {
-		if(source!=null) {
-			putAll(source);
-		}
+		putAll(source);
 	}
 
 	public Options(Object... args) {
-		if(args!=null) {
-			putAll(args);
-		}
+		putAll(args);
 	}
 	
 	@SuppressWarnings("unchecked")

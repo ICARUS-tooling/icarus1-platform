@@ -20,10 +20,18 @@
 	<action id="plugins.coref.coreferenceDocumentView.toggleShowPropertyOutlineAction"
 		name="${id}.name" desc="${id}.description" icon="properties.gif" type="toggle" />
 		
+	<!-- Toggle Context Outline -->
+	<action id="plugins.coref.coreferenceDocumentView.toggleShowContextOutlineAction"
+		name="${id}.name" desc="${id}.description" icon="icallout_obj.gif" type="toggle" />
+		
 	<!-- Open Preferences -->
 	<action id="plugins.coref.coreferenceDocumentView.openPreferencesAction"
 		template="actions.default.openPreferencesAction"
 		name="${id}.name" desc="${id}.description" />
+	
+	<!-- Show Property Dialog -->
+	<action id="plugins.coref.coreferenceDocumentView.showPropertyDialogAction"
+		name="${id}.name" desc="${id}.description" icon="container_obj.gif" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.coreferenceDocumentView.toolBarList">
@@ -35,6 +43,9 @@
 		<item type="custom" value="headerLabel" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentView.toggleShowPropertyOutlineAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentView.toggleShowContextOutlineAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceDocumentView.showPropertyDialogAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentView.refreshViewAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentView.clearViewAction" />

@@ -31,5 +31,5 @@ package de.ims.icarus.plugins.jgraph.cells;
  *
  */
 public interface GraphNode extends GraphCell {
-
+	// no-op
 }

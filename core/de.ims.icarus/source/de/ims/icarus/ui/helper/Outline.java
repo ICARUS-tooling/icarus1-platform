@@ -39,5 +39,5 @@ package de.ims.icarus.ui.helper;
  *
  */
 public interface Outline {
-
+	// no-op
 }

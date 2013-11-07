@@ -49,6 +49,7 @@ import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.coref.view.DocumentListCellRenderer;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
@@ -73,10 +74,6 @@ public class CoreferenceDocumentSetPresenter extends
 	
 	protected JPopupMenu documentFilterPopupMenu;
 		
-	public CoreferenceDocumentSetPresenter() {
-		toolBarListId = "plugins.coref.coreferenceDocumentPresenter.extendedToolBarList"; //$NON-NLS-1$
-	}
-
 	@Override
 	protected void registerActionCallbacks() {
 		super.registerActionCallbacks();
@@ -135,6 +132,18 @@ public class CoreferenceDocumentSetPresenter extends
 		}
 	}
 
+	/**
+	 * @see de.ims.icarus.plugins.coref.view.text.AbstractCoreferenceTextPresenter#createToolBar()
+	 */
+	@Override
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = super.createToolBar();
+		
+		builder.setActionListId("plugins.coref.coreferenceDocumentPresenter.extendedToolBarList"); //$NON-NLS-1$
+		
+		return builder;
+	}
+
 	@Override
 	protected Handler createHandler() {
 		return new CDSHandler();
@@ -179,7 +188,7 @@ public class CoreferenceDocumentSetPresenter extends
 		splitPane.setDividerSize(5);
 		panel.add(splitPane, BorderLayout.CENTER);
 		
-		JToolBar toolBar = createToolBar();
+		JToolBar toolBar = createToolBar().buildToolBar();
 		if(toolBar!=null) {
 			panel.add(toolBar, BorderLayout.NORTH);
 		}
@@ -199,7 +208,7 @@ public class CoreferenceDocumentSetPresenter extends
 		}
 		
 		CoreferenceDocumentData docData = documentListModel.getElementAt(index);
-		doc.appendBatchCoreferenceDocumentData(docData, allocation, goldAllocation);
+		doc.appendBatchCoreferenceDocumentData(docData, getAllocation(), getGoldAllocation());
 		
 		doc.applyBatchUpdates(0);
 		

@@ -27,16 +27,11 @@ package de.ims.icarus.xml.jaxb;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.tasks.TaskManager;
 
@@ -59,7 +54,7 @@ public abstract class JAXBGate<B extends Object> {
 	
 	public JAXBGate(File file) {
 		if(file==null)
-			throw new NullPointerException("Invalid file");
+			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		
 		this.file = file;
 	}
@@ -190,7 +185,7 @@ public abstract class JAXBGate<B extends Object> {
 			try {
 				save(buffer);
 			} catch (Exception e) {
-				LoggerFactory.error(this, "Failed to save buffer", e);
+				LoggerFactory.error(this, "Failed to save buffer", e); //$NON-NLS-1$
 			}
 			
 			scheduleUpdate();

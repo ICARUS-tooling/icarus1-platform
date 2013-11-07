@@ -289,5 +289,13 @@ public final class FrameManager {
 			}
 			return false;
 		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return id.hashCode();
+		}
 	}
 }

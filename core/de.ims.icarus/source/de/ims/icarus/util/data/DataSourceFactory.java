@@ -121,6 +121,7 @@ public final class DataSourceFactory {
 		return getConfigDataSource(null, path, listener);
 	}
 	
+	@SuppressWarnings("unused")
 	private class DelegatingDataSource extends AbstractDataSource implements ChangeListener {
 		
 		private final DataSource source;

@@ -1683,6 +1683,14 @@ public class ConfigRegistry implements ConfigConstants {
 		public ConfigRegistry getSource() {
 			return ConfigRegistry.this;
 		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return getSource().hashCode() * id.hashCode();
+		}
 	}
 	
 	public interface ValueFilter {

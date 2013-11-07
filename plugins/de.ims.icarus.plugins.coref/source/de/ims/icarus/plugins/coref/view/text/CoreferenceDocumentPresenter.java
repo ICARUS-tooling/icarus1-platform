@@ -28,6 +28,7 @@ package de.ims.icarus.plugins.coref.view.text;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
@@ -81,7 +82,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		doc.setFilter(filter);
 		
 		doc.setAnnotationManager(getAnnotationManager());
-		doc.appendBatchCoreferenceDocumentData(data, allocation, goldAllocation);
+		doc.appendBatchCoreferenceDocumentData(data, getAllocation(), getGoldAllocation());
 		
 		doc.applyBatchUpdates(0);
 		
@@ -129,6 +130,8 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		}
 		
 		protected void buildLookup() {
+			CoreferenceAllocation allocation = getAllocation();
+			
 			if(allocation==null) {
 				return;
 			}

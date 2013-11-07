@@ -152,4 +152,12 @@ public class ExtensionIdentity implements Identity {
 	public String toString() {
 		return getId();
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
 }

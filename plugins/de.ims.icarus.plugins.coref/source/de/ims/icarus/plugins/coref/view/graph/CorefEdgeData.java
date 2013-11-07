@@ -85,4 +85,12 @@ public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
 		//return getLabel();
 		return ""; //$NON-NLS-1$
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return data.hashCode();
+	}
 }

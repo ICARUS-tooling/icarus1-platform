@@ -86,7 +86,7 @@ public final class ClassProxy {
 	
 	@Override
 	public String toString() {
-		return "Proxy: "+className; //$NON-NLS-1$
+		return "ListenerProxy: "+className; //$NON-NLS-1$
 	}
 	
 	/**
@@ -130,5 +130,13 @@ public final class ClassProxy {
 	 */
 	public ClassLoader getClassLoader() {
 		return classLoader;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return classLoader.hashCode() * className.hashCode();
 	}
 }

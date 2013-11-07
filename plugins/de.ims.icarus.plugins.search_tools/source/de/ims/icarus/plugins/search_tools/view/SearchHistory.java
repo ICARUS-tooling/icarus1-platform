@@ -131,6 +131,7 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void diffWithLast() {
 		if(descriptors==null || descriptors.size()<2) {
 			return;

@@ -68,6 +68,36 @@ public final class SpanFilters {
 		public boolean accepts(Object obj) {
 			return spans==null ? true : spans.contains(obj);
 		}
+
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return spans==null ? 0 : spans.hashCode();
+		}
+
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof SpanFilter) {
+				return CollectionUtils.equals(spans, ((SpanFilter)obj).spans);
+			}
+			return false;
+		}
+
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "{SpanFilter: "+spans.toString()+"}"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	public static class ClusterIdFilter implements Filter {
@@ -84,6 +114,33 @@ public final class SpanFilters {
 		@Override
 		public boolean accepts(Object obj) {
 			return obj==null ? false : ((Span)obj).getClusterId()==clusterId;
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return clusterId;
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof ClusterIdFilter) {
+				return clusterId==((ClusterIdFilter)obj).clusterId;
+			}
+			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "{Cluster-Id Filter: "+clusterId+"}"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 	}

@@ -143,4 +143,12 @@ public class EntityGridNode {
 	public String toString() {
 		return Arrays.toString(spans);
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(spans);
+	}
 }

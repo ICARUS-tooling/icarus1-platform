@@ -850,7 +850,7 @@ public class IcarusFrame extends JFrame {
 		 */
 		@Override
 		public void removeListener(EventListener listener) {
-			getEventSource().removeListener(listener);
+			getEventSource().removeEventListener(listener);
 		}
 
 		/**
@@ -858,7 +858,7 @@ public class IcarusFrame extends JFrame {
 		 */
 		@Override
 		public void removeListener(EventListener listener, String eventName) {
-			getEventSource().removeListener(listener, eventName);
+			getEventSource().removeEventListener(listener, eventName);
 		}
 
 		/**

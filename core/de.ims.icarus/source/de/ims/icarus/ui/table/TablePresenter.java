@@ -31,9 +31,9 @@ import java.awt.Component;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JToolBar;
 
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
@@ -63,7 +63,7 @@ public abstract class TablePresenter implements AWTPresenter {
 	
 	protected abstract JTable createTable();
 	
-	protected JToolBar createToolBar() {
+	protected ActionComponentBuilder createToolBar() {
 		return null;
 	}
 	
@@ -75,9 +75,10 @@ public abstract class TablePresenter implements AWTPresenter {
 		scrollPane.setBorder(UIUtil.emptyBorder);
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
 		
-		JToolBar toolBar = createToolBar();
-		if(toolBar!=null) {
-			contentPanel.add(toolBar, BorderLayout.NORTH);
+		
+		ActionComponentBuilder builder = createToolBar();
+		if(builder!=null) {
+			contentPanel.add(builder.buildToolBar(), BorderLayout.NORTH);
 		}
 	}
 	

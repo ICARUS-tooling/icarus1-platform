@@ -202,4 +202,12 @@ public class TreebankDescriptor implements Comparable<TreebankDescriptor> {
 	public int compareTo(TreebankDescriptor other) {
 		return name.compareTo(other.name);
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 }

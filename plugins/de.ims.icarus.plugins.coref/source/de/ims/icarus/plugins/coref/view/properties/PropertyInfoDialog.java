@@ -101,7 +101,7 @@ public class PropertyInfoDialog extends JFrame {
 	protected FormBuilder formBuilder;
 	protected DefaultComboBoxModel<Object> allocationModel;
 	
-	protected static final Object dummyEntry = "-"; //$NON-NLS-1$
+	protected static final Object dummyEntry = "Default Allocation"; //$NON-NLS-1$
 	
 	protected PropertyPanel sentencePanel;
 	protected PropertyPanel spanPanel;
@@ -117,6 +117,10 @@ public class PropertyInfoDialog extends JFrame {
 	private static Reference<PropertyInfoDialog> instance;
 	
 	public static synchronized void showDialog() {
+		showDialog(null);
+	}
+	
+	public static synchronized void showDialog(Options options) {
 		PropertyInfoDialog dialog = null;
 		
 		if(instance!=null) {
@@ -129,6 +133,7 @@ public class PropertyInfoDialog extends JFrame {
 			UIUtil.centerComponent(dialog);
 		}
 		
+		dialog.setSelectedItems(options);
 		dialog.setVisible(true);
 	}
 	
@@ -170,6 +175,22 @@ public class PropertyInfoDialog extends JFrame {
 		setIconImages(Core.getIconImages());
 		
 		init();
+	}
+	
+	public void setSelectedItems(Options options) {
+		if(options==null) {
+			return;
+		}
+		
+		Object documentSet = options.get("documentSet"); //$NON-NLS-1$
+		if(documentSet instanceof DocumentSetDescriptor) {
+			formBuilder.setValue("documentSet", documentSet); //$NON-NLS-1$
+		}
+		
+		Object allocation = options.get("allocation"); //$NON-NLS-1$
+		if(allocation instanceof AllocationDescriptor) {
+			formBuilder.setValue("allocation", allocation); //$NON-NLS-1$
+		}
 	}
 	
 	protected void init() {

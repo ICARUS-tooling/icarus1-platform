@@ -54,6 +54,10 @@ public class SpanCache {
 	
 	public void cacheSpan(Span span) {
 		if(span!=null) {
+			
+			if(indexMap.containsKey(span))
+				throw new IllegalStateException("Span already cached: "+span); //$NON-NLS-1$
+			
 			counter.increment(span.getClusterId());
 			indexMap.put(span, indexMap.size());
 		}

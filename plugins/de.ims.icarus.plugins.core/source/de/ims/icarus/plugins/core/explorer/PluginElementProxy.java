@@ -94,6 +94,7 @@ public class PluginElementProxy implements Wrapper<Object> {
 			// EXTENSION
 			
 			Extension extension = (Extension) element;
+			@SuppressWarnings("resource")
 			ClassLoader classLoader = pluginManager.getPluginClassLoader(extension.getDeclaringPluginDescriptor());
 			Extension.Parameter param = extension.getParameter("resource"); //$NON-NLS-1$
 			if(param!=null) {

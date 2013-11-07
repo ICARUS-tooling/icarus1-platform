@@ -238,7 +238,7 @@ public abstract class AbstractTreeModel implements TreeModel {
 		 */
 		@Override
 		public String toString() {
-			return "root";
+			return "root"; //$NON-NLS-1$
 		}
 		
 	}

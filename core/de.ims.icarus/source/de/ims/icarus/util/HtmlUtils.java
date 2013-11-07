@@ -104,7 +104,7 @@ public final class HtmlUtils {
 	}
 	
 	public static String revertBreaks(String s) {
-		return s.replaceAll("<[bB][rR]>", "\n");
+		return s.replaceAll("<[bB][rR]>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public static abstract class HtmlBuilder {

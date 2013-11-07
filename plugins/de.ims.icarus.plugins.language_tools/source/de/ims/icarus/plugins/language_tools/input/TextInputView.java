@@ -37,6 +37,7 @@ import javax.swing.text.Document;
 
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
@@ -90,7 +91,7 @@ public class TextInputView extends View {
 		scrollPane.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		
-		toolBar = createToolBar();
+		toolBar = createToolBar().buildToolBar();
 		
 		container.setLayout(new BorderLayout());
 		container.add(toolBar, BorderLayout.NORTH);
@@ -109,9 +110,11 @@ public class TextInputView extends View {
 		// for subclasses
 	}
 	
-	protected JToolBar createToolBar() {
-		return getDefaultActionManager().createToolBar(
-				"plugins.languageTools.textInputView.toolBarList", null); //$NON-NLS-1$
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getDefaultActionManager());
+		builder.setActionListId("plugins.languageTools.textInputView.toolBarList"); //$NON-NLS-1$
+		
+		return builder;
 	}
 
 	/**

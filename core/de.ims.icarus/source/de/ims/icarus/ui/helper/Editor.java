@@ -97,7 +97,7 @@ public interface Editor<T extends Object> {
 	 * @param <T>
 	 */
 	public interface TableEditor<T extends Object> extends Editor<T> {
-		
+		// no-op
 	}
 	
 	/**
@@ -108,6 +108,6 @@ public interface Editor<T extends Object> {
 	 * @param <T>
 	 */
 	public interface GraphEditor<T extends Object> extends Editor<T> {
-		
+		// no-op
 	}
 }

@@ -119,7 +119,7 @@ public class ButtonTabComponent extends JPanel implements ChangeListener,
 
 	@Override
 	public void componentAdded(ContainerEvent e) {
-		
+		// no-op
 	}
 
 	@Override

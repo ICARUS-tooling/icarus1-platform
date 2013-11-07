@@ -257,6 +257,8 @@ public class Core {
 				if(!outFile.isFile()) {
 					outFile.createNewFile();
 				}
+				
+				@SuppressWarnings("resource")
 				PrintStream ps = new PrintStream(new FileOutputStream(outFile), 
 					true, "UTF-8"); //$NON-NLS-1$
 				
@@ -711,6 +713,12 @@ public class Core {
 					"Failed to load license file", e); //$NON-NLS-1$
 			
 			return null;
+		} finally {
+			try {
+				in.close();
+			} catch(IOException e) {
+				LoggerFactory.error(Core.class, "Failed to close input stream", e); //$NON-NLS-1$
+			}
 		}
 	}
 	
@@ -757,8 +765,13 @@ public class Core {
 		ensureResource(null, filename, path, loader);
 	}
 
+	@SuppressWarnings("resource")
 	public void ensureResource(String foldername, String filename, 
 			String path, ClassLoader loader) {
+		
+		InputStream in = null;
+		OutputStream out = null;
+		
 		try {
 			File folder = dataFolder;
 			if(foldername!=null) {
@@ -777,13 +790,29 @@ public class Core {
 			
 			System.out.println(path);
 			
-			InputStream in = loader.getResourceAsStream(path);
-			OutputStream out = new FileOutputStream(file);
+			in = loader.getResourceAsStream(path);
+			out = new FileOutputStream(file);
 			
 			IOUtil.copyStream(in, out, 4096);
 			
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to ensure resource: "+filename, e); //$NON-NLS-1$
+		} finally {
+			if(in!=null) {
+				try {
+					in.close();
+				} catch(IOException e) {
+					LoggerFactory.error(this, "Failed to clsoe input stream", e); //$NON-NLS-1$
+				}
+			}
+
+			if(out!=null) {
+				try {
+					out.close();
+				} catch(IOException e) {
+					LoggerFactory.error(this, "Failed to clsoe output stream", e); //$NON-NLS-1$
+				}
+			}
 		}
 	}
 	

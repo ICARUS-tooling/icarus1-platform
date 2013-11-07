@@ -159,4 +159,12 @@ public class ModelStorage {
 		
 		return newStorage;
 	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return language.hashCode();
+	}
 }

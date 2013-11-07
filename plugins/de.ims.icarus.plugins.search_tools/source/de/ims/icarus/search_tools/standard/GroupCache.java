@@ -55,10 +55,12 @@ public interface GroupCache {
 
 		@Override
 		public void lock() {
+			// no-op
 		}
 
 		@Override
 		public void reset() {
+			// no-op
 		}
 
 		@Override

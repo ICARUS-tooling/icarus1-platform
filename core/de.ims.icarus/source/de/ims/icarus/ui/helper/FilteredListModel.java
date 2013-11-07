@@ -176,9 +176,11 @@ public class FilteredListModel<E extends Object> extends AbstractListModel<E> {
 	private static class OwnedListDataListener implements ListDataListener {
 		
 		private final Reference<FilteredListModel> owner;
+		private final int hash;
 		
 		public OwnedListDataListener(FilteredListModel model) {
 			owner = new WeakReference<>(model);
+			hash = model.hashCode();
 		}
 		
 		@Override
@@ -230,6 +232,14 @@ public class FilteredListModel<E extends Object> extends AbstractListModel<E> {
 			} else {
 				model.intervalChanged(e.getIndex0(), e.getIndex1());
 			}
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() { 
+			return hash;
 		}
 	}
 }
