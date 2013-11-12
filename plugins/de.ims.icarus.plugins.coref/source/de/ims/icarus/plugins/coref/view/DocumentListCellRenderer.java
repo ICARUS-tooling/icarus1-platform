@@ -42,6 +42,18 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 	private static final long serialVersionUID = -7249622078036629896L;
 	
+	private static DocumentListCellRenderer sharedInstance;
+	
+	/**
+	 * @return the sharedInstance
+	 */
+	public static DocumentListCellRenderer getSharedInstance() {
+		if(sharedInstance==null) {
+			sharedInstance = new DocumentListCellRenderer();
+		}
+		return sharedInstance;
+	}
+
 	@Override
 	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected,
@@ -53,9 +65,9 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 				cellHasFocus);
 	}
 	
-	protected final StringBuilder sb = new StringBuilder(200);
-
-	protected String getTextForValue(int index, CoreferenceDocumentData docData) {
+	private static final StringBuilder sb = new StringBuilder(200);
+	
+	public static String defaultGetTextForValue(int index, CoreferenceDocumentData docData) {
 		if(docData==null) {
 			return null;
 		}
@@ -85,6 +97,10 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 		
 		sb.append(id);
 		
-		return id;
+		return sb.toString();
+	}
+
+	protected String getTextForValue(int index, CoreferenceDocumentData docData) {
+		return defaultGetTextForValue(index, docData);
 	}
 }

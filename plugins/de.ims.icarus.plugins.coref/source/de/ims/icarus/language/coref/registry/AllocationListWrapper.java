@@ -23,64 +23,65 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.ui.list;
+package de.ims.icarus.language.coref.registry;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-import javax.swing.ListModel;
-import javax.swing.event.ListDataListener;
 
 import de.ims.icarus.ui.Updatable;
 
-/**
- * @author Markus Gärtner
- * @version $Id$
- *
- */
-public class ComboBoxListWrapper<E extends Object> extends AbstractListModel<E> implements ComboBoxModel<E>, Updatable {
+public class AllocationListWrapper extends AbstractListModel<Object> 
+		implements ComboBoxModel<Object>, Updatable {
 
-	private static final long serialVersionUID = -6008214104889282059L;
+	private static final long serialVersionUID = 5697820922840356053L;
 	
-	private final ListModel<E> base;
+	private final boolean gold;
+	
 	private Object selectedItem;
-	
-	public ComboBoxListWrapper(ListModel<E> base) {
-		if(base==null)
-			throw new NullPointerException("Invalid base list model"); //$NON-NLS-1$
-		
-		this.base = base;
-	}
 
+	private DocumentSetDescriptor descriptor;
+	
+	public AllocationListWrapper(boolean gold) {
+		this.gold = gold;
+	}
+	
+	private boolean isEmpty() {
+		return descriptor==null || descriptor.size()==0;
+	}
+	
 	/**
 	 * @see javax.swing.ListModel#getSize()
 	 */
 	@Override
 	public int getSize() {
-		return base.getSize();
+		int offset = gold ? 2 : 1;
+		return isEmpty() ? 0 : descriptor.size() + offset;
 	}
 
 	/**
 	 * @see javax.swing.ListModel#getElementAt(int)
 	 */
 	@Override
-	public E getElementAt(int index) {
-		return base.getElementAt(index);
+	public Object getElementAt(int index) {
+		if(isEmpty()) {
+			return null;
+		}
+		if(index==0) {
+			return gold ? CoreferenceRegistry.dummyEntry : 
+				getDefaultAllocationDescriptor();
+		} else if(gold && index==1) {
+			return getDefaultAllocationDescriptor();
+		}
+		int offset = gold ? 2 : 1;
+		return descriptor.get(index-offset);
 	}
 
 	/**
-	 * @see javax.swing.ListModel#addListDataListener(javax.swing.event.ListDataListener)
+	 * @return
 	 */
-	@Override
-	public void addListDataListener(ListDataListener l) {
-		base.addListDataListener(l);
-	}
-
-	/**
-	 * @see javax.swing.ListModel#removeListDataListener(javax.swing.event.ListDataListener)
-	 */
-	@Override
-	public void removeListDataListener(ListDataListener l) {
-		base.removeListDataListener(l);
+	private Object getDefaultAllocationDescriptor() {
+		return CoreferenceRegistry.getInstance()
+				.getDefaultAllocationDescriptor(descriptor);
 	}
 
 	/**
@@ -89,10 +90,15 @@ public class ComboBoxListWrapper<E extends Object> extends AbstractListModel<E> 
 	@Override
 	public void setSelectedItem(Object anItem) {
 		
+		if(anItem==CoreferenceRegistry.dummyEntry) {
+			anItem = null;
+		}
+		
 		if((selectedItem!=null && !selectedItem.equals(anItem))
 				|| (selectedItem==null && anItem!=null)) {
 			
 			selectedItem = anItem;
+			
 			fireContentsChanged(this, -1, -1);
 		}
 	}
@@ -102,6 +108,11 @@ public class ComboBoxListWrapper<E extends Object> extends AbstractListModel<E> 
 	 */
 	@Override
 	public Object getSelectedItem() {
+		if(selectedItem==null) {
+			return gold ? CoreferenceRegistry.dummyEntry
+					: getDefaultAllocationDescriptor();
+		}
+		
 		return selectedItem;
 	}
 	
@@ -112,5 +123,24 @@ public class ComboBoxListWrapper<E extends Object> extends AbstractListModel<E> 
 	public boolean update() {
 		fireContentsChanged(this, 0, Math.max(0, getSize()-1));
 		return true;
+	}
+
+	/**
+	 * @return the descriptor
+	 */
+	public DocumentSetDescriptor getDescriptor() {
+		return descriptor;
+	}
+
+	/**
+	 * @param descriptor the descriptor to set
+	 */
+	public void setDescriptor(DocumentSetDescriptor descriptor) {
+		
+		this.descriptor = descriptor;
+		
+		if(selectedItem instanceof DefaultAllocationDescriptor) {
+			selectedItem = getDefaultAllocationDescriptor();
+		}
 	}
 }

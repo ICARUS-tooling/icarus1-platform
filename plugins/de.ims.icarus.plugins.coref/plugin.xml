@@ -26,7 +26,7 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
-		<library id="args4j" path="lib/args4j-20120919.jar" type="code">
+		<!--<library id="args4j" path="lib/args4j-20120919.jar" type="code">
 			<export prefix="*" />
 		</library>
 		<library id="ims-hotcoref" path="lib/ims-hotcoref-src.jar" type="code">
@@ -46,7 +46,7 @@
 		</library>
 		<library id="trove" path="lib/trove-3.0.3.jar" type="code">
 			<export prefix="*" />
-		</library>
+		</library>-->
 	</runtime>
 	
 	<!-- Extension-Points -->
@@ -147,7 +147,7 @@
 		<parameter id="preview" value="de/ims/icarus/plugins/coref/coreference-perspective-preview.jpg" />
 	</extension>
 	
-	<extension id="CoreferenceManagerView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
+	<extension id="CoreferenceManagerView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">
 		<doc>
 			<doc-text>
 				Tree style view for management of registered coreference document sets and their
@@ -163,7 +163,7 @@
 		<parameter id="priority" value="high" />
 	</extension>
 	
-	<extension id="CoreferenceExplorerView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
+	<extension id="CoreferenceExplorerView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">
 		<doc>
 			<doc-text>
 				Utility view to select a document set and assign actual allocations to it.
@@ -186,7 +186,7 @@
 		</parameter>
 	</extension>
 	
-	<extension id="CoreferenceDocumentView" plugin-id="de.ims.icarus.languageTools" point-id="LanguageToolsView">
+	<extension id="CoreferenceDocumentView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">
 		<doc>
 			<doc-text>
 				Presentation view that allows for selection of different visualization
@@ -205,6 +205,26 @@
 		<parameter id="capabilities">
 			<parameter id="clear" />
 			<parameter id="present" value="CoreferenceDocumentDataContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="ErrorAnalysisView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.coref.errorAnalysisView.identity.name" />
+		<parameter id="description" value="plugins.coref.errorAnalysisView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.ea.ErrorAnalysisView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/view/error-analysis-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="default" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
 		</parameter>
 	</extension>
 	

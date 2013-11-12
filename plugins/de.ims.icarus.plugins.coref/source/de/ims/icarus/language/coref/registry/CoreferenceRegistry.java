@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javax.swing.AbstractListModel;
@@ -102,6 +103,10 @@ public final class CoreferenceRegistry {
 	private Map<CoreferenceAllocation, AllocationDescriptor> allocationLookup;
 	
 	private DocumentSetListModel documentListModel;
+	
+	private Map<DocumentSetDescriptor, AllocationDescriptor> defaultAllocationDescriptors;
+
+	public static final Object dummyEntry = "-"; //$NON-NLS-1$
 
 	private CoreferenceRegistry() {
 		eventSource = new WeakEventSource(this);
@@ -138,6 +143,24 @@ public final class CoreferenceRegistry {
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
+	}
+	
+	public AllocationDescriptor getDefaultAllocationDescriptor(DocumentSetDescriptor descriptor) {
+		if(descriptor==null) {
+			return null;
+		}
+		
+		if(defaultAllocationDescriptors==null) {
+			defaultAllocationDescriptors = new WeakHashMap<>();
+		}
+		
+		AllocationDescriptor alloc = defaultAllocationDescriptors.get(descriptor);
+		if(alloc==null) {
+			alloc = new DefaultAllocationDescriptor(descriptor);
+			defaultAllocationDescriptors.put(descriptor, alloc);
+		}
+		
+		return alloc;
 	}
 	
 	public ListModel<DocumentSetDescriptor> getDocumentSetListModel() {

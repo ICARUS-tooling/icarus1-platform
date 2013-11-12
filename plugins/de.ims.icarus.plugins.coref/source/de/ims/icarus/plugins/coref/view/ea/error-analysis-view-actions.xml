@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		ERROR ANALYSIS VIEW
+	-->
+		
+	<!-- Toggle 'analyzeSubSet' -->
+	<action id="plugins.coref.errorAnalysisView.toggleAnalyzeSubSetAction"
+		name="${id}.name" desc="${id}.description" type="toggle" icon="XSDSimpleEnum.gif" />
+		
+	<!-- Refresh -->
+	<action id="plugins.coref.errorAnalysisView.refreshAction"
+		template="actions.default.refreshAction" />
+		
+	<!-- Select All -->
+	<action id="plugins.coref.errorAnalysisView.selectAllDocumentsAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Unselect All -->
+	<action id="plugins.coref.errorAnalysisView.unselectAllDocumentsAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Invert Selection -->
+	<action id="plugins.coref.errorAnalysisView.invertDocumentsSelectionAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Tool-Bar list -->
+	<action-list id="plugins.coref.errorAnalysisView.toolBarList">
+		<item type="action" value="plugins.coref.errorAnalysisView.toggleAnalyzeSubSetAction" />
+		<separator />
+		<item type="action" value="plugins.coref.errorAnalysisView.refreshAction" />
+	</action-list>
+		
+	<!-- Popup-Menu list -->
+	<action-list id="plugins.coref.errorAnalysisView.popupMenuList">
+		<item type="action" value="plugins.coref.errorAnalysisView.selectAllDocumentsAction" />
+		<item type="action" value="plugins.coref.errorAnalysisView.unselectAllDocumentsAction" />
+		<separator />
+		<item type="action" value="plugins.coref.errorAnalysisView.invertDocumentsSelectionAction" />
+	</action-list>
+	
+</actions>

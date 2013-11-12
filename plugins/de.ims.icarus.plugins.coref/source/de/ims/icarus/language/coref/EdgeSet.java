@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -54,7 +55,13 @@ public class EdgeSet extends CorefListMember<Edge> {
 	 * Returns a read-only view of all the edges in this {@code EdgeSet}
 	 */
 	public List<Edge> getEdges() {
-		return Collections.unmodifiableList(items);
+		List<Edge> result = items;
+		if(result==null) {
+			result = Collections.emptyList();
+		} else {
+			result = CollectionUtils.getListProxy(result);
+		}
+		return result;
 	}
 	
 	@Override

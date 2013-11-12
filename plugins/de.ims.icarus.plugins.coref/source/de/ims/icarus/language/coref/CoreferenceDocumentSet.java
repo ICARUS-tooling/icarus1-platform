@@ -25,11 +25,13 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 
@@ -60,6 +62,10 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 		}
 		
 		return result;
+	}
+	
+	public Collection<CoreferenceDocumentData> getDocuments() {
+		return CollectionUtils.getCollectionProxy(items);
 	}
 	
 	public void add(CoreferenceDocumentData data) {

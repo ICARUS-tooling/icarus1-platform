@@ -391,7 +391,7 @@ public final class ListenerProxies {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args)
 				throws Throwable {
-			// ENsure that several significant methods will be redirected
+			// Ensure that several significant methods will be redirected
 			// to this proxy object instead of its owner!
 			if(ignoredMethods.contains(method.getName())) {
 				return method.invoke(this, args);
@@ -410,7 +410,7 @@ public final class ListenerProxies {
 				
 				Object source = getSource(args);
 				if(source!=null) {
-					System.out.println("Owner dead, unregistering");
+					//System.out.println("Owner dead, unregistering"); //$NON-NLS-1$
 					tryRemoveListener(source, proxy, listenerClass);
 				}
 				

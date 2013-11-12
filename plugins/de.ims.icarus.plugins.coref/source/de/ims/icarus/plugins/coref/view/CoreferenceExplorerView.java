@@ -33,27 +33,24 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
-import javax.swing.AbstractListModel;
-import javax.swing.ComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.java.plugin.registry.Extension;
-
-import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
+import de.ims.icarus.language.coref.registry.AllocationListWrapper;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry.LoadJob;
+import de.ims.icarus.language.coref.registry.DefaultAllocationDescriptor;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
@@ -61,16 +58,17 @@ import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.Updatable;
+import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.ChoiceFormEntry;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.ui.list.ComboBoxListWrapper;
 import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.DataListModel;
-import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
@@ -87,11 +85,10 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	
 	private JLabel loadingLabel;
 	
-	private DocumentSetListWrapper documentSetModel;
+	private ComboBoxListWrapper<DocumentSetDescriptor> documentSetModel;
 	private AllocationListWrapper allocationModel;
 	private AllocationListWrapper goldAllocationModel;
 	
-	private static final Object dummyEntry = "-"; //$NON-NLS-1$
 	
 	private DocumentSetDescriptor descriptor;
 //	private AllocationDescriptor allocation;
@@ -99,8 +96,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		
 	private Handler handler;
 	private CallbackHandler callbackHandler;
-	
-	private DefaultAllocationDescriptor defaultAllocationDescriptor;
+	private JPopupMenu popupMenu;
 	
 	public CoreferenceExplorerView() {
 		// no-op
@@ -126,7 +122,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		ChoiceFormEntry entry;
 		
 		// Document-set selection
-		documentSetModel = new DocumentSetListWrapper();
+		documentSetModel = new ComboBoxListWrapper<>(
+				CoreferenceRegistry.getInstance().getDocumentSetListModel());
 		entry = new ChoiceFormEntry( 
 				"plugins.coref.labels.documentSet", documentSetModel, false); //$NON-NLS-1$
 		entry.getComboBox().addActionListener(handler);
@@ -160,6 +157,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		list = new JList<>(listModel);
 		list.setCellRenderer(new DocumentListCellRenderer());
 		list.setBorder(UIUtil.defaultContentBorder);
+		UIUtil.enableRighClickListSelection(list);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addMouseListener(handler);
 		list.addListSelectionListener(handler);
@@ -188,8 +186,12 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		}
 		
 		// Reset user selection
-		allocationModel.setSelectedItem(getDefautlAllocationDescriptor());
-		goldAllocationModel.setSelectedItem(dummyEntry);
+		documentSetModel.setSelectedItem(descriptor);
+		allocationModel.setDescriptor(descriptor);
+		goldAllocationModel.setDescriptor(descriptor);
+		allocationModel.setSelectedItem(CoreferenceRegistry.getInstance()
+				.getDefaultAllocationDescriptor(descriptor));
+		goldAllocationModel.setSelectedItem(CoreferenceRegistry.dummyEntry);
 		
 		if(descriptor!=null && !descriptor.isLoaded()) {
 			listModel.clear();
@@ -260,8 +262,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			Options options = new Options();
 			
 			// Fetch allocations	
-			options.put("allocation", getAllocation(allocationModel, false)); //$NON-NLS-1$
-			options.put("goldAllocation", getAllocation(goldAllocationModel, true)); //$NON-NLS-1$
+			options.put("allocation", getAllocation(allocationModel)); //$NON-NLS-1$
+			options.put("goldAllocation", getAllocation(goldAllocationModel)); //$NON-NLS-1$
 			
 			Message message = new Message(this, Commands.PRESENT, document, options);
 			sendRequest(CorefConstants.COREFERENCE_DOCUMENT_VIEW_ID, message);
@@ -274,24 +276,45 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		}
 	}
 	
-	private AllocationDescriptor getAllocation(AllocationListWrapper model, boolean gold) {
+	private void analyzeSelectedValue() {
+		int index = list.getSelectedIndex();
+		
+		if(index==-1) {
+			return;
+		}
+		
+		try {
+			// Fetch document
+			CoreferenceDocumentData document = listModel.getElementAt(index);
+			if(document==null) {
+				return;
+			}
+			
+			Options options = new Options();
+			
+			// Fetch allocations	
+			options.put("allocation", getAllocation(allocationModel)); //$NON-NLS-1$
+			options.put("goldAllocation", getAllocation(goldAllocationModel)); //$NON-NLS-1$
+			
+			Message message = new Message(this, Commands.PRESENT, document, options);
+			sendRequest(CorefConstants.ERROR_ANALYSIS_VIEW_ID, message);
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to forward analysis of document at index "+index, e); //$NON-NLS-1$
+			
+			UIUtil.beep();
+			showError(e);
+		}
+	}
+	
+	private AllocationDescriptor getAllocation(AllocationListWrapper model) {
 		Object selectedItem = model.getSelectedItem();
-		if(selectedItem==dummyEntry || selectedItem==getDefautlAllocationDescriptor()) {
+		if(selectedItem==CoreferenceRegistry.dummyEntry || 
+				selectedItem instanceof DefaultAllocationDescriptor) {
 			selectedItem = null;
 		}
 		
 		return (AllocationDescriptor) selectedItem;
-	}
-	
-	private DefaultAllocationDescriptor getDefautlAllocationDescriptor() {
-		if(defaultAllocationDescriptor==null) {
-			synchronized (this) {
-				if(defaultAllocationDescriptor==null) {
-					defaultAllocationDescriptor = new DefaultAllocationDescriptor();
-				}
-			}
-		}
-		return defaultAllocationDescriptor;
 	}
 	
 	@Override
@@ -339,19 +362,52 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	}
 	
 	private void refreshActions() {
-		// no-op
+		boolean hasSelection = list.getSelectedIndex()!=-1;
+		
+		ActionManager actionManager = getDefaultActionManager();
+		
+		actionManager.setEnabled(hasSelection, 
+				"plugins.coref.coreferenceExplorerView.inspectDocumentAction", //$NON-NLS-1$
+				"plugins.coref.coreferenceExplorerView.analyzeDocumentAction"); //$NON-NLS-1$
 	}
 	
 	private void registerActionCallbacks() {
 		if(callbackHandler==null) {
 			callbackHandler = new CallbackHandler();
 		}
+		
+		ActionManager actionManager = getDefaultActionManager();
+		
+		actionManager.addHandler("plugins.coref.coreferenceExplorerView.inspectDocumentAction",  //$NON-NLS-1$
+				callbackHandler, "inspectDocument"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceExplorerView.analyzeDocumentAction",  //$NON-NLS-1$
+				callbackHandler, "analyzeDocument"); //$NON-NLS-1$
 	}
 	
 	private void updateModels() {
 		documentSetModel.update();
 		allocationModel.update();
 		goldAllocationModel.update();
+	}
+
+	private void showPopup(MouseEvent e) {
+		if(popupMenu==null) {
+			// Create new popup menu
+			
+			popupMenu = getDefaultActionManager().createPopupMenu(
+					"plugins.coref.coreferenceExplorerView.popupMenuList", null); //$NON-NLS-1$
+			
+			if(popupMenu!=null) {
+				popupMenu.pack();
+			} else {
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
+			}
+		}
+		
+		if(popupMenu!=null) {
+			refreshActions();
+			popupMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 
 	private class Handler extends MouseAdapter 
@@ -383,7 +439,15 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			displaySelectedValue();
+			
+			JComboBox<?> cb = (JComboBox<?>) e.getSource();			
+			Object selectedItem = cb.getSelectedItem();
+			
+			if(selectedItem instanceof DocumentSetDescriptor) {
+				displayData((DocumentSetDescriptor) selectedItem, null);
+			} else {
+				displaySelectedValue();
+			}
 		}
 
 		/**
@@ -393,6 +457,23 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		public void invoke(Object sender, EventObject event) {
 			updateModels();
 		}
+		
+		private void maybeShowPopup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				showPopup(e);
+			}
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
 	}
 	
 	public class CallbackHandler {
@@ -400,202 +481,13 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		protected CallbackHandler() {
 			// no-op
 		}
-	}
-	
-	private class DocumentSetListWrapper extends AbstractListModel<Object> 
-			implements ComboBoxModel<Object>, Updatable {
-
-		private static final long serialVersionUID = -8374082995792875575L;
 		
-		private final ListModel<DocumentSetDescriptor> base =
-				CoreferenceRegistry.getInstance().getDocumentSetListModel();
-		
-		/**
-		 * @see javax.swing.ListModel#getSize()
-		 */
-		@Override
-		public int getSize() {
-			return base.getSize()+1;
-		}
-
-		/**
-		 * @see javax.swing.ListModel#getElementAt(int)
-		 */
-		@Override
-		public Object getElementAt(int index) {
-			return index==0 ? dummyEntry : base.getElementAt(index-1);
-		}
-
-		/**
-		 * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
-		 */
-		@Override
-		public void setSelectedItem(Object anItem) {
-			if(!(anItem instanceof DocumentSetDescriptor)) {
-				anItem = null;
-			}
-			displayData((DocumentSetDescriptor) anItem, null);
-			
-			fireContentsChanged(this, -1, -1);
-		}
-
-		/**
-		 * @see javax.swing.ComboBoxModel#getSelectedItem()
-		 */
-		@Override
-		public Object getSelectedItem() {
-			return descriptor==null ? dummyEntry : descriptor;
+		public void inspectDocument(ActionEvent e) {
+			displaySelectedValue();
 		}
 		
-		/**
-		 * @see de.ims.icarus.ui.Updatable#update()
-		 */
-		@Override
-		public boolean update() {
-			fireContentsChanged(this, 0, Math.max(0, getSize()-1));
-			return true;
-		}
-	}
-	
-	private class AllocationListWrapper extends AbstractListModel<Object> 
-			implements ComboBoxModel<Object>, Updatable {
-
-		private static final long serialVersionUID = 5697820922840356053L;
-		
-		private final boolean gold;
-		
-		private Object selectedItem;
-		
-		public AllocationListWrapper(boolean gold) {
-			this.gold = gold;
-			
-			selectedItem = gold ? dummyEntry : getDefautlAllocationDescriptor();
-		}
-		
-		private boolean isEmpty() {
-			return descriptor==null || descriptor.size()==0;
-		}
-		
-		/**
-		 * @see javax.swing.ListModel#getSize()
-		 */
-		@Override
-		public int getSize() {
-			int offset = gold ? 2 : 1;
-			return isEmpty() ? 0 : descriptor.size() + offset;
-		}
-
-		/**
-		 * @see javax.swing.ListModel#getElementAt(int)
-		 */
-		@Override
-		public Object getElementAt(int index) {
-			if(isEmpty()) {
-				return null;
-			}
-			if(index==0) {
-				return gold ? dummyEntry : getDefautlAllocationDescriptor();
-			} else if(gold && index==1) {
-				return getDefautlAllocationDescriptor();
-			}
-			int offset = gold ? 2 : 1;
-			return descriptor.get(index-offset);
-		}
-
-		/**
-		 * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
-		 */
-		@Override
-		public void setSelectedItem(Object anItem) {
-			
-			if(anItem==dummyEntry) {
-				anItem = null;
-			}
-			
-			if((selectedItem!=null && !selectedItem.equals(anItem))
-					|| (selectedItem==null && anItem!=null)) {
-				
-				selectedItem = anItem;
-				
-				fireContentsChanged(this, -1, -1);
-			}
-		}
-
-		/**
-		 * @see javax.swing.ComboBoxModel#getSelectedItem()
-		 */
-		@Override
-		public Object getSelectedItem() {
-			return selectedItem==null ? dummyEntry : selectedItem;
-		}
-		
-		/**
-		 * @see de.ims.icarus.ui.Updatable#update()
-		 */
-		@Override
-		public boolean update() {
-			fireContentsChanged(this, 0, Math.max(0, getSize()-1));
-			return true;
-		}
-	}
-	
-	private class DefaultAllocationDescriptor extends AllocationDescriptor {
-		
-		private DefaultAllocationDescriptor() {
-			super();
-		}
-
-		@Override
-		public String getName() {
-			String name = ResourceManager.getInstance().get(
-					"plugins.coref.labels.defaultAllocation"); //$NON-NLS-1$
-			CoreferenceAllocation allocation = getAllocation();
-			if(allocation==null || allocation.size()==0) {
-				name += " (empty)"; //$NON-NLS-1$
-			}
-			return name;
-		}
-
-		@Override
-		public CoreferenceAllocation getAllocation() {
-			if(descriptor==null) {
-				return null;
-			}
-			CoreferenceDocumentSet documentSet = descriptor.getDocumentSet();
-			if(documentSet==null) {
-				return null;
-			}
-			return documentSet.getDefaultAllocation();
-		}
-
-		@Override
-		public boolean isLoaded() {
-			return true;
-		}
-
-		@Override
-		public boolean isLoading() {
-			return false;
-		}
-
-		@Override
-		public void load() throws Exception {
-			// no-op
-		}
-
-		@Override
-		public Location getLocation() {
-			return null;
-		}
-
-		@Override
-		public Extension getReaderExtension() {
-			return null;
-		}
-
-		@Override
-		public void free() {
-			// no-op
+		public void analyzeDocument(ActionEvent e) {
+			analyzeSelectedValue();
 		}
 	}
 }

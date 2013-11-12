@@ -39,9 +39,13 @@ public class FilterList extends JList<Boolean> {
 	private static final long serialVersionUID = -6538597249341306029L;
 
 	public FilterList(FilterListModel model) {
+		this(model, new FilterListCellRenderer());
+	}
+
+	public FilterList(FilterListModel model, FilterListCellRenderer renderer) {
 		super(model);
 
-		setCellRenderer(new FilterListCellRenderer());
+		setCellRenderer(renderer);
 	}
 	
 	public FilterList() {

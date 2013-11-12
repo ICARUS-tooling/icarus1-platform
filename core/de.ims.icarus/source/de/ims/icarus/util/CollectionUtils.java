@@ -28,6 +28,7 @@ package de.ims.icarus.util;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+import java.util.WeakHashMap;
 
 /**
  * @author Markus Gärtner
@@ -45,9 +47,116 @@ import java.util.Stack;
  *
  */
 public final class CollectionUtils {
-
+	
+	private static Map<Class<?>, Map<Object, Object>> proxyMaps;
+	private static final Object proxyLock = new Object();
+	
 	private CollectionUtils() {
 		// no-op
+	}
+	
+	public static <E extends Object> Set<E> getSetProxy(Set<E> set) {
+		if(set==null)
+			throw new NullPointerException("Invalid set"); //$NON-NLS-1$
+		
+		synchronized (proxyLock) {
+			if(proxyMaps==null) {
+				proxyMaps = new HashMap<>();
+			}
+			
+			Map<Object, Object> proxies = proxyMaps.get(Set.class);
+			if(proxies==null) {
+				proxies = new WeakHashMap<>();
+				proxyMaps.put(Set.class, proxies);
+			}
+			
+			@SuppressWarnings("unchecked")
+			Set<E> proxy = (Set<E>) proxies.get(set);
+			if(proxy==null) {
+				proxy = Collections.unmodifiableSet(set);
+				proxies.put(set, proxy);
+			}
+			
+			return proxy;
+		}
+	}
+	
+	public static <E extends Object> Collection<E> getCollectionProxy(Collection<E> collection) {
+		if(collection==null)
+			throw new NullPointerException("Invalid collection"); //$NON-NLS-1$
+		
+		synchronized (proxyLock) {
+			if(proxyMaps==null) {
+				proxyMaps = new HashMap<>();
+			}
+			
+			Map<Object, Object> proxies = proxyMaps.get(Collection.class);
+			if(proxies==null) {
+				proxies = new WeakHashMap<>();
+				proxyMaps.put(Collection.class, proxies);
+			}
+			
+			@SuppressWarnings("unchecked")
+			Collection<E> proxy = (Collection<E>) proxies.get(collection);
+			if(proxy==null) {
+				proxy = Collections.unmodifiableCollection(collection);
+				proxies.put(collection, proxy);
+			}
+			
+			return proxy;
+		}
+	}
+	
+	public static <E extends Object> List<E> getListProxy(List<E> list) {
+		if(list==null)
+			throw new NullPointerException("Invalid list"); //$NON-NLS-1$
+		
+		synchronized (proxyLock) {
+			if(proxyMaps==null) {
+				proxyMaps = new HashMap<>();
+			}
+			
+			Map<Object, Object> proxies = proxyMaps.get(List.class);
+			if(proxies==null) {
+				proxies = new WeakHashMap<>();
+				proxyMaps.put(List.class, proxies);
+			}
+			
+			@SuppressWarnings("unchecked")
+			List<E> proxy = (List<E>) proxies.get(list);
+			if(proxy==null) {
+				proxy = Collections.unmodifiableList(list);
+				proxies.put(list, proxy);
+			}
+			
+			return proxy;
+		}
+	}
+	
+	public static <K extends Object, V extends Object> Map<K, V> getMapProxy(Map<K, V> map) {
+		if(map==null)
+			throw new NullPointerException("Invalid map"); //$NON-NLS-1$
+		
+		synchronized (proxyLock) {
+			if(proxyMaps==null) {
+				proxyMaps = new HashMap<>();
+			}
+			
+			Map<Object, Object> proxies = proxyMaps.get(Map.class);
+			if(proxies==null) {
+				proxies = new WeakHashMap<>();
+				proxyMaps.put(Map.class, proxies);
+			}
+			
+			@SuppressWarnings("unchecked")
+			Map<K, V> proxy = (Map<K, V>) proxies.get(map);
+			if(proxy==null) {
+				proxy = Collections.unmodifiableMap(map);
+				proxies.put(map, proxy);
+			}
+			
+			return proxy;
+		}
 	}
 	
 	public static boolean equals(Object o1, Object o2) {

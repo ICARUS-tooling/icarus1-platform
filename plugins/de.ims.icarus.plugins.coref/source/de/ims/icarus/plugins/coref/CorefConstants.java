@@ -47,6 +47,8 @@ public interface CorefConstants {
 			COREFERENCE_PLUGIN_ID+"@CoreferenceExplorerView"; //$NON-NLS-1$
 	public static final String COREFERENCE_DOCUMENT_VIEW_ID = 
 			COREFERENCE_PLUGIN_ID+"@CoreferenceDocumentView"; //$NON-NLS-1$
+	public static final String ERROR_ANALYSIS_VIEW_ID = 
+			COREFERENCE_PLUGIN_ID+"@ErrorAnalysisView"; //$NON-NLS-1$
 
 	// Event constants
 	public static final String DOCUMENT_EXPLORER_SELECTION_CHANGED = 

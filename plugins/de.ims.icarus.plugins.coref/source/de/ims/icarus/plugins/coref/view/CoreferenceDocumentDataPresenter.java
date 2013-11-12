@@ -520,15 +520,15 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		
 		StringBuilder sb = new StringBuilder(name);
 		sb.append(" ["); //$NON-NLS-1$
-		sb.append(getAllocastionName(options, false));
+		sb.append(getAllocationName(options, false));
 		sb.append("/"); //$NON-NLS-1$
-		sb.append(getAllocastionName(options, true));
+		sb.append(getAllocationName(options, true));
 		sb.append("]"); //$NON-NLS-1$
 		
 		return sb.toString();
 	}
 	
-	private String getAllocastionName(Options options, boolean gold) {
+	private String getAllocationName(Options options, boolean gold) {
 		String name = null;
 		
 		if(options!=null) {

@@ -170,8 +170,40 @@ public final class StringUtil {
 	
 	private static DecimalFormat decimalFormat = new DecimalFormat("#,###"); //$NON-NLS-1$
 	
-	public static synchronized String formatDecimal(int value) {
-		return decimalFormat.format(value);
+	public static String formatDecimal(int value) {
+		synchronized (decimalFormat) {
+			return decimalFormat.format(value);
+		}
+	}
+
+	private static DecimalFormat fractionDecimalFormat = new DecimalFormat("#,##0.00"); //$NON-NLS-1$
+
+	public static String formatShortenedDecimal(double value) {
+		synchronized (fractionDecimalFormat) {
+			if(value>=1_000_000_000) {
+				return fractionDecimalFormat.format(value/1_000_000_000)+'G';
+			} else if(value>=1_000_000) {
+				return fractionDecimalFormat.format(value/1_000_000)+'M';
+			} else if(value>=1_000) {
+				return fractionDecimalFormat.format(value/1_000)+'K';
+			} else {
+				return formatDecimal((int) value);
+				
+			}
+		}
+	}
+
+	public static String formatShortenedDecimal(int value) {
+		if(value>=1_000_000_000) {
+			return formatDecimal(value/1_000_000_000)+'G';
+		} else if(value>=1_000_000) {
+			return formatDecimal(value/1_000_000)+'M';
+		} else if(value>=1_000) {
+			return formatDecimal(value/1_000)+'K';
+		} else {
+			return formatDecimal(value);
+			
+		}
 	}
 	
 	public static void trim(StringBuilder sb) {

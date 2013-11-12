@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.ims.icarus.util.MutablePrimitives.MutableInteger;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -36,38 +38,38 @@ import java.util.Map;
  */
 public class Counter<E extends Object> {
 	
-	private Map<E, Integer> counts = new HashMap<>();
+	private Map<E, MutableInteger> counts = new HashMap<>();
 
 	public Counter() {
 		// no-op
 	}
 
 	public int increment(E data) {
-		Integer c = counts.get(data);
+		MutableInteger c = counts.get(data);
 		if(c==null) {
-			c = 0;
+			c = new MutableInteger();
 		}
-		c++;
+		c.increment();
 		
 		counts.put(data, c);
 		
-		return c;
+		return c.getValue();
 	}
 
 	public int decrement(E data) {
-		Integer c = counts.get(data);
-		if(c==null || c==0) 
+		MutableInteger c = counts.get(data);
+		if(c==null || c.getValue()==0) 
 			throw new IllegalStateException("Cannot decrement count for data: "+data); //$NON-NLS-1$
 
-		c--;
+		c.decrement();
 		
-		if(c==0) {
+		if(c.getValue()==0) {
 			counts.remove(data);
 		} else {
 			counts.put(data, c);
 		}
 		
-		return c;
+		return c.getValue();
 	}
 	
 	public void clear() {
@@ -75,13 +77,17 @@ public class Counter<E extends Object> {
 	}
 	
 	public int getCount(E data) {
-		Integer c = counts.get(data);
-		return c==null ? 0 : c;
+		MutableInteger c = counts.get(data);
+		return c==null ? 0 : c.getValue();
+	}
+	
+	public boolean hasCount(E data) {
+		MutableInteger c = counts.get(data);
+		return c!=null && c.getValue()>0;
 	}
 	
 	public Collection<E> getItems() {
-		// TODO make returned collection immutable?
-		return counts.keySet();
+		return CollectionUtils.getCollectionProxy(counts.keySet());
 	}
 	
 	public boolean isEmpty() {

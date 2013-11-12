@@ -85,6 +85,10 @@ public class FilterListModel extends AbstractListModel<Boolean> {
 	public Boolean getElementAt(int index) {
 		return filter==null ? false : filter.get(index);
 	}
+	
+	public boolean isSet(int index) {
+		return filter==null ? false : filter.get(index);
+	}
 
 	/**
 	 * @see javax.swing.ListModel#getSize()
