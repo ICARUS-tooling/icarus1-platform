@@ -179,6 +179,16 @@ public class SpanBuffer {
 		}
 		if(spanCount!=0)
 			throw new CorruptedStateException("Unclosed span count: "+spanCount); //$NON-NLS-1$
+		
+		//FIXME check if sorting of spans in ids list schould be re-enabled!
+//		for(int[] list : ids) {
+//			if(list==null || list.length==0 || list[0]==0) {
+//				continue;
+//			}
+//			
+////			System.out.println(Arrays.toString(list));
+//			Arrays.sort(list, 1, list[0]);
+//		}
 	}
 	
 	private int[] add(int index, int id) {

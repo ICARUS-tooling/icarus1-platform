@@ -475,7 +475,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 					ClusterAttributes attributes = attributeStack.pop();
 //					System.out.printf("attr::pop %s %s\n",attributeStack, span);
-					span = spanStack.pop();
+					//span = spanStack.pop();
 					AttributeSet attr;
 					
 					// Remove trailing whitespace characters
@@ -716,6 +716,9 @@ public class CoreferenceDocument extends BatchDocument {
 	
 	protected AttributeSet createHighlightedAttr(AttributeSet attr, Span span, Color col, int type) {
 //		System.out.printf("attr=%s span=%s col=%s type=%d\n",attr,span,col,type);
+		if(attr==null) {
+			return null;
+		}
 		
 		if(col==null && !highlightStack.isEmpty()) {
 			col = highlightStack.peek();

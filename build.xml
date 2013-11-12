@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ICARUS main build file" default="help" basedir=".">
 	<property name="app.name" value="ICARUS" />
-	<property name="app.version" value="1.0.2" />
+	<property name="app.version" value="1.0.3" />
 	
 	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />
@@ -194,9 +194,9 @@ test  - runs some tests
 		</copy>
 		<copy todir="${build.home}" file="${license.file}" />
 		
-		<copy todir="${build.home}/${app.name}">
+		<copy todir="${build.home}/${app.name}-${app.version}">
 			<fileset dir="${build.home}">
-				<exclude name="${app.name}/*" />
+				<exclude name="${app.name}-${app.version}/*" />
 				<include name="**/*"/>
 			</fileset>
 		</copy>
@@ -204,7 +204,7 @@ test  - runs some tests
 		     duplicate="fail"
 		     update="false">
 			<fileset dir="${build.home}">
-				<include name="${app.name}/**/*" />
+				<include name="${app.name}-${app.version}/**/*" />
 			</fileset>
 		</zip>
 		<delete includeemptydirs="true">
@@ -225,9 +225,9 @@ test  - runs some tests
 		</copy>
 		<copy todir="${build.home}" file="${license.file}" />
 		
-		<copy todir="${build.home}/${app.name}">
+		<copy todir="${build.home}/${app.name}-${app.version}">
 			<fileset dir="${build.home}">
-				<exclude name="${app.name}/*" />
+				<exclude name="${app.name}-${app.version}/*" />
 				<include name="**/*"/>
 			</fileset>
 		</copy>
@@ -235,7 +235,7 @@ test  - runs some tests
 		     duplicate="fail"
 		     update="false">
 			<fileset dir="${build.home}">
-				<include name="${app.name}/**/*" />
+				<include name="${app.name}-${app.version}/**/*" />
 			</fileset>
 		</zip>
 		<delete includeemptydirs="true">

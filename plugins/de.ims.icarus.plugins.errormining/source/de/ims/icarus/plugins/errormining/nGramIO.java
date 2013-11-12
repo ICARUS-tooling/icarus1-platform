@@ -43,8 +43,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import sun.security.krb5.Config;
-
 import de.ims.icarus.config.ConfigRegistry;
 
 /**
