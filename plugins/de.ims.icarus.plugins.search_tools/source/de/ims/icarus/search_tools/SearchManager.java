@@ -199,7 +199,7 @@ public final class SearchManager {
 				
 				for(Extension.Parameter param : params) {
 					ContentType entryType = ContentTypeRegistry.getInstance().getType(param.valueAsExtension());
-					if(ContentTypeRegistry.isCompatible(entryType, entryType)) {
+					if(ContentTypeRegistry.isCompatible(contentType, entryType)) {
 						compatible = true;
 						break;
 					}

@@ -374,7 +374,7 @@ public abstract class AbstractParallelSearch extends Search {
 	
 	protected int getMaxWorkerCount() {
 		int cores = ConfigRegistry.getGlobalRegistry().getInteger("plugins.searchTools.maxCores"); //$NON-NLS-1$
-		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
+		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()-1);
 		if(cores>0) {
 			cores = Math.min(cores, availableCores);
 		}
@@ -399,7 +399,7 @@ public abstract class AbstractParallelSearch extends Search {
 		// Obtain number of possible concurrent workers
 		int cores = getMaxWorkerCount();
 		
-		LoggerFactory.log(this, Level.FINE, "Executing search "+getClass().getSimpleName()+" on "+cores+" cores"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		LoggerFactory.log(this, Level.INFO, "Executing search "+getClass().getSimpleName()+" on "+cores+" cores"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		pendingWorkers = cores;
 		

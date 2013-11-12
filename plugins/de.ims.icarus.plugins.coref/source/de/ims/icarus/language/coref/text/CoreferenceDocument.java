@@ -409,7 +409,7 @@ public class CoreferenceDocument extends BatchDocument {
 					// Subscript begin index
 					if(isShowOffset()) {
 						attr = createHighlightedAttr(attributes.getSubscriptStyle(), span, highlightColor, 0);
-						appendBatchString(String.valueOf(span.getBeginIndex()+1), attr);
+						appendBatchString(String.valueOf(index+1), attr);
 					}
 					
 					attributeStack.push(attributes);
@@ -442,7 +442,7 @@ public class CoreferenceDocument extends BatchDocument {
 			}
 			
 			if(isMarkSpans() && spanBuffer.isEnd(index)) {
-				for(int i=0; i<spanBuffer.getSpanCount(index); i++) {
+				for(int i=spanBuffer.getSpanCount(index)-1; i>-1; i--) {
 					Span span = spanBuffer.getSpan(index, i);
 					if(span==null || span.getEndIndex()!=index) {
 						continue;
@@ -475,7 +475,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 					ClusterAttributes attributes = attributeStack.pop();
 //					System.out.printf("attr::pop %s %s\n",attributeStack, span);
-					//span = spanStack.pop();
+					span = spanStack.pop();
 					AttributeSet attr;
 					
 					// Remove trailing whitespace characters
@@ -484,7 +484,7 @@ public class CoreferenceDocument extends BatchDocument {
 					// Subscript end index
 					if(isShowOffset()) {
 						attr = createHighlightedAttr(attributes.getSubscriptStyle(), span, highlightColor, 0);
-						appendBatchString(String.valueOf(span.getEndIndex()+1), attr);
+						appendBatchString(String.valueOf(index+1), attr);
 					}
 					
 					// Closing bracket

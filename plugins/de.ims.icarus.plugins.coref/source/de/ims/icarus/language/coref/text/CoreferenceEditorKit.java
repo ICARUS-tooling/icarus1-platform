@@ -25,10 +25,13 @@
  */
 package de.ims.icarus.language.coref.text;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Stroke;
 
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -156,6 +159,8 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 
 	public static class CorefLabelView extends LabelView {
 		
+		private static final Stroke strokeW2 = new BasicStroke(2f);
+		
 		private CorefParagraphView box;
 		
 		private Handle markupHandle = ConfigRegistry.getGlobalRegistry().getHandle(
@@ -186,8 +191,9 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 		}
 
 		@Override
-		public void paint(Graphics g, Shape a) {
+		public void paint(Graphics graphics, Shape a) {
 			AttributeSet attr = getAttributes();
+			Graphics2D g = (Graphics2D) graphics;
 			
 			CoreferenceDocument doc = getDocument();
 			Span span = null;
@@ -259,6 +265,8 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 				int y2 = y+run.height-1;
 				
 				Color c = g.getColor();
+				Stroke stroke = g.getStroke();
+				g.setStroke(strokeW2);
 				g.setColor(highlightColor);
 				// Always draw horizontal lines
 				g.drawLine(x, y, x2, y);
@@ -271,6 +279,7 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 					g.drawLine(x2, y, x2, y2);
 				}
 				g.setColor(c);
+				g.setStroke(stroke);
 			}
 		}
 

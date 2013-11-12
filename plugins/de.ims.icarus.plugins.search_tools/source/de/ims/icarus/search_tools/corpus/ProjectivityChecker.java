@@ -155,7 +155,7 @@ public class ProjectivityChecker {
 		 * 	2. 	Mark start and end index of edge in bounds array
 		 * 		plus direction of edge (ltr vs. rtl)
 		 *		
-		 * 
+		 * TODO
 		 */
 		
 		// Populate bounds array

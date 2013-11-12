@@ -27,11 +27,11 @@ package de.ims.icarus.search_tools;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 
 
@@ -69,8 +69,6 @@ public abstract class SearchOperator implements Serializable {
 	public abstract String getDescription();
 	
 	private static Map<String, SearchOperator> available = new LinkedHashMap<>();
-	private static Set<String> symbols = Collections.unmodifiableSet(available.keySet());
-	private static Collection<SearchOperator> operators = Collections.unmodifiableCollection(available.values());
 	
 	public static void register(SearchOperator operator) {
 		if(operator==null)
@@ -86,14 +84,15 @@ public abstract class SearchOperator implements Serializable {
 	}
 	
 	public static Set<String> symbols() {
-		return symbols;
+		return CollectionUtils.getSetProxy(available.keySet());
 	}
 	
 	public static Collection<SearchOperator> operators() {
-		return operators;
+		return CollectionUtils.getCollectionProxy(available.values());
 	}
 	
 	public static SearchOperator[] values() {
-		return operators.toArray(new SearchOperator[0]);
+		SearchOperator[] result = new SearchOperator[available.size()];
+		return available.values().toArray(result);
 	}
 }

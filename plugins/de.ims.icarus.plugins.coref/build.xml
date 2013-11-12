@@ -49,12 +49,13 @@ Use top-level project build file to build application.
 		<jar jarfile="${plugin.home}/${plugin.id}.jar" basedir="${basedir}/classes" 
 			index="true" />
 
-		<mkdir dir="${plugin.home}/lib" />
+		<!-- TODO add libs later when they are actually needed! -->
+		<!--<mkdir dir="${plugin.home}/lib" />
 		<copy todir="${plugin.home}/lib">
 			<fileset dir="${basedir}/lib"
 			         includes="**/*"
 			         excludes="**/.*" />
-		</copy>
+		</copy>-->
 	</target>
 
 	<target name="docs">
