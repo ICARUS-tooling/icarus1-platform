@@ -164,14 +164,24 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 	
 		int[] hitArray = hit.getIndices();
 		
-		System.out.println("HitArray " + hitArray[0] + " " //$NON-NLS-1$ //$NON-NLS-2$
-							+ hitArray[1] + " " //$NON-NLS-1$
-							+ hitArray[2]);
+		
+		//Debug print hitarray, inside the array all informations need for highlight
+//		System.out.println("HitArray " + hitArray[0] + " " //$NON-NLS-1$ //$NON-NLS-2$
+//							+ hitArray[1] + " " //$NON-NLS-1$
+//							+ hitArray[2]);
 
 		
 		int start = hitArray[0];
 		int end = hitArray[1];
 		int nuclei = hitArray[2];
+		
+		
+		// used when highlight dependency result
+		int sourceNode = 0;
+		//dependency hit consists of target(nucleus) and sourceNode information
+		if (hit.getIndexCount() == 4){
+			sourceNode = hitArray[3];
+		}
 		
 		//only nuclei
 		if(end == start){
@@ -180,7 +190,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 		} else {
 			for(int i = start-1; i < end; i++){
 				long highlight = 0L;
-				if (i == nuclei-1){
+				if (i == nuclei-1 || i == sourceNode-1){
 					//nuclei
 					highlight = nucleiHighlight;
 				} else {
@@ -295,7 +305,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 		public LazyNGramAnnotation(Object data, ResultEntry entry) {
 			super(data, entry);
 			
-			System.out.println("AnnoCount: " +LazyNGramAnnotation.this.getAnnotationCount());
+			//System.out.println("AnnoCount: " +LazyNGramAnnotation.this.getAnnotationCount());
 
 		}
 

@@ -41,7 +41,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-class DetailedNGramSentenceDataList implements SentenceDataList {
+public class DetailedNGramSentenceDataList implements SentenceDataList {
 
 	protected List<SentenceData> sdl;
 	

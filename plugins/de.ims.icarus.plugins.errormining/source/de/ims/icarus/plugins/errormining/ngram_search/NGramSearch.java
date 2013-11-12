@@ -39,6 +39,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
 import de.ims.icarus.plugins.errormining.DependencySentenceInfo;
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
+import de.ims.icarus.plugins.errormining.NGramData;
 import de.ims.icarus.plugins.errormining.NGramQAttributes;
 import de.ims.icarus.plugins.errormining.NGrams;
 import de.ims.icarus.plugins.errormining.NGramsDependency;
@@ -46,6 +47,7 @@ import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.plugins.errormining.annotation.NGramHighlighting;
 import de.ims.icarus.plugins.errormining.annotation.NGramResultAnnotator;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
+import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchNode;
@@ -53,6 +55,7 @@ import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
 import de.ims.icarus.search_tools.result.AbstractSearchResult;
+import de.ims.icarus.search_tools.result.DefaultSearchResult0D;
 import de.ims.icarus.search_tools.result.EntryBuilder;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.standard.AbstractParallelSearch;
@@ -144,8 +147,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 	 */
 	@Override
 	protected SearchResult createResult() {
-		List<SearchConstraint> tmp = Collections.emptyList();
-		SearchResult result = createResult(tmp);
+		SearchResult result = new NGramSearchResult(this);
 		
 		
 		ResultAnnotator annotator = createAnnotator();
@@ -451,9 +453,9 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 			 */
 			@Override
 			protected void cleanup() {
-				System.out.println("Matches: " + result.getTotalMatchCount());
-				System.out.println("Hits: " + result.getTotalHitCount());
-				System.out.println(result.getAnnotationType());
+//				System.out.println("Matches: " + result.getTotalMatchCount());
+//				System.out.println("Hits: " + result.getTotalHitCount());
+//				System.out.println(result.getAnnotationType());
 				
 			}
 			
@@ -647,10 +649,10 @@ protected class NGramWorker extends Worker{
 		 */
 		@Override
 		protected void cleanup() {
-			System.out.println("Matches: " + result.getTotalMatchCount());
-			System.out.println("Hits: " + result.getTotalHitCount());
-			System.out.println(result.getAnnotationType());
-			System.out.println(result.getContentType());
+//			System.out.println("Matches: " + result.getTotalMatchCount());
+//			System.out.println("Hits: " + result.getTotalHitCount());
+//			System.out.println(result.getAnnotationType());
+//			System.out.println(result.getContentType());
 		}
 		
 	}
@@ -694,5 +696,25 @@ protected class NGramWorker extends Worker{
 //		}
 		
 		return newHit;
+	}
+	
+	private static class NGramSearchResult extends DefaultSearchResult0D {
+
+		/**
+		 * @param search
+		 */
+		public NGramSearchResult(Search search) {
+			super(search);
+			// TODO Auto-generated constructor stub
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.result.AbstractSearchResult#getContentType()
+		 */
+		@Override
+		public ContentType getContentType() {
+			return ContentTypeRegistry.getInstance().getTypeForClass(NGramData.class);
+		}
+		
 	}
 }

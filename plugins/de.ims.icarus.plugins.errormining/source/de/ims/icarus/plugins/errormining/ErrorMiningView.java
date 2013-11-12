@@ -123,7 +123,7 @@ public class ErrorMiningView extends View {
 	protected JList<SearchDescriptor> searchHistoryList;
 	protected SearchHistory searchHistory;
 	
-	protected NGramEditor currentNGramEditor;
+	protected SearchEditor currentNGramEditor;
 
 	protected Handler handler;
 	
@@ -166,10 +166,9 @@ public class ErrorMiningView extends View {
 				"plugins.errorMining.errorMiningView.toolBarList", options); //$NON-NLS-1$
 			
 		//current NGram Editor
-		currentNGramEditor = new NGramEditor();
+		currentNGramEditor = new SearchEditor();
 		// Set initially empty NGram
-		currentNGramEditor.setEditingItem(newDescriptor());
-		
+		currentNGramEditor.setEditingItem(newDescriptor());		
 		
 		JPanel editorPanel = new JPanel(new BorderLayout());
 		editorPanel.add(toolBar, BorderLayout.NORTH);
@@ -202,30 +201,7 @@ public class ErrorMiningView extends View {
 		container.setLayout(new BorderLayout());
 		container.add(editorPanel, BorderLayout.NORTH);
 		container.add(historyPanel, BorderLayout.CENTER);
-				
-		
-		// History
-//		ngramHistoryTreeModel = new NGramHistoryTreeModel();
-//		ngramHistoryTree = new JTree(ngramHistoryTreeModel);
-//		ngramHistoryTree.setEditable(false);
-//		ngramHistoryTree.setRootVisible(false);
-//		ngramHistoryTree.setShowsRootHandles(true);
-//		ngramHistoryTree.addTreeSelectionListener(handler);
-//		ngramHistoryTree.setCellRenderer(new NGramHistoryTreeCellRenderer());
-//		JScrollPane scrollPane = new JScrollPane(ngramHistoryTree);
-//		scrollPane.setBorder(UIUtil.topLineBorder);
-//		UIUtil.defaultSetUnitIncrement(scrollPane);
-		
-		
-//		JPanel contentPanel = new JPanel(new BorderLayout());
-//		contentPanel.add(currentNGramEditor.getEditorComponent(), BorderLayout.NORTH);
-//		contentPanel.add(scrollPane, BorderLayout.CENTER);
-//		
-//		container.setLayout(new BorderLayout());
-//		container.add(createToolBar(), BorderLayout.NORTH);
-//		container.add(contentPanel, BorderLayout.CENTER);
-		
-		
+						
 		registerActionCallbacks();
 
 		refreshActions();
@@ -481,58 +457,58 @@ public class ErrorMiningView extends View {
 		
 		public void executeNGram(ActionEvent e) {
 
-//			if(currentNGramEditor.getEditingItem()==null) {
-//				return;
-//			}
-//			
-//			try {
-//				
-//				syncEditorViews();
-//				SearchDescriptor descriptor = currentNGramEditor.getEditingItem();
-//				
-//				/*
-//				SearchDescriptor updatedDescriptor = currentNGramEditor.getEditingItem();
-//				if(updatedDescriptor!=null && updatedDescriptor!=descriptor) {
-//					descriptor.setQuery(updatedDescriptor.getQuery());
-//				}
-//				*/
-//				
-//				Search search = descriptor.getSearch();
-//				if(search!=null && search.isRunning()) {
-//					UIUtil.beep();
-//					return;
-//				}
-//				
-//				// Generate query
-//
-//				System.out.println("Search " + descriptor.getSearch()); //$NON-NLS-1$
-//				System.out.println("SFactory " + descriptor.getSearchFactory()); //$NON-NLS-1$
-//				System.out.println("Target " + descriptor.getTarget()); //$NON-NLS-1$
-//				System.out.println("Query " + descriptor.getQuery()); //$NON-NLS-1$
-//				System.out.println("Parameter " + descriptor.getParameters()); //$NON-NLS-1$
-//
-//				// Create a new descriptor without a search object
-//				SearchDescriptor clone = descriptor.cloneShallow();
-//				// Let factory create a blank new search object
-//				if(!clone.createSearch()) {
-//					return;
-//				}
-//				currentNGramEditor.setEditingItem(descriptor.clone());
-//				
-//				searchHistory.addSearch(clone);
-//				//SearchManager.getInstance().executeSearch(clone.getSearch());
-//				
-//				refreshActions();
-//				
-//				System.out.println("Finished NGRAM");
-//				
-//			} catch(Exception ex) {
-//				LoggerFactory.log(this, Level.SEVERE, 
-//						"Failed to execute search", ex); //$NON-NLS-1$
-//				UIUtil.beep();
-//				
-//				showError(ex);
-//			}
+			if(currentNGramEditor.getEditingItem()==null) {
+				return;
+			}
+			
+			try {
+				
+				syncEditorViews();
+				SearchDescriptor descriptor = currentNGramEditor.getEditingItem();
+				
+				/*
+				SearchDescriptor updatedDescriptor = currentNGramEditor.getEditingItem();
+				if(updatedDescriptor!=null && updatedDescriptor!=descriptor) {
+					descriptor.setQuery(updatedDescriptor.getQuery());
+				}
+				*/
+				
+				Search search = descriptor.getSearch();
+				if(search!=null && search.isRunning()) {
+					UIUtil.beep();
+					return;
+				}
+				
+				// Generate query
+
+				System.out.println("Search " + descriptor.getSearch()); //$NON-NLS-1$
+				System.out.println("SFactory " + descriptor.getSearchFactory()); //$NON-NLS-1$
+				System.out.println("Target " + descriptor.getTarget()); //$NON-NLS-1$
+				System.out.println("Query " + descriptor.getQuery()); //$NON-NLS-1$
+				System.out.println("Parameter " + descriptor.getParameters()); //$NON-NLS-1$
+
+				// Create a new descriptor without a search object
+				SearchDescriptor clone = descriptor.cloneShallow();
+				// Let factory create a blank new search object
+				if(!clone.createSearch()) {
+					return;
+				}
+				currentNGramEditor.setEditingItem(descriptor.clone());
+				
+				searchHistory.addSearch(clone);
+				SearchManager.getInstance().executeSearch(clone.getSearch());
+				
+				refreshActions();
+				
+				System.out.println("Finished NGRAM");
+				
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to execute search", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 			
 			
 			//#############
@@ -549,9 +525,9 @@ public class ErrorMiningView extends View {
 			
 			ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
 			System.out.println("Filepath: "  //$NON-NLS-1$
-					+ config.getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
+					+ config.getString("plugins.errorMining.appearance.inputfiledebug")); //$NON-NLS-1$
 			
-			String inputFileName = config.getString("plugins.errorMining.appearance.filepath"); //$NON-NLS-1$
+			String inputFileName = config.getString("plugins.errorMining.appearance.inputfiledebug"); //$NON-NLS-1$
 			
 			//18 Sentences			
 			//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$
@@ -572,7 +548,6 @@ public class ErrorMiningView extends View {
 			int sentencesToRead = config.getInteger("plugins.errorMining.appearance.limit"); //$NON-NLS-1$
 			
 			File file = new File(inputFileName);
-			
 			
 			final List<SentenceData> corpus = new ArrayList<SentenceData>();
 			
@@ -715,11 +690,20 @@ public class ErrorMiningView extends View {
 
 
 		public void openPreferences(ActionEvent e) {
-			// TODO
-			Core.showNotice();
+			try {
+				UIUtil.openConfigDialog("plugins.searchTools"); //$NON-NLS-1$
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to open preferences", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 		public void editQuery(ActionEvent e) {
+			
+			System.out.println("EDITOR " + currentNGramEditor.getEditingItem());
 			if(currentNGramEditor.getEditingItem()==null) {
 				return;
 			}
@@ -755,8 +739,33 @@ public class ErrorMiningView extends View {
 		}
 		
 		public void editParameter(ActionEvent e) {
-			// TODO
-			Core.showNotice();
+			// TODO enable editor panel
+			if(currentNGramEditor.getEditingItem()==null) {
+				return;
+			}
+			
+			try {
+				SearchDescriptor descriptor = currentNGramEditor.getEditingItem();
+				
+				Editor<Options> editor = descriptor.getSearchFactory().createParameterEditor();
+				Options parameters = descriptor.getParameters();
+				if(parameters==null) {
+					parameters = new Options();
+				}
+				
+				if(DialogFactory.getGlobalFactory().showEditorDialog(
+						getFrame(), parameters, editor, 
+						"plugins.searchTools.searchManagerView.dialogs.editParameters.title")) { //$NON-NLS-1$
+					descriptor.setParameters(editor.getEditingItem());
+				}
+				
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to edit paramters", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
 		}
 		
 		
@@ -817,8 +826,7 @@ public class ErrorMiningView extends View {
 			
 			if(currentNGramEditor.getEditingItem()==null) {
 				return;
-			}
-						
+			}						
 			
 			SearchFactory factory = currentNGramEditor.getEditingItem().getSearchFactory();
 
@@ -964,159 +972,160 @@ public class ErrorMiningView extends View {
 	
 	
 	
-	protected class NGramEditor implements Editor<SearchDescriptor>, ActionListener{		
-		protected SearchDescriptor descriptor;
-		
-		protected FormBuilder formBuilder;
-				
-		protected Timer timer;
-		
-		
-		protected NGramEditor(){
-			
-			Action a;
-			
-			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
-			// Factory
-			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectFactoryAction"); //$NON-NLS-1$
-			formBuilder.addEntry("factory", new SelectFormEntry( //$NON-NLS-1$
-					"plugins.errorMining.errorMiningView.nGramEditor.labels.factory", null, a)); //$NON-NLS-1$
-						
-			// Target
-			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectTargetAction"); //$NON-NLS-1$
-			formBuilder.addEntry("target", new SelectFormEntry( //$NON-NLS-1$
-					"plugins.errorMining.errorMiningView.nGramEditor.labels.target", null, a)); //$NON-NLS-1$
-			// Query
-			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.editQueryAction"); //$NON-NLS-1$
-			formBuilder.addEntry("query", new SelectFormEntry( //$NON-NLS-1$
-					"plugins.errorMining.errorMiningView.nGramEditor.labels.query", null, a)); //$NON-NLS-1$
-			// Result
-			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.viewResultAction"); //$NON-NLS-1$
-			formBuilder.addEntry("result", new SelectFormEntry( //$NON-NLS-1$
-					"plugins.errorMining.errorMiningView.nGramEditor.labels.result", null, a)); //$NON-NLS-1$
-			
-			formBuilder.buildForm();
-			((JComponent)formBuilder.getContainer()).setBorder(UIUtil.topLineBorder);
-			
-		}
+//	protected class NGramEditor implements Editor<SearchDescriptor>, ActionListener{		
+//		protected SearchDescriptor descriptor;
+//		
+//		protected FormBuilder formBuilder;
+//				
+//		protected Timer timer;
+//		
+//		
+//		protected NGramEditor(){
+//			
+//			Action a;
+//			
+//			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
+//			// Factory
+//			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectFactoryAction"); //$NON-NLS-1$
+//			formBuilder.addEntry("factory", new SelectFormEntry( //$NON-NLS-1$
+//					"plugins.errorMining.errorMiningView.nGramEditor.labels.factory", null, a)); //$NON-NLS-1$
+//						
+//			// Target
+//			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectTargetAction"); //$NON-NLS-1$
+//			formBuilder.addEntry("target", new SelectFormEntry( //$NON-NLS-1$
+//					"plugins.errorMining.errorMiningView.nGramEditor.labels.target", null, a)); //$NON-NLS-1$
+//			// Query
+//			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.editQueryAction"); //$NON-NLS-1$
+//			formBuilder.addEntry("query", new SelectFormEntry( //$NON-NLS-1$
+//					"plugins.errorMining.errorMiningView.nGramEditor.labels.query", null, a)); //$NON-NLS-1$
+//			// Result
+//			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.viewResultAction"); //$NON-NLS-1$
+//			formBuilder.addEntry("result", new SelectFormEntry( //$NON-NLS-1$
+//					"plugins.errorMining.errorMiningView.nGramEditor.labels.result", null, a)); //$NON-NLS-1$
+//			
+//			formBuilder.buildForm();
+//			((JComponent)formBuilder.getContainer()).setBorder(UIUtil.topLineBorder);
+//			
+//		}
+//
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#getEditorComponent()
+//		 */
+//		@Override
+//		public Component getEditorComponent() {
+//			return formBuilder.getContainer();
+//		}
+//		
+//		
+//		public void refresh() {
+//			SearchDescriptor descriptor = getEditingItem();
+//			if (descriptor != null) {
+//				setEditingItem(descriptor);
+//			}
+//		}
+//		
+//
+//		
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#setEditingItem(java.lang.Object)
+//		 */
+//		@Override
+//		public void setEditingItem(SearchDescriptor item) {
+//
+//			if (item == null)
+//				throw new NullPointerException("Invalid search-descriptor"); //$NON-NLS-1$
+//
+//			descriptor = item;
+//
+//			Search search = descriptor.getSearch();
+//			if (search != null && search.isRunning()) {
+//				if (timer == null) {
+//					timer = new Timer(1000, this);
+//				}
+//				timer.start();
+//			} else if (timer != null) {
+//				timer.stop();
+//			}
+//			// Factory
+//			formBuilder
+//					.setValue(
+//							"factory", PluginUtil.getIdentity(descriptor.getFactoryExtension())); //$NON-NLS-1$
+//
+//			//TODO change to ngrammstuff
+//			// Target
+//			String name = StringUtil.getName(descriptor.getTarget());
+//			if (name == null || name.isEmpty()) {
+//				name = ResourceManager.getInstance().get(
+//						"plugins.searchTools.undefinedStats"); //$NON-NLS-1$
+//			}
+//			formBuilder.setValue("target", name); //$NON-NLS-1$
+//
+//			// Query
+//			String query = SearchUtils.getQueryStats(descriptor.getQuery());
+//			if (query == null || query.isEmpty()) {
+//				query = ResourceManager.getInstance().get(
+//						"plugins.searchTools.emptyStats"); //$NON-NLS-1$
+//			}
+//			formBuilder.setValue("query", query); //$NON-NLS-1$
+//
+//		}
+//
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#getEditingItem()
+//		 */
+//		@Override
+//		public SearchDescriptor getEditingItem() {
+//			return descriptor;
+//		}
+//		
+//
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#resetEdit()
+//		 */
+//		@Override
+//		public void resetEdit() {
+//			//noop			
+//		}
+//
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#applyEdit()
+//		 */
+//		@Override
+//		public void applyEdit() {
+//			//noop
+//		}
+//
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#hasChanges()
+//		 */
+//		@Override
+//		public boolean hasChanges() {
+//			return false;
+//		}
+//
+//		/**
+//		 * @see de.ims.icarus.ui.helper.Editor#close()
+//		 */
+//		@Override
+//		public void close() {
+//			//noop			
+//		}
+//		
+//		/**
+//		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+//		 */
+//		@Override
+//		public void actionPerformed(ActionEvent e) {
+//			SearchDescriptor descriptor = getEditingItem();
+//			if(descriptor!=null) {
+//				setEditingItem(descriptor);
+//			} else if(timer!=null) {
+//				timer.stop();
+//			}
+//		}
+//		
+//	}
 
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#getEditorComponent()
-		 */
-		@Override
-		public Component getEditorComponent() {
-			return formBuilder.getContainer();
-		}
-		
-		
-		public void refresh() {
-			SearchDescriptor descriptor = getEditingItem();
-			if (descriptor != null) {
-				setEditingItem(descriptor);
-			}
-		}
-		
-
-		
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#setEditingItem(java.lang.Object)
-		 */
-		@Override
-		public void setEditingItem(SearchDescriptor item) {
-
-			if (item == null)
-				throw new NullPointerException("Invalid search-descriptor"); //$NON-NLS-1$
-
-			descriptor = item;
-
-			Search search = descriptor.getSearch();
-			if (search != null && search.isRunning()) {
-				if (timer == null) {
-					timer = new Timer(1000, this);
-				}
-				timer.start();
-			} else if (timer != null) {
-				timer.stop();
-			}
-			// Factory
-			formBuilder
-					.setValue(
-							"factory", PluginUtil.getIdentity(descriptor.getFactoryExtension())); //$NON-NLS-1$
-
-			//TODO change to ngrammstuff
-			// Target
-			String name = StringUtil.getName(descriptor.getTarget());
-			if (name == null || name.isEmpty()) {
-				name = ResourceManager.getInstance().get(
-						"plugins.searchTools.undefinedStats"); //$NON-NLS-1$
-			}
-			formBuilder.setValue("target", name); //$NON-NLS-1$
-
-			// Query
-			String query = SearchUtils.getQueryStats(descriptor.getQuery());
-			if (query == null || query.isEmpty()) {
-				query = ResourceManager.getInstance().get(
-						"plugins.searchTools.emptyStats"); //$NON-NLS-1$
-			}
-			formBuilder.setValue("query", query); //$NON-NLS-1$
-
-		}
-
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#getEditingItem()
-		 */
-		@Override
-		public SearchDescriptor getEditingItem() {
-			return descriptor;
-		}
-		
-
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#resetEdit()
-		 */
-		@Override
-		public void resetEdit() {
-			//noop			
-		}
-
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#applyEdit()
-		 */
-		@Override
-		public void applyEdit() {
-			//noop
-		}
-
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#hasChanges()
-		 */
-		@Override
-		public boolean hasChanges() {
-			return false;
-		}
-
-		/**
-		 * @see de.ims.icarus.ui.helper.Editor#close()
-		 */
-		@Override
-		public void close() {
-			//noop			
-		}
-		
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			SearchDescriptor descriptor = getEditingItem();
-			if(descriptor!=null) {
-				setEditingItem(descriptor);
-			} else if(timer!=null) {
-				timer.stop();
-			}
-		}
-		
-	}
 	
 	/**
 	 * 
@@ -1475,20 +1484,20 @@ public class ErrorMiningView extends View {
 			Action a;
 			
 			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
-			// Factory
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectFactoryAction"); //$NON-NLS-1$
+			// Factory plugins.errorMining.errorMiningView.selectFactoryAction
+			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectFactoryAction"); //$NON-NLS-1$
 			formBuilder.addEntry("factory", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.factory", null, a)); //$NON-NLS-1$
 			// Target
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectTargetAction"); //$NON-NLS-1$
+			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.selectTargetAction"); //$NON-NLS-1$
 			formBuilder.addEntry("target", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.target", null, a)); //$NON-NLS-1$
 			// Query
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editQueryAction"); //$NON-NLS-1$
+			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.editQueryAction"); //$NON-NLS-1$
 			formBuilder.addEntry("query", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.query", null, a)); //$NON-NLS-1$
 			// Parameters
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editParametersAction"); //$NON-NLS-1$
+			a = getDefaultActionManager().getAction("plugins.errorMining.errorMiningView.editParameterAction"); //$NON-NLS-1$
 			formBuilder.addEntry("parameters", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.parameters", null, a)); //$NON-NLS-1$
 			

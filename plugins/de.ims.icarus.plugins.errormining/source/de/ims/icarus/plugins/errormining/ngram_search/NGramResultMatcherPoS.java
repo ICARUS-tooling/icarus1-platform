@@ -86,43 +86,96 @@ public class NGramResultMatcherPoS implements ErrorminingMatcher, Cloneable, Com
 	 * @param index 
 	 */
 	private void buildHit(ArrayList<ItemInNuclei> iinL, int index) {
-		for (int item = 0; item < iinL.size(); item++) {
-			ItemInNuclei iin = iinL.get(item);
+		
+		//we have at least iinL size of 2 (iinL = 1 was filtered out before)
+		ItemInNuclei iin = iinL.get(0);	
+		String[] iiTagArray = iin.getPosTag().split(" "); //$NON-NLS-1$
+		
+		SentenceInfo si = iin.getSentenceInfoAt(0);
+		
+		List<Integer> nucleiIndexList = new ArrayList<Integer>();
+		
+		for (int item = 1; item < iinL.size(); item++) {
+			ItemInNuclei iinCompare = iinL.get(item);
+			String[] iiTagCompare = iinCompare.getPosTag().split(" "); //$NON-NLS-1$
 			// System.out.println("PoSTag: "+ iin.getPosTag() +
-			// " PoSCount: " + iin.getCount());
-
-			for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
-				SentenceInfo si = iin.getSentenceInfoAt(s);
-				int sIndex = si.getSentenceNr()-1;
-//				System.out.println("InputSentence: " + index +
-//						" Current " + sIndex);
-				
-				
-				// only if we have the correct sentence index check
-				// nucleis and make hits!
-				if(index == sIndex){
-					for (int nuclei = 0; nuclei < si
-							.getNucleiIndexListSize(); nuclei++) {
-
-						// start - end - nuclei
-						int[] hitArray = new int[3];
-						// satzanfang
-						hitArray[0] = si.getSentenceBegin();
-						// satzende
-						hitArray[1] = si.getSentenceEnd();
-						// nuclei
-						hitArray[2] = si.getNucleiIndexListAt(nuclei);
-
-						// System.out.println(hitArray[0] + " "
-						// + hitArray[1] + " " + hitArray[2]);
-
-						Hit hit = new Hit(hitArray);
-						entryBuilder.addHit(hit);
-					}
-				}
-			}
+			// " PoSCount: " + iin.getCount());			
+			generateNucleiList(iiTagArray,iiTagCompare, nucleiIndexList);
 		}
 		
+		
+		for(int j = 0; j < nucleiIndexList.size(); j++){
+			// start - end - nuclei
+			int[] hitArray = new int[3];
+			// satzanfang
+			hitArray[0] = si.getSentenceBegin();
+			// satzende
+			hitArray[1] = si.getSentenceEnd();
+			// nuclei
+			hitArray[2] = si.getSentenceBegin() + nucleiIndexList.get(j);
+
+//			 System.out.println(hitArray[0] + " "
+//			 + hitArray[1] + " " + hitArray[2]);
+
+			Hit hit = new Hit(hitArray);
+			entryBuilder.addHit(hit);			
+		}
+			
+
+//			for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
+//				SentenceInfo si = iin.getSentenceInfoAt(s);
+//				int sIndex = si.getSentenceNr()-1;
+////				System.out.println("InputSentence: " + index +
+////						" Current " + sIndex);
+//				
+//				
+//				// only if we have the correct sentence index check
+//				// nucleis and make hits!
+//				if(index == sIndex){
+//					for (int nuclei = 0; nuclei < si
+//							.getNucleiIndexListSize(); nuclei++) {
+//
+//						// start - end - nuclei
+//						int[] hitArray = new int[3];
+//						// satzanfang
+//						hitArray[0] = si.getSentenceBegin();
+//						// satzende
+//						hitArray[1] = si.getSentenceEnd();
+//						// nuclei
+//						hitArray[2] = si.getNucleiIndexListAt(nuclei);
+//
+//						// System.out.println(hitArray[0] + " "
+//						// + hitArray[1] + " " + hitArray[2]);
+//
+//						Hit hit = new Hit(hitArray);
+//						entryBuilder.addHit(hit);
+//					}
+//				}
+//			}			
+//		}
+		
+	}
+
+
+	/**
+	 * @param iiTagArray
+	 * @param iiTagCompare
+	 * @param nucleiIndexList
+	 */
+	private void generateNucleiList(String[] iiTagArray, String[] iiTagCompare,
+			List<Integer> nucleiIndexList) {
+		
+		for(int i = 0 ; i < iiTagArray.length; i++){
+			//System.out.println(iiTagArray[i] + " " + iiTagCompare[i]);
+			
+			if(!iiTagArray[i].equals(iiTagCompare[i])){
+				//System.out.println("!equal");
+				if (!nucleiIndexList.contains(i)){
+					nucleiIndexList.add(i);
+				}
+			}
+			
+		}		
 	}
 
 

@@ -25,17 +25,7 @@
  */
 package de.ims.icarus.plugins.errormining.view;
 
-import java.awt.Color;
-
-import javax.swing.JList;
-import javax.swing.text.Highlighter;
-import javax.swing.text.Highlighter.HighlightPainter;
-import javax.swing.text.Style;
-
-import de.ims.icarus.language.dependency.annotation.AnnotatedDependencyData;
 import de.ims.icarus.plugins.dependency.list.DependencyListCellRenderer;
-import de.ims.icarus.util.annotation.AnnotationManager;
-import de.ims.icarus.util.annotation.HighlightType;
 
 /**
  * @author Gregor Thiele

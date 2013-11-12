@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
+import de.ims.icarus.plugins.errormining.DependencySentenceInfo;
 import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.search_tools.result.EntryBuilder;
 import de.ims.icarus.search_tools.result.Hit;
@@ -92,7 +93,7 @@ protected int id;
 			// " PoSCount: " + iin.getCount());
 
 			for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
-				SentenceInfo si = iin.getSentenceInfoAt(s);
+				DependencySentenceInfo si = iin.getSentenceInfoAt(s);
 				int sIndex = si.getSentenceNr()-1;
 //				System.out.println("InputSentence: " + index +
 //						" Current " + sIndex);
@@ -105,13 +106,18 @@ protected int id;
 							.getNucleiIndexListSize(); nuclei++) {
 
 						// start - end - nuclei
-						int[] hitArray = new int[3];
+						int[] hitArray = new int[4];
 						// satzanfang
 						hitArray[0] = si.getSentenceBegin();
 						// satzende
 						hitArray[1] = si.getSentenceEnd();
-						// nuclei
-						hitArray[2] = si.getNucleiIndexListAt(nuclei);
+						// targetnode
+						hitArray[2] = si.getNucleiIndex();
+						// sourcenode
+						hitArray[3] = si.getSentenceHeadIndex();
+						
+						System.out.println(si.getNucleiIndex() + " Target");
+						System.out.println(si.getSentenceHeadIndex()+ " Source");
 
 						// System.out.println(hitArray[0] + " "
 						// + hitArray[1] + " " + hitArray[2]);

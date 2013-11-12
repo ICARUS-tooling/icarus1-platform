@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -14,16 +14,16 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
+
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
+ * $LastChangedBy$
  */
-package de.ims.icarus.plugins.errormining;
+package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,12 +33,12 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,12 +48,12 @@ import java.util.logging.Level;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
@@ -67,37 +67,41 @@ import javax.swing.table.AbstractTableModel;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.core.View;
+import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
+import de.ims.icarus.plugins.errormining.DetailedNGramSentenceDataList;
+import de.ims.icarus.plugins.errormining.ErrorMiningView;
+import de.ims.icarus.plugins.errormining.ItemInNuclei;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataListDependency;
+import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
+import de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.result.AbstractSearchResult;
 import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.ui.helper.UIHelperRegistry;
+import de.ims.icarus.ui.view.AWTPresenter;
+import de.ims.icarus.ui.view.ListPresenter;
+import de.ims.icarus.ui.view.PresenterUtils;
+import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.mpi.Commands;
-import de.ims.icarus.util.mpi.Message;
-import de.ims.icarus.util.mpi.ResultMessage;
+import de.ims.icarus.util.Options;
+import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.DataList;
 
 /**
  * @author Gregor Thiele
  * @version $Id$
- * @param <JListModel>
  *
  */
-public class NGramResultView<JListModel> extends View{
-	
-	protected JPanel contentPanel;
-	
-	protected Collection<JComponent> localizedComponents;
-	
-	protected Handler handler;
-	private CallbackHandler callbackHandler;
-	
+public class ErrorMiningSearchPresenter extends SearchResultPresenter {
+
 	
 	//stuff for ngram visualization
 	protected JList<Object> ngramList;
@@ -107,44 +111,89 @@ public class NGramResultView<JListModel> extends View{
 	//stuff for detailed distributed visualization
 	protected JTable ngramTable;
 	protected NGramResultViewTableModel ngramTableModel;
-	//protected NGramResultViewJTableRenderer ngramTableRenderer;
 	
-	//TODO test
+	private JLabel header;
+	private JLabel infoLabel;
+	
+	private JScrollPane scrollPane;
+	private JScrollPane scrollPaneDetailed;
+	
+	private JLabel nucleiCount;
+	private JLabel nucleiName;
+	
+	protected JPanel headerPanel;
+	protected JButton sortAsc;
+	protected JButton sortDesc;
+	
+	
+	protected JTabbedPane tabbedPane;
+	protected ListPresenter listPresenter;
+	protected AWTPresenter detailsPresenter;
+	
+	protected JSplitPane splitPane;
+	
+	
+	//result stuff	
 	protected Map<String,ArrayList<DependencyItemInNuclei>> nGramResultDependency;
 	protected NGramDataListDependency ngListDependency;
 	
 	
 	protected Map<String,ArrayList<ItemInNuclei>> nGramResult;
 	protected NGramDataList ngList;
-	protected List<SentenceData> corpus;
-	
-	//buttons
-	protected JPanel headerPanel;
-	protected JButton sortAsc;
-	protected JButton sortDesc;
-	
-	private JLabel header;
-	private JLabel infoLabel;
-	
-	private JLabel nucleiCount;
-	private JLabel nucleiName;
-
-	private JScrollPane scrollPane;
-	private JScrollPane scrollPaneDetailed;
-	
-	/**
-	 * Constructor
-	 */
-	public NGramResultView() {
-		//noop
-	}
 	
 	
 	/**
-	 * @see de.ims.icarus.plugins.core.View#init(javax.swing.JComponent)
+	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#getSupportedDimensions()
 	 */
 	@Override
-	public void init(JComponent container) {
+	public int getSupportedDimensions() {
+		return 0;
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#displayResult()
+	 */
+	@Override
+	protected void displayResult() {
+		if (searchResult == null){
+			showDefaultInfo();
+			return;
+		}
+		
+		nGramResult = (Map<String, ArrayList<ItemInNuclei>>) searchResult.getProperty("COMPLETE_NGRAM");
+		//System.out.println("SIZE " + nGramResult.size());
+		
+		if(ngramListModel == null){
+			ngramListModel = new NGramResultViewListModel();
+		}
+		
+		if (nGramResult != null) {
+			ngramListModel.reload();
+		}
+		
+		if (scrollPane != null) {
+			scrollPane.setViewportView(ngramList);
+		}
+		
+
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#refresh()
+	 */
+	@Override
+	public void refresh() {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#buildContentPanel()
+	 */
+	@Override
+	protected void buildContentPanel() {
+		//ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+		
 		// Load actions
 		URL actionLocation = ErrorMiningView.class
 				.getResource("errormining-view-actions.xml"); //$NON-NLS-1$
@@ -153,16 +202,18 @@ public class NGramResultView<JListModel> extends View{
 					"Missing resources: errormining-view-actions.xml"); //$NON-NLS-1$
 
 		try {
-			getDefaultActionManager().loadActions(actionLocation);
+			getActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to load actions from file", e); //$NON-NLS-1$
-			UIDummies.createDefaultErrorOutput(container, e);
+			UIDummies.createDefaultErrorOutput(contentPanel, e);
 			return;
 		}
-
-		handler = createHandler();	
-
+		
+		tabbedPane = new JTabbedPane();
+		contentPanel = new JPanel(new BorderLayout());
+		
+		JPanel overviewPanel = new JPanel(new BorderLayout()); 
 		
 		
 		// Header label
@@ -219,7 +270,7 @@ public class NGramResultView<JListModel> extends View{
 					ResourceManager.getInstance()
 					.get("plugins.errormining.nGramResultView.sortAscAction.description"))); //$NON-NLS-1$
 		sortAsc.setActionCommand("asc"); //$NON-NLS-1$
-		sortAsc.addActionListener(handler);
+		sortAsc.addActionListener(getHandler());
 		
 		sortDesc = new JButton(IconRegistry.getGlobalRegistry()
 				.getIcon("sort_rows_desc_alph.gif")); //$NON-NLS-1$
@@ -227,131 +278,42 @@ public class NGramResultView<JListModel> extends View{
 				ResourceManager.getInstance()
 				.get("plugins.errormining.nGramResultView.sortDescAction.description"))); //$NON-NLS-1$
 		sortDesc.setActionCommand("desc"); //$NON-NLS-1$
-		sortDesc.addActionListener(handler);
+		sortDesc.addActionListener(getHandler());
 		
 		headerPanel = new JPanel(new GridBagLayout());
 		headerPanel.add(header, GridBagUtil.makeGbc(0, 0, 1, 1, 1));
 		headerPanel.add(sortAsc, GridBagUtil.makeGbc(1, 0, 1, 1, 0));
 		headerPanel.add(sortDesc, GridBagUtil.makeGbc(2, 0, 1, 1, 0));
 		
-		container.setLayout(new BorderLayout());
-		container.add(headerPanel, BorderLayout.NORTH);
-		container.add(jsp, BorderLayout.CENTER);
-		//TODO needed?
-		//container.add(detailedView, BorderLayout.SOUTH);
+		overviewPanel.add(headerPanel, BorderLayout.NORTH);
+		overviewPanel.add(jsp, BorderLayout.CENTER);
 		
-		showDefaultInfo();
 		
-		registerActionCallbacks();
-		refreshActions();
+		// TODO needed?
+		// header.setText("Found " + nGramResult.size() + " NGrams"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-	}
-
-
-	private void showDefaultInfo() {
-		scrollPane.setViewportView(infoLabel);
-		header.setText(""); //$NON-NLS-1$
-		refreshActions();	
-	}
-
-
-	protected void refreshActions() {
-		if (ngList != null){
-			sortAsc.setEnabled(true);
-			sortDesc.setEnabled(true);
-		} else {
-			sortAsc.setEnabled(false);
-			sortDesc.setEnabled(false);			
+		//Create and initialize JList
+		if(ngramListModel == null){
+			ngramListModel = new NGramResultViewListModel();
 		}
-	}
-
-
-	protected void registerActionCallbacks() {
-		if(callbackHandler==null) {
-			callbackHandler = createCallbackHandler();
-		}
-	}
-	
-	
-	protected Handler createHandler() {
-		return new Handler();
-	}
-	
-	
-	protected CallbackHandler createCallbackHandler() {
-		return new CallbackHandler();
-	}
-	
-	/**
-	 * @param data
-	 */
-	private void showResults(NGramDataList data) {
-		for(int i = 0; i < data.size(); i++){
-			System.out.println(data.get(i).toString());
-			SentenceData sd = data.get(i);
-			System.out.println(sd.getForm(i));
-		}
-		
-//		ngramList = new JList<Object>(data);
-//		
-//		if (ngramListRenderer == null){
-//			ngramListRenderer = new NGramResultViewListCellRenderer();
-//		}
-//		
-//		
-//		ngramList.setCellRenderer(ngramListRenderer);
-//		
-//		scrollPane.setViewportView(ngramList);
-//
-//		System.out.println(data.size() + " k " +  ngramList.getModel().getSize()); //$NON-NLS-1$
-		
-	}
-
-
-	/**
-	 * @param data
-	 */
-
-	private void showResults(Object data) {
-		
-		header.setText("Found " + nGramResult.size() + " NGrams"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-		//TODO Create and initialize JList
-		ngramListModel = new NGramResultViewListModel();
 		ngramList = new JList<Object>(ngramListModel);
 		ngramList.setBorder(UIUtil.defaultContentBorder);
 		DefaultListSelectionModel selectionModel = new DefaultListSelectionModel();
 		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		ngramList.setSelectionModel(selectionModel);
-		ngramList.addListSelectionListener(handler);
-		ngramList.addMouseListener(handler);
-		ngramList.getModel().addListDataListener(handler);
+		ngramList.addListSelectionListener(getHandler());
+		ngramList.addMouseListener(getHandler());
+		ngramList.getModel().addListDataListener(getHandler());	
 
-		if (nGramResult != null) {
-			ngramListModel.reload();
-		}
-
+		ngramListRenderer = new NGramResultViewListCellRenderer();		
 		
-		if (ngramListRenderer == null){
-			ngramListRenderer = new NGramResultViewListCellRenderer();
-		}
 		ngramList.setCellRenderer(ngramListRenderer);
 		
-		scrollPane.setViewportView(ngramList);
-		
+		scrollPane.setViewportView(ngramList);		
 		
 		//TODO Detailed Stuff
-		initializeDetailed();
-	}
-
-
-	/**
-	 * Detailed Result
-	 */
-	private void initializeDetailed() {
-		
 		nucleiCount = new JLabel(ResourceManager.getInstance()
-						.get("plugins.errormining.labels.NucleiCount")); //$NON-NLS-1$
+				.get("plugins.errormining.labels.NucleiCount")); //$NON-NLS-1$
 		nucleiName = new JLabel(ResourceManager.getInstance()
 						.get("plugins.errormining.labels.NucleiName")); //$NON-NLS-1$
 		
@@ -359,102 +321,302 @@ public class NGramResultView<JListModel> extends View{
 		ngramTable = new JTable(ngramTableModel);		
 		scrollPaneDetailed.setViewportView(ngramTable);
 		
+		
+		
+		tabbedPane.addTab("Overview", overviewPanel);
+		
+		
+		//second view
+		JPanel graphOutlinePanel = new JPanel(new BorderLayout());
+		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setContinuousLayout(false);
+		splitPane.setDividerSize(5);
+		splitPane.setBorder(null);
+		splitPane.setResizeWeight(1);
+		splitPane.addComponentListener(getHandler());
+		
+		graphOutlinePanel.add(splitPane, BorderLayout.CENTER);
+		
+		tabbedPane.addTab("Detail", graphOutlinePanel);
+		
+		
+		
+		
+		//add all stuff back to contentPanel
+		contentPanel.add(tabbedPane);
+		
+		//showDefaultInfo();
+		
+		registerActionCallbacks();
+		refreshActions();
+		
+		displayResult();
+
 	}
 	
 	
-	private void showResultsDependency(Object data) {
-		
-		header.setText("Found " + nGramResultDependency.size() + " NGrams"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-		//TODO Create and initialize JList
-//		ngramListModel = new NGramResultViewListModel();
-//		ngramList = new JList<Object>(ngramListModel);
-//		ngramList.setBorder(UIUtil.defaultContentBorder);
-//		DefaultListSelectionModel selectionModel = new DefaultListSelectionModel();
-//		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//		ngramList.setSelectionModel(selectionModel);
-//		ngramList.addListSelectionListener(handler);
-//		ngramList.addMouseListener(handler);
-//		ngramList.getModel().addListDataListener(handler);
-//
-//		if (nGramResultDependency != null) {
-//			ngramListModel.reload();
-//		}
-//
-//		
-//		if (ngramListRenderer == null){
-//			ngramListRenderer = new NGramResultViewListCellRenderer();
-//		}
-//		ngramList.setCellRenderer(ngramListRenderer);
-//		
-//		scrollPane.setViewportView(ngramList);		
-		
-		//TODO Detailed Stuff
-		//initializeDetailedDependency();
+	private void showDefaultInfo() {
+		scrollPane.setViewportView(infoLabel);
+		header.setText(""); //$NON-NLS-1$	
 	}
 	
-	/**
-	 * Detailed Result
-	 */
-	private void initializeDetailedDependency() {
-		
-		nucleiCount = new JLabel(ResourceManager.getInstance()
-						.get("plugins.errormining.labels.NucleiCount")); //$NON-NLS-1$
-		nucleiName = new JLabel(ResourceManager.getInstance()
-						.get("plugins.errormining.labels.NucleiName")); //$NON-NLS-1$
-		
-		ngramTableModel = new NGramResultViewTableModel();
-		ngramTable = new JTable(ngramTableModel);		
-		scrollPaneDetailed.setViewportView(ngramTable);
-		
-	}
-
-
 	
-	protected ResultMessage handleRequest(Message message) throws Exception {
-		if(Commands.DISPLAY.equals(message.getCommand())) {			
-			
-			Object data = message.getData();
-
-			// We allow null values since this is a way to clear the editor view
-//			if(data==null || data instanceof NGramDataList) {
-//				showResults((NGramDataList) data);
-//				refreshActions();
-//				return message.successResult(this, null);
-//			}
-			System.out.println(data.toString());
-			if (data != null && (data instanceof NGramDataList)) {
-				System.out.println("PoS Data Result"); //$NON-NLS-1$
-				nGramResult = ((NGramDataList) data).getnGramMap();
-				corpus = ((NGramDataList) data).getCorpus();
-				ngList = (NGramDataList) data;
-				showResults(data);
-				refreshActions();
-				return message.successResult(this, null);
-			}
-			if (data != null && (data instanceof NGramDataListDependency)) {
-				System.out.println("Dependency Data Result"); //$NON-NLS-1$
-				nGramResultDependency = ((NGramDataListDependency) data).getnGramMap();
-				corpus = ((NGramDataListDependency) data).getCorpus();
-				ngListDependency = (NGramDataListDependency) data;
-				System.out.println("ngsize: " + ngListDependency.size());
-				System.out.println("keyset" + nGramResultDependency.keySet());
-				showResultsDependency(data);
-				refreshActions();
-				return message.successResult(this, null);
-			} else {
-				return message.unsupportedDataResult(this);
-			}
-			
-		}else {
-			return message.unknownRequestResult(this);
+	
+	
+	protected void setDetailPresenter(AWTPresenter detailsPresenter) {
+		if(this.detailsPresenter==detailsPresenter) {
+			return;
 		}
+		
+		if(this.detailsPresenter!=null) {
+			this.detailsPresenter.close();
+		}
+		
+		this.detailsPresenter = detailsPresenter;
+		
+		if(this.detailsPresenter!=null) {
+			splitPane.setLeftComponent(detailsPresenter.getPresentingComponent());
+		} else {
+			//showDetailInfo(null);
+		}
+	}
 	
+	
+	protected void setListPresenter(ListPresenter listPresenter) {
+		if(this.listPresenter==listPresenter) {
+			return;
+		}
+		
+		if(this.listPresenter!=null) {
+			this.listPresenter.getSelectionModel().removeListSelectionListener(getHandler());
+			this.listPresenter.close();
+		}
+		
+		this.listPresenter = listPresenter;
+		
+		if(this.listPresenter!=null) {
+			this.listPresenter.getSelectionModel().addListSelectionListener(getHandler());
+			
+			splitPane.setRightComponent(listPresenter.getPresentingComponent());
+		} else {
+			//showInfo(null);
+		}
+	}
+	
+	
+	private void showDetails(SentenceDataList sentenceList){
+		// Ensure list presenter
+		ListPresenter listPresenter = this.listPresenter;
+		if(listPresenter==null || !PresenterUtils.presenterSupports(listPresenter, sentenceList)) {
+			listPresenter = UIHelperRegistry.globalRegistry().findHelper(ListPresenter.class, sentenceList);
+		}
+		
+		ContentType entryType = sentenceList.getContentType();
+		
+		// Ensure details presenter
+		AWTPresenter detailsPresenter = this.detailsPresenter;
+		if(detailsPresenter==null || !PresenterUtils.presenterSupports(detailsPresenter, entryType)) {
+			// Try graph presenter first
+			detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphPresenter.class, entryType, true, false);
+			if(detailsPresenter==null) {
+				detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(AWTPresenter.class, entryType, true, true);
+			}
+		}
+		
+		// Signal missing list presenter
+		if(detailsPresenter==null) {
+			return;
+		}
+		
+		// Now present data
+		try {
+			listPresenter.present(sentenceList, options);
+		} catch (UnsupportedPresentationDataException e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to present data list: "+sentenceList, e); //$NON-NLS-1$
+			return;
+		}
+		
+		setListPresenter(listPresenter);
+		setDetailPresenter(detailsPresenter);
+
+		
+		if(sentenceList.size()>0) {
+			listPresenter.getSelectionModel().setSelectionInterval(0, 0);
+		} else {
+			listPresenter.getSelectionModel().clearSelection();
+		}
+		
+		tabbedPane.setSelectedIndex(1);
 	}
 
+
+	/**
+	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#createHandler()
+	 */
+	@Override
+	protected Handler createHandler() {
+		return new HandlerErrorMining();
+	}
+
+	@Override
+	protected HandlerErrorMining getHandler() {
+		return (HandlerErrorMining) super.getHandler();
+	}
 	
-	protected class Handler extends MouseAdapter implements ActionListener, 
-	ListSelectionListener, EventListener, ListDataListener {
+	protected void displaySelectedData() throws Exception {
+		if(listPresenter==null || detailsPresenter==null) {
+			return;
+		}
+		
+		ListSelectionModel selectionModel = listPresenter.getSelectionModel();
+		
+		if(selectionModel.getValueIsAdjusting()) {
+			return;
+		}
+		
+		int selectedIndex = selectionModel.getMinSelectionIndex();
+		Object selectedObject = null;
+		
+		if(selectedIndex!=-1) {
+			selectedObject = listPresenter.getListModel().getElementAt(selectedIndex);
+		}
+		
+		if(selectedObject==null) {
+			detailsPresenter.clear();
+			return;
+		} 
+		
+		// Display selected object in details presenter
+		Options options = new Options();
+		options.put(Options.INDEX, selectedIndex);
+		options.put(Options.CONTENT_TYPE, listPresenter.getContentType());
+		options.putAll(getOptions());
+		
+		detailsPresenter.present(selectedObject, options);
+	}
+
+
+	
+	//	protected String getNuclei(String[] s, String tag) {
+	//
+	//		for(int i = 0; i < s.length; i++){
+	//			if(isNuclei(s[i])){
+	//				ArrayList<ItemInNuclei>  iin = nGramResult.get(s[i]);
+	//				
+	//				if(internCount == tag){
+	//					return s[i];
+	//				}
+	//			}			
+	//		}
+	//		return null;
+	//
+	//	}
+		
+		
+		
+		
+		//	protected String getNuclei(String[] s, String tag) {
+	//
+	//		for(int i = 0; i < s.length; i++){
+	//			if(isNuclei(s[i])){
+	//				ArrayList<ItemInNuclei>  iin = nGramResult.get(s[i]);
+	//				
+	//				if(internCount == tag){
+	//					return s[i];
+	//				}
+	//			}			
+	//		}
+	//		return null;
+	//
+	//	}
+		
+		
+		
+		
+		/***
+		 * Check if key is a valid uniGram or if its an added Nuclei in Step x or if its
+		 * none of that. Used for Highlightning.
+		 * @param inputNGram
+		 * @param lb
+		 * @param rb
+		 */
+		
+		protected boolean isNuclei(String key) {
+	
+			if (nGramResult.containsKey(key)){
+				//not found = color orange
+				return true;
+			}
+			
+			//not found = color black
+			return false;
+		}
+
+		//	protected String getNuclei(String[] s, String tag) {
+		//
+		//		for(int i = 0; i < s.length; i++){
+		//			if(isNuclei(s[i])){
+		//				ArrayList<ItemInNuclei>  iin = nGramResult.get(s[i]);
+		//				
+		//				if(internCount == tag){
+		//					return s[i];
+		//				}
+		//			}			
+		//		}
+		//		return null;
+		//
+		//	}
+			
+			
+			
+			
+			/**
+			 * 
+			 * @param iin
+			 * @return
+			 */
+			protected Object sentenceOccurences(ItemInNuclei iin) {
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < iin.getSentenceInfoSize(); i++){
+					//FIXME -1 needed?
+					sb.append(iin.getSentenceInfoAt(i).getSentenceNr());
+					if (i < iin.getSentenceInfoSize()){
+						sb.append(", "); //$NON-NLS-1$
+					}			
+				}
+				return sb.toString();		
+			}
+
+		/**
+		 * 
+		 * @param iin
+		 * @return
+		 */
+		protected Object getNucleis(ItemInNuclei iin) {		
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < iin.getSentenceInfoSize(); i++){			
+				for(int n  = 0; n < iin.getSentenceInfoAt(i).getNucleiIndexListSize(); n++){
+					sb.append(iin.getSentenceInfoAt(i).getNucleiIndexListAt(n));
+					if (n < iin.getSentenceInfoAt(i).getNucleiIndexListSize()-1){
+						sb.append(", "); //$NON-NLS-1$
+					}
+				}
+				
+				if (i < iin.getSentenceInfoSize()-1){
+					sb.append(", "); //$NON-NLS-1$
+				}
+			}
+	
+			return sb.toString();		
+		}
+
+
+
+	protected class HandlerErrorMining extends Handler implements ActionListener, 
+	ListSelectionListener, EventListener, ListDataListener, ComponentListener {
+		
+		protected boolean trackResizing = true;
 		
 		/**
 		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
@@ -463,51 +625,48 @@ public class NGramResultView<JListModel> extends View{
 		public void mouseClicked(MouseEvent me) {
 		    if (me.getClickCount() == 2) {
 		        int index = ngramList.locationToIndex(me.getPoint());
-		        System.out.println("Double clicked on Item " + index);
+		        //System.out.println("Double clicked on Item " + index);
 		        
 		        ngramListModel.getElementAt(index);
 		        //System.out.println(ngramListModel.getElementAt(index));
-		        String key = (String) ngramListModel.getElementAt(index);		        
+		        String key = (String) ngramListModel.getElementAt(index);	        
 
-				Message messageUserDetailed = new Message(this,
-						Commands.DISPLAY, createDetailedResultDebug(key), null);
-				sendRequest(null, messageUserDetailed);	
+		        showDetails(createDetailList(key));
+		        
 		     }
 		}
 		
 
 		/**
 		 * @param key
+		 * @return 
 		 * @return
 		 */
-		private DetailedNGramSentenceDataList createDetailedResultDebug(String key) {
+		private SentenceDataList createDetailList(String key) {
+			//TODO add later presentation		
+			
+			List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
+
+			//System.out.println("selectedKey " + key);
+			ArrayList<ItemInNuclei> iinList = nGramResult.get(key);			
+		
+			DataList<?> dl = ((AbstractSearchResult)searchResult).getTarget();
+			for(int i = 0; i < iinList.size(); i++){
+				ItemInNuclei iin = iinList.get(i);
 				
-				List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
-						
-				ArrayList<ItemInNuclei> iinList = null;
-							
-				String[] keySplitted = key.split(" "); //$NON-NLS-1$
-				
-				for(int keyIdx = 0; keyIdx < keySplitted.length; keyIdx++){
-					if(isNuclei(keySplitted[keyIdx])){
-						iinList = ngList.getnGramMap().get(keySplitted[keyIdx]);
-						for(int i = 0; i < iinList.size(); i++){
-							ItemInNuclei iin = iinList.get(i);
-							
-							for (int s = 0; s < iin.getSentenceInfoSize(); s++){
-								SentenceData sentenceData =
-										corpus.get(iin.getSentenceInfoAt(s)
-												.getSentenceNr()-1);
-								//System.out.println(sentenceData.getText() + "TEXT");
-								sentenceDataDetailedList.add(sentenceData);
-							}
-						}
-					}
+				for (int s = 0; s < iin.getSentenceInfoSize(); s++){
+					SentenceData sentenceData =
+							(SentenceData) dl.get(iin.getSentenceInfoAt(s).getSentenceNr()-1);
+					//System.out.println(sentenceData.getText() + "TEXT");
+					sentenceDataDetailedList.add(sentenceData);
+					
 				}
-				
-				DetailedNGramSentenceDataList dsdl = 
-							new DetailedNGramSentenceDataList(sentenceDataDetailedList);
-				return dsdl;
+			}
+			
+			DetailedNGramSentenceDataList dsdl = 
+					new DetailedNGramSentenceDataList(sentenceDataDetailedList);
+			return dsdl;
+			
 		}
 
 
@@ -525,8 +684,18 @@ public class NGramResultView<JListModel> extends View{
 		 */
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
-			Object selectedObject = ngramList.getSelectedValue();
-			ngramTableModel.reload((String) selectedObject);	
+			
+			if (e.getSource() == ngramList){
+				Object selectedObject = ngramList.getSelectedValue();
+				ngramTableModel.reload((String) selectedObject);	
+			} else {
+				try {
+					displaySelectedData();
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to handle change in selection: "+e, ex); //$NON-NLS-1$
+				}
+			}
 		}
 
 		/**
@@ -553,11 +722,9 @@ public class NGramResultView<JListModel> extends View{
 		 */
 		@Override
 		public void contentsChanged(ListDataEvent e) {
-
 //			System.out.println("Result NGRAM-List ContentsChanged: "  //$NON-NLS-1$
 //						+ e.getIndex0() +    ", " + e.getIndex1()); //$NON-NLS-1$
-			ngramList.clearSelection();
-		
+			ngramList.clearSelection();		
 		}
 
 		/**
@@ -577,16 +744,52 @@ public class NGramResultView<JListModel> extends View{
 			// TODO Auto-generated method stub
 			
 		}
-	
-	}
-	
-	public final class CallbackHandler {
 
-		private CallbackHandler() {
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentResized(ComponentEvent e) {
+			if(!trackResizing) {
+				return;
+			}
+			
+			int height = splitPane.getHeight();
+			if(height==0) {
+				return;
+			}
+			
+			splitPane.setDividerLocation(Math.max(height/2, height-100));
+			
+			trackResizing = false;
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentHidden(ComponentEvent e) {
+			trackResizing = true;
+		}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentMoved(ComponentEvent e) {
 			// no-op
 		}
-	}
+
+		/**
+		 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
+		 */
+		@Override
+		public void componentShown(ComponentEvent e) {
+			// no-op
+		}
 	
+	}
 	
 	
 	/**
@@ -645,7 +848,9 @@ public class NGramResultView<JListModel> extends View{
 				Collections.reverse(myList);
 			}
 			
-			keys = myList.toArray();	
+			keys = myList.toArray();
+			
+			fireContentsChanged(this, 0, Math.max(getSize()-1, 0));
 			
 		}
 	}
@@ -916,78 +1121,9 @@ public class NGramResultView<JListModel> extends View{
 //		return null;
 //
 //	}
-	
-	
-	
-	
-	/**
-	 * 
-	 * @param iin
-	 * @return
-	 */
-	protected Object getNucleis(ItemInNuclei iin) {		
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < iin.getSentenceInfoSize(); i++){			
-			for(int n  = 0; n < iin.getSentenceInfoAt(i).getNucleiIndexListSize(); n++){
-				sb.append(iin.getSentenceInfoAt(i).getNucleiIndexListAt(n));
-				if (n < iin.getSentenceInfoAt(i).getNucleiIndexListSize()-1){
-					sb.append(", "); //$NON-NLS-1$
-				}
-			}
-			
-			if (i < iin.getSentenceInfoSize()-1){
-				sb.append(", "); //$NON-NLS-1$
-			}
-		}
 
-		return sb.toString();		
-	}
 	
-	
-	
-	
-	/***
-	 * Check if key is a valid uniGram or if its an added Nuclei in Step x or if its
-	 * none of that. Used for Highlightning.
-	 * @param inputNGram
-	 * @param lb
-	 * @param rb
-	 */
-	
-	protected boolean isNuclei(String key) {
 
-		if (nGramResult.containsKey(key)){
-			//not found = color orange
-			return true;
-		}
-		
-		//not found = color black
-		return false;
-	}
 	
-	
-	/**
-	 * 
-	 * @param iin
-	 * @return
-	 */
-	protected Object sentenceOccurences(ItemInNuclei iin) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < iin.getSentenceInfoSize(); i++){
-			//FIXME -1 needed?
-			sb.append(iin.getSentenceInfoAt(i).getSentenceNr());
-			if (i < iin.getSentenceInfoSize()){
-				sb.append(", "); //$NON-NLS-1$
-			}			
-		}
-		return sb.toString();		
-	}
 
-
-	//TODO remove?!
-//	class NGramResultViewJTableRenderer{
-//		
-//	}
-	
 }
-

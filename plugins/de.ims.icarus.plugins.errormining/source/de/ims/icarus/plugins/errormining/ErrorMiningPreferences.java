@@ -50,7 +50,8 @@ public class ErrorMiningPreferences {
 		
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		
-		builder.addStringEntry("filepath", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addStringEntry("filepath", "E:\\errormining_result.xml"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addStringEntry("inputfiledebug", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.addIntegerEntry("limit",10); //$NON-NLS-1$
 		
 		builder.addBooleanEntry("showOriginalIndex", true); //$NON-NLS-1$

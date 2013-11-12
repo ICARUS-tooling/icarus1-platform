@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.plugins.errormining;
 
-import de.ims.icarus.language.dependency.DependencyData;
 
 /**
  * @author Gregor Thiele

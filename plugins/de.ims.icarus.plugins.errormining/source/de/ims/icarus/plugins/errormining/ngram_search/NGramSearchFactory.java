@@ -28,7 +28,6 @@ package de.ims.icarus.plugins.errormining.ngram_search;
 import java.util.List;
 
 import de.ims.icarus.language.dependency.DependencyUtils;
-import de.ims.icarus.plugins.errormining.NGramData;
 import de.ims.icarus.plugins.errormining.NGramQAttributes;
 import de.ims.icarus.plugins.errormining.NGramQueryEditor;
 import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
@@ -46,7 +45,6 @@ import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Gregor Thiele

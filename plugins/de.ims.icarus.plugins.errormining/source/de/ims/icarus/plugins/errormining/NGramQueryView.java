@@ -132,10 +132,10 @@ public class NGramQueryView extends View {
 
 		// Load actions
 		URL actionLocation = ErrorMiningView.class
-				.getResource("query-view-actions.xml"); //$NON-NLS-1$
+				.getResource("query-editor-actions.xml"); //$NON-NLS-1$
 		if (actionLocation == null)
 			throw new CorruptedStateException(
-					"Missing resources: query-view-actions.xml"); //$NON-NLS-1$
+					"Missing resources: query-editor-actions.xml"); //$NON-NLS-1$
 		
 		ActionManager actionManager = getDefaultActionManager();
 		try {

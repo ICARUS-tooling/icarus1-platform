@@ -70,6 +70,7 @@ public class DependencySentenceInfo extends SentenceInfo {
 
 	/**
 	 * @return the sentenceHeadIndex
+	 * sentenceHeadIndex = Target Node (Source Node = sentenceInfo.getNuclei())
 	 */
 	public int getSentenceHeadIndex() {
 		return sentenceHeadIndex;

@@ -74,10 +74,10 @@ public class ErrorMiningPerspective extends Perspective {
 		if(managementViewPoint!=null) {
 			newExtensions.addAll(PluginUtil.getExtensions(
 					managementViewPoint, true, true, null));
-		}
+		}		
 		
 		connectedViews.addAll(newExtensions);
-		
+			
 		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEWS_ADDED, 
 				"extensions", newExtensions.toArray())); //$NON-NLS-1$
 	}
