@@ -78,8 +78,8 @@ public class CoreferenceDocument extends BatchDocument {
 	protected StringBuilder builder;
 	
 	private boolean markSpans = true;
-	private boolean showClusterId = true;
-	private boolean showOffset = true;
+	private boolean showClusterId = false;
+	private boolean showOffset = false;
 	private boolean forceLinebreaks = true;
 	private boolean showDocumentHeader = true;
 	private boolean showSentenceIndex = true;

@@ -78,6 +78,7 @@ import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.list.RowHeaderList;
+import de.ims.icarus.ui.table.TableColumnAdjuster;
 import de.ims.icarus.ui.table.TableIndexListModel;
 import de.ims.icarus.ui.table.TablePresenter;
 import de.ims.icarus.ui.table.TableRowHeaderRenderer;
@@ -115,6 +116,10 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 	
 	protected CoreferenceDocumentDataPresenter parent;
+	
+	protected TableColumnAdjuster columnAdjuster;
+	
+	protected boolean adjustColumnWidth = true;
 	
 	public static final int DEFAULT_CELL_HEIGHT = 20;
 	public static final int DEFAULT_CELL_WIDTH = 70;
@@ -163,6 +168,10 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		if(callbackHandler==null) {
 			callbackHandler = createCallbackHandler();
 		}
+		
+		actionManager.setSelected(adjustColumnWidth, 
+				"plugins.coref.entityGridPresenter.toggleAdjustColumnWidthAction"); //$NON-NLS-1$
+		
 		actionManager.addHandler("plugins.coref.entityGridPresenter.refreshAction",  //$NON-NLS-1$
 				callbackHandler, "refresh"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.entityGridPresenter.openPreferencesAction",  //$NON-NLS-1$
@@ -175,6 +184,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 				callbackHandler, "toggleFilterSingletons"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleLabelModeAction",  //$NON-NLS-1$
 				callbackHandler, "toggleLabelMode"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleAdjustColumnWidthAction",  //$NON-NLS-1$
+				callbackHandler, "toggleAdjustColumnWidth"); //$NON-NLS-1$
 	}
 	
 	protected void refreshActions() {
@@ -314,6 +325,12 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		scrollPane.setBorder(UIUtil.topLineBorder);
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
 		
+		columnAdjuster = new TableColumnAdjuster(table);
+		columnAdjuster.setColumnDataIncluded(true);
+		columnAdjuster.setColumnHeaderIncluded(false);
+		columnAdjuster.setOnlyAdjustLarger(false);
+		columnAdjuster.setDynamicAdjustment(false);
+		
 		ActionComponentBuilder builder = createToolBar();
 		if(builder!=null) {
 			contentPanel.add(builder.buildToolBar(), BorderLayout.NORTH);
@@ -427,6 +444,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		
 		gridModel.setDocument(document);
 		gridModel.reload(allocation, goldAllocation);
+		
+		tryAdjustColumnWidth();
 	}
 	
 	protected void refreshLabelBuilder() {
@@ -459,6 +478,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		
 		cellRenderer.setLabelBuilder(builder);
 		if(table!=null) {
+			tryAdjustColumnWidth();
 			table.repaint();
 		}
 	}
@@ -484,6 +504,14 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	@Override
 	public void uninstall(Object target) {
 		parent = null;
+	}
+	
+	protected void tryAdjustColumnWidth() {
+		if(!adjustColumnWidth || columnAdjuster==null) {
+			return;
+		}
+		
+		columnAdjuster.adjustColumns();
 	}
 	
 	protected void showPopup(MouseEvent e) {
@@ -718,6 +746,32 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to toggle label mode", e); //$NON-NLS-1$
+			}
+		}
+
+		public void toggleAdjustColumnWidth(ActionEvent e) {
+			// ignore
+		}
+
+		public void toggleAdjustColumnWidth(boolean b) {
+			
+			if(adjustColumnWidth==b) {
+				return;
+			}
+			
+			try {
+				adjustColumnWidth = b;
+				
+//				columnAdjuster.setDynamicAdjustment(adjustColumnWidth);
+				
+				if(adjustColumnWidth) {
+					columnAdjuster.adjustColumns();
+				} else {
+//					columnAdjuster.restoreColumns();
+				}
+			} catch(Exception e) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to adjust table columns", e); //$NON-NLS-1$
 			}
 		}
 

@@ -22,6 +22,10 @@
 	<action id="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction"
 		name="${id}.name" desc="${id}.description" icon="filter_singletons.png" type="toggle" />
 		
+	<!-- Toggle 'adjustColumnWidth' -->
+	<action id="plugins.coref.entityGridPresenter.toggleAdjustColumnWidthAction"
+		name="${id}.name" desc="${id}.description" icon="html_tag_obj.gif" type="toggle" />
+		
 	<!-- Toggle Label Mode -->
 	<action id="plugins.coref.entityGridPresenter.toggleLabelModeAction"
 		name="${id}.name" desc="${id}.description" icon="label_mode.png" type="toggle" />
@@ -37,6 +41,8 @@
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction" />
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleShowGoldSpansAction" />
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction" />
+		<separator />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleAdjustColumnWidthAction" />
 		<separator />
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleLabelModeAction" />
 		<item type="custom" value="patternSelect" />

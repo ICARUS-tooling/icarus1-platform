@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.coref.view.grid;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -309,7 +310,44 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		g.drawString("]", x, y); //$NON-NLS-1$
 	}
 	
-    @Override
+	protected static final Dimension nullSize = new Dimension();
+	
+    /**
+	 * @see javax.swing.JComponent#getPreferredSize()
+	 */
+	@Override
+	public Dimension getPreferredSize() {
+		
+		if(node==null) {
+			return nullSize;
+		}
+
+		Font f = getFont();
+		FontMetrics fm = getFontMetrics(f);
+		
+		int width = 0;
+		int height = fm.getHeight();
+		int count = node.getSpanCount();
+		
+		// Calculate required total width
+		width += fm.charWidth('[');
+		for(int i=0; i<count; i++) {
+			if(i>0) {
+				width += fm.charWidth(',');
+			}
+			
+			String token = labelBuilder==null ? null : labelBuilder.getLabel(node, i);
+			if(token==null) {
+				continue;
+			}
+			width += fm.stringWidth(token);
+		}
+		width += fm.charWidth(']');
+		
+		return new Dimension(width, height);
+	}
+
+	@Override
     public boolean isOpaque() {
         return true;
     }

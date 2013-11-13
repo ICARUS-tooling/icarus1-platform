@@ -423,7 +423,9 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 				TableColumn column = new TableColumn(i);
 				
 				column.setIdentifier(clusters.get(i));
+				column.setMinWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 				column.setPreferredWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
+				column.setMaxWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH*3);
 				
 				addColumn(column);
 			}
