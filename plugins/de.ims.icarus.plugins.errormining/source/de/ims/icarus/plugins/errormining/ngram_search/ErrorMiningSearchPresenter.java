@@ -39,6 +39,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,6 +76,7 @@ import de.ims.icarus.plugins.errormining.ErrorMiningView;
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataListDependency;
+import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter;
 import de.ims.icarus.resources.ResourceManager;
@@ -139,6 +141,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	
 	
 	protected Map<String,ArrayList<ItemInNuclei>> nGramResult;
+	protected Map<String,ArrayList<ItemInNuclei>> nGramResultFiltered;
 	protected NGramDataList ngList;
 	
 	
@@ -163,12 +166,25 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		nGramResult = (Map<String, ArrayList<ItemInNuclei>>) searchResult.getProperty("COMPLETE_NGRAM");
 		//System.out.println("SIZE " + nGramResult.size());
 		
+		
+		int minimumGramsize = searchResult.getSource().getParameters().getInteger(NGramParameters.GRAMS_GREATERX);
+		
+		//no limitations
+		if(minimumGramsize == 0){
+			nGramResultFiltered = nGramResult;
+		} else {
+			generateFilteredResult(minimumGramsize);
+		}
+		
 		if(ngramListModel == null){
 			ngramListModel = new NGramResultViewListModel();
 		}
 		
 		if (nGramResult != null) {
 			ngramListModel.reload();
+			if(ngramList != null){
+				ngramList.setPrototypeCellValue(ngramListModel.getLargestElement());
+			}
 		}
 		
 		if (scrollPane != null) {
@@ -304,7 +320,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		ngramList.addListSelectionListener(getHandler());
 		ngramList.addMouseListener(getHandler());
 		ngramList.getModel().addListDataListener(getHandler());	
-
+		ngramList.setPrototypeCellValue(ngramListModel.getLargestElement());
+		
 		ngramListRenderer = new NGramResultViewListCellRenderer();		
 		
 		ngramList.setCellRenderer(ngramListRenderer);
@@ -318,7 +335,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						.get("plugins.errormining.labels.NucleiName")); //$NON-NLS-1$
 		
 		ngramTableModel = new NGramResultViewTableModel();
-		ngramTable = new JTable(ngramTableModel);		
+		ngramTable = new JTable(ngramTableModel);
+		ngramTable.addMouseListener(getHandler());
 		scrollPaneDetailed.setViewportView(ngramTable);
 		
 		
@@ -355,14 +373,26 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	}
 	
 	
-	private void showDefaultInfo() {
-		scrollPane.setViewportView(infoLabel);
-		header.setText(""); //$NON-NLS-1$	
+	/**
+	 * 
+	 */
+	private void generateFilteredResult(int minsize) {
+		nGramResultFiltered = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
+		
+		List<String> tmpKey = new ArrayList<String>(nGramResult.keySet());
+		
+		for (int i = 0; i < tmpKey.size();i++){
+			String key = tmpKey.get(i);
+	
+			if(key.split(" ").length >= minsize){ //$NON-NLS-1$				
+				nGramResultFiltered.put(key, nGramResult.get(key));		
+			}
+		}
+		
+		//System.out.println(nGramResultFiltered.keySet());
+		
 	}
-	
-	
-	
-	
+
 	protected void setDetailPresenter(AWTPresenter detailsPresenter) {
 		if(this.detailsPresenter==detailsPresenter) {
 			return;
@@ -404,6 +434,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	}
 	
 	
+	private void showDefaultInfo() {
+		scrollPane.setViewportView(infoLabel);
+		header.setText(""); //$NON-NLS-1$	
+	}
+
 	private void showDetails(SentenceDataList sentenceList){
 		// Ensure list presenter
 		ListPresenter listPresenter = this.listPresenter;
@@ -623,7 +658,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public void mouseClicked(MouseEvent me) {
+			
+			
 		    if (me.getClickCount() == 2) {
+		    	if(me.getSource() == ngramList){
 		        int index = ngramList.locationToIndex(me.getPoint());
 		        //System.out.println("Double clicked on Item " + index);
 		        
@@ -632,6 +670,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		        String key = (String) ngramListModel.getElementAt(index);	        
 
 		        showDetails(createDetailList(key));
+		        } else {
+		        	int selectedRow = ngramTable.getSelectedRow();
+		        	//add correct column!!
+		        	showDetails(createDetailListFromTable(
+				        			(String) ngramTable.getModel()
+				        					.getValueAt(selectedRow, 3)));
+		        }
+		    	
 		        
 		     }
 		}
@@ -643,8 +689,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 * @return
 		 */
 		private SentenceDataList createDetailList(String key) {
-			//TODO add later presentation		
-			
 			List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
 
 			//System.out.println("selectedKey " + key);
@@ -659,14 +703,31 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							(SentenceData) dl.get(iin.getSentenceInfoAt(s).getSentenceNr()-1);
 					//System.out.println(sentenceData.getText() + "TEXT");
 					sentenceDataDetailedList.add(sentenceData);
-					
 				}
 			}
 			
 			DetailedNGramSentenceDataList dsdl = 
 					new DetailedNGramSentenceDataList(sentenceDataDetailedList);
-			return dsdl;
+			return dsdl;			
+		}
+		
+		
+		private SentenceDataList createDetailListFromTable(String value) {
+			List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
+
+			//System.out.println("selectedKey " + value); //$NON-NLS-1$
+			String[] tmp = value.split(", "); //$NON-NLS-1$
+		
+			DataList<?> dl = ((AbstractSearchResult)searchResult).getTarget();
+			for(int i = 0; i < tmp.length; i++){
+					SentenceData sentenceData =	(SentenceData) dl.get(Integer.parseInt(tmp[i]) - 1);
+					//System.out.println(sentenceData.getText() + "TEXT");
+					sentenceDataDetailedList.add(sentenceData);
+			}
 			
+			DetailedNGramSentenceDataList dsdl = 
+					new DetailedNGramSentenceDataList(sentenceDataDetailedList);
+			return dsdl;			
 		}
 
 
@@ -802,7 +863,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 		protected boolean ascending = true;
 
-		Object[] keys;
+		private Object[] keys;
+		
+		private Object largestElement;
 		
 		public void setSort(boolean newSort){
 			if (newSort != ascending){
@@ -828,17 +891,38 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		public int getSize() {
 			return keys.length;
 		}
+		
+		public Object getLargestElement(){
+			return largestElement;			
+		}
 
 
 		public void reload() {
 			//keys = nGramResult.keySet().toArray();
+
+//			System.out.println("minsize: " 
+//						+ searchResult.getSource().getParameters()
+//							.getInteger(NGramParameters.GRAMS_GREATERX));
 			
-			List<Object> myList;
-			if (nGramResult != null){
-				myList = new ArrayList<Object>(nGramResult.keySet());
+			List<Object> myList = new ArrayList<>();
+			Collection<String> source ;
+			
+			if (nGramResultFiltered != null){
+				source = nGramResultFiltered.keySet();
 			} else {
-				myList = new ArrayList<Object>(nGramResultDependency.keySet());
+				source = nGramResultDependency.keySet();
 			}
+			
+			String sMax = ""; //$NON-NLS-1$
+			
+			for (String element: source){
+				myList.add(element);
+				if(element.length() > sMax.length()){
+					sMax = element;
+				}
+			}
+			
+			largestElement = sMax;
 			
 			if (ascending){
 				//System.out.println("normal");
@@ -860,10 +944,13 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 
 		private static final long serialVersionUID = 6942839834724864784L;
+		
+		private StringBuilder sb;
 
 
 		public NGramResultViewListCellRenderer(){
 	         setOpaque(true);
+	         sb = new StringBuilder();
 	     }
 
 
@@ -871,12 +958,18 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			      boolean isSelected, boolean cellHasFocus) {
 			String[] s = ((String) value).split(" "); //$NON-NLS-1$
 			
+			sb.setLength(0);
+			
+			sb.append("<html>").append((index + 1)).append(") ") //$NON-NLS-1$ //$NON-NLS-2$
+				.append(" (").append(s.length).append("-Gram) ")  //$NON-NLS-1$//$NON-NLS-2$
+				.append(colorString(s)).append("</html>"); //$NON-NLS-1$
+			
 
-			String text =	"<html>"  //$NON-NLS-1$
-							+ (index + 1) + ") "  //$NON-NLS-1$
-							+ " (" + s.length + "-Gram) "  //$NON-NLS-1$//$NON-NLS-2$
-							+ colorString(s)
-							+ "</html>"; //$NON-NLS-1$
+//			String text =	"<html>"  //$NON-NLS-1$
+//							+ (index + 1) + ") "  //$NON-NLS-1$
+//							+ " (" + s.length + "-Gram) "  //$NON-NLS-1$//$NON-NLS-2$
+//							+ colorString(s)
+//							+ "</html>"; //$NON-NLS-1$
 
 		      if (isSelected) {
 		          setBackground(list.getSelectionBackground());
@@ -888,7 +981,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		          // setBackground(Color.WHITE);
 		          //text.setForeground(list.getForeground());
 		        }
-			setText(text);
+			setText(sb.toString());
 			
 			return this;
 		  }
@@ -989,7 +1082,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public int getColumnCount() {
-			return 6;
+			return 4;
 		}
 		
 		
@@ -1005,11 +1098,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		            case 2: return ResourceManager.getInstance().get(
 		            		"plugins.errormining.labels.Count"); //$NON-NLS-1$
 		            case 3: return ResourceManager.getInstance().get(
-		            		"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
-		            case 4: return ResourceManager.getInstance().get(
-		            		"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
-		            case 5: return ResourceManager.getInstance().get(
 		            		"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
+		            case 4: return ResourceManager.getInstance().get(
+		            		"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
+		            case 5: return ResourceManager.getInstance().get(
+		            		"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
 		            default: break;
 		        }
 		        return null;
@@ -1067,11 +1160,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				case 2:
 					return iin.getCount();
 				case 3:
-					return nucleiCount;
-				case 4:
-					return getNucleis(iin);
-				case 5:
 					return sentenceOccurences(iin);
+				case 4:
+					return nucleiCount;
+				case 5:
+					return getNucleis(iin);
 				default:
 					break;
 				}
@@ -1091,11 +1184,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				case 2:
 					return iin.getCount();
 				case 3:
-					return iin.getSentenceInfoAt(0).getNucleiIndexListSize();
+					return sentenceOccurences(iin);					
 				case 4:
-					return getNucleis(iin);
+					return iin.getSentenceInfoAt(0).getNucleiIndexListSize();
 				case 5:
-					return sentenceOccurences(iin);
+					return getNucleis(iin);
+
 				default:
 					break;
 				}
