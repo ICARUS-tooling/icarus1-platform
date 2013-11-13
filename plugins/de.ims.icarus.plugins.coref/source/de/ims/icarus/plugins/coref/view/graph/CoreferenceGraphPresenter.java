@@ -421,12 +421,13 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			Object parent = graph.getDefaultParent();
 			
 			Collection<Edge> edges = edgeSet.getEdges();
-			if(isFilterSingletons()) {
-				edges = CoreferenceUtils.removeSingletons(edges);
-			}
 			
 			cache.clear();
 			cache.cacheEdges(edges);
+			
+			if(isFilterSingletons()) {
+				edges = CoreferenceUtils.removeSingletons(edges);
+			}
 			
 			//System.out.println(Arrays.toString(edges.toArray()));
 			

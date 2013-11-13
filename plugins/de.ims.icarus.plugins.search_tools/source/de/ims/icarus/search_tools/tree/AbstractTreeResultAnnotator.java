@@ -91,7 +91,7 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 			highlights.add(baseHighlights[i]);
 			
 			SearchEdge edge = matchers[i].getEdge();
-			if(edge!=null && edge.getEdgeType()==EdgeType.TRANSITIVE) {
+			if(!trans && edge!=null && edge.getEdgeType()==EdgeType.TRANSITIVE) {
 				trans = true;
 			}
 		}

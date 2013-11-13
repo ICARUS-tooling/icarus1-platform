@@ -59,7 +59,6 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 	public CorefNodeData(Span data, CoreferenceData sentence, int type, long highlight) {
 		super(data, type, highlight);
 		setSentence(sentence);
-
 	}
 
 	@Override

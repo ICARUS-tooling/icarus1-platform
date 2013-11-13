@@ -1290,6 +1290,7 @@ public class DefaultQueryParser {
 			return edge;
 		}
 		
+		@SuppressWarnings("unused")
 		private boolean containsConstraint(List<? extends SearchConstraint> constraints, SearchConstraint constraint) {
 			for(SearchConstraint target : constraints) {
 				if(target.getToken().equals(constraint.getToken())) {
@@ -1307,9 +1308,9 @@ public class DefaultQueryParser {
 					throw new ParseException(errorMessage(
 							"Unexpected node-constraint '"+constraint.getToken()+"'"), index); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				if(containsConstraint(nodeConstraints, constraint))
-					throw new ParseException(errorMessage(
-							"Duplicate node-constraint '"+constraint.getToken()+"'"), index); //$NON-NLS-1$ //$NON-NLS-2$
+//				if(containsConstraint(nodeConstraints, constraint))
+//					throw new ParseException(errorMessage(
+//							"Duplicate node-constraint '"+constraint.getToken()+"'"), index); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				nodeConstraints.add(constraint);
 			} else {
@@ -1317,9 +1318,9 @@ public class DefaultQueryParser {
 					throw new ParseException(errorMessage(
 							"Unexpected edge-constraint '"+constraint.getToken()+"'"), index); //$NON-NLS-1$ //$NON-NLS-2$
 
-				if(containsConstraint(nodeConstraints, constraint))
-					throw new ParseException(errorMessage(
-							"Duplicate edge-constraint '"+constraint.getToken()+"'"), index); //$NON-NLS-1$ //$NON-NLS-2$
+//				if(containsConstraint(nodeConstraints, constraint))
+//					throw new ParseException(errorMessage(
+//							"Duplicate edge-constraint '"+constraint.getToken()+"'"), index); //$NON-NLS-1$ //$NON-NLS-2$
 					
 				edgeConstraints.add(constraint);
 			}

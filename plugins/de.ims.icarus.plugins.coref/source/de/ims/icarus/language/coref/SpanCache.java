@@ -25,8 +25,11 @@
  */
 package de.ims.icarus.language.coref;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.ims.icarus.util.Counter;
@@ -53,7 +56,7 @@ public class SpanCache {
 	}
 	
 	public void cacheSpan(Span span) {
-		if(span!=null) {
+		if(span!=null && !span.isROOT()) {
 			
 			if(indexMap.containsKey(span))
 				throw new IllegalStateException("Span already cached: "+span); //$NON-NLS-1$
@@ -118,8 +121,13 @@ public class SpanCache {
 			return;
 		}
 		
+		List<Span> spans = new ArrayList<>(edges.size());
 		for(Edge edge : edges) {
-			cacheSpan(edge.getTarget());
+			spans.add(edge.getTarget());
 		}
+		
+		Collections.sort(spans);
+		
+		cacheSpans(spans);
 	}
 }
