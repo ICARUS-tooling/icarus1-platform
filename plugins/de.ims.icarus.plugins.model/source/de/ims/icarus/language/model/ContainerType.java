@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,37 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
  * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public enum ContainerType {
+	
+	/**
+	 * The container holds a single {@code Markable}.
+	 */
+	SINGLETON,
+	
+	/**
+	 * The container holds a non-continuous collection
+	 * of {@code Markable}s. The elements may appear in
+	 * any order.
+	 */
+	UNORDERED_SET,
 
 	/**
-	 * Returns the {@code ContentType} that describes this object
+	 * The container holds a non-continuous but ordered
+	 * collection of {@code Markable}s. 
 	 */
-	ContentType getEnclosingType();
+	ORDERED_SET,
+	
+	/**
+	 * The container holds an ordered and continuous list
+	 * of {@code Markable}s.
+	 */
+	SPAN,
 }

@@ -23,20 +23,24 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
+
+import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
  * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface MarkableLayer extends Layer {
 
+	MarkableLayerManifest getManifest();
+	
 	/**
-	 * Returns the {@code ContentType} that describes this object
+	 * Returns the container holding all the {@code Markable} objects this
+	 * layer defines.
+	 * @return
 	 */
-	ContentType getEnclosingType();
+	Container getContainer();
 }

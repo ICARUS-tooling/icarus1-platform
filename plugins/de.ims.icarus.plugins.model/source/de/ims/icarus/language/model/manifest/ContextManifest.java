@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,29 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model.manifest;
+
+import java.util.List;
+
+import de.ims.icarus.language.model.io.ContextReader;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface ContextManifest extends Manifest {
 
+	List<LayerManifest> getLayerManifests();
+	
 	/**
-	 * Returns the {@code ContentType} that describes this object
+	 * Returns the reader that is used to build the actual content
+	 * of this context. If the layers in this context are generated
+	 * programmatically then this method might return {@code null}.
+	 * 
+	 * @return The {@link ContextReader} that is used for this context
+	 * or {@code null} if this context does not derive from a physical
+	 * data location.
 	 */
-	ContentType getEnclosingType();
+	ContextReader getContextReader();
 }

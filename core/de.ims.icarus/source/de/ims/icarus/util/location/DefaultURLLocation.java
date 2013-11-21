@@ -41,7 +41,7 @@ import de.ims.icarus.io.IOUtil;
  * @version $Id$
  *
  */
-public class DefaultURLLocation extends Location {
+public class DefaultURLLocation implements Location {
 	
 	private final URL url;
 

@@ -26,6 +26,7 @@
 package de.ims.icarus.language.coref;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,9 +102,7 @@ public class SpanCache {
 			return;
 		}
 		
-		for(int i=0; i<edgeSet.size(); i++) {
-			cacheSpan(edgeSet.get(i).getTarget());
-		}
+		cacheEdges(edgeSet.getEdges());
 	}
 	
 	public void cacheEdges(Edge[] edges) {
@@ -111,9 +110,7 @@ public class SpanCache {
 			return;
 		}
 		
-		for(int i=0; i<edges.length; i++) {
-			cacheSpan(edges[i].getTarget());
-		}
+		cacheEdges(Arrays.asList(edges));
 	}
 	
 	public void cacheEdges(Collection<Edge> edges) {
@@ -126,6 +123,7 @@ public class SpanCache {
 			spans.add(edge.getTarget());
 		}
 		
+		// Preserve natural order of spans!
 		Collections.sort(spans);
 		
 		cacheSpans(spans);

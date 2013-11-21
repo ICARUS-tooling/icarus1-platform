@@ -161,8 +161,11 @@ public class ConfigUtils implements ConfigConstants {
 		Object[] fonts = UIUtil.getFontNames();
 		int index = CollectionUtils.indexOf(fonts, defaultFont);
 		
-		if(index==-1)
-			throw new IllegalArgumentException("Unknown font: "+defaultFont); //$NON-NLS-1$
+		if(index==-1) {
+			defaultFont = "Dialog"; //$NON-NLS-1$
+			index = CollectionUtils.indexOf(fonts, defaultFont);
+//			throw new IllegalArgumentException("Unknown font: "+defaultFont); //$NON-NLS-1$
+		}
 		
 		builder.setProperties(builder.addOptionsEntry("fontFamily", index, fonts), //$NON-NLS-1$
 					ConfigConstants.RENDERER, ConfigUtils.fontFamilyRenderer);

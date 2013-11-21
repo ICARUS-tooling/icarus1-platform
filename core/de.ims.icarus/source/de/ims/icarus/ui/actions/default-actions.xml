@@ -165,5 +165,11 @@
 		name="export" 
 		desc="export"
 		icon="export_wiz.gif" />
+	
+	<!-- Export -->
+	<action id="actions.default.filterAction" virtual="true"
+		name="filter" 
+		desc="filter"
+		icon="filter_tsk.gif" />
 
 </actions>

@@ -5,6 +5,6 @@ Main-Class: de.ims.icarus.Core
 SplashScreen-Image: de.ims.icarus/ICARUS_Splash.png
 Implementation-Version: 1.0.3
 Implementation-Vendor: Markus Gaertner, Gregor Thiele
-Built-Date: 2013-11-13-10-35
+Built-Date: 2013-11-18-16-34
 Class-Path: jpf.jar
 

@@ -23,20 +23,34 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
+
+import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
  * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface AnnotationLayer extends Layer {
 
 	/**
-	 * Returns the {@code ContentType} that describes this object
+	 * Returns the shared {@code AnnotationLayerManifest} that holds
+	 * information about keys and possible values in this annotation.
+	 * 
+	 * @return The manifest that describes this annotation
 	 */
-	ContentType getEnclosingType();
+	AnnotationLayerManifest getManifest();
+	
+	/**
+	 * 
+	 * @param markable
+	 * @return
+	 * @throws NullPointerException if the {@code markable} is {@code null}
+	 * @throws IllegalArgumentException if the
+	 */
+	Object getValue(Markable markable);
+	
+	Object getValue(Markable markable, String key);
 }

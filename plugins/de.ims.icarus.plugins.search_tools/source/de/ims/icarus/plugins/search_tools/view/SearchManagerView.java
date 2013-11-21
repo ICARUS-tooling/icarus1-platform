@@ -396,7 +396,7 @@ public class SearchManagerView extends View {
 				// Display result
 				SearchResult result = descriptor.getSearchResult();
 				
-				if(result==null) {
+				if(result==null || !descriptor.getSearch().isRunning()) {
 					return;
 				}
 				

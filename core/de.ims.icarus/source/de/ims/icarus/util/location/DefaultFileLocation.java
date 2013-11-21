@@ -45,7 +45,7 @@ import de.ims.icarus.io.IOUtil;
  * @version $Id$
  *
  */
-public class DefaultFileLocation extends Location {
+public class DefaultFileLocation implements Location {
 	
 	private final File file;
 

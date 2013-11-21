@@ -53,7 +53,8 @@
 		
 	<!-- Filter Span -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.filterSpanAction"
-		name="${id}.name" desc="${id}.description" icon="filter_tsk.gif" />
+		template="actions.default.filterAction"
+		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Clear Filter -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.clearFilterAction"

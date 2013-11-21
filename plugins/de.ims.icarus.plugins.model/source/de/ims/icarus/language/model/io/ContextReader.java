@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,22 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model.io;
+
+import java.io.IOException;
+import java.util.List;
+
+import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.util.UnsupportedFormatException;
+import de.ims.icarus.util.location.UnsupportedLocationException;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
- * 
- * @author Markus Gärtner
+ * @author Markus
  * @version $Id$
  *
  */
-public interface Content {
+public interface ContextReader {
 
-	/**
-	 * Returns the {@code ContentType} that describes this object
-	 */
-	ContentType getEnclosingType();
+	List<Layer> readContext(ContextManifest manifest) throws IOException, UnsupportedFormatException, UnsupportedLocationException;
 }

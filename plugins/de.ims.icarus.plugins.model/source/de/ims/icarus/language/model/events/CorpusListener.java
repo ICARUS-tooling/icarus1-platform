@@ -23,20 +23,14 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model.events;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
  * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface CorpusListener {
 
-	/**
-	 * Returns the {@code ContentType} that describes this object
-	 */
-	ContentType getEnclosingType();
 }

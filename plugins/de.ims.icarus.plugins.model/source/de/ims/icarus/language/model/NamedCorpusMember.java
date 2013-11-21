@@ -23,20 +23,24 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
+
+import de.ims.icarus.util.NamedObject;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
  * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface NamedCorpusMember extends CorpusMember, NamedObject {
 
 	/**
-	 * Returns the {@code ContentType} that describes this object
+	 * Returns the unique name of the member.
+	 * <p>
+	 * Needs only to be unique within the scope of a single corpus!
+	 * 
+	 * @return Unique name of the member.
 	 */
-	ContentType getEnclosingType();
+	String getName();
 }

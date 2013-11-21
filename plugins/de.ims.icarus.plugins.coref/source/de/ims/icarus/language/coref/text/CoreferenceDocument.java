@@ -269,7 +269,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 		CoreferenceDocumentAnnotationManager annotationManager = 
 				(CoreferenceDocumentAnnotationManager) getAnnotationManager();
-		/*Annotation annotation = data instanceof AnnotatedData ? 
+		/*AnnotationLayer annotation = data instanceof AnnotatedData ? 
 				((AnnotatedData)data).getAnnotation() : null; 
 		if(annotationManager!=null) {
 			annotationManager.setAnnotation(annotation);

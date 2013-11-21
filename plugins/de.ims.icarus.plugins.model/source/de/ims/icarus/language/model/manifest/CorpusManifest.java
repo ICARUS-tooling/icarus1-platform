@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,18 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model.manifest;
+
+import java.util.List;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface CorpusManifest extends Manifest {
 
-	/**
-	 * Returns the {@code ContentType} that describes this object
-	 */
-	ContentType getEnclosingType();
+	ContextManifest getDefaultContextManifest();
+	
+	List<ContextManifest> getContextManifests();
 }

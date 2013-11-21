@@ -23,20 +23,21 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
  * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface Edge extends Markable {
+	
+	Structure getStructure();
 
-	/**
-	 * Returns the {@code ContentType} that describes this object
-	 */
-	ContentType getEnclosingType();
+	Markable getSource();
+	
+	Markable getTarget();
+	
+	boolean isDirected();
 }

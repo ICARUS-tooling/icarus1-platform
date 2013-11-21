@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,26 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
+
+import java.util.List;
+
+import de.ims.icarus.io.Loadable;
+import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.util.location.Location;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface Context extends Loadable {
 
-	/**
-	 * Returns the {@code ContentType} that describes this object
-	 */
-	ContentType getEnclosingType();
+	Location getLocation();
+	
+	Corpus getCorpus();
+	
+	List<Layer> getLayers();
+	
+	ContextManifest getManifest();
 }

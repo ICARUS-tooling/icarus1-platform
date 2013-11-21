@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,40 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public enum StructureType {
 
 	/**
-	 * Returns the {@code ContentType} that describes this object
+	 * An unordered collection of nodes, not connected
+	 * by any edges. This is by far the most basic type of
+	 * structure.
 	 */
-	ContentType getEnclosingType();
+	SET,
+	
+	/**
+	 * An ordered sequence of nodes, each with at most one
+	 * predecessor and successor. Edges in this structure are
+	 * expected to be {@code directed} only!
+	 */
+	CHAIN,
+	
+	/**
+	 * A hierarchically ordered collection of nodes where each node
+	 * is assigned at most one parent and is allowed to have an arbitrary
+	 * number of children. All edges are {@code directed} from a parent
+	 * down to the child node itself.
+	 */
+	TREE,
+	
+	/**
+	 * Being the most unbounded and therefore most complex type a {@code GRAPH}
+	 * does not pose any restrictions on nodes or edges.
+	 */
+	GRAPH;
 }

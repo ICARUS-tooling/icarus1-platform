@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,20 +23,26 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util.data;
+package de.ims.icarus.language.model;
 
 /**
- * For objects that are aware of their own {@code ContentType} this 
- * interface provides the means to signal this.
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Content {
+public interface MarkableLevels {
 
-	/**
-	 * Returns the {@code ContentType} that describes this object
-	 */
-	ContentType getEnclosingType();
+	public static final String TOKENS = "tokens"; //$NON-NLS-1$
+
+	public static final String SPANS = "spans"; //$NON-NLS-1$
+
+	public static final String SENTENCES = "sentences"; //$NON-NLS-1$
+
+	public static final String CLUSTERS = "clusters"; //$NON-NLS-1$
+
+	public static final String SECTIONS = "sections"; //$NON-NLS-1$
+
+	public static final String CHAPTERS = "chapters"; //$NON-NLS-1$
+
+	public static final String DOCUMENTS = "documents"; //$NON-NLS-1$
 }

@@ -36,15 +36,15 @@ import java.net.URL;
  * @version $Id$
  *
  */
-public abstract class Location {
+public interface Location {
 
-	public abstract URL getURL();
+	public URL getURL();
 	
-	public abstract boolean isLocal();
+	public boolean isLocal();
 	
-	public abstract File getFile();
+	public File getFile();
 	
-	public abstract OutputStream openOutputStream() throws IOException;
+	public OutputStream openOutputStream() throws IOException;
 	
-	public abstract InputStream openInputStream() throws IOException;
+	public InputStream openInputStream() throws IOException;
 }
