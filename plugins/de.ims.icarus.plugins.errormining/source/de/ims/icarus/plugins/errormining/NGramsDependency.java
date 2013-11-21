@@ -1066,6 +1066,11 @@ public class NGramsDependency {
 		return nGramCache;
 	}
 	
+	
+	public int getPasses(){
+		return nGramCount;
+	}
+	
 
 
 	/**
@@ -1216,19 +1221,14 @@ public class NGramsDependency {
 		Options on = new Options();
 		on.put("FringeSTART", 3); //$NON-NLS-1$
 		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
-		on.put("NGramLIMIT", 10); //$NON-NLS-1$
-
+		on.put("NGramLIMIT", 0); //$NON-NLS-1$
+		on.put("UseFringe", true); //$NON-NLS-1$
+		on.put("UseNumberWildcard", false); //$NON-NLS-1$
 	
 		NGramsDependency ngrams = new NGramsDependency(1, on);
 		try {
 			
-//			Treebank treebank = (Treebank) new TreebankDescriptor();
-//			treebank.set(dd, i, DataType.SYSTEM);
-//			TreebankRegistry.getInstance().newTreebank("", "Test");
-			
-			conellReader.init(dloc, o);
-
-			
+			conellReader.init(dloc, o);			
 			//while (cr.next() != null) {
 			for(int i = 0; i < sentencesToRead; i++){
 				DependencyData dd = (DependencyData) conellReader.next();

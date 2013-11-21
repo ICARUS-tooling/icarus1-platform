@@ -43,8 +43,7 @@ public class ItemInNuclei {
 	public ItemInNuclei(){
 		List<SentenceInfo> sl = new ArrayList<>();
 		this.sl = sl;
-		count = 1; //innitialize with 1 occurences +1 when found
-		count = 1;
+		this.count = 1; //innitialize with 1 occurences +1 when found
 	}
 	
 	
@@ -151,7 +150,8 @@ public class ItemInNuclei {
 		sentenceInfo.setNucleiIndex(si.getNucleiIndex());
 		sentenceInfo.setSentenceNr(si.getSentenceNr());
 		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
-			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
+			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));
+			//System.out.println("sll " + si.getNucleiIndexListAt(i));
 		}
 		//sentenceInfo.setNucleiSentencePos(si.getNucleiSentencePos());
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin()-1); //going left
@@ -165,7 +165,8 @@ public class ItemInNuclei {
 		sentenceInfo.setNucleiIndex(si.getNucleiIndex());
 		sentenceInfo.setSentenceNr(si.getSentenceNr());
 		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
-			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
+			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));
+			//System.out.println("srr " + si.getNucleiIndexListAt(i));
 		}
 		//sentenceInfo.setNucleiSentencePos(si.getNucleiSentencePos());
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin());

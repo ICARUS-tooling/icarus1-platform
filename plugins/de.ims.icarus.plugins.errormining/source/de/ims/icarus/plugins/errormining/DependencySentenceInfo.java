@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.errormining;
 
+
 /**
  * @author Gregor Thiele
  * @version $Id$
@@ -35,7 +36,7 @@ public class DependencySentenceInfo extends SentenceInfo {
 	protected int sentenceHeadBegin;
 	protected int sentenceHeadEnd;
 	protected int sentenceHeadIndex;
-	
+
 	public DependencySentenceInfo(){
 		//noop
 	}

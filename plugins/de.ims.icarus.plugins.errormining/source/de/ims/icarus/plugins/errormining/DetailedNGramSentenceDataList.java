@@ -33,6 +33,7 @@ import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
+import de.ims.icarus.language.annotation.AnnotatedSentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.util.data.ContentType;
 
@@ -41,7 +42,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class DetailedNGramSentenceDataList implements SentenceDataList {
+public class DetailedNGramSentenceDataList implements SentenceDataList{
 
 	protected List<SentenceData> sdl;
 	

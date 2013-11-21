@@ -42,7 +42,30 @@ public class MappedNGramResult {
 	protected List<String> keyList;
 	protected int coverStart;
 	protected int coverEnd;
+	protected int nucleusIndex;
 	
+	/**
+	 * @return the nucleusIndex
+	 */
+	public int getNucleusIndex() {
+		return nucleusIndex;
+	}
+
+
+
+
+
+	/**
+	 * @param nucleusIndex the nucleusIndex to set
+	 */
+	public void setNucleusIndex(int nucleusIndex) {
+		this.nucleusIndex = nucleusIndex;
+	}
+
+
+
+
+
 	/**
 	 * @param index
 	 * @param key
@@ -57,6 +80,7 @@ public class MappedNGramResult {
 		this.index = index;
 		this.coverStart = si.getSentenceBegin();
 		this.coverEnd = si.getSentenceEnd();
+		this.nucleusIndex = si.getNucleiIndex();
 	}
 
 

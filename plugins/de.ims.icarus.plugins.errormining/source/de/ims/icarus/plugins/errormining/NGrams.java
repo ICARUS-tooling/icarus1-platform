@@ -38,6 +38,8 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.w3c.dom.Element;
+
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
@@ -45,6 +47,7 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.UnsupportedLocationException;
+import de.tuebingen.uni.sfs.wlf1.tc.api.Sentence;
 
 
 /**
@@ -185,7 +188,6 @@ public class NGrams {
 			
 			for (int j = 0 ; j < item.getSentenceInfoSize(); j++){
 				SentenceInfo si = item.getSentenceInfoAt(j);
-				
 				if(si.getSentenceNr() == sentenceNR){
 					//maybe list?!
 					//System.out.println("NucleiToBeAdded " + si.getNucleiSentencePositionAt(0));
@@ -193,8 +195,7 @@ public class NGrams {
 				}				
 			}
 		}
-		return null;
-		
+		return null;		
 	}
 	
 	
@@ -592,6 +593,7 @@ public class NGrams {
 				for (int s = 0 ; s < iin.getSentenceInfoSize(); s++){
 					
 					SentenceInfo si = iin.getSentenceInfoAt(s);
+					//System.out.println("SISIZE"+si.getNucleiIndexListSize());
 					
 					//start sentencecount at 1 so decrement
 					DependencyData dd = corpus.get(si.getSentenceNr()-1);
@@ -602,7 +604,7 @@ public class NGrams {
 
 					/*
 					System.out.println("Sentence: " + si.getSentenceNr() +
-										" NucleiPos " + si.getNucleiIndexListSize() + 
+										" NucleiLSize " + si.getNucleiIndexListSize() + 
 										" NucleiForm " + dd.getForm(si.getNucleiIndexListAt(0)-1));
 					*/
 					
@@ -650,13 +652,12 @@ public class NGrams {
 											SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 											addNucleiLeft(item, posTagBuilder.toString(), si, sitemp, true);
 											knownTag = true;
-										} else {
+										} else {											
 											addSentenceInfoLeft(item, posTagBuilder.toString(), si, true);
 											knownTag = true;
 										}
 									}
 								}
-								
 								
 								//outputNGram.put(leftKey.toString(), itemsTemp);
 
@@ -680,14 +681,14 @@ public class NGrams {
 								ItemInNuclei item = new ItemInNuclei();
 								
 								//already an unigram
-								if (addNewNuclei){									
+								if (addNewNuclei){
 									SentenceInfo sitemp = returnSentenceInfoNREqual(nGramCache.get(leftForm), si.getSentenceNr());
 									addNucleiLeft(item, posTagBuilder.toString(), si, sitemp, false);
 									items.add(item);
 								} else {
 									addSentenceInfoLeft(item, posTagBuilder.toString(), si, false);
 									items.add(item);
-								}
+								}								
 								outputNGram.put(leftKey.toString(), items);
 							}
 		
@@ -723,7 +724,7 @@ public class NGrams {
 							String rightPOS = getTagQuery(dd.getPos(endIndex + 1));
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
-							boolean addNewNuclei = nGramCache.containsKey(rightForm);							
+							boolean addNewNuclei = nGramCache.containsKey(rightForm);
 							
 							rightKey.append(key).append(" ").append(rightForm); //$NON-NLS-1$
 							posTagBuilder.delete(0, posTagBuilder.length());
@@ -785,7 +786,6 @@ public class NGrams {
 									addSentenceInfoRigth(item, si, posTagBuilder.toString(), false);
 									items.add(item);
 								}
-
 								//System.out.println("<<<<<<"+rightKey.toString());
 								outputNGramR.put(rightKey.toString(), items);
 							}
@@ -835,9 +835,9 @@ public class NGrams {
 
 				if(nGramCount >= fringeStart){
 					if(nGramCount <= fringeEnd){
-					System.out.println("Fringe Triggered [N-Gram " + nGramCount //$NON-NLS-1$
-										+ "| Start " + fringeStart //$NON-NLS-1$
-										+ " | END " + fringeEnd + " ]"); //$NON-NLS-1$ //$NON-NLS-2$
+//					System.out.println("Fringe Triggered [N-Gram " + nGramCount //$NON-NLS-1$
+//										+ "| Start " + fringeStart //$NON-NLS-1$
+//										+ " | END " + fringeEnd + " ]"); //$NON-NLS-1$ //$NON-NLS-2$
 
 					outputNGram = distrustFringeHeuristic(outputNGram);
 					}
@@ -864,27 +864,106 @@ public class NGrams {
 			Map<String, ArrayList<ItemInNuclei>> outputNGramR) {
 
 		Map<String, ArrayList<ItemInNuclei>> result = new LinkedHashMap<String, ArrayList<ItemInNuclei>>();
-		
+
 		result.putAll(outputNGram);
 	
 	
 	for(Iterator<String> it = outputNGramR.keySet().iterator(); it.hasNext();){
 		String key = it.next();
 		if (result.containsKey(key)){
-//			System.out.println(key + " "+ outputNGram.get(key).get(0).getPosTag());
-//			System.out.println(key + " "+ outputNGramR.get(key).get(0).getPosTag());
+			//System.out.println(key + " "+ outputNGram.get(key).get(0).getPosTag());
+			//System.out.println(key + " "+ outputNGramR.get(key).get(0).getPosTag());
 			//need merge
 			result.put(key, outputNGram.get(key));
 		} else {
 			result.put(key, outputNGramR.get(key));			
 		}
+	}	
+	
+	//TODO add clean up of unused nucleus
+	//System.out.println("Checker " + isNucleiList("Dynamics", involvedSentences("General Dynamics")));
+	for(Iterator<String> cleanKey = result.keySet().iterator(); cleanKey.hasNext();){
+		String keyToCheck = cleanKey.next();
+		ArrayList<ItemInNuclei> arrayList = result.get(keyToCheck);
+		//cleanNuclei(arrayList, keyToCheck);		
 	}
-
+	
 	return result;
 }
 	
 	
 	
+	
+	
+	//TODO method to clean up unecessary nucleus 20.11
+	private void cleanNuclei(SentenceInfo si, String cleanKey){
+		String[] splitKey = cleanKey.split(" "); //$NON-NLS-1$
+		
+		for(String s:splitKey){
+			System.out.print(s +  " ### " + cleanKey + " ---> ");
+			System.out.println(isNucleiList(s, involvedSentences(cleanKey)));
+			
+			//general nuclei check
+			if(isNucleiList(s, involvedSentences(s))){
+				int i = 0;
+				if(!isNucleiList(s, involvedSentences(cleanKey))){
+					System.out.println("lösche nucleus " + s + i);
+		
+					si.deleteNucleiAtIndex(i);
+					i++;
+//					System.out.println(si.getSentenceBegin());
+//					System.out.println(si.getSentenceEnd());
+//					System.out.println(si.getNucleiIndex());
+//					System.out.println(si.getNucleiIndexListSize());
+				}
+				
+			}
+			
+
+		}
+		
+//		for(int i = 0; i < arrayList.size(); i++){
+//			ItemInNuclei iin = arrayList.get(i);
+//			
+//			for (int k = 0; k < iin.getSentenceInfoSize(); k++){
+//				
+//				SentenceInfo si = iin.getSentenceInfoAt(k);
+//				for(int n = 0; n < si.getNucleiIndexListSize(); n++){
+//					System.out.println(cleanKey + " " + si.getNucleiIndexListAt(n));
+//				}
+//			}
+			
+//			//more than one nucleus
+//			for(int s = 0; s < iin.getSentenceInfoSize(); s++){
+//				System.out.println(cleanKey);
+//				System.out.println(iin.getSentenceInfoAt(s).getNucleiIndexListSize());
+//				if (iin.getSentenceInfoAt(s).getNucleiIndexListSize() > 1){
+//					System.out.println(iin.getPosTag());
+//				}				
+//			}
+//		}		
+	}
+	
+	
+	
+	protected ArrayList<Integer>  involvedSentences(String key){
+		ArrayList<Integer> tmp = new ArrayList<Integer>();	
+		ArrayList<ItemInNuclei> arrL = nGramCache.get(key);	
+		if (arrL != null){
+			for(int i = 0; i < arrL.size(); i++){
+				ItemInNuclei iin = arrL.get(i);
+				//System.out.println(iin.getPosTag());
+				for(int j = 0; j < iin.getSentenceInfoSize();j++){						
+					tmp.add(iin.getSentenceInfoAt(j).getSentenceNr());
+					//System.out.println("snr " + iin.getSentenceInfoAt(j).getSentenceNr());
+				}
+			}
+		}	
+		//System.out.println("SentencesSize " + tmp.size());
+		return tmp;
+	}
+
+
 	/**
 	 * Continue until no new NGram found or until NGram Limit is reached
 	 * @return
@@ -898,6 +977,38 @@ public class NGrams {
 	}
 
 	
+	protected boolean isNucleiList(String key, ArrayList<Integer> arrayList) {
+	
+		if (nGramCache.containsKey(key)){
+			ArrayList<ItemInNuclei> arrL = nGramCache.get(key);
+			ArrayList<String> tempTag = new ArrayList<String>();
+			
+			if (arrL != null){
+				for(int i = 0; i < arrL.size(); i++){
+					ItemInNuclei iin = arrL.get(i);
+					//System.out.println(iin.getPosTag());
+					
+					for(int j = 0; j < iin.getSentenceInfoSize();j++){
+						if(arrayList.contains(iin.getSentenceInfoAt(j).getSentenceNr())){
+							if(!tempTag.contains(iin.getPosTag())){
+							tempTag.add(iin.getPosTag());
+							}
+						}						
+					}
+				}
+			}	
+			
+			//not found = color orange
+			if(tempTag.size() > 1) {
+				return true;
+			}
+		}
+		
+		//not found = color black
+		return false;
+	}
+
+
 	/**
 	 * @param item
 	 * @param posTag
@@ -911,12 +1022,13 @@ public class NGrams {
 			int oldCount = item.getCount();
 			item.setCount(oldCount + 1);	
 		}
-		//item.setPosTag(ensureValid(rigthPOS + " "+ iin.getPosTag()));
+		//System.out.println("Right: posTag " + posTag);
+		//System.out.println("Right: nuclei INDEX " + si.getNucleiIndex());		
 		item.setPosTag(ensureValid(posTag));
 		item.addNewNucleiToSentenceInfoRight(si, sitemp);		
 	}
-
-
+	
+	
 	/**
 	 * @param item
 	 * @param posTag
@@ -930,7 +1042,8 @@ public class NGrams {
 			int oldCount = item.getCount();
 			item.setCount(oldCount + 1);	
 		}
-		//item.setPosTag(ensureValid(leftPOS + " "+ iin.getPosTag()));
+		//System.out.println("Left: posTag " + posTag);
+		//System.out.println("Left nuclei INDEX " + si.getNucleiIndex());
 		item.setPosTag(ensureValid(posTag));
 		item.addNewNucleiToSentenceInfoLeft(si, sitemp);		
 	}
@@ -949,8 +1062,10 @@ public class NGrams {
 			int oldCount = item.getCount();
 			item.setCount(oldCount + 1);	
 		}
+//		System.out.println("SentenceRight: posTag " + posTag);
+//		System.out.println("SentenceRight INDEX " + si.getNucleiIndex());
 		item.setPosTag(ensureValid(posTag));											
-		item.addNewSentenceInfoRigth(si);		
+		item.addNewSentenceInfoRigth(si);
 	}
 
 
@@ -964,8 +1079,11 @@ public class NGrams {
 			int oldCount = item.getCount();
 			item.setCount(oldCount + 1);	
 		}
-		item.setPosTag(ensureValid(posTag));											
-		item.addNewSentenceInfoLeft(si);			
+//		System.out.println("SentenceLeft: posTag " + posTag);
+//		System.out.println("SentenceLeft INDEX " + si.getNucleiIndex());
+		item.setPosTag(ensureValid(posTag));
+		item.addNewSentenceInfoLeft(si);	
+
 	}
 	
 	protected String getTagQuery(String qtag){
@@ -1008,6 +1126,10 @@ public class NGrams {
 		return nGramCache;
 	}
 	
+	public int getPasses(){
+		return nGramCount;
+	}
+	
 
 
 	/**
@@ -1024,6 +1146,30 @@ public class NGrams {
 			LoggerFactory.log(this,Level.SEVERE, "XML Output Exeption", e); //$NON-NLS-1$
 		}		
 	}
+	
+	public void cleanUpNucleus(){
+		for(Iterator<String> it = getResult().keySet().iterator(); it.hasNext();){
+			String wordform = it.next();			
+			ArrayList<ItemInNuclei> arrItem = getResult().get(wordform);
+			//cleanNuclei(arrItem, wordform);	
+
+			for(int i = 0; i < arrItem.size(); i++){				
+				ItemInNuclei item = arrItem.get(i);
+				
+				for(int j = 0; j <item.getSentenceInfoSize(); j++) {					
+					SentenceInfo si = item.getSentenceInfoAt(j);
+					
+					//System.out.println("CACHE:"+si.getNucleiIndexListSize());
+					for(int n = 0; n < si.getNucleiIndexListSize(); n++){
+						cleanNuclei(si, wordform);	
+						System.out.println("Nucleus " + si.getNucleiIndexListAt(n)); //$NON-NLS-1$
+					}	
+					
+				}
+			}			
+		}
+	}
+	
 
 
 
@@ -1098,11 +1244,12 @@ public class NGrams {
 //			}
 //		}
 		
-		//TODO change false false
-		createNGrams(nGramCache, false, false);
+		//TO DO change false false
+		createNGrams(nGramCache, false, false);	
 
 	}
 	
+	@SuppressWarnings("unused")
 	private void printNuclei(SentenceInfo sentenceInfo){
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < sentenceInfo.getNucleiIndexListSize(); i++){
@@ -1119,7 +1266,8 @@ public class NGrams {
 		//18 Sentences
 		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$		
 		//String  inputFileName = "E:\\test_small_modded_v2.txt"; //$NON-NLS-1$
-		String  inputFileName = "E:\\tiger_release_aug07_short"; //$NON-NLS-1$
+		//String  inputFileName = "E:\\tiger_release_aug07_short"; //$NON-NLS-1$
+		String  inputFileName = "E:\\double_nucleus.txt"; //$NON-NLS-1$
 		
 		//CONLL Training English (1334 Sentences)
 		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
@@ -1134,7 +1282,7 @@ public class NGrams {
 		//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
 
 		
-		int sentencesToRead = 24;
+		int sentencesToRead = 2;
 		
 		File file = new File(inputFileName);		
 		
@@ -1152,14 +1300,8 @@ public class NGrams {
 
 	
 		NGrams ngrams = new NGrams(1, on);
-		try {
-			
-//			Treebank treebank = (Treebank) new TreebankDescriptor();
-//			treebank.set(dd, i, DataType.SYSTEM);
-//			TreebankRegistry.getInstance().newTreebank("", "Test");
-			
-			conellReader.init(dloc, o);
-			
+		try {	
+			conellReader.init(dloc, o);			
 			int sentenceNr = 1;
 			
 			//while (cr.next() != null) {
@@ -1173,7 +1315,8 @@ public class NGrams {
 			
 			//ngrams.outputToFile();
 
-			System.out.println("Finished nGram Processing"); //$NON-NLS-1$
+			System.out.println("Finished nGram Processing"); //$NON-NLS-1$		
+
 			
 		} catch (IOException e) {
 			System.out.println("Main Debug IOExeption"); //$NON-NLS-1$
@@ -1185,8 +1328,6 @@ public class NGrams {
 			System.out.println("Main Debug Exception"); //$NON-NLS-1$
 			e.printStackTrace();
 		}
-
-	}
-	
+	}	
 
 }

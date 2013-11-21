@@ -269,11 +269,9 @@ public class nGramIO {
 				emPoS.setAttribute("tag", posTag); //$NON-NLS-1$
 				emPoS.setAttribute("count", posCount); //$NON-NLS-1$
 				
-				
 				for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 					
-					SentenceInfo si = iin.getSentenceInfoAt(k);
-					
+					SentenceInfo si = iin.getSentenceInfoAt(k);					
 
 					Element emSentence = document.createElement("Sentence"); //$NON-NLS-1$
 					
@@ -293,7 +291,6 @@ public class nGramIO {
 					
 					//when more than one nuclei in string
 					String elementNucleiNr = "NucleiIndex"; //$NON-NLS-1$					
-					
 					
 					//TODO only add if nucleicount > 1
 					for(int n = 0; n < si.getNucleiIndexListSize(); n++){

@@ -146,6 +146,10 @@ public class SentenceInfo {
 		nucleiIndexList.add(nucleiPosition);
 	}
 	
+	public void deleteNucleiAtIndex(int index){
+		nucleiIndexList.remove(index);
+	}
+	
 	
 	public int getNucleiIndexListSize(){
 		return nucleiIndexList.size();

@@ -1134,7 +1134,7 @@ public class ErrorMiningView extends View {
 	 *
 	 */
 	
-	protected class ErrorMiningJob extends SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Object>
+	private class ErrorMiningJob extends SwingWorker<Map<String,ArrayList<ItemInNuclei>>, Object>
 	implements Identity {
 
 		protected NGrams ngrams;
@@ -1246,7 +1246,7 @@ public class ErrorMiningView extends View {
 	}
 	
 	
-	protected class ErrorMiningJobDependency extends SwingWorker<Map<String,ArrayList<DependencyItemInNuclei>>, Object>
+	private class ErrorMiningJobDependency extends SwingWorker<Map<String,ArrayList<DependencyItemInNuclei>>, Object>
 	implements Identity {
 
 		protected NGramsDependency ngrams;

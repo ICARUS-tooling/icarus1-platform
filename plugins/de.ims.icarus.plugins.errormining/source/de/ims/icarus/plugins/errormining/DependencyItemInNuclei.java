@@ -104,6 +104,13 @@ public class DependencyItemInNuclei {
 		sentenceInfo.setSentenceNr(sentenceNR);
 		sentenceInfo.addNucleiIndexList(positionNR);
 		sentenceInfo.setNucleiIndex(positionNR);
+		
+		
+		System.out.println("SentenceNR " + sentenceNR);
+		System.out.println("NEW DEPENDENCy UNIGRAM INFO" + positionNR +" " + headIndex);
+		sentenceInfo.setSentenceHeadBegin(positionNR);
+		sentenceInfo.setSentenceHeadEnd(headIndex);
+		
 		//sentenceInfo.setNucleiSentencePos(positionNR);
 //		sentenceInfo.setSentenceBegin(positionNR);
 //		sentenceInfo.setSentenceEnd(positionNR);
@@ -129,7 +136,8 @@ public class DependencyItemInNuclei {
 	}
 	
 	
-	public void addNewDependencySentenceInfo(int sentenceNR, int nucleiPos, int sentenceBegin, int sentenceEnd){
+	public void addNewDependencySentenceInfo(int sentenceNR, int nucleiPos,
+												int sentenceBegin, int sentenceEnd){
 		DependencySentenceInfo sentenceInfo = new DependencySentenceInfo();
 		sentenceInfo.setSentenceNr(sentenceNR);
 		sentenceInfo.addNucleiIndexList(nucleiPos);

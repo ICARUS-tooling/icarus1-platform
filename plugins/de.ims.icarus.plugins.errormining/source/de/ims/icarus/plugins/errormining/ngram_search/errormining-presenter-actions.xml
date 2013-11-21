@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		ERRORMINING PRESENTER
+	-->
+	
+
+	<!-- Filter Results -->
+	<action id="plugins.errormining.nGramResultView.applyFilterAction"
+		name="${id}.name" desc="${id}.description" icon="filter_errormining.png" />
+
+	<!-- Reset -->
+	<action id="plugins.errorMining.nGramResultView.resetFilterAction"
+		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+	
+	<!-- Sort Results ASC -->
+	<action id="plugins.errormining.nGramResultView.sortAscAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_asc_alph.gif" />
+	
+	<!-- SORT Results DESC -->
+	<action id="plugins.errormining.nGramResultView.sortDescAction"
+		name="${id}.name" desc="${id}.description" icon="sort_rows_desc_alph.gif"/>
+	
+	<!-- Open Preferences -->
+	<action id="plugins.errormining.nGramResultView.openPreferencesAction"
+		template="actions.default.openPreferencesAction" />
+	
+
+
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.errormining.nGramResultView.toolBarList">
+		<item type="action" value="plugins.errormining.nGramResultView.openPreferencesAction" />
+		<separator />		
+		<item type="label" value="plugins.errormining.nGramResultView.filteredResults.label" />
+		<item type="custom" value="resultCounter" />		
+		<separator />
+		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
+		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
+		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
+		<item type="custom" value="textfield" />
+		<separator />
+		<item type="label" value="plugins.errormining.nGramResultView.lowerBound.label" />
+		<item type="custom" value="lowerBound" />
+		<item type="label" value="plugins.errormining.nGramResultView.upperBound.label" />
+		<item type="custom" value="upperBound" />
+		<separator />
+		<item type="action" value="plugins.errormining.nGramResultView.sortAscAction" />
+		<item type="action" value="plugins.errormining.nGramResultView.sortDescAction" />
+	</action-list>	
+</actions>
