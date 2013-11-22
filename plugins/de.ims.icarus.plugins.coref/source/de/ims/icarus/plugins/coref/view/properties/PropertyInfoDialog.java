@@ -112,7 +112,7 @@ public class PropertyInfoDialog extends JFrame {
 	
 	protected JProgressBar progressBar;
 	
-	private static Map<Object, Counter<String>> cache;
+	private static Map<Object, Counter> cache;
 	
 	private static Reference<PropertyInfoDialog> instance;
 	
@@ -137,14 +137,14 @@ public class PropertyInfoDialog extends JFrame {
 		dialog.setVisible(true);
 	}
 	
-	protected synchronized static Counter<String> getCachedCounter(Object item) {
+	protected synchronized static Counter getCachedCounter(Object item) {
 		if(item==null)
 			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
 		
 		return cache==null ? null : cache.get(item);
 	}
 	
-	protected synchronized static void cacheCounter(Object item, Counter<String> counter) {
+	protected synchronized static void cacheCounter(Object item, Counter counter) {
 		if(item==null)
 			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
 		
@@ -320,8 +320,8 @@ public class PropertyInfoDialog extends JFrame {
 		refreshButtons();
 	}
 	
-	protected synchronized void countFinished(Counter<String> sentenceCounter,
-			Counter<String> spanCounter, Counter<String> edgeCounter) {
+	protected synchronized void countFinished(Counter sentenceCounter,
+			Counter spanCounter, Counter edgeCounter) {
 		
 		task = null;
 		
@@ -388,7 +388,7 @@ public class PropertyInfoDialog extends JFrame {
 		
 	}
 	
-	protected static class PropertyTableModel extends CounterTableModel<String> {
+	protected static class PropertyTableModel extends CounterTableModel {
 
 		private static final long serialVersionUID = -7952452998284531824L;
 
@@ -478,7 +478,7 @@ public class PropertyInfoDialog extends JFrame {
 			setBorder(UIUtil.topLineBorder);
 		}
 		
-		public void reload(Counter<String> counter) {
+		public void reload(Counter counter) {
 			model.setCounter(counter);
 		}
 		
@@ -555,9 +555,9 @@ public class PropertyInfoDialog extends JFrame {
 			}
 			
 			// Count sentence properties
-			Counter<String> sentenceCounter = getCachedCounter(documentSet.getId());
+			Counter sentenceCounter = getCachedCounter(documentSet.getId());
 			if(sentenceCounter==null) {
-				sentenceCounter = new Counter<>();
+				sentenceCounter = new Counter();
 				CoreferenceDocumentSet dSet = documentSet.get();
 				publish(new Range(dSet.size()), 0, true);
 				for(int i=0; i<dSet.size(); i++) {
@@ -575,9 +575,9 @@ public class PropertyInfoDialog extends JFrame {
 				publish(new Range(documentIds.length), 0, true);
 				
 				// Count span properties
-				Counter<String> spanCounter = getCachedCounter(allocation.getId()+"_spans"); //$NON-NLS-1$
+				Counter spanCounter = getCachedCounter(allocation.getId()+"_spans"); //$NON-NLS-1$
 				if(spanCounter==null) {
-					spanCounter = new Counter<>();
+					spanCounter = new Counter();
 					for(int i=0; i<documentIds.length; i++) {
 						SpanSet spanSet = alloc.getSpanSet(documentIds[i]);
 						if(spanSet!=null) {
@@ -589,9 +589,9 @@ public class PropertyInfoDialog extends JFrame {
 				result.put("spanCounter", spanCounter); //$NON-NLS-1$
 				
 				// Count edge properties
-				Counter<String> edgeCounter = getCachedCounter(allocation.getId()+"_edges"); //$NON-NLS-1$
+				Counter edgeCounter = getCachedCounter(allocation.getId()+"_edges"); //$NON-NLS-1$
 				if(edgeCounter==null) {
-					edgeCounter = new Counter<>();
+					edgeCounter = new Counter();
 					for(int i=0; i<documentIds.length; i++) {
 						EdgeSet edgeSet = alloc.getEdgeSet(documentIds[i]);
 						if(edgeSet!=null) {
@@ -631,12 +631,11 @@ public class PropertyInfoDialog extends JFrame {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected void done() {
-			Counter<String> sentenceCounter = null;
-			Counter<String> spanCounter = null;
-			Counter<String> edgeCounter = null;
+			Counter sentenceCounter = null;
+			Counter spanCounter = null;
+			Counter edgeCounter = null;
 			
 			try {
 				Options result = get();
@@ -644,9 +643,9 @@ public class PropertyInfoDialog extends JFrame {
 					return;
 				}
 				
-				sentenceCounter = (Counter<String>) result.get("sentenceCounter"); //$NON-NLS-1$
-				spanCounter = (Counter<String>) result.get("spanCounter"); //$NON-NLS-1$
-				edgeCounter = (Counter<String>) result.get("edgeCounter"); //$NON-NLS-1$
+				sentenceCounter = (Counter) result.get("sentenceCounter"); //$NON-NLS-1$
+				spanCounter = (Counter) result.get("spanCounter"); //$NON-NLS-1$
+				edgeCounter = (Counter) result.get("edgeCounter"); //$NON-NLS-1$
 				
 				cacheCounter(documentSet.getId(), sentenceCounter);
 				if(allocation!=null) {

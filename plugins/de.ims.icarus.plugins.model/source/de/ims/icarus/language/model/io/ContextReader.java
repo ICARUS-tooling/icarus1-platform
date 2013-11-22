@@ -34,7 +34,7 @@ import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 
 /**
- * @author Markus
+ * @author Markus Gärtner
  * @version $Id$
  *
  */

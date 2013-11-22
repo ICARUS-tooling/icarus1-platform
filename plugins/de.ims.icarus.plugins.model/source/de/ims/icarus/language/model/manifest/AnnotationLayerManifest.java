@@ -28,6 +28,7 @@ package de.ims.icarus.language.model.manifest;
 import java.util.Set;
 
 import de.ims.icarus.language.model.MarkableLayer;
+import de.ims.icarus.language.model.meta.ValueSet;
 
 /**
  * @author Markus Gärtner
@@ -47,31 +48,6 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 * for annotations.
 	 */
 	Set<String> getAvailableKeys();
-	
-	/**
-	 * Provides a localized identification of a certain key.
-	 * 
-	 * @param key The <i>base-name</i> of the key to be localized.
-	 * @return The (optionally localized) name of the provided key.
-	 * @throws NullPointerException if the {@code key} is {@code null}
-	 * @throws IllegalArgumentException if the given {@code key} is 
-	 * unknown to this manifest
-	 */
-	String getName(String key);
-	
-	/**
-	 * 
-	 * Provides a localized description of a certain key.
-	 * <p>
-	 * This is an optional method.
-	 * 
-	 * @param key The <i>base-name</i> of the key to be localized.
-	 * @return The (optionally localized) description of the provided key or {@code null}.
-	 * @throws NullPointerException if the {@code key} is {@code null}
-	 * @throws IllegalArgumentException if the given {@code key} is 
-	 * unknown to this manifest
-	 */
-	String getDescription(String key);
 
 	/**
 	 * Tells whether or not a certain {@code key} has a predefined
@@ -97,20 +73,41 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	boolean isBounded(String key);
 	
 	/**
-	 * Returns all the possible values used to annotate a given {@code key}.
-	 * Note that before calling this method one should always check if a
-	 * certain {@code key} is bounded via {@link #isBounded(String)} since
-	 * this method is encouraged to throw an {@code IllegalArgumentException}
-	 * if the key in question happens to be unbounded.
+	 * Returns the {@code ValueSet} object that describes the possible annotation
+	 * values for a given key. If the key is unbounded this method returns {@code null}
+	 * otherwise it must return a valid {@code ValueSet} object! 
 	 * 
-	 * @param key The <i>base-name</i> of the key in question
-	 * @return The non-empty collection of possible values for the
-	 * given {@code key}.
+	 * @param key the key
+	 * @return a valid {@code ValueSet} if the key is not unbounded or {@code null}
+	 * otherwise
+	 * @throws NullPointerException if the {@code key} is {@code null}
+	 */
+	ValueSet getValueSet(String key);
+	
+	/**
+	 * Provides a localized identification of a certain key.
+	 * 
+	 * @param key The <i>base-name</i> of the key to be localized.
+	 * @return The (optionally localized) name of the provided key.
 	 * @throws NullPointerException if the {@code key} is {@code null}
 	 * @throws IllegalArgumentException if the given {@code key} is 
-	 * unknown to this manifest or if it is unbounded.
+	 * unknown to this manifest
 	 */
-	Set<String> getValueSet(String key);
+	String getName(String key);
+	
+	/**
+	 * 
+	 * Provides a localized description of a certain key.
+	 * <p>
+	 * This is an optional method.
+	 * 
+	 * @param key The <i>base-name</i> of the key to be localized.
+	 * @return The (optionally localized) description of the provided key or {@code null}.
+	 * @throws NullPointerException if the {@code key} is {@code null}
+	 * @throws IllegalArgumentException if the given {@code key} is 
+	 * unknown to this manifest
+	 */
+	String getDescription(String key);
 	
 	/**
 	 * Returns whether this layer only provides annotations for the members

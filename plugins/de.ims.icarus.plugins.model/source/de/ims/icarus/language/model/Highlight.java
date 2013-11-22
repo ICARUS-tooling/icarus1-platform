@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -26,16 +26,13 @@
 package de.ims.icarus.language.model;
 
 /**
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ID {
+public interface Highlight {
 
-	String toString();
+	Markable getMarkable();
 	
-	boolean equals(Object obj);
 	
-	int hashCode();
 }

@@ -75,7 +75,6 @@ import de.ims.icarus.ui.helper.UIHelperRegistry;
 import de.ims.icarus.ui.list.DynamicWidthList;
 import de.ims.icarus.ui.view.ListPresenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
@@ -84,6 +83,7 @@ import de.ims.icarus.util.annotation.AnnotationContainer;
 import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

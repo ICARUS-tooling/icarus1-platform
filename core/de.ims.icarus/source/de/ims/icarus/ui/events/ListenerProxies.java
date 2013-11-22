@@ -39,8 +39,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.util.BiDiMap;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.BiDiMap;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

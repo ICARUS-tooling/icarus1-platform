@@ -128,7 +128,7 @@ import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.Actions;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 

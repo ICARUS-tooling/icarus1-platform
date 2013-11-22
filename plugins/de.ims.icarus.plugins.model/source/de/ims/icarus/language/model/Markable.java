@@ -53,6 +53,13 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * If this markable is hosted within a container, returns that enclosing 
 	 * container. Otherwise it represents a top-level markable and returns 
 	 * {@code null}.
+	 * <p>
+	 * Note that this method returns the container that <b>owns</b> this markable
+	 * and not necessarily the one through which it was obtained! It is perfectly
+	 * legal for a container to reuse the elements of another container and to
+	 * augment the collection with its own intermediate markables. For this
+	 * reason it is advised to keep track of the container the markable was 
+	 * fetched from when this method is called.
 	 * 
 	 * @return The enclosing container of this markable or {@code null} if this
 	 * markable is not hosted within a container.

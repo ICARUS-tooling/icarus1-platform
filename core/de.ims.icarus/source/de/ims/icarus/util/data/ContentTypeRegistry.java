@@ -48,9 +48,9 @@ import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.events.WeakEventSource;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationContainer;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 import de.ims.icarus.util.id.UnknownIdentifierException;
 

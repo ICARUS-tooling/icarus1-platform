@@ -31,9 +31,11 @@ import java.util.List;
 import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.util.CollectionUtils;
-import de.ims.icarus.util.location.Location;
+import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.location.Locations;
 
 /**
  * @author Markus Gärtner
@@ -49,8 +51,6 @@ public abstract class LoadableContext implements Context {
 	
 	private volatile State state = State.BLANK;
 	private final Object lock = new Object();
-	
-	private Location location;
 	
 	protected enum State {
 		BLANK,
@@ -120,25 +120,20 @@ public abstract class LoadableContext implements Context {
 			return;
 		}
 		
-		// TODO
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getLocation()
-	 */
-	@Override
-	public Location getLocation() {
-		return location;
-	}
-
-	/**
-	 * @param location the location to set
-	 */
-	public void setLocation(Location location) {
-		if(location==null)
-			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
 		
-		this.location = location;
+		ContextReader reader = createReader();
+		
+		if(reader==null) 
+			throw new IllegalStateException("Failed to instantiate reader"); //$NON-NLS-1$
+		
+		List<Layer> newLayers = reader.readContext(getManifest());
+		
+		if(newLayers==null) {
+			LoggerFactory.warning(this, 
+					"Layer source was empty: "+Locations.getPath(getManifest().getLocation())); //$NON-NLS-1$
+		}
+		
+		layers.addAll(newLayers);
 	}
 
 	/**
@@ -165,4 +160,12 @@ public abstract class LoadableContext implements Context {
 		return manifest;
 	}
 
+	protected ContextReader createReader() throws Exception {
+		Class<? extends ContextReader> clazz = getManifest().getReaderClass();
+		
+		if(clazz==null)
+			throw new IllegalStateException("No reader defined"); //$NON-NLS-1$
+		
+		return clazz.newInstance();
+	}
 }

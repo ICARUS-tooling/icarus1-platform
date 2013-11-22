@@ -41,8 +41,8 @@ import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.dialog.DialogFactory;
-import de.ims.icarus.util.BiDiMap;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
+import de.ims.icarus.util.collections.BiDiMap;
 import de.ims.icarus.util.Options;
 
 

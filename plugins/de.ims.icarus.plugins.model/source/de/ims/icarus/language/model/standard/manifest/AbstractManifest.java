@@ -33,7 +33,7 @@ import java.util.Set;
 import javax.swing.Icon;
 
 import de.ims.icarus.language.model.manifest.Manifest;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.Identity;
 
 /**

@@ -33,7 +33,7 @@ import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.location.Location;
 
 /**

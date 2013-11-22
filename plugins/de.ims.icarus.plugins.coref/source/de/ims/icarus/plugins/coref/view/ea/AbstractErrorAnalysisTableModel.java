@@ -39,7 +39,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

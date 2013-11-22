@@ -204,7 +204,8 @@ public class CorefProperties extends CompactProperties {
 	}
 	
 	public static void countKeys(CorefProperties properties, 
-			Counter<String> counter) {
+			Counter counter) {
+		
 		if(counter==null)
 			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		

@@ -113,10 +113,10 @@ import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.actions.Actions;
 import de.ims.icarus.ui.config.ConfigDialog;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**

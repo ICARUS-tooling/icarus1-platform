@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 

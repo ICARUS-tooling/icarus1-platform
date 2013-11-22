@@ -25,9 +25,10 @@
  */
 package de.ims.icarus.language.model.manifest;
 
-import java.util.List;
+import java.util.Set;
 
 import de.ims.icarus.language.model.io.ContextReader;
+import de.ims.icarus.util.location.Location;
 
 /**
  * @author Markus Gärtner
@@ -36,7 +37,7 @@ import de.ims.icarus.language.model.io.ContextReader;
  */
 public interface ContextManifest extends Manifest {
 
-	List<LayerManifest> getLayerManifests();
+	Set<LayerManifest> getLayerManifests();
 	
 	/**
 	 * Returns the reader that is used to build the actual content
@@ -47,5 +48,7 @@ public interface ContextManifest extends Manifest {
 	 * or {@code null} if this context does not derive from a physical
 	 * data location.
 	 */
-	ContextReader getContextReader();
+	Class<? extends ContextReader> getReaderClass();
+	
+	Location getLocation();
 }

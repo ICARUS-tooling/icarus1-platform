@@ -66,13 +66,13 @@ import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.util.CellBuffer;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Order;
 import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 
 /**

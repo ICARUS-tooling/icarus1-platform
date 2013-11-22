@@ -23,7 +23,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util;
+package de.ims.icarus.util.collections;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -40,6 +40,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.WeakHashMap;
+
+import de.ims.icarus.util.Exceptions;
+import de.ims.icarus.util.Filter;
 
 /**
  * @author Markus Gärtner

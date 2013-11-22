@@ -23,7 +23,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.util;
+package de.ims.icarus.util.collections;
 
 import java.util.Collection;
 import java.util.IdentityHashMap;

@@ -30,8 +30,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

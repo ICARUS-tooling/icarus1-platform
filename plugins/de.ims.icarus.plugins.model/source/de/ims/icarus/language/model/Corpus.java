@@ -58,14 +58,13 @@ public interface Corpus extends Iterable<Layer> {
 	 * Resolves a given id and returns the member within this corpus
 	 * that is registered with this id.
 	 * 
-	 * @param id the {@code ID} of the member to be resolved
+	 * @param id the {@code id} of the member to be resolved
 	 * @return The member that was registered for the given {@code ID}
 	 * 
-	 * @throws NullPointerException if {@code id} is {@code null}
 	 * @throws IllegalArgumentException if there is no member registered 
-	 * for the given {@code ID}
+	 * for the given {@code id}
 	 */
-	CorpusMember getMember(ID id);
+	CorpusMember getMember(long id);
 	
 	/**
 	 * Resolves a given name to the corresponding member. 
@@ -164,7 +163,7 @@ public interface Corpus extends Iterable<Layer> {
 	/**
 	 * Adds the given layer to this corpus.
 	 * 
-	 * @param layer
+	 * @param layer the layer to be added
 	 * @throws NullPointerException if the {@code layer} argument is {@code null}
 	 * @throws DuplicateIdentifierException if this corpus already contains a layer
 	 * with the same {@code ID} as defined by {@link Layer#getId()}.

@@ -61,7 +61,7 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.events.WeakEventSource;
-import de.ims.icarus.util.BiDiMap;
+import de.ims.icarus.util.collections.BiDiMap;
 import de.ims.icarus.util.id.Identity;
 
 

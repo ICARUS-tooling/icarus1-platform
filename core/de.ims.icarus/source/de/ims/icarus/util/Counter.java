@@ -26,67 +26,65 @@
 package de.ims.icarus.util;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-import de.ims.icarus.util.MutablePrimitives.MutableInteger;
+import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.collections.IntValueHashMap;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class Counter<E extends Object> {
+public class Counter {
 	
-	private Map<E, MutableInteger> counts = new HashMap<>();
+	private IntValueHashMap counts = new IntValueHashMap();
 
 	public Counter() {
 		// no-op
 	}
 
-	public int increment(E data) {
-		MutableInteger c = counts.get(data);
-		if(c==null) {
-			c = new MutableInteger();
+	public int increment(Object data) {
+		int c = counts.get(data);
+		if(c==-1) {
+			c = 0;
 		}
-		c.increment();
 		
+		c++;
 		counts.put(data, c);
 		
-		return c.getValue();
+		return c;
 	}
 
-	public int decrement(E data) {
-		MutableInteger c = counts.get(data);
-		if(c==null || c.getValue()==0) 
+	public int decrement(Object data) {
+		int c = counts.get(data);
+		if(c<1)
 			throw new IllegalStateException("Cannot decrement count for data: "+data); //$NON-NLS-1$
-
-		c.decrement();
 		
-		if(c.getValue()==0) {
+		c--;
+		if(c==0) {
 			counts.remove(data);
 		} else {
 			counts.put(data, c);
 		}
 		
-		return c.getValue();
+		return c;
 	}
 	
 	public void clear() {
 		counts.clear();
 	}
 	
-	public int getCount(E data) {
-		MutableInteger c = counts.get(data);
-		return c==null ? 0 : c.getValue();
+	public int getCount(Object data) {
+		int c = counts.get(data);
+		return c==-1 ? 0 : c;
 	}
 	
-	public boolean hasCount(E data) {
-		MutableInteger c = counts.get(data);
-		return c!=null && c.getValue()>0;
+	public boolean hasCount(Object data) {
+		int c = counts.get(data);
+		return c>0;
 	}
 	
-	public Collection<E> getItems() {
+	public Collection<Object> getItems() {
 		return CollectionUtils.getCollectionProxy(counts.keySet());
 	}
 	

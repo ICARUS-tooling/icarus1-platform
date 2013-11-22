@@ -27,6 +27,7 @@ package de.ims.icarus.language.model;
 
 
 
+
 /**
  * Provides a structural view on a {@link MarkableLayer} by specifying a
  * set of nodes connected by edges.
@@ -35,30 +36,14 @@ package de.ims.icarus.language.model;
  * @version $Id$
  *
  */
-public interface Structure extends Markable, Iterable<Edge> {
-	
-	/**
-	 * Since a {@code Structure} represents a top-level {@code Markable}
-	 * this method must <b>always</b> return {@code null} for any 
-	 * {@code Structure} object!
-	 * 
-	 * @see de.ims.icarus.language.model.Markable#getContainer()
-	 */
-	Container getContainer();
-
-	/**
-	 * Returns the container hosting the {@code Markable} objects that serve as
-	 * nodes for this structure.
-	 * 
-	 * @return
-	 */
-	Container getNodeContainer();
+public interface Structure extends Container {
 	
 	/**
 	 * Returns the total number of edges this structure hosts.
 	 * @return the total number of edges this structure hosts.
 	 */
 	int getEdgeCount();
+	
 	/**
 	 * Returns the {@link Edge} stored at the given position within this
 	 * structure.
@@ -105,7 +90,7 @@ public interface Structure extends Markable, Iterable<Edge> {
 	/**
 	 * Utility method to fetch the <i>parent</i> of a given markable in this
 	 * structure. The meaning of the term <i>parent</i> is depending on the
-	 * {@code StructureType} as defined in this structure's {@code MarkableLayerManifest}
+	 * {@code StructureType} as defined in this structure's {@code ContainerManifest}
 	 * <p>
 	 * This is an optional method and only to be expected when the type of
 	 * this structure is neither {@value StructureType#SET} nor 
@@ -135,10 +120,4 @@ public interface Structure extends Markable, Iterable<Edge> {
 	 * structure is of type {@value StructureType#SET}
 	 */
 	Markable getRoot();
-
-	/**
-	 * Returns the <i>type</i> of this structure. 
-	 * @return
-	 */
-	StructureType getStructureType();
 }

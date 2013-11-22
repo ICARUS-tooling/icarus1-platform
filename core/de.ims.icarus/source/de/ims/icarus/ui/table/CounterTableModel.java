@@ -27,6 +27,7 @@ package de.ims.icarus.ui.table;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -40,20 +41,22 @@ import de.ims.icarus.util.StringUtil;
  *
  */
 
-public class CounterTableModel<E extends Comparable<? super E>> extends AbstractTableModel {
+public class CounterTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 6898056399696712268L;
 	
-	private Counter<E> counter;
-	private List<E> keyList;
+	private Counter counter;
+	private List<Object> keyList;
 	
 	private boolean showIndex = true;
+	
+	private boolean sorting = true;
 
-	public Counter<E> getCounter() {
+	public Counter getCounter() {
 		return counter;
 	}
 
-	public void setCounter(Counter<E> counter) {
+	public void setCounter(Counter counter) {
 		this.counter = counter;
 		
 		rebuild();
@@ -77,8 +80,10 @@ public class CounterTableModel<E extends Comparable<? super E>> extends Abstract
 		keyList = null;
 		
 		if(counter!=null) {
-			List<E> tmp = new ArrayList<>(counter.getItems());
-			Collections.sort(tmp);
+			List<Object> tmp = new ArrayList<>(counter.getItems());
+			if(sorting) {
+				Collections.sort(tmp, LEXICAL_COMPARATOR);
+			}
 			keyList = tmp;
 		}
 		
@@ -118,9 +123,30 @@ public class CounterTableModel<E extends Comparable<? super E>> extends Abstract
 			return StringUtil.formatDecimal(rowIndex+1);
 		}
 		
-		E key = keyList.get(rowIndex); 
+		Object key = keyList.get(rowIndex); 
 		
 		return columnIndex==0 ? key : counter.getCount(key);
 	}
+
+	/**
+	 * @return the sorting
+	 */
+	public boolean isSorting() {
+		return sorting;
+	}
+
+	/**
+	 * @param sorting the sorting to set
+	 */
+	public void setSorting(boolean sorting) {
+		this.sorting = sorting;
+	}
 	
+	private static Comparator<Object> LEXICAL_COMPARATOR = new Comparator<Object>() {
+
+		@Override
+		public int compare(Object o1, Object o2) {
+			return o1.toString().compareTo(o2.toString());
+		}
+	};
 }

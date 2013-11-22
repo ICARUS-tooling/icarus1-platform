@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import de.ims.icarus.search_tools.NodeType;
 import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.util.SearchUtils;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**

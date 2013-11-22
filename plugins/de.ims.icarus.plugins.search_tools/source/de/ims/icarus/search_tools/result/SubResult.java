@@ -8,9 +8,9 @@ import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
 import de.ims.icarus.search_tools.corpus.CorpusSearchResult0D;
 import de.ims.icarus.search_tools.standard.GroupCache;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.annotation.AnnotatedData;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataList;
 

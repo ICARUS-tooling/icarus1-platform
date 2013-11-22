@@ -28,6 +28,8 @@ package de.ims.icarus.util;
 import java.awt.Color;
 import java.util.Map;
 
+import de.ims.icarus.util.collections.CollectionUtils;
+
 /**
  * 
  * @author Markus Gärtner

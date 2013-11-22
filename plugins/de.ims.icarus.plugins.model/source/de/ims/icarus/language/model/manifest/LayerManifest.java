@@ -27,8 +27,6 @@ package de.ims.icarus.language.model.manifest;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.ID;
-
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -55,12 +53,12 @@ public interface LayerManifest extends Manifest {
 	interface Prerequisite {
 		
 		/**
-		 * Returns the id of the target layer or {@code null} if an exact id match
+		 * Returns the name of the target layer or {@code null} if an exact name match
 		 * is not required.
 		 * 
 		 * @return
 		 */
-		ID getLayerId();
+		String getLayerName();
 		
 		/**
 		 * If this layer only requires <i>some</i> layer of a certain type to be present

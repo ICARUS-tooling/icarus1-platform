@@ -43,9 +43,9 @@ import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.util.ClassUtils;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Counter;
 import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner
@@ -427,7 +427,7 @@ public class DefaultErrorAnalysisTableModel extends AbstractErrorAnalysisTableMo
 		 * Counts the number of spans that are descendants
 		 * of of a given span
 		 */
-		public Counter<Span> childCounters = new Counter<>();
+		public Counter childCounters = new Counter();
 		/**
 		 * Contains all spans that are considered singletons
 		 */

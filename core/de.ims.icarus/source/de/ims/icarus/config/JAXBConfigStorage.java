@@ -46,8 +46,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Exceptions;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.xml.jaxb.JAXBUtils;
 import de.ims.icarus.xml.jaxb.MapAdapter;
 

@@ -52,17 +52,15 @@ public interface MarkableLayerManifest extends LayerManifest {
 	boolean isStructureLayer();
 	
 	/**
-	 * Returns {@code true} if the structures contained in this layer are allowed
-	 * to have multiple root nodes. It is mandatory to ensure the structural nature
-	 * of this layer before calling this method since it is encouraged to throw an
-	 * exception in the case that the layer does not provide structural informations!
-	 *  
-	 * @return {@code true} if and only if this layer is a structure layer as indicated
-	 * by {@link #isStructureLayer()} returning {@code true} and the structure represented
-	 * is allowed to contain multiple root nodes.
-	 * @throws IllegalStateException if this layer is not a structure layer as indicated
-	 * by {@link #isStructureLayer()} returning {@code true}.
-	 * 
+	 * Returns the number of nested containers and/or structures within this
+	 * layer.
+	 * <p>
+	 * Note that the returned value is always at least {@code 1}.
+	 * @return
 	 */
-	boolean isMultiRootStructure();
+	int getContainerDepth();
+	
+	ContextManifest getRootContainerManifest();
+	
+	ContainerManifest getContainerManifest(int level);
 }

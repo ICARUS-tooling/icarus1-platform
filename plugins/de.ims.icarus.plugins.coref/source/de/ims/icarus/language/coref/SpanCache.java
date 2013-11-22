@@ -36,7 +36,7 @@ import java.util.Map;
 import de.ims.icarus.util.Counter;
 
 public class SpanCache {
-	private Counter<Integer> counter = new Counter<>();
+	private Counter counter = new Counter();
 	private Map<Span, Integer> indexMap = new HashMap<>();
 	
 	public boolean isSingleton(Span span) {

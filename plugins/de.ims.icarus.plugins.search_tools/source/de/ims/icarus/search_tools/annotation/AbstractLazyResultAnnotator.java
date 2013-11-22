@@ -30,10 +30,10 @@ import java.util.BitSet;
 import de.ims.icarus.search_tools.result.Hit;
 import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.result.SearchResult;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.annotation.AbstractAnnotation;
 import de.ims.icarus.util.annotation.AnnotatedData;
 import de.ims.icarus.util.annotation.Annotation;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

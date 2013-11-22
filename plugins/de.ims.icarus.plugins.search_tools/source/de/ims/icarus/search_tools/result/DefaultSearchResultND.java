@@ -39,7 +39,7 @@ import javax.swing.event.ChangeListener;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.standard.GroupCache;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataList;
 

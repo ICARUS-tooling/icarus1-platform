@@ -42,9 +42,9 @@ import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**

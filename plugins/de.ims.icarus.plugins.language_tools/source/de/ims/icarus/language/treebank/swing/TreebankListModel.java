@@ -39,8 +39,8 @@ import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**

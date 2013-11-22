@@ -25,13 +25,14 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.location.Location;
 
 /**
  * @author Markus Gärtner
@@ -40,21 +41,61 @@ import de.ims.icarus.util.CollectionUtils;
  */
 public class DefaultContextManifest extends AbstractManifest implements ContextManifest {
 
-	private List<LayerManifest> layerManifests = new ArrayList<>(5);
+	private Set<LayerManifest> layerManifests = new HashSet<>();
 	
 	private Class<? extends ContextReader> readerClass;
+	
+	private Location location;
 	
 	/**
 	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLayerManifests()
 	 */
 	@Override
-	public List<LayerManifest> getLayerManifests() {
-		return CollectionUtils.getListProxy(layerManifests);
+	public Set<LayerManifest> getLayerManifests() {
+		return CollectionUtils.getSetProxy(layerManifests);
 	}
 
+	/**
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getReaderClass()
+	 */
+	@Override
+	public Class<? extends ContextReader> getReaderClass() {
+		return readerClass;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLocation()
+	 */
+	@Override
+	public Location getLocation() {
+		return location;
+	}
+
+	/**
+	 * @param readerClass the readerClass to set
+	 */
+	public void setReaderClass(Class<? extends ContextReader> readerClass) {
+		if(readerClass==null)
+			throw new NullPointerException("Invalid reader class"); //$NON-NLS-1$
+		
+		this.readerClass = readerClass;
+	}
+
+	/**
+	 * @param location the location to set
+	 */
+	public void setLocation(Location location) {
+		if(location==null)
+			throw new NullPointerException("Invalid locations"); //$NON-NLS-1$
+		
+		this.location = location;
+	}
+	
 	public void addLayerManifest(LayerManifest layerManifest) {
 		if(layerManifest==null)
 			throw new NullPointerException("Invalid layer manifest"); //$NON-NLS-1$
+		if(layerManifests.contains(layerManifest))
+			throw new IllegalArgumentException("Layer manifest already registered: "+layerManifest.getId()); //$NON-NLS-1$
 		
 		layerManifests.add(layerManifest);
 	}

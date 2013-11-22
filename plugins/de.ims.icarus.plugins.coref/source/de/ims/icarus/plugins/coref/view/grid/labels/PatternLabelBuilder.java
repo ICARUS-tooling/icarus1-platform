@@ -34,7 +34,7 @@ import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.plugins.coref.view.grid.EntityGridNode;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

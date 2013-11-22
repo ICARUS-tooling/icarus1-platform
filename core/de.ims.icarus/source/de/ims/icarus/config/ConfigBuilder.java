@@ -30,8 +30,8 @@ import java.util.Stack;
 
 import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.config.ConfigRegistry.Handle;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Exceptions;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**

@@ -36,7 +36,7 @@ public interface CorpusMember {
 	/**
 	 * @return The globally unique id
 	 */
-	ID getId();
+	long getId();
 	
 	/**
 	 * 

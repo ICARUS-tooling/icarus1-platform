@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model;
 
+import de.ims.icarus.language.model.manifest.ContainerManifest;
+
 
 /**
  * 
@@ -33,6 +35,14 @@ package de.ims.icarus.language.model;
  *
  */
 public interface Container extends Markable, Iterable<Markable> {
+	
+	/**
+	 * Returns the {@link ContainerManifest} object that holds additional
+	 * information about this container.
+	 * 
+	 * @return
+	 */
+	ContainerManifest getManifest();
 	
 	/**
 	 * @return The underlying container if this container relies on the
@@ -61,16 +71,6 @@ public interface Container extends Markable, Iterable<Markable> {
      *         (<tt>index &lt; 0 || index &gt;= getMarkableCount()</tt>)
 	 */
 	Markable getMarkableAt(int index);
-	
-	/**
-	 * Returns the type of this container. This provides 
-	 * information about how contained {@code Markable}s are ordered and
-	 * if they represent a continuous subset of the corpus.
-	 * 
-	 * @return The {@code ContainerType} of this {@code Container}
-	 * @see ContainerType
-	 */
-	ContainerType getContainerType();
 	
 	/**
 	 * Returns the index of the given {@code Markable} within this containers

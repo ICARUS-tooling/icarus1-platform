@@ -41,7 +41,7 @@ import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.search_tools.util.SearchUtils.Visitor;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**

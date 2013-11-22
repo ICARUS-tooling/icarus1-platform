@@ -37,7 +37,6 @@ import java.util.Set;
 import de.ims.icarus.language.model.AnnotationLayer;
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.ID;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
@@ -86,10 +85,10 @@ public final class CorpusUtils {
 		if(corpus==null)
 			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
 		
-		ID id = prerequisite.getLayerId();
-		if(id!=null) {
+		String name = prerequisite.getLayerName();
+		if(name!=null) {
 			try {
-				Object member = corpus.getMember(id);
+				Object member = corpus.getNamedMember(name);
 				
 				return member instanceof Layer;
 			} catch(IllegalArgumentException e) {
@@ -106,9 +105,9 @@ public final class CorpusUtils {
 	}
 	
 	public static String getName(LayerManifest.Prerequisite prerequisite) {
-		ID id = prerequisite.getLayerId();
-		if(id!=null) {
-			return "Required layer-id: "+id; //$NON-NLS-1$
+		String name = prerequisite.getLayerName();
+		if(name!=null) {
+			return "Required layer-id: "+name; //$NON-NLS-1$
 		}
 		
 		String typeName = prerequisite.getTypeName();

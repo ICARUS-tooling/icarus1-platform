@@ -35,9 +35,9 @@ import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
-import de.ims.icarus.util.CollectionUtils;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner

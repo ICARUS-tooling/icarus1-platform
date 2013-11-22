@@ -50,7 +50,9 @@ public interface Manifest extends Identity {
 	
 	/**
 	 * Returns a more detailed description of the task performed
-	 * by instances of this manifest. This is an optional method.
+	 * by instances of this manifest. 
+	 * <p>
+	 * This is an optional method.
 	 * 
 	 * @return Returns the optional description of this manifest
 	 */

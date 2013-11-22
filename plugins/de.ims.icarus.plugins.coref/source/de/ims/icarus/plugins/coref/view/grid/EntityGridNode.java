@@ -31,7 +31,7 @@ import java.util.List;
 
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.util.CollectionUtils;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner
