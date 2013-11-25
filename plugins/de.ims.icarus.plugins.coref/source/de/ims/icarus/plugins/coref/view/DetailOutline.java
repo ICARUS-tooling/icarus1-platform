@@ -48,6 +48,7 @@ import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.resources.ResourceManager;
@@ -130,18 +131,18 @@ public class DetailOutline implements AWTPresenter {
 		ResourceManager rm = ResourceManager.getInstance();
 		if(data instanceof Span) {
 			Span span = (Span) data;
-			sb.append(rm.get("plugins.coref.labels.span")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
-			span.appendTo(sb);
+			sb.append(rm.get("plugins.coref.labels.span")).append('\n'); //$NON-NLS-1$
+			appendSpan(sb, span);
 		} else if(data instanceof Edge) {
 			Edge edge = (Edge) data;
 			sb.append(rm.get("plugins.coref.labels.edge")).append('\n'); //$NON-NLS-1$
 			// Source
-			sb.append(rm.get("plugins.coref.labels.source")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
-			edge.getSource().appendTo(sb);
+			sb.append(rm.get("plugins.coref.labels.source")).append(":\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			appendSpan(sb, edge.getSource());
 			sb.append('\n');
 			// Target
-			sb.append(rm.get("plugins.coref.labels.target")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
-			edge.getTarget().appendTo(sb);
+			sb.append(rm.get("plugins.coref.labels.target")).append(":\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			appendSpan(sb, edge.getTarget());
 		}
 		
 		CorefProperties properties = data.getProperties();
@@ -151,6 +152,24 @@ public class DetailOutline implements AWTPresenter {
 		}
 		
 		return sb.toString();
+	}
+	
+	private void appendSpan(StringBuilder sb, Span span) {
+		ResourceManager rm = ResourceManager.getInstance();
+		
+		String text = CoreferenceUtils.getSpanText(span, document);
+		text = StringUtil.fit(text, 40);
+		
+		sb.append(rm.get("plugins.coref.labels.text")) //$NON-NLS-1$
+			.append(": ").append(text).append('\n'); //$NON-NLS-1$
+		sb.append(rm.get("plugins.coref.labels.sentenceId")) //$NON-NLS-1$
+			.append(": ").append(span.getSentenceIndex()+1).append('\n'); //$NON-NLS-1$
+		sb.append(rm.get("plugins.coref.labels.beginIndex")) //$NON-NLS-1$
+			.append(": ").append(span.getBeginIndex()+1).append('\n'); //$NON-NLS-1$
+		sb.append(rm.get("plugins.coref.labels.endIndex")) //$NON-NLS-1$
+			.append(": ").append(span.getEndIndex()+1).append('\n'); //$NON-NLS-1$
+		sb.append(rm.get("plugins.coref.labels.clusterId")) //$NON-NLS-1$
+			.append(": ").append(span.getClusterId()).append('\n'); //$NON-NLS-1$
 	}
 	
 

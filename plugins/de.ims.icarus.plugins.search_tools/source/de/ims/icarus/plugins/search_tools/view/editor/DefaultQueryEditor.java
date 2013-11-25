@@ -76,7 +76,7 @@ public class DefaultQueryEditor extends QueryEditor {
 	protected JPanel contentPanel;
 
 	public DefaultQueryEditor() {
-		// TODO Auto-generated constructor stub
+		// no-op
 	}
 	
 	protected ActionManager getActionManager() {

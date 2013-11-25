@@ -251,6 +251,15 @@ public class CoreferenceManagerView extends View {
 		}
 		return null;
 	}
+	
+	private void selectPath(Object... items) {
+		TreePath path = new TreePath(treeModel.getRoot());
+		for(Object item : items) {
+			path = path.pathByAddingChild(item);
+		}
+		
+		tree.setSelectionPath(path);
+	}
 
 	private class Handler extends MouseAdapter implements TreeSelectionListener {
 		
@@ -273,7 +282,12 @@ public class CoreferenceManagerView extends View {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount()==2) {
-				callbackHandler.inspectDocumentSet(null);
+				Object selectedItem = getSelectedObject();
+				if(selectedItem instanceof DocumentSetDescriptor) {
+					callbackHandler.editDocumentSet(null);
+				} else if(selectedItem instanceof AllocationDescriptor) {
+					callbackHandler.editAllocation(null);
+				}
 			}
 		}
 
@@ -318,11 +332,13 @@ public class CoreferenceManagerView extends View {
 		}
 		
 		public void addDocumentSet(ActionEvent e) {
+			DocumentSetDescriptor descriptor = null;
+			
 			try {
 				String name = "New Document-Set"; //$NON-NLS-1$
 				name = CoreferenceRegistry.getInstance().getUniqueDocumentSetName(name);
 				
-				CoreferenceRegistry.getInstance().newDocumentSet(name);
+				descriptor = CoreferenceRegistry.getInstance().newDocumentSet(name);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to add document set", ex); //$NON-NLS-1$
@@ -330,6 +346,14 @@ public class CoreferenceManagerView extends View {
 				UIUtil.beep();
 				showError(ex);
 			}
+			
+			if(descriptor==null) {
+				return;
+			}
+			
+			selectPath(descriptor);
+			
+			editDocumentSet(null);;
 		}
 		
 		public void deleteDocumentSet(ActionEvent e) {
@@ -398,6 +422,20 @@ public class CoreferenceManagerView extends View {
 				}
 				
 				DocumentSetDescriptor descriptor = (DocumentSetDescriptor) selectedObject;
+
+				if(descriptor.getLocation()==null) {
+					DialogFactory.getGlobalFactory().showError(getFrame(), 
+							"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+							"plugins.coref.dialogs.missingLocation"); //$NON-NLS-1$
+					return;
+				}
+				if(descriptor.getReaderExtension()==null) {
+					DialogFactory.getGlobalFactory().showError(getFrame(), 
+							"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+							"plugins.coref.dialogs.missingReader"); //$NON-NLS-1$
+					return;
+				}
+				
 				Message message = new Message(this, Commands.DISPLAY, descriptor, null);
 				
 				sendRequest(CorefConstants.COREFERENCE_EXPLORER_VIEW_ID, message);
@@ -411,17 +449,19 @@ public class CoreferenceManagerView extends View {
 		}
 		
 		public void addAllocation(ActionEvent e) {
+			DocumentSetDescriptor descriptor = getSelectedDocumentSet();
+			if(descriptor==null) {
+				return;
+			}
+			
+			AllocationDescriptor alloc = null;
+			
 			try {
-				DocumentSetDescriptor descriptor = getSelectedDocumentSet();
-				if(descriptor==null) {
-					return;
-				}
-
 				String name = "New Allocation"; //$NON-NLS-1$
 				name = CoreferenceRegistry.getInstance().getUniqueAllocationName(
 						descriptor, name);
 				
-				CoreferenceRegistry.getInstance().newAllocation(name, descriptor);
+				alloc = CoreferenceRegistry.getInstance().newAllocation(name, descriptor);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to add allocation", ex); //$NON-NLS-1$
@@ -429,6 +469,14 @@ public class CoreferenceManagerView extends View {
 				UIUtil.beep();
 				showError(ex);
 			}
+			
+			if(alloc==null) {
+				return;
+			}
+			
+			selectPath(descriptor, alloc);
+			
+			editAllocation(null);
 		}
 		
 		public void deleteAllocation(ActionEvent e) {

@@ -35,6 +35,7 @@ import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.dialog.FormBuilder.FormEntry;
 import de.ims.icarus.ui.dialog.InputFormEntry;
 import de.ims.icarus.ui.helper.Editor;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Orientation;
 
@@ -59,18 +60,18 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 
 		FormEntry entry = new ChoiceFormEntry(
 				"plugins.searchTools.labels.searchMode",  //$NON-NLS-1$
-				SearchMode.values());
+				SearchMode.values()).setRenderer(TooltipListCellRenderer.getSharedInstance());
 		formBuilder.addEntry(SEARCH_MODE, entry); 
 		
 		entry = new ChoiceFormEntry(
 				"plugins.searchTools.labels.orientation",  //$NON-NLS-1$
-				Orientation.values());
+				Orientation.values()).setRenderer(TooltipListCellRenderer.getSharedInstance());
 		formBuilder.addEntry(SEARCH_ORIENTATION, entry); 
 		
 		formBuilder.addToggleFormEntry(SEARCH_CASESENSITIVE,  
 				"plugins.searchTools.labels.caseSensitive"); //$NON-NLS-1$
-		formBuilder.addToggleFormEntry(OPTIMIZE_SEARCH,  
-				"plugins.searchTools.labels.optimize"); //$NON-NLS-1$
+//		formBuilder.addToggleFormEntry(OPTIMIZE_SEARCH,  
+//				"plugins.searchTools.labels.optimize"); //$NON-NLS-1$
 		
 		entry = new InputFormEntry(
 				"plugins.searchTools.labels.resultLimit") //$NON-NLS-1$
@@ -105,7 +106,7 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 		formBuilder.setValue(SEARCH_MODE, options.get(SEARCH_MODE, DEFAULT_SEARCH_MODE)); 
 		formBuilder.setValue(SEARCH_ORIENTATION, options.get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION)); 
 		formBuilder.setValue(SEARCH_CASESENSITIVE, options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE)); 
-		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH)); 
+//		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH)); 
 		formBuilder.setValue(SEARCH_RESULT_LIMIT, String.valueOf(options.get(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT))); 
 	}
 

@@ -35,8 +35,10 @@
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.coreferenceDocumentView.toolBarList">
+		<!--
 		<item type="action" value="plugins.coref.coreferenceDocumentView.openPreferencesAction" />
 		<separator />
+		-->
 		<item type="label" value="plugins.coref.coreferenceDocumentView.presenter" />
 		<item type="custom" value="selectPresenter" />
 		<separator />

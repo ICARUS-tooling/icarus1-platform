@@ -13,7 +13,7 @@
 		
 	<!-- Copy Cells -->
 	<action id="plugins.jgraph.graphPresenter.copyCellsAction"
-		template="actions.default.editAction"
+		template="actions.default.copyAction"
 		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Paste Cells -->
@@ -173,10 +173,12 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
 		<item type="custom" value="annotationControl" />
+		-->
 		<item type="glue" />
 	</action-list>
 		
@@ -204,11 +206,13 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkIncomingAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleMarkOutgoingAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
 		<item type="custom" value="annotationControl" />
 		<separator />
+		-->
 		<item type="glue" />
 	</action-list>
 		
@@ -228,9 +232,11 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		-->
 	</action-list>
 		
 	<!-- Popup Menu List for uneditable graphs -->
@@ -238,9 +244,11 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.copyCellsAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		-->
 	</action-list>
 	
 </actions>

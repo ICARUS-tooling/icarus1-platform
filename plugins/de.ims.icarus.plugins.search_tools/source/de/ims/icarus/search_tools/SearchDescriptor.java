@@ -270,6 +270,6 @@ public class SearchDescriptor {
 	}
 	
 	public boolean isActive() {
-		return search!=null && search.isRunning();
+		return search!=null && (!search.isDone() || search.isRunning());
 	}
 }

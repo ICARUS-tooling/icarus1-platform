@@ -33,6 +33,7 @@ import javax.swing.SwingWorker;
 
 import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.core.IcarusFrame;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
@@ -77,13 +78,6 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 			
 			treebank.load();
 			LoggerFactory.log(this, Level.INFO, "Loaded treebank: "+treebank.getName()); //$NON-NLS-1$
-		} catch(InterruptedException | CancellationException e) {
-			// ignore
-		} catch(Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to load treebank: "+treebank.getName(), e); //$NON-NLS-1$
-			
-			throw e;
 		} finally {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, false);
 		}
@@ -91,8 +85,21 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 	
 	@Override
 	protected void done() {
-		if(load && !treebank.isLoaded()) {
+		try {
+			get();
+
+			if(load && !treebank.isLoaded()) {
+				UIUtil.beep();
+			}
+		} catch(CancellationException | InterruptedException e) {
+			// ignore
+		} catch(Exception ex) {
+			String operation = load ? "load" : "free"; //$NON-NLS-1$ //$NON-NLS-2$
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Unable to "+operation+" treebank: "+treebank.getName(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			UIUtil.beep();
+			
+			IcarusFrame.defaultShowError(ex);;
 		}
 	}
 
@@ -102,13 +109,6 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 			
 			treebank.free();
 			LoggerFactory.log(this, Level.INFO, "Freed treebank: "+treebank.getName()); //$NON-NLS-1$
-		} catch(CancellationException e) {
-			// ignore
-		} catch(Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$
-			
-			throw e;
 		} finally {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, false);
 		}

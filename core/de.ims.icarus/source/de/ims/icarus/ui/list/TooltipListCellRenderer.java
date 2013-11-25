@@ -98,7 +98,7 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 			textWidth = fm.stringWidth(tooltip);
 		}
 		
-		if(textWidth<=columnWidth) {
+		if(textWidth<=columnWidth && tooltip.equals(getText())) {
 			tooltip = null;
 		}
 		

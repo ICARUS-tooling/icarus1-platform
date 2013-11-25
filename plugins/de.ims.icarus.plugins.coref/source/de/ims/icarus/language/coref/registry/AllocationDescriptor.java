@@ -148,6 +148,10 @@ public class AllocationDescriptor implements Loadable,
 			throw new IllegalStateException("Loading process already started"); //$NON-NLS-1$
 		
 		try {
+			
+			Location location = getLocation();
+			if(location==null)
+				throw new IllegalStateException("No location specified"); //$NON-NLS-1$
 
 			AllocationReader reader = createReader();
 			if(reader==null)
@@ -161,7 +165,7 @@ public class AllocationDescriptor implements Loadable,
 			if(parent==null)
 				throw new IllegalStateException("No parent set"); //$NON-NLS-1$
 			
-			reader.init(getLocation(), options, parent.getDocumentSet());
+			reader.init(location, options, parent.getDocumentSet());
 			
 			reader.readAllocation(allocation);
 		} finally {

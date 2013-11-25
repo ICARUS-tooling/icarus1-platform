@@ -53,9 +53,11 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		-->
 		<separator />
 		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction" />
 		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction" />
@@ -75,9 +77,11 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		-->
 		<separator />
 		<item type="custom" value="showInMenu" />
 	</action-list>

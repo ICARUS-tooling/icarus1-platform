@@ -64,9 +64,9 @@ public class CoreferencePreferences {
 		builder.addBooleanEntry("filterSingletons", true); //$NON-NLS-1$
 		Options options = new Options();
 		options.put("gridEnabled", false); //$NON-NLS-1$
-		options.put("selectedVertexShape", 1); //$NON-NLS-1$
+//		options.put("selectedVertexShape", 1); //$NON-NLS-1$
 		options.put("vertexStrokeColor", Color.black.getRGB()); //$NON-NLS-1$
-		options.put("selectedVertexPerimeter", 1); //$NON-NLS-1$
+//		options.put("selectedVertexPerimeter", 1); //$NON-NLS-1$
 		JGraphPreferences.buildDefaultGraphConfig(builder, options);
 		builder.reset();
 		
@@ -77,7 +77,8 @@ public class CoreferencePreferences {
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		builder.setProperties(
-				builder.addOptionsEntry("defaultDocumentPresenter", 0, CoreferencePlugin.getCoreferencePresenterExtensions().toArray()), //$NON-NLS-1$
+				builder.addOptionsEntry("defaultDocumentPresenter", 0,  //$NON-NLS-1$
+						CoreferencePlugin.getCoreferencePresenterExtensions().toArray()),
 				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
 		builder.addBooleanEntry("showRowIndex", true); //$NON-NLS-1$
 		builder.addBooleanEntry("showSetIndex", false); //$NON-NLS-1$

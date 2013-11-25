@@ -250,6 +250,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 		dialog.setResizable(true);
 		//dialog.setMinimumSize(dialog.getPreferredSize());
 		
+		dialog.pack();
 		dialog.setVisible(true);
 		dialog.dispose();
 		

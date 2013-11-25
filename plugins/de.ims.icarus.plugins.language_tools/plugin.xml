@@ -219,6 +219,7 @@
 		</parameter>
 	</extension>
 	
+	<!--
 	<extension id="TreebankEditView" plugin-id="de.ims.icarus.languageTools" point-id="TreebankManagementView">
 		<doc>
 			<doc-text>
@@ -234,12 +235,12 @@
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="high" />
 		
-		<!-- CAPABILITIES -->
 		<parameter id="capabilities">
 			<parameter id="clear" />
 			<parameter id="edit" value="TreebankContentType" />
 		</parameter>
 	</extension>
+	-->
 	
 	<extension id="TreebankExplorerView" plugin-id="de.ims.icarus.languageTools" point-id="TreebankManagementView">
 		<doc>
@@ -295,6 +296,7 @@
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.DefaultSimpleTreebank" />
 	</extension>
 	
+	<!--
 	<extension id="FilteredTreebank" plugin-id="de.ims.icarus.languageTools" point-id="Treebank">
 		<doc>
 			<doc-text>
@@ -307,6 +309,7 @@
 		</doc>
 		<parameter id="class" value="de.ims.icarus.plugins.language_tools.treebank.FilteredTreebank" />
 	</extension>
+	-->
 	
 	<!-- HELPERS -->
 	

@@ -395,8 +395,9 @@ public class SearchManagerView extends View {
 				
 				// Display result
 				SearchResult result = descriptor.getSearchResult();
+				Search search = descriptor.getSearch();
 				
-				if(result==null || !descriptor.getSearch().isRunning()) {
+				if(result==null || (!search.isDone() && !search.isRunning())) {
 					return;
 				}
 				
@@ -752,6 +753,12 @@ public class SearchManagerView extends View {
 					return;
 				}
 				
+				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(), 
+						"plugins.searchTools.searchManagerView.dialogs.removeSearch.title",  //$NON-NLS-1$
+						"plugins.searchTools.searchManagerView.dialogs.removeSearch.confirm")) { //$NON-NLS-1$
+					return;
+				}
+				
 				int index = searchHistoryList.getSelectedIndex();
 				searchHistory.removeSearch(descriptor);
 				
@@ -785,10 +792,16 @@ public class SearchManagerView extends View {
 				for(int i=0; i<searchHistory.getSize(); i++) {
 					if(searchHistory.getElementAt(i).isActive()) {
 						DialogFactory.getGlobalFactory().showWarning(getFrame(), 
-								"plugins.searchTools.searchManagerView.dialogs.removeSearch.title",  //$NON-NLS-1$
-								"plugins.searchTools.searchManagerView.dialogs.removeSearch.message"); //$NON-NLS-1$
+								"plugins.searchTools.searchManagerView.dialogs.clearHistory.title",  //$NON-NLS-1$
+								"plugins.searchTools.searchManagerView.dialogs.clearHistory.message"); //$NON-NLS-1$
 						return;
 					}
+				}
+				
+				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(), 
+						"plugins.searchTools.searchManagerView.dialogs.clearHistory.title",  //$NON-NLS-1$
+						"plugins.searchTools.searchManagerView.dialogs.clearHistory.confirm")) { //$NON-NLS-1$
+					return;
 				}
 				
 				searchHistory.clear();

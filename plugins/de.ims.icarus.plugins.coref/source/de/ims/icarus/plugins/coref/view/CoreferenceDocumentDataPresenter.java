@@ -75,6 +75,7 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.ui.view.AWTPresenter;
@@ -411,7 +412,14 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		detailOutline.setDocument(document);
 		
 		try  {
-			if(member!=null && showPropertyOutline) {
+			boolean rootMember = false;
+			if(member instanceof Span) {
+				rootMember = ((Span)member).isROOT();
+			} else if(member instanceof Edge) {
+				rootMember = ((Edge)member).getSource().isROOT();
+			}
+			
+			if(member!=null && showPropertyOutline && !rootMember) {
 				detailOutline.present(member, options);
 			} else {
 				detailOutline.clear();
@@ -420,11 +428,11 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 			if(member instanceof Edge) {
 				member = ((Edge)member).getTarget();
 			}
-			if(member instanceof Span && showContextOutline) {
+			if(member instanceof Span && showContextOutline && !rootMember) {
 				Span span = (Span)member;
 				options = new Options(options);
 				options.put("index", span.getSentenceIndex()); //$NON-NLS-1$
-				options.putAll(getPresenterOptions());
+				options.putAll(this.options);
 				options.put("filter", new SpanFilters.SpanFilter(span)); //$NON-NLS-1$
 				
 				contextOutline.present(document, options);
@@ -457,19 +465,29 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		refresh();
 	}
 	
+	@SuppressWarnings("incomplete-switch")
 	private void refresh() {
 		
 		CoreferenceDocumentData document = this.document;
-		Options options = getPresenterOptions();
+		Options options = new Options(this.options);
+		
+		DescriptorState state = checkDescriptorStates(options);
+		
+		detailOutline.clear();
+		contextOutline.clear();
 		
 		if(document==null) {
 			return;
 		}
 		
 		// Check if some allocations need to be loaded
-		if(options==null) {
+		switch (state) {
+		case LOADING:
 			contentPanel.removeAll();
 			contentPanel.add(loadingLabel, BorderLayout.CENTER);
+			return;
+			
+		case INVALID:
 			return;
 		}
 		
@@ -547,17 +565,16 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		return name;
 	}
 	
-	private Options getPresenterOptions() {
-		Options options = new Options(this.options);
-		
-		if(checkAllocation(options, "allocation")) { //$NON-NLS-1$
-			return null;
+	private DescriptorState checkDescriptorStates(Options options) {
+		DescriptorState state = checkAllocation(options, "allocation"); //$NON-NLS-1$
+		if(state!=DescriptorState.VALID) {
+			return state;
 		}
-		if(checkAllocation(options, "goldAllocation")) { //$NON-NLS-1$
-			return null;
+		state = checkAllocation(options, "goldAllocation"); //$NON-NLS-1$
+		if(state!=DescriptorState.VALID) {
+			return state;
 		}
-		
-		return options;
+		return DescriptorState.VALID;
 	}
 	
 	private void refreshUIState() {
@@ -590,14 +607,28 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		contentPanel.repaint();
 	}
 	
-	private boolean checkAllocation(final Options options, final String key) {
+	private DescriptorState checkAllocation(final Options options, final String key) {
 		Object value = options.get(key);
 		if(value instanceof AllocationDescriptor) {
 			final AllocationDescriptor descriptor = (AllocationDescriptor) value;
 
 			options.put(key, descriptor.getAllocation());
 			
-			if(!descriptor.isLoaded() && !descriptor.isLoading()) {				
+			if(!descriptor.isLoaded() && !descriptor.isLoading()) {
+
+				if(descriptor.getLocation()==null) {
+					DialogFactory.getGlobalFactory().showError(null, 
+							"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+							"plugins.coref.dialogs.missingLocation"); //$NON-NLS-1$
+					return DescriptorState.INVALID;
+				}
+				if(descriptor.getReaderExtension()==null) {
+					DialogFactory.getGlobalFactory().showError(null, 
+							"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+							"plugins.coref.dialogs.missingReader"); //$NON-NLS-1$
+					return DescriptorState.INVALID;
+				}
+				
 				final String name = descriptor.getName();
 				String title = ResourceManager.getInstance().get(
 						"plugins.coref.labels.loadingAllocation"); //$NON-NLS-1$
@@ -625,11 +656,17 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 				TaskManager.getInstance().schedule(task, title, null, null, 
 						TaskPriority.DEFAULT, true);
 				
-				return true;
+				return DescriptorState.LOADING;
 			}
 		}
 		
-		return false;
+		return DescriptorState.VALID;
+	}
+	
+	private enum DescriptorState {
+		VALID,
+		INVALID,
+		LOADING,
 	}
 	
 	public class CallbackHandler {

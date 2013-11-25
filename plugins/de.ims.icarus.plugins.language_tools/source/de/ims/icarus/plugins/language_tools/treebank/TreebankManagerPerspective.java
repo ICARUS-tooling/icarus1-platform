@@ -123,7 +123,7 @@ public class TreebankManagerPerspective extends Perspective {
 		
 		String[] defaultViewIds = {
 				LanguageToolsConstants.TREEBANK_EXPLORER_VIEW_ID,
-				LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID,
+				//LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID,
 				LanguageToolsConstants.TREEBANK_PROPERTIES_VIEW_ID,
 				/*LanguageToolsConstants.TREEBANK_INSPECT_VIEW_ID,*/
 				ManagementConstants.DEFAULT_LOG_VIEW_ID,

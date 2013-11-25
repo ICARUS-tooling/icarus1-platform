@@ -45,6 +45,7 @@ import de.ims.icarus.language.treebank.TreebankDescriptor;
 import de.ims.icarus.language.treebank.TreebankEvents;
 import de.ims.icarus.language.treebank.TreebankMetaData;
 import de.ims.icarus.language.treebank.TreebankMetaDataBuilder;
+import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.events.EventObject;
@@ -103,6 +104,8 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 		String uid = (String) properties.get(READER_EXTENSION_PROPERTY);
 		if(uid!=null) {
 			readerExtension = PluginUtil.getExtension(uid);
+		} else {
+			readerExtension = TreebankRegistry.getInstance().getDefaultReaderExtension();
 		}
 		
 		reader = null;

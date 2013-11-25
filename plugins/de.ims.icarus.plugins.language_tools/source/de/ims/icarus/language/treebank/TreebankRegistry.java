@@ -56,6 +56,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.Version;
 
@@ -115,6 +116,8 @@ public class TreebankRegistry {
 	private Map<String, TreebankDescriptor> descriptorMap = 
 			Collections.synchronizedMap(new HashMap<String, TreebankDescriptor>());
 	
+	private Extension defaultReaderExtension;
+	
 	// maps instantiated treebank to its descriptor
 	private Map<Treebank, TreebankDescriptor> treebankMap = new HashMap<>();
 	
@@ -127,6 +130,13 @@ public class TreebankRegistry {
 		// Load all connected treebank extensions
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry().getPluginDescriptor(
 				LanguageToolsConstants.LANGUAGE_TOOLS_PLUGIN_ID);
+
+
+		ExtensionPoint extensionPoint = descriptor.getExtensionPoint("SentenceDataReader"); //$NON-NLS-1$
+		List<Extension> readerExtensions = new ArrayList<>(extensionPoint.getConnectedExtensions());
+		Collections.sort(readerExtensions, PluginUtil.EXTENSION_COMPARATOR);
+		defaultReaderExtension = readerExtensions.isEmpty() ? null : readerExtensions.get(0);
+		
 		for(Extension extension : descriptor.getExtensionPoint("Treebank").getConnectedExtensions()) { //$NON-NLS-1$
 			treebankTypes.put(extension.getId(), extension);
 		}
@@ -155,6 +165,10 @@ public class TreebankRegistry {
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
+	}
+	
+	public Extension getDefaultReaderExtension() {
+		return defaultReaderExtension;
 	}
 	
 	public Set<Extension> availableTypes() {

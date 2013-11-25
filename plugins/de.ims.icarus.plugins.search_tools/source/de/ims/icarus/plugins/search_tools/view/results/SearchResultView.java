@@ -153,8 +153,8 @@ public class SearchResultView extends View {
 		boolean hasResult = resultPresenter!=null;
 		
 		actionManager.setEnabled(hasResult, 
+				"plugins.searchTools.searchResultView.openPreferencesAction",  //$NON-NLS-1$
 				"plugins.searchTools.searchResultView.refreshAction",  //$NON-NLS-1$
-				"plugins.searchTools.searchResultView.viewSearchAction",  //$NON-NLS-1$
 				"plugins.searchTools.searchResultView.saveResultAction",  //$NON-NLS-1$
 				"plugins.searchTools.searchResultView.clearViewAction"); //$NON-NLS-1$
 	}
@@ -170,8 +170,6 @@ public class SearchResultView extends View {
 				callbackHandler, "refresh"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchResultView.openPreferencesAction",  //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.searchTools.searchResultView.viewSearchAction",  //$NON-NLS-1$
-				callbackHandler, "viewSearch"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchResultView.saveResultAction",  //$NON-NLS-1$
 				callbackHandler, "saveResult"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchResultView.openResultAction",  //$NON-NLS-1$
@@ -515,22 +513,6 @@ public class SearchResultView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to open preferences", ex); //$NON-NLS-1$
-				UIUtil.beep();
-				
-				showError(ex);
-			}
-		}
-		
-		public void viewSearch(ActionEvent e) {
-			if(resultPresenter==null) {
-				return;
-			}
-			
-			try {
-				// TODO fetch search descriptor and send to manager view!
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to view search", ex); //$NON-NLS-1$
 				UIUtil.beep();
 				
 				showError(ex);

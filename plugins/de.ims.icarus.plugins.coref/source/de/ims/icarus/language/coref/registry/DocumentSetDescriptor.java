@@ -131,7 +131,6 @@ public class DocumentSetDescriptor implements Loadable,
 	/**
 	 * @see de.ims.icarus.io.Loadable#load()
 	 */
-	@SuppressWarnings("resource")
 	@Override
 	public void load() throws Exception {
 		if(!loading.compareAndSet(false, true))
@@ -140,6 +139,10 @@ public class DocumentSetDescriptor implements Loadable,
 		Reader<CoreferenceDocumentData> reader = null;
 		
 		try {
+			
+			Location location = getLocation();
+			if(location==null)
+				throw new IllegalStateException("No location specified"); //$NON-NLS-1$
 
 			reader = createReader();
 			if(reader==null)
@@ -149,7 +152,7 @@ public class DocumentSetDescriptor implements Loadable,
 			CoreferenceDocumentSet documentSet = getDocumentSet();
 			documentSet.free();
 			
-			CoreferenceUtils.loadDocumentSet(reader, getLocation(), options, documentSet);
+			CoreferenceUtils.loadDocumentSet(reader, location, options, documentSet);
 		} finally {
 			
 			if(reader!=null) {

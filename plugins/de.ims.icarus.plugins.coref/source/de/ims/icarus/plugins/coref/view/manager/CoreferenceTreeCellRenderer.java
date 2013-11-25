@@ -31,11 +31,15 @@ import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import org.java.plugin.registry.Extension;
+
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.DecoratedIcon;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
 
 /**
@@ -46,6 +50,8 @@ import de.ims.icarus.util.location.Locations;
 public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	private static final long serialVersionUID = 3033361195693809708L;
+
+	private static final DecoratedIcon cellIcon = new DecoratedIcon(UIUtil.getBlankIcon(16, 16));
 
 	public CoreferenceTreeCellRenderer() {
 		setLeafIcon(null);
@@ -68,10 +74,14 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 		
 		Icon icon = null;
 		String tooltip = null;
+		Extension readerExtension = null;
+		Location location = null;
 		
 		if(value instanceof DocumentSetDescriptor) {
 			DocumentSetDescriptor descriptor = (DocumentSetDescriptor)value;
 			value = descriptor.getName();
+			readerExtension = descriptor.getReaderExtension();
+			location = descriptor.getLocation();
 			
 			StringBuilder sb = new StringBuilder(200);
 			sb.append(ResourceManager.getInstance().get("plugins.languageTools.labels.name")) //$NON-NLS-1$
@@ -88,6 +98,8 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 		} else if(value instanceof AllocationDescriptor) {
 			AllocationDescriptor descriptor = (AllocationDescriptor)value;
 			value = descriptor.getName();
+			readerExtension = descriptor.getReaderExtension();
+			location = descriptor.getLocation();
 			
 			StringBuilder sb = new StringBuilder(200);
 			sb.append(ResourceManager.getInstance().get("plugins.languageTools.labels.name")) //$NON-NLS-1$
@@ -104,7 +116,26 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 		
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 		
-		setIcon(icon);
+		if(icon!=null) {
+			cellIcon.setBaseIcon(icon);
+		} else {
+			cellIcon.setBaseIcon(UIUtil.getBlankIcon(16, 16));
+		}
+		
+		cellIcon.removeDecorations();
+		
+		Icon overlay = null;
+		if(readerExtension==null || location==null) {
+			overlay = IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif"); //$NON-NLS-1$
+		} else if(!Locations.isValid(location)) {
+			overlay = IconRegistry.getGlobalRegistry().getIcon("warning_co.gif"); //$NON-NLS-1$
+		}
+		
+		if(overlay!=null) {
+			cellIcon.addDecoration(overlay, 0, cellIcon.getIconHeight()-8);
+		}
+		
+		setIcon(cellIcon);
 		setToolTipText(tooltip);
 		
 		return this;

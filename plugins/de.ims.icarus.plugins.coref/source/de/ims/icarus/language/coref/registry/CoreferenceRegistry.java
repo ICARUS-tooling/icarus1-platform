@@ -59,6 +59,8 @@ import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.coref.CoreferencePlugin;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
@@ -104,6 +106,9 @@ public final class CoreferenceRegistry {
 	
 	private DocumentSetListModel documentListModel;
 	
+	private final Extension defaultAllocatinReaderExtension;
+	private final Extension defaultDocumentReaderExtension;
+	
 	private Map<DocumentSetDescriptor, AllocationDescriptor> defaultAllocationDescriptors;
 
 	public static final Object dummyEntry = "-"; //$NON-NLS-1$
@@ -122,6 +127,16 @@ public final class CoreferenceRegistry {
 		allocationMap = Collections.synchronizedMap(allocationMap);
 		
 		allocationLookup = new HashMap<>();
+		
+		// Default allocation reader
+		List<Extension> extensions = new ArrayList<>(CoreferencePlugin.getAllocationReaderExtensions());
+		Collections.sort(extensions, PluginUtil.EXTENSION_COMPARATOR);
+		defaultAllocatinReaderExtension = extensions.isEmpty() ? null : extensions.get(0);
+		
+		// Default document set reader
+		extensions = new ArrayList<>(CoreferencePlugin.getDocumentReaderExtensions());
+		Collections.sort(extensions, PluginUtil.EXTENSION_COMPARATOR);
+		defaultDocumentReaderExtension = extensions.isEmpty() ? null : extensions.get(0);
 
 		// Attempt to load document-set list
 		try {
@@ -184,6 +199,20 @@ public final class CoreferenceRegistry {
 		return documentSetList.get(index);
 	}
 	
+	/**
+	 * @return the defaultAllocatinReaderExtension
+	 */
+	public Extension getDefaultAllocatinReaderExtension() {
+		return defaultAllocatinReaderExtension;
+	}
+
+	/**
+	 * @return the defaultDocumentReaderExtension
+	 */
+	public Extension getDefaultDocumentReaderExtension() {
+		return defaultDocumentReaderExtension;
+	}
+
 	public int indexOfDocumentSet(DocumentSetDescriptor descriptor) {
 		return documentSetList.indexOf(descriptor);
 	}
@@ -203,6 +232,7 @@ public final class CoreferenceRegistry {
 		DocumentSetDescriptor descriptor = new DocumentSetDescriptor();
 		descriptor.setId(UUID.randomUUID().toString());
 		descriptor.setName(name);
+		descriptor.setReaderExtension(getDefaultDocumentReaderExtension());
 		
 		addDocumentSet(descriptor);
 		
@@ -337,6 +367,7 @@ public final class CoreferenceRegistry {
 		AllocationDescriptor descriptor = new AllocationDescriptor(parent);
 		descriptor.setId(UUID.randomUUID().toString());
 		descriptor.setName(name);
+		descriptor.setReaderExtension(getDefaultAllocatinReaderExtension());
 		
 		parent.addAllocation(descriptor);
 		

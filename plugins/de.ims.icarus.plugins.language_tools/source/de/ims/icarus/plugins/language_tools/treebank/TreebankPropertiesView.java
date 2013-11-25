@@ -54,7 +54,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.language.treebank.TreebankListDelegate;
 import de.ims.icarus.language.treebank.TreebankMetaData;
@@ -72,6 +71,7 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.table.TooltipTableCellRenderer;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.mpi.Commands;
@@ -216,10 +216,17 @@ public class TreebankPropertiesView extends View {
 
 	private void showDefaultInfo() {
 		scrollPane.setViewportView(infoLabel);
+		
+		refreshActions();
 	}
 
 	private void refreshActions() {
-		// TODO
+		ActionManager actionManager = getDefaultActionManager();
+		
+		boolean isLoaded = treebank!=null && treebank.isLoaded();
+		
+		actionManager.setEnabled(isLoaded, 
+				"plugins.languageTools.treebankPropertiesView.inspectTreebankAction"); //$NON-NLS-1$
 	}
 	
 	private void showPopup(MouseEvent trigger) {
@@ -286,6 +293,9 @@ public class TreebankPropertiesView extends View {
 	private static String LF = "\n"; //$NON-NLS-1$
 	
 	private void refresh() {
+		
+		refreshActions();
+		
 		if(treebank==null) {
 			return;
 		}
@@ -301,10 +311,10 @@ public class TreebankPropertiesView extends View {
 		.append(LF);
 		
 		// Type
-		sb.append(resourceDomain.get("plugins.languageTools.labels.type")) //$NON-NLS-1$
-		.append(COLON)
-		.append(TreebankRegistry.getInstance().getExtension(treebank).getId())
-		.append(LF);
+//		sb.append(resourceDomain.get("plugins.languageTools.labels.type")) //$NON-NLS-1$
+//		.append(COLON)
+//		.append(TreebankRegistry.getInstance().getExtension(treebank).getId())
+//		.append(LF);
 		
 		// Loaded
 		sb.append(resourceDomain.get("plugins.languageTools.labels.loaded")) //$NON-NLS-1$
@@ -313,15 +323,17 @@ public class TreebankPropertiesView extends View {
 		.append(LF);
 		
 		// Editable
-		sb.append(resourceDomain.get("plugins.languageTools.labels.editable")) //$NON-NLS-1$
-		.append(COLON)
-		.append(Boolean.toString(treebank.isEditable()))
-		.append(LF);
+//		sb.append(resourceDomain.get("plugins.languageTools.labels.editable")) //$NON-NLS-1$
+//		.append(COLON)
+//		.append(Boolean.toString(treebank.isEditable()))
+//		.append(LF);
 		
 		// Gold
-		sb.append(resourceDomain.get("plugins.languageTools.labels.gold")) //$NON-NLS-1$
-		.append(COLON)
-		.append(Boolean.toString(treebank.supportsType(DataType.GOLD))); // no LF on last line!
+//		sb.append(resourceDomain.get("plugins.languageTools.labels.gold")) //$NON-NLS-1$
+//		.append(COLON)
+//		.append(Boolean.toString(treebank.supportsType(DataType.GOLD))); // no LF on last line!
+		
+		StringUtil.trim(sb);
 		
 		propertiesArea.setText(sb.toString());
 		
@@ -350,7 +362,7 @@ public class TreebankPropertiesView extends View {
 			metaDataTable.getTableHeader().setVisible(false);
 		} else {
 			metaDataLabel.setText(resourceDomain.get(
-					"plugins.languageTools.labels.metaData")+COLON); //$NON-NLS-1$
+					"plugins.languageTools.treebankPropertiesView.metaData")+COLON); //$NON-NLS-1$
 			metaDataTable.setVisible(true);
 			metaDataTable.getTableHeader().setVisible(true);
 		}

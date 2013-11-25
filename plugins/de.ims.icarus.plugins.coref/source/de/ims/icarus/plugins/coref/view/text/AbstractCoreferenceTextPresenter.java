@@ -324,13 +324,16 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 	 */
 	@Override
 	public void clear() {
-		if(!isPresenting()) {
-			return;
-		}
+//		if(!isPresenting()) {
+//			return;
+//		}
 		
 		options = null;
 		setData(null);
-		refresh();
+	
+		if(textPane!=null) {
+			textPane.setDocument(createNewDocument());
+		}
 	}
 
 	/**

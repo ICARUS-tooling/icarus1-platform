@@ -48,16 +48,10 @@ import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeSelectionModel;
-import javax.swing.tree.TreePath;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.java.plugin.registry.Extension;
 
@@ -70,8 +64,7 @@ import de.ims.icarus.language.treebank.TreebankInfo;
 import de.ims.icarus.language.treebank.TreebankListDelegate;
 import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.language.treebank.swing.TreebankListCellRenderer;
-import de.ims.icarus.language.treebank.swing.TreebankTreeCellRenderer;
-import de.ims.icarus.language.treebank.swing.TreebankTreeModel;
+import de.ims.icarus.language.treebank.swing.TreebankListModel;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.InfoPanel;
 import de.ims.icarus.plugins.core.ToolBarDelegate;
@@ -85,6 +78,7 @@ import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.Events;
+import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
@@ -102,7 +96,7 @@ import de.ims.icarus.util.mpi.Message;
  */
 public class TreebankExplorerView extends View {
 	
-	private JTree treebanksTree;
+	private JList<Treebank> treebanksList;
 	
 	private JPopupMenu popupMenu;
 	
@@ -129,25 +123,19 @@ public class TreebankExplorerView extends View {
 		loadTracker = new LoadTracker();
 
 		// Create and init tree
-		treebanksTree = new JTree(TreebankTreeModel.getSharedInstance());
-		UIUtil.enableToolTip(treebanksTree);
-		UIUtil.enableRighClickTreeSelection(treebanksTree);
-		treebanksTree.setCellRenderer(new TreebankTreeCellRenderer());
-		treebanksTree.setEditable(false);
-		treebanksTree.setBorder(UIUtil.defaultContentBorder);
-		treebanksTree.setLargeModel(true);
-		treebanksTree.setRootVisible(false);
-		treebanksTree.setShowsRootHandles(true);	
-		DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
-		selectionModel.setSelectionMode(DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
-		treebanksTree.setSelectionModel(selectionModel);
-		treebanksTree.addTreeSelectionListener(handler);		
-		treebanksTree.addMouseListener(handler);
-		treebanksTree.getModel().addTreeModelListener(handler);
-		UIUtil.expandAll(treebanksTree, true);
+		TreebankListModel model = new TreebankListModel();
+		model.setDummyTreebankAllowed(false);
+		treebanksList = new JList<>(model);
+		UIUtil.enableToolTip(treebanksList);
+		UIUtil.enableRighClickListSelection(treebanksList);
+		treebanksList.setCellRenderer(TreebankListCellRenderer.getSharedInstance());
+		treebanksList.setBorder(UIUtil.defaultContentBorder);
+		treebanksList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		treebanksList.addListSelectionListener(handler);
+		treebanksList.addMouseListener(handler);
 		
 		// Scroll pane
-		JScrollPane scrollPane = new JScrollPane(treebanksTree);
+		JScrollPane scrollPane = new JScrollPane(treebanksList);
 		scrollPane.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		
@@ -166,15 +154,6 @@ public class TreebankExplorerView extends View {
 		
 		registerActionCallbacks();
 		refreshActions();
-	}
-
-	/**
-	 * @see de.ims.icarus.plugins.core.View#reset()
-	 */
-	@Override
-	public void reset() {
-		UIUtil.expandAll(treebanksTree, false);
-		treebanksTree.expandPath(new TreePath(treebanksTree.getModel().getRoot()));
 	}
 	
 	/**
@@ -211,9 +190,8 @@ public class TreebankExplorerView extends View {
 			return;
 		}
 		
-		Object selectedItem = getSelectedObject();
-		if(selectedItem instanceof Treebank) {
-			Treebank treebank = (Treebank) selectedItem;
+		Treebank treebank = treebanksList.getSelectedValue();
+		if(treebank!=null) {
 			TreebankDescriptor descriptor = TreebankRegistry.getInstance().getDescriptor(treebank);
 			String text = treebank.getName()+" - "+descriptor.getExtension().getUniqueId(); //$NON-NLS-1$
 
@@ -235,29 +213,6 @@ public class TreebankExplorerView extends View {
 		infoPanel.displayText("totalTreebanks", text); //$NON-NLS-1$
 	}
 	
-	private Object[] getSelectionPath() {
-		TreePath path = treebanksTree.getSelectionPath();
-		if(path==null) {
-			return null;
-		}
-		Object[] items = path.getPath();
-		for(int i=items.length-1; i>-1; i--) {
-			if(items[i] instanceof DefaultMutableTreeNode) {
-				items[i] = ((DefaultMutableTreeNode)items[i]).getUserObject();
-			}
-		}
-		
-		return items;
-	}
-	
-	private Object getSelectedObject() {
-		Object[] path = getSelectionPath();
-		if(path==null || path.length==0) {
-			return null;
-		}
-		return path[path.length-1];
-	}
-	
 	private void showPopup(MouseEvent trigger) {
 		if(popupMenu==null) {
 			// Create new popup menu
@@ -274,22 +229,17 @@ public class TreebankExplorerView extends View {
 		}
 		
 		if(popupMenu!=null) {			
-			popupMenu.show(treebanksTree, trigger.getX(), trigger.getY());
+			popupMenu.show(treebanksList, trigger.getX(), trigger.getY());
 		}
 	}
 	
 	private void refreshActions() {
-		Object selectedObject = getSelectedObject();
+		Treebank treebank = treebanksList.getSelectedValue();
 		ActionManager actionManager = getDefaultActionManager();
 		
-		boolean isTreebank = selectedObject instanceof Treebank;
-		boolean isExtension = selectedObject instanceof Extension;
-		boolean isLoading = isTreebank && ((Treebank)selectedObject).isLoading();
-		boolean isLoaded = isTreebank && ((Treebank)selectedObject).isLoaded()
-					&& !isLoading;
-		
-		actionManager.setEnabled(isTreebank || isExtension, 
-				"plugins.languageTools.treebankExplorerView.newTreebankAction");  //$NON-NLS-1$
+		boolean isTreebank = treebank!=null;
+		boolean isLoading = isTreebank && treebank.isLoading();
+		boolean isLoaded = isTreebank && treebank.isLoaded() && !isLoading;
 		
 		actionManager.setEnabled(isTreebank, 
 				"plugins.languageTools.treebankExplorerView.deleteTreebankAction",  //$NON-NLS-1$
@@ -388,30 +338,7 @@ public class TreebankExplorerView extends View {
 		}
 	}
 	
-	private class Handler extends MouseAdapter implements TreeSelectionListener, 
-		TreeModelListener, EventListener {
-
-		/**
-		 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
-		 */
-		@Override
-		public void valueChanged(TreeSelectionEvent e) {
-			Object[] path = getSelectionPath();
-			Object selectedObject = (path==null || path.length==0) ? null : path[path.length-1];
-	
-			refreshActions();
-			
-			if(selectedObject instanceof Treebank) {
-				loadTracker.register((Treebank) selectedObject);
-			} else {
-				loadTracker.unregister();
-			}
-			
-			showTreebankInfo();
-			
-			fireBroadcastEvent(new EventObject(LanguageToolsConstants.TREEBANK_EXPLORER_SELECTION_CHANGED, 
-					"item", selectedObject, "path", path)); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+	private class Handler extends MouseAdapter implements ListSelectionListener, EventListener {
 		
 		private void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
@@ -449,52 +376,33 @@ public class TreebankExplorerView extends View {
 		}
 
 		/**
-		 * @see javax.swing.event.TreeModelListener#treeNodesChanged(javax.swing.event.TreeModelEvent)
-		 */
-		@Override
-		public void treeNodesChanged(TreeModelEvent e) {
-			// no-op
-		}
-
-		/**
-		 * @see javax.swing.event.TreeModelListener#treeNodesInserted(javax.swing.event.TreeModelEvent)
-		 */
-		@Override
-		public void treeNodesInserted(TreeModelEvent e) {
-			TreePath path = e.getTreePath();
-			if(path==null) {
-				return;
-			}
-			treebanksTree.expandPath(path);
-		}
-
-		/**
-		 * @see javax.swing.event.TreeModelListener#treeNodesRemoved(javax.swing.event.TreeModelEvent)
-		 */
-		@Override
-		public void treeNodesRemoved(TreeModelEvent e) {
-			// no-op
-		}
-
-		/**
-		 * @see javax.swing.event.TreeModelListener#treeStructureChanged(javax.swing.event.TreeModelEvent)
-		 */
-		@Override
-		public void treeStructureChanged(TreeModelEvent e) {
-			TreePath path = e.getTreePath();
-			if(path==null) {
-				return;
-			}
-			treebanksTree.expandPath(path);
-		}
-
-		/**
 		 * @see de.ims.icarus.ui.events.EventListener#invoke(java.lang.Object, de.ims.icarus.ui.events.EventObject)
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
 			showTreebankInfo();
 			refreshActions();
+		}
+
+		/**
+		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+		 */
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			
+			refreshActions();
+			
+			if(treebank!=null) {
+				loadTracker.register(treebank);
+			} else {
+				loadTracker.unregister();
+			}
+			
+			showTreebankInfo();
+			
+			fireBroadcastEvent(new EventObject(LanguageToolsConstants.TREEBANK_EXPLORER_SELECTION_CHANGED, 
+					"item", treebank)); //$NON-NLS-1$
 		}
 	}
 	
@@ -505,25 +413,12 @@ public class TreebankExplorerView extends View {
 		}
 		
 		public void newTreebank(ActionEvent e) {
-			Object[] path = getSelectionPath();
-			if(path==null) {
-				return;
-			}
+			Extension extension = TreebankRegistry.getInstance().availableTypes().iterator().next();
 			
-			Extension extension = null;
-			for(int i=path.length-1; i>-1; i--) {
-				if(path[i] instanceof Extension) {
-					extension = (Extension) path[i];
-				}
-			}
-			
-			if(extension==null) {
-				return;
-			}
-			
-			String name = TreebankRegistry.getInstance().getUniqueName("New "+extension.getId()); //$NON-NLS-1$
+			String name = TreebankRegistry.getInstance().getUniqueName("New Treebank"); //$NON-NLS-1$
+			TreebankDescriptor descriptor = null;
 			try {
-				TreebankRegistry.getInstance().newTreebank(extension, name);
+				descriptor = TreebankRegistry.getInstance().newTreebank(extension, name);
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Unable to create new treebank: "+name, ex); //$NON-NLS-1$
@@ -531,15 +426,21 @@ public class TreebankExplorerView extends View {
 				
 				showError(ex);
 			}
-		}
-		
-		public void deleteTreebank(ActionEvent e) {
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+			
+			if(descriptor==null) {
 				return;
 			}
 			
-			Treebank treebank = (Treebank)selectedObject;
+			treebanksList.setSelectedValue(descriptor.getTreebank(), true);
+			
+			editTreebank(null);
+		}
+		
+		public void deleteTreebank(ActionEvent e) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
+				return;
+			}
 			boolean doDelete = false;
 			
 			// Special handling for treebanks with other treebanks derived from them 
@@ -583,27 +484,12 @@ public class TreebankExplorerView extends View {
 		}
 		
 		public void cloneTreebank(ActionEvent e) {
-			Object[] path = getSelectionPath();
-			if(path==null || path.length==0) {
-				return;
-			}
-			Object selectedObject = path[path.length-1];
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
 				return;
 			}
 			
-			Treebank treebank = (Treebank)selectedObject;
-			
-			Extension extension = null;
-			for(int i=path.length-1; i>-1; i--) {
-				if(path[i] instanceof Extension) {
-					extension = (Extension) path[i];
-				}
-			}
-			
-			if(extension==null) {
-				return;
-			}
+			Extension extension = TreebankRegistry.getInstance().getExtension(treebank);
 			
 			String name = TreebankRegistry.getInstance().getUniqueName(treebank.getName());
 			try {
@@ -618,12 +504,10 @@ public class TreebankExplorerView extends View {
 		}
 		
 		public void renameTreebank(ActionEvent e) {
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
 				return;
 			}
-			
-			Treebank treebank = (Treebank)selectedObject;
 			
 			String currentName = treebank.getName();
 			String newName = DialogFactory.getGlobalFactory().showInputDialog(getFrame(), 
@@ -664,13 +548,10 @@ public class TreebankExplorerView extends View {
 			if(!Desktop.isDesktopSupported()) {
 				return;
 			}
-			
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
 				return;
 			}
-			
-			Treebank treebank = (Treebank)selectedObject;
 			Location location = treebank.getLocation();
 			if(location==null) {
 				return;
@@ -694,13 +575,11 @@ public class TreebankExplorerView extends View {
 			}
 		}
 		
-		public void inspectTreebank(ActionEvent e) {	
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+		public void inspectTreebank(ActionEvent e) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
 				return;
 			}
-			
-			Treebank treebank = (Treebank)selectedObject;
 			if(!treebank.isLoaded()) {
 				return;
 			}
@@ -727,12 +606,10 @@ public class TreebankExplorerView extends View {
 		}
 		
 		public void loadTreebank(ActionEvent e) {	
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
 				return;
 			}
-			
-			Treebank treebank = (Treebank)selectedObject;
 			if(treebank.isLoaded()) {
 				return;
 			}
@@ -750,12 +627,10 @@ public class TreebankExplorerView extends View {
 		}
 		
 		public void freeTreebank(ActionEvent e) {	
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
 				return;
 			}
-			
-			Treebank treebank = (Treebank)selectedObject;
 			if(!treebank.isLoaded()) {
 				return;
 			}
@@ -772,24 +647,42 @@ public class TreebankExplorerView extends View {
 			}
 		}
 		
-		public void editTreebank(ActionEvent e) {			
-			Object selectedObject = getSelectedObject();
-			if(selectedObject==null || !(selectedObject instanceof Treebank)) {
-				return;
-			}
-			
-			Treebank treebank = (Treebank)selectedObject;
-			
-			Message message = new Message(this, Commands.EDIT, treebank, null);
-			
+		public void editTreebank(ActionEvent e) {
+//			
+//			Message message = new Message(this, Commands.EDIT, treebank, null);
+//			
+//			try {
+//				sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
+//			} catch(Exception ex) {
+//				LoggerFactory.log(this, Level.SEVERE, 
+//						"Failed to edit treebank: "+treebank.getName(), ex); //$NON-NLS-1$
+//				UIUtil.beep();
+//				
+//				showError(ex);
+//			}
+			Editor<Treebank> editor = null;
 			try {
-				sendRequest(LanguageToolsConstants.TREEBANK_EDIT_VIEW_ID, message);
+				Treebank treebank = treebanksList.getSelectedValue();
+				if(treebank==null) {
+					return;
+				}
+				
+				editor = new DefaultSimpleTreebankEditor();
+				
+				DialogFactory.getGlobalFactory().showEditorDialog(
+						getFrame(), treebank, editor, 
+						"plugins.languageTools.treebankExplorerView.dialogs.editTreebank.title"); //$NON-NLS-1$
+				
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to edit treebank: "+treebank.getName(), ex); //$NON-NLS-1$
-				UIUtil.beep();
+						"Failed to edit treebank", ex); //$NON-NLS-1$
 				
+				UIUtil.beep();
 				showError(ex);
+			} finally {
+				if(editor!=null) {
+					editor.close();
+				}
 			}
 		}
 		

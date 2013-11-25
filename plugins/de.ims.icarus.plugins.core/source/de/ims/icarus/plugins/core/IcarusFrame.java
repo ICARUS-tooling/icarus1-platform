@@ -28,6 +28,8 @@ package de.ims.icarus.plugins.core;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.KeyboardFocusManager;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -726,6 +728,24 @@ public class IcarusFrame extends JFrame {
 		
 		actionManager.addHandler("plugins.core.icarusFrame.openPerspectiveDialogAction",  //$NON-NLS-1$
 				callbackHandler, "openPerspectiveDialog"); //$NON-NLS-1$
+	}
+	
+	public Perspective getCurrentPerspective() {
+		return currentPerspective;
+	}
+	
+	public static void defaultShowError(Throwable t) {
+		Window w = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+		if(w==null || !(w instanceof IcarusFrame)) {
+			return;
+		}
+		
+		IcarusFrame frame = (IcarusFrame) w;
+
+		DialogFactory.getGlobalFactory().showError(frame, 
+				"plugins.core.icarusCorePlugin.errorDialog.title",  //$NON-NLS-1$
+				"plugins.core.icarusCorePlugin.errorDialog.message",  //$NON-NLS-1$
+				t.getMessage());
 	}
 	
 	/**

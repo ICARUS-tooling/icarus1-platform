@@ -45,6 +45,15 @@ public final class Locations {
 		// no-op
 	}
 	
+	public static boolean isValid(Location location) {
+		if(location==null) {
+			return false;
+		}
+		
+		URL url = location.getURL();
+		
+		return url!=null && IOUtil.isResourceExists(url);
+	}
 
 	public static Location getLocation(String path) throws MalformedURLException {
 		if(path==null)

@@ -74,11 +74,19 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 	}
 	
 	public void setExcludes(Treebank...excludes) {
-		setFilter(new ExclusionFilter((Object[]) excludes));
+		Filter filter = null;
+		if(excludes!=null && excludes.length>=0) {
+			filter = new ExclusionFilter((Object[]) excludes);
+		}
+		setFilter(filter);
 	}
 	
 	public void setExcludes(Collection<Treebank> excludes) {
-		setFilter(new ExclusionFilter(excludes));
+		Filter filter = null;
+		if(excludes!=null && !excludes.isEmpty()) {
+			filter = new ExclusionFilter(excludes);
+		}
+		setFilter(filter);
 	}
 	
 	public Filter getFilter() {

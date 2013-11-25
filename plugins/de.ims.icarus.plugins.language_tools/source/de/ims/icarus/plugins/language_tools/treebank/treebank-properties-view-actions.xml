@@ -30,21 +30,19 @@
 		
 	<!-- Edit Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.editTreebankAction"
-		template="actions.default.editAction"
-		name="${id}.name" desc="${id}.description" />
+		name="${id}.name" desc="${id}.description" icon="treebank_edit.png" />
 		
 	<!-- Inspect Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.inspectTreebankAction"
-		template="actions.default.inspectAction"
-		name="${id}.name" desc="${id}.description" />
+		name="${id}.name" desc="${id}.description" icon="treebank_inspect.png" />
 		
 	<!-- Load Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.loadTreebankAction"
-		name="${id}.name" desc="${id}.description" />
+		name="${id}.name" desc="${id}.description" icon="treebank_load.png" />
 		
 	<!-- Free Treebank -->
 	<action id="plugins.languageTools.treebankPropertiesView.freeTreebankAction"
-		name="${id}.name" desc="${id}.description" />
+		name="${id}.name" desc="${id}.description" icon="treebank_free.png" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.languageTools.treebankPropertiesView.toolBarList">

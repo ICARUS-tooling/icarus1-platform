@@ -244,7 +244,7 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 			int index1 = 0;
 			
 			for(int i=0; i<descriptors.size(); i++) {
-				if(descriptors.get(i).getSearch().isRunning()) {
+				if(descriptors.get(i).isActive()) {
 					needsRefresh = true;
 					index0 = Math.min(index0, i);
 					index1 = Math.max(index1, i);
