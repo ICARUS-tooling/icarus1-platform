@@ -33,8 +33,8 @@ import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.annotation.AnnotatedSentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
+import de.ims.icarus.util.annotation.AnnotationContainer;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -42,7 +42,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class DetailedNGramSentenceDataList implements SentenceDataList{
+public class DetailedNGramSentenceDataList implements SentenceDataList, AnnotationContainer{
 
 	protected List<SentenceData> sdl;
 	
@@ -52,6 +52,10 @@ public class DetailedNGramSentenceDataList implements SentenceDataList{
 	public DetailedNGramSentenceDataList(
 			List<SentenceData> sdl) {
 		this.sdl = sdl;
+	}
+	
+	public DetailedNGramSentenceDataList() {
+
 	}
 
 	/**
@@ -120,6 +124,14 @@ public class DetailedNGramSentenceDataList implements SentenceDataList{
 	public SentenceData get(int index, DataType type,
 			AvailabilityObserver observer) {
 		return get(index);
+	}
+
+	/**
+	 * @see de.ims.icarus.util.annotation.AnnotationContainer#getAnnotationType()
+	 */
+	@Override
+	public ContentType getAnnotationType() {
+		return DependencyUtils.getDependencyAnnotationType();
 	}
 	
 }

@@ -42,7 +42,6 @@ import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
  */
 public class NGramHighlighting extends BitmaskHighlighting {
 
-
 	private static NGramHighlighting instance;
 	
 	public static NGramHighlighting getInstance() {
@@ -62,10 +61,8 @@ public class NGramHighlighting extends BitmaskHighlighting {
 		super(DEFAULT_BLOCK_SIZE); // Use default block size of 5 digits
 		
 		// Register tokens
-		//registerToken("begin", true, new Color(2807039)); //$NON-NLS-1$
-		//registerToken("end", true, new Color(2807039)); //$NON-NLS-1$
 		registerToken("ngram", true, new Color(0,255,0)); //$NON-NLS-1$
-		registerToken("nuclei", true, new Color(255,42,0)); //$NON-NLS-1$
+		registerToken("nucleus", true, new Color(255,42,0)); //$NON-NLS-1$
 	}
 	
 
@@ -77,7 +74,7 @@ public class NGramHighlighting extends BitmaskHighlighting {
 	@Override
 	public void loadConfig() {
 		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
-		Handle group = config.getHandle("plugins.dependency.highlighting"); //$NON-NLS-1$
+		Handle group = config.getHandle("plugins.errorMining.highlighting"); //$NON-NLS-1$
 
 		if (configListener == null) {
 			configListener = new ConfigListener() {
@@ -96,13 +93,10 @@ public class NGramHighlighting extends BitmaskHighlighting {
 					group, token + "Highlight"))); //$NON-NLS-1$
 			tokenColors.put(token, col);
 		}
-
-		transitiveHighlightColor = new Color(config.getInteger(config
-				.getChildHandle(group, "transitiveHighlight"))); //$NON-NLS-1$
-		nodeHighlightColor = new Color(config.getInteger(config.getChildHandle(
-				group, "nodeHighlight"))); //$NON-NLS-1$
-		edgeHighlightColor = new Color(config.getInteger(config.getChildHandle(
-				group, "edgeHighlight"))); //$NON-NLS-1$
+//		nodeHighlightColor = new Color(config.getInteger(config.getChildHandle(
+//				group, "nucleusHighlight"))); //$NON-NLS-1$
+//		edgeHighlightColor = new Color(config.getInteger(config.getChildHandle(
+//				group, "edgeHighlight"))); //$NON-NLS-1$
 	}
 
 }

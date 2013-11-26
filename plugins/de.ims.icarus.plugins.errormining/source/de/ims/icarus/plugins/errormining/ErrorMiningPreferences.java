@@ -63,19 +63,10 @@ public class ErrorMiningPreferences {
 		// HIGHLIGHTING GROUP
 		builder.addGroup("highlighting", true); //$NON-NLS-1$
 		
-		builder.addColorEntry("nodeHighlight", NGramHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
-		builder.addColorEntry("edgeHighlight", NGramHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
-		builder.addColorEntry("transitiveHighlight", NGramHighlighting.getInstance().getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
 		for(String token : NGramHighlighting.getInstance().getTokens()) {
 			builder.addColorEntry(token+"Highlight", NGramHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
 		}
-		
-		/*
-		Color nuclei = new Color(255,42,0);
-		builder.addColorEntry("nucleiColor", nuclei.getRGB()); //$NON-NLS-1$
-		Color ngram = new Color(0,255,0);
-		builder.addColorEntry("ngramColor", ngram.getRGB()); //$NON-NLS-1$
-		 */
+
 		
 		builder.back();
 		// END HIGHLIGHTING GROUP

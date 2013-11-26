@@ -9,7 +9,7 @@
 
 	<!-- Filter Results -->
 	<action id="plugins.errormining.nGramResultView.applyFilterAction"
-		name="${id}.name" desc="${id}.description" icon="filter_errormining.png" />
+		name="${id}.name" desc="${id}.description" icon="filter_tsk.gif" />
 
 	<!-- Reset -->
 	<action id="plugins.errorMining.nGramResultView.resetFilterAction"
@@ -27,9 +27,17 @@
 	<action id="plugins.errormining.nGramResultView.openPreferencesAction"
 		template="actions.default.openPreferencesAction" />
 	
+	<!-- Stats Generation -->
+	<action id="plugins.errormining.nGramResultView.statsAction"
+		name="${id}.name" desc="${id}.description" icon="uddi_registry_cat_node.gif"/>
+	
+	<!-- Show Details -->
+	<action id="plugins.errormining.nGramResultView.showDetailAction"
+		name="${id}.name" desc="${id}.description" icon="filter_errormining.png"/>
+	
 
 
-	<!-- ToolBar List for header area -->
+	<!-- ToolBar List for overview area -->
 	<action-list id="plugins.errormining.nGramResultView.toolBarList">
 		<item type="action" value="plugins.errormining.nGramResultView.openPreferencesAction" />
 		<separator />		
@@ -37,16 +45,36 @@
 		<item type="custom" value="resultCounter" />		
 		<separator />
 		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
+		<separator />		
 		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
-		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
 		<item type="custom" value="textfield" />
-		<separator />
 		<item type="label" value="plugins.errormining.nGramResultView.lowerBound.label" />
 		<item type="custom" value="lowerBound" />
 		<item type="label" value="plugins.errormining.nGramResultView.upperBound.label" />
 		<item type="custom" value="upperBound" />
+		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
 		<separator />
 		<item type="action" value="plugins.errormining.nGramResultView.sortAscAction" />
 		<item type="action" value="plugins.errormining.nGramResultView.sortDescAction" />
+		<separator />
+		<item type="label" value="plugins.errormining.nGramResultView.statsSpinner.label" />
+		<item type="custom" value="statsSpinner" />
+		<item type="action" value="plugins.errormining.nGramResultView.statsAction" />
+	</action-list>	
+
+	<!-- ToolBar List for statistic -->
+	<action-list id="plugins.errormining.nGramResultView.toolBarStatistic">
+		<item type="action" value="plugins.errormining.nGramResultView.openPreferencesAction" />
+		<separator />		
+		<item type="label" value="plugins.errormining.nGramResultView.filteredResults.label" />
+		<item type="custom" value="statisticCounter" />		
+		<separator />
+		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
+		<separator />		
+		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
+		<item type="custom" value="statisticTextFilterField" />
+		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
+		<separator />
+		<item type="action" value="plugins.errormining.nGramResultView.showDetailAction" />
 	</action-list>	
 </actions>

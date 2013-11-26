@@ -43,7 +43,6 @@ import de.ims.icarus.plugins.errormining.NGramData;
 import de.ims.icarus.plugins.errormining.NGramQAttributes;
 import de.ims.icarus.plugins.errormining.NGrams;
 import de.ims.icarus.plugins.errormining.NGramsDependency;
-import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.plugins.errormining.annotation.NGramHighlighting;
 import de.ims.icarus.plugins.errormining.annotation.NGramResultAnnotator;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
@@ -167,6 +166,19 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 		}
 		
 		return result;
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#itemProcessed(de.ims.icarus.search_tools.standard.AbstractParallelSearch.ItemBuffer)
+	 */
+	@Override
+	protected void itemProcessed(ItemBuffer buffer) {
+		synchronized (this) {
+			processed++;
+			double total = source.size();
+			setProgress(50 + (int)(processed/total * 50d));
+		}
 	}
 
 
@@ -479,8 +491,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 protected class NGramWorker extends Worker{
 		
 		protected GroupCache cache;
-		protected EntryBuilder entryBuilder;
-	
+		protected EntryBuilder entryBuilder;	
 		
 		protected Map<String, ArrayList<ItemInNuclei>> ngramsResultMap;
 		protected List<MappedNGramResult> helferList;
@@ -501,6 +512,7 @@ protected class NGramWorker extends Worker{
 		 */
 		@Override
 		protected void init() {		
+
 			//System.out.println(source.size());
 			
 			cache = createCache();
@@ -508,148 +520,117 @@ protected class NGramWorker extends Worker{
 			matcher = (NGramResultMatcherPoS) createNGramResultMatcher();
 			
 			Options ngramOptions = createOptions();
-
 			
 			ngrams = new NGrams(ngramOptions, createQueryList());
 			
-			int sentenceNr = 1;
+
+			int maxSentences = sentenceLimit;
+			
+			if(maxSentences== 0){
+				maxSentences = source.size()-1;
+			}
+			
+			//progress bar
+			double progress = 0;
 			
 			// if zero read everything
 			// 1 makes no sense at all (can't find any ngrams)
 			// we treat one same as zero (look at all sentences...)
-			if (sentenceLimit == 0) {
-				for (int i = 0; i < source.size(); i++){
-					
-					SentenceData sd = (SentenceData)source.get(i);
-					
+			for (int i = 0; i <= maxSentences; i++){					
+					SentenceData sd = (SentenceData)source.get(i);					
 					//Debug
 					// for (int j = 0 ; j < dd.length(); j++){
 					// 	System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
 					// }
-					// System.out.println();
-					
-					ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
+					// System.out.println();					
+					ngrams.initializeUniGrams((DependencyData) sd, i);
 					//NGrams.getInstance().initializeUniGrams((DependencyData) sd, sentenceNr);
-	
-					sentenceNr++;					
-				}				
-			} 
-			//read either only sentences until limit or corpussize
-			else {
-				for (int i = 0; i < source.size(); i++){
-					
-					SentenceData sd = (SentenceData)source.get(i);
-					
-					//Debug
-					// for (int j = 0 ; j < dd.length(); j++){
-					// 	System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
-					// }
-					// System.out.println();
-					if(sentenceNr <= sentenceLimit){
-						ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
-						//NGrams.getInstance().initializeUniGrams((DependencyData) sd, sentenceNr);
-					}
-					sentenceNr++;					
-				}	
-				
+					progress = (double) i / maxSentences * 50d;
+					setProgress((int)progress);			
 			}
 			
+			//start generation process
 			ngrams.nGramResults();			
-			
+			//grab result map
 			ngramsResultMap = ngrams.getResult();
 
+			
 			//FIXME
 			//remove unwanted nucleus
 			//ngrams.cleanUpNucleus();
 			
 			helferList = new ArrayList<MappedNGramResult>();
 
-			List<String> tmpKey = new ArrayList<String>(ngramsResultMap.keySet());
+			//List<String> tmpKey = new ArrayList<String>(ngramsResultMap.keySet());
 			//Collections.reverse(tmpKey);
 			
-//			for(int i = 0; i < ngramsResultMap.keySet().size();i++){
-//				String key = tmpKey.get(i);
-//				
-//				ArrayList<ItemInNuclei> value = ngramsResultMap.get(key);
-//				
-//				for (int j = 0; j < value.size();j++){
-//					ItemInNuclei iin = value.get(j);
-////					System.out.println("PoSTag: "+ iin.getPosTag() +
-////									  " PoSCount: " + iin.getCount());					
-//						for (int k = 0; k < iin.getSentenceInfoSize(); k++){
+//			for (String key : ngramsResultMap.keySet()) {
+//
+//				if (key.split(" ").length > gramsGreaterX) { //$NON-NLS-1$
+//
+//					ArrayList<ItemInNuclei> item = ngramsResultMap.get(key);
+//					for (int j = 0; j < item.size(); j++) {
+//						ItemInNuclei iin = item.get(j);
+//						// System.out.println("PoSTag: "+ iin.getPosTag() +
+//						// " PoSCount: " + iin.getCount());
+//
+//						for (int k = 0; k < iin.getSentenceInfoSize(); k++) {
 //							SentenceInfo si = iin.getSentenceInfoAt(k);
-//							int sentenceNR = si.getSentenceNr()-1;
-//							
+//							int sentenceNR = si.getSentenceNr() - 1;
+//							// System.out.println(key + " " + sentenceNR);
+//							// System.out.println(
+//							// iin.getSentenceInfoAt(k).getNucleiIndexListSize());
+//
+//							// FIXME zwei nuclei im satz aber nicht
+//							// verschmolzen!
 //							MappedNGramResult mapping = new MappedNGramResult(
-//															sentenceNR, key, si);
+//									sentenceNR, key, si);
+//							
 //							helferList.add(mapping);
 //
-//						}							
-//					}								
-//			}
-			
-			for (int i = 0; i < tmpKey.size();i++){
-				String key = tmpKey.get(i);
-
-				if(key.split(" ").length > gramsGreaterX){ //$NON-NLS-1$
-				
-					ArrayList<ItemInNuclei> value = ngramsResultMap.get(key);
-					for (int j = 0; j < value.size();j++){
-						ItemInNuclei iin = value.get(j);
-	//					System.out.println("PoSTag: "+ iin.getPosTag() +
-	//									  " PoSCount: " + iin.getCount());
-						
-							for (int k = 0; k < iin.getSentenceInfoSize(); k++){
-								SentenceInfo si = iin.getSentenceInfoAt(k);
-								int sentenceNR = si.getSentenceNr()-1;
-	//							System.out.println(key + " " + sentenceNR);
-	//							System.out.println(
-	//									iin.getSentenceInfoAt(k).getNucleiIndexListSize());
-								
-								//FIXME zwei nuclei im satz aber nicht verschmolzen!
-								MappedNGramResult mapping = 
-										new MappedNGramResult(sentenceNR, key, si);
-
-								if(helferList.contains(mapping)){	
-									//donothing
-									//System.out.println(si.getSentenceNr() + key);;
-									if(disjunctNuclei(mapping, key, helferList)){
-										//FIXME enable für sentence hitcount
-										//MappedNGramResult tmp = helferList.get(helferList.indexOf(mapping));
-										//tmp.addKey(key);
-										helferList.add(mapping);
-									}
-								} else {								
-									helferList.add(mapping);	
-								}
-							}
-					}
-				}
-				}
-				
-//				System.out.println("~~~~~~~~~~~~~~~~~~~~");
-//				for (int x = 0; x < helferList.size();x++){					
-//					System.out.println(helferList.get(x).getCoverStart());
-//					System.out.println(helferList.get(x).getCoverEnd());
-//					System.out.println(helferList.get(x).getIndex());
+////							if (helferList.contains(mapping)) {
+////								// donothing
+////								// System.out.println(si.getSentenceNr() +
+////								// key);;
+////								if (disjunctNuclei(mapping, key, helferList)) {
+////									// FIXME enable für sentence hitcount
+////									// MappedNGramResult tmp =
+////									// helferList.get(helferList.indexOf(mapping));
+////									// tmp.addKey(key);
+////									helferList.add(mapping);
+////								}
+////							} else {
+////								helferList.add(mapping);
+////							}
+//						}
+//					}
 //				}
-				
-				//ggf direkt in matcher erzeugen lassen
-				matcher.setSentenceList(helferList);
-				((NGramResultMatcherPoS) matcher).setResultNGrams(ngramsResultMap);
-				matcher.setCache(cache);
-				matcher.setEntryBuilder(entryBuilder);				
+//			}
+//				
+////				System.out.println("~~~~~~~~~~~~~~~~~~~~");
+////				for (int x = 0; x < helferList.size();x++){					
+////					System.out.println(helferList.get(x).getCoverStart());
+////					System.out.println(helferList.get(x).getCoverEnd());
+////					System.out.println(helferList.get(x).getIndex());
+////				}
+//			
+//			//ggf direkt in matcher erzeugen lassen
+//			matcher.setSentenceList(helferList);
+//			((NGramResultMatcherPoS) matcher).setResultNGrams(ngramsResultMap);
+			
+			matcher.setCache(cache);
+			matcher.setEntryBuilder(entryBuilder);						
 			
 			if(createXML){
 				ngrams.outputToFile();
-			}
-			
+			}			
 
 			
 			//TODO
 			result.setProperty("COMPLETE_NGRAM", ngramsResultMap); //$NON-NLS-1$
 			result.setProperty("LARGEST_NGRAM", ngrams.getPasses()); //$NON-NLS-1$
 			result.setProperty("MODE", 0); //$NON-NLS-1$
+			
 			//Debug output for all sentences in result with largest ngram-span
 //			for (int i = 0; i < helferList.size();i++){
 //				System.out.println(helferList.get(i).getIndex()+1 + " "
@@ -658,8 +639,6 @@ protected class NGramWorker extends Worker{
 			
 			//ngrams.outputToFile();
 			//NGrams.getInstance().nGramResults();
-			
-
 		}
 
 		/**
@@ -674,18 +653,17 @@ protected class NGramWorker extends Worker{
 			//System.out.println(ngramsResultMap.size());
 			//System.out.println("BUFFER Index->" + buffer.getIndex());
 			
-			//initialisiere
+//			//initialisiere
 			entryBuilder.setIndex(buffer.getIndex());
 			
-			//check for hits
+//			//check for hits
 			matcher.matches(buffer.getIndex());		
 			
 //			// for every entry in  list we check if current buffer index 
 //			// equals; note all indices saved within the list are results and have
 //			// to show up in the resulting list!
 //			for(int i = 0; i < helferList.size(); i++){
-//				if(helferList.get(i).containsIntIndex(buffer.getIndex())){
-//					
+//				if(helferList.get(i).containsIntIndex(buffer.getIndex())){				
 //					cache.commit(entryBuilder.toEntry());
 //				}
 //			}	
@@ -723,7 +701,7 @@ protected class NGramWorker extends Worker{
 	 * @param helferList 
 	 * @return 
 	 */
-	public boolean disjunctNuclei(MappedNGramResult mapping, String newKey, List<MappedNGramResult> helferList) {
+	private boolean disjunctNuclei(MappedNGramResult mapping, String newKey, List<MappedNGramResult> helferList) {
 		MappedNGramResult tmp = helferList.get(helferList.indexOf(mapping));
 		
 		boolean newHit = false;
@@ -762,7 +740,6 @@ protected class NGramWorker extends Worker{
 		 */
 		public NGramSearchResult(Search search) {
 			super(search);
-			// TODO Auto-generated constructor stub
 		}
 
 		/**

@@ -162,9 +162,6 @@ public class SentenceInfo {
 
 	public int indexOfNucleiIndexList(SentenceInfo si){
 		return nucleiIndexList.indexOf(si);
-	}
-
-
-	
+	}	
 
 }

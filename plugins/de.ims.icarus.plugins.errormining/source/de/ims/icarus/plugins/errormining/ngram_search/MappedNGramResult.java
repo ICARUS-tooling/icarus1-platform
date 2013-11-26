@@ -167,6 +167,19 @@ public class MappedNGramResult {
 	}
 
 
+	//TODO write hash function!?
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return 0;
+	}
+
+
+
+
+
 	/**
 	 * @param index the index to set
 	 */

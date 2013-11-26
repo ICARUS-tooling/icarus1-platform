@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
-import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.search_tools.result.EntryBuilder;
 import de.ims.icarus.search_tools.result.Hit;
 import de.ims.icarus.search_tools.standard.GroupCache;
@@ -58,25 +57,24 @@ public class NGramResultMatcherPoS implements ErrorminingMatcher, Cloneable, Com
 	protected int allocation = -1;
 	
 	
-	public void matches(int index) {	
+	public void matches(int index) {
+		
+		int[] hitArray = new int[1];
+		hitArray[0] = index;
+
+		Hit hit = new Hit(hitArray);
+		entryBuilder.addHit(hit);
 		
 		// for every entry in  list we check if current buffer index 
 		// equals; note all indices saved within the list are results and have
 		// to show up in the resulting list!
 
-		for(int i = 0; i < helferList.size(); i++){
-			if(helferList.get(i).containsIntIndex(index)){
-				MappedNGramResult mr = helferList.get(i);
-				buildHit(mr, index);
-				
-				//TODO remove
-//				for(int tmp = 0; tmp < mr.getKeyListSize(); tmp++){
-//					ArrayList<ItemInNuclei> iinL = ngramsResultMap.get(
-//														mr.getKeyAt(tmp));
-//					buildHit(iinL, index);					
-//				}	
-			}
-		}	
+//		for(int i = 0; i < helferList.size(); i++){
+//			if(helferList.get(i).containsIntIndex(index)){
+//				MappedNGramResult mr = helferList.get(i);
+//				buildHit(mr, index);				
+//			}
+//		}	
 		commit();
 	}
 	
