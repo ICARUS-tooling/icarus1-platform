@@ -18,10 +18,10 @@ Use top-level project build file to build application.
 
 	<target name="build">
 		<echo>Building ICARUS core to folder ${build.home}</echo>
+		<mkdir dir="${basedir}/classes" />
 		<delete includeEmptyDirs="true">
 			<fileset dir="${basedir}/classes" includes="**/*" />
 		</delete>
-		<mkdir dir="${basedir}/classes" />
 		<manifest file="${basedir}/manifest.mf">
 			<attribute name="Class-Path" value="jpf.jar" />
 			<attribute name="Main-Class" value="${core.main-class}" />

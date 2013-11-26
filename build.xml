@@ -114,16 +114,6 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		</if>
 	</target>
 
-	<target name="-compile">
-		<delete includeEmptyDirs="true">
-			<fileset dir="${dest.dir}" includes="**/*" />
-		</delete>
-
-		<javac srcdir="${src.dir}" destdir="${dest.dir}" executable="javac"
-			optimize="false" debug="on" classpathref="${classpathref}"/>
-
-	</target>
-
 	<target name="build" depends="clean,-init,-version-properties" description="Builds entire project">
 
 		<ant dir="launcher/de.ims.icarus" target="build" />
