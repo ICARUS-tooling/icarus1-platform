@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyData;
@@ -347,46 +348,30 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 				
 				ngrams = new NGramsDependency(ngramOptions, createQueryList());
 				
-				int sentenceNr = 1;
+				int maxSentences = sentenceLimit;
+				
+				if(maxSentences== 0){
+					maxSentences = source.size()-1;
+				}
+				
+				//progress bar
+				double progress = 0;
 	
 				// if zero read everything
 				// 1 makes no sense at all (can't find any ngrams)
 				// we treat one same as zero (look at all sentences...)
 				if (sentenceLimit == 0) {
-					for (int i = 0; i < source.size(); i++){
-						
-						SentenceData sd = (SentenceData)source.get(i);
-						
+					for (int i = 0; i < maxSentences; i++){						
+						SentenceData sd = (SentenceData)source.get(i);						
 						//Debug
 						// for (int j = 0 ; j < dd.length(); j++){
 						// 	System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
 						// }
-						// System.out.println();
-						
-						ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
-						//NGrams.getInstance().initializeUniGrams((DependencyData) sd, sentenceNr);
-		
-						sentenceNr++;					
+						// System.out.println();						
+						ngrams.initializeUniGrams((DependencyData) sd, i);
+						progress = (double) i / maxSentences * 50d;
+						setProgress((int)progress);	
 					}				
-				} 
-				//read either only sentences until limit or corpussize
-				else {
-					for (int i = 0; i < source.size(); i++){
-						
-						SentenceData sd = (SentenceData)source.get(i);
-						
-						//Debug
-						// for (int j = 0 ; j < dd.length(); j++){
-						// 	System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
-						// }
-						// System.out.println();
-						if(sentenceNr <= sentenceLimit){
-							ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
-							//NGrams.getInstance().initializeUniGrams((DependencyData) sd, sentenceNr);
-						}
-						sentenceNr++;					
-					}	
-					
 				}
 				
 				ngrams.nGramResults();					
@@ -622,7 +607,7 @@ protected class NGramWorker extends Worker{
 			matcher.setEntryBuilder(entryBuilder);						
 			
 			if(createXML){
-				ngrams.outputToFile();
+				ngrams.outputToFile();				
 			}			
 
 			

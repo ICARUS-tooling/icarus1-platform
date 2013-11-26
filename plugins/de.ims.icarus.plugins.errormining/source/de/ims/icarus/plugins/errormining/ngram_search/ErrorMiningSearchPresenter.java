@@ -221,7 +221,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 //				+ "\n"+searchResult.getRawEntry(3) +" "+ searchResult.getRawEntry(3).getIndex()
 //				+ "\n"+searchResult.getRawEntry(5) +" "+ searchResult.getRawEntry(5).getIndex()
 //				);
-		
 		minimumGramsize = searchResult.getSource().getParameters().getInteger(NGramParameters.GRAMS_GREATERX);
 		maximumGramsize = Math.max(searchResult.getSource().getParameters().getInteger(NGramParameters.NGRAM_RESULT_LIMIT),
 									(int) searchResult.getProperty("LARGEST_NGRAM")); //$NON-NLS-1$

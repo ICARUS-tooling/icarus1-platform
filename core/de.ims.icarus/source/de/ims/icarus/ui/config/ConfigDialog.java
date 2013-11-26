@@ -650,6 +650,10 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 		case FILE:
 			// System.out.println(config.getType(leafhandle));
+			addFileField(leafhandle, gbc, state);
+			break;
+		case FOLDER:
+			// System.out.println(config.getType(leafhandle));
 			addPathField(leafhandle, gbc, state);
 			break;
      }
@@ -1376,6 +1380,47 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	}
 
 	
+	//File
+	protected void addFileField(Handle handle, GridBagConstraints gbc,
+			State state) {
+		// gbc.gridx = GridBagConstraints.RELATIVE;
+		paintLabel(handle, gbc, state);
+		JLabel currentPathLabel = new JLabel();
+		String currentPath = "/~"; //$NON-NLS-1$
+
+		if (!((config.getValue(handle)) == null)) {
+			if (getLatestItem(handle) != null) {
+				currentPathLabel.setText(getLatestItem(handle).toString());
+				currentPath = getLatestItem(handle).toString();
+			} else {
+				currentPathLabel.setText(config.getValue(handle).toString());
+				currentPath = config.getValue(handle).toString();
+			}
+		}
+
+		JButton fileChooseButton = new JButton(
+				ResourceManager.getInstance().get("config.chooseFile.name")); //$NON-NLS-1$
+		fileChooseButton.setToolTipText(UIUtil.toSwingTooltip(
+				ResourceManager.getInstance()
+				.get("config.chooseFile.desc"))); //$NON-NLS-1$
+		fileChooseButton.setPreferredSize((new Dimension(70, 20)));
+
+		fileChooseButton.addActionListener(new FileChooseAction(handle,
+				currentPathLabel, currentPath));
+
+		if (config.isLocked(handle))
+			fileChooseButton.setEnabled(false);
+		state.getStatePanel().add(fileChooseButton, gbc);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridwidth = 3;
+		state.getStatePanel().add(currentPathLabel, gbc);
+
+		paintNote(handle, gbc, state);
+		// jp.setBorder(BorderFactory.createLineBorder(Color.gray));
+	}
+	
+
+	
 	//Path
 	protected void addPathField(Handle handle, GridBagConstraints gbc,
 			State state) {
@@ -2044,7 +2089,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 					    
 		    JTable table = new JTable(dtm)
 	        {
-	        	public boolean isCellEditable(int row, int column){
+				private static final long serialVersionUID = 3301792416945083917L;
+				public boolean isCellEditable(int row, int column){
 	        		return false;
 	        	}
 	        	public TableCellRenderer getCellRenderer (int row, int column){
@@ -2545,41 +2591,49 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		@Override
 		public void firePropertyChange(String propertyName, byte oldValue,
 				byte newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, char oldValue,
 				char newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, short oldValue,
 				short newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, int oldValue,
 				int newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, long oldValue,
 				long newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, float oldValue,
 				float newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, double oldValue,
 				double newValue) {
+			//noop
 		}
 
 		@Override
 		public void firePropertyChange(String propertyName, boolean oldValue,
 				boolean newValue) {
+			//noop
 		}
 
 	
@@ -3503,4 +3557,53 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			}
         }	
 	}
+	
+	// Path Chooser
+		protected class FileChooseAction extends AbstractAction{
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -7264060828066381998L;
+			protected final Handle handle;
+			protected final JLabel pathlabel;
+			protected final JFileChooser fileChooser = new JFileChooser();
+			protected final String lastdir;
+
+			
+			FileChooseAction(Handle handle, JLabel pathlabel, String lastdir) {
+				this.handle = handle;			
+				this.pathlabel = pathlabel;		
+				this.lastdir = lastdir;
+				iniPathChooser(fileChooser,lastdir);
+			}
+			
+			void iniPathChooser(JFileChooser pathChooser, String lastdir) {		
+				// Setting up Filter
+				//pathChooser.setCurrentDirectory(new File("/~"));	
+				pathChooser.setCurrentDirectory(new File(lastdir));
+				pathChooser.setDialogTitle(ResourceManager.getInstance().get("config.chooseFileDialog.title")); //$NON-NLS-1$
+				pathChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				pathChooser.setToolTipText(UIUtil.toSwingTooltip("null")); //$NON-NLS-1$
+			}
+			
+			public String getFileName(){			
+			    return fileChooser.getSelectedFile().getName();
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fileChooser.showDialog(null, ResourceManager.getInstance().get("config.chooseFileSet.name")); //$NON-NLS-1$
+				if (fileChooser.getSelectedFile() != null){
+					if (getFileName() != null && getFileName() != lastdir){
+						pathlabel.setText(getFileName());
+						fileChooser.setCurrentDirectory(new File(getFileName()));
+						
+			        	changesMap.put(handle,getFileName());
+			        	configBottomPanel.getComponent(0).setEnabled(true);
+			        	//System.out.println(changesMap);
+					}
+				}
+	        }	
+		}
 }

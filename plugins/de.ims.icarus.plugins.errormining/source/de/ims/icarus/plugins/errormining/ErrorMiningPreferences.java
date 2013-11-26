@@ -25,9 +25,15 @@
  */
 package de.ims.icarus.plugins.errormining;
 
+import java.io.File;
+
 import de.ims.icarus.config.ConfigBuilder;
+import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
-import de.ims.icarus.plugins.errormining.annotation.NGramHighlighting;
+import de.ims.icarus.config.ConfigRegistry.EntryType;
+import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
+import de.ims.icarus.util.annotation.HighlightType;
 
 
 /**
@@ -48,24 +54,47 @@ public class ErrorMiningPreferences {
 
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		
-		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
+		//builder.addStringEntry("filepath", "E:\\errormining_result.xml"); //$NON-NLS-1$ //$NON-NLS-2$
+				builder.addStringEntry("inputfiledebug", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			
 		
-		builder.addStringEntry("filepath", "E:\\errormining_result.xml"); //$NON-NLS-1$ //$NON-NLS-2$
-		builder.addStringEntry("inputfiledebug", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
-		builder.addIntegerEntry("limit",10); //$NON-NLS-1$
+		builder.addGroup("fileOutput", true); //$NON-NLS-1$
+		builder.virtual();
+		//ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
+		builder.addBooleanEntry("useDefaultFile", true); //$NON-NLS-1$
+		builder.addEntry("filepath", EntryType.FILE,  //$NON-NLS-1$
+				new File(System.getProperty("user.dir")).getAbsolutePath(), //$NON-NLS-1$
+				"E:\\errormining_result.xml"); //$NON-NLS-1$
 		
-		builder.addBooleanEntry("showOriginalIndex", true); //$NON-NLS-1$
+		builder.back();
+	
+		//builder.addIntegerEntry("limit",10); //$NON-NLS-1$		
+		//builder.addBooleanEntry("showOriginalIndex", true); //$NON-NLS-1$
+		
+		//group for result stuff
+		builder.addGroup("resultPresenter",true); //$NON-NLS-1$
+		builder.virtual();	
+		builder.addIntegerEntry("minDefaultGramsize", 3, 1, 99); //$NON-NLS-1$
+		builder.addIntegerEntry("maxDefaultGramsize", 7, 1, 99); //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.back();
+		
 		
 		builder.back();
 		// END APPEARANCE GROUP
 		
 		
 		// HIGHLIGHTING GROUP
-		builder.addGroup("highlighting", true); //$NON-NLS-1$
-		
-		for(String token : NGramHighlighting.getInstance().getTokens()) {
-			builder.addColorEntry(token+"Highlight", NGramHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
-		}
+		// TODO add color stuff as soon as new data model is implemented
+//		builder.addGroup("highlighting", true); //$NON-NLS-1$
+//		
+//		for(String token : NGramHighlighting.getInstance().getTokens()) {
+//			builder.addColorEntry(token+"Highlight", NGramHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
+//		}
 
 		
 		builder.back();

@@ -1795,6 +1795,7 @@ public class ConfigRegistry implements ConfigConstants {
 		STRING(String.class),
 		CUSTOM(Object.class),
 		FILE(String.class),
+		FOLDER(String.class),
 		OPTIONS(Object.class),
 		COLOR(Integer.class),
 		MAP(Map.class),

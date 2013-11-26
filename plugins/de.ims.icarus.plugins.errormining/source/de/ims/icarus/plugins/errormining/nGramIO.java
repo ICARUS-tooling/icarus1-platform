@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -44,6 +45,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.ui.dialog.DialogFactory;
 
 /**
  * @author Gregor Thiele
@@ -81,11 +83,27 @@ public class nGramIO {
         //writing to file
         FileOutputStream fop = null;
         
+        File file = null;
 
-        //FIXME remove debug!
         //File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$
-        File file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
-
+        
+		if(ConfigRegistry.getGlobalRegistry()
+				.getBoolean("plugins.errorMining.appearance.fileOutput.useDefaultFile")){ //$NON-NLS-1$
+			file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
+		} else {
+			FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", //$NON-NLS-1$
+																			"xml"); //$NON-NLS-1$
+			file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+					null,
+					"chooseXMLfile", //$NON-NLS-1$
+					file,
+					xmlfilter);
+		}
+        
+		
+		if(file == null){
+			return;
+		}
        
         fop = new FileOutputStream(file);
 

@@ -55,7 +55,7 @@ public class IcarusCorePreferences {
 		builder.addGroup("general", true); //$NON-NLS-1$
 		builder.addOptionsEntry("language", 0,  //$NON-NLS-1$
 				"en", "de"); // TODO add more language options //$NON-NLS-1$ //$NON-NLS-2$
-		builder.addEntry("workingDirectory", EntryType.FILE,  //$NON-NLS-1$
+		builder.addEntry("workingDirectory", EntryType.FOLDER,  //$NON-NLS-1$
 				new File(System.getProperty("user.dir")).getAbsolutePath()); //$NON-NLS-1$
 		builder.addBooleanEntry("eula", false);  //$NON-NLS-1$
 				
