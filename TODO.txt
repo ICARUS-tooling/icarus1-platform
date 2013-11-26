@@ -4,43 +4,11 @@ OPTIONAL:
 
 TODO:
 
-	-	add -dev command line flag to bypass EULA
-	-	"Select Perspective" - Screen:
-		-	add missing desc
-		-	put desc on top of preview pic
-	-	Treebank-Manager:
-		-	use list instead of tree
-		-	when creating new treebank, switch to edit mode directly
-		-	rename "DefaultSimpleTreebank" to "Treebank"
-		-	add error-icon in treebank list for missing reader/invalid location
-	-	preselect first item in various drop-down menus (readers, search target, etc..)
 	-	add sanity-checks for editors (cannot apply until check is successful)
-	-	move property stuff from treebank editor to popup
 	-	check "hasChanges" method from treebank editor
 	-	Treebank-Properties View:
-		-	make icons look the same as in the manager
-		-	remove "editable" and "gold" properties
 		-	localize meta-data keys
-	-	Search-Perspective:
-		-	rename "Target" to "Data-Set"
-		-	remove "optimize" option
-		-	check "refresh" delegation of search result view to presenters
-		-	"View Search" -> "View Search Setup"
-		-	check "Open Preferences" (does nothing?)
-		-	show error when "Sync to Graph" fails
-		-	show error when graph is empty
-		-	add confirmation dialogs to removal functions in search history
-	-	fix "Copy Cell" icon in graph presenter
-	-	check the annotation control in toolbars to only be active when there
-		is a real highlight annotation!
 	-	Coref-Perspective:
-		-	go into edit mode when creating a new doc-set/allocation
-		-	change default layout of vertices to rectangle
-		-	reduce cell label in graph to be bare label
-		-	add cluster-id to properties outline
-		-	change label in properties outline to localized details ("Sentence x\n Begin Y...)
-		-	clear context/properties outline when doc changes
-		-	disable outlines for ROOT span (causes error right now!)
 		-	add total outline of span to node tooltip
 	
 	-	add existence constraint
@@ -53,3 +21,42 @@ TODO:
 		-	limited options for user in terms of additional perspectives and/or views
 
 DONE:
+
+	-	fix "Copy Cell" icon in graph presenter
+	-	check the annotation control in toolbars to only be active when there
+		is a real highlight annotation!
+	-	"Select Perspective" - Screen:
+		-	add missing desc
+		-	put desc on top of preview pic
+	-	preselect first item in various drop-down menus (readers, search target, etc..)
+	-	add -dev command line flag to bypass EULA
+	-	Treebank-Manager:
+		-	use list instead of tree
+		-	when creating new treebank, switch to edit mode directly
+		-	rename "DefaultSimpleTreebank" to "Treebank"
+		-	add error-icon in treebank list for missing reader/invalid location
+	-	preselect first item in various drop-down menus (readers, search target, etc..)
+	-	add sanity-checks for editors (cannot apply until check is successful)
+	-	move property stuff from treebank editor to popup
+	-	check "hasChanges" method from treebank editor
+	-	Treebank-Properties View:
+		-	make icons look the same as in the manager
+		-	remove "editable" and "gold" properties
+	-	Search-Perspective:
+		-	rename "Target" to "Data-Set"
+		-	remove "optimize" option
+		-	check "refresh" delegation of search result view to presenters
+		-	"View Search" -> "View Search Setup" (removed)
+		-	check "Open Preferences" (does nothing?)
+		-	show error when "Sync to Graph" fails
+		-	show error when graph is empty
+		-	add confirmation dialogs to removal functions in search history
+	-	fix "Copy Cell" icon in graph presenter
+	-	Coref-Perspective:
+		-	go into edit mode when creating a new doc-set/allocation
+		-	change default layout of vertices to rectangle
+		-	reduce cell label in graph to be bare label
+		-	add cluster-id to properties outline
+		-	change label in properties outline to localized details ("Sentence x\n Begin Y...)
+		-	clear context/properties outline when doc changes
+		-	disable outlines for ROOT span (causes error right now!)

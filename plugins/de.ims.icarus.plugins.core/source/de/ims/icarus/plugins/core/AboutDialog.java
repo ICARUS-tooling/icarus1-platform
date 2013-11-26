@@ -122,6 +122,19 @@ public class AboutDialog extends JDialog {
 		panel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
 	}
 	
+	private String versionString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(Core.getCore().getAppVersion())
+		.append(' ')
+		.append(Core.getCore().getAppRevision())
+		.append("  (") //$NON-NLS-1$
+		.append(Core.getCore().getAppBuildDate())
+		.append(')');		
+		
+		return sb.toString();
+	}
+	
 	protected void buildAbout() {	
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -149,8 +162,7 @@ public class AboutDialog extends JDialog {
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
 									.get("plugins.core.aboutDialog.version")), gbc); //$NON-NLS-1$
 		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 0, 1, 1);
-		aboutPanel.add(new JLabel(ResourceManager.getInstance()
-									.get("plugins.core.aboutDialog.versionNR")), gbc); //$NON-NLS-1$
+		aboutPanel.add(new JLabel(versionString()), gbc);
 		gbc.gridy++;
 		
 		

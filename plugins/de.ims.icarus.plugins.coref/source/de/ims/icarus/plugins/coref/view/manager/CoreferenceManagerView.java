@@ -104,6 +104,7 @@ public class CoreferenceManagerView extends View {
 		tree.addMouseListener(handler);
 		tree.setRootVisible(false);
 		tree.setShowsRootHandles(true);
+		tree.setLargeModel(true);
 		
 		JScrollPane scrollPane = new JScrollPane(tree);
 		scrollPane.setBorder(UIUtil.topLineBorder);

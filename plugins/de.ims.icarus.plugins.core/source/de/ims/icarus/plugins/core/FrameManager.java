@@ -196,19 +196,22 @@ public final class FrameManager {
 		}
 		isShutdownActive = true;
 		
-		Queue<IcarusFrame> frames = new LinkedList<>(this.frames.keySet());
-		IcarusFrame frame;
-		
-		while((frame = frames.poll())!=null) {
-			try {
-				frame.close();
-				frame.setVisible(false);
-				frame.dispose();
-			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to close frame: "+frame.getTitle(), e); //$NON-NLS-1$
+		if(frames!=null) {
+			Queue<IcarusFrame> frames = new LinkedList<>(this.frames.keySet());
+			IcarusFrame frame;
+			
+			while((frame = frames.poll())!=null) {
+				try {
+					frame.close();
+					frame.setVisible(false);
+					frame.dispose();
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to close frame: "+frame.getTitle(), e); //$NON-NLS-1$
+				}
 			}
 		}
+		
 		
 		if(windows!=null) {
 			for(Window window : windows) {

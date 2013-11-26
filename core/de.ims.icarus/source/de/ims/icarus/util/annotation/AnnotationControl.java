@@ -347,7 +347,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		
 		this.annotationManager = annotationManager;
 		
-		setEnabled(annotationManager!=null);
+		setEnabled(annotationManager!=null && annotationManager.hasAnnotation());
 		
 		if(this.annotationManager!=null) {
 			this.annotationManager.addPropertyChangeListener(this);
@@ -429,7 +429,7 @@ public class AnnotationControl extends PropertyChangeSource implements PropertyC
 		} else if("position".equals(evt.getPropertyName())) { //$NON-NLS-1$
 			updateNavigationLabel();
 		} else if("annotation".equals(evt.getPropertyName())) { //$NON-NLS-1$
-			setEnabled(annotationManager!=null);
+			setEnabled(annotationManager!=null && annotationManager.hasAnnotation());
 			updateNavigationLabel();
 		}
 		refreshActions();

@@ -30,10 +30,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -87,11 +84,11 @@ import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.cache.LRUCache;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.xml.jaxb.MapAdapter;
@@ -203,25 +200,14 @@ public class PerspectiveChooser {
 
 		// Preview
 		previewLabel = new JLabel();
-		previewLabel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+		previewLabel.setBorder(UIUtil.bottomLineBorder);
 		previewLabel.setVerticalAlignment(SwingConstants.TOP);
+		previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		previewLabel.setBackground(bg);
 		previewLabel.setMaximumSize(new Dimension(300, 300));
 		
 		// Description
-		descriptionArea = new JTextArea(){
-
-			private static final long serialVersionUID = -3584521432069459903L;
-
-			/**
-			 * @see javax.swing.JTextArea#getScrollableTracksViewportWidth()
-			 */
-			@Override
-			public boolean getScrollableTracksViewportWidth() {
-				return true;
-			}
-			
-		};
+		descriptionArea = new JTextArea();
 		UIUtil.disableCaretScroll(descriptionArea);
 		descriptionArea.setEditable(false);
 		descriptionArea.setEnabled(false);
@@ -237,21 +223,32 @@ public class PerspectiveChooser {
 					"plugins.core.perspectiveChooser.selectPerspective")); //$NON-NLS-1$
 		button.addActionListener(handler);
 		
-		JScrollPane spRight = new JScrollPane(descriptionArea);
+		// Arrange stuff
+//		JPanel panel = new JPanel(new GridBagLayout());
+//		panel.add(headerLabel, GridBagUtil.makeGbcH(0, 0, 1, 1));
+//		GridBagConstraints gbc = GridBagUtil.gbcTop(GridBagUtil.makeGbc(0, 1), 100);
+//		gbc.insets = new Insets(10, 10, 10, 10);
+//		panel.add(previewLabel, gbc);
+//		panel.add(spRight, GridBagUtil.makeGbcR(0, 2, 1, 1));
+//		gbc = GridBagUtil.gbcCenter(GridBagUtil.makeGbc(0, 3, 1, 1));
+//		gbc.insets = new Insets(5, 5, 5, 5);
+//		panel.add(button, gbc);
+//		panel.setBackground(bg);
+		
+		JPanel detailPanel = new JPanel(new BorderLayout());
+		detailPanel.add(previewLabel, BorderLayout.NORTH);
+		detailPanel.add(descriptionArea, BorderLayout.CENTER);
+		detailPanel.setBackground(bg);
+		
+		JScrollPane spRight = new JScrollPane(detailPanel);
 		spRight.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(spRight);
-		spRight.setBackground(bg);	
+		spRight.setBackground(bg);
+		spRight.setBorder(UIUtil.topLineBorder);
 		
-		// Arrange stuff
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.add(headerLabel, GridBagUtil.makeGbcH(0, 0, 2, 1));
-		GridBagConstraints gbc = GridBagUtil.gbcTop(GridBagUtil.makeGbc(0, 1), 100);
-		gbc.insets = new Insets(10, 10, 10, 10);
-		panel.add(previewLabel, gbc);
-		panel.add(spRight, GridBagUtil.makeGbcR(1, 1, 1, 1));
-		gbc = GridBagUtil.gbcCenter(GridBagUtil.makeGbc(0, 2, 2, 1));
-		gbc.insets = new Insets(5, 5, 5, 5);
-		panel.add(button, gbc);
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(headerLabel, BorderLayout.NORTH);
+		panel.add(spRight, BorderLayout.CENTER);
 		panel.setBackground(bg);
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, spLeft, panel);
@@ -358,6 +355,8 @@ public class PerspectiveChooser {
 	
 	private static Map<Extension, Image> imageCache = new LRUCache<>(20);
 	
+	private int maxWidth = 650;
+	
 	private void refreshDetails() {
 		if(displayedPerspective==null) {
 			return;
@@ -385,13 +384,13 @@ public class PerspectiveChooser {
 					}
 				}
 				// Wait for image to be fully loaded
-				int height, width;
-				while((height=image.getHeight(previewLabel))==-1
+				int width;
+				while(image.getHeight(previewLabel)==-1
 						|| (width=image.getWidth(previewLabel))==-1);
 				
 				image = image.getScaledInstance(
-							width>300 ? 300 : -1, 
-							height>200 ? 200 : -1, Image.SCALE_SMOOTH);
+							width>maxWidth ? maxWidth : -1, 
+							-1, Image.SCALE_SMOOTH);
 				
 				/*while((height=image.getHeight(preview))==-1
 						|| (width=image.getWidth(preview))==-1);*/
@@ -412,7 +411,6 @@ public class PerspectiveChooser {
 			previewLabel.setIcon(null);
 			previewLabel.setText(ResourceManager.getInstance().get(
 					"plugins.core.perspectiveChooser.noPreview")); //$NON-NLS-1$
-			previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 			previewLabel.setVerticalAlignment(SwingConstants.CENTER);
 			previewLabel.setPreferredSize(new Dimension(200, 200));
 		}
@@ -423,6 +421,11 @@ public class PerspectiveChooser {
 			description = ResourceManager.getInstance().get(
 					"plugins.core.perspectiveChooser.noDescription"); //$NON-NLS-1$
 		}
+		
+		Component comp = SwingUtilities.getAncestorOfClass(JScrollPane.class, descriptionArea);
+		int width = Math.max(comp.getWidth(), 800);
+		
+		description = StringUtil.wrap(description, descriptionArea, width);
 		descriptionArea.setText(description);
 	}
 	

@@ -102,6 +102,7 @@ public abstract class AbstractEditorPanePresenter<T extends Object> implements A
 			contentPane.setEditable(false);
 			contentPane.setBorder(UIUtil.defaultContentBorder);
 			UIUtil.disableCaretScroll(contentPane);
+			UIUtil.addPopupMenu(contentPane, UIUtil.createDefaultTextMenu(contentPane, false));
 			
 			scrollPane = new JScrollPane(contentPane);
 			scrollPane.setBorder(null);

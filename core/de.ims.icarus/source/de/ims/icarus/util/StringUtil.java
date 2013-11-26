@@ -35,10 +35,14 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.helper.TextItem;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.intern.Interner;
+import de.ims.icarus.util.intern.StrongInterner;
+import de.ims.icarus.util.intern.WeakInterner;
 
 
 /**
@@ -47,11 +51,34 @@ import de.ims.icarus.util.id.Identity;
  *
  */
 public final class StringUtil {
+	
+	public static final String WEAK_INTERN_PROPERTY = 
+			"de.ims.icarus.strings.useWeakIntern"; //$NON-NLS-1$
 
 	private StringUtil() {
 		// no-op
 	}
 
+	private static Interner<String> interner;
+	private static final int defaultInternerCapacity = 500;
+	
+	public static String intern(String s) {
+		Interner<String> i = interner;
+		if(i==null) {
+			synchronized (StringUtil.class) {
+				i = interner;
+				if(i==null) {
+					if("true".equals(Core.getCore().getProperty(WEAK_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
+						interner = new WeakInterner<>(defaultInternerCapacity);
+					} else {
+						interner = new StrongInterner<>(defaultInternerCapacity);
+					}
+				}
+			}
+		}
+		
+		return interner.intern(s);
+	}
 	
 	private static Pattern indexPattern;
 	

@@ -49,7 +49,7 @@ Use top-level project build file to build application.
 
 	<target name="source">
 		<echo>Distributing ICARUS launcher sources to folder ${build.home}</echo>
-		<copy todir="${build.home}/launcher">
+		<copy todir="${source.home}/launcher">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
 			         excludes="**/.*" />

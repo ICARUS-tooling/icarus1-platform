@@ -320,6 +320,9 @@ public class SearchManagerView extends View {
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to synchronize editor views", e); //$NON-NLS-1$
+			
+			UIUtil.beep();
+			showError(e);
 		}
 		
 		refreshActions();

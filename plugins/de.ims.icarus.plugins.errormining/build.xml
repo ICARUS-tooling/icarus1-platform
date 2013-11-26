@@ -7,6 +7,8 @@
 	          propertyversion="plugin.version" />
 	<property name="plugin.home"
 	          value="${plugins.build}/${plugin.id}" />
+	<property name="plugin.source"
+	          value="${plugins.source}/${plugin.id}" />
 
 	<path id="plugin.classpath">
 		<fileset dir="${lib.home}" includes="*.jar" />
@@ -60,7 +62,7 @@ Use top-level project build file to build application.
 
 	<target name="source">
 		<echo>Distributing plug-in ${plugin.id} sources to folder ${plugin.home}</echo>
-		<copy todir="${plugin.home}">
+		<copy todir="${plugin.source}">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
 			         excludes="**/.*" />

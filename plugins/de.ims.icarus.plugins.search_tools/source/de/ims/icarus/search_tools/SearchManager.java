@@ -46,6 +46,7 @@ import javax.swing.SwingWorker;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
@@ -326,11 +327,11 @@ public final class SearchManager {
 			
 			this.search = search;
 			
-			/*timeout = ConfigRegistry.getGlobalRegistry().getLong(
+			timeout = ConfigRegistry.getGlobalRegistry().getLong(
 					"plugins.searchTools.searchTimeout") * 1000; //$NON-NLS-1$*/
 			
 			// TODO DEBUG
-			timeout = 0;
+//			timeout = 0;
 		}
 
 		@Override

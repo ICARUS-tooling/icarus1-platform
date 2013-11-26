@@ -152,6 +152,11 @@ public class CoreferenceDocumentSetTargetSelector
 		DocumentSetDescriptor documentSet = (DocumentSetDescriptor) formBuilder.getValue("documentSet"); //$NON-NLS-1$
 		allocationModel.removeAllElements();
 		allocationModel.addElement(dummyEntry);
+		
+		if(documentSet==null) {
+			return;
+		}
+		
 		for(int i=0; i<documentSet.size(); i++) {
 			allocationModel.addElement(documentSet.get(i));
 		}

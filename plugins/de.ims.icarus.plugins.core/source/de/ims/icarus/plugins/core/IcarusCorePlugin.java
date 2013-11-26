@@ -39,6 +39,7 @@ import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
@@ -233,7 +234,7 @@ public final class IcarusCorePlugin extends Plugin {
 		
 		boolean showFrame = true;
 		boolean hideDisclaimer = config.getBoolean("general.eula"); //$NON-NLS-1$
-		if(!hideDisclaimer) {
+		if(!hideDisclaimer && !Core.getCore().getOptions().isDevMode()) {
 			showFrame = DisclaimerDialog.showDialog();
 		}
 		

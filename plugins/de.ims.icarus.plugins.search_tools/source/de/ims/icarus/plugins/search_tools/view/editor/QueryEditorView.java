@@ -175,7 +175,15 @@ public class QueryEditorView extends View {
 			reset();
 			return message.successResult(this, null);
 		} else if(Commands.COMMIT.equals(message.getCommand())) {
-			commitQuery();
+			try {
+				commitQuery();
+			} catch(Exception e) {
+				LoggerFactory.error(this, 
+						"Failed to commit query", e); //$NON-NLS-1$
+				
+				UIUtil.beep();
+				showError(e);
+			}
 			return message.successResult(this, getSearchDescriptor());
 		} else {
 			return message.unknownRequestResult(this);

@@ -136,7 +136,10 @@
 	<extension id="CoreferencePerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
-				TODO
+				Compact collection of tools related to visualization and analysis of coreference data.
+				Available features include the management of multiple sets of coreference annotations
+				per corpus. Data-sets and their annotations can be visualized using various techniques
+				like text highlighting, graph-outlines or a customizable entity-grid implementation.
 			</doc-text>
 		</doc>
 		<parameter id="name" value="plugins.coref.coreferencePerspective.identity.name" />
@@ -144,7 +147,7 @@
 		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
 		<parameter id="class" value="de.ims.icarus.plugins.coref.CoreferencePerspective" />
 		<parameter id="icon" value="de/ims/icarus/plugins/coref/coreference-perspective.gif" />
-		<parameter id="preview" value="de/ims/icarus/plugins/coref/coreference-perspective-preview.jpg" />
+		<parameter id="preview" value="de/ims/icarus/plugins/coref/coreference-perspective-preview.png" />
 	</extension>
 	
 	<extension id="CoreferenceManagerView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">

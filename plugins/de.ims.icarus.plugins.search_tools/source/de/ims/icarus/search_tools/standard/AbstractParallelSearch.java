@@ -376,9 +376,9 @@ public abstract class AbstractParallelSearch extends Search {
 		int cores = ConfigRegistry.getGlobalRegistry().getInteger("plugins.searchTools.maxCores"); //$NON-NLS-1$
 		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()-1);
 		if(cores>0) {
-			cores = Math.min(cores, availableCores);
+			availableCores = Math.min(cores, availableCores);
 		}
-		cores = Math.max(cores, 1);
+		cores = Math.max(availableCores, 1);
 		
 		return cores;
 	}

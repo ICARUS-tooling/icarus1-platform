@@ -49,6 +49,7 @@ import de.ims.icarus.plugins.search_tools.view.graph.ConstraintGraphPresenter;
 import de.ims.icarus.search_tools.SearchDescriptor;
 import de.ims.icarus.search_tools.SearchGraph;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
@@ -275,7 +276,7 @@ public class DefaultQueryEditor extends QueryEditor {
 		
 		SearchGraph searchGraph = graphPresenter.snapshot();
 		if(searchGraph==null) {
-			return;
+			searchGraph = new DefaultSearchGraph();
 		}
 		
 		searchQuery.setSearchGraph(searchGraph);

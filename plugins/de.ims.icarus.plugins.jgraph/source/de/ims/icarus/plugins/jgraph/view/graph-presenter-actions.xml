@@ -177,8 +177,8 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
-		<item type="custom" value="annotationControl" />
 		-->
+		<item type="custom" value="annotationControl" />
 		<item type="glue" />
 	</action-list>
 		
@@ -210,9 +210,9 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
+		-->
 		<item type="custom" value="annotationControl" />
 		<separator />
-		-->
 		<item type="glue" />
 	</action-list>
 		

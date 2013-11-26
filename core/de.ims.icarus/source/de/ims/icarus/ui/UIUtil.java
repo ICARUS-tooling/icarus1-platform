@@ -222,6 +222,7 @@ public final class UIUtil {
 	public static final Border defaultBoxBorder = BorderFactory.createLineBorder(defaultBorderColor, 1);
 	
 	public static final Border topLineBorder = new SeparatingBorder(true, false, false, false);
+	public static final Border bottomLineBorder = new SeparatingBorder(false, false, true, false);
 	public static final Border emptyBorder = new EmptyBorder(0, 0, 0, 0);
 	
 	public static final Border defaultContentBorder = new EmptyBorder(1, 3, 1, 3);
