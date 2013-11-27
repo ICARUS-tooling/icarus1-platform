@@ -451,6 +451,8 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 
 		<!-- Cleanup build stuff -->
 		<delete dir="${build.home}/${app.name}-${app.version}" />
+		
+		<echo>Operation succeeded. You find the zipped dustributable in the 'dist' folder</echo>
 	</target>
 
 	<target name="dist-ims" description="Prepares distribution packages (for IMS internal staff members)">
