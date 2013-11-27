@@ -37,12 +37,14 @@ Use top-level project build file to build application.
 			deprecation="${compile.deprecation}"
 			optimize="${compile.optimize}"
 			encoding="UTF-8"
-			includeantruntime="false">
-			<classpath>
+			includeantruntime="false"
+			classpathref="app.classpath">
+			
+			<classpath path="${app.classpath}">
 				<fileset file="${build.home}/icarus.jar" />
-				<fileset dir="${lib.home}" includes="**/*.jar" />
 			</classpath>
 		</javac>
+			
 		<copy todir="${basedir}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
@@ -57,7 +59,7 @@ Use top-level project build file to build application.
 	</target>
 
 	<target name="source">
-		<echo>Distributing ICARUS core sources to folder ${build.home}</echo>
+		<echo>Distributing ICARUS core sources to folder ${source.home}</echo>
 		<copy todir="${source.home}/core">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
