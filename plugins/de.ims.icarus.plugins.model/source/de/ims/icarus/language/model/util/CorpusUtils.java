@@ -85,7 +85,7 @@ public final class CorpusUtils {
 		if(corpus==null)
 			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
 		
-		String name = prerequisite.getLayerName();
+		String name = prerequisite.getTypeName();
 		if(name!=null) {
 			try {
 				Object member = corpus.getNamedMember(name);
@@ -105,7 +105,7 @@ public final class CorpusUtils {
 	}
 	
 	public static String getName(LayerManifest.Prerequisite prerequisite) {
-		String name = prerequisite.getLayerName();
+		String name = prerequisite.getTypeName();
 		if(name!=null) {
 			return "Required layer-id: "+name; //$NON-NLS-1$
 		}

@@ -77,6 +77,10 @@ public final class ClassProxy {
 		
 		return null;
 	}
+	
+	public Class<?> loadClass() throws ClassNotFoundException {
+		return classLoader.loadClass(className);
+	}
 
 	public Object loadObjectUnsafe() throws Exception {
 		Class<?> clazz = classLoader.loadClass(className);

@@ -31,6 +31,8 @@ import java.util.Set;
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
+import de.ims.icarus.util.ClassProxy;
+import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.location.Location;
 
@@ -43,7 +45,7 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 
 	private Set<LayerManifest> layerManifests = new HashSet<>();
 	
-	private Class<? extends ContextReader> readerClass;
+	private Object readerClass;
 	
 	private Location location;
 	
@@ -58,9 +60,18 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 	/**
 	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getReaderClass()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends ContextReader> getReaderClass() {
-		return readerClass;
+		if(readerClass instanceof ClassProxy) {
+			try {
+				readerClass = ((ClassProxy) readerClass).loadClass();
+			} catch (ClassNotFoundException e) {
+				throw new CorruptedStateException("Failed to load reader class: "+readerClass, e); //$NON-NLS-1$
+			}
+		}
+		
+		return (Class<? extends ContextReader>) readerClass;
 	}
 
 	/**
@@ -79,6 +90,16 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 			throw new NullPointerException("Invalid reader class"); //$NON-NLS-1$
 		
 		this.readerClass = readerClass;
+	}
+
+	/**
+	 * @param proxy the readerClass to set
+	 */
+	public void setReaderClass(ClassProxy proxy) {
+		if(proxy==null)
+			throw new NullPointerException("Invalid proxy"); //$NON-NLS-1$
+		
+		this.readerClass = proxy;
 	}
 
 	/**
