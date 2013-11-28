@@ -31,7 +31,6 @@ import java.util.Map;
 
 import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
 import de.ims.icarus.plugins.errormining.DependencySentenceInfo;
-import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.search_tools.result.EntryBuilder;
 import de.ims.icarus.search_tools.result.Hit;
 import de.ims.icarus.search_tools.standard.GroupCache;
@@ -61,24 +60,31 @@ protected int id;
 	
 	public void matches(int index) {	
 		
+		int[] hitArray = new int[1];
+		hitArray[0] = index;
+
+		Hit hit = new Hit(hitArray);
+		entryBuilder.addHit(hit);
+		commit();
+		
 		// for every entry in  list we check if current buffer index 
 		// equals; note all indices saved within the list are results and have
 		// to show up in the resulting list!
 		
-		for(int i = 0; i < helferList.size(); i++){
-			if(helferList.get(i).containsIntIndex(index)){
-				MappedNGramResult mngResult = helferList.get(i);
-				for(int tmp = 0; tmp < mngResult.getKeyListSize(); tmp++){
-					ArrayList<DependencyItemInNuclei> iinL = ngramsResultMap.get(
-																	mngResult.getKeyAt(tmp));
-					
-					buildHit(iinL, index);					
-				}	
-
-				commit();
-			
-			}
-		}			
+//		for(int i = 0; i < helferList.size(); i++){
+//			if(helferList.get(i).containsIntIndex(index)){
+//				MappedNGramResult mngResult = helferList.get(i);
+//				for(int tmp = 0; tmp < mngResult.getKeyListSize(); tmp++){
+//					ArrayList<DependencyItemInNuclei> iinL = ngramsResultMap.get(
+//																	mngResult.getKeyAt(tmp));
+//					
+//					buildHit(iinL, index);					
+//				}	
+//
+//				commit();
+//			
+//			}
+//		}			
 	}
 	
 	
@@ -116,8 +122,8 @@ protected int id;
 						// sourcenode
 						hitArray[3] = si.getSentenceHeadIndex();
 						
-						System.out.println(si.getNucleiIndex() + " Target");
-						System.out.println(si.getSentenceHeadIndex()+ " Source");
+						//System.out.println(si.getNucleiIndex() + " Target");
+						//System.out.println(si.getSentenceHeadIndex()+ " Source");
 
 						// System.out.println(hitArray[0] + " "
 						// + hitArray[1] + " " + hitArray[2]);

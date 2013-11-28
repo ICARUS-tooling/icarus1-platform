@@ -3588,7 +3588,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			}
 			
 			public String getFileName(){			
-			    return fileChooser.getSelectedFile().getName();
+			    return fileChooser.getSelectedFile().getAbsolutePath();
 			}
 
 			@Override

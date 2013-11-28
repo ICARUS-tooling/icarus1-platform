@@ -89,7 +89,8 @@ public class nGramIO {
         
 		if(ConfigRegistry.getGlobalRegistry()
 				.getBoolean("plugins.errorMining.appearance.fileOutput.useDefaultFile")){ //$NON-NLS-1$
-			file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.filepath")); //$NON-NLS-1$
+					
+			file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.fileOutput.filepath")); //$NON-NLS-1$
 		} else {
 			FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", //$NON-NLS-1$
 																			"xml"); //$NON-NLS-1$
@@ -103,8 +104,8 @@ public class nGramIO {
 		
 		if(file == null){
 			return;
-		}
-       
+		}       
+		
         fop = new FileOutputStream(file);
 
         // if file doesnt exists, then create it

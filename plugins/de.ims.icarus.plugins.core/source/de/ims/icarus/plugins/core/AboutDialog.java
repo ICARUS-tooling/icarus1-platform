@@ -181,14 +181,17 @@ public class AboutDialog extends JDialog {
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
 									.get("plugins.core.aboutDialog.eMail")), gbc); //$NON-NLS-1$
 		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 0);
-		JLabel eMailMarkus = new JLabel(ResourceManager.getInstance()
-								.get("plugins.core.aboutDialog.eMail.markus")); //$NON-NLS-1$
-		aboutPanel.add(eMailMarkus, gbc);
-		gbc.gridy++;
-		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 0);
-		JLabel eMailGregor = new JLabel(ResourceManager.getInstance()
-								.get("plugins.core.aboutDialog.eMail.gregor")); //$NON-NLS-1$
-		aboutPanel.add(eMailGregor, gbc);
+//		JLabel eMailMarkus = new JLabel(ResourceManager.getInstance()
+//								.get("plugins.core.aboutDialog.eMail.markus")); //$NON-NLS-1$
+//		aboutPanel.add(eMailMarkus, gbc);
+//		gbc.gridy++;
+//		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 0);
+//		JLabel eMailGregor = new JLabel(ResourceManager.getInstance()
+//								.get("plugins.core.aboutDialog.eMail.gregor")); //$NON-NLS-1$
+//		aboutPanel.add(eMailGregor, gbc);
+		JLabel eMailIcarus = new JLabel(ResourceManager.getInstance()
+		.get("plugins.core.aboutDialog.eMail.icarus")); //$NON-NLS-1$
+		aboutPanel.add(eMailIcarus, gbc);
 		gbc.gridy++;
 		
 		//URL + Visit
@@ -243,8 +246,9 @@ public class AboutDialog extends JDialog {
 		
 		if (isBrowsingSupported()) {
 			makeLinkable(url, new LinkMouseListener());
-			makeLinkable(eMailMarkus, new LinkMouseListener());
-			makeLinkable(eMailGregor, new LinkMouseListener());
+			//makeLinkable(eMailMarkus, new LinkMouseListener());
+			//makeLinkable(eMailGregor, new LinkMouseListener());
+			makeLinkable(eMailIcarus, new LinkMouseListener());
 		}
 		
 		

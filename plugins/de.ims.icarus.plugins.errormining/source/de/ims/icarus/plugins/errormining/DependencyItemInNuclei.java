@@ -105,17 +105,13 @@ public class DependencyItemInNuclei {
 		sentenceInfo.addNucleiIndexList(positionNR);
 		sentenceInfo.setNucleiIndex(positionNR);
 		
-		
-		System.out.println("SentenceNR " + sentenceNR);
-		System.out.println("NEW DEPENDENCy UNIGRAM INFO" + positionNR +" " + headIndex);
 		sentenceInfo.setSentenceHeadBegin(positionNR);
 		sentenceInfo.setSentenceHeadEnd(headIndex);
 		
 		//sentenceInfo.setNucleiSentencePos(positionNR);
 //		sentenceInfo.setSentenceBegin(positionNR);
 //		sentenceInfo.setSentenceEnd(positionNR);
-		
-//		//TODO Workaround needed?
+
 		
 		if(positionNR > headIndex){
 			sentenceInfo.setSentenceBegin(headIndex);
@@ -156,10 +152,11 @@ public class DependencyItemInNuclei {
 		
 		for(int i = 0; i < sitemp.getNucleiIndexListSize();  i++){
 			sentenceInfo.addNucleiIndexList(sitemp.getNucleiIndexListAt(i));			
-		}
+		}		
 		for(int i = 0; i < si.getNucleiIndexListSize();  i++){
 			sentenceInfo.addNucleiIndexList(si.getNucleiIndexListAt(i));			
 		}
+		
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin()-1); //going left
 		sentenceInfo.setSentenceEnd(si.getSentenceEnd());
 		sl.add(sentenceInfo);
@@ -178,6 +175,7 @@ public class DependencyItemInNuclei {
 		for(int i = 0; i < sitemp.getNucleiIndexListSize();  i++){
 			sentenceInfo.addNucleiIndexList(sitemp.getNucleiIndexListAt(i));			
 		}
+		
 		sentenceInfo.setSentenceBegin(si.getSentenceBegin());
 		sentenceInfo.setSentenceEnd(si.getSentenceEnd()+1); //going right
 		sl.add(sentenceInfo);

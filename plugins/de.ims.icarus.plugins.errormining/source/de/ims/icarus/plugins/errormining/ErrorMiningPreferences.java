@@ -29,7 +29,7 @@ import java.io.File;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
-import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
@@ -54,9 +54,9 @@ public class ErrorMiningPreferences {
 
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		
+		//TODO remove dev option
 		//builder.addStringEntry("filepath", "E:\\errormining_result.xml"); //$NON-NLS-1$ //$NON-NLS-2$
 				builder.addStringEntry("inputfiledebug", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
-
 			
 		
 		builder.addGroup("fileOutput", true); //$NON-NLS-1$
@@ -64,8 +64,7 @@ public class ErrorMiningPreferences {
 		//ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.addBooleanEntry("useDefaultFile", true); //$NON-NLS-1$
 		builder.addEntry("filepath", EntryType.FILE,  //$NON-NLS-1$
-				new File(System.getProperty("user.dir")).getAbsolutePath(), //$NON-NLS-1$
-				"E:\\errormining_result.xml"); //$NON-NLS-1$
+				new File("E:\\errormining_result_test.xml")); //$NON-NLS-1$
 		
 		builder.back();
 	
@@ -80,6 +79,7 @@ public class ErrorMiningPreferences {
 		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
 				(Object[])HighlightType.values()),
 				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+		//ConfigRegistry.getGlobalRegistry().getColor("plugins.dependency.appearance.highlighting.nodeHighlight")
 		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
 		builder.back();
 		

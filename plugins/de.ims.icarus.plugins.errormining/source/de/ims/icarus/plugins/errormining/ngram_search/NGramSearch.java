@@ -367,7 +367,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 						// for (int j = 0 ; j < dd.length(); j++){
 						// 	System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
 						// }
-						// System.out.println();						
+						// System.out.println();
 						ngrams.initializeUniGrams((DependencyData) sd, i);
 						progress = (double) i / maxSentences * 50d;
 						setProgress((int)progress);	
@@ -380,36 +380,36 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 	
 				helferList = new ArrayList<MappedNGramResult>();
 	
-				List<String> tmpKey = new ArrayList<String>(ngramsResultMap.keySet());
-				Collections.reverse(tmpKey);
-				
-				for (int i = 0; i < tmpKey.size();i++){
-					String key = tmpKey.get(i);
-					
-					if(key.split(" ").length > gramsGreaterX){ //$NON-NLS-1$
-						ArrayList<DependencyItemInNuclei> value = ngramsResultMap.get(key);
-						for (int j = 0; j < value.size();j++){
-							DependencyItemInNuclei iin = value.get(j);
-		//					System.out.println("PoSTag: "+ iin.getPosTag() +
-		//									  " PoSCount: " + iin.getCount());
-							
-								for (int k = 0; k < iin.getSentenceInfoSize(); k++){
-									DependencySentenceInfo si = iin.getSentenceInfoAt(k);
-									int sentenceNR = si.getSentenceNr()-1;
-		//							System.out.println(key + " " + sentenceNR);
-		//							System.out.println(
-		//									iin.getSentenceInfoAt(k).getNucleiIndexListSize());
-									
-									MappedNGramResult mapping = 
-											new MappedNGramResult(sentenceNR, key, si);
-									if(helferList.contains(mapping)){	
-										//donothing
-									} else {
-										helferList.add(mapping);	
-									}
-								}
-						}
-					}
+//				List<String> tmpKey = new ArrayList<String>(ngramsResultMap.keySet());
+//				Collections.reverse(tmpKey);
+//				
+//				for (int i = 0; i < tmpKey.size();i++){
+//					String key = tmpKey.get(i);
+//					
+//					if(key.split(" ").length > gramsGreaterX){ //$NON-NLS-1$
+//						ArrayList<DependencyItemInNuclei> value = ngramsResultMap.get(key);
+//						for (int j = 0; j < value.size();j++){
+//							DependencyItemInNuclei iin = value.get(j);
+//		//					System.out.println("PoSTag: "+ iin.getPosTag() +
+//		//									  " PoSCount: " + iin.getCount());
+//							
+//								for (int k = 0; k < iin.getSentenceInfoSize(); k++){
+//									DependencySentenceInfo si = iin.getSentenceInfoAt(k);
+//									int sentenceNR = si.getSentenceNr()-1;
+//		//							System.out.println(key + " " + sentenceNR);
+//		//							System.out.println(
+//		//									iin.getSentenceInfoAt(k).getNucleiIndexListSize());
+//									
+//									MappedNGramResult mapping = 
+//											new MappedNGramResult(sentenceNR, key, si);
+//									if(helferList.contains(mapping)){	
+//										//donothing
+//									} else {
+//										helferList.add(mapping);	
+//									}
+//								}
+//						}
+//					}
 					
 					//ggf direkt in matcher erzeugen lassen
 					matcher.setSentenceList(helferList);
@@ -417,7 +417,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 					matcher.setCache(cache);
 					matcher.setEntryBuilder(entryBuilder);
 					
-				}
+//				}
 				
 				if(createXML){
 					ngrams.outputToFile();
