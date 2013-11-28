@@ -26,10 +26,13 @@
 
 	<property name="license.file" value="${basedir}/license.txt" />
 
+	<property name="docs.home" value="${build.home}/docs" />
+
 	<property name="plugins.home" value="${basedir}/plugins" />
 	<property name="plugins.build" value="${build.home}/plugins" />
 	<property name="plugins.source" value="${source.home}/plugins" />
-
+	<property name="plugins.docs" value="${docs.home}/plugins" />
+	
 	<!--================= COMPILER OPTIONS =================-->
 	<property name="compile.debug"       value="true"/>
 	<property name="compile.deprecation" value="false"/>
@@ -207,10 +210,13 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 
 			<!-- Generate javadocs for plugin -->
 			<case value="docs">
-				<echo>Generating javadoc for plug-in ${plugin.id} to folder ${plugin.home}/docs</echo>
-				<javadoc destdir="${plugin.home}/docs"
-				         classpathref="classpath"
-				         sourcepath="${dir}/source">
+				<echo>Generating javadoc for plug-in ${plugin.id} to folder ${plugins.docs}/${plugin.id}</echo>
+				<javadoc destdir="${plugins.docs}/${plugin.id}"
+				        classpathref="classpath"
+						encoding="UTF-8"
+						docencoding="UTF-8"
+						charset="UTF-8"
+				        sourcepath="${dir}/source">
 				</javadoc>
 			</case>
 
@@ -224,6 +230,31 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 				</echo>
 			</default>
 		</switch>
+	</target>
+	
+	<target name="-docs">
+		
+		<!--
+		<local name="classpath" />
+		<path id="classpath">
+			<path refid="app.classpath" />
+			<fileset dir="${build.home}" includes="**/*.jar" />
+		</path>
+
+		<echo>Generating javadoc for ICARUS ${docs.home}</echo>
+		<javadoc destdir="${docs.home}"
+		        classpathref="classpath"
+				encoding="UTF-8"
+		        sourcepath="${source.home}">
+		</javadoc>
+		-->
+		
+		<ant dir="launcher/de.ims.icarus" target="docs" inheritrefs="true" />
+		<ant dir="core/de.ims.icarus" target="docs" inheritrefs="true" />
+
+		<antcall target="-build-plugins" inheritrefs="true">
+			<param name="target" value="docs" />
+		</antcall>
 	</target>
 
 	<target name="-build">
@@ -265,8 +296,9 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 			<case value="docs">
 				<echo>Generating javadoc for ${id} to folder ${home}/docs</echo>
 				<javadoc destdir="${home}/docs"
-				         classpathref="classpath"
-				         sourcepath="${dir}/source">
+				        classpathref="classpath"
+						encoding="UTF-8"
+				        sourcepath="${dir}/source">
 				</javadoc>
 			</case>
 
@@ -434,6 +466,16 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		</copy>
 		<copy todir="${build.home}" file="${license.file}" />
 
+
+		<!-- Collect documentation files -->
+		<mkdir dir="${docs.home}" />
+		<delete includeemptydirs="true">
+			<fileset dir="${docs.home}">
+				<include name="**/*" />
+			</fileset>
+		</delete>
+		<antcall target="-docs" />
+
 		<!-- Zip build folder and move to dist folder -->
 		<copy todir="${build.home}/${app.name}-${app.version}">
 			<fileset dir="${build.home}">
@@ -441,7 +483,13 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 				<include name="**/*"/>
 			</fileset>
 		</copy>
-		<zip destfile="${dist.home}/${app.name}-bin-${app.version}.zip"
+		<mkdir dir="${dist.home}" />
+		<delete includeemptydirs="true">
+			<fileset dir="${dist.home}">
+				<include name="**/*" />
+			</fileset>
+		</delete>
+		<zip destfile="${dist.home}/${app.name}-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">
 			<fileset dir="${build.home}">

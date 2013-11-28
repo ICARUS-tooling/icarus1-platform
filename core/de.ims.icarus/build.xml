@@ -66,5 +66,16 @@ Use top-level project build file to build application.
 			         excludes="**/.*" />
 		</copy>
 	</target>
+
+	<target name="docs">
+		<echo>Generating javadoc for ICARUS core at ${source.home}/core</echo>
+		<javadoc destdir="${docs.home}/core"
+		        classpathref="app.classpath"
+				encoding="UTF-8"
+				docencoding="UTF-8"
+				charset="UTF-8"
+		        sourcepath="${basedir}/source">
+		</javadoc>
+	</target>
 	
 </project>
