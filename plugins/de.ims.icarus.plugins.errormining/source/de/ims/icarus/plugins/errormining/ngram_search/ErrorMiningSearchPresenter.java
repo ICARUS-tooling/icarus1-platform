@@ -1394,12 +1394,13 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 				//SentenceData sentenceData = (SentenceData) dl.get(sentenceNr);
 				//System.out.println(sentenceData.getText() + "TEXT");
+				
 
 				for(int j = 0; j < diinL.size(); j++){
-					DependencyItemInNuclei diin = diinL.get(j);
+					DependencyItemInNuclei diin = diinL.get(j);					
 					
 					for (int s = 0; s < diin.getSentenceInfoSize(); s++){
-						
+						//System.out.println("SNR"+sentenceNr);
 						if(diin.getSentenceInfoAt(s).getSentenceNr() == sentenceNr){
 							//SentenceData sentenceData = (SentenceData) dl.get(diin.getSentenceInfoAt(s).getSentenceNr());
 							//System.out.println(sentenceData.getText() + "TEXT");
@@ -1420,9 +1421,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 							DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(hlIndexArray);
 							annoDepData.setAnnotation(new NGramAnnotation(defaultGHL));
-												
-							sentenceDataDetailedList.add(annoDepData);
-							
+															
+							sentenceDataDetailedList.add(annoDepData);							
 						}
 	
 					//sentenceDataDetailedList.add(sentenceData);
@@ -1455,23 +1455,38 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 */
 	private List<String> getNucleusDependency(String key, DependencyItemInNuclei diin) {
 	
-		List<String> list = new ArrayList<String>();		
+		List<String> list = new ArrayList<String>();
+		
 		String[] splittedKey = key.split(" ");  //$NON-NLS-1$		
 		int colorOffset = -1;
 		
 		DependencySentenceInfo dsi = diin.getSentenceInfoAt(0); 
 		colorOffset = dsi.getSentenceBegin();
 		
+		//TODO remove if
 		if(dsi.getSentenceEnd()-dsi.getSentenceBegin() > 1){
-				colorOffset = dsi.getSentenceEnd();
+				//colorOffset = dsi.getSentenceEnd();
 		}
 		
+		//System.out.println(colorOffset);
 		for(int c = 0; c < splittedKey.length; c++){			
 			if(isDependencyNuclei(c, dsi, colorOffset)){
 				//System.out.println(splittedKey[c]);
 				list.add(splittedKey[c]);
 			}		
-		}		
+		}
+		
+		if (list.size() == 0){
+			colorOffset = dsi.getSentenceEnd();
+			for(int c = 0; c < splittedKey.length; c++){			
+				if(isDependencyNuclei(c, dsi, colorOffset)){
+					//System.out.println(splittedKey[c]);
+					list.add(splittedKey[c]);
+				}		
+			}
+			
+		}
+		
 		return list;
 	}
 	
@@ -2373,8 +2388,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					
 
 					for (int i = 0; i < iinDList.size(); i++) {
-						//System.out.println("iind"+iinDList.get(i).getPosTag());
-						//System.out.println(getNucleusDependency(key, iinDList.get(i)));
+						System.out.println("iind"+iinDList.get(i).getPosTag());
+						System.out.println(getNucleusDependency(key, iinDList.get(i)));
 						
 						//FIXME
 						List<String> nucleiList = getNucleusDependency(key, iinDList.get(i));
