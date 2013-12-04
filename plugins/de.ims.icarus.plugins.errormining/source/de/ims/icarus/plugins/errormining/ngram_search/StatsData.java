@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class StatsData implements Comparable<StatsData>, Comparator<Object>{
+public class StatsData implements Comparable<StatsData>{
 	
 	List<String> wordstring;
 	String tagKey;
@@ -113,12 +113,5 @@ public class StatsData implements Comparable<StatsData>, Comparator<Object>{
 		return this.tagKey.compareTo(stats.getTagKey());
 	}
 
-	/**
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(Object sd1, Object sd2) {
-		return ((StatsData) sd1).getTagKey().compareTo(((StatsData) sd2).getTagKey());
-	};
 	
 }

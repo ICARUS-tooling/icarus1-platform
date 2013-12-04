@@ -88,9 +88,9 @@ public class nGramIO {
         //File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$
         
 		if(ConfigRegistry.getGlobalRegistry()
-				.getBoolean("plugins.errorMining.appearance.fileOutput.useDefaultFile")){ //$NON-NLS-1$
+				.getBoolean("plugins.errorMining.fileOutput.useDefaultFile")){ //$NON-NLS-1$
 					
-			file = new File(ConfigRegistry.getGlobalRegistry().getString("plugins.errorMining.appearance.fileOutput.filepath")); //$NON-NLS-1$
+			file = ConfigRegistry.getGlobalRegistry().getFile("plugins.errorMining.fileOutput.filepath"); //$NON-NLS-1$
 		} else {
 			FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", //$NON-NLS-1$
 																			"xml"); //$NON-NLS-1$

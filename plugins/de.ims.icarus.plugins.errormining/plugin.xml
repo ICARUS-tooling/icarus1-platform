@@ -28,6 +28,22 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
+		<library id="jfreechart" path="lib/jfreechart-1.0.17.jar" type="code">
+			<doc>
+				<doc-text>
+					jfreechart library version 1.0.17
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
+		<library id="jcommon" path="lib/jcommon-1.0.21.jar" type="code">
+			<doc>
+				<doc-text>
+					jcommon library version 1.0.21
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
 	</runtime>
 	
 	<!-- Extension-Points -->

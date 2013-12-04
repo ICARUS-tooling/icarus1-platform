@@ -1314,6 +1314,14 @@ public class ConfigRegistry implements ConfigConstants {
 		return (String)getValue(path);
 	}
 	
+	public File getFile(Handle handle) {
+		return (File)getValue(handle);
+	}
+	
+	public File getFile(String path) {
+		return (File)getValue(path);
+	}
+	
 	public boolean getBoolean(Handle handle) {
 		return (Boolean)getValue(handle);
 	}

@@ -25,11 +25,11 @@
  */
 package de.ims.icarus.plugins.errormining;
 
+import java.awt.Color;
 import java.io.File;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
-import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
@@ -50,24 +50,23 @@ public class ErrorMiningPreferences {
 		// GENERAL ERRORMINING GROUP
 		builder.addGroup("errorMining", true); //$NON-NLS-1$
 		
+		//file output preferences
+		builder.addGroup("fileOutput", true); //$NON-NLS-1$
+		builder.virtual();
+		//ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
+		builder.addBooleanEntry("useDefaultFile", false); //$NON-NLS-1$
+		builder.addEntry("filepath", EntryType.FILE,  //$NON-NLS-1$
+				new File("errormining_result.xml")); //$NON-NLS-1$		
+		builder.back();
+		
 		// APPEARANCE GROUP
 
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		
-		//TODO remove dev option
+		//dev option
 		//builder.addStringEntry("filepath", "E:\\errormining_result.xml"); //$NON-NLS-1$ //$NON-NLS-2$
-				builder.addStringEntry("inputfiledebug", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-		
-		builder.addGroup("fileOutput", true); //$NON-NLS-1$
-		builder.virtual();
-		//ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
-		builder.addBooleanEntry("useDefaultFile", true); //$NON-NLS-1$
-		builder.addEntry("filepath", EntryType.FILE,  //$NON-NLS-1$
-				new File("E:\\errormining_result_test.xml")); //$NON-NLS-1$
-		
-		builder.back();
-	
+		//		builder.addStringEntry("inputfiledebug", "E:\\test_small_modded.txt"); //$NON-NLS-1$ //$NON-NLS-2$
+				
 		//builder.addIntegerEntry("limit",10); //$NON-NLS-1$		
 		//builder.addBooleanEntry("showOriginalIndex", true); //$NON-NLS-1$
 		
@@ -81,6 +80,15 @@ public class ErrorMiningPreferences {
 				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
 		//ConfigRegistry.getGlobalRegistry().getColor("plugins.dependency.appearance.highlighting.nodeHighlight")
 		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.back();
+		
+		//group for result stuff
+		builder.addGroup("resultMatrix",true); //$NON-NLS-1$
+		builder.virtual();	
+		builder.addColorEntry("defaultChartBackgroundPaint", Color.white.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("defaultChartTitlePaint", Color.black.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("defaultGridlinePaint", Color.black.getRGB()); //$NON-NLS-1$
+		builder.addDoubleEntry("defaultBarWidth", 0.30, 0.0, 1.0); //$NON-NLS-1$
 		builder.back();
 		
 		

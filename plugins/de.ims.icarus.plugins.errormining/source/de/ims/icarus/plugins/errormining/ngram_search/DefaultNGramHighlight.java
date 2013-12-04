@@ -35,14 +35,25 @@ public class DefaultNGramHighlight implements Highlight {
 	
 	protected BitSet highlightedIndices;
 	protected int[] indexMap;
-	protected final long ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
+	protected final long ngramHighlight;
+	protected final long ngramHeadHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
+	protected boolean highlightEdge;
 	
-	public DefaultNGramHighlight(int[] indexMap) {
+	protected int[] dependencyInfo;
+	
+	public DefaultNGramHighlight(int[] indexMap, boolean highlightEdge) {
 		
 		int size = CollectionUtils.max(indexMap);
 		highlightedIndices = new BitSet(size);
 		
 		this.indexMap = indexMap;
+		this.highlightEdge = highlightEdge;
+		
+		if(highlightEdge){
+			ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT | BitmaskHighlighting.EDGE_HIGHLIGHT;
+		} else {
+			ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
+		}
 		
 		for(int index : indexMap) {
 			if(index!=-1) {
@@ -50,6 +61,7 @@ public class DefaultNGramHighlight implements Highlight {
 			}
 		}		
 	}
+	
 	
 
 	/**
@@ -60,7 +72,12 @@ public class DefaultNGramHighlight implements Highlight {
 		if(highlightedIndices.get(index)) {
 			for(int i=0; i<indexMap.length; i++) {
 				if(indexMap[i]==index) {
-					return ngramHighlight;
+					//dependency highlight always dependend, head node)
+					if(highlightEdge && (i % 2 != 0)){
+						return ngramHeadHighlight;
+					}else {
+						return ngramHighlight;
+					}
 				}
 			}
 		}			
