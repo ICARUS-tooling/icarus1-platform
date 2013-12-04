@@ -31,6 +31,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import javax.swing.Icon;
+import javax.swing.SwingConstants;
 
 import de.ims.icarus.util.Exceptions;
 
@@ -134,6 +135,66 @@ public class DecoratedIcon implements Icon {
 	public void addDecoration(Icon icon, int x, int y) {
 		addDecoration(DEFAULT_LAYER, icon, x, y);
 	}
+
+	public void addDecoration(Icon icon, int alignment) {
+		int x, y;
+		int w = getIconWidth();
+		int h = getIconHeight();
+		int wi = icon.getIconWidth();
+		int hi = icon.getIconHeight();
+		
+		switch (alignment) {
+		case SwingConstants.NORTH:
+			x = w/2 - wi/2;
+			y = 0;
+			break;
+
+		case SwingConstants.NORTH_EAST:
+			x = w-wi;
+			y = 0;
+			break;
+
+		case SwingConstants.NORTH_WEST:
+			x = 0;
+			y = 0;
+			break;
+
+		case SwingConstants.SOUTH:
+			x = w/2 - wi/2;
+			y = h-hi;
+			break;
+
+		case SwingConstants.SOUTH_EAST:
+			x = w-wi;
+			y = h-hi;
+			break;
+
+		case SwingConstants.SOUTH_WEST:
+			x = 0;
+			y = h-hi;
+			break;
+
+		case SwingConstants.EAST:
+			x = w-wi;
+			y = h/2 - hi/2;
+			break;
+
+		case SwingConstants.WEST:
+			x = 0;
+			y = h/2 - hi/2;
+			break;
+
+		case SwingConstants.CENTER:
+			x = w/2 - wi/2;
+			y = h/2 - hi/2;
+			break;
+
+		default:
+			throw new IllegalArgumentException("Not a recognized alignment value: "+alignment); //$NON-NLS-1$
+		}
+		
+		addDecoration(DEFAULT_LAYER, icon, x, y);
+	}
 	
 	public void addDecoration(int layer, Icon icon, int x, int y) {
 		Exceptions.testNullArgument(icon, "icon"); //$NON-NLS-1$
@@ -165,6 +226,66 @@ public class DecoratedIcon implements Icon {
 		decorationCounts[layer]++;
 		
 		rebuildBuffer();
+	}
+
+	public void removeDecoration(Icon icon, int alignment) {
+		int x, y;
+		int w = getIconWidth();
+		int h = getIconHeight();
+		int wi = icon.getIconWidth();
+		int hi = icon.getIconHeight();
+		
+		switch (alignment) {
+		case SwingConstants.NORTH:
+			x = w/2 - wi/2;
+			y = 0;
+			break;
+
+		case SwingConstants.NORTH_EAST:
+			x = w-wi;
+			y = 0;
+			break;
+
+		case SwingConstants.NORTH_WEST:
+			x = 0;
+			y = 0;
+			break;
+
+		case SwingConstants.SOUTH:
+			x = w/2 - wi/2;
+			y = h-hi;
+			break;
+
+		case SwingConstants.SOUTH_EAST:
+			x = w-wi;
+			y = h-hi;
+			break;
+
+		case SwingConstants.SOUTH_WEST:
+			x = 0;
+			y = h-hi;
+			break;
+
+		case SwingConstants.EAST:
+			x = w-wi;
+			y = h/2 - hi/2;
+			break;
+
+		case SwingConstants.WEST:
+			x = 0;
+			y = h/2 - hi/2;
+			break;
+
+		case SwingConstants.CENTER:
+			x = w/2 - wi/2;
+			y = h/2 - hi/2;
+			break;
+
+		default:
+			throw new IllegalArgumentException("Not a recognized alignment value: "+alignment); //$NON-NLS-1$
+		}
+		
+		removeDecoration(DEFAULT_LAYER, icon, x, y);
 	}
 	
 	public void removeDecoration(int layer, Icon icon, int x, int y) {

@@ -136,7 +136,7 @@ public class TreebankExplorerView extends View {
 		
 		// Scroll pane
 		JScrollPane scrollPane = new JScrollPane(treebanksList);
-		scrollPane.setBorder(null);
+		scrollPane.setBorder(UIUtil.topLineBorder);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		
 		// Header

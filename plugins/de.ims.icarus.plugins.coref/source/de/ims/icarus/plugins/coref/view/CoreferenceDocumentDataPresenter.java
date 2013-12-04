@@ -32,8 +32,11 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,8 +56,11 @@ import javax.swing.border.EmptyBorder;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CorefMember;
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
@@ -62,7 +68,6 @@ import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
-import de.ims.icarus.language.coref.registry.CoreferenceRegistry.LoadJob;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
@@ -85,6 +90,7 @@ import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.Identity;
@@ -105,7 +111,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	private DetailOutline detailOutline;
 	private ContextOutline contextOutline;
 	private boolean showPropertyOutline = false;
-	private boolean showContextOutline = false;
+	private boolean showContextOutline = true;
 	
 	private Map<Extension, AWTPresenter> presenterInstances;
 	
@@ -407,41 +413,79 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		refresh();
 	}
 	
+	private CoreferenceAllocation getAllocation(Options options, String name) {
+		if(options==null) {
+			return null;
+		}
+		
+		CoreferenceAllocation allocation = null;
+		Object value = options.get(name);
+		if(value instanceof AllocationDescriptor) {
+			allocation = ((AllocationDescriptor)value).get();
+		} else if(value instanceof CoreferenceAllocation) {
+			allocation = (CoreferenceAllocation) value;
+		}
+		
+		return allocation;
+		
+	}
+
 	public void outlineMember(CorefMember member, Options options) {
+		outlineMembers(Collections.singleton(member), options);
+	}
+	
+	public void outlineMembers(CorefMember[] members, Options options) {
+		outlineMembers(CollectionUtils.asList(members), options);
+	}
+	
+	public void outlineMembers(Collection<? extends CorefMember> members, Options options) {
 
 		detailOutline.setDocument(document);
 		
 		try  {
-			boolean rootMember = false;
-			if(member instanceof Span) {
-				rootMember = ((Span)member).isROOT();
-			} else if(member instanceof Edge) {
-				rootMember = ((Edge)member).getSource().isROOT();
+			List<CorefMember> items = new ArrayList<>();
+			if(members!=null) {
+				items.addAll(members);
 			}
 			
-			if(member!=null && showPropertyOutline && !rootMember) {
-				detailOutline.present(member, options);
+			List<Span> spans = new LinkedList<>();
+			
+			for(Iterator<CorefMember> i = items.iterator(); i.hasNext(); ) {
+				CorefMember member = i.next();
+				if(member instanceof Edge) {
+					member = ((Edge)member).getSource();
+				}
+				if(member instanceof Span) {
+					Span s = (Span) member;
+					if(s.isROOT()) {
+						i.remove();
+					} else {
+						spans.add(s);
+					}
+				}
+			}
+			
+			if(showPropertyOutline && !items.isEmpty()) {
+				detailOutline.present(items, options);
 			} else {
 				detailOutline.clear();
 			}
 			
-			if(member instanceof Edge) {
-				member = ((Edge)member).getTarget();
-			}
-			if(member instanceof Span && showContextOutline && !rootMember) {
-				Span span = (Span)member;
-				options = new Options(options);
-				options.put("index", span.getSentenceIndex()); //$NON-NLS-1$
-				options.putAll(this.options);
-				options.put("filter", new SpanFilters.SpanFilter(span)); //$NON-NLS-1$
+			if(showContextOutline && !spans.isEmpty()) {
+				Options opt = new Options(options);
+				//opt.putAll(this.options);
+				opt.put("index", spans.get(0).getSentenceIndex()); //$NON-NLS-1$
+				opt.put("filter", new SpanFilters.SpanFilter(spans)); //$NON-NLS-1$
+				opt.put("allocation", getAllocation(this.options, "allocation")); //$NON-NLS-1$ //$NON-NLS-2$
+				opt.put("goldAllocation", getAllocation(this.options, "goldAllocation")); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				contextOutline.present(document, options);
+				contextOutline.present(document, opt);
 			} else {
 				contextOutline.clear();
 			}
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
-					"Failed to outline properties for: "+String.valueOf(member), e); //$NON-NLS-1$
+					"Failed to outline properties for: "+String.valueOf(members), e); //$NON-NLS-1$
 		}
 	}
 	
@@ -632,7 +676,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 				final String name = descriptor.getName();
 				String title = ResourceManager.getInstance().get(
 						"plugins.coref.labels.loadingAllocation"); //$NON-NLS-1$
-				Object task = new LoadJob(descriptor) {
+				Object task = new IOUtil.LoadJob(descriptor) {
 					@Override
 					protected void done() {
 						try {
@@ -644,6 +688,8 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 									"Failed to load allocation: "+name, e); //$NON-NLS-1$
 							
 							UIUtil.beep();
+							
+							Core.getCore().handleThrowable(e);
 						} finally {
 							contentPanel.remove(loadingLabel);
 							contentPanel.revalidate();

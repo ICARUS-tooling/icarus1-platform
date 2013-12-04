@@ -70,6 +70,7 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPanel;
+import de.ims.icarus.ui.vm.MemoryMonitorPanel;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.id.Identity;
@@ -92,6 +93,7 @@ public class IcarusFrame extends JFrame {
 	
 	private InfoPanel infoPanel;
 	private TaskPanel taskPanel;
+	private MemoryMonitorPanel memoryMonitorPanel;
 	private PerspectivePanel perspectivePanel;
 	private JPanel footerPanel;
 	
@@ -264,6 +266,13 @@ public class IcarusFrame extends JFrame {
 		return taskPanel;
 	}
 	
+	private MemoryMonitorPanel getMemoryMonitorPanel() {
+		if(memoryMonitorPanel==null) {
+			memoryMonitorPanel = new MemoryMonitorPanel();
+		}
+		return memoryMonitorPanel;
+	}
+	
 	private InfoPanel getInfoPanel() {
 		if(infoPanel==null) {
 			infoPanel = new InfoPanel();
@@ -275,7 +284,12 @@ public class IcarusFrame extends JFrame {
 		if(footerPanel==null) {
 			footerPanel = new JPanel(new BorderLayout());
 			footerPanel.add(getInfoPanel().getContentPanel(), BorderLayout.CENTER);
-			footerPanel.add(getTaskPanel(), BorderLayout.EAST);
+			
+			JPanel toolsPanel = new JPanel();
+			toolsPanel.add(getMemoryMonitorPanel());
+			toolsPanel.add(getTaskPanel());
+			
+			footerPanel.add(toolsPanel, BorderLayout.EAST);
 		}
 		return footerPanel;
 	}
@@ -620,6 +634,8 @@ public class IcarusFrame extends JFrame {
 		}
 
 		try {
+			memoryMonitorPanel.close();
+			
 			for(Perspective perspective : containers.keySet()) {
 				String id = perspective.getIdentity().getId();
 				try {
@@ -734,13 +750,17 @@ public class IcarusFrame extends JFrame {
 		return currentPerspective;
 	}
 	
-	public static void defaultShowError(Throwable t) {
+	public static IcarusFrame getActiveFrame() {
 		Window w = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-		if(w==null || !(w instanceof IcarusFrame)) {
-			return;
+		while(w!=null && w.getOwner()!=null) {
+			w = w.getOwner();
 		}
-		
-		IcarusFrame frame = (IcarusFrame) w;
+				
+		return (w instanceof IcarusFrame) ? (IcarusFrame) w : null;
+	}
+	
+	public static void defaultShowError(Throwable t) {		
+		IcarusFrame frame = getActiveFrame();
 
 		DialogFactory.getGlobalFactory().showError(frame, 
 				"plugins.core.icarusCorePlugin.errorDialog.title",  //$NON-NLS-1$

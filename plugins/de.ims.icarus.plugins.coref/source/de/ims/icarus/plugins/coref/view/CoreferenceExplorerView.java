@@ -45,11 +45,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.ims.icarus.Core;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.AllocationListWrapper;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
-import de.ims.icarus.language.coref.registry.CoreferenceRegistry.LoadJob;
 import de.ims.icarus.language.coref.registry.DefaultAllocationDescriptor;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.logging.LoggerFactory;
@@ -201,7 +202,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			
 			String title = ResourceManager.getInstance().get(
 					"plugins.coref.labels.loadingDocumentSet"); //$NON-NLS-1$
-			Object task = new LoadJob(descriptor) {
+			Object task = new IOUtil.LoadJob(descriptor) {
 				@Override
 				protected void done() {
 					try {
@@ -213,7 +214,10 @@ public class CoreferenceExplorerView extends View implements Updatable {
 								"Failed to load document-set: "+name, e); //$NON-NLS-1$
 						
 						UIUtil.beep();
-						showError(e);
+						
+						if(!Core.getCore().handleThrowable(e)) {
+							showError(e);
+						}
 					} finally {
 						update();
 						loadingLabel.setVisible(false);

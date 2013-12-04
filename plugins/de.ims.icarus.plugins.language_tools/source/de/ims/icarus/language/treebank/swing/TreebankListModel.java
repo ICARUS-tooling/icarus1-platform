@@ -122,9 +122,7 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 		
 		Collections.sort(treebanks, TreebankRegistry.TREEBANK_NAME_COMPARATOR);
 		
-		if(!treebanks.isEmpty()) {
-			fireContentsChanged(this, 0, getSize()-1);
-		}
+		fireContentsChanged(this, 0, getSize()-1);
 	}
 
 	/**

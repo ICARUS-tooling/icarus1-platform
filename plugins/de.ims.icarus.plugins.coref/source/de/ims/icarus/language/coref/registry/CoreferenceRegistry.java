@@ -42,7 +42,6 @@ import java.util.logging.Level;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
-import javax.swing.SwingWorker;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -55,7 +54,6 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.Core.NamedRunnable;
-import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.logging.LoggerFactory;
@@ -677,44 +675,6 @@ public final class CoreferenceRegistry {
 				fireContentsChanged(this, index, index);
 			}
 		}
-	}
-
-	
-	public static class LoadJob extends SwingWorker<Loadable, Object> {
-		
-		private final Loadable loadable;
-		
-		public LoadJob(Loadable loadable) {
-			if(loadable==null) 
-				throw new NullPointerException("Invalid loadable"); //$NON-NLS-1$
-			
-			this.loadable = loadable;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof LoadJob) {
-				return ((LoadJob)obj).loadable==loadable;
-			}
-			return false;
-		}
-
-		/**
-		 * @see javax.swing.SwingWorker#doInBackground()
-		 */
-		@Override
-		protected Loadable doInBackground() throws Exception {
-			// Wait while target is loading
-			while(loadable.isLoading());
-			
-			if(loadable.isLoaded()) {
-				return null;
-			}
-			
-			loadable.load();
-			
-			return loadable;
-		}		
 	}
 	
 	private class ShutdownHook implements NamedRunnable {

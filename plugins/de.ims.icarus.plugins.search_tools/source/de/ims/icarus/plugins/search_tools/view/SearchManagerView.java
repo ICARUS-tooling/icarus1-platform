@@ -38,6 +38,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.Action;
@@ -59,6 +60,9 @@ import javax.swing.event.ListSelectionListener;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.Core;
+import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.io.Loadable;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
@@ -75,12 +79,15 @@ import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.SearchTargetSelector;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
+import de.ims.icarus.ui.ComponentUpdater;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.dialog.SelectFormEntry;
 import de.ims.icarus.ui.helper.Editor;
+import de.ims.icarus.ui.tasks.TaskManager;
+import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
@@ -199,6 +206,8 @@ public class SearchManagerView extends View {
 		}
 
 		refreshActions();
+		
+		ComponentUpdater.getInstance().addComponent(searchHistoryList);
 	}
 	
 	protected void refreshActions() {
@@ -207,6 +216,7 @@ public class SearchManagerView extends View {
 		// Refresh editor actions
 		SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
 		Search search = descriptor==null ? null : descriptor.getSearch();
+		Object target = descriptor==null ? null : descriptor.getTarget();
 
 		boolean canRun = descriptor!=null && descriptor.getTarget()!=null;
 		
@@ -219,6 +229,10 @@ public class SearchManagerView extends View {
 		search = selected ? descriptor.getSearch() : null;
 		boolean canCancel = search!=null && search.isRunning();
 		boolean hasResult = search!=null && search.getResult()!=null;
+		boolean isLoadable = target instanceof Loadable;
+		boolean isLoading = isLoadable && ((Loadable)target).isLoading();
+		boolean canLoad = isLoadable && !isLoading && !((Loadable)target).isLoaded();
+		boolean canFree = isLoadable && !isLoading && ((Loadable)target).isLoaded();
 		
 		actionManager.setEnabled(hasResult,
 				"plugins.searchTools.searchManagerView.viewResultAction"); //$NON-NLS-1$		
@@ -228,7 +242,11 @@ public class SearchManagerView extends View {
 				"plugins.searchTools.searchManagerView.clearHistoryAction"); //$NON-NLS-1$
 		actionManager.setEnabled(selected, 
 				"plugins.searchTools.searchManagerView.viewSearchAction",  //$NON-NLS-1$
-				"plugins.searchTools.searchManagerView.removeSearchAction"); //$NON-NLS-1$
+				"plugins.searchTools.searchManagerView.removeSearchAction"); //$NON-NLS-1$		
+		actionManager.setEnabled(canLoad,
+				"plugins.searchTools.searchManagerView.loadSearchTargetAction"); //$NON-NLS-1$		
+		actionManager.setEnabled(canFree,
+				"plugins.searchTools.searchManagerView.freeSearchTargetAction"); //$NON-NLS-1$
 	}
 	
 	protected void showPopup(MouseEvent trigger) {
@@ -247,6 +265,8 @@ public class SearchManagerView extends View {
 		}
 		
 		if(popupMenu!=null) {
+			refreshActions();
+			
 			popupMenu.show(searchHistoryList, trigger.getX(), trigger.getY());
 		}
 	}
@@ -282,6 +302,10 @@ public class SearchManagerView extends View {
 				callbackHandler, "editParameters"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchManagerView.viewSearchAction",  //$NON-NLS-1$
 				callbackHandler, "viewSearch"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchManagerView.loadSearchTargetAction",  //$NON-NLS-1$
+				callbackHandler, "loadSearchTarget"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchManagerView.freeSearchTargetAction",  //$NON-NLS-1$
+				callbackHandler, "freeSearchTarget"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -401,6 +425,14 @@ public class SearchManagerView extends View {
 				Search search = descriptor.getSearch();
 				
 				if(result==null || (!search.isDone() && !search.isRunning())) {
+					return;
+				}
+				
+				if(result.getTotalMatchCount()<1) {
+					DialogFactory.getGlobalFactory().showWarning(getFrame(), 
+							"plugins.searchTools.searchManagerView.dialogs.emptyResult.title",  //$NON-NLS-1$
+							"plugins.searchTools.searchManagerView.dialogs.emptyResult.message"); //$NON-NLS-1$
+					
 					return;
 				}
 				
@@ -735,6 +767,105 @@ public class SearchManagerView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to cancel selected search", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
+		}
+		
+		public void loadSearchTarget(ActionEvent e) {
+			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
+			if(descriptor==null) {
+				return;
+			}
+			
+			try {
+				Object target = descriptor.getTarget();
+				
+				if(!(target instanceof Loadable)) {
+					return;
+				}
+				
+				Loadable loadable = (Loadable) target;
+				
+				if(loadable.isLoaded() || loadable.isLoading()) {
+					return;
+				}
+				
+				String title = ResourceManager.getInstance().get(
+						"plugins.searchTools.searchManager.loadTargetJob.name"); //$NON-NLS-1$
+				String info = ResourceManager.getInstance().get(
+						"plugins.searchTools.searchManager.loadTargetJob.description", //$NON-NLS-1$
+						StringUtil.getName(loadable));
+				
+				Object task = new IOUtil.LoadJob(loadable) {
+
+					/**
+					 * @see javax.swing.SwingWorker#done()
+					 */
+					@Override
+					protected void done() {
+						Loadable loadable = null;
+						try {
+							loadable = get();
+							
+						} catch(InterruptedException | CancellationException e) {
+							// ignore
+						} catch(Exception e) {
+							LoggerFactory.log(this, Level.SEVERE, 
+									"Failed to load search target: "+String.valueOf(loadable), e); //$NON-NLS-1$
+							UIUtil.beep();
+							
+							if(!Core.getCore().handleThrowable(e)) {
+								showError(e);
+							}
+							
+						} finally {
+							searchHistoryList.repaint();
+							refreshActions();
+						}
+					}
+				};
+
+				TaskManager.getInstance().schedule(task, title, info, null, TaskPriority.HIGH, true);
+
+				searchHistoryList.repaint();
+				refreshActions();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to load search target", ex); //$NON-NLS-1$
+				UIUtil.beep();
+				
+				showError(ex);
+			}
+		}
+		
+		public void freeSearchTarget(ActionEvent e) {
+			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
+			if(descriptor==null) {
+				return;
+			}
+			
+			try {
+				Object target = descriptor.getTarget();
+				
+				if(!(target instanceof Loadable)) {
+					return;
+				}
+				
+				Loadable loadable = (Loadable) target;
+				
+				if(!loadable.isLoaded() || loadable.isLoading()) {
+					return;
+				}
+				
+				loadable.free();
+
+				searchHistoryList.repaint();
+				refreshActions();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to free search target", ex); //$NON-NLS-1$
 				UIUtil.beep();
 				
 				showError(ex);

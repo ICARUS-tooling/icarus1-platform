@@ -81,4 +81,6 @@ public interface Manifest extends Identity {
 	 * not contain any properties.
 	 */
 	Set<String> getPropertyNames();
+	
+	boolean isEditable();
 }

@@ -46,6 +46,7 @@ import javax.swing.SwingWorker;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.logging.LoggerFactory;
@@ -445,7 +446,9 @@ public final class SearchManager {
 				cancelSearch();
 				UIUtil.beep();
 				
-				showErrorDialog(e);
+				if(!Core.getCore().handleThrowable(e)) {				
+					showErrorDialog(e);
+				}
 			} finally {
 				searchJobMap.remove(search);
 			}
@@ -487,12 +490,15 @@ public final class SearchManager {
 		}
 	}
 	
-	private static class LoadTargetJob extends SwingWorker<Loadable, Object> 
+	public static class LoadTargetJob extends SwingWorker<Loadable, Object> 
 			implements Identity {
 		
 		private final Search search;
 		
-		private LoadTargetJob(Search search) {
+		public LoadTargetJob(Search search) {
+			if(search==null)
+				throw new NullPointerException("Invalid search"); //$NON-NLS-1$
+			
 			this.search = search;
 		}
 
@@ -587,6 +593,8 @@ public final class SearchManager {
 						"Failed to load search target: "+String.valueOf(loadable), e); //$NON-NLS-1$
 				cancelSearch();
 				UIUtil.beep();
+				
+				Core.getCore().handleThrowable(e);
 			}
 		}
 	}

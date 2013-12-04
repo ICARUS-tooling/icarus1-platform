@@ -64,6 +64,8 @@ public class RowHeaderList extends JList<String> {
 		this(model);
 		
 		setTargetSelectionModel(targetSelectionModel);
+		
+		addListSelectionListener(getSelectionSynchronizer());
 	}
 
 	public ListSelectionModel getTargetSelectionModel() {
@@ -89,6 +91,9 @@ public class RowHeaderList extends JList<String> {
 		if(this.targetSelectionModel!=null) {
 			this.targetSelectionModel.addListSelectionListener(getSelectionSynchronizer());
 		}
+		
+		setSelectionMode(targetSelectionModel==null ? 
+				ListSelectionModel.SINGLE_SELECTION : targetSelectionModel.getSelectionMode());
 	}
 
 	public int getMinimumCellWidth() {
@@ -201,14 +206,41 @@ public class RowHeaderList extends JList<String> {
 	}
 	
 	private class SelectionSynchronizer implements ListSelectionListener {
+		
+		private boolean ignoreChanges = false;
 
 		/**
 		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
 		 */
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
-			// TODO Auto-generated method stub
+			if(ignoreChanges || getTargetSelectionModel()==null) {
+				return;
+			}
 			
+			ListSelectionModel model = null;
+			
+			if(e.getSource() instanceof ListSelectionModel) {
+				model = (ListSelectionModel) e.getSource();
+			} else if(e.getSource()==RowHeaderList.this) {
+				model = getSelectionModel();
+			}
+			
+			if(model==null) {
+				return;
+			}
+			
+			try {
+				ignoreChanges = true;
+				
+				if(model==getSelectionModel()) {
+					ListUtils.copySelectionState(model, getTargetSelectionModel());
+				} else {
+					ListUtils.copySelectionState(getTargetSelectionModel(), getSelectionModel());
+				}
+			} finally {
+				ignoreChanges = false;
+			}
 		}
 		
 	}

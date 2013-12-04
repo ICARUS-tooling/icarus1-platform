@@ -77,6 +77,11 @@ public final class ListenerProxies {
 		if(owner==null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 		
+		// ENsure we are not accidently creating proxies for a proxy!
+		if(Proxy.isProxyClass(owner.getClass())) {
+			return owner;
+		}
+		
 		synchronized (lock) {
 			Map<Object, Object> proxyMap = proxies.get(listenerClass);
 			if(proxyMap==null) {

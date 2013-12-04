@@ -1,6 +1,5 @@
 FIXME:
 	-	task manager not reflecting the latest values of title and info for tasks
-	-	ContextOutline refresh -> Descriptor vs. CorefAllocation
 	-	check "false negatives" option in text outline
 	-	check action refresh for "false-pos" and "false-neg" in presenters
 	-	disable max column width in entity grid
@@ -9,25 +8,14 @@ OPTIONAL:
 
 TODO:
 
-	-	raname "Management" to "Developement"
-	-	CLARIN without "E"
-	-	remove "Edit" and "Inspect" actions from treebank properties view
 	-	Search History:
 		-	add icon signaling which is the current query graph
 		-	add "loaded" icon for targets in list
 		-	add "Load" and "Free" actions for context menu
-	-	"Remove Cells" -> "Clear Graph"
 	-	develope memory monitor (much like Eclipse)
 	-	lock mouse-over highlight in coref text outline via click (unlock on blank space)
-	-	add tooltips for property dialog in coref environment
-	-	remove default search timeout
 	-	add progress check in task manager
 	-	add "Save and Continue" button to ConfigDialog
-	-	add "[...]" as third line in entity grid header when label is too long (same for property outline!)
-	-	enable row- and column-selection in entity grid
-	-	change default HEAD index to be right-most in span
-	-	show context outline per default
-	-	add navigation to property outline (combobox or arrows)
 
 	-	add sanity-checks for editors (cannot apply until check is successful)
 	-	check "hasChanges" method from treebank editor
@@ -47,6 +35,18 @@ TODO:
 
 DONE:
 
+	-	add navigation to property outline (combobox or arrows)
+	-	ContextOutline refresh -> Descriptor vs. CorefAllocation
+	-	CLARIN without "E"
+	-	"Remove Cells" -> "Clear Graph"
+	-	add tooltips for property dialog in coref environment
+	-	remove default search timeout
+	-	enable row- and column-selection in entity grid
+	-	show context outline per default
+	-	remove "Edit" and "Inspect" actions from treebank properties view
+	-	add "[...]" as third line in entity grid header when label is too long (same for property outline!)
+	-	change default HEAD index to be right-most in span
+	-	rename "Management" to "Developement"
 	-	fix "Copy Cell" icon in graph presenter
 	-	check the annotation control in toolbars to only be active when there
 		is a real highlight annotation!

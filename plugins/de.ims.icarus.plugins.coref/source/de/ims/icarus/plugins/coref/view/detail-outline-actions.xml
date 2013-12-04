@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		DETAIL OUTLINE
+	-->
+		
+	
+	<!-- First Element -->
+	<action id="plugins.coref.detailOutline.firstElementAction"
+		template="actions.default.firstElementAction" />
+
+	<!-- Previous Element -->
+	<action id="plugins.coref.detailOutline.previousElementAction"
+		template="actions.default.previousElementAction" />
+
+	<!-- Next Element -->
+	<action id="plugins.coref.detailOutline.nextElementAction"
+		template="actions.default.nextElementAction" />
+
+	<!-- Last Element -->
+	<action id="plugins.coref.detailOutline.lastElementAction"
+		template="actions.default.lastElementAction" />
+		
+	<!-- Tool-Bar list -->
+	<action-list id="plugins.coref.detailOutline.toolBarList">
+		<item type="action" value="plugins.coref.detailOutline.firstElementAction" />
+		<item type="action" value="plugins.coref.detailOutline.previousElementAction" />
+		<item type="custom" value="itemSelect" />
+		<item type="action" value="plugins.coref.detailOutline.nextElementAction" />
+		<item type="action" value="plugins.coref.detailOutline.lastElementAction" />
+	</action-list>
+	
+</actions>

@@ -191,7 +191,7 @@ public class TreebankPropertiesView extends View {
 		
 		// Scroll pane
 		scrollPane = new JScrollPane();
-		scrollPane.setBorder(null);
+		scrollPane.setBorder(UIUtil.topLineBorder);
 		
 		// ToolBar
 		JToolBar toolBar = getDefaultActionManager().createToolBar(

@@ -54,6 +54,8 @@ Use top-level project build file to build application.
 		<mkdir dir="${build.home}/lib" />
 		<copy todir="${build.home}/lib" file="${lib.home}/jpf.jar" overwrite="true"/>
 		<copy todir="${build.home}/lib" file="${lib.home}/commons-logging.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jgoodies-common-1.6.0-sources.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jgoodies-forms-1.7.1-sources.jar" overwrite="true"/>
 		<jar jarfile="${build.home}/lib/${core.jar.name}" basedir="${basedir}/classes" 
 			index="true" manifest="${basedir}/manifest.mf" />
 	</target>
@@ -68,7 +70,7 @@ Use top-level project build file to build application.
 	</target>
 
 	<target name="docs">
-		<echo>Generating javadoc for ICARUS core at ${source.home}/core</echo>
+		<echo>Generating javadoc for ICARUS core at ${docs.home}/core</echo>
 		<javadoc destdir="${docs.home}/core"
 		        classpathref="app.classpath"
 				encoding="UTF-8"

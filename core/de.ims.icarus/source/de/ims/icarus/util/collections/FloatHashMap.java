@@ -25,12 +25,15 @@
  */
 package de.ims.icarus.util.collections;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * @author Markus
  * @version $Id$
  * 
  */
-public class FloatHashMap {
+public class FloatHashMap<E extends Object> {
 
 	/**
 	 * The hash table data.
@@ -164,14 +167,14 @@ public class FloatHashMap {
 	 * @see #containsKey(int)
 	 * @see java.util.Map
 	 */
-	public boolean containsValue(Object value) {
+	public boolean containsValue(E value) {
 		if (value == null)
 			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
 
 		Entry tab[] = table;
 		for (int i = tab.length; i-- > 0;) {
 			for (Entry e = tab[i]; e != null; e = e.next) {
-				if (e.value.equals(value)) {
+				if (value.equals(e.value)) {
 					return true;
 				}
 			}
@@ -211,13 +214,14 @@ public class FloatHashMap {
 	 *         hash-table.
 	 * @see #put(int, Object)
 	 */
-	public Object get(float key) {
+	@SuppressWarnings("unchecked")
+	public E get(float key) {
 		Entry tab[] = table;
 		int hash = (int) key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
 		for (Entry e = tab[index]; e != null; e = e.next) {
 			if (e.key == key) {
-				return e.value;
+				return (E) e.value;
 			}
 		}
 		return null;
@@ -265,14 +269,15 @@ public class FloatHashMap {
 	 *         {@code null} if it did not have one.
 	 * @see #get(int)
 	 */
-	public Object put(float key, Object value) {
+	public E put(float key, E value) {
 		// Makes sure the key is not already in the hash-table.
 		Entry tab[] = table;
 		int hash = (int) key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
 		for (Entry e = tab[index]; e != null; e = e.next) {
 			if (e.key == key) {
-				Object old = e.value;
+				@SuppressWarnings("unchecked")
+				E old = (E) e.value;
 				e.value = value;
 				return old;
 			}
@@ -302,7 +307,7 @@ public class FloatHashMap {
 	 * @return the value to which the key had been mapped in this hash-table, or
 	 *         {@code null} if the key did not have a mapping.
 	 */
-	public Object remove(float key) {
+	public E remove(float key) {
 		Entry tab[] = table;
 		int hash = (int) key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -314,7 +319,8 @@ public class FloatHashMap {
 					tab[index] = e.next;
 				}
 				count--;
-				Object oldValue = e.value;
+				@SuppressWarnings("unchecked")
+				E oldValue = (E) e.value;
 				e.value = null;
 				return oldValue;
 			}
@@ -333,4 +339,17 @@ public class FloatHashMap {
 		count = 0;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Collection<E> values() {
+		Collection<E> result = new ArrayList<>(count);
+
+		Entry tab[] = table;
+		for (int i = tab.length; i-- > 0;) {
+			for (Entry e = tab[i]; e != null; e = e.next) {
+				result.add((E) e.value);
+			}
+		}
+		
+		return result;
+	}
 }

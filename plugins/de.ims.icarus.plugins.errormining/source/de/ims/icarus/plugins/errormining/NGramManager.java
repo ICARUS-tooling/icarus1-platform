@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
@@ -278,8 +279,10 @@ public class NGramManager {
 						"Failed to execute search", e); //$NON-NLS-1$
 				cancelSearch();
 				UIUtil.beep();
-
-				showErrorDialog(e);
+				
+				if(!Core.getCore().handleThrowable(e)) {
+					showErrorDialog(e);
+				}
 			} finally {
 				searchJobMap.remove(search);
 			}
@@ -425,6 +428,8 @@ public class NGramManager {
 								"Failed to load search target: " + String.valueOf(loadable), e); //$NON-NLS-1$
 				cancelSearch();
 				UIUtil.beep();
+
+				Core.getCore().handleThrowable(e);
 			}
 		}
 	}

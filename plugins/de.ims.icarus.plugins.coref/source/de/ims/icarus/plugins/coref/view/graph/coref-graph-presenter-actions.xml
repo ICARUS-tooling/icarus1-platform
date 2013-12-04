@@ -7,27 +7,27 @@
 	-->
 		
 	<!-- Toggle 'markFalseEdges' -->
-	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction"
 		name="${id}.name" desc="${id}.description" icon="false_edge.png" type="toggle" />
 		
 	<!-- Toggle 'markFalseNodes' -->
-	<action id="plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction"
 		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
 	<!-- Toggle 'showGoldEdges' -->
-	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction"
 		name="${id}.name" desc="${id}.description" icon="gold_edge.png" type="toggle" />
 		
 	<!-- Toggle 'showGoldVertices' -->
-	<action id="plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"
 		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
-	<action id="plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction"
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"
 		name="${id}.name" desc="${id}.description" icon="filter_singletons.png" type="toggle" />
 		
 	<!-- Main ToolBar List for editable graph -->
-	<action-list id="plugins.coref.corefGraphPresenter.editableMainToolBarList">
+	<action-list id="plugins.coref.coreferenceGraphPresenter.editableMainToolBarList">
 		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.clearGraphAction" />
@@ -59,16 +59,16 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
 		-->
 		<separator />
-		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction" />
-		<item type="action" value="plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction" />
-		<item type="action" value="plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction" />
-		<item type="action" value="plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction" />
-		<item type="action" value="plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction" />
 		<item type="glue" />
 	</action-list>
 		
 	<!-- Popup Menu List for editable graphs -->
-	<action-list id="plugins.coref.corefGraphPresenter.editablePopupMenuList">
+	<action-list id="plugins.coref.coreferenceGraphPresenter.editablePopupMenuList">
 		<item type="action" value="plugins.jgraph.graphPresenter.exportCellsAction" />
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.deleteCellsAction" />

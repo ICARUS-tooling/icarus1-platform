@@ -38,7 +38,7 @@ import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.language.treebank.TreebankDescriptor;
 import de.ims.icarus.language.treebank.TreebankInfo;
 import de.ims.icarus.plugins.language_tools.treebank.DefaultSimpleTreebank;
-import de.ims.icarus.ui.CompoundIcon;
+import de.ims.icarus.ui.DecoratedIcon;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.location.Location;
@@ -57,7 +57,12 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 	
 	private static TreebankListCellRenderer sharedInstance;
 	
-	private static final CompoundIcon icon = new CompoundIcon(UIUtil.getBlankIcon(8, 16));
+	private static final DecoratedIcon icon = new DecoratedIcon(UIUtil.getBlankIcon(8, 16));
+
+	private static final Icon loadingIcon = IconRegistry.getGlobalRegistry().getIcon("waiting_ovr.gif"); //$NON-NLS-1$
+	private static final Icon loadedIcon = IconRegistry.getGlobalRegistry().getIcon("version_controlled.gif"); //$NON-NLS-1$
+	private static final Icon invalidSettingsIcon = IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif"); //$NON-NLS-1$
+	private static final Icon invalidLocationIcon = IconRegistry.getGlobalRegistry().getIcon("warning_co.gif"); //$NON-NLS-1$
 
 	/**
 	 * @return the sharedInstance
@@ -101,10 +106,18 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 		}
 		
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		
-		Icon overlay = null;
+
+		icon.removeDecorations();
 		
 		if(treebank!=null) {
+			Icon overlay = null;
+			
+			if(treebank.isLoading()) {
+				overlay = loadingIcon;
+			} else if(treebank.isLoaded()) {
+				overlay = loadedIcon;
+			}
+			
 			Extension readerExtension = null;
 			if(treebank instanceof DefaultSimpleTreebank) {
 				readerExtension = ((DefaultSimpleTreebank)treebank).getReader();
@@ -112,13 +125,15 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 			Location location = treebank.getLocation();
 			
 			if(readerExtension==null || location==null) {
-				overlay = IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif"); //$NON-NLS-1$
+				overlay = invalidSettingsIcon;
 			} else if(!Locations.isValid(location)) {
-				overlay = IconRegistry.getGlobalRegistry().getIcon("warning_co.gif"); //$NON-NLS-1$
+				overlay = invalidLocationIcon;
+			}
+			
+			if(overlay!=null) {
+				icon.addDecoration(overlay, SwingConstants.SOUTH_WEST);
 			}
 		}
-		
-		icon.setBottomLeftOverlay(overlay);
 		
 		setIcon(icon);
 		

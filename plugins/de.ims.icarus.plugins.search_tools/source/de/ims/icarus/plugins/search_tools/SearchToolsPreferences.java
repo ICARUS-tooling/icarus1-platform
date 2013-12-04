@@ -63,7 +63,7 @@ public class SearchToolsPreferences {
 		builder.addGroup("searchTools", true); //$NON-NLS-1$
 		builder.addBooleanEntry("alwaysUseFallbackPresenter", false); //$NON-NLS-1$
 		builder.addBooleanEntry("alwaysUnifyNonAggregatedConstraints", false); //$NON-NLS-1$
-		builder.addIntegerEntry("searchTimeout", 60); //$NON-NLS-1$
+		builder.addIntegerEntry("searchTimeout", 0); //$NON-NLS-1$
 		builder.setProperties(builder.addIntegerEntry("maxCores", 0),  //$NON-NLS-1$
 				ConfigConstants.NOTE_KEY, "config.searchTools.maxCores.note"); //$NON-NLS-1$
 		builder.setProperties(builder.addListEntry("groupColors", EntryType.COLOR,  //$NON-NLS-1$

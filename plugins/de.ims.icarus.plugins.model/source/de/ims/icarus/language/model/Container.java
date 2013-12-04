@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model;
 
 import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.manifest.ManifestOwner;
 
 
 /**
@@ -34,7 +35,7 @@ import de.ims.icarus.language.model.manifest.ContainerManifest;
  * @version $Id$
  *
  */
-public interface Container extends Markable, Iterable<Markable> {
+public interface Container extends Markable, Iterable<Markable>, ManifestOwner<ContainerManifest> {
 	
 	/**
 	 * Returns the {@link ContainerManifest} object that holds additional

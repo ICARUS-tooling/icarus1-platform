@@ -38,6 +38,7 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Grouping;
@@ -292,6 +293,8 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to display sub-result for index: "+index, e); //$NON-NLS-1$
+				
+				Core.getCore().handleThrowable(e);
 			} finally {
 				firePropertyChange("indeterminate", true, false); //$NON-NLS-1$
 			}

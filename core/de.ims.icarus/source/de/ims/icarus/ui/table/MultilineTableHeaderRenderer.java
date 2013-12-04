@@ -121,9 +121,16 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		public void setLines(String...lines) {
 			clear();
 			
-			int max = Math.min(lines.length, maxLineCount);
-			for(int i=0; i<max; i++) {
-				this.lines.add(lines[i]);
+			for(int i=0; i<lines.length; i++) {
+				addLine(lines[i]);
+				
+				// Check break condition AFTER adding the last line!
+				// This way a header using up 3 lines will be shown properly
+				// while only a header using more than 3 lines will get
+				// its third line changed to reflect that
+				if(i>=maxLineCount) {
+					break;
+				}
 			}
 			
 			fireContentChange();
@@ -132,6 +139,8 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		public void addLine(String line) {
 			if(lines.size()<maxLineCount) {
 				lines.add(line);
+			} else {
+				lines.set(maxLineCount-1, StringUtil.TEXT_WILDCARD);
 			}
 		}
 		

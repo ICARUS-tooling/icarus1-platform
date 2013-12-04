@@ -52,6 +52,8 @@ import de.ims.icarus.util.intern.WeakInterner;
  */
 public final class StringUtil {
 	
+	public static final String TEXT_WILDCARD = "[...]"; //$NON-NLS-1$
+	
 	public static final String WEAK_INTERN_PROPERTY = 
 			"de.ims.icarus.strings.useWeakIntern"; //$NON-NLS-1$
 
@@ -178,19 +180,26 @@ public final class StringUtil {
 	}
 	
 	public static String fit(String s, int maxLength) {
+		return fit(s, maxLength, null); //$NON-NLS-1$
+	}
+	
+	public static String fit(String s, int maxLength, String wildcard) {
 		if(s==null) {
 			return ""; //$NON-NLS-1$
 		}
 		if(s.length()<=maxLength) {
 			return s;
 		}
+		if(wildcard==null || wildcard.isEmpty()) {
+			wildcard = TEXT_WILDCARD;
+		}
 		
-		int chunkLength = (maxLength-3)/2;
+		int chunkLength = (maxLength-wildcard.length())/2;
 		
 		StringBuilder sb = new StringBuilder(maxLength);
 		sb.append(s, 0, chunkLength)
-		.append("...") //$NON-NLS-1$
-		.append(s, chunkLength+3, maxLength-chunkLength);
+		.append(wildcard)
+		.append(s, chunkLength+wildcard.length(), maxLength-chunkLength);
 		
 		return sb.toString();
 	}

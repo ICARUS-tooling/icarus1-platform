@@ -168,10 +168,6 @@ public class ResourceDomain {
 		return get(key, null, defaultValue);
 	}
 
-	public String get(String key, Object...params) {
-		return get(key, key, params);
-	}
-
 	public String get(String key, String defaultValue, Object...params) {
 		String value = getResource(key);
 

@@ -218,16 +218,8 @@ public final class ResourceManager {
 		return globalDomain.get(key);
 	}
 
-	public String get(String key, String defaultValue) {
-		return globalDomain.get(key, defaultValue);
-	}
-
 	public String get(String key, Object...params) {
-		return globalDomain.get(key, params);
-	}
-
-	public String get(String key, String defaultValue, Object...params) {
-		return globalDomain.get(key, defaultValue, params);
+		return globalDomain.get(key, null, params);
 	}
 	
 	public static String format(String text, Object...params) {

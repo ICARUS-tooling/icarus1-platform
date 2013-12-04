@@ -119,4 +119,16 @@ public final class Exceptions {
 					"Argument '%s' is out of range [%d to %d]: %d",  //$NON-NLS-1$
 					name, min, max, value));
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Throwable> T getThrowableOfType(Throwable t, Class<T> clazz) {
+		if(t==null)
+			throw new NullPointerException("Invalid throwable"); //$NON-NLS-1$
+		
+		while(!clazz.isAssignableFrom(t.getClass()) && t.getCause()!=null) {
+			t = t.getCause();
+		}
+		
+		return clazz.isAssignableFrom(t.getClass()) ? (T) t : null;
+	}
 }

@@ -221,8 +221,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	protected void initGraphComponentInternals() {
 		super.initGraphComponentInternals();
 		
-		editableMainToolBarListId = "plugins.coref.corefGraphPresenter.editableMainToolBarList"; //$NON-NLS-1$
-		editablePopupMenuListId = "plugins.coref.corefGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
+		editableMainToolBarListId = "plugins.coref.coreferenceGraphPresenter.editableMainToolBarList"; //$NON-NLS-1$
+		editablePopupMenuListId = "plugins.coref.coreferenceGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
 
 		presenterMenu = new CoreferenceDocumentDataPresenter.PresenterMenu(this, getHandler());
 	}
@@ -283,31 +283,31 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 		// Init 'selected' states
 		actionManager.setSelected(isMarkFalseEdges(), 
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isMarkFalseNodes(), 
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isShowGoldEdges(), 
-				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isShowGoldNodes(), 
-				"plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isFilterSingletons(), 
-				"plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		
 		// Register callback functions
 		actionManager.addHandler(
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
 				callbackHandler, "markFalseEdges"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
 				callbackHandler, "markFalseNodes"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
 				callbackHandler, "showGoldEdges"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction",  //$NON-NLS-1$
 				callbackHandler, "showGoldNodes"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
 				callbackHandler, "filterSingletons"); //$NON-NLS-1$
 	}
 	
@@ -319,10 +319,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
 		actionManager.setEnabled(hasGold, 
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
-				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
-				"plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -563,7 +563,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		rebuildGraph();
 		
 		getActionManager().setSelected(showGoldEdges, 
-				"plugins.coref.corefGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
 		
 		firePropertyChange("showGoldEdges", oldValue, showGoldEdges); //$NON-NLS-1$
 	}
@@ -579,7 +579,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		rebuildGraph();
 		
 		getActionManager().setSelected(showGoldNodes, 
-				"plugins.coref.corefGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
 		
 		firePropertyChange("showGoldNodes", oldValue, showGoldNodes); //$NON-NLS-1$
 	}
@@ -595,7 +595,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		rebuildGraph();
 		
 		getActionManager().setSelected(markFalseEdges, 
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseEdgesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction"); //$NON-NLS-1$
 		
 		firePropertyChange("markFalseEdges", oldValue, markFalseEdges); //$NON-NLS-1$
 	}
@@ -611,7 +611,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		rebuildGraph();
 		
 		getActionManager().setSelected(markFalseNodes, 
-				"plugins.coref.corefGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
 		
 		firePropertyChange("markFalseNodes", oldValue, markFalseNodes); //$NON-NLS-1$
 	}
@@ -627,7 +627,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		rebuildGraph();
 		
 		getActionManager().setSelected(filterSingletons, 
-				"plugins.coref.corefGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		
 		firePropertyChange("filterSingletons", oldValue, filterSingletons); //$NON-NLS-1$
 	}

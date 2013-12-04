@@ -77,7 +77,7 @@ public class ConfigUtils implements ConfigConstants {
 		if (name == null) 
 			name = "config." + config.getName(handle); //$NON-NLS-1$
 		
-		return ResourceManager.getInstance().get(name, null, config.getName(handle));
+		return ResourceManager.getInstance().get(name, config.getName(handle));
 	}
 
 	public static String localizeDescription(ConfigRegistry config,
@@ -87,7 +87,7 @@ public class ConfigUtils implements ConfigConstants {
 		if (desc == null)
 			desc = "config.desc." + config.getName(handle); //$NON-NLS-1$
 		
-		return ResourceManager.getInstance().get(desc, null, (Object[])null);
+		return ResourceManager.getInstance().get(desc, (Object[])null);
 	}
 
 	public static String localizeNote(ConfigRegistry config, Handle handle) {
@@ -96,7 +96,7 @@ public class ConfigUtils implements ConfigConstants {
 		if (note == null)
 			note = "config.note." + config.getName(handle); //$NON-NLS-1$
 		
-		return ResourceManager.getInstance().get(note, null, (Object[])null);
+		return ResourceManager.getInstance().get(note, (Object[])null);
 	}
 
 	public static String localizeOption(ConfigRegistry config, Handle handle) {
@@ -105,7 +105,7 @@ public class ConfigUtils implements ConfigConstants {
 		if (name == null)
 			name = "config.options" + config.getName(handle); //$NON-NLS-1$
 	
-		return ResourceManager.getInstance().get(name, null, config.getName(handle));
+		return ResourceManager.getInstance().get(name, config.getName(handle));
 	}
 	
 	public static String[] localizeOptions(ConfigRegistry config, Handle handle, List<?> options) {

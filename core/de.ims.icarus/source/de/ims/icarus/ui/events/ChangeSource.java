@@ -28,7 +28,6 @@ package de.ims.icarus.ui.events;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
-import javax.swing.event.TreeModelListener;
 
 /**
  * @author Markus Gärtner
@@ -53,7 +52,7 @@ public class ChangeSource {
 		ChangeEvent event = null;
 
 		for (int i = pairs.length - 2; i >= 0; i -= 2) {
-			if (pairs[i] == TreeModelListener.class) {
+			if (pairs[i] == ChangeListener.class) {
 				if (event == null) {
 					event = new ChangeEvent(this);
 				}

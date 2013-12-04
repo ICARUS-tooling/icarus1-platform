@@ -30,16 +30,25 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -51,10 +60,15 @@ import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.NavigationControl.ElementType;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
+import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
+import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
@@ -64,17 +78,28 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class DetailOutline implements AWTPresenter {
+public class DetailOutline implements AWTPresenter, ActionListener {
 	
 	protected PropertyTableModel tableModel;
 	protected JTable table;
 	protected JTextArea textArea;
 	
 	protected JPanel contentPanel;
-	
-	protected CorefMember currentMember;
+	protected JLabel indexLabel;
 	
 	protected CoreferenceDocumentData document;
+	
+	protected ActionManager actionManager;
+	
+	private static ActionManager sharedActionManager;
+	
+	private CorefMember[] members;
+	private int currentIndex = -1;
+
+	protected static final String firstActionId = "plugins.coref.detailOutline.firstElementAction"; //$NON-NLS-1$
+	protected static final String previousActionId = "plugins.coref.detailOutline.previousElementAction"; //$NON-NLS-1$
+	protected static final String nextActionId = "plugins.coref.detailOutline.nextElementAction"; //$NON-NLS-1$
+	protected static final String lastActionId = "plugins.coref.detailOutline.lastElementAction"; //$NON-NLS-1$
 
 	public DetailOutline() {
 		tableModel = new PropertyTableModel();
@@ -97,19 +122,32 @@ public class DetailOutline implements AWTPresenter {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		
-		if(!(data instanceof Edge)
-			&& !(data instanceof Span))
-			throw new UnsupportedPresentationDataException("Not an edge or span: "+data); //$NON-NLS-1$
+		Collection<?> items = (Collection<?>) data;
 		
-		// TODO allow for presentation of multiple spans?
-		CorefMember member = (CorefMember) data;
+		if(items==null || items.isEmpty())
+			throw new UnsupportedPresentationDataException("Cannot present empty or invalid collection. Use Presenter.clear() in that case!"); //$NON-NLS-1$
 		
-		if(currentMember==member) {
+		CorefMember[] members = new CorefMember[items.size()];
+		items.toArray(members);
+		
+		if(this.members!=null && Arrays.equals(members, this.members)) {
 			return;
 		}
 		
-		currentMember = member;
+		this.members = members;
+		currentIndex = 0;
+		
+		displaySelectedMember();
+	}
+	
+	protected CorefMember getSelectedMember() {
+		return members==null || currentIndex==-1 ? null : members[currentIndex];
+	}
+	
+	protected void displaySelectedMember() {
 
+		CorefMember member = getSelectedMember();
+		
 		CorefProperties sentenceProperties = null;
 		CorefProperties memberProperties = member.getProperties();
 		
@@ -123,6 +161,12 @@ public class DetailOutline implements AWTPresenter {
 		
 		tableModel.setProperties(memberProperties, sentenceProperties);
 		textArea.setText(createLabel(member));
+
+		String indexString = String.valueOf(currentIndex+1)+'/'+String.valueOf(getMemberCount());
+		
+		indexLabel.setText(indexString);
+		
+		refreshActions();
 	}
 	
 	protected String createLabel(CorefMember data) {
@@ -172,6 +216,10 @@ public class DetailOutline implements AWTPresenter {
 			.append(": ").append(span.getClusterId()).append('\n'); //$NON-NLS-1$
 	}
 	
+	private int getMemberCount() {
+		return members==null ? 0 : members.length;
+	}
+	
 
 	public CoreferenceDocumentData getDocument() {
 		return document;
@@ -189,6 +237,11 @@ public class DetailOutline implements AWTPresenter {
 		textArea.setText(ResourceManager.getInstance().get(
 				"plugins.coref.propertyPresenter.notAvailable")); //$NON-NLS-1$
 		tableModel.clear();
+		
+		currentIndex = -1;
+		
+		indexLabel.setText("-"); //$NON-NLS-1$
+		refreshActions();
 	}
 
 	/**
@@ -215,6 +268,89 @@ public class DetailOutline implements AWTPresenter {
 		return tableModel.getProperties();
 	}
 	
+	protected static synchronized final ActionManager getSharedActionManager() {
+		if(sharedActionManager==null) {
+			sharedActionManager = ActionManager.globalManager().derive();
+
+			URL actionLocation = DetailOutline.class.getResource("detail-outline-actions.xml"); //$NON-NLS-1$
+			if(actionLocation==null)
+				throw new CorruptedStateException("Missing resources: detail-outline-actions.xml"); //$NON-NLS-1$
+			
+			try {
+				sharedActionManager.loadActions(actionLocation);
+			} catch (IOException e) {
+				LoggerFactory.log(DetailOutline.class, Level.SEVERE, 
+						"Failed to load actions from file", e); //$NON-NLS-1$
+			}
+		}
+		
+		return sharedActionManager;
+	}
+	
+	protected ActionManager getActionManager() {
+		if(actionManager==null) {
+			actionManager = getSharedActionManager().derive();
+			
+			registerActionCallbacks();
+		}
+		
+		return actionManager;
+	}
+	
+	protected ActionComponentBuilder createToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
+		builder.setActionListId("plugins.coref.detailOutline.toolBarList"); //$NON-NLS-1$
+
+		indexLabel = createIndexLabel();
+		builder.addOption("itemSelect", indexLabel); //$NON-NLS-1$
+		
+		return builder;
+	}
+	
+	protected JLabel createIndexLabel() {
+		
+		JLabel indexLabel = new JLabel();
+		indexLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		Dimension size = new Dimension(80, 22);
+		indexLabel.setPreferredSize(size);
+		indexLabel.setMinimumSize(size);
+		indexLabel.setMaximumSize(size);
+		
+		return indexLabel;
+	}
+	
+	protected void refreshActions() {
+		int size = getMemberCount();
+		int selectedIndex = currentIndex;
+		
+		boolean selected = selectedIndex!=-1;
+		
+		boolean firstEnabled = selected && selectedIndex>0;
+		boolean previousEnabled = selected && selectedIndex>0;
+		boolean nextEnabled = selected && selectedIndex<size-1;
+		boolean lastEnabled = selected && selectedIndex<size-1;
+		
+		ActionManager actionManager = getActionManager();
+		actionManager.setEnabled(firstEnabled, firstActionId);
+		actionManager.setEnabled(previousEnabled, previousActionId);
+		actionManager.setEnabled(nextEnabled, nextActionId);
+		actionManager.setEnabled(lastEnabled, lastActionId);
+		
+		if(indexLabel!=null) {
+			indexLabel.setEnabled(getMemberCount()>1);
+		}
+	}
+	
+	protected void registerActionCallbacks() {
+		ActionManager actionManager = getActionManager();
+		
+		actionManager.addHandler(firstActionId, this, "actionPerformed"); //$NON-NLS-1$
+		actionManager.addHandler(previousActionId, this, "actionPerformed"); //$NON-NLS-1$
+		actionManager.addHandler(nextActionId, this, "actionPerformed"); //$NON-NLS-1$
+		actionManager.addHandler(lastActionId, this, "actionPerformed"); //$NON-NLS-1$
+	}
+	
 	protected JPanel buildPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		
@@ -232,15 +368,64 @@ public class DetailOutline implements AWTPresenter {
 		table.setDefaultRenderer(Object.class, new PropertyTableCellRenderer());
 		table.setBorder(UIUtil.emptyBorder);
 		
+		JPanel outlinePanel = new JPanel(new BorderLayout());
+		outlinePanel.setBorder(UIUtil.topLineBorder);
+		
 		JScrollPane scrollPane = new JScrollPane(table);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		scrollPane.setBorder(UIUtil.emptyBorder);
 		
-		panel.add(textArea, BorderLayout.NORTH);
-		panel.add(scrollPane, BorderLayout.CENTER);
+		outlinePanel.add(textArea, BorderLayout.NORTH);
+		outlinePanel.add(scrollPane, BorderLayout.CENTER);
+		
+		ActionComponentBuilder builder = createToolBar();
+		if(builder!=null) {
+			panel.add(builder.buildToolBar(), BorderLayout.NORTH);
+		}
+		
+		panel.add(outlinePanel, BorderLayout.CENTER);
 		panel.setPreferredSize(new Dimension(200, 200));
 		
 		return panel;
+	}
+
+	/**
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		ElementType type = ElementType.parse(command);
+		
+		int size = getMemberCount();
+		int selectedIndex = currentIndex;
+		
+		switch (type) {
+		case FIRST_ELEMENT:
+			selectedIndex = 0;
+			break;
+			
+		case PREVIOUS_ELEMENT:
+			selectedIndex--;
+			break;
+			
+		case NEXT_ELEMENT:
+			selectedIndex++;
+			break;
+			
+		case LAST_ELEMENT:
+			selectedIndex = size-1;
+			break;
+		}
+		
+		if(selectedIndex<0 || selectedIndex>=size) {
+			LoggerFactory.log(this, Level.WARNING, 
+					"Invalid action state - selection index is out of bounds: "+selectedIndex, new Throwable()); //$NON-NLS-1$
+			return;
+		}
+				
+		currentIndex = selectedIndex;
+		displaySelectedMember();
 	}
 
 	/**

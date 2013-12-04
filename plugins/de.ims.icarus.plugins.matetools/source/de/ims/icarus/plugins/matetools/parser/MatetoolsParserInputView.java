@@ -49,6 +49,7 @@ import javax.swing.event.DocumentListener;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigEvent;
 import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
@@ -568,7 +569,9 @@ public class MatetoolsParserInputView extends TextInputView {
 						"Unexpected exception while obtaining final pipeline computation result", e); //$NON-NLS-1$
 				UIUtil.beep();
 				
-				showErrorDialog(e);
+				if(!Core.getCore().handleThrowable(e)) {
+					showErrorDialog(e);
+				}
 			} finally {			
 				MatetoolsPipeline.releasePipeline(pipelineOwner);
 			

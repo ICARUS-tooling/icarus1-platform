@@ -171,5 +171,34 @@
 		name="filter" 
 		desc="filter"
 		icon="filter_tsk.gif" />
+	
+	<!-- First Element -->
+	<action id="actions.default.firstElementAction" virtual="true"
+		name="navigationActions.first.name" 
+		desc="navigationActions.first.description"
+		icon="navi_left_stop.png"
+		command="firstElement" />
+
+	<!-- Previous Element -->
+	<action id="actions.default.previousElementAction" virtual="true"
+		name="navigationActions.previous.name" 
+		desc="navigationActions.previous.description"
+		icon="navi_left.png"
+		command="previousElement" />
+
+	<!-- Next Element -->
+	<action id="actions.default.nextElementAction" virtual="true"
+		name="navigationActions.next.name" 
+		desc="navigationActions.next.description"
+		icon="navi_right.png"
+		command="nextElement" />
+
+	<!-- Last Element -->
+	<action id="actions.default.lastElementAction" virtual="true"
+		name="navigationActions.last.name" 
+		desc="navigationActions.last.description"
+		icon="navi_right_stop.png"
+		command="lastElement" />
+	
 
 </actions>

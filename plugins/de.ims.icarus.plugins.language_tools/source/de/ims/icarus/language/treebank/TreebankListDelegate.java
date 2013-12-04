@@ -207,6 +207,17 @@ public class TreebankListDelegate implements SentenceDataList, NamedObject, Load
 			treebank.load();
 		}
 	}
+
+	/**
+	 * @see de.ims.icarus.io.Loadable#free()
+	 */
+	@Override
+	public void free() {
+		Treebank treebank = getTreebank();
+		if(treebank!=null) {
+			treebank.free();
+		}
+	}
 	
 	@Override
 	public String toString() {

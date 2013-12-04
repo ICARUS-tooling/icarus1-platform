@@ -255,33 +255,12 @@ public class TaskListCellRenderer extends JPanel implements
 			showTask(task);
 			return;
 		}
-		
-		// "Named" change
-		switch (property) {
-		case "title": //$NON-NLS-1$
-			header.setText(manager.getTitle(task));
-			break;
-
-		case "info": //$NON-NLS-1$
-			footer.setText(manager.getInfo(task));
-			break;
-
-		case "icon": //$NON-NLS-1$
-			taskIcon.setIcon(manager.getIcon(task));
-			break;
-
-		case "indetermminate": //$NON-NLS-1$
-			progressBar.setIndeterminate(manager.isIndeterminate(task));
-			break;
-
-		case "progress": //$NON-NLS-1$
-			progressBar.setValue(manager.getProgress(task));
-			break;
-			
-		default:
-			showTask(task);
-			break;
-		}
+	
+		header.setText(manager.getTitle(task));
+		footer.setText(manager.getInfo(task));
+		taskIcon.setIcon(manager.getIcon(task));
+		progressBar.setIndeterminate(manager.isIndeterminate(task));
+		progressBar.setValue(manager.getProgress(task));
 		
 		progressBar.repaint();
 	}

@@ -37,4 +37,6 @@ public interface Loadable {
 	boolean isLoading();
 	
 	void load() throws Exception;
+	
+	void free();
 }

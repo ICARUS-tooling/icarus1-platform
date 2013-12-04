@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model;
 
 import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.manifest.ManifestOwner;
 
 /**
  * 
@@ -33,7 +34,7 @@ import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
  * @version $Id$
  *
  */
-public interface AnnotationLayer extends Layer {
+public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerManifest> {
 
 	/**
 	 * Returns the shared {@code AnnotationLayerManifest} that holds
@@ -41,6 +42,7 @@ public interface AnnotationLayer extends Layer {
 	 * 
 	 * @return The manifest that describes this annotation
 	 */
+	@Override
 	AnnotationLayerManifest getManifest();
 	
 	/**

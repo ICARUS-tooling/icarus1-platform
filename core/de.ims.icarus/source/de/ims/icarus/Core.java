@@ -78,7 +78,10 @@ import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.launcher.SplashWindow;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.ui.dialog.DialogDispatcher;
 import de.ims.icarus.ui.dialog.DialogFactory;
+import de.ims.icarus.ui.vm.SystemMonitor;
+import de.ims.icarus.util.Exceptions;
 
 /**
  * Main class and application entry point for startup operation.
@@ -148,6 +151,7 @@ public class Core {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		try {
 			if(core!=null)
 				throw new IllegalStateException("Core already started!"); //$NON-NLS-1$
@@ -560,7 +564,18 @@ public class Core {
 		return shutdownHooks.toArray(hooks);
 	}
 	
+	private volatile boolean shuttingDown = false;
+	
+	/**
+	 * @return the shuttingDown
+	 */
+	public boolean isShuttingDown() {
+		return shuttingDown;
+	}
+
 	public synchronized void shutdown(UncaughtExceptionHandler handler) {
+		shuttingDown = true;
+		
 		NamedRunnable[] hooks = getShutdownHooks();
 		
 		for(NamedRunnable hook : hooks) {
@@ -858,6 +873,30 @@ public class Core {
 	public String getAppVersion() {
 		String version = getVersionProperty("app.version"); //$NON-NLS-1$
 		return version==null ? "???" : version; //$NON-NLS-1$
+	}
+	
+	
+	public boolean handleThrowable(Throwable t) {
+		
+		OutOfMemoryError oom = Exceptions.getThrowableOfType(t, OutOfMemoryError.class);
+		
+		if(oom!=null) {
+			long used = SystemMonitor.getInstance().getUsed();
+			long committed = SystemMonitor.getInstance().getCommitted();
+			
+			DialogDispatcher dispatcher = new DialogDispatcher(
+					null, 
+					"core.dialogs.outOfMemory.title",  //$NON-NLS-1$
+					"core.dialogs.outOfMemory.message",  //$NON-NLS-1$
+					SystemMonitor.formatMemory(used),
+					SystemMonitor.formatMemory(committed));
+			
+			dispatcher.showAsError();
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 	

@@ -195,6 +195,8 @@ public class PropertyInfoDialog extends JFrame {
 	
 	protected void init() {
 		
+		ResourceManager rm = ResourceManager.getInstance();
+		
 		header = new JLabel();
 		header.setFont(header.getFont().deriveFont(Font.BOLD, 18F));
 		header.setHorizontalAlignment(SwingConstants.LEFT);
@@ -205,12 +207,22 @@ public class PropertyInfoDialog extends JFrame {
 		togglePinButton.addActionListener(getHandler());
 		UIUtil.resizeComponent(togglePinButton, 20, 20);
 		togglePinButton.setFocusable(false);
+		togglePinButton.setHideActionText(true);
+		rm.getGlobalDomain().prepareComponent(togglePinButton, 
+				null,
+				"plugins.coref.propertyInfoDialog.pinWindowAction.description"); //$NON-NLS-1$
+		rm.getGlobalDomain().addComponent(togglePinButton);
 		
 		reloadButton = new JButton();
 		reloadButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("refresh.gif")); //$NON-NLS-1$
 		reloadButton.addActionListener(getHandler());
 		UIUtil.resizeComponent(reloadButton, 20, 20);
 		reloadButton.setFocusable(false);
+		reloadButton.setHideActionText(true);
+		rm.getGlobalDomain().prepareComponent(reloadButton, 
+				null,
+				"plugins.coref.propertyInfoDialog.refreshAction.description"); //$NON-NLS-1$
+		rm.getGlobalDomain().addComponent(reloadButton);
 
 		JPanel formPanel = new JPanel();
 		formPanel.setBorder(UIUtil.topLineBorder);
@@ -656,6 +668,8 @@ public class PropertyInfoDialog extends JFrame {
 				// ignore
 			} catch (Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to count properties for document set: "+documentSet.getName(), e); //$NON-NLS-1$
+				
+				Core.getCore().handleThrowable(e);
 			} finally {
 				progressBar.setVisible(false);
 				progressBar.setIndeterminate(false);

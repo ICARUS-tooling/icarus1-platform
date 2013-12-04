@@ -48,9 +48,11 @@
 	<action-list id="plugins.languageTools.treebankPropertiesView.toolBarList">
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyAllPropertiesAction" />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.exportPropertiesAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.editTreebankAction" />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.inspectTreebankAction" />
+		-->
 		<item type="glue" />
 	</action-list>
 		
@@ -62,10 +64,11 @@
 		<separator />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.copyAllPropertiesAction" />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.exportPropertiesAction" />
+		<!--
 		<separator />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.editTreebankAction" />
 		<item type="action" value="plugins.languageTools.treebankPropertiesView.inspectTreebankAction" />
-		<item type="glue"/>
+		-->
 	</action-list>
 	
 </actions>

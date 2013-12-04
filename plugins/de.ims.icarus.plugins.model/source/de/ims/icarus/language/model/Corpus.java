@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.model.events.CorpusListener;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
+import de.ims.icarus.language.model.manifest.ManifestOwner;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 
@@ -40,7 +42,7 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  * @version $Id$
  *
  */
-public interface Corpus extends Iterable<Layer> {
+public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusManifest> {
 	
 	/**
 	 * Returns the lock object that should be used when performing <i>write</i>
@@ -141,6 +143,15 @@ public interface Corpus extends Iterable<Layer> {
 	Set<Context> getContexts();
 	
 	/**
+	 * Returns the virtual overlay layer that gives a layer-style access to
+	 * the containers defined in other {@code MarkableLayer} objects registered
+	 * to this corpus.
+	 * 
+	 * @return
+	 */
+	MarkableLayer getOverlayLayer();
+	
+	/**
 	 * Returns all layers registered for this corpus in the order of their
 	 * registration. If this corpus does not yet host any layers the returned
 	 * list is empty. Either way the returned list should be immutable.
@@ -174,10 +185,62 @@ public interface Corpus extends Iterable<Layer> {
 	 * be fulfilled (i.e. one of the required underlying layers is missing).
 	 */
 	void addLayer(Layer layer);
-	
+
+	/**
+	 * Removes the given layer from this corpus.
+	 * 
+	 * @param layer the layer to be added
+	 * @throws NullPointerException if the {@code layer} argument is {@code null}
+	 * @throws IllegalArgumentException if the layer is not part of this corpus
+	 * @throws IllegalStateException if one or more other layers defined this 
+	 * layer as prerequisite
+	 */
 	void removeLayer(Layer layer);
 	
+	/**
+	 * Adds the given meta-data to this corpus and links it with the optionally
+	 * specified layer. The {@code contentType} argument is used to group meta-data
+	 * objects besides their layer.
+	 * 
+	 * @param type The {@link ContentType} describing the meta-data object
+	 * @param layer The layer the meta-data should be linked with or {@code null} if
+	 * the meta-data should be assigned to the entire corpus
+	 * @param data The meta-data itself, must not be {@code null}
+	 * @throws NullPointerException if either one of {@code type} or {@code data}
+	 * is {@code null}
+	 * @throws IllegalArgumentException if the specified layer is not a part of
+	 * this corpus
+	 */
 	void addMetaData(ContentType type, Layer layer, Object data);
 	
+	void removeMetaData(ContentType type, Layer layer, Object data);
+	
+	/**
+	 * Returns all the previously registered meta-data objects for the given
+	 * combination of {@link ContentType} and {@link Layer}. If the {@code layer}
+	 * argument is {@code null} then only meta-data objects assigned to the
+	 * entire corpus will be returned. If the {@code type} argument is {@code null}
+	 * then all meta-data registered for the specified layer (or the entire corpus)
+	 * is returned.
+	 *  
+	 * Note that the returned collection of meta-data items is unordered. The corpus
+	 * does not keep track of the order of insertion! It is advised that decisions
+	 * required to select one out of many meta-data objects of the same type be delegated
+	 * to the user.
+	 * 
+	 * @param type The {@link ContentType} describing the meta-data object or {@code null}
+	 * if all meta-data registered for the {@code layer} argument should be returned
+	 * @param layer The {@link Layer} for which to fetch meta-data or {@code null} if only
+	 * meta-data assigned to the entire corpus should be returned.
+	 * @return A {@link Set} holding meta-data objects for the given combination of 
+	 * {@link ContentType} and {@link Layer}
+	 * @throws IllegalArgumentException if the {@code layer} argument is non-{@code null}
+	 * and the layer is not part of this corpus
+	 */
 	Set<?> getMetaData(ContentType type, Layer layer);
+	
+	
+	void free();
+	
+	void renameLayer(Layer layer, String newName);
 }

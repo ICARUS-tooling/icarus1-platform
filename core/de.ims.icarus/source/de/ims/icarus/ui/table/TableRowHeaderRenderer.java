@@ -26,6 +26,7 @@
 package de.ims.icarus.ui.table;
 
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -63,8 +64,13 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	protected int verticalOffset;
 
 	protected int rolloverRow = -1;
+	
+	protected int currentRow = -1;
 
 	protected boolean alwaysContains = false;
+	protected boolean isRenderCall = false;
+	
+	protected MouseEvent pendingEvent = null;
 
 	public TableRowHeaderRenderer(JList<String> list, JTable table) {
 		if(list==null)
@@ -140,7 +146,7 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		}
 
 		// repaint old cell
-		if (oldBounds != null && rolloverRow != row) {
+		if (!isRenderCall && oldBounds != null && rolloverRow != row) {
 			list.paintImmediately(oldBounds);
 		}
 
@@ -164,19 +170,27 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		}
 
 		if (newBounds != null) {
-			list.paintImmediately(newBounds);
+			if(!isRenderCall) {
+				list.paintImmediately(newBounds);
+			}
 		} else {
 			rolloverRow = -1;
 		}
 
-		/*
-		 * TableHeaderUI may store the current rollover state, so scrolling
-		 * might corrupt proper painting. The current workaround is to clear the
-		 * UI's rollover state immediately after painting.
-		 */
-		for (int i = listeners.length - 1; i >= 0; i--) {
-			listeners[i].mouseExited(e);
+		if(!isRenderCall) {
+			/*
+			 * TableHeaderUI may store the current rollover state, so scrolling
+			 * might corrupt proper painting. The current workaround is to clear the
+			 * UI's rollover state immediately after painting.
+			 */
+			for (int i = listeners.length - 1; i >= 0; i--) {
+				listeners[i].mouseExited(e);
+			}
+		} else {
+			pendingEvent = e;
 		}
+		
+		isRenderCall = false;
 	}
 
 	@Override
@@ -187,11 +201,20 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	@Override
 	public Component getListCellRendererComponent(JList<? extends String> list,
 			String value, int index, boolean selected, boolean hasFocus) {
-
-		proxyColumn.setHeaderValue(value);
-		proxyColumn.setWidth(list.getWidth());
+		
+		currentRow = index;
 
 		// setSize(list.getWidth(), list.getFixedCellHeight());
+		
+		if(selected) {
+			isRenderCall = true;
+			
+			Rectangle bounds = list.getCellBounds(index, index);
+			int x = bounds.x+1;
+			int y = bounds.y+1;
+			MouseEvent event = new MouseEvent(list, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), 0, x, y, 1, false);
+			updateRolloverRow(event);
+		}
 
 		return this;
 	}
@@ -211,6 +234,31 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	@Override
 	public void setBounds(int x, int y, int w, int h) {
 		super.setBounds(x, y, w, h + verticalOffset);
+	}
+
+	/**
+	 * @see javax.swing.JComponent#paint(java.awt.Graphics)
+	 */
+	@Override
+	public void paint(Graphics g) {
+
+		int row = currentRow;
+		
+		proxyColumn.setHeaderValue(list.getModel().getElementAt(row));
+		proxyColumn.setWidth(list.getWidth());
+		
+		super.paint(g);
+		
+		MouseEvent event = pendingEvent;
+		pendingEvent = null;
+		
+		if(event!=null) {
+
+			MouseListener[] listeners = getMouseListeners();
+			for (int i = listeners.length - 1; i >= 0; i--) {
+				listeners[i].mouseExited(event);
+			}
+		}
 	}
 
 	@Override

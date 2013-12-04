@@ -60,6 +60,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.PluginUtil;
@@ -774,6 +775,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to compute prototype cell value for list", e); //$NON-NLS-1$
+				
+				Core.getCore().handleThrowable(e);
 			} finally {
 				listCellPrototypeComputationCompleted(prototype);
 			}

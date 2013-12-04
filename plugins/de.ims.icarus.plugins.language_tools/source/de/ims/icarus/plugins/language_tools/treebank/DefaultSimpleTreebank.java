@@ -265,6 +265,8 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 				LoggerFactory.log(this, Level.SEVERE, "Failed to close reader for treebank: "+getName(), e); //$NON-NLS-1$
 			}
 			eventSource.fireEvent(new EventObject(TreebankEvents.LOADED));
+			
+			TreebankRegistry.getInstance().treebankChanged(this);
 		}
 	}
 
@@ -296,6 +298,8 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 			if(size>0) {
 				fireChangeEvent();
 			}
+			
+			TreebankRegistry.getInstance().treebankChanged(this);
 		}
 	}
 

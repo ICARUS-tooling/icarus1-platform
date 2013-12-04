@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.IcarusFrame;
@@ -99,7 +100,9 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 					"Unable to "+operation+" treebank: "+treebank.getName(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			UIUtil.beep();
 			
-			IcarusFrame.defaultShowError(ex);;
+			if(!Core.getCore().handleThrowable(ex)) {
+				IcarusFrame.defaultShowError(ex);
+			}
 		}
 	}
 

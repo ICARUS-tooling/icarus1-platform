@@ -46,11 +46,11 @@ import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
-import de.ims.icarus.language.coref.registry.CoreferenceRegistry.LoadJob;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.resources.ResourceManager;
@@ -245,7 +245,7 @@ public class ErrorAnalysisView extends View {
 				final String name = descriptor.getName();
 				String title = ResourceManager.getInstance().get(
 						"plugins.coref.labels.loadingAllocation"); //$NON-NLS-1$
-				Object task = new LoadJob(descriptor) {
+				Object task = new IOUtil.LoadJob(descriptor) {
 					@Override
 					protected void done() {
 						try {

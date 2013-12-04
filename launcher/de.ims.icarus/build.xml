@@ -48,7 +48,7 @@ Use top-level project build file to build application.
 	</target>
 
 	<target name="source">
-		<echo>Distributing ICARUS launcher sources to folder ${build.home}</echo>
+		<echo>Distributing ICARUS launcher sources to folder ${source.home}/launcher</echo>
 		<copy todir="${source.home}/launcher">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
@@ -57,7 +57,7 @@ Use top-level project build file to build application.
 	</target>
 
 	<target name="docs">
-		<echo>Generating javadoc for ICARUS launcher at ${source.home}/launcher</echo>
+		<echo>Generating javadoc for ICARUS launcher at ${docs.home}/launcher</echo>
 		<javadoc destdir="${docs.home}/launcher"
 		        classpathref="app.classpath"
 				encoding="UTF-8"

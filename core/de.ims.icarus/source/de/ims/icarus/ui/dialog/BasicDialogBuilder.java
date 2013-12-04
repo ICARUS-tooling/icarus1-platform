@@ -35,6 +35,7 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.plugins.core.IcarusFrame;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.Exceptions;
@@ -97,7 +98,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 			JTextArea label = getLabel();
 			
 			if(builder.getResourceDomain()!=null) {
-				message = builder.getResourceDomain().get((String) message, params);
+				message = builder.getResourceDomain().get((String) message, null, params);
 			}
 			
 			label.setText((String) message);
@@ -240,6 +241,10 @@ public class BasicDialogBuilder extends DialogBuilder {
 	public void showDialog(Component parent, Options options) { 
 		if(options==null) {
 			options = Options.emptyOptions;
+		}
+		
+		if(parent==null) {
+			parent = IcarusFrame.getActiveFrame();
 		}
 		
 		JDialog dialog = optionPane.createDialog(parent, title);

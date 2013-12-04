@@ -534,7 +534,7 @@ public class CoreferenceDocument extends BatchDocument {
 		
 		int size = data.size();
 		for(int i=0; i<size; i++) {
-			Span[] spans = spanSet.getSpans(i);
+			Span[] spans = spanSet==null ? new Span[0] : spanSet.getSpans(i);
 			Span[] goldSpans = goldSet==null ? null : goldSet.getSpans(i);
 			appendBatchCoreferenceData(data.get(i), i, spans, goldSpans);
 		}

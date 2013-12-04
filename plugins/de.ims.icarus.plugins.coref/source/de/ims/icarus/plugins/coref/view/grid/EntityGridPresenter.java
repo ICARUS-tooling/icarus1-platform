@@ -26,7 +26,6 @@
 package de.ims.icarus.plugins.coref.view.grid;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -49,6 +48,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.MutableComboBoxModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
@@ -120,6 +120,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	protected TableColumnAdjuster columnAdjuster;
 	
 	protected boolean adjustColumnWidth = true;
+	protected boolean patternActive = true;
 	
 	public static final int DEFAULT_CELL_HEIGHT = 20;
 	public static final int DEFAULT_CELL_WIDTH = 70;
@@ -171,6 +172,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		
 		actionManager.setSelected(adjustColumnWidth, 
 				"plugins.coref.entityGridPresenter.toggleAdjustColumnWidthAction"); //$NON-NLS-1$
+		actionManager.setSelected(patternActive, 
+				"plugins.coref.entityGridPresenter.toggleLabelModeAction"); //$NON-NLS-1$
 		
 		actionManager.addHandler("plugins.coref.entityGridPresenter.refreshAction",  //$NON-NLS-1$
 				callbackHandler, "refresh"); //$NON-NLS-1$
@@ -227,14 +230,18 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			if(pattern!=null && pattern.trim().isEmpty()) {
 				pattern = null;
 			}
-
-			patternSelect = new JComboBox<>();
-			patternSelect.setSelectedItem(pattern);
-			boolean usePatternLabel = ConfigRegistry.getGlobalRegistry().getBoolean(
-					"plugins.coref.appearance.grid.usePatternLabel"); //$NON-NLS-1$
-			patternSelect.setEnabled(usePatternLabel);
 			
+			patternActive = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"plugins.coref.appearance.grid.usePatternLabel"); //$NON-NLS-1$
+
+			patternSelect = new JComboBox<>();			
 			patternSelect.setEditable(true);
+			if(pattern!=null) {
+				MutableComboBoxModel<Object> model = (MutableComboBoxModel<Object>) patternSelect.getModel();
+				model.addElement(pattern);
+			}
+			patternSelect.setSelectedItem(pattern);
+			patternSelect.setEnabled(patternActive);
 			patternSelect.addActionListener(getHandler());
 			UIUtil.resizeComponent(patternSelect, 150, 24);
 		}
@@ -383,12 +390,13 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		UIUtil.enableRighClickTableSelection(table);
 		table.setDefaultRenderer(EntityGridNode.class, cellRenderer);
 		table.setFillsViewportHeight(true);
-		table.setRowSelectionAllowed(false);
-		table.setColumnSelectionAllowed(false);
+		//table.setRowSelectionAllowed(false);
+		//table.setColumnSelectionAllowed(false);
 		table.setRowHeight(DEFAULT_CELL_HEIGHT);
-		table.setIntercellSpacing(new Dimension(4, 4));
+		//table.setIntercellSpacing(new Dimension(4, 4));
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.addMouseListener(getHandler());
+		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getSelectionModel().addListSelectionListener(getHandler());
 		table.getColumnModel().getSelectionModel().addListSelectionListener(getHandler());
 
@@ -544,11 +552,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		}
 		
 		try {
-			Span span = null;
-			if(node!=null && node.getSpanCount()>0) {
-				span = node.getSpan(0);
-			}
-			parent.outlineMember(span, null);
+			parent.outlineMembers(node.getSpans(), null);
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to outline properties: "+String.valueOf(node), e); //$NON-NLS-1$
@@ -736,11 +740,12 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 
 		public void toggleLabelMode(boolean b) {
 			
-			if(patternSelect.isEnabled()==b) {
+			if(patternActive==b) {
 				return;
 			}
 			
 			try {
+				patternActive = b;
 				patternSelect.setEnabled(b);
 				refreshLabelBuilder();
 			} catch(Exception e) {

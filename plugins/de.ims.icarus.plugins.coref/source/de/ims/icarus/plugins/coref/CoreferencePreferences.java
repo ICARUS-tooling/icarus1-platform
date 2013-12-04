@@ -97,8 +97,8 @@ public class CoreferencePreferences {
 		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.addOptionsEntry("clusterLabelType", 0, (Object[])ClusterLabelType.values()); //$NON-NLS-1$
-		builder.addBooleanEntry("usePatternLabel", false); //$NON-NLS-1$
-		builder.addStringEntry("defaultLabelPattern", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addBooleanEntry("usePatternLabel", true); //$NON-NLS-1$
+		builder.addStringEntry("defaultLabelPattern", "$form$"); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.back();
 		// END GRID SUBGROUP
 		builder.back();

@@ -84,6 +84,18 @@ public class DefaultContext implements Context {
 	}
 
 	/**
+	 * @see de.ims.icarus.io.Loadable#free()
+	 */
+	@Override
+	public void free() {
+		for(Layer layer : layers) {
+			getCorpus().removeLayer(layer);
+		}
+		
+		layers.clear();
+	}
+
+	/**
 	 * @see de.ims.icarus.language.model.Context#getLocation()
 	 */
 	@Override

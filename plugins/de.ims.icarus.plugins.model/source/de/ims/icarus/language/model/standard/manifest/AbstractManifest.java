@@ -48,6 +48,7 @@ public class AbstractManifest implements Manifest {
 	
 	private Identity identity;
 	private Map<String, Object> properties;
+	private boolean editable = false;
 
 	/**
 	 * @see de.ims.icarus.util.id.Identity#getId()
@@ -130,5 +131,20 @@ public class AbstractManifest implements Manifest {
 		}
 		
 		properties.put(key, value);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.Manifest#isEditable()
+	 */
+	@Override
+	public boolean isEditable() {
+		return editable;
+	}
+
+	/**
+	 * @param editable the editable to set
+	 */
+	public void setEditable(boolean editable) {
+		this.editable = editable;
 	}
 }

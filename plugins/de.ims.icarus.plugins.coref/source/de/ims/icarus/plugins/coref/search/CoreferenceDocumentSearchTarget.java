@@ -163,4 +163,16 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 	public int hashCode() {
 		return documentSet.hashCode() * (allocation==null ? 1 : allocation.hashCode());
 	}
+
+	/**
+	 * @see de.ims.icarus.io.Loadable#free()
+	 */
+	@Override
+	public void free() {
+		documentSet.free();
+		
+		if(allocation!=null) {
+			allocation.free();
+		}
+	}
 }

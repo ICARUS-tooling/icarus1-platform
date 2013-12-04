@@ -232,7 +232,7 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		</switch>
 	</target>
 	
-	<target name="-docs">
+	<target name="-docs" unless="nodoc">
 		
 		<!--
 		<local name="classpath" />

@@ -8,19 +8,19 @@
 
 	<!-- First Element -->
 	<action id="core.helpers.navigationControl.firstElementAction"
-		name="${id}.name" desc="${id}.description" command="firstElement" />
+		template="actions.default.firstElementAction" />
 
 	<!-- Previous Element -->
 	<action id="core.helpers.navigationControl.previousElementAction"
-		name="${id}.name" desc="${id}.description" command="previousElement" />
+		template="actions.default.previousElementAction" />
 
 	<!-- Next Element -->
 	<action id="core.helpers.navigationControl.nextElementAction"
-		name="${id}.name" desc="${id}.description" command="nextElement" />
+		template="actions.default.nextElementAction" />
 
 	<!-- Last Element -->
 	<action id="core.helpers.navigationControl.lastElementAction"
-		name="${id}.name" desc="${id}.description" command="lastElement" />
+		template="actions.default.lastElementAction" />
 
 	<!-- ToolBar List -->
 	<action-list id="core.helpers.navigationControl.toolBarList">

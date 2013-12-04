@@ -404,8 +404,9 @@ public final class IcarusCorePlugin extends Plugin {
 		 */
 		@Override
 		public void uncaughtException(Thread t, Throwable e) {
-			LoggerFactory.log(this, Level.SEVERE, 
-					"Uncaught exception on thread "+t.getName(), e); //$NON-NLS-1$
+			LoggerFactory.error(this, "Uncaught exception on thread "+t.getName(), e); //$NON-NLS-1$
+			
+			Core.getCore().handleThrowable(e);
 		}
 		
 	}

@@ -26,6 +26,7 @@
 package de.ims.icarus.ui.list;
 
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 
 /**
  * @author Markus Gärtner
@@ -53,5 +54,30 @@ public final class ListUtils {
 		}
 		
 		return -1;
+	}
+	
+	public static void copySelectionState(ListSelectionModel m1, ListSelectionModel m2) {
+		m2.setValueIsAdjusting(true);
+		try {
+			m2.clearSelection();
+			
+			if(m1.isSelectionEmpty()) {
+				return;
+			}
+			
+			switch (m1.getSelectionMode()) {
+			case ListSelectionModel.MULTIPLE_INTERVAL_SELECTION:
+				for(int i=m1.getMinSelectionIndex(); i<=m1.getMaxSelectionIndex(); i++) {
+					// TODO group intervals and apply selection on the target
+				}
+				break;
+
+			default:
+				m2.setSelectionInterval(m1.getMinSelectionIndex(), m1.getMaxSelectionIndex());
+				break;
+			}
+		} finally {
+			m2.setValueIsAdjusting(false);
+		}
 	}
 }

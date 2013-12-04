@@ -231,7 +231,7 @@ public abstract class AbstractTreeModel implements TreeModel {
 		listeners.remove(TreeModelListener.class, listener);
 	}
 
-	private static class Root {
+	public static class Root {
 
 		/**
 		 * @see java.lang.Object#toString()

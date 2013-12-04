@@ -107,7 +107,7 @@ public final class CorpusUtils {
 	public static String getName(LayerManifest.Prerequisite prerequisite) {
 		String name = prerequisite.getTypeName();
 		if(name!=null) {
-			return "Required layer-id: "+name; //$NON-NLS-1$
+			return "Required layer-name: "+name; //$NON-NLS-1$
 		}
 		
 		String typeName = prerequisite.getTypeName();

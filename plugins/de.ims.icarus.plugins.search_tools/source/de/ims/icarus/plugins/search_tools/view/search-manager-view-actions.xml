@@ -18,6 +18,14 @@
 	<action id="plugins.searchTools.searchManagerView.cancelSearchAction"
 		name="${id}.name" desc="${id}.description" icon="search_cancel.png" />
 		
+	<!-- Load Search Target -->
+	<action id="plugins.searchTools.searchManagerView.loadSearchTargetAction"
+		name="${id}.name" desc="${id}.description" icon="search_load.png" />
+		
+	<!-- Free Search Target -->
+	<action id="plugins.searchTools.searchManagerView.freeSearchTargetAction"
+		name="${id}.name" desc="${id}.description" icon="search_free.png" />
+		
 	<!-- Remove Search -->
 	<action id="plugins.searchTools.searchManagerView.removeSearchAction"
 		name="${id}.name" desc="${id}.description" icon="search_delete.png" />
@@ -84,6 +92,9 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.loadSearchTargetAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.freeSearchTargetAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.cancelSearchAction" />
 	</action-list>

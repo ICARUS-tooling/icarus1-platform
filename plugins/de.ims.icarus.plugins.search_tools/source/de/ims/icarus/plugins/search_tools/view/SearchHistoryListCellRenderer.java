@@ -41,12 +41,14 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
+import de.ims.icarus.io.Loadable;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchDescriptor;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
+import de.ims.icarus.ui.DecoratedIcon;
 import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.ProgressBar;
@@ -66,11 +68,14 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 	private JLabel label;
 	private ProgressBar progressBar;
 	
-	private static final Icon dummyIcon = UIUtil.getBlankIcon(7, 8);
+	private static final DecoratedIcon icon = new DecoratedIcon(UIUtil.getBlankIcon(16, 16));
+	
 	private static final Icon pendingIcon = IconRegistry.getGlobalRegistry().getIcon("synch_co.gif"); //$NON-NLS-1$
 	private static final Icon runningIcon = IconRegistry.getGlobalRegistry().getIcon("contention_ovr.gif"); //$NON-NLS-1$
 	private static final Icon cancelledIcon = IconRegistry.getGlobalRegistry().getIcon("error_co.gif"); //$NON-NLS-1$
 	private static final Icon doneIcon = IconRegistry.getGlobalRegistry().getIcon("installed_ovr.gif"); //$NON-NLS-1$
+	private static final Icon loadingIcon = IconRegistry.getGlobalRegistry().getIcon("waiting_ovr.gif"); //$NON-NLS-1$
+	private static final Icon loadedIcon = IconRegistry.getGlobalRegistry().getIcon("version_controlled.gif"); //$NON-NLS-1$
 	
 	private static final Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
@@ -172,18 +177,40 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 		
 		setToolTipText(UIUtil.toSwingTooltip(sb.toString()));
 		
-		Icon icon = dummyIcon;
+		icon.removeDecorations();
+		
+		Icon stateIcon = null;
 		if(search!=null) {
 			if(search.isRunning()) {
-				icon = runningIcon;
+				stateIcon = runningIcon;
 			} else if(search.isCancelled()) {
-				icon = cancelledIcon;
+				stateIcon = cancelledIcon;
 			} else if(search.isDone()) {
-				icon = doneIcon;
+				stateIcon = doneIcon;
 			} else {
-				icon = pendingIcon;
+				stateIcon = pendingIcon;
 			}
 		}
+		
+		if(stateIcon!=null) {
+			icon.addDecoration(stateIcon, SwingConstants.SOUTH_WEST);
+		}
+		
+		if(target!=null && target instanceof Loadable) {
+			Loadable loadable = (Loadable) target;
+			Icon overlay = null;
+			
+			if(loadable.isLoading()) {
+				overlay = loadingIcon;
+			} else if(loadable.isLoaded()) {
+				overlay = loadedIcon;
+			}
+			
+			if(overlay!=null) {
+				icon.addDecoration(overlay, SwingConstants.SOUTH_EAST);
+			}
+		}
+		
 		label.setIcon(icon);
 		
 		if(search!=null && !search.isDone()) {

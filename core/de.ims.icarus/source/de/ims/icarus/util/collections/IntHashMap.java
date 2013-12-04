@@ -25,12 +25,15 @@
  */
 package de.ims.icarus.util.collections;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * @author Markus
  * @version $Id$
  * 
  */
-public class IntHashMap {
+public class IntHashMap<E extends Object> {
 
 	/**
 	 * The hash table data.
@@ -162,14 +165,14 @@ public class IntHashMap {
 	 * @see #containsKey(int)
 	 * @see java.util.Map
 	 */
-	public boolean containsValue(Object value) {
+	public boolean containsValue(E value) {
 		if (value == null)
 			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
 
 		Entry tab[] = table;
 		for (int i = tab.length; i-- > 0;) {
 			for (Entry e = tab[i]; e != null; e = e.next) {
-				if (e.value.equals(value)) {
+				if (value.equals(e.value)) {
 					return true;
 				}
 			}
@@ -208,13 +211,14 @@ public class IntHashMap {
 	 *         hash-table.
 	 * @see #put(int, Object)
 	 */
-	public Object get(int key) {
+	@SuppressWarnings("unchecked")
+	public E get(int key) {
 		Entry tab[] = table;
 		int hash = key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
 		for (Entry e = tab[index]; e != null; e = e.next) {
 			if (e.hash == hash) {
-				return e.value;
+				return (E) e.value;
 			}
 		}
 		return null;
@@ -262,14 +266,15 @@ public class IntHashMap {
 	 *         {@code null} if it did not have one.
 	 * @see #get(int)
 	 */
-	public Object put(int key, Object value) {
+	public E put(int key, E value) {
 		// Makes sure the key is not already in the hash-table.
 		Entry tab[] = table;
 		int hash = key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
 		for (Entry e = tab[index]; e != null; e = e.next) {
 			if (e.hash == hash) {
-				Object old = e.value;
+				@SuppressWarnings("unchecked")
+				E old = (E) e.value;
 				e.value = value;
 				return old;
 			}
@@ -299,7 +304,7 @@ public class IntHashMap {
 	 * @return the value to which the key had been mapped in this hash-table, or
 	 *         {@code null} if the key did not have a mapping.
 	 */
-	public Object remove(int key) {
+	public E remove(int key) {
 		Entry tab[] = table;
 		int hash = key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -311,7 +316,8 @@ public class IntHashMap {
 					tab[index] = e.next;
 				}
 				count--;
-				Object oldValue = e.value;
+				@SuppressWarnings("unchecked")
+				E oldValue = (E) e.value;
 				e.value = null;
 				return oldValue;
 			}
@@ -328,6 +334,20 @@ public class IntHashMap {
 			tab[index] = null;
 		}
 		count = 0;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Collection<E> values() {
+		Collection<E> result = new ArrayList<>(count);
+
+		Entry tab[] = table;
+		for (int i = tab.length; i-- > 0;) {
+			for (Entry e = tab[i]; e != null; e = e.next) {
+				result.add((E) e.value);
+			}
+		}
+		
+		return result;
 	}
 
 }

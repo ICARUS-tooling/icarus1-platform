@@ -33,6 +33,7 @@ import javax.swing.ListModel;
 import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.logging.LoggerFactory;
@@ -187,6 +188,8 @@ public abstract class AbstractErrorAnalysisTableModel extends AbstractTableModel
 						: String.valueOf(documents.size());
 				
 				LoggerFactory.error(this, "Failed to analyze document: "+id, e); //$NON-NLS-1$
+				
+				Core.getCore().handleThrowable(e);
 			}
 			
 			fireTableStructureChanged();

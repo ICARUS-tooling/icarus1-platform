@@ -60,6 +60,7 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigEvent;
 import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
@@ -129,6 +130,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 	
 	// Filter to be applied when the user decides to filter certain spans
 	protected Filter pendingFilter = null;
+	protected boolean markupFilterLocked = false;
 	
 	protected JComboBox<CoreferenceDocument.DisplayMode> displayModeSelect;
 
@@ -698,6 +700,13 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 			
 			Span span = offset==-1 ? null : getSpanForOffset(offset);
 			outlineProperties(span);
+			
+			markupFilterLocked = span!=null;
+			
+			Filter markupFilter = span==null ? null : createMarkupFilterForSpan(span);
+			getDocument().setMarkupFilter(markupFilter);
+			
+			textPane.repaint();
 		}
 
 		/**
@@ -705,9 +714,12 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		 */
 		@Override
 		public void mouseMoved(MouseEvent e) {
+			if(markupFilterLocked) {
+				return;
+			}
 
 			int offset = textPane.viewToModel(e.getPoint());
-			Span span = getSpanForOffset(offset);			
+			Span span = getSpanForOffset(offset);	
 			Filter markupFilter = span==null ? null : createMarkupFilterForSpan(span);
 			getDocument().setMarkupFilter(markupFilter);
 		}
@@ -1038,6 +1050,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to rebuild document", e); //$NON-NLS-1$
+				
+				Core.getCore().handleThrowable(e);
 			} finally {
 				refreshActions();
 			}

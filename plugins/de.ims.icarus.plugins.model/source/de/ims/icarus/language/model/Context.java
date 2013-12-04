@@ -29,6 +29,7 @@ import java.util.List;
 
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.manifest.ManifestOwner;
 import de.ims.icarus.util.location.Location;
 
 /**
@@ -36,7 +37,7 @@ import de.ims.icarus.util.location.Location;
  * @version $Id$
  *
  */
-public interface Context extends Loadable {
+public interface Context extends Loadable, ManifestOwner<ContextManifest> {
 
 	Location getLocation();
 	

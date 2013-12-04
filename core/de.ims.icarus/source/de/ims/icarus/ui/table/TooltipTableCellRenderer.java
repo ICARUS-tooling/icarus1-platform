@@ -41,6 +41,18 @@ import de.ims.icarus.util.StringUtil;
 public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = 2505308201912712643L;
+	
+	private static TooltipTableCellRenderer sharedInstance;
+
+	/**
+	 * @return the sharedInstance
+	 */
+	public static TooltipTableCellRenderer getSharedInstance() {
+		if(sharedInstance==null) {
+			sharedInstance = new TooltipTableCellRenderer();
+		}
+		return sharedInstance;
+	}
 
 	public TooltipTableCellRenderer() {
 		// no-op

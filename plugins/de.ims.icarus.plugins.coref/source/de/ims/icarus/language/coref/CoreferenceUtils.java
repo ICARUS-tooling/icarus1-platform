@@ -418,7 +418,7 @@ public final class CoreferenceUtils {
 			}
 			if(idx<span.getEndIndex()) {
 				StringUtil.trim(sb);
-				sb.append(" [...] "); //$NON-NLS-1$
+				sb.append(' ').append(StringUtil.TEXT_WILDCARD).append(' ');
 				sb.append(sentence.getForm(span.getEndIndex()));
 			}
 			sb.append('"');
@@ -470,7 +470,7 @@ public final class CoreferenceUtils {
 			}
 			if(idx<span.getEndIndex()) {
 				StringUtil.trim(sb);
-				sb.append(" [...] "); //$NON-NLS-1$
+				sb.append(' ').append(StringUtil.TEXT_WILDCARD).append(' ');
 				sb.append(sentence.getForm(span.getEndIndex()));
 			}
 			sb.append('"');
