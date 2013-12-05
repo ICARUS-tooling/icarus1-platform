@@ -88,7 +88,6 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
 
 import de.ims.icarus.config.ConfigRegistry;
@@ -155,7 +154,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected JTable ngramTable;
 	protected NGramResultViewTableModel ngramTableModel;
 	protected TableColumnAdjuster ngramTableAdjuster;
-	protected NGramResultViewTableCellRenderer ngramTableRenderer;
+	//protected NGramResultViewTableCellRenderer ngramTableRenderer;
 
 	
 	private JScrollPane scrollPane;
@@ -243,7 +242,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					"plugins.errorMining.errorMiningSearchPresenter.dialogs.noResults.message"); //$NON-NLS-1$
 			showDefaultInfo();
 		}
-
 		
 		searchMode = (int) searchResult.getProperty("MODE"); //$NON-NLS-1$
 		
@@ -316,6 +314,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 		refreshCount();
 	}
+
 
 	/**
 	 * 
@@ -455,7 +454,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		statisticList.getModel().addListDataListener(getHandler());	
 		DefaultListSelectionModel statsSelectionModel = new DefaultListSelectionModel();
 		statsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		statisticList.setSelectionModel(statsSelectionModel);
+		statisticList.setSelectionModel(statsSelectionModel);	
+		statisticList.setCellRenderer(new NGramResultViewListCellRenderer());
 		
 		scrollPaneStatsDetailed = new JScrollPane();
 		scrollPaneStatsDetailed.setBorder(UIUtil.emptyBorder);
@@ -540,16 +540,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				false, // tooltips?
 				false); // URLs?
 
-		chart.setBackgroundPaint(ConfigRegistry
-				.getGlobalRegistry()
-				.getColor(
-						"plugins.errorMining.appearance.resultMatrix.defaultChartBackgroundPaint")); //$NON-NLS-1$
-		chart.getTitle()
-				.setPaint(
-						ConfigRegistry
-								.getGlobalRegistry()
-								.getColor(
-										"plugins.errorMining.appearance.resultMatrix.defaultChartTitlePaint")); //$NON-NLS-1$
+		chart.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
+			.getColor("plugins.errorMining.appearance.resultMatrix.defaultChartBackgroundPaint")); //$NON-NLS-1$
+		chart.getTitle().setPaint(ConfigRegistry.getGlobalRegistry()
+				.getColor("plugins.errorMining.appearance.resultMatrix.defaultChartTitlePaint")); //$NON-NLS-1$
 		chart.setAntiAlias(true);
 
 		// plot customization
@@ -796,7 +790,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset(); //.clear();
 		StringBuilder sb = new StringBuilder();
 		
-		chart.setTitle(title);
+		chart.setTitle(formatDependencyKey(title));
 
 		
 		for(int i = 0; i < list.size(); i++){
@@ -808,7 +802,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					.append(sd.getCount())
 					.append(")"); //$NON-NLS-1$
 			//row compare key "x" compare always to one value
-			dataset.addValue(sd.getCount(), String.valueOf(sd.getCount()), sd.getTagKey());
+			dataset.addValue(sd.getCount(), String.valueOf(sd.getCount()), formatDependencyKey(sd.getTagKey()));
 		}
 		
 //		for(int d = 0; d < dataset.getRowCount(); d++){
@@ -830,7 +824,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		for(int i = 0; i < listAdd.size(); i++){
 			StatsData sd = listAdd.get(i);
-			dcd.addValue(sd.getCount(), String.valueOf(sd.getCount()), sd.getTagKey());
+			dcd.addValue(sd.getCount(), String.valueOf(sd.getCount()), formatDependencyKey(sd.getTagKey()));
 		}
 		
 		//System.out.println("DSC"+plot.getDatasetCount());
@@ -877,15 +871,23 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	private void generateFilteredStatistic(){		
 		if(!statisticTextFilterField.equals("")){ //$NON-NLS-1$
 			statsResultFiltered.clear();
+			String filter = statisticTextFilterField.getText();
+			filter = filter.replace("->", "_R"); //$NON-NLS-1$ //$NON-NLS-2$
+			filter = filter.replace("<-", "_L");  //$NON-NLS-1$//$NON-NLS-2$
 			for (String key : statsResult.keySet()) {
-				if (key.contains(statisticTextFilterField.getText())) {
+				if (key.contains(filter)) {
 					statsResultFiltered.put(key, statsResult.get(key));
 				}
 			}
 		}else{
 			statsResultFiltered.clear();
-			statsResultFiltered.putAll(statsResult);
-			
+			statsResultFiltered.putAll(statsResult);			
+		}
+		
+		
+		//clear list when no results
+		if(statsResultFiltered.size() == 0){
+			statisticList.removeAll();
 		}
 	}
 	
@@ -1070,7 +1072,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected void displaySelectedStatsData(){
 		int selectedRow = statisticTable.getSelectedRow();
 		// add correct column!!					
-		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 0);
+		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
 		//System.out.println(key);
 		
 		refreshBarChart(key, statsResultFiltered.get(key));
@@ -1897,6 +1899,87 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	}
 	
 	
+	private void createStatisticDependency(int gramsize) {
+			
+			statsResult = new LinkedHashMap<String, List<StatsData>>();			
+			statsResultFiltered = new LinkedHashMap<String, List<StatsData>>();				
+			
+			for(String key : nGramResultDependency.keySet()){
+				if(key.split(" ").length == gramsize){ //$NON-NLS-1$
+					List<DependencyItemInNuclei> diinList = nGramResultDependency.get(key);
+				
+					ArrayList<StatsData> tmp = new ArrayList<StatsData>();
+					List<String> keyList = new ArrayList<String>();
+					
+					for(int i = 0; i < diinList.size(); i++){
+						StatsData sd = new StatsData(diinList.get(i).getPosTag(),
+								diinList.get(i).getCount());
+						
+						sd.addWordstringSize(key);					
+						
+						//System.out.println(iinList.get(i).getCount());
+						tmp.add(sd);	
+						keyList.add(diinList.get(i).getPosTag());
+						//System.out.println(sd.getWordstringSize());
+					}
+					
+					Collections.sort(keyList);
+					Collections.sort(tmp);
+					
+					if(statsResult.containsKey(keyList.toString())){
+						List<StatsData> sdl = statsResult.get(keyList.toString());
+						//check if we have to increase existing tag count
+						for(StatsData sd : tmp){
+							if(sdl.contains(sd)){
+								StatsData newSD = sdl.get(sdl.indexOf(sd));
+								newSD.setCount(newSD.getCount() + sd.getCount());
+								newSD.addWordstringSize(sd.getWordstringAt(0));
+								sdl.set(sdl.indexOf(sd), newSD);
+							}
+						}						
+					} else {					
+						statsResult.put(keyList.toString(), tmp);
+						statsResultFiltered.put(keyList.toString(), tmp);
+					}
+				}			
+			}
+			
+			
+			//debug
+	//			for(String s : statsResult.keySet()){
+	//				List<StatsData> sdList = statsResult.get(s);
+	//				System.out.print("Tag " + s );	
+	//				
+	//				for (int i = 0; i < sdList.size(); i++) {
+	//					System.out.print(" Tag: " +sdList.get(i).getTagKey());
+	//					System.out.print(" Count: " +sdList.get(i).getCount());	
+	//					
+	//				}
+	//				System.out.println();	
+	//			}
+			
+			//generateFilteredStatistic();
+	
+			
+			statisticTableModel.reload();
+			//activate tab
+			tabbedPane.setSelectedIndex(1);
+		}
+	
+	
+	private String formatDependencyKey(String tagKey) {
+		String formattedKey = tagKey;
+		if(formattedKey.contains("_L")){ //$NON-NLS-1$
+			formattedKey = formattedKey.replace("_L", " <-"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	
+		if(formattedKey.contains("_R")){ //$NON-NLS-1$
+			formattedKey = formattedKey.replace("_R", " ->"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return formattedKey;
+	}
+
+
 	public class DifferenceBarRenderer extends BarRenderer {
 
 		private static final long serialVersionUID = 7871113296140703067L;
@@ -1921,73 +2004,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	}
 	
 	
-	private void createStatisticDependency(int gramsize) {
-		
-		statsResult = new LinkedHashMap<String, List<StatsData>>();			
-		statsResultFiltered = new LinkedHashMap<String, List<StatsData>>();				
-		
-		for(String key : nGramResultDependency.keySet()){
-			if(key.split(" ").length == gramsize){ //$NON-NLS-1$
-				List<DependencyItemInNuclei> diinList = nGramResultDependency.get(key);
-			
-				ArrayList<StatsData> tmp = new ArrayList<StatsData>();
-				List<String> keyList = new ArrayList<String>();
-				
-				for(int i = 0; i < diinList.size(); i++){
-					StatsData sd = new StatsData(diinList.get(i).getPosTag(),
-							diinList.get(i).getCount());
-					
-					sd.addWordstringSize(key);					
-					
-					//System.out.println(iinList.get(i).getCount());
-					tmp.add(sd);	
-					keyList.add(diinList.get(i).getPosTag());
-					//System.out.println(sd.getWordstringSize());
-				}
-				
-				Collections.sort(keyList);
-				Collections.sort(tmp);
-				
-				if(statsResult.containsKey(keyList.toString())){
-					List<StatsData> sdl = statsResult.get(keyList.toString());
-					//check if we have to increase existing tag count
-					for(StatsData sd : tmp){
-						if(sdl.contains(sd)){
-							StatsData newSD = sdl.get(sdl.indexOf(sd));
-							newSD.setCount(newSD.getCount() + sd.getCount());
-							newSD.addWordstringSize(sd.getWordstringAt(0));
-							sdl.set(sdl.indexOf(sd), newSD);
-						}
-					}						
-				} else {					
-					statsResult.put(keyList.toString(), tmp);
-					statsResultFiltered.put(keyList.toString(), tmp);
-				}
-			}			
-		}
-		
-		
-		//debug
-//			for(String s : statsResult.keySet()){
-//				List<StatsData> sdList = statsResult.get(s);
-//				System.out.print("Tag " + s );	
-//				
-//				for (int i = 0; i < sdList.size(); i++) {
-//					System.out.print(" Tag: " +sdList.get(i).getTagKey());
-//					System.out.print(" Count: " +sdList.get(i).getCount());	
-//					
-//				}
-//				System.out.println();	
-//			}
-		
-		//generateFilteredStatistic();
-
-		
-		statisticTableModel.reload();
-		//activate tab
-		tabbedPane.setSelectedIndex(1);
-	}
-
 	private class FilterWorker extends SwingWorker<Object, Object> implements Identity{
 		
 			/**
@@ -2435,7 +2451,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						
 						int selectedRow = statisticTable.getSelectedRow();
 						// add correct column!!					
-						String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 0);
+						String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
 						String title = keyTable + "\n " + key; //$NON-NLS-1$
 						addBarChartItems(title, statsList, statsResultFiltered.get(keyTable));
 					}					
@@ -3030,7 +3046,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		public void reload(List<String> list){
 			keys = list;
 			fireContentsChanged(this, 0, Math.max(getSize()-1, 0));
-		}		
+		}	
+		
+		public void removeAll(){
+			keys.clear();
+			fireContentsChanged(this, 0, Math.max(getSize()-1, 0));
+		}	
 
 
 		/**
@@ -3063,6 +3084,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			//noop			
 		}
 		
+		/**
+		 * @see javax.swing.table.TableModel#getColumnClass(int)
+		 */
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return String.class;
+		}
+		
 
 		public void reload (){
 			statistic = statsResultFiltered;
@@ -3078,10 +3107,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		public String getColumnName(int columnIndex) {
 
 		      switch (columnIndex) {
-		            case 0: return ResourceManager.getInstance().get(
-		            		"plugins.errormining.labels.Tag"); //$NON-NLS-1$
+		      		case 0: return ResourceManager.getInstance().get(
+	            		"plugins.errormining.labels.Count"); //$NON-NLS-1$
 		            case 1: return ResourceManager.getInstance().get(
-		            		"plugins.errormining.labels.Count"); //$NON-NLS-1$
+		            	"plugins.errormining.labels.Tag"); //$NON-NLS-1$
+
 		        }
 		        return null;
 		}
@@ -3091,7 +3121,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public int getColumnCount() {
-			return 2;
+			return 1;
 		}
 
 		/**
@@ -3114,9 +3144,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 			switch (columnIndex) {
 				case 0:
-					return keyAray[rowIndex].toString();
-				case 1:
 					return createCount(statistic.get(keyAray[rowIndex])); 
+				case 1:
+					return keyAray[rowIndex].toString();
 				default:
 					break;
 			}			
@@ -3128,21 +3158,40 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		
 		private String createCount(List<StatsData> sdList) {
+						
 			StringBuilder sb = new StringBuilder();
+			
+			// System.out.println(hex);
+			sb.append("<html>"); //$NON-NLS-1$
 			for (int i = 0; i < sdList.size(); i++) {
+
 				if (i < sdList.size() - 1) {
-					sb.append("[").append(sdList.get(i).getTagKey()) //$NON-NLS-1$
+					Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
+							.getInteger("plugins.errorMining.appearance.resultMatrix.firstItem")); //$NON-NLS-1$
+					String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$
+					sb.append("<font color=" + hex + ">") //$NON-NLS-1$ //$NON-NLS-2$
+					.append("[").append(formatDependencyKeyHTML(sdList.get(i).getTagKey())) //$NON-NLS-1$
 					.append(" ") //$NON-NLS-1$
 					.append(sdList.get(i).getCount()).append("] "); //$NON-NLS-1$
+
 				} else {
-					sb.append("[").append(sdList.get(i).getTagKey()) //$NON-NLS-1$
+					Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
+							.getInteger("plugins.errorMining.appearance.resultMatrix.secondItem")); //$NON-NLS-1$
+					String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$		
+					sb.append("<font color=" + hex + ">") //$NON-NLS-1$ //$NON-NLS-2$
+					.append("[").append(formatDependencyKeyHTML(sdList.get(i).getTagKey())) //$NON-NLS-1$
 					.append(" ") //$NON-NLS-1$
 					.append(sdList.get(i).getCount()).append("]"); //$NON-NLS-1$
-		
 				}
+				sb.append("</font>"); //$NON-NLS-1$
 			}
+			sb.append("</html>"); //$NON-NLS-1$
+			//System.out.println(sb.toString());
+
 			return sb.toString();
 		}
+
+		
 
 
 		private void createWordList(List<StatsData> sdList) {
@@ -3157,11 +3206,25 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			}
 			statisticListModel.reload(tmp);
 		}
+
+		/**
+		 * @param tagKey
+		 * @return
+		 */
+		private String formatDependencyKeyHTML(String tagKey) {
+			String formattedKey = tagKey;
+			if(formattedKey.contains("_L")){ //$NON-NLS-1$
+				formattedKey = formattedKey.replace("_L", " &lt;-"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		
+			if(formattedKey.contains("_R")){ //$NON-NLS-1$
+				formattedKey = formattedKey.replace("_R", " ->"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			return formattedKey;
+		}
 		
 	}	
 	
-	
-
 	/**
 	 * @param iinD
 	 * @param headIndex 

@@ -84,7 +84,9 @@ public class ErrorMiningPreferences {
 		
 		//group for result stuff
 		builder.addGroup("resultMatrix",true); //$NON-NLS-1$
-		builder.virtual();	
+		builder.virtual();
+		builder.addColorEntry("firstItem", Color.magenta.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("secondItem", Color.blue.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultChartBackgroundPaint", Color.white.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultChartTitlePaint", Color.black.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultGridlinePaint", Color.black.getRGB()); //$NON-NLS-1$
