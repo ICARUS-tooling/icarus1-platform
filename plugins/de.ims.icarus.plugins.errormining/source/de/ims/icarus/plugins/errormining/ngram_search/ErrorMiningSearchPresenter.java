@@ -38,7 +38,6 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,9 +78,9 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
+import org.jfree.chart.labels.CategoryToolTipGenerator;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
-import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
@@ -91,6 +90,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.ui.TextAnchor;
 
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
+import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.language.dependency.DependencyData;
@@ -216,6 +217,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	private static final Pattern numberPattern = Pattern.compile("^[0-9]"); //$NON-NLS-1$
 	private static final int minDependencyGram = 2;
 	private static final int maximumCharPerTab = 40;
+	private static final String labelmatrix = "Totalcount";
 
 	
 	/**
@@ -236,13 +238,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			return;
 		}
 		
-		if(searchResult.getTotalMatchCount() == 0){
-			DialogFactory.getGlobalFactory().showInfo(null,
-					"plugins.errorMining.errorMiningSearchPresenter.dialogs.noResults.title", //$NON-NLS-1$
-					"plugins.errorMining.errorMiningSearchPresenter.dialogs.noResults.message"); //$NON-NLS-1$
-			showDefaultInfo();
-		}
-		
 		searchMode = (int) searchResult.getProperty("MODE"); //$NON-NLS-1$
 		
 		//TODO Debug
@@ -257,6 +252,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		minimumGramsize = searchResult.getSource().getParameters().getInteger(NGramParameters.GRAMS_GREATERX);
 		maximumGramsize = Math.max(searchResult.getSource().getParameters().getInteger(NGramParameters.NGRAM_RESULT_LIMIT),
 									(int) searchResult.getProperty("LARGEST_NGRAM")); //$NON-NLS-1$
+
 		initializeSpinners();
 		
 		
@@ -279,7 +275,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				generateFilteredDependencyResult();
 			}
 		};		
-		
 
 		
 		if(ngramListModel == null){
@@ -301,7 +296,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			scrollPane.setViewportView(ngramList);
 		}
 		
-		
 		//switch to first dab  (overview) when selecting new/other result!
 		if(tabbedPane != null && searchResult.getTotalMatchCount() != 0){
 			if(isPoSErrorMiningResult()) {
@@ -312,17 +306,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			tabbedPane.setSelectedIndex(0);
 		}
 		
-		refreshCount();
-	}
+		refresh();
 
-
-	/**
-	 * 
-	 */
-	private void showDefaultInfo() {
-		minimumGramsize = 0;
-		maximumGramsize = 2;	
-		initializeSpinners();
 	}
 
 	/**
@@ -330,7 +315,34 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 */
 	@Override
 	public void refresh() {
-		// TO DO Auto-generated method stub
+		
+		//close tabs
+		if (tabbedPane != null){
+			int tabCount = tabbedPane.getTabCount();
+			//remove other tabs
+			if(tabCount > 2){
+				//first tab = overview and second tab = matrix
+				// both should be never closed so we start at 2
+				for(int t = 2; t < tabCount; t++){
+					tabbedPane.remove(t);
+				}
+			}
+		}
+		
+		
+		if(statisticTable != null){
+			statisticTable.removeAll();
+		}
+		
+		if(statisticList != null) {
+			statisticList.removeAll();
+		}
+		
+		if(plot != null){
+			refreshBarChart("", null); //$NON-NLS-1$
+		}
+		
+		refreshCount();
 	}
 	
 	/**
@@ -471,33 +483,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 		statsPanel.add(buildStatisticToolbar(), BorderLayout.NORTH);
 		statsPanel.add(statisticHorizontal, BorderLayout.CENTER);
-
 		
 		tabbedPane.addTab(ResourceManager.getInstance().get(
 				"plugins.errormining.errorMiningSearchPresenter.tab.stats"), //$NON-NLS-1$
 				IconRegistry.getGlobalRegistry().getIcon("uddi_registry_cat_node.gif"), //$NON-NLS-1$
 				statsPanel);
-		
-		
-		
-		//--------------------------------------------------------
-		//thrid view (detailed - after click on item in overview)
-		//TODO remove
-//		JPanel graphOutlinePanel = new JPanel(new BorderLayout());
-//		splitpaneDetails = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-//		splitpaneDetails.setContinuousLayout(true);
-//		splitpaneDetails.setDividerSize(5);
-//		splitpaneDetails.setBorder(null);
-//		splitpaneDetails.setResizeWeight(1);
-//		splitpaneDetails.addComponentListener(getHandler());
-//		
-//		graphOutlinePanel.add(splitpaneDetails, BorderLayout.CENTER);
-//		
-//		tabbedPane.addTab(ResourceManager.getInstance().get(
-//				"plugins.errormining.errorMiningSearchPresenter.tab.detail"), //$NON-NLS-1$
-//				IconRegistry.getGlobalRegistry().getIcon("filter_errormining.png"), //$NON-NLS-1$
-//				graphOutlinePanel);	
-
 		
 		
 		//add all stuff back to contentPanel
@@ -536,8 +526,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				ResourceManager.getInstance().get(
 						"plugins.errormining.labels.barChart.y-axis"), //$NON-NLS-1$
 				null, PlotOrientation.VERTICAL, // orientation
-				false, // include legend
-				false, // tooltips?
+				true, // include legend
+				true, // tooltips?
 				false); // URLs?
 
 		chart.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
@@ -548,11 +538,16 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		// plot customization
 		plot = chart.getCategoryPlot();
+		plot.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
+			.getColor("plugins.errorMining.appearance.resultMatrix.defaultPlotBackgroundPaint")); //$NON-NLS-1$
 		  
 		  
 		// only integer ticks
 		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		rangeAxis.setAutoRange(true);
+		rangeAxis.setUpperMargin(0.15);
+
 
 		plot.setRangeGridlinePaint(ConfigRegistry
 				.getGlobalRegistry()
@@ -562,15 +557,25 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				"plugins.errorMining.appearance.resultMatrix.defaultBarWidth")); //$NON-NLS-1$
 		br.setDrawBarOutline(false);
 
-		  
+		
+		Handle handle = ConfigRegistry.getGlobalRegistry().getHandle(
+				"plugins.errorMining.appearance.font"); //$NON-NLS-1$
+
+		Font font = ConfigUtils.defaultReadFont(handle);
+		
 		CategoryItemRenderer renderer = plot.getRenderer();
-		CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(
-				"{0}", NumberFormat.getInstance());
-		renderer.setBaseItemLabelGenerator(generator);
-		renderer.setBaseItemLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+		renderer.setBaseItemLabelGenerator(new CustomLabelGenerator());		
+		renderer.setBaseItemLabelFont(font);
 		renderer.setBaseItemLabelsVisible(true);
-		renderer.setSeriesPositiveItemLabelPosition(0, new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12,TextAnchor.BASELINE_CENTER));
-		  
+		//TODO add option
+		renderer.setBaseItemLabelPaint(Color.black);
+		renderer.setSeriesPositiveItemLabelPosition(
+								1,
+								new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12,
+								TextAnchor.BASELINE_CENTER));
+		
+		//add tooltip (current value of bar
+		renderer.setSeriesToolTipGenerator(0, new CustomToolTipGenerator());
 		  
 		ChartPanel barchartPanel = new ChartPanel(chart);
 		return barchartPanel;
@@ -685,6 +690,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			minimum, //min
 			maximumGramsize-1, //max
 			1);          //step
+		} else {
+			sbm.setMaximum(maximumGramsize-1);
+			sbm.setValue(minimum); 
+			
 		}
 	}
 
@@ -782,15 +791,23 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	
 		
 	/**
-	 * @param valueAt
+	 * 
+	 * @param title
+	 * @param list
 	 */
 	private void refreshBarChart(String title, List<StatsData> list) {
+		
+		chart.setTitle(formatDependencyKey(title));
+		
+		if(list == null){
+			plot.setDataset(0, new DefaultCategoryDataset());
+			return;
+		}
+		
 		
 		//clear before adding new data
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset(); //.clear();
 		StringBuilder sb = new StringBuilder();
-		
-		chart.setTitle(formatDependencyKey(title));
 
 		
 		for(int i = 0; i < list.size(); i++){
@@ -802,38 +819,33 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					.append(sd.getCount())
 					.append(")"); //$NON-NLS-1$
 			//row compare key "x" compare always to one value
-			dataset.addValue(sd.getCount(), String.valueOf(sd.getCount()), formatDependencyKey(sd.getTagKey()));
+			//dataset.addValue(sd.getCount(), String.valueOf(sd.getCount()), formatDependencyKey(sd.getTagKey()));
+			dataset.addValue(sd.getCount(),
+					labelmatrix,
+					formatDependencyKey(sd.getTagKey()));
 		}
 		
 //		for(int d = 0; d < dataset.getRowCount(); d++){
 //			plot.getRenderer().setSeriesPaint(d, Color.red);
 //		}
 		plot.setDataset(0, dataset);
-//		System.out.println("DSC"+plot.getDatasetCount());
-//		System.out.println(plot.getCategories());
+		
 	}
 	
-	
-	private void addBarChartItems(String title, List<StatsData> listAdd, List<StatsData> listBase) {
-
-		//chart.setTitle(title);
-		//dataset.clear();
-
-		refreshBarChart(title, listBase);
-		DefaultCategoryDataset dcd = (DefaultCategoryDataset) plot.getDataset(0);		
-
-		for(int i = 0; i < listAdd.size(); i++){
-			StatsData sd = listAdd.get(i);
-			dcd.addValue(sd.getCount(), String.valueOf(sd.getCount()), formatDependencyKey(sd.getTagKey()));
-		}
+	/**
+	 * 
+	 * @param dcd
+	 * @param listAdd
+	 * @param unique
+	 * @return
+	 */
+	private DefaultCategoryDataset buildDefaultCategoryDataset(DefaultCategoryDataset dcd, List<StatsData> listAdd, String unique) {
 		
-		//System.out.println("DSC"+plot.getDatasetCount());
-
-
-//		for(int d = 0; d < dataset.getRowCount(); d++){
-//			plot.getRenderer().setSeriesPaint(d, Color.red);
-//		}
-
+		for(int i = 0; i < listAdd.size(); i++){
+			StatsData sd = listAdd.get(i);			
+			dcd.addValue(sd.getCount(), unique, formatDependencyKey(sd.getTagKey()));
+		}		
+		return dcd;
 	}
 	
 
@@ -959,55 +971,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 	private void showDetails(SentenceDataList sentenceList){
 
-		//TODO add new tab
-		
-//		// Ensure list presenter
-//		ListPresenter listPresenter = this.listPresenter;
-//		if(listPresenter==null || !PresenterUtils.presenterSupports(listPresenter, sentenceList)) {
-//			listPresenter = UIHelperRegistry.globalRegistry().findHelper(ListPresenter.class, sentenceList);
-//		}
-//		
-//		ContentType entryType = sentenceList.getContentType();
-//		System.out.println(entryType);
-//		
-//		// Ensure details presenter
-//		AWTPresenter detailsPresenter = this.detailsPresenter;
-//		if(detailsPresenter==null || !PresenterUtils.presenterSupports(detailsPresenter, entryType)) {
-//			// Try graph presenter first
-//			detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphPresenter.class, entryType, true, false);
-//			if(detailsPresenter==null) {
-//				detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(AWTPresenter.class, entryType, true, true);
-//			}
-//		}
-//		
-//		// Signal missing list presenter
-//		if(detailsPresenter==null) {
-//			return;
-//		}
-//		
-//		// Now present data
-//		try {
-//			listPresenter.present(sentenceList, options);
-//		} catch (UnsupportedPresentationDataException e) {
-//			LoggerFactory.log(this, Level.SEVERE, 
-//					"Failed to present data list: "+sentenceList, e); //$NON-NLS-1$
-//			return;
-//		}
-//		
-//		//System.out.println("LP ContentType:"+listPresenter.getContentType());
-//		setListPresenter(listPresenter);
-//		setDetailPresenter(detailsPresenter);
-//		
-//		if(sentenceList.size()>0) {
-//			listPresenter.getSelectionModel().setSelectionInterval(0, 0);
-//		} else {
-//			listPresenter.getSelectionModel().clearSelection();
-//		}
-		
-		//autofocus on detail panel		
-		//tabbedPane.setSelectedIndex(2);
-		
-		
 		int index = tabbedPane.getTabCount();
 		
 		String title = (String) ngramList.getSelectedValue();
@@ -1071,9 +1034,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	
 	protected void displaySelectedStatsData(){
 		int selectedRow = statisticTable.getSelectedRow();
-		// add correct column!!					
+		// add correct column!!	
+		
+		//List<StatsData> tmp = (List<StatsData>) statisticTable.getValueAt(selectedRow, 1);
+		//System.out.println(tmp.get(0));
+		
 		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-		//System.out.println(key);
+		
+		
 		
 		refreshBarChart(key, statsResultFiltered.get(key));
 		statisticTableModel.generateListEntryFromString(key);
@@ -1288,7 +1256,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	}
 	
 	protected Object getNucleiDependency(DependencyItemInNuclei ddin, int index) {
-		StringBuilder sb = new StringBuilder();
+//		StringBuilder sb = new StringBuilder();
 //		for (int n = 0; n < ddin.getSentenceInfoAt(0)
 //				.getNucleiIndexListSize(); n++) {
 //			sb.append(ddin.getSentenceInfoAt(0).getNucleiIndexListAt(n));
@@ -1874,7 +1842,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							statsResult.put(keyList.toString(), tmp);
 							statsResultFiltered.put(keyList.toString(), tmp);
 						}
-					}			
+					}
 				}
 				
 				
@@ -1894,6 +1862,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				//generateFilteredStatistic();
 				
 				statisticTableModel.reload();
+				//reninitialize list
+				statisticListModel.reload(null);
 				//activate tab
 				tabbedPane.setSelectedIndex(1);
 	}
@@ -2290,9 +2260,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						int max = Math.max(minDependencyGram, (int)sbm.getValue());
 						createStatisticDependency(max);
 					}				
-					if(statisticTable.getModel().getValueAt(0, 0) != null){					
-						statisticTable.getSelectionModel().setSelectionInterval(0, 0);
-						String key = (String) statisticTable.getModel().getValueAt(0, 0);
+					if(statisticTable.getModel().getValueAt(0, 1) != null){					
+						statisticTable.getSelectionModel().setSelectionInterval(0, 1);
+						String key = (String) statisticTable.getModel().getValueAt(0, 1);
 						statisticTableModel.generateListEntryFromString(key);
 					}
 				} catch(Exception ex) {
@@ -2419,41 +2389,54 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				}
 				
 			} else if (e.getSource() == statisticList){
-					String key = (String) statisticList.getSelectedValue();
+					//String key = (String) statisticList.getSelectedValue();
+					List<Object> keys = statisticList.getSelectedValuesList();
 					
-					if(key == null){
+					if(keys == null){
 						return;
 					}
 					
 					if(statisticListModel.getSize() > 1){
-						//System.out.println(key);
-						
-						List<StatsData> statsList = new ArrayList<StatsData>();
-						
-						if(isPoSErrorMiningResult()){
-							List<ItemInNuclei> iinList = nGramResult.get(key);
-							for(int i = 0; i < iinList.size(); i++){
-								StatsData sd = new StatsData(iinList.get(i).getPosTag(),
-										iinList.get(i).getCount());							
-								sd.addWordstringSize(key);
-								statsList.add(sd);
-							}
-							
-						} else {
-							List<DependencyItemInNuclei> iinList = nGramResultDependency.get(key);
-							for(int i = 0; i < iinList.size(); i++){
-								StatsData sd = new StatsData(iinList.get(i).getPosTag(),
-										iinList.get(i).getCount());							
-								sd.addWordstringSize(key);
-								statsList.add(sd);
-							}
-						}
+						//System.out.println(keys);
 						
 						int selectedRow = statisticTable.getSelectedRow();
-						// add correct column!!					
 						String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-						String title = keyTable + "\n " + key; //$NON-NLS-1$
-						addBarChartItems(title, statsList, statsResultFiltered.get(keyTable));
+						String title = keyTable; // + "\n " + keys; //$NON-NLS-1$
+						refreshBarChart(title, statsResultFiltered.get(keyTable));
+						
+						//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable)
+						DefaultCategoryDataset dcd = (DefaultCategoryDataset) plot.getDataset(0);
+						
+						for(Object o : keys){
+							List<StatsData> statsList = new ArrayList<StatsData>();
+							String key = o.toString();
+							if(isPoSErrorMiningResult()){
+								List<ItemInNuclei> iinList = nGramResult.get(key);
+								for(int i = 0; i < iinList.size(); i++){
+									StatsData sd = new StatsData(iinList.get(i).getPosTag(),
+											iinList.get(i).getCount());							
+									sd.addWordstringSize(key);
+									statsList.add(sd);
+								}
+								
+							} else {
+								List<DependencyItemInNuclei> iinList = nGramResultDependency.get(key);
+								for(int i = 0; i < iinList.size(); i++){
+									StatsData sd = new StatsData(iinList.get(i).getPosTag(),
+											iinList.get(i).getCount());							
+									sd.addWordstringSize(key);
+									statsList.add(sd);
+								}
+							}
+							
+							//int selectedRow = statisticTable.getSelectedRow();
+							// add correct column!!					
+							//String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
+							//String title = keyTable + "\n " + key; //$NON-NLS-1$
+							//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable), o.toString());
+							dcd = buildDefaultCategoryDataset(dcd, statsList, o.toString());	
+						}
+						plot.setDataset(0, dcd);
 					}					
 					
 			} else {
@@ -3077,7 +3060,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		private static final long serialVersionUID = 2680904262921741087L;
 
 		protected Map<String, List<StatsData>> statistic;
-		protected Object[] keyAray;
+		protected Object[] keyArray;
 		
 		
 		public StatisticTableModel(){
@@ -3095,7 +3078,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		public void reload (){
 			statistic = statsResultFiltered;
-			keyAray = statsResultFiltered.keySet().toArray();
+			keyArray = statsResultFiltered.keySet().toArray();
 			refreshStatisticCount();
 			fireTableDataChanged();
 		}
@@ -3144,9 +3127,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 			switch (columnIndex) {
 				case 0:
-					return createCount(statistic.get(keyAray[rowIndex])); 
+					return createCount(statistic.get(keyArray[rowIndex])); 
 				case 1:
-					return keyAray[rowIndex].toString();
+					return keyArray[rowIndex];
 				default:
 					break;
 			}			
@@ -3160,39 +3143,46 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		private String createCount(List<StatsData> sdList) {
 						
 			StringBuilder sb = new StringBuilder();
+			boolean flipColor = false;
 			
 			// System.out.println(hex);
 			sb.append("<html>"); //$NON-NLS-1$
 			for (int i = 0; i < sdList.size(); i++) {
+				Color nuclei = changeColor(flipColor);
+				String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$		
+				
 
 				if (i < sdList.size() - 1) {
-					Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
-							.getInteger("plugins.errorMining.appearance.resultMatrix.firstItem")); //$NON-NLS-1$
-					String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$
 					sb.append("<font color=" + hex + ">") //$NON-NLS-1$ //$NON-NLS-2$
 					.append("[").append(formatDependencyKeyHTML(sdList.get(i).getTagKey())) //$NON-NLS-1$
 					.append(" ") //$NON-NLS-1$
 					.append(sdList.get(i).getCount()).append("] "); //$NON-NLS-1$
 
 				} else {
-					Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
-							.getInteger("plugins.errorMining.appearance.resultMatrix.secondItem")); //$NON-NLS-1$
-					String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$		
 					sb.append("<font color=" + hex + ">") //$NON-NLS-1$ //$NON-NLS-2$
 					.append("[").append(formatDependencyKeyHTML(sdList.get(i).getTagKey())) //$NON-NLS-1$
 					.append(" ") //$NON-NLS-1$
 					.append(sdList.get(i).getCount()).append("]"); //$NON-NLS-1$
 				}
 				sb.append("</font>"); //$NON-NLS-1$
+				flipColor = !flipColor;
 			}
 			sb.append("</html>"); //$NON-NLS-1$
 			//System.out.println(sb.toString());
 
 			return sb.toString();
 		}
-
 		
-
+		private Color changeColor(boolean flip){
+			if(flip){
+				return new Color(ConfigRegistry.getGlobalRegistry()
+						.getInteger("plugins.errorMining.appearance.resultMatrix.firstItem")); //$NON-NLS-1$
+			
+			}			
+			return new Color(ConfigRegistry.getGlobalRegistry()
+					.getInteger("plugins.errorMining.appearance.resultMatrix.secondItem")); //$NON-NLS-1$
+		}
+		
 
 		private void createWordList(List<StatsData> sdList) {
 			List<String> tmp = new ArrayList<String>();			
@@ -3283,8 +3273,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 
 		tabbedPane = createTabbedPane();
-		String title = ResourceManager.getInstance().get(
-				"plugins.searchTools.searchResultPresenter.labels.overview"); //$NON-NLS-1$
+		//String title = ResourceManager.getInstance().get(
+		//		"plugins.searchTools.searchResultPresenter.labels.overview"); //$NON-NLS-1$
 
 		//contentPanel.remove(overviewPanel);
 		//tabbedPane.insertTab(title, null, overviewPanel, null, 0);
@@ -3314,6 +3304,50 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		//tabbedPane = null;
 	}
 	
+	
+	protected class CustomLabelGenerator implements CategoryItemLabelGenerator {
+
+		/**
+		 * @see org.jfree.chart.labels.CategoryItemLabelGenerator#generateColumnLabel(org.jfree.data.category.CategoryDataset, int)
+		 */
+		@Override
+		public String generateColumnLabel(CategoryDataset dataset, int column) {
+			// TO DO Auto-generated method stub
+			return null;
+		}
+
+		/**
+		 * @see org.jfree.chart.labels.CategoryItemLabelGenerator#generateLabel(org.jfree.data.category.CategoryDataset, int, int)
+		 */
+		@Override
+		public String generateLabel(CategoryDataset dataset, int row, int column) {
+			String label = StringUtil.formatDecimal(
+					(int) (dataset.getValue(row, column).doubleValue()));
+//			System.out.println("row"+dataset.getRowKey(row));
+//			if(dataset.getRowKey(row).equals("")){
+//				return label;
+//			}
+//			return label + " " + dataset.getRowKey(row);			
+			return label;
+		}
+
+		/**
+		 * @see org.jfree.chart.labels.CategoryItemLabelGenerator#generateRowLabel(org.jfree.data.category.CategoryDataset, int)
+		 */
+		@Override
+		public String generateRowLabel(CategoryDataset dataset, int row) {
+			// TO DO Auto-generated method stub
+			return null;
+		}
+	}
+	
+	
+	protected class CustomToolTipGenerator implements CategoryToolTipGenerator  {
+	    public String generateToolTip(CategoryDataset dataset, int row, int column) {
+	    	String label = StringUtil.formatDecimal(dataset.getValue(row, column).intValue());
+	    	return label;
+	    }
+	}
 
 	
 	protected class ClosableTabbedPane extends JTabbedPane implements TabController {

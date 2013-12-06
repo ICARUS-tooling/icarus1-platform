@@ -30,9 +30,11 @@ import java.io.File;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
+import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
+import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.HighlightType;
 
 
@@ -44,6 +46,9 @@ import de.ims.icarus.util.annotation.HighlightType;
 public class ErrorMiningPreferences {
 	public ErrorMiningPreferences() {
 		ConfigBuilder builder = new ConfigBuilder();
+		
+		Options options = Options.emptyOptions;
+
 		
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
@@ -89,8 +94,15 @@ public class ErrorMiningPreferences {
 		builder.addColorEntry("secondItem", Color.blue.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultChartBackgroundPaint", Color.white.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultChartTitlePaint", Color.black.getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("defaultPlotBackgroundPaint", Color.white.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultGridlinePaint", Color.black.getRGB()); //$NON-NLS-1$
 		builder.addDoubleEntry("defaultBarWidth", 0.30, 0.0, 1.0); //$NON-NLS-1$
+		builder.back();
+		
+		builder.addGroup("font", true); //$NON-NLS-1$
+		builder.virtual();
+		ConfigUtils.buildDefaultFontConfig(builder, 
+				options.get("barchartLabel", "Dialog")); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.back();
 		
 		

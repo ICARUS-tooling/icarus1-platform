@@ -26,7 +26,6 @@
 package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class StatsData implements Comparable<StatsData>{

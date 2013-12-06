@@ -60,6 +60,7 @@
 		<item type="label" value="plugins.errormining.nGramResultView.statsSpinner.label" />
 		<item type="custom" value="statsSpinner" />
 		<item type="action" value="plugins.errormining.nGramResultView.statsAction" />
+		<item type="glue"/>
 	</action-list>	
 
 	<!-- ToolBar List for statistic -->
@@ -76,5 +77,6 @@
 		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
 		<separator />
 		<item type="action" value="plugins.errormining.nGramResultView.showDetailAction" />
+		<item type="glue"/>
 	</action-list>	
 </actions>
