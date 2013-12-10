@@ -95,34 +95,6 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 		return sentence;
 	}
 
-	@Override
-	public String createLabel() {
-		if(data==null) {
-			return "-"; //$NON-NLS-1$
-		} else if(data.isROOT()) {
-			return "\n  Document Root  \n "; //$NON-NLS-1$
-		} else {
-			StringBuilder sb = new StringBuilder();
-			
-//			sb.append(data.getClusterId()).append('\n');
-			
-			int i0 = data.getBeginIndex();
-			int i1 = data.getEndIndex();
-			
-			for(int i=i0; i<=i1; i++) {
-				if(i>i0) {
-					sb.append(' ');
-				}
-				sb.append(sentence.getForm(i));
-			}
-			
-			sb.append('\n');
-			data.appendTo(sb);
-			
-			return sb.toString();
-		}
-	}
-
 	public void setSpan(Span span) {
 		setData(span);
 	}

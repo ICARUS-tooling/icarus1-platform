@@ -76,11 +76,6 @@ public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
 	}
 
 	@Override
-	protected String createLabel() {
-		return data.toString();
-	}
-
-	@Override
 	public String toString() {
 		//return getLabel();
 		return ""; //$NON-NLS-1$

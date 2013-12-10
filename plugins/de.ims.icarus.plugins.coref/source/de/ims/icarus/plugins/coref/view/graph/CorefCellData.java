@@ -84,16 +84,16 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 		this.data = data;
 		label = null;
 	}
-	
-	protected String createLabel() {
-		return data.toString();
-	}
 
 	public String getLabel() {
-		if(label==null) {
-			label = createLabel();
-		}
 		return label;
+	}
+
+	/**
+	 * @param label the label to set
+	 */
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	@Override

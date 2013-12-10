@@ -26,6 +26,10 @@
 	<action id="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"
 		name="${id}.name" desc="${id}.description" icon="filter_singletons.png" type="toggle" />
 		
+	<!-- Toggle 'showSpanBounds' -->
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction"
+		name="${id}.name" desc="${id}.description" icon="register_view.png" type="toggle" />
+		
 	<!-- Main ToolBar List for editable graph -->
 	<action-list id="plugins.coref.coreferenceGraphPresenter.editableMainToolBarList">
 		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
@@ -53,6 +57,8 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction" />
 		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
@@ -78,13 +84,21 @@
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction" />
 		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.expandCellsAction" />
 		-->
 		<separator />
-		<item type="custom" value="showInMenu" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction" />
+		<item type="custom" value="errorInfoLabel" />
+		<item type="glue" />
 	</action-list>
 	
 </actions>

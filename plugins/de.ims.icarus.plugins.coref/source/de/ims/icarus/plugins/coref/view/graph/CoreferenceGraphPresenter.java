@@ -102,6 +102,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	protected boolean markFalseEdges = true;
 	protected boolean markFalseNodes = true;
 	protected boolean filterSingletons = true;
+	protected boolean showSpanBounds = true;
 
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 	
@@ -311,6 +312,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isFilterSingletons(), 
 				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
+		actionManager.setSelected(isShowSpanBounds(), 
+				"plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction"); //$NON-NLS-1$
 		
 		// Register callback functions
 		actionManager.addHandler(
@@ -328,6 +331,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		actionManager.addHandler(
 				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
 				callbackHandler, "filterSingletons"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction",  //$NON-NLS-1$
+				callbackHandler, "showSpanBounds"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -637,6 +643,32 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		firePropertyChange("filterSingletons", oldValue, filterSingletons); //$NON-NLS-1$
 	}
 	
+	/**
+	 * @return the showSpanBounds
+	 */
+	public boolean isShowSpanBounds() {
+		return showSpanBounds;
+	}
+
+	/**
+	 * @param showSpanBounds the showSpanBounds to set
+	 */
+	public void setShowSpanBounds(boolean showSpanBounds) {
+		if(showSpanBounds==this.showSpanBounds) {
+			return;
+		}
+		
+		boolean oldValue = this.showSpanBounds;
+		this.showSpanBounds = showSpanBounds;
+
+		rebuildGraph();
+		
+		getActionManager().setSelected(showSpanBounds, 
+				"plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction"); //$NON-NLS-1$
+		
+		firePropertyChange("showSpanBounds", oldValue, showSpanBounds); //$NON-NLS-1$
+	}
+
 	protected void outlineProperties(Object value) {
 		if(parent==null) {
 			return;
@@ -762,14 +794,64 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			setMultigraph(true);
 		}
 
+//		@Override
+//		public mxRectangle getPreferredSizeForCell(Object cell) {
+//			mxRectangle bounds = super.getPreferredSizeForCell(cell);
+//			
+//			bounds.setWidth(bounds.getWidth()+12);
+//			bounds.setHeight(bounds.getHeight()+2);
+//			
+//			return bounds;
+//		}
+		
 		@Override
-		public mxRectangle getPreferredSizeForCell(Object cell) {
-			mxRectangle bounds = super.getPreferredSizeForCell(cell);
+		public String convertValueToString(Object cell) {
 			
-			bounds.setWidth(bounds.getWidth()+12);
-			bounds.setHeight(bounds.getHeight()+2);
+			Object value = model.getValue(cell);
+
+			String label = ((CorefCellData<?>)value).getLabel();
 			
-			return bounds;
+			if(label!=null) {
+				return label;
+			}
+			
+			if(value instanceof CorefEdgeData) {
+//				CorefEdgeData edgeData = (CorefEdgeData) value;
+//				label = edgeData.getEdge().toString();
+				label = ""; //$NON-NLS-1$
+			} else if(value instanceof CorefNodeData) {
+				CorefNodeData nodeData = (CorefNodeData) value;
+				Span data = nodeData.getSpan();
+				
+				if(data==null) {
+					label = "-"; //$NON-NLS-1$
+				} else if(data.isROOT()) {
+					label = "\n  Document Root  \n "; //$NON-NLS-1$
+				} else {
+					StringBuilder sb = new StringBuilder();
+					
+					int i0 = data.getBeginIndex();
+					int i1 = data.getEndIndex();
+					
+					for(int i=i0; i<=i1; i++) {
+						if(i>i0) {
+							sb.append(' ');
+						}
+						sb.append(nodeData.getSentence().getForm(i));
+					}
+					
+					if(isShowSpanBounds()) {
+						sb.append('\n');
+						data.appendTo(sb);
+					}
+					
+					label = sb.toString();
+				}
+			}
+			
+			((CorefCellData<?>)value).setLabel(label);
+			
+			return label;
 		}
 
 		@Override
@@ -839,6 +921,14 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		}
 
 		public void filterSingletons(ActionEvent e) {
+			// ignore
+		}
+
+		public void showSpanBounds(boolean b) {
+			setShowSpanBounds(b);
+		}
+
+		public void showSpanBounds(ActionEvent e) {
 			// ignore
 		}
 	}
