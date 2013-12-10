@@ -23,16 +23,16 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.highlight;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Highlight {
+public enum HighlightType {
 
-	Markable getMarkable();
+	GROUP,
 	
 	
 }

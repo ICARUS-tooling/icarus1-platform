@@ -25,11 +25,18 @@
  */
 package de.ims.icarus.language.model.manifest;
 
+import de.ims.icarus.language.model.StructureType;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface StructureLayerManifest {
+public interface StructureLayerManifest extends MarkableLayerManifest {
 
+	/**
+	 * Returns the 
+	 * @return
+	 */
+	StructureType getStructureType();
 }

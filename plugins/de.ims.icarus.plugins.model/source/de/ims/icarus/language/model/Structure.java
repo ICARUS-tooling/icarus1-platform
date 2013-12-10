@@ -37,6 +37,12 @@ package de.ims.icarus.language.model;
  *
  */
 public interface Structure extends Container {
+
+	/**
+	 * Returns the <i>type</i> of this structure.
+	 * @return the type of this structure
+	 */
+	StructureType getStructureType();
 	
 	/**
 	 * Returns the total number of edges this structure hosts.

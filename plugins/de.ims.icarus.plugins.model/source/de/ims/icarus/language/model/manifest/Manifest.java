@@ -82,5 +82,11 @@ public interface Manifest extends Identity {
 	 */
 	Set<String> getPropertyNames();
 	
+	/**
+	 * Returns {@code true} if the content described by this manifest can
+	 * be edited by the user. 
+	 * 
+	 * @return
+	 */
 	boolean isEditable();
 }

@@ -27,7 +27,6 @@ package de.ims.icarus.language.model.manifest;
 
 import de.ims.icarus.language.model.ContainerType;
 import de.ims.icarus.language.model.Structure;
-import de.ims.icarus.language.model.StructureType;
 
 /**
  * A manifest that describes a container and its content.
@@ -72,22 +71,6 @@ public interface ContainerManifest extends Manifest {
 	 * @see ContainerType
 	 */
 	ContainerType getContainerType();
-	
-	/**
-	 * Returns whether or not this container represents a {@link Structure} object.
-	 * @return
-	 */
-	boolean isStructureContainer();
-
-	/**
-	 * Returns the <i>type</i> of this structure. 
-	 * <p>
-	 * Note that this method is only supported if the container actually is a
-	 * {@link Structure} as returned by {@link #isStructureContainer()}.
-	 * @return
-	 * @throws UnsupportedOperationException if this container is not a structure
-	 */
-	StructureType getStructureType();
 
 	
 	/**

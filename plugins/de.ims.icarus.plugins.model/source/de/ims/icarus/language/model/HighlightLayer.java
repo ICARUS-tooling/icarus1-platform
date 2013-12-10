@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model;
 
+import java.util.List;
+
 import de.ims.icarus.language.model.highlight.HighlightIterator;
 import de.ims.icarus.language.model.manifest.HighlightLayerManifest;
 import de.ims.icarus.language.model.manifest.ManifestOwner;
@@ -35,6 +37,8 @@ import de.ims.icarus.language.model.manifest.ManifestOwner;
  *
  */
 public interface HighlightLayer extends Layer, ManifestOwner<HighlightLayerManifest> {
+	
+	List<Layer> getHighlightedLayers();
 
 	/**
 	 * Returns a {@code HighlightIterator} that can be used to navigate over
@@ -44,5 +48,13 @@ public interface HighlightLayer extends Layer, ManifestOwner<HighlightLayerManif
 	 */
 	HighlightIterator getHighlighIterator();
 	
+	/**
+	 * Returns a {@code HighlightIterator} that can be used to navigate over
+	 * highlights of the referenced layers top-level members (top-level members
+	 * are the markables in that layers root container).
+	 * 
+	 * @param markable
+	 * @return
+	 */
 	HighlightIterator getHighlightIterator(Markable markable);
 }

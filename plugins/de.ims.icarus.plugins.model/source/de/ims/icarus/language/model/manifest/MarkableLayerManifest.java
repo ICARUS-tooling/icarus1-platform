@@ -32,21 +32,6 @@ package de.ims.icarus.language.model.manifest;
  *
  */
 public interface MarkableLayerManifest extends LayerManifest {
-
-	/**
-	 * Returns {@code true} if the layer contains structures as members of 
-	 * its top-level container.
-	 * <p>
-	 * A return value of {@code false} does not prevent the layer from containing
-	 * a mix of structural and bare markable items or structure objects in some 
-	 * deeper level. This method is intended to be a hint for utility frameworks
-	 * to better decide on what visualizations and or access methods to use for 
-	 * this layer.
-	 * 
-	 * @return {@code true} if this layer is meant as a container for structure
-	 * informations and wishes to be handled as such.
-	 */
-	boolean isStructureLayer();
 	
 	/**
 	 * Returns the number of nested containers and/or structures within this
@@ -57,7 +42,22 @@ public interface MarkableLayerManifest extends LayerManifest {
 	 */
 	int getContainerDepth();
 	
+	/**
+	 * Returns the manifest for the top-level container in this layer.
+	 * 
+	 * @return
+	 */
 	ContextManifest getRootContainerManifest();
 	
+	/**
+	 * Returns the manifest for the container at depth {@code level}.
+	 * For a {@code level} value of {@code 1} the result is equal to
+	 * {@link #getRootContainerManifest()}.
+	 * 
+	 * @param level the depth for which the manifest should be returned
+	 * @return the manifest for the container at the given depth
+     * @throws IndexOutOfBoundsException if the level is out of range
+     *         (<tt>level &lt; 0 || level &gt;= getContainerDepth()</tt>)
+	 */
 	ContainerManifest getContainerManifest(int level);
 }

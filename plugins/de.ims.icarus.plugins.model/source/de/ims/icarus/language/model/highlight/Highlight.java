@@ -25,6 +25,11 @@
  */
 package de.ims.icarus.language.model.highlight;
 
+import java.awt.Color;
+import java.awt.Container;
+
+import de.ims.icarus.language.model.Markable;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -32,4 +37,19 @@ package de.ims.icarus.language.model.highlight;
  */
 public interface Highlight {
 
+	Container getContainer();
+	
+	HighlightIterator getHighlightIterator();
+	
+	boolean isHighlighted(Markable markable);
+	
+	boolean isHighlighted(Markable markable, int layerIndex);
+	
+	Color getHighlightColor(Markable markable);
+	
+	Color getHighlightColor(Markable markable, int layerIndex);
+	
+	int getGroupId(Markable markable);
+	
+	int getGroupId(Markable markable, int layerIndex);
 }

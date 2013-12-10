@@ -25,16 +25,22 @@
  */
 package de.ims.icarus.language.model.highlight;
 
+import de.ims.icarus.language.model.HighlightLayer;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface HighlightIterator {
+	
+	HighlightLayer getHighlightLayer();
 
 	int highlightCount();
 	
-	Highlight highlight();
+	Highlight navigate(int position);
+	
+	Highlight current();
 	
 	int position();
 	

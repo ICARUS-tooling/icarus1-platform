@@ -55,20 +55,7 @@ public interface Layer extends NamedCorpusMember {
 	
 	/**
 	 * Returns the {@code MarkableLayer} that this layer
-	 * depends on. The exact meaning of this relation differs
-	 * between certain types of layers:
-	 * <ul>
-	 * <li>For an {@code AnnotationLayer} the <i>base layer</i> is
-	 * the layer that hosts the markables for which the annotation
-	 * layer defines annotation values.</li>
-	 * <li>For a common {@code MarkableLayer} the <i>base layer</i>
-	 * contains the markable objects that the new layer builds upon.
-	 * For example a 'sentence' layer would refer to the 'token' layer
-	 * as its base to form token groups.</li>
-	 * <li>In the special case of a {@code MarkableLayer} that is 
-	 * </li>
-	 * </ul>
-	 * 
+	 * depends on.
 	 * 
 	 * @return
 	 */
