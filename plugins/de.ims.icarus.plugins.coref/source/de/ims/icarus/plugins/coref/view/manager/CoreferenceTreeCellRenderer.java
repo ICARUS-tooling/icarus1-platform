@@ -29,10 +29,12 @@ import java.awt.Component;
 
 import javax.swing.Icon;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.resources.ResourceManager;
@@ -52,6 +54,13 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 	private static final long serialVersionUID = 3033361195693809708L;
 
 	private static final DecoratedIcon cellIcon = new DecoratedIcon(UIUtil.getBlankIcon(16, 16));
+	
+	private static final Icon loadingIcon = IconRegistry.getGlobalRegistry().getIcon("waiting_ovr.gif"); //$NON-NLS-1$
+	private static final Icon loadedIcon = IconRegistry.getGlobalRegistry().getIcon("version_controlled.gif"); //$NON-NLS-1$
+	private static final Icon invalidSettingsIcon = IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif"); //$NON-NLS-1$
+	private static final Icon invalidLocationIcon = IconRegistry.getGlobalRegistry().getIcon("warning_co.gif"); //$NON-NLS-1$
+	
+	private static final Icon documentSetIcon = IconRegistry.getGlobalRegistry().getIcon("file_obj.gif"); //$NON-NLS-1$
 
 	public CoreferenceTreeCellRenderer() {
 		setLeafIcon(null);
@@ -73,9 +82,20 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 		}*/
 		
 		Icon icon = null;
+		Icon overlay = null;
 		String tooltip = null;
 		Extension readerExtension = null;
 		Location location = null;
+		
+		if(value instanceof Loadable) {
+			Loadable loadable = (Loadable) value;
+			
+			if(loadable.isLoading()) {
+				overlay = loadingIcon;
+			} else if(loadable.isLoaded()) {
+				overlay = loadedIcon;
+			}
+		}
 		
 		if(value instanceof DocumentSetDescriptor) {
 			DocumentSetDescriptor descriptor = (DocumentSetDescriptor)value;
@@ -94,7 +114,7 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 			.append(path==null ? "?" : path); //$NON-NLS-1$
 			
 			tooltip = UIUtil.toSwingTooltip(sb.toString());
-			icon = IconRegistry.getGlobalRegistry().getIcon("file_obj.gif"); //$NON-NLS-1$
+			icon = documentSetIcon;
 		} else if(value instanceof AllocationDescriptor) {
 			AllocationDescriptor descriptor = (AllocationDescriptor)value;
 			value = descriptor.getName();
@@ -124,15 +144,14 @@ public class CoreferenceTreeCellRenderer extends DefaultTreeCellRenderer {
 		
 		cellIcon.removeDecorations();
 		
-		Icon overlay = null;
 		if(readerExtension==null || location==null) {
-			overlay = IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif"); //$NON-NLS-1$
+			overlay = invalidSettingsIcon; 
 		} else if(!Locations.isValid(location)) {
-			overlay = IconRegistry.getGlobalRegistry().getIcon("warning_co.gif"); //$NON-NLS-1$
+			overlay = invalidLocationIcon; 
 		}
 		
 		if(overlay!=null) {
-			cellIcon.addDecoration(overlay, 0, cellIcon.getIconHeight()-8);
+			cellIcon.addDecoration(overlay, SwingConstants.SOUTH_WEST);
 		}
 		
 		setIcon(cellIcon);

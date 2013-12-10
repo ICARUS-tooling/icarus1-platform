@@ -26,10 +26,14 @@
 package de.ims.icarus.plugins.coref;
 
 import java.awt.Color;
+import java.util.ArrayList;
+
+import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.coref.view.grid.ClusterLabelType;
@@ -57,10 +61,10 @@ public class CoreferencePreferences {
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		// COREFERENCE GROUP
 		builder.addGroup("coref", true); //$NON-NLS-1$
+		builder.addBooleanEntry("markFalseNodes", true); //$NON-NLS-1$
+		builder.addBooleanEntry("includeGoldNodes", false); //$NON-NLS-1$
 		builder.addBooleanEntry("markFalseEdges", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showGoldEdges", false); //$NON-NLS-1$
-		builder.addColorEntry("falseEdgeColor", Color.red.getRGB()); //$NON-NLS-1$
-		builder.addColorEntry("falseNodeColor", Color.red.getRGB()); //$NON-NLS-1$
+		builder.addBooleanEntry("includeGoldEdges", false); //$NON-NLS-1$
 		builder.addBooleanEntry("filterSingletons", true); //$NON-NLS-1$
 		Options options = new Options();
 		options.put("gridEnabled", false); //$NON-NLS-1$
@@ -78,10 +82,22 @@ public class CoreferencePreferences {
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		builder.setProperties(
 				builder.addOptionsEntry("defaultDocumentPresenter", 0,  //$NON-NLS-1$
-						CoreferencePlugin.getCoreferencePresenterExtensions().toArray()),
+						collectPresenterExtensions()),
 				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
 		builder.addBooleanEntry("showRowIndex", true); //$NON-NLS-1$
 		builder.addBooleanEntry("showSetIndex", false); //$NON-NLS-1$
+		
+		// ERROR COLORS SUBGROUP
+		builder.addGroup("errorColors", true); //$NON-NLS-1$
+		builder.virtual();
+		builder.addColorEntry(CorefErrorType.FALSE_NEGATIVE_MENTION.getKey(), Color.green.getRGB());
+		builder.addColorEntry(CorefErrorType.FALSE_POSITIVE_MENTION.getKey(), Color.red.getRGB());
+		builder.addColorEntry(CorefErrorType.FOREIGN_CLUSTER_HEAD.getKey(), new Color(255, 127, 42).getRGB());
+		builder.addColorEntry(CorefErrorType.HALLUCINATED_HEAD.getKey(), new Color(255, 85, 212).getRGB());
+		builder.addColorEntry(CorefErrorType.INVALID_CLUSTER_START.getKey(), new Color(0, 255, 170).getRGB());
+		builder.back();
+		// END ERROR COLORS SUBGROUP
+		
 		// TEXT SUBGROUP
 		builder.addGroup("text", true); //$NON-NLS-1$
 		builder.virtual();
@@ -96,7 +112,7 @@ public class CoreferencePreferences {
 		builder.virtual();
 		builder.addColorEntry("background", Color.white.getRGB()); //$NON-NLS-1$
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
-		builder.addOptionsEntry("clusterLabelType", 0, (Object[])ClusterLabelType.values()); //$NON-NLS-1$
+		builder.addOptionsEntry("clusterLabelType", 3, (Object[])ClusterLabelType.values()); //$NON-NLS-1$
 		builder.addBooleanEntry("usePatternLabel", true); //$NON-NLS-1$
 		builder.addStringEntry("defaultLabelPattern", "$form$"); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.back();
@@ -124,5 +140,15 @@ public class CoreferencePreferences {
 		// END HIGHLIGHTING GROUP
 		
 		CoreferenceDocumentHighlighting.getInstance().loadConfig();
+	}
+	
+	private Object[] collectPresenterExtensions() {
+		java.util.List<Object> items = new ArrayList<>();
+		
+		for(Extension extension : CoreferencePlugin.getCoreferencePresenterExtensions()) {
+			items.add(extension.getUniqueId());
+		}
+		
+		return items.toArray();
 	}
 }

@@ -67,6 +67,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.helper.SpanFilters;
@@ -278,10 +279,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 				callbackHandler, "toggleForceLinebreaks"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleShowDocumentHeaderAction",  //$NON-NLS-1$
 				callbackHandler, "toggleShowDocumentHeader"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
-				callbackHandler, "toggleMarkFalseSpans"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction",  //$NON-NLS-1$
-				callbackHandler, "toggleShowGoldSpans"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseMentionsAction",  //$NON-NLS-1$
+				callbackHandler, "toggleMarkFalseMentions"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleIncludeGoldMentionsAction",  //$NON-NLS-1$
+				callbackHandler, "toggleIncludeGoldMentions"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
 				callbackHandler, "toggleFilterSingletons"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction",  //$NON-NLS-1$
@@ -312,8 +313,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		CoreferenceAllocation goldAllocation = getGoldAllocation();
 		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
 		actionManager.setEnabled(hasGold, 
-				"plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
-				"plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseMentionsAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceDocumentPresenter.toggleIncludeGoldMentionsAction"); //$NON-NLS-1$
 		
 		AnnotationManager annotationManager = getAnnotationManager();
 		boolean hasAnnotation = annotationManager.hasAnnotation();
@@ -405,6 +406,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		};
 		
 		builder.addOption("modifiers", items); //$NON-NLS-1$
+		builder.addOption("errorInfoLabel", CoreferenceUtils.createErrorInfoLabel()); //$NON-NLS-1$
 		
 		return builder;
 	}
@@ -440,6 +442,8 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		JPanel panel = new JPanel(new BorderLayout());
 		
 		textPane = createTextPane();
+		
+		getDocument().setFilterSingletons(false);
 		
 		JScrollPane scrollPane = new JScrollPane(textPane);
 		scrollPane.getViewport().addChangeListener(getHandler());

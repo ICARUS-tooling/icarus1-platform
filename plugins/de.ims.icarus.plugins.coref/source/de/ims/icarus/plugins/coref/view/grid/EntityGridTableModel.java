@@ -27,14 +27,11 @@ package de.ims.icarus.plugins.coref.view.grid;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.event.TableColumnModelEvent;
@@ -44,20 +41,21 @@ import javax.swing.table.TableColumn;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.Cluster;
+import de.ims.icarus.language.coref.CorefComparison;
+import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
-import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanCache;
-import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import de.ims.icarus.util.collections.IntHashMap;
 
 /**
  * @author Markus Gärtner
@@ -71,11 +69,12 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	protected CoreferenceDocumentData document;
 	
 	protected Map<String, EntityGridNode> nodes;
+	protected IntHashMap<ErrorSummary> columnSummaries = new IntHashMap<>();
 	
 	protected EntityGridColumnModel columnModel = new EntityGridColumnModel();
 
-	protected boolean showGoldSpans = true;
-	protected boolean markFalseSpans = true;
+	protected boolean includeGoldMentions = true;
+	protected boolean markFalseMentions = true;
 	protected boolean filterSingletons = true;
 	
 	protected AnnotationController annotationController;
@@ -124,6 +123,29 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	protected String getKey(int row, int column) {
 		return row+"_"+column; //$NON-NLS-1$
 	}
+	
+	public ErrorSummary getErrorSummary(int column) {
+		ErrorSummary summary = columnSummaries.get(column);
+		
+		if(summary==null) {
+			summary = new ErrorSummary();
+			
+			for(int row = 0; row<getRowCount(); row++) {
+				EntityGridNode node = getValueAt(row, column);
+				if(node==null) {
+					continue;
+				}
+				
+				for(int i=0; i<node.getSpanCount(); i++) {
+					summary.add(node.getErrorType(i));
+				}
+			}
+			
+			columnSummaries.put(column, summary);
+		}
+		
+		return summary;
+	}
 
 	/**
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
@@ -170,6 +192,8 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		}
 		columnModel.clear();
 		
+		columnSummaries.clear();
+		
 		if(document==null) {
 			return;
 		}
@@ -179,53 +203,26 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		if(edgeSet==null) {
 			return;
 		}
-		EdgeSet goldEdges = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
-		if(!showGoldSpans || edgeSet==goldEdges) {
-			goldEdges = null;
+		EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
+		if(edgeSet==goldSet) {
+			goldSet = null;
 		}
-				
-		// Fetch span sets
-		SpanSet spanSet = CoreferenceUtils.getSpanSet(document, allocation);
-		if(spanSet==null) {
-			return;
-		}
-		SpanSet goldSpans = CoreferenceUtils.getGoldSpanSet(document, goldAllocation);
-		if(spanSet==goldSpans) {
-			goldSpans = null;
-		}
+		
+		CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, filterSingletons);
 		
 		if(cache==null) {
 			cache = new SpanCache();
 		} else {
 			cache.clear();
 		}
-		cache.cacheSpans(spanSet);
-		
-		Set<Span> tmp = new HashSet<>();
-		Set<Span> goldLookup = new HashSet<>();
-		Set<Span> failLookup = new HashSet<>();
-		
-		feedSpans(tmp, edgeSet, filterSingletons);
-		feedSpans(goldLookup, goldEdges, filterSingletons);
-		
-		// Create lookup for those spans that appear in the regular set
-		// but not in the gold set
-		if(!goldLookup.isEmpty()) {
-			failLookup.addAll(tmp);
-			failLookup.removeAll(goldLookup);
-		}
-		
-		// Ensure gold lookup only contains those spans that
-		// exist solely in the gold set (missing in the regular set)
-		goldLookup.removeAll(tmp);
-		
-		//System.out.println("fails: "+Arrays.toString(failLookup.toArray()));
-		//System.out.println("golds: "+Arrays.toString(goldLookup.toArray()));
-		
+		cache.cacheEdges(comparison.getEdgeSet().getEdges());
+				
 		// Finally merge all edges into one list
-		List<Span> spans = new ArrayList<>(tmp.size()+goldLookup.size());
-		spans.addAll(tmp);
-		spans.addAll(goldLookup);
+		List<Span> spans = new ArrayList<>();
+		spans.addAll(comparison.getSpans());
+		if(includeGoldMentions && comparison.getGoldSpans()!=null) {
+			spans.addAll(comparison.getGoldSpans());
+		}
 		
 		Collections.sort(spans);
 
@@ -235,7 +232,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		Cluster dummyCluster = new Cluster(-1);
 		int currentRow = -1;
 		Map<Integer, List<Span>> spanBuffer = new HashMap<>();
-		Map<Integer, List<Short>> typeBuffer = new HashMap<>();
+		Map<Integer, List<CorefErrorType>> typeBuffer = new HashMap<>();
 		
 		for(Span span : spans) {			
 			int row = span.getSentenceIndex();
@@ -263,11 +260,12 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 			}
 			
 			// Get type of current span
-			short type = 0;
-			if(failLookup.contains(span)) {
-				type = EntityGridNode.FALSE_PREDICTED_SPAN;
-			} else if(goldLookup.contains(span)) {
-				type = EntityGridNode.MISSING_GOLD_SPAN;
+			CorefErrorType type = null;
+			if(markFalseMentions) {
+				type = comparison.getErrorType(span);
+			}
+			if(type==null) {
+				type = CorefErrorType.TRUE_POSITIVE_MENTION;
 			}
 			
 			// Add span and type info to buffer
@@ -277,27 +275,29 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		// Process remaining data in  buffer
 		processBuffer(currentRow, spanBuffer, typeBuffer);
 		
+		columnSummaries.clear();
+		
 		// Now reload table columns
 		columnModel.reload(clusterList);
 	}
 	
-	protected void feedSpans(Collection<Span> buffer, EdgeSet edgeSet, 
-			boolean filterSingletons) {
-		if(edgeSet==null) {
-			return;
-		}
-		Collection<Edge> edges = edgeSet.getEdges();
-		if(filterSingletons) {
-			edges = CoreferenceUtils.removeSingletons(edges);
-		}
-		
-		for(Edge edge : edges) {
-			buffer.add(edge.getTarget());
-		}
-	}
+//	protected void feedSpans(Collection<Span> buffer, EdgeSet edgeSet, 
+//			boolean filterSingletons) {
+//		if(edgeSet==null) {
+//			return;
+//		}
+//		Collection<Edge> edges = edgeSet.getEdges();
+//		if(filterSingletons) {
+//			edges = CoreferenceUtils.removeSingletons(edges);
+//		}
+//		
+//		for(Edge edge : edges) {
+//			buffer.add(edge.getTarget());
+//		}
+//	}
 	
 	protected void clearBuffer(Map<Integer, List<Span>> spanBuffer,
-			Map<Integer, List<Short>> typeBuffer) {
+			Map<Integer, List<CorefErrorType>> typeBuffer) {
 		/*for(List<Span> spanList : spanBuffer.values()) {
 			spanList.clear();
 		}
@@ -308,9 +308,9 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		typeBuffer.clear();
 	}
 	
-	protected void fillBuffer(Span span, short type, int column, 
+	protected void fillBuffer(Span span, CorefErrorType type, int column, 
 			Map<Integer, List<Span>> spanBuffer,
-			Map<Integer, List<Short>> typeBuffer) {
+			Map<Integer, List<CorefErrorType>> typeBuffer) {
 		// Add span
 		List<Span> spanList = spanBuffer.get(column);
 		if(spanList==null) {
@@ -320,7 +320,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		spanList.add(span);
 
 		// Add type
-		List<Short> typeList = typeBuffer.get(column);
+		List<CorefErrorType> typeList = typeBuffer.get(column);
 		if(typeList==null) {
 			typeList = new ArrayList<>();
 			typeBuffer.put(column, typeList);
@@ -329,7 +329,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	}
 	
 	protected void processBuffer(int row, Map<Integer, List<Span>> spanBuffer,
-			Map<Integer, List<Short>> typeBuffer) {
+			Map<Integer, List<CorefErrorType>> typeBuffer) {
 		if(spanBuffer.isEmpty()) {
 			return;
 		}
@@ -337,13 +337,13 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		for(Entry<Integer, List<Span>> entry : spanBuffer.entrySet()) {
 			int column = entry.getKey();
 			List<Span> spanList = entry.getValue();
-			List<Short> typeList = typeBuffer.get(column);
+			List<CorefErrorType> typeList = typeBuffer.get(column);
 			CoreferenceData sentence = document.get(row);
 			
 			int size = spanList.size(); 
 					
 			Span[] spans = new Span[size];
-			short[] types = new short[size];
+			CorefErrorType[] types = new CorefErrorType[size];
 			
 			for(int i=0; i<size; i++) {
 				spans[i] = spanList.get(i);
@@ -382,24 +382,24 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		return columnModel;
 	}
 
-	public boolean isShowGoldSpans() {
-		return showGoldSpans;
+	public boolean isIncludeGoldMentions() {
+		return includeGoldMentions;
 	}
 
-	public boolean isMarkFalseSpans() {
-		return markFalseSpans;
+	public boolean isMarkFalseMentions() {
+		return markFalseMentions;
 	}
 
 	public boolean isFilterSingletons() {
 		return filterSingletons;
 	}
 
-	public void setShowGoldSpans(boolean showGoldNodes) {
-		this.showGoldSpans = showGoldNodes;
+	public void setIncludeGoldMentions(boolean showFalseNegatives) {
+		this.includeGoldMentions = showFalseNegatives;
 	}
 
-	public void setMarkFalseSpans(boolean markFalseNodes) {
-		this.markFalseSpans = markFalseNodes;
+	public void setMarkFalseMentions(boolean markFalsePositives) {
+		this.markFalseMentions = markFalsePositives;
 	}
 
 	public void setFilterSingletons(boolean filterSingletons) {
@@ -425,7 +425,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 				column.setIdentifier(clusters.get(i));
 				column.setMinWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 				column.setPreferredWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
-				column.setMaxWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH*3);
+				//column.setMaxWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH*3);
 				
 				addColumn(column);
 			}
@@ -437,6 +437,31 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		
 		public void clear() {
 			clusters = null;
+		}
+		
+		public String getPrototypeLabel() {
+			String prototypeLabel = null;
+			
+			for(TableColumn column : tableColumns) {
+				String label = (String) column.getHeaderValue();
+				if(label!=null && (prototypeLabel==null || label.length()>prototypeLabel.length())) {
+					prototypeLabel = label;
+				}
+			}
+			
+			return prototypeLabel;
+		}
+		
+		public void resetColumnSize() {
+			int size = getColumnCount();
+			if(size==0) {
+				return;
+			}
+			for(int i=0; i<size; i++) {
+				TableColumn column = getColumn(i);
+				column.setPreferredWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
+				column.setWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
+			}
 		}
 		
 		public void reloadLabels() {

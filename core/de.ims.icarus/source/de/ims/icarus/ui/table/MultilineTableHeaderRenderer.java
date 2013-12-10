@@ -106,6 +106,12 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		return this;
 	}
 
+	/**
+	 * 
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
 	public static class MultilineListModel extends AbstractListModel<String> {
 
 		private static final long serialVersionUID = 2182638905258539653L;
@@ -113,6 +119,7 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 		private List<String> lines = new ArrayList<>();
 		
 		private int maxLineCount = 3;
+		private int minLineCount = 0;
 		
 		public void clear() {
 			lines.clear();
@@ -131,6 +138,11 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 				if(i>=maxLineCount) {
 					break;
 				}
+			}
+			
+			for(int i=getSize(); i<minLineCount; i++) {
+//				System.out.println("adding dummy line");
+				addLine(" "); //$NON-NLS-1$
 			}
 			
 			fireContentChange();
@@ -170,6 +182,20 @@ public class MultilineTableHeaderRenderer extends JList<String> implements
 
 		public void setMaxLineCount(int maxLineCount) {
 			this.maxLineCount = maxLineCount;
+		}
+
+		/**
+		 * @return the minLineCount
+		 */
+		public int getMinLineCount() {
+			return minLineCount;
+		}
+
+		/**
+		 * @param minLineCount the minLineCount to set
+		 */
+		public void setMinLineCount(int minLineCount) {
+			this.minLineCount = minLineCount;
 		}
 		
 	}

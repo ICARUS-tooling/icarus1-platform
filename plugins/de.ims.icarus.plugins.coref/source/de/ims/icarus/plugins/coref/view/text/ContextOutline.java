@@ -136,6 +136,17 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 		return panel;
 	}
 
+//	/**
+//	 * @see de.ims.icarus.plugins.coref.view.text.AbstractCoreferenceTextPresenter#registerActionCallbacks()
+//	 */
+//	@Override
+//	protected void registerActionCallbacks() {
+//		super.registerActionCallbacks();
+//		
+//		getActionManager().setSelected(false, 
+//				"plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
+//	}
+
 	/**
 	 * @see de.ims.icarus.plugins.coref.view.text.AbstractCoreferenceTextPresenter#createHandler()
 	 */

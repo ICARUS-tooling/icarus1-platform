@@ -49,6 +49,7 @@ import javax.swing.text.ViewFactory;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
+import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.util.Filter;
@@ -288,7 +289,8 @@ public class CoreferenceEditorKit extends StyledEditorKit {
 			AttributeSet attr = getAttributes();
 			if(attr.isDefined(CoreferenceDocument.PARAM_SPAN)) {
 				Span span = (Span) attr.getAttribute(CoreferenceDocument.PARAM_SPAN);
-				return CoreferenceUtils.getSpanTooltip(span, null);
+				CorefErrorType errorType = (CorefErrorType) attr.getAttribute(CoreferenceDocument.PARAM_ERROR_TYPE);
+				return CoreferenceUtils.getSpanTooltip(span, null, errorType);
 			}
 			return super.getToolTipText(x, y, allocation);
 		}

@@ -33,17 +33,28 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JLabel;
+import javax.swing.ToolTipManager;
+
+import de.ims.icarus.config.ConfigEvent;
+import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.TooltipFreezer;
+import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.UnsupportedFormatException;
@@ -65,9 +76,223 @@ public final class CoreferenceUtils {
 		// no-op
 	}
 	
+	private static Map<CorefErrorType, Color> errorColors = new HashMap<>();
+	
+	private static void loadErrorColors() {
+		ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+		Handle root = registry.getHandle("plugins.coref.appearance.errorColors"); //$NON-NLS-1$
+		
+		for(CorefErrorType errorType : CorefErrorType.values()) {
+			if(errorType==CorefErrorType.TRUE_POSITIVE_MENTION) {
+				// No need to declare a color for true positive
+				// since this color is subject to the presenting
+				// module's own discretions
+				continue;
+			}
+			
+			Handle handle = registry.getChildHandle(root, errorType.getKey());
+			
+			errorColors.put(errorType, registry.getColor(handle));
+		}
+	}
+	
+	static {
+		ConfigRegistry.getGlobalRegistry().addGroupListener(
+				"plugins.coref.appearance.errorColors", new ConfigListener() { //$NON-NLS-1$
+			
+			@Override
+			public void invoke(ConfigRegistry sender, ConfigEvent event) {
+				loadErrorColors();
+			}
+		});
+		
+		loadErrorColors();
+	}
+	
+	public static Color getErrorColor(CorefErrorType errorType) {
+		if(errorType==null || errorType==CorefErrorType.TRUE_POSITIVE_MENTION) {
+			return null;
+		}
+		
+		return errorColors.get(errorType);
+	}
+	
 	public static Color getClusterMarkupColor() {
 		return ConfigRegistry.getGlobalRegistry().getColor(
 				"plugins.coref.appearance.text.clusterMarkup"); //$NON-NLS-1$
+	}
+	
+	public static CorefComparison compare(EdgeSet edgeSet, EdgeSet goldSet, boolean filterSingletons) {
+		if(edgeSet==null)
+			throw new NullPointerException("Invalid edge set"); //$NON-NLS-1$
+		
+		if(goldSet==null) {
+			CorefComparison result = new CorefComparison();
+			
+			Set<Edge> edges = new LinkedHashSet<>(edgeSet.getEdges());
+			
+			if(filterSingletons) {
+				edges = (Set<Edge>) removeSingletons(edges);
+			}
+			
+			result.setEdgeSet(edgeSet);
+			result.setEdges(edges);
+			result.setSpans(collectSpans(edges));
+			
+			return result;
+		}
+		
+		Map<Span, CorefErrorType> errors = new HashMap<>();
+		
+		Collection<Edge> tmp = edgeSet.getEdges();
+		if(filterSingletons) {
+			tmp = removeSingletons(tmp);
+		}
+		Set<Edge> edges = new LinkedHashSet<>(tmp);
+		
+		tmp = goldSet.getEdges();
+		if(filterSingletons) {
+			tmp = removeSingletons(tmp);
+		}
+		Set<Edge> goldEdges = new LinkedHashSet<>(tmp);
+		
+		Set<Span> spanLut = collectSpans(edges);
+		Set<Span> goldLut = collectSpans(goldEdges);
+		
+		Map<Span, Span> headLut = new HashMap<>();
+		Map<Span, Span> rootLut = new HashMap<>();
+		
+		Map<Span, Span> goldHeadLut = new LinkedHashMap<>();
+		Map<Span, Span> goldRootLut = new LinkedHashMap<>();
+		
+		// Cache predicted information
+		for(Edge edge : edgeSet.getEdges()) {
+			Span source = edge.getSource();
+			Span target = edge.getTarget();
+			
+			if(source.isROOT()) {
+				continue;
+			}
+			
+			headLut.put(target, source);
+			
+			Span root = rootLut.get(source);
+			if(root==null) {
+				root = source;
+			}
+			rootLut.put(target, root);
+		}
+		
+		
+		// Cache gold information
+		for(Edge edge : goldSet.getEdges()) {
+			Span source = edge.getSource();
+			Span target = edge.getTarget();
+			
+			if(source.isROOT()) {
+				continue;
+			}
+			
+			goldHeadLut.put(target, source);
+			
+			Span root = goldRootLut.get(source);
+			if(root==null) {
+				root = source;
+			}
+			goldRootLut.put(target, root);
+		}
+		
+		// Now process predicted spans/edges and assign error types
+		for(Span span : spanLut) {
+			if(!goldLut.contains(span)) {
+				// False positive mention (hallucinated)
+				errors.put(span, CorefErrorType.FALSE_POSITIVE_MENTION);
+				continue;
+			}
+				
+			Span root = rootLut.get(span);
+			Span goldRoot = goldRootLut.get(span);
+			
+			if(ClassUtils.equals(root, goldRoot)) {
+				// Same cluster in both predicted and gold allocation
+				// (either both starting a new cluster or both being
+				// part of the same cluster, as defined by their
+				// respective root mention)
+				// -> true positive
+				continue;
+			}
+			
+			if(root==null) {
+				// Mention starts a new cluster in predicted allocation
+				// but not in the gold
+				errors.put(span, CorefErrorType.INVALID_CLUSTER_START);
+				continue;
+			} 
+//			else if(goldRoot==null) {
+//				// Mention is in wrong cluster (gold mention starts
+//				// a new cluster)
+//				errors.put(span, CorefErrorType.FOREIGN_CLUSTER_HEAD);
+//				continue;
+//			}
+			
+			Span head = headLut.get(span);
+			Span goldHead = goldHeadLut.get(span);
+			
+			if(ClassUtils.equals(head, goldHead)) {
+				// Same head in both predicted and gold allocation
+				// -> true positive
+				continue;
+			}
+			
+			if(!goldLut.contains(head)) {
+				// Head span is unknown to the gold set
+				errors.put(span, CorefErrorType.HALLUCINATED_HEAD);
+				continue;
+			}
+			
+			errors.put(span, CorefErrorType.FOREIGN_CLUSTER_HEAD);
+		}
+		
+		// Now collect false negatives
+		goldLut.removeAll(spanLut);
+		for(Span span : goldLut) {
+			errors.put(span, CorefErrorType.FALSE_NEGATIVE_MENTION);
+		}
+		
+//		for(Iterator<Edge> it = goldEdges.iterator(); it.hasNext();) {
+//			Edge edge = it.next();
+//			
+//			if(!goldLut.contains(edge.getSource())
+//					|| !goldLut.contains(edge.getTarget())) {
+//				it.remove();
+//			}
+//		}
+		goldEdges.removeAll(edges);
+		
+		CorefComparison result = new CorefComparison();
+		result.setEdgeSet(edgeSet);
+		result.setGoldSet(goldSet);
+		result.setSpans(spanLut);
+		result.setGoldSpans(goldLut);
+		result.setErrors(errors);
+		result.setEdges(edges);
+		result.setGoldEdges(goldEdges);
+		
+		return result;
+	}
+	
+	public static Set<Span> collectSpans(EdgeSet edgeSet) {
+		return collectSpans(edgeSet.getEdges());
+	}
+	
+	public static Set<Span> collectSpans(Collection<Edge> edges) {
+		Set<Span> result = new HashSet<>();
+		
+		for(Edge edge : edges) {
+			result.add(edge.getTarget());
+		}
+		
+		return result;
 	}
 	
 	public static final CoreferenceData emptySentence = new DefaultCoreferenceData(null, new String[0]);
@@ -342,18 +567,18 @@ public final class CoreferenceUtils {
 		}
 	}
 	
-	public static Set<Span> collectSpans(EdgeSet edgeSet) {
-		Set<Span> spans = new HashSet<>();
-		
-		for(int i=0; i<edgeSet.size(); i++) {
-			Edge edge = edgeSet.get(i);
-			
-			spans.add(edge.getSource());
-			spans.add(edge.getTarget());
-		}
-		
-		return spans;
-	}
+//	public static Set<Span> collectSpans(EdgeSet edgeSet) {
+//		Set<Span> spans = new HashSet<>();
+//		
+//		for(int i=0; i<edgeSet.size(); i++) {
+//			Edge edge = edgeSet.get(i);
+//			
+//			spans.add(edge.getSource());
+//			spans.add(edge.getTarget());
+//		}
+//		
+//		return spans;
+//	}
 	
 	public static void appendProperties(StringBuilder buffer, String key, CoreferenceData sentence, Span span) {
 		int beginIndex = span.getBeginIndex();
@@ -395,7 +620,7 @@ public final class CoreferenceUtils {
 		return buffer.toString();
 	}
 	
-	public static String createTooltip(CoreferenceData sentence, List<Span> spans) {
+	public static String createTooltip(CoreferenceData sentence, List<Span> spans, List<CorefErrorType> errorTypes) {
 		StringBuilder sb = new StringBuilder();
 		
 		for(int i=0; i<spans.size(); i++) {
@@ -405,7 +630,14 @@ public final class CoreferenceUtils {
 			
 			Span span = spans.get(i);
 			span.appendTo(sb);
-			sb.append(":\n"); //$NON-NLS-1$
+			sb.append(':');
+			CorefErrorType errorType = errorTypes.get(i);
+			if(errorType!=null && errorType!=CorefErrorType.TRUE_POSITIVE_MENTION) {
+				sb.append("  ("); //$NON-NLS-1$
+				sb.append(errorType.getName());
+				sb.append(')');
+			}
+			sb.append('\n');
 			int len = 0;
 			int idx = span.getBeginIndex();
 			sb.append('"');
@@ -444,7 +676,7 @@ public final class CoreferenceUtils {
 		}
 	}
 	
-	public static String getSpanTooltip(Span span, CoreferenceData sentence) {
+	public static String getSpanTooltip(Span span, CoreferenceData sentence, CorefErrorType errorType) {
 		if(span==null) {
 			return null;
 		}
@@ -454,6 +686,11 @@ public final class CoreferenceUtils {
 		ResourceManager rm = ResourceManager.getInstance();
 		sb.append(rm.get("plugins.coref.labels.span")).append('\n'); //$NON-NLS-1$
 		span.appendTo(sb);
+		if(errorType!=null && errorType!=CorefErrorType.TRUE_POSITIVE_MENTION) {
+			sb.append('\n');
+			sb.append(rm.get("plugins.coref.labels.errorType")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(errorType.getName());
+		}
 		
 		if(sentence!=null) {
 			sb.append('\n');
@@ -482,7 +719,7 @@ public final class CoreferenceUtils {
 		return sb.toString();
 	}
 	
-	public static String getEdgeTooltip(Edge edge) {
+	public static String getEdgeTooltip(Edge edge, CorefErrorType errorType) {
 		if(edge==null) {
 			return null;
 		}
@@ -491,6 +728,11 @@ public final class CoreferenceUtils {
 		
 		ResourceManager rm = ResourceManager.getInstance();
 		sb.append(rm.get("plugins.coref.labels.edge")).append('\n'); //$NON-NLS-1$
+		if(errorType!=null && errorType!=CorefErrorType.TRUE_POSITIVE_MENTION) {
+			sb.append(rm.get("plugins.coref.labels.errorType")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(errorType.getName());
+			sb.append('\n');
+		}
 		sb.append(rm.get("plugins.coref.labels.source")).append(": "); //$NON-NLS-1$ //$NON-NLS-2$
 		edge.getSource().appendTo(sb);
 		sb.append('\n');
@@ -533,6 +775,69 @@ public final class CoreferenceUtils {
 		lookup.toArray(result);
 		
 		return result;
+	}
+
+
+	private static String createErrorInfoTooltip() {
+		StringBuilder sb = new StringBuilder(300);
+		ResourceManager rm = ResourceManager.getInstance();
+		
+		sb.append("<html>"); //$NON-NLS-1$
+		sb.append("<h3>").append(rm.get("plugins.coref.errorTypes.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("<table>"); //$NON-NLS-1$
+		sb.append("<tr><th>") //$NON-NLS-1$
+			.append(rm.get("plugins.coref.errorTypes.type")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
+			.append(rm.get("plugins.coref.errorTypes.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		for(CorefErrorType errorType : CorefErrorType.values()) {
+			if(errorType==CorefErrorType.TRUE_POSITIVE_MENTION) {
+				continue;
+			}
+			
+			sb.append("<tr><td>") //$NON-NLS-1$
+			.append("<font color=\"") //$NON-NLS-1$
+			.append(HtmlUtils.hexString(getErrorColor(errorType)))
+			.append("\">") //$NON-NLS-1$
+			.append(errorType.getName()) //$NON-NLS-1
+			.append("</font>") //$NON-NLS-1$
+			.append("</td><td>").append(errorType.getDescription()).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		sb.append("</table>"); //$NON-NLS-1$
+		
+		return sb.toString();
+	}
+	
+	public static JLabel createErrorInfoLabel() {
+
+		final JLabel label = new JLabel(){
+
+			private static final long serialVersionUID = -6452835926413982692L;
+
+			/**
+			 * @see javax.swing.JComponent#getToolTipText()
+			 */
+			@Override
+			public String getToolTipText() {
+				return createErrorInfoTooltip();
+			}			
+		};
+		label.addMouseListener(new TooltipFreezer());
+		label.setIcon(UIUtil.getInfoIcon());
+		ToolTipManager.sharedInstance().registerComponent(label);
+//		
+//		Localizable localizable = new Localizable() {
+//			
+//			@Override
+//			public void localize() {
+//				label.setToolTipText(createErrorInfoTooltip());
+//			}
+//		};
+//		
+//		localizable.localize();
+//		ResourceManager.getInstance().getGlobalDomain().addItem(localizable);
+		
+		return label;
 	}
 	
 	public static final Comparator<Span> SPAN_SIZE_SORTER = new Comparator<Span>() {

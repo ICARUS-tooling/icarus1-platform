@@ -54,6 +54,32 @@ public interface Structure extends Container {
      *         (<tt>index &lt; 0 || index &gt;= getEdgeCount()</tt>)
 	 */
 	Edge getEdgeAt(int index);
+
+	
+	/**
+	 * Returns the index of the given {@code Edge} within this structure's
+	 * list of edges or {@code -1} if the markable is not hosted within this
+	 * structure.
+	 * <p>
+	 * Note that for every edge <i>m</i> that is hosted within some structure the 
+	 * following will always return a result different from {@code -1}:<br>
+	 * {@code e.getStructure().indexOfEdge(e)}
+	 * 
+	 * @param edge The {@code Edge} whose index is to be returned
+	 * @return The index at which the {@code Edge} appears within this
+	 * structure or {@code -1} if the edge is not hosted within this structure.
+	 * @throws NullPointerException if the {@code edge} argument is {@code null}
+	 */
+	int indexOfEdge(Edge edge);
+
+	/**
+	 * Returns {@code true} if this structure hosts the specified edge.
+	 * 
+	 * @param edge The edge to check
+	 * @return {@code true} iff this structure hosts the given edge
+	 * @throws NullPointerException if the {@code edge} argument is {@code null}
+	 */
+	boolean containsEdge(Edge edge);
 	
 	/**
 	 * Return the number of <b>outgoing</i> edges for a given node.

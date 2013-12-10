@@ -6,20 +6,20 @@
 		COREFERENCE GRAPH PRESENTER
 	-->
 		
-	<!-- Toggle 'markFalseEdges' -->
+	<!-- Toggle 'markFalsePositiveEdges' -->
 	<action id="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction"
 		name="${id}.name" desc="${id}.description" icon="false_edge.png" type="toggle" />
 		
-	<!-- Toggle 'markFalseNodes' -->
+	<!-- Toggle 'markFalsePositiveNodes' -->
 	<action id="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction"
 		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
-	<!-- Toggle 'showGoldEdges' -->
-	<action id="plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction"
+	<!-- Toggle 'includeGoldEdges' -->
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction"
 		name="${id}.name" desc="${id}.description" icon="gold_edge.png" type="toggle" />
 		
-	<!-- Toggle 'showGoldVertices' -->
-	<action id="plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"
+	<!-- Toggle 'includeGoldNodes' -->
+	<action id="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction"
 		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
@@ -61,9 +61,10 @@
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction" />
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction" />
-		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction" />
-		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction" />
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction" />
+		<item type="custom" value="errorInfoLabel" />
 		<item type="glue" />
 	</action-list>
 		

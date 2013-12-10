@@ -33,6 +33,7 @@ import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.plugins.jgraph.layout.GraphLayout;
 import de.ims.icarus.plugins.jgraph.layout.GraphOwner;
+import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.util.Options;
 
@@ -142,21 +143,29 @@ public class CoreferenceGraphLayout implements GraphLayout {
 		public boolean isEdgeIgnored(Object edge) {
 			boolean ignored = super.isEdgeIgnored(edge);
 			
-			if(!ignored) {
-				mxIGraphModel model = graph.getModel();
-				Object value = model.getValue(edge);
-				if(value instanceof CorefEdgeData) {
-					CorefEdgeData data = (CorefEdgeData) value;
-					Object target = model.getTerminal(edge, false);
-					// Ensure that leaf nodes that only occur in the gold
-					// graph are not excluded.
-					boolean isSoleLeaf = model.getEdgeCount(target)==1;
-					ignored = !isSoleLeaf  && !data.getEdge().getSource().isROOT()
-							&& data.isMissingGold();
-				}
+			if(ignored) {
+				return true;
 			}
 			
-			return ignored;
+			mxIGraphModel model = graph.getModel();
+			Object value = model.getValue(edge);
+			if(value instanceof CorefEdgeData) {
+				CorefEdgeData data = (CorefEdgeData) value;
+				Object target = model.getTerminal(edge, false);
+				CorefNodeData nodeData = (CorefNodeData) model.getValue(target);
+				
+				if(data.getEdge().getSource().isROOT()) {
+					return false;
+				}
+				
+				if(GraphUtils.getIncomingEdgeCount(model, target)==1) {
+					return false;
+				}
+				
+				return (nodeData.isGold() || data.isGold());
+			}
+			
+			return false;
 		}
 		
 	}

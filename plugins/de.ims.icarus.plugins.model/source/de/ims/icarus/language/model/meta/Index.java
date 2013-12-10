@@ -30,7 +30,6 @@ package de.ims.icarus.language.model.meta;
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public interface Index extends MetaData {
 
-	ValueSet getValueSet();
 }

@@ -23,14 +23,13 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.meta;
+package de.ims.icarus.language.model.manifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public interface StructureLayerManifest {
 
-	ValueSet getValueSet();
 }

@@ -35,10 +35,7 @@ public interface MarkableLayerManifest extends LayerManifest {
 
 	/**
 	 * Returns {@code true} if the layer contains structures as members of 
-	 * its top-level container. Note that if the layer contains a single big
-	 * structure as its only markable this structure has still to be contained
-	 * within a wrapper container since {@code Structure} does not extend
-	 * {@code Container}!
+	 * its top-level container.
 	 * <p>
 	 * A return value of {@code false} does not prevent the layer from containing
 	 * a mix of structural and bare markable items or structure objects in some 

@@ -33,7 +33,7 @@ import de.ims.icarus.language.model.Markable;
  * @version $Id$
  *
  */
-public interface Mapping {
+public interface Mapping extends MetaData {
 
 	Container getSource();
 	

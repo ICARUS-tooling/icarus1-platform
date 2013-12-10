@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 
+import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -40,15 +41,12 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class EntityGridNode {
 	
-	public static final short FALSE_PREDICTED_SPAN = 1;
-	public static final short MISSING_GOLD_SPAN = 2; 
-	
 	private final CoreferenceData sentence;
 	private final Span[] spans;
-	private final short[] types;
+	private final CorefErrorType[] types;
 	private final Color[] highlightColors;
 
-	public EntityGridNode(CoreferenceData sentence, Span[] spans, short[] types, Color[] highlightColors) {
+	public EntityGridNode(CoreferenceData sentence, Span[] spans, CorefErrorType[] types, Color[] highlightColors) {
 		if(sentence==null)
 			throw new NullPointerException("Invalid sentence"); //$NON-NLS-1$
 		if(spans==null)
@@ -76,7 +74,7 @@ public class EntityGridNode {
 		return spans[index];
 	}
 	
-	public short getType(int index) {
+	public CorefErrorType getErrorType(int index) {
 		return types[index];
 	}
 	
@@ -84,31 +82,36 @@ public class EntityGridNode {
 		return CollectionUtils.asList(spans);
 	}
 	
-	public boolean isFalsePredictedSpan(int index) {
-		return types[index]==FALSE_PREDICTED_SPAN;
+	public List<CorefErrorType> getTypes() {
+		return CollectionUtils.asList(types);
 	}
+		
 	
-	public boolean isMissingGoldSpan(int index) {
-		return types[index]==MISSING_GOLD_SPAN;
-	}
-	
-	public boolean hasFalsePredictedSpan() {
-		for(short type : types) {
-			if(type==FALSE_PREDICTED_SPAN) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public boolean hasMissingGoldSpan() {
-		for(short type : types) {
-			if(type==MISSING_GOLD_SPAN) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	public boolean isFalsePositive(int index) {
+//		return types[index]==ErrorType.FALSE_POSITIVE;
+//	}
+//	
+//	public boolean isFalseNegative(int index) {
+//		return types[index]==ErrorType.FALSE_NEGATIVE;
+//	}
+//	
+//	public boolean hasFalsePositive() {
+//		for(ErrorType type : types) {
+//			if(type==ErrorType.FALSE_POSITIVE) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+//	
+//	public boolean hasFalseNegative() {
+//		for(ErrorType type : types) {
+//			if(type==ErrorType.FALSE_NEGATIVE) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 	
 	public Color getHighlightColor(int index) {
 		return highlightColors==null ? null : highlightColors[index];

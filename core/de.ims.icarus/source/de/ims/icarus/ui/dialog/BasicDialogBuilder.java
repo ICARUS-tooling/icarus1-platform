@@ -35,7 +35,6 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
 import de.ims.icarus.Core;
-import de.ims.icarus.plugins.core.IcarusFrame;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.Exceptions;
@@ -244,7 +243,7 @@ public class BasicDialogBuilder extends DialogBuilder {
 		}
 		
 		if(parent==null) {
-			parent = IcarusFrame.getActiveFrame();
+			parent = UIUtil.getActiveWindow();
 		}
 		
 		JDialog dialog = optionPane.createDialog(parent, title);

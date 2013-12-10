@@ -30,8 +30,8 @@ import java.awt.Color;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxUtils;
 
-import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.config.ConfigRegistry.Handle;
+import de.ims.icarus.language.coref.CorefErrorType;
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.jgraph.layout.DefaultGraphStyle;
 import de.ims.icarus.plugins.jgraph.layout.GraphOwner;
@@ -43,9 +43,6 @@ import de.ims.icarus.util.Options;
  *
  */
 public class CoreferenceGraphStyle extends DefaultGraphStyle {
-	
-	protected Color falseEdgeColor = Color.red;
-	protected Color falseNodeColor = Color.red;
 
 	public CoreferenceGraphStyle() {
 		// no-op
@@ -63,15 +60,6 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 	@Override
 	protected CoreferenceGraphPresenter getPresenter() {
 		return (CoreferenceGraphPresenter) super.getPresenter();
-	}
-
-	@Override
-	protected void refreshStylesheet(Handle handle) {
-		super.refreshStylesheet(handle);
-		
-		ConfigRegistry config = handle.getSource();
-		falseEdgeColor = config.getColor(config.getChildHandle(handle, "falseEdgeColor")); //$NON-NLS-1$
-		falseNodeColor = config.getColor(config.getChildHandle(handle, "falseNodeColor")); //$NON-NLS-1$
 	}
 
 	@Override
@@ -99,31 +87,38 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 		if(value instanceof CorefNodeData) {
 			CorefNodeData data = (CorefNodeData) value;
 			StringBuilder style = new StringBuilder("defaultVertex"); //$NON-NLS-1$
+			
+			CorefErrorType errorType = data.getErrorType();
 
-			if(data.isFalsePredicted() && getPresenter().isMarkFalseNodes()) {
+			if(errorType!=null && errorType!=CorefErrorType.TRUE_POSITIVE_MENTION 
+					&& getPresenter().isMarkFalseNodes()) {
 				style.append(";strokeColor=") //$NON-NLS-1$
-				.append(mxUtils.getHexColorString(falseNodeColor)); 
+				.append(mxUtils.getHexColorString(CoreferenceUtils.getErrorColor(errorType))); 
 			}
-			if(data.isMissingGold()) {
+			if(data.isGold()) {
 				style.append(";dashed=1"); //$NON-NLS-1$
 			} 
 			return style.toString();
 		} else if(value instanceof CorefEdgeData) {
 			CorefEdgeData data = (CorefEdgeData) value;
+			CorefNodeData nodeData = (CorefNodeData) model.getValue(model.getTerminal(cell, false));
+			CorefErrorType errorType = nodeData.getErrorType();
+			
 			StringBuilder style = new StringBuilder("defaultEdge"); //$NON-NLS-1$
 			if(data.getEdge().getSource().isROOT()) {
 				style.append(";shape=curveConnector"); //$NON-NLS-1$
 			}
-			if(data.isFalsePredicted() && getPresenter().isMarkFalseEdges()) {
+			if(errorType!=null && errorType.isEdgeRelated() 
+					&& getPresenter().isMarkFalseEdges()) {
 				style.append(";strokeColor=") //$NON-NLS-1$
-				.append(mxUtils.getHexColorString(falseEdgeColor)); 
+				.append(mxUtils.getHexColorString(CoreferenceUtils.getErrorColor(errorType))); 
 			}
-			if(data.isMissingGold()) {
+			if(data.isGold()) {
 				style.append(";dashed=1"); //$NON-NLS-1$
 			} 
-			if(!data.isMissingGold() || data.getEdge().getSource().isROOT()) {
+//			if(!data.isGold() || data.getEdge().getSource().isROOT()) {
 				style.append(";entryX=0.5;entryY=0"); //$NON-NLS-1$
-			}
+//			}
 			if(getPresenter().isHighlightedIncomingEdge(cell)) {
 				style.append(";strokeColor=") //$NON-NLS-1$
 				.append(mxUtils.getHexColorString(getPresenter().getIncomingEdgeColor())); 

@@ -44,6 +44,7 @@ import javax.swing.SwingWorker;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.Options;
 
 
@@ -61,7 +62,11 @@ public final class IOUtil {
 	}
 	
 	public static boolean isZipSource(String name) {
-		return name.endsWith("zip") || name.endsWith(".gzip") || name.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return name.endsWith("zip"); //$NON-NLS-1$ 
+	}
+	
+	public static boolean isGZipSource(String name) {
+		return name.endsWith(".gzip") || name.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$ 
 	}
 
 	public static String readStream(InputStream input) throws IOException {
@@ -315,6 +320,12 @@ public final class IOUtil {
     	}
     }
 
+    public static boolean canFree(Loadable loadable) {
+    	if(loadable==null)
+    		throw new NullPointerException("Invalid loadable"); //$NON-NLS-1$
+    	
+    	return loadable.isLoaded() && !loadable.isLoading();
+    }
 	
 	public static class LoadJob extends SwingWorker<Loadable, Object> {
 		
@@ -340,14 +351,20 @@ public final class IOUtil {
 		 */
 		@Override
 		protected Loadable doInBackground() throws Exception {
-			// Wait while target is loading
-			while(loadable.isLoading());
+			TaskManager.getInstance().setIndeterminate(this, true);
 			
-			if(loadable.isLoaded()) {
-				return null;
+			try {
+				// Wait while target is loading
+				while(loadable.isLoading());
+				
+				if(loadable.isLoaded()) {
+					return null;
+				}
+				
+				loadable.load();
+			} finally {
+				TaskManager.getInstance().setIndeterminate(this, false);
 			}
-			
-			loadable.load();
 			
 			return loadable;
 		}		

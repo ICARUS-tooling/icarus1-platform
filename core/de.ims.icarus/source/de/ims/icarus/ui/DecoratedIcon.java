@@ -78,6 +78,10 @@ public class DecoratedIcon implements Icon {
 	public void setBaseIcon(Icon baseIcon) {
 		Exceptions.testNullArgument(baseIcon, "baseIcon"); //$NON-NLS-1$
 		
+		if(baseIcon.equals(this.baseIcon)) {
+			return;
+		}
+		
 		this.baseIcon = baseIcon;
 		
 		rebuildBuffer();
@@ -101,6 +105,8 @@ public class DecoratedIcon implements Icon {
 		BufferedImage image = new BufferedImage(maxSize.width, maxSize.height, BufferedImage.TYPE_INT_ARGB);
 		
 		Graphics g = image.createGraphics();
+		
+		baseIcon.paintIcon(null, g, 0, 0);
 		
 		loop_layers : for(int layer=0; layer<decorationCounts.length; layer++) {
 			if(decorations[layer]==null) {

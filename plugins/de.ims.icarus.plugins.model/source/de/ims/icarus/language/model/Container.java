@@ -63,7 +63,7 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * Returns the {@code Markable} stored at position {@code index} within
 	 * this {@code Container}. Note that however elements in a container may
 	 * be unordered depending on the {@code ContainerType} as returned by
-	 * {@link #getType()}, the same index has always to be mapped to
+	 * {@link #getErrorType()}, the same index has always to be mapped to
 	 * the exact same {@code Markable} within a single container!
 	 * 
 	 * @param index The index of the {@code Markable} to be returned
@@ -74,7 +74,7 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	Markable getMarkableAt(int index);
 	
 	/**
-	 * Returns the index of the given {@code Markable} within this containers
+	 * Returns the index of the given {@code Markable} within this container's
 	 * list of markables or {@code -1} if the markable is not hosted within this
 	 * container.
 	 * <p>
@@ -88,4 +88,13 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 */
 	int indexOfMarkable(Markable markable);
+	
+	/**
+	 * Returns {@code true} if this container hosts the specified markable.
+	 * 
+	 * @param markable The markable to check
+	 * @return {@code true} iff this container hosts the given markable
+	 * @throws NullPointerException if the {@code markable} argument is {@code null}
+	 */
+	boolean containsMarkable(Markable markable);
 }

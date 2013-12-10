@@ -32,7 +32,17 @@ package de.ims.icarus.language.model.highlight;
  */
 public interface HighlightIterator {
 
-	int size();
+	int highlightCount();
 	
+	Highlight highlight();
 	
+	int position();
+	
+	boolean hasNext();
+	
+	Highlight next();
+	
+	boolean hasPrevious();
+	
+	Highlight previous();
 }

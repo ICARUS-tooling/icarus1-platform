@@ -43,6 +43,8 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.AllocationEditor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
@@ -87,8 +89,6 @@ public class CoreferenceManagerView extends View {
 		if(!defaultLoadActions(CoreferenceManagerView.class, "coreference-manager-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
-		
-		handler = new Handler();
 
 		container.setLayout(new BorderLayout());
 		
@@ -97,11 +97,11 @@ public class CoreferenceManagerView extends View {
 		tree.setBorder(UIUtil.defaultContentBorder);
 		DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
 		selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		selectionModel.addTreeSelectionListener(handler);
+		selectionModel.addTreeSelectionListener(getHandler());
 		tree.setSelectionModel(selectionModel);
 		tree.setCellRenderer(new CoreferenceTreeCellRenderer());
 		UIUtil.enableRighClickTreeSelection(tree);
-		tree.addMouseListener(handler);
+		tree.addMouseListener(getHandler());
 		tree.setRootVisible(false);
 		tree.setShowsRootHandles(true);
 		tree.setLargeModel(true);
@@ -117,6 +117,14 @@ public class CoreferenceManagerView extends View {
 		
 		registerActionCallbacks();
 		refreshActions();
+	}
+	
+	private Handler getHandler() {
+		if (handler==null) {
+			handler = new Handler();
+		}
+		
+		return handler;
 	}
 	
 	@Override
@@ -144,16 +152,30 @@ public class CoreferenceManagerView extends View {
 		boolean isAllocation = hasSelection && selectedObject instanceof AllocationDescriptor;
 		boolean isDocumentSetPath = getSelectedDocumentSet()!=null;
 		
+		boolean canLoadDocumentSet = isDocumentSet && CoreferenceRegistry.canLoad((DocumentSetDescriptor) selectedObject);
+		boolean canFreeDocumentSet = isDocumentSet && IOUtil.canFree((Loadable) selectedObject);
+
+		boolean canLoadAllocation = isAllocation && CoreferenceRegistry.canLoad((AllocationDescriptor) selectedObject);
+		boolean canFreeAllocation = isAllocation && IOUtil.canFree((Loadable) selectedObject);
+		
 		ActionManager actionManager = getDefaultActionManager();
 		actionManager.setEnabled(isDocumentSet, 
 				"plugins.coref.coreferenceManagerView.deleteDocumentSetAction", //$NON-NLS-1$
 				"plugins.coref.coreferenceManagerView.editDocumentSetAction", //$NON-NLS-1$
 				"plugins.coref.coreferenceManagerView.inspectDocumentSetAction"); //$NON-NLS-1$
+		actionManager.setEnabled(canLoadDocumentSet, 
+				"plugins.coref.coreferenceManagerView.loadDocumentSetAction"); //$NON-NLS-1$
+		actionManager.setEnabled(canFreeDocumentSet, 
+				"plugins.coref.coreferenceManagerView.freeDocumentSetAction"); //$NON-NLS-1$
 		actionManager.setEnabled(isDocumentSetPath, 
 				"plugins.coref.coreferenceManagerView.addAllocationAction"); //$NON-NLS-1$
 		actionManager.setEnabled(isAllocation, 
 				"plugins.coref.coreferenceManagerView.deleteAllocationAction", //$NON-NLS-1$
 				"plugins.coref.coreferenceManagerView.editAllocationAction"); //$NON-NLS-1$
+		actionManager.setEnabled(canLoadAllocation, 
+				"plugins.coref.coreferenceManagerView.loadAllocationAction"); //$NON-NLS-1$
+		actionManager.setEnabled(canFreeAllocation, 
+				"plugins.coref.coreferenceManagerView.freeAllocationAction"); //$NON-NLS-1$
 	}
 	
 	private void registerActionCallbacks() {
@@ -176,6 +198,10 @@ public class CoreferenceManagerView extends View {
 				callbackHandler, "editDocumentSet"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceManagerView.inspectDocumentSetAction",  //$NON-NLS-1$
 				callbackHandler, "inspectDocumentSet"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.loadDocumentSetAction",  //$NON-NLS-1$
+				callbackHandler, "loadDocumentSet"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.freeDocumentSetAction",  //$NON-NLS-1$
+				callbackHandler, "freeDocumentSet"); //$NON-NLS-1$
 		
 		actionManager.addHandler("plugins.coref.coreferenceManagerView.addAllocationAction",  //$NON-NLS-1$
 				callbackHandler, "addAllocation"); //$NON-NLS-1$
@@ -183,6 +209,10 @@ public class CoreferenceManagerView extends View {
 				callbackHandler, "deleteAllocation"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.coreferenceManagerView.editAllocationAction",  //$NON-NLS-1$
 				callbackHandler, "editAllocation"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.loadAllocationAction",  //$NON-NLS-1$
+				callbackHandler, "loadAllocation"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.freeAllocationAction",  //$NON-NLS-1$
+				callbackHandler, "freeAllocation"); //$NON-NLS-1$
 		
 		actionManager.addHandler("plugins.coref.coreferenceManagerView.showPropertyDialogAction",  //$NON-NLS-1$
 				callbackHandler, "showPropertyDialog"); //$NON-NLS-1$
@@ -235,7 +265,6 @@ public class CoreferenceManagerView extends View {
 		return null;
 	}
 	
-	@SuppressWarnings("unused")
 	private AllocationDescriptor getSelectedAllocation() {
 		TreePath treePath = tree.getSelectionPath();
 		if(treePath==null) {
@@ -262,7 +291,7 @@ public class CoreferenceManagerView extends View {
 		tree.setSelectionPath(path);
 	}
 
-	private class Handler extends MouseAdapter implements TreeSelectionListener {
+	private class Handler extends MouseAdapter implements TreeSelectionListener, Runnable {
 		
 		private void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
@@ -297,6 +326,15 @@ public class CoreferenceManagerView extends View {
 		 */
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
+			refreshActions();
+		}
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			tree.repaint();
 			refreshActions();
 		}
 	}
@@ -449,6 +487,50 @@ public class CoreferenceManagerView extends View {
 			}
 		}
 		
+		public void loadDocumentSet(ActionEvent e) {
+			try {
+								
+				DocumentSetDescriptor descriptor = getSelectedDocumentSet();
+				
+				if(descriptor==null) {
+					return;
+				}
+
+				CoreferenceRegistry.loadDocumentSet(descriptor, getHandler());
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to load document set", ex); //$NON-NLS-1$
+				
+				UIUtil.beep();
+				showError(ex);
+			}
+		}
+		
+		public void freeDocumentSet(ActionEvent e) {
+			try {
+								
+				DocumentSetDescriptor descriptor = getSelectedDocumentSet();
+				
+				if(descriptor==null) {
+					return;
+				}
+				
+				if (!descriptor.isLoaded() || descriptor.isLoading()) {
+					return;
+				}
+				
+				descriptor.free();
+
+				refreshActions();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to free document set", ex); //$NON-NLS-1$
+				
+				UIUtil.beep();
+				showError(ex);
+			}
+		}
+		
 		public void addAllocation(ActionEvent e) {
 			DocumentSetDescriptor descriptor = getSelectedDocumentSet();
 			if(descriptor==null) {
@@ -525,6 +607,50 @@ public class CoreferenceManagerView extends View {
 				if(editor!=null) {
 					editor.close();
 				}
+			}
+		}
+		
+		public void loadAllocation(ActionEvent e) {
+			try {
+								
+				AllocationDescriptor descriptor = getSelectedAllocation();
+				
+				if(descriptor==null) {
+					return;
+				}
+
+				CoreferenceRegistry.loadAllocation(descriptor, getHandler());
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to load allocation", ex); //$NON-NLS-1$
+				
+				UIUtil.beep();
+				showError(ex);
+			}
+		}
+		
+		public void freeAllocation(ActionEvent e) {
+			try {
+								
+				AllocationDescriptor descriptor = getSelectedAllocation();
+				
+				if(descriptor==null) {
+					return;
+				}
+				
+				if (!descriptor.isLoaded() || descriptor.isLoading()) {
+					return;
+				}
+				
+				descriptor.free();
+
+				refreshActions();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to free allocation", ex); //$NON-NLS-1$
+				
+				UIUtil.beep();
+				showError(ex);
 			}
 		}
 		

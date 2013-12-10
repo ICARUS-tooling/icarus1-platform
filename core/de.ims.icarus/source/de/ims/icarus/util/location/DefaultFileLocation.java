@@ -119,7 +119,7 @@ public class DefaultFileLocation implements Location {
 			throw new IOException("File is empty: "+file.getAbsolutePath()); //$NON-NLS-1$
 		
 		InputStream in = new FileInputStream(file);
-		if(IOUtil.isZipSource(file.getName())) {
+		if(IOUtil.isGZipSource(file.getName())) {
 			in = new GZIPInputStream(in);
 		}
 		return in;

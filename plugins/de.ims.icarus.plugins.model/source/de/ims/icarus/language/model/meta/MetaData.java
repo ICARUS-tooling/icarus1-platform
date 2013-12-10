@@ -30,7 +30,9 @@ package de.ims.icarus.language.model.meta;
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public interface MetaData {
 
-	ValueSet getValueSet();
+	// Empty marker interface to signal that a class or interface 
+	// participates in the meta-data framework of the ICARUS
+	// data model facility
 }

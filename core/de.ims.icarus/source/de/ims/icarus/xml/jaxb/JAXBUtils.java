@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
+import org.java.plugin.registry.Extension;
+
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -55,6 +57,7 @@ public final class JAXBUtils {
 	);
 	
 	static {
+		registerAdapter(Extension.class, "de.ims.icarus.xml.jaxb.ExtensionAdapter"); //$NON-NLS-1$
 		registerAdapter(Location.class, "de.ims.icarus.xml.jaxb.LocationAdapter"); //$NON-NLS-1$
 		registerAdapter(Color.class, "de.ims.icarus.xml.jaxb.ColorAdapter"); //$NON-NLS-1$
 		registerAdapter(Map.class, "de.ims.icarus.xml.jaxb.MapAdapter"); //$NON-NLS-1$

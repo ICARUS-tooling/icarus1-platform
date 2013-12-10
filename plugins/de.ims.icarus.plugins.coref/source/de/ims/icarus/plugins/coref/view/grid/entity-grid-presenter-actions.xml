@@ -11,11 +11,11 @@
 		template="actions.default.refreshAction" />
 	
 	<!-- Toggle 'markFalseSpans' -->
-	<action id="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction"
+	<action id="plugins.coref.entityGridPresenter.toggleMarkFalseMentionsAction"
 		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
-	<!-- Toggle 'showGoldSpans' -->
-	<action id="plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"
+	<!-- Toggle 'includeGold' -->
+	<action id="plugins.coref.entityGridPresenter.toggleIncludeGoldMentionsAction"
 		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
@@ -38,10 +38,6 @@
 	<action-list id="plugins.coref.entityGridPresenter.toolBarList">
 		<item type="action" value="plugins.coref.entityGridPresenter.openPreferencesAction" />
 		<separator />
-		<item type="action" value="plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction" />
-		<item type="action" value="plugins.coref.entityGridPresenter.toggleShowGoldSpansAction" />
-		<item type="action" value="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction" />
-		<separator />
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleAdjustColumnWidthAction" />
 		<separator />
 		<item type="action" value="plugins.coref.entityGridPresenter.toggleLabelModeAction" />
@@ -51,6 +47,12 @@
 		<item type="custom" value="annotationControl" />
 		<separator />
 		<item type="action" value="plugins.coref.entityGridPresenter.refreshAction" />
+		<separator />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleMarkFalseMentionsAction" />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleIncludeGoldMentionsAction" />
+		<item type="action" value="plugins.coref.entityGridPresenter.toggleFilterSingletonsAction" />
+		<item type="custom" value="errorInfoLabel" />
+		<item type="glue" />
 	</action-list>
 		
 	<!-- ToolBar List for Popup-Menu -->

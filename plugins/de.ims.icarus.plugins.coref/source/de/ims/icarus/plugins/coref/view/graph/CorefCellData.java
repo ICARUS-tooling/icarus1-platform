@@ -37,14 +37,10 @@ import de.ims.icarus.plugins.jgraph.cells.GraphCell;
 public abstract class CorefCellData<E extends Object> implements Serializable, GraphCell {
 
 	private static final long serialVersionUID = 5316908730346053116L;
-
-	public static final int FALSE_PREDICTED = 1;
-	public static final int MISSING_GOLD = 2;
-
 	protected String label;
-	
-	protected int type = 0;
 	protected long highlight = 0L;
+	
+	protected boolean gold;
 	
 	protected E data;
 	
@@ -55,18 +51,32 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 	protected CorefCellData(E data) {
 		setData(data);
 	}
-	
-	protected CorefCellData(E data, int type) {
+
+	protected CorefCellData(E data, boolean gold) {
 		setData(data);
-		setType(type);
+		setGold(gold);
 	}
 	
-	protected CorefCellData(E data, int type, long highlight) {
+	protected CorefCellData(E data, boolean gold, long highlight) {
 		setData(data);
-		setType(type);
+		setGold(gold);
 		setHighlight(highlight);
 	}
 	
+	/**
+	 * @return the gold
+	 */
+	public boolean isGold() {
+		return gold;
+	}
+
+	/**
+	 * @param gold the gold to set
+	 */
+	public void setGold(boolean gold) {
+		this.gold = gold;
+	}
+
 	protected void setData(E data) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
@@ -86,25 +96,9 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 		return label;
 	}
 
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
-	}
-
 	@Override
 	public String toString() {
 		return getLabel();
-	}
-
-	public boolean isFalsePredicted() {
-		return type==FALSE_PREDICTED;
-	}
-	
-	public boolean isMissingGold() {
-		return type==MISSING_GOLD;
 	}
 
 	public long getHighlight() {

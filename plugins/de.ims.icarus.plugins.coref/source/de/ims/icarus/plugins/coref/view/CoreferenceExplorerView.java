@@ -30,7 +30,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
@@ -42,11 +41,11 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import de.ims.icarus.Core;
-import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.AllocationListWrapper;
@@ -56,7 +55,6 @@ import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.coref.CorefConstants;
-import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.ui.actions.ActionManager;
@@ -66,8 +64,6 @@ import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.list.ComboBoxListWrapper;
 import de.ims.icarus.ui.list.ListUtils;
-import de.ims.icarus.ui.tasks.TaskManager;
-import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.DataListModel;
 import de.ims.icarus.util.mpi.Commands;
@@ -114,8 +110,6 @@ public class CoreferenceExplorerView extends View implements Updatable {
 				"coreference-explorer-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
-		
-		handler = new Handler();
 
 		container.setLayout(new BorderLayout());
 		
@@ -127,19 +121,19 @@ public class CoreferenceExplorerView extends View implements Updatable {
 				CoreferenceRegistry.getInstance().getDocumentSetListModel());
 		entry = new ChoiceFormEntry( 
 				"plugins.coref.labels.documentSet", documentSetModel, false); //$NON-NLS-1$
-		entry.getComboBox().addActionListener(handler);
+		entry.getComboBox().addActionListener(getHandler());
 		formBuilder.addEntry("documentSet", entry); //$NON-NLS-1$
 		// Allocation selection
 		allocationModel = new AllocationListWrapper(false);
 		entry = new ChoiceFormEntry( 
 				"plugins.coref.labels.allocation", allocationModel, false); //$NON-NLS-1$
-		entry.getComboBox().addActionListener(handler);
+		entry.getComboBox().addActionListener(getHandler());
 		formBuilder.addEntry("allocation", entry); //$NON-NLS-1$
 		// Gold allocation selection
 		goldAllocationModel = new AllocationListWrapper(true);
 		entry = new ChoiceFormEntry( 
 				"plugins.coref.labels.goldAllocation", goldAllocationModel, false); //$NON-NLS-1$
-		entry.getComboBox().addActionListener(handler);
+		entry.getComboBox().addActionListener(getHandler());
 		formBuilder.addEntry("goldAllocation", entry); //$NON-NLS-1$
 		
 		formBuilder.buildForm();
@@ -154,14 +148,15 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		headerPanel.add(header, BorderLayout.CENTER);
 		headerPanel.add(loadingLabel, BorderLayout.SOUTH);
 		
-		listModel = new DataListModel<>();		
+		listModel = new DataListModel<>();
+		listModel.addListDataListener(getHandler());
 		list = new JList<>(listModel);
 		list.setCellRenderer(new DocumentListCellRenderer());
 		list.setBorder(UIUtil.defaultContentBorder);
 		UIUtil.enableRighClickListSelection(list);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.addMouseListener(handler);
-		list.addListSelectionListener(handler);
+		list.addMouseListener(getHandler());
+		list.addListSelectionListener(getHandler());
 		
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setBorder(UIUtil.topLineBorder);
@@ -171,6 +166,14 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		
 		registerActionCallbacks();
 		refreshActions();
+	}
+	
+	private Handler getHandler() {
+		if(handler==null) {
+			handler = new Handler();
+		}
+		
+		return handler;
 	}
 
 	private void displayData(DocumentSetDescriptor descriptor, Options options) {
@@ -198,34 +201,14 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			listModel.clear();
 			loadingLabel.setVisible(true);
 			
-			final String name = descriptor.getName();
-			
-			String title = ResourceManager.getInstance().get(
-					"plugins.coref.labels.loadingDocumentSet"); //$NON-NLS-1$
-			Object task = new IOUtil.LoadJob(descriptor) {
+			CoreferenceRegistry.loadDocumentSet(descriptor, new Runnable() {
+				
 				@Override
-				protected void done() {
-					try {
-						get();
-					} catch(CancellationException | InterruptedException e) {
-						// ignore
-					} catch(Exception e) {
-						LoggerFactory.log(this, Level.SEVERE, 
-								"Failed to load document-set: "+name, e); //$NON-NLS-1$
-						
-						UIUtil.beep();
-						
-						if(!Core.getCore().handleThrowable(e)) {
-							showError(e);
-						}
-					} finally {
-						update();
-						loadingLabel.setVisible(false);
-					}
-				}				
-			};
-			TaskManager.getInstance().schedule(task, title, null, null, 
-					TaskPriority.DEFAULT, true);
+				public void run() {
+					update();
+					loadingLabel.setVisible(false);
+				}
+			});
 		} else {
 			update();
 		}
@@ -266,14 +249,27 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			Options options = new Options();
 			
 			// Fetch allocations	
-			options.put("allocation", getAllocation(allocationModel)); //$NON-NLS-1$
-			options.put("goldAllocation", getAllocation(goldAllocationModel)); //$NON-NLS-1$
+			options.put("allocation", getAllocation(allocationModel, false)); //$NON-NLS-1$
+			options.put("goldAllocation", getAllocation(goldAllocationModel, true)); //$NON-NLS-1$
 			
 			Message message = new Message(this, Commands.PRESENT, document, options);
 			sendRequest(CorefConstants.COREFERENCE_DOCUMENT_VIEW_ID, message);
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to forward presentation of document at index "+index, e); //$NON-NLS-1$
+			
+			UIUtil.beep();
+			showError(e);
+		}
+	}
+	
+	private void clearOutline() {
+		try {
+			Message message = new Message(this, Commands.CLEAR);
+			sendRequest(CorefConstants.COREFERENCE_DOCUMENT_VIEW_ID, message);
+		} catch(Exception e) {
+			LoggerFactory.log(this, Level.SEVERE, 
+					"Failed to forward clear command", e); //$NON-NLS-1$
 			
 			UIUtil.beep();
 			showError(e);
@@ -297,8 +293,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			Options options = new Options();
 			
 			// Fetch allocations	
-			options.put("allocation", getAllocation(allocationModel)); //$NON-NLS-1$
-			options.put("goldAllocation", getAllocation(goldAllocationModel)); //$NON-NLS-1$
+			options.put("allocation", getAllocation(allocationModel, false)); //$NON-NLS-1$
+			options.put("goldAllocation", getAllocation(goldAllocationModel, true)); //$NON-NLS-1$
 			
 			Message message = new Message(this, Commands.PRESENT, document, options);
 			sendRequest(CorefConstants.ERROR_ANALYSIS_VIEW_ID, message);
@@ -311,10 +307,10 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		}
 	}
 	
-	private AllocationDescriptor getAllocation(AllocationListWrapper model) {
+	private AllocationDescriptor getAllocation(AllocationListWrapper model, boolean allowDefault) {
 		Object selectedItem = model.getSelectedItem();
 		if(selectedItem==CoreferenceRegistry.dummyEntry || 
-				selectedItem instanceof DefaultAllocationDescriptor) {
+				(!allowDefault && selectedItem instanceof DefaultAllocationDescriptor)) {
 			selectedItem = null;
 		}
 		
@@ -415,7 +411,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 	}
 
 	private class Handler extends MouseAdapter 
-			implements ListSelectionListener, ActionListener, EventListener {
+			implements ListSelectionListener, ActionListener, EventListener, ListDataListener {
 
 		/**
 		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
@@ -476,6 +472,36 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			maybeShowPopup(e);
+		}
+		
+		private void maybeClearOutline() {
+			if(list.getModel().getSize()==0) {
+				clearOutline();
+			}
+		}
+
+		/**
+		 * @see javax.swing.event.ListDataListener#intervalAdded(javax.swing.event.ListDataEvent)
+		 */
+		@Override
+		public void intervalAdded(ListDataEvent e) {
+			// no-op
+		}
+
+		/**
+		 * @see javax.swing.event.ListDataListener#intervalRemoved(javax.swing.event.ListDataEvent)
+		 */
+		@Override
+		public void intervalRemoved(ListDataEvent e) {
+			maybeClearOutline();
+		}
+
+		/**
+		 * @see javax.swing.event.ListDataListener#contentsChanged(javax.swing.event.ListDataEvent)
+		 */
+		@Override
+		public void contentsChanged(ListDataEvent e) {
+			maybeClearOutline();
 		}
 
 	}

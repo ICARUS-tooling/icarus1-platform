@@ -31,7 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -50,6 +50,8 @@ import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.config.ConfigDelegate;
 import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.language.coref.CorefComparison;
+import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
@@ -71,6 +73,7 @@ import de.ims.icarus.plugins.jgraph.layout.GraphStyle;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
@@ -94,8 +97,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	protected CoreferenceAllocation allocation;
 	protected CoreferenceAllocation goldAllocation;
 	
-	protected boolean showGoldEdges = false;
-	protected boolean showGoldNodes = true;
+	protected boolean includeGoldEdges = false;
+	protected boolean includeGoldNodes = true;
 	protected boolean markFalseEdges = true;
 	protected boolean markFalseNodes = true;
 	protected boolean filterSingletons = true;
@@ -168,8 +171,12 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				"plugins.jgraph.appearance.coref.compressGraph")); //$NON-NLS-1$
 		setMarkFalseEdges(config.getBoolean(
 				"plugins.jgraph.appearance.coref.markFalseEdges")); //$NON-NLS-1$
-		setShowGoldEdges(config.getBoolean(
-				"plugins.jgraph.appearance.coref.showGoldEdges")); //$NON-NLS-1$
+		setIncludeGoldEdges(config.getBoolean(
+				"plugins.jgraph.appearance.coref.includeGoldEdges")); //$NON-NLS-1$
+		setMarkFalseNodes(config.getBoolean(
+				"plugins.jgraph.appearance.coref.markFalseNodes")); //$NON-NLS-1$
+		setIncludeGoldNodes(config.getBoolean(
+				"plugins.jgraph.appearance.coref.includeGoldNodes")); //$NON-NLS-1$
 		setFilterSingletons(config.getBoolean(
 				"plugins.jgraph.appearance.coref.filterSingletons")); //$NON-NLS-1$
 	}
@@ -225,6 +232,18 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		editablePopupMenuListId = "plugins.coref.coreferenceGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
 
 		presenterMenu = new CoreferenceDocumentDataPresenter.PresenterMenu(this, getHandler());
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.jgraph.view.GraphPresenter#createUpperToolBar()
+	 */
+	@Override
+	protected ActionComponentBuilder createUpperToolBar() {
+		ActionComponentBuilder builder = super.createUpperToolBar();
+		
+		builder.addOption("errorInfoLabel", CoreferenceUtils.createErrorInfoLabel()); //$NON-NLS-1$
+		
+		return builder;
 	}
 
 	/**
@@ -286,10 +305,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isMarkFalseNodes(), 
 				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction"); //$NON-NLS-1$
-		actionManager.setSelected(isShowGoldEdges(), 
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
-		actionManager.setSelected(isShowGoldNodes(), 
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+		actionManager.setSelected(isIncludeGoldEdges(), 
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction"); //$NON-NLS-1$
+		actionManager.setSelected(isIncludeGoldNodes(), 
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isFilterSingletons(), 
 				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		
@@ -301,11 +320,11 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
 				callbackHandler, "markFalseNodes"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
-				callbackHandler, "showGoldEdges"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction",  //$NON-NLS-1$
+				callbackHandler, "includeGoldEdges"); //$NON-NLS-1$
 		actionManager.addHandler(
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction",  //$NON-NLS-1$
-				callbackHandler, "showGoldNodes"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction",  //$NON-NLS-1$
+				callbackHandler, "includeGoldNodes"); //$NON-NLS-1$
 		actionManager.addHandler(
 				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
 				callbackHandler, "filterSingletons"); //$NON-NLS-1$
@@ -321,8 +340,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		actionManager.setEnabled(hasGold, 
 				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseEdgesAction",  //$NON-NLS-1$
 				"plugins.coref.coreferenceGraphPresenter.toggleMarkFalseNodesAction",  //$NON-NLS-1$
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction",  //$NON-NLS-1$
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction",  //$NON-NLS-1$
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -330,7 +349,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		return new CorefHandler();
 	}
 
-	protected Object createVertex(Span span, int nodeType) {
+	protected Object createVertex(Span span, CorefErrorType nodeType, boolean gold) {
 		CoreferenceData sentence = span.isROOT() ?
 				CoreferenceUtils.emptySentence
 				: document.get(span.getSentenceIndex());
@@ -347,14 +366,14 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			}
 		}
 		
-		mxCell cell = new mxCell(new CorefNodeData(span, sentence, nodeType, highlight));
+		mxCell cell = new mxCell(new CorefNodeData(span, sentence, nodeType, gold, highlight));
 		cell.setVertex(true);
 		cell.setGeometry(new mxGeometry());
 		
 		return cell;
 	}
 	
-	protected Object createEdge(Edge edge, Object source, Object target, int edgeType) {
+	protected Object createEdge(Edge edge, Object source, Object target, boolean gold) {
 
 		long highlight = 0L;
 		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
@@ -368,7 +387,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			}
 		}
 		
-		mxCell cell = new mxCell(new CorefEdgeData(edge, edgeType, highlight));
+		mxCell cell = new mxCell(new CorefEdgeData(edge, gold, highlight));
 		cell.setEdge(true);
 		
 		graph.getModel().setTerminal(cell, source, true);
@@ -407,38 +426,24 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				goldSet = null;
 			}
 			
-			Collection<Edge> edgeLookup = null;
-			if(goldSet!=null) {
-				edgeLookup = new HashSet<>(goldSet.getEdges());
-			}
-			
-			Collection<Span> spanLookup = null;
-			if(goldSet!=null) {
-				spanLookup = CoreferenceUtils.collectSpans(goldSet);
-			}
-			
 			Map<Span, Object> cellMap = new HashMap<>();
 			Object parent = graph.getDefaultParent();
 			
-			Collection<Edge> edges = edgeSet.getEdges();
-			
+			CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, isFilterSingletons());
+
 			cache.clear();
-			cache.cacheEdges(edges);
-			
-			if(isFilterSingletons()) {
-				edges = CoreferenceUtils.removeSingletons(edges);
-			}
+			cache.cacheEdges(comparison.getEdgeSet().getEdges());
 			
 			//System.out.println(Arrays.toString(edges.toArray()));
 			
-			for(Edge edge : edges) {
+			for(Edge edge : comparison.getEdges()) {
+				//System.out.println("adding edge: "+edge);
 				Span spanS = edge.getSource();
 				Span spanT = edge.getTarget();
 				
 				Object cellS = cellMap.get(spanS);
 				if(cellS==null) {
-					boolean falseNode = spanLookup!=null && !spanLookup.remove(spanS);
-					cellS = createVertex(spanS, falseNode ? CorefCellData.FALSE_PREDICTED : 0);
+					cellS = createVertex(spanS, comparison.getErrorType(spanS), false);
 					cellMap.put(spanS, cellS);
 					
 					model.add(parent, cellS, model.getChildCount(parent));
@@ -449,8 +454,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				
 				Object cellT = cellMap.get(spanT);
 				if(cellT==null) {
-					boolean falseNode = spanLookup!=null && !spanLookup.remove(spanT);
-					cellT = createVertex(spanT, falseNode ? CorefCellData.FALSE_PREDICTED : 0);
+					cellT = createVertex(spanT, comparison.getErrorType(spanT), false);
 					cellMap.put(spanT, cellT);
 					
 					model.add(parent, cellT, model.getChildCount(parent));
@@ -458,43 +462,46 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 					
 					graph.cellSizeUpdated(cellT, false);
 				}
-				
-				boolean falseEdge = edgeLookup!=null && !edgeLookup.remove(edge);
-				
-				Object cellE = createEdge(edge, cellS, cellT, falseEdge ?
-						CorefCellData.FALSE_PREDICTED : 0);
+
+				Object cellE = createEdge(edge, cellS, cellT, false);
 				
 				model.add(parent, cellE, model.getChildCount(parent));
 				//	System.out.println("added edge: "+edge);
 			}
 			
 			// Insert all missing gold nodes and edges
-			if((isShowGoldEdges() || isShowGoldNodes()) 
-					&& edgeLookup!=null && !edgeLookup.isEmpty()) {
-				if(isFilterSingletons()) {
-					edgeLookup = CoreferenceUtils.removeSingletons(edgeLookup);
-				}
+			if((isIncludeGoldEdges() || isIncludeGoldNodes()) 
+					&& comparison.getGoldEdges()!=null && !comparison.getGoldEdges().isEmpty()) {
 				
-				for(Edge edge : edgeLookup) {
+				for(Edge edge : comparison.getGoldEdges()) {
 					//System.out.println("adding gold edge: "+edge);
 					
 					Span spanS = edge.getSource();
 					Span spanT = edge.getTarget();
 					
+//					if(!comparison.isGold(spanS)
+//							&& !comparison.isGold(spanT)) {
+//						continue;
+//					}
+					
 					Object cellS = cellMap.get(spanS);
 					Object cellT = cellMap.get(spanT);
 					
-					if(!isShowGoldNodes() && (cellS==null || cellT==null)) {
-						continue;
-					}
-					if(!isShowGoldEdges() && !spanS.isROOT()) {
-						continue;
-					}
-					
 					boolean isNew = cellS==null || cellT==null;
 					
+					// Skip edges to or from gold nodes when those nodes should 
+					// not be displayed
+					if(!isIncludeGoldNodes() && isNew) {
+						continue;
+					}
+					
+					// Skip edges
+					if(!isIncludeGoldEdges() && !isNew) {
+						continue;
+					}
+					
 					if(cellS==null) {
-						cellS = createVertex(spanS, CorefCellData.MISSING_GOLD);
+						cellS = createVertex(spanS, comparison.getErrorType(spanS), true);
 						cellMap.put(spanS, cellS);
 						
 						model.add(parent, cellS, model.getChildCount(parent));
@@ -503,7 +510,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 					}
 					
 					if(cellT==null) {
-						cellT = createVertex(spanT, CorefCellData.MISSING_GOLD);
+						cellT = createVertex(spanT, comparison.getErrorType(spanT), true);
 						cellMap.put(spanT, cellT);
 						
 						model.add(parent, cellT, model.getChildCount(parent));
@@ -511,11 +518,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 						graph.cellSizeUpdated(cellT, false);
 					}
 					
-					if(isShowGoldEdges() || (spanS.isROOT() && isNew)) {
-						Object cellE = createEdge(edge, cellS, cellT, CorefCellData.MISSING_GOLD);
-						
-						model.add(parent, cellE, model.getChildCount(parent));
-					}
+					Object cellE = createEdge(edge, cellS, cellT, true);
+					
+					model.add(parent, cellE, model.getChildCount(parent));
 				}
 			}
 			
@@ -532,12 +537,12 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		// TODO enable modifications as soon as the inner data storage is a clone of supplied data!
 	}
 	
-	public boolean isShowGoldEdges() {
-		return showGoldEdges;
+	public boolean isIncludeGoldEdges() {
+		return includeGoldEdges;
 	}
 	
-	public boolean isShowGoldNodes() {
-		return showGoldNodes;
+	public boolean isIncludeGoldNodes() {
+		return includeGoldNodes;
 	}
 
 	public boolean isMarkFalseEdges() {
@@ -552,36 +557,36 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		return filterSingletons;
 	}
 
-	public void setShowGoldEdges(boolean showGoldEdges) {
-		if(showGoldEdges==this.showGoldEdges) {
+	public void setIncludeGoldEdges(boolean includeGoldEdges) {
+		if(includeGoldEdges==this.includeGoldEdges) {
 			return;
 		}
 		
-		boolean oldValue = this.showGoldEdges;
-		this.showGoldEdges = showGoldEdges;
+		boolean oldValue = this.includeGoldEdges;
+		this.includeGoldEdges = includeGoldEdges;
 
 		rebuildGraph();
 		
-		getActionManager().setSelected(showGoldEdges, 
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldEdgesAction"); //$NON-NLS-1$
+		getActionManager().setSelected(includeGoldEdges, 
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldEdgesAction"); //$NON-NLS-1$
 		
-		firePropertyChange("showGoldEdges", oldValue, showGoldEdges); //$NON-NLS-1$
+		firePropertyChange("includeGoldEdges", oldValue, includeGoldEdges); //$NON-NLS-1$
 	}
 
-	public void setShowGoldNodes(boolean showGoldNodes) {
-		if(showGoldNodes==this.showGoldNodes) {
+	public void setIncludeGoldNodes(boolean includeGoldNodes) {
+		if(includeGoldNodes==this.includeGoldNodes) {
 			return;
 		}
 		
-		boolean oldValue = this.showGoldNodes;
-		this.showGoldNodes = showGoldNodes;
+		boolean oldValue = this.includeGoldNodes;
+		this.includeGoldNodes = includeGoldNodes;
 
 		rebuildGraph();
 		
-		getActionManager().setSelected(showGoldNodes, 
-				"plugins.coref.coreferenceGraphPresenter.toggleShowGoldNodesAction"); //$NON-NLS-1$
+		getActionManager().setSelected(includeGoldNodes, 
+				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction"); //$NON-NLS-1$
 		
-		firePropertyChange("showGoldNodes", oldValue, showGoldNodes); //$NON-NLS-1$
+		firePropertyChange("includeGoldNodes", oldValue, includeGoldNodes); //$NON-NLS-1$
 	}
 
 	public void setMarkFalseEdges(boolean markFalseEdges) {
@@ -638,15 +643,20 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		}
 		
 		try {
-			CorefMember member = null;
+			Collection<CorefMember> members = new LinkedList<>();
 			
 			if(value instanceof CorefNodeData) {
-				member = ((CorefNodeData)value).getSpan();
+				members.add(((CorefNodeData)value).getSpan());
 			} else if(value instanceof CorefEdgeData) {
-				member = ((CorefEdgeData)value).getEdge();
+				Edge edge = ((CorefEdgeData)value).getEdge();
+				
+				if(!edge.getSource().isROOT()) {
+					members.add(edge.getSource());
+				}
+				members.add(edge.getTarget());
 			}
 			
-			parent.outlineMember(member, null);
+			parent.outlineMembers(members, null);
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, 
 					"Failed to outline properties: "+String.valueOf(value), e); //$NON-NLS-1$
@@ -769,14 +779,17 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			String tooltip = null;
 			
 			if(value instanceof CorefNodeData) {
-				Span span = ((CorefNodeData)value).getSpan();
-				int sentenceIndex = span.getSentenceIndex();
-				if(sentenceIndex!=-1) {
-					CoreferenceData sentence = document.get(sentenceIndex);
-					tooltip = CoreferenceUtils.getSpanTooltip(span, sentence);
+				CorefNodeData nodeData = (CorefNodeData) value;
+				if(!nodeData.getSpan().isROOT()) {
+					tooltip = CoreferenceUtils.getSpanTooltip(
+							nodeData.getSpan(), 
+							nodeData.getSentence(), 
+							nodeData.getErrorType());
 				}
 			} else if(value instanceof CorefEdgeData) {
-				tooltip = CoreferenceUtils.getEdgeTooltip(((CorefEdgeData)value).getEdge());
+				CorefEdgeData data = (CorefEdgeData) value;
+				CorefNodeData nodeData = (CorefNodeData) getModel().getValue(getModel().getTerminal(cell, false));
+				tooltip = CoreferenceUtils.getEdgeTooltip(data.getEdge(), nodeData.getErrorType());
 			}
 			
 			return tooltip==null ? null : UIUtil.toUnwrappedSwingTooltip(tooltip);
@@ -805,19 +818,19 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			// ignore
 		}
 
-		public void showGoldEdges(boolean b) {
-			setShowGoldEdges(b);
+		public void includeGoldEdges(boolean b) {
+			setIncludeGoldEdges(b);
 		}
 
-		public void showGoldEdges(ActionEvent e) {
+		public void includeGoldEdges(ActionEvent e) {
 			// ignore
 		}
 
-		public void showGoldNodes(boolean b) {
-			setShowGoldNodes(b);
+		public void includeGoldNodes(boolean b) {
+			setIncludeGoldNodes(b);
 		}
 
-		public void showGoldNodes(ActionEvent e) {
+		public void includeGoldNodes(ActionEvent e) {
 			// ignore
 		}
 

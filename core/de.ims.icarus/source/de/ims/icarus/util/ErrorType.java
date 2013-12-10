@@ -23,14 +23,55 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.meta;
+package de.ims.icarus.util;
+
+import javax.swing.Icon;
+
+import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public enum ErrorType implements Identity {
+	TRUE_NEGATIVE("trueNegative"), //$NON-NLS-1$
+	TRUE_POSITIVE("truePositive"), //$NON-NLS-1$
+	FALSE_POSITIVE("falsePositive"), //$NON-NLS-1$
+	FALSE_NEGATIVE("falseNegative"); //$NON-NLS-1$
 
-	ValueSet getValueSet();
+	
+	private final String key;
+	
+	private ErrorType(String key) {
+		this.key = key;
+	}
+
+	@Override
+	public String getId() {
+		return getName();
+	}
+
+	@Override
+	public String getName() {
+		return ResourceManager.getInstance().get(
+				"errorType."+key+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Override
+	public String getDescription() {
+		return ResourceManager.getInstance().get(
+				"errorType."+key+".description"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Override
+	public Icon getIcon() {
+		return null;
+	}
+
+	@Override
+	public Object getOwner() {
+		return ErrorType.class;
+	}
 }

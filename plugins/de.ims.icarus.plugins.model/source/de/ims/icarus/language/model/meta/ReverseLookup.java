@@ -42,7 +42,7 @@ import de.ims.icarus.language.model.Markable;
  * @version $Id$
  *
  */
-public interface ReverseLookup {
+public interface ReverseLookup extends MetaData {
 
 	/**
 	 * Returns the container that hosts the markable objects

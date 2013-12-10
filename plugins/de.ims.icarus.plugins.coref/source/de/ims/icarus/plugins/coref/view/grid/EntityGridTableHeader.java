@@ -23,14 +23,26 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.meta;
+package de.ims.icarus.plugins.coref.view.grid;
+
+import javax.swing.table.JTableHeader;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public class EntityGridTableHeader extends JTableHeader {
 
-	ValueSet getValueSet();
+	private static final long serialVersionUID = 4636453180027403027L;
+
+//	/**
+//	 * @see javax.swing.JComponent#getHeight()
+//	 */
+//	@Override
+//	public int getHeight() {
+//		return 100;
+//	}
+
+	
 }

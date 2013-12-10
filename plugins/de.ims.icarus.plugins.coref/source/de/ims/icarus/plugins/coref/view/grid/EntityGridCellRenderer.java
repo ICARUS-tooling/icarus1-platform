@@ -58,9 +58,6 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 	protected Color unselectedForeground;
     protected Color unselectedBackground;
     
-    protected Color missingGoldNodeColor = Color.red;
-    protected Color falseNodeColor = Color.green;
-    
     protected EntityGridNode node;
     
     // If true the renderer will only display the number
@@ -163,7 +160,8 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		String tooltip = null;
 		
 		if(node!=null && node.getSpanCount()>0) {
-			tooltip = CoreferenceUtils.createTooltip(node.getSentence(), node.getSpans());
+			tooltip = CoreferenceUtils.createTooltip(node.getSentence(), 
+					node.getSpans(), node.getTypes());
 		}
 		setToolTipText(UIUtil.toUnwrappedSwingTooltip(tooltip));
 	}
@@ -219,17 +217,17 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		g.drawString("[", x, y); //$NON-NLS-1$
 		x += fm.charWidth('[');
 		
-		Color c = null;
-		if(node.hasMissingGoldSpan()) {
-			// False negatives
-			c = missingGoldNodeColor;
-		} else if(node.hasFalsePredictedSpan()) {
-			// False positives
-			c = falseNodeColor;
-		}
-		if(c!=null) {
-			g.setColor(c);
-		}
+//		Color c = null;
+//		if(node.hasFalseNegative()) {
+//			// False negatives
+//			c = CoreferenceUtils.getFalseNegativeColor();
+//		} else if(node.hasFalsePositive()) {
+//			// False positives
+//			c = CoreferenceUtils.getFalsePositiveColor();
+//		}
+//		if(c!=null) {
+//			g.setColor(c);
+//		}
 		g.drawString(label, x, y);
 		x += fm.stringWidth(label);
 		
@@ -291,10 +289,8 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 			Color c = null;
 			if(node.isHighlighted(i)) {
 				c = node.getHighlightColor(i);
-			} else if(node.isMissingGoldSpan(i)) {
-				c = missingGoldNodeColor;
-			} else if(node.isFalsePredictedSpan(i)) {
-				c = falseNodeColor;
+			} else {
+				c = CoreferenceUtils.getErrorColor(node.getErrorType(i));
 			}
 			
 			if(c==null) {

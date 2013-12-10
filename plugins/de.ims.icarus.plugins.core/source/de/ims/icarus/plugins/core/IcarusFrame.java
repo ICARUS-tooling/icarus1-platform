@@ -285,9 +285,12 @@ public class IcarusFrame extends JFrame {
 			footerPanel = new JPanel(new BorderLayout());
 			footerPanel.add(getInfoPanel().getContentPanel(), BorderLayout.CENTER);
 			
+			TaskPanel taskPanel = getTaskPanel();
+			
 			JPanel toolsPanel = new JPanel();
+			toolsPanel.add(taskPanel.getProgressPanel());
 			toolsPanel.add(getMemoryMonitorPanel());
-			toolsPanel.add(getTaskPanel());
+			toolsPanel.add(taskPanel.getOpenDialogButton());
 			
 			footerPanel.add(toolsPanel, BorderLayout.EAST);
 		}

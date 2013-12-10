@@ -23,14 +23,10 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.meta;
+package de.ims.icarus.language.coref.registry;
 
-/**
- * @author Markus Gärtner
- * @version $Id$
- *
- */
-public interface ValueDistribution extends MetaData {
-
-	ValueSet getValueSet();
+public enum DescriptorState {
+	VALID,
+	INVALID,
+	LOADING,
 }

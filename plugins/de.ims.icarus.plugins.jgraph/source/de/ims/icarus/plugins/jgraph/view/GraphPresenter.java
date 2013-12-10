@@ -133,6 +133,7 @@ import de.ims.icarus.plugins.jgraph.util.CellBuffer;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.config.ConfigDialog;
@@ -553,8 +554,14 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 	protected String uneditableMainToolBarListId = "plugins.jgraph.graphPresenter.uneditableMainToolBarList"; //$NON-NLS-1$
 		
 	protected Component createUpperComponent() {
-		ActionManager actionManager = getActionManager();
+		return createUpperToolBar().buildToolBar();
+	}
+	
+	protected ActionComponentBuilder createUpperToolBar() {
+		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
 		
+		builder.setActionListId(isEditable() ? editableMainToolBarListId : uneditableMainToolBarListId);
+
 		Options options = new Options();
 		feedSelector(options, SELECT_LAYOUT_COMMAND);
 		feedSelector(options, SELECT_STYLE_COMMAND);
@@ -569,11 +576,9 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			options.put("annotationControl", items.toArray()); //$NON-NLS-1$
 		}
 		
-		String actionListId = isEditable() ? editableMainToolBarListId : uneditableMainToolBarListId;
-		JToolBar toolBar = actionManager.createToolBar(actionListId, options);
-		//toolBar.setLayout(new ModifiedFlowLayout(FlowLayout.LEFT, 1, 3));
-				
-		return toolBar;
+		builder.addOptions(options);
+		
+		return builder;
 	}
 	
 	protected AnnotationControl createAnnotationControl() {

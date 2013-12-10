@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.AbstractListModel;
@@ -54,12 +55,15 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.Core.NamedRunnable;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.CoreferencePlugin;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
@@ -528,6 +532,22 @@ public final class CoreferenceRegistry {
 		return StringUtil.getUniqueName(baseName, usedNames);
 	}
 	
+	public static boolean canLoad(DocumentSetDescriptor descriptor) {
+		if(descriptor==null)
+			throw new NullPointerException("Invalid document set descriptor"); //$NON-NLS-1$
+		
+		return !descriptor.isLoaded() && !descriptor.isLoading();
+	}
+	
+	public static boolean canLoad(AllocationDescriptor descriptor) {
+		if(descriptor==null)
+			throw new NullPointerException("Invalid allocation descriptor"); //$NON-NLS-1$
+		
+		DocumentSetDescriptor parent = descriptor.getParent();
+		
+		return parent.isLoaded() && !parent.isLoading() && !descriptor.isLoaded() && !descriptor.isLoading();
+	}
+	
 	public AllocationDescriptor[] getAvailableAllocations(DocumentSetDescriptor descriptor) {
 		Collection<AllocationDescriptor> allocations = new ArrayList<>();
 		
@@ -536,6 +556,108 @@ public final class CoreferenceRegistry {
 		}
 		
 		return allocations.toArray(new AllocationDescriptor[allocations.size()]);
+	}
+	
+	public static DescriptorState loadDocumentSet(final DocumentSetDescriptor descriptor, final Runnable runnable) {
+		if(descriptor==null)
+			throw new NullPointerException("Invalid document set descriptor"); //$NON-NLS-1$
+		
+		if(descriptor.isLoaded() || descriptor.isLoading()) {
+			return DescriptorState.VALID;
+		}
+
+		if(descriptor.getLocation()==null) {
+			DialogFactory.getGlobalFactory().showError(null, 
+					"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+					"plugins.coref.dialogs.missingLocation"); //$NON-NLS-1$
+			return DescriptorState.INVALID;
+		}
+		if(descriptor.getReaderExtension()==null) {
+			DialogFactory.getGlobalFactory().showError(null, 
+					"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+					"plugins.coref.dialogs.missingReader"); //$NON-NLS-1$
+			return DescriptorState.INVALID;
+		}
+		
+		final String name = descriptor.getName();
+		String title = ResourceManager.getInstance().get(
+				"plugins.coref.labels.loadingDocumentSet"); //$NON-NLS-1$
+		Object task = new IOUtil.LoadJob(descriptor) {
+			@Override
+			protected void done() {
+				try {
+					get();
+				} catch(CancellationException | InterruptedException e) {
+					// ignore
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to load document set: "+name, e); //$NON-NLS-1$
+					
+					UIUtil.beep();
+					
+					Core.getCore().handleThrowable(e);
+				} finally {
+					if(runnable!=null) {
+						runnable.run();
+					}
+				}
+			}				
+		};
+		TaskManager.getInstance().schedule(task, title, null, null, 
+				TaskPriority.DEFAULT, true);
+		
+		return DescriptorState.LOADING;
+	}
+	
+	public static DescriptorState loadAllocation(final AllocationDescriptor descriptor, final Runnable runnable) {
+		if(descriptor==null)
+			throw new NullPointerException("Invalid allocation descriptor"); //$NON-NLS-1$
+		
+		if(descriptor.isLoaded() || descriptor.isLoading()) {
+			return DescriptorState.VALID;
+		}
+
+		if(descriptor.getLocation()==null) {
+			DialogFactory.getGlobalFactory().showError(null, 
+					"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+					"plugins.coref.dialogs.missingLocation"); //$NON-NLS-1$
+			return DescriptorState.INVALID;
+		}
+		if(descriptor.getReaderExtension()==null) {
+			DialogFactory.getGlobalFactory().showError(null, 
+					"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
+					"plugins.coref.dialogs.missingReader"); //$NON-NLS-1$
+			return DescriptorState.INVALID;
+		}
+		
+		final String name = descriptor.getName();
+		String title = ResourceManager.getInstance().get(
+				"plugins.coref.labels.loadingAllocation"); //$NON-NLS-1$
+		Object task = new IOUtil.LoadJob(descriptor) {
+			@Override
+			protected void done() {
+				try {
+					get();
+				} catch(CancellationException | InterruptedException e) {
+					// ignore
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to load allocation: "+name, e); //$NON-NLS-1$
+					
+					UIUtil.beep();
+					
+					Core.getCore().handleThrowable(e);
+				} finally {
+					if(runnable!=null) {
+						runnable.run();
+					}
+				}
+			}				
+		};
+		TaskManager.getInstance().schedule(task, title, null, null, 
+				TaskPriority.DEFAULT, true);
+		
+		return DescriptorState.LOADING;
 	}
 	
 	private void saveBackground() {

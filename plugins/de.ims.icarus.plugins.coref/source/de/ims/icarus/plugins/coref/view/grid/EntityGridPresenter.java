@@ -70,13 +70,13 @@ import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
 import de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder;
 import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
+import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.ui.list.RowHeaderList;
 import de.ims.icarus.ui.table.TableColumnAdjuster;
 import de.ims.icarus.ui.table.TableIndexListModel;
@@ -107,6 +107,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		
 	protected EntityGridTableModel gridModel;
 	protected EntityGridCellRenderer cellRenderer;
+	protected EntityGridTableHeaderRenderer headerRenderer;
 	
 	protected AnnotationManager annotationManager;
 	
@@ -123,7 +124,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	protected boolean patternActive = true;
 	
 	public static final int DEFAULT_CELL_HEIGHT = 20;
-	public static final int DEFAULT_CELL_WIDTH = 70;
+	public static final int DEFAULT_CELL_WIDTH = 95;
 	
 	protected ActionManager actionManager;
 	protected CallbackHandler callbackHandler;
@@ -179,10 +180,10 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 				callbackHandler, "refresh"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.entityGridPresenter.openPreferencesAction",  //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
-				callbackHandler, "toggleMarkFalseSpans"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleShowGoldSpansAction",  //$NON-NLS-1$
-				callbackHandler, "toggleShowGoldSpans"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleMarkFalseMentionsAction",  //$NON-NLS-1$
+				callbackHandler, "toggleMarkFalseMentions"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleIncludeGoldMentionsAction",  //$NON-NLS-1$
+				callbackHandler, "toggleIncludeGoldMentions"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleFilterSingletonsAction",  //$NON-NLS-1$
 				callbackHandler, "toggleFilterSingletons"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.coref.entityGridPresenter.toggleLabelModeAction",  //$NON-NLS-1$
@@ -192,20 +193,23 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	}
 	
 	protected void refreshActions() {
+		if(contentPanel==null) {
+			return;
+		}
 		
 		ActionManager actionManager = getActionManager();
 		
 		EntityGridTableModel model = getGridModel();
 
-		actionManager.setSelected(model.isMarkFalseSpans(), "plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction"); //$NON-NLS-1$
-		actionManager.setSelected(model.isShowGoldSpans(), "plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
+		actionManager.setSelected(model.isMarkFalseMentions(), "plugins.coref.entityGridPresenter.toggleMarkFalseMentionsAction"); //$NON-NLS-1$
+		actionManager.setSelected(model.isIncludeGoldMentions(), "plugins.coref.entityGridPresenter.toggleIncludeGoldMentionsAction"); //$NON-NLS-1$
 		actionManager.setSelected(model.isFilterSingletons(), "plugins.coref.entityGridPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 		actionManager.setSelected(patternSelect.isEnabled(), "plugins.coref.entityGridPresenter.toggleLabelModeAction"); //$NON-NLS-1$
 
 		boolean hasGold = goldAllocation!=null && goldAllocation!=allocation;
 		actionManager.setEnabled(hasGold, 
-				"plugins.coref.entityGridPresenter.toggleMarkFalseSpansAction",  //$NON-NLS-1$
-				"plugins.coref.entityGridPresenter.toggleShowGoldSpansAction"); //$NON-NLS-1$
+				"plugins.coref.entityGridPresenter.toggleMarkFalseMentionsAction",  //$NON-NLS-1$
+				"plugins.coref.entityGridPresenter.toggleIncludeGoldMentionsAction"); //$NON-NLS-1$
 	}
 
 	public AnnotationManager getAnnotationManager() {
@@ -248,7 +252,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		
 		if(patternSelectInfo==null) {
 			final JLabel label = new JLabel();
-			label.addMouseListener(new TooltipFreezer());label.setIcon(IconRegistry.getGlobalRegistry().getIcon("smartmode_co.gif")); //$NON-NLS-1$
+			label.addMouseListener(new TooltipFreezer());label.setIcon(UIUtil.getInfoIcon());
 			
 			Localizable localizable = new Localizable() {
 				
@@ -263,7 +267,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			
 			patternSelectInfo = label;
 		}
-		
+
+		builder.addOption("errorInfoLabel", CoreferenceUtils.createErrorInfoLabel()); //$NON-NLS-1$
 		builder.addOption("patternSelect", patternSelect); //$NON-NLS-1$
 		builder.addOption("patternSelectInfo", patternSelectInfo); //$NON-NLS-1$
 		AnnotationControl annotationControl = createAnnotationControl();
@@ -385,6 +390,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	 */
 	@Override
 	protected JTable createTable() {
+
+		
 		JTable table = new JTable(gridModel, gridModel.getColumnModel());
 		
 		UIUtil.enableRighClickTableSelection(table);
@@ -399,13 +406,14 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getSelectionModel().addListSelectionListener(getHandler());
 		table.getColumnModel().getSelectionModel().addListSelectionListener(getHandler());
-
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
-		EntityGridTableHeaderRenderer headerRenderer = new EntityGridTableHeaderRenderer();
+		headerRenderer = new EntityGridTableHeaderRenderer(header.getDefaultRenderer());
+		headerRenderer.setAutoAdjustEnabled(adjustColumnWidth);
 		header.setDefaultRenderer(headerRenderer);
 		//renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
 		gridModel.getColumnModel().setHeaderRenderer(headerRenderer);
+		
 		
 		return table;
 	}
@@ -453,7 +461,36 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		gridModel.setDocument(document);
 		gridModel.reload(allocation, goldAllocation);
 		
+		refreshGridHeader();
+		
 		tryAdjustColumnWidth();
+		
+		refreshActions();
+	}
+	
+	protected void refreshGridHeader() {
+		if(headerRenderer==null) {
+			return;
+		}
+		
+		boolean hasValidGold = goldAllocation!=null && goldAllocation!=allocation;
+
+		headerRenderer.setShowErrorLabels(hasValidGold);
+
+		JTableHeader header = table.getTableHeader();
+		
+		headerRenderer.setPrototypeMode(true);
+		try {
+			header.resizeAndRepaint();
+		} finally {
+			headerRenderer.setPrototypeMode(false);
+		}
+		
+//		JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(
+//				JScrollPane.class, table);
+//		JViewport viewport = scrollPane.getColumnHeader();
+//		viewport.revalidate();
+//		viewport.repaint();
 	}
 	
 	protected void refreshLabelBuilder() {
@@ -471,6 +508,16 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			if(pattern!=null && !pattern.isEmpty()) {
 				try {
 					builder = new PatternLabelBuilder(pattern);
+					
+					// Legal pattern
+					MutableComboBoxModel<Object> model = 
+							(MutableComboBoxModel<Object>) patternSelect.getModel();
+					
+					int index = ListUtils.indexOf(pattern, model);
+					
+					if(index==-1) {
+						model.addElement(pattern);
+					}
 				} catch(Exception e) {
 					LoggerFactory.log(this, Level.SEVERE, 
 							"Invalid pattern: "+pattern, e); //$NON-NLS-1$
@@ -515,11 +562,19 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	}
 	
 	protected void tryAdjustColumnWidth() {
-		if(!adjustColumnWidth || columnAdjuster==null) {
+		if(columnAdjuster==null) {
 			return;
 		}
 		
-		columnAdjuster.adjustColumns();
+		if(headerRenderer!=null) {
+			headerRenderer.setAutoAdjustEnabled(adjustColumnWidth);
+		}
+		
+		if(adjustColumnWidth) {
+			columnAdjuster.adjustColumns();
+		} else {
+			gridModel.getColumnModel().resetColumnSize();
+		}
 	}
 	
 	protected void showPopup(MouseEvent e) {
@@ -674,43 +729,43 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			}
 		}
 
-		public void toggleMarkFalseSpans(ActionEvent e) {
+		public void toggleMarkFalseMentions(ActionEvent e) {
 			// ignore
 		}
 
-		public void toggleMarkFalseSpans(boolean b) {
+		public void toggleMarkFalseMentions(boolean b) {
 			EntityGridTableModel model = getGridModel();
 			
-			if(model.isMarkFalseSpans()==b) {
+			if(model.isMarkFalseMentions()==b) {
 				return;
 			}
 			
 			try {
-				model.setMarkFalseSpans(b);
+				model.setMarkFalseMentions(b);
 				EntityGridPresenter.this.refresh();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to toggle 'markFalseSpans' flag", e); //$NON-NLS-1$
+						"Failed to toggle 'markFalseMentions' flag", e); //$NON-NLS-1$
 			}
 		}
 
-		public void toggleShowGoldSpans(ActionEvent e) {
+		public void toggleIncludeGoldMentions(ActionEvent e) {
 			// ignore
 		}
 
-		public void toggleShowGoldSpans(boolean b) {
+		public void toggleIncludeGoldMentions(boolean b) {
 			EntityGridTableModel model = getGridModel();
 			
-			if(model.isShowGoldSpans()==b) {
+			if(model.isIncludeGoldMentions()==b) {
 				return;
 			}
 			
 			try {
-				model.setShowGoldSpans(b);
+				model.setIncludeGoldMentions(b);
 				EntityGridPresenter.this.refresh();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to toggle 'showGoldSpans' flag", e); //$NON-NLS-1$
+						"Failed to toggle 'includeGoldMentions' flag", e); //$NON-NLS-1$
 			}
 		}
 
@@ -767,13 +822,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 			try {
 				adjustColumnWidth = b;
 				
-//				columnAdjuster.setDynamicAdjustment(adjustColumnWidth);
-				
-				if(adjustColumnWidth) {
-					columnAdjuster.adjustColumns();
-				} else {
-//					columnAdjuster.restoreColumns();
-				}
+				tryAdjustColumnWidth();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, 
 						"Failed to adjust table columns", e); //$NON-NLS-1$

@@ -23,7 +23,7 @@ Use top-level project build file to build application.
 			<fileset dir="${basedir}/classes" includes="**/*" />
 		</delete>
 		<manifest file="${basedir}/manifest.mf">
-			<attribute name="Class-Path" value="jpf.jar" />
+			<attribute name="Class-Path" value="jpf.jar jgoodies-common-1.6.0.jar jgoodies-forms-1.7.1.jar" />
 			<attribute name="Main-Class" value="${core.main-class}" />
 			<attribute name="SplashScreen-Image" value="${core.splash-image}" />
 			<attribute name="Implementation-Version" value="${implementation.version}" />
@@ -54,8 +54,8 @@ Use top-level project build file to build application.
 		<mkdir dir="${build.home}/lib" />
 		<copy todir="${build.home}/lib" file="${lib.home}/jpf.jar" overwrite="true"/>
 		<copy todir="${build.home}/lib" file="${lib.home}/commons-logging.jar" overwrite="true"/>
-		<copy todir="${build.home}/lib" file="${lib.home}/jgoodies-common-1.6.0-sources.jar" overwrite="true"/>
-		<copy todir="${build.home}/lib" file="${lib.home}/jgoodies-forms-1.7.1-sources.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jgoodies-common-1.6.0.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jgoodies-forms-1.7.1.jar" overwrite="true"/>
 		<jar jarfile="${build.home}/lib/${core.jar.name}" basedir="${basedir}/classes" 
 			index="true" manifest="${basedir}/manifest.mf" />
 	</target>

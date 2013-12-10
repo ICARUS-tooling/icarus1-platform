@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.coref.view.graph;
 
+import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.plugins.jgraph.cells.GraphNode;
@@ -42,6 +43,8 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 	
 	protected String label;
 
+	private CorefErrorType type;
+
 	protected CorefNodeData() {
 		// no-op
 	}
@@ -51,14 +54,28 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 		setSentence(sentence);
 	}
 	
-	public CorefNodeData(Span span, CoreferenceData sentence, int nodeType) {
-		super(span, nodeType);
+	public CorefNodeData(Span span, CoreferenceData sentence, CorefErrorType type) {
+		super(span);
+		setSentence(sentence);
+	}
+	
+	public CorefNodeData(Span span, CoreferenceData sentence, CorefErrorType type, boolean gold) {
+		super(span, gold);
 		setSentence(sentence);
 	}
 
-	public CorefNodeData(Span data, CoreferenceData sentence, int type, long highlight) {
-		super(data, type, highlight);
+	public CorefNodeData(Span data, CoreferenceData sentence, CorefErrorType type, boolean gold, long highlight) {
+		super(data, gold, highlight);
 		setSentence(sentence);
+		setType(type);
+	}
+
+	public CorefErrorType getErrorType() {
+		return type;
+	}
+
+	public void setType(CorefErrorType type) {
+		this.type = type;
 	}
 
 	@Override
@@ -83,7 +100,7 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 		if(data==null) {
 			return "-"; //$NON-NLS-1$
 		} else if(data.isROOT()) {
-			return "-1\nGenericDocRoot"; //$NON-NLS-1$
+			return "\n  Document Root  \n "; //$NON-NLS-1$
 		} else {
 			StringBuilder sb = new StringBuilder();
 			

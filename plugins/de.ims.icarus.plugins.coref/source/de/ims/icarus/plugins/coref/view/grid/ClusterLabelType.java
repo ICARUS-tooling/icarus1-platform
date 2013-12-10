@@ -77,6 +77,26 @@ public enum ClusterLabelType implements Identity {
 			
 			return minSpan;
 		}
+	},
+	LONGEST("longest") { //$NON-NLS-1$
+		@Override
+		protected Span getSignificantSpan(Cluster cluster,
+				CoreferenceDocumentData document) {
+
+			int maxLength = 0;
+			Span maxSpan = null;
+			
+			for(int i=0; i<cluster.size(); i++) {
+				Span span = cluster.get(i);
+				int length = CoreferenceUtils.getSpanLength(span, document);
+				if(length>maxLength) {
+					maxLength = length;
+					maxSpan = span;
+				}
+			}
+			
+			return maxSpan;
+		}
 	}; 
 	
 	private final String key;

@@ -23,12 +23,12 @@
 	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction"
 		name="${id}.name" desc="${id}.description" icon="uddi_registry_cat_node.gif" type="toggle" />
 		
-	<!-- Toggle 'markFalseSpans' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction"
+	<!-- Toggle 'markFalseMentions' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseMentionsAction"
 		name="${id}.name" desc="${id}.description" icon="false_node.png" type="toggle" />
 		
-	<!-- Toggle 'showGoldSpans' -->
-	<action id="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction"
+	<!-- Toggle 'includeGoldMentions' -->
+	<action id="plugins.coref.coreferenceDocumentPresenter.toggleIncludeGoldMentionsAction"
 		name="${id}.name" desc="${id}.description" icon="gold_node.png" type="toggle" />
 		
 	<!-- Toggle 'filterSingletons' -->
@@ -84,11 +84,6 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
 		<separator />
-		<!--<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />-->
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction" />
-		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
 		<separator />
@@ -96,6 +91,13 @@
 		<separator />
 		<item type="custom" value="modifiers" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
+		<separator />
+		<!--<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />-->
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction" />
+		<item type="custom" value="errorInfoLabel" />
+		<item type="glue" />
 	</action-list>
 		
 	<!-- Extended Toolbar List for header area -->
@@ -115,15 +117,17 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowOffsetAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowClusterIdAction" />
 		<separator />
-		<!--<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />-->
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
-		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction" />
-		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.filterSpanAction" />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
+		<separator />
+		<!--<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleMarkFalseSpansAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleShowGoldSpansAction" />-->
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction" />
+		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.toggleFilterNonHighlightedAction" />
+		<item type="custom" value="errorInfoLabel" />
+		<item type="glue" />
 	</action-list>
 		
 	<!-- Popup-Menu list -->

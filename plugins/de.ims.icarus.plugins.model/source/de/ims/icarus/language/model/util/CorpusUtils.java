@@ -119,7 +119,7 @@ public final class CorpusUtils {
 	}
 	
 	public static String getName(Layer layer) {
-		return layer.getName()+" ("+layer.getTypeName()+")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return layer.getName()+" ("+layer.getType().getName()+")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public static Set<MarkableLayer> getMarkableLayers(Corpus corpus) {

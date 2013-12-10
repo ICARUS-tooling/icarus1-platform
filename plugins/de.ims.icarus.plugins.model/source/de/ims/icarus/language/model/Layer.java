@@ -36,15 +36,15 @@ import de.ims.icarus.language.model.manifest.LayerManifest;
 public interface Layer extends NamedCorpusMember {
 
 	/**
-	 * Returns the 'type' of this layer. This is a {@code String}
+	 * Returns the 'type' of this layer. This is an object
 	 * previously defined via a plugin.xml declaration. The corpus
 	 * uses this type information to group top-level members for
 	 * easier access.
 	 * 
-	 * @return the shared name of the group the member belongs to
+	 * @return the shared type of the group the member belongs to
 	 * (e.g. 'Lemma', 'Part-of-Speech', etc.)
 	 */
-	String getTypeName();
+	LayerType getType();
 	
 	/**
 	 * Returns the {@code Context} object that defines the physical 
@@ -53,8 +53,34 @@ public interface Layer extends NamedCorpusMember {
 	 */
 	Context getContext();
 	
+	/**
+	 * Returns the {@code MarkableLayer} that this layer
+	 * depends on. The exact meaning of this relation differs
+	 * between certain types of layers:
+	 * <ul>
+	 * <li>For an {@code AnnotationLayer} the <i>base layer</i> is
+	 * the layer that hosts the markables for which the annotation
+	 * layer defines annotation values.</li>
+	 * <li>For a common {@code MarkableLayer} the <i>base layer</i>
+	 * contains the markable objects that the new layer builds upon.
+	 * For example a 'sentence' layer would refer to the 'token' layer
+	 * as its base to form token groups.</li>
+	 * <li>In the special case of a {@code MarkableLayer} that is 
+	 * </li>
+	 * </ul>
+	 * 
+	 * 
+	 * @return
+	 */
 	MarkableLayer getBaseLayer();
 	
+	/**
+	 * Returns the manifest object that describes the content of 
+	 * this layer. Subclasses should override this method to return
+	 * a specific type of {@code LayerManifest}!
+	 * 
+	 * @return The manifest describing the content of this layer
+	 */
 	LayerManifest getManifest();
 	
 	/**

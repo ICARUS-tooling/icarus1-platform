@@ -22,6 +22,14 @@
 	<action id="plugins.coref.coreferenceManagerView.deleteDocumentSetAction"
 		name="${id}.name" desc="${id}.description" icon="coref_delete.png" />
 	
+	<!-- Load Document Set -->
+	<action id="plugins.coref.coreferenceManagerView.loadDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="coref_load.png" />
+	
+	<!-- Free Document Set -->
+	<action id="plugins.coref.coreferenceManagerView.freeDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="coref_free.png" />
+	
 	<!-- Edit Document Set -->
 	<action id="plugins.coref.coreferenceManagerView.editDocumentSetAction"
 		name="${id}.name" desc="${id}.description" icon="coref_edit.png" />
@@ -38,7 +46,15 @@
 	<action id="plugins.coref.coreferenceManagerView.deleteAllocationAction"
 		name="${id}.name" desc="${id}.description" icon="alloc_delete.png" />
 	
-	<!-- Edit Allocation -->
+	<!-- Delete Allocation -->
+	<action id="plugins.coref.coreferenceManagerView.loadAllocationAction"
+		name="${id}.name" desc="${id}.description" icon="alloc_load.png" />
+	
+	<!-- Load Allocation -->
+	<action id="plugins.coref.coreferenceManagerView.freeAllocationAction"
+		name="${id}.name" desc="${id}.description" icon="alloc_free.png" />
+	
+	<!-- Free Allocation -->
 	<action id="plugins.coref.coreferenceManagerView.editAllocationAction"
 		name="${id}.name" desc="${id}.description" icon="alloc_edit.png" />
 	
@@ -69,9 +85,15 @@
 		<item type="action" value="plugins.coref.coreferenceManagerView.editDocumentSetAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.inspectDocumentSetAction" />
 		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.loadDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.freeDocumentSetAction" />
+		<separator />
 		<item type="action" value="plugins.coref.coreferenceManagerView.addAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.deleteAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.editAllocationAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.loadAllocationAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.freeAllocationAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceManagerView.showPropertyDialogAction" />
 	</action-list>

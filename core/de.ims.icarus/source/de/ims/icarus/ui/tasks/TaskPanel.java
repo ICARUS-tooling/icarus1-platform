@@ -28,8 +28,6 @@ package de.ims.icarus.ui.tasks;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
@@ -39,7 +37,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -59,9 +56,7 @@ import de.ims.icarus.ui.events.Events;
  * @version $Id$
  *
  */
-public class TaskPanel extends JToolBar {
-
-	private static final long serialVersionUID = -8876327710810382573L;
+public class TaskPanel {
 
 	private JButton openDialogButton;
 	private TaskProgressPanel progressPanel;
@@ -100,24 +95,19 @@ public class TaskPanel extends JToolBar {
 		progressPanel = new TaskProgressPanel();
 		progressPanel.setVisible(false);
 		
-		setLayout(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridy = 0;
-		gbc.anchor = GridBagConstraints.CENTER;
-		
-		add(progressPanel, gbc);
-		add(new JToolBar.Separator(null), gbc);
-		add(openDialogButton, gbc);
-		
-		setRollover(true);
-		setFloatable(false);
-		setBorder(null);
-		
 		refresh();
 		
 		taskManager.addListener(Events.ADDED, getHandler());
 		taskManager.addListener(Events.REMOVED, getHandler());
 		taskManager.addListener(TaskConstants.ACTIVE_TASK_CHANGED, getHandler());
+	}
+	
+	public JButton getOpenDialogButton() {
+		return openDialogButton;
+	}
+	
+	public JPanel getProgressPanel() {
+		return progressPanel;
 	}
 	
 	public TaskManager getTaskManager() {

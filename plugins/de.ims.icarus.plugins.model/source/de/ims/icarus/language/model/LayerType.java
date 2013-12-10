@@ -23,14 +23,17 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.meta;
+package de.ims.icarus.language.model;
+
+import de.ims.icarus.language.model.manifest.LayerManifest;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public interface LayerType extends Identity {
 
-	ValueSet getValueSet();
+	LayerManifest getSharedManifest();
 }

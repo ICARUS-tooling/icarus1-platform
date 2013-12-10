@@ -40,7 +40,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
@@ -56,9 +55,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.java.plugin.registry.Extension;
 
-import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -68,6 +65,7 @@ import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
+import de.ims.icarus.language.coref.registry.DescriptorState;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
@@ -80,9 +78,6 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.dialog.DialogFactory;
-import de.ims.icarus.ui.tasks.TaskManager;
-import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.Presenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
@@ -431,7 +426,11 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	}
 
 	public void outlineMember(CorefMember member, Options options) {
-		outlineMembers(Collections.singleton(member), options);
+		Collection<CorefMember> members = new LinkedList<>();
+		if(member!=null) {
+			members.add(member);
+		}
+		outlineMembers(members, options);
 	}
 	
 	public void outlineMembers(CorefMember[] members, Options options) {
@@ -471,7 +470,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 				detailOutline.clear();
 			}
 			
-			if(showContextOutline && !spans.isEmpty()) {
+			if(showContextOutline && !isTextPresenter() && !spans.isEmpty()) {
 				Options opt = new Options(options);
 				//opt.putAll(this.options);
 				opt.put("index", spans.get(0).getSentenceIndex()); //$NON-NLS-1$
@@ -658,61 +657,20 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 
 			options.put(key, descriptor.getAllocation());
 			
-			if(!descriptor.isLoaded() && !descriptor.isLoading()) {
-
-				if(descriptor.getLocation()==null) {
-					DialogFactory.getGlobalFactory().showError(null, 
-							"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
-							"plugins.coref.dialogs.missingLocation"); //$NON-NLS-1$
-					return DescriptorState.INVALID;
-				}
-				if(descriptor.getReaderExtension()==null) {
-					DialogFactory.getGlobalFactory().showError(null, 
-							"plugins.coref.dialogs.errorTitle",  //$NON-NLS-1$
-							"plugins.coref.dialogs.missingReader"); //$NON-NLS-1$
-					return DescriptorState.INVALID;
-				}
+			return CoreferenceRegistry.loadAllocation(descriptor, new Runnable() {
 				
-				final String name = descriptor.getName();
-				String title = ResourceManager.getInstance().get(
-						"plugins.coref.labels.loadingAllocation"); //$NON-NLS-1$
-				Object task = new IOUtil.LoadJob(descriptor) {
-					@Override
-					protected void done() {
-						try {
-							get();
-						} catch(CancellationException | InterruptedException e) {
-							// ignore
-						} catch(Exception e) {
-							LoggerFactory.log(this, Level.SEVERE, 
-									"Failed to load allocation: "+name, e); //$NON-NLS-1$
+				@Override
+				public void run() {
+					contentPanel.remove(loadingLabel);
+					contentPanel.revalidate();
+					contentPanel.repaint();
 							
-							UIUtil.beep();
-							
-							Core.getCore().handleThrowable(e);
-						} finally {
-							contentPanel.remove(loadingLabel);
-							contentPanel.revalidate();
-							contentPanel.repaint();
-									
-							refresh();
-						}
-					}				
-				};
-				TaskManager.getInstance().schedule(task, title, null, null, 
-						TaskPriority.DEFAULT, true);
-				
-				return DescriptorState.LOADING;
-			}
+					refresh();
+				}
+			});
 		}
 		
 		return DescriptorState.VALID;
-	}
-	
-	private enum DescriptorState {
-		VALID,
-		INVALID,
-		LOADING,
 	}
 	
 	public class CallbackHandler {

@@ -105,4 +105,15 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 	public CoreferenceAllocation getDefaultAllocation() {
 		return defaultAllocation;
 	}
+
+	/**
+	 * @see de.ims.icarus.language.coref.CorefListMember#free()
+	 */
+	@Override
+	public void free() {
+		allocation = null;
+		defaultAllocation = new CoreferenceAllocation();
+		
+		super.free();
+	}
 }

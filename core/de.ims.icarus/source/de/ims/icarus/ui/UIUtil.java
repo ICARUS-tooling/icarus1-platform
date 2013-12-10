@@ -34,6 +34,7 @@ import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -797,6 +798,10 @@ public final class UIUtil {
 	public static Icon getLargeLoadingIcon() {
 		return IconRegistry.getGlobalRegistry().getIcon("ajax-loader_32.gif"); //$NON-NLS-1$
 	}
+	
+	public static Icon getInfoIcon() {
+		return IconRegistry.getGlobalRegistry().getIcon("smartmode_co.gif"); //$NON-NLS-1$
+	}
 
 	public static final Border DUMMY_BORDER = BorderFactory.createEmptyBorder(
 			2, 2, 2, 2);
@@ -982,6 +987,15 @@ public final class UIUtil {
 				DUMMY_BORDER.paintBorder(c, g, x, y, width, height);
 			}
 		}
+	}
+	
+	public static Window getActiveWindow() {
+		Window w = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+		while(w!=null && w.getOwner()!=null) {
+			w = w.getOwner();
+		}
+				
+		return w;
 	}
 	
 	public static final int DEFAULT_UNDO_LIMIT = 40;

@@ -40,6 +40,11 @@ public class Message {
 	private final String command;
 	private final Object source;
 	private Options options;
+
+	
+	public Message(Object source, String command) {
+		this(source, command, null, null);
+	}
 	
 	public Message(Object source, String command, Object data, Options options) {
 		Exceptions.testNullArgument(source, "source"); //$NON-NLS-1$

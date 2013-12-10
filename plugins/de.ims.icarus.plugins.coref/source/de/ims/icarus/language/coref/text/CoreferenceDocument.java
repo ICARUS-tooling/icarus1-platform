@@ -101,6 +101,7 @@ public class CoreferenceDocument extends BatchDocument {
 	private DisplayMode displayMode = DisplayMode.DEFAULT;
 
 	public static final String PARAM_SPAN = "span"; //$NON-NLS-1$
+	public static final String PARAM_ERROR_TYPE = "errorType"; //$NON-NLS-1$
 
 	public static final String PARAM_HIGHLIGHT_COLOR = "highlightColor"; //$NON-NLS-1$
 	public static final String PARAM_FILL_COLOR = "fillColor"; //$NON-NLS-1$
@@ -209,7 +210,7 @@ public class CoreferenceDocument extends BatchDocument {
 		filterSingletons = source.filterSingletons;
 		filterNonHighlighted = source.filterNonHighlighted;
 		showSentenceIndex = source.showSentenceIndex;
-		markupFilter = source.markupFilter;
+//		markupFilter = source.markupFilter;
 		displayMode = source.displayMode;
 	}
 	
@@ -258,7 +259,6 @@ public class CoreferenceDocument extends BatchDocument {
 	}
 
 	// TODO bug: no space between last and next to last token in span when nested span is filtered out!
-	@SuppressWarnings("incomplete-switch")
 	public void appendBatchCoreferenceData(CoreferenceData data, int sentenceIndex, 
 			Span[] spanSet, Span[] goldSet) {
 		if(data==null)
@@ -288,6 +288,10 @@ public class CoreferenceDocument extends BatchDocument {
 
 		case FALSE_POSITIVES:
 			spans = CoreferenceUtils.getFalsePositives(spanSet, goldSet);
+			break;
+			
+		default:
+			// no-op, since per default we show the above spans array
 			break;
 		}
 		

@@ -8,13 +8,6 @@ OPTIONAL:
 
 TODO:
 
-	-	Search History:
-		-	add icon signaling which is the current query graph
-		-	add "loaded" icon for targets in list
-		-	add "Load" and "Free" actions for context menu
-	-	develope memory monitor (much like Eclipse)
-	-	lock mouse-over highlight in coref text outline via click (unlock on blank space)
-	-	add progress check in task manager
 	-	add "Save and Continue" button to ConfigDialog
 
 	-	add sanity-checks for editors (cannot apply until check is successful)
@@ -32,9 +25,22 @@ TODO:
 		-	only core plug-in active with management perspective
 		-	no integrity check of plug-in registry!
 		-	limited options for user in terms of additional perspectives and/or views
+	-	related to new data model: add a generic corpus task class
+		-	define preconditions the target corpus has to meet
+		-	define required meta-data objects
+		-	register progress trackers and pre/intermediate/post-processors
+		-	at execution time:
+			-	check meta-data on target corpus
+			-	generate missing meta-data
+			-	execute registered processors
 
 DONE:
 
+	-	Search History:
+		-	add "loaded" icon for targets in list
+		-	add "Load" and "Free" actions for context menu
+	-	develope memory monitor (much like Eclipse)
+	-	lock mouse-over highlight in coref text outline via click (unlock on blank space)
 	-	add navigation to property outline (combobox or arrows)
 	-	ContextOutline refresh -> Descriptor vs. CorefAllocation
 	-	CLARIN without "E"
@@ -85,3 +91,7 @@ DONE:
 		-	change label in properties outline to localized details ("Sentence x\n Begin Y...)
 		-	clear context/properties outline when doc changes
 		-	disable outlines for ROOT span (causes error right now!)
+
+DISCARDED:
+	-	add progress check in task manager
+	-	add icon in search history list signaling which is the current query graph

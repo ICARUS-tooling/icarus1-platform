@@ -253,6 +253,6 @@ public class AllocationDescriptor implements Loadable,
 	}
 	
 	public void free() {
-		// no-op
+		getAllocation().free();
 	}
 }

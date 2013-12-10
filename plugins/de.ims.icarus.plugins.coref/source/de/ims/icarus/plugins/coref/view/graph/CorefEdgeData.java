@@ -45,12 +45,12 @@ public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
 		super(edge);
 	}
 	
-	public CorefEdgeData(Edge edge, int edgeType) {
-		super(edge, edgeType);
+	public CorefEdgeData(Edge edge, boolean gold) {
+		super(edge, gold);
 	}
 
-	public CorefEdgeData(Edge data, int type, long highlight) {
-		super(data, type, highlight);
+	public CorefEdgeData(Edge data, boolean gold, long highlight) {
+		super(data, gold, highlight);
 	}
 
 	public Edge getEdge() {

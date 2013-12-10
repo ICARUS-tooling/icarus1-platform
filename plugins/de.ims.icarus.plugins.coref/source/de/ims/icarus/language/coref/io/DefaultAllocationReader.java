@@ -116,7 +116,7 @@ public class DefaultAllocationReader implements AllocationReader {
 			
 			if(checkIds && !ids.remove(documentId))
 				throw new IllegalArgumentException(String.format(
-						"Unknown document id '%s' at line %d ", lineCount, documentId)); //$NON-NLS-1$
+						"Unknown document id '%s' at line %s ", lineCount, documentId)); //$NON-NLS-1$
 			
 			CoreferenceDocumentData document = documentSet==null ? 
 					null : documentSet.getDocument(documentId);

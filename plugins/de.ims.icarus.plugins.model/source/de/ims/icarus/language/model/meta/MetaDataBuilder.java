@@ -25,12 +25,17 @@
  */
 package de.ims.icarus.language.model.meta;
 
+import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.util.Options;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public interface MetaDataBuilder {
 
-	ValueSet getValueSet();
+	boolean createMetaData(Corpus corpus, Class<? extends MetaData> metaDataClass, 
+			Options options, Layer...layers);
 }

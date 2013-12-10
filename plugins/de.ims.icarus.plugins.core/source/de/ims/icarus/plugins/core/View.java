@@ -34,6 +34,7 @@ import javax.swing.JComponent;
 
 import org.java.plugin.registry.Extension;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.UIDummies;
@@ -386,6 +387,10 @@ public abstract class View implements Identifiable {
 	}
 	
 	protected void showError(Throwable t) {
+		if(Core.getCore().handleThrowable(t)) {
+			return;
+		}
+		
 		DialogFactory.getGlobalFactory().showError(getFrame(), 
 				"plugins.core.icarusCorePlugin.errorDialog.title",  //$NON-NLS-1$
 				"plugins.core.icarusCorePlugin.errorDialog.message",  //$NON-NLS-1$
