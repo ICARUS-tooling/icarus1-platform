@@ -471,6 +471,7 @@ public class NGrams {
 	private Map<String, ArrayList<ItemInNuclei>> distrustFringeHeuristic(Map<String,ArrayList<ItemInNuclei>> input){
 		
 		ArrayList<String> removeFringeFromNGrams = new ArrayList<String>();
+		
 		for(Iterator<String> i = input.keySet().iterator(); i.hasNext();){
 			String key = i.next();
 			ArrayList<ItemInNuclei> arrItem = input.get(key);
@@ -489,8 +490,8 @@ public class NGrams {
 					 * the others are fringe nucleis or not
 					 */
 					
-					//new version should work now and only delete fringe
-					// within an ngram wit 2+ nuclei if both are fringe
+					// new version should work now and only delete fringe
+					// within an ngram with 2+ nuclei if both are fringe
 					if(getFringeItem(si)){
 						//System.out.println("FringeKey " + key);
 						if(!removeFringeFromNGrams.contains(key)){
@@ -498,6 +499,7 @@ public class NGrams {
 							removeFringeFromNGrams.add(key);
 						}
 					}
+
 					
 
 //					for(int n = 0; n < si.getNucleiIndexListSize(); n++){		
@@ -515,9 +517,9 @@ public class NGrams {
 			}
 		}
 				
-		//System.out.println("FringeItems to Remove: " + removeFringeFromNGrams.size());
+		System.out.println("FringeItems to Remove: " + removeFringeFromNGrams.size());
 		for(int i = 0; i < removeFringeFromNGrams.size(); i++){
-			//System.out.println("Remove " + removeFringeFromNGrams.get(i));
+			System.out.println("Remove " + removeFringeFromNGrams.get(i));
 			input.remove(removeFringeFromNGrams.get(i));
 		}
 
@@ -526,7 +528,8 @@ public class NGrams {
 		
 	}
 	
-	
+
+
 	/**
 	 * @param si
 	 */
@@ -534,21 +537,27 @@ public class NGrams {
 		boolean fringe = true;
 		int start = si.getSentenceBegin();
 		int end = si.getSentenceEnd();
+		
+		int nonFringe = si.getNucleiIndexListSize();
+		
 		for(int n = 0; n < si.getNucleiIndexListSize(); n++){			
 			//is fringe?
-			//TODO fringe fixen
-			if(fringe){
 			fringe = isFringe(si.getNucleiIndexListAt(n), start, end);
 //			System.out.print(" Fringe:" + si.getNucleiIndexListAt(n)
 //					+ " start:" + start + " end:" + end + " " + fringe + "\n");
-			}
 			
-			if (!fringe) {
-				//System.out.println("Do not delete " + si.getNucleiIndexListAt(n));
-				return fringe;
+			if(fringe){
+				nonFringe--;
 			}
 		}
-		return fringe;
+
+		
+		// at least one nucleus is non fringe
+		if(nonFringe > 0){
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 
@@ -826,15 +835,15 @@ public class NGrams {
 			
 			// remove items at the fringe
 			if (useFringe) {
-				if(nGramCount >= fringeStart){
-					if(nGramCount <= fringeEnd){
+				if(nGramCount >= 2){
+//					if(nGramCount <= fringeEnd){
 //					System.out.println("Fringe Triggered [N-Gram " + nGramCount //$NON-NLS-1$
 //										+ "| Start " + fringeStart //$NON-NLS-1$
 //										+ " | END " + fringeEnd + " ]"); //$NON-NLS-1$ //$NON-NLS-2$
 
 					outputNGram = distrustFringeHeuristic(outputNGram);
 					}
-				}				
+//				}				
 			}
 			
 			//add results into Cache

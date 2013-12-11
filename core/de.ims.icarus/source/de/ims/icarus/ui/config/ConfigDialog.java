@@ -128,6 +128,7 @@ import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.Actions;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 
@@ -142,6 +143,11 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 	private static final long serialVersionUID = 6372741052385278814L;
 	
+	private static int CONTINUE_CSAVE_EXIT = DialogFactory.registerOptions(
+						"config.save-and-continue", //$NON-NLS-1$
+						"cancel", //$NON-NLS-1$
+						"continue"); //$NON-NLS-1$
+
 	protected final JTree tree;	
 	protected final Handle masterhandle;	
 	protected final Actions actions;
@@ -336,6 +342,14 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		} else {
 			int exit = showYN("config.exitWarning.title", //$NON-NLS-1$
 					"config.exitWarning.message"); //$NON-NLS-1$
+
+			//save and exit
+			if (exit == 1){
+				setNewValues(changesMap);
+				ConfigDialog.this.setVisible(false);
+				ConfigDialog.this.dispose();
+				changesMap.clear();
+			}
 			if (exit == 0){
 				ConfigDialog.this.setVisible(false);
 				ConfigDialog.this.dispose();
@@ -1059,6 +1073,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 				"config.saveConfig.desc"); //$NON-NLS-1$
 		resourceDomain.addAction(action);
 		actions.addAction(CONFIG_SAVE_ACTION, action);
+		
 	
 		//Exit Config
 		action = new ExitSaveAction(true);
@@ -2327,13 +2342,9 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 				if (val == null)
 					val = jt.getValueAt(indexRow, 1);
 				
-
-				
 				// add selected value to entry handler
 				mh.setValue(val);
-				mh.setKey(key);				
-
-								
+				mh.setKey(key);	
 				
 				// Edit
 				if (mode == 0 && mh.isValueEditable()) {
@@ -2353,6 +2364,11 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 						((JFileChooser)comp).showDialog(ConfigDialog.this,
 								ResourceManager.getInstance().get("config.choosePathSet.name")); //$NON-NLS-1$
 					} else {
+//						valid = DialogFactory.getGlobalFactory().showConfirm(
+//								ConfigDialog.this,
+//								DialogFactory.OK_CANCEL_OPTION,
+//								title,
+//								"");
 						valid = JOptionPane.YES_OPTION == JOptionPane.showOptionDialog(
 								ConfigDialog.this, (Object)new Object[]{
 							comp}, title, 
@@ -2378,10 +2394,15 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 						val = mh.getValue();
 						
 						if (data.containsKey(key)) {
-							JOptionPane.showMessageDialog(ConfigDialog.this,
-									ResourceManager.getInstance().get("config.keyDuplicate.desc"), //$NON-NLS-1$
-									ResourceManager.getInstance().get("config.keyDuplicate.name"), //$NON-NLS-1$
-									JOptionPane.WARNING_MESSAGE);
+							DialogFactory.getGlobalFactory().showWarning(
+									ConfigDialog.this,
+									"config.keyDuplicate.name", //$NON-NLS-1$
+									"config.keyDuplicate.desc" //$NON-NLS-1$
+									);
+//							JOptionPane.showMessageDialog(ConfigDialog.this,
+//									ResourceManager.getInstance().get("config.keyDuplicate.desc"), //$NON-NLS-1$
+//									ResourceManager.getInstance().get("config.keyDuplicate.name"), //$NON-NLS-1$
+//									JOptionPane.WARNING_MESSAGE);
 							return;
 						}
 						
@@ -2670,7 +2691,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			int mode = this.mode;
 			String title = null;
 			Object newVal = null;			
-			
+
 			
 			// new
 			if (mode == 1) {
@@ -2683,10 +2704,12 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 				mode = 0;
 			}
 
+
 			if (index != -1 && index <= dlm.getSize()) {
 				
-				if (newVal == null)
+				if (newVal == null){
 					newVal = dlm.getElementAt(index);
+				}
 				
 				// add selected value to entry handler
 				eh.setValue(newVal);
@@ -2752,17 +2775,15 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	
 	
 	class CustomDialog extends JDialog implements PropertyChangeListener {
-		 /**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 8730334291227865442L;
 		private String typedText = ""; //$NON-NLS-1$
-		 private JTextField textField;
-		 private JOptionPane optionPane;
-		 
-		 private String enter = ResourceManager.getInstance().get("enter"); //$NON-NLS-1$
-		 private String cancel = ResourceManager.getInstance().get("cancel"); //$NON-NLS-1$
-		 
+		private JTextField textField;
+		private JOptionPane optionPane;
+
+		private String enter = ResourceManager.getInstance().get("enter"); //$NON-NLS-1$
+		private String cancel = ResourceManager.getInstance().get("cancel"); //$NON-NLS-1$
+
 		 /**
 		   * Returns null if the typed string was invalid;
 		   * otherwise, returns the string as the user entered it.
@@ -3099,10 +3120,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	//Basic save & exit operations
 	protected class ExitSaveAction extends AbstractAction{
 		
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 7681721446277096555L;
+		
 		private final boolean exit;
 		
 		ExitSaveAction(boolean exit) {
@@ -3125,17 +3144,12 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		}
 	}
 	
-	public Integer showYN(String titleKey, String messageKey, Object... args) {
-		Object[] options = {ResourceManager.getInstance().get("continue"), //$NON-NLS-1$
-                ResourceManager.getInstance().get("cancel")}; //$NON-NLS-1$
-		int i = JOptionPane.showOptionDialog(this, String.format(ResourceManager.getInstance()
-				.get(messageKey), args), ResourceManager.getInstance().get(titleKey),
-				JOptionPane.YES_NO_OPTION,
-				JOptionPane.QUESTION_MESSAGE,
-				null,
-			    options,
-			    options[1]);
-			return i;
+	public int showYN(String titleKey, String messageKey, Object... args) {
+		return DialogFactory.getGlobalFactory().showInfo(null,
+				CONTINUE_CSAVE_EXIT,
+				titleKey,
+				messageKey,
+				args);
 	}
 
 	

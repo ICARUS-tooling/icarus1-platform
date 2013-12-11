@@ -249,7 +249,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 	
 	
 	protected EntryBuilder createEntryBuilder() {
-		//TODO only one node so entrybuilder 1 is sufficient (no tree matching!!)
+		//only one node so entrybuilder 1 is sufficient (no tree matching!!)
 		return new EntryBuilder(1);
 	}
 	
@@ -446,11 +446,15 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 					
 					//System.out.println(buffer.getData());
 					
-					//initialisiere
-					entryBuilder.setIndex(buffer.getIndex());
+					//FIXME WORKAROUND for Hits	
+					if(buffer.getIndex() < ngramsResultMap.size()){
 					
-					//check for hits
-					matcher.matches(buffer.getIndex());		
+						//initialisiere
+						entryBuilder.setIndex(buffer.getIndex());
+						
+						//check for hits
+						matcher.matches(buffer.getIndex());		
+					}
 
 				}	
 			}
@@ -535,8 +539,7 @@ protected class NGramWorker extends Worker{
 			//grab result map
 			ngramsResultMap = ngrams.getResult();
 
-			
-			//FIXME
+
 			//remove unwanted nucleus
 			//ngrams.cleanUpNucleus();
 			
@@ -562,8 +565,7 @@ protected class NGramWorker extends Worker{
 //							// System.out.println(
 //							// iin.getSentenceInfoAt(k).getNucleiIndexListSize());
 //
-//							// FIXME zwei nuclei im satz aber nicht
-//							// verschmolzen!
+//							// FIXME zwei nuclei im satz aber nicht verschmolzen!
 //							MappedNGramResult mapping = new MappedNGramResult(
 //									sentenceNR, key, si);
 //							
@@ -606,8 +608,6 @@ protected class NGramWorker extends Worker{
 				ngrams.outputToFile();				
 			}			
 
-			
-			//TODO
 			result.setProperty("COMPLETE_NGRAM", ngramsResultMap); //$NON-NLS-1$
 			result.setProperty("LARGEST_NGRAM", ngrams.getPasses()); //$NON-NLS-1$
 			result.setProperty("MODE", 0); //$NON-NLS-1$
@@ -634,11 +634,15 @@ protected class NGramWorker extends Worker{
 			//System.out.println(ngramsResultMap.size());
 			//System.out.println("BUFFER Index->" + buffer.getIndex());
 			
-//			//initialisiere
-			entryBuilder.setIndex(buffer.getIndex());
-			
-//			//check for hits
-			matcher.matches(buffer.getIndex());		
+			//FIXME WORKAROUND for Hits	
+			if(buffer.getIndex() < ngramsResultMap.size()){
+				
+	//			//initialisiere
+				entryBuilder.setIndex(buffer.getIndex());
+				
+	//			//check for hits
+				matcher.matches(buffer.getIndex());		
+			}
 			
 //			// for every entry in  list we check if current buffer index 
 //			// equals; note all indices saved within the list are results and have
@@ -686,7 +690,6 @@ protected class NGramWorker extends Worker{
 		MappedNGramResult tmp = helferList.get(helferList.indexOf(mapping));
 		
 		boolean newHit = false;
-		//TODO remove crappy stuff below
 //		for(int i = 0; i < tmp.getKeyListSize(); i++){
 //			//System.out.println(tmp.getKeyAt(i).equals(newKey));
 //			if (!tmp.getKeyAt(i).equals(newKey)){

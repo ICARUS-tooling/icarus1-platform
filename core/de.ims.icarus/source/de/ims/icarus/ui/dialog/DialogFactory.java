@@ -78,7 +78,7 @@ public final class DialogFactory {
 	
 	private static final Map<Integer, Object[]> _options = new HashMap<>();
 	
-	private static Object[] getOptions(int id) {
+	public static Object[] getOptions(int id) {
 		return _options.get(id).clone();
 	}
 	
@@ -171,12 +171,12 @@ public final class DialogFactory {
 		builder.showDialog(parent);
 	}
 
-	public void showPlain(Component parent, String title, 
+	public int showPlain(Component parent, String title, 
 			String message, Object... params) {
-		showPlain(parent, OK_OPTION, title, message, params);
+		return showPlain(parent, OK_OPTION, title, message, params);
 	}
 
-	public void showPlain(Component parent, int options, String title, 
+	public int showPlain(Component parent, int options, String title, 
 			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -187,14 +187,15 @@ public final class DialogFactory {
 		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
+		return builder.getValue();
 	}
 
-	public void showInfo(Component parent, String title, 
+	public int showInfo(Component parent, String title, 
 			String message, Object... params) {
-		showInfo(parent, OK_OPTION, title, message, params);
+		return showInfo(parent, OK_OPTION, title, message, params);
 	}
 
-	public void showInfo(Component parent, int options, String title, 
+	public int showInfo(Component parent, int options, String title, 
 			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -205,14 +206,15 @@ public final class DialogFactory {
 		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
+		return builder.getValue();
 	}
 
-	public void showWarning(Component parent, String title, 
+	public int showWarning(Component parent, String title, 
 			String message, Object... params) {
-		showWarning(parent, OK_OPTION, title, message, params);
+		return showWarning(parent, OK_OPTION, title, message, params);
 	}
 
-	public void showWarning(Component parent, int options, String title, 
+	public int showWarning(Component parent, int options, String title, 
 			String message, Object... params) {
 		
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
@@ -223,6 +225,7 @@ public final class DialogFactory {
 		builder.setOptions(getOptions(options));
 		
 		builder.showDialog(parent);
+		return builder.getValue();
 	}
 
 	public boolean showConfirm(Component parent, String title, 

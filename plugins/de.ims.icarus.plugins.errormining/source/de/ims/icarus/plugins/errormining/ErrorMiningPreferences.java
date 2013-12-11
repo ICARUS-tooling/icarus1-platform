@@ -106,6 +106,15 @@ public class ErrorMiningPreferences {
 		builder.back();
 		
 		
+		builder.addGroup("export", true); //$NON-NLS-1$
+		builder.virtual();
+		builder.addIntegerEntry("compression", 5, 0, 9); //$NON-NLS-1$
+		builder.addIntegerEntry("width", 800); //$NON-NLS-1$
+		builder.addIntegerEntry("height", 600); //$NON-NLS-1$
+		builder.addBooleanEntry("encodeAlpha", false); //$NON-NLS-1$
+		builder.back();
+		
+		
 		builder.back();
 		// END APPEARANCE GROUP
 		

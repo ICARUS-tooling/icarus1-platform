@@ -35,6 +35,10 @@
 	<action id="plugins.errormining.nGramResultView.showDetailAction"
 		name="${id}.name" desc="${id}.description" icon="filter_errormining.png"/>
 	
+	<!-- Export barchart -->
+	<action id="plugins.errormining.nGramResultView.exportBarchart"
+		name="${id}.name" desc="${id}.description" icon="export_wiz.gif"/>
+	
 
 
 	<!-- ToolBar List for overview area -->
@@ -77,6 +81,8 @@
 		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
 		<separator />
 		<item type="action" value="plugins.errormining.nGramResultView.showDetailAction" />
+		<separator />
+		<item type="action" value="plugins.errormining.nGramResultView.exportBarchart" />
 		<item type="glue"/>
 	</action-list>	
 </actions>

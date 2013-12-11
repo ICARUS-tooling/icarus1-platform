@@ -36,6 +36,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
@@ -101,6 +103,7 @@ import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
 import de.ims.icarus.plugins.errormining.DependencySentenceInfo;
 import de.ims.icarus.plugins.errormining.DetailedNGramSentenceDataList;
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
+import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.plugins.errormining.annotation.NGramAnnotation;
 import de.ims.icarus.plugins.errormining.ngram_tools.CompareStringLength;
 import de.ims.icarus.plugins.errormining.ngram_tools.DependencyNucleusCache;
@@ -119,6 +122,7 @@ import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.ui.helper.DefaultFileFilter;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
 import de.ims.icarus.ui.tab.ButtonTabComponent;
 import de.ims.icarus.ui.tab.TabController;
@@ -217,7 +221,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	private static final Pattern numberPattern = Pattern.compile("^[0-9]"); //$NON-NLS-1$
 	private static final int minDependencyGram = 2;
 	private static final int maximumCharPerTab = 40;
-	private static final String labelmatrix = "Totalcount";
+	private static final String labelmatrix = "Total#"; //$NON-NLS-1$
 
 	
 	/**
@@ -239,8 +243,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		
 		searchMode = (int) searchResult.getProperty("MODE"); //$NON-NLS-1$
-		
-		//TODO Debug
+
 //		System.out.println("TEST"
 //				//+ "\n"+searchResult.getTotalHitCount()
 //				+ "\n"+searchResult.getRawEntry(0) +" "+ searchResult.getRawEntry(0).getIndex()
@@ -254,6 +257,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 									(int) searchResult.getProperty("LARGEST_NGRAM")); //$NON-NLS-1$
 
 		initializeSpinners();
+		refresh();
 		
 		
 		if(isPoSErrorMiningResult()){
@@ -296,7 +300,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			scrollPane.setViewportView(ngramList);
 		}
 		
-		//switch to first dab  (overview) when selecting new/other result!
+		//switch to first tab  (overview) when selecting new/other result!
 		if(tabbedPane != null && searchResult.getTotalMatchCount() != 0){
 			if(isPoSErrorMiningResult()) {
 				createStatistic(1);
@@ -306,7 +310,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			tabbedPane.setSelectedIndex(0);
 		}
 		
-		refresh();
+		//refresh();
 
 	}
 
@@ -327,6 +331,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					tabbedPane.remove(t);
 				}
 			}
+		}
+
+		if(ngramTable != null){
+			ngramTableModel = new NGramResultViewTableModel();
+			ngramTable.setModel(ngramTableModel);
 		}
 		
 		
@@ -428,7 +437,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		JSplitPane statisticHorizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		statisticHorizontal.setContinuousLayout(true);
 		statisticHorizontal.setDividerSize(5);
-		statisticHorizontal.setBorder(null);
+		statisticHorizontal.setBorder(UIUtil.topLineBorder);
 		statisticHorizontal.setResizeWeight(0.6);
 		statisticHorizontal.addComponentListener(getHandler());
 		
@@ -574,7 +583,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12,
 								TextAnchor.BASELINE_CENTER));
 		
-		//add tooltip (current value of bar
+		//add tooltip (current value of bar)
 		renderer.setSeriesToolTipGenerator(0, new CustomToolTipGenerator());
 		  
 		ChartPanel barchartPanel = new ChartPanel(chart);
@@ -663,6 +672,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			minimum = minDependencyGram;
 		}
 		
+		//lower bound spinner (overview)
 		if(lbm == null){
 			lbm = new SpinnerNumberModel(minimum, //initial value
 					minimum, //min
@@ -671,10 +681,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		} else {
 			//lbm.setMinimum(Math.max(minimumGramsize, minimum));
 			lbm.setMaximum(maximumGramsize-1);
-			ubm.setValue(minimum);
+			lbm.setValue(minimum);
 		}
 		
 		
+		//upper bound spinner (overview)
 		if(ubm == null){
 			ubm = new SpinnerNumberModel(maximumGramsize-1, //initial value
 			minimum, //min
@@ -685,6 +696,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			ubm.setValue(maximumGramsize-1);
 		}
 		
+		
+		//statistic spinner
 		if(sbm == null){
 			sbm = new SpinnerNumberModel(minimum, //initial value
 			minimum, //min
@@ -1034,13 +1047,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	
 	protected void displaySelectedStatsData(){
 		int selectedRow = statisticTable.getSelectedRow();
-		// add correct column!!	
-		
+
 		//List<StatsData> tmp = (List<StatsData>) statisticTable.getValueAt(selectedRow, 1);
 		//System.out.println(tmp.get(0));
 		
-		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-		
+		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 1);		
 		
 		
 		refreshBarChart(key, statsResultFiltered.get(key));
@@ -1360,10 +1371,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		int sentenceNucleiIndex = diinList.get(0).getSentenceInfoAt(0).getNucleiIndex();		
 		//int sentenceEnd = diinList.get(0).getSentenceInfoAt(0).getSentenceEnd();		
 		
-		
 		int colorOffset = diinList.get(0).getSentenceInfoAt(0).getSentenceBegin();
 
-		
 		if(splittedKey.length == 2){
 			if(sentenceNucleiIndex-sentenceStart > 1){
 				colorOffset = sentenceNucleiIndex;				
@@ -1373,6 +1382,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
 				.getInteger("plugins.dependency.highlighting.nodeHighlight")); //$NON-NLS-1$
 		
+		
+		boolean space = spacingNeeded(diinList, splittedKey.length);		
+		
+		System.out.println(key);
 //		System.out.println("Start"+ sentenceStart);
 //		System.out.println("Nuclei"+ sentenceNucleiIndex);
 //		System.out.println(sentenceNucleiIndex-sentenceStart);
@@ -1383,8 +1396,20 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(splittedKey[c]);
 				sb.append(" "); //$NON-NLS-1$	
-				sb.append("</font>"); //$NON-NLS-1$			
-			} else {
+				sb.append("</font>"); //$NON-NLS-1$	
+				if(space){
+					sb.append("[...] "); //$NON-NLS-1$
+					space = false;
+				}
+			}			
+			else if(isDependencyHead(c, diinList.get(0).getSentenceInfoAt(0), splittedKey.length, colorOffset)){
+				String hex = "#" + Integer.toHexString(Color.blue.getRGB()).substring(2); //$NON-NLS-1$
+				sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(splittedKey[c]);
+				sb.append(" "); //$NON-NLS-1$	
+				sb.append("</font>"); //$NON-NLS-1$				
+			}
+			else {
 				sb.append(splittedKey[c]);
 				sb.append(" "); //$NON-NLS-1$
 			}			
@@ -1394,8 +1419,29 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		return sb.toString();
 	}
 	
+	/**
+	 * @param diinList
+	 * @param length 
+	 */
+	private boolean spacingNeeded(List<DependencyItemInNuclei> diinList, int length) {
+		
+		for(int i = 0; i < diinList.size(); i++){
+			DependencyItemInNuclei diin = diinList.get(i);
+			for(int s = 0; s < diin.getSentenceInfoSize(); s++){
+				SentenceInfo si = diin.getSentenceInfoAt(s);
+				int cover = si.getSentenceEnd() - si.getSentenceBegin() + 1;
+				
+				if(cover > length){
+					return true;
+				}
+				//System.out.println(cover + "#" + length);							
+			}
+		}		
+		return false;
+	}
+	
+	
 	private boolean isDependencyNuclei(int index, DependencySentenceInfo dsi, int colorOffset) {
-
 		for(int n = 0; n < dsi.getNucleiIndexListSize(); n++){
 //			System.out.println("colorOFF: " + colorOffset);
 //			System.out.println("head: " + dsi.getNucleiIndexListAt(n));
@@ -1407,6 +1453,60 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		return false;
 	}
 	
+
+	private boolean isDependencyHead(int index, DependencySentenceInfo dsi, int length, int colorOffset) {
+		
+		for(int n = 0; n < dsi.getNucleiIndexListSize(); n++){
+			
+			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			DependencyData dd = (DependencyData) dl.get(0);
+			
+			//FIXME painting
+			
+			int head = dsi.getSentenceHeadIndex();
+			//int offset = headIndex - dsi.getSentenceBegin();			
+			int nucleus = dsi.getNucleiIndexListAt(n)-1;
+			//int head = dd.getHead(nucleus) + 1;
+			int offset = head - dsi.getSentenceBegin();
+			
+//			System.out.println("colorOffset: " + colorOffset);
+//			System.out.println("head: " + dsi.getSentenceHeadIndex());
+//			System.out.println("head: " + head);
+//			System.out.println(dd.getForm(nucleus) + " Nucleus: " + nucleus + " " + dsi.getSentenceNr());
+//			System.out.println("off: " + offset + "vs" + (dsi.getSentenceEnd()-dsi.getSentenceBegin()));
+//			System.out.println("index: " + index);				
+
+
+			if(offset < (dsi.getSentenceEnd()-dsi.getSentenceBegin())){
+				//offset = headIndex - dsi.getSentenceBegin();
+			}
+
+		
+			if(length == 2){
+				return true;
+			}
+			
+			if (index == offset){
+				return true;
+			}			
+
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param nucleusIndex
+	 * @param sentenceNo
+	 * @return
+	 */
+	private int getHeadIndexFromNucleus(int nucleusIndex, int sentenceNo){
+		DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+		DependencyData dd = (DependencyData) dl.get(sentenceNo);
+		return dd.getHead(nucleusIndex);
+	}
+	
+
 	protected boolean isOverviewSelected(){
 		return tabbedPane.getSelectedIndex() == 0;
 	}
@@ -1462,6 +1562,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		actionManager.addHandler(
 				"plugins.errormining.nGramResultView.showDetailAction", //$NON-NLS-1$
 				callbackHandler, "showDetail"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.errormining.nGramResultView.exportBarchart", //$NON-NLS-1$
+				callbackHandler, "exportBarchart"); //$NON-NLS-1$
+		
 	}
 	
 		
@@ -1543,6 +1647,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				else {
 					ArrayList<DependencyItemInNuclei> diinList = nGramResultDependency.get(key);			
 
+					//System.out.println("clicked " + key);
 					for(int i = 0; i < diinList.size(); i++){
 						
 						DependencyItemInNuclei diin = diinList.get(i);
@@ -1559,17 +1664,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							//System.out.println("KEY"+involvedSentences((String) key));
 							//System.out.println("NLL"+getNucleusDependency(key, diin));
 							//System.out.println("NLL"+getNucleusDependencyNr(key, diin.getSentenceInfoAt(s)));	
-	
-							
-							int[] hlIndexArray = new int[hlIndex.size()*2];							
-							
-							for (int h = 0; h < hlIndex.size(); h++) {
-								int index = 0;
+								
+							int[] hlIndexArray = new int[hlIndex.size()*2];	
+							int index = 0;
+							for (int h = 0; h < hlIndex.size(); h++) {								
 								hlIndexArray[index] = hlIndex.get(h);
 								hlIndexArray[index+1] = annoDepData.getHead(hlIndex.get(h));
-								index++;
+								index=index+2;
 							}
-
 							
 							DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(hlIndexArray,true);
 							annoDepData.setAnnotation(new NGramAnnotation(defaultGHL));
@@ -1680,12 +1782,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							//System.out.println("NLL"+getNucleusDependencyNr(key, diin.getSentenceInfoAt(s)));	
 
 							int[] hlIndexArray = new int[hlIndex.size()*2];
-							
-							for (int h = 0; h < hlIndex.size(); h++) {
-								int index = 0;
+							int index = 0;
+							for (int h = 0; h < hlIndex.size(); h++) {								
 								hlIndexArray[index] = hlIndex.get(h);
 								hlIndexArray[index+1] = annoDepData.getHead(hlIndex.get(h));
-								index++;
+								index=index+2;
 							}							
 		
 							DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(hlIndexArray,true);
@@ -1948,6 +2049,79 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		return formattedKey;
 	}
+
+
+	/**
+		 * @param iinD
+		 * @param dependentIndex 
+		 * @param object 
+		 * @return
+		 */
+		protected Object getCombinedDependencyTag(DependencyItemInNuclei iinD, int sentenceNo, int dependentIndex) {
+			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			DependencyData dd = (DependencyData) dl.get(sentenceNo);
+			dependentIndex = dependentIndex-1;
+	
+	//		System.out.println("SNR "+ sentenceNo
+	//						+  " " + dd.getForm(dependentIndex) 
+	//						+  " " + dd.getHead(dependentIndex)
+	//						+  " " + dd.getRelation(dependentIndex)
+	//						+  " DependentIndex" + dependentIndex);
+	
+			
+			StringBuilder sb = new StringBuilder();
+			int headIndex = dd.getHead(dependentIndex);
+			
+			String headAppendix;
+			if (dependentIndex > headIndex){
+				headAppendix = " ->";//"_R"; //$NON-NLS-1$
+			} else {
+				headAppendix = " <-"; //"_L"; //$NON-NLS-1$			
+			}
+			sb.append(dd.getRelation(dependentIndex)).append(headAppendix);
+	
+			return sb.toString();
+		}
+
+	protected Object getHeadTag(DependencyItemInNuclei iinD, int sentenceNo, Integer dependentIndex) {
+			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			DependencyData dd = (DependencyData) dl.get(sentenceNo);
+			
+			dependentIndex = dependentIndex-1;
+			int headIndex = dd.getHead(dependentIndex);
+			
+	//		System.out.println("SNR "+ sentenceNo
+	//		+  " " + dd.getForm(dependentIndex) 
+	//		+  " " + dd.getForm(dd.getHead(dependentIndex))
+	//		+  " HeadIndex " + headIndex
+	//		+  " DependentIndex" + dependentIndex);
+	
+			if (dependentIndex > headIndex){
+				return dd.getForm(dependentIndex);		
+			}
+			
+			return dd.getForm(dd.getHead(dependentIndex));
+		}
+
+	protected Object getDependentTag(DependencyItemInNuclei iinD, int sentenceNo, Integer dependentIndex) {
+			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			DependencyData dd = (DependencyData) dl.get(sentenceNo);
+			
+			dependentIndex = dependentIndex-1;
+			int headIndex = dd.getHead(dependentIndex);
+			
+	//		System.out.println("SNR "+ sentenceNo
+	//		+  " " + dd.getForm(dependentIndex) 
+	//		+  " " + dd.getForm(dd.getHead(dependentIndex))
+	//		+  " HeadIndex " + headIndex
+	//		+  " DependentIndex" + dependentIndex);
+	
+			if (dependentIndex < headIndex){
+				return dd.getForm(dependentIndex);		
+			}
+			
+			return dd.getForm(dd.getHead(dependentIndex));
+		}
 
 
 	public class DifferenceBarRenderer extends BarRenderer {
@@ -2306,6 +2480,48 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		
 		
+		public void exportBarchart(ActionEvent e){
+			try {
+				ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+
+				DefaultFileFilter ff = new DefaultFileFilter(
+						".png", //$NON-NLS-1$
+						ResourceManager.getInstance().get(
+								"plugins.errormining.dialog.exportBarchart.filetype")); //$NON-NLS-1$
+				
+				File file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+						null,
+						ResourceManager.getInstance().get(
+								"plugins.errormining.dialog.exportBarchart"), //$NON-NLS-1$
+						null,
+						ff);
+				
+				if (file == null){
+					return;
+				}
+
+				int width = config.getInteger("plugins.errorMining.appearance.export.width"); //$NON-NLS-1$
+				int height = config.getInteger("plugins.errorMining.appearance.export.height"); //$NON-NLS-1$
+				int compression = config.getInteger("plugins.errorMining.appearance.export.compression"); //$NON-NLS-1$
+				boolean encodeAlpha = config.getBoolean("plugins.errorMining.appearance.export.encodeAlpha"); //$NON-NLS-1$
+				
+				
+				ChartUtilities.saveChartAsPNG(
+						file, // file
+						chart, // chart
+						width, // width
+						height, // height
+						null, // chart info
+						encodeAlpha, // alpha
+						compression); // Compression
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to show details", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+
+		}		
+		
 	}
 
 
@@ -2347,10 +2563,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				
 				else if (me.getSource() == statisticList) {
 					String key = (String) statisticList.getSelectedValue();
-					System.out.println(createDetailList(key).size());
+					//System.out.println(createDetailList(key).size());
 					showDetails(createDetailList(key));
 				} else {
-					//nothing
+					//noop
 				}
 		        
 		     }
@@ -2401,7 +2617,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						
 						int selectedRow = statisticTable.getSelectedRow();
 						String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-						String title = keyTable; // + "\n " + keys; //$NON-NLS-1$
+						String title = keyTable; // + "\n " + keys;
 						refreshBarChart(title, statsResultFiltered.get(keyTable));
 						
 						//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable)
@@ -2727,14 +2943,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				if(isPoSErrorMiningResult()){
 					//iinList = nGramResult.get(key);					
 
-					iinList = new ArrayList<>();					
-					this.keySplitted = key.split(" ");	 //$NON-NLS-1$
+					iinList = new ArrayList<>();
+
+					this.keySplitted = key.split(" ");	 //$NON-NLS-1$	
 					
 					for (int i = 0; i < keySplitted.length; i++) {
 						//System.out.println(keySplitted[i]);
-						if (isNuclei(keySplitted[i])) {
-							iinList.addAll(nGramResult.get(keySplitted[i]));
-	
+						if (isNucleiItem(i, nGramResult.get(key))) {
+							iinList.addAll(nGramResult.get(keySplitted[i]));	
 							/*
 							 * size sets rowcount in table, (e.g. size = 2 row 0 and
 							 * row 1 must get assigned with keySplitted[i] tag.
@@ -2746,9 +2962,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								tmpMap.put(itemsAdded, keySplitted[i]);
 								itemsAdded++;
 							}
-	
 						}
 					}
+					
 					
 				} else {
 					
@@ -2757,8 +2973,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					iinDList = new ArrayList<>();					
 					iinDList.addAll(nGramResultDependency.get(key));
 					
-					nucleusMap = new LinkedHashMap<>();					
-					
+					nucleusMap = new LinkedHashMap<>();
 
 					for (int i = 0; i < iinDList.size(); i++) {
 						//System.out.println("iind"+iinDList.get(i).getPosTag());
@@ -2786,6 +3001,28 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		
 		
+		/**
+		 * @param j
+		 * @param iinList
+		 */
+		private boolean isNucleiItem(int j, ArrayList<ItemInNuclei> iinList) {
+			List<String> test = new ArrayList<>();
+			
+			for(int i = 0; i < iinList.size(); i++){
+				String[] s = iinList.get(i).getPosTag().split(" "); //$NON-NLS-1$
+				if(!test.contains(s[j])){
+					test.add(s[j]);
+				}
+			}
+			
+			if (test.size() > 1){
+				return true;
+			}
+			
+			return false;
+			
+		}
+
 		/**
 		 * @see javax.swing.table.TableModel#getColumnClass(int)
 		 */
@@ -2847,16 +3084,17 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							"plugins.errormining.labels.HeadNode"); //$NON-NLS-1$
 				case 3:
 					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.Count"); //$NON-NLS-1$
+							"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
 				case 4:
 					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
+							"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
 				case 5:
 					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
+							"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
 				case 6:
 					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
+							"plugins.errormining.labels.Count"); //$NON-NLS-1$
+
 				default:
 					break;
 				}
@@ -2946,20 +3184,55 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				
 				int nucleiDCount = iinD.getSentenceInfoAt(0).getNucleiIndexListSize();
 				int index = nucleusMap.get(rowIndex).getHeadIndex();
-					//FIXME
-					
+				String[] number;
+				
+				if (!multinuclei) {				
 					switch (columnIndex) {
 					case 0:
-						return nucleusMap.get(rowIndex).getKey();//keySplitted[nucleiGenIndex-start];
+						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						return getDependentTag(iinD
+								,Integer.valueOf(number[0])
+								,(Integer) getValueAt(rowIndex, 5));
+						//return nucleusMap.get(rowIndex).getKey();//keySplitted[nucleiGenIndex-start];
 					case 1:
-						String[] number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
 						return getCombinedDependencyTag(iinD
 								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));
 					case 2:
-						String[] head = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						number  = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
 						return getHeadTag(iinD
-								,Integer.valueOf(head[0])
+								,Integer.valueOf(number[0])
+								,(Integer) getValueAt(rowIndex, 5));
+					case 3:
+						return sentenceOccurences(iinD);
+					case 4:
+						return nucleiDCount;
+					case 5:
+						return getNucleiDependency(iinD, index);
+					case 6:
+						return StringUtil.formatDecimal(iinD.getCount());
+					default:
+						break;
+					}
+				} else {
+					
+					switch (columnIndex) {					
+					case 0:	
+						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						return getDependentTag(iinD
+								,Integer.valueOf(number[0])
+								,(Integer) getValueAt(rowIndex, 5));
+						//return nucleusMap.get(0).getKey();//keySplitted[nucleiGenIndex-start];
+					case 1:	
+						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						return getCombinedDependencyTag(iinD
+								,Integer.valueOf(number[0])
+								,(Integer) getValueAt(rowIndex, 5));
+					case 2:		
+						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						return getHeadTag(iinD
+								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));
 					case 3:
 						return sentenceOccurences(iinD);
@@ -2974,7 +3247,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						break;
 					}
 				}
-				return null;			
+			}
+			return null;			
 		}
 	}
 	
@@ -2997,9 +3271,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		    Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 			if(col == 0){
 			    String s = table.getModel().getValueAt(row, col).toString();
-			    
-			    String selectedKey = (String)ngramList.getSelectedValue();			    
-			     
+
+			    String selectedKey = (String) ngramList.getSelectedValue();			    
+
 			    //System.out.print(s + " # " + selectedKey  //$NON-NLS-1$
 			    //					+ " " + involvedSentences(selectedKey)); //$NON-NLS-1$
 			    if (isColorTableEntry(s, involvedSentences(selectedKey))) {
@@ -3214,42 +3488,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		
 	}	
-	
-	/**
-	 * @param iinD
-	 * @param headIndex 
-	 * @param object 
-	 * @return
-	 */
-	protected Object getCombinedDependencyTag(DependencyItemInNuclei iinD, int sentenceNo, Integer headIndex) {
-		DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-		DependencyData dd = (DependencyData) dl.get(sentenceNo);
-		headIndex = headIndex-1;
-		//System.out.println("SNR"+sentenceNo);
-		//System.out.println(dd.getForm(headIndex) +  " " + dd.getHead(headIndex) + " " + dd.getRelation(headIndex));
-
-		StringBuilder sb = new StringBuilder();
-		int tempIndex = dd.getHead(headIndex);
-		String headAppendix;
-		if (headIndex < tempIndex){
-			headAppendix = " ->";//"_R"; //$NON-NLS-1$
-		} else {
-			headAppendix = " <-"; //"_L"; //$NON-NLS-1$
-		}
-		sb.append(dd.getRelation(headIndex)).append(headAppendix);
-		
-		return sb.toString();
-	}
-	
-	
-	protected Object getHeadTag(DependencyItemInNuclei iinD, int sentenceNo, Integer headIndex) {
-		DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-		DependencyData dd = (DependencyData) dl.get(sentenceNo);
-		//System.out.println("SNR"+sentenceNo);
-		//System.out.println(dd.getForm(headIndex) +  " " + dd.getHead(headIndex) + " " + dd.getRelation(headIndex));
-		
-		return dd.getForm(dd.getHead(headIndex-1));
-	}
 	
 	protected JTabbedPane createTabbedPane() {
 		return new ClosableTabbedPane();
