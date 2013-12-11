@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.ui.events;
 
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -39,6 +38,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.BiDiMap;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -330,21 +330,19 @@ public final class ListenerProxies {
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 */
-	static class ListenerProxy implements InvocationHandler {
+	static class ListenerProxy extends WeakReference<Object> implements InvocationHandler {
 
 		private final int hash;
-		private final Reference<Object> ref;
 		private final Class<?> listenerClass;
 		
 		private boolean dead = false;
 		
 		public ListenerProxy(Object owner, Class<?> listenerClass) {
-			if(owner==null)
-				throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
+			super(owner);
+			
 			if(listenerClass==null)
 				throw new NullPointerException("Invalid listener claass"); //$NON-NLS-1$
 			
-			ref = new WeakReference<>(owner);
 			hash = 31 + owner.hashCode();
 			this.listenerClass = listenerClass;
 		}
@@ -356,19 +354,16 @@ public final class ListenerProxies {
 		public int hashCode() {
 			return getClass().hashCode() * hash;
 		}
-		
-		private Object getOwner() {
-			return ref.get();
-		}
 
 		/**
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			if(obj!=null && getClass().equals(obj.getClass())) {
+			if(obj instanceof ListenerProxy) {
 				ListenerProxy other = (ListenerProxy) obj;
-				return getOwner()==other.getOwner();
+				return ClassUtils.equals(get(), other.get()) 
+						&& hashCode()==other.hashCode();
 			}
 			return false;
 		}
@@ -387,7 +382,7 @@ public final class ListenerProxies {
 		@Override
 		public String toString() {
 			return String.format("[ListenerProxy: class=%s owner=%s]",  //$NON-NLS-1$
-					listenerClass.getName(), getOwner());
+					listenerClass.getName(), get());
 		}
 
 		/**
@@ -408,7 +403,7 @@ public final class ListenerProxies {
 				return null;
 			}
 			
-			Object owner = getOwner();
+			Object owner = get();
 			
 			if(owner==null) {
 				die();

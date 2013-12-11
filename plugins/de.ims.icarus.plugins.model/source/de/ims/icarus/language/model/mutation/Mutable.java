@@ -19,46 +19,34 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$
- * $LastChangedRevision$
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.mutation;
 
-import java.util.List;
-
-import de.ims.icarus.io.Loadable;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ManifestOwner;
-import de.ims.icarus.util.location.Location;
+import de.ims.icarus.language.model.CorpusMember;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Context extends Loadable, ManifestOwner<ContextManifest> {
+public interface Mutable<M extends Mutator<? extends CorpusMember>> {
 
-	Location getLocation();
-
-	Corpus getCorpus();
-
-	List<Layer> getLayers();
-
-	@Override
-	ContextManifest getManifest();
-
+	
 	/**
-	 * Called by a corpus to signal a context that it has been added.
+	 * Returns the mutator that can be used to change the internal
+	 * state of this {@code CorpusMember} object. Note that since
+	 * {@code Mutator} objects are not required to be thread-safe
+	 * each call of this method should return a new mutator instance.
 	 * 
-	 * @param corpus The corpus this context has been added to
+	 * @return A new mutator instance that can be used to alter the
+	 * internal state of this object.
+	 * @throws UnsupportedOperationException if the implementation
+	 * does not support mutation
+	 * @throws IllegalStateException if the corpus or context this
+	 * object is hosted in does not support user made changes
 	 */
-	void addNotify(Corpus corpus);
-
-	/**
-	 * Called by a corpus to signal a context that it has been removed.
-	 * 
-	 * @param corpus The corpus this context has been removed from
-	 */
-	void removeNotify(Corpus corpus);
+	M getMutator();
 }

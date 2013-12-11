@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.meta;
@@ -35,7 +35,13 @@ import de.ims.icarus.util.id.Identity;
  *
  */
 public interface ValueSet extends MetaData, Identity {
-	
+
+	/**
+	 * Returns the type of values stored in this {@code ValueSet}
+	 * @return
+	 */
+	ValueType getValueType();
+
 	/**
 	 * Returns all the possible values used for annotation.
 	 *
@@ -43,18 +49,18 @@ public interface ValueSet extends MetaData, Identity {
 	 * value set
 	 */
 	Set<String> getValues();
-	
+
 	/**
 	 * Provides a localized identification of a certain value.
 	 * 
 	 * @param key The <i>base-name</i> of the value to be localized.
 	 * @return The (optionally localized) name of the provided value.
 	 * @throws NullPointerException if the {@code value} is {@code null}
-	 * @throws IllegalArgumentException if the given {@code value} is 
+	 * @throws IllegalArgumentException if the given {@code value} is
 	 * unknown to this value set
 	 */
 	String getName(String value);
-	
+
 	/**
 	 * 
 	 * Provides a localized description of a certain value.
@@ -64,7 +70,7 @@ public interface ValueSet extends MetaData, Identity {
 	 * @param key The <i>base-name</i> of the value to be localized.
 	 * @return The (optionally localized) description of the provided value or {@code null}.
 	 * @throws NullPointerException if the {@code value} is {@code null}
-	 * @throws IllegalArgumentException if the given {@code key} is 
+	 * @throws IllegalArgumentException if the given {@code key} is
 	 * unknown to this value set
 	 */
 	String getDescription(String value);

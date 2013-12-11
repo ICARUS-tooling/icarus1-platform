@@ -19,46 +19,45 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$
- * $LastChangedRevision$
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
-
-import java.util.List;
-
-import de.ims.icarus.io.Loadable;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ManifestOwner;
-import de.ims.icarus.util.location.Location;
+package de.ims.icarus.language.model.mutation.batch;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Context extends Loadable, ManifestOwner<ContextManifest> {
-
-	Location getLocation();
-
-	Corpus getCorpus();
-
-	List<Layer> getLayers();
-
-	@Override
-	ContextManifest getManifest();
+public interface BatchMutator {
+	
+	/**
+	 * Tries to acquire the modification lock on the underlying
+	 * corpus member and returns {@code true} if successful.
+	 * 
+	 * @return {@code true} iff the modification lock on the
+	 * mutated corpus member has successfully been acquired
+	 */
+	boolean beginBatch();
 
 	/**
-	 * Called by a corpus to signal a context that it has been added.
+	 * Discards all accumulated batch operations and releases
+	 * the previously acquired modification lock.
 	 * 
-	 * @param corpus The corpus this context has been added to
+	 * @throws IllegalStateException if this mutator does not
+	 * currently hold the modification lock on the underlying
+	 * corpus member
 	 */
-	void addNotify(Corpus corpus);
-
+	void discardBatch();
+	
 	/**
-	 * Called by a corpus to signal a context that it has been removed.
 	 * 
-	 * @param corpus The corpus this context has been removed from
+	 * @return {@code true} iff all pending batch operations have
+	 * been executed successfully
+	 * @throws IllegalStateException if this mutator does not
+	 * currently hold the modification lock on the underlying
+	 * corpus member
 	 */
-	void removeNotify(Corpus corpus);
+	boolean executeBatch();
 }

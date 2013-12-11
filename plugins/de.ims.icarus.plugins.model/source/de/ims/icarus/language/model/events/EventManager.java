@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,30 +23,36 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.events;
 
 /**
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface CorpusMember {
+public interface EventManager {
 
-	/**
-	 * @return The globally unique id
-	 */
-	long getId();
 	
 	/**
+	 * Registers the given listener to the internal list of registered
+	 * listeners. Does nothing if the provided listener is {@code null}.
+	 * Note that implementations should make sure that no listener is
+	 * registered more than once. Typically this means doubling the cost
+	 * of registration. Since it is not to be expected that registrations
+	 * occur extremely frequent, this can be ignored.
 	 * 
-	 * @return The corpus this member is a part of
+	 * @param l The listener to be registered, may be {@code null}
 	 */
-	Corpus getCorpus();
+	void addCorpusListener(CorpusListener l);
 	
 	/**
-	 * 
-	 * @return The type of this member
+	 * Unregisters the given listener from the internal list of registered
+	 * listeners. Does nothing if the provided listener is {@code null}.
+	 * @param l The listener to be unregistered, may be {@code null}
 	 */
-	MemberType getMemberType();
+	void removeCorpusListener(CorpusListener l);
+	
+	void fireCorpusChanged(CorpusEvent e);
+	
+	// TODO add fireXXX methods for all methods in the CorpusListener interface!
 }

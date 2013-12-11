@@ -19,46 +19,21 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$
- * $LastChangedRevision$
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
-
-import java.util.List;
-
-import de.ims.icarus.io.Loadable;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ManifestOwner;
-import de.ims.icarus.util.location.Location;
+package de.ims.icarus.language.model.mutation.batch;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Context extends Loadable, ManifestOwner<ContextManifest> {
-
-	Location getLocation();
-
-	Corpus getCorpus();
-
-	List<Layer> getLayers();
-
-	@Override
-	ContextManifest getManifest();
-
-	/**
-	 * Called by a corpus to signal a context that it has been added.
-	 * 
-	 * @param corpus The corpus this context has been added to
-	 */
-	void addNotify(Corpus corpus);
-
-	/**
-	 * Called by a corpus to signal a context that it has been removed.
-	 * 
-	 * @param corpus The corpus this context has been removed from
-	 */
-	void removeNotify(Corpus corpus);
+public enum MutationType {
+	ADD,
+	REMOVE,
+	CLEAR,
+	SORT,
+	SWAP;
 }

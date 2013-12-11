@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
@@ -30,7 +30,15 @@ package de.ims.icarus.language.model;
 
 /**
  * Provides a structural view on a {@link MarkableLayer} by specifying a
- * set of nodes connected by edges.
+ * set of nodes connected by edges. Typically a {@code Structure} object
+ * will serve as a kind of <i>augmentation</i> of an existing {@code Container}:
+ * <br>
+ * It holds the required markables from the original container (either
+ * directly or via a general reference to the other container) and
+ * (optionally) defines a set of virtual markables. Overall those markables
+ * it then spans a colelction of edges, thereby creating the <i>structural</i>
+ * information.
+ * 
  * 
  * @author Markus Gärtner
  * @version $Id$
@@ -43,31 +51,47 @@ public interface Structure extends Container {
 	 * @return the type of this structure
 	 */
 	StructureType getStructureType();
-	
+
+	/**
+	 * Returns the {@code Container} that serves as bounding
+	 * box for the markables in this structure. In most cases
+	 * this will be a member of another {@code MarkableLayer}
+	 * that represents the sentence or document level. If this
+	 * {@code Structure} object only builds a virtual structure
+	 * atop of other markables and is not limited by previously
+	 * defined <i>boundary containers</i> then this method should
+	 * return {@code null}.
+	 * <p>
+	 * This is an optional method.
+	 * 
+	 * @return
+	 */
+	Container getBoundaryContainer();
+
 	/**
 	 * Returns the total number of edges this structure hosts.
 	 * @return the total number of edges this structure hosts.
 	 */
 	int getEdgeCount();
-	
+
 	/**
 	 * Returns the {@link Edge} stored at the given position within this
 	 * structure.
 	 * 
 	 * @param index The position of the desired {@code Edge} within this structure
 	 * @return The {@code Edge} at position {@code index}
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         (<tt>index &lt; 0 || index &gt;= getEdgeCount()</tt>)
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount()</tt>)
 	 */
 	Edge getEdgeAt(int index);
 
-	
+
 	/**
 	 * Returns the index of the given {@code Edge} within this structure's
 	 * list of edges or {@code -1} if the markable is not hosted within this
 	 * structure.
 	 * <p>
-	 * Note that for every edge <i>m</i> that is hosted within some structure the 
+	 * Note that for every edge <i>m</i> that is hosted within some structure the
 	 * following will always return a result different from {@code -1}:<br>
 	 * {@code e.getStructure().indexOfEdge(e)}
 	 * 
@@ -86,12 +110,12 @@ public interface Structure extends Container {
 	 * @throws NullPointerException if the {@code edge} argument is {@code null}
 	 */
 	boolean containsEdge(Edge edge);
-	
+
 	/**
 	 * Return the number of <b>outgoing</i> edges for a given node.
 	 * <p>
 	 * This is an optional method and only to be expected when the type of
-	 * this structure is neither {@value StructureType#SET} nor 
+	 * this structure is neither {@value StructureType#SET} nor
 	 * {@value StructureType#GRAPH}.
 	 * 
 	 * @param node the node to query for the number of outgoing edges.
@@ -101,38 +125,38 @@ public interface Structure extends Container {
 	 * of this structure's node-container
 	 */
 	int getEdgeCount(Markable node);
-	
+
 	/**
 	 * Return the <b>outgoing</i> edge at position {@code index} for a given node.
 	 * <p>
 	 * This is an optional method and only to be expected when the type of
-	 * this structure is neither {@value StructureType#SET} nor 
+	 * this structure is neither {@value StructureType#SET} nor
 	 * {@value StructureType#GRAPH}.
 	 * 
 	 * @param node the {@code Markable} in question
-	 * @param index the position of the desired {@code Edge} in the list of 
+	 * @param index the position of the desired {@code Edge} in the list of
 	 * <i>outgoing</i> edges for the given node
 	 * @return the <b>outgoing</i> edge at position {@code index} for a given node.
 	 * @throws NullPointerException if the {@code node} is {@code null}
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Markable)</tt>)
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Markable)</tt>)
 	 */
 	Edge getEdgeAt(Markable node, int index);
-	
+
 	/**
 	 * Utility method to fetch the <i>parent</i> of a given markable in this
 	 * structure. The meaning of the term <i>parent</i> is depending on the
 	 * {@code StructureType} as defined in this structure's {@code ContainerManifest}
 	 * <p>
 	 * This is an optional method and only to be expected when the type of
-	 * this structure is neither {@value StructureType#SET} nor 
+	 * this structure is neither {@value StructureType#SET} nor
 	 * {@value StructureType#GRAPH}.
 	 * 
 	 * @param node the node whose parent is to be returned
 	 * @return the node's parent or {@code null} if the node has no parent
 	 */
 	Markable getParent(Markable node);
-	
+
 	/**
 	 * For non-trivial structures returns the <i>generic root</i> node.
 	 * To allow actual root nodes of the structure to contain edge

@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.events;
 
+import de.ims.icarus.language.model.Context;
+
 /**
  * 
  * @author Markus Gärtner
@@ -33,4 +35,47 @@ package de.ims.icarus.language.model.events;
  */
 public interface CorpusListener {
 
+	/**
+	 * A general change in the corpus occurred.
+	 * 
+	 * @param e
+	 */
+	void corpusChanged(CorpusEvent e);
+	
+	/**
+	 * A new {@link Context} was added to the corpus.
+	 * @param e
+	 */
+	void contextAdded(CorpusEvent e);
+	
+	/**
+	 * A {@link Context} was removed from the corpus
+	 * @param e
+	 */
+	void contextRemoved(CorpusEvent e);
+	
+	/**
+	 * 
+	 * @param e
+	 */
+	void memberAdded(CorpusEvent e);
+	
+	void memberRemoved(CorpusEvent e);
+	
+	/**
+	 * Signals programmatic modifications to the state
+	 * of a {@code CorpusMember}.
+	 * <p>
+	 * Note that changed originating from direct user actions
+	 * are reported via {@link #memberMutated(CorpusEvent)}!
+	 * 
+	 * @param e
+	 */
+	void memberChanged(CorpusEvent e);
+	
+	/**
+	 * Signals user modifications to the state of a {@code CorpusMember}.
+	 * @param e
+	 */
+	void memberMutated(CorpusEvent e);
 }

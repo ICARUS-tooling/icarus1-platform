@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 import de.ims.icarus.io.Loadable;
-import de.ims.icarus.language.model.events.CorpusListener;
+import de.ims.icarus.language.model.events.EventManager;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.ManifestOwner;
 import de.ims.icarus.util.data.ContentType;
@@ -95,23 +95,12 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	Context getDefaultContext();
 	
 	/**
-	 * Registers the given listener to the internal list of registered
-	 * listeners. Does nothing if the provided listener is {@code null}.
-	 * Note that implementations should make sure that no listener is
-	 * registered more than once. Typically this means doubling the cost
-	 * of registration. Since it is not to be expected that registrations
-	 * occur extremely frequent, this can be ignored.
+	 * Returns the event manager that is responsible for storing listeners
+	 * and for publishing events.
 	 * 
-	 * @param l The listener to be registered, may be {@code null}
+	 * @return
 	 */
-	void addCorpusListener(CorpusListener l);
-	
-	/**
-	 * Unregisters the given listener from the internal list of registered
-	 * listeners. Does nothing if the provided listener is {@code null}.
-	 * @param l The listener to be unregistered, may be {@code null}
-	 */
-	void removeCorpusListener(CorpusListener l);
+	EventManager getEventManager();
 	
 	/**
 	 * Returns the manifest that describes this corpus.

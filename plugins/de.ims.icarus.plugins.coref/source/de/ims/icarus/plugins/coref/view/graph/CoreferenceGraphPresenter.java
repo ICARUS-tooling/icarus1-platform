@@ -45,7 +45,6 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 import de.ims.icarus.config.ConfigDelegate;

@@ -7,6 +7,8 @@ package de.ims.icarus.ui.events;
 import java.util.Hashtable;
 import java.util.Map;
 
+import de.ims.icarus.util.collections.CollectionUtils;
+
 /**
  * Base class for objects that dispatch named events.
  * @author Markus Gärtner
@@ -64,7 +66,7 @@ public class EventObject {
 	 * 
 	 */
 	public Map<String, Object> getProperties() {
-		return properties;
+		return CollectionUtils.getMapProxy(properties);
 	}
 
 	/**
@@ -87,22 +89,22 @@ public class EventObject {
 	public void consume() {
 		consumed = true;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append(name);
 		if(consumed) {
 			sb.append(" (consumed)"); //$NON-NLS-1$
 		}
-		
+
 		sb.append("["); //$NON-NLS-1$
 		for(Map.Entry<String, Object> entry : properties.entrySet()) {
 			sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		sb.append("]"); //$NON-NLS-1$
-		
+
 		return sb.toString();
 	}
 

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
@@ -44,15 +44,22 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 */
 	@Override
 	AnnotationLayerManifest getManifest();
-	
+
 	/**
 	 * 
 	 * @param markable
 	 * @return
 	 * @throws NullPointerException if the {@code markable} is {@code null}
-	 * @throws IllegalArgumentException if the
 	 */
 	Object getValue(Markable markable);
-	
+
+	/**
+	 * 
+	 * @param markable
+	 * @param key
+	 * @return
+	 * @throws NullPointerException if either the {@code markable} or {@code key}
+	 * is {@code null}
+	 */
 	Object getValue(Markable markable, String key);
 }
