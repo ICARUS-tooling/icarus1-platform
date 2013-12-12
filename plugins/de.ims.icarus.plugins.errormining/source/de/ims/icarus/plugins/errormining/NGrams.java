@@ -477,49 +477,56 @@ public class NGrams {
 			ArrayList<ItemInNuclei> arrItem = input.get(key);
 			//System.out.println(key);
 			
-			for(int j = 0; j < arrItem.size(); j++){
-				ItemInNuclei iin = arrItem.get(j);
-				for (int s = 0; s < iin.getSentenceInfoSize(); s++){
-					SentenceInfo si = iin.getSentenceInfoAt(s);
-					
-					/*
-					 * we only want to remove items where we have fringe;
-					 * when there is a ngram with more than one nuclei we check
-					 * for every nuclei if its fringe, if there is at most
-					 * one nuclei NOT fringe we will keep the ngram no matter if
-					 * the others are fringe nucleis or not
-					 */
-					
-					// new version should work now and only delete fringe
-					// within an ngram with 2+ nuclei if both are fringe
-					if(getFringeItem(si)){
-						//System.out.println("FringeKey " + key);
-						if(!removeFringeFromNGrams.contains(key)){
-							//System.out.println("FringeKey " + key);
-							removeFringeFromNGrams.add(key);
-						}
-					}
-
-					
-
-//					for(int n = 0; n < si.getNucleiIndexListSize(); n++){		
-//						//is fringe?
-//						if(isFringe(si.getNucleiIndexListAt(n), start, end)){
-//							
-//							if(!removeFringeFromNGrams.contains(key)){
-//								//System.out.println("FringeKey " + key);
-//								removeFringeFromNGrams.add(key);
-//							}
-//						}
-//					}
-					
+			int nonfringeItems = 0;
+			
+			String[] keySplitted = key.split(" "); //$NON-NLS-1$
+			for (int k = 1; k < keySplitted.length-1; k++) {			
+				if(containsNonFringe(k, arrItem)){
+					nonfringeItems++;					
 				}
 			}
+			
+			//count > 0 => we have at least one item that is no fringe
+			if(nonfringeItems == 0){
+				if(!removeFringeFromNGrams.contains(key)){
+					//System.out.println("FringeKey " + key);
+					removeFringeFromNGrams.add(key);
+				}
+			}
+			
+//			for(int j = 0; j < arrItem.size(); j++){
+//				
+//				
+//				ItemInNuclei iin = arrItem.get(j);
+//				System.out.println(iin.getPosTag());
+
+//				for (int s = 0; s < iin.getSentenceInfoSize(); s++){
+//					SentenceInfo si = iin.getSentenceInfoAt(s);
+//					
+//					/*
+//					 * we only want to remove items where we have fringe;
+//					 * when there is a ngram with more than one nuclei we check
+//					 * for every nuclei if its fringe, if there is at most
+//					 * one nuclei NOT fringe we will keep the ngram no matter if
+//					 * the others are fringe nucleis or not
+//					 */
+//					
+//					// new version should work now and only delete fringe
+//					// within an ngram with 2+ nuclei if both are fringe
+//					if(getFringeItem(si)){
+//						//System.out.println("FringeKey " + key);
+//						if(!removeFringeFromNGrams.contains(key)){
+//							//System.out.println("FringeKey " + key);
+//							removeFringeFromNGrams.add(key);
+//						}
+//					}
+//				}
+//			}
 		}
 				
-		System.out.println("FringeItems to Remove: " + removeFringeFromNGrams.size());
+		//System.out.println("FringeItems to Remove: " + removeFringeFromNGrams.size());
 		for(int i = 0; i < removeFringeFromNGrams.size(); i++){
-			System.out.println("Remove " + removeFringeFromNGrams.get(i));
+			//System.out.println("Remove " + removeFringeFromNGrams.get(i));
 			input.remove(removeFringeFromNGrams.get(i));
 		}
 
@@ -528,6 +535,29 @@ public class NGrams {
 		
 	}
 	
+
+
+	/**
+	 * @param k 
+	 * @param arrItem
+	 */
+	private boolean containsNonFringe(int k, ArrayList<ItemInNuclei> iinList) {
+		List<String> test = new ArrayList<>();
+		
+		for(int i = 0; i < iinList.size(); i++){
+			String[] s = iinList.get(i).getPosTag().split(" "); //$NON-NLS-1$
+			if(!test.contains(s[k])){
+				test.add(s[k]);
+			}
+		}
+		
+		if (test.size() > 1){
+			return true;
+		}
+		
+		return false;
+		
+	}
 
 
 	/**
