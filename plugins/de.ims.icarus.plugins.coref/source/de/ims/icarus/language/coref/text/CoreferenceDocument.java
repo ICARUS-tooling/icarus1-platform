@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
@@ -347,9 +348,9 @@ public class CoreferenceDocument extends BatchDocument {
 					}
 
 					// Do not filter out highlighted singletons!
-					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
-						continue;
-					}
+//					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
+//						continue;
+//					}
 
 					ClusterAttributes attributes = getClusterAttributes(span.getClusterId(), highlightType);
 					AttributeSet attr;
@@ -428,9 +429,9 @@ public class CoreferenceDocument extends BatchDocument {
 					}
 
 					// Do not filter out highlighted singletons!
-					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
-						continue;
-					}
+//					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
+//						continue;
+//					}
 
 					ClusterAttributes attributes = attributeStack.pop();
 					//					System.out.printf("attr::pop %s %s\n",attributeStack, span);
@@ -544,9 +545,11 @@ public class CoreferenceDocument extends BatchDocument {
 
 	private Span[] filterSpans(Collection<Span> spans, int sentenceId) {
 		Collection<Span> tmp = new ArrayList<>();
-		for(Span span : spans) {
+		for(Iterator<Span> it = spans.iterator(); it.hasNext();) {
+			Span span = it.next();
 			if(span.getSentenceIndex()==sentenceId) {
 				tmp.add(span);
+				it.remove();
 			}
 		}
 

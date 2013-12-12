@@ -158,13 +158,9 @@ public final class CoreferenceUtils {
 		if(goldSet==null) {
 			CorefComparison result = new CorefComparison();
 
-			if(filterSingletons) {
-				edges = (Set<Edge>) removeSingletons(edges);
-			}
-
 			result.setEdgeSet(edgeSet);
 			result.setEdges(edges);
-			result.setSpans(collectSpans(edges));
+			result.setSpans(spanLut);
 			result.setRootMap(rootLut);
 
 			return result;
