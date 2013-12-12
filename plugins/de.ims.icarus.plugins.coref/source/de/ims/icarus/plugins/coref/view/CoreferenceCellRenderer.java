@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view;
@@ -53,9 +53,9 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
 		ListCellRenderer<CoreferenceData>, TableCellRenderer {
 
 	private static final long serialVersionUID = 3528239616495396258L;
-	
+
     protected static final Border DEFAULT_NO_FOCUS_BORDER = new EmptyBorder(1, 1, 1, 1);
-    
+
 	public CoreferenceCellRenderer() {
 		setEditorKit(new CoreferenceEditorKit());
         setOpaque(true);
@@ -66,7 +66,7 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
         Border border = UIManager.getBorder("List.cellNoFocusBorder"); //$NON-NLS-1$
         return border==null ? DEFAULT_NO_FOCUS_BORDER : border;
     }
-    
+
 	/**
 	 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 	 */
@@ -114,12 +114,12 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
             border = getNoFocusBorder();
         }
         setBorder(border);
-        
+
         setData(value, index);
 
         return this;
 	}
-	
+
     protected Color unselectedForeground;
     protected Color unselectedBackground;
 
@@ -129,9 +129,8 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		if (table == null) {
-            return this;
-        }
+		if (table == null)
+			return this;
 
         Color fg = null;
         Color bg = null;
@@ -196,22 +195,23 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
         } else {
             setBorder(getNoFocusBorder());
         }
-        
+
         setData((CoreferenceData) value, row);
-        
+
         return this;
 	}
-	
-	public void setData(CoreferenceData data, int index) {		
+
+	public void setData(CoreferenceData data, int index) {
 		try {
 			CoreferenceDocument doc = (CoreferenceDocument) getStyledDocument();
 			doc.clear();
-			
+
 			//doc.insertString(0, index+": ", null); //$NON-NLS-1$
-			doc.appendBatchCoreferenceData(data, index, null, null);
+			// FIXME
+//			doc.appendBatchCoreferenceData(data, index, null, null);
 			doc.applyBatchUpdates(0);
 		} catch (BadLocationException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to highlight spans", e); //$NON-NLS-1$
 		}
 	}
@@ -234,7 +234,7 @@ public class CoreferenceCellRenderer extends DummyTextPane implements
         setForeground(null);
         setBackground(null);
     }
-    
+
     @Override
     public boolean isOpaque() {
         Color back = getBackground();

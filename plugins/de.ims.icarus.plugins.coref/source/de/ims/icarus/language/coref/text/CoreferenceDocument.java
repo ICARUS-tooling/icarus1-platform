@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.text;
@@ -28,6 +28,10 @@ package de.ims.icarus.language.coref.text;
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Stack;
 
@@ -37,13 +41,14 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import de.ims.icarus.language.coref.CorefComparison;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanCache;
-import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.language.coref.helper.SpanBuffer;
@@ -69,14 +74,14 @@ import de.ims.icarus.util.id.Identity;
 public class CoreferenceDocument extends BatchDocument {
 
 	private static final long serialVersionUID = -5717201692774979302L;
-	
-	protected SpanBuffer spanBuffer;
+
+	protected final SpanBuffer spanBuffer = new SpanBuffer();
 	//protected SpanBuffer goldBuffer;
-	protected Stack<ClusterAttributes> attributeStack;
-	protected Stack<Color> highlightStack;
-	protected Stack<Span> spanStack;
-	protected StringBuilder builder;
-	
+	protected final Stack<ClusterAttributes> attributeStack = new Stack<>();
+	protected final Stack<Color> highlightStack = new Stack<>();
+	protected final Stack<Span> spanStack = new Stack<>();
+	protected final StringBuilder builder = new StringBuilder();
+
 	private boolean markSpans = true;
 	private boolean showClusterId = false;
 	private boolean showOffset = false;
@@ -86,18 +91,18 @@ public class CoreferenceDocument extends BatchDocument {
 
 	private boolean filterSingletons = true;
 	private boolean filterNonHighlighted = false;
-	
+
 	private HighlightType highlightType = HighlightType.BACKGROUND;
-	
+
 	private Filter filter;
 	private Filter markupFilter;
-	
+
 	private AnnotationManager annotationManager;
-	
+
 	private SpanCache cache;
-	
+
 	private PropertyChangeSupport propertyChangeSupport;
-	
+
 	private DisplayMode displayMode = DisplayMode.DEFAULT;
 
 	public static final String PARAM_SPAN = "span"; //$NON-NLS-1$
@@ -110,26 +115,26 @@ public class CoreferenceDocument extends BatchDocument {
 	public static final String PARAM_HIGHLIGHT_TYPE = "highlightType"; //$NON-NLS-1$
 	public static final int HIGHLIGHT_TYPE_BEGIN = (1 << 0);
 	public static final int HIGHLIGHT_TYPE_END = (1 << 1);
-	
+
 	// BEGIN unused
 	public static final MutableAttributeSet CONTENT = new SimpleAttributeSet();
 	public static final MutableAttributeSet SUBSCRIPT = new SimpleAttributeSet();
 	public static final MutableAttributeSet SUPERSCRIPT = new SimpleAttributeSet();
 	public static final MutableAttributeSet HEADER = new SimpleAttributeSet();
-	
+
 	static {
 		StyleConstants.setSuperscript(SUPERSCRIPT, true);
 		StyleConstants.setSubscript(SUBSCRIPT, true);
-		
+
 		StyleConstants.setBold(HEADER, true);
 		StyleConstants.setFontSize(HEADER, 14);
 		StyleConstants.setSpaceAbove(HEADER, 5);
 		StyleConstants.setSpaceBelow(HEADER, 3);
-		
+
 		CONTENT.addAttribute(ElementNameAttribute, ContentElementName);
 	}
 	// END unused
-	
+
 	public static boolean isHighlightBegin(int highlight) {
 		return (highlight & HIGHLIGHT_TYPE_BEGIN)==HIGHLIGHT_TYPE_BEGIN;
 	}
@@ -137,16 +142,16 @@ public class CoreferenceDocument extends BatchDocument {
 	public static boolean isHighlightEnd(int highlight) {
 		return (highlight & HIGHLIGHT_TYPE_END)==HIGHLIGHT_TYPE_END;
 	}
-	
+
 	public enum DisplayMode implements Identity {
 		DEFAULT("default"), //$NON-NLS-1$
 		GOLD("gold"), //$NON-NLS-1$
 		FALSE_POSITIVES("falsePositives"), //$NON-NLS-1$
 		FALSE_NEGATIVES("falseNegatives"), //$NON-NLS-1$
 		;
-		
+
 		private final String key;
-		
+
 		private DisplayMode(String key) {
 			this.key = key;
 		}
@@ -192,13 +197,13 @@ public class CoreferenceDocument extends BatchDocument {
 		public Object getOwner() {
 			return getClass();
 		}
-		
+
 	}
-	
+
 	public CoreferenceDocument() {
 		// no-op
 	}
-	
+
 	public void copySettings(CoreferenceDocument source) {
 		markSpans = source.markSpans;
 		showClusterId = source.showClusterId;
@@ -210,18 +215,18 @@ public class CoreferenceDocument extends BatchDocument {
 		filterSingletons = source.filterSingletons;
 		filterNonHighlighted = source.filterNonHighlighted;
 		showSentenceIndex = source.showSentenceIndex;
-//		markupFilter = source.markupFilter;
+		//		markupFilter = source.markupFilter;
 		displayMode = source.displayMode;
 	}
-	
+
 	protected PropertyChangeSupport getPropertyChangeSupport() {
 		if(propertyChangeSupport==null) {
 			propertyChangeSupport = new PropertyChangeSupport(this);
 		}
-		
+
 		return propertyChangeSupport;
 	}
-	
+
 	/**
 	 * @param listener
 	 * @see de.ims.icarus.util.PropertyChangeSource#addPropertyChangeListener(java.beans.PropertyChangeListener)
@@ -259,94 +264,44 @@ public class CoreferenceDocument extends BatchDocument {
 	}
 
 	// TODO bug: no space between last and next to last token in span when nested span is filtered out!
-	public void appendBatchCoreferenceData(CoreferenceData data, int sentenceIndex, 
-			Span[] spanSet, Span[] goldSet) {
+	protected void appendBatchCoreferenceData(CoreferenceData data, int sentenceIndex, CorefComparison comparison) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		if(data.length()==0) {
+		if(data.length()==0)
 			return;
-		}
 
-		CoreferenceDocumentAnnotationManager annotationManager = 
+		CoreferenceDocumentAnnotationManager annotationManager =
 				(CoreferenceDocumentAnnotationManager) getAnnotationManager();
-		/*AnnotationLayer annotation = data instanceof AnnotatedData ? 
-				((AnnotatedData)data).getAnnotation() : null; 
-		if(annotationManager!=null) {
-			annotationManager.setAnnotation(annotation);
-		}*/
-		
-		Span[] spans = spanSet;
-		
-		switch (displayMode) {
-		case GOLD:
-			spans = goldSet;
-			break;
 
-		case FALSE_NEGATIVES:
-			spans = CoreferenceUtils.getFalseNegatives(spanSet, goldSet);
-			break;
-
-		case FALSE_POSITIVES:
-			spans = CoreferenceUtils.getFalsePositives(spanSet, goldSet);
-			break;
-			
-		default:
-			// no-op, since per default we show the above spans array
-			break;
-		}
-		
-		if(spanBuffer==null) {
-			spanBuffer = new SpanBuffer();
-			attributeStack = new Stack<>();
-			highlightStack = new Stack<>();
-			spanStack = new Stack<>();
-			builder = new StringBuilder();
-		}
-		
-		if(spans==null) {
-			spanBuffer.clear();
-			// Ensure a non-null spans array!
-			spans = new Span[0];
-		} else {
-			spanBuffer.rebuild(spans);
-		}
-		
-		/*if(goldSpans==null) {
-			goldBuffer.clear();
-		} else {
-			goldBuffer.rebuild(goldSpans);
-		}*/
-		
-//		Color markupColor = CoreferenceUtils.getClusterMarkupColor();
 		HighlightType highlightType = getHighlightType();
 		Filter filter = getFilter();
 		//boolean lastWasClosing = false;
 		//boolean lastWasImportant = false;
-		
+
 		int length = data.length();
-		
+
 		if(!batch.isEmpty() && isForceLinebreaks()) {
 			appendBatchLineFeed(null);
 		}
-		
+
 		if(isShowSentenceIndex()) {
 			String indexString = StringUtil.formatDecimal(sentenceIndex+1)+": "; //$NON-NLS-1$
 			appendBatchString(indexString, null);
 		}
-		
-		for(int index = 0; index<length; index++) {			
+
+		for(int index = 0; index<length; index++) {
 			//boolean important = isMarkSpans() && spanBuffer.isImportant(index);
 			boolean isLast = index==length-1;
 			String token = data.getForm(index);
-			
-			// Add space 
-			//if(index>0 && (builder.length()>0 
-			//		|| (lastWasImportant /*&& !important*/) // TODO 
+
+			// Add space
+			//if(index>0 && (builder.length()>0
+			//		|| (lastWasImportant /*&& !important*/) // TODO
 			//		|| (lastWasClosing && spanBuffer.isStart(index)))) {
 			//	builder.append(" "); //$NON-NLS-1$
 			//}
 			//lastWasClosing = false;
-			
+
 			// Border between two spans or regular text an the beginning of a new span
 			if(builder.length()>0 && spanBuffer.isStartOrEnd(index)) {
 				// Distinguish between text within a span (nested or not)
@@ -357,13 +312,13 @@ public class CoreferenceDocument extends BatchDocument {
 				Color col = highlightStack.isEmpty() ? null : highlightStack.peek();
 				attr = createHighlightedAttr(attr, span, col, 0);
 				appendBatchString(builder.toString(), attr);
-				
+
 				builder.setLength(0);
 			}
-			
+
 			// Mark the start of a span with the cluster id and
 			// the mentions begin index
-			if(isMarkSpans() && spanBuffer.isStart(index)) {	
+			if(isMarkSpans() && spanBuffer.isStart(index)) {
 				for(int i=0; i<spanBuffer.getSpanCount(index); i++) {
 					Span span = spanBuffer.getSpan(index, i);
 					if(span==null || span.getBeginIndex()!=index) {
@@ -372,41 +327,41 @@ public class CoreferenceDocument extends BatchDocument {
 					if(filter!=null && !filter.accepts(span)) {
 						continue;
 					}
-					
+
 					int clusterIndex = getCache().getIndex(span);
 					Color highlightColor = null;
-					long highlight = annotationManager.getHighlight(clusterIndex);
+					long highlight = annotationManager==null ? 0L : annotationManager.getHighlight(clusterIndex);
 					if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
 						highlightColor =  CoreferenceDocumentHighlighting.getInstance().getGroupColor(highlight);
 						if(highlightColor==null) {
 							highlightColor = CoreferenceDocumentHighlighting.getInstance().getHighlightColor(highlight);
 						}
 					}
-					
-//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
-//						highlightColor = markupColor;
-//					}
-					
+
+					//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
+					//						highlightColor = markupColor;
+					//					}
+
 					if(filterNonHighlighted && highlightColor==null) {
 						continue;
 					}
-					
+
 					// Do not filter out highlighted singletons!
 					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
 						continue;
 					}
-										
+
 					ClusterAttributes attributes = getClusterAttributes(span.getClusterId(), highlightType);
 					AttributeSet attr;
-					
+
 					// Superscript cluster id
 					if(isShowClusterId()) {
 						attr = createHighlightedAttr(attributes.getSuperscriptStyle(), span, highlightColor, HIGHLIGHT_TYPE_BEGIN);
 						appendBatchString(String.valueOf(span.getClusterId()), attr);
 					}
-					
+
 					// Opening bracket
-					attr = createHighlightedAttr(attributes.getFillerStyle(), span, highlightColor, 
+					attr = createHighlightedAttr(attributes.getFillerStyle(), span, highlightColor,
 							isShowClusterId() ? 0 : HIGHLIGHT_TYPE_BEGIN);
 					appendBatchString("[", attr); //$NON-NLS-1$
 
@@ -415,9 +370,9 @@ public class CoreferenceDocument extends BatchDocument {
 						attr = createHighlightedAttr(attributes.getSubscriptStyle(), span, highlightColor, 0);
 						appendBatchString(String.valueOf(index+1), attr);
 					}
-					
+
 					attributeStack.push(attributes);
-//					System.out.printf("attr::push %s %s\n",attributeStack, span);
+					//					System.out.printf("attr::push %s %s\n",attributeStack, span);
 					spanStack.push(span);
 					if(highlightColor!=null) {
 						highlightStack .push(highlightColor);
@@ -426,12 +381,12 @@ public class CoreferenceDocument extends BatchDocument {
 			}
 
 			// Accumulate tokens till a significant highlight change
-			// occurs so they can be stored in a single element.  
+			// occurs so they can be stored in a single element.
 			builder.append(token);
 			if(index<length-1) {
 				builder.append(' ');
 			}
-			
+
 			// Handle singletons and last tokens here since the regular string buffering
 			// would place them after the surrounding brackets
 			if(builder.length()>0 && (isLast || spanBuffer.isEnd(index))) {
@@ -441,47 +396,47 @@ public class CoreferenceDocument extends BatchDocument {
 				Color col = highlightStack.isEmpty() ? null : highlightStack.peek();
 				attr = createHighlightedAttr(attr, span, col, 0);
 				appendBatchString(builder.toString(), attr);
-				
+
 				builder.setLength(0);
 			}
-			
+
 			if(isMarkSpans() && spanBuffer.isEnd(index)) {
 				for(int i=spanBuffer.getSpanCount(index)-1; i>-1; i--) {
 					Span span = spanBuffer.getSpan(index, i);
 					if(span==null || span.getEndIndex()!=index) {
 						continue;
 					}
-					
+
 					if(filter!=null && !filter.accepts(span)) {
 						continue;
 					}
 					//lastWasClosing = true;
-					
+
 					int clusterIndex = getCache().getIndex(span);
 					Color highlightColor = null;
-					long highlight = annotationManager.getHighlight(clusterIndex);
+					long highlight = annotationManager==null ? 0L : annotationManager.getHighlight(clusterIndex);
 					if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
 						highlightColor =  highlightStack.pop();
 					}
-					
-//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
-//						highlightColor = markupColor;
-//					}
+
+					//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
+					//						highlightColor = markupColor;
+					//					}
 
 					if(filterNonHighlighted && highlightColor==null) {
 						continue;
 					}
-					
+
 					// Do not filter out highlighted singletons!
 					if(highlightColor==null && filterSingletons && getCache().isSingleton(span)) {
 						continue;
 					}
 
 					ClusterAttributes attributes = attributeStack.pop();
-//					System.out.printf("attr::pop %s %s\n",attributeStack, span);
+					//					System.out.printf("attr::pop %s %s\n",attributeStack, span);
 					span = spanStack.pop();
 					AttributeSet attr;
-					
+
 					// Remove trailing whitespace characters
 					StringUtil.trim(builder);
 
@@ -490,9 +445,9 @@ public class CoreferenceDocument extends BatchDocument {
 						attr = createHighlightedAttr(attributes.getSubscriptStyle(), span, highlightColor, 0);
 						appendBatchString(String.valueOf(index+1), attr);
 					}
-					
+
 					// Closing bracket
-					attr = createHighlightedAttr(attributes.getFillerStyle(), span, highlightColor, 
+					attr = createHighlightedAttr(attributes.getFillerStyle(), span, highlightColor,
 							isShowClusterId() ? 0 : HIGHLIGHT_TYPE_END);
 					appendBatchString("]", attr); //$NON-NLS-1$
 
@@ -501,69 +456,128 @@ public class CoreferenceDocument extends BatchDocument {
 						attr = createHighlightedAttr(attributes.getSuperscriptStyle(), span, highlightColor, HIGHLIGHT_TYPE_END);
 						appendBatchString(String.valueOf(span.getClusterId()), attr);
 					}
-					
+
 					builder.append(' ');
 				}
 			}
-			
+
 			//lastWasImportant = important;
 		}
 	}
-	
-	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data, 
+
+	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data,
 			CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
+		appendBatchCoreferenceDocumentData(data, allocation, goldAllocation, -1, -1);
+	}
+
+	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data,
+			CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation,
+			int index0, int index1) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
+		if(index0==-1) {
+			index0 = 0;
+		}
+		if(index1==-1) {
+			index1 = data.size()-1;
+		}
+
 		if(!batch.isEmpty()) {
 			appendBatchLineFeed(null);
 		}
-		
+
 		if(isShowDocumentHeader()) {
 			appendBatchDocumentHeader(data);
 		}
-		
-		SpanSet spanSet = CoreferenceUtils.getSpanSet(data, allocation);
-		SpanSet goldSet = CoreferenceUtils.getGoldSpanSet(data, goldAllocation);
-		
-		cacheSpans(spanSet, goldSet);
 
-		CoreferenceDocumentAnnotationManager annotationManager = 
+		EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(data, allocation);
+		EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(data, goldAllocation);
+
+		CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, filterSingletons);
+
+		cacheSpans(edgeSet, goldSet);
+
+		CoreferenceDocumentAnnotationManager annotationManager =
 				(CoreferenceDocumentAnnotationManager) getAnnotationManager();
-		Annotation annotation = data instanceof AnnotatedData ? 
-				((AnnotatedData)data).getAnnotation() : null; 
+		Annotation annotation = data instanceof AnnotatedData ?
+				((AnnotatedData)data).getAnnotation() : null;
+
 		if(annotationManager!=null) {
 			annotationManager.setAnnotation(annotation);
 		}
-		
-		int size = data.size();
-		for(int i=0; i<size; i++) {
-			Span[] spans = spanSet==null ? new Span[0] : spanSet.getSpans(i);
-			Span[] goldSpans = goldSet==null ? null : goldSet.getSpans(i);
-			appendBatchCoreferenceData(data.get(i), i, spans, goldSpans);
+
+		Collection<Span> spans = null;
+
+		switch (displayMode) {
+		case GOLD:
+			spans = new HashSet<>(comparison.getGoldSpans());
+			break;
+
+		case FALSE_NEGATIVES:
+			spans = new HashSet<>(comparison.getGoldSpans());
+			spans.removeAll(comparison.getSpans());
+			break;
+
+		case FALSE_POSITIVES:
+			spans = new HashSet<>(comparison.getSpans());
+			spans.removeAll(comparison.getGoldSpans());
+			break;
+
+		default:
+			spans = new HashSet<>(comparison.getSpans());
+			break;
+		}
+
+		for(int i=index0; i<=index1; i++) {
+
+			spanBuffer.rebuild(filterSpans(spans, i));
+
+			appendBatchCoreferenceData(data.get(i), i, comparison);
+
+			attributeStack.clear();
+			highlightStack.clear();
+			spanStack.clear();
+			builder.setLength(0);
 		}
 	}
-	
+
+	private Span[] filterSpans(Collection<Span> spans, int sentenceId) {
+		Collection<Span> tmp = new ArrayList<>();
+		for(Span span : spans) {
+			if(span.getSentenceIndex()==sentenceId) {
+				tmp.add(span);
+			}
+		}
+
+		Span[] result = new Span[tmp.size()];
+		tmp.toArray(result);
+
+		Arrays.sort(result, CoreferenceUtils.SPAN_SIZE_REVERSE_SORTER);
+
+		return result;
+	}
+
 	public void appendBatchDocumentHeader(CoreferenceDocumentData data) {
 		appendBatchLineFeed(null);
 		appendBatchString(CoreferenceUtils.getDocumentHeader(data), HEADER);
 		appendBatchLineFeed(null);
 	}
-	
+
 	protected SpanCache getCache() {
 		if(cache==null) {
 			cache = new SpanCache();
 		}
 		return cache;
 	}
-	
-	public void cacheSpans(SpanSet spans, SpanSet goldSpans) {
+
+	public void cacheSpans(EdgeSet edgeSet, EdgeSet goldSets) {
 		getCache().clear();
 		if(displayMode==CoreferenceDocument.DisplayMode.GOLD
 				|| displayMode==CoreferenceDocument.DisplayMode.FALSE_NEGATIVES) {
-			getCache().cacheSpans(goldSpans);
+			getCache().cacheEdges(goldSets);
 		} else {
-			getCache().cacheSpans(spans);
+			getCache().cacheEdges(edgeSet);
 		}
 	}
 
@@ -604,13 +618,12 @@ public class CoreferenceDocument extends BatchDocument {
 	}
 
 	public void setHighlightType(HighlightType highlightType) {
-		if(highlightType==null) {
+		if(highlightType==null)
 			throw new NullPointerException("Invalid highlight type"); //$NON-NLS-1$
-		}
-		
+
 		this.highlightType = highlightType;
 	}
-	
+
 	public boolean isForceLinebreaks() {
 		return forceLinebreaks;
 	}
@@ -656,13 +669,12 @@ public class CoreferenceDocument extends BatchDocument {
 	}
 
 	public void setFilter(Filter filter) {
-		if(ClassUtils.equals(this.filter, filter)) {
+		if(ClassUtils.equals(this.filter, filter))
 			return;
-		}
-		
+
 		Filter oldValue = this.filter;
 		this.filter = filter;
-		
+
 		getPropertyChangeSupport().firePropertyChange("filter", oldValue, filter); //$NON-NLS-1$
 	}
 
@@ -671,20 +683,19 @@ public class CoreferenceDocument extends BatchDocument {
 	}
 
 	public void setMarkupFilter(Filter markupFilter) {
-		if(ClassUtils.equals(this.markupFilter, markupFilter)) {
+		if(ClassUtils.equals(this.markupFilter, markupFilter))
 			return;
-		}
-		
+
 		Filter oldValue = this.markupFilter;
 		this.markupFilter = markupFilter;
 
 		getPropertyChangeSupport().firePropertyChange("markupFilter", oldValue, markupFilter); //$NON-NLS-1$
 	}
-	
-//	protected static MutableAttributeSet cloneAttributes(AttributeSet attr) {
-//		return new SimpleAttributeSet(attr);
-//	}
-	
+
+	//	protected static MutableAttributeSet cloneAttributes(AttributeSet attr) {
+	//		return new SimpleAttributeSet(attr);
+	//	}
+
 	/**
 	 * @return the displayMode
 	 */
@@ -698,47 +709,45 @@ public class CoreferenceDocument extends BatchDocument {
 	public void setDisplayMode(DisplayMode displayMode) {
 		if(displayMode==null)
 			throw new NullPointerException("Invalid display mode"); //$NON-NLS-1$
-		if(this.displayMode==displayMode) {
+		if(this.displayMode==displayMode)
 			return;
-		}
-		
+
 		DisplayMode oldValue = this.displayMode;
 		this.displayMode = displayMode;
-		
+
 		getPropertyChangeSupport().firePropertyChange("displayMode", oldValue, displayMode); //$NON-NLS-1$
 	}
 
 	protected static MutableAttributeSet cloneAttributes(AttributeSet attr, Span span) {
 		SimpleAttributeSet a = new SimpleAttributeSet(attr);
-		
+
 		if(span!=null) {
 			a.addAttribute(PARAM_SPAN, span);
 		}
-		
+
 		return a;
 	}
-	
+
 	protected AttributeSet createHighlightedAttr(AttributeSet attr, Span span, Color col, int type) {
-//		System.out.printf("attr=%s span=%s col=%s type=%d\n",attr,span,col,type);
-		if(attr==null) {
+		//		System.out.printf("attr=%s span=%s col=%s type=%d\n",attr,span,col,type);
+		if(attr==null)
 			return null;
-		}
-		
+
 		if(col==null && !highlightStack.isEmpty()) {
 			col = highlightStack.peek();
 			type = 0;
 		}
-		
+
 		MutableAttributeSet a = null;
-		
+
 		if(col!=null || span!=null) {
 			a = new SimpleAttributeSet(attr);
-			
+
 			if(span!=null) {
 				a.addAttribute(PARAM_SPAN, span);
 			}
 		}
-		
+
 		if(a!=null && a!=attr) {
 			Integer v = (Integer) attr.getAttribute(PARAM_HIGHLIGHT_TYPE);
 			if(v==null) {
@@ -747,33 +756,33 @@ public class CoreferenceDocument extends BatchDocument {
 			v |= type;
 			a.addAttribute(PARAM_HIGHLIGHT_TYPE, v);
 		}
-		
+
 		return a;
 	}
 
 	private static Map<String, ClusterAttributes> attributeCache = new LRUCache<>(100);
-	
+
 	protected static ClusterAttributes getClusterAttributes(int clusterId, HighlightType highlightType) {
 		String key = String.valueOf(clusterId)+highlightType.toString();
-		
+
 		ClusterAttributes attr = attributeCache.get(key);
-		
+
 		if(attr==null) {
 			attr = new ClusterAttributes(clusterId, highlightType);
 			attributeCache.put(key, attr);
 		}
-		
+
 		return attr;
 	}
-	
+
 	protected static final ClusterAttributes emptyAttributes = new ClusterAttributes(-1, null);
-	
+
 	protected static class ClusterAttributes {
 		MutableAttributeSet superscript, subscript, content, filler;
-		
+
 		final int clusterId;
 		final HighlightType highlightType;
-		
+
 		ClusterAttributes(ClusterAttributes source) {
 			subscript = source.subscript;
 			superscript = source.superscript;
@@ -782,36 +791,36 @@ public class CoreferenceDocument extends BatchDocument {
 			clusterId = source.clusterId;
 			highlightType = source.highlightType;
 		}
-		
+
 		ClusterAttributes(int clusterId, HighlightType highlightType) {
 			this.clusterId = clusterId;
 			this.highlightType = highlightType;
-			
+
 			if(highlightType==null) {
 				superscript = subscript = content = filler = null;
 				return;
 			}
-			
+
 			Color col = CoreferenceStyling.getClusterColor(clusterId);
-			
+
 			// Superscript style
 			superscript = new SimpleAttributeSet();
 			//superscript.addAttribute(PARAM_CLUSTER_ID, clusterId);
 			StyleConstants.setSuperscript(superscript, true);
-			
+
 			// Subscript style
 			subscript = new SimpleAttributeSet();
 			//subscript.addAttribute(PARAM_CLUSTER_ID, clusterId);
 			StyleConstants.setSubscript(subscript, true);
-			
+
 			// Content style
 			content = new SimpleAttributeSet();
 			//content.addAttribute(PARAM_CLUSTER_ID, clusterId);
-			
+
 			// Filler style
 			filler = new SimpleAttributeSet();
 			//filler.addAttribute(PARAM_CLUSTER_ID, clusterId);
-			
+
 			switch (highlightType) {
 			case FOREGROUND:
 				StyleConstants.setForeground(superscript, col);
@@ -826,40 +835,40 @@ public class CoreferenceDocument extends BatchDocument {
 				content.addAttribute(PARAM_FILL_COLOR, col);
 				filler.addAttribute(PARAM_FILL_COLOR, col);
 				break;
-				
+
 			case BOLD:
 				StyleConstants.setBold(content, true);
 				break;
-				
+
 			case UNDERLINED:
 				content.addAttribute(PARAM_UNDERLINE_COLOR, col);
 				break;
-				
+
 			case ITALIC:
 				StyleConstants.setItalic(content, true);
 				break;
-				
+
 			default:
 				throw new IllegalArgumentException("Highlight type not supported: "+highlightType); //$NON-NLS-1$
 			}
 		}
-		
+
 		public AttributeSet getSuperscriptStyle() {
 			return superscript;
 		}
-		
+
 		public AttributeSet getSubscriptStyle() {
 			return subscript;
 		}
-		
+
 		public AttributeSet getContentStyle() {
 			return content;
 		}
-		
+
 		public AttributeSet getFillerStyle() {
 			return filler;
 		}
-		
+
 		@Override
 		public ClusterAttributes clone() {
 			return new ClusterAttributes(this);
@@ -870,7 +879,7 @@ public class CoreferenceDocument extends BatchDocument {
 		 */
 		@Override
 		public int hashCode() {
-			return (clusterId + 32) * highlightType.hashCode(); 
+			return (clusterId + 32) * highlightType.hashCode();
 		}
 
 		/**

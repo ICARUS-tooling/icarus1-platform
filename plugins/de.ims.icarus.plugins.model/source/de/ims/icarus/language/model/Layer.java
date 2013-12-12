@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
@@ -36,6 +36,15 @@ import de.ims.icarus.language.model.manifest.LayerManifest;
 public interface Layer extends NamedCorpusMember {
 
 	/**
+	 * Returns the name of the layer. This call is typically forwarded
+	 * to the manifest that describes this layer.
+	 * 
+	 * @see de.ims.icarus.language.model.NamedCorpusMember#getName()
+	 */
+	@Override
+	String getName();
+
+	/**
 	 * Returns the 'type' of this layer. This is an object
 	 * previously defined via a plugin.xml declaration. The corpus
 	 * uses this type information to group top-level members for
@@ -45,14 +54,14 @@ public interface Layer extends NamedCorpusMember {
 	 * (e.g. 'Lemma', 'Part-of-Speech', etc.)
 	 */
 	LayerType getType();
-	
+
 	/**
-	 * Returns the {@code Context} object that defines the physical 
-	 * source of this layer and provides information about other 
+	 * Returns the {@code Context} object that defines the physical
+	 * source of this layer and provides information about other
 	 * layers sharing the same origin.
 	 */
 	Context getContext();
-	
+
 	/**
 	 * Returns the {@code MarkableLayer} that this layer
 	 * depends on.
@@ -60,16 +69,16 @@ public interface Layer extends NamedCorpusMember {
 	 * @return
 	 */
 	MarkableLayer getBaseLayer();
-	
+
 	/**
-	 * Returns the manifest object that describes the content of 
+	 * Returns the manifest object that describes the content of
 	 * this layer. Subclasses should override this method to return
 	 * a specific type of {@code LayerManifest}!
 	 * 
 	 * @return The manifest describing the content of this layer
 	 */
 	LayerManifest getManifest();
-	
+
 	/**
 	 * Called by a corpus to signal a layer that it has been added.
 	 * 

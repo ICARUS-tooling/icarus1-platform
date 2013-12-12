@@ -31,34 +31,24 @@ import java.util.List;
 import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
-import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.location.Locations;
 
 /**
+ * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class LoadableContext implements Context {
+public class VirtualContext implements Context {
 
 	private final Corpus corpus;
 	private final ContextManifest manifest;
 
 	private final List<Layer> layers = new ArrayList<>(5);
 
-	private volatile State state = State.BLANK;
-	private final Object lock = new Object();
-
-	protected enum State {
-		BLANK,
-		LOADING,
-		LAODED;
-	}
-
-	protected LoadableContext(Corpus corpus, ContextManifest manifest) {
+	public VirtualContext(Corpus corpus, ContextManifest manifest) {
 		if(corpus==null)
 			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
 		if(manifest==null)
@@ -68,37 +58,12 @@ public class LoadableContext implements Context {
 		this.manifest = manifest;
 	}
 
-	protected Object getLock() {
-		return lock;
-	}
-
-	/**
-	 * Atomically attempts to set a new state if and only if the current state
-	 * matches the expected state. Returns {@code true} if the operation was
-	 * successful.
-	 */
-	protected boolean setState(State expected, State newState) {
-		synchronized (getLock()) {
-			if(state==expected) {
-				state = newState;
-				return true;
-			} else
-				return false;
-		}
-	}
-
-	protected State getState() {
-		synchronized (getLock()) {
-			return state;
-		}
-	}
-
 	/**
 	 * @see de.ims.icarus.io.Loadable#isLoaded()
 	 */
 	@Override
 	public boolean isLoaded() {
-		return getState()==State.LAODED;
+		return true;
 	}
 
 	/**
@@ -106,7 +71,7 @@ public class LoadableContext implements Context {
 	 */
 	@Override
 	public boolean isLoading() {
-		return getState()==State.LOADING;
+		return false;
 	}
 
 	/**
@@ -114,24 +79,20 @@ public class LoadableContext implements Context {
 	 */
 	@Override
 	public void load() throws Exception {
-		// Abort if loading already in progress
-		if(!setState(State.BLANK, State.LOADING))
-			return;
+		throw new UnsupportedOperationException(
+				"Loading not supported by virtual context"); //$NON-NLS-1$
+	}
 
-
-		ContextReader reader = createReader();
-
-		if(reader==null)
-			throw new IllegalStateException("Failed to instantiate reader"); //$NON-NLS-1$
-
-		List<Layer> newLayers = reader.readContext(getManifest());
-
-		if(newLayers==null) {
-			LoggerFactory.warning(this,
-					"Layer source was empty: "+Locations.getPath(getManifest().getLocation())); //$NON-NLS-1$
+	/**
+	 * @see de.ims.icarus.io.Loadable#free()
+	 */
+	@Override
+	public void free() {
+		for(Layer layer : layers) {
+			getCorpus().removeLayer(layer);
 		}
 
-		layers.addAll(newLayers);
+		layers.clear();
 	}
 
 	/**
@@ -158,25 +119,27 @@ public class LoadableContext implements Context {
 		return manifest;
 	}
 
-	protected ContextReader createReader() throws Exception {
-		Class<? extends ContextReader> clazz = getManifest().getReaderClass();
+	public void addLayer(Layer layer) {
+		if(layer==null)
+			throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
+		if(layer.getContext()!=this)
+			throw new IllegalArgumentException("Foreign layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
 
-		if(clazz==null)
-			throw new IllegalStateException("No reader defined"); //$NON-NLS-1$
+		layers.add(layer);
 
-		return clazz.newInstance();
+		getCorpus().addLayer(layer);
 	}
 
-	/**
-	 * @see de.ims.icarus.io.Loadable#free()
-	 */
-	@Override
-	public void free() {
-		for(Layer layer : layers) {
-			getCorpus().removeLayer(layer);
-		}
+	public void removeLayer(Layer layer) {
+		if(layer==null)
+			throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
+		if(layer.getContext()!=this)
+			throw new IllegalArgumentException("Foreign layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
 
-		layers.clear();
+		if(!layers.remove(layer))
+			throw new IllegalArgumentException("Unknown layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
+
+		getCorpus().removeLayer(layer);
 	}
 
 	/**
@@ -184,8 +147,7 @@ public class LoadableContext implements Context {
 	 */
 	@Override
 	public void addNotify(Corpus corpus) {
-		// TODO Auto-generated method stub
-
+		// no-op
 	}
 
 	/**
@@ -193,7 +155,6 @@ public class LoadableContext implements Context {
 	 */
 	@Override
 	public void removeNotify(Corpus corpus) {
-		// TODO Auto-generated method stub
-
+		// no-op
 	}
 }

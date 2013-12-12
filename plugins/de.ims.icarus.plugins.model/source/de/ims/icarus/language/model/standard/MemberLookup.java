@@ -23,36 +23,28 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.events;
+package de.ims.icarus.language.model.standard;
+
+import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.util.collections.LongHashMap;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface EventManager {
+public class MemberLookup {
 
+	private final LongHashMap<CorpusMember> lookup = new LongHashMap<>(1000);
 
-	/**
-	 * Registers the given listener to the internal list of registered
-	 * listeners. Does nothing if the provided listener is {@code null}.
-	 * Note that implementations should make sure that no listener is
-	 * registered more than once. Typically this means doubling the cost
-	 * of registration. Since it is not to be expected that registrations
-	 * occur extremely frequent, this increase in cost can be ignored.
-	 * 
-	 * @param l The listener to be registered, may be {@code null}
-	 */
-	void addCorpusListener(CorpusListener l);
+	public void addMember(CorpusMember member) {
+		if(member==null)
+			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
 
-	/**
-	 * Unregisters the given listener from the internal list of registered
-	 * listeners. Does nothing if the provided listener is {@code null}.
-	 * @param l The listener to be unregistered, may be {@code null}
-	 */
-	void removeCorpusListener(CorpusListener l);
+		lookup.put(member.getId(), member);
+	}
 
-	void fireCorpusChanged(CorpusEvent e);
-
-	// TODO add fireXXX methods for all methods in the CorpusListener interface!
+	public CorpusMember getMember(long id) {
+		return lookup.get(id);
+	}
 }

@@ -19,16 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.io;
 
 import java.io.IOException;
-import java.util.List;
 
-import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.Context;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.location.Location;
@@ -41,8 +40,8 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
  */
 public interface ContextWriter {
 
-	void init(List<Layer> layers, Location location, Options options) 
+	void init(Context context, Location location, Options options)
 			throws UnsupportedLocationException, UnsupportedFormatException;
-	
+
 	void write() throws IOException, UnsupportedFormatException;
 }

@@ -34,6 +34,7 @@ import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.CorpusMember;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.Structure;
+import de.ims.icarus.language.model.meta.MetaData;
 import de.ims.icarus.language.model.mutation.UndoableMutation;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -159,5 +160,9 @@ public class CorpusEvent {
 
 	public UndoableMutation getMutation() {
 		return (UndoableMutation) getProperty("mutation"); //$NON-NLS-1$
+	}
+
+	public MetaData getMetaData() {
+		return (MetaData) getProperty("metadata"); //$NON-NLS-1$
 	}
 }

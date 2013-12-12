@@ -19,14 +19,20 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.mutation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import de.ims.icarus.language.model.Context;
+import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.util.MutablePrimitives.MutableLong;
 
 /**
  * @author Markus Gärtner
@@ -34,6 +40,24 @@ import java.util.List;
  * 
  */
 public class UndoableMutation {
+
+	private static final Map<Context, MutableLong> generations = new WeakHashMap<>();
+
+	private static long createGenerationId(Mutator<?> source) {
+		Context context = CorpusUtils.getContext(source.getSubject());
+		if(context==null)
+			throw new IllegalArgumentException("Unable to resolve context for mutator: "+source); //$NON-NLS-1$
+
+		synchronized (generations) {
+			MutableLong gen = generations.get(context);
+			if(gen==null) {
+				gen = new MutableLong();
+				generations.put(context, gen);
+			}
+
+			return gen.increment();
+		}
+	}
 
 	/**
 	 * Describes an atomic change to the content of a corpus.
@@ -46,20 +70,22 @@ public class UndoableMutation {
 		void execute();
 	}
 
+	protected final long generationId;
+
 	/**
 	 * Holds the source of the mutation.
 	 */
-	protected Mutator<?> source;
+	protected final Mutator<?> source;
 
 	/**
 	 * Holds the list of atomic mutations that make up this undoable mutation.
 	 */
-	protected List<AtomicMutation> mutations = new ArrayList<AtomicMutation>();
+	protected final List<AtomicMutation> mutations = new ArrayList<AtomicMutation>();
 
 	/**
 	 * Specifies this undoable mutation is significant. Default is true.
 	 */
-	protected boolean significant = true;
+	protected final boolean significant;
 
 	/**
 	 * Specifies the state of the undoable mutation.
@@ -77,7 +103,11 @@ public class UndoableMutation {
 	 * Constructs a new undoable mutation for the given source.
 	 */
 	public UndoableMutation(Mutator<?> source, boolean significant) {
+		if(source==null)
+			throw new NullPointerException("Invalid mutator"); //$NON-NLS-1$
+
 		this.source = source;
+		this.generationId = createGenerationId(source);
 		this.significant = significant;
 	}
 
@@ -100,8 +130,15 @@ public class UndoableMutation {
 	/**
 	 * @return the source
 	 */
-	public Object getSource() {
+	public Mutator<?> getSource() {
 		return source;
+	}
+
+	/**
+	 * @return the generationId
+	 */
+	public long getGenerationId() {
+		return generationId;
 	}
 
 	/**

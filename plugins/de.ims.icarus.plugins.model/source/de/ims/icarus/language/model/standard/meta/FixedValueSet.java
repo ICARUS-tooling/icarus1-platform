@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.standard.meta;
@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.swing.Icon;
 
 import de.ims.icarus.language.model.meta.ValueSet;
+import de.ims.icarus.language.model.meta.ValueType;
 
 /**
  * @author Markus Gärtner
@@ -37,8 +38,8 @@ import de.ims.icarus.language.model.meta.ValueSet;
  *
  */
 public class FixedValueSet implements ValueSet {
-	
-	
+
+
 
 	/**
 	 * @see de.ims.icarus.util.id.Identity#getId()
@@ -108,6 +109,15 @@ public class FixedValueSet implements ValueSet {
 	 */
 	@Override
 	public String getDescription(String value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.meta.ValueSet#getValueType()
+	 */
+	@Override
+	public ValueType getValueType() {
 		// TODO Auto-generated method stub
 		return null;
 	}

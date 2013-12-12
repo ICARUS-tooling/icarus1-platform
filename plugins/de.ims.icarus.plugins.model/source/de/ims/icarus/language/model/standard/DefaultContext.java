@@ -19,134 +19,44 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.standard;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.util.CorpusUtils;
-import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.location.Location;
 
 /**
+ * Implements a {@code Context} suitable as a the default context of a
+ * {@link Corpus} instance. It is different to a regular context in that
+ * it does not allow to be added to/removed from a corpus. Attempting to
+ * do so will throw an {@code AssertionError}
+ * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultContext implements Context {
-	
-	private final Corpus corpus;
-	private final ContextManifest manifest;
+public class DefaultContext extends LoadableContext {
 
-	private List<Layer> layers = new ArrayList<>(5);
-	
 	public DefaultContext(Corpus corpus, ContextManifest manifest) {
-		if(corpus==null)
-			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
-		if(manifest==null)
-			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
-		
-		this.corpus = corpus;
-		this.manifest = manifest;
+		super(corpus, manifest);
 	}
 
 	/**
-	 * @see de.ims.icarus.io.Loadable#isLoaded()
+	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
 	 */
 	@Override
-	public boolean isLoaded() {
-		return true;
+	public void addNotify(Corpus corpus) {
+		throw new AssertionError();
 	}
 
 	/**
-	 * @see de.ims.icarus.io.Loadable#isLoading()
+	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
 	 */
 	@Override
-	public boolean isLoading() {
-		return false;
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#load()
-	 */
-	@Override
-	public void load() throws Exception {
-		throw new UnsupportedOperationException(
-				"Loading not supported by defualt context"); //$NON-NLS-1$
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#free()
-	 */
-	@Override
-	public void free() {
-		for(Layer layer : layers) {
-			getCorpus().removeLayer(layer);
-		}
-		
-		layers.clear();
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getLocation()
-	 */
-	@Override
-	public Location getLocation() {
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getCorpus()
-	 */
-	@Override
-	public Corpus getCorpus() {
-		return corpus;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getLayers()
-	 */
-	@Override
-	public List<Layer> getLayers() {
-		return CollectionUtils.getListProxy(layers);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getManifest()
-	 */
-	@Override
-	public ContextManifest getManifest() {
-		return manifest;
-	}
-	
-	public void addLayer(Layer layer) {
-		if(layer==null)
-			throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
-		if(layer.getContext()!=this)
-			throw new IllegalArgumentException("Foreign layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
-		
-		layers.add(layer);
-		
-		getCorpus().addLayer(layer);
-	}
-	
-	public void removeLayer(Layer layer) {
-		if(layer==null)
-			throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
-		if(layer.getContext()!=this)
-			throw new IllegalArgumentException("Foreign layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
-		
-		if(!layers.remove(layer))
-			throw new IllegalArgumentException("Unknown layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
-		
-		getCorpus().removeLayer(layer);
+	public void removeNotify(Corpus corpus) {
+		throw new AssertionError();
 	}
 }

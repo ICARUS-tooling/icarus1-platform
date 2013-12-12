@@ -30,7 +30,6 @@ import java.util.List;
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ManifestOwner;
-import de.ims.icarus.util.location.Location;
 
 /**
  * @author Markus Gärtner
@@ -38,8 +37,6 @@ import de.ims.icarus.util.location.Location;
  *
  */
 public interface Context extends Loadable, ManifestOwner<ContextManifest> {
-
-	Location getLocation();
 
 	Corpus getCorpus();
 

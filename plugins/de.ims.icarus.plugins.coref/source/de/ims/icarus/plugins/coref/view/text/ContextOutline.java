@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.text;
@@ -29,11 +29,9 @@ import java.awt.Dimension;
 
 import javax.swing.JComponent;
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 
-import de.ims.icarus.language.coref.CoreferenceUtils;
-import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
@@ -45,9 +43,9 @@ import de.ims.icarus.util.Filter;
  *
  */
 public class ContextOutline extends CoreferenceDocumentPresenter {
-	
+
 	public static final int DEFAULT_SCOPE = 1;
-	
+
 	private JSlider scopeSelect;
 
 	private int scope = DEFAULT_SCOPE;
@@ -58,30 +56,30 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 	@Override
 	protected ActionComponentBuilder createToolBar() {
 		ActionComponentBuilder builder = super.createToolBar();
-		
+
 		if(scopeSelect==null) {
-			scopeSelect = new JSlider(JSlider.HORIZONTAL, 1, 5, DEFAULT_SCOPE);
+			scopeSelect = new JSlider(SwingConstants.HORIZONTAL, 1, 5, DEFAULT_SCOPE);
 			scopeSelect.addChangeListener(getHandler());
 			scopeSelect.setPaintTicks(true);
 			scopeSelect.setMajorTickSpacing(1);
-			
+
 			//XXX manual resizing
 			Dimension d = scopeSelect.getPreferredSize();
-			d.width = 140;			
+			d.width = 140;
 			scopeSelect.setPreferredSize(d);
 			scopeSelect.setMinimumSize(new Dimension(60, d.height));
 			scopeSelect.setMaximumSize(d);
 			scopeSelect.setSize(d);
 		}
-		
+
 		Object[] items = {
 			"plugins.coref.contextOutline.labels.scopeSelect", //$NON-NLS-1$
 			scopeSelect,
 			EntryType.SEPARATOR,
 		};
-		
+
 		builder.addOption("modifiers", items); //$NON-NLS-1$
-		
+
 		return builder;
 	}
 
@@ -90,37 +88,28 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 	 */
 	@Override
 	protected boolean buildDocument(CoreferenceDocument doc) throws Exception {
-		if(data==null) {
+		if(data==null)
 			return false;
-		}
-		
+
 		Filter filter = (Filter) options.get("filter"); //$NON-NLS-1$
 		doc.setFilter(filter);
-		
+
 		int index = options.getInteger("index"); //$NON-NLS-1$
 		int scope = options.getInteger("scope"); //$NON-NLS-1$
-		
+
 		if(scope==0) {
 			scope = getScope();
 		}
 
-		SpanSet spanSet = CoreferenceUtils.getSpanSet(data, getAllocation());
-		SpanSet goldSet = CoreferenceUtils.getGoldSpanSet(data, getGoldAllocation());
-		
-		doc.setAnnotationManager(getAnnotationManager());
-		doc.cacheSpans(spanSet, goldSet);
-		
 		int fromIndex = Math.max(0, index-scope);
 		int toIndex = Math.min(data.size()-1, index+scope);
-		
-		for(int i=fromIndex; i<=toIndex; i++) {
-			Span[] spans = spanSet.getSpans(i);
-			Span[] goldSpans = goldSet==null ? null : goldSet.getSpans(i);
-			doc.appendBatchCoreferenceData(data.get(i), i, spans, goldSpans);
-		}
-		
+
+		doc.appendBatchCoreferenceDocumentData(data,
+				getAllocation(), getGoldAllocation(),
+				fromIndex, toIndex);
+
 		doc.applyBatchUpdates(0);
-		
+
 		return true;
 	}
 
@@ -130,9 +119,9 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 	@Override
 	protected JComponent createContentPanel() {
 		JComponent panel = super.createContentPanel();
-		
+
 		panel.setPreferredSize(new Dimension(200, 200));
-		
+
 		return panel;
 	}
 
@@ -142,8 +131,8 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 //	@Override
 //	protected void registerActionCallbacks() {
 //		super.registerActionCallbacks();
-//		
-//		getActionManager().setSelected(false, 
+//
+//		getActionManager().setSelected(false,
 //				"plugins.coref.coreferenceDocumentPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
 //	}
 
@@ -174,12 +163,11 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 	 * @param scope the scope to set
 	 */
 	public void setScope(int scope) {
-		if(scope==this.scope) {
+		if(scope==this.scope)
 			return;
-		}
-		
+
 		this.scope = scope;
-		
+
 		refresh();
 	}
 
@@ -196,6 +184,6 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 				super.stateChanged(e);
 			}
 		}
-		
+
 	}
 }

@@ -19,14 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.manifest.ContextManifest;
@@ -43,18 +43,18 @@ import de.ims.icarus.util.location.Location;
  */
 public class DefaultContextManifest extends AbstractManifest implements ContextManifest {
 
-	private Set<LayerManifest> layerManifests = new HashSet<>();
-	
+	private final List<LayerManifest> layerManifests = new ArrayList<>();
+
 	private Object readerClass;
-	
+
 	private Location location;
-	
+
 	/**
 	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLayerManifests()
 	 */
 	@Override
-	public Set<LayerManifest> getLayerManifests() {
-		return CollectionUtils.getSetProxy(layerManifests);
+	public List<LayerManifest> getLayerManifests() {
+		return CollectionUtils.getListProxy(layerManifests);
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 				throw new CorruptedStateException("Failed to load reader class: "+readerClass, e); //$NON-NLS-1$
 			}
 		}
-		
+
 		return (Class<? extends ContextReader>) readerClass;
 	}
 
@@ -88,7 +88,7 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 	public void setReaderClass(Class<? extends ContextReader> readerClass) {
 		if(readerClass==null)
 			throw new NullPointerException("Invalid reader class"); //$NON-NLS-1$
-		
+
 		this.readerClass = readerClass;
 	}
 
@@ -98,7 +98,7 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 	public void setReaderClass(ClassProxy proxy) {
 		if(proxy==null)
 			throw new NullPointerException("Invalid proxy"); //$NON-NLS-1$
-		
+
 		this.readerClass = proxy;
 	}
 
@@ -108,16 +108,24 @@ public class DefaultContextManifest extends AbstractManifest implements ContextM
 	public void setLocation(Location location) {
 		if(location==null)
 			throw new NullPointerException("Invalid locations"); //$NON-NLS-1$
-		
+
 		this.location = location;
 	}
-	
+
 	public void addLayerManifest(LayerManifest layerManifest) {
 		if(layerManifest==null)
 			throw new NullPointerException("Invalid layer manifest"); //$NON-NLS-1$
 		if(layerManifests.contains(layerManifest))
 			throw new IllegalArgumentException("Layer manifest already registered: "+layerManifest.getId()); //$NON-NLS-1$
-		
+
 		layerManifests.add(layerManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#setName(java.lang.String)
+	 */
+	@Override
+	public void setName(String newName) {
+		throw new UnsupportedOperationException("Renaming not supported"); //$NON-NLS-1$
 	}
 }

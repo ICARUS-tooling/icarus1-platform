@@ -19,13 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.events;
 
 import de.ims.icarus.language.model.Context;
+import de.ims.icarus.language.model.NamedCorpusMember;
 
 /**
  * 
@@ -41,40 +42,105 @@ public interface CorpusListener {
 	 * @param e
 	 */
 	void corpusChanged(CorpusEvent e);
-	
+
 	/**
 	 * A new {@link Context} was added to the corpus.
+	 * <p>
+	 * The {@code "context"} property holds the {@code Context}
+	 * that was added.
+	 * 
 	 * @param e
 	 */
 	void contextAdded(CorpusEvent e);
-	
+
 	/**
 	 * A {@link Context} was removed from the corpus
+	 * <p>
+	 * The {@code "context"} property holds the {@code Context}
+	 * that was removed.
+	 * 
 	 * @param e
 	 */
 	void contextRemoved(CorpusEvent e);
-	
+
 	/**
+	 * A new member was added to the corpus.
+	 * <p>
+	 * This can be anything from a bare atomic markable, over
+	 * a container, structure, edge or layer.
+	 * <p>
+	 * The {@code "member"} property holds the {@code CorpusMember}
+	 * that was added.
 	 * 
 	 * @param e
 	 */
 	void memberAdded(CorpusEvent e);
-	
+
+	/**
+	 * A new member was removed from the corpus.
+	 * <p>
+	 * This can be anything from a bare atomic markable, over
+	 * a container, structure, edge or layer.
+	 * <p>
+	 * The {@code "member"} property holds the {@code CorpusMember}
+	 * that was removed.
+	 * 
+	 * @param e
+	 */
 	void memberRemoved(CorpusEvent e);
-	
+
+	/**
+	 * A new {@code MetaData} object was added to the corpus
+	 * <p>
+	 * The {@code "metadata"} property holds the {@code MetaData}
+	 * that was added.
+	 * <br>
+	 * The {@code "layer"} property holds the {@code Layer} the
+	 * meta-data has been added for.
+	 * 
+	 * @param e
+	 */
+	void metaDataAdded(CorpusEvent e);
+
+	/**
+	 * A new {@code MetaData} object was removed from the corpus
+	 * <p>
+	 * The {@code "metadata"} property holds the {@code MetaData}
+	 * that was removed.
+	 * <br>
+	 * The {@code "layer"} property holds the {@code Layer} the
+	 * meta-data has been removed from.
+	 * 
+	 * @param e
+	 */
+	void metaDataRemoved(CorpusEvent e);
+
 	/**
 	 * Signals programmatic modifications to the state
 	 * of a {@code CorpusMember}.
 	 * <p>
 	 * Note that changed originating from direct user actions
-	 * are reported via {@link #memberMutated(CorpusEvent)}!
+	 * are reported via {@link #memberMutated(CorpusEvent)}! An exception
+	 * to this is the renaming of {@link NamedCorpusMember} objects by the
+	 * user which is {@code not} considered a real mutation and therefore
+	 * will be propagated by this event.
+	 * <p>
+	 * The {@code "member"} property holds the {@code CorpusMember}
+	 * that was changed.
 	 * 
 	 * @param e
 	 */
 	void memberChanged(CorpusEvent e);
-	
+
 	/**
 	 * Signals user modifications to the state of a {@code CorpusMember}.
+	 * <p>
+	 * The {@code "member"} property holds the {@code CorpusMember}
+	 * that was changed.
+	 * <br>
+	 * The {@code "mutation"} property holds the {@code UndoableMutation}
+	 * that occurred.
+	 * 
 	 * @param e
 	 */
 	void memberMutated(CorpusEvent e);

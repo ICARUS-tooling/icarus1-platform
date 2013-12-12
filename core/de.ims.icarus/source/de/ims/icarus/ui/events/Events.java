@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.events;
@@ -33,20 +33,24 @@ package de.ims.icarus.ui.events;
 public interface Events {
 
 	public static final String PROPERTY = "property"; //$NON-NLS-1$
-	public static final String ADD = "adding"; //$NON-NLS-1$
+	public static final String ADD = "add"; //$NON-NLS-1$
 	public static final String ADDED = "added"; //$NON-NLS-1$
-	public static final String REMOVE = "removing"; //$NON-NLS-1$
+	public static final String REMOVE = "remove"; //$NON-NLS-1$
 	public static final String REMOVED = "removed"; //$NON-NLS-1$
-	public static final String INSERT = "inserting"; //$NON-NLS-1$
+	public static final String INSERT = "insert"; //$NON-NLS-1$
 	public static final String INSERTED = "inserted"; //$NON-NLS-1$
-	public static final String MOVE = "moving"; //$NON-NLS-1$
+	public static final String MOVE = "move"; //$NON-NLS-1$
 	public static final String MOVED = "moved"; //$NON-NLS-1$
-	public static final String CLEAN = "cleaning"; //$NON-NLS-1$
+	public static final String CLEAN = "clean"; //$NON-NLS-1$
 	public static final String CLEANED = "cleaned"; //$NON-NLS-1$
-	public static final String DELETE = "deleting"; //$NON-NLS-1$
+	public static final String DELETE = "delete"; //$NON-NLS-1$
 	public static final String DELETED = "deleted"; //$NON-NLS-1$
-	public static final String CHANGE = "changing"; //$NON-NLS-1$
+	public static final String CHANGE = "change"; //$NON-NLS-1$
 	public static final String CHANGED = "changed"; //$NON-NLS-1$
+
+	public static final String CLEAR = "clear"; //$NON-NLS-1$
+	public static final String UNDO = "undo"; //$NON-NLS-1$
+	public static final String REDO = "redo"; //$NON-NLS-1$
 
 	public static final String SELECTION_CHANGED = "selectionChanged"; //$NON-NLS-1$
 }

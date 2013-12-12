@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.grid;
@@ -65,22 +65,22 @@ import de.ims.icarus.util.collections.IntHashMap;
 public class EntityGridTableModel extends AbstractTableModel implements Installable {
 
 	private static final long serialVersionUID = 1954436908379655973L;
-	
+
 	protected CoreferenceDocumentData document;
-	
+
 	protected Map<String, EntityGridNode> nodes;
 	protected IntHashMap<ErrorSummary> columnSummaries = new IntHashMap<>();
-	
+
 	protected EntityGridColumnModel columnModel = new EntityGridColumnModel();
 
 	protected boolean includeGoldMentions = true;
 	protected boolean markFalseMentions = true;
 	protected boolean filterSingletons = true;
-	
+
 	protected AnnotationController annotationController;
-	
+
 	protected SpanCache cache;
-	
+
 	public EntityGridTableModel() {
 		// no-op
 	}
@@ -114,7 +114,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	public int getColumnCount() {
 		return columnModel.getColumnCount();
 	}
-	
+
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		return EntityGridNode.class;
@@ -123,27 +123,27 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	protected String getKey(int row, int column) {
 		return row+"_"+column; //$NON-NLS-1$
 	}
-	
+
 	public ErrorSummary getErrorSummary(int column) {
 		ErrorSummary summary = columnSummaries.get(column);
-		
+
 		if(summary==null) {
 			summary = new ErrorSummary();
-			
+
 			for(int row = 0; row<getRowCount(); row++) {
 				EntityGridNode node = getValueAt(row, column);
 				if(node==null) {
 					continue;
 				}
-				
+
 				for(int i=0; i<node.getSpanCount(); i++) {
 					summary.add(node.getErrorType(i));
 				}
 			}
-			
+
 			columnSummaries.put(column, summary);
 		}
-		
+
 		return summary;
 	}
 
@@ -152,113 +152,112 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	 */
 	@Override
 	public EntityGridNode getValueAt(int rowIndex, int columnIndex) {
-		if(nodes==null || nodes.isEmpty()) {
+		if(nodes==null || nodes.isEmpty())
 			return null;
-		}
 		return nodes.get(getKey(rowIndex, columnIndex));
 	}
-	
+
 	public CoreferenceDocumentData getDocument() {
 		return document;
 	}
 
 	public void setDocument(CoreferenceDocumentData document) {
-		if(document==this.document) {
+		if(document==this.document)
 			return;
-		}
-		
+
 		this.document = document;
-		
+
 		fireTableStructureChanged();
 	}
-	
+
 	protected CoreferenceDocumentAnnotationManager getAnnotationManager() {
-		AnnotationManager annotationManager = annotationController==null ? null : 
+		AnnotationManager annotationManager = annotationController==null ? null :
 			annotationController.getAnnotationManager();
-		
-		if(annotationManager instanceof CoreferenceDocumentAnnotationManager) {
+
+		if(annotationManager instanceof CoreferenceDocumentAnnotationManager)
 			return (CoreferenceDocumentAnnotationManager) annotationManager;
-		} else {
+		else
 			return null;
-		}
 	}
 
 	public void reload(CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
-		
+
 		if(nodes==null) {
 			nodes = new HashMap<>();
 		} else {
 			nodes.clear();
 		}
 		columnModel.clear();
-		
+
 		columnSummaries.clear();
-		
-		if(document==null) {
+
+		if(document==null)
 			return;
-		}
-		
+
 		// Fetch edge sets
 		EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(document, allocation);
-		if(edgeSet==null) {
+		if(edgeSet==null)
 			return;
-		}
 		EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
 		if(edgeSet==goldSet) {
 			goldSet = null;
 		}
-		
+
 		CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, filterSingletons);
-		
+
 		if(cache==null) {
 			cache = new SpanCache();
 		} else {
 			cache.clear();
 		}
 		cache.cacheEdges(comparison.getEdgeSet().getEdges());
-				
+
 		// Finally merge all edges into one list
 		List<Span> spans = new ArrayList<>();
 		spans.addAll(comparison.getSpans());
 		if(includeGoldMentions && comparison.getGoldSpans()!=null) {
 			spans.addAll(comparison.getGoldSpans());
 		}
-		
+
 		Collections.sort(spans);
 
-		// Maps a cluster id to the respective column
-		Map<Integer, Integer> columnMap = new HashMap<>();
+		// Maps a root span to the respective column
+		Map<Span, Integer> columnMap = new HashMap<>();
 		List<Cluster> clusterList = new ArrayList<>();
 		Cluster dummyCluster = new Cluster(-1);
 		int currentRow = -1;
 		Map<Integer, List<Span>> spanBuffer = new HashMap<>();
 		Map<Integer, List<CorefErrorType>> typeBuffer = new HashMap<>();
-		
-		for(Span span : spans) {			
+
+		for(Span span : spans) {
 			int row = span.getSentenceIndex();
-			
+
 			// Process buffered node data
 			if(row!=currentRow) {
 				processBuffer(currentRow, spanBuffer, typeBuffer);
 				currentRow = row;
 				clearBuffer(spanBuffer, typeBuffer);
 			}
-			
+
 			// Get column id for span
-			int clusterId = span.getClusterId();
-			Integer column = columnMap.get(clusterId);
+			Span root = comparison.isGold(span) ? comparison.getGoldRoot(span) : comparison.getRoot(span);
+//			System.out.printf("root for %s: %s\n",span,root);
+			if(root==null) {
+				root = span;
+			}
+			Integer column = columnMap.get(root);
 			if(column==null) {
 				column = columnMap.size();
-				columnMap.put(clusterId, column);
-				
+				columnMap.put(root, column);
+
 				Cluster cluster = span.getCluster();
 				if(cluster==null) {
 					cluster = dummyCluster;
 				}
-				
+
 				clusterList.add(cluster);
 			}
-			
+
 			// Get type of current span
 			CorefErrorType type = null;
 			if(markFalseMentions) {
@@ -267,21 +266,21 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 			if(type==null) {
 				type = CorefErrorType.TRUE_POSITIVE_MENTION;
 			}
-			
+
 			// Add span and type info to buffer
 			fillBuffer(span, type, column, spanBuffer, typeBuffer);
 		}
-		
+
 		// Process remaining data in  buffer
 		processBuffer(currentRow, spanBuffer, typeBuffer);
-		
+
 		columnSummaries.clear();
-		
+
 		// Now reload table columns
 		columnModel.reload(clusterList);
 	}
-	
-//	protected void feedSpans(Collection<Span> buffer, EdgeSet edgeSet, 
+
+//	protected void feedSpans(Collection<Span> buffer, EdgeSet edgeSet,
 //			boolean filterSingletons) {
 //		if(edgeSet==null) {
 //			return;
@@ -290,12 +289,12 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 //		if(filterSingletons) {
 //			edges = CoreferenceUtils.removeSingletons(edges);
 //		}
-//		
+//
 //		for(Edge edge : edges) {
 //			buffer.add(edge.getTarget());
 //		}
 //	}
-	
+
 	protected void clearBuffer(Map<Integer, List<Span>> spanBuffer,
 			Map<Integer, List<CorefErrorType>> typeBuffer) {
 		/*for(List<Span> spanList : spanBuffer.values()) {
@@ -307,8 +306,8 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		spanBuffer.clear();
 		typeBuffer.clear();
 	}
-	
-	protected void fillBuffer(Span span, CorefErrorType type, int column, 
+
+	protected void fillBuffer(Span span, CorefErrorType type, int column,
 			Map<Integer, List<Span>> spanBuffer,
 			Map<Integer, List<CorefErrorType>> typeBuffer) {
 		// Add span
@@ -327,32 +326,31 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		}
 		typeList.add(type);
 	}
-	
+
 	protected void processBuffer(int row, Map<Integer, List<Span>> spanBuffer,
 			Map<Integer, List<CorefErrorType>> typeBuffer) {
-		if(spanBuffer.isEmpty()) {
+		if(spanBuffer.isEmpty())
 			return;
-		}
-		
+
 		for(Entry<Integer, List<Span>> entry : spanBuffer.entrySet()) {
 			int column = entry.getKey();
 			List<Span> spanList = entry.getValue();
 			List<CorefErrorType> typeList = typeBuffer.get(column);
 			CoreferenceData sentence = document.get(row);
-			
-			int size = spanList.size(); 
-					
+
+			int size = spanList.size();
+
 			Span[] spans = new Span[size];
 			CorefErrorType[] types = new CorefErrorType[size];
-			
+
 			for(int i=0; i<size; i++) {
 				spans[i] = spanList.get(i);
 				types[i] = typeList.get(i);
 			}
-			
+
 			String key = getKey(row, column);
 			Color[] highlightColors = null;
-			
+
 			CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
 			if(annotationManager!=null && annotationManager.hasAnnotation()) {
 				highlightColors = new Color[size];
@@ -367,17 +365,17 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 					if(c==null) {
 						c = CoreferenceDocumentHighlighting.getInstance().getHighlightColor(highlight);
 					}
-					
+
 					highlightColors[i] = c;
 				}
 			}
-			
+
 			EntityGridNode node = new EntityGridNode(sentence, spans, types, highlightColors);
-			
+
 			nodes.put(key, node);
 		}
 	}
-	
+
 	public EntityGridColumnModel getColumnModel() {
 		return columnModel;
 	}
@@ -409,78 +407,76 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	public class EntityGridColumnModel extends DefaultTableColumnModel {
 
 		private static final long serialVersionUID = -7530784522005750109L;
-		
+
 		protected List<Cluster> clusters;
-		
+
 		protected EntityGridTableHeaderRenderer headerRenderer;
-		
+
 		public void reload(List<Cluster> clusterList) {
 			clusters = clusterList;
-			
+
 			tableColumns = new Vector<>();
-			
+
 			for(int i=0; i<clusters.size(); i++) {
 				TableColumn column = new TableColumn(i);
-				
+
 				column.setIdentifier(clusters.get(i));
 				column.setMinWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 				column.setPreferredWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 				//column.setMaxWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH*3);
-				
+
 				addColumn(column);
 			}
-			
+
 			reloadLabels();
-			
+
 			fireTableStructureChanged();
 		}
-		
+
 		public void clear() {
 			clusters = null;
 		}
-		
+
 		public String getPrototypeLabel() {
 			String prototypeLabel = null;
-			
+
 			for(TableColumn column : tableColumns) {
 				String label = (String) column.getHeaderValue();
 				if(label!=null && (prototypeLabel==null || label.length()>prototypeLabel.length())) {
 					prototypeLabel = label;
 				}
 			}
-			
+
 			return prototypeLabel;
 		}
-		
+
 		public void resetColumnSize() {
 			int size = getColumnCount();
-			if(size==0) {
+			if(size==0)
 				return;
-			}
 			for(int i=0; i<size; i++) {
 				TableColumn column = getColumn(i);
 				column.setPreferredWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 				column.setWidth(EntityGridPresenter.DEFAULT_CELL_WIDTH);
 			}
 		}
-		
+
 		public void reloadLabels() {
 			int size = getColumnCount();
-			if(size==0) {
+			if(size==0)
 				return;
-			}
-			
+
 			ClusterLabelType labelType = (ClusterLabelType) ConfigRegistry.getGlobalRegistry().getValue(
 					"plugins.coref.appearance.grid.clusterLabelType"); //$NON-NLS-1$
-			
+
 			for(int i=0; i<size; i++) {
 				TableColumn column = getColumn(i);
 				Cluster cluster = (Cluster) column.getIdentifier();
-				
+
 				column.setHeaderValue(labelType.getLabel(cluster, document));
 				column.setHeaderRenderer(getHeaderRenderer());
 			}
-			
+
 			fireColumnAdded(new TableColumnModelEvent(this, 0, size-1));
 		}
 
@@ -489,10 +485,9 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		}
 
 		public void setHeaderRenderer(EntityGridTableHeaderRenderer headerRenderer) {
-			if(this.headerRenderer!=null && this.headerRenderer.equals(headerRenderer)) {
+			if(this.headerRenderer!=null && this.headerRenderer.equals(headerRenderer))
 				return;
-			}
-			
+
 			this.headerRenderer = headerRenderer;
 			reloadLabels();
 		}

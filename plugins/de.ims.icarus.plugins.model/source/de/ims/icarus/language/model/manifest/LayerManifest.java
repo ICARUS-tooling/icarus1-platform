@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.manifest;
@@ -33,13 +33,13 @@ import java.util.List;
  *
  */
 public interface LayerManifest extends Manifest {
-	
+
 	/**
 	 * Returns a list of prerequisites describing other layers a corpus
 	 * has to host in order for the new layer to be operational. If this
 	 * layer does not depend on other layers the returned list is empty.
 	 * 
-	 * @return 
+	 * @return
 	 */
 	List<Prerequisite> getPrerequisites();
 
@@ -51,7 +51,7 @@ public interface LayerManifest extends Manifest {
 	 *
 	 */
 	interface Prerequisite {
-		
+
 		/**
 		 * Returns the name of the target layer or {@code null} if an exact name match
 		 * is not required.
@@ -59,11 +59,11 @@ public interface LayerManifest extends Manifest {
 		 * @return
 		 */
 		String getLayerName();
-		
+
 		/**
 		 * If this layer only requires <i>some</i> layer of a certain type to be present
 		 * this method provides the mechanics to tell this. When the returned value is
-		 * {@code non-null} it is considered to be the exact name of a previously 
+		 * {@code non-null} it is considered to be the exact name of a previously
 		 * defined layer type.
 		 * 
 		 * @return
