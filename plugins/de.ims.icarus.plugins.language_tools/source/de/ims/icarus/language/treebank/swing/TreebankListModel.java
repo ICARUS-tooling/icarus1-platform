@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.treebank.swing;
@@ -48,31 +48,31 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class TreebankListModel extends AbstractListModel<Treebank> 
+public class TreebankListModel extends AbstractListModel<Treebank>
 		implements ComboBoxModel<Treebank>, EventListener {
 
 	private static final long serialVersionUID = -2738466365490012327L;
-	
+
 	private List<Treebank> treebanks;
-		
+
 	private Filter filter;
-	
+
 	private Treebank selectedTreebank;
-	
+
 	private boolean dummyTreebankAllowed = true;
-	
+
 	public TreebankListModel(Treebank...excludes) {
 		setExcludes(excludes);
-		
+
 		TreebankRegistry.getInstance().addListener(null, this);
 	}
-	
+
 	public TreebankListModel(Filter filter) {
 		setFilter(filter);
-		
+
 		TreebankRegistry.getInstance().addListener(null, this);
 	}
-	
+
 	public void setExcludes(Treebank...excludes) {
 		Filter filter = null;
 		if(excludes!=null && excludes.length>=0) {
@@ -80,7 +80,7 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 		}
 		setFilter(filter);
 	}
-	
+
 	public void setExcludes(Collection<Treebank> excludes) {
 		Filter filter = null;
 		if(excludes!=null && !excludes.isEmpty()) {
@@ -88,18 +88,17 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 		}
 		setFilter(filter);
 	}
-	
+
 	public Filter getFilter() {
 		return filter;
 	}
 
 	public void setFilter(Filter filter) {
-		if(this.filter==filter) {
+		if(this.filter==filter)
 			return;
-		}
-		
+
 		this.filter = filter;
-		
+
 		reload();
 	}
 
@@ -109,20 +108,29 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 		} else {
 			treebanks.clear();
 		}
-		
+
+		boolean keepSelectedItem = false;
+
 		for(Treebank treebank : TreebankRegistry.getInstance().availableTreebanks()) {
 			if(filter==null || filter.accepts(treebank)) {
 				treebanks.add(treebank);
 			}
+			if(selectedTreebank==treebank) {
+				keepSelectedItem = true;
+			}
 		}
-		
+
 		if(dummyTreebankAllowed) {
 			treebanks.add(TreebankRegistry.DUMMY_TREEBANK);
 		}
-		
+
+		if(!keepSelectedItem) {
+			selectedTreebank = null;
+		}
+
 		Collections.sort(treebanks, TreebankRegistry.TREEBANK_NAME_COMPARATOR);
-		
-		fireContentsChanged(this, 0, getSize()-1);
+
+		fireContentsChanged(this, 0, Math.max(0, getSize()-1));
 	}
 
 	/**
@@ -148,11 +156,11 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 	public void setSelectedItem(Object anItem) {
 		if(anItem!=null && !(anItem instanceof Treebank))
 			throw new IllegalArgumentException("Unsupported item: "+anItem); //$NON-NLS-1$
-		
+
 		if((selectedTreebank!=null && !selectedTreebank.equals(anItem))
 				|| (selectedTreebank==null && anItem!=null)) {
 			selectedTreebank = (Treebank) anItem;
-			
+
 			fireContentsChanged(this, -1, -1);
 		}
 	}
@@ -178,7 +186,7 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 	public void setDummyTreebankAllowed(boolean dummyTreebankAllowed) {
 		if(this.dummyTreebankAllowed!=dummyTreebankAllowed) {
 			this.dummyTreebankAllowed = dummyTreebankAllowed;
-			
+
 			reload();
 		}
 	}
@@ -190,14 +198,14 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 	public void invoke(Object sender, EventObject event) {
 		reload();
 	}
-	
+
 	private static class ExclusionFilter implements Filter {
 		private final Set<Object> exclusions;
-		
+
 		private ExclusionFilter(Collection<?> items) {
 			exclusions = items==null ? null : new HashSet<>(items);
 		}
-		
+
 		private ExclusionFilter(Object...items) {
 			exclusions = items==null ? null : new HashSet<>();
 			if(exclusions!=null) {

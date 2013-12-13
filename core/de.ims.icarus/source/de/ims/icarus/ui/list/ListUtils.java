@@ -19,12 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.list;
 
+import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
@@ -39,32 +40,40 @@ public final class ListUtils {
 		// no-op
 	}
 
+	public static <E extends Object> E getSelectedItem(JList<E> list) {
+		if(list==null)
+			throw new NullPointerException("Invalid list"); //$NON-NLS-1$
+
+		ListModel<E> model = list.getModel();
+		int selectedIndex = list.getSelectedIndex();
+
+		return selectedIndex>-1 && selectedIndex<model.getSize() ?
+				model.getElementAt(selectedIndex) : null;
+	}
+
 	public static <T extends Object> int indexOf(T item, ListModel<T> model) {
 		if(model==null)
 			throw new NullPointerException("Invalid list model"); //$NON-NLS-1$
-		
-		if(item==null) {
+
+		if(item==null)
 			return -1;
-		}
-		
+
 		for(int i=0; i<model.getSize(); i++) {
-			if(item.equals(model.getElementAt(i))) {
+			if(item.equals(model.getElementAt(i)))
 				return i;
-			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	public static void copySelectionState(ListSelectionModel m1, ListSelectionModel m2) {
 		m2.setValueIsAdjusting(true);
 		try {
 			m2.clearSelection();
-			
-			if(m1.isSelectionEmpty()) {
+
+			if(m1.isSelectionEmpty())
 				return;
-			}
-			
+
 			switch (m1.getSelectionMode()) {
 			case ListSelectionModel.MULTIPLE_INTERVAL_SELECTION:
 				for(int i=m1.getMinSelectionIndex(); i<=m1.getMaxSelectionIndex(); i++) {

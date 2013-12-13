@@ -58,6 +58,7 @@ import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.UnsupportedFormatException;
+import de.ims.icarus.util.collections.IntValueHashMap;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
@@ -133,8 +134,8 @@ public final class CoreferenceUtils {
 		Set<Edge> edges = new LinkedHashSet<>(tmp);
 
 		Set<Span> spanLut = collectSpans(edges);
-		Map<Span, Span> headLut = new HashMap<>();
 		Map<Span, Span> rootLut = new HashMap<>();
+		Map<Span, Span> headLut = new HashMap<>();
 
 		// Cache predicted information
 		for(Edge edge : edgeSet.getEdges()) {
@@ -173,19 +174,19 @@ public final class CoreferenceUtils {
 		Set<Edge> goldEdges = new LinkedHashSet<>(tmp);
 
 		Set<Span> goldLut = collectSpans(goldEdges);
-		Map<Span, Span> goldHeadLut = new LinkedHashMap<>();
 		Map<Span, Span> goldRootLut = new LinkedHashMap<>();
+		IntValueHashMap goldClusterIds = new IntValueHashMap(goldLut.size());
 
 		// Cache gold information
 		for(Edge edge : goldSet.getEdges()) {
 			Span source = edge.getSource();
 			Span target = edge.getTarget();
 
+			goldClusterIds.put(target, target.getClusterId());
+
 			if(source.isROOT()) {
 				continue;
 			}
-
-			goldHeadLut.put(target, source);
 
 			Span root = goldRootLut.get(source);
 			if(root==null) {
@@ -228,19 +229,28 @@ public final class CoreferenceUtils {
 //			}
 
 			Span head = headLut.get(span);
-			Span goldHead = goldHeadLut.get(span);
-
-			if(ClassUtils.equals(head, goldHead)) {
-				// Same head in both predicted and gold allocation
-				// -> true positive
-				continue;
-			}
 
 			if(!goldLut.contains(head)) {
 				// Head span is unknown to the gold set
 				errors.put(span, CorefErrorType.HALLUCINATED_HEAD);
 				continue;
 			}
+
+			int goldSourceId = goldClusterIds.get(head);
+			int goldTargetId = goldClusterIds.get(span);
+
+			if(goldSourceId==goldTargetId) {
+				// Both source and target are located in the same
+				// cluster respectively
+				// -> true positive
+				continue;
+			}
+
+//			if(ClassUtils.equals(head, goldHead)) {
+//				// Same head in both predicted and gold allocation
+//				// -> true positive
+//				continue;
+//			}
 
 			errors.put(span, CorefErrorType.FOREIGN_CLUSTER_HEAD);
 		}

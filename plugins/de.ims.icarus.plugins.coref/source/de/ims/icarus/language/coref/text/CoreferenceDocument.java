@@ -264,7 +264,11 @@ public class CoreferenceDocument extends BatchDocument {
 		getPropertyChangeSupport().removePropertyChangeListener(propertyName, listener);
 	}
 
-	// TODO bug: no space between last and next to last token in span when nested span is filtered out!
+	/**
+	 * TODO bug: no space between last and next to last token in span when nested span is filtered out!
+	 * FIXME: current implementation lost the ability to force highlighted singletons visible. unsure whether
+	 * this should be attempted to be fixed before the data-model rework?
+	 */
 	protected void appendBatchCoreferenceData(CoreferenceData data, int sentenceIndex, CorefComparison comparison) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
@@ -339,9 +343,9 @@ public class CoreferenceDocument extends BatchDocument {
 						}
 					}
 
-					//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
-					//						highlightColor = markupColor;
-					//					}
+//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
+//						highlightColor = markupColor;
+//					}
 
 					if(filterNonHighlighted && highlightColor==null) {
 						continue;
@@ -420,9 +424,9 @@ public class CoreferenceDocument extends BatchDocument {
 						highlightColor =  highlightStack.pop();
 					}
 
-					//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
-					//						highlightColor = markupColor;
-					//					}
+//					if(highlightColor==null && markupFilter!=null && markupFilter.accepts(span)) {
+//						highlightColor = markupColor;
+//					}
 
 					if(filterNonHighlighted && highlightColor==null) {
 						continue;
