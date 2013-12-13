@@ -97,6 +97,7 @@ public class ErrorMiningPreferences {
 		builder.addColorEntry("defaultPlotBackgroundPaint", Color.white.getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("defaultGridlinePaint", Color.black.getRGB()); //$NON-NLS-1$
 		builder.addDoubleEntry("defaultBarWidth", 0.30, 0.0, 1.0); //$NON-NLS-1$
+		builder.addBooleanEntry("useSimpleBarChart", false);//$NON-NLS-1$
 		builder.back();
 		
 		builder.addGroup("font", true); //$NON-NLS-1$
