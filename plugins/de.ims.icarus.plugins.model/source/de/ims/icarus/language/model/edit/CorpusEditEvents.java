@@ -19,33 +19,47 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.mutation;
+package de.ims.icarus.language.model.edit;
 
-import de.ims.icarus.language.model.CorpusMember;
+import javax.swing.event.UndoableEditListener;
 
 /**
- * A {@code Mutator} is the external entry point for user
- * originated modifications of members in a corpus.
- * It allows other client code to request changes to the underlying
- * corpus members. The mutator has to evaluate the conditions of
- * a given request, execute it if possible and notify listeners
- * in the corpus about the changes.
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Mutator<C extends CorpusMember> {
+public interface CorpusEditEvents {
 
 	/**
-	 * Returns the {@code CorpusMember} this mutator is 
-	 * allowed to perform mutations on.
-	 * 
-	 * @return
+	 * Fired when the update level is increased
 	 */
-	C getSubject();
+	public static final String BEGIN_UPDATE = "beginUpdate"; //$NON-NLS-1$
+
+	/**
+	 * Fired when the update level is decreased.
+	 * <p>
+	 * The "edit" property contains the edit in progress.
+	 */
+	public static final String END_UPDATE = "endUpdate"; //$NON-NLS-1$
+
+	/**
+	 * Fired when an edit is executed.
+	 */
+	public static final String EXECUTE = "execute"; //$NON-NLS-1$
+
+	/**
+	 * Fired after an edit has been executed but before it is
+	 * dispatched to the {@link UndoableEditListener}s.
+	 */
+	public static final String BEFORE_UNDO = "beforeUndo"; //$NON-NLS-1$
+
+	/**
+	 * Fired when the
+	 */
+	public static final String UNDO = "undo"; //$NON-NLS-1$
+	public static final String CHANGE = "change"; //$NON-NLS-1$
 }

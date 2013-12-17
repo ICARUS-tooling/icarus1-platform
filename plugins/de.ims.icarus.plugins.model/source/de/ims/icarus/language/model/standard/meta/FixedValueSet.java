@@ -27,64 +27,16 @@ package de.ims.icarus.language.model.standard.meta;
 
 import java.util.Set;
 
-import javax.swing.Icon;
-
 import de.ims.icarus.language.model.meta.ValueSet;
 import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.standard.ProxyIdentity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class FixedValueSet implements ValueSet {
-
-
-
-	/**
-	 * @see de.ims.icarus.util.id.Identity#getId()
-	 */
-	@Override
-	public String getId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.util.id.Identity#getName()
-	 */
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.util.id.Identity#getDescription()
-	 */
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.util.id.Identity#getIcon()
-	 */
-	@Override
-	public Icon getIcon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.util.id.Identity#getOwner()
-	 */
-	@Override
-	public Object getOwner() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public class FixedValueSet extends ProxyIdentity implements ValueSet {
 
 	/**
 	 * @see de.ims.icarus.language.model.meta.ValueSet#getValues()

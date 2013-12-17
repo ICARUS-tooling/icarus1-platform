@@ -28,6 +28,8 @@ package de.ims.icarus.language.model;
 
 
 
+
+
 /**
  * Provides a structural view on a {@link MarkableLayer} by specifying a
  * set of nodes connected by edges. Typically a {@code Structure} object
@@ -38,8 +40,8 @@ package de.ims.icarus.language.model;
  * (optionally) defines a set of virtual markables. Overall those markables
  * it then spans a colelction of edges, thereby creating the <i>structural</i>
  * information.
- * 
- * 
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -63,7 +65,7 @@ public interface Structure extends Container {
 	 * return {@code null}.
 	 * <p>
 	 * This is an optional method.
-	 * 
+	 *
 	 * @return
 	 */
 	Container getBoundaryContainer();
@@ -77,7 +79,7 @@ public interface Structure extends Container {
 	/**
 	 * Returns the {@link Edge} stored at the given position within this
 	 * structure.
-	 * 
+	 *
 	 * @param index The position of the desired {@code Edge} within this structure
 	 * @return The {@code Edge} at position {@code index}
 	 * @throws IndexOutOfBoundsException if the index is out of range
@@ -94,7 +96,7 @@ public interface Structure extends Container {
 	 * Note that for every edge <i>m</i> that is hosted within some structure the
 	 * following will always return a result different from {@code -1}:<br>
 	 * {@code e.getStructure().indexOfEdge(e)}
-	 * 
+	 *
 	 * @param edge The {@code Edge} whose index is to be returned
 	 * @return The index at which the {@code Edge} appears within this
 	 * structure or {@code -1} if the edge is not hosted within this structure.
@@ -104,7 +106,7 @@ public interface Structure extends Container {
 
 	/**
 	 * Returns {@code true} if this structure hosts the specified edge.
-	 * 
+	 *
 	 * @param edge The edge to check
 	 * @return {@code true} iff this structure hosts the given edge
 	 * @throws NullPointerException if the {@code edge} argument is {@code null}
@@ -117,7 +119,7 @@ public interface Structure extends Container {
 	 * This is an optional method and only to be expected when the type of
 	 * this structure is neither {@value StructureType#SET} nor
 	 * {@value StructureType#GRAPH}.
-	 * 
+	 *
 	 * @param node the node to query for the number of outgoing edges.
 	 * @return the number of <b>outgoing</i> edges for a given node.
 	 * @throws NullPointerException if the {@code node} is {@code null}
@@ -132,7 +134,7 @@ public interface Structure extends Container {
 	 * This is an optional method and only to be expected when the type of
 	 * this structure is neither {@value StructureType#SET} nor
 	 * {@value StructureType#GRAPH}.
-	 * 
+	 *
 	 * @param node the {@code Markable} in question
 	 * @param index the position of the desired {@code Edge} in the list of
 	 * <i>outgoing</i> edges for the given node
@@ -151,7 +153,7 @@ public interface Structure extends Container {
 	 * This is an optional method and only to be expected when the type of
 	 * this structure is neither {@value StructureType#SET} nor
 	 * {@value StructureType#GRAPH}.
-	 * 
+	 *
 	 * @param node the node whose parent is to be returned
 	 * @return the node's parent or {@code null} if the node has no parent
 	 */
@@ -171,9 +173,97 @@ public interface Structure extends Container {
 	 * of general {@value StructureType#GRAPH} structures it will be either a
 	 * single node specifically marked as root or each node that has no
 	 * incoming edges.
-	 * 
+	 *
 	 * @return the <i>generic root</i> of this structure or {@code null} if this
 	 * structure is of type {@value StructureType#SET}
 	 */
 	Markable getRoot();
+
+	// EDIT METHODS
+
+	/**
+	 * Changes the type of this structure
+	 * @param structureType
+	 */
+	void setStructureType(StructureType structureType);
+
+	/**
+	 * Removes from this structure all edges.
+	 */
+	void removeAllEdges();
+
+	/**
+	 * Creates a new edge as member of this structure
+	 * and appends it to the end of the internal storage.
+	 *
+	 * @return The newly created member of the container
+	 * @param source
+	 * @param target
+	 */
+	Markable addEdge(Markable source, Markable target);
+
+	/**
+	 * Creates a new edge as member of this structure
+	 * and inserts it at the specified position in the internal
+	 * storage.
+	 *
+	 * Note that calling this method with an {@code index} parameter
+	 * equal to the size of the mutating structure as returned by
+	 * {@link Structure#getEdgeCount()} is equivalent to
+	 * using {@link #addEdge(Markable, Markable)}.
+	 *
+	 * @param source
+	 * @param target
+	 * @param index The position to insert the new edge at
+	 * @return The newly created edge of the structure
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt; getSubject().getEdgeCount()</tt>)
+	 */
+	Edge addEdge(Markable source, Markable target, int index);
+
+	/**
+	 * Removes and returns the edge at the given index. Shifts the
+	 * indices of all edges after the given position to account
+	 * for the missing member.
+	 *
+	 * @param index The position of the edge to be removed
+	 * @return The markable previously at position {@code index}.
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt;= getSubject().getEdgeCount()</tt>)
+	 */
+	Edge removeEdge(int index);
+
+	/**
+	 * First determines the index of the given edge object within
+	 * this structure and then calls {@link #removeEdge(int)}.
+	 *
+	 * @param markable
+	 * @return
+	 * @see Structure#indexOfEdge(Edge)
+	 */
+	Edge removeEdge(Edge edge);
+
+	/**
+	 * Moves the edge currently located at position {@code index0}
+	 * over to position {@code index1}.
+	 *
+	 * @param index0
+	 * @param index1
+	 * @throws IllegalArgumentException if <tt>index0 == index1</tt>
+	 * @throws IndexOutOfBoundsException if either {@code index0} or {@code index1}
+	 * is out of range (<tt>index &lt; 0 || index &gt;= getSubject().getEdgeCount()</tt>)
+	 */
+	void moveEdge(int index0, int index1);
+
+	/**
+	 * Shorthand method for moving a given edge object.
+	 *
+	 * First determines the index of the given edge object within
+	 * this structure and then calls {@link #moveEdge(int, int)}.
+	 *
+	 * @param markable The markable to be moved
+	 * @param index The position the {@code edge} argument should be moved to
+	 * @see Structure#indexOfEdge(Edge)
+	 */
+	void moveEdge(Edge edge, int index);
 }

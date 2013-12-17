@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.manifest;
@@ -35,6 +35,20 @@ import java.util.Set;
 public interface CorpusManifest extends Manifest {
 
 	ContextManifest getDefaultContextManifest();
-	
+
 	Set<ContextManifest> getCustomContextManifests();
+
+	/**
+	 * Returns {@code true} if the corpus described by this manifest can
+	 * be edited by the user.
+	 *
+	 * @return
+	 */
+	boolean isEditable();
+
+	/**
+	 *
+	 * @param value
+	 */
+	void setEditable(boolean value);
 }

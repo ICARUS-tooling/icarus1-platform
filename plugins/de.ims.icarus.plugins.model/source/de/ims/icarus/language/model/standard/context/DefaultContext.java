@@ -23,14 +23,40 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.mutation;
+package de.ims.icarus.language.model.standard.context;
+
+import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.manifest.ContextManifest;
 
 /**
+ * Implements a {@code Context} suitable as a the default context of a
+ * {@link Corpus} instance. It is different to a regular context in that
+ * it does not allow to be added to/removed from a corpus. Attempting to
+ * do so will throw an {@code AssertionError}
+ * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface LayerMutator {
+public class DefaultContext extends LoadableContext {
 
-	// Marker interface
+	public DefaultContext(Corpus corpus, ContextManifest manifest) {
+		super(corpus, manifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
+	 */
+	@Override
+	public void addNotify(Corpus corpus) {
+		throw new AssertionError();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
+	 */
+	@Override
+	public void removeNotify(Corpus corpus) {
+		throw new AssertionError();
+	}
 }

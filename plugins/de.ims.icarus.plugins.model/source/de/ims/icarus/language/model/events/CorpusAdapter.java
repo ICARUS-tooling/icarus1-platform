@@ -90,18 +90,18 @@ public class CorpusAdapter implements CorpusListener {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.events.CorpusListener#memberChanged(de.ims.icarus.language.model.events.CorpusEvent)
+	 * @see de.ims.icarus.language.model.events.CorpusListener#corpusSaved(de.ims.icarus.language.model.events.CorpusEvent)
 	 */
 	@Override
-	public void memberChanged(CorpusEvent e) {
+	public void corpusSaved(CorpusEvent e) {
 		// no-op
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.events.CorpusListener#memberMutated(de.ims.icarus.language.model.events.CorpusEvent)
+	 * @see de.ims.icarus.language.model.events.CorpusListener#memberChanged(de.ims.icarus.language.model.events.CorpusEvent)
 	 */
 	@Override
-	public void memberMutated(CorpusEvent e) {
+	public void memberChanged(CorpusEvent e) {
 		// no-op
 	}
 

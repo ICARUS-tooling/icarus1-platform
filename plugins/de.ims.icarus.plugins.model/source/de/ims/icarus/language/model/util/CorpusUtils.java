@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.language.model.AnnotationLayer;
-import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.CorpusMember;
@@ -66,20 +65,20 @@ public final class CorpusUtils {
 		return result;
 	}
 
-	public static String getText(Container c) {
-		StringBuilder sb = new StringBuilder(c.getMarkableCount()*10);
-
-		sb.append("["); //$NON-NLS-1$
-		for(int i=0; i<c.getMarkableCount(); i++) {
-			if(i>0) {
-				sb.append(", "); //$NON-NLS-1$
-			}
-			sb.append(c.getMarkableAt(i).getText());
-		}
-		sb.append("]"); //$NON-NLS-1$
-
-		return sb.toString();
-	}
+//	public static String getText(Container c) {
+//		StringBuilder sb = new StringBuilder(c.getMarkableCount()*10);
+//
+//		sb.append("["); //$NON-NLS-1$
+//		for(int i=0; i<c.getMarkableCount(); i++) {
+//			if(i>0) {
+//				sb.append(", "); //$NON-NLS-1$
+//			}
+//			sb.append(c.getMarkableAt(i).getText());
+//		}
+//		sb.append("]"); //$NON-NLS-1$
+//
+//		return sb.toString();
+//	}
 
 	public static boolean matches(LayerManifest.Prerequisite prerequisite, Corpus corpus) {
 		if(prerequisite==null)
@@ -203,5 +202,15 @@ public final class CorpusUtils {
 		}
 
 		return layer==null ? null : layer.getContext();
+	}
+
+	public static int compare(Markable m1, Markable m2) {
+		int result = m1.getBeginOffset()-m2.getBeginOffset();
+
+		if(result==0) {
+			result = m1.getEndOffset()-m2.getEndOffset();
+		}
+
+		return result;
 	}
 }

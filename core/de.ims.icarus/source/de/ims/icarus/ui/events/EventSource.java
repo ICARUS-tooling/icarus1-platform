@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.events;
@@ -42,8 +42,8 @@ public class EventSource {
 
 	/**
 	 * Storage for registered listeners and the events they
-	 * are listening to in the format 
-	 * ..[event_name][listener].. 
+	 * are listening to in the format
+	 * ..[event_name][listener]..
 	 */
 	protected transient List<Object> eventListeners = null;
 
@@ -53,9 +53,9 @@ public class EventSource {
 	 * used in its place.
 	 */
 	protected Object eventSource;
-	
+
 	protected transient volatile int deadListenerCount = 0;
-	
+
 	protected transient int deadListenerTreshold = 5;
 
 	/**
@@ -78,21 +78,21 @@ public class EventSource {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Object getEventSource() {
 		return eventSource;
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setEventSource(Object value) {
 		this.eventSource = value;
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public boolean isEventsEnabled() {
 		return eventsEnabled;
@@ -120,7 +120,7 @@ public class EventSource {
 	 */
 	public void addListener(String eventName, EventListener listener) {
 		Exceptions.testNullArgument(listener, "listener"); //$NON-NLS-1$
-		
+
 		if (eventListeners == null) {
 			eventListeners = new ArrayList<>();
 		}
@@ -175,7 +175,7 @@ public class EventSource {
 			fireEvent(event, null);
 		} else {
 			UIUtil.invokeLater(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					fireEvent(event, null);
@@ -194,7 +194,7 @@ public class EventSource {
 	public void fireEvent(EventObject event, Object sender) {
 		if (eventListeners != null && !eventListeners.isEmpty()
 				&& isEventsEnabled()) {
-			
+
 			// ensure a valid non-null source!
 			if (sender == null) {
 				sender = getEventSource();
@@ -203,23 +203,25 @@ public class EventSource {
 				sender = this;
 			}
 
-			for (int i = 0; i < eventListeners.size(); i += 2) {
+			int size = eventListeners.size();
+
+			for (int i = 0; i < size; i += 2) {
 				String listen = (String) eventListeners.get(i);
 				EventListener listener = (EventListener) eventListeners.get(i + 1);
-				
+
 				if(listener==null) {
 					deadListenerCount++;
 				} else if (listen == null || listen.equals(event.getName())) {
 					listener.invoke(sender, event);
 				}
 			}
-			
+
 			if(deadListenerCount>=deadListenerTreshold) {
 				clearEventListeners();
 			}
 		}
 	}
-	
+
 	protected void clearEventListeners() {
 		for(int i=eventListeners.size()-2; i>-1; i-=2) {
 			if(eventListeners.get(i)==null && eventListeners.get(i+1)==null) {
@@ -227,7 +229,7 @@ public class EventSource {
 				eventListeners.remove(i);
 			}
 		}
-		
+
 		deadListenerCount = 0;
 	}
 
@@ -236,7 +238,7 @@ public class EventSource {
 			fireEvent(event, null);
 		} else {
 			UIUtil.invokeLater(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					fireEvent(event, sender);

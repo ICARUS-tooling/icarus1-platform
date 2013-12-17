@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.grid;
@@ -52,17 +52,17 @@ import de.ims.icarus.ui.UIUtil;
 public class EntityGridCellRenderer extends JComponent implements TableCellRenderer {
 
 	private static final long serialVersionUID = 8877308537117345014L;
-	
+
 	protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
 	protected Color unselectedForeground;
     protected Color unselectedBackground;
-    
+
     protected EntityGridNode node;
-    
+
     // If true the renderer will only display the number
     protected boolean showCompactLabel = false;
-	
+
 	protected GridLabelBuilder labelBuilder = null;
 
 	public EntityGridCellRenderer() {
@@ -98,10 +98,8 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
         }
 
         if (isSelected) {
-            super.setForeground(fg == null ? table.getSelectionForeground()
-                                           : fg);
-            super.setBackground(bg == null ? table.getSelectionBackground()
-                                           : bg);
+            fg = fg==null ? table.getSelectionForeground() : fg;
+            bg = bg==null ? table.getSelectionBackground() : bg;
         } else {
             Color background = unselectedBackground != null
                                     ? unselectedBackground
@@ -112,11 +110,24 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
                     background = alternateColor;
                 }
             }
-            super.setForeground(unselectedForeground != null
+            fg = unselectedForeground != null
                                     ? unselectedForeground
-                                    : table.getForeground());
-            super.setBackground(background);
+                                    : table.getForeground();
+            bg = background;
         }
+
+    	if(isSelected && !hasFocus) {
+    		bg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 60);
+    		fg = null;
+    	}
+        super.setBackground(bg);
+
+        if(fg==null) {
+            fg = unselectedForeground != null
+                    ? unselectedForeground
+                    : table.getForeground();
+        }
+        super.setForeground(fg);
 
         setFont(table.getFont());
 
@@ -149,23 +160,23 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 
         return this;
 	}
-	
+
 	protected void setValue(Object value) {
 		if(value instanceof EntityGridNode) {
 			node = (EntityGridNode) value;
 		} else {
 			node = null;
 		}
-		
+
 		String tooltip = null;
-		
+
 		if(node!=null && node.getSpanCount()>0) {
-			tooltip = CoreferenceUtils.createTooltip(node.getSentence(), 
+			tooltip = CoreferenceUtils.createTooltip(node.getSentence(),
 					node.getSpans(), node.getTypes());
 		}
 		setToolTipText(UIUtil.toUnwrappedSwingTooltip(tooltip));
 	}
-	
+
 	@Override
     public void setForeground(Color c) {
         super.setForeground(c);
@@ -184,39 +195,39 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 		g.setColor(c);
-		
+
 		if(node==null) {
 			return;
 		}
-		
+
 		if(isShowCompactLabel() || labelBuilder==null) {
 			paintCompactLabel(g);
 		} else {
 			paintCompleteLabel(g);
 		}
 	}
-	
+
 	protected void paintCompactLabel(Graphics g) {
 
 		int w = getWidth();
 		int h = getHeight();
-		
+
 		Font f = getFont();
 		FontMetrics fm = getFontMetrics(f);
-		
+
 		String label = String.valueOf(node.getSpanCount());
-		
+
 		int width = fm.charWidth('[')+fm.stringWidth(label)+fm.charWidth(']');
 		int height = fm.getHeight();
 
 		int x = Math.max(1, (w-width)/2);
 		int y = Math.max(0, (h-height)/2);
 		y += fm.getAscent();
-		
+
 		Color col = g.getColor();
 		g.drawString("[", x, y); //$NON-NLS-1$
 		x += fm.charWidth('[');
-		
+
 //		Color c = null;
 //		if(node.hasFalseNegative()) {
 //			// False negatives
@@ -230,31 +241,31 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 //		}
 		g.drawString(label, x, y);
 		x += fm.stringWidth(label);
-		
+
 		g.setColor(col);
 		g.drawString("]", x, y); //$NON-NLS-1$
 	}
-	
+
 	protected void paintCompleteLabel(Graphics g) {
-		
+
 		int w = getWidth();
 		int h = getHeight();
-		
+
 		Font f = getFont();
 		FontMetrics fm = getFontMetrics(f);
-		
+
 		int width = 0;
 		int height = fm.getHeight();
 		int count = node.getSpanCount();
 		String[] tokens = new String[count];
-		
+
 		// Calculate required total width
 		width += fm.charWidth('[');
 		for(int i=0; i<count; i++) {
 			if(i>0) {
 				width += fm.charWidth(',');
 			}
-			
+
 			String token = labelBuilder.getLabel(node, i);
 			if(token==null) {
 				continue;
@@ -263,75 +274,75 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 			tokens[i] = token;
 		}
 		width += fm.charWidth(']');
-		
+
 		int x = Math.max(1, (w-width)/2);
 		int y = Math.max(0, (h-height)/2);
 		y += fm.getAscent();
-		
+
 		// Now draw the entire string with highlight colors
 		Color col = g.getColor();
 		g.drawString("[", x, y); //$NON-NLS-1$
 		x += fm.charWidth('[');
-		
+
 		for(int i=0; i<count; i++) {
 			String token = tokens[i];
-			
+
 			if(token==null) {
 				continue;
 			}
-			
+
 			if(i>0) {
 				g.setColor(col);
 				g.drawString(",", x, y); //$NON-NLS-1$
 				x += fm.charWidth(',');
 			}
-			
+
 			Color c = null;
 			if(node.isHighlighted(i)) {
 				c = node.getHighlightColor(i);
 			} else {
 				c = CoreferenceUtils.getErrorColor(node.getErrorType(i));
 			}
-			
+
 			if(c==null) {
 				c = col;
 			}
-			
+
 			g.setColor(c);
 			g.drawString(token, x, y);
 			x += fm.stringWidth(token);
 		}
-		
+
 		g.setColor(col);
 		g.drawString("]", x, y); //$NON-NLS-1$
 	}
-	
+
 	protected static final Dimension nullSize = new Dimension();
-	
+
     /**
 	 * @see javax.swing.JComponent#getPreferredSize()
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		
+
 		if(node==null) {
 			return nullSize;
 		}
 
 		Font f = getFont();
 		FontMetrics fm = getFontMetrics(f);
-		
+
 		int width = 0;
 		int height = fm.getHeight();
 		int count = node.getSpanCount();
-		
+
 		// Calculate required total width
 		width += fm.charWidth('[');
 		for(int i=0; i<count; i++) {
 			if(i>0) {
 				width += fm.charWidth(',');
 			}
-			
+
 			String token = labelBuilder==null ? null : labelBuilder.getLabel(node, i);
 			if(token==null) {
 				continue;
@@ -339,7 +350,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 			width += fm.stringWidth(token);
 		}
 		width += fm.charWidth(']');
-		
+
 		return new Dimension(width, height);
 	}
 
@@ -368,12 +379,13 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
      * See the <a href="#override">Implementation Note</a>
      * for more information.
      */
-    public void repaint(long tm, int x, int y, int width, int height) {
+    @Override
+	public void repaint(long tm, int x, int y, int width, int height) {
     	// no-op
     }
 
     @Override
-    public void repaint(Rectangle r) { 
+    public void repaint(Rectangle r) {
     	// no-op
     }
 
@@ -390,7 +402,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
     }
 
     @Override
-    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { 
+    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
     	// no-op
     }
 
@@ -409,5 +421,5 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 	public void setLabelBuilder(GridLabelBuilder labelBuilder) {
 		this.labelBuilder = labelBuilder;
 	}
-    
+
 }

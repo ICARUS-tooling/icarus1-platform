@@ -35,11 +35,10 @@ import de.ims.icarus.language.model.CorpusMember;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.Structure;
 import de.ims.icarus.language.model.meta.MetaData;
-import de.ims.icarus.language.model.mutation.UndoableMutation;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -84,14 +83,14 @@ public class CorpusEvent {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Map<String, Object> getProperties() {
 		return CollectionUtils.getMapProxy(properties);
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Object getProperty(String key) {
 		return properties.get(key);
@@ -156,10 +155,6 @@ public class CorpusEvent {
 
 	public Structure getStructure() {
 		return (Structure) getProperty("structure"); //$NON-NLS-1$
-	}
-
-	public UndoableMutation getMutation() {
-		return (UndoableMutation) getProperty("mutation"); //$NON-NLS-1$
 	}
 
 	public MetaData getMetaData() {

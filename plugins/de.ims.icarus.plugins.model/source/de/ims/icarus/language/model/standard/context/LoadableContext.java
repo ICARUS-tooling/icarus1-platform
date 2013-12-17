@@ -23,12 +23,11 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard;
+package de.ims.icarus.language.model.standard.context;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.io.ContextReader;
@@ -42,10 +41,7 @@ import de.ims.icarus.util.location.Locations;
  * @version $Id$
  *
  */
-public class LoadableContext implements Context {
-
-	private final Corpus corpus;
-	private final ContextManifest manifest;
+public class LoadableContext extends AbstractContext {
 
 	private final List<Layer> layers = new ArrayList<>(5);
 
@@ -59,13 +55,7 @@ public class LoadableContext implements Context {
 	}
 
 	protected LoadableContext(Corpus corpus, ContextManifest manifest) {
-		if(corpus==null)
-			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
-		if(manifest==null)
-			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
-
-		this.corpus = corpus;
-		this.manifest = manifest;
+		super(corpus, manifest);
 	}
 
 	protected Object getLock() {
@@ -135,27 +125,11 @@ public class LoadableContext implements Context {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#getCorpus()
-	 */
-	@Override
-	public Corpus getCorpus() {
-		return corpus;
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.Context#getLayers()
 	 */
 	@Override
 	public List<Layer> getLayers() {
 		return CollectionUtils.getListProxy(layers);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getManifest()
-	 */
-	@Override
-	public ContextManifest getManifest() {
-		return manifest;
 	}
 
 	protected ContextReader createReader() throws Exception {
@@ -177,23 +151,5 @@ public class LoadableContext implements Context {
 		}
 
 		layers.clear();
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
-	 */
-	@Override
-	public void addNotify(Corpus corpus) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
-	 */
-	@Override
-	public void removeNotify(Corpus corpus) {
-		// TODO Auto-generated method stub
-
 	}
 }

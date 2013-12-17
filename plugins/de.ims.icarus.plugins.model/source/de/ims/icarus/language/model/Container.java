@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
@@ -30,71 +30,155 @@ import de.ims.icarus.language.model.manifest.ManifestOwner;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface Container extends Markable, Iterable<Markable>, ManifestOwner<ContainerManifest> {
-	
+
 	/**
 	 * Returns the {@link ContainerManifest} object that holds additional
 	 * information about this container.
-	 * 
+	 *
 	 * @return
 	 */
+	@Override
 	ContainerManifest getManifest();
-	
+
 	/**
 	 * @return The underlying container if this container relies on the
-	 * elements of another container object or {@code null} otherwise. 
+	 * elements of another container object or {@code null} otherwise.
 	 */
 	Container getBaseContainer();
-	
+
 	/**
 	 * Returns the number of {@code Markable} objects hosted within this
 	 * container.
-	 * 
+	 *
 	 * @return The number of {@code Markable}s in this container
 	 */
 	int getMarkableCount();
-	
+
 	/**
 	 * Returns the {@code Markable} stored at position {@code index} within
 	 * this {@code Container}. Note that however elements in a container may
 	 * be unordered depending on the {@code ContainerType} as returned by
 	 * {@link #getErrorType()}, the same index has always to be mapped to
 	 * the exact same {@code Markable} within a single container!
-	 * 
+	 *
 	 * @param index The index of the {@code Markable} to be returned
 	 * @return The {@code Markable} at position {@code index} within this container
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= getMarkableCount()</tt>)
 	 */
 	Markable getMarkableAt(int index);
-	
+
 	/**
 	 * Returns the index of the given {@code Markable} within this container's
 	 * list of markables or {@code -1} if the markable is not hosted within this
 	 * container.
 	 * <p>
-	 * Note that for every markable <i>m</i> that is hosted within some container the 
+	 * Note that for every markable <i>m</i> that is hosted within some container the
 	 * following will always return a result different from {@code -1}:<br>
 	 * {@code m.getContainer().indexOfMarkable(m)}
-	 * 
+	 *
 	 * @param markable The {@code Markable} whose index is to be returned
 	 * @return The index at which the {@code Markable} appears within this
 	 * container or {@code -1} if the markable is not hosted within this container.
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 */
 	int indexOfMarkable(Markable markable);
-	
+
 	/**
 	 * Returns {@code true} if this container hosts the specified markable.
-	 * 
+	 *
 	 * @param markable The markable to check
 	 * @return {@code true} iff this container hosts the given markable
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 */
 	boolean containsMarkable(Markable markable);
+
+
+	/**
+	 * Changes the type of the mutating container
+	 * @param containerType The new type of the mutating container
+	 */
+	void setContainerType(ContainerType containerType);
+
+	/**
+	 * Removes from the mutating container all elements.
+	 */
+	void removeAllMarkables();
+
+	/**
+	 * Creates a new markable as member of this container
+	 * and appends it to the end of the internal storage.
+	 *
+	 * @return The newly created member of the container
+	 */
+	Markable addMarkable();
+
+	/**
+	 * Creates a new markable as member of this container
+	 * and inserts it at the specified position in the internal
+	 * storage.
+	 *
+	 * Note that calling this method with an {@code index} parameter
+	 * equal to the size of the mutating container as returned by
+	 * {@link Container#getMarkableCount()} is equivalent to
+	 * using {@link #addMarkable()}.
+	 *
+	 * @param index The position to insert the new markable at
+	 * @return The newly created member of the container
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt; getSubject().getMarkableCount()</tt>)
+	 */
+	Markable addMarkable(int index);
+
+	/**
+	 * Removes and returns the markable at the given index. Shifts the
+	 * indices of all markables after the given position to account
+	 * for the missing member.
+	 *
+	 * @param index The position of the markable to be removed
+	 * @return The markable previously at position {@code index}.
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt;= getSubject().getMarkableCount()</tt>)
+	 */
+	Markable removeMarkable(int index);
+
+	/**
+	 * First determines the index of the given markable object within
+	 * this container and then calls {@link #removeMarkable(int)}.
+	 *
+	 * @param markable
+	 * @return
+	 * @see Container#indexOfMarkable(Markable)
+	 */
+	Markable removeMarkable(Markable markable);
+
+	/**
+	 * Moves the markable currently located at position {@code index0}
+	 * over to position {@code index1}.
+	 *
+	 * @param index0
+	 * @param index1
+	 * @throws IllegalArgumentException if <tt>index0 == index1</tt>
+	 * @throws IndexOutOfBoundsException if either {@code index0} or {@code index1}
+	 * is out of range (<tt>index &lt; 0 || index &gt;= getSubject().getMarkableCount()</tt>)
+	 */
+	void moveMarkable(int index0, int index1);
+
+	/**
+	 * Shorthand method for moving a given markable object.
+	 *
+	 * First determines the index of the given markable object within
+	 * this container and then calls {@link #moveMarkable(int, int)}.
+	 *
+	 * @param markable The markable to be moved
+	 * @param index The position the {@code markable} argument should be moved to
+	 * @see Container#indexOfMarkable(Markable)
+	 */
+	void moveMarkable(Markable markable, int index);
 }

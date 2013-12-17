@@ -23,12 +23,11 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard;
+package de.ims.icarus.language.model.standard.context;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.manifest.ContextManifest;
@@ -36,51 +35,17 @@ import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class VirtualContext implements Context {
-
-	private final Corpus corpus;
-	private final ContextManifest manifest;
+public class VirtualContext extends AbstractContext {
 
 	private final List<Layer> layers = new ArrayList<>(5);
 
 	public VirtualContext(Corpus corpus, ContextManifest manifest) {
-		if(corpus==null)
-			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
-		if(manifest==null)
-			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
-
-		this.corpus = corpus;
-		this.manifest = manifest;
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#isLoaded()
-	 */
-	@Override
-	public boolean isLoaded() {
-		return true;
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#isLoading()
-	 */
-	@Override
-	public boolean isLoading() {
-		return false;
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#load()
-	 */
-	@Override
-	public void load() throws Exception {
-		throw new UnsupportedOperationException(
-				"Loading not supported by virtual context"); //$NON-NLS-1$
+		super(corpus, manifest);
 	}
 
 	/**
@@ -96,27 +61,11 @@ public class VirtualContext implements Context {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#getCorpus()
-	 */
-	@Override
-	public Corpus getCorpus() {
-		return corpus;
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.Context#getLayers()
 	 */
 	@Override
 	public List<Layer> getLayers() {
 		return CollectionUtils.getListProxy(layers);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#getManifest()
-	 */
-	@Override
-	public ContextManifest getManifest() {
-		return manifest;
 	}
 
 	public void addLayer(Layer layer) {
@@ -140,21 +89,5 @@ public class VirtualContext implements Context {
 			throw new IllegalArgumentException("Unknown layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
 
 		getCorpus().removeLayer(layer);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
-	 */
-	@Override
-	public void addNotify(Corpus corpus) {
-		// no-op
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
-	 */
-	@Override
-	public void removeNotify(Corpus corpus) {
-		// no-op
 	}
 }

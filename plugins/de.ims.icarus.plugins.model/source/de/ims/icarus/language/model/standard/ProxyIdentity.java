@@ -25,38 +25,75 @@
  */
 package de.ims.icarus.language.model.standard;
 
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.manifest.ContextManifest;
+import javax.swing.Icon;
+
+import de.ims.icarus.util.id.Identity;
 
 /**
- * Implements a {@code Context} suitable as a the default context of a
- * {@link Corpus} instance. It is different to a regular context in that
- * it does not allow to be added to/removed from a corpus. Attempting to
- * do so will throw an {@code AssertionError}
- * 
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultContext extends LoadableContext {
+public class ProxyIdentity implements Identity {
 
-	public DefaultContext(Corpus corpus, ContextManifest manifest) {
-		super(corpus, manifest);
+	private Identity identity;
+
+	/**
+	 * @return the identity
+	 */
+	public Identity getIdentity() {
+		return identity;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
+	 * @param identity the identity to set
 	 */
-	@Override
-	public void addNotify(Corpus corpus) {
-		throw new AssertionError();
+	public void setIdentity(Identity identity) {
+		this.identity = identity;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
+	 * @return
+	 * @see de.ims.icarus.util.id.Identity#getId()
 	 */
 	@Override
-	public void removeNotify(Corpus corpus) {
-		throw new AssertionError();
+	public String getId() {
+		return identity.getId();
 	}
+
+	/**
+	 * @return
+	 * @see de.ims.icarus.util.id.Identity#getName()
+	 */
+	@Override
+	public String getName() {
+		return identity.getName();
+	}
+
+	/**
+	 * @return
+	 * @see de.ims.icarus.util.id.Identity#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return identity.getDescription();
+	}
+
+	/**
+	 * @return
+	 * @see de.ims.icarus.util.id.Identity#getIcon()
+	 */
+	@Override
+	public Icon getIcon() {
+		return identity.getIcon();
+	}
+
+	/**
+	 * @return
+	 * @see de.ims.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return identity.getOwner();
+	};
 }

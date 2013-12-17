@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.manifest;
@@ -36,20 +36,10 @@ import java.util.List;
 public interface HighlightLayerManifest extends LayerManifest {
 
 	List<LayerManifest> getHighlightedLayerManifests();
-	
-	Color getHighlightColor(int groupId);
-	
-	Color getHighlighColor(int layerIndex);
-	
-	Object getHighlightSource();
 
-	/**
-	 * Since highlights are generated automatically there is no point in 
-	 * allowing the user to modify them. Therefore this method should
-	 * always return {@code false}.
-	 * 
-	 * @see de.ims.icarus.language.model.manifest.Manifest#isEditable()
-	 */
-	@Override
-	boolean isEditable();
+	Color getHighlightColor(int groupId);
+
+	Color getHighlighColor(int layerIndex);
+
+	Object getHighlightSource();
 }

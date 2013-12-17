@@ -26,10 +26,10 @@
 package de.ims.icarus.language.model.events;
 
 import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.NamedCorpusMember;
+import de.ims.icarus.language.model.Corpus;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -38,17 +38,26 @@ public interface CorpusListener {
 
 	/**
 	 * A general change in the corpus occurred.
-	 * 
+	 *
 	 * @param e
 	 */
 	void corpusChanged(CorpusEvent e);
+
+	/**
+	 * Indicates that the corpus and all it's context objects have
+	 * been saved (i.e. saved to a permanent storage). This event
+	 * only fires for corpora that are editable.
+	 *
+	 * @param e
+	 */
+	void corpusSaved(CorpusEvent e);
 
 	/**
 	 * A new {@link Context} was added to the corpus.
 	 * <p>
 	 * The {@code "context"} property holds the {@code Context}
 	 * that was added.
-	 * 
+	 *
 	 * @param e
 	 */
 	void contextAdded(CorpusEvent e);
@@ -58,7 +67,7 @@ public interface CorpusListener {
 	 * <p>
 	 * The {@code "context"} property holds the {@code Context}
 	 * that was removed.
-	 * 
+	 *
 	 * @param e
 	 */
 	void contextRemoved(CorpusEvent e);
@@ -71,7 +80,7 @@ public interface CorpusListener {
 	 * <p>
 	 * The {@code "member"} property holds the {@code CorpusMember}
 	 * that was added.
-	 * 
+	 *
 	 * @param e
 	 */
 	void memberAdded(CorpusEvent e);
@@ -84,10 +93,23 @@ public interface CorpusListener {
 	 * <p>
 	 * The {@code "member"} property holds the {@code CorpusMember}
 	 * that was removed.
-	 * 
+	 *
 	 * @param e
 	 */
 	void memberRemoved(CorpusEvent e);
+
+	/**
+	 * A new member was changed.
+	 * <p>
+	 * This event only fires on descriptor-based changes as defined in the
+	 * {@link Corpus} documentation.
+	 * <p>
+	 * The {@code "member"} property holds the {@code CorpusMember}
+	 * that was changed.
+	 *
+	 * @param e
+	 */
+	void memberChanged(CorpusEvent e);
 
 	/**
 	 * A new {@code MetaData} object was added to the corpus
@@ -97,7 +119,7 @@ public interface CorpusListener {
 	 * <br>
 	 * The {@code "layer"} property holds the {@code Layer} the
 	 * meta-data has been added for.
-	 * 
+	 *
 	 * @param e
 	 */
 	void metaDataAdded(CorpusEvent e);
@@ -110,38 +132,8 @@ public interface CorpusListener {
 	 * <br>
 	 * The {@code "layer"} property holds the {@code Layer} the
 	 * meta-data has been removed from.
-	 * 
+	 *
 	 * @param e
 	 */
 	void metaDataRemoved(CorpusEvent e);
-
-	/**
-	 * Signals programmatic modifications to the state
-	 * of a {@code CorpusMember}.
-	 * <p>
-	 * Note that changed originating from direct user actions
-	 * are reported via {@link #memberMutated(CorpusEvent)}! An exception
-	 * to this is the renaming of {@link NamedCorpusMember} objects by the
-	 * user which is {@code not} considered a real mutation and therefore
-	 * will be propagated by this event.
-	 * <p>
-	 * The {@code "member"} property holds the {@code CorpusMember}
-	 * that was changed.
-	 * 
-	 * @param e
-	 */
-	void memberChanged(CorpusEvent e);
-
-	/**
-	 * Signals user modifications to the state of a {@code CorpusMember}.
-	 * <p>
-	 * The {@code "member"} property holds the {@code CorpusMember}
-	 * that was changed.
-	 * <br>
-	 * The {@code "mutation"} property holds the {@code UndoableMutation}
-	 * that occurred.
-	 * 
-	 * @param e
-	 */
-	void memberMutated(CorpusEvent e);
 }

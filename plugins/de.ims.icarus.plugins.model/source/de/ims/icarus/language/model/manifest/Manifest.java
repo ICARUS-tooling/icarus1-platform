@@ -37,10 +37,10 @@ import de.ims.icarus.util.id.Identity;
  * storage objects created by the model framework. They normally derive
  * from a static xml definition and the only thing the user can modify
  * in certain cases is the identifier used to present them in the GUI.
- * 
+ *
  * When saving the current state of a corpus, the framework converts the
  * manifests back into a physical xml-based representation.
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -52,7 +52,7 @@ public interface Manifest extends Identity {
 	 * Allows for localization of corpus related components.
 	 * The returned name is not required to be equal to the
 	 * result of a {@link NamedCorpusMember#getName()} call.
-	 * 
+	 *
 	 * @return The (optionally) localized name of the task
 	 * this manifest describes.
 	 */
@@ -64,7 +64,7 @@ public interface Manifest extends Identity {
 	 * by instances of this manifest.
 	 * <p>
 	 * This is an optional method.
-	 * 
+	 *
 	 * @return Returns the optional description of this manifest
 	 */
 	@Override
@@ -74,7 +74,7 @@ public interface Manifest extends Identity {
 	 * Returns the property assigned to this manifest for the given
 	 * name. If their is no property with the given name available
 	 * this method should return {@code null}.
-	 * 
+	 *
 	 * @param name The name of the property in question
 	 * @return The value of the property with the given name or {@code null}
 	 * if no such property exists.
@@ -87,18 +87,10 @@ public interface Manifest extends Identity {
 	 * available then this method should return an empty {@code Set}!
 	 * <p>
 	 * The returned {@code Set} should be immutable.
-	 * 
+	 *
 	 * @return A {@code Set} view on all the available property names
 	 * for this manifest or the empty {@code Set} if this manifest does
 	 * not contain any properties.
 	 */
 	Set<String> getPropertyNames();
-
-	/**
-	 * Returns {@code true} if the content described by this manifest can
-	 * be edited by the user.
-	 * 
-	 * @return
-	 */
-	boolean isEditable();
 }
