@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.dependency;
@@ -45,7 +45,7 @@ public class DependencyPreferences {
 
 	public DependencyPreferences() {
 		ConfigBuilder builder = new ConfigBuilder(ConfigRegistry.getGlobalRegistry());
-		
+
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
 		// JGRAPH GROUP
@@ -67,12 +67,12 @@ public class DependencyPreferences {
 		builder.addBooleanEntry("markNonProjective", false); //$NON-NLS-1$
 		JGraphPreferences.buildDefaultGraphConfig(builder, null);
 		builder.reset();
-		
+
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
 		// GENERAL DEPENDENCY GROUP
 		builder.addGroup("dependency", true); //$NON-NLS-1$
-		
+
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
 		builder.setProperties(builder.addListEntry("tableColumns", EntryType.CUSTOM,  //$NON-NLS-1$
@@ -86,11 +86,11 @@ public class DependencyPreferences {
 				ConfigConstants.HANDLER, new ColumnListHandler());
 		builder.back();
 		// END APPEARANCE GROUP
-		
+
 		// HIGHLIGHTING GROUP
 		builder.addGroup("highlighting", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showCorpusIndex", false); //$NON-NLS-1$
+//		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
+//		builder.addBooleanEntry("showCorpusIndex", false); //$NON-NLS-1$
 		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
 				(Object[])HighlightType.values()),
 				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
@@ -106,10 +106,10 @@ public class DependencyPreferences {
 		}
 		builder.back();
 		// END HIGHLIGHTING GROUP
-		
+
 		builder.back();
 		// END GENERAL DEPENDENCY GROUP
-		
+
 		DependencyHighlighting.getInstance().loadConfig();
 	}
 

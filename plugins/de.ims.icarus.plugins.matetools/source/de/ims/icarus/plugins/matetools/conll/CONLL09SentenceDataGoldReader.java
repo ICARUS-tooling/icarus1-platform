@@ -19,8 +19,8 @@
  * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
  * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.matetools/source/de/ims/icarus/plugins/matetools/conll/CONLL09SentenceDataReader.java $
  *
- * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $ 
- * $LastChangedRevision: 123 $ 
+ * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
+ * $LastChangedRevision: 123 $
  * $LastChangedBy: mcgaerty $
  */
 package de.ims.icarus.plugins.matetools.conll;
@@ -51,16 +51,17 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 /**
  * @author Gregor Thiele
  * @version $Id: CONLL09SentenceDataReader.java 123 2013-07-31 15:22:01Z mcgaerty $
- * 
+ *
  */
 public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 
 	protected CONLLReader09 reader;
 	protected boolean normalize;
 	protected int inputFormat; // 0 (default) or 1
+	protected int count;
 
 	/**
-	 * 
+	 *
 	 */
 	public CONLL09SentenceDataGoldReader() {
 		// TODO Auto-generated constructor stub
@@ -77,7 +78,7 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 		File file = location.getFile();
 
 		if (file == null)
-			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$	
+			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
 
 		if (!file.exists())
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
@@ -89,13 +90,14 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 
 		normalize = true;
 		inputFormat = 0;
+		count = 0;
 
 		try {
 			reader = new CONLLReader09(normalize);
 			reader.startReading(location.openInputStream());
 		} catch (IllegalArgumentException e) {
 			LoggerFactory.log(this, Level.SEVERE,
-					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$			
+					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$
 		}
 
 	}
@@ -112,11 +114,11 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 
 		// more sentences left?
 		if ((input = reader.getNext()) != null) {
-			resultdd = CONLLUtils.readGold(input, true, true);
+			resultdd = CONLLUtils.readGold(input, count++, true, true);
 		}
 
 		// catch illegal state getcause -> originale
-		return (SentenceData) resultdd;
+		return resultdd;
 	}
 
 	/**

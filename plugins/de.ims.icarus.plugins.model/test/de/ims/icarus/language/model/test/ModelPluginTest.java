@@ -23,17 +23,21 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.test;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import de.ims.icarus.language.model.test.member.LookupListTest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum MemberType {
-	MARKABLE,
-	EDGE,
-	CONTAINER,
-	STRUCTURE,
-	LAYER;
+@RunWith(Suite.class)
+@SuiteClasses({ LookupListTest.class })
+public class ModelPluginTest {
+	// no-op
 }

@@ -26,24 +26,37 @@
 package de.ims.icarus.language.model.standard.member;
 
 import de.ims.icarus.language.model.Container;
+import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MemberType;
+import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.registry.CorpusRegistry;
+import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class AbstractContainer extends AbstractMarkable implements Container {
+public abstract class AbstractContainer implements Container {
+
+	private final long id;
 
 	/**
 	 * @param id
 	 * @param container
 	 */
-	public AbstractContainer(long id, Container container) {
-		super(id, container);
-		// TODO Auto-generated constructor stub
+	public AbstractContainer() {
+		id = CorpusRegistry.getInstance().newId();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.CorpusMember#getId()
+	 */
+	@Override
+	public long getId() {
+		return id;
 	}
 
 	/**
@@ -51,17 +64,7 @@ public class AbstractContainer extends AbstractMarkable implements Container {
 	 */
 	@Override
 	public MemberType getMemberType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Markable#getText()
-	 */
-	@Override
-	public String getText() {
-		// TODO Auto-generated method stub
-		return null;
+		return MemberType.CONTAINER;
 	}
 
 	/**
@@ -69,8 +72,10 @@ public class AbstractContainer extends AbstractMarkable implements Container {
 	 */
 	@Override
 	public int getBeginOffset() {
-		// TODO Auto-generated method stub
-		return 0;
+		if(getMarkableCount()==0)
+			throw new IllegalStateException("Container is empty"); //$NON-NLS-1$
+
+		return getMarkableAt(0).getBeginOffset();
 	}
 
 	/**
@@ -78,8 +83,10 @@ public class AbstractContainer extends AbstractMarkable implements Container {
 	 */
 	@Override
 	public int getEndOffset() {
-		// TODO Auto-generated method stub
-		return 0;
+		if(getMarkableCount()==0)
+			throw new IllegalStateException("Container is empty"); //$NON-NLS-1$
+
+		return getMarkableAt(getMarkableCount()-1).getEndOffset();
 	}
 
 	/**
@@ -87,17 +94,7 @@ public class AbstractContainer extends AbstractMarkable implements Container {
 	 */
 	@Override
 	public int compareTo(Markable o) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Container#getManifest()
-	 */
-	@Override
-	public ContainerManifest getManifest() {
-		// TODO Auto-generated method stub
-		return null;
+		return CorpusUtils.compare(this, o);
 	}
 
 	/**
@@ -105,8 +102,64 @@ public class AbstractContainer extends AbstractMarkable implements Container {
 	 */
 	@Override
 	public boolean containsMarkable(Markable markable) {
-		// TODO Auto-generated method stub
-		return false;
+		return indexOfMarkable(markable)!=-1;
 	}
 
+	/**
+	 * @see de.ims.icarus.language.model.Container#getBaseContainer()
+	 */
+	@Override
+	public Container getBaseContainer() {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#indexOfMarkable(de.ims.icarus.language.model.Markable)
+	 */
+	@Override
+	public int indexOfMarkable(Markable markable) {
+		if (markable == null)
+			throw new NullPointerException("Invalid markable");  //$NON-NLS-1$
+
+		int size = getMarkableCount();
+
+		for(int i=0; i<size; i++) {
+			if(markable.equals(getMarkableAt(i))) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#addMarkable()
+	 */
+	@Override
+	public Markable addMarkable() {
+		return addMarkable(getMarkableCount());
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#removeMarkable(de.ims.icarus.language.model.Markable)
+	 */
+	@Override
+	public Markable removeMarkable(Markable markable) {
+		return removeMarkable(indexOfMarkable(markable));
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#moveMarkable(de.ims.icarus.language.model.Markable, int)
+	 */
+	@Override
+	public void moveMarkable(Markable markable, int index) {
+		moveMarkable(indexOfMarkable(markable), index);
+	}
+
+	protected void execute(AtomicChange change) {
+		Corpus corpus = getCorpus();
+
+		if(!corpus.getManifest().isEditable())
+			throw
+	}
 }

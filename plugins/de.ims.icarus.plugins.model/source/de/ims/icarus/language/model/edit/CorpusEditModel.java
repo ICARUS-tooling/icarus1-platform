@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.WeakEventSource;
 
@@ -102,7 +103,20 @@ public class CorpusEditModel extends WeakEventSource {
 	 * @return
 	 */
 	protected UndoableCorpusEdit createUndoableEdit(String nameKey) {
-		return new UndoableCorpusEdit(getCorpus(), nameKey);
+		return new UndoableCorpusEdit(getCorpus(), nameKey){
+
+			private static final long serialVersionUID = -471363052764925086L;
+
+			/**
+			 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit#dispatch()
+			 */
+			@Override
+			public void dispatch() {
+				getCorpus().getEditModel().fireEvent(
+						new EventObject(CorpusEditEvents.CHANGE, "edit", this)); //$NON-NLS-1$
+			}
+
+		};
 	}
 
 	/**
@@ -135,6 +149,15 @@ public class CorpusEditModel extends WeakEventSource {
 		}
 	}
 
+	/**
+	 * Executes the given atomic change and adds it to the edit currently in
+	 * progress. This is considered as a micro-transaction and therefore
+	 * a full cycle of update level relate methods is called. Note that if
+	 * the change fails in its {@link AtomicChange#execute()} method by
+	 * throwing an exception, the update level will remain unaffected.
+	 *
+	 * @param change
+	 */
 	public void execute(UndoableCorpusEdit.AtomicChange change) {
 		change.execute();
 		beginUpdate();

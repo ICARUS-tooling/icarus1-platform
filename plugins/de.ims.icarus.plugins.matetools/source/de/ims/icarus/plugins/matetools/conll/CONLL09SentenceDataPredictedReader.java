@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.matetools.conll;
@@ -48,16 +48,17 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 
 	protected CONLLReader09 reader;
 	protected boolean normalize;
 	protected int inputFormat; // 0 (default) or 1
+	protected int count;
 
 	/**
-	 * 
+	 *
 	 */
 	public CONLL09SentenceDataPredictedReader() {
 		// TODO Auto-generated constructor stub
@@ -74,7 +75,7 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 		File file = location.getFile();
 
 		if (file == null)
-			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$	
+			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
 
 		if (!file.exists())
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
@@ -86,13 +87,14 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 
 		normalize = true;
 		inputFormat = 0;
+		count = 0;
 
 		try {
 			reader = new CONLLReader09(normalize);
 			reader.startReading(location.openInputStream());
 		} catch (IllegalArgumentException e) {
 			LoggerFactory.log(this, Level.SEVERE,
-					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$			
+					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$
 		}
 
 	}
@@ -109,11 +111,11 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 
 		// more sentences left?
 		if ((input = reader.getNext()) != null) {
-			resultdd = CONLLUtils.readPredicted(input, true, true);
+			resultdd = CONLLUtils.readPredicted(input, count++, true, true);
 		}
 
 		// catch illegal state getcause -> originale
-		return (SentenceData) resultdd;
+		return resultdd;
 	}
 
 	/**

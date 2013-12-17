@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.standard.manifest;
@@ -37,18 +37,17 @@ import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.Identity;
 
 /**
- * 
+ *
  * This class is not thread-safe!
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class AbstractManifest implements Manifest {
-	
+
 	private Identity identity;
 	private Map<String, Object> properties;
-	private boolean editable = false;
 
 	/**
 	 * @see de.ims.icarus.util.id.Identity#getId()
@@ -107,44 +106,40 @@ public class AbstractManifest implements Manifest {
 		if(properties!=null) {
 			result = CollectionUtils.getSetProxy(properties.keySet());
 		}
-		
+
 		if(result==null) {
 			result = Collections.emptySet();
 		}
-		
+
 		return result;
 	}
 
 	public void setIdentity(Identity identity) {
 		if(identity==null)
 			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
-		
+
 		this.identity = identity;
 	}
-	
+
 	public void setProperty(String key, Object value) {
 		if(key==null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
-		
+
 		if(properties==null) {
 			properties = new HashMap<>();
 		}
-		
+
 		properties.put(key, value);
 	}
 
-	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#isEditable()
-	 */
-	@Override
-	public boolean isEditable() {
-		return editable;
-	}
+	public void setProperties(Map<String, Object> values) {
+		if(values==null)
+			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
 
-	/**
-	 * @param editable the editable to set
-	 */
-	public void setEditable(boolean editable) {
-		this.editable = editable;
+		if(properties==null) {
+			properties = new HashMap<>();
+		}
+
+		properties.putAll(values);
 	}
 }

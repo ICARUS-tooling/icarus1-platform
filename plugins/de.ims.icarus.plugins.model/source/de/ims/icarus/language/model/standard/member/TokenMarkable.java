@@ -41,16 +41,11 @@ import de.ims.icarus.language.model.MemberType;
 public class TokenMarkable extends AbstractMarkable implements Markable {
 
 	private final int index;
-	private final String text;
 
-	public TokenMarkable(long id, int index, Container container, String text) {
+	public TokenMarkable(long id, int index, Container container) {
 		super(id, container);
 
-		if(text==null)
-			throw new NullPointerException("Invalid text"); //$NON-NLS-1$
-
 		this.index = index;
-		this.text = text;
 	}
 
 	/**
@@ -59,14 +54,6 @@ public class TokenMarkable extends AbstractMarkable implements Markable {
 	@Override
 	public MemberType getMemberType() {
 		return MemberType.MARKABLE;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Markable#getText()
-	 */
-	@Override
-	public String getText() {
-		return text;
 	}
 
 	/**
@@ -90,7 +77,7 @@ public class TokenMarkable extends AbstractMarkable implements Markable {
 	 */
 	@Override
 	public int hashCode() {
-		return (int) getId() * text.hashCode();
+		return (int) getId();
 	}
 
 	/**
@@ -111,7 +98,7 @@ public class TokenMarkable extends AbstractMarkable implements Markable {
 	 */
 	@Override
 	public String toString() {
-		return text;
+		return "Token<"+getId()+">"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

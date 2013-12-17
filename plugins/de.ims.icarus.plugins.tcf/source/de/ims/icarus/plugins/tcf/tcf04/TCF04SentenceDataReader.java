@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.tcf.tcf04;
@@ -62,41 +62,41 @@ import de.tuebingen.uni.sfs.wlf1.tc.xb.TextCorpusLayerTag;
  *
  */
 public class TCF04SentenceDataReader implements SentenceDataReader {
-	
+
 	protected TextCorpusStreamed textCorpusStreamed;
 	protected EnumSet<TextCorpusLayerTag> layersToRead;
 	protected int sentenceIndex;
 
 	/**
-	 * 
+	 *
 	 */
 	public TCF04SentenceDataReader() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
-	 * @throws WLFormatException 
+	 * @throws WLFormatException
 	 * @see de.ims.icarus.language.SentenceDataReader#init(de.ims.icarus.util.location.Location, de.ims.icarus.util.Options)
 	 */
 	@Override
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
-				
+
 		File file = location.getFile();
-		
+
 		if(file == null)
-			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$		
-		
-		
+			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
+
+
 		if(!file.exists())
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
 											+file.getAbsolutePath());
-		
+
 		if (options == null){
 			options = Options.emptyOptions;
 		}
-		
-		
+
+
 		// TODO extend with options FixME: Gold/System?!
 		// specify which layer/layers annotations should be read in order to process
 		layersToRead = EnumSet.of(
@@ -111,7 +111,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 		// TextCorpusStreamed object with the layers specified in (layersToRead)
 		// and file-inputstream. This object will _only_ load the specified layers to
 		// memory and skip other layers (if there are other layers inside the tcf)
-		
+
 		FileInputStream fis = new FileInputStream(file);
 		sentenceIndex = 0;
 
@@ -132,9 +132,9 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 		String[] forms, lemmas, features, poss, relations;
 		short[] heads;
 		long[] flags;
-		
+
 		SimpleDependencyData sdd = null;
-		
+
 		// For every sentence in corpus
 		if ( sentenceIndex < textCorpusStreamed.getSentencesLayer().size()) {
 
@@ -152,14 +152,14 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			features = new String[size];
 			relations = new String[size];
 			flags = new long[size];
-			
+
 			// For every Token specified Layers (layerToRead) are checked and
 			// the information extracted
 			for (int index = 0; index < token.length; index++) {
-				
+
 
 				forms[index] = ensureDummy(token[index].getString(), "<empty>"); //$NON-NLS-1$
-				
+
 				//lemma
 				if(textCorpusStreamed.getLemmasLayer() !=null){
 				lemmas[index] = ensureValid(textCorpusStreamed.getLemmasLayer()
@@ -167,7 +167,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 				} else {
 					lemmas[index] = ""; //$NON-NLS-1$
 				}
-				
+
 				//pos
 				if(textCorpusStreamed.getPosTagsLayer() !=null){
 				poss[index] = ensureValid(textCorpusStreamed.getPosTagsLayer()
@@ -176,7 +176,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 					poss[index] = ""; //$NON-NLS-1$
 				}
 
-				
+
 				//Morphology
 				String morphfeatures = ""; //$NON-NLS-1$
 				if (textCorpusStreamed.getMorphologyLayer() != null) {
@@ -196,16 +196,16 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 						morphfeatures = sb.toString();
 					}
 				}
-				
+
 				features[index] = ensureValid(morphfeatures);
 
-				
+
 				//dependency stuff
 				if (textCorpusStreamed.getDependencyParsingLayer() != null) {
 					Dependency[] dep = textCorpusStreamed.getDependencyParsingLayer().getParse(sentenceIndex)
 					.getDependencies();
 					relations[index] = ensureValid(dep[index].getFunction());
-			
+
 					// check if dependent or root
 					if (textCorpusStreamed.getDependencyParsingLayer()
 							.getGovernorTokens(dep[index]) != null) {
@@ -238,7 +238,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 					heads[index] = LanguageConstants.DATA_UNDEFINED_VALUE;
 					relations[index] = ""; //$NON-NLS-1$
 				}
-				
+
 				/*
 				System.out.println(
 						"Form " + forms[index] + " " +
@@ -249,15 +249,15 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 						"| Head "+ heads[index]);
 				*/
 			}
-			
-			sdd = new SimpleDependencyData(forms, lemmas, features, poss,relations, heads, flags);
+
+			sdd = new SimpleDependencyData(sentenceIndex, forms, lemmas, features, poss,relations, heads, flags);
 			DependencyUtils.fillProjectivityFlags(heads, flags);
 			sentenceIndex++;
-			
+
 		}
 
-		
-		return (SentenceData) sdd;
+
+		return sdd;
 	}
 
 	/**
@@ -282,24 +282,24 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 		return ContentTypeRegistry.getInstance().getType(
 				DependencyConstants.CONTENT_TYPE_ID);
 	}
-	
+
 	protected String ensureValid(String input) {
 		return input==null ? "" : input; //$NON-NLS-1$
 	}
-	
-	
+
+
 	protected String ensureDummy(String input, String dummy) {
 		return input==null ? dummy : input;
 	}
-	
-	
+
+
 	public static void main(String[] args) throws UnsupportedFormatException {
-		
+
 		File file = new File ("E:\\tcf04-karin-wl.xml"); //$NON-NLS-1$
-		
+
 		DefaultFileLocation dloc = new DefaultFileLocation(file);
 		Options o = null;
-		
+
 		TCF04SentenceDataReader t4 = new TCF04SentenceDataReader();
 		try {
 			t4.init(dloc, o);

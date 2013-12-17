@@ -99,13 +99,6 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 */
 	boolean containsMarkable(Markable markable);
 
-
-	/**
-	 * Changes the type of the mutating container
-	 * @param containerType The new type of the mutating container
-	 */
-	void setContainerType(ContainerType containerType);
-
 	/**
 	 * Removes from the mutating container all elements.
 	 */

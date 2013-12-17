@@ -153,19 +153,6 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	void addMember(CorpusMember member);
 
 	/**
-	 * Resolves a given name to the corresponding member.
-	 * <p>
-	 * This method
-	 *
-	 * @param name The name of the member to be returned.
-	 * @return The member registered for the given {@code name}
-	 * @throws NullPointerException if the {@code name} is {@code null}
-	 * @throws IllegalArgumentException if there is no member registered
-	 * for the given {@code name}
-	 */
-	NamedCorpusMember getNamedMember(String name);
-
-	/**
 	 * Utility method to help external sources to get truly unique names
 	 * for new members of the corpus or for renaming.
 	 *
@@ -246,6 +233,17 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	 * @return A list containing all the layers currently hosted within this corpus.
 	 */
 	List<Layer> getLayers();
+
+	/**
+	 * Returns the layer that has the given id;
+	 *
+	 * @param id
+	 * @return
+	 * @throws NullPointerException if the {@code id} argument is {@code null}
+	 * @throws IllegalArgumentException if there is no layer in this corpus whose
+	 * assigned identifier matches the given {@code id}.
+	 */
+	Layer getLayer(String id);
 
 	/**
 	 * Returns all the layers in this corpus that are of the given type as defined

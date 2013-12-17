@@ -19,14 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.matetools.conll;
 
 import is2.data.SentenceData09;
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
@@ -42,7 +42,7 @@ public final class CONLLUtils {
 		// no-op
 	}
 
-	public static DependencyData readGold(SentenceData09 input, boolean skipRoot, boolean inferProjectivityFlags) {
+	public static DependencyData readGold(SentenceData09 input, int corpusIndex, boolean skipRoot, boolean inferProjectivityFlags) {
 		int size = input.forms.length;
 		if(skipRoot) {
 			size--;
@@ -55,10 +55,10 @@ public final class CONLLUtils {
 		String[] features = new String[size];
 		String[] relations = new String[size];
 		long[] flags = new long[size];
-		
+
 		int iSource = skipRoot ? 1 : 0;
 		String def = ""; //$NON-NLS-1$
-		
+
 		for(int i=0; i<size; i++) {
 
 			forms[i] = get(input.forms, iSource, "<empty>"); //$NON-NLS-1$
@@ -68,19 +68,31 @@ public final class CONLLUtils {
 			poss[i] = get(input.gpos, iSource, def);
 			relations[i] = get(input.labels, iSource, def);
 			flags[i] = 0;
-			
+
 			iSource++;
 		}
-		
+
 		if(inferProjectivityFlags) {
 			DependencyUtils.fillProjectivityFlags(heads, flags);
 		}
-		
-		return new SimpleDependencyData(forms, lemmas, features, 
+
+		int index = -1;
+		if(input.id.length>1) {
+			String id = input.id[1];
+			int idx = id.indexOf('_');
+			if(idx!=-1) {
+				index = Integer.parseInt(id.substring(0, idx))-1;
+			}
+		}
+		if(index==-1) {
+			index = corpusIndex;
+		}
+
+		return new SimpleDependencyData(index, forms, lemmas, features,
 				poss, relations, heads, flags);
 	}
 
-	public static DependencyData readPredicted(SentenceData09 input, boolean skipRoot, boolean inferProjectivityFlags) {
+	public static DependencyData readPredicted(SentenceData09 input, int corpusIndex, boolean skipRoot, boolean inferProjectivityFlags) {
 		int size = input.forms.length;
 		if(skipRoot) {
 			size--;
@@ -93,11 +105,11 @@ public final class CONLLUtils {
 		String[] features = new String[size];
 		String[] relations = new String[size];
 		long[] flags = new long[size];
-		
+
 		int iSource = skipRoot ? 1 : 0;
-		
+
 		String def = ""; //$NON-NLS-1$
-		
+
 		for(int i=0; i<size; i++) {
 
 			forms[i] = get(input.forms, iSource, "<empty>"); //$NON-NLS-1$
@@ -107,32 +119,44 @@ public final class CONLLUtils {
 			poss[i] = get(input.ppos, iSource, def);
 			relations[i] = get(input.plabels, iSource, def);
 			flags[i] = 0;
-			
+
 			iSource++;
 		}
-		
+
 		if(inferProjectivityFlags) {
 			DependencyUtils.fillProjectivityFlags(heads, flags);
 		}
-		
-		return new SimpleDependencyData(forms, lemmas, features, 
+
+		int index = -1;
+		if(input.id.length>1) {
+			String id = input.id[1];
+			int idx = id.indexOf('_');
+			if(idx!=-1) {
+				index = Integer.parseInt(id.substring(0, idx))-1;
+			}
+		}
+		if(index==-1) {
+			index = corpusIndex;
+		}
+
+		return new SimpleDependencyData(index, forms, lemmas, features,
 				poss, relations, heads, flags);
 	}
-	
+
 	private static int get(int[] vals, int index) {
-		return vals==null ? LanguageUtils.DATA_UNDEFINED_VALUE : vals[index]-1;
+		return vals==null ? LanguageConstants.DATA_UNDEFINED_VALUE : vals[index]-1;
 	}
-	
+
 	private static String get(String[] vals, int index, String def) {
 		String v = vals==null ? def : vals[index];
 		return v==null ? def : v;
 	}
-	
+
 	public static String ensureValid(String input) {
 		return input==null ? "" : input; //$NON-NLS-1$
 	}
-	
-	
+
+
 	public static String ensureDummy(String input, String dummy) {
 		return input==null ? dummy : input;
 	}

@@ -104,14 +104,6 @@ public class CorpusUndoManager extends UndoManager {
 	@Override
 	public synchronized void discardAllEdits() {
 		super.discardAllEdits();
-	}
-
-	/**
-	 * @see javax.swing.undo.UndoManager#end()
-	 */
-	@Override
-	public synchronized void end() {
-		// TODO Auto-generated method stub
-		super.end();
+		savedGeneration = 0L;
 	}
 }

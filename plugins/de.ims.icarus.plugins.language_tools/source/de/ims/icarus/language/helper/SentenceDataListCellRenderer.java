@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.helper;
@@ -29,6 +29,7 @@ import java.awt.Component;
 
 import javax.swing.JList;
 
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Installable;
@@ -45,7 +46,7 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 		implements Installable {
 
 	private static final long serialVersionUID = 6024979433069005270L;
-	
+
 	protected AnnotationController annotationSource;
 
 	public SentenceDataListCellRenderer() {
@@ -62,26 +63,38 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 		if(value instanceof SentenceData) {
 			SentenceData data = (SentenceData) value;
 			StringBuilder sb = new StringBuilder(data.length()*20);
-			
-			sb.append(StringUtil.formatDecimal(index+1)).append(": "); //$NON-NLS-1$
-			
+
+			// Show index
+			if(LanguageUtils.isShowIndex()) {
+				sb.append(StringUtil.formatDecimal(index+1)+": "); //$NON-NLS-1$
+			}
+
+			// Show corpus index if available
+			if(LanguageUtils.isShowCorpusIndex()) {
+				sb.append("(").append(StringUtil.formatDecimal(data.getIndex()+1)).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
 			for(int i=0; i<data.length(); i++) {
 				if(i>0) {
 					sb.append(" "); //$NON-NLS-1$
 				}
 				sb.append(data.getForm(i));
 			}
-			
+
 			value = sb.toString();
 		} else {
 			if(value==null) {
 				value = "loading..."; //$NON-NLS-1$
 			}
-			value = StringUtil.formatDecimal(index+1)+": "+value; //$NON-NLS-1$
+
+			if(LanguageUtils.isShowIndex()) {
+				value = StringUtil.formatDecimal(index+1)+": "+value; //$NON-NLS-1$
+			}
+
 		}
-		
+
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		
+
 		return this;
 	}
 
@@ -93,7 +106,7 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 		if(target instanceof AnnotationController) {
 			if(this.annotationSource!=null && this.annotationSource!=target)
 				throw new IllegalStateException("Cannot be assigned to multiple annotation controllers"); //$NON-NLS-1$
-			
+
 			this.annotationSource = (AnnotationController)target;
 		} else {
 			this.annotationSource = null;

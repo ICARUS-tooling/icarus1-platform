@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency;
@@ -35,7 +35,7 @@ import de.ims.icarus.language.LanguageUtils;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -45,6 +45,8 @@ import de.ims.icarus.language.LanguageUtils;
 public class SimpleDependencyData implements DependencyData {
 
 	private static final long serialVersionUID = -6877590672027658180L;
+
+	private int index;
 
 	@XmlElement(name="form")
 	protected String[] forms;
@@ -67,8 +69,9 @@ public class SimpleDependencyData implements DependencyData {
 	@XmlElement(name="flag", required=false)
 	protected long[] flags;
 
-	public SimpleDependencyData(String[] forms, String[] lemmas, 
+	public SimpleDependencyData(int index, String[] forms, String[] lemmas,
 			String[] features, String[] poss, String[] relations, short[] heads, long[] flags) {
+		this.index = index;
 		this.forms = forms;
 		this.lemmas = lemmas;
 		this.features = features;
@@ -81,6 +84,7 @@ public class SimpleDependencyData implements DependencyData {
 	public SimpleDependencyData(DependencyData source) {
 		int size = source.length();
 
+		index = source.getIndex();
 		forms = new String[size];
 		lemmas = new String[size];
 		features = new String[size];
@@ -102,6 +106,7 @@ public class SimpleDependencyData implements DependencyData {
 	public SimpleDependencyData() {
 		// Creates the empty sentence
 
+		index = -1;
 		forms = new String[0];
 		lemmas = new String[0];
 		features = new String[0];
@@ -170,7 +175,8 @@ public class SimpleDependencyData implements DependencyData {
 	public String getLemma(int index) {
 		return lemmas[index];
 	}
-	
+
+	@Override
 	public boolean isFlagSet(int index, long flag) {
 		return flags!=null && (flags[index] & flag)==flag;
 	}
@@ -197,5 +203,13 @@ public class SimpleDependencyData implements DependencyData {
 	@Override
 	public String getText() {
 		return LanguageUtils.combine(this);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.dependency.DependencyData#getIndex()
+	 */
+	@Override
+	public int getIndex() {
+		return index;
 	}
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency;
@@ -54,62 +54,64 @@ import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class DependencyUtils implements DependencyConstants {
-	
+
 	public static Options createOptionsFromConfig() {
 
 		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
-		
+
 		Options options = new Options();
-		options.put(SearchParameters.SEARCH_CASESENSITIVE, 
+		options.put(SearchParameters.SEARCH_CASESENSITIVE,
 				config.getBoolean("dependency.search.caseSensitive")); //$NON-NLS-1$
-		options.put(SearchParameters.SEARCH_ORIENTATION, 
+		options.put(SearchParameters.SEARCH_ORIENTATION,
 				"leftToRight".equals( //$NON-NLS-1$
 						config.getString("dependency.search.direction"))? //$NON-NLS-1$
-								Orientation.LEFT_TO_RIGHT 
+								Orientation.LEFT_TO_RIGHT
 								: Orientation.RIGHT_TO_LEFT);
 		options.put(SearchParameters.SEARCH_RESULT_LIMIT,
 				config.getInteger("dependency.search.maxResultCount")); //$NON-NLS-1$
 		SearchMode mode = SearchMode.MATCHES;
 		String modeString = config.getString("dependency.search.searchMode"); //$NON-NLS-1$
-		
+
 		// TODO use accurate mode check!
 		if("occurrences".equals(modeString)) { //$NON-NLS-1$
 			mode = SearchMode.HITS;
 		} else if("exhaustiveSentences".equals(modeString)) { //$NON-NLS-1$
 		}
-		
+
 		options.put(SearchParameters.SEARCH_MODE, mode);
-		
+
 		return options;
 	}
 
 	public static DependencyData createEmptySentenceData() {
 		return new SimpleDependencyData();
 	}
-	
+
 	public static String createExampleQuery() {
 		return "[pos=<*>[form=the]][pos=NN]"; //$NON-NLS-1$
 	}
 
 	public static DependencyData createExampleSentenceData() {
 		return new SimpleDependencyData(
+				-1,
 				new String[] { "That", "thing", "I", "will", "never", "forget" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] { "that", "thing", "i", "will", "never", "forget" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] { "_", "_", "_", "_", "_", "_" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] { "DT", "NN", "PRP", "MD", "RB", "VB" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				new String[] {"NMOD", "ROOT", "SBJ", "NMOD", "TMP", "VC" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-				new short[] { 1, 5, 3, LanguageUtils.DATA_HEAD_ROOT, 3, 3 },
+				new short[] { 1, 5, 3, LanguageConstants.DATA_HEAD_ROOT, 3, 3 },
 				new long[]{ 0, 0, 0, 0, 0, 0}); // TODO
 	}
-	
-	public static final SentenceData dummySentenceData = 
+
+	public static final SentenceData dummySentenceData =
 		new SimpleDependencyData(
+				-1,
 				new String[]{"Test"},  //$NON-NLS-1$
 				new String[]{""},   //$NON-NLS-1$
 				new String[]{""},   //$NON-NLS-1$
@@ -117,7 +119,7 @@ public class DependencyUtils implements DependencyConstants {
 				new String[]{""},  //$NON-NLS-1$
 				new short[]{LanguageUtils.DATA_UNDEFINED_VALUE},
 				new long[]{0});
-	
+
 	/*public static String getExistenceLabel(int existence) {
 		switch (existence) {
 		case DATA_UNDEFINED_VALUE:
@@ -128,7 +130,7 @@ public class DependencyUtils implements DependencyConstants {
 			return String.valueOf(true);
 		}
 	}
-	
+
 	public static int parseExistenceLabel(String label) {
 		if(DATA_GROUP_LABEL.equals(label))
 			return DATA_GROUP_VALUE;
@@ -168,7 +170,7 @@ public class DependencyUtils implements DependencyConstants {
 			return -1;
 		}
 	}
-	
+
 	private static class DataEntry {
 		public short index = LanguageUtils.DATA_UNDEFINED_VALUE;
 		public String form = ""; //$NON-NLS-1$
@@ -178,7 +180,7 @@ public class DependencyUtils implements DependencyConstants {
 		public String relation = ""; //$NON-NLS-1$
 		public DataEntry head = null;
 	}
-	
+
 	public static SimpleDependencyData parseData(String text) {
 		Exceptions.testNullArgument(text, "text"); //$NON-NLS-1$
 
@@ -269,7 +271,7 @@ public class DependencyUtils implements DependencyConstants {
 		String[] poss = new String[size];
 		String[] relations = new String[size];
 		short[] heads = new short[size];
-		
+
 		for(int i=0; i<size; i++) {
 			entry = items.get(i);
 			forms[i] = entry.form;
@@ -277,10 +279,10 @@ public class DependencyUtils implements DependencyConstants {
 			features[i] = entry.features;
 			poss[i] = entry.pos;
 			relations[i] = entry.relation;
-			heads[i] = entry.head==null ? LanguageUtils.DATA_HEAD_ROOT : entry.head.index;
+			heads[i] = entry.head==null ? LanguageConstants.DATA_HEAD_ROOT : entry.head.index;
 		}
-		
-		return new SimpleDependencyData(forms, lemmas, features, poss, relations, heads, null);
+
+		return new SimpleDependencyData(-1, forms, lemmas, features, poss, relations, heads, null);
 	}
 
 	protected static void addConstraint(DataEntry entry,
@@ -300,7 +302,7 @@ public class DependencyUtils implements DependencyConstants {
 					"Unknown field key: '%s' (value='%s')", String //$NON-NLS-1$
 							.valueOf(key), String.valueOf(value)));
 	}
-	
+
 	public static Grammar getDependencyGrammar() {
 		return LanguageManager.getInstance().getGrammar(GRAMMAR_ID);
 	}
@@ -316,118 +318,118 @@ public class DependencyUtils implements DependencyConstants {
 	public static ContentType getDependencyAnnotationType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyAnnotation.class);
 	}
-	
+
 	public static String getForm(DependencyNodeData item) {
 		return item.hasChildren() ? item.getForm2() : item.getForm();
 	}
-	
+
 	public static ConstraintContext getDependencyContext() {
 		return SearchManager.getInstance().getConstraintContext(getDependencyContentType());
 	}
-	
+
 	public static String getForms(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = items[i].getForm();
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getLemma(DependencyNodeData item) {
 		return item.hasChildren() ? item.getLemma2() : item.getLemma();
 	}
-	
+
 	public static String getLemmas(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = items[i].getLemma();
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getFeatures(DependencyNodeData item) {
 		return item.hasChildren() ? item.getFeatures2() : item.getFeatures();
 	}
-	
+
 	public static String getFeatures(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = items[i].getFeatures();
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getPos(DependencyNodeData item) {
 		return item.hasChildren() ? item.getPos2() : item.getPos();
 	}
-	
+
 	public static String getPoss(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = items[i].getPos();
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getRelation(DependencyNodeData item) {
 		//return item.hasChildren() ? item.getRelation2() : item.getRelation();
 		return item.getRelation();
 	}
-	
+
 	public static String getRelations(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = items[i].getRelation();
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getHeads(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		String[] buffer = new String[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = LanguageUtils.getHeadLabel(items[i].getHead());
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getIndices(DependencyNodeData[] items) {
 		if(items==null)
 			return ""; //$NON-NLS-1$
-		
+
 		int[] buffer = new int[items.length];
 		for(int i=0; i<items.length; i++)
 			buffer[i] = items[i].getIndex()+1;
-		
+
 		return Arrays.toString(buffer);
 	}
-	
+
 	public static String getDirection(DependencyNodeData item) {
 		if(item.hasHead()) {
-			return item.getHead()<item.getIndex() ? 
-					LanguageUtils.DATA_RIGHT_LABEL : LanguageUtils.DATA_LEFT_LABEL;
+			return item.getHead()<item.getIndex() ?
+					LanguageConstants.DATA_RIGHT_LABEL : LanguageConstants.DATA_LEFT_LABEL;
 		} else {
 			return ""; //$NON-NLS-1$
 		}
 	}
-	
+
 	public static String getDistance(DependencyNodeData item) {
 		if(item.hasHead()) {
 			return String.valueOf(Math.abs(item.getHead()-item.getIndex()));
@@ -435,18 +437,18 @@ public class DependencyUtils implements DependencyConstants {
 			return ""; //$NON-NLS-1$
 		}
 	}
-	
+
 	public static boolean isDependencyTreebank(Treebank treebank) {
 		Exceptions.testNullArgument(treebank, "treebank"); //$NON-NLS-1$
 
 		return ContentTypeRegistry.isCompatible(
 				DependencyConstants.CONTENT_TYPE_ID, treebank.getContentType());
 	}
-	
+
 	/**
-	 * Algorithm by 
+	 * Algorithm by
 	 * <a href="http://ufal.mff.cuni.cz:8080/pub/files/havelka2005.pdf">Havelka 2005</a>
-	 * 
+	 *
 	 * Naive approach used for now instead!
 	 */
 	public static void fillProjectivityFlags(short[] heads, long[] flags) {
@@ -457,41 +459,41 @@ public class DependencyUtils implements DependencyConstants {
 			}
 		}
 	}
-	
+
 	public static boolean checkBooleanConstraint(int constraint, boolean value) {
 		switch (constraint) {
-		case LanguageUtils.DATA_YES_VALUE:
+		case LanguageConstants.DATA_YES_VALUE:
 			return value;
-		case LanguageUtils.DATA_NO_VALUE:
+		case LanguageConstants.DATA_NO_VALUE:
 			return !value;
 
 		default:
 			return true;
 		}
 	}
-	
+
 	public static DependencyTree getTreeFromGraph(mxGraph graph, Object root) {
 		Exceptions.testNullArgument(graph, "graph"); //$NON-NLS-1$
 		Exceptions.testNullArgument(root, "root"); //$NON-NLS-1$
-		
+
 		DependencyTree tree = new DependencyTree();
 		Set<Object> visited = new HashSet<Object>();
 		feedTreeFromGraph(tree, graph, root, visited);
-		
+
 		return tree;
 	}
-	
-	private static void feedTreeFromGraph(DependencyTree node, mxGraph graph, 
+
+	private static void feedTreeFromGraph(DependencyTree node, mxGraph graph,
 			Object cell, Set<Object> visited) {
 		if(visited.contains(cell))
 			throw new IllegalArgumentException("Supplied graph is cyclic!"); //$NON-NLS-1$
-		
+
 		mxIGraphModel model = graph.getModel();
 		visited.add(cell);
 		node.setData(model.getValue(cell));
-		
+
 		for(Object edge : graph.getOutgoingEdges(cell)) {
-			feedTreeFromGraph(node.append(null), graph, 
+			feedTreeFromGraph(node.append(null), graph,
 					model.getTerminal(edge, false), visited);
 		}
 	}

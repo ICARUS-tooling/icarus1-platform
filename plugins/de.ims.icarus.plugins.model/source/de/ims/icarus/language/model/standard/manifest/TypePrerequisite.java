@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.standard.manifest;
@@ -33,32 +33,32 @@ import de.ims.icarus.language.model.manifest.LayerManifest;
  *
  */
 public class TypePrerequisite implements LayerManifest.Prerequisite {
-	
-	private final String typeName;
 
-	public TypePrerequisite(String typeName) {
-		if(typeName==null)
-			throw new NullPointerException("Invalid type name"); //$NON-NLS-1$
-		if(typeName.isEmpty())
-			throw new IllegalArgumentException("Empty type name"); //$NON-NLS-1$
-		
-		this.typeName = typeName;
+	private final String typeId;
+
+	public TypePrerequisite(String typeId) {
+		if(typeId==null)
+			throw new NullPointerException("Invalid type id"); //$NON-NLS-1$
+		if(typeId.isEmpty())
+			throw new IllegalArgumentException("Empty type id"); //$NON-NLS-1$
+
+		this.typeId = typeId;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getLayerName()
+	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getLayerId()
 	 */
 	@Override
-	public String getLayerName() {
+	public String getLayerId() {
 		return null;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getTypeName()
+	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getTypeId()
 	 */
 	@Override
-	public String getTypeName() {
-		return typeName;
+	public String getTypeId() {
+		return typeId;
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class TypePrerequisite implements LayerManifest.Prerequisite {
 	 */
 	@Override
 	public int hashCode() {
-		return typeName.hashCode();
+		return typeId.hashCode();
 	}
 
 	/**
@@ -75,8 +75,8 @@ public class TypePrerequisite implements LayerManifest.Prerequisite {
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof LayerManifest.Prerequisite) {
-			String type = ((LayerManifest.Prerequisite) obj).getTypeName();
-			return type!=null && typeName.equals(type);
+			String type = ((LayerManifest.Prerequisite) obj).getTypeId();
+			return type!=null && typeId.equals(type);
 		}
 		return false;
 	}
@@ -86,7 +86,7 @@ public class TypePrerequisite implements LayerManifest.Prerequisite {
 	 */
 	@Override
 	public String toString() {
-		return "Required type-name: "+typeName; //$NON-NLS-1$;
+		return "Required type-id: "+typeId; //$NON-NLS-1$;
 	}
 
 }

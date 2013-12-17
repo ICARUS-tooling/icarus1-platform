@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.annotation;
@@ -36,16 +36,16 @@ import de.ims.icarus.util.annotation.Annotation;
  *
  */
 public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenceData {
-	
+
 	private static final long serialVersionUID = -883053201659702672L;
-	
+
 	private final DependencyData source;
 	private Annotation annotation;
 
 	public AnnotatedDependencyData(DependencyData source, Annotation annotation) {
 		if(source==null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
-		
+
 		this.source = source;
 		this.annotation = annotation;
 	}
@@ -165,5 +165,13 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 
 	public void setAnnotation(Annotation annotation) {
 		this.annotation = annotation;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.dependency.DependencyData#getIndex()
+	 */
+	@Override
+	public int getIndex() {
+		return source.getIndex();
 	}
 }

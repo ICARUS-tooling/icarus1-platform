@@ -12,6 +12,7 @@
 	<attributes>
 		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.language_tools.resources.language_tools" />
 		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/language_tools/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.language_tools.LanguageToolsPreferences" />
 	</attributes>
 	
 	<requires>

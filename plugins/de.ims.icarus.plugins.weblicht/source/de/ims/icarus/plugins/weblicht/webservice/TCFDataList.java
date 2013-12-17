@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.weblicht.webservice;
 
@@ -49,7 +49,7 @@ import de.tuebingen.uni.sfs.wlf1.tc.api.Token;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class TCFDataList implements SentenceDataList {
 
@@ -172,7 +172,7 @@ public class TCFDataList implements SentenceDataList {
 	private class TCFSentenceData implements DependencyData {
 
 		private static final long serialVersionUID = -1706328677253900802L;
-		
+
 		private int sentenceIndex;
 		private Sentence sentence;
 		private long[] flags;
@@ -180,7 +180,7 @@ public class TCFDataList implements SentenceDataList {
 		private String[] forms;
 
 		public TCFSentenceData(int index) {
-			
+
 			// Get Sentence Layer
 			sentence = tcs.getSentencesLayer().getSentence(index);
 			// Extract Tokens from Sentence Layer
@@ -255,16 +255,16 @@ public class TCFDataList implements SentenceDataList {
 		 */
 		@Override
 		public String getRelation(int index) {
-			
-			
-			
+
+
+
 			// dependency stuff
-			if (tcs.getDependencyParsingLayer() != null) {	
-				
+			if (tcs.getDependencyParsingLayer() != null) {
+
 				Dependency[] dep = tcs.getDependencyParsingLayer()
 						.getParse(sentenceIndex).getDependencies();
-				
-				
+
+
 				//workaround for wrong index, recalculate to be save
 				// see getHead for more information
 				boolean undefinedVal = true;
@@ -274,16 +274,16 @@ public class TCFDataList implements SentenceDataList {
 					Sentence toksentence = tcs.getSentencesLayer().getSentence(
 							tmpTok[0]);
 					Token[] tokenOffset = tcs.getSentencesLayer().getTokens(							toksentence);
-					
+
 					if ((tmpTok[0].getOrder()-tokenOffset[0].getOrder()) == index) {
 						index = i;
 						undefinedVal = false;
 					}
-				}				
+				}
 				if (undefinedVal) {
 					return "";
 				}
-				
+
 				return ensureValid(dep[index].getFunction());
 			} else {
 				return ""; //$NON-NLS-1$
@@ -340,28 +340,28 @@ public class TCFDataList implements SentenceDataList {
 
 				/* wrong index check if appropiate candidate in dep list,
 				 * some parser output may not recognize all tokens
-				 * 
+				 *
 				 * workaround for this issue: we check everytime if the dependency
 				 * arraylist has a token with the current index (tmpTok[0].getOrder)
 				 * if we a match we just have to set the correct (new) index, otherwise
 				 * we assume that the data has an undefined value.
 				 */
 				boolean undefinedVal = true;
-				for (int i = 0; i < dep4.length; i++) {					
+				for (int i = 0; i < dep4.length; i++) {
 					Token[] tmpTok = tcs.getDependencyParsingLayer()
 							.getDependentTokens(dep4[i]);
-					
+
 					//again offset numbercrunching
 					Sentence toksentence = tcs.getSentencesLayer().getSentence(
 							tmpTok[0]);
 					Token[] tokenOffset = tcs.getSentencesLayer().getTokens(							toksentence);
-					
+
 					if ((tmpTok[0].getOrder()-tokenOffset[0].getOrder()) == index) {
 						index = i;
 						undefinedVal = false;
 					}
 				}
-				
+
 				if (undefinedVal) {
 					return LanguageConstants.DATA_UNDEFINED_VALUE;
 				}
@@ -424,6 +424,14 @@ public class TCFDataList implements SentenceDataList {
 		@Override
 		public String getText() {
 			return LanguageUtils.combine(this);
+		}
+
+		/**
+		 * @see de.ims.icarus.language.SentenceData#getIndex()
+		 */
+		@Override
+		public int getIndex() {
+			return sentenceIndex;
 		}
 
 	}

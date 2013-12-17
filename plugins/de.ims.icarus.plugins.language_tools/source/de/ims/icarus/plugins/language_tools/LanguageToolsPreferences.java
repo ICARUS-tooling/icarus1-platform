@@ -23,17 +23,30 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.plugins.language_tools;
+
+import de.ims.icarus.config.ConfigBuilder;
+import de.ims.icarus.config.ConfigRegistry;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum MemberType {
-	MARKABLE,
-	EDGE,
-	CONTAINER,
-	STRUCTURE,
-	LAYER;
+public class LanguageToolsPreferences {
+
+	public LanguageToolsPreferences() {
+		ConfigBuilder builder = new ConfigBuilder(ConfigRegistry.getGlobalRegistry());
+
+		// PLUGINS GROUP
+		builder.addGroup("plugins", true); //$NON-NLS-1$
+		// GENERAL DEPENDENCY GROUP
+		builder.addGroup("languageTools", true); //$NON-NLS-1$
+		// APPEARANCE GROUP
+		builder.addGroup("appearance", true); //$NON-NLS-1$
+
+		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showCorpusIndex", false); //$NON-NLS-1$
+	}
+
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency;
@@ -32,6 +32,7 @@ import java.util.Map;
 
 import de.ims.icarus.language.AbstractMutableSentenceData;
 import de.ims.icarus.language.Grammar;
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.MutableSentenceData;
 import de.ims.icarus.language.SentenceData;
@@ -43,7 +44,7 @@ import de.ims.icarus.util.annotation.Annotation;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -58,14 +59,16 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	protected Annotation annotation = null; // TODO change to default value?
 
 	private List<DependencyDataEntry> items = new ArrayList<>();
-	
+
 	private Map<String, Object> properties;
+
+	private int index;
 
 	public MutableDependencyData() {
 		event = new DependencyDataEvent(this);
 	}
 
-	public MutableDependencyData(String[] forms, String[] lemmas, 
+	public MutableDependencyData(String[] forms, String[] lemmas,
 			String[] features, String[] poss, int[] heads,
 			String[] relations, long[] flags) {
 		this();
@@ -74,13 +77,13 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 		for (int i = 0; i < forms.length; i++) {
 			items.add(this.new DependencyDataEntry(
-					forms[i], lemmas[i], features[i], 
+					forms[i], lemmas[i], features[i],
 					poss[i], heads[i], relations[i], flags[i]));
 		}
 	}
 
 	protected void fireDataChanged() {
-		event.set(SentenceDataEvent.CHANGE_EVENT, (int)-1, (int)-1);
+		event.set(SentenceDataEvent.CHANGE_EVENT, -1, -1);
 		fireDataChanged(event);
 	}
 
@@ -99,6 +102,21 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		fireDataChanged(event);
 	}
 
+	/**
+	 * @return the index
+	 */
+	@Override
+	public int getIndex() {
+		return index;
+	}
+
+	/**
+	 * @param index the index to set
+	 */
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
 	public DependencyDataEntry getItem(int index) {
 		return items.get(index);
 	}
@@ -115,7 +133,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public DependencyDataEntry addDummyItem() {
 		DependencyDataEntry item = this.new DependencyDataEntry();
 		items.add(item);
-		int index = (int) (items.size() - 1);
+		int index = items.size() - 1;
 		item.index = index;
 		item.form = "<empty>"; //$NON-NLS-1$
 		fireItemsInserted(index, index);
@@ -125,21 +143,21 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public void addItem(String form, String lemma, String features, String pos, int head, String relation, long flags) {
 		items.add(this.new DependencyDataEntry(
 				form, lemma, features, pos, head, relation, flags));
-		int index = (int) (items.size() - 1);
+		int index = items.size() - 1;
 		fireItemsInserted(index, index);
 	}
 
 	public boolean addItem(DependencyDataEntry item) {
 		if (!items.contains(item)) {
 			items.add(item);
-			int index = (int) (items.size() - 1);
+			int index = items.size() - 1;
 			fireItemsInserted(index, index);
 			return true;
 		}
 		return false;
 	}
 
-	public void insertItem(int index, String form, String lemma, String features, 
+	public void insertItem(int index, String form, String lemma, String features,
 			String pos, int head, String relation, long flags) {
 		items.add(index, this.new DependencyDataEntry(
 				form, lemma, features, pos, head, relation, flags));
@@ -156,37 +174,37 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	public int indexOf(DependencyDataEntry item) {
-		return (int) items.indexOf(item);
+		return items.indexOf(item);
 	}
 
 	public void removeItemAt(int index) {
 		// Find children
 		int indexFrom = Short.MAX_VALUE;
 		int indexTo = -1;
-		
+
 		for(int i=0; i<items.size(); i++) {
 			if(i==index) {
 				continue;
 			}
-			
+
 			DependencyDataEntry item = items.get(i);
 			if(item.getHead()==index) {
-				item.setHead0(LanguageUtils.DATA_UNDEFINED_VALUE);
-				indexFrom = (int) Math.min(indexFrom, i);
-				indexTo = (int) Math.max(indexTo, i);
+				item.setHead0(LanguageConstants.DATA_UNDEFINED_VALUE);
+				indexFrom = Math.min(indexFrom, i);
+				indexTo = Math.max(indexTo, i);
 			}
 		}
-		
+
 		if(indexFrom<Short.MAX_VALUE && indexTo>-1) {
 			fireItemsUpdated(indexFrom, indexTo);
 		}
-		
+
 		items.remove(index);
 		fireItemsRemoved(index, index);
 	}
 
 	public boolean removeItem(DependencyDataEntry item) {
-		int index = (int) items.indexOf(item);
+		int index = items.indexOf(item);
 		if (index >= 0) {
 			removeItemAt(index);
 			return true;
@@ -212,17 +230,17 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		if (!(source instanceof DependencyData))
 			throw new UnsupportedSentenceDataException("Unsupported type: "+source.getClass()); //$NON-NLS-1$
-		
+
 		DependencyData data = (DependencyData) source;
 		items.clear();
 		for (int i = 0; i < data.length(); i++) {
 			items.add(this.new DependencyDataEntry(data, i));
 		}
-		
+
 		if(source instanceof AnnotatedSentenceData) {
 			annotation = ((AnnotatedSentenceData)source).getAnnotation();
 		}
-		
+
 		fireDataChanged();
 	}
 
@@ -238,7 +256,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public Annotation getAnnotation() {
 		return annotation;
 	}
-	
+
 	public void setAnnotation(Annotation annotation) {
 		// TODO
 	}
@@ -247,7 +265,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public String getForm(int index) {
 		return items.get(index).getForm();
 	}
-	
+
 	public void setForm(int index, String form) {
 		items.get(index).setForm(form);
 	}
@@ -256,7 +274,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public String getLemma(int index) {
 		return items.get(index).getLemma();
 	}
-	
+
 	public void setLemma(int index, String lemma) {
 		items.get(index).setForm(lemma);
 	}
@@ -265,7 +283,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public String getFeatures(int index) {
 		return items.get(index).getFeatures();
 	}
-	
+
 	public void setFeatures(int index, String features) {
 		items.get(index).setForm(features);
 	}
@@ -274,7 +292,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public int getHead(int index) {
 		return items.get(index).getHead();
 	}
-	
+
 	public void setHead(int index, int head) {
 		items.get(index).setHead(head);
 	}
@@ -283,7 +301,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public String getPos(int index) {
 		return items.get(index).getPos();
 	}
-	
+
 	public void setPos(int index, String pos) {
 		items.get(index).setForm(pos);
 	}
@@ -292,7 +310,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public String getRelation(int index) {
 		return items.get(index).getRelation();
 	}
-	
+
 	public void setRelation(int index, String relation) {
 		items.get(index).setForm(relation);
 	}
@@ -318,7 +336,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		value &= ~flag;
 		items.get(index).setFlags(value);
 	}
-	
+
 	@Override
 	public long getFlags(int index) {
 		return items.get(index).getFlags();
@@ -326,9 +344,9 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 	/**
 	 * Checks basic constraints for this parse.
-	 * 
-	 * @return true, if and only if exactly {@code n-1} items have a valid head 
-	 * where {@code n} is the total number of items and exactly one 
+	 *
+	 * @return true, if and only if exactly {@code n-1} items have a valid head
+	 * where {@code n} is the total number of items and exactly one
 	 * item is marked as root. Items with undefined heads count towards
 	 * the 'root' value.
 	 */
@@ -348,8 +366,8 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			DependencyDataEntry item = items.get(index);
 			visited[index] = true;
 			item.index = index;
-			if (item.head == LanguageUtils.DATA_HEAD_ROOT 
-					|| item.head==LanguageUtils.DATA_UNDEFINED_VALUE) {
+			if (item.head == LanguageConstants.DATA_HEAD_ROOT
+					|| item.head==LanguageConstants.DATA_UNDEFINED_VALUE) {
 				// 1 = root
 				counts[1]++;
 			} else if (item.head >= 0 && item.head < items.size()) {
@@ -377,25 +395,25 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 		itemA.copyFrom(itemB);
 		itemB.copyFrom(tmp);
-		
+
 		headSwitch(indexFrom, indexTo);
 	}
-	
+
 	protected void headSwitch(int oldHead, int newHead) {
 
-		int updateFrom = (int) Math.min(oldHead, newHead);
-		int updateTo = (int) Math.max(oldHead, newHead);
+		int updateFrom = Math.min(oldHead, newHead);
+		int updateTo = Math.max(oldHead, newHead);
 
 		for (int i = 0; i < items.size(); i++) {
 			DependencyDataEntry tmp = items.get(i);
 			if (tmp.head == oldHead) {
 				tmp.head = newHead;
-				updateFrom = (int) Math.min(updateFrom, i);
-				updateTo = (int) Math.max(updateTo, i);
+				updateFrom = Math.min(updateFrom, i);
+				updateTo = Math.max(updateTo, i);
 			} else if (tmp.head == newHead) {
 				tmp.head = oldHead;
-				updateFrom = (int) Math.min(updateFrom, i);
-				updateTo = (int) Math.max(updateTo, i);
+				updateFrom = Math.min(updateFrom, i);
+				updateTo = Math.max(updateTo, i);
 			}
 		}
 
@@ -426,7 +444,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		if(properties==null) {
 			properties = new HashMap<>();
 		}
-		
+
 		if(value==null) {
 			properties.remove(key);
 		} else {
@@ -451,7 +469,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -471,12 +489,12 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		private int head;
 
 		private int index;
-		
+
 		private long flags;
 
 		public DependencyDataEntry() {
 			form = pos = relation = lemma = features = ""; //$NON-NLS-1$
-			head = LanguageUtils.DATA_UNDEFINED_VALUE;
+			head = LanguageConstants.DATA_UNDEFINED_VALUE;
 			flags = 0;
 		}
 
@@ -526,52 +544,52 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			relation = source.getRelation(idx);
 			flags = source.getFlags(idx);
 		}
-		
+
 		public void copyFrom(DependencyNodeData nodeData) {
 			boolean fireEvent = false;
-			
+
 			// FORM
 			if(!form.equals(nodeData.getForm())) {
 				fireEvent = true;
 				form = nodeData.getForm();
 			}
-			
+
 			// LEMMA
 			if(!lemma.equals(nodeData.getLemma())) {
 				fireEvent = true;
 				lemma = nodeData.getLemma();
 			}
-			
+
 			// FEATURES
 			if(!features.equals(nodeData.getFeatures())) {
 				fireEvent = true;
 				features = nodeData.getFeatures();
 			}
-			
+
 			// POS
 			if(!pos.equals(nodeData.getPos())) {
 				fireEvent = true;
 				pos = nodeData.getPos();
 			}
-			
+
 			// HEAD
 			if(head!=nodeData.getHead()) {
 				fireEvent = true;
 				head = nodeData.getHead();
 			}
-			
+
 			// RELATION
 			if(!relation.equals(nodeData.getRelation())) {
 				fireEvent = true;
 				relation = nodeData.getRelation();
 			}
-			
+
 			// INDEX
 			if(index!=nodeData.getIndex()) {
 				fireEvent = false;
 				MutableDependencyData.this.switchItems(index, nodeData.getIndex());
 			}
-			
+
 			if(fireEvent) {
 				MutableDependencyData.this.fireItemsUpdated(index, index);
 			}
@@ -596,7 +614,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		 */
 		public void setFlags(long flags) {
 			this.flags = flags;
-			
+
 			int index = MutableDependencyData.this.indexOf(this);
 			MutableDependencyData.this.fireItemsUpdated(index, index);
 		}
@@ -664,7 +682,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 				MutableDependencyData.this.fireItemsUpdated(index, index);
 			}
 		}
-		
+
 		void setHead0(int head) {
 			this.head = head;
 		}
@@ -695,12 +713,12 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 		}
 
 		public boolean isRoot() {
-			return head == LanguageUtils.DATA_HEAD_ROOT;
+			return head == LanguageConstants.DATA_HEAD_ROOT;
 		}
 
 		public boolean hasHead() {
-			return head != LanguageUtils.DATA_HEAD_ROOT 
-					&& head != LanguageUtils.DATA_UNDEFINED_VALUE;
+			return head != LanguageConstants.DATA_HEAD_ROOT
+					&& head != LanguageConstants.DATA_UNDEFINED_VALUE;
 		}
 	}
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.manifest;
@@ -30,28 +30,28 @@ import de.ims.icarus.language.model.Structure;
 
 /**
  * A manifest that describes a container and its content.
- * 
- * @author Markus Gärtner 
+ *
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface ContainerManifest extends Manifest {
-	
+
 	/**
 	 * Returns the manifest of the {@code MarkableLayer} the container
 	 * is hosted in.
 	 * @return
 	 */
 	MarkableLayerManifest getLayerManifest();
-	
+
 	/**
-	 * If this is a nested container this will return the manifest of 
-	 * the parent container. On a top-level manifest the returned 
+	 * If this is a nested container this will return the manifest of
+	 * the parent container. On a top-level manifest the returned
 	 * value will be {@code null}.
 	 * @return
 	 */
 	ContainerManifest getParentManifest();
-	
+
 	/**
 	 * If the elements of this container are themselves containers and this
 	 * container is their actual parent than this method returns the manifest
@@ -59,23 +59,31 @@ public interface ContainerManifest extends Manifest {
 	 * @return
 	 */
 	ContainerManifest getElementManifest();
-	
+
 	/**
-	 * Returns the type of this container. This provides 
+	 * Returns the type of this container. This provides
 	 * information about how contained {@code Markable}s are ordered and
 	 * if they represent a continuous subset of the corpus. Note that the
 	 * container type of a {@link Structure} object is undefined and therefore
 	 * this method is optional when this container is a structure.
-	 * 
+	 *
 	 * @return The {@code ContainerType} of this {@code Container}
 	 * @see ContainerType
 	 */
 	ContainerType getContainerType();
 
-	
+
+	/**
+	 * Changes the type of this container
+	 * @param containerType The new type of this container
+	 * @throws NullPointerException if the {@code containerType} argument is {@code null}
+	 */
+	void setContainerType(ContainerType containerType);
+
+
 	/**
 	 * Returns {@code true} if this structure is allowed to have multiple root nodes.
-	 *  
+	 *
 	 * @return {@code true} if and only if the structure represented
 	 * is allowed to contain multiple root nodes.
 	 * @throws UnsupportedOperationException if this container is not a structure

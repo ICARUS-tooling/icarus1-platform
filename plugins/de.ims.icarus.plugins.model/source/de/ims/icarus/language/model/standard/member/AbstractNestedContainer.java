@@ -27,51 +27,24 @@ package de.ims.icarus.language.model.standard.member;
 
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
-import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractMarkable implements Markable {
+public abstract class AbstractNestedContainer extends AbstractContainer {
 
-	private final long id;
-	private final Container container;
+	private final Container parent;
 
-	public AbstractMarkable(Container container) {
-		if(container==null)
-			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
+	public AbstractNestedContainer(Container parent) {
+		if (parent == null)
+			throw new NullPointerException("Invalid parent");  //$NON-NLS-1$
 
-		this.id = CorpusRegistry.getInstance().newId();
-		this.container = container;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
-	 */
-	@Override
-	public long getId() {
-		return id;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
-	 */
-	@Override
-	public Corpus getCorpus() {
-		return container.getCorpus();
-	}
-
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Markable o) {
-		return CorpusUtils.compare(this, o);
+		this.parent = parent;
 	}
 
 	/**
@@ -79,7 +52,7 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public Container getContainer() {
-		return container;
+		return parent;
 	}
 
 	/**
@@ -87,6 +60,36 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public MarkableLayer getLayer() {
-		return container.getLayer();
+		return parent.getLayer();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 */
+	@Override
+	public Corpus getCorpus() {
+		return parent.getCorpus();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#getManifest()
+	 */
+	@Override
+	public ContainerManifest getManifest() {
+		// Fetch the container level and ask the
+		// hosting markable layer manifest for the container
+		// manifest at the specific level
+
+		int level = 2;
+
+		Container parent = getContainer();
+		while(parent.getContainer()!=null) {
+			level++;
+			parent = parent.getContainer();
+		}
+
+		MarkableLayerManifest manifest = getLayer().getManifest();
+
+		return manifest.getContainerManifest(level);
 	}
 }

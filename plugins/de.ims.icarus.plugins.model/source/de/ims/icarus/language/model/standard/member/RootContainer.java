@@ -25,42 +25,37 @@
  */
 package de.ims.icarus.language.model.standard.member;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.ContainerType;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.edit.ContainerMutator;
+import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.util.CorpusUtils;
-import de.ims.icarus.util.collections.LongIntHashMap;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class RootContainer implements Container {
+public class RootContainer extends AbstractContainer {
 
-	private final long id;
 	private final MarkableLayer layer;
+	private final ContainerManifest manifest;
 
-	private final List<Markable> markables = new ArrayList<>();
-	private final LongIntHashMap indexLookup = new LongIntHashMap();
+	private final LookupList<Markable> list = new LookupList<>();
 
-	/**
-	 * @see de.ims.icarus.language.model.Markable#getText()
-	 */
-//	@Override
-//	public String getText() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
+	public RootContainer(MarkableLayer layer, ContainerManifest manifest) {
+		if (layer == null)
+			throw new NullPointerException("Invalid layer");  //$NON-NLS-1$
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest");  //$NON-NLS-1$
+
+		this.layer = layer;
+		this.manifest = manifest;
+	}
 
 	/**
 	 * Since this implementation represents the top-level container
@@ -95,15 +90,7 @@ public class RootContainer implements Container {
 	 */
 	@Override
 	public int getEndOffset() {
-		return markables.size();
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
-	 */
-	@Override
-	public long getId() {
-		return id;
+		return list.size();
 	}
 
 	/**
@@ -115,27 +102,11 @@ public class RootContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
-	 */
-	@Override
-	public MemberType getMemberType() {
-		return MemberType.CONTAINER;
-	}
-
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Markable o) {
-		return CorpusUtils.compare(this, o);
-	}
-
-	/**
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
 	public Iterator<Markable> iterator() {
-		return markables.iterator();
+		return list.iterator();
 	}
 
 	/**
@@ -143,8 +114,7 @@ public class RootContainer implements Container {
 	 */
 	@Override
 	public ContainerManifest getManifest() {
-		// TODO Auto-generated method stub
-		return null;
+		return manifest;
 	}
 
 	/**
@@ -160,7 +130,7 @@ public class RootContainer implements Container {
 	 */
 	@Override
 	public int getMarkableCount() {
-		return markables.size();
+		return list.size();
 	}
 
 	/**
@@ -168,7 +138,7 @@ public class RootContainer implements Container {
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
-		return markables.get(index);
+		return list.get(index);
 	}
 
 	/**
@@ -176,7 +146,7 @@ public class RootContainer implements Container {
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
-		return m;
+		return list.indexOf(markable);
 	}
 
 	/**
@@ -184,73 +154,136 @@ public class RootContainer implements Container {
 	 */
 	@Override
 	public boolean containsMarkable(Markable markable) {
-		// TODO Auto-generated method stub
-		return false;
+		return list.contains(markable);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getMutator()
+	 * @see de.ims.icarus.language.model.Container#removeAllMarkables()
 	 */
 	@Override
-	public ContainerMutator getMutator() {
+	public void removeAllMarkables() {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#addMarkable()
+	 */
+	@Override
+	public Markable addMarkable() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private static class BaseMarkable implements Markable {
+	/**
+	 * @see de.ims.icarus.language.model.Container#addMarkable(int)
+	 */
+	@Override
+	public Markable addMarkable(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getId()
-		 */
-		@Override
-		public long getId() {
-			// TODO Auto-generated method stub
-			return 0;
+	/**
+	 * @see de.ims.icarus.language.model.Container#removeMarkable(int)
+	 */
+	@Override
+	public Markable removeMarkable(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#removeMarkable(de.ims.icarus.language.model.Markable)
+	 */
+	@Override
+	public Markable removeMarkable(Markable markable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#moveMarkable(int, int)
+	 */
+	@Override
+	public void moveMarkable(int index0, int index1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Container#moveMarkable(de.ims.icarus.language.model.Markable, int)
+	 */
+	@Override
+	public void moveMarkable(Markable markable, int index) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private class ElementChange implements AtomicChange {
+
+		private Markable markable;
+		private final int index;
+
+		public ElementChange(int index, Markable markable) {
+			this.index = index;
+			this.markable = markable;
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
-		public Corpus getCorpus() {
-			// TODO Auto-generated method stub
-			return null;
+		public void execute() {
+			if(markable==null) {
+				markable = list.remove(index);
+			} else {
+				list.add(index, markable);
+				markable = null;
+			}
+		}
+
+	}
+
+	private class MoveChange implements AtomicChange {
+
+		private int indexFrom, indexTo;
+
+		public MoveChange(int indexFrom, int indexTo) {
+			this.indexFrom = indexFrom;
+			this.indexTo = indexTo;
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
-		public MemberType getMemberType() {
-			// TODO Auto-generated method stub
-			return null;
+		public void execute() {
+			Markable m1 = list.get(indexFrom);
+			Markable m2 = list.get(indexTo);
+
+			list.set(m2, indexFrom);
+			list.set(m1, indexTo);
+
+			int tmp = indexFrom;
+			indexFrom = indexTo;
+			indexTo = tmp;
 		}
 
-		/**
-		 * @see java.lang.Comparable#compareTo(java.lang.Object)
-		 */
-		@Override
-		public int compareTo(Markable o) {
-			// TODO Auto-generated method stub
-			return 0;
-		}
+	}
+
+	public static class BaseMarkable extends AbstractMarkable {
+
+		private final int index;
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getContainer()
+		 * @param id
+		 * @param container
 		 */
-		@Override
-		public Container getContainer() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+		public BaseMarkable(Container container, int index) {
+			super(container);
 
-		/**
-		 * @see de.ims.icarus.language.model.Markable#getLayer()
-		 */
-		@Override
-		public MarkableLayer getLayer() {
-			// TODO Auto-generated method stub
-			return null;
+			this.index = index;
 		}
 
 		/**
@@ -258,8 +291,7 @@ public class RootContainer implements Container {
 		 */
 		@Override
 		public int getBeginOffset() {
-			// TODO Auto-generated method stub
-			return 0;
+			return index;
 		}
 
 		/**
@@ -267,192 +299,15 @@ public class RootContainer implements Container {
 		 */
 		@Override
 		public int getEndOffset() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-	}
-
-	private static class RootContainerMutator implements ContainerMutator {
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.Mutator#getSubject()
-		 */
-		@Override
-		public Container getSubject() {
-			// TODO Auto-generated method stub
-			return null;
+			return index;
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.batch.BatchMutator#beginBatch()
+		 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
 		 */
 		@Override
-		public boolean beginBatch() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.batch.BatchMutator#discardBatch()
-		 */
-		@Override
-		public void discardBatch() {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.batch.BatchMutator#executeBatch()
-		 */
-		@Override
-		public boolean executeBatch() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#setContainerType(de.ims.icarus.language.model.ContainerType)
-		 */
-		@Override
-		public void setContainerType(ContainerType containerType) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#removeAllMarkables()
-		 */
-		@Override
-		public void removeAllMarkables() {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#addMarkable()
-		 */
-		@Override
-		public Markable addMarkable() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#addMarkable(int)
-		 */
-		@Override
-		public Markable addMarkable(int index) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#removeMarkable(int)
-		 */
-		@Override
-		public Markable removeMarkable(int index) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#removeMarkable(de.ims.icarus.language.model.Markable)
-		 */
-		@Override
-		public Markable removeMarkable(Markable markable) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#moveMarkable(int, int)
-		 */
-		@Override
-		public void moveMarkable(int index0, int index1) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#moveMarkable(de.ims.icarus.language.model.Markable, int)
-		 */
-		@Override
-		public void moveMarkable(Markable markable, int index) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchSetContainerType(de.ims.icarus.language.model.ContainerType)
-		 */
-		@Override
-		public void batchSetContainerType(ContainerType containerType) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchRemoveAll()
-		 */
-		@Override
-		public void batchRemoveAll() {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchAddMarkable()
-		 */
-		@Override
-		public void batchAddMarkable() {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchAddMarkable(int)
-		 */
-		@Override
-		public void batchAddMarkable(int index) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchRemoveMarkable(int)
-		 */
-		@Override
-		public void batchRemoveMarkable(int index) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchRemoveMarkable(de.ims.icarus.language.model.Markable)
-		 */
-		@Override
-		public void batchRemoveMarkable(Markable markable) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchMoveMarkable(int, int)
-		 */
-		@Override
-		public void batchMoveMarkable(int index0, int index1) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.edit.ContainerMutator#batchMoveMarkable(de.ims.icarus.language.model.Markable, int)
-		 */
-		@Override
-		public void batchMoveMarkable(Markable markable, int index1) {
-			// TODO Auto-generated method stub
-
+		public MemberType getMemberType() {
+			return MemberType.MARKABLE;
 		}
 
 	}

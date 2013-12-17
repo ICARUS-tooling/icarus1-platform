@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.standard.manifest;
@@ -33,31 +33,31 @@ import de.ims.icarus.language.model.manifest.LayerManifest;
  *
  */
 public class LayerPrerequisite implements LayerManifest.Prerequisite {
-	
-	private final String layerName;
 
-	public LayerPrerequisite(String layerName) {
-		if(layerName==null)
-			throw new NullPointerException("Invalid layer name"); //$NON-NLS-1$
-		if(layerName.isEmpty())
-			throw new IllegalArgumentException("Empty layer name"); //$NON-NLS-1$
-		
-		this.layerName = layerName;
+	private final String layerId;
+
+	public LayerPrerequisite(String layerId) {
+		if(layerId==null)
+			throw new NullPointerException("Invalid layer id"); //$NON-NLS-1$
+		if(layerId.isEmpty())
+			throw new IllegalArgumentException("Empty layer id"); //$NON-NLS-1$
+
+		this.layerId = layerId;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getLayerName()
+	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getLayerId()
 	 */
 	@Override
-	public String getLayerName() {
-		return layerName;
+	public String getLayerId() {
+		return layerId;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getTypeName()
+	 * @see de.ims.icarus.language.model.manifest.LayerManifest.Prerequisite#getTypeId()
 	 */
 	@Override
-	public String getTypeName() {
+	public String getTypeId() {
 		return null;
 	}
 
@@ -66,7 +66,7 @@ public class LayerPrerequisite implements LayerManifest.Prerequisite {
 	 */
 	@Override
 	public int hashCode() {
-		return layerName.hashCode();
+		return layerId.hashCode();
 	}
 
 	/**
@@ -75,8 +75,8 @@ public class LayerPrerequisite implements LayerManifest.Prerequisite {
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof LayerManifest.Prerequisite) {
-			String name = ((LayerManifest.Prerequisite) obj).getLayerName();
-			return name!=null && layerName.equals(name);
+			String name = ((LayerManifest.Prerequisite) obj).getLayerId();
+			return name!=null && layerId.equals(name);
 		}
 		return false;
 	}
@@ -86,7 +86,7 @@ public class LayerPrerequisite implements LayerManifest.Prerequisite {
 	 */
 	@Override
 	public String toString() {
-		return "Required layer-name: "+layerName; //$NON-NLS-1$;
+		return "Required layer-id: "+layerId; //$NON-NLS-1$;
 	}
 
 }

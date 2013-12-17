@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -36,17 +36,17 @@ import de.ims.icarus.language.LanguageUtils;
 public class DefaultCoreferenceData extends CorefMember implements CoreferenceData {
 
 	private static final long serialVersionUID = 1641469565583964051L;
-	
+
 	protected final String[] forms;
-	
+
 	protected CoreferenceDocumentData document;
-	
+
 	protected int sentenceIndex = -1;
-	
+
 	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
 		if(forms==null)
 			throw new NullPointerException("Invalid forms array"); //$NON-NLS-1$
-		
+
 		this.forms = forms;
 		setDocument(document);
 	}
@@ -96,10 +96,10 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 	public CoreferenceData clone() {
 		DefaultCoreferenceData clone = new DefaultCoreferenceData(document, forms);
 		clone.setProperties(cloneProperties());
-		
+
 		return clone;
 	}
-	
+
 	@Override
 	public String toString() {
 		return LanguageUtils.combine(this);
@@ -113,6 +113,7 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 		return LanguageUtils.combine(this);
 	}
 
+	@Override
 	public CoreferenceDocumentData getDocument() {
 		return document;
 	}
@@ -121,10 +122,10 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 		if(forms!=null && forms.length==0) {
 			return;
 		}
-		
+
 		if(document==null)
 			throw new NullPointerException("Invalid document"); //$NON-NLS-1$
-		
+
 		this.document = document;
 	}
 
@@ -134,5 +135,13 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 
 	public void setSentenceIndex(int sentenceIndex) {
 		this.sentenceIndex = sentenceIndex;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getIndex()
+	 */
+	@Override
+	public int getIndex() {
+		return sentenceIndex;
 	}
 }

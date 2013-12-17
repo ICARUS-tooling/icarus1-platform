@@ -35,6 +35,7 @@ import javax.swing.undo.CannotUndoException;
 
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.events.EventObject;
 
 /**
  * @author Markus Gärtner
@@ -106,11 +107,11 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	}
 
 	/**
-	 * Hook to notify any listeners of the changes after an undo or redo has
-	 * been carried out. This implementation is empty.
+	 * Notifies listeners of the execution of this edit
 	 */
 	public void dispatch() {
-		// empty
+		getCorpus().getEditModel().fireEvent(
+				new EventObject(CorpusEditEvents.CHANGE, "edit", this)); //$NON-NLS-1$
 	}
 
 	/**

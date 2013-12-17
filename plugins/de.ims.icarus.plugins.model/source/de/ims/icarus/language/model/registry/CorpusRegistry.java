@@ -19,15 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.registry;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import de.ims.icarus.util.collections.LongHashMap;
+import de.ims.icarus.language.model.LayerType;
 
 /**
  * @author Markus Gärtner
@@ -37,7 +37,7 @@ import de.ims.icarus.util.collections.LongHashMap;
 public final class CorpusRegistry {
 
 	private static volatile CorpusRegistry instance;
-	
+
 	public static CorpusRegistry getInstance() {
 		CorpusRegistry tmp = instance;
 		if(tmp==null) {
@@ -46,37 +46,31 @@ public final class CorpusRegistry {
 				if(tmp==null) {
 					tmp = new CorpusRegistry();
 					tmp.init();
-					
+
 					instance = tmp;
 				}
 			}
 		}
-		
+
 		return tmp;
 	}
-	
+
 	private final AtomicLong nextId = new AtomicLong();
-	
-	private final LongHashMap idMap = new LongHashMap(100);
-	
+
 	private CorpusRegistry() {
 		if(instance!=null)
 			throw new IllegalStateException("Cannot instantiate additional registry"); //$NON-NLS-1$
 	}
-	
+
 	private void init() {
 		// TODO
 	}
-	
+
 	public long newId() {
 		return nextId.incrementAndGet();
 	}
-	
-	public void map(long id, Object value) {
-		idMap.put(id, value);
-	}
-	
-	public void unmap(long id) {
-		idMap.remove(id);
+
+	public LayerType getLayerType(String name) {
+
 	}
 }

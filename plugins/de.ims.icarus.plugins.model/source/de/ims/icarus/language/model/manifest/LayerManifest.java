@@ -38,14 +38,14 @@ public interface LayerManifest extends Manifest {
 	 * Returns a list of prerequisites describing other layers a corpus
 	 * has to host in order for the new layer to be operational. If this
 	 * layer does not depend on other layers the returned list is empty.
-	 * 
+	 *
 	 * @return
 	 */
 	List<Prerequisite> getPrerequisites();
 
 	/**
 	 * Abstract description of a layer object this layer depends on.
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -53,21 +53,21 @@ public interface LayerManifest extends Manifest {
 	interface Prerequisite {
 
 		/**
-		 * Returns the name of the target layer or {@code null} if an exact name match
+		 * Returns the id of the target layer or {@code null} if an exact id match
 		 * is not required.
-		 * 
+		 *
 		 * @return
 		 */
-		String getLayerName();
+		String getLayerId();
 
 		/**
 		 * If this layer only requires <i>some</i> layer of a certain type to be present
 		 * this method provides the mechanics to tell this. When the returned value is
 		 * {@code non-null} it is considered to be the exact name of a previously
 		 * defined layer type.
-		 * 
+		 *
 		 * @return
 		 */
-		String getTypeName();
+		String getTypeId();
 	}
 }

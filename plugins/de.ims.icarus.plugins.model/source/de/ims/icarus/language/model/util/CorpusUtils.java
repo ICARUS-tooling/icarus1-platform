@@ -39,10 +39,12 @@ import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.CorpusMember;
 import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.LayerType;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.Manifest;
+import de.ims.icarus.language.model.registry.CorpusRegistry;
 
 /**
  * @author Markus Gärtner
@@ -53,16 +55,6 @@ public final class CorpusUtils {
 
 	private CorpusUtils() {
 		throw new AssertionError();
-	}
-
-	public static int compareMarkables(Markable m1, Markable m2) {
-		int result = m1.getBeginOffset()-m2.getBeginOffset();
-
-		if(result==0) {
-			result = m1.getEndOffset()-m2.getEndOffset();
-		}
-
-		return result;
 	}
 
 //	public static String getText(Container c) {
@@ -86,10 +78,10 @@ public final class CorpusUtils {
 		if(corpus==null)
 			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
 
-		String name = prerequisite.getTypeName();
-		if(name!=null) {
+		String id = prerequisite.getLayerId();
+		if(id!=null) {
 			try {
-				Object member = corpus.getNamedMember(name);
+				Object member = corpus.getLayer(id);
 
 				return member instanceof Layer;
 			} catch(IllegalArgumentException e) {
@@ -97,21 +89,23 @@ public final class CorpusUtils {
 			}
 		}
 
-		String typeName = prerequisite.getTypeName();
-		if(typeName!=null && !typeName.isEmpty())
-			return !corpus.getLayers(typeName).isEmpty();
+		String typeId = prerequisite.getTypeId();
+		if(typeId!=null && !typeId.isEmpty()) {
+			LayerType type = CorpusRegistry.getInstance().getLayerType(typeId);
+			return !corpus.getLayers(type).isEmpty();
+		}
 
 		return true;
 	}
 
 	public static String getName(LayerManifest.Prerequisite prerequisite) {
-		String name = prerequisite.getTypeName();
-		if(name!=null)
-			return "Required layer-name: "+name; //$NON-NLS-1$
+		String id = prerequisite.getLayerId();
+		if(id!=null)
+			return "Required layer-id: "+id; //$NON-NLS-1$
 
-		String typeName = prerequisite.getTypeName();
+		String typeName = prerequisite.getTypeId();
 		if(typeName!=null && !typeName.isEmpty())
-			return "Required type-name: "+typeName; //$NON-NLS-1$
+			return "Required type-id: "+typeName; //$NON-NLS-1$
 
 		return prerequisite.toString();
 	}

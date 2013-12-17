@@ -19,15 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency;
 
 import de.ims.icarus.language.CompoundSentenceData;
 import de.ims.icarus.language.DataType;
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.SentenceData;
 
 /**
@@ -57,7 +57,7 @@ public class CompoundDependencyData extends CompoundSentenceData implements
 	public void setData(DataType type, SentenceData data) {
 		if(!(data instanceof DependencyData))
 			throw new IllegalArgumentException("Sentence data type not supported: "+data.getClass()); //$NON-NLS-1$
-		
+
 		super.setData(type, data);
 	}
 
@@ -69,6 +69,15 @@ public class CompoundDependencyData extends CompoundSentenceData implements
 	@Override
 	protected DependencyData getFirstSet() {
 		return (DependencyData) super.getFirstSet();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.dependency.DependencyData#getIndex()
+	 */
+	@Override
+	public int getIndex() {
+		DependencyData data = getFirstSet();
+		return data==null ? -1 : data.getIndex();
 	}
 
 	/**
@@ -122,7 +131,7 @@ public class CompoundDependencyData extends CompoundSentenceData implements
 	@Override
 	public int getHead(int index) {
 		DependencyData data = getFirstSet();
-		return data==null ? LanguageUtils.DATA_UNDEFINED_VALUE : data.getHead(index);
+		return data==null ? LanguageConstants.DATA_UNDEFINED_VALUE : data.getHead(index);
 	}
 
 	/**

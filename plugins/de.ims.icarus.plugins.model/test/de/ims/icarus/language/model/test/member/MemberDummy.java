@@ -23,31 +23,23 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.member;
+package de.ims.icarus.language.model.test.member;
 
-import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
-import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.language.model.MemberType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractMarkable implements Markable {
+public class MemberDummy implements CorpusMember {
 
 	private final long id;
-	private final Container container;
 
-	public AbstractMarkable(Container container) {
-		if(container==null)
-			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
-
-		this.id = CorpusRegistry.getInstance().newId();
-		this.container = container;
+	public MemberDummy(long id) {
+		this.id = id;
 	}
 
 	/**
@@ -63,30 +55,17 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public Corpus getCorpus() {
-		return container.getCorpus();
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
 	 */
 	@Override
-	public int compareTo(Markable o) {
-		return CorpusUtils.compare(this, o);
+	public MemberType getMemberType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	/**
-	 * @see de.ims.icarus.language.model.Markable#getContainer()
-	 */
-	@Override
-	public Container getContainer() {
-		return container;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Markable#getLayer()
-	 */
-	@Override
-	public MarkableLayer getLayer() {
-		return container.getLayer();
-	}
 }

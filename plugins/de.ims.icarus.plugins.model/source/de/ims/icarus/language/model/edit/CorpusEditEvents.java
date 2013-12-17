@@ -47,19 +47,36 @@ public interface CorpusEditEvents {
 	public static final String END_UPDATE = "endUpdate"; //$NON-NLS-1$
 
 	/**
-	 * Fired when an edit is executed.
+	 * Fired when an atomic change is executed.
+	 * <p>
+	 * The "change" property contains the executed atomic change.
 	 */
 	public static final String EXECUTE = "execute"; //$NON-NLS-1$
 
 	/**
 	 * Fired after an edit has been executed but before it is
 	 * dispatched to the {@link UndoableEditListener}s.
+	 * <p>
+	 * The "edit" property contains the undoable edit that
+	 * is about to be committed.
 	 */
 	public static final String BEFORE_UNDO = "beforeUndo"; //$NON-NLS-1$
 
 	/**
-	 * Fired when the
+	 * Fired when an edit is committed and dispatched.
+	 * <p>
+	 * The "edit" property contains the undoable edit that
+	 * was committed.
 	 */
 	public static final String UNDO = "undo"; //$NON-NLS-1$
+
+	/**
+	 * Fired when an undoable edit is executed, either via its
+	 * {@link UndoableCorpusEdit#undo()} or {@link UndoableCorpusEdit#redo()}
+	 * method.
+	 * <p>
+	 * The "edit" property contains the undoable edit that
+	 * has been undone or redone.
+	 */
 	public static final String CHANGE = "change"; //$NON-NLS-1$
 }
