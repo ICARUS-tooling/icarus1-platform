@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,25 +23,33 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.standard.structure;
+
+import de.ims.icarus.language.model.Markable;
+import de.ims.icarus.language.model.Structure;
 
 /**
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Edge extends Markable {
+public class UndirectedEdge extends DefaultEdge {
 
-	Structure getStructure();
+	/**
+	 * @param structure
+	 * @param source
+	 * @param target
+	 */
+	public UndirectedEdge(Structure structure, Markable source, Markable target) {
+		super(structure, source, target);
+	}
 
-	Markable getSource();
+	/**
+	 * @see de.ims.icarus.language.model.standard.structure.DefaultEdge#isDirected()
+	 */
+	@Override
+	public boolean isDirected() {
+		return false;
+	}
 
-	Markable getTarget();
-
-	void setSource(Markable markable);
-
-	void setTarget(Markable markable);
-
-	boolean isDirected();
 }

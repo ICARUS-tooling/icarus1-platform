@@ -72,6 +72,10 @@ public final class CorpusUtils {
 //		return sb.toString();
 //	}
 
+	public static boolean isVirtual(Markable markable) {
+		return markable.getBeginOffset()==-1 || markable.getEndOffset()==-1;
+	}
+
 	public static boolean matches(LayerManifest.Prerequisite prerequisite, Corpus corpus) {
 		if(prerequisite==null)
 			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$

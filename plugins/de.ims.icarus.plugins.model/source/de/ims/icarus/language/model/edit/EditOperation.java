@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,25 +23,55 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.edit;
 
 /**
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Edge extends Markable {
+public enum EditOperation {
 
-	Structure getStructure();
+	/**
+	 * Describes the adding of a new element either
+	 * at the end of a collection or as its first
+	 * element. This is essentially the operation of
+	 * appending an element to either the head or tail
+	 * of a list.
+	 */
+	ADD,
 
-	Markable getSource();
+	/**
+	 * Adding an element is supported at every random
+	 * position within the collection.
+	 */
+	ADD_RANDOM,
 
-	Markable getTarget();
+	/**
+	 * Removal of an element is only possible on one of
+	 * the two ends of a the list.
+	 */
+	REMOVE,
 
-	void setSource(Markable markable);
+	/**
+	 * Any element in the list can be removed at any time
+	 */
+	REMOVE_RANDOM,
 
-	void setTarget(Markable markable);
+	/**
+	 * All elements can be removed with one atomic operation
+	 */
+	CLEAR,
 
-	boolean isDirected();
+	/**
+	 * An element can be moved within the collection between
+	 * random positions.
+	 */
+	MOVE,
+
+	/**
+	 * A special kind of operation only affecting edges.
+	 * Allows to change the source or target terminal of an edge.
+	 */
+	LINK;
 }

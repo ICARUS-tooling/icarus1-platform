@@ -79,14 +79,4 @@ public interface ContainerManifest extends Manifest {
 	 * @throws NullPointerException if the {@code containerType} argument is {@code null}
 	 */
 	void setContainerType(ContainerType containerType);
-
-
-	/**
-	 * Returns {@code true} if this structure is allowed to have multiple root nodes.
-	 *
-	 * @return {@code true} if and only if the structure represented
-	 * is allowed to contain multiple root nodes.
-	 * @throws UnsupportedOperationException if this container is not a structure
-	 */
-	boolean isMultiRoot();
 }

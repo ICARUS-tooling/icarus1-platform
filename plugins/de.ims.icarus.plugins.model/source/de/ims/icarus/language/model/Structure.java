@@ -25,10 +25,7 @@
  */
 package de.ims.icarus.language.model;
 
-
-
-
-
+import de.ims.icarus.language.model.manifest.StructureManifest;
 
 /**
  * Provides a structural view on a {@link MarkableLayer} by specifying a
@@ -37,8 +34,8 @@ package de.ims.icarus.language.model;
  * <br>
  * It holds the required markables from the original container (either
  * directly or via a general reference to the other container) and
- * (optionally) defines a set of virtual markables. Overall those markables
- * it then spans a colelction of edges, thereby creating the <i>structural</i>
+ * (optionally) defines a set of virtual markables. Over all those markables
+ * it then spans a collection of edges, thereby creating the <i>structural</i>
  * information.
  *
  *
@@ -48,11 +45,23 @@ package de.ims.icarus.language.model;
  */
 public interface Structure extends Container {
 
+	@Override
+	StructureManifest getManifest();
+
 	/**
 	 * Returns the <i>type</i> of this structure.
 	 * @return the type of this structure
 	 */
 	StructureType getStructureType();
+
+	/**
+	 * Returns {@code true} if this structure is allowed to have multiple root nodes.
+	 *
+	 * @return {@code true} if and only if the structure represented
+	 * is allowed to contain multiple root nodes.
+	 * @throws UnsupportedOperationException if this container is not a structure
+	 */
+	boolean isMultiRoot();
 
 	/**
 	 * Returns the {@code Container} that serves as bounding
@@ -182,13 +191,9 @@ public interface Structure extends Container {
 	// EDIT METHODS
 
 	/**
-	 * Changes the type of this structure
-	 * @param structureType
-	 */
-	void setStructureType(StructureType structureType);
-
-	/**
 	 * Removes from this structure all edges.
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	void removeAllEdges();
 
@@ -199,6 +204,8 @@ public interface Structure extends Container {
 	 * @return The newly created member of the container
 	 * @param source
 	 * @param target
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	Markable addEdge(Markable source, Markable target);
 
@@ -218,6 +225,8 @@ public interface Structure extends Container {
 	 * @return The newly created edge of the structure
 	 * @throws IndexOutOfBoundsException if the index is out of range
 	 *         (<tt>index &lt; 0 || index &gt; getSubject().getEdgeCount()</tt>)
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	Edge addEdge(Markable source, Markable target, int index);
 
@@ -227,9 +236,11 @@ public interface Structure extends Container {
 	 * for the missing member.
 	 *
 	 * @param index The position of the edge to be removed
-	 * @return The markable previously at position {@code index}.
+	 * @return The edge previously at position {@code index}.
 	 * @throws IndexOutOfBoundsException if the index is out of range
 	 *         (<tt>index &lt; 0 || index &gt;= getSubject().getEdgeCount()</tt>)
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	Edge removeEdge(int index);
 
@@ -237,7 +248,7 @@ public interface Structure extends Container {
 	 * First determines the index of the given edge object within
 	 * this structure and then calls {@link #removeEdge(int)}.
 	 *
-	 * @param markable
+	 * @param edge
 	 * @return
 	 * @see Structure#indexOfEdge(Edge)
 	 */
@@ -252,6 +263,8 @@ public interface Structure extends Container {
 	 * @throws IllegalArgumentException if <tt>index0 == index1</tt>
 	 * @throws IndexOutOfBoundsException if either {@code index0} or {@code index1}
 	 * is out of range (<tt>index &lt; 0 || index &gt;= getSubject().getEdgeCount()</tt>)
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	void moveEdge(int index0, int index1);
 
@@ -266,4 +279,21 @@ public interface Structure extends Container {
 	 * @see Structure#indexOfEdge(Edge)
 	 */
 	void moveEdge(Edge edge, int index);
+
+	/**
+	 * Changes the specified terminal (source or target) of the given edge to
+	 * the supplied markable. Note that the {@code markable} argument has to
+	 * be already contained within the "node" container of this structure.
+	 *
+	 * @param edge The edge whose terminal should be changed
+	 * @param markable The new terminal for the edge
+	 * @param isSource Specifies which terminal (source or target) should be changed
+	 * @throws NullPointerException if either one the {@code edge} or {@code markable}
+	 * argument is {@code null}
+	 * @throws IllegalArgumentException if the given {@code markable} is unknown to
+	 * this structure (i.e. not a member of its "node" container")
+	 * @throws IllegalArgumentException if the given {@code markable} is not a valid
+	 * candidate for the specified terminal
+	 */
+	void setTerminal(Edge edge, Markable markable, boolean isSource);
 }

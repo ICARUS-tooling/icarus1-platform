@@ -23,36 +23,54 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.member;
+package de.ims.icarus.language.model.standard.container;
+
+import java.util.List;
 
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractNestedContainer extends AbstractContainer {
+public class RootContainer extends AbstractListContainer {
 
-	private final Container parent;
+	private final MarkableLayer layer;
+	private final ContainerManifest manifest;
 
-	public AbstractNestedContainer(Container parent) {
-		if (parent == null)
-			throw new NullPointerException("Invalid parent");  //$NON-NLS-1$
+	public RootContainer(MarkableLayer layer, ContainerManifest manifest) {
+		this(layer, manifest, null);
+	}
 
-		this.parent = parent;
+	public RootContainer(MarkableLayer layer, ContainerManifest manifest, List<? extends Markable> markables) {
+		if (layer == null)
+			throw new NullPointerException("Invalid layer");  //$NON-NLS-1$
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest");  //$NON-NLS-1$
+
+		this.layer = layer;
+		this.manifest = manifest;
+
+		if(markables!=null) {
+			addAll(markables);
+		}
 	}
 
 	/**
+	 * Since this implementation represents the top-level container
+	 * of a corpus there is no enclosing container. Therefore this
+	 * method always returns {@code null}.
+	 *
 	 * @see de.ims.icarus.language.model.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
-		return parent;
+		return null;
 	}
 
 	/**
@@ -60,7 +78,7 @@ public abstract class AbstractNestedContainer extends AbstractContainer {
 	 */
 	@Override
 	public MarkableLayer getLayer() {
-		return parent.getLayer();
+		return layer;
 	}
 
 	/**
@@ -68,7 +86,7 @@ public abstract class AbstractNestedContainer extends AbstractContainer {
 	 */
 	@Override
 	public Corpus getCorpus() {
-		return parent.getCorpus();
+		return layer.getCorpus();
 	}
 
 	/**
@@ -76,20 +94,17 @@ public abstract class AbstractNestedContainer extends AbstractContainer {
 	 */
 	@Override
 	public ContainerManifest getManifest() {
-		// Fetch the container level and ask the
-		// hosting markable layer manifest for the container
-		// manifest at the specific level
+		return manifest;
+	}
 
-		int level = 2;
+	public static class RootContainerBuilder extends ListContainerBuilder<RootContainer> {
 
-		Container parent = getContainer();
-		while(parent.getContainer()!=null) {
-			level++;
-			parent = parent.getContainer();
+		/**
+		 * @see de.ims.icarus.language.model.standard.builder.AbstractContainerBuilder#createContainer()
+		 */
+		@Override
+		protected RootContainer createContainer() {
+			return new RootContainer(layer, manifest);
 		}
-
-		MarkableLayerManifest manifest = getLayer().getManifest();
-
-		return manifest.getContainerManifest(level);
 	}
 }

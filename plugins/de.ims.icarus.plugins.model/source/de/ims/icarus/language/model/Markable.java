@@ -86,8 +86,12 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * {@link Container} or {@link Structure} then the returned offset is the
 	 * result of calling {@link Markable#getBeginOffset()} on the left-most markable
 	 * hosted within this object.
+	 * <p>
+	 * Note that is perfectly legal for <i>virtual</i> markables to return
+	 * {@code -1} indicating that they are not really placed within the corpus.
 	 *
 	 * @return The zero-based offset of this markable's begin within the corpus
+	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
 	int getBeginOffset();
 
@@ -99,8 +103,12 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * {@link Container} or {@link Structure} then the returned offset is the
 	 * result of calling {@link Markable#getEndOffset()} on the right-most markable
 	 * hosted within this object.
+	 * <p>
+	 * Note that is perfectly legal for <i>virtual</i> markables to return
+	 * {@code -1} indicating that they are not really placed within the corpus.
 	 *
 	 * @return The zero-based offset of this markable's end within the corpus
+	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
 	int getEndOffset();
 }

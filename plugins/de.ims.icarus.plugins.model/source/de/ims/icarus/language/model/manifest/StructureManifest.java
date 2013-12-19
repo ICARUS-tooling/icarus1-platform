@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,25 +23,32 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.manifest;
+
+import de.ims.icarus.language.model.StructureType;
 
 /**
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Edge extends Markable {
+public interface StructureManifest extends ContainerManifest {
 
-	Structure getStructure();
+	/**
+	 * Returns the type of this structure
+	 * @return
+	 */
+	StructureType getStructureType();
 
-	Markable getSource();
+	/**
+	 * Changes the type of this structure
+	 * @param structureType
+	 */
+	void setStructureType(StructureType structureType);
 
-	Markable getTarget();
-
-	void setSource(Markable markable);
-
-	void setTarget(Markable markable);
-
-	boolean isDirected();
+	/**
+	 *
+	 * @return
+	 */
+	ContainerManifest getBoundaryContainerManifest();
 }

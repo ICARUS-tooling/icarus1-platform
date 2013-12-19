@@ -19,13 +19,12 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.manifest;
 
-import de.ims.icarus.language.model.StructureType;
 
 /**
  * @author Markus Gärtner
@@ -35,8 +34,10 @@ import de.ims.icarus.language.model.StructureType;
 public interface StructureLayerManifest extends MarkableLayerManifest {
 
 	/**
-	 * Returns the 
+	 * Returns the manifest for the members of the top-level
+	 * container in this layer.
+	 *
 	 * @return
 	 */
-	StructureType getStructureType();
+	StructureManifest getStructureManifest();
 }

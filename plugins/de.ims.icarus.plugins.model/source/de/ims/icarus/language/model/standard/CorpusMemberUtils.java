@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,25 +23,32 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.language.model.standard;
 
 /**
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Edge extends Markable {
+public class CorpusMemberUtils {
 
-	Structure getStructure();
+	public static String idMismatchMessage(String msg, long expected, long id) {
+		return String.format("%s: expected id %d - got %d", msg, expected, id); //$NON-NLS-1$
+	}
 
-	Markable getSource();
+	public static String sizeMismatchMessage(String msg, int expected, int size) {
+		return String.format("%s: expected size %d - got %d", msg, expected, size); //$NON-NLS-1$
+	}
 
-	Markable getTarget();
+	public static String offsetMismatchMessage(String msg, int expected, int index) {
+		return String.format("%s: expected offset %d - got %d", msg, expected, index); //$NON-NLS-1$
+	}
 
-	void setSource(Markable markable);
+	public static String illegalOffsetMessage(String msg, int index) {
+		return String.format("%s: unexpected offset %d", msg, index); //$NON-NLS-1$
+	}
 
-	void setTarget(Markable markable);
-
-	boolean isDirected();
+	public static String outOfBoundsMessage(String msg, int index, int min, int max) {
+		return String.format("%s: index %d out of bounds [%d,%d]", msg, index, min, max); //$NON-NLS-1$
+	}
 }

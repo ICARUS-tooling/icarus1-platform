@@ -38,6 +38,16 @@ import de.ims.icarus.language.model.manifest.ManifestOwner;
 public interface Container extends Markable, Iterable<Markable>, ManifestOwner<ContainerManifest> {
 
 	/**
+	 * Returns the type of this container. This provides
+	 * information about how contained {@code Markable}s are ordered and
+	 * if they represent a continuous subset of the corpus.
+	 *
+	 * @return The {@code ContainerType} of this {@code Container}
+	 * @see ContainerType
+	 */
+	ContainerType getContainerType();
+
+	/**
 	 * Returns the {@link ContainerManifest} object that holds additional
 	 * information about this container.
 	 *
@@ -101,21 +111,23 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 
 	/**
 	 * Removes from the mutating container all elements.
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	void removeAllMarkables();
 
 	/**
-	 * Creates a new markable as member of this container
-	 * and appends it to the end of the internal storage.
+	 * Adds a new markable to this container
 	 *
-	 * @return The newly created member of the container
+	 * @param markable
+	 * @throws NullPointerException if the {@code markable} argument is {@code null}
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
-	Markable addMarkable();
+	void addMarkable(Markable markable);
 
 	/**
-	 * Creates a new markable as member of this container
-	 * and inserts it at the specified position in the internal
-	 * storage.
+	 * Adds a new markable to this container
 	 *
 	 * Note that calling this method with an {@code index} parameter
 	 * equal to the size of the mutating container as returned by
@@ -123,11 +135,14 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * using {@link #addMarkable()}.
 	 *
 	 * @param index The position to insert the new markable at
-	 * @return The newly created member of the container
+	 * @param markable
 	 * @throws IndexOutOfBoundsException if the index is out of range
 	 *         (<tt>index &lt; 0 || index &gt; getSubject().getMarkableCount()</tt>)
+	 * @throws NullPointerException if the {@code markable} argument is {@code null}
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
-	Markable addMarkable(int index);
+	void addMarkable(int index, Markable markable);
 
 	/**
 	 * Removes and returns the markable at the given index. Shifts the
@@ -138,6 +153,8 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @return The markable previously at position {@code index}.
 	 * @throws IndexOutOfBoundsException if the index is out of range
 	 *         (<tt>index &lt; 0 || index &gt;= getSubject().getMarkableCount()</tt>)
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	Markable removeMarkable(int index);
 
@@ -160,6 +177,8 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @throws IllegalArgumentException if <tt>index0 == index1</tt>
 	 * @throws IndexOutOfBoundsException if either {@code index0} or {@code index1}
 	 * is out of range (<tt>index &lt; 0 || index &gt;= getSubject().getMarkableCount()</tt>)
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable or the operation is not supported by the implementation
 	 */
 	void moveMarkable(int index0, int index1);
 

@@ -23,37 +23,29 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.member;
+package de.ims.icarus.language.model.standard.markable;
 
 import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MemberType;
 
 /**
- * Implements a markable of the bottom-most level in a corpus.
- * It only holds a piece of text (the <i>token</i> it represents)
- * and the link to its container.
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class TokenMarkable extends AbstractMarkable implements Markable {
+public class BaseMarkable extends AbstractMarkable {
 
 	private final int index;
 
-	public TokenMarkable(long id, int index, Container container) {
-		super(id, container);
+	/**
+	 * @param id
+	 * @param container
+	 */
+	public BaseMarkable(Container container, int index) {
+		super(container);
 
 		this.index = index;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
-	 */
-	@Override
-	public MemberType getMemberType() {
-		return MemberType.MARKABLE;
 	}
 
 	/**
@@ -73,32 +65,11 @@ public class TokenMarkable extends AbstractMarkable implements Markable {
 	}
 
 	/**
-	 * @see java.lang.Object#hashCode()
+	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
 	 */
 	@Override
-	public int hashCode() {
-		return (int) getId();
-	}
-
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Markable) {
-			Markable other = (Markable)obj;
-			return getId()==other.getId() &&
-					getCorpus()==other.getCorpus();
-		}
-		return false;
-	}
-
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "Token<"+getId()+">"; //$NON-NLS-1$ //$NON-NLS-2$
+	public MemberType getMemberType() {
+		return MemberType.MARKABLE;
 	}
 
 }

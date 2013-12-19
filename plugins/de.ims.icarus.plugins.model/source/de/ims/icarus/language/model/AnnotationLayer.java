@@ -66,6 +66,8 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 
 	/**
 	 * Deletes all annotations in the mutating layer
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable
 	 */
 	void removeAllValues();
 
@@ -76,6 +78,8 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @param key The key for which annotations should be
 	 * deleted
 	 * @throws UnsupportedOperationException if this layer does not allow multiple keys
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable
 	 */
 	void removeAllValues(String key);
 
@@ -92,6 +96,8 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * elements ({@code Markable}s and {@code Edge}s alike) in the supplied
 	 * {@code Markable}
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable
 	 */
 	void removeAllValues(Markable markable, boolean recursive);
 
@@ -108,6 +114,8 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @throws IllegalArgumentException if the supplied {@code value} is not
 	 * contained in the {@link ValueSet} of this layer's manifest. This is only
 	 * checked if the manifest actually defines such restrictions.
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable
 	 */
 	void setValue(Markable markable, Object value);
 
@@ -130,6 +138,8 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @throws IllegalArgumentException if the supplied {@code value} is not
 	 * contained in the {@link ValueSet} of this layer's manifest for the given {@code key}.
 	 * This is only checked if the manifest actually defines such restrictions.
+	 * @throws UnsupportedOperationException if the corpus
+	 * is not editable
 	 */
 	void setValue(Markable markable, String key, Object value);
 }

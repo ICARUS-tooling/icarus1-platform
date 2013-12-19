@@ -28,14 +28,20 @@ package de.ims.icarus.language.model.edit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.util.CorruptedStateException;
 
 /**
  * @author Markus Gärtner
@@ -49,14 +55,33 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	private static final AtomicLong idGenerator = new AtomicLong();
 
 	/**
-	 * Describes an atomic change to the content of a corpus.
+	 * Describes an atomic change to the content of a corpus. As a general
+	 * rule a change should check its preconditions and fail without any
+	 * modifications when they are not entirely met.
 	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	public interface AtomicChange {
+
+		/**
+		 * Executes the change and modifies it internal information
+		 * so that the next call to this method reverts the result.
+		 *
+		 * @throws CorruptedStateException if the preconditions of this
+		 * change are not met
+		 */
 		void execute();
+
+		/**
+		 * Returns the {@code CorpusMember} that this change affected.
+		 * This is used to decide whether or not changes or entire edits
+		 * should be purged from the undo history in the event of higher order
+		 * changes like the removal of an entire context.
+		 * @return
+		 */
+		CorpusMember getAffectedMember();
 	}
 
 	private final long id;
@@ -69,7 +94,7 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	/**
 	 * Holds the list of atomic changes that make up this undoable mutation.
 	 */
-	private final List<AtomicChange> changes = new ArrayList<AtomicChange>();
+	private final List<AtomicChange> changes = new ArrayList<>();
 
 	/**
 	 * Specifies this undoable edit is significant. Default is true.
@@ -161,9 +186,16 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 
 		int count = changes.size();
 
-		for (int i = count - 1; i >= 0; i--) {
-			AtomicChange change = changes.get(i);
-			change.execute();
+		Lock lock = getCorpus().getLock();
+
+		lock.lock();
+		try {
+			for (int i = count - 1; i >= 0; i--) {
+				AtomicChange change = changes.get(i);
+				change.execute();
+			}
+		} finally {
+			lock.unlock();
 		}
 
 		dispatch();
@@ -179,9 +211,16 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 
 		int count = changes.size();
 
-		for (int i = 0; i < count; i++) {
-			AtomicChange change = changes.get(i);
-			change.execute();
+		Lock lock = getCorpus().getLock();
+
+		lock.lock();
+		try {
+			for (int i = 0; i < count; i++) {
+				AtomicChange change = changes.get(i);
+				change.execute();
+			}
+		} finally {
+			lock.unlock();
 		}
 
 		dispatch();
@@ -223,5 +262,30 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	 */
 	public long getId() {
 		return id;
+	}
+
+	private Context getContextForChange(AtomicChange change){
+		CorpusMember member = change.getAffectedMember();
+		if(member instanceof Markable) {
+			return ((Markable)member).getLayer().getContext();
+		} else if(member instanceof Layer) {
+			return ((Layer)member).getContext();
+		} else {
+			return null;
+		}
+	}
+
+	public boolean isAffected(Context context) {
+		if (context == null)
+			throw new NullPointerException("Invalid context"); //$NON-NLS-1$
+
+		for(AtomicChange change : changes) {
+			Context affected = getContextForChange(change);
+			if(affected!=null && affected.equals(context)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

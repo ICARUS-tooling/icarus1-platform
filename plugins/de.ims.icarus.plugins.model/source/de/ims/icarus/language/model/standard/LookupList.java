@@ -23,9 +23,10 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.member;
+package de.ims.icarus.language.model.standard;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -73,7 +74,7 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 	}
 
 	public void add(E item) {
-        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        ensureCapacity(size + 1);  // Increments modCount!!
 
 		int index = size;
         items[size++] = item;
@@ -83,12 +84,36 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 	public void add(int index, E item) {
         rangeCheckForAdd(index);
 
-        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        ensureCapacity(size + 1);  // Increments modCount!!
         System.arraycopy(items, index, items, index + 1,
                          size - index);
         items[index] = item;
         size++;
         map(item, index);
+	}
+
+	public void addAll(Collection<? extends E> elements) {
+		if (elements == null)
+			throw new NullPointerException("Invalid elements");  //$NON-NLS-1$
+
+		ensureCapacity(size + elements.size()); // Increments modCount!!
+		for(E item : elements) {
+			int index = size++;
+			items[index] = item;
+			map(item, index);
+		}
+	}
+
+	public void addAll(@SuppressWarnings("unchecked") E...elements) {
+		if (elements == null)
+			throw new NullPointerException("Invalid elements");  //$NON-NLS-1$
+
+		ensureCapacity(size + elements.length); // Increments modCount!!
+		for(E item : elements) {
+			int index = size++;
+			items[index] = item;
+			map(item, index);
+		}
 	}
 
 	public E set(E item, int index) {
@@ -169,6 +194,22 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 		return size==0;
 	}
 
+	public Object[] toArray() {
+		return Arrays.copyOf(items, size);
+	}
+
+	public void set(Object[] elements) {
+		if (elements == null)
+			throw new NullPointerException("Invalid elements"); //$NON-NLS-1$
+
+		ensureCapacity(elements.length);
+
+		System.arraycopy(elements, 0, items, 0, elements.length);
+		size = elements.length;
+		lookup = null;
+
+		modCount++;
+	}
 
     private void fastRemove(int index) {
         modCount++;
@@ -198,7 +239,7 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    private void ensureCapacityInternal(int minCapacity) {
+    private void ensureCapacity(int minCapacity) {
 
         if (items == EMPTY_ITEMS) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
@@ -270,7 +311,7 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 
 	private class Itr implements Iterator<E> {
         int cursor;       // index of next element to return
-        int lastRet = -1; // index of last element returned; -1 if no such
+//        int lastRet = -1; // index of last element returned; -1 if no such
         int expectedModCount = modCount;
 
 		/**
@@ -295,7 +336,8 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
             if (i >= items.length)
                 throw new ConcurrentModificationException();
             cursor = i + 1;
-            return (E) items[lastRet = i];
+//            return (E) items[lastRet = i];
+            return (E) items[i];
 		}
 
 		/**
@@ -303,18 +345,19 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 		 */
 		@Override
 		public void remove() {
-            if (lastRet < 0)
-                throw new IllegalStateException();
-            checkForComodification();
-
-            try {
-            	LookupList.this.remove(lastRet);
-                cursor = lastRet;
-                lastRet = -1;
-                expectedModCount = modCount;
-            } catch (IndexOutOfBoundsException ex) {
-                throw new ConcurrentModificationException();
-            }
+//            if (lastRet < 0)
+//                throw new IllegalStateException();
+//            checkForComodification();
+//
+//            try {
+//            	LookupList.this.remove(lastRet);
+//                cursor = lastRet;
+//                lastRet = -1;
+//                expectedModCount = modCount;
+//            } catch (IndexOutOfBoundsException ex) {
+//                throw new ConcurrentModificationException();
+//            }
+			throw new UnsupportedOperationException("Remove not supported"); //$NON-NLS-1$
 		}
 
         final void checkForComodification() {

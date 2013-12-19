@@ -19,11 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
+
+import java.util.EnumSet;
+
+import de.ims.icarus.language.model.edit.EditOperation;
 
 /**
  * @author Markus Gärtner
@@ -37,26 +41,119 @@ public enum StructureType {
 	 * by any edges. This is by far the most basic type of
 	 * structure.
 	 */
-	SET,
-	
+	SET(false, 0, 0, 0),
+
 	/**
 	 * An ordered sequence of nodes, each with at most one
 	 * predecessor and successor. Edges in this structure are
 	 * expected to be {@code directed} only!
 	 */
-	CHAIN,
-	
+	CHAIN(true, 1, 1, 1),
+
 	/**
 	 * A hierarchically ordered collection of nodes where each node
 	 * is assigned at most one parent and is allowed to have an arbitrary
 	 * number of children. All edges are {@code directed} from a parent
 	 * down to the child node itself.
 	 */
-	TREE,
-	
+	TREE(true, -1, 1, 1),
+
+	/**
+	 * A general graph with the only restriction that edges have to be
+	 * directed and in addition
+	 */
+	DIRECTED_GRAPH(true, -1, -1, 0),
+
 	/**
 	 * Being the most unbounded and therefore most complex type a {@code GRAPH}
 	 * does not pose any restrictions on nodes or edges.
 	 */
-	GRAPH;
+	GRAPH(false, -1, -1, 0);
+
+	private final int maxChildCount;
+	private final int maxParentCount;
+	private final int minEdgeCount;
+	private final boolean directed;
+	private final EnumSet<EditOperation> operations;
+
+	private StructureType(boolean directed, int maxChildCount,
+			int maxParentCount, int minEdgeCount,
+			EditOperation...operations) {
+
+		this.maxChildCount = maxChildCount;
+		this.maxParentCount = maxParentCount;
+		this.minEdgeCount = minEdgeCount;
+		this.directed = directed;
+
+		if(operations==null || operations.length==0) {
+			this.operations = EnumSet.allOf(EditOperation.class);
+		} else {
+			this.operations = EnumSet.noneOf(EditOperation.class);
+			for(EditOperation operation : operations) {
+				this.operations.add(operation);
+			}
+		}
+	}
+
+	/**
+	 * @return the operations
+	 */
+	public EditOperation[] getOperations() {
+		return operations.toArray(new EditOperation[operations.size()]);
+	}
+
+	/**
+	 * Returns whether or not the given operation is supported on this
+	 * type of structure.
+	 * @param operation The operation in question
+	 * @return {@code true} iff the given operation is supported on this
+	 * structure type
+	 * @throws NullPointerException if the {@code operation} argument
+	 * is {@code null}
+	 */
+	public boolean supportsOperation(EditOperation operation) {
+		if (operation == null)
+			throw new NullPointerException("Invalid operation");  //$NON-NLS-1$
+
+		return operations.contains(operation);
+	}
+
+	/**
+	 * Returns the maximum number of child nodes a single node is
+	 * allows to have in this structure type.
+	 * <p>
+	 * Note that this does <b>not</b> affect the root node!
+	 *
+	 * @return the maxChildCount
+	 */
+	public int getMaxChildCount() {
+		return maxChildCount;
+	}
+
+	/**
+	 * Returns the maximum number of parent nodes a single node is
+	 * allows to have in this structure type.
+	 * <p>
+	 * Note that this does <b>not</b> affect the root node!
+	 *
+	 * @return the maxParentCount
+	 */
+	public int getMaxParentCount() {
+		return maxParentCount;
+	}
+
+	/**
+	 * Returns the minimum
+	 * @return the minEdgeCount
+	 */
+	public int getMinEdgeCount() {
+		return minEdgeCount;
+	}
+
+	/**
+	 * @return the directed
+	 */
+	public boolean isDirected() {
+		return directed;
+	}
 }

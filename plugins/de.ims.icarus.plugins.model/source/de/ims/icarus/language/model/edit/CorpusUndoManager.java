@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.edit;
 
 import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.events.CorpusAdapter;
@@ -96,6 +97,17 @@ public class CorpusUndoManager extends UndoManager {
 	@Override
 	protected UndoableCorpusEdit editToBeRedone() {
 		return (UndoableCorpusEdit) super.editToBeRedone();
+	}
+
+	/**
+	 * @see javax.swing.undo.UndoManager#addEdit(javax.swing.undo.UndoableEdit)
+	 */
+	@Override
+	public synchronized boolean addEdit(UndoableEdit anEdit) {
+		if(!(anEdit instanceof UndoableCorpusEdit))
+			throw new IllegalArgumentException("Can only handle corpus edits"); //$NON-NLS-1$
+
+		return super.addEdit(anEdit);
 	}
 
 	/**

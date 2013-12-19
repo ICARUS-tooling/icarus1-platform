@@ -34,7 +34,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.standard.member.LookupList;
+import de.ims.icarus.language.model.standard.LookupList;
 
 /**
  * @author Markus Gärtner

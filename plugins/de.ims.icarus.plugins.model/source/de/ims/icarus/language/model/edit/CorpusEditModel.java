@@ -27,6 +27,7 @@ package de.ims.icarus.language.model.edit;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
 
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
@@ -159,10 +160,18 @@ public class CorpusEditModel extends WeakEventSource {
 	 * @param change
 	 */
 	public void execute(UndoableCorpusEdit.AtomicChange change) {
-		change.execute();
-		beginUpdate();
-		currentEdit.add(change);
-		fireEvent(new EventObject(CorpusEditEvents.EXECUTE, "change", change)); //$NON-NLS-1$
-		endUpdate();
+		Lock lock = getCorpus().getLock();
+
+		lock.lock();
+		try {
+			change.execute();
+
+			beginUpdate();
+			currentEdit.add(change);
+			fireEvent(new EventObject(CorpusEditEvents.EXECUTE, "change", change)); //$NON-NLS-1$
+			endUpdate();
+		} finally {
+			lock.unlock();
+		}
 	}
 }

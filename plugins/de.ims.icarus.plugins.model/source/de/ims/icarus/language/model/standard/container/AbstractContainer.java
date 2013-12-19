@@ -23,14 +23,13 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.member;
+package de.ims.icarus.language.model.standard.container;
 
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
@@ -132,12 +131,14 @@ public abstract class AbstractContainer implements Container {
 		return -1;
 	}
 
+	// Shorthand edit methods
+
 	/**
 	 * @see de.ims.icarus.language.model.Container#addMarkable()
 	 */
 	@Override
-	public Markable addMarkable() {
-		return addMarkable(getMarkableCount());
+	public void addMarkable(Markable markable) {
+		addMarkable(getMarkableCount(), markable);
 	}
 
 	/**
@@ -156,10 +157,19 @@ public abstract class AbstractContainer implements Container {
 		moveMarkable(indexOfMarkable(markable), index);
 	}
 
+	/**
+	 * Helper method to check whether or not the enclosing corpus is editable
+	 * and to forward an atomic change to the edit model.
+	 *
+	 * @param change
+	 * @throws UnsupportedOperationException if the corpus is not editable
+	 */
 	protected void execute(AtomicChange change) {
 		Corpus corpus = getCorpus();
 
 		if(!corpus.getManifest().isEditable())
-			throw
+			throw new UnsupportedOperationException("Corpus does not support modifications"); //$NON-NLS-1$
+
+		corpus.getEditModel().execute(change);
 	}
 }

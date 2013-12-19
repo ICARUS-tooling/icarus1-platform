@@ -23,31 +23,32 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.member;
+package de.ims.icarus.language.model.standard.structure;
 
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
+import de.ims.icarus.language.model.MemberType;
+import de.ims.icarus.language.model.Structure;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
-import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractMarkable implements Markable {
+public class Root implements Markable {
 
-	private final long id;
-	private final Container container;
+	private final long id = CorpusRegistry.getInstance().newId();
 
-	public AbstractMarkable(Container container) {
-		if(container==null)
-			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
+	private final Structure owner;
 
-		this.id = CorpusRegistry.getInstance().newId();
-		this.container = container;
+	public Root(Structure owner) {
+		if (owner == null)
+			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
+
+		this.owner = owner;
 	}
 
 	/**
@@ -63,7 +64,15 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public Corpus getCorpus() {
-		return container.getCorpus();
+		return getContainer().getCorpus();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 */
+	@Override
+	public MemberType getMemberType() {
+		return MemberType.MARKABLE;
 	}
 
 	/**
@@ -71,7 +80,8 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public int compareTo(Markable o) {
-		return CorpusUtils.compare(this, o);
+		// FIXME
+		return -1;
 	}
 
 	/**
@@ -79,7 +89,7 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public Container getContainer() {
-		return container;
+		return owner;
 	}
 
 	/**
@@ -87,6 +97,23 @@ public abstract class AbstractMarkable implements Markable {
 	 */
 	@Override
 	public MarkableLayer getLayer() {
-		return container.getLayer();
+		return getContainer().getLayer();
 	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 */
+	@Override
+	public int getBeginOffset() {
+		return -1;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 */
+	@Override
+	public int getEndOffset() {
+		return -1;
+	}
+
 }
