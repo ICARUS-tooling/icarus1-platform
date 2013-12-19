@@ -61,9 +61,6 @@
 		<item type="action" value="plugins.errormining.nGramResultView.sortAscAction" />
 		<item type="action" value="plugins.errormining.nGramResultView.sortDescAction" />
 		<separator />
-		<item type="label" value="plugins.errormining.nGramResultView.statsSpinner.label" />
-		<item type="custom" value="statsSpinner" />
-		<item type="action" value="plugins.errormining.nGramResultView.statsAction" />
 		<item type="glue"/>
 	</action-list>	
 
@@ -82,7 +79,12 @@
 		<separator />
 		<item type="action" value="plugins.errormining.nGramResultView.showDetailAction" />
 		<separator />
+		<item type="label" value="plugins.errormining.nGramResultView.statsSpinner.label" />
+		<item type="custom" value="statsSpinner" />
+		<item type="action" value="plugins.errormining.nGramResultView.statsAction" />
+		<separator />
 		<item type="action" value="plugins.errormining.nGramResultView.exportBarchart" />
+		<separator />
 		<item type="glue"/>
 	</action-list>	
 </actions>

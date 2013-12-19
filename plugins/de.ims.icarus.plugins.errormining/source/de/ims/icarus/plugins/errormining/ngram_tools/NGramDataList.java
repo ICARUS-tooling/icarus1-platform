@@ -509,6 +509,14 @@ public class NGramDataList implements SentenceDataList {
 		public long getFlags(int index) {
 			return dd.getFlags(index);
 		}
+
+		/**
+		 * @see de.ims.icarus.language.SentenceData#getIndex()
+		 */
+		@Override
+		public int getIndex() {
+			return dd.getIndex();
+		}
 		
 	}
 

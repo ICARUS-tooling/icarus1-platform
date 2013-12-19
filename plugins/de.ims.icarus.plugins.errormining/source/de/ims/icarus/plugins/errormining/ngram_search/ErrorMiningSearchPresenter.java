@@ -31,7 +31,6 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -68,11 +67,14 @@ import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -220,11 +222,16 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	
 	protected Map<String,ArrayList<ItemInNuclei>> nGramResult;
 	protected Map<String,ArrayList<ItemInNuclei>> nGramResultFiltered;
-	protected NGramDataList ngList;
-	
+	protected NGramDataList ngList;	
 	
 	private int minimumGramsize;
 	private int maximumGramsize;
+	
+	
+	//Color Stuff
+	protected Color nilColor = Color.green;
+	protected Color headColor = Color.blue;
+	protected Color nucleusColor;
 	
 	// 1 = dependency; 0 = part-of-speech
 	private int searchMode;
@@ -233,6 +240,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	private static final int minDependencyGram = 2;
 	private static final int maximumCharPerTab = 40;
 	private static final String labelmatrix = "Total#"; //$NON-NLS-1$
+	private static final String nilString = "nil"; //$NON-NLS-1$
 
 	
 	/**
@@ -331,17 +339,19 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	@Override
 	public void refresh() {
 		
+		nucleusColor = new Color(ConfigRegistry.getGlobalRegistry()
+				.getInteger("plugins.dependency.highlighting.nodeHighlight")); //$NON-NLS-1$
+		
 		//close tabs
 		if (tabbedPane != null){
 			int tabCount = tabbedPane.getTabCount();
-			//remove other tabs
-			if(tabCount > 2){
-				//first tab = overview and second tab = matrix
-				// both should be never closed so we start at 2
-				for(int t = 2; t < tabCount; t++){
-					tabbedPane.remove(t);
-				}
+			// first tab = overview and second tab = matrix
+			// both should be never closed so we start at 2			
+			while(tabCount > 2){
+				tabCount--;
+				tabbedPane.remove(tabCount);				
 			}
+
 		}
 
 		if(ngramTable != null){
@@ -439,6 +449,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		ngramTable.setIntercellSpacing(new Dimension(3,3));
 		ngramTable.setDefaultRenderer(String.class, new NGramResultViewTableCellRenderer());
 		ngramTable.addMouseListener(getHandler());
+		ngramTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		ngramTableAdjuster = new TableColumnAdjuster(ngramTable);
 		ngramTableAdjuster.setOnlyAdjustLarger(false);
 		scrollPaneDetailed.setViewportView(ngramTable);
@@ -479,6 +490,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		statisticTable.setBorder(UIUtil.emptyBorder);
 		statisticTable.addMouseListener(getHandler());
 		statisticTable.getSelectionModel().addListSelectionListener(getHandler());
+		statisticTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		statisticTableAdjuster = new TableColumnAdjuster(ngramTable);
 		statisticTableAdjuster.setOnlyAdjustLarger(false);
 		
@@ -640,13 +652,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		upperBound.setToolTipText(ResourceManager.getInstance()
 					.get("plugins.errormining.nGramResultView.upperBound.description")); //$NON-NLS-1$
 		
-		upperBound.setBorder(UIUtil.defaultContentBorder);
-		
-		
-		statsSpinner = new JSpinner(sbm);
-		statsSpinner.setMinimumSize(new Dimension(10,20));
-		statsSpinner.setToolTipText(ResourceManager.getInstance()
-					.get("plugins.errormining.nGramResultView.statsSpinner.description")); //$NON-NLS-1$
+		upperBound.setBorder(UIUtil.defaultContentBorder);		
 
 		textFilterField = new JTextField();
 		textFilterField.setMinimumSize(new Dimension(120,20));
@@ -662,7 +668,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		acb.addOption("textfield", textFilterField); //$NON-NLS-1$
 		acb.addOption("lowerBound", lowerBound); //$NON-NLS-1$
 		acb.addOption("upperBound", upperBound); //$NON-NLS-1$
-		acb.addOption("statsSpinner", statsSpinner); //$NON-NLS-1$
 		toolBarOverview = acb.buildToolBar();
 
 		return toolBarOverview;
@@ -684,10 +689,18 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		UIUtil.createUndoSupport(statisticTextFilterField, 10);
 		UIUtil.createDefaultTextMenu(statisticTextFilterField, true);		
 		
+		
+		statsSpinner = new JSpinner(sbm);
+		statsSpinner.setMinimumSize(new Dimension(10,20));
+		statsSpinner.setToolTipText(ResourceManager.getInstance()
+					.get("plugins.errormining.nGramResultView.statsSpinner.description")); //$NON-NLS-1$
+
+		
 		ActionComponentBuilder acb = new ActionComponentBuilder(getActionManager());
 		acb.setActionListId("plugins.errormining.nGramResultView.toolBarStatistic"); //$NON-NLS-1$
 		acb.addOption("statisticCounter", statisticCounter); //$NON-NLS-1$
 		acb.addOption("statisticTextFilterField", statisticTextFilterField); //$NON-NLS-1$
+		acb.addOption("statsSpinner", statsSpinner); //$NON-NLS-1$
 		toolBarStatistic = acb.buildToolBar();
 
 		return toolBarStatistic;
@@ -953,7 +966,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 		//clear list when no results
 		if(statsResultFiltered.size() == 0){
-			statisticListModel.removeAll();
+			if(statisticListModel != null){
+				statisticListModel.removeAll();
+			}
 		}
 	}
 	
@@ -1397,9 +1412,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 		//length = 1 -> we have nucleus always color nucleus
 		if(s.length == 1){
-			Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
-					.getInteger("plugins.dependency.highlighting.nodeHighlight")); //$NON-NLS-1$
-			String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$
+			String hex = "#" + Integer.toHexString(nucleusColor.getRGB()).substring(2); //$NON-NLS-1$
 			// System.out.println(hex);
 			sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(s[0]);
@@ -1409,11 +1422,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			for (int i = 0; i < s.length; i++) {
 				if (isNucleiItem(i, nGramResult.get(value))) {
 					//fixme neues data model wieder aktivieren
-					//Color nuclei = ConfigRegistry.getGlobalRegistry().getColor(
-					//		"plugins.errorMining.highlighting.nucleusHighlight"); //$NON-NLS-1$
-					Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
-							.getInteger("plugins.dependency.highlighting.nodeHighlight")); //$NON-NLS-1$
-					String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$
+					String hex = "#" + Integer.toHexString(nucleusColor.getRGB()).substring(2); //$NON-NLS-1$
 					// System.out.println(hex);
 					sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 					sb.append(s[i]);
@@ -1448,10 +1457,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			}
 		}
 		
-		Color nuclei = new Color(ConfigRegistry.getGlobalRegistry()
-				.getInteger("plugins.dependency.highlighting.nodeHighlight")); //$NON-NLS-1$
-		
-		
 		boolean space = spacingNeeded(diinList, splittedKey.length);		
 		
 //		System.out.println(key);
@@ -1460,7 +1465,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 //		System.out.println(sentenceNucleiIndex-sentenceStart);
 		for(int c = 0; c < splittedKey.length; c++){			
 			if(isDependencyNuclei(c, diinList.get(0).getSentenceInfoAt(0), colorOffset)){
-				String hex = "#" + Integer.toHexString(nuclei.getRGB()).substring(2); //$NON-NLS-1$
+				String hex = "#" + Integer.toHexString(nucleusColor.getRGB()).substring(2); //$NON-NLS-1$
 				// System.out.println(hex);
 				sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(splittedKey[c]);
@@ -1472,11 +1477,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				}
 			}			
 			else if(isDependencyHead(c, diinList.get(0).getSentenceInfoAt(0), splittedKey.length, colorOffset)){
-				String hex = "#" + Integer.toHexString(Color.blue.getRGB()).substring(2); //$NON-NLS-1$
+				String hex = "#" + Integer.toHexString(headColor.getRGB()).substring(2); //$NON-NLS-1$
 				sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(splittedKey[c]);
 				sb.append(" "); //$NON-NLS-1$	
-				sb.append("</font>"); //$NON-NLS-1$				
+				sb.append("</font>"); //$NON-NLS-1$
 			}
 			else {
 				sb.append(splittedKey[c]);
@@ -1488,6 +1493,23 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		return sb.toString();
 	}
 	
+	/**
+	 * @param relationLabel
+	 * @return
+	 */
+	private String createColoredHTMLString(String relationLabel, Color color) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html>"); //$NON-NLS-1$
+		String hex = "#" + Integer.toHexString(color.getRGB()).substring(2); //$NON-NLS-1$
+		// System.out.println(hex);
+		sb.append("<font color=" + hex + ">"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(relationLabel);
+		sb.append(" "); //$NON-NLS-1$	
+		sb.append("</font>"); //$NON-NLS-1$	
+		sb.append("<html>"); //$NON-NLS-1$
+		return sb.toString();			
+	}
+
 	/**
 	 * @param diinList
 	 * @param length 
@@ -1930,6 +1952,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			for (int i = 0; i < diinList.size(); i++) {
 
 				DependencyItemInNuclei diin = diinList.get(i);
+				
 				if(diin.getPosTag().equals(label)){
 					
 					for (int s = 0; s < diin.getSentenceInfoSize(); s++) {
@@ -1973,7 +1996,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		return dsdl;
 	}
 
-	private SentenceDataList createDetailListFromTable(String key, String sentences) {
+	private SentenceDataList createDetailListFromTable(String key, String sentences, String label) {
 		
 		
 		List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
@@ -1992,53 +2015,67 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				ArrayList<ItemInNuclei> iinList = nGramResult.get(key);
 
 				for (int k = 0; k < iinList.size(); k++) {
-					ItemInNuclei iin = iinList.get(k);					
+					ItemInNuclei iin = iinList.get(k);
 
-					for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
+					if (iin.getPosTag().equals(label)) {
 
-						if(iin.getSentenceInfoAt(s).getSentenceNr() == sentenceNr){
-							//SentenceData sentenceData = (SentenceData) dl.get(sentenceNr);
-							//System.out.println("SentenceData: "+ sentenceData.getText());
-							//sentenceDataDetailedList.add(sentenceData);						
-							
-							AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-									(DependencyData) dl.get(sentenceNr));
-	
-							List<Integer> hlIndex = new ArrayList<Integer>();
-							List<String> nucleusList = getNucleusList(key, involvedSentences((String) key));
-							
-							int start = iin.getSentenceInfoAt(s).getSentenceBegin()-1;
-							int end = iin.getSentenceInfoAt(s).getSentenceEnd();
-								
-							for (int j = start; j < end; j++) {
-								String currentForm = annoDepData.getForm(j);
-								
-								if (isNucleiItem(j-start, nGramResult.get(key))) {
-									//System.out.println("fail" + currentForm);
-									// add new index
-									hlIndex.add(j);
-									//System.out.println("NUCLEUS " + annoDepData.getForm(j) 
-									//					+ "Position " + (j+1)
-									//					+ " Satz " + (sentenceNr+1));									
-								} else if (nucleusList.contains("[number-wildcard]")){ //$NON-NLS-1$
-									if(numberPattern.matcher(currentForm).find()){										
+						for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
+
+							if (iin.getSentenceInfoAt(s).getSentenceNr() == sentenceNr) {
+								// SentenceData sentenceData = (SentenceData)
+								// dl.get(sentenceNr);
+								// System.out.println("SentenceData: "+
+								// sentenceData.getText());
+								// sentenceDataDetailedList.add(sentenceData);
+
+								AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
+										(DependencyData) dl.get(sentenceNr));
+
+								List<Integer> hlIndex = new ArrayList<Integer>();
+								List<String> nucleusList = getNucleusList(key,
+										involvedSentences((String) key));
+
+								int start = iin.getSentenceInfoAt(s)
+										.getSentenceBegin() - 1;
+								int end = iin.getSentenceInfoAt(s)
+										.getSentenceEnd();
+
+								for (int j = start; j < end; j++) {
+									String currentForm = annoDepData.getForm(j);
+
+									if (isNucleiItem(j - start,	nGramResult.get(key))) {
+										// System.out.println("fail" +
+										// currentForm);
+										// add new index
 										hlIndex.add(j);
+										// System.out.println("NUCLEUS " +
+										// annoDepData.getForm(j)
+										// + "Position " + (j+1)
+										// + " Satz " + (sentenceNr+1));
+									} else if (nucleusList
+											.contains("[number-wildcard]")) { //$NON-NLS-1$
+										if (numberPattern.matcher(currentForm)
+												.find()) {
+											hlIndex.add(j);
+										}
 									}
 								}
-							}
-							
-							int[] hlIndexArray = new int[hlIndex.size()];
-							
-							for (int h = 0; h < hlIndex.size(); h++) {
-								hlIndexArray[h] = hlIndex.get(h);
-							}							
-	
-							DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(hlIndexArray,false);
-							annoDepData.setAnnotation(new NGramAnnotation(defaultGHL));
-												
-							sentenceDataDetailedList.add(annoDepData);
-						}
 
+								int[] hlIndexArray = new int[hlIndex.size()];
+
+								for (int h = 0; h < hlIndex.size(); h++) {
+									hlIndexArray[h] = hlIndex.get(h);
+								}
+
+								DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(
+										hlIndexArray, false);
+								annoDepData.setAnnotation(new NGramAnnotation(
+										defaultGHL));
+
+								sentenceDataDetailedList.add(annoDepData);
+							}
+
+						}
 					}
 				}
 			} 
@@ -2046,7 +2083,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			//dependency
 			else {
 
-				//System.out.println("key " + ngramList.getSelectedValue() +"#");
+				//System.out.println("key " + ngramList.getSelectedValue() +"#" + label);
 				key = (String) ngramList.getSelectedValue();
 				
 				//FIXME workaround list manchmal null?! fire event?
@@ -2058,39 +2095,57 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				//SentenceData sentenceData = (SentenceData) dl.get(sentenceNr);
 				//System.out.println(sentenceData.getText() + "TEXT");
 				
-
+				
 				for(int j = 0; j < diinL.size(); j++){
-					DependencyItemInNuclei diin = diinL.get(j);					
+					DependencyItemInNuclei diin = diinL.get(j);
 					
-					for (int s = 0; s < diin.getSentenceInfoSize(); s++){
-						//System.out.println("SNR"+sentenceNr);
-						if(diin.getSentenceInfoAt(s).getSentenceNr() == sentenceNr){
-							//SentenceData sentenceData = (SentenceData) dl.get(diin.getSentenceInfoAt(s).getSentenceNr());
-							//System.out.println(sentenceData.getText() + "TEXT");
-							
-							AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-									(DependencyData) dl.get(sentenceNr));
-							
-							List<Integer> hlIndex = getNucleusDependencyNr(key, diin.getSentenceInfoAt(s));							
-							//System.out.println("KEY"+involvedSentences((String) key));
-							//System.out.println("NLL"+getNucleusDependency(key, diin));
-							//System.out.println("NLL"+getNucleusDependencyNr(key, diin.getSentenceInfoAt(s)));	
+					int nucleusCount = diin.getSentenceInfoAt(0).getNucleiIndexListSize();
+				
+					if (diin.getPosTag().equals(label) || diin.getPosTag().equals(nilString) || nucleusCount > 1) {
 
-							int[] hlIndexArray = new int[hlIndex.size()*2];
-							int index = 0;
-							for (int h = 0; h < hlIndex.size(); h++) {								
-								hlIndexArray[index] = hlIndex.get(h);
-								hlIndexArray[index+1] = annoDepData.getHead(hlIndex.get(h));
-								index=index+2;
-							}							
-		
-							DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(hlIndexArray,true);
-							annoDepData.setAnnotation(new NGramAnnotation(defaultGHL));
-															
-							sentenceDataDetailedList.add(annoDepData);							
+						for (int s = 0; s < diin.getSentenceInfoSize(); s++) {
+							// System.out.println("SNR"+sentenceNr);
+							if (diin.getSentenceInfoAt(s).getSentenceNr() == sentenceNr) {
+								// SentenceData sentenceData = (SentenceData)
+								// dl.get(diin.getSentenceInfoAt(s).getSentenceNr());
+								// System.out.println(sentenceData.getText() +
+								// "TEXT");
+
+								AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
+										(DependencyData) dl.get(sentenceNr));
+
+								List<Integer> hlIndex = getNucleusDependencyNr(
+										key, diin.getSentenceInfoAt(s));
+								// System.out.println("KEY"+involvedSentences((String)key));
+								// System.out.println("NLL"+getNucleusDependency(key, diin));
+								// System.out.println("NLL"+getNucleusDependencyNr(key,diin.getSentenceInfoAt(s)));
+
+
+								int[] hlIndexArray = new int[hlIndex.size() * 2];
+								int index = 0;
+								for (int h = 0; h < hlIndex.size(); h++) {
+									hlIndexArray[index] = hlIndex.get(h);
+									//is -> Root getHeadIndex
+									if(annoDepData.getHead(hlIndex.get(h)) == -1){
+										hlIndexArray[index + 1] = diin.getSentenceInfoAt(s).getSentenceHeadIndex()-1;
+									} else {
+										hlIndexArray[index + 1] = annoDepData.getHead(hlIndex.get(h));
+									}
+									
+									index = index + 2;
+								}
+
+								//System.out.println(hlIndexArray[0] + " " + hlIndexArray[1]);
+								DefaultNGramHighlight defaultGHL = new DefaultNGramHighlight(
+										hlIndexArray, true);
+								annoDepData.setAnnotation(new NGramAnnotation(
+										defaultGHL));
+
+								sentenceDataDetailedList.add(annoDepData);
+							}
+
+							// sentenceDataDetailedList.add(sentenceData);
 						}
-	
-					//sentenceDataDetailedList.add(sentenceData);
 					}
 				}
 					
@@ -2149,7 +2204,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					list.add(splittedKey[c]);
 				}		
 			}
-			
 		}
 		
 		return list;
@@ -2177,7 +2231,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					list.add(c + colorOffset - 1);
 				}		
 			}
-			
 		}
 		return list;
 	}
@@ -2256,12 +2309,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	//			}
 				
 				//generateFilteredStatistic();
-				
 				statisticTableModel.reload();
-				//reninitialize list
+//				//reninitialize list
 				statisticListModel.reload(null);
 				//activate tab
-				tabbedPane.setSelectedIndex(1);
+				tabbedPane.setSelectedIndex(1);		
 	}
 	
 	
@@ -2328,11 +2380,29 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	
 			
 			statisticTableModel.reload();
+			//reninitialize list
+			statisticListModel.reload(null);
 			//activate tab
 			tabbedPane.setSelectedIndex(1);
 		}
 	
 	
+	/**
+	 * @param tagKey
+	 * @return
+	 */
+	private String formatDependencyKeyHTML(String tagKey) {
+		String formattedKey = tagKey;
+		if(formattedKey.contains("_L")){ //$NON-NLS-1$
+			formattedKey = formattedKey.replace("_L", " &lt;-"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	
+		if(formattedKey.contains("_R")){ //$NON-NLS-1$
+			formattedKey = formattedKey.replace("_R", " ->"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return formattedKey;
+	}
+
 	private String formatDependencyKey(String tagKey) {
 		String formattedKey = tagKey;
 		if(formattedKey.contains("_L")){ //$NON-NLS-1$
@@ -2386,6 +2456,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				headAppendix = " <-"; //"_L"; //$NON-NLS-1$			
 			}
 			sb.append(dd.getRelation(dependentIndex)).append(headAppendix);
+			
+			if(iinD.getPosTag().equals(nilString)){
+				return reFormatDependencyKey(sb.toString());
+			}
 	
 			return sb.toString();
 		}
@@ -2397,17 +2471,20 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			dependentIndex = dependentIndex-1;
 			int headIndex = dd.getHead(dependentIndex);
 			
-	//		System.out.println("SNR "+ sentenceNo
-	//		+  " " + dd.getForm(dependentIndex) 
-	//		+  " " + dd.getForm(dd.getHead(dependentIndex))
-	//		+  " HeadIndex " + headIndex
-	//		+  " DependentIndex" + dependentIndex);
-	
-			if (dependentIndex > headIndex){
-				return dd.getForm(dependentIndex);		
-			}
+//			System.out.println("SNR "+ sentenceNo
+//			+  " " + dd.getForm(dependentIndex) 
+//			+  " " + dd.getForm(dd.getHead(dependentIndex))
+//			+  " HeadIndex " + headIndex
+//			+  " DependentIndex" + dependentIndex);
 			
-			return dd.getForm(dd.getHead(dependentIndex));
+			if(headIndex == -1){
+				return createColoredHTMLString(dd.getForm(iinD.getSentenceInfoAt(0).getNucleiIndex()-1), nilColor);	
+			}
+			else if (dependentIndex > headIndex){				
+				return createColoredHTMLString(dd.getForm(dependentIndex), nucleusColor);		
+			} else {
+				return createColoredHTMLString(dd.getForm(dd.getHead(dependentIndex)), headColor);
+			}
 		}
 
 	protected Object getDependentTag(DependencyItemInNuclei iinD, int sentenceNo, Integer dependentIndex) {
@@ -2417,17 +2494,570 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			dependentIndex = dependentIndex-1;
 			int headIndex = dd.getHead(dependentIndex);
 			
-	//		System.out.println("SNR "+ sentenceNo
-	//		+  " " + dd.getForm(dependentIndex) 
-	//		+  " " + dd.getForm(dd.getHead(dependentIndex))
-	//		+  " HeadIndex " + headIndex
-	//		+  " DependentIndex" + dependentIndex);
+			
+//			System.out.println("SNR "+ sentenceNo
+//			+  " " + dd.getForm(dependentIndex) 
+//			+  " " + dd.getForm(dd.getHead(dependentIndex))
+//			+  " HeadIndex " + headIndex
+//			+  " DependentIndex" + dependentIndex);
+			
+			if(headIndex == -1){
+				return createColoredHTMLString(dd.getForm(iinD.getSentenceInfoAt(0).getSentenceHeadIndex()-1), nilColor);	
+			}
+			else if (dependentIndex < headIndex){				
+				return createColoredHTMLString(dd.getForm(dependentIndex), nucleusColor);		
+			} else {
+				return createColoredHTMLString(dd.getForm(dd.getHead(dependentIndex)), headColor);
+			}
+		}
+
+
+	public class CallbackHandlerErrorMining extends CallbackHandler{
+		
+		private CallbackHandlerErrorMining(){
+			//noop
+		}
+		
+		
+		public void applyFilter(ActionEvent e) {
+			try {
+				
+				if(isOverviewSelected()){
+					doResultFiltering();
+				} else {
+					doStatisticFiltering();
+				}
+				
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to apply result filter", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+		}
+		
+		public void resetFilter(ActionEvent e) {
+			try {
+				if(isOverviewSelected()){
+					resetFilters();
+				} else {
+					resetStatisticFilter();
+				}
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to reset result filter", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+		}
+		
+		public void sortAsc(ActionEvent e) {
+			try {
+				if(isOverviewSelected()){
+					ngramListModel.setSort(true);
+				}
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to sort ascending", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+		}
+		
+		public void sortDesc(ActionEvent e) {
+			try {
+				if(isOverviewSelected()){
+					ngramListModel.setSort(false);
+				}
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to sort descending", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+		}
+		
+		public void openPreferences(ActionEvent e) {
+			try {
+				UIUtil.openConfigDialog("plugins.errorMining"); //$NON-NLS-1$
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to open preferences", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+		}
+		
+		public void statsGeneration(ActionEvent e) {
+			//model check
+			if( ngramListModel.getSize() > 0){
+				try {
+					if(isPoSErrorMiningResult()){
+						createStatistic((int)sbm.getValue());
+					} else	{
+						int max = Math.max(minDependencyGram, (int)sbm.getValue());
+						createStatisticDependency(max);
+					}				
+					if(statisticTable.getModel().getValueAt(0, 1) != null){					
+						statisticTable.getSelectionModel().setSelectionInterval(0, 1);
+						String key = (String) statisticTable.getModel().getValueAt(0, 1);
+						statisticTableModel.generateListEntryFromString(key);
+					}
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE, 
+							"Failed to generate statistic", ex); //$NON-NLS-1$				
+					UIUtil.beep();
+				}
+			}
+		}
+		
+		
+		public void showDetail(ActionEvent e) {
+			try {
+				//TODO noch richten
+				if(isOverviewSelected()){
+					if(ngramList.getSelectedIndex() != -1){
+						int index = ngramList.getSelectedIndex();
+						ngramListModel.getElementAt(index);
+						// System.out.println(ngramListModel.getElementAt(index));
+						String key = (String) ngramListModel.getElementAt(index);
 	
-			if (dependentIndex < headIndex){
-				return dd.getForm(dependentIndex);		
+						showDetails(createDetailList(key));
+					}
+				} else {
+					//System.out.println(statisticList.getSelectedIndices().length);
+					//TODO maybe enable multi selection
+					if(statisticList.getSelectedIndices().length != 0){	
+						if(statisticList.getSelectedIndices().length == 1){	
+							showDetails(createDetailList((String)statisticList.getSelectedValue()));
+						} else {
+							//showDetails(createDetailList(statisticList.getSelectedValuesList()));
+						}
+					}
+				}
+				
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to show details", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+		}
+		
+		
+		public void exportBarchart(ActionEvent e){
+			try {
+				ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+	
+				DefaultFileFilter ff = new DefaultFileFilter(
+						".png", //$NON-NLS-1$
+						ResourceManager.getInstance().get(
+								"plugins.errormining.dialog.exportBarchart.filetype")); //$NON-NLS-1$
+				
+				File file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+						null,
+						ResourceManager.getInstance().get(
+								"plugins.errormining.dialog.exportBarchart"), //$NON-NLS-1$
+						null,
+						ff);
+				
+				if (file == null){
+					return;
+				}
+	
+				int width = config.getInteger("plugins.errorMining.appearance.export.width"); //$NON-NLS-1$
+				int height = config.getInteger("plugins.errorMining.appearance.export.height"); //$NON-NLS-1$
+				int compression = config.getInteger("plugins.errorMining.appearance.export.compression"); //$NON-NLS-1$
+				boolean encodeAlpha = config.getBoolean("plugins.errorMining.appearance.export.encodeAlpha"); //$NON-NLS-1$
+				
+				
+				ChartUtilities.saveChartAsPNG(
+						file, // file
+						chart, // chart
+						width, // width
+						height, // height
+						null, // chart info
+						encodeAlpha, // alpha
+						compression); // Compression
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to show details", ex); //$NON-NLS-1$				
+				UIUtil.beep();
+			}
+	
+		}		
+		
+	}
+
+
+	protected class HandlerErrorMining extends Handler implements ActionListener, 
+		ListSelectionListener, EventListener, ListDataListener, ComponentListener, ChartMouseListener {
+			
+			protected boolean trackResizing = true;
+			
+			/**
+			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mouseClicked(MouseEvent me) {
+				
+				if (me.getClickCount() == 2) {
+					
+					if (me.getSource() == ngramList) {
+						int index = ngramList.locationToIndex(me.getPoint());
+						// System.out.println("Double clicked on Item " + index);
+						// System.out.println(ngramListModel.getElementAt(index));
+						String key = (String) ngramListModel.getElementAt(index);
+	
+						showDetails(createDetailList(key));
+					}
+					
+					else if (me.getSource() == ngramTable) {
+						int selectedRow = ngramTable.getSelectedRow();
+						
+						System.out.println("selRow"+selectedRow);
+						// add correct column!!
+						String nucleus = (String) ngramTable.getModel().getValueAt(selectedRow, 0);
+						String label = (String) ngramTable.getModel().getValueAt(selectedRow, 1);
+						String sentences = (String) ngramTable.getModel().getValueAt(selectedRow, 3);
+						
+						if(!isPoSErrorMiningResult()){
+							label = reFormatDependencyKey(label);
+						}
+						
+						showDetails(createDetailListFromTable(nucleus, sentences, label));
+					}			
+			    	
+					else if (me.getSource() == statisticTable) {
+						displaySelectedStatsData();
+					}
+					
+					else if (me.getSource() == statisticList) {
+						String key = (String) statisticList.getSelectedValue();
+						//System.out.println(createDetailList(key).size());
+						//System.out.println(key);
+						showDetails(createDetailList(key));
+					} else {
+						//noop
+					}
+			        
+			     }
 			}
 			
-			return dd.getForm(dd.getHead(dependentIndex));
+	
+			/**
+			 * @see de.ims.icarus.ui.events.EventListener#invoke(java.lang.Object, de.ims.icarus.ui.events.EventObject)
+			 */
+			@Override
+			public void invoke(Object sender, EventObject event) {
+				// TO DO Auto-generated method stub			
+			}
+	
+			/**
+			 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+			 */
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				
+				if(e.getValueIsAdjusting()){
+					return;
+				}
+	
+				
+				if (e.getSource() == ngramList){
+					Object selectedObject = ngramList.getSelectedValue();
+					//System.out.println((String) selectedObject);
+					ngramTableModel.reload((String) selectedObject);	
+					ngramTableAdjuster.adjustColumns();
+	
+				} else if (e.getSource() == statisticTable.getSelectionModel()){
+					//no selection check
+					if(statisticTable.getSelectedRow() != -1){
+						displaySelectedStatsData();
+					}
+					
+				} else if (e.getSource() == statisticList){
+						//String key = (String) statisticList.getSelectedValue();
+						List<Object> keys = statisticList.getSelectedValuesList();
+						
+						if(keys == null){
+							return;
+						}
+						
+						if(statisticListModel.getSize() > 1){
+							//System.out.println(keys);
+							
+							int selectedRow = statisticTable.getSelectedRow();
+							String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
+							String title = keyTable; // + "\n " + keys;
+							refreshBarChart(title, statsResultFiltered.get(keyTable));
+							
+							//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable)
+							DefaultCategoryDataset dcd = (DefaultCategoryDataset) plot.getDataset(0);
+							
+							for(Object o : keys){
+								List<StatsData> statsList = new ArrayList<StatsData>();
+								String key = o.toString();
+								if(isPoSErrorMiningResult()){
+									List<ItemInNuclei> iinList = nGramResult.get(key);
+									for(int i = 0; i < iinList.size(); i++){
+										StatsData sd = new StatsData(iinList.get(i).getPosTag(),
+												iinList.get(i).getCount());							
+										sd.addWordstringSize(key);
+										statsList.add(sd);
+									}
+									
+								} else {
+									List<DependencyItemInNuclei> iinList = nGramResultDependency.get(key);
+									for(int i = 0; i < iinList.size(); i++){
+										StatsData sd = new StatsData(iinList.get(i).getPosTag(),
+												iinList.get(i).getCount());							
+										sd.addWordstringSize(key);
+										statsList.add(sd);
+									}
+								}
+								
+								//int selectedRow = statisticTable.getSelectedRow();
+								// add correct column!!					
+								//String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
+								//String title = keyTable + "\n " + key; //$NON-NLS-1$
+								//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable), o.toString());
+								dcd = buildDefaultCategoryDataset(dcd, statsList, o.toString());	
+							}
+							plot.setDataset(0, dcd);
+						}					
+						
+				} else {
+					try {
+						//for default presenter
+						displaySelectedTabData();
+					} catch(Exception ex) {
+						LoggerFactory.log(this, Level.SEVERE, 
+								"Failed to handle change in selection: "+e, ex); //$NON-NLS-1$
+					}
+				}
+	
+			}
+	
+			/**
+			 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+			 */
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if(e.getSource() == textFilterField){ 
+					doResultFiltering();				
+				}
+				
+				if(e.getSource() == statisticTextFilterField){ 
+					doStatisticFiltering();				
+				}
+				
+			}
+	
+			/**
+			 * @see javax.swing.event.ListDataListener#contentsChanged(javax.swing.event.ListDataEvent)
+			 */
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+	//			System.out.println("Result NGRAM-List ContentsChanged: "  //$NON-NLS-1$
+	//						+ e.getIndex0() +    ", " + e.getIndex1()); //$NON-NLS-1$
+				ngramList.clearSelection();		
+			}
+	
+			/**
+			 * @see javax.swing.event.ListDataListener#intervalAdded(javax.swing.event.ListDataEvent)
+			 */
+			@Override
+			public void intervalAdded(ListDataEvent arg0) {
+				// TO DO Auto-generated method stub
+				
+			}
+	
+			/**
+			 * @see javax.swing.event.ListDataListener#intervalRemoved(javax.swing.event.ListDataEvent)
+			 */
+			@Override
+			public void intervalRemoved(ListDataEvent arg0) {
+				// TO DO Auto-generated method stub
+				
+			}
+	
+	
+			/**
+			 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
+			 */
+			@Override
+			public void componentResized(ComponentEvent e) {
+	//			if(!trackResizing) {
+	//				return;
+	//			}
+	//			
+	//			int height = splitpaneDetails.getHeight();
+	//			if(height==0) {
+	//				return;
+	//			}
+	//			
+	//			splitpaneDetails.setDividerLocation(Math.max(height/2, height-100));
+	//			
+	//			trackResizing = false;
+			}
+	
+			/**
+			 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
+			 */
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				trackResizing = true;
+			}
+	
+			/**
+			 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
+			 */
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// no-op
+			}
+	
+			/**
+			 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
+			 */
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// no-op
+			}
+	
+	
+			/**
+			 * @see org.jfree.chart.ChartMouseListener#chartMouseClicked(org.jfree.chart.ChartMouseEvent)
+			 */
+			@Override
+			public void chartMouseClicked(ChartMouseEvent e) {
+		           ChartEntity entity = e.getEntity();
+		            //System.out.println(entity);
+		            String key;
+		            String label;
+		           
+		            // details with filtered clicked on bars
+		            if (entity != null && (entity instanceof CategoryItemEntity)) {
+		            	CategoryItemEntity item = (CategoryItemEntity) entity;
+		            	
+		            	
+		            	label = item.getColumnKey().toString();
+		            	
+		            	if(!isPoSErrorMiningResult()){
+			            	label = reFormatDependencyKey(label);
+		            	}
+		            	
+		            	key = item.getRowKey().toString();	            	
+		            	displayResultFromStats(key, label);	            	
+		            }
+		            
+		            
+		            // details with filtered (clicked on label x-axis)
+		            if (entity != null && (entity instanceof CategoryLabelEntity)) {
+		            	CategoryLabelEntity item = (CategoryLabelEntity) entity;
+		            	
+		            	label = item.getKey().toString();
+		            	
+		            	if(!isPoSErrorMiningResult()){
+		            		label = reFormatDependencyKey(label);
+		            	}
+	
+		            	
+		            	
+		            	displayResultFromStats("", label);    //$NON-NLS-1$
+		            }
+		            
+		            
+		            // details complete label (clicked legend)
+		            if (entity != null && (entity instanceof LegendItemEntity)) {
+		            	LegendItemEntity item = (LegendItemEntity) entity;
+		            	
+		            	key = item.getSeriesKey().toString();
+		            	
+		            	if(!key.equals(labelmatrix)){	            		
+		            		showDetails(createDetailList(key));
+		            	} else {	            	
+			            	if(statisticList.getSelectedValuesList().size() == 0){	            		
+			            		DialogFactory.getGlobalFactory().showInfo(null,
+			            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+			            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+		//	            		for(int i = 0; i < statisticListModel.getSize(); i++){
+		//		            		key = (String) statisticListModel.getElementAt(i);
+		//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
+		//	            		}
+			            	} else {	            	
+								for (int i = 0; i < statisticList.getSelectedValuesList()
+										.size(); i++) {
+									key = (String) statisticList.getSelectedValuesList()
+											.get(i);
+									showDetails(createDetailList(key)); 
+		
+								}
+			            	}
+		            	}
+		            }
+	
+						
+			}
+	
+	
+			/**
+			 * @param key
+			 * @param label
+			 */
+			private void displayResultFromStats(String key, String label) {
+	        	StringBuilder sbLabel = new StringBuilder();
+	        	
+	        	sbLabel.append(" [").append(label).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+	        	
+	        	
+	        	if(key.equals(labelmatrix) && statisticListModel.getSize() == 1){
+	        		key = (String) statisticListModel.getElementAt(0);
+	        		showDetails(createDetailList(key,label), key + sbLabel.toString() ); 
+	        	}
+	   	            	
+	        	else{
+	            	if(statisticList.getSelectedValuesList().size() == 0){	            		
+	            		DialogFactory.getGlobalFactory().showInfo(null,
+	            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+	            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+	//            		for(int i = 0; i < statisticListModel.getSize(); i++){
+	//	            		key = (String) statisticListModel.getElementAt(i);
+	//	            		showDetails(createDetailList(key,label), key + sbLabel.toString()); //$NON-NLS-1$
+	//            		}
+	            	} else {	            	
+						for (int i = 0; i < statisticList.getSelectedValuesList()
+								.size(); i++) {
+							key = (String) statisticList.getSelectedValuesList()
+									.get(i);
+							showDetails(createDetailList(key, label), key + sbLabel.toString()); 
+	
+						}
+	            	}
+	        	}
+				
+			}
+	
+	
+			/**
+			 * @see org.jfree.chart.ChartMouseListener#chartMouseMoved(org.jfree.chart.ChartMouseEvent)
+			 */
+			@Override
+			public void chartMouseMoved(ChartMouseEvent e) {
+				ChartEntity entity = e.getEntity();
+				
+				CustomBarHighlightRenderer cbhr = (CustomBarHighlightRenderer) plot.getRenderer();
+	
+	            if (!(entity instanceof CategoryItemEntity)) {            	
+	                cbhr.setHighlightedItem(-1, -1);
+	                barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	                return;
+	            }
+	            
+	            CategoryItemEntity cie = (CategoryItemEntity) entity;
+	            CategoryDataset dataset = cie.getDataset();
+	
+	        	cbhr.setHighlightedItem(dataset.getRowIndex(cie.getRowKey()),
+	                    dataset.getColumnIndex(cie.getColumnKey()));
+	        	barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));			
+				
+			}
 		}
 
 
@@ -2660,548 +3290,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		
 	}
 
-	public class CallbackHandlerErrorMining extends CallbackHandler{
-		
-		private CallbackHandlerErrorMining(){
-			//noop
-		}
-		
-		
-		public void applyFilter(ActionEvent e) {
-			try {
-				
-				if(isOverviewSelected()){
-					doResultFiltering();
-				} else {
-					doStatisticFiltering();
-				}
-				
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to apply result filter", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-		}
-		
-		public void resetFilter(ActionEvent e) {
-			try {
-				if(isOverviewSelected()){
-					resetFilters();
-				} else {
-					resetStatisticFilter();
-				}
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to reset result filter", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-		}
-		
-		public void sortAsc(ActionEvent e) {
-			try {
-				if(isOverviewSelected()){
-					ngramListModel.setSort(true);
-				}
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to sort ascending", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-		}
-		
-		public void sortDesc(ActionEvent e) {
-			try {
-				if(isOverviewSelected()){
-					ngramListModel.setSort(false);
-				}
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to sort descending", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-		}
-		
-		public void openPreferences(ActionEvent e) {
-			try {
-				UIUtil.openConfigDialog("plugins.errorMining"); //$NON-NLS-1$
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to open preferences", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-		}
-		
-		public void statsGeneration(ActionEvent e) {
-			//model check
-			if( ngramListModel.getSize() > 0){
-				try {
-					if(isPoSErrorMiningResult()){
-						createStatistic((int)sbm.getValue());
-					} else	{
-						int max = Math.max(minDependencyGram, (int)sbm.getValue());
-						createStatisticDependency(max);
-					}				
-					if(statisticTable.getModel().getValueAt(0, 1) != null){					
-						statisticTable.getSelectionModel().setSelectionInterval(0, 1);
-						String key = (String) statisticTable.getModel().getValueAt(0, 1);
-						statisticTableModel.generateListEntryFromString(key);
-					}
-				} catch(Exception ex) {
-					LoggerFactory.log(this, Level.SEVERE, 
-							"Failed to generate statistic", ex); //$NON-NLS-1$				
-					UIUtil.beep();
-				}
-			}
-		}
-		
-		
-		public void showDetail(ActionEvent e) {
-			try {
-				//TODO noch richten
-				if(isOverviewSelected()){
-					if(ngramList.getSelectedIndex() != -1){
-						int index = ngramList.getSelectedIndex();
-						ngramListModel.getElementAt(index);
-						// System.out.println(ngramListModel.getElementAt(index));
-						String key = (String) ngramListModel.getElementAt(index);
-	
-						showDetails(createDetailList(key));
-					}
-				} else {
-					//System.out.println(statisticList.getSelectedIndices().length);
-					//TODO maybe enable multi selection
-					if(statisticList.getSelectedIndices().length != 0){	
-						if(statisticList.getSelectedIndices().length == 1){	
-							showDetails(createDetailList((String)statisticList.getSelectedValue()));
-						} else {
-							//showDetails(createDetailList(statisticList.getSelectedValuesList()));
-						}
-					}
-				}
-				
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
-						"Failed to show details", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-		}
-		
-		
-		public void exportBarchart(ActionEvent e){
-			try {
-				ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
-
-				DefaultFileFilter ff = new DefaultFileFilter(
-						".png", //$NON-NLS-1$
-						ResourceManager.getInstance().get(
-								"plugins.errormining.dialog.exportBarchart.filetype")); //$NON-NLS-1$
-				
-				File file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
-						null,
-						ResourceManager.getInstance().get(
-								"plugins.errormining.dialog.exportBarchart"), //$NON-NLS-1$
-						null,
-						ff);
-				
-				if (file == null){
-					return;
-				}
-
-				int width = config.getInteger("plugins.errorMining.appearance.export.width"); //$NON-NLS-1$
-				int height = config.getInteger("plugins.errorMining.appearance.export.height"); //$NON-NLS-1$
-				int compression = config.getInteger("plugins.errorMining.appearance.export.compression"); //$NON-NLS-1$
-				boolean encodeAlpha = config.getBoolean("plugins.errorMining.appearance.export.encodeAlpha"); //$NON-NLS-1$
-				
-				
-				ChartUtilities.saveChartAsPNG(
-						file, // file
-						chart, // chart
-						width, // width
-						height, // height
-						null, // chart info
-						encodeAlpha, // alpha
-						compression); // Compression
-			} catch (Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to show details", ex); //$NON-NLS-1$				
-				UIUtil.beep();
-			}
-
-		}		
-		
-	}
-
-
-	protected class HandlerErrorMining extends Handler implements ActionListener, 
-	ListSelectionListener, EventListener, ListDataListener, ComponentListener, ChartMouseListener {
-		
-		protected boolean trackResizing = true;
-		
-		/**
-		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
-		 */
-		@Override
-		public void mouseClicked(MouseEvent me) {
-			
-			if (me.getClickCount() == 2) {
-				
-				if (me.getSource() == ngramList) {
-					int index = ngramList.locationToIndex(me.getPoint());
-					// System.out.println("Double clicked on Item " + index);
-					// System.out.println(ngramListModel.getElementAt(index));
-					String key = (String) ngramListModel.getElementAt(index);
-
-					showDetails(createDetailList(key));
-				}
-				
-				else if (me.getSource() == ngramTable) {
-					int selectedRow = ngramTable.getSelectedRow();
-					// add correct column!!
-					showDetails(createDetailListFromTable(
-							(String) ngramTable.getModel()
-								.getValueAt(selectedRow, 0),
-							(String) ngramTable.getModel()
-								.getValueAt(selectedRow, 3)));
-				}			
-		    	
-				else if (me.getSource() == statisticTable) {
-					displaySelectedStatsData();
-				}
-				
-				else if (me.getSource() == statisticList) {
-					String key = (String) statisticList.getSelectedValue();
-					//System.out.println(createDetailList(key).size());
-					//System.out.println(key);
-					showDetails(createDetailList(key));
-				} else {
-					//noop
-				}
-		        
-		     }
-		}
-		
-
-		/**
-		 * @see de.ims.icarus.ui.events.EventListener#invoke(java.lang.Object, de.ims.icarus.ui.events.EventObject)
-		 */
-		@Override
-		public void invoke(Object sender, EventObject event) {
-			// TO DO Auto-generated method stub			
-		}
-
-		/**
-		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
-		 */
-		@Override
-		public void valueChanged(ListSelectionEvent e) {
-			
-			if(e.getValueIsAdjusting()){
-				return;
-			}
-
-			
-			if (e.getSource() == ngramList){
-				Object selectedObject = ngramList.getSelectedValue();
-				//System.out.println((String) selectedObject);
-				ngramTableModel.reload((String) selectedObject);	
-				ngramTableAdjuster.adjustColumns();
-
-			} else if (e.getSource() == statisticTable.getSelectionModel()){
-				//no selection check
-				if(statisticTable.getSelectedRow() != -1){
-					displaySelectedStatsData();
-				}
-				
-			} else if (e.getSource() == statisticList){
-					//String key = (String) statisticList.getSelectedValue();
-					List<Object> keys = statisticList.getSelectedValuesList();
-					
-					if(keys == null){
-						return;
-					}
-					
-					if(statisticListModel.getSize() > 1){
-						//System.out.println(keys);
-						
-						int selectedRow = statisticTable.getSelectedRow();
-						String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-						String title = keyTable; // + "\n " + keys;
-						refreshBarChart(title, statsResultFiltered.get(keyTable));
-						
-						//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable)
-						DefaultCategoryDataset dcd = (DefaultCategoryDataset) plot.getDataset(0);
-						
-						for(Object o : keys){
-							List<StatsData> statsList = new ArrayList<StatsData>();
-							String key = o.toString();
-							if(isPoSErrorMiningResult()){
-								List<ItemInNuclei> iinList = nGramResult.get(key);
-								for(int i = 0; i < iinList.size(); i++){
-									StatsData sd = new StatsData(iinList.get(i).getPosTag(),
-											iinList.get(i).getCount());							
-									sd.addWordstringSize(key);
-									statsList.add(sd);
-								}
-								
-							} else {
-								List<DependencyItemInNuclei> iinList = nGramResultDependency.get(key);
-								for(int i = 0; i < iinList.size(); i++){
-									StatsData sd = new StatsData(iinList.get(i).getPosTag(),
-											iinList.get(i).getCount());							
-									sd.addWordstringSize(key);
-									statsList.add(sd);
-								}
-							}
-							
-							//int selectedRow = statisticTable.getSelectedRow();
-							// add correct column!!					
-							//String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-							//String title = keyTable + "\n " + key; //$NON-NLS-1$
-							//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable), o.toString());
-							dcd = buildDefaultCategoryDataset(dcd, statsList, o.toString());	
-						}
-						plot.setDataset(0, dcd);
-					}					
-					
-			} else {
-				try {
-					//for default presenter
-					displaySelectedTabData();
-				} catch(Exception ex) {
-					LoggerFactory.log(this, Level.SEVERE, 
-							"Failed to handle change in selection: "+e, ex); //$NON-NLS-1$
-				}
-			}
-
-		}
-
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			
-			if(e.getSource() == textFilterField){ 
-				doResultFiltering();				
-			}
-			
-			if(e.getSource() == statisticTextFilterField){ 
-				doStatisticFiltering();				
-			}
-			
-		}
-
-		/**
-		 * @see javax.swing.event.ListDataListener#contentsChanged(javax.swing.event.ListDataEvent)
-		 */
-		@Override
-		public void contentsChanged(ListDataEvent e) {
-//			System.out.println("Result NGRAM-List ContentsChanged: "  //$NON-NLS-1$
-//						+ e.getIndex0() +    ", " + e.getIndex1()); //$NON-NLS-1$
-			ngramList.clearSelection();		
-		}
-
-		/**
-		 * @see javax.swing.event.ListDataListener#intervalAdded(javax.swing.event.ListDataEvent)
-		 */
-		@Override
-		public void intervalAdded(ListDataEvent arg0) {
-			// TO DO Auto-generated method stub
-			
-		}
-
-		/**
-		 * @see javax.swing.event.ListDataListener#intervalRemoved(javax.swing.event.ListDataEvent)
-		 */
-		@Override
-		public void intervalRemoved(ListDataEvent arg0) {
-			// TO DO Auto-generated method stub
-			
-		}
-
-
-		/**
-		 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
-		 */
-		@Override
-		public void componentResized(ComponentEvent e) {
-//			if(!trackResizing) {
-//				return;
-//			}
-//			
-//			int height = splitpaneDetails.getHeight();
-//			if(height==0) {
-//				return;
-//			}
-//			
-//			splitpaneDetails.setDividerLocation(Math.max(height/2, height-100));
-//			
-//			trackResizing = false;
-		}
-
-		/**
-		 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
-		 */
-		@Override
-		public void componentHidden(ComponentEvent e) {
-			trackResizing = true;
-		}
-
-		/**
-		 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
-		 */
-		@Override
-		public void componentMoved(ComponentEvent e) {
-			// no-op
-		}
-
-		/**
-		 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
-		 */
-		@Override
-		public void componentShown(ComponentEvent e) {
-			// no-op
-		}
-
-
-		/**
-		 * @see org.jfree.chart.ChartMouseListener#chartMouseClicked(org.jfree.chart.ChartMouseEvent)
-		 */
-		@Override
-		public void chartMouseClicked(ChartMouseEvent e) {
-	           ChartEntity entity = e.getEntity();
-	            //System.out.println(entity);
-	            String key;
-	            String label;
-	           
-	            // details with filtered clicked on bars
-	            if (entity != null && (entity instanceof CategoryItemEntity)) {
-	            	CategoryItemEntity item = (CategoryItemEntity) entity;
-	            	
-	            	
-	            	label = item.getColumnKey().toString();
-	            	
-	            	if(!isPoSErrorMiningResult()){
-		            	label = reFormatDependencyKey(label);
-	            	}
-	            	
-	            	key = item.getRowKey().toString();	            	
-	            	displayResultFromStats(key, label);	            	
-	            }
-	            
-	            
-	            // details with filtered (clicked on label x-axis)
-	            if (entity != null && (entity instanceof CategoryLabelEntity)) {
-	            	CategoryLabelEntity item = (CategoryLabelEntity) entity;
-	            	
-	            	label = item.getKey().toString();
-	            	
-	            	if(!isPoSErrorMiningResult()){
-	            		label = reFormatDependencyKey(label);
-	            	}
-
-	            	
-	            	
-	            	displayResultFromStats("", label);    //$NON-NLS-1$
-	            }
-	            
-	            
-	            // details complete label (clicked legend)
-	            if (entity != null && (entity instanceof LegendItemEntity)) {
-	            	LegendItemEntity item = (LegendItemEntity) entity;
-	            	
-	            	key = item.getSeriesKey().toString();
-	            	
-	            	if(!key.equals(labelmatrix)){	            		
-	            		showDetails(createDetailList(key));
-	            	} else {	            	
-		            	if(statisticList.getSelectedValuesList().size() == 0){	            		
-		            		DialogFactory.getGlobalFactory().showInfo(null,
-		            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
-		            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
-	//	            		for(int i = 0; i < statisticListModel.getSize(); i++){
-	//		            		key = (String) statisticListModel.getElementAt(i);
-	//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
-	//	            		}
-		            	} else {	            	
-							for (int i = 0; i < statisticList.getSelectedValuesList()
-									.size(); i++) {
-								key = (String) statisticList.getSelectedValuesList()
-										.get(i);
-								showDetails(createDetailList(key)); 
-	
-							}
-		            	}
-	            	}
-	            }
-
-					
-		}
-
-
-		/**
-		 * @param key
-		 * @param label
-		 */
-		private void displayResultFromStats(String key, String label) {
-        	StringBuilder sbLabel = new StringBuilder();
-        	
-        	sbLabel.append(" [").append(label).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
-        	
-        	
-        	if(key.equals(labelmatrix) && statisticListModel.getSize() == 1){
-        		key = (String) statisticListModel.getElementAt(0);
-        		showDetails(createDetailList(key,label), key + sbLabel.toString() ); 
-        	}
-   	            	
-        	else{
-            	if(statisticList.getSelectedValuesList().size() == 0){	            		
-            		DialogFactory.getGlobalFactory().showInfo(null,
-            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
-            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
-//            		for(int i = 0; i < statisticListModel.getSize(); i++){
-//	            		key = (String) statisticListModel.getElementAt(i);
-//	            		showDetails(createDetailList(key,label), key + sbLabel.toString()); //$NON-NLS-1$
-//            		}
-            	} else {	            	
-					for (int i = 0; i < statisticList.getSelectedValuesList()
-							.size(); i++) {
-						key = (String) statisticList.getSelectedValuesList()
-								.get(i);
-						showDetails(createDetailList(key, label), key + sbLabel.toString()); 
-
-					}
-            	}
-        	}
-			
-		}
-
-
-		/**
-		 * @see org.jfree.chart.ChartMouseListener#chartMouseMoved(org.jfree.chart.ChartMouseEvent)
-		 */
-		@Override
-		public void chartMouseMoved(ChartMouseEvent e) {
-			ChartEntity entity = e.getEntity();
-			
-			CustomBarHighlightRenderer cbhr = (CustomBarHighlightRenderer) plot.getRenderer();
-
-            if (!(entity instanceof CategoryItemEntity)) {            	
-                cbhr.setHighlightedItem(-1, -1);
-                barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                return;
-            }
-            
-            CategoryItemEntity cie = (CategoryItemEntity) entity;
-            CategoryDataset dataset = cie.getDataset();
-
-        	cbhr.setHighlightedItem(dataset.getRowIndex(cie.getRowKey()),
-                    dataset.getColumnIndex(cie.getColumnKey()));
-        	barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));			
-			
-		}
-	}
-	
 	/**
 	 * Stuff for List Visualization
 	 * 
@@ -3544,8 +3632,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		@Override
 		public int getColumnCount() {
 			if(isPoSErrorMiningResult()){
-				return 6;
+				return 3;
+				//return 6;
 			} else {
+				//return 4;
 				return 7;
 			}
 		}
@@ -3686,11 +3776,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				return null;	
 				
 			} else {
+				/**
+				 * Dependency Visialization stuff
+				 */
 				DependencyItemInNuclei iinD = nucleusMap.get(rowIndex).getDiin();				
 				
 				int nucleiDCount = iinD.getSentenceInfoAt(0).getNucleiIndexListSize();
 				int index = nucleusMap.get(rowIndex).getHeadIndex();
 				String[] number;
+
 				
 				if (!multinuclei) {				
 					switch (columnIndex) {
@@ -3702,10 +3796,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						//return nucleusMap.get(rowIndex).getKey();//keySplitted[nucleiGenIndex-start];
 					case 1:
 						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
-						return getCombinedDependencyTag(iinD
-								,Integer.valueOf(number[0])
-								,(Integer) getValueAt(rowIndex, 5));
-					case 2:
+						String relationLabel = (String) getCombinedDependencyTag(iinD
+															,Integer.valueOf(number[0])
+															,(Integer) getValueAt(rowIndex, 5));
+						if(iinD.getPosTag().equals(nilString)){
+							return createColoredHTMLString(relationLabel, nilColor);
+						}						
+						return relationLabel;
+					case 2:						
 						number  = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
 						return getHeadTag(iinD
 								,Integer.valueOf(number[0])
@@ -3730,11 +3828,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));
 						//return nucleusMap.get(0).getKey();//keySplitted[nucleiGenIndex-start];
-					case 1:	
+					case 1:
 						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
-						return getCombinedDependencyTag(iinD
-								,Integer.valueOf(number[0])
-								,(Integer) getValueAt(rowIndex, 5));
+						String relationLabel = (String) getCombinedDependencyTag(iinD
+															,Integer.valueOf(number[0])
+															,(Integer) getValueAt(rowIndex, 5));
+						if(iinD.getPosTag().equals(nilString)){
+							return createColoredHTMLString(formatDependencyKeyHTML(relationLabel), nilColor);
+						}						
+						return relationLabel;
 					case 2:		
 						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
 						return getHeadTag(iinD
@@ -3756,6 +3858,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			}
 			return null;			
 		}
+
 	}
 	
 	
@@ -3861,6 +3964,18 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			keyArray = statsResultFiltered.keySet().toArray();
 			refreshStatisticCount();
 			fireTableDataChanged();
+			
+			statisticTable.getModel().addTableModelListener(new TableModelListener() {
+		        @Override
+		        public void tableChanged(TableModelEvent e) {
+		            SwingUtilities.invokeLater(new Runnable() {
+		                @Override
+		                public void run() {
+		                    statisticTable.changeSelection(0, 0, false, false);      
+		                }
+		            });
+		        }            
+		    });
 		}
 		
 		/**
@@ -3871,7 +3986,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		      switch (columnIndex) {
 		      		case 0: return ResourceManager.getInstance().get(
-	            		"plugins.errormining.labels.Count"); //$NON-NLS-1$
+	            		"plugins.errormining.labels.LabelDistribution"); //$NON-NLS-1$
 		            case 1: return ResourceManager.getInstance().get(
 		            	"plugins.errormining.labels.Tag"); //$NON-NLS-1$
 
@@ -3975,22 +4090,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				}
 			}
 			statisticListModel.reload(tmp);
-		}
-
-		/**
-		 * @param tagKey
-		 * @return
-		 */
-		private String formatDependencyKeyHTML(String tagKey) {
-			String formattedKey = tagKey;
-			if(formattedKey.contains("_L")){ //$NON-NLS-1$
-				formattedKey = formattedKey.replace("_L", " &lt;-"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		
-			if(formattedKey.contains("_R")){ //$NON-NLS-1$
-				formattedKey = formattedKey.replace("_R", " ->"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			return formattedKey;
 		}
 		
 	}	

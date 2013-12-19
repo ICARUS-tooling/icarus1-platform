@@ -112,5 +112,16 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 		return null;
 	}
 
+
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getIndex()
+	 */
+	@Override
+	public int getIndex() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
 

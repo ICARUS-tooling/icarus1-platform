@@ -65,6 +65,11 @@ public class NGramsDependency {
 	protected Options options;
 	
 	
+	//NIL stuff
+	protected Map<Integer,ArrayList<Integer>> nilCache;
+	protected Map<Integer,ArrayList<Integer>> nilEqualSentencesCache;	
+	
+	
 	protected List<DependencyData> corpus;
 	
 	
@@ -98,6 +103,8 @@ public class NGramsDependency {
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
+		
+		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
 	}
 
 	
@@ -119,6 +126,8 @@ public class NGramsDependency {
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
+		
+		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
 	}
 	
 	
@@ -139,6 +148,8 @@ public class NGramsDependency {
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
+		
+		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
 	}
 	
 
@@ -178,7 +189,7 @@ public class NGramsDependency {
 	
 	
 	//needed?
-	public List<String>  getVariationForTag(String tag){
+	public List<String>  getLabelVariation(String tag){
 		List<String> resultVari = null;
 		
 		if (nGramCache.containsKey(tag)){
@@ -231,17 +242,25 @@ public class NGramsDependency {
 	
 	/**
 	 * Step 1) Initialize Corpus / Create uniGrams
-	 * Loop trough the Corpus and add all occuring Words with their specific PoSTags
+	 * Loop trough the Corpus and add all occurring Words with their specific PoSTags
 	 * to the nGramCache. Also Store CorpusPosition (SentenceNr/Wordpositon-in-Sentence)
 	 * If one Word has more than one Tag assigned add the new Tag aswell to the Wordform.
-	 * Step 2) we will only use that unigrams whicht contains at least 2 different PoS Tags.
+	 * Step 2) we will only use that unigrams which contains at least 2 different PoS Tags.
 	 * 
 	 * @param dd
 	 * @param sentenceNr
 	 */
 	public void initializeUniGrams(DependencyData dd, int sentenceNr) {
 		
-		corpus.add(dd);		
+		corpus.add(dd);
+
+		if(nilCache.containsKey(dd.length())){
+			nilCache.get(dd.length()).add(sentenceNr);
+		} else {
+			ArrayList<Integer> snrList = new ArrayList<Integer>();
+			snrList.add(sentenceNr);
+			nilCache.put(dd.length(), snrList);
+		}
 		
 		for (int wordIndex = 0; wordIndex < dd.length(); wordIndex++) {
 			String currentWord = dd.getForm(wordIndex);
@@ -380,12 +399,12 @@ public class NGramsDependency {
 	 */
 
 	private Map<String, ArrayList<DependencyItemInNuclei>> removeItemsLengthOne(Map<String,ArrayList<DependencyItemInNuclei>> input){
-		
+		//input = addNilLabels(input);
 		ArrayList<String> removeFromNGrams = new ArrayList<String>();
 		for(Iterator<String> i = input.keySet().iterator(); i.hasNext();){
 			String key = i.next();
-			ArrayList<DependencyItemInNuclei> arrItem = input.get(key);
-			//only one PoS Tag found -> add to delet list;
+			ArrayList<DependencyItemInNuclei> arrItem = input.get(key);		
+			//only one PoS Tag found -> add to delet list;			
 			if (arrItem.size() == 1){
 				removeFromNGrams.add(key);
 			}
@@ -397,6 +416,79 @@ public class NGramsDependency {
 		}
 
 		removeFromNGrams.clear();
+		return input;
+	}
+	
+	
+	private Map<String, ArrayList<DependencyItemInNuclei>> addNilLabels(Map<String,ArrayList<DependencyItemInNuclei>> input){
+
+		for (Iterator<String> i = input.keySet().iterator(); i.hasNext();) {
+			String key = i.next();
+			ArrayList<DependencyItemInNuclei> arrItem = input.get(key);
+			
+			ArrayList<DependencyItemInNuclei> arrItemNew = new ArrayList<DependencyItemInNuclei>();
+			
+			for (int j = 0; j < arrItem.size(); j++) {
+
+				DependencyItemInNuclei arri = arrItem.get(j);
+
+				// System.out.println(key);
+				for (int s = 0; s < arri.getSentenceInfoSize(); s++) {
+					DependencySentenceInfo dsi = arri.getSentenceInfoAt(s);
+					int sentenceNr = dsi.getSentenceNr();
+
+					// sentence in double list?
+					if (nilEqualSentencesCache.containsKey(sentenceNr)) {
+						// edge between two nodes in both sentences?
+						List<Integer> sameSentenceIDList = nilEqualSentencesCache
+								.get(sentenceNr);
+
+//						System.out.println(sameSentenceIDList 
+//											+ " :"	+ sentenceNr);
+						for (Integer sentenceIndex : sameSentenceIDList) {
+							DependencyData dd = corpus.get(sentenceIndex);
+							int nucleiIndex = dsi.getNucleiIndex() - 1;
+							//System.out.println(dd.getForm(nucleiIndex)+dd.getHead(nucleiIndex));
+							int headIndex = dsi.getSentenceHeadIndex() - 1;
+							
+							
+							if (dd.getHead(nucleiIndex) != headIndex) {
+								DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+								//addSentenceInfoLeft(arri, "nil", dsi, false);
+								//addSentenceInfoLeft(newDIIN, "nil", dsi, true);
+								newDIIN.addNewDependencySentenceInfoUniGrams(sentenceIndex, dsi.getNucleiIndex(), dsi.getSentenceHeadIndex());
+								newDIIN.setPosTag("nil");	 //$NON-NLS-1$
+								arrItemNew.add(newDIIN);
+								//System.out.println(key + " nilLabel");
+								//return input;
+							}
+						}
+
+					}
+				}
+			}
+			
+			arrItem.addAll(arrItemNew);
+			input.put(key, arrItem);
+		}
+		
+		return input;
+	}
+	
+	private Map<Integer, ArrayList<Integer>> removeItemsSnr(Map<Integer,ArrayList<Integer>> input){
+		
+		ArrayList<Integer> removeFromNGrams = new ArrayList<Integer>();
+		for(Integer snr : input.keySet()){
+			//only one PoS Tag found -> add to delet list;
+			if (input.get(snr).size() == 1){
+				removeFromNGrams.add(snr);
+			}
+		}
+				
+		//System.out.println("Items to Remove: " + removeFromnGrams.size());
+		for(int i = 0; i < removeFromNGrams.size(); i++){
+			input.remove(removeFromNGrams.get(i));
+		}
 		return input;
 	}
 	
@@ -717,7 +809,7 @@ public class NGramsDependency {
 
 							if (hasGap){
 								rightKey = rebuildGapTag(startIndex, si, dd);
-							} else {
+							} else {								
 								String tmp = rebuildTag(startIndex, si, dd);
 								rightKey.append(tmp).append(" ").append(rightForm); //$NON-NLS-1$
 							}
@@ -1166,6 +1258,29 @@ public class NGramsDependency {
 	
 	@SuppressWarnings("nls")
 	public void nGramResults(){
+		
+		//TODO enable NIL Heuristic
+		/**
+		//prepare nilCache - remove all unique sentences (length only occur 1x)
+		removeItemsSnr(nilCache);
+		//build list nilEqualSentencesCache with same sentences
+		//same = every token has the same wordform.	
+		createEqualSentences(nilCache);
+		
+		addNilLabels(nGramCache);
+		*/
+		
+//		System.out.println("Equal Sentences---------");
+//		for (Integer snr : nilEqualSentencesCache.keySet()){;
+//			System.out.println(snr + ": " + nilEqualSentencesCache.get(snr));
+//		}
+		
+		
+		//generateNIL(nGramCache);
+		
+
+		
+		
 //		System.out.println("Corpussize: " + corpus.size());
 		
 //		for (Iterator<Entry<String, ArrayList<DependencyItemInNuclei>>> it = nGramCache.entrySet().iterator();
@@ -1205,6 +1320,219 @@ public class NGramsDependency {
 	}
 	
 	
+	/**
+	 * @param nGramCache2
+	 */
+	private void generateNIL(Map<String, ArrayList<DependencyItemInNuclei>> ngrams) {
+		
+	
+		for(String key : ngrams.keySet()){
+				//System.out.println("KEY> "+ key + ": ");
+				
+			for(int corpusIndex = 0; corpusIndex < corpus.size(); corpusIndex++){
+
+				DependencyData  dd = corpus.get(corpusIndex);
+				//System.out.println("CI"+corpus.indexOf(dd));
+			
+				List<DependencyItemInNuclei> diinL = ngrams.get(key);
+				
+				//for(int i = 0; i < diinL.size(); i++){
+				DependencyItemInNuclei diin = diinL.get(0);
+				
+				NilItem nilItem = checkNIL(dd, key, diin);
+				if(nilItem.isNil()){
+					
+					//DependencyItemInNuclei diin = diinL.get(0);
+					
+					int head = diin.getSentenceInfoAt(0).getSentenceHeadIndex();
+					int dependent = diin.getSentenceInfoAt(0).getNucleiIndex();
+					//System.out.println("A" + nilItem.getA() + " B" + nilItem.getB());
+					if (head < dependent){
+						DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+						newDIIN.addNewDependencySentenceInfoUniGrams(
+								corpusIndex, nilItem.getA(), nilItem.getB());								
+						newDIIN.setPosTag("nil"); //$NON-NLS-1$
+						diinL.add(newDIIN);					
+					} else {
+						DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+						newDIIN.addNewDependencySentenceInfoUniGrams(
+								corpusIndex, nilItem.getB(), nilItem.getA());
+						newDIIN.setPosTag("nil"); //$NON-NLS-1$
+						diinL.add(newDIIN);					
+					}					
+					//System.out.println("nil" + key  + " " + nilItem.getA() + nilItem.getB());
+				}
+			}
+		}		
+	}
+
+
+	/**
+	 * @param dd
+	 * @param diin 
+	 * @param dependent
+	 * @param headIndex 
+	 * @param headIndex
+	 * @return 
+	 * @return 
+	 */
+	private NilItem checkNIL(DependencyData dd, String key, DependencyItemInNuclei diin) {
+
+		String[] keySplit = key.split(" "); //$NON-NLS-1$
+		
+		List<Integer> indexOfTokens = new ArrayList<Integer>();
+		List<Integer> indexOfTokens2 = new ArrayList<Integer>();
+		
+		NilItem nilItem;
+		
+		//System.out.println("k0: " + keySplit[0] + " k1 " + keySplit[1]); //$NON-NLS-1$ //$NON-NLS-2$
+		for(int d = 0; d < dd.length(); d++){			
+			//System.out.println(dd.getForm(d) + dIndex + " " + hIndex);
+			if(dd.getForm(d).equals(keySplit[0])){
+				indexOfTokens.add(d);
+//				if(dd.getHead(d) == -1){
+//					System.out.println(dd.getForm(d) + " nil");
+//					indexOfTokens.add(d);
+//				} else {
+//					System.out.println(dd.getForm(dd.getHead(d)));
+//					if(!dd.getForm(dd.getHead(d)).equals(keySplit[1])){
+//						//System.out.println(nGramCache.containsKey(dd.getForm(d) + " " + dd.getForm(dd.getHead(d))));
+//						//System.out.println("D>"+dd.getForm(d) + " " + dd.getForm(dd.getHead(d)));
+//						indexOfTokens.add(d);
+//					}
+//				}
+			}
+			
+			else if(dd.getForm(d).equals(keySplit[1])){
+				indexOfTokens2.add(d);
+			}
+		}
+		
+//		System.out.println(indexOfTokens);
+//		System.out.println(indexOfTokens2);
+//		System.out.println("HCHECK "  //$NON-NLS-1$
+//							+ recieveHead(dd, indexOfTokens, indexOfTokens2)
+//							+ " : "  //$NON-NLS-1$
+//							+ recieveHead(dd, indexOfTokens2, indexOfTokens));
+	
+		if(indexOfTokens.size() > 0 && indexOfTokens2.size() > 0){
+			boolean nil = !recieveHead(dd, indexOfTokens, indexOfTokens2)
+			 		&& !recieveHead(dd, indexOfTokens2, indexOfTokens);
+			//System.out.println("FOUND NIL" + nil);		
+			//System.out.println(key);
+			
+			nilItem = new NilItem(nil, getIndex2Key(dd, keySplit[0], indexOfTokens), getIndex2Key(dd, keySplit[1],indexOfTokens2));
+			return nilItem;			
+		}	
+
+		return new NilItem(false, 1, 1);		
+	}
+	
+
+
+
+	/**
+	 * @param dd 
+	 * @param string
+	 * @param indexOfTokens
+	 * @return
+	 */
+	private int getIndex2Key(DependencyData dd, String key, List<Integer> list) {
+		
+		for(Integer i : list){
+			if(dd.getForm(i).equals(key)){
+				return i+1;
+			}
+		}
+		return -1;
+	}
+
+
+	/**
+	 * @param dd
+	 * @param indexOfTokens
+	 * @param indexOfTokens2 
+	 */
+	private boolean recieveHead(DependencyData dd, List<Integer> l1, List<Integer> l2) {
+		for(Integer i : l1){
+			if(dd.getHead(i) != -1){
+				if(l2.contains(dd.getHead(i))){
+					return true;
+				}
+			}
+		}	
+		return false;
+	}
+
+
+	/**
+	 * @param nilCache2
+	 */
+	private void createEqualSentences(Map<Integer, ArrayList<Integer>> nilCache) {
+		nilEqualSentencesCache = new LinkedHashMap<>();
+		
+		for (Integer length : removeItemsSnr(nilCache).keySet()){			
+			
+			for (int snr = 0; snr < nilCache.get(length).size(); snr++) {
+				List<Integer> tmp = nilCache.get(length);
+				
+				List<Integer> result = sentenceMultipleOccurence(tmp.get(snr), tmp);
+				if(result.size() > 0){
+					nilEqualSentencesCache.put(tmp.get(snr), (ArrayList<Integer>) result);
+				}
+				//System.out.println("Test " + tmp.get(snr) +" " + sentenceMultipleOccurence(tmp.get(snr), tmp) + tmp);
+			}
+		}	
+	}
+
+
+	/**
+	 * @param snr
+	 * @param tmp
+	 */
+	private List<Integer> sentenceMultipleOccurence(int snr, List<Integer> tmp) {
+		DependencyData dd = corpus.get(snr);
+	
+		List<Integer> equalSentences = new ArrayList<Integer>();
+		
+		for(int i = 0; i < tmp.size(); i++){
+			//dont compare same sentences
+			if(snr != tmp.get(i)){
+				DependencyData ddTemp = corpus.get(tmp.get(i));				
+				
+				if(isEqualDependencyData(dd,ddTemp)){
+					equalSentences.add(tmp.get(i));
+				}			
+				//System.out.println("snr " + snr + " compare " + tmp.get(i));
+			}
+		}
+		return equalSentences;		
+	}
+
+
+	/**
+	 * @param dd
+	 * @param ddTemp
+	 * @return
+	 */
+	private boolean isEqualDependencyData(DependencyData dd, DependencyData ddTemp) {
+		
+		int midIndex = dd.length()/2;
+		
+		//check if form in the middle is the same
+		if(!dd.getForm(midIndex).equals(ddTemp.getForm(midIndex))){
+			return false;
+		} else {		
+			for(int index = 0; index < dd.length(); index++){
+				if(!dd.getForm(index).equals(ddTemp.getForm(index))){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+
 	@SuppressWarnings("unused")
 	private void printNuclei(DependencySentenceInfo sentenceInfo){
 		StringBuilder sb = new StringBuilder();
@@ -1260,7 +1588,7 @@ public class NGramsDependency {
 		NGramsDependency ngrams = new NGramsDependency(1, on);
 		try {
 			
-			conellReader.init(dloc, o);			
+			conellReader.init(dloc, on);			
 			//while (cr.next() != null) {
 			for(int i = 0; i < sentencesToRead; i++){
 				DependencyData dd = (DependencyData) conellReader.next();

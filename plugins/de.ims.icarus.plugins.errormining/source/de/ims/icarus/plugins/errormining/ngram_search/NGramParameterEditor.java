@@ -91,8 +91,14 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 			.setDocument(new NumberDocument());
 		formBuilder.addEntry(GRAMS_GREATERX, entry);
 		
+		
 		formBuilder.addToggleFormEntry(CREATE_XML_OUTPUT,
 				"plugins.errormining.labels.createxmlOutput"); //$NON-NLS-1$
+		
+		
+//		entry = new InputFormEntry("plugins.errormining.labels.nilSentenceMatch") //$NON-NLS-1$
+//					.setDocument(new NumberDocument());
+//		formBuilder.addEntry(NIL_SENTENCE_MATCH, entry);
 			
 		return formBuilder;
 	}
@@ -150,6 +156,10 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 		formBuilder.setValue(CREATE_XML_OUTPUT,
 							options.get(CREATE_XML_OUTPUT,
 										DEFAULT_CREATE_XML_OUTPUT));
+		
+//		formBuilder.setValue(NIL_SENTENCE_MATCH,
+//				String.valueOf(options.get(NIL_SENTENCE_MATCH,
+//										DEFAULT_NIL_SENTENCE_MATCH)));
 
 	}
 	

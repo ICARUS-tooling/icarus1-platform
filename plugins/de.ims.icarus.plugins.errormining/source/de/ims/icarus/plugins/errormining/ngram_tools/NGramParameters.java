@@ -48,6 +48,10 @@ public interface NGramParameters {
 	
 	public static final String CREATE_XML_OUTPUT = "createxmlOutput"; //$NON-NLS-1$
 	
+	//public static final String NIL_SENTENCE_MATCH = "nilSentenceMatch"; //$NON-NLS-1$
+	
+	//public static final String NIL_SENTENCE_EXHAUSTIVE = "nilExhaustive"; //$NON-NLS-1$
+	
 	//default values
 	public static final boolean DEFAULT_USE_NUMBER_WILDCARD = true;
 	public static final int DEFAULT_NGRAM_RESULT_LIMIT = 0;
@@ -57,4 +61,5 @@ public interface NGramParameters {
 	public static final int DEFAULT_GRAMS_GREATERX = 0;
 	public static final int DEFAULT_SENTENCE_LIMIT = 0;
 	public static final boolean DEFAULT_CREATE_XML_OUTPUT = false;
+	//public static final int DEFAULT_NIL_SENTENCE_MATCH = 0;
 }
