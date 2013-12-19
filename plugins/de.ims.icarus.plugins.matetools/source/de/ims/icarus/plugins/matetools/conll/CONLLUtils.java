@@ -77,9 +77,9 @@ public final class CONLLUtils {
 		}
 
 		int index = -1;
-		if(input.id.length>1) {
+		if(input.id!=null && input.id.length>1) {
 			String id = input.id[1];
-			int idx = id.indexOf('_');
+			int idx = id==null ? -1 : id.indexOf('_');
 			if(idx!=-1) {
 				index = Integer.parseInt(id.substring(0, idx))-1;
 			}
@@ -128,9 +128,9 @@ public final class CONLLUtils {
 		}
 
 		int index = -1;
-		if(input.id.length>1) {
+		if(input.id!=null && input.id.length>1) {
 			String id = input.id[1];
-			int idx = id.indexOf('_');
+			int idx = id==null ? -1 : id.indexOf('_');
 			if(idx!=-1) {
 				index = Integer.parseInt(id.substring(0, idx))-1;
 			}
