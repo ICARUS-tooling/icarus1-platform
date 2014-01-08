@@ -145,8 +145,8 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	
 	private static int CONTINUE_CSAVE_EXIT = DialogFactory.registerOptions(
 						"config.save-and-continue", //$NON-NLS-1$
-						"cancel", //$NON-NLS-1$
-						"continue"); //$NON-NLS-1$
+						"continue", //$NON-NLS-1$
+						"cancel"); //$NON-NLS-1$
 
 	protected final JTree tree;	
 	protected final Handle masterhandle;	

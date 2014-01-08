@@ -3790,6 +3790,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					switch (columnIndex) {
 					case 0:
 						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						
+						if(iinD.getPosTag().equals(nilString)){
+							return getValueAt(0, 0);
+						}	
 						return getDependentTag(iinD
 								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));
@@ -3800,11 +3804,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 															,Integer.valueOf(number[0])
 															,(Integer) getValueAt(rowIndex, 5));
 						if(iinD.getPosTag().equals(nilString)){
-							return createColoredHTMLString(relationLabel, nilColor);
+							//return createColoredHTMLString(relationLabel, nilColor);
+							return createColoredHTMLString(formatDependencyKeyHTML(nilString), nilColor);
 						}						
 						return relationLabel;
 					case 2:						
 						number  = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						if(iinD.getPosTag().equals(nilString)){
+							return getValueAt(0, 2);
+						}	
 						return getHeadTag(iinD
 								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));
@@ -3824,6 +3832,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					switch (columnIndex) {					
 					case 0:	
 						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						if(iinD.getPosTag().equals(nilString)){
+							return getValueAt(0, 0);
+						}	
 						return getDependentTag(iinD
 								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));
@@ -3834,11 +3845,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 															,Integer.valueOf(number[0])
 															,(Integer) getValueAt(rowIndex, 5));
 						if(iinD.getPosTag().equals(nilString)){
-							return createColoredHTMLString(formatDependencyKeyHTML(relationLabel), nilColor);
+							//return createColoredHTMLString(formatDependencyKeyHTML(relationLabel), nilColor);
+							return createColoredHTMLString(formatDependencyKeyHTML(nilString), nilColor);
 						}						
 						return relationLabel;
 					case 2:		
 						number = ((String) getValueAt(rowIndex, 3)).split(", "); //$NON-NLS-1$
+						if(iinD.getPosTag().equals(nilString)){
+							return getValueAt(0, 2);
+						}	
 						return getHeadTag(iinD
 								,Integer.valueOf(number[0])
 								,(Integer) getValueAt(rowIndex, 5));

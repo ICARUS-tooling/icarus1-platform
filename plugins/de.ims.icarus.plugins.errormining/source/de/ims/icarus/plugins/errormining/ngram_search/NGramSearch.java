@@ -347,28 +347,26 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 				
 				int maxSentences = sentenceLimit;
 				
-				if(maxSentences== 0){
-					maxSentences = source.size()-1;
+				if(maxSentences == 0){
+					maxSentences = source.size();
 				}
 				
 				//progress bar
 				double progress = 0;
-	
+
 				// if zero read everything
 				// 1 makes no sense at all (can't find any ngrams)
 				// we treat one same as zero (look at all sentences...)
-				if (sentenceLimit == 0) {
-					for (int i = 0; i < maxSentences; i++){						
-						SentenceData sd = (SentenceData)source.get(i);						
-						//Debug
-						// for (int j = 0 ; j < dd.length(); j++){
-						// 	System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
-						// }
-						// System.out.println();
-						ngrams.initializeUniGrams((DependencyData) sd, i);
-						progress = (double) i / maxSentences * 50d;
-						setProgress((int)progress);	
-					}				
+				for (int i = 0; i < maxSentences; i++) {
+					SentenceData sd = (SentenceData) source.get(i);
+					// Debug
+					// for (int j = 0 ; j < dd.length(); j++){
+					// System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
+					// }
+					// System.out.println();
+					ngrams.initializeUniGrams((DependencyData) sd, i);
+					progress = (double) i / maxSentences * 50d;
+					setProgress((int) progress);
 				}
 				
 				ngrams.nGramResults();					
@@ -511,7 +509,7 @@ protected class NGramWorker extends Worker{
 			
 
 			int maxSentences = sentenceLimit;
-			System.out.println(sentenceLimit);
+			
 			if(maxSentences == 0){
 				maxSentences = source.size();
 			}

@@ -67,7 +67,8 @@ public class NGramsDependency {
 	
 	//NIL stuff
 	protected Map<Integer,ArrayList<Integer>> nilCache;
-	protected Map<Integer,ArrayList<Integer>> nilEqualSentencesCache;	
+	protected Map<Integer,ArrayList<Integer>> nilEqualSentencesCache;
+	protected Map<String,ArrayList<Integer>> nilLexiconCache;
 	
 	
 	protected List<DependencyData> corpus;
@@ -105,6 +106,7 @@ public class NGramsDependency {
 		corpus = new ArrayList<DependencyData>();
 		
 		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
+		nilLexiconCache = new LinkedHashMap<String,ArrayList<Integer>>();
 	}
 
 	
@@ -128,6 +130,7 @@ public class NGramsDependency {
 		corpus = new ArrayList<DependencyData>();
 		
 		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
+		nilLexiconCache = new LinkedHashMap<String,ArrayList<Integer>>();
 	}
 	
 	
@@ -150,6 +153,7 @@ public class NGramsDependency {
 		corpus = new ArrayList<DependencyData>();
 		
 		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
+		nilLexiconCache = new LinkedHashMap<String,ArrayList<Integer>>();
 	}
 	
 
@@ -180,10 +184,7 @@ public class NGramsDependency {
 				}				
 			}
 		}
-		//
-
-		return null;
-		
+		return null;		
 	}
 	
 	
@@ -254,17 +255,33 @@ public class NGramsDependency {
 		
 		corpus.add(dd);
 
-		if(nilCache.containsKey(dd.length())){
-			nilCache.get(dd.length()).add(sentenceNr);
-		} else {
-			ArrayList<Integer> snrList = new ArrayList<Integer>();
-			snrList.add(sentenceNr);
-			nilCache.put(dd.length(), snrList);
-		}
+		//simple sentence length nil check (not sufficient)
+//		if(nilCache.containsKey(dd.length())){
+//			nilCache.get(dd.length()).add(sentenceNr);
+//		} else {
+//			ArrayList<Integer> snrList = new ArrayList<Integer>();
+//			snrList.add(sentenceNr);
+//			nilCache.put(dd.length(), snrList);
+//		}
+		
+		
 		
 		for (int wordIndex = 0; wordIndex < dd.length(); wordIndex++) {
 			String currentWord = dd.getForm(wordIndex);
 			//System.out.print(currentWord + " "); //$NON-NLS-1$
+			
+			
+			if(nilLexiconCache.containsKey(currentWord)){
+				if(!nilLexiconCache.get(currentWord).contains(sentenceNr)){
+					nilLexiconCache.get(currentWord).add(sentenceNr);
+				}				
+
+			} else {
+				ArrayList<Integer> snrList = new ArrayList<Integer>();
+				snrList.add(sentenceNr);
+				nilLexiconCache.put(currentWord, snrList);
+			}
+			
 			
 			int headIndex = dd.getHead(wordIndex);
 
@@ -1276,7 +1293,7 @@ public class NGramsDependency {
 //		}
 		
 		
-		//generateNIL(nGramCache);
+		generateNIL(nGramCache);
 		
 
 		
@@ -1288,10 +1305,10 @@ public class NGramsDependency {
 //			System.out.println(it.next().getKey());
 //		}
 		
-//		System.out.print("NGramsize " + nGramCount + " ");
-//		System.out.println("Found " + nGramCache.size() + " uniGrams");
+		System.out.print("NGramsize " + nGramCount + " ");
+		System.out.println("Found " + nGramCache.size() + " uniGrams");
 		removeItemsLengthOne(nGramCache);
-//		System.out.println("Remaining " + nGramCache.size() + " filtered uniGrams");
+		System.out.println("Remaining " + nGramCache.size() + " filtered uniGrams");
 		
 //		for(Iterator<String> i = nGramCache.keySet().iterator(); i.hasNext();){
 //			String key = i.next();
@@ -1325,45 +1342,93 @@ public class NGramsDependency {
 	 */
 	private void generateNIL(Map<String, ArrayList<DependencyItemInNuclei>> ngrams) {
 		
+//		System.out.println(nilLexiconCache.keySet());
+//		System.out.println("von" + nilLexiconCache.get("von"));
+//		System.out.println("UN" + nilLexiconCache.get("UN"));
 	
+		//we have to check the entire keyset
+		//nevertheless only pairs where one "real" edge occurs are interesting
 		for(String key : ngrams.keySet()){
-				//System.out.println("KEY> "+ key + ": ");
-				
-			for(int corpusIndex = 0; corpusIndex < corpus.size(); corpusIndex++){
-
-				DependencyData  dd = corpus.get(corpusIndex);
-				//System.out.println("CI"+corpus.indexOf(dd));
+			//System.out.println("KEY> "+ key + ": ");
 			
-				List<DependencyItemInNuclei> diinL = ngrams.get(key);
+			//keySplit[0] = wordform nodeA; [1] = wordform nodeB
+			String[] keySplit = key.split(" "); //$NON-NLS-1$
+			
+			//List including all sentenceNo where the current keypair occurs
+			List<Integer> list = sentencesWithSameKeypair(keySplit);
+			
+			if(list.size() > 1){
+				//System.out.println(key + list);
 				
-				//for(int i = 0; i < diinL.size(); i++){
-				DependencyItemInNuclei diin = diinL.get(0);
-				
-				NilItem nilItem = checkNIL(dd, key, diin);
-				if(nilItem.isNil()){
+				for (int i = 0; i < list.size(); i++) {
+					int corpusIndex = list.get(i);
+
+					DependencyData dd = corpus.get(corpusIndex);
+					// System.out.println("CI"+corpus.indexOf(dd));
+
+					List<DependencyItemInNuclei> diinL = ngrams.get(key);
+
+					// for(int i = 0; i < diinL.size(); i++){
+					DependencyItemInNuclei diin = diinL.get(0);
+
+					NilItem nilItem = checkNIL(dd, key, diin);
 					
-					//DependencyItemInNuclei diin = diinL.get(0);
-					
-					int head = diin.getSentenceInfoAt(0).getSentenceHeadIndex();
-					int dependent = diin.getSentenceInfoAt(0).getNucleiIndex();
-					//System.out.println("A" + nilItem.getA() + " B" + nilItem.getB());
-					if (head < dependent){
+					if (nilItem.isNil()) {
+						// DependencyItemInNuclei diin = diinL.get(0);
+
+						int head = diin.getSentenceInfoAt(0).getSentenceHeadIndex();
+						int dependent = diin.getSentenceInfoAt(0).getNucleiIndex();
+						// System.out.println("A" + nilItem.getA() + " B" +
+						// nilItem.getB());
+						
 						DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
-						newDIIN.addNewDependencySentenceInfoUniGrams(
-								corpusIndex, nilItem.getA(), nilItem.getB());								
+						
+						newDIIN.addNewDependencySentenceInfoUniGrams(corpusIndex, nilItem.getA(), nilItem.getB());
 						newDIIN.setPosTag("nil"); //$NON-NLS-1$
-						diinL.add(newDIIN);					
-					} else {
-						DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
-						newDIIN.addNewDependencySentenceInfoUniGrams(
-								corpusIndex, nilItem.getB(), nilItem.getA());
-						newDIIN.setPosTag("nil"); //$NON-NLS-1$
-						diinL.add(newDIIN);					
-					}					
-					//System.out.println("nil" + key  + " " + nilItem.getA() + nilItem.getB());
+						diinL.add(newDIIN);
+
+//						if (head < dependent) {
+//							//DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+//							newDIIN.addNewDependencySentenceInfoUniGrams(
+//									corpusIndex, nilItem.getA(), nilItem.getB());
+//							newDIIN.setPosTag("nil"); //$NON-NLS-1$
+//							diinL.add(newDIIN);
+//						} else {
+//							//DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+//							newDIIN.addNewDependencySentenceInfoUniGrams(
+//									corpusIndex, nilItem.getB(), nilItem.getA());
+//							newDIIN.setPosTag("nil"); //$NON-NLS-1$
+//							diinL.add(newDIIN);
+//						}
+//						// System.out.println("nil" + key + " " + nilItem.getA()
+//						// + nilItem.getB());
+					}
 				}
-			}
-		}		
+			}	
+		}
+	}
+
+
+	/**
+	 * Use the local wordlexicon to look up the set of sentences where the
+	 * the specified wordpair occur. The intersection set is returned.
+	 * (Of course only sentences where both words occure are interesting when
+	 * looking for nil edges.)
+	 * @param keySplit
+	 * @return 
+	 */
+	private List<Integer> sentencesWithSameKeypair(String[] keyPair) {
+		List<Integer> tempList = new ArrayList<Integer>();
+		tempList.addAll(nilLexiconCache.get(keyPair[0]));
+
+//		System.out.println("a:" + keyPair[0] + " b:" + keyPair[1]);
+//		System.out.println("a:" + nilLexiconCache.get(keyPair[0]));
+//		System.out.println("b:" + nilLexiconCache.get(keyPair[1]));		
+
+		tempList.retainAll(nilLexiconCache.get(keyPair[1]));	
+		//System.out.println("tl:" + tempList);		
+		
+		return tempList;
 	}
 
 
@@ -1415,9 +1480,13 @@ public class NGramsDependency {
 //							+ " : "  //$NON-NLS-1$
 //							+ recieveHead(dd, indexOfTokens2, indexOfTokens));
 	
+		// second check both lists should contain more than one entry
+		// already ensured because only sentences that contain the keypair
+		// are passed
 		if(indexOfTokens.size() > 0 && indexOfTokens2.size() > 0){
+			//check both directions
 			boolean nil = !recieveHead(dd, indexOfTokens, indexOfTokens2)
-			 		&& !recieveHead(dd, indexOfTokens2, indexOfTokens);
+			 				&& !recieveHead(dd, indexOfTokens2, indexOfTokens);
 			//System.out.println("FOUND NIL" + nil);		
 			//System.out.println(key);
 			
@@ -1453,14 +1522,15 @@ public class NGramsDependency {
 	 * @param indexOfTokens
 	 * @param indexOfTokens2 
 	 */
-	private boolean recieveHead(DependencyData dd, List<Integer> l1, List<Integer> l2) {
-		for(Integer i : l1){
-			if(dd.getHead(i) != -1){
-				if(l2.contains(dd.getHead(i))){
+	private boolean recieveHead(DependencyData dd, List<Integer> l1,
+			List<Integer> l2) {
+		for (Integer i : l1) {
+			if (dd.getHead(i) != -1) {
+				if (l2.contains(dd.getHead(i))) {
 					return true;
 				}
 			}
-		}	
+		}
 		return false;
 	}
 
@@ -1575,9 +1645,6 @@ public class NGramsDependency {
 		
 		CONLL09SentenceDataGoldReader conellReader = new CONLL09SentenceDataGoldReader();	
 		DefaultFileLocation dloc = new DefaultFileLocation(file);
-		Options o = null;
-		
-		
 		Options on = new Options();
 		on.put("FringeSTART", 3); //$NON-NLS-1$
 		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
