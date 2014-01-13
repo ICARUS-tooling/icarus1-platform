@@ -35,6 +35,7 @@ import de.ims.icarus.language.model.CorpusMember;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
+import de.ims.icarus.language.model.standard.builder.AbstractContainerBuilder;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
@@ -60,18 +61,36 @@ public class Span extends AbstractNestedContainer {
 	/**
 	 * @param parent
 	 */
-	public Span(Container parent, Container base, int startIndex, int endIndex) {
-		super(parent);
+	public Span(long id, Container parent, Container base, int startIndex, int endIndex) {
+		super(id, parent);
 
 		if (base == null)
 			throw new NullPointerException("Invalid base"); //$NON-NLS-1$
-		if(startIndex<0 || endIndex<0 || startIndex>endIndex)
+		if(/*startIndex<0 || endIndex<0 || */startIndex>endIndex)
 			throw new IndexOutOfBoundsException("Invalid bounds: start="+startIndex+", end="+endIndex); //$NON-NLS-1$ //$NON-NLS-2$
 
 		this.base = base;
 
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
+	}
+
+	protected void addMarkable0(Markable markable) {
+		// The markable has already been added to its original host container.
+		// Therefore we can safely call the indexOf() method
+		int index = base.indexOfMarkable(markable);
+
+		if(index==-1)
+			throw new CorruptedStateException("Markable not yet added to base container: "+markable); //$NON-NLS-1$
+
+		if(startIndex==-1) {
+			startIndex = endIndex = index;
+		} else if(index==startIndex-1) {
+			startIndex--;
+		} else if(index==endIndex+1) {
+			endIndex++;
+		} else
+			throw new IllegalArgumentException("Markable not adjacent to current span: "+markable); //$NON-NLS-1$
 	}
 
 	/**
@@ -126,7 +145,7 @@ public class Span extends AbstractNestedContainer {
 		int size = getMarkableCount();
 		if(index!=0 && index!=size)
 			throw new IllegalArgumentException(CorpusMemberUtils.outOfBoundsMessage(
-					"Invalid index for removal", index, 0, size)); //$NON-NLS-1$
+					"Invalid index for add", index, 0, size)); //$NON-NLS-1$
 
 		boolean append = index==size;
 
@@ -201,14 +220,14 @@ public class Span extends AbstractNestedContainer {
 					markable = base.getMarkableAt(endIndex-1);
 					if(markable.getId()!=id)
 						throw new CorruptedStateException(CorpusMemberUtils.idMismatchMessage(
-								"Moving failed (tail)", id, markable.getId())); //$NON-NLS-1$
+								"Remove failed (tail)", id, markable.getId())); //$NON-NLS-1$
 
 					endIndex--;
 				} else {
 					markable = base.getMarkableAt(startIndex+1);
 					if(markable.getId()!=id)
 						throw new CorruptedStateException(CorpusMemberUtils.idMismatchMessage(
-								"Moving failed (head)", id, markable.getId())); //$NON-NLS-1$
+								"Remove failed (head)", id, markable.getId())); //$NON-NLS-1$
 
 					startIndex++;
 				}
@@ -363,5 +382,25 @@ public class Span extends AbstractNestedContainer {
             if (getMarkableCount()!=expectedSize)
                 throw new ConcurrentModificationException();
         }
+	}
+
+	public static class SpanContainerBuilder extends AbstractContainerBuilder<Span> {
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.builder.ContainerBuilder#addMarkable(de.ims.icarus.language.model.Markable)
+		 */
+		@Override
+		public void addMarkable(Markable markable) {
+			container.addMarkable0(markable);
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.builder.AbstractContainerBuilder#createContainer()
+		 */
+		@Override
+		protected Span createContainer() {
+			return new Span(newId(), parent, base, 0, 0);
+		}
+
 	}
 }

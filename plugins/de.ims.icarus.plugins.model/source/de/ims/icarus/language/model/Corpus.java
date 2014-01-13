@@ -37,6 +37,7 @@ import de.ims.icarus.language.model.events.CorpusAdapter;
 import de.ims.icarus.language.model.events.CorpusListener;
 import de.ims.icarus.language.model.events.EventManager;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
+import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.ManifestOwner;
 import de.ims.icarus.language.model.meta.MetaData;
 import de.ims.icarus.ui.events.EventListener;
@@ -87,7 +88,13 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  * solely of type {@link CorpusListener} and a special callback method is defined for each type of change.
  * (Note that there exists the {@link CorpusAdapter} class that implements the {@code CorpusListener}
  * interface with empty methods so that a new listener implementation only needs to define the methods
- * it actually requires)
+ * it actually requires).
+ * <p>
+ * To allow the handling of large corpora, the {@link ChunkControl} offers a mechanism to load a big corpus
+ * in relatively little parts, so called <i>chunks</i>, each fitting easily into the main memory of the
+ * current machine. The control object ensures that at most one chunk is loaded into memory at any time
+ * and that requesting a new chunk to be loaded causes the current chunk (if present) to be unloaded.
+ * Note that this
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -128,47 +135,49 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	CorpusUndoManager getUndoManager();
 
 	/**
-	 * Resolves a given id and returns the member within this corpus
-	 * that is registered with this id.
+	 * Returns the <i>root</i> {@code IdDomain} that is used for pooling
+	 * ids in this corpus.
 	 *
-	 * @param id the {@code id} of the member to be resolved
-	 * @return The member that was registered for the given {@code ID}
-	 *
-	 * @throws IllegalArgumentException if there is no member registered
-	 * for the given {@code id}
-	 */
-	CorpusMember getMember(long id);
-
-	/**
-	 * Called by layers, containers and structures when new members get
-	 * added to them. The purpose of this method is to centralize the
-	 * registration and notification of new members.
-	 * <p>
-	 * This method should do nothing in the case that a member is already
-	 * present in the corpus (although this might represent a state of
-	 * inconsistency).
-	 *
-	 * @param member
-	 */
-	void addMember(CorpusMember member);
-
-	/**
-	 * Utility method to help external sources to get truly unique names
-	 * for new members of the corpus or for renaming.
-	 *
-	 * @param baseName
 	 * @return
 	 */
-	String getUniqueName(String baseName);
+	IdDomain getGlobalIdDomain();
+
 
 	/**
-	 * Utility method to help external sources to get truly unique ids
-	 * for new context instances.
+	 * Returns the object that manages the resolution and loading
+	 * of data chunks if this corpus is distributed across multiple
+	 * physical locations or {@code null} if it does not support
+	 * chunks.
 	 *
-	 * @param baseName
-	 * @return
+	 * @return The {@code ChunkControl} for this corpus or {@code null}
+	 * if the corpus does not support chunks.
 	 */
-	String getUniqueId(String baseId);
+	ChunkControl getChunkControl();
+
+//	/**
+//	 * Resolves a given id and returns the member within this corpus
+//	 * that is registered with this id.
+//	 *
+//	 * @param id the {@code id} of the member to be resolved
+//	 * @return The member that was registered for the given {@code ID}
+//	 *
+//	 * @throws IllegalArgumentException if there is no member registered
+//	 * for the given {@code id}
+//	 */
+//	CorpusMember getMember(long id);
+
+//	/**
+//	 * Called by layers, containers and structures when new members get
+//	 * added to them. The purpose of this method is to centralize the
+//	 * registration and notification of new members.
+//	 * <p>
+//	 * This method should do nothing in the case that a member is already
+//	 * present in the corpus (although this might represent a state of
+//	 * inconsistency).
+//	 *
+//	 * @param member
+//	 */
+//	void addMember(CorpusMember member);
 
 	/**
 	 * Returns the {@code Context} object all the default members of
@@ -179,12 +188,23 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	Context getDefaultContext();
 
 	/**
-	 * Returns the event manager that is responsible for storing listeners
-	 * and for publishing events.
+	 * Registers the given listener to the internal list of registered
+	 * listeners. Does nothing if the provided listener is {@code null}.
+	 * Note that implementations should make sure that no listener is
+	 * registered more than once. Typically this means doubling the cost
+	 * of registration. Since it is not to be expected that registrations
+	 * occur extremely frequent, this increase in cost can be ignored.
 	 *
-	 * @return
+	 * @param listener The listener to be registered, may be {@code null}
 	 */
-	EventManager getEventManager();
+	void addCorpusListener(CorpusListener listener);
+
+	/**
+	 * Unregisters the given listener from the internal list of registered
+	 * listeners. Does nothing if the provided listener is {@code null}.
+	 * @param listener The listener to be unregistered, may be {@code null}
+	 */
+	void removeCorpusListener(CorpusListener listener);
 
 	/**
 	 * Returns the manifest that describes this corpus.
@@ -235,7 +255,8 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	List<Layer> getLayers();
 
 	/**
-	 * Returns the layer that has the given id;
+	 * Returns the layer that has the given id. This is a bridging method to
+	 * fetch the actual {@code Layer} that is described by a {@link LayerManifest}.
 	 *
 	 * @param id
 	 * @return
@@ -247,7 +268,7 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 
 	/**
 	 * Returns all the layers in this corpus that are of the given type as defined
-	 * by their {@link Layer#getType()} method. If this corpus does not yet host any layers the returned
+	 * by their {@link Layer#getLayerType()} method. If this corpus does not yet host any layers the returned
 	 * list is empty. Either way the returned list should be immutable.
 	 *
 	 * @param type The desired type (e.g. "lemma")

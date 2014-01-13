@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.results;
@@ -60,13 +60,13 @@ import de.ims.icarus.util.Options;
  *
  */
 public class Default2DResultPresenter extends SearchResultTabbedPresenter {
-	
+
 	public static final int SUPPORTED_DIMENSIONS = 2;
-	
+
 	// TODO allow sub-result creation for cells, rows and columns (0D and 1D respectively)
-	
+
 	protected JTable table;
-	
+
 	protected RowHeaderList rowHeader;
 	protected TableRowHeaderRenderer rowHeaderRenderer;
 	protected SearchResultTableModel tableModel;
@@ -88,7 +88,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	protected void updateGroupPainters() {
 		int id1 = SearchUtils.getGroupId(getSearchResult(), 0);
 		int id2 = SearchUtils.getGroupId(getSearchResult(), 1);
-		
+
 		if(tableModel.isFlipped()) {
 			Grouping.setGroupIds(table, id2, id1);
 		} else {
@@ -105,7 +105,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 		if(searchResult==null) {
 			searchResult = ResultDummies.dummyResult2D;
 		}
-		
+
 		tableModel.setResultData(searchResult);
 		cellRenderer.setSearchResult(searchResult);
 	}
@@ -116,7 +116,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	@Override
 	public void refresh() {
 		tableModel.update();
-		
+
 		// TODO refresh sub-result tabs as well?
 	}
 
@@ -134,10 +134,10 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	protected void setNumberDisplayMode(NumberDisplayMode mode) {
 		if(mode==null)
 			throw new NullPointerException("Invalid display mode"); //$NON-NLS-1$
-		
+
 		cellRenderer.setDisplayMode(mode);
 		tableModel.setDisplayMode(mode);
-		
+
 		// TODO ensure that the row header is still readable (adjust width?)
 	}
 
@@ -146,7 +146,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 		if(hasCurrentTask()) {
 			return;
 		}
-		
+
 		SortTableJob job = new SortTableJob(sortMode){
 			@Override
 			protected Object doInBackground() throws Exception {
@@ -162,7 +162,7 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	@Override
 	protected void flipTable() {
 		tableModel.flip();
-		
+
 		updateGroupPainters();
 	}
 
@@ -177,39 +177,39 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 	@Override
 	protected void buildContentPanel() {
 		contentPanel = new JPanel(new BorderLayout());
-		
+
 		cellRenderer = new ResultCountTableCellRenderer();
-		
+
 		tableModel = new SearchResultTableModel(ResultDummies.dummyResult2D);
 		table = createTable(tableModel, cellRenderer, false);
 		table.addMouseListener(getHandler());
-		
+
 		rowHeader = createRowHeader(tableModel.getRowHeaderModel(), table, contentPanel);
-		
+
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setRowHeaderView(rowHeader);
 		scrollPane.setBorder(UIUtil.topLineBorder);
 		Grouping.decorate(scrollPane, true);
-		
+
 		CompoundMenuButton menuButtonRows = createCompoundButton(SORT_ROWS_BUTTON);
 		CompoundMenuButton menuButtonCols = createCompoundButton(SORT_COLUMNS_BUTTON);
-		
+
 		Options options = new Options();
 		options.put("sortButtons", new Object[]{ //$NON-NLS-1$
 				EntryType.SEPARATOR,
-				menuButtonRows, 
+				menuButtonRows,
 				menuButtonRows.getOpenButton(),
-				menuButtonCols, 
+				menuButtonCols,
 				menuButtonCols.getOpenButton(),
 		});
 		options.put("multiline", true); //$NON-NLS-1$
 		JToolBar toolBar = getActionManager().createToolBar(
 				"plugins.searchTools.searchResultPresenter.toolBarList2D", options); //$NON-NLS-1$
-		
+
 		overviewPanel = new JPanel(new BorderLayout());
 		overviewPanel.add(toolBar, BorderLayout.NORTH);
 		overviewPanel.add(scrollPane, BorderLayout.CENTER);
-		
+
 		contentPanel.add(overviewPanel, BorderLayout.CENTER);
 	}
 
@@ -221,34 +221,34 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 				super.mouseClicked(e);
 				return;
 			}
-			
+
 			if(e.getClickCount()!=2 || !SwingUtilities.isLeftMouseButton(e)) {
 				return;
 			}
-			
+
 			int row = table.rowAtPoint(e.getPoint());
 			int col = table.columnAtPoint(e.getPoint());
-			
+
 			if(row==-1 || col==-1) {
 				return;
 			}
-			
+
 			int count = tableModel.getValueAt(row, col);
 			if(count==0) {
 				return;
 			}
-			
+
 			int[] indices = new int[2];
-			
+
 			try {
 				indices[0] = tableModel.translateRowIndex(row, col);
 				indices[1] = tableModel.translateColumnIndex(row, col);
-				
+
 				String label = tableModel.getRowName(row)+"/"+tableModel.getColumnName(col); //$NON-NLS-1$
-				
+
 				displaySelectedSubResult(indices, label);
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to handle sub-result selection: "+e, ex); //$NON-NLS-1$
 			}
 		}
@@ -259,8 +259,8 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 	}
 }

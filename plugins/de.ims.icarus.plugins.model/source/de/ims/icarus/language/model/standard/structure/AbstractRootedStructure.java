@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
+import java.util.List;
+
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.CorpusMember;
 import de.ims.icarus.language.model.Edge;
@@ -35,20 +37,92 @@ import de.ims.icarus.language.model.standard.LookupList;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
+ * Implements a rooted structure of arbitrary type (chain, tree or graph).
+ * <p>
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class AbstractRootedStructure extends EmptyStructure {
+public abstract class AbstractRootedStructure extends EmptyStructure {
 
 	private final LookupList<Edge> edges = new LookupList<>();
 
-	public AbstractRootedStructure(Container parent, Container boundary) {
-		super(parent, boundary);
+	private final Markable root;
+
+	public AbstractRootedStructure(long id, Container parent) {
+		super(id, parent);
+
+		root = createRoot();
 	}
 
-	public AbstractRootedStructure(Container parent) {
-		super(parent);
+	public AbstractRootedStructure(long id, Container parent, Container boundary,
+			boolean augment, boolean boundaryAsBase) {
+		super(id, parent, boundary, augment, boundaryAsBase);
+
+		root = createRoot();
+	}
+
+	protected void addAllEdges0(List<? extends Edge> edges) {
+		this.edges.addAll(edges);
+
+		invalidate();
+	}
+
+	protected void addAllEdges0(Edge...edges) {
+		this.edges.addAll(edges);
+
+		invalidate();
+	}
+
+	protected void addEdge0(Edge edge) {
+		edges.add(edge);
+
+		invalidate();
+	}
+
+	/**
+	 * Creates the single {@code root} node for this structure. Note that
+	 * each structure must declare its own root object. Otherwise it would be
+	 * impossible for annotations to be assigned to the correct root node!
+	 *
+	 * @return
+	 */
+	protected Markable createRoot() {
+		return new Root(this);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getRoot()
+	 */
+	@Override
+	public Markable getRoot() {
+		return root;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#isRoot(de.ims.icarus.language.model.Markable)
+	 */
+	@Override
+	public boolean isRoot(Markable node) {
+		if (node == null)
+			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
+
+		if(node==root) {
+			return true;
+		} else if(!containsMarkable(node))
+			throw new IllegalArgumentException("Unknown node: "+node); //$NON-NLS-1$
+
+		return false;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#isMultiRoot()
+	 */
+	@Override
+	public boolean isMultiRoot() {
+		return true;
 	}
 
 	/**
@@ -56,8 +130,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public int getEdgeCount() {
-		// TODO Auto-generated method stub
-		return super.getEdgeCount();
+		return edges.size();
 	}
 
 	/**
@@ -65,8 +138,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public Edge getEdgeAt(int index) {
-		// TODO Auto-generated method stub
-		return super.getEdgeAt(index);
+		return edges.get(index);
 	}
 
 	/**
@@ -74,8 +146,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public int indexOfEdge(Edge edge) {
-		// TODO Auto-generated method stub
-		return super.indexOfEdge(edge);
+		return edges.indexOf(edge);
 	}
 
 	/**
@@ -83,8 +154,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public boolean containsEdge(Edge edge) {
-		// TODO Auto-generated method stub
-		return super.containsEdge(edge);
+		return edges.contains(edge);
 	}
 
 	/**
@@ -92,32 +162,86 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public void removeAllEdges() {
-		execute(new ClearChange());
+		execute(new ClearEdgesChange());
 	}
 
+	/**
+	 * Verifies that the given {@code edge} is allowed to be added to this structure.
+	 * THe default implementation only checks the source and target of the edge using the
+	 * {@link #checkMarkable(Markable)} method. Subclasses should override this method to
+	 * perform structure type specific checks to ensure that certain constraints are not
+	 * violated (like having at most one incoming edge in the case of a tree structure).
+	 * When overriding a subclass should still call this method via {@code super#checkEdge(Edge)}
+	 * to make sure that the terminals of the edge are valid.
+	 *
+	 * @param edge The {@code edge} to verify
+	 */
 	protected void checkEdge(Edge edge) {
 		if (edge == null)
-			throw new NullPointerException("Invalid edge");
+			throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
 
 		checkMarkable(edge.getSource());
 		checkMarkable(edge.getTarget());
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#addEdge(de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Edge)
 	 */
 	@Override
-	public Markable addEdge(Markable source, Markable target) {
-		Edge edge = new
+	public Edge addEdge(Edge edge) {
+		return addEdge(edge, getEdgeCount()-1);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#addEdge(de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable, int)
+	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Edge, int)
+	 */
+	@Override
+	public Edge addEdge(Edge edge, int index) {
+		checkEdge(edge);
+
+		execute(new EdgeChange(index, edge.getId(), edge));
+
+		return edge;
+	}
+
+	/**
+	 * Creates a new {@code Edge} that can be added to this structure.
+	 * The default implementation generates a simple directed edge.
+	 * Note that no verification is performed in this method, since
+	 * an edge should only be checked once an attempt is made to actually
+	 * add it to the structure!
+	 *
+	 * @param source
+	 * @param target
+	 * @return
+	 */
+	protected Edge createEdge(Markable source, Markable target) {
+		long id = getCorpus().getGlobalIdDomain().nextId();
+		return new DefaultEdge(id, this, source, target);
+	}
+
+	/**
+	 * Creates a new {@link DefaultEdge} object using the given
+	 * {@code isSource} and {@code target} markables and attempts
+	 * to add it using {@link #addEdge(Edge)}
+	 *
+	 * @see #addEdge(Edge)
+	 */
+	@Override
+	public Edge addEdge(Markable source, Markable target) {
+		return addEdge(createEdge(source, target));
+	}
+
+	/**
+	 * Creates a new {@link DefaultEdge} object using the given
+	 * {@code isSource} and {@code target} markables and attempts
+	 * to add it using {@link #addEdge(Edge)}
+	 *
+	 * @see #addEdge(Edge, int)
 	 */
 	@Override
 	public Edge addEdge(Markable source, Markable target, int index) {
-		// TODO Auto-generated method stub
-		return super.addEdge(source, target, index);
+		return addEdge(createEdge(source, target), index);
 	}
 
 	/**
@@ -127,7 +251,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	public Edge removeEdge(int index) {
 		Edge edge = getEdgeAt(index);
 
-		execute(new ElementChange(index, edge.getId(), edge));
+		execute(new EdgeChange(index, edge.getId(), null));
 
 		return edge;
 	}
@@ -139,7 +263,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	public Edge removeEdge(Edge edge) {
 		int index = indexOfEdge(edge);
 
-		execute(new ElementChange(index, edge.getId(), null));
+		execute(new EdgeChange(index, edge.getId(), null));
 
 		return edge;
 	}
@@ -149,7 +273,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public void moveEdge(int index0, int index1) {
-		execute(new MoveChange(index0, index1));
+		execute(new MoveEdgeChange(index0, index1));
 	}
 
 	/**
@@ -159,7 +283,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 	public void moveEdge(Edge edge, int index) {
 		int index0 = indexOfEdge(edge);
 
-		execute(new MoveChange(index0, index));
+		execute(new MoveEdgeChange(index0, index));
 	}
 
 	/**
@@ -167,18 +291,68 @@ public class AbstractRootedStructure extends EmptyStructure {
 	 */
 	@Override
 	public void setTerminal(Edge edge, Markable markable, boolean isSource) {
-		// TODO Auto-generated method stub
-		super.setTerminal(edge, markable, isSource);
+		execute(new TerminalChange(edge, isSource, markable));
 	}
 
-	private class ElementChange implements AtomicChange {
+	/**
+	 * Allows subclasses to intercept execution of an {@code add} change.
+	 * This method is intended to be both a notification for the structure
+	 * to refresh its internal data and an opportunity to verify the correctness
+	 * of the change.
+	 * <p>
+	 * If this method throws an exception no changes will be carried out by
+	 * the model!
+	 *
+	 * @param edge The {@code Edge} that will be added to the structure
+	 * @param index The position in the list the edge should be placed at
+	 */
+	protected void edgeAdded(Edge edge, int index) {
+		// hook for subclasses to refresh structure data
+	}
+
+
+	/**
+	 * Allows subclasses to intercept execution of an {@code remove} change.
+	 * This method is intended to be both a notification for the structure
+	 * to refresh its internal data and an opportunity to verify the correctness
+	 * of the change.
+	 * <p>
+	 * If this method throws an exception no changes will be carried out by
+	 * the model!
+	 *
+	 * @param edge The {@code Edge} that will be added to the structure
+	 * @param index The position in the list the edge should be placed at
+	 */
+	protected void edgeRemoved(Edge edge, int index) {
+		// hook for subclasses to refresh structure data
+	}
+
+	/**
+	 * Allows subclasses to intercept execution of an {@code terminal} change.
+	 * This method is intended to be both a notification for the structure
+	 * to refresh its internal data and an opportunity to verify the correctness
+	 * of the change.
+	 * <p>
+	 * If this method throws an exception no changes will be carried out by
+	 * the model!
+	 *
+	 * @param edge The {@code Edge} whose terminal will be changed
+	 * @param isSource Specifies whether or not the source terminal is affected
+	 * @param oldTerminal The old terminal (this is essentially the same as {@link Edge#getSource()}
+	 * @param newTerminal The markable to which the terminal should be changed
+	 */
+	protected void terminalChanged(Edge edge, boolean isSource, Markable oldTerminal, Markable newTerminal) {
+		// hook for subclasses to refresh structure data
+	}
+
+	private class EdgeChange implements AtomicChange {
 
 		private Edge edge;
 		private final int index;
 		private final long id;
 		private int expectedSize;
 
-		public ElementChange(int index, long id, Edge edge) {
+		public EdgeChange(int index, long id, Edge edge) {
 			this.index = index;
 			this.id = id;
 			this.edge = edge;
@@ -199,12 +373,16 @@ public class AbstractRootedStructure extends EmptyStructure {
 					throw new CorruptedStateException(CorpusMemberUtils.idMismatchMessage(
 							"Removing failed", id, edges.get(index).getId())); //$NON-NLS-1$
 
+				edgeRemoved(edges.get(index), index);
+
 				edge = edges.remove(index);
 				expectedSize--;
 			} else {
+				edgeAdded(edge, index);
+
 				edges.add(index, edge);
-				edge = null;
 				expectedSize++;
+				edge = null;
 			}
 		}
 
@@ -218,13 +396,13 @@ public class AbstractRootedStructure extends EmptyStructure {
 
 	}
 
-	private class MoveChange implements AtomicChange {
+	private class MoveEdgeChange implements AtomicChange {
 
 		private int indexFrom, indexTo;
 		private long idFrom, idTo;
 		private int expectedSize;
 
-		public MoveChange(int indexFrom, int indexTo) {
+		public MoveEdgeChange(int indexFrom, int indexTo) {
 			this.indexFrom = indexFrom;
 			this.indexTo = indexTo;
 
@@ -263,6 +441,8 @@ public class AbstractRootedStructure extends EmptyStructure {
 			long idTmp = idFrom;
 			idFrom = idTo;
 			idTo = idTmp;
+
+			//TODO should we add some hook to react on edge movement?
 		}
 
 		/**
@@ -275,7 +455,7 @@ public class AbstractRootedStructure extends EmptyStructure {
 
 	}
 
-	private class ClearChange implements AtomicChange {
+	private class ClearEdgesChange implements AtomicChange {
 
 		private Object[] items;
 		private int expectedSize = edges.size();
@@ -298,6 +478,8 @@ public class AbstractRootedStructure extends EmptyStructure {
 				expectedSize = items.length;
 				items = null;
 			}
+
+			invalidate();
 		}
 
 		/**
@@ -306,6 +488,59 @@ public class AbstractRootedStructure extends EmptyStructure {
 		@Override
 		public CorpusMember getAffectedMember() {
 			return AbstractRootedStructure.this;
+		}
+
+	}
+
+	private class TerminalChange implements AtomicChange {
+
+		private final Edge edge;
+		private final boolean isSource;
+		private Markable terminal;
+		private long expectedId;
+
+		public TerminalChange(Edge edge, boolean isSource, Markable terminal) {
+			if (edge == null)
+				throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
+			if (terminal == null)
+				throw new NullPointerException("Invalid terminal");  //$NON-NLS-1$
+
+			this.edge = edge;
+			this.isSource = isSource;
+			this.terminal = terminal;
+
+			expectedId = isSource ? edge.getSource().getId() : edge.getTarget().getId();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 */
+		@Override
+		public void execute() {
+			Markable oldTerminal = isSource ? edge.getSource() : edge.getTarget();
+			if(expectedId!=oldTerminal.getId())
+				throw new CorruptedStateException(CorpusMemberUtils.idMismatchMessage(
+						"Terminal change failed", expectedId, oldTerminal.getId())); //$NON-NLS-1$
+
+			expectedId = terminal.getId();
+
+			terminalChanged(edge, isSource, oldTerminal, terminal);
+
+			if(isSource) {
+				edge.setSource(terminal);
+			} else {
+				edge.setTarget(terminal);
+			}
+
+			terminal = oldTerminal;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 */
+		@Override
+		public CorpusMember getAffectedMember() {
+			return edge;
 		}
 
 	}

@@ -42,8 +42,8 @@ public class BaseMarkable extends AbstractMarkable {
 	 * @param id
 	 * @param container
 	 */
-	public BaseMarkable(Container container, int index) {
-		super(container);
+	public BaseMarkable(long id, Container container, int index) {
+		super(id, container);
 
 		this.index = index;
 	}

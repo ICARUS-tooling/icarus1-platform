@@ -809,6 +809,8 @@ public class CoreferenceDocument extends BatchDocument {
 			}
 
 			Color col = CoreferenceStyling.getClusterColor(clusterId);
+			//TMP little hack for the demo paper
+//			col = new Color(38, 251, 38);
 
 			// Superscript style
 			superscript = new SimpleAttributeSet();

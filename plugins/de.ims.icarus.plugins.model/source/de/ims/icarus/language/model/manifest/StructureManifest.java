@@ -47,7 +47,9 @@ public interface StructureManifest extends ContainerManifest {
 	void setStructureType(StructureType structureType);
 
 	/**
-	 *
+	 * Returns the manifest describing the <i>boundary containers</i> used for
+	 * {@code Structure} instances of this manifest or {@code null} if those
+	 * structures are not restricted by boundaries.
 	 * @return
 	 */
 	ContainerManifest getBoundaryContainerManifest();

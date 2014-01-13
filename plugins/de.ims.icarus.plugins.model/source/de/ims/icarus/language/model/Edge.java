@@ -26,6 +26,16 @@
 package de.ims.icarus.language.model;
 
 /**
+ * Specifies a member of a {@code Structure} object. In addition to being
+ * a simple {@link Markable}, an {@code Edge} consists of a {@code source}
+ * and {@code target} markable.
+ * <p>
+ * <b>Note</b> that while this interface specifies methods to change terminals
+ * ({@link #setSource(Markable)} and {@link #setTarget(Markable)}) one should never
+ * call them directly! They are necessary for the enclosing structure to modify
+ * edge terminals. So to achieve the desired effect <b>always</b> use
+ * {@link Structure#setTerminal(Edge, Markable, boolean)} on the structure object
+ * obtained via {@link Edge#getStructure()}!
  *
  * @author Markus Gärtner
  * @version $Id$

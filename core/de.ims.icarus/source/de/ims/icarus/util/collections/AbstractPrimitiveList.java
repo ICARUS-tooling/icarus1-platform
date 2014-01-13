@@ -23,28 +23,28 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard;
-
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.util.collections.LongHashMap;
+package de.ims.icarus.util.collections;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class MemberLookup {
+public class AbstractPrimitiveList {
 
-	private final LongHashMap<CorpusMember> lookup = new LongHashMap<>(1000);
+	protected int size = 0;
 
-	public void addMember(CorpusMember member) {
-		if(member==null)
-			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+    protected void rangeCheck(int index) {
+        if (index >= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
 
-		lookup.put(member.getId(), member);
-	}
+    protected void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
 
-	public CorpusMember getMember(long id) {
-		return lookup.get(id);
-	}
+    protected String outOfBoundsMsg(int index) {
+        return "Index: "+index+", Size: "+size; //$NON-NLS-1$ //$NON-NLS-2$
+    }
 }

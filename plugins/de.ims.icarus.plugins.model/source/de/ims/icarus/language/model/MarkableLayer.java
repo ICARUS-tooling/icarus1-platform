@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
@@ -29,15 +29,12 @@ import de.ims.icarus.language.model.manifest.ManifestOwner;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 
 /**
- * A {@code MarkableLayer} defines a collection of markables. If it is 
+ * A {@code MarkableLayer} defines a collection of markables. If it is
  * the <i>base layer</> of a corpus it describes the basic collection
  * of available markables for that corpus. In any other case it serves
- * as a sort of aggregated view, grouping markables of the underlying 
+ * as a sort of aggregated view, grouping markables of the underlying
  * layers in its container.
- * <p>
- * In addition this layer can provide structural information for its
- * markables. 
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -48,16 +45,18 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 * Returns the shared {@code MarkableLayerManifest} that holds
 	 * information about markable composition and possible structures
 	 * in this layer.
-	 * 
+	 *
 	 * @return The manifest that describes this collection of markables
 	 */
 	@Override
 	MarkableLayerManifest getManifest();
-	
+
 	/**
 	 * Returns the container holding all the {@code Markable} objects this
 	 * layer defines.
 	 * @return The root container of this layer
 	 */
 	Container getContainer();
+
+//	IdDomain getIdDomain();
 }

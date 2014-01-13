@@ -155,7 +155,13 @@ public class CorpusEditModel extends WeakEventSource {
 	 * progress. This is considered as a micro-transaction and therefore
 	 * a full cycle of update level relate methods is called. Note that if
 	 * the change fails in its {@link AtomicChange#execute()} method by
-	 * throwing an exception, the update level will remain unaffected.
+	 * throwing an exception, the update level will remain unaffected and no
+	 * listener notification will be performed.
+	 * <p>
+	 * Note that a change will only trigger a {@value CorpusEditEvents#EXECUTE}
+	 * event the first time it is executed by the model. Subsequent executions
+	 * (when undoing or redoing a change) will {@code not} result in events being
+	 * fired for every atomic change!
 	 *
 	 * @param change
 	 */

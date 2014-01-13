@@ -68,6 +68,10 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 		/**
 		 * Executes the change and modifies it internal information
 		 * so that the next call to this method reverts the result.
+		 * If a change requires a specific set of preconditions to be
+		 * carried out, it should check them first or at least try to
+		 * fail before making any permanent changes to the model, should
+		 * any of those conditions be unfulfilled.
 		 *
 		 * @throws CorruptedStateException if the preconditions of this
 		 * change are not met

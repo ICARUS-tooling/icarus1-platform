@@ -47,15 +47,19 @@ public abstract class AbstractListContainer extends AbstractContainer {
 
 	private final LookupList<Markable> list = new LookupList<>();
 
-	protected void addAll(List<? extends Markable> markables) {
+	public AbstractListContainer(long id) {
+		super(id);
+	}
+
+	protected void addAllMarkables0(List<? extends Markable> markables) {
 		list.addAll(markables);
 	}
 
-	protected void addAll(Markable...markables) {
+	protected void addAllMarkables0(Markable...markables) {
 		list.addAll(markables);
 	}
 
-	protected void add(Markable markable) {
+	protected void addMarkable0(Markable markable) {
 		list.add(markable);
 	}
 
@@ -145,13 +149,17 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		execute(new ClearChange());
 	}
 
+	protected void checkMarkable(Markable markable) {
+		if (markable == null)
+			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+	}
+
 	/**
 	 * @see de.ims.icarus.language.model.Container#addMarkable(int)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+		checkMarkable(markable);
 
 		execute(new ElementChange(index, markable.getId(), markable));
 	}
@@ -198,6 +206,22 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		execute(new MoveChange(index0, index));
 	}
 
+	protected void invalidate() {
+		// hook for subclasses to clear caches
+	}
+
+	protected void markableAdded(Markable markable, int index) {
+		// hook for subclasses
+	}
+
+	protected void markableRemoved(Markable markable, int index) {
+		// hook for subclasses
+	}
+
+	protected void markableMoved(Markable markable, int index0, int index1) {
+		// hook for subclasses
+	}
+
 	private class ElementChange implements AtomicChange {
 
 		private Markable markable;
@@ -228,10 +252,12 @@ public abstract class AbstractListContainer extends AbstractContainer {
 
 				markable = list.remove(index);
 				expectedSize--;
+				markableRemoved(markable, index);
 			} else {
 				list.add(index, markable);
-				markable = null;
 				expectedSize++;
+				markableAdded(markable, index);
+				markable = null;
 			}
 		}
 
@@ -283,6 +309,8 @@ public abstract class AbstractListContainer extends AbstractContainer {
 			list.set(m2, indexFrom);
 			list.set(m1, indexTo);
 
+			markableMoved(m1, indexFrom, indexTo);
+
 			int tmp = indexFrom;
 			indexFrom = indexTo;
 			indexTo = tmp;
@@ -325,6 +353,8 @@ public abstract class AbstractListContainer extends AbstractContainer {
 				expectedSize = items.length;
 				items = null;
 			}
+
+			invalidate();
 		}
 
 		/**
@@ -344,7 +374,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		 */
 		@Override
 		public void addMarkable(Markable markable) {
-			container.add(markable);
+			container.addMarkable0(markable);
 		}
 
 	}

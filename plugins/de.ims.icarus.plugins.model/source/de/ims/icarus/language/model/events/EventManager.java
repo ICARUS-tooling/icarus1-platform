@@ -25,34 +25,188 @@
  */
 package de.ims.icarus.language.model.events;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import de.ims.icarus.language.model.Context;
+import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.meta.MetaData;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface EventManager {
+public class EventManager {
 
+	private final Corpus corpus;
 
-	/**
-	 * Registers the given listener to the internal list of registered
-	 * listeners. Does nothing if the provided listener is {@code null}.
-	 * Note that implementations should make sure that no listener is
-	 * registered more than once. Typically this means doubling the cost
-	 * of registration. Since it is not to be expected that registrations
-	 * occur extremely frequent, this increase in cost can be ignored.
-	 * 
-	 * @param l The listener to be registered, may be {@code null}
-	 */
-	void addCorpusListener(CorpusListener l);
+	private final List<CorpusListener> listeners = new CopyOnWriteArrayList<>();
 
-	/**
-	 * Unregisters the given listener from the internal list of registered
-	 * listeners. Does nothing if the provided listener is {@code null}.
-	 * @param l The listener to be unregistered, may be {@code null}
-	 */
-	void removeCorpusListener(CorpusListener l);
+	public EventManager(Corpus corpus) {
+		if (corpus == null)
+			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
 
-	void fireCorpusChanged(CorpusEvent e);
+		this.corpus = corpus;
+	}
 
-	// TODO add fireXXX methods for all methods in the CorpusListener interface!
+	public void addCorpusListener(CorpusListener listener) {
+		if (listener == null)
+			throw new NullPointerException("Invalid listener");  //$NON-NLS-1$
+
+		if(!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
+
+	public void removeCorpusListener(CorpusListener listener) {
+		if (listener == null)
+			throw new NullPointerException("Invalid listener");  //$NON-NLS-1$
+
+		if(listeners.contains(listener)) {
+			listeners.remove(listener);
+		}
+	}
+
+	public void fireCorpusChanged() {
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus);
+
+		for(CorpusListener listener : listeners) {
+			listener.corpusChanged(event);
+		}
+	}
+
+	public void fireCorpusSaved() {
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus);
+
+		for(CorpusListener listener : listeners) {
+			listener.corpusSaved(event);
+		}
+	}
+
+	public void fireContextAdded(Context context) {
+		if (context == null)
+			throw new NullPointerException("Invalid context"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"context", context); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.contextAdded(event);
+		}
+	}
+
+	public void fireContextRemoved(Context context) {
+		if (context == null)
+			throw new NullPointerException("Invalid context"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"context", context); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.contextRemoved(event);
+		}
+	}
+
+	public void fireMemberAdded(CorpusMember member) {
+		if (member == null)
+			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"member", member); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.memberAdded(event);
+		}
+	}
+
+	public void fireMemberRemoved(CorpusMember member) {
+		if (member == null)
+			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"member", member); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.memberRemoved(event);
+		}
+	}
+
+	public void fireMemberChanged(CorpusMember member) {
+		if (member == null)
+			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"member", member); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.memberChanged(event);
+		}
+	}
+
+	public void fireMetaDataAdded(MetaData metaData, Layer layer) {
+		if (metaData == null)
+			throw new NullPointerException("Invalid metaData"); //$NON-NLS-1$
+		if (layer == null)
+			throw new NullPointerException("Invalid layer");  //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"metadata", metaData, "layer", layer); //$NON-NLS-1$ //$NON-NLS-2$
+
+		for(CorpusListener listener : listeners) {
+			listener.metaDataAdded(event);
+		}
+	}
+
+	public void fireMetaDataRemoved(MetaData metaData, Layer layer) {
+		if (metaData == null)
+			throw new NullPointerException("Invalid metaData"); //$NON-NLS-1$
+		if (layer == null)
+			throw new NullPointerException("Invalid layer");  //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"metadata", metaData, "layer", layer); //$NON-NLS-1$ //$NON-NLS-2$
+
+		for(CorpusListener listener : listeners) {
+			listener.metaDataRemoved(event);
+		}
+	}
 }

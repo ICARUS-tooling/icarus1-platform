@@ -48,12 +48,12 @@ public class Singleton extends AbstractNestedContainer {
 	/**
 	 * @param parent
 	 */
-	public Singleton(Container parent) {
-		super(parent);
+	public Singleton(long id, Container parent) {
+		super(id, parent);
 	}
 
-	public Singleton(Container parent, Markable singleton) {
-		this(parent);
+	public Singleton(long id, Container parent, Markable singleton) {
+		this(id, parent);
 
 		if (singleton == null)
 			throw new NullPointerException("Invalid singleton"); //$NON-NLS-1$
@@ -150,7 +150,7 @@ public class Singleton extends AbstractNestedContainer {
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
-		if(index!=0)
+		if(index!=0 || getMarkableCount()==0)
 			throw new IndexOutOfBoundsException();
 
 		Markable markable = singleton;

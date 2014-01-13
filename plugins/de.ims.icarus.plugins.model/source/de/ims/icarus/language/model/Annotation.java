@@ -19,45 +19,31 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.mutation.batch;
+package de.ims.icarus.language.model;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface BatchMutator {
-	
-	/**
-	 * Tries to acquire the modification lock on the underlying
-	 * corpus member and returns {@code true} if successful.
-	 * 
-	 * @return {@code true} iff the modification lock on the
-	 * mutated corpus member has successfully been acquired
-	 */
-	boolean beginBatch();
+public interface Annotation {
 
 	/**
-	 * Discards all accumulated batch operations and releases
-	 * the previously acquired modification lock.
-	 * 
-	 * @throws IllegalStateException if this mutator does not
-	 * currently hold the modification lock on the underlying
-	 * corpus member
+	 * Returns the {@code value} this annotation wraps.
+	 * @return
 	 */
-	void discardBatch();
-	
+	Object getValue();
+
 	/**
-	 * 
-	 * @return {@code true} iff all pending batch operations have
-	 * been executed successfully
-	 * @throws IllegalStateException if this mutator does not
-	 * currently hold the modification lock on the underlying
-	 * corpus member
+	 * Returns the type of this annotation that provides
+	 * additional information on how to visualize/present the
+	 * annotation to the user.
+	 *
+	 * @return
 	 */
-	boolean executeBatch();
+	AnnotationType getAnnotationType();
 }

@@ -47,6 +47,10 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	AnnotationLayerManifest getManifest();
 
 	/**
+	 * Returns the annotation for a given markable or {@code null} if that markable
+	 * has not been assigned an annotation value in this layer. Note that the returned
+	 * object can be either an actual value or an {@link Annotation} instance that wraps
+	 * a value and provides further information.
 	 *
 	 * @param markable
 	 * @return
@@ -55,6 +59,10 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	Object getValue(Markable markable);
 
 	/**
+	 * Returns the annotation for a given markable and key or {@code null} if that markable
+	 * has not been assigned an annotation value for the specified key in this layer.
+	 * Note that the returned object can be either an actual value or an {@link Annotation}
+	 * instance that wraps a value and provides further information.
 	 *
 	 * @param markable
 	 * @param key
@@ -65,7 +73,7 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	Object getValue(Markable markable, String key);
 
 	/**
-	 * Deletes all annotations in the mutating layer
+	 * Deletes all annotations in this layer
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable
 	 */

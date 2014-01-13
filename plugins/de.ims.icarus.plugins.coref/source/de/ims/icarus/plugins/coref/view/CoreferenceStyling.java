@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view;
@@ -51,7 +51,7 @@ public final class CoreferenceStyling {
 	private CoreferenceStyling() {
 		// no-op
 	}
-	
+
 	public static final HighlightType[] supportedHighlightTypes = {
 		HighlightType.BACKGROUND,
 		HighlightType.FOREGROUND,
@@ -59,45 +59,45 @@ public final class CoreferenceStyling {
 		HighlightType.ITALIC,
 		HighlightType.BOLD,
 	};
-	
+
 	private static CoreferenceEditorKit editorKit;
-	
+
 	private static final Color baseColor = new Color(60, 235, 0);
-	
+
 	private static Map<Object, Object> colorMap;
 
 	public static Color getClusterColor(int index) {
 		if(colorMap==null) {
 			colorMap = new HashMap<>();
 		}
-		
+
 		Color col = (Color) colorMap.get(index);
-		
+
 		if(col==null) {
 			while(colorMap.containsKey((col=UIUtil.generateRandomColor(baseColor))));
 			colorMap.put(index, col);
 		}
-		
+
 		return col;
 	}
-	
+
     @SuppressWarnings("unused")
 	private static HighlightPainter applyHighlightType(HighlightType type, Style style, Color col) {
     	HighlightPainter painter = null;
-    	
+
     	switch (type) {
 		case BACKGROUND:
 			StyleConstants.setBackground(style, col);
 			break;
-			
+
 		case FOREGROUND:
 			StyleConstants.setForeground(style, col);
 			break;
-			
+
 		case UNDERLINED:
 			painter =  HighlightUtils.getPainter(col, UnderlineHighlightPainter.class);
 			break;
-			
+
 		case OUTLINED:
 			painter = HighlightUtils.getPainter(col, OutlineHighlightPainter.class);
 			break;
@@ -105,10 +105,10 @@ public final class CoreferenceStyling {
 		default:
 			throw new IllegalArgumentException("Highlight type not supported: "+type); //$NON-NLS-1$
 		}
-    	
+
     	return painter;
     }
-    
+
     public static CoreferenceEditorKit getSharedEditorKit() {
     	if(editorKit==null) {
     		editorKit = new CoreferenceEditorKit();

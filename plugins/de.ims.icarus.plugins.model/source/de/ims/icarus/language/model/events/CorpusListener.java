@@ -89,7 +89,11 @@ public interface CorpusListener {
 	 * A new member was removed from the corpus.
 	 * <p>
 	 * This can be anything from a bare atomic markable, over
-	 * a container, structure, edge or layer.
+	 * a container, structure, edge or layer. Note that as a general rule
+	 * this event should hold the top-most member involved in
+	 * an remove operation. So if an entire container was removed a single
+	 * event should be fired for that container alone and not for every
+	 * markable object it hosted.
 	 * <p>
 	 * The {@code "member"} property holds the {@code CorpusMember}
 	 * that was removed.

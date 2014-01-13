@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.edit;
 
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
@@ -37,7 +38,7 @@ import de.ims.icarus.language.model.events.CorpusEvent;
  * @version $Id$
  *
  */
-public class CorpusUndoManager extends UndoManager {
+public class CorpusUndoManager extends UndoManager implements CorpusUndoListener {
 
 	private static final long serialVersionUID = -1207749889681029406L;
 
@@ -49,7 +50,9 @@ public class CorpusUndoManager extends UndoManager {
 		if (corpus == null)
 			throw new NullPointerException("Invalid corpus");  //$NON-NLS-1$
 
-		corpus.getEventManager().addCorpusListener(new CorpusAdapter(){
+		this.corpus = corpus;
+
+		corpus.addCorpusListener(new CorpusAdapter(){
 
 			/**
 			 * @see de.ims.icarus.language.model.events.CorpusAdapter#corpusSaved(de.ims.icarus.language.model.events.CorpusEvent)
@@ -61,7 +64,7 @@ public class CorpusUndoManager extends UndoManager {
 
 		});
 
-		this.corpus = corpus;
+		corpus.getEditModel().addCorpusUndoListener(this);
 	}
 
 	/**
@@ -117,5 +120,22 @@ public class CorpusUndoManager extends UndoManager {
 	public synchronized void discardAllEdits() {
 		super.discardAllEdits();
 		savedGeneration = 0L;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.edit.CorpusUndoListener#undoableEditHappened(de.ims.icarus.language.model.edit.UndoableCorpusEdit)
+	 */
+	@Override
+	public void undoableEditHappened(UndoableCorpusEdit edit) {
+		addEdit(edit);
+	}
+
+	/**
+	 * @see javax.swing.undo.UndoManager#undoableEditHappened(javax.swing.event.UndoableEditEvent)
+	 */
+	@Override
+	public void undoableEditHappened(UndoableEditEvent e) {
+		throw new UnsupportedOperationException(
+				"Use method in de.ims.icarus.language.model.edit.CorpusUndoListener interface"); //$NON-NLS-1$
 	}
 }

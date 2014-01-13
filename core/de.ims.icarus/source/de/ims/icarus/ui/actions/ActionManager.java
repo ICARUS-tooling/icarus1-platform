@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.actions;
@@ -93,46 +93,46 @@ import de.ims.icarus.util.id.UnknownIdentifierException;
  *
  */
 public class ActionManager {
-	
+
 	public static final String DIRECTION_PARAMETER = "direction"; //$NON-NLS-1$
 	public static final String FILL_TOOLBAR = "fillToolBar"; //$NON-NLS-1$
-	
+
 	public static final String RIGHT_TO_LEFT = "rightToLeft"; //$NON-NLS-1$
 	public static final String LEFT_TO_RIGHT = "leftToRight"; //$NON-NLS-1$
-	
+
 	public static final String SEPARATOR_SMALL = "small"; //$NON-NLS-1$
 	public static final String SEPARATOR_MEDIUM = "medium"; //$NON-NLS-1$
 	public static final String SEPARATOR_WIDE = "wide"; //$NON-NLS-1$
-	
+
 	public static final String SMALL_SELECTED_ICON_KEY = "IcarusSmallSelectedIcon"; //$NON-NLS-1$
 	public static final String LARGE_SELECTED_ICON_KEY = "IcarusLargeSelectedIcon"; //$NON-NLS-1$
-	
+
 	private ResourceDomain resourceDomain;
 	private IconRegistry iconRegistry;
-	
+
 	private final ActionManager parent;
-	
+
 	private boolean silent = false;
-	
+
 	protected Map<String, Action> actionMap;
 	protected Map<String, ActionSet> actionSetMap;
 	protected Map<String, ActionList> actionListMap;
 	protected Map<Integer, ButtonGroup> groupMap;
 	protected Map<String, ActionAttributes> attributeMap;
-	
+
 	private static ActionManager instance;
-	
+
 	public static ActionManager globalManager() {
 		if(instance==null) {
 			synchronized (ActionManager.class) {
 				if(instance==null) {
 					instance = new ActionManager(null, null, null);
-					
+
 					URL actionLocation = ActionManager.class.getResource(
 							"default-actions.xml"); //$NON-NLS-1$
 					if(actionLocation==null)
 						throw new CorruptedStateException("Missing resources: default-actions.xml"); //$NON-NLS-1$
-					
+
 					try {
 						instance.loadActions(actionLocation);
 					} catch (IOException e) {
@@ -141,19 +141,19 @@ public class ActionManager {
 				}
 			}
 		}
-		
+
 		return instance;
 	}
-	
+
 	protected ComponentHandler toolBarHandler;
 	protected ComponentHandler menuHandler;
 	protected ComponentHandler popupMenuHandler;
 	protected ComponentHandler menuBarHandler;
-	
+
 	protected Set<String> loadedResources;
 
 	/**
-	 * 
+	 *
 	 */
 	public ActionManager(ActionManager parent, ResourceDomain resourceDomain, IconRegistry iconRegistry) {
 		this.parent = parent;
@@ -165,51 +165,51 @@ public class ActionManager {
 			setSilent(parent.isSilent());
 		}
 	}
-	
+
 	public ResourceDomain getResourceDomain() {
 		if(resourceDomain==null) {
 			synchronized (this) {
 				if(resourceDomain==null && parent!=null)
 					resourceDomain = parent.getResourceDomain();
-				
-				if(resourceDomain==null)					
+
+				if(resourceDomain==null)
 					resourceDomain = ResourceManager.getInstance().getGlobalDomain();
 			}
 		}
-		
+
 		return resourceDomain;
 	}
-	
+
 	public IconRegistry getIconRegistry() {
 		if(iconRegistry==null) {
 			synchronized (this) {
 				if(iconRegistry==null && parent!=null)
 					iconRegistry = parent.getIconRegistry();
-				
+
 				if(iconRegistry==null)
 					iconRegistry = IconRegistry.getGlobalRegistry();
 			}
 		}
-		
+
 		return iconRegistry;
 	}
-	
+
 	public ActionManager derive() {
 		return new ActionManager(this, null, null);
 	}
-	
+
 	protected boolean isSilent() {
 		return silent;
 	}
-	
+
 	protected void setSilent(boolean silent) {
 		this.silent = silent;
 	}
-	
+
 	public ActionManager getParent() {
 		return parent;
 	}
-	
+
 	protected DelegateAction getDelegateAction(String id) {
 		Action a = getAction(id);
 		if(a instanceof DelegateAction) {
@@ -217,7 +217,7 @@ public class ActionManager {
 		}
 		return null;
 	}
-	
+
 	protected StateChangeAction getStateChangeAction(String id) {
 		Action a = getAction(id);
 		if(a instanceof StateChangeAction) {
@@ -225,7 +225,7 @@ public class ActionManager {
 		}
 		return null;
 	}
-	
+
 	protected void addAttributes(Attributes attrs) {
 		if (attributeMap == null) {
 			attributeMap = new HashMap<>();
@@ -235,86 +235,86 @@ public class ActionManager {
 
 	protected ActionAttributes getAttributes(String key) {
 		ActionAttributes attributes = null;
-		
+
 		if (attributeMap != null) {
 			attributes = attributeMap.get(key);
 		}
-		
+
 		if(attributes==null && parent!=null) {
 			attributes = parent.getAttributes(key);
 		}
-		
+
 		return attributes;
 	}
-	
+
 	public Action deriveAction(String id, String templateId) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		Exceptions.testNullArgument(templateId, "templateId"); //$NON-NLS-1$
 		if(actionMap==null) {
 			actionMap = new HashMap<>();
 		}
-		
+
 		ActionAttributes attr = getAttributes(templateId);
 		if(attr==null)
 			throw new UnknownIdentifierException("Unknown template id: "+templateId); //$NON-NLS-1$
-		
+
 		return createAction(attr, id);
 	}
-	
+
 	protected Action findAction(String id) {
 		Action action = null;
 		if(actionMap!=null) {
 			action = actionMap.get(id);
 		}
-		
+
 		if(action==null && parent!=null) {
 			action = parent.findAction(id);
 		}
-		
+
 		return action;
 	}
-	
+
 	public Action getAction(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
-		
+
 		// Search for action all along the parent line
 		Action action = findAction(id);
-		
+
 		// Action already found -> return it
 		if(action!=null) {
 			return action;
 		}
-		
+
 		// Fetch attributes to create action from
 		ActionAttributes attr = getAttributes(id);
-		
+
 		if(attr==null && !isSilent())
 			throw new UnknownIdentifierException("Unknown action id: "+id); //$NON-NLS-1$
-		
+
 		// Virtual actions are not supposed to be instantiated directly
 		if(attr!=null && Boolean.parseBoolean(attr.getValue(VIRTUAL_INDEX)))
 			throw new IllegalArgumentException("Cannot instantiate virtual action: "+id); //$NON-NLS-1$
-		
+
 		// Create new action
 		return createAction(attr, null);
 	}
-	
+
 	public void addAction(String id, Action action) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		Exceptions.testNullArgument(action, "action"); //$NON-NLS-1$
-		
+
 		if(actionMap==null) {
 			actionMap = new HashMap<>();
 		}
-		
+
 		synchronized (actionMap) {
 			if(actionMap.containsKey(id) && !isSilent())
 				throw new DuplicateIdentifierException("Duplicate action id: "+id); //$NON-NLS-1$
-			
+
 			actionMap.put(id, action);
 		}
 	}
-	
+
 	protected Action createAction(ActionAttributes attr, String id) {
 		Action action = null;
 		if (attr != null) {
@@ -323,7 +323,7 @@ public class ActionManager {
 			if(id==null) {
 				id = attr.getValue(ID_INDEX);
 			}
-			
+
 			String type = attr.getValue(TYPE_INDEX);
 			if ("toggle".equals(type)) { //$NON-NLS-1$
 				action = new StateChangeAction();
@@ -341,18 +341,18 @@ public class ActionManager {
 		if(orig==null) {
 			orig = attr;
 		}
-		
+
 		if(attr.hasValue(TEMPLATE_INDEX)) {
 			String templateId = attr.getValue(TEMPLATE_INDEX);
 			ActionAttributes tplAttr = getAttributes(templateId);
-			if(tplAttr==null && !silent) 
+			if(tplAttr==null && !silent)
 				throw new UnknownIdentifierException("Unknown template id: "+templateId); //$NON-NLS-1$
-			
+
 			if(tplAttr!=null) {
 				configureAction(action, tplAttr, orig, id);
 			}
 		}
-		
+
 		action.putValue(Action.NAME, attr.getValue(NAME_INDEX));
 		if(attr.hasValue(SMALL_SELECTED_ICON_INDEX)) {
 			action.putValue(SMALL_SELECTED_ICON_KEY, getIconRegistry().getIcon(
@@ -381,7 +381,7 @@ public class ActionManager {
 			action.putValue(Action.SHORT_DESCRIPTION, attr.getValue(DESC_INDEX));
 			action.putValue(Action.LONG_DESCRIPTION, attr.getValue(DESC_INDEX));
 		}
-		
+
 		String mnemonic = attr.getValue(MNEMONIC_INDEX);
 		if (mnemonic != null && !mnemonic.equals("")) { //$NON-NLS-1$
 			action.putValue(Action.MNEMONIC_KEY,
@@ -392,24 +392,24 @@ public class ActionManager {
 			action.putValue(Action.ACCELERATOR_KEY,
 					KeyStroke.getKeyStroke(accel));
 		}
-		
+
 		// Finally apply localization
 		if(orig==attr) {
-			getResourceDomain().prepareAction(action, 
-					(String)action.getValue(Action.NAME), 
+			getResourceDomain().prepareAction(action,
+					(String)action.getValue(Action.NAME),
 					(String)action.getValue(Action.SHORT_DESCRIPTION));
 			getResourceDomain().addAction(action);
 		}
 	}
-	
+
 	public ActionSet getActionSet(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		ActionSet actionSet = null;
-		
+
 		if(actionSetMap!=null) {
 			actionSet = actionSetMap.get(id);
 		}
-		
+
 		if(actionSet==null && parent!=null) {
 			try {
 				actionSet = parent.getActionSet(id);
@@ -417,36 +417,36 @@ public class ActionManager {
 				// ignore the 'silent' setting of parent managers
 			}
 		}
-		
+
 		if(actionSet==null && !isSilent())
 			throw new UnknownIdentifierException("Unknown action-set id: "+id); //$NON-NLS-1$
-		
+
 		return actionSet;
 	}
-	
+
 	public void addActionSet(String id, ActionSet actionSet) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		Exceptions.testNullArgument(actionSet, "actionSet"); //$NON-NLS-1$
-		
+
 		if(actionSetMap==null) {
 			actionSetMap = new HashMap<>();
 		}
-		
+
 		synchronized (actionSetMap) {
 			if(actionSetMap.containsKey(id) && !isSilent())
 				throw new DuplicateIdentifierException("Duplicate action-set id: "+id); //$NON-NLS-1$
-			
+
 			actionSetMap.put(id, actionSet);
 		}
 	}
-	
+
 	public ActionList getActionList(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		ActionList actionList = null;
 		if(actionListMap!=null) {
 			actionList = actionListMap.get(id);
 		}
-		
+
 		if(actionList==null && parent!=null) {
 			try {
 				actionList = parent.getActionList(id);
@@ -454,39 +454,39 @@ public class ActionManager {
 				// ignore the 'silent' setting of parent managers
 			}
 		}
-		
+
 		if(actionList==null && !isSilent())
 			throw new UnknownIdentifierException("Unknown action-list id: "+id); //$NON-NLS-1$
-		
+
 		return actionList;
 	}
-	
+
 	public void addActionList(String id, ActionList actionList) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
-		
+
 		if(actionListMap==null) {
 			actionListMap = new HashMap<>();
 		}
-		
+
 		synchronized (actionListMap) {
 			if(actionListMap.containsKey(id) && !isSilent())
 				throw new DuplicateIdentifierException("Duplicate action-list id: "+id); //$NON-NLS-1$
-			
+
 			actionListMap.put(id, actionList);
 		}
 	}
-	
+
 	public ButtonGroup getGroup(String groupId, Component comp) {
 		Exceptions.testNullArgument(groupId, "id"); //$NON-NLS-1$
 		Exceptions.testNullArgument(comp, "comp"); //$NON-NLS-1$
-		
+
 		if(groupMap==null) {
 			groupMap = new HashMap<>();
 		}
-		
+
 		Integer key = new Integer(groupId.hashCode() ^ comp.hashCode());
-		
+
 		ButtonGroup group = groupMap.get(key);
 		if(group==null) {
 			if(group==null) {
@@ -494,7 +494,7 @@ public class ActionManager {
 				groupMap.put(key, group);
 			}
 		}
-		
+
 		return group;
 	}
 
@@ -538,7 +538,7 @@ public class ActionManager {
 
 	/**
 	 * Registers a {@code handler} object to receive notifications
-	 * about events on the specified action. All invocations are 
+	 * about events on the specified action. All invocations are
 	 * targeted at the method named {@code method} with the matching
 	 * signature for the invocation at hand:
 	 * <p>
@@ -556,8 +556,8 @@ public class ActionManager {
 	 * objects registered as callbacks. When the target of such a reference
 	 * gets garbage collected the next invocation attempt will cause the
 	 * listener to be unregistered from the action. So it is strongly recommended
-	 * to store a strong reference to all handler objects! 
-	 * 
+	 * to store a strong reference to all handler objects!
+	 *
 	 * @param id the unique identifier of the {@code Action} the handler should
 	 * be attached to
 	 * @param handler the object defining the callback method
@@ -566,31 +566,31 @@ public class ActionManager {
 	 * @throws IllegalArgumentException if any of the arguments is {@code null} or
 	 * if the referenced {@code Action} is not able to forward events (i.e. it is
 	 * not derived of type {@link DelegateAction})
-	 * @throws UnknownIdentifierException if the given {@code id} is not mapped to 
+	 * @throws UnknownIdentifierException if the given {@code id} is not mapped to
 	 * an {@code Action} and this manager is not configured to be silent
 	 */
 	public void addHandler(String id, Object handler, String method) {
 		Exceptions.testNullArgument(handler, "handler"); //$NON-NLS-1$
 		Exceptions.testNullArgument(method, "method"); //$NON-NLS-1$
 		Action a = getAction(id);
-		
+
 		if(a instanceof StateChangeAction) {
 			ItemListener listener = new BooleanInvocationHandler(a, handler, method);
 			((StateChangeAction)a).addItemListener(listener);
 		}
-		
+
 		if(a instanceof DelegateAction) {
 			ActionListener listener = new ActionInvocationHandler(a, handler, method);
 			((DelegateAction)a).addActionListener(listener);
 		} else
 			throw new IllegalArgumentException("Cannot attach handler to non-delegating action: "+id); //$NON-NLS-1$
 	}
-	
+
 	public void removeHandler(String id, Object handler, String method) {
 		Exceptions.testNullArgument(handler, "handler"); //$NON-NLS-1$
 		Exceptions.testNullArgument(method, "method"); //$NON-NLS-1$
 		Action a = getAction(id);
-		
+
 		if(a instanceof StateChangeAction) {
 			StateChangeAction sa = (StateChangeAction) a;
 			ItemListener[] listeners = sa.getItemListeners();
@@ -603,7 +603,7 @@ public class ActionManager {
 				}
 			}
 		}
-		
+
 		if(a instanceof DelegateAction) {
 			DelegateAction da = (DelegateAction) a;
 			ActionListener[] listeners = da.getActionListeners();
@@ -617,7 +617,7 @@ public class ActionManager {
 			}
 		}
 	}
-	
+
 	protected void feedActionSet(final Component container,
 			final ComponentHandler handler, final ActionSet actionSet, final Map<String, Object> properties) {
 
@@ -636,13 +636,13 @@ public class ActionManager {
 						actionSet.getId(), actionSet.getActionIdAt(i)));
 		}
 	}
-	
+
 	protected void feedActionList(final Component container,
 			final ComponentHandler handler, final ActionList list, final Map<String, Object> properties) {
-		
+
 		Action action;
 		ActionSet actionSet;
-		
+
 		int size = list.size();
 		int index;
 		boolean rightToLeft = RIGHT_TO_LEFT.equals(properties.get(DIRECTION_PARAMETER));
@@ -654,7 +654,7 @@ public class ActionManager {
 			case LABEL:
 				handler.feedComponent(container, createLabel(value));
 				break;
-				
+
 			case SEPARATOR:
 				// Prevent two separators beside each other
 				if(separatorAllowed) {
@@ -662,15 +662,15 @@ public class ActionManager {
 					separatorAllowed = false;
 				}
 				break;
-				
+
 			case EMPTY:
 				handler.feedEmpty(container, value);
 				break;
-				
+
 			case GLUE:
 				handler.feedGlue(container);
 				break;
-				
+
 			case ACTION_ID:
 				action = getAction(value);
 				if(action!=null)
@@ -678,7 +678,7 @@ public class ActionManager {
 				else
 					LoggerFactory.log(this, Level.WARNING, "Unknown action id: "+value); //$NON-NLS-1$
 				break;
-				
+
 			case ACTION_SET_ID:
 				actionSet = getActionSet(value);
 				if(actionSet==null) {
@@ -687,7 +687,7 @@ public class ActionManager {
 				}
 				feedActionSet(container, handler, actionSet, properties);
 				break;
-				
+
 			case ACTION_LIST_ID:
 				ActionList subList = getActionList(value);
 				if(subList!=null)
@@ -695,13 +695,13 @@ public class ActionManager {
 				else
 					LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+value); //$NON-NLS-1$
 				break;
-				
+
 			case CUSTOM:
 				Object replacement = properties.get(value);
 				if(replacement==null) {
 					value = null;
 				} else {
-					Object[] items = replacement instanceof Object[] ? 
+					Object[] items = replacement instanceof Object[] ?
 							(Object[]) replacement : new Object[]{replacement};
 					for(Object item : items) {
 						if(item instanceof String) {
@@ -730,28 +730,28 @@ public class ActionManager {
 			separatorAllowed = list.getTypeAt(i)!=EntryType.SEPARATOR && value!=null;
 		}
 	}
-	
+
 	private static Border DEFAULT_LABEL_BORDER;
-	
+
 	protected Component createLabel(String value) {
 		JLabel label = new JLabel();
-		
+
 		if(value!=null && !value.isEmpty()) {
 			getResourceDomain().prepareComponent(label, value, null);
 			getResourceDomain().addComponent(label);
 		} else {
 			label.setText("<undefined>"); //$NON-NLS-1$
 		}
-		
+
 		if(DEFAULT_LABEL_BORDER==null) {
 			DEFAULT_LABEL_BORDER = new EmptyBorder(0, 4, 0, 3);
 		}
-		
+
 		label.setBorder(DEFAULT_LABEL_BORDER);
-		
+
 		return label;
 	}
-	
+
 	protected ComponentHandler getHandler(Class<?> containerClass) {
 		if(containerClass==JMenu.class) {
 			if(menuHandler==null)
@@ -769,144 +769,144 @@ public class ActionManager {
 			if(menuBarHandler==null)
 				menuBarHandler = new MenuBarHandler();
 			return menuBarHandler;
-		} else 
+		} else
 			throw new IllegalArgumentException("Unsupported container class: "+containerClass); //$NON-NLS-1$
 	}
-	
+
 	protected static final Map<String, Object> EMPTY_PROPERTIES = Collections.emptyMap();
 
 	public JMenu createMenu(String id, Map<String, Object> properties) {
 		ActionList actionList = getActionList(id);
-		
+
 		if(actionList==null) {
 			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
-		
+
 		return createMenu(actionList, properties);
 	}
-	
+
 	public JMenu createMenu(ActionList actionList, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
 		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
 		}
-		
+
 		Action action = null;
 		if(actionList.getActionId()!=null) {
 			action = getAction(actionList.getActionId());
 		}
-		
+
 		JMenu menu = new JMenu(action);
-		
+
 		feedActionList(menu, getHandler(JMenu.class), actionList, properties);
 		configureMenu(menu, action, properties);
-		
+
 		return menu;
 	}
 
 	public JMenuBar createMenuBar(String id, Map<String, Object> properties) {
 		ActionList actionList = getActionList(id);
-		
+
 		if(actionList==null) {
 			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
-		
+
 		return createMenuBar(actionList, properties);
 	}
-	
+
 	public JMenuBar createMenuBar(ActionList actionList, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
 		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
 		}
-		
+
 		JMenuBar menuBar = new JMenuBar();
-		
+
 		feedActionList(menuBar, getHandler(JMenuBar.class), actionList, properties);
 		configureMenuBar(menuBar, properties);
-		
+
 		return menuBar;
 	}
-	
+
 	public JToolBar createEmptyToolBar() {
 		JToolBar toolBar = new JToolBar();
 		configureToolBar(toolBar, EMPTY_PROPERTIES);
-		
+
 		return toolBar;
 	}
 
 	public JToolBar createToolBar(String id, Map<String, Object> properties) {
 		ActionList actionList = getActionList(id);
-		
+
 		if(actionList==null) {
 			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
-		
+
 		return createToolBar(actionList, properties);
 	}
-	
+
 	public JToolBar createToolBar(ActionList actionList, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
 		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
 		}
-		
+
 		JToolBar toolBar = new JToolBar();
-		
+
 		feedActionList(toolBar, getHandler(JToolBar.class), actionList, properties);
-		
+
 		configureToolBar(toolBar, properties);
-		
+
 		return toolBar;
 	}
 
 	public void feedToolBar(String id, JToolBar toolBar, Map<String, Object> properties) {
 		ActionList actionList = getActionList(id);
-		
+
 		if(actionList==null) {
 			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return;
 		}
-		
+
 		feedToolBar(actionList, toolBar, properties);
 	}
-	
+
 	public void feedToolBar(ActionList actionList, JToolBar toolBar, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
 		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
 		}
-		
+
 		feedActionList(toolBar, getHandler(JToolBar.class), actionList, properties);
-		
+
 		configureToolBar(toolBar, properties);
 	}
 
 	public JPopupMenu createPopupMenu(String id, Map<String, Object> properties) {
 		ActionList actionList = getActionList(id);
-		
+
 		if(actionList==null) {
 			LoggerFactory.log(this, Level.WARNING, "Unknown action-list id: "+id); //$NON-NLS-1$
 			return null;
 		}
-		
+
 		return createPopupMenu(actionList, properties);
 	}
-	
+
 	public JPopupMenu createPopupMenu(ActionList actionList, Map<String, Object> properties) {
 		Exceptions.testNullArgument(actionList, "actionList"); //$NON-NLS-1$
 		if(properties==null) {
 			properties = EMPTY_PROPERTIES;
 		}
-		
+
 		JPopupMenu popupMenu = new JPopupMenu();
-		
+
 		feedActionList(popupMenu, getHandler(JPopupMenu.class), actionList, properties);
 		configurePopupMenu(popupMenu, properties);
-		
+
 		return popupMenu;
 	}
 
@@ -926,7 +926,7 @@ public class ActionManager {
 			}
 
 			configureToggleMenuItem(menuItem, sca);
-			
+
 			sca.addPropertyChangeListener(new ToggleActionPropertyChangeListener(menuItem));
 		} else if(action!=null) {
 			menuItem = new JMenuItem(action);
@@ -946,7 +946,7 @@ public class ActionManager {
 		if (action instanceof StateChangeAction) {
 			StateChangeAction sca = (StateChangeAction)action;
 			ButtonGroup group = groupId==null ? null : getGroup(groupId, container);
-			
+
 			button = new JToggleButton(sca);
 			button.addItemListener(sca);
 			button.setSelected(sca.isSelected());
@@ -961,34 +961,34 @@ public class ActionManager {
 		}
 		return button;
 	}
-	
+
 	// configuration callbacks
-	
+
 	protected void configureMenu(JMenu menu, Action action, Map<String, Object> properties) {
 		// no-op
 	}
-	
+
 	protected void configurePopupMenu(JPopupMenu popupMenu, Map<String, Object> properties) {
 		// no-op
 	}
-	
+
 	protected void configureToolBar(JToolBar toolBar, Map<String, Object> properties) {
 		toolBar.setFloatable(false);
 		toolBar.setRollover(true);
-		
+
 		if(Boolean.parseBoolean(String.valueOf(properties.get("multiline")))) { //$NON-NLS-1$
 			// FIXME ModifiedFlowLayout needs rework to support glue objects
 			toolBar.setLayout(new ModifiedFlowLayout(FlowLayout.LEFT, 1, 3));
 		}
 	}
-	
+
 	protected void configureMenuBar(JMenuBar menuBar, Map<String, Object> properties) {
 		// no-op
 	}
-	
+
 	protected void configureToggleButton(JToggleButton button, Action action) {
 		configureButton(button, action);
-		
+
 		Icon selectedIcon = (Icon) action.getValue(SMALL_SELECTED_ICON_KEY);
 		if(selectedIcon==null) {
 			selectedIcon = (Icon) action.getValue(LARGE_SELECTED_ICON_KEY);
@@ -999,8 +999,8 @@ public class ActionManager {
 	protected void configureButton(AbstractButton button, Action action) {
 		button.setHideActionText(true);
 		button.setFocusable(false);
-		
-		// TODO check for requirements of a default preferred size for buttons! 
+
+		// TODO check for requirements of a default preferred size for buttons!
 		/*Icon icon = button.getIcon();
 		if(icon!=null) {
 			int width = Math.max(24, icon.getIconWidth()+6);
@@ -1018,7 +1018,7 @@ public class ActionManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -1038,6 +1038,7 @@ public class ActionManager {
 	        return this.target.get();
 	    }
 
+		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			String propertyName = evt.getPropertyName();
 
@@ -1047,7 +1048,7 @@ public class ActionManager {
 					Action action = (Action) evt.getSource();
 					action.removePropertyChangeListener(this);
 				} else {
-					Boolean selected = (Boolean) evt.getNewValue();				
+					Boolean selected = (Boolean) evt.getNewValue();
 					button.setSelected(selected.booleanValue());
 				}
 			}
@@ -1066,21 +1067,21 @@ public class ActionManager {
 	        }
 	    }
 	}
-	
+
 	protected static class WeakActionHandler extends WeakHandler {
-		
+
 		private final Action action;
 
 		public WeakActionHandler(Action action, Object target, String methodName) {
 			super(target, methodName);
 			this.action = action;
 		}
-		
+
 		public Action getAction() {
 			return action;
 		}
 	}
-	
+
 	protected static class ActionInvocationHandler extends WeakActionHandler implements ActionListener {
 
 		public ActionInvocationHandler(Action action, Object target, String methodName) {
@@ -1098,7 +1099,7 @@ public class ActionManager {
 			} else {
 				dispatch(e);
 			}
-		}		
+		}
 	}
 
 	protected static class BooleanInvocationHandler extends WeakActionHandler implements ItemListener {
@@ -1107,6 +1108,7 @@ public class ActionManager {
 			super(action, target, methodName);
 		}
 
+		@Override
 		public void itemStateChanged(ItemEvent evt) {
 			Boolean value = Boolean.TRUE;
 			if (evt.getStateChange() == ItemEvent.DESELECTED) {
@@ -1123,7 +1125,7 @@ public class ActionManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -1141,7 +1143,7 @@ public class ActionManager {
 		public String getValue(int index) {
 			return array[index];
 		}
-		
+
 		private String substitute(String s) {
 			String id = getValue(ID_INDEX);
 			if(id!=null) {
@@ -1149,7 +1151,7 @@ public class ActionManager {
 			}
 			return s;
 		}
-		
+
 		public boolean hasValue(int index) {
 			return array[index]!=null;
 		}
@@ -1159,7 +1161,7 @@ public class ActionManager {
 			if(value!=null) {
 				if(index!=ID_INDEX)
 					value = substitute(value);
-				
+
 				array[index] = value;
 			}
 		}
@@ -1179,7 +1181,7 @@ public class ActionManager {
 			setValue(COMMAND_INDEX, attrs.getValue(COMMAND_ATTRIBUTE));
 		}
 	}
-	
+
     private final static String ACCEL_ATTRIBUTE = "accel"; //$NON-NLS-1$
     private final static String DESC_ATTRIBUTE = "desc"; //$NON-NLS-1$
     private final static String LARGE_ICON_ATTRIBUTE = "licon"; //$NON-NLS-1$
@@ -1209,10 +1211,10 @@ public class ActionManager {
     private final static int VIRTUAL_INDEX = 10;
     private final static int COMMAND_INDEX = 11;
     private final static int TEMPLATE_INDEX = 12;
-    
+
     private static SAXParserFactory parserFactory;
     private XmlActionHandler xmlHandler;
-    
+
 	private void parseActions(InputStream stream) throws IOException {
 		if (parserFactory == null) {
 			parserFactory = SAXParserFactory.newInstance();
@@ -1226,7 +1228,7 @@ public class ActionManager {
 		try {
 			SAXParser parser = parserFactory.newSAXParser();
 			String dtdResource = getClass().getResource("").toString(); //$NON-NLS-1$
-			
+
 			parser.parse(stream, xmlHandler, dtdResource);
 		} catch (SAXException e) {
 			throw new IOException("Error parsing: " + e.getMessage()); //$NON-NLS-1$
@@ -1236,7 +1238,7 @@ public class ActionManager {
 			throw new IOException("Error configuring parser: " + e.getMessage()); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
 	 * Hook for subclasses to bypass the optimization regarding
 	 * redundant loading of action resources.
@@ -1246,44 +1248,44 @@ public class ActionManager {
 	protected boolean isPreventRedundantLoading() {
 		return true;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	public void loadActions(URL location) throws IOException {
 		Exceptions.testNullArgument(location, "location"); //$NON-NLS-1$
-		
+
 		if(loadedResources==null) {
 			loadedResources = new HashSet<>();
 		}
-		
+
 		// Skip redundant loading of resources
 		if(isPreventRedundantLoading() && loadedResources.contains(location.toExternalForm())) {
 			return;
-		}	
-		
+		}
+
 		InputStream stream = location.openStream();
 		try {
 			parseActions(stream);
 		} finally {
-			try { 
+			try {
 				stream.close();
 			} catch(IOException e) {
 				// ignore
 			}
 		}
-		
+
 		loadedResources.add(location.toExternalForm());
 	}
 
     /**
-     * 
+     *
      * @author Markus Gärtner
      * @version $Id$
      *
      */
 	protected class XmlActionHandler extends DefaultHandler {
-		
+
 	    private final static String ACTION_ELEMENT="action"; //$NON-NLS-1$
 	    private final static String ACTION_SET_ELEMENT="action-set"; //$NON-NLS-1$
 	    private final static String ACTION_LIST_ELEMENT="action-list"; //$NON-NLS-1$
@@ -1319,7 +1321,7 @@ public class ActionManager {
 			} else if (ACTION_LIST_ELEMENT.equals(name)) {
 				String id = attributes.getValue(ID_ATTRIBUTE);
 				String idref = attributes.getValue(IDREF_ATTRIBUTE);
-				
+
 				// Idref pointer overrides id
 				if (idref == null) {
 					idref = id;
@@ -1359,7 +1361,7 @@ public class ActionManager {
 					// Override fields only if target is not a template!
 					actionAtts.setAttributes(attributes);
 				}
-				
+
 				if(actionSet!=null) {
 					actionSet.add(id, groupId);
 				} else if(actionList!=null) {
@@ -1382,7 +1384,7 @@ public class ActionManager {
 				if(actionList!=null) {
 					String type = attributes.getValue(TYPE_ATTRIBUTE);
 					String value = attributes.getValue(VALUE_ATTRIBUTE);
-					
+
 					actionList.add(EntryType.parse(type), value);
 				}
 			}
@@ -1390,7 +1392,7 @@ public class ActionManager {
 
 		@Override
 		public void endElement(String nameSpace, String localName, String name) {
-			
+
 			if (ACTION_SET_ELEMENT.equals(name)) {
 				actionSet = null;
 			} else if (ACTION_LIST_ELEMENT.equals(name)) {
@@ -1436,13 +1438,13 @@ public class ActionManager {
 			sb.append("Column: ").append(ex.getColumnNumber()); //$NON-NLS-1$
 			if(ex.getException()!=null)
 				sb.append("\nEmbedded: ").append(ex.getException()); //$NON-NLS-1$
-			
+
 			LoggerFactory.log(this, level, sb.toString(), ex);
-		}		
+		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -1456,9 +1458,9 @@ public class ActionManager {
 		void feedEmpty(Component container, String value);
 		void feedGlue(Component container);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -1529,11 +1531,11 @@ public class ActionManager {
 		public void feedGlue(Component container) {
 			// not supported
 		}
-		
+
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -1605,9 +1607,9 @@ public class ActionManager {
 		public void feedGlue(Component container) {
 			// not supported
 		}
-		
+
 	}
-	
+
 	protected class MenuBarHandler implements ComponentHandler {
 
 		/**
@@ -1625,7 +1627,7 @@ public class ActionManager {
 		public void feedList(Component container, ActionList list,
 				Map<String, Object> properties) {
 			JMenuBar menuBar = (JMenuBar)container;
-			
+
 			JMenu menu = createMenu(list, properties);
 			if(menu!=null) {
 				menuBar.add(menu);
@@ -1671,11 +1673,11 @@ public class ActionManager {
 		public void feedGlue(Component container) {
 			// not supported
 		}
-		
+
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -1702,12 +1704,12 @@ public class ActionManager {
 		@Override
 		public void feedAction(Component container, Action a, String groupId) {
 			JToolBar toolBar = (JToolBar) container;
-			
+
 			AbstractButton button = createButton(a, groupId, container);
 			button.setHorizontalTextPosition(SwingConstants.CENTER);
 	        button.setVerticalTextPosition(SwingConstants.BOTTOM);
 	        //button.setFocusable(false);
-	        
+
 			toolBar.add(button);
 		}
 
@@ -1718,7 +1720,7 @@ public class ActionManager {
 		public void feedSeparator(Component container, String value) {
 			JToolBar toolBar = (JToolBar) container;
 			int width = -1;
-			
+
 			if(value!=null) {
 				switch (value) {
 				case SEPARATOR_WIDE:
@@ -1732,7 +1734,7 @@ public class ActionManager {
 				case SEPARATOR_SMALL:
 					width = 10;
 					break;
-	
+
 				default:
 					try {
 						width = Integer.parseInt(value);
@@ -1742,13 +1744,13 @@ public class ActionManager {
 					break;
 				}
 			}
-			
+
 			if(width<0) {
 				width = 4;
 			}
 
 			toolBar.addSeparator(new Dimension(width, 24));
-			
+
 			// TODO
 			/*if(width>-1)
 				toolBar.addSeparator(new Dimension(width, 24));
@@ -1781,7 +1783,7 @@ public class ActionManager {
 		public void feedEmpty(Component container, String value) {
 			JToolBar toolBar = (JToolBar) container;
 			int width = -1;
-			
+
 			if(value!=null) {
 				switch (value) {
 				case SEPARATOR_WIDE:
@@ -1795,7 +1797,7 @@ public class ActionManager {
 				case SEPARATOR_SMALL:
 					width = 10;
 					break;
-	
+
 				default:
 					try {
 						width = Integer.parseInt(value);
@@ -1805,11 +1807,11 @@ public class ActionManager {
 					break;
 				}
 			}
-			
+
 			if(width==-1) {
 				width = 25;
 			}
-			
+
 			toolBar.add(Box.createHorizontalStrut(width));
 		}
 
@@ -1821,6 +1823,6 @@ public class ActionManager {
 			JToolBar toolBar = (JToolBar) container;
 			toolBar.add(Box.createHorizontalGlue());
 		}
-		
+
 	}
 }

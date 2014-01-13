@@ -26,7 +26,6 @@
 package de.ims.icarus.language.model.standard.builder;
 
 import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 
@@ -35,10 +34,10 @@ import de.ims.icarus.language.model.manifest.ContainerManifest;
  * @version $Id$
  *
  */
-public abstract class AbstractContainerBuilder<C extends Container> implements ContainerBuilder {
+public abstract class AbstractContainerBuilder<C extends Container> extends AbstractBuilder implements ContainerBuilder {
 
 	protected Container parent;
-	protected Corpus corpus;
+	protected Container base;
 	protected MarkableLayer layer;
 	protected ContainerManifest manifest;
 
@@ -52,10 +51,17 @@ public abstract class AbstractContainerBuilder<C extends Container> implements C
 	}
 
 	/**
-	 * @return the corpus
+	 * @return the base
 	 */
-	public Corpus getCorpus() {
-		return corpus;
+	public Container getBase() {
+		return base;
+	}
+
+	/**
+	 * @param base the base to set
+	 */
+	public void setBase(Container base) {
+		this.base = base;
 	}
 
 	/**
@@ -63,13 +69,6 @@ public abstract class AbstractContainerBuilder<C extends Container> implements C
 	 */
 	public void setParent(Container parent) {
 		this.parent = parent;
-	}
-
-	/**
-	 * @param corpus the corpus to set
-	 */
-	public void setCorpus(Corpus corpus) {
-		this.corpus = corpus;
 	}
 
 	/**

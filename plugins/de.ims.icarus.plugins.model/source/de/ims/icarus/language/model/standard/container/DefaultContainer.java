@@ -48,18 +48,20 @@ public class DefaultContainer extends AbstractListContainer {
 
 	private final Container parent;
 
-	public DefaultContainer(Container parent) {
-		this(parent, null);
+	public DefaultContainer(long id, Container parent) {
+		this(id, parent, null);
 	}
 
-	public DefaultContainer(Container parent, List<? extends Markable> markables) {
+	public DefaultContainer(long id, Container parent, List<? extends Markable> markables) {
+		super(id);
+
 		if (parent == null)
 			throw new NullPointerException("Invalid parent");  //$NON-NLS-1$
 
 		this.parent = parent;
 
 		if(markables!=null) {
-			addAll(markables);
+			addAllMarkables0(markables);
 		}
 	}
 
@@ -117,4 +119,15 @@ public class DefaultContainer extends AbstractListContainer {
 		return manifest.getContainerManifest(level);
 	}
 
+	public static class DefaultContainerBuilder extends ListContainerBuilder<DefaultContainer> {
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.builder.AbstractContainerBuilder#createContainer()
+		 */
+		@Override
+		protected DefaultContainer createContainer() {
+			return new DefaultContainer(newId(), parent);
+		}
+
+	}
 }

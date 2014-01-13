@@ -31,7 +31,7 @@ import de.ims.icarus.language.model.NamedCorpusMember;
 import de.ims.icarus.util.id.Identity;
 
 /**
- * A manifest is a kind of descriptor for corpus parts of a corpus.
+ * A manifest is a kind of descriptor for parts of a corpus.
  * It stores information relevant to localization and identification
  * of the item it describes. Manifests for the most part are immutable
  * storage objects created by the model framework. They normally derive
@@ -46,7 +46,6 @@ import de.ims.icarus.util.id.Identity;
  *
  */
 public interface Manifest extends Identity {
-
 
 	/**
 	 * Allows for localization of corpus related components.
@@ -71,6 +70,17 @@ public interface Manifest extends Identity {
 	String getDescription();
 
 	/**
+	 * Returns the manifest that describes possible options the
+	 * user can assign to this manifest. If the manifest does not
+	 * support additional properties assignable by the user, this
+	 * method returns {@code null}.
+	 *
+	 * @return the manifest describing options for this manifest
+	 * or {@code null}
+	 */
+	OptionsManifest getOptionsManifest();
+
+	/**
 	 * Returns the property assigned to this manifest for the given
 	 * name. If their is no property with the given name available
 	 * this method should return {@code null}.
@@ -80,6 +90,20 @@ public interface Manifest extends Identity {
 	 * if no such property exists.
 	 */
 	Object getProperty(String name);
+
+	/**
+	 * Changes the value of the property specified by {@code name} to
+	 * the new {@code value}.
+	 *
+	 * @param name The name of the property to be changed
+	 * @param value The new value for the property, allowed to be {@code null}
+	 * if stated so in the {@code OptionsManifest} for this manifest
+	 * @throws NullPointerException if the {@code name} argument is {@code null}
+	 * @throws IllegalArgumentException if the {@code value} argument does not
+	 * fulfill the contract described in the {@code OptionsManifest} of this
+	 * manifest.
+	 */
+	void setProperty(String name, Object value);
 
 	/**
 	 * Returns a {@link Set} view of all the available property names

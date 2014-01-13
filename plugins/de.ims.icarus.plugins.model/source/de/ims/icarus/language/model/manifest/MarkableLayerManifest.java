@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.manifest;
@@ -32,7 +32,7 @@ package de.ims.icarus.language.model.manifest;
  *
  */
 public interface MarkableLayerManifest extends LayerManifest {
-	
+
 	/**
 	 * Returns the number of nested containers and/or structures within this
 	 * layer.
@@ -41,23 +41,23 @@ public interface MarkableLayerManifest extends LayerManifest {
 	 * @return
 	 */
 	int getContainerDepth();
-	
+
 	/**
 	 * Returns the manifest for the top-level container in this layer.
-	 * 
+	 *
 	 * @return
 	 */
-	ContextManifest getRootContainerManifest();
-	
+	ContainerManifest getRootContainerManifest();
+
 	/**
 	 * Returns the manifest for the container at depth {@code level}.
 	 * For a {@code level} value of {@code 1} the result is equal to
 	 * {@link #getRootContainerManifest()}.
-	 * 
+	 *
 	 * @param level the depth for which the manifest should be returned
 	 * @return the manifest for the container at the given depth
      * @throws IndexOutOfBoundsException if the level is out of range
-     *         (<tt>level &lt; 0 || level &gt;= getContainerDepth()</tt>)
+     *         (<tt>level &lt; 1 || level &gt;= getContainerDepth()</tt>)
 	 */
 	ContainerManifest getContainerManifest(int level);
 }

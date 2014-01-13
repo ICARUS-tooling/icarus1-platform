@@ -30,7 +30,6 @@ import java.util.List;
 import de.ims.icarus.language.model.events.EventManager;
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.io.ContextWriter;
-import de.ims.icarus.util.location.Location;
 
 /**
  * @author Markus Gärtner
@@ -38,6 +37,8 @@ import de.ims.icarus.util.location.Location;
  *
  */
 public interface ContextManifest extends Manifest {
+
+	CorpusManifest getCorpusManifest();
 
 	/**
 	 * Allows for changes of the layer's name at runtime. This is one of the
@@ -48,7 +49,7 @@ public interface ContextManifest extends Manifest {
 	 * and assigns it as current name. Does nothing if the {@code newName}
 	 * argument is equal to the current name. Otherwise it will forward
 	 * notification of the change to the {@link EventManager} of the corpus.
-	 * 
+	 *
 	 * @param newName The desired new name of the layer
 	 * @throws UnsupportedOperationException if the manifest does not support renaming
 	 * @throws NullPointerException if the {@code newName} parameter is {@code null}
@@ -59,7 +60,7 @@ public interface ContextManifest extends Manifest {
 
 	/**
 	 * Returns the list of manifests that describe the layers in this context
-	 * 
+	 *
 	 * @return
 	 */
 	List<LayerManifest> getLayerManifests();
@@ -68,7 +69,7 @@ public interface ContextManifest extends Manifest {
 	 * Returns the reader that is used to build the actual content
 	 * of this context. If the layers in this context are generated
 	 * programmatically then this method might return {@code null}.
-	 * 
+	 *
 	 * @return The {@link ContextReader} that is used for this context
 	 * or {@code null} if this context does not derive from a physical
 	 * data location.
@@ -78,17 +79,19 @@ public interface ContextManifest extends Manifest {
 	Class<? extends ContextWriter> getWriterClass();
 
 	/**
-	 * Returns the physical location the data in this context is originating
-	 * from. If the layers in this context are generated
-	 * programmatically then this method might return {@code null}.
-	 * 
+	 * Returns the manifest that describes where the data for this context's
+	 * layers is loaded from.
+	 *
 	 * @return
 	 */
-	Location getLocation();
+	LocationManifest getLocationManifest();
 
 	/**
-	 * Changes
-	 * @param location
+	 * Changes the location from which this context's data is loaded.
+	 *
+	 * @param manifest
 	 */
-	void setLocation(Location location);
+	void setLocationManifest(LocationManifest manifest);
+
+	//TODO add flag to signal a context is usable as default context of a corpus
 }

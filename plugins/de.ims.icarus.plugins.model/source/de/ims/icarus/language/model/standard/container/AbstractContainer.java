@@ -30,7 +30,6 @@ import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -46,8 +45,8 @@ public abstract class AbstractContainer implements Container {
 	 * @param id
 	 * @param container
 	 */
-	public AbstractContainer() {
-		id = CorpusRegistry.getInstance().newId();
+	public AbstractContainer(long id) {
+		this.id = id;
 	}
 
 	/**

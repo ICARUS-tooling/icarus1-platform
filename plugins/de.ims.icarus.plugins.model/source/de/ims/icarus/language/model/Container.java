@@ -170,7 +170,8 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 
 	/**
 	 * Moves the markable currently located at position {@code index0}
-	 * over to position {@code index1}.
+	 * over to position {@code index1}. The markable previously located
+	 * at position {@code index1} will then be moved to {@code index0}.
 	 *
 	 * @param index0
 	 * @param index1

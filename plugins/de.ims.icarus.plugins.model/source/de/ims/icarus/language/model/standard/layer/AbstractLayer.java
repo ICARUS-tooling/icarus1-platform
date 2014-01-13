@@ -108,10 +108,10 @@ public class AbstractLayer implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getType()
+	 * @see de.ims.icarus.language.model.Layer#getLayerType()
 	 */
 	@Override
-	public LayerType getType() {
+	public LayerType getLayerType() {
 		return layerType;
 	}
 

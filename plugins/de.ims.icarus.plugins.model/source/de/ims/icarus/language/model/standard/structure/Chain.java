@@ -26,19 +26,49 @@
 package de.ims.icarus.language.model.standard.structure;
 
 import de.ims.icarus.language.model.Container;
+import de.ims.icarus.language.model.Markable;
+import de.ims.icarus.language.model.StructureType;
+
 
 /**
+ * Implements a simple chain structure with the following constraints:
+ * <ul>
+ * <li>there may be multiple independent root nodes</li>
+ * <li>all edges are directed</li>
+ * <li>each node has exactly one <i>parent</i> (either another non-root node
+ * or the virtual ROOT markable obtainable via {@link #getRoot()})</li>
+ * <li>each node can have at most one child node (except for the virtual
+ * ROOT, which can have an arbitrary number of children)</li>
+ * </ul>
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class Chain extends EmptyStructure {
+public class Chain extends Tree {
 
-	/**
-	 * @param parent
-	 */
-	public Chain(Container parent) {
-		super(parent);
+	public Chain(long id, Container parent, Container boundary, boolean augment,
+			boolean boundaryAsBase) {
+		super(id, parent, boundary, augment, boundaryAsBase);
 	}
 
+	public Chain(long id, Container parent) {
+		super(id, parent);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.structure.DirectedGraph#getStructureType()
+	 */
+	@Override
+	public StructureType getStructureType() {
+		return StructureType.CHAIN;
+	}
+
+	@Override
+	protected void checkNodeConstraints(Markable node) {
+		if(getStruct().getEdgeCount(true, node)>0)
+			throw new IllegalArgumentException("Node already has a parent: "+node); //$NON-NLS-1$
+		if(!isRoot(node) && getStruct().getEdgeCount(false, node)>0)
+			throw new IllegalArgumentException("Node already has a successor: "+node); //$NON-NLS-1$
+	}
 }

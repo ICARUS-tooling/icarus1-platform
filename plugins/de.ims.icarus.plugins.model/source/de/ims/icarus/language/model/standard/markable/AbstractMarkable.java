@@ -29,7 +29,6 @@ import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -39,13 +38,15 @@ import de.ims.icarus.language.model.util.CorpusUtils;
  */
 public abstract class AbstractMarkable implements Markable {
 
-	private final long id = CorpusRegistry.getInstance().newId();
+	private final long id;
 	private final Container container;
 
-	public AbstractMarkable(Container container) {
+	public AbstractMarkable(long id, Container container) {
 		if(container==null)
 			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
 		this.container = container;
+
+		this.id = id;
 	}
 
 	/**

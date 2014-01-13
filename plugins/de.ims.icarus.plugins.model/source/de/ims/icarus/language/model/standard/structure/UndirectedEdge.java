@@ -40,8 +40,8 @@ public class UndirectedEdge extends DefaultEdge {
 	 * @param source
 	 * @param target
 	 */
-	public UndirectedEdge(Structure structure, Markable source, Markable target) {
-		super(structure, source, target);
+	public UndirectedEdge(long id, Structure structure, Markable source, Markable target) {
+		super(id, structure, source, target);
 	}
 
 	/**

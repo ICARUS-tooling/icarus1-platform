@@ -126,8 +126,7 @@ public interface Structure extends Container {
 	 * Return the number of <b>outgoing</i> edges for a given node.
 	 * <p>
 	 * This is an optional method and only to be expected when the type of
-	 * this structure is neither {@value StructureType#SET} nor
-	 * {@value StructureType#GRAPH}.
+	 * this structure is not {@value StructureType#SET}.
 	 *
 	 * @param node the node to query for the number of outgoing edges.
 	 * @return the number of <b>outgoing</i> edges for a given node.
@@ -141,8 +140,7 @@ public interface Structure extends Container {
 	 * Return the <b>outgoing</i> edge at position {@code index} for a given node.
 	 * <p>
 	 * This is an optional method and only to be expected when the type of
-	 * this structure is neither {@value StructureType#SET} nor
-	 * {@value StructureType#GRAPH}.
+	 * this structure is not {@value StructureType#SET}.
 	 *
 	 * @param node the {@code Markable} in question
 	 * @param index the position of the desired {@code Edge} in the list of
@@ -188,6 +186,17 @@ public interface Structure extends Container {
 	 */
 	Markable getRoot();
 
+	/**
+	 * Returns whether or not the given {@code Markable} is a root in this structure
+	 *
+	 * @param node The {@code Markable} in question
+	 * @return {@code true} iff the given {@code node} is a root in this structure
+	 * @throws NullPointerException if the {@code node} argument is {@code null}
+	 * @throws IllegalArgumentException if the {@code node} is not a member of this
+	 * structure
+	 */
+	boolean isRoot(Markable node);
+
 	// EDIT METHODS
 
 	/**
@@ -198,6 +207,26 @@ public interface Structure extends Container {
 	void removeAllEdges();
 
 	/**
+	 * Adds the given {@code edge} to the internal edge storage
+	 *
+	 * @param edge
+	 * @return
+	 */
+	Edge addEdge(Edge edge);
+
+	/**
+	 * Adds the given {@code edge} to the internal edge storage at
+	 * the given position
+	 *
+	 * @param edge
+	 * @param index
+	 * @return
+	 *
+	 * @see #addEdge(Edge)
+	 */
+	Edge addEdge(Edge edge, int index);
+
+	/**
 	 * Creates a new edge as member of this structure
 	 * and appends it to the end of the internal storage.
 	 *
@@ -206,8 +235,10 @@ public interface Structure extends Container {
 	 * @param target
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
+	 *
+	 * @see #addEdge(Edge)
 	 */
-	Markable addEdge(Markable source, Markable target);
+	Edge addEdge(Markable source, Markable target);
 
 	/**
 	 * Creates a new edge as member of this structure
@@ -227,6 +258,8 @@ public interface Structure extends Container {
 	 *         (<tt>index &lt; 0 || index &gt; getSubject().getEdgeCount()</tt>)
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
+	 *
+	 * @see #addEdge(Edge, int)
 	 */
 	Edge addEdge(Markable source, Markable target, int index);
 

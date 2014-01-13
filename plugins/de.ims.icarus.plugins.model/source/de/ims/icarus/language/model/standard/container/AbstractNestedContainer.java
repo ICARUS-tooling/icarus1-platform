@@ -30,6 +30,7 @@ import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
  * @author Markus Gärtner
@@ -40,9 +41,8 @@ public abstract class AbstractNestedContainer extends AbstractContainer {
 
 	private final Container parent;
 
-	public AbstractNestedContainer(Container parent) {
-		if (parent == null)
-			throw new NullPointerException("Invalid parent");  //$NON-NLS-1$
+	public AbstractNestedContainer(long id, Container parent) {
+		super(id);
 
 		this.parent = parent;
 	}
@@ -82,22 +82,6 @@ public abstract class AbstractNestedContainer extends AbstractContainer {
 	 */
 	@Override
 	public ContainerManifest getManifest() {
-		// Fetch the container level and ask the
-		// hosting markable layer manifest for the container
-		// manifest at the specific level
-
-		// We assume that this container is nested at least one level
-		// below a root container
-		int level = 2;
-
-		Container parent = getContainer();
-		while(parent.getContainer()!=null) {
-			level++;
-			parent = parent.getContainer();
-		}
-
-		MarkableLayerManifest manifest = getLayer().getManifest();
-
-		return manifest.getContainerManifest(level);
+		return CorpusUtils.getContainerManifest(this);
 	}
 }

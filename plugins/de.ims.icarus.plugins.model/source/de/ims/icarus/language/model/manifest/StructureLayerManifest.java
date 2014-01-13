@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.manifest;
 
 
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -35,9 +36,20 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 
 	/**
 	 * Returns the manifest for the members of the top-level
-	 * container in this layer.
+	 * container in this layer. This is effectively the same as calling
+	 * {@link #getContainerManifest(int)} with a {@code level} value
+	 * of {@code 2} and casting the result to {@code StructureManifest}.
 	 *
 	 * @return
 	 */
 	StructureManifest getStructureManifest();
+
+	/**
+	 * Returns the {@code MarkableLayerManifest} that describes the layer hosting
+	 * <i>boundary containers</i> for the structures in this manifests'
+	 * {@code StructureLayer}. If the structures are not restricted by <i>boundary containers</i>
+	 * this method should return {@code null}.
+	 * @return
+	 */
+	MarkableLayerManifest getBoundaryLayerManifest();
 }

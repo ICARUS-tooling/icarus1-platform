@@ -32,7 +32,6 @@ import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.Structure;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -45,16 +44,17 @@ import de.ims.icarus.language.model.util.CorpusUtils;
 public class DefaultEdge implements Edge {
 
 	private Markable source, target;
-	private final long id = CorpusRegistry.getInstance().newId();
+	private final long id;
 	private final Structure structure;
 
 	/**
 	 * @param structure
 	 */
-	public DefaultEdge(Structure structure, Markable source, Markable target) {
+	public DefaultEdge(long id, Structure structure, Markable source, Markable target) {
 		if (structure == null)
 			throw new NullPointerException("Invalid structure"); //$NON-NLS-1$
 
+		this.id = id;
 		this.structure = structure;
 
 		setSource(source);

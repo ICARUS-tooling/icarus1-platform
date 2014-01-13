@@ -43,11 +43,13 @@ public class RootContainer extends AbstractListContainer {
 	private final MarkableLayer layer;
 	private final ContainerManifest manifest;
 
-	public RootContainer(MarkableLayer layer, ContainerManifest manifest) {
-		this(layer, manifest, null);
+	public RootContainer(long id, MarkableLayer layer, ContainerManifest manifest) {
+		this(id, layer, manifest, null);
 	}
 
-	public RootContainer(MarkableLayer layer, ContainerManifest manifest, List<? extends Markable> markables) {
+	public RootContainer(long id, MarkableLayer layer, ContainerManifest manifest, List<? extends Markable> markables) {
+		super(id);
+
 		if (layer == null)
 			throw new NullPointerException("Invalid layer");  //$NON-NLS-1$
 		if (manifest == null)
@@ -57,7 +59,7 @@ public class RootContainer extends AbstractListContainer {
 		this.manifest = manifest;
 
 		if(markables!=null) {
-			addAll(markables);
+			addAllMarkables0(markables);
 		}
 	}
 
@@ -104,7 +106,7 @@ public class RootContainer extends AbstractListContainer {
 		 */
 		@Override
 		protected RootContainer createContainer() {
-			return new RootContainer(layer, manifest);
+			return new RootContainer(newId(), layer, manifest);
 		}
 	}
 }

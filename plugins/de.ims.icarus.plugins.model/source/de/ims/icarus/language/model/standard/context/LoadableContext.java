@@ -34,7 +34,6 @@ import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.location.Locations;
 
 /**
  * @author Markus Gärtner
@@ -118,7 +117,7 @@ public class LoadableContext extends AbstractContext {
 
 		if(newLayers==null) {
 			LoggerFactory.warning(this,
-					"Layer source was empty: "+Locations.getPath(getManifest().getLocation())); //$NON-NLS-1$
+					"Layer source was empty: "+getManifest().getLocationManifest().getPath()); //$NON-NLS-1$
 		}
 
 		layers.addAll(newLayers);

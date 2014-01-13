@@ -31,6 +31,7 @@ package de.ims.icarus.language.model;
  *
  */
 public enum MemberType {
+	FRAGMENT,
 	MARKABLE,
 	EDGE,
 	CONTAINER,

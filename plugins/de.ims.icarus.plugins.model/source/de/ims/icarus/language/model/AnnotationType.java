@@ -19,21 +19,21 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.mutation.batch;
+package de.ims.icarus.language.model;
+
+import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum MutationType {
-	ADD,
-	REMOVE,
-	CLEAR,
-	SORT,
-	SWAP;
+public interface AnnotationType extends Identity {
+
+	AnnotationLayerManifest getSharedManifest();
 }

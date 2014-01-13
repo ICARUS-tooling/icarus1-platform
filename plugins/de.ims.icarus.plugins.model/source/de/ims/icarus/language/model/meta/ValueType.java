@@ -33,7 +33,9 @@ package de.ims.icarus.language.model.meta;
 public enum ValueType {
 
 	UNKNOWN,
+	CUSTOM,
 	STRING,
 	BOOLEAN,
-	NUMBER;
+	INTEGER,
+	DOUBLE;
 }

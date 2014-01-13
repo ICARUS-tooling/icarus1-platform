@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.util.collections.AbstractPrimitiveList;
 import de.ims.icarus.util.collections.LongIntHashMap;
 
 /**
@@ -39,7 +40,7 @@ import de.ims.icarus.util.collections.LongIntHashMap;
  * @version $Id$
  *
  */
-public class LookupList<E extends CorpusMember> implements Iterable<E> {
+public class LookupList<E extends CorpusMember> extends AbstractPrimitiveList implements Iterable<E> {
 
 	private static final int MIN_LOOKUP_SIZE = 6;
 
@@ -49,7 +50,6 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 
 	private Object[] items;
 	private LongIntHashMap lookup;
-	private int size = 0;
 	private int modCount = 0;
 
 	public LookupList() {
@@ -223,20 +223,6 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
         unmap(item);
     }
 
-    private void rangeCheck(int index) {
-        if (index >= size)
-            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
-    }
-
-    private void rangeCheckForAdd(int index) {
-        if (index > size || index < 0)
-            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
-    }
-
-    private String outOfBoundsMsg(int index) {
-        return "Index: "+index+", Size: "+size; //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     private void ensureCapacity(int minCapacity) {
@@ -311,7 +297,7 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 
 	private class Itr implements Iterator<E> {
         int cursor;       // index of next element to return
-//        int lastRet = -1; // index of last element returned; -1 if no such
+        int lastRet = -1; // index of last element returned; -1 if no such
         int expectedModCount = modCount;
 
 		/**
@@ -336,8 +322,8 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
             if (i >= items.length)
                 throw new ConcurrentModificationException();
             cursor = i + 1;
-//            return (E) items[lastRet = i];
-            return (E) items[i];
+            return (E) items[lastRet = i];
+//            return (E) items[i];
 		}
 
 		/**
@@ -345,19 +331,19 @@ public class LookupList<E extends CorpusMember> implements Iterable<E> {
 		 */
 		@Override
 		public void remove() {
-//            if (lastRet < 0)
-//                throw new IllegalStateException();
-//            checkForComodification();
-//
-//            try {
-//            	LookupList.this.remove(lastRet);
-//                cursor = lastRet;
-//                lastRet = -1;
-//                expectedModCount = modCount;
-//            } catch (IndexOutOfBoundsException ex) {
-//                throw new ConcurrentModificationException();
-//            }
-			throw new UnsupportedOperationException("Remove not supported"); //$NON-NLS-1$
+            if (lastRet < 0)
+                throw new IllegalStateException();
+            checkForComodification();
+
+            try {
+            	LookupList.this.remove(lastRet);
+                cursor = lastRet;
+                lastRet = -1;
+                expectedModCount = modCount;
+            } catch (IndexOutOfBoundsException ex) {
+                throw new ConcurrentModificationException();
+            }
+//			throw new UnsupportedOperationException("Remove not supported"); //$NON-NLS-1$
 		}
 
         final void checkForComodification() {
