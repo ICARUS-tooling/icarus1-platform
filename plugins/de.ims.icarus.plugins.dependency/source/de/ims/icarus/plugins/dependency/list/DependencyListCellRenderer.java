@@ -87,6 +87,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 	public DependencyListCellRenderer() {
 		setHighlighter(createHighlighter());
 		setDocument(new BatchDocument());
+		setOpaque(true);
 	}
 
 	protected static Style getMultipleAnnotationStyle() {
@@ -183,7 +184,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 			}
 
 			if(!annotated){
-				plain(value, index, isSelected, cellHasFocus);
+				plain(list, value, index, isSelected, cellHasFocus);
 			}
 
 			try {
@@ -276,8 +277,14 @@ public class DependencyListCellRenderer extends DummyTextPane
 		boolean markMultiple = config.getBoolean(
 				"plugins.dependency.highlighting.markMultipleAnnotations"); //$NON-NLS-1$
 
+		Color fg = isSelected ? list.getSelectionForeground() : list.getForeground();
+		Color bg = isSelected ? list.getSelectionBackground() : list.getBackground();
+
+		setBackground(bg);
+
 		Style defaultStyle = offlineDocument.addStyle(null, null);
-		StyleConstants.setForeground(defaultStyle, getForeground());
+		StyleConstants.setForeground(defaultStyle, fg);
+		StyleConstants.setBackground(defaultStyle, bg);
 
 		// Show index
 		if(LanguageUtils.isShowIndex()) {
@@ -308,7 +315,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 					buffer.setLength(0);
 				}
 
-				style = offlineDocument.addStyle(null, null);
+				style = offlineDocument.addStyle(null, defaultStyle);
 
 				Color col = DependencyHighlighting.getInstance().getGroupColor(highlight);
 				if(col!=null) {
@@ -354,10 +361,17 @@ public class DependencyListCellRenderer extends DummyTextPane
 		return true;
     }
 
-    protected void plain(SentenceData data, int index, boolean isSelected,
+    protected void plain(JList<?> list, SentenceData data, int index, boolean isSelected,
 			boolean cellHasFocus) {
+
+		Color fg = isSelected ? list.getSelectionForeground() : list.getForeground();
+		Color bg = isSelected ? list.getSelectionBackground() : list.getBackground();
+
+		setBackground(bg);
+
 		Style defaultStyle = offlineDocument.addStyle(null, null);
-		StyleConstants.setForeground(defaultStyle, getForeground());
+		StyleConstants.setForeground(defaultStyle, fg);
+		StyleConstants.setBackground(defaultStyle, bg);
 
 		// Show index
 		if(LanguageUtils.isShowIndex()) {

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.tree;
@@ -34,15 +34,18 @@ import javax.swing.tree.TreePath;
 /**
  * @author Markus Gärtner
  * @version $Id$
- * 
+ *
  */
 public abstract class AbstractTreeModel implements TreeModel {
 
 	protected EventListenerList listeners = new EventListenerList();
-	
+
 	protected Object root;
-	
+
 	protected AbstractTreeModel(Object root) {
+		if (root == null)
+			throw new NullPointerException("Invalid root"); //$NON-NLS-1$
+
 		this.root = root;
 	}
 
@@ -107,15 +110,15 @@ public abstract class AbstractTreeModel implements TreeModel {
 		fireTreeStructureChanged(new TreePath(getRoot()));
 	}
 
-	/** 
-	 * Call when a node has changed its leaf state. 
+	/**
+	 * Call when a node has changed its leaf state.
 	 */
 	protected void firePathLeafStateChanged(TreePath path) {
 		fireTreeStructureChanged(path);
 	}
 
-	/** 
-	 * Call when the tree structure below the path has completely changed. 
+	/**
+	 * Call when the tree structure below the path has completely changed.
 	 */
 	protected void fireTreeStructureChanged(TreePath parentPath) {
 		Object[] pairs = listeners.getListenerList();
@@ -240,6 +243,6 @@ public abstract class AbstractTreeModel implements TreeModel {
 		public String toString() {
 			return "root"; //$NON-NLS-1$
 		}
-		
+
 	}
 }

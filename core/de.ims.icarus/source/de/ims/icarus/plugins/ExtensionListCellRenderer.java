@@ -92,6 +92,9 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 		if(identity!=null) {
 			setIcon(identity.getIcon());
 			setToolTipText(UIUtil.toSwingTooltip(identity.getDescription()));
+		} else {
+			setIcon(null);
+			setToolTipText(null);
 		}
 
 		return this;

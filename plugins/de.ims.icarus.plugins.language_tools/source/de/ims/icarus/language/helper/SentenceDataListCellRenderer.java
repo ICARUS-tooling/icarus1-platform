@@ -57,7 +57,7 @@ public class SentenceDataListCellRenderer extends TooltipListCellRenderer
 	 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 	 */
 	@Override
-	public Component getListCellRendererComponent(JList<? extends Object> list,
+	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
 		if(value instanceof SentenceData) {
