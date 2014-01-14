@@ -34,7 +34,6 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.id.Identity;
 
 /**
@@ -46,18 +45,18 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 144607075843240899L;
 
-	private static ExtensionListCellRenderer sharedInstance;
-
-	public static ExtensionListCellRenderer getSharedInstance() {
-		if(sharedInstance==null) {
-			synchronized (ExtensionListCellRenderer.class) {
-				if(sharedInstance==null) {
-					sharedInstance = new ExtensionListCellRenderer();
-				}
-			}
-		}
-		return sharedInstance;
-	}
+//	private static ExtensionListCellRenderer sharedInstance;
+//
+//	public static ExtensionListCellRenderer getSharedInstance() {
+//		if(sharedInstance==null) {
+//			synchronized (ExtensionListCellRenderer.class) {
+//				if(sharedInstance==null) {
+//					sharedInstance = new ExtensionListCellRenderer();
+//				}
+//			}
+//		}
+//		return sharedInstance;
+//	}
 
 	/**
 	 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
@@ -98,18 +97,6 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 		}
 
 		return this;
-	}
-
-	/**
-	 * @see javax.swing.JLabel#updateUI()
-	 */
-	@Override
-	public void updateUI() {
-		if(!RendererCache.getInstance().requiresNewUI(this)) {
-			return;
-		}
-
-		super.updateUI();
 	}
 
 }

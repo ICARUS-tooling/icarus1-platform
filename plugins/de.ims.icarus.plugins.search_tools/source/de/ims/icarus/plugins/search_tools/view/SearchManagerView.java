@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view;
@@ -103,16 +103,16 @@ import de.ims.icarus.util.mpi.ResultMessage;
  *
  */
 public class SearchManagerView extends View {
-	
+
 	protected JList<SearchDescriptor> searchHistoryList;
 	protected SearchHistory searchHistory;
-	
+
 	protected SearchEditor currentSearchEditor;
-	
+
 	protected Handler handler;
-	
+
 	protected CallbackHandler callbackHandler;
-	
+
 	protected JPopupMenu popupMenu;
 
 	public SearchManagerView() {
@@ -129,31 +129,31 @@ public class SearchManagerView extends View {
 		if(factoryExtensions==null || factoryExtensions.isEmpty()) {
 			container.setLayout(new BorderLayout());
 			JTextArea infoLabel = UIUtil.defaultCreateInfoLabel(container);
-			ResourceManager.getInstance().getGlobalDomain().prepareComponent(infoLabel, 
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(infoLabel,
 					"plugins.searchTools.searchManagerView.notAvailable", null); //$NON-NLS-1$
 			ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
 			container.add(infoLabel, BorderLayout.NORTH);
-			
+
 			return;
 		}
-		
+
 		// Load actions
 		if(!defaultLoadActions(SearchManagerView.class, "search-manager-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
-		
+
 		handler = new Handler();
-		
+
 		// Header tool-bar
 		Options options = new Options("multiline", true); //$NON-NLS-1$
 		JToolBar toolBar = getDefaultActionManager().createToolBar(
 				"plugins.searchTools.searchManagerView.toolBarList", options); //$NON-NLS-1$
-		
+
 		// Current search editor
 		currentSearchEditor = new SearchEditor();
 		// Set initially empty search
 		currentSearchEditor.setEditingItem(newDescriptor());
-		
+
 		JPanel editorPanel = new JPanel(new BorderLayout());
 		editorPanel.add(toolBar, BorderLayout.NORTH);
 		editorPanel.add(currentSearchEditor.getEditorComponent(), BorderLayout.CENTER);
@@ -162,7 +162,7 @@ public class SearchManagerView extends View {
 		options = new Options("multiline", true); //$NON-NLS-1$
 		toolBar = getDefaultActionManager().createToolBar(
 				"plugins.searchTools.searchManagerView.historyToolBarList", options); //$NON-NLS-1$
-		
+
 		// History
 		searchHistory = SearchHistory.getSharedInstance();
 		searchHistoryList = new JList<>(searchHistory);
@@ -176,53 +176,53 @@ public class SearchManagerView extends View {
 		scrollPane.setBorder(UIUtil.topLineBorder);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		UIUtil.enableRighClickListSelection(searchHistoryList);
-		
+
 		JPanel historyPanel = new JPanel(new BorderLayout());
 		historyPanel.setBorder(UIUtil.topLineBorder);
 		historyPanel.add(toolBar, BorderLayout.NORTH);
 		historyPanel.add(scrollPane, BorderLayout.CENTER);
-		
+
 		container.setLayout(new BorderLayout());
 		container.add(editorPanel, BorderLayout.NORTH);
 		container.add(historyPanel, BorderLayout.CENTER);
-		
+
 		registerActionCallbacks();
-		
+
 		// Show example if required
-		if(IcarusCorePlugin.isShowExampleData()) {			
+		if(IcarusCorePlugin.isShowExampleData()) {
 			try {
 				SearchDescriptor descriptor = new SearchDescriptor();
 				descriptor.setFactoryExtension(factoryExtensions.iterator().next());
-				
+
 				descriptor.createExampleSearch();
-				
+
 				currentSearchEditor.setEditingItem(descriptor);
-				
+
 				callbackHandler.editQuery(null);
 			} catch (Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to generate example search", e); //$NON-NLS-1$
 			}
 		}
 
 		refreshActions();
-		
+
 		ComponentUpdater.getInstance().addComponent(searchHistoryList);
 	}
-	
+
 	protected void refreshActions() {
 		ActionManager actionManager = getDefaultActionManager();
-		
+
 		// Refresh editor actions
 		SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
 		Search search = descriptor==null ? null : descriptor.getSearch();
 		Object target = descriptor==null ? null : descriptor.getTarget();
 
 		boolean canRun = descriptor!=null && descriptor.getTarget()!=null;
-		
-		actionManager.setEnabled(canRun, 
+
+		actionManager.setEnabled(canRun,
 				"plugins.searchTools.searchManagerView.executeSearchAction"); //$NON-NLS-1$
-		
+
 		// Refresh history actions
 		descriptor = searchHistoryList.getSelectedValue();
 		boolean selected = descriptor!=null;
@@ -233,51 +233,51 @@ public class SearchManagerView extends View {
 		boolean isLoading = isLoadable && ((Loadable)target).isLoading();
 		boolean canLoad = isLoadable && !isLoading && !((Loadable)target).isLoaded();
 		boolean canFree = isLoadable && !isLoading && ((Loadable)target).isLoaded();
-		
+
 		actionManager.setEnabled(hasResult,
-				"plugins.searchTools.searchManagerView.viewResultAction"); //$NON-NLS-1$		
+				"plugins.searchTools.searchManagerView.viewResultAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canCancel,
-				"plugins.searchTools.searchManagerView.cancelSearchAction"); //$NON-NLS-1$		
-		actionManager.setEnabled(searchHistory.getSize()>0, 
+				"plugins.searchTools.searchManagerView.cancelSearchAction"); //$NON-NLS-1$
+		actionManager.setEnabled(searchHistory.getSize()>0,
 				"plugins.searchTools.searchManagerView.clearHistoryAction"); //$NON-NLS-1$
-		actionManager.setEnabled(selected, 
+		actionManager.setEnabled(selected,
 				"plugins.searchTools.searchManagerView.viewSearchAction",  //$NON-NLS-1$
-				"plugins.searchTools.searchManagerView.removeSearchAction"); //$NON-NLS-1$		
+				"plugins.searchTools.searchManagerView.removeSearchAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canLoad,
-				"plugins.searchTools.searchManagerView.loadSearchTargetAction"); //$NON-NLS-1$		
+				"plugins.searchTools.searchManagerView.loadSearchTargetAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canFree,
 				"plugins.searchTools.searchManagerView.freeSearchTargetAction"); //$NON-NLS-1$
 	}
-	
+
 	protected void showPopup(MouseEvent trigger) {
 		if(popupMenu==null) {
 			// Create new popup menu
-			
+
 			Options options = new Options();
 			popupMenu = getDefaultActionManager().createPopupMenu(
 					"plugins.searchTools.searchManagerView.historyPopupMenuList", options); //$NON-NLS-1$
-			
+
 			if(popupMenu!=null) {
 				popupMenu.pack();
 			} else {
 				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
 			}
 		}
-		
+
 		if(popupMenu!=null) {
 			refreshActions();
-			
+
 			popupMenu.show(searchHistoryList, trigger.getX(), trigger.getY());
 		}
 	}
-	
+
 	protected void registerActionCallbacks() {
 		if(callbackHandler==null) {
 			callbackHandler = new CallbackHandler();
 		}
-		
+
 		ActionManager actionManager = getDefaultActionManager();
-		
+
 		actionManager.addHandler("plugins.searchTools.searchManagerView.newSearchAction",  //$NON-NLS-1$
 				callbackHandler, "newSearch"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchManagerView.executeSearchAction",  //$NON-NLS-1$
@@ -307,7 +307,7 @@ public class SearchManagerView extends View {
 		actionManager.addHandler("plugins.searchTools.searchManagerView.freeSearchTargetAction",  //$NON-NLS-1$
 				callbackHandler, "freeSearchTarget"); //$NON-NLS-1$
 	}
-	
+
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		if(Commands.SELECT.equals(message.getCommand())) {
@@ -315,15 +315,15 @@ public class SearchManagerView extends View {
 			if(data instanceof SearchDescriptor) {
 				SearchDescriptor descriptor = (SearchDescriptor)data;
 				SearchDescriptor currentDescriptor = currentSearchEditor.getEditingItem();
-				
+
 				if(currentDescriptor!=null && currentDescriptor!=descriptor) {
 					currentDescriptor.setQuery(descriptor.getQuery());
 					descriptor = currentDescriptor;
 				}
-				
+
 				currentSearchEditor.setEditingItem(descriptor);
 				searchHistoryList.setSelectedValue(descriptor, true);
-				
+
 				return message.successResult(this, data);
 			} else {
 				return message.unsupportedDataResult(this);
@@ -332,55 +332,55 @@ public class SearchManagerView extends View {
 			return message.unknownRequestResult(this);
 		}
 	}
-	
+
 	protected void syncEditorViews() {
 		if(currentSearchEditor.getEditingItem()==null) {
 			return;
 		}
-		
+
 		Message message = new Message(this, Commands.COMMIT, null, null);
 		try {
 			sendRequest(null, message);
 		} catch(Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to synchronize editor views", e); //$NON-NLS-1$
-			
+
 			UIUtil.beep();
 			showError(e);
 		}
-		
+
 		refreshActions();
 	}
-	
+
 	protected void clearEditorViews() {
 		Message message = new Message(this, Commands.CLEAR, null, null);
 		try {
 			sendRequest(SearchToolsConstants.QUERY_EDITOR_VIEW_ID, message);
 		} catch(Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to clear editor views", e); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected SearchDescriptor newDescriptor() {
 		Collection<Extension> factoryExtensions = SearchManager.getSearchFactoryExtensions();
 		if(factoryExtensions==null || factoryExtensions.isEmpty())
 			throw new IllegalStateException("Cannot create search descriptor - no search factories available"); //$NON-NLS-1$
-		
+
 		SearchDescriptor descriptor = new SearchDescriptor();
 		descriptor.setFactoryExtension(factoryExtensions.iterator().next());
-		
+
 		return descriptor;
 	}
 
 	protected class Handler extends MouseAdapter implements ListSelectionListener, PropertyChangeListener {
-		
+
 		protected Search observedSearch;
-		
+
 		protected Handler() {
 			// no-op
 		}
-		
+
 		protected void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
 				showPopup(e);
@@ -402,7 +402,7 @@ public class SearchManagerView extends View {
 			if(e.getClickCount()!=2 || !SwingUtilities.isLeftMouseButton(e)) {
 				return;
 			}
-			
+
 			int index = searchHistoryList.locationToIndex(e.getPoint());
 			if(index==-1) {
 				return;
@@ -411,37 +411,37 @@ public class SearchManagerView extends View {
 			if(!bounds.contains(e.getPoint())) {
 				return;
 			}
-			
+
 			SearchDescriptor descriptor = searchHistoryList.getModel().getElementAt(index);
-			
+
 			try {
 				// Display search
 				SearchDescriptor clone = descriptor.clone();
 				currentSearchEditor.setEditingItem(clone);
 				refreshActions();
-				
+
 				// Display result
 				SearchResult result = descriptor.getSearchResult();
 				Search search = descriptor.getSearch();
-				
+
 				if(result==null || (!search.isDone() && !search.isRunning())) {
 					return;
 				}
-				
+
 				if(result.getTotalMatchCount()<1) {
-					DialogFactory.getGlobalFactory().showWarning(getFrame(), 
+					DialogFactory.getGlobalFactory().showWarning(getFrame(),
 							"plugins.searchTools.searchManagerView.dialogs.emptyResult.title",  //$NON-NLS-1$
 							"plugins.searchTools.searchManagerView.dialogs.emptyResult.message"); //$NON-NLS-1$
-					
+
 					return;
 				}
-				
+
 				Options options = new Options();
 				Message message = new Message(this, Commands.PRESENT, result, options);
-				
+
 				sendRequest(SearchToolsConstants.SEARCH_RESULT_VIEW_ID, message);
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to view result for search at index: "+index, ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
@@ -456,16 +456,16 @@ public class SearchManagerView extends View {
 				observedSearch.removePropertyChangeListener("state", this); //$NON-NLS-1$
 				observedSearch = null;
 			}
-			
+
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor!=null) {
 				observedSearch = descriptor.getSearch();
 			}
-			
+
 			if(observedSearch!=null) {
 				observedSearch.addPropertyChangeListener("state", this); //$NON-NLS-1$
 			}
-			
+
 			refreshActions();
 		}
 
@@ -477,51 +477,51 @@ public class SearchManagerView extends View {
 			refreshActions();
 		}
 	}
-	
+
 	public class CallbackHandler {
 		protected CallbackHandler() {
 			// no-op
 		}
-		
+
 		public void newSearch(ActionEvent e) {
 			try {
 				syncEditorViews();
-				
+
 				currentSearchEditor.setEditingItem(newDescriptor());
-				
+
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to create new search", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void executeSearch(ActionEvent e) {
 			if(currentSearchEditor.getEditingItem()==null) {
 				return;
 			}
-			
+
 			try {
-				
+
 				syncEditorViews();
 				SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
-				
+
 				/*SearchDescriptor updatedDescriptor = currentSearchEditor.getEditingItem();
 				if(updatedDescriptor!=null && updatedDescriptor!=descriptor) {
 					descriptor.setQuery(updatedDescriptor.getQuery());
 				}*/
-				
+
 				Search search = descriptor.getSearch();
 				if(search!=null && search.isRunning()) {
 					UIUtil.beep();
 					return;
 				}
-				
+
 				// TODO allow for execution of already running searches
-				
+
 				// Create a new descriptor without a search object
 				SearchDescriptor clone = descriptor.cloneShallow();
 				// Let factory create a blank new search object
@@ -529,33 +529,33 @@ public class SearchManagerView extends View {
 					return;
 				}
 				currentSearchEditor.setEditingItem(descriptor.clone());
-				
+
 				searchHistory.addSearch(clone);
-				
+
 				SearchManager.getInstance().executeSearch(clone.getSearch());
-				
+
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to execute search", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void openPreferences(ActionEvent e) {
 			try {
 				UIUtil.openConfigDialog("plugins.searchTools"); //$NON-NLS-1$
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to open preferences", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void editQuery(ActionEvent e) {
 			if(currentSearchEditor.getEditingItem()==null) {
 				return;
@@ -564,90 +564,90 @@ public class SearchManagerView extends View {
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			SearchQuery searchQuery = descriptor.getQuery();
 			if(searchQuery==null) {
-				LoggerFactory.log(this, Level.WARNING, 
+				LoggerFactory.log(this, Level.WARNING,
 						"No search-query present on search-descriptor"); //$NON-NLS-1$
 				return;
 			}
-			
+
 			try {
-				Message message = new Message(SearchManagerView.this, 
+				Message message = new Message(SearchManagerView.this,
 						Commands.PRESENT, descriptor, null);
-				
+
 				sendRequest(SearchToolsConstants.QUERY_EDITOR_VIEW_ID, message);
 			}  catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to forward editing of query", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
-			
+
 		}
-		
-		public void selectFactory(ActionEvent e) {			
+
+		public void selectFactory(ActionEvent e) {
 			try {
 				Collection<Extension> extensions = SearchManager.getInstance().availableSearchFactories();
-				Extension extension = PluginUtil.showExtensionDialog(getFrame(), 
+				Extension extension = PluginUtil.showExtensionDialog(getFrame(),
 						"plugins.searchTools.searchManagerView.dialogs.selectFactory.title",  //$NON-NLS-1$
 						extensions, true);
 
 				if(extension==null) {
 					return;
 				}
-				
+
 				SearchDescriptor descriptor = new SearchDescriptor();
 				descriptor.setFactoryExtension(extension);
 				currentSearchEditor.setEditingItem(descriptor);
-				
+
 				clearEditorViews();
 
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to select new search factory", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void selectTarget(ActionEvent e) {
 			if(currentSearchEditor.getEditingItem()==null) {
 				return;
 			}
-			
+
 			SearchFactory factory = currentSearchEditor.getEditingItem().getSearchFactory();
 			if(factory==null) {
 				UIUtil.beep();
 				return;
 			}
-			
+
 			try {
 				ContentType contentType = factory.getConstraintContext().getContentType();
 				SearchTargetDialog dialog = new SearchTargetDialog(contentType);
 				dialog.showDialog();
-				
+
 				Object target = dialog.getTarget();
 				if(target==null) {
 					return;
 				}
-				
+
 				boolean compatible = false;
 				if(target instanceof DataContainer) {
 					// If target is a container allow checking against its internal content type
-					compatible = ContentTypeRegistry.isCompatible(contentType, 
+					compatible = ContentTypeRegistry.isCompatible(contentType,
 							((DataContainer)target).getContentType());
 				} else {
 					// No information about content type accessible, so
 					// just do a plain check (will fail often?)
 					compatible = ContentTypeRegistry.isCompatible(contentType, target);
 				}
-				
+
 				if(!compatible) {
-					DialogFactory.getGlobalFactory().showError(null, 
+					DialogFactory.getGlobalFactory().showError(null,
 							"plugins.searchTools.searchManagerView.dialogs.selectTarget.title",  //$NON-NLS-1$
 							"plugins.searchTools.searchManagerView.dialogs.selectTarget.incompatible",  //$NON-NLS-1$
 							target.getClass().getName(), contentType.getName());
@@ -659,49 +659,49 @@ public class SearchManagerView extends View {
 
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to select target for current search", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void editParameters(ActionEvent e) {
 			if(currentSearchEditor.getEditingItem()==null) {
 				return;
 			}
-			
+
 			try {
 				SearchDescriptor descriptor = currentSearchEditor.getEditingItem();
-				
+
 				Editor<Options> editor = descriptor.getSearchFactory().createParameterEditor();
 				Options parameters = descriptor.getParameters();
 				if(parameters==null) {
 					parameters = new Options();
 				}
-				
+
 				if(DialogFactory.getGlobalFactory().showEditorDialog(
-						getFrame(), parameters, editor, 
+						getFrame(), parameters, editor,
 						"plugins.searchTools.searchManagerView.dialogs.editParameters.title")) { //$NON-NLS-1$
 					descriptor.setParameters(editor.getEditingItem());
 				}
-				
+
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to edit paramters", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void viewResult(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			try {
 				// TODO DEBUG
 				/*if(descriptor.getSearch()==null) {
@@ -710,53 +710,53 @@ public class SearchManagerView extends View {
 				}*/
 
 				SearchResult result = descriptor.getSearchResult();
-				
+
 				if(result==null) {
 					return;
 				}
-				
+
 				Options options = new Options();
 				Message message = new Message(this, Commands.PRESENT, result, options);
-				
+
 				sendRequest(SearchToolsConstants.SEARCH_RESULT_VIEW_ID, message);
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to view result of selected search", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void viewSearch(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			try {
 				SearchDescriptor clone = descriptor.cloneShallow();
 				currentSearchEditor.setEditingItem(clone);
 
 				refreshActions();
-				
+
 				// Forward to query editor directly
 				editQuery(e);
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to edit selected search", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void cancelSearch(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			try {
 				Search search = descriptor.getSearch();
 				if(search!=null) {
@@ -765,39 +765,39 @@ public class SearchManagerView extends View {
 
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to cancel selected search", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void loadSearchTarget(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			try {
 				Object target = descriptor.getTarget();
-				
+
 				if(!(target instanceof Loadable)) {
 					return;
 				}
-				
+
 				Loadable loadable = (Loadable) target;
-				
+
 				if(loadable.isLoaded() || loadable.isLoading()) {
 					return;
 				}
-				
+
 				String title = ResourceManager.getInstance().get(
 						"plugins.searchTools.searchManager.loadTargetJob.name"); //$NON-NLS-1$
 				String info = ResourceManager.getInstance().get(
 						"plugins.searchTools.searchManager.loadTargetJob.description", //$NON-NLS-1$
 						StringUtil.getName(loadable));
-				
+
 				Object task = new IOUtil.LoadJob(loadable) {
 
 					/**
@@ -808,18 +808,18 @@ public class SearchManagerView extends View {
 						Loadable loadable = null;
 						try {
 							loadable = get();
-							
+
 						} catch(InterruptedException | CancellationException e) {
 							// ignore
 						} catch(Exception e) {
-							LoggerFactory.log(this, Level.SEVERE, 
+							LoggerFactory.log(this, Level.SEVERE,
 									"Failed to load search target: "+String.valueOf(loadable), e); //$NON-NLS-1$
 							UIUtil.beep();
-							
+
 							if(!Core.getCore().handleThrowable(e)) {
 								showError(e);
 							}
-							
+
 						} finally {
 							searchHistoryList.repaint();
 							refreshActions();
@@ -832,75 +832,75 @@ public class SearchManagerView extends View {
 				searchHistoryList.repaint();
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to load search target", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void freeSearchTarget(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			try {
 				Object target = descriptor.getTarget();
-				
+
 				if(!(target instanceof Loadable)) {
 					return;
 				}
-				
+
 				Loadable loadable = (Loadable) target;
-				
+
 				if(!loadable.isLoaded() || loadable.isLoading()) {
 					return;
 				}
-				
+
 				loadable.free();
 
 				searchHistoryList.repaint();
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to free search target", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void removeSearch(ActionEvent e) {
 			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
 			if(descriptor==null) {
 				return;
 			}
-			
+
 			try {
-				
+
 				if(descriptor.isActive()) {
-					DialogFactory.getGlobalFactory().showWarning(getFrame(), 
+					DialogFactory.getGlobalFactory().showWarning(getFrame(),
 							"plugins.searchTools.searchManagerView.dialogs.removeSearch.title",  //$NON-NLS-1$
 							"plugins.searchTools.searchManagerView.dialogs.removeSearch.message"); //$NON-NLS-1$
 					return;
 				}
-				
-				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(), 
+
+				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(),
 						"plugins.searchTools.searchManagerView.dialogs.removeSearch.title",  //$NON-NLS-1$
 						"plugins.searchTools.searchManagerView.dialogs.removeSearch.confirm")) { //$NON-NLS-1$
 					return;
 				}
-				
+
 				int index = searchHistoryList.getSelectedIndex();
 				searchHistory.removeSearch(descriptor);
-				
+
 				Search search = descriptor.getSearch();
 				if(search!=null) {
 					SearchManager.getInstance().cancelSearch(search);
 				}
-				
+
 				// Maintain selected index to allow for more fluent
 				// use of selection related actions
 				if(index==-1 || index>=searchHistory.getSize()) {
@@ -912,90 +912,90 @@ public class SearchManagerView extends View {
 					refreshActions();
 				}
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to remove selected search from history", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void clearHistory(ActionEvent e) {
 			try {
 				// Abort if there is a search still active and running
 				for(int i=0; i<searchHistory.getSize(); i++) {
 					if(searchHistory.getElementAt(i).isActive()) {
-						DialogFactory.getGlobalFactory().showWarning(getFrame(), 
+						DialogFactory.getGlobalFactory().showWarning(getFrame(),
 								"plugins.searchTools.searchManagerView.dialogs.clearHistory.title",  //$NON-NLS-1$
 								"plugins.searchTools.searchManagerView.dialogs.clearHistory.message"); //$NON-NLS-1$
 						return;
 					}
 				}
-				
-				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(), 
+
+				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(),
 						"plugins.searchTools.searchManagerView.dialogs.clearHistory.title",  //$NON-NLS-1$
 						"plugins.searchTools.searchManagerView.dialogs.clearHistory.confirm")) { //$NON-NLS-1$
 					return;
 				}
-				
+
 				searchHistory.clear();
 
 				refreshActions();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to clear search history", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
 	}
-	
+
 	protected static class SearchTargetDialog implements ActionListener {
 		protected final ContentType contentType;
-		
+
 		protected Object target;
 		protected JPanel panel;
-		
+
 		protected Map<Extension, SearchTargetSelector> selectorInstances;
-		
+
 		public SearchTargetDialog(ContentType contentType) {
 			if(contentType==null)
 				throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
-			
+
 			this.contentType = contentType;
 		}
-		
+
 		public void showDialog() {
 			Collection<Extension> extensions = SearchManager.getInstance().availableTargetSelectors();
-			if(extensions==null || extensions.isEmpty()) 
+			if(extensions==null || extensions.isEmpty())
 				throw new IllegalStateException("No target selectors available"); //$NON-NLS-1$
-			
+
 			panel = new JPanel(new BorderLayout());
-			
+
 			JToolBar toolBar = ActionManager.globalManager().createEmptyToolBar();;
-			
+
 			JLabel label = new JLabel();
 			label.setText(ResourceManager.getInstance().get(
 					"plugins.searchTools.searchManagerView.dialogs.selectTarget.label")); //$NON-NLS-1$
 			label.setBorder(new EmptyBorder(1, 5, 1, 10));
 			toolBar.add(label);
-			
+
 			JComboBox<Extension> cb = new JComboBox<>(
 					new ExtensionListModel(extensions, true));
 			cb.setEditable(false);
-			cb.setRenderer(ExtensionListCellRenderer.getSharedInstance());
+			cb.setRenderer(new ExtensionListCellRenderer());
 			UIUtil.fitToContent(cb, 150, 250, 22);
 			cb.addActionListener(this);
 			toolBar.add(cb);
-			
+
 			panel.add(toolBar, BorderLayout.NORTH);
 			panel.setPreferredSize(new Dimension(400, 300));
 
 			cb.setSelectedIndex(0);
-			
+
 			target = null;
-			if(DialogFactory.getGlobalFactory().showGenericDialog(null, 
+			if(DialogFactory.getGlobalFactory().showGenericDialog(null,
 					"plugins.searchTools.searchManagerView.dialogs.selectTarget.title",  //$NON-NLS-1$
 					null, panel, true, "ok", "cancel")) { //$NON-NLS-1$ //$NON-NLS-2$
 				Extension extension = (Extension) cb.getSelectedItem();
@@ -1004,19 +1004,19 @@ public class SearchManagerView extends View {
 				}
 			}
 		}
-		
+
 		public Object getTarget() {
 			return target;
 		}
-		
+
 		protected SearchTargetSelector getSelector(Extension extension) {
 			if(extension==null)
 				throw new NullPointerException();
-			
+
 			if(selectorInstances==null) {
 				selectorInstances = new HashMap<>();
 			}
-			
+
 			SearchTargetSelector selector = selectorInstances.get(extension);
 			if(selector==null) {
 				try {
@@ -1024,11 +1024,11 @@ public class SearchManagerView extends View {
 					selector.setAllowedContentType(contentType);
 					selectorInstances.put(extension, selector);
 				} catch (Exception e) {
-					LoggerFactory.log(this, Level.SEVERE, 
+					LoggerFactory.log(this, Level.SEVERE,
 							"Failed to instantiate target selector: "+extension.getUniqueId(), e); //$NON-NLS-1$
 				}
 			}
-			
+
 			return selector;
 		}
 
@@ -1038,18 +1038,18 @@ public class SearchManagerView extends View {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JComboBox<?> cb = (JComboBox<?>) e.getSource();
-			
+
 			Extension extension = (Extension) cb.getSelectedItem();
 			if(extension==null) {
 				return;
 			}
-			
+
 			SearchTargetSelector selector = getSelector(extension);
 			if(selector==null) {
 				UIUtil.beep();
 				return;
 			}
-			
+
 			if(panel.getComponentCount()>1) {
 				panel.remove(1);
 			}
@@ -1059,17 +1059,17 @@ public class SearchManagerView extends View {
 			selector.getSelectorComponent().requestFocusInWindow();
 		}
 	}
-	
+
 	protected class SearchEditor implements Editor<SearchDescriptor>, ActionListener {
 		protected SearchDescriptor descriptor;
-		
+
 		protected FormBuilder formBuilder;
-		
+
 		protected Timer timer;
-		
+
 		protected SearchEditor() {
 			Action a;
-			
+
 			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
 			// Factory
 			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectFactoryAction"); //$NON-NLS-1$
@@ -1087,7 +1087,7 @@ public class SearchManagerView extends View {
 			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editParametersAction"); //$NON-NLS-1$
 			formBuilder.addEntry("parameters", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.parameters", null, a)); //$NON-NLS-1$
-			
+
 			formBuilder.buildForm();
 			((JComponent)formBuilder.getContainer()).setBorder(UIUtil.topLineBorder);
 		}
@@ -1099,7 +1099,7 @@ public class SearchManagerView extends View {
 		public Component getEditorComponent() {
 			return formBuilder.getContainer();
 		}
-		
+
 		public void refresh() {
 			SearchDescriptor descriptor = getEditingItem();
 			if(descriptor!=null) {
@@ -1114,9 +1114,9 @@ public class SearchManagerView extends View {
 		public void setEditingItem(SearchDescriptor item) {
 			if(item==null)
 				throw new NullPointerException("Invalid search-descriptor"); //$NON-NLS-1$
-						
+
 			descriptor = item;
-			
+
 			Search search = descriptor.getSearch();
 			if(search!=null && search.isRunning()) {
 				if(timer==null) {
@@ -1126,20 +1126,20 @@ public class SearchManagerView extends View {
 			} else if(timer!=null) {
 				timer.stop();
 			}
-			
+
 			// Factory
 			formBuilder.setValue("factory", PluginUtil.getIdentity(descriptor.getFactoryExtension())); //$NON-NLS-1$
-			
+
 			// Target
 			String name = StringUtil.getName(descriptor.getTarget());
 			if(name==null || name.isEmpty()) {
 				name = ResourceManager.getInstance().get("plugins.searchTools.undefinedStats"); //$NON-NLS-1$
 			}
 			formBuilder.setValue("target", name); //$NON-NLS-1$
-			
+
 			// Query
 			String query = descriptor.getSearchFactory().getQueryLabel(descriptor.getQuery());
-			// Generate default label if factory does not require a specialized label 
+			// Generate default label if factory does not require a specialized label
 			if(query==null) {
 				query = SearchUtils.getQueryStats(descriptor.getQuery());
 			}
@@ -1147,14 +1147,14 @@ public class SearchManagerView extends View {
 				query = ResourceManager.getInstance().get("plugins.searchTools.emptyStats"); //$NON-NLS-1$
 			}
 			formBuilder.setValue("query", query); //$NON-NLS-1$
-			
+
 			// Result
 			/*String result = SearchUtils.getResultStats(descriptor.getSearchResult());
 			if(result==null || result.isEmpty()) {
 				result = ResourceManager.getInstance().get("plugins.searchTools.emptyStats"); //$NON-NLS-1$
 			}
 			formBuilder.setValue("result", result); //$NON-NLS-1$*/
-			
+
 			// Parameters
 			// TODO provide any kind of textual representation?
 		}

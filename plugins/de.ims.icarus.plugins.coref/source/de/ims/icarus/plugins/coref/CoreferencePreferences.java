@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref;
@@ -52,7 +52,7 @@ public class CoreferencePreferences {
 
 	public CoreferencePreferences() {
 		ConfigBuilder builder = new ConfigBuilder();
-		
+
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
 		// JGRAPH GROUP
@@ -73,7 +73,7 @@ public class CoreferencePreferences {
 //		options.put("selectedVertexPerimeter", 1); //$NON-NLS-1$
 		JGraphPreferences.buildDefaultGraphConfig(builder, options);
 		builder.reset();
-		
+
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
 		// COREF GROUP
@@ -83,10 +83,10 @@ public class CoreferencePreferences {
 		builder.setProperties(
 				builder.addOptionsEntry("defaultDocumentPresenter", 0,  //$NON-NLS-1$
 						collectPresenterExtensions()),
-				ConfigConstants.RENDERER, ExtensionListCellRenderer.getSharedInstance());
+				ConfigConstants.RENDERER, new ExtensionListCellRenderer());
 		builder.addBooleanEntry("showRowIndex", true); //$NON-NLS-1$
 		builder.addBooleanEntry("showSetIndex", false); //$NON-NLS-1$
-		
+
 		// ERROR COLORS SUBGROUP
 		builder.addGroup("errorColors", true); //$NON-NLS-1$
 		builder.virtual();
@@ -97,7 +97,7 @@ public class CoreferencePreferences {
 		builder.addColorEntry(CorefErrorType.INVALID_CLUSTER_START.getKey(), new Color(0, 255, 170).getRGB());
 		builder.back();
 		// END ERROR COLORS SUBGROUP
-		
+
 		// TEXT SUBGROUP
 		builder.addGroup("text", true); //$NON-NLS-1$
 		builder.virtual();
@@ -106,7 +106,7 @@ public class CoreferencePreferences {
 		ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.back();
 		// END TEXT SUBGROUP
-		
+
 		// GRID SUBGROUP
 		builder.addGroup("grid", true); //$NON-NLS-1$
 		builder.virtual();
@@ -125,10 +125,10 @@ public class CoreferencePreferences {
 		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
 		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
 				(Object[])HighlightType.values()),
-				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+				ConfigConstants.RENDERER, new TooltipListCellRenderer());
 		builder.setProperties(builder.addOptionsEntry("groupHighlightType", 0,  //$NON-NLS-1$
 				(Object[])HighlightType.values()),
-				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+				ConfigConstants.RENDERER, new TooltipListCellRenderer());
 		builder.addBooleanEntry("markMultipleAnnotations", true); //$NON-NLS-1$
 		builder.addColorEntry("nodeHighlight", CoreferenceDocumentHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("edgeHighlight", CoreferenceDocumentHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
@@ -138,17 +138,17 @@ public class CoreferencePreferences {
 		}
 		builder.back();
 		// END HIGHLIGHTING GROUP
-		
+
 		CoreferenceDocumentHighlighting.getInstance().loadConfig();
 	}
-	
+
 	private Object[] collectPresenterExtensions() {
 		java.util.List<Object> items = new ArrayList<>();
-		
+
 		for(Extension extension : CoreferencePlugin.getCoreferencePresenterExtensions()) {
 			items.add(extension.getUniqueId());
 		}
-		
+
 		return items.toArray();
 	}
 }

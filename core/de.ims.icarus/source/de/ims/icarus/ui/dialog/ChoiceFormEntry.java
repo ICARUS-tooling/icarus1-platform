@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.dialog;
@@ -48,19 +48,19 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 		if(model==null) {
 			model = new DefaultComboBoxModel<>();
 		}
-		
+
 		comboBox = new JComboBox<>(model);
 		comboBox.setEditable(editable);
 		comboBox.setSelectedItem(null);
-		comboBox.setRenderer(TooltipListCellRenderer.getSharedInstance());
-		
+		comboBox.setRenderer(new TooltipListCellRenderer());
+
 		setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
 	}
-	
+
 	public ChoiceFormEntry(String label, ComboBoxModel<?> model) {
 		this(label, model, false);
 	}
-	
+
 	public ChoiceFormEntry(String label, boolean editable) {
 		this(label, (ComboBoxModel<?>) null, editable);
 	}
@@ -68,7 +68,7 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 	public ChoiceFormEntry(String label, Object[] items) {
 		this(label, items, false);
 	}
-	
+
 	public ChoiceFormEntry(String label, Object[] items, boolean editable) {
 		this(label, new DefaultComboBoxModel<>(items), editable);
 	}
@@ -76,7 +76,7 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 	public ChoiceFormEntry() {
 		this(null, (ComboBoxModel<Object>)null);
 	}
-	
+
 	public JComboBox<?> getComboBox() {
 		return comboBox;
 	}
@@ -88,7 +88,7 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 	public void addComponents(FormBuilder builder) {
 		builder.feedComponent(comboBox, null, getResizeMode());
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ChoiceFormEntry setRenderer(ListCellRenderer renderer) {
 		getComboBox().setRenderer(renderer);
@@ -109,7 +109,7 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 	 */
 	@Override
 	public Object getValue() {
-		return comboBox.getSelectedItem(); 
+		return comboBox.getSelectedItem();
 	}
 
 	/**

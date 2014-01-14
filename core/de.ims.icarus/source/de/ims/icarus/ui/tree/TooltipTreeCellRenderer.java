@@ -33,7 +33,6 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
@@ -48,14 +47,14 @@ public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	private static final long serialVersionUID = -28033820708371349L;
 
-	private static TooltipTreeCellRenderer sharedInstance;
-
-	public static TooltipTreeCellRenderer getSharedInstance() {
-		if(sharedInstance==null) {
-			sharedInstance = new TooltipTreeCellRenderer();
-		}
-		return sharedInstance;
-	}
+//	private static TooltipTreeCellRenderer sharedInstance;
+//
+//	public static TooltipTreeCellRenderer getSharedInstance() {
+//		if(sharedInstance==null) {
+//			sharedInstance = new TooltipTreeCellRenderer();
+//		}
+//		return sharedInstance;
+//	}
 
 	public TooltipTreeCellRenderer() {
 		// no-op
@@ -110,17 +109,5 @@ public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {
 		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 
 		return this;
-	}
-
-	/**
-	 * @see javax.swing.JLabel#updateUI()
-	 */
-	@Override
-	public void updateUI() {
-		if(!RendererCache.getInstance().requiresNewUI(this)) {
-			return;
-		}
-
-		super.updateUI();
 	}
 }

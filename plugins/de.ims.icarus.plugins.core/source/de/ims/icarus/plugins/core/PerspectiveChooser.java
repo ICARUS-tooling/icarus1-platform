@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core;
@@ -99,28 +99,28 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
  *
  */
 public class PerspectiveChooser {
-	
+
 	private JComponent container;
-	
+
 	private Filter filter;
 	private Extension selectedPerspective;
 	private ChangeListener changeListener;
-	
+
 	private Extension displayedPerspective;
-	
+
 	private PerspectiveUsageStatistic statistics;
-	
+
 	private JLabel previewLabel;
 	private JLabel headerLabel;
 	private JTextArea descriptionArea;
 	private JList<Extension> perspectiveList;
-	
+
 	private Handler handler;
 
 	public PerspectiveChooser(ChangeListener changeListener, Filter filter) {
 		if(changeListener==null)
 			throw new NullPointerException("Invalid change listener"); //$NON-NLS-1$
-		
+
 		this.changeListener = changeListener;
 		this.filter = filter;
 	}
@@ -128,9 +128,9 @@ public class PerspectiveChooser {
 	public PerspectiveChooser(ChangeListener changeListener) {
 		this(changeListener, null);
 	}
-	
+
 	private static final String STATISTICS_FILE = "perspectiveUsages.xml"; //$NON-NLS-1$
-	
+
 	public void init(JComponent container) {
 		// Load statistics
 		File file = new File(Core.getCore().getDataFolder(), STATISTICS_FILE);
@@ -146,14 +146,14 @@ public class PerspectiveChooser {
 		if(statistics==null) {
 			statistics = new PerspectiveUsageStatistic();
 		}
-				
+
 		// Collect available perspectives
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
-				.getPluginDescriptor(IcarusCorePlugin.PLUGIN_ID);		
+				.getPluginDescriptor(IcarusCorePlugin.PLUGIN_ID);
 		ExtensionPoint extensionPoint = descriptor.getExtensionPoint("Perspective"); //$NON-NLS-1$
 		List<Extension> connectedExtensions = new ArrayList<>(
 				PluginUtil.findExtensions(extensionPoint, getFilter()));
-		
+
 		// Handle (almost impossible) case of no available perspectives
 		if(connectedExtensions.isEmpty()) {
 			JTextArea info = new JTextArea(ResourceManager.getInstance().get(
@@ -167,7 +167,7 @@ public class PerspectiveChooser {
 			container.add(info, BorderLayout.CENTER);
 			return;
 		}
-		
+
 		// Sort perspectives one way or the other
 		if(ConfigRegistry.getGlobalRegistry().getBoolean(
 				"general.appearance.sortPerspectivesByStatistics")) { //$NON-NLS-1$
@@ -175,23 +175,23 @@ public class PerspectiveChooser {
 		} else {
 			Collections.sort(connectedExtensions, PluginUtil.IDENTITY_COMPARATOR);
 		}
-		
+
 		handler = new Handler();
-		
-		Color bg = Color.white; 
-		
+
+		Color bg = Color.white;
+
 		perspectiveList = new JList<>(new ExtensionListModel(connectedExtensions, false));
-		perspectiveList.setCellRenderer(ExtensionListCellRenderer.getSharedInstance());
+		perspectiveList.setCellRenderer(new ExtensionListCellRenderer());
 		perspectiveList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		perspectiveList.addListSelectionListener(handler);
 		perspectiveList.addMouseListener(handler);
 		perspectiveList.setBackground(bg);
-		
+
 		JScrollPane spLeft = new JScrollPane(perspectiveList);
 		spLeft.setBorder(UIUtil.defaultContentBorder);
 		UIUtil.defaultSetUnitIncrement(spLeft);
 		spLeft.setBackground(bg);
-		
+
 		// Header
 		headerLabel = new JLabel();
 		headerLabel.setFont(headerLabel.getFont().deriveFont(Font.BOLD));
@@ -205,7 +205,7 @@ public class PerspectiveChooser {
 		previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		previewLabel.setBackground(bg);
 		previewLabel.setMaximumSize(new Dimension(300, 300));
-		
+
 		// Description
 		descriptionArea = new JTextArea();
 		UIUtil.disableCaretScroll(descriptionArea);
@@ -217,12 +217,12 @@ public class PerspectiveChooser {
 		descriptionArea.setBorder(new EmptyBorder(3, 3, 3, 3));
 		descriptionArea.setBackground(bg);
 
-		
+
 		// Select-Button
 		JButton button = new JButton(ResourceManager.getInstance().get(
 					"plugins.core.perspectiveChooser.selectPerspective")); //$NON-NLS-1$
 		button.addActionListener(handler);
-		
+
 		// Arrange stuff
 //		JPanel panel = new JPanel(new GridBagLayout());
 //		panel.add(headerLabel, GridBagUtil.makeGbcH(0, 0, 1, 1));
@@ -234,23 +234,23 @@ public class PerspectiveChooser {
 //		gbc.insets = new Insets(5, 5, 5, 5);
 //		panel.add(button, gbc);
 //		panel.setBackground(bg);
-		
+
 		JPanel detailPanel = new JPanel(new BorderLayout());
 		detailPanel.add(previewLabel, BorderLayout.NORTH);
 		detailPanel.add(descriptionArea, BorderLayout.CENTER);
 		detailPanel.setBackground(bg);
-		
+
 		JScrollPane spRight = new JScrollPane(detailPanel);
 		spRight.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(spRight);
 		spRight.setBackground(bg);
 		spRight.setBorder(UIUtil.topLineBorder);
-		
+
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(headerLabel, BorderLayout.NORTH);
 		panel.add(spRight, BorderLayout.CENTER);
 		panel.setBackground(bg);
-		
+
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, spLeft, panel);
 		splitPane.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createLineBorder(Color.blue, 1, true),
@@ -264,7 +264,7 @@ public class PerspectiveChooser {
 				comp.setBackground(Color.blue);
 			}
 		}
-		
+
 		JLabel title = new JLabel();
 		ResourceManager.getInstance().getGlobalDomain().prepareComponent(
 				title, "plugins.core.perspectiveChooser.selectPerspective", null); //$NON-NLS-1$
@@ -274,7 +274,7 @@ public class PerspectiveChooser {
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setVerticalAlignment(SwingConstants.CENTER);
 		title.setBackground(bg);
-		
+
 		JPanel contentPanel = new JPanel(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 		contentPanel.add(splitPane, BorderLayout.CENTER);
@@ -283,23 +283,23 @@ public class PerspectiveChooser {
 
 		container.setLayout(new BorderLayout());
 		container.add(contentPanel, BorderLayout.CENTER);
-		
+
 		perspectiveList.setSelectedIndex(0);
-		
+
 		this.container = container;
 	}
-	
+
 	private void setSelectedPerspective(Extension selectedPerspective) {
 		if(selectedPerspective==null)
 			throw new NullPointerException("Invalid perspective extension"); //$NON-NLS-1$
-		
+
 		this.selectedPerspective = selectedPerspective;
-		
+
 		statistics.increment(selectedPerspective);
-		
+
 		// Save statistics
 		TaskManager.getInstance().execute(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				File file = new File(Core.getCore().getDataFolder(), STATISTICS_FILE);
@@ -313,25 +313,25 @@ public class PerspectiveChooser {
 				}
 			}
 		});
-		
+
 		JLabel label = new JLabel();
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setIcon(IconRegistry.getGlobalRegistry().getIcon("ajax-loader_32.gif")); //$NON-NLS-1$
-		
+
 		container.removeAll();
 		container.add(label, BorderLayout.CENTER);
 		container.revalidate();
 		container.repaint();
-		
+
 		UIUtil.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				changeListener.stateChanged(new ChangeEvent(PerspectiveChooser.this));
 			}
 		});
 	}
-	
+
 	/**
 	 * @return the filter
 	 */
@@ -345,30 +345,30 @@ public class PerspectiveChooser {
 	public void setFilter(Filter filter) {
 		this.filter = filter;
 	}
-	
+
 	/**
 	 * @return the selectedPerspective
 	 */
 	public Extension getSelectedPerspective() {
 		return selectedPerspective;
 	}
-	
+
 	private static Map<Extension, Image> imageCache = new LRUCache<>(20);
-	
+
 	private int maxWidth = 650;
-	
+
 	private void refreshDetails() {
 		if(displayedPerspective==null) {
 			return;
 		}
-		
+
 		Identity identity = PluginUtil.getIdentity(displayedPerspective);
 
 		// Header
 		headerLabel.setText(identity.getName());
 		headerLabel.setToolTipText(identity.getName()+" ("+identity.getId()+")");  //$NON-NLS-1$//$NON-NLS-2$
 		headerLabel.setIcon(identity.getIcon());
-		
+
 		// Preview
 		Extension.Parameter param = displayedPerspective.getParameter("preview"); //$NON-NLS-1$
 		if(param!=null) {
@@ -378,7 +378,7 @@ public class PerspectiveChooser {
 					ClassLoader loader = PluginUtil.getClassLoader(displayedPerspective);
 					URL location = loader.getResource(param.valueAsString());
 					image = location==null ? null : ImageIO.read(location);
-					
+
 					if(image!=null) {
 						imageCache.put(displayedPerspective, image);
 					}
@@ -387,14 +387,14 @@ public class PerspectiveChooser {
 				int width;
 				while(image.getHeight(previewLabel)==-1
 						|| (width=image.getWidth(previewLabel))==-1);
-				
+
 				image = image.getScaledInstance(
-							width>maxWidth ? maxWidth : -1, 
+							width>maxWidth ? maxWidth : -1,
 							-1, Image.SCALE_SMOOTH);
-				
+
 				/*while((height=image.getHeight(preview))==-1
 						|| (width=image.getWidth(preview))==-1);*/
-				
+
 				Icon icon = new ImageIcon(image);
 				previewLabel.setIcon(icon);
 				previewLabel.setText(null);
@@ -414,21 +414,21 @@ public class PerspectiveChooser {
 			previewLabel.setVerticalAlignment(SwingConstants.CENTER);
 			previewLabel.setPreferredSize(new Dimension(200, 200));
 		}
-		
+
 		// Description
 		String description = identity.getDescription();
 		if(description==null || description.isEmpty()) {
 			description = ResourceManager.getInstance().get(
 					"plugins.core.perspectiveChooser.noDescription"); //$NON-NLS-1$
 		}
-		
+
 		Component comp = SwingUtilities.getAncestorOfClass(JScrollPane.class, descriptionArea);
 		int width = Math.max(comp.getWidth(), 800);
-		
+
 		description = StringUtil.wrap(description, descriptionArea, width);
 		descriptionArea.setText(description);
 	}
-	
+
 	private class Handler extends MouseAdapter implements ListSelectionListener, ActionListener {
 
 		@Override
@@ -438,9 +438,9 @@ public class PerspectiveChooser {
 				if(index==-1) {
 					return;
 				}
-				
+
 				Extension perspective = perspectiveList.getModel().getElementAt(index);
-				
+
 				setSelectedPerspective(perspective);
 			}
 		}
@@ -453,7 +453,7 @@ public class PerspectiveChooser {
 			if(displayedPerspective==null) {
 				return;
 			}
-			
+
 			setSelectedPerspective(displayedPerspective);
 		}
 
@@ -467,19 +467,19 @@ public class PerspectiveChooser {
 			}
 			int index = perspectiveList.getSelectedIndex();
 			displayedPerspective = index==-1 ? null : perspectiveList.getModel().getElementAt(index);
-			
+
 			refreshDetails();
 		}
-		
+
 	}
 
 	@XmlRootElement(name="PerspectiveUsageStatistic")
 	public static class PerspectiveUsageStatistic implements Comparator<Extension> {
-		
+
 		@XmlElement
 		@XmlJavaTypeAdapter(value=MapAdapter.class)
 		private Map<String, Integer> usageCounts = new HashMap<>();
-		
+
 		void increment(Extension extension) {
 			String perspectiveId = extension.getUniqueId();
 			Integer count = usageCounts.get(perspectiveId);
@@ -489,7 +489,7 @@ public class PerspectiveChooser {
 			count++;
 			usageCounts.put(perspectiveId, count);
 		}
-		
+
 		int getCount(Extension extension) {
 			Integer count = usageCounts.get(extension.getUniqueId());
 			return count==null ? 0 : count;

@@ -31,7 +31,6 @@ import java.awt.FontMetrics;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.StringUtil;
 
 /**
@@ -43,17 +42,17 @@ public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = 2505308201912712643L;
 
-	private static TooltipTableCellRenderer sharedInstance;
-
-	/**
-	 * @return the sharedInstance
-	 */
-	public static TooltipTableCellRenderer getSharedInstance() {
-		if(sharedInstance==null) {
-			sharedInstance = new TooltipTableCellRenderer();
-		}
-		return sharedInstance;
-	}
+//	private static TooltipTableCellRenderer sharedInstance;
+//
+//	/**
+//	 * @return the sharedInstance
+//	 */
+//	public static TooltipTableCellRenderer getSharedInstance() {
+//		if(sharedInstance==null) {
+//			sharedInstance = new TooltipTableCellRenderer();
+//		}
+//		return sharedInstance;
+//	}
 
 	public TooltipTableCellRenderer() {
 		// no-op
@@ -88,17 +87,5 @@ public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 		setToolTipText(tooltip);
 
 		return this;
-	}
-
-	/**
-	 * @see javax.swing.JLabel#updateUI()
-	 */
-	@Override
-	public void updateUI() {
-		if(!RendererCache.getInstance().requiresNewUI(this)) {
-			return;
-		}
-
-		super.updateUI();
 	}
 }

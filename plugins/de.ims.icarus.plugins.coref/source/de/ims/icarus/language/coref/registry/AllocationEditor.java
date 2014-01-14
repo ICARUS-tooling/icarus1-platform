@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.registry;
@@ -59,28 +59,28 @@ import de.ims.icarus.util.location.Locations;
  *
  */
 public class AllocationEditor implements Editor<AllocationDescriptor> {
-	
+
 	private JPanel contentPanel;
 	private FormBuilder formBuilder;
 	private AllocationDescriptor descriptor;
-	
+
 	private boolean ignoreEvents = false;
 	private Handler handler;
 
 	public AllocationEditor() {
 		// no-op
 	}
-	
-	private void initForm() {		
+
+	private void initForm() {
 		// NAME
 		formBuilder.addInputFormEntry("name", "labels.name"); //$NON-NLS-1$ //$NON-NLS-2$
 		// LOCATION
 		formBuilder.addLocationFormEntry("location", "labels.location"); //$NON-NLS-1$ //$NON-NLS-2$
 		// READER
 		ComboBoxModel<Extension> model = new ExtensionListModel(
-				CoreferencePlugin.getAllocationReaderExtensions(), true);		
+				CoreferencePlugin.getAllocationReaderExtensions(), true);
 		ChoiceFormEntry entry = new ChoiceFormEntry("labels.reader", model); //$NON-NLS-1$
-		entry.getComboBox().setRenderer(ExtensionListCellRenderer.getSharedInstance());
+		entry.getComboBox().setRenderer(new ExtensionListCellRenderer());
 		formBuilder.addEntry("reader", entry); //$NON-NLS-1$
 		// PROPERTIES
 		formBuilder.addPropertiesFormEntry("properties"); //$NON-NLS-1$
@@ -101,11 +101,11 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 			handler = new Handler();
 			CoreferenceRegistry.getInstance().addListener(Events.REMOVED, handler);
 			CoreferenceRegistry.getInstance().addListener(Events.CHANGED, handler);
-			
+
 			initForm();
-			
+
 			formBuilder.buildForm();
-			
+
 			resetEdit();
 		}
 		return contentPanel;
@@ -119,9 +119,9 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 		if(item==descriptor) {
 			return;
 		}
-		
+
 		descriptor = item;
-		
+
 		resetEdit();
 	}
 
@@ -141,12 +141,12 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 		if(contentPanel==null) {
 			return;
 		}
-		
+
 		if(descriptor==null) {
 			formBuilder.clear();
 			return;
-		} 
-		
+		}
+
 		formBuilder.setValue("name", descriptor.getName()); //$NON-NLS-1$
 		formBuilder.setValue("location", descriptor.getLocation()); //$NON-NLS-1$
 		formBuilder.setValue("reader", descriptor.getReaderExtension()); //$NON-NLS-1$
@@ -160,7 +160,7 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 	public void applyEdit() {
 		ignoreEvents = true;
 		try {
-			
+
 			// Name
 			String newName = (String)formBuilder.getValue("name"); //$NON-NLS-1$
 			if(!newName.equals(descriptor.getName())) {
@@ -168,7 +168,7 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 				String uniqueName = CoreferenceRegistry.getInstance().getUniqueAllocationName(
 						documentSet, newName);
 				if(!uniqueName.equals(newName)) {
-					DialogFactory.getGlobalFactory().showInfo(null, 
+					DialogFactory.getGlobalFactory().showInfo(null,
 							"plugins.coref.coreferenceManagerView.dialogs.allocation.title",  //$NON-NLS-1$
 							"plugins.coref.coreferenceManagerView.dialogs.allocation.duplicateName",  //$NON-NLS-1$
 							newName, uniqueName);
@@ -176,14 +176,14 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 				formBuilder.setValue("name", uniqueName); //$NON-NLS-1$
 				CoreferenceRegistry.getInstance().setName(descriptor, uniqueName);
 			}
-			
+
 			// Location
 			Location location = null;
 			try {
 				location = (Location)formBuilder.getValue("location"); //$NON-NLS-1$
 			} catch (InvalidFormDataException e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to resolve location for document-set: "+descriptor.getName(), e); //$NON-NLS-1$
-				DialogFactory.getGlobalFactory().showError(null, 
+				DialogFactory.getGlobalFactory().showError(null,
 						"plugins.coref.coreferenceManagerView.dialogs.allocation.title",  //$NON-NLS-1$
 						"plugins.coref.coreferenceManagerView.dialogs.allocation.invalidLocation",  //$NON-NLS-1$
 						((LocationFormEntry)formBuilder.getEntry("location")).getLocationString()); //$NON-NLS-1$
@@ -191,12 +191,12 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 			if(!Locations.equals(location, descriptor.getLocation())) {
 				CoreferenceRegistry.getInstance().setLocation(descriptor, location);
 			}
-			
+
 			// Reader
 			Extension extension = (Extension) formBuilder.getValue("reader"); //$NON-NLS-1$
 			CoreferenceRegistry.getInstance().setReaderExtension(descriptor, extension);
-	
-	
+
+
 			// Properties
 			// Replace the old set of properties
 			@SuppressWarnings("unchecked")
@@ -218,12 +218,12 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 		if(descriptor==null) {
 			return false;
 		}
-		
+
 		// Compare name
 		if(!CollectionUtils.equals(formBuilder.getValue("name"), descriptor.getName())) { //$NON-NLS-1$
 			return true;
 		}
-		
+
 		// Compare location
 		Location location = null;
 		try {
@@ -234,12 +234,12 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 		if(!Locations.equals(location, descriptor.getLocation())) {
 			return true;
 		}
-		
+
 		// Compare reader
 		if(!CollectionUtils.equals(formBuilder.getValue("reader"), descriptor.getReaderExtension())) { //$NON-NLS-1$
 			return true;
 		}
-		
+
 		// Compare complete set of properties
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = (Map<String, Object>) formBuilder.getValue("properties"); //$NON-NLS-1$
@@ -265,7 +265,7 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -275,7 +275,7 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 	@Override
 	public void close() {
 		descriptor = null;
-		
+
 		if(contentPanel!=null) {
 			formBuilder.clear();
 		}
@@ -283,7 +283,7 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 			CoreferenceRegistry.getInstance().removeListener(handler);
 		}
 	}
-	
+
 	protected class Handler implements EventListener {
 
 		/**
@@ -295,6 +295,6 @@ public class AllocationEditor implements Editor<AllocationDescriptor> {
 				resetEdit();
 			}
 		}
-		
+
 	}
 }

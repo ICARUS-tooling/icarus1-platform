@@ -5,7 +5,7 @@
 	
 	<!--Application properties -->
 	<property name="app.name" value="ICARUS" />
-	<property name="app.version" value="1.0.4" />
+	<property name="app.version" value="1.0.5" />
 
 	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />

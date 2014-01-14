@@ -128,7 +128,7 @@ public class TreebankExplorerView extends View {
 		treebanksList = new JList<>(model);
 		UIUtil.enableToolTip(treebanksList);
 		UIUtil.enableRighClickListSelection(treebanksList);
-		treebanksList.setCellRenderer(TreebankListCellRenderer.getSharedInstance());
+		treebanksList.setCellRenderer(new TreebankListCellRenderer());
 		treebanksList.setBorder(UIUtil.defaultContentBorder);
 		treebanksList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		treebanksList.addListSelectionListener(handler);

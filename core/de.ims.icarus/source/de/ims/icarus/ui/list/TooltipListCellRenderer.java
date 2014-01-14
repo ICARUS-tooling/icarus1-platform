@@ -33,7 +33,6 @@ import javax.swing.Icon;
 import javax.swing.JList;
 
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
@@ -48,14 +47,14 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 4283938142282983275L;
 
-	private static TooltipListCellRenderer sharedInstance;
-
-	public static TooltipListCellRenderer getSharedInstance() {
-		if(sharedInstance==null) {
-			sharedInstance = new TooltipListCellRenderer();
-		}
-		return sharedInstance;
-	}
+//	private static TooltipListCellRenderer sharedInstance;
+//
+//	public static TooltipListCellRenderer getSharedInstance() {
+//		if(sharedInstance==null) {
+//			sharedInstance = new TooltipListCellRenderer();
+//		}
+//		return sharedInstance;
+//	}
 
 	public TooltipListCellRenderer() {
 		// no-op
@@ -108,18 +107,5 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 		setToolTipText(UIUtil.toSwingTooltip(tooltip));
 
 		return this;
-	}
-
-
-	/**
-	 * @see javax.swing.JLabel#updateUI()
-	 */
-	@Override
-	public void updateUI() {
-		if(!RendererCache.getInstance().requiresNewUI(this)) {
-			return;
-		}
-
-		super.updateUI();
 	}
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.registry;
@@ -59,28 +59,28 @@ import de.ims.icarus.util.location.Locations;
  *
  */
 public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
-	
+
 	private JPanel contentPanel;
 	private FormBuilder formBuilder;
 	private DocumentSetDescriptor descriptor;
-	
+
 	private boolean ignoreEvents = false;
 	private Handler handler;
 
 	public DocumentSetEditor() {
 		// no-op
 	}
-	
-	private void initForm() {		
+
+	private void initForm() {
 		// NAME
 		formBuilder.addInputFormEntry("name", "labels.name"); //$NON-NLS-1$ //$NON-NLS-2$
 		// LOCATION
 		formBuilder.addLocationFormEntry("location", "labels.location"); //$NON-NLS-1$ //$NON-NLS-2$
 		// READER
 		ComboBoxModel<Extension> model = new ExtensionListModel(
-				CoreferencePlugin.getDocumentReaderExtensions(), true);		
+				CoreferencePlugin.getDocumentReaderExtensions(), true);
 		ChoiceFormEntry entry = new ChoiceFormEntry("labels.reader", model); //$NON-NLS-1$
-		entry.getComboBox().setRenderer(ExtensionListCellRenderer.getSharedInstance());
+		entry.getComboBox().setRenderer(new ExtensionListCellRenderer());
 		formBuilder.addEntry("reader", entry); //$NON-NLS-1$
 		// PROPERTIES
 		formBuilder.addPropertiesFormEntry("properties"); //$NON-NLS-1$
@@ -101,11 +101,11 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 			handler = new Handler();
 			CoreferenceRegistry.getInstance().addListener(Events.REMOVED, handler);
 			CoreferenceRegistry.getInstance().addListener(Events.CHANGED, handler);
-			
+
 			initForm();
-			
+
 			formBuilder.buildForm();
-			
+
 			resetEdit();
 		}
 		return contentPanel;
@@ -119,9 +119,9 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 		if(item==descriptor) {
 			return;
 		}
-		
+
 		descriptor = item;
-		
+
 		resetEdit();
 	}
 
@@ -141,12 +141,12 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 		if(contentPanel==null) {
 			return;
 		}
-		
+
 		if(descriptor==null) {
 			formBuilder.clear();
 			return;
-		} 
-		
+		}
+
 		formBuilder.setValue("name", descriptor.getName()); //$NON-NLS-1$
 		formBuilder.setValue("location", descriptor.getLocation()); //$NON-NLS-1$
 		formBuilder.setValue("reader", descriptor.getReaderExtension()); //$NON-NLS-1$
@@ -160,13 +160,13 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 	public void applyEdit() {
 		ignoreEvents = true;
 		try {
-			
+
 			// Name
 			String newName = (String)formBuilder.getValue("name"); //$NON-NLS-1$
 			if(!newName.equals(descriptor.getName())) {
 				String uniqueName = CoreferenceRegistry.getInstance().getUniqueDocumentSetName(newName);
 				if(!uniqueName.equals(newName)) {
-					DialogFactory.getGlobalFactory().showInfo(null, 
+					DialogFactory.getGlobalFactory().showInfo(null,
 							"plugins.coref.coreferenceManagerView.dialogs.documentSet.title",  //$NON-NLS-1$
 							"plugins.coref.coreferenceManagerView.dialogs.documentSet.duplicateName",  //$NON-NLS-1$
 							newName, uniqueName);
@@ -174,14 +174,14 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 				formBuilder.setValue("name", uniqueName); //$NON-NLS-1$
 				CoreferenceRegistry.getInstance().setName(descriptor, uniqueName);
 			}
-			
+
 			// Location
 			Location location = null;
 			try {
 				location = (Location)formBuilder.getValue("location"); //$NON-NLS-1$
 			} catch (InvalidFormDataException e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to resolve location for document-set: "+descriptor.getName(), e); //$NON-NLS-1$
-				DialogFactory.getGlobalFactory().showError(null, 
+				DialogFactory.getGlobalFactory().showError(null,
 						"plugins.coref.coreferenceManagerView.dialogs.documentSet.title",  //$NON-NLS-1$
 						"plugins.coref.coreferenceManagerView.dialogs.documentSet.invalidLocation",  //$NON-NLS-1$
 						((LocationFormEntry)formBuilder.getEntry("location")).getLocationString()); //$NON-NLS-1$
@@ -189,11 +189,11 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 			if(!Locations.equals(location, descriptor.getLocation())) {
 				CoreferenceRegistry.getInstance().setLocation(descriptor, location);
 			}
-			
+
 			// Reader
 			Extension extension = (Extension) formBuilder.getValue("reader"); //$NON-NLS-1$
 			CoreferenceRegistry.getInstance().setReaderExtension(descriptor, extension);
-	
+
 			// Properties
 			// Replace the old set of properties
 			@SuppressWarnings("unchecked")
@@ -215,12 +215,12 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 		if(descriptor==null) {
 			return false;
 		}
-		
+
 		// Compare name
 		if(!CollectionUtils.equals(formBuilder.getValue("name"), descriptor.getName())) { //$NON-NLS-1$
 			return true;
 		}
-		
+
 		// Compare location
 		Location location = null;
 		try {
@@ -231,12 +231,12 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 		if(!Locations.equals(location, descriptor.getLocation())) {
 			return true;
 		}
-		
+
 		// Compare reader
 		if(!CollectionUtils.equals(formBuilder.getValue("reader"), descriptor.getReaderExtension())) { //$NON-NLS-1$
 			return true;
 		}
-		
+
 		// Compare complete set of properties
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = (Map<String, Object>) formBuilder.getValue("properties"); //$NON-NLS-1$
@@ -262,7 +262,7 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -272,7 +272,7 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 	@Override
 	public void close() {
 		descriptor = null;
-		
+
 		if(contentPanel!=null) {
 			formBuilder.clear();
 		}
@@ -280,7 +280,7 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 			CoreferenceRegistry.getInstance().removeListener(handler);
 		}
 	}
-	
+
 	protected class Handler implements EventListener {
 
 		/**
@@ -292,6 +292,6 @@ public class DocumentSetEditor implements Editor<DocumentSetDescriptor> {
 				resetEdit();
 			}
 		}
-		
+
 	}
 }

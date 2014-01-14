@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -46,38 +46,38 @@ import de.ims.icarus.util.Orientation;
  *
  */
 public class DefaultParameterEditor implements Editor<Options>, SearchParameters {
-	
+
 	protected Options data;
-	
+
 	protected FormBuilder formBuilder;
-	
+
 	public DefaultParameterEditor() {
 		// no-op
 	}
-	
+
 	protected FormBuilder createForm() {
 		FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
 
 		FormEntry entry = new ChoiceFormEntry(
 				"plugins.searchTools.labels.searchMode",  //$NON-NLS-1$
-				SearchMode.values()).setRenderer(TooltipListCellRenderer.getSharedInstance());
-		formBuilder.addEntry(SEARCH_MODE, entry); 
-		
+				SearchMode.values()).setRenderer(new TooltipListCellRenderer());
+		formBuilder.addEntry(SEARCH_MODE, entry);
+
 		entry = new ChoiceFormEntry(
 				"plugins.searchTools.labels.orientation",  //$NON-NLS-1$
-				Orientation.values()).setRenderer(TooltipListCellRenderer.getSharedInstance());
-		formBuilder.addEntry(SEARCH_ORIENTATION, entry); 
-		
-		formBuilder.addToggleFormEntry(SEARCH_CASESENSITIVE,  
+				Orientation.values()).setRenderer(new TooltipListCellRenderer());
+		formBuilder.addEntry(SEARCH_ORIENTATION, entry);
+
+		formBuilder.addToggleFormEntry(SEARCH_CASESENSITIVE,
 				"plugins.searchTools.labels.caseSensitive"); //$NON-NLS-1$
-//		formBuilder.addToggleFormEntry(OPTIMIZE_SEARCH,  
+//		formBuilder.addToggleFormEntry(OPTIMIZE_SEARCH,
 //				"plugins.searchTools.labels.optimize"); //$NON-NLS-1$
-		
+
 		entry = new InputFormEntry(
 				"plugins.searchTools.labels.resultLimit") //$NON-NLS-1$
 			.setDocument(new NumberDocument());
 		formBuilder.addEntry(SEARCH_RESULT_LIMIT, entry);
-			
+
 		return formBuilder;
 	}
 
@@ -89,25 +89,25 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 		if(formBuilder==null) {
 			formBuilder = createForm();
 			formBuilder.buildForm();
-			
+
 			refresh();
 		}
-		
+
 		return formBuilder.getContainer();
 	}
-	
+
 	protected void refresh() {
 		if(formBuilder==null) {
 			return;
 		}
-		
+
 		Options options = data==null ? Options.emptyOptions : data;
-		
-		formBuilder.setValue(SEARCH_MODE, options.get(SEARCH_MODE, DEFAULT_SEARCH_MODE)); 
-		formBuilder.setValue(SEARCH_ORIENTATION, options.get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION)); 
-		formBuilder.setValue(SEARCH_CASESENSITIVE, options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE)); 
-//		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH)); 
-		formBuilder.setValue(SEARCH_RESULT_LIMIT, String.valueOf(options.get(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT))); 
+
+		formBuilder.setValue(SEARCH_MODE, options.get(SEARCH_MODE, DEFAULT_SEARCH_MODE));
+		formBuilder.setValue(SEARCH_ORIENTATION, options.get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION));
+		formBuilder.setValue(SEARCH_CASESENSITIVE, options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE));
+//		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH));
+		formBuilder.setValue(SEARCH_RESULT_LIMIT, String.valueOf(options.get(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT)));
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 	@Override
 	public void setEditingItem(Options item) {
 		data = item;
-		
+
 		if(formBuilder!=null) {
 			refresh();
 		}
@@ -150,14 +150,14 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 		if(formBuilder==null) {
 			return;
 		}
-		
+
 		if(data==null) {
 			data = new Options();
 		}
 
 		for(int i=0; i<formBuilder.getEntryCount(); i++) {
 			String id = formBuilder.getIdAt(i);
-			
+
 			data.put(id, formBuilder.getValue(id));
 		}
 	}
@@ -173,18 +173,18 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 		if(data==null) {
 			data = new Options();
 		}
-		
+
 		for(int i=0; i<formBuilder.getEntryCount(); i++) {
 			String id = formBuilder.getIdAt(i);
-			
+
 			Object oldValue = data.get(id);
 			Object newValue = formBuilder.getValue(id);
-			
+
 			if(oldValue==null || !oldValue.equals(newValue)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 

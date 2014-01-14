@@ -394,7 +394,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 			displayModeSelect = new JComboBox<>(CoreferenceDocument.DisplayMode.values());
 			displayModeSelect.setEditable(false);
 			displayModeSelect.addActionListener(getHandler());
-			displayModeSelect.setRenderer(TooltipListCellRenderer.getSharedInstance());
+			displayModeSelect.setRenderer(new TooltipListCellRenderer());
 			UIUtil.fitToContent(displayModeSelect, 60, 140, 22);
 		}
 

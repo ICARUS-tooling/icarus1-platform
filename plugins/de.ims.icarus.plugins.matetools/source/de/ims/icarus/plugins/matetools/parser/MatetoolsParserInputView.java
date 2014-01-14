@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.matetools.parser;
@@ -97,20 +97,20 @@ import de.ims.icarus.util.mpi.Message;
  *
  */
 public class MatetoolsParserInputView extends TextInputView {
-	
+
 	private volatile PipelineWorker worker;
 	private JComboBox<Extension> tokenizerSelect;
 	private JComboBox<String> modelStorageSelect;
-	
+
 	private CallbackHandler callbackHandler;
 	private Handler handler;
-	
+
 	//private TaskProgressPanel progressPanel;
-	
+
 	private ResultList resultList;
-	
+
 	private final PipelineOwner pipelineOwner = new PipelineOwner() {
-		
+
 		@Override
 		public String getName() {
 			return getIdentity().getName();
@@ -131,27 +131,27 @@ public class MatetoolsParserInputView extends TextInputView {
 
 	@Override
 	public void init(JComponent container) {
-		
+
 		// Load actions
 		URL actionLocation = MatetoolsParserInputView.class.getResource("matetools-parser-input-view-actions.xml"); //$NON-NLS-1$
 		if(actionLocation==null)
 			throw new CorruptedStateException("Missing resources: matetools-parser-input-view-actions.xml"); //$NON-NLS-1$
-		
+
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to load actions from file", e); //$NON-NLS-1$
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
-		
+
 		handler = new Handler();
-		
+
 		super.init(container);
-		
+
 		//progressPanel = new TaskProgressPanel();
-		
+
 		inputArea.getDocument().addDocumentListener(handler);
 		ConfigRegistry.getGlobalRegistry().addGroupListener(
 				"plugins.matetools.parser", handler); //$NON-NLS-1$
@@ -160,13 +160,13 @@ public class MatetoolsParserInputView extends TextInputView {
 	@Override
 	protected void refreshActions() {
 		boolean enabled = worker==null;
-		
+
 		if(enabled) {
 			String text = inputArea.getText();
 			enabled = text!=null && !text.trim().isEmpty();
 		}
-		
-		getDefaultActionManager().setEnabled(enabled, 
+
+		getDefaultActionManager().setEnabled(enabled,
 				"plugins.matetools.matetoolsParserInputView.startPipelineAction"); //$NON-NLS-1$
 	}
 
@@ -175,10 +175,10 @@ public class MatetoolsParserInputView extends TextInputView {
 		if(callbackHandler==null) {
 			callbackHandler = new CallbackHandler();
 		}
-		
+
 		// Register default actions
 		super.registerActionCallbacks();
-		
+
 		// Now register new actions
 		ActionManager actionManager = getDefaultActionManager();
 		actionManager.addHandler("plugins.matetools.matetoolsParserInputView.startPipelineAction",  //$NON-NLS-1$
@@ -191,34 +191,34 @@ public class MatetoolsParserInputView extends TextInputView {
 	protected ActionComponentBuilder createToolBar() {
 		ActionComponentBuilder builder = new ActionComponentBuilder(getDefaultActionManager());
 		builder.setActionListId("plugins.matetools.matetoolsParserInputView.toolBarList"); //$NON-NLS-1$
-		
+
 		if(tokenizerSelect==null) {
 			Collection<Extension> availableTokenizers = LanguageManager.getAvailableTokenizers();
 			tokenizerSelect = new JComboBox<>(new ExtensionListModel(availableTokenizers, true));
 			tokenizerSelect.setEditable(false);
-			tokenizerSelect.setRenderer(ExtensionListCellRenderer.getSharedInstance());
-			
+			tokenizerSelect.setRenderer(new ExtensionListCellRenderer());
+
 			UIUtil.fitToContent(tokenizerSelect, 130, 200, 24);
-			
+
 			if(availableTokenizers.isEmpty()) {
 				tokenizerSelect.setEnabled(false);
 			} else {
 				tokenizerSelect.setSelectedIndex(0);
 			}
 		}
-		
+
 		if(modelStorageSelect==null) {
 			modelStorageSelect = new JComboBox<>(new DefaultComboBoxModel<String>());
 			modelStorageSelect.setEditable(false);
-			
+
 			UIUtil.fitToContent(modelStorageSelect, 130, 200, 24);
 		}
-		
+
 		builder.addOption("selectTokenizer", tokenizerSelect); //$NON-NLS-1$
 		builder.addOption("selectModelSet", modelStorageSelect); //$NON-NLS-1$
-		
+
 		refreshModelSelect();
-		
+
 		return builder;
 	}
 
@@ -229,7 +229,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		delegate.add(getDefaultActionManager().getAction(
 				"plugins.matetools.matetoolsParserInputView.startPipelineAction")); //$NON-NLS-1$
 	}
-	
+
 	/*@Override
 	protected void refreshInfoPanel(InfoPanel infoPanel) {
 		infoPanel.add(progressPanel, GridBagConstraints.CENTER);
@@ -239,41 +239,41 @@ public class MatetoolsParserInputView extends TextInputView {
 		if(tokenizerSelect==null) {
 			return null;
 		}
-		
+
 		Extension extension = (Extension) tokenizerSelect.getSelectedItem();
-		
+
 		if(extension==null) {
 			return null;
 		}
-		
+
 		try {
 			return (Tokenizer) PluginUtil.instantiate(extension);
 		} catch (Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to instantiate tokenizer: "+extension.getUniqueId(), e); //$NON-NLS-1$
 		}
-		
+
 		return null;
 	}
-	
+
 	private void refreshModelSelect() {
 		if(modelStorageSelect==null) {
 			return;
 		}
-		
+
 		Object selectedItem = modelStorageSelect.getSelectedItem();
-		
+
 		DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)modelStorageSelect.getModel();
 		model.removeAllElements();
-		
+
 		List<?> storages = (List<?>) ConfigRegistry.getGlobalRegistry().getValue(
 				"plugins.matetools.parser.models"); //$NON-NLS-1$
-		
+
 		if(storages==null || storages.isEmpty()) {
 			modelStorageSelect.setSelectedItem(null);
 		} else {
 			boolean selectionValid = false;
-			
+
 			for(Object item : storages) {
 				ModelStorage ms = (ModelStorage) item;
 				if(!selectionValid && selectedItem!=null && ms.getLanguage().equals(selectedItem)) {
@@ -281,7 +281,7 @@ public class MatetoolsParserInputView extends TextInputView {
 				}
 				model.addElement(ms.getLanguage());
 			}
-			
+
 			if(selectionValid) {
 				modelStorageSelect.setSelectedItem(selectedItem);
 			} else if(model.getSize()>0) {
@@ -291,27 +291,27 @@ public class MatetoolsParserInputView extends TextInputView {
 			}
 		}
 	}
-		
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void executePipeline() throws Exception {
 		// No concurrent parsing
 		if(worker!=null) {
 			return;
 		}
-		
+
 		if(inputArea==null) {
 			return;
 		}
-		
+
 		String input = inputArea.getText();
-		
+
 		if(input==null || input.isEmpty()) {
 			return;
 		}
-		
+
 		// Fetch model storage
 		List<?> storages = (List<?>) ConfigRegistry.getGlobalRegistry().getValue(
-				"plugins.matetools.parser.models"); //$NON-NLS-1$		
+				"plugins.matetools.parser.models"); //$NON-NLS-1$
 		ModelStorage storage = null;
 		String language = (String) modelStorageSelect.getSelectedItem();
 		if(language!=null && storages!=null) {
@@ -324,32 +324,32 @@ public class MatetoolsParserInputView extends TextInputView {
 			}
 		}
 		if(storage==null || storage.isEmpty()) {
-			new DialogDispatcher(null, 
+			new DialogDispatcher(null,
 					"plugins.matetools.matetoolsParserInputView.title",  //$NON-NLS-1$
 					"plugins.matetools.matetoolsParserInputView.invalidModel",  //$NON-NLS-1$
 					language).showAsError();
 			return;
 		}
-		
+
 		// Fetch tokenizer
 		Tokenizer tokenizer = getTokenizer();
-		
+
 		if(tokenizer==null)
 			throw new IllegalStateException("Failed to obtain tokenizer"); //$NON-NLS-1$
-	
+
 		Options options = new Options();
 		options.put(Tokenizer.PRECEDED_ROOT_OPTION, true);
 		TokenizationResult tokenizationResult = tokenizer.tokenize(input, options);
-		
+
 		if(tokenizationResult==null || tokenizationResult.getResultCount()==0) {
-			DialogFactory.getGlobalFactory().showError(null, 
+			DialogFactory.getGlobalFactory().showError(null,
 					"plugins.matetools.matetoolsParserInputView.title",  //$NON-NLS-1$
 					"plugins.matetools.matetoolsParserInputView.invalidTokenization"); //$NON-NLS-1$
 			return;
 		}
-		
+
 		String[] tokens = null;
-		
+
 		if(tokenizationResult.getResultCount()>1) {
 			Vector buffer = new Vector(tokenizationResult.getResultCount());
 			for(int i=0; i<tokenizationResult.getResultCount(); i++) {
@@ -357,61 +357,61 @@ public class MatetoolsParserInputView extends TextInputView {
 			}
 			JList list = new JList(buffer);
 			list.setCellRenderer(new TokenListCellRenderer());
-			
+
 			JScrollPane scrollPane = new JScrollPane(list);
 			scrollPane.setPreferredSize(new Dimension(300, 300));
-			
-			DialogFactory.getGlobalFactory().showGenericDialog(null, 
+
+			DialogFactory.getGlobalFactory().showGenericDialog(null,
 					"plugins.matetools.matetoolsParserInputView.title",  //$NON-NLS-1$
 					"plugins.matetools.matetoolsParserInputView.multipleTokenization", //$NON-NLS-1$
 					scrollPane, true, "ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
-			
+
 			if(list.getSelectedIndex()!=-1) {
 				tokens = (String[]) list.getSelectedValue();
 			}
 		} else {
 			tokens = tokenizationResult.getTokens(0);
 		}
-		
+
 		// Fail silently
 		if(tokens==null) {
 			return;
 		}
-		
+
 		options = new Options();
 		// TODO assign new option parameters?
 		worker = new PipelineWorker(tokens, storage, options);
-		
+
 		// Refresh progress panel
 		//progressPanel.setTitle(worker.getDescription());
 		//progressPanel.setTask(worker);
-		
+
 		// Schedule worker for concurrent execution on background thread
 		TaskManager.getInstance().schedule(
 				worker, null, TaskPriority.DEFAULT, true);
-		
+
 		refreshActions();
 	}
-	
-	private void appendResult(DependencyData data) {		
+
+	private void appendResult(DependencyData data) {
 		if(resultList==null) {
 			resultList = new ResultList();
 		}
-		
+
 		resultList.addData(data);
-		
+
 		// Send result list
 		Options options = new Options();
 		options.put(Options.CONTENT_TYPE, ContentTypeRegistry.getInstance().getTypeForClass(SentenceDataList.class));
-		
-		Message message = new Message(MatetoolsParserInputView.this, 
+
+		Message message = new Message(MatetoolsParserInputView.this,
 				Commands.DISPLAY, resultList, options);
-		
+
 		sendRequest(ListGraphView.class, message);
 	}
 
 	private class Handler implements DocumentListener, ConfigListener {
-		
+
 		private Handler() {
 			// no-op
 		}
@@ -448,45 +448,45 @@ public class MatetoolsParserInputView extends TextInputView {
 			refreshModelSelect();
 		}
 	}
-	
+
 	public class CallbackHandler {
-		
+
 		protected CallbackHandler() {
 			// no-op
 		}
-		
+
 		public void startPipeline(ActionEvent e) {
-			
+
 			// Ensure we have ownership of the pipeline or abort otherwise
 			if(MatetoolsPipeline.getPipeline(pipelineOwner)==null) {
 				return;
 			}
-			
-			
+
+
 			try {
 				 executePipeline();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to start parser-pipeline", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void openPreferences(ActionEvent e) {
 			try {
 				UIUtil.openConfigDialog("plugins.matetools.parser"); //$NON-NLS-1$
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to open preferences", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
 	}
-	
+
 	private static final String[] stageLabels = {
 		"plugins.matetools.matetoolsParserInputView.pipelineWorker.stage0Blank", //$NON-NLS-1$
 		"plugins.matetools.matetoolsParserInputView.pipelineWorker.stage1Lemmatizing", //$NON-NLS-1$
@@ -494,24 +494,24 @@ public class MatetoolsParserInputView extends TextInputView {
 		"plugins.matetools.matetoolsParserInputView.pipelineWorker.stage3MTagging", //$NON-NLS-1$
 		"plugins.matetools.matetoolsParserInputView.pipelineWorker.stage4Parsing", //$NON-NLS-1$
 	};
-	
+
 	private class PipelineWorker extends SwingWorker<DependencyData, DependencyData> implements Identity {
 
 		private final String[] tokens;
 		private final ModelStorage storage;
 		private final Options options;
-		
+
 		private int stage = 0;
-				
+
 		PipelineWorker(String[] tokens, ModelStorage storage, Options options) {
 			if(tokens==null)
 				throw new NullPointerException("Invalid tokens array"); //$NON-NLS-1$
-			
+
 			this.tokens = tokens;
 			this.storage = storage;
 			this.options = options;
 		}
-		
+
 		/**
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
@@ -520,10 +520,10 @@ public class MatetoolsParserInputView extends TextInputView {
 			MatetoolsPipeline pipeline = MatetoolsPipeline.getPipeline(pipelineOwner);
 			if(pipeline==null)
 				throw new IllegalStateException("Synchronization failed - pipeline not owned by "+pipelineOwner.getName()); //$NON-NLS-1$
-						
+
 			return pipeline.runPipeline(tokens, storage, options);
 		}
-		
+
 		private void publishIntermediateResult(DependencyData data) {
 			stage++;
 			setProgress(stage*25);
@@ -536,17 +536,17 @@ public class MatetoolsParserInputView extends TextInputView {
 			if(chunks==null || chunks.isEmpty()) {
 				return;
 			}
-			
+
 			// Fetch latest state
 			DependencyData data = chunks.get(chunks.size()-1);
 
 			// Send data item
 			Options options = new Options();
 			options.put(Options.CONTENT_TYPE, DependencyUtils.getDependencyContentType());
-			
-			Message message = new Message(MatetoolsParserInputView.this, 
+
+			Message message = new Message(MatetoolsParserInputView.this,
 					Commands.DISPLAY, data, options);
-			
+
 			sendRequest(Outline.class, message);
 		}
 
@@ -565,32 +565,32 @@ public class MatetoolsParserInputView extends TextInputView {
 				if(e instanceof ExecutionException) {
 					e = e.getCause();
 				}
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Unexpected exception while obtaining final pipeline computation result", e); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				if(!Core.getCore().handleThrowable(e)) {
 					showErrorDialog(e);
 				}
-			} finally {			
+			} finally {
 				MatetoolsPipeline.releasePipeline(pipelineOwner);
-			
+
 				refreshActions();
 			}
 		}
-		
+
 		private void showErrorDialog(Throwable e) {
 			String title = "plugins.matetools.matetoolsParserInputView.errorTitle"; //$NON-NLS-1$
-			
+
 			String message = null;
 			if(e instanceof OutOfMemoryError) {
 				message = "plugins.matetools.matetoolsParserInputView.outOfMemoryError"; //$NON-NLS-1$
 			}
-			
+
 			if(message==null) {
 				message = "plugins.matetools.matetoolsParserInputView.generalError"; //$NON-NLS-1$
 			}
-			
+
 			DialogFactory.getGlobalFactory().showError(getFrame(), title, message);
 		}
 
@@ -635,23 +635,23 @@ public class MatetoolsParserInputView extends TextInputView {
 		public Object getOwner() {
 			return this;
 		}
-		
+
 	}
-	
+
 	private class ResultList extends AbstractDataList<SentenceData> implements SentenceDataList {
 
 		private List<DependencyData> items;
-		
+
 		private void addData(DependencyData data) {
 			if(items==null) {
 				items = new ArrayList<>();
 			}
-			
+
 			items.add(data);
-			
+
 			fireChangeEvent();
 		}
-		
+
 		/**
 		 * @see de.ims.icarus.util.data.DataList#size()
 		 */
@@ -700,6 +700,6 @@ public class MatetoolsParserInputView extends TextInputView {
 				AvailabilityObserver observer) {
 			return get(index, type);
 		}
-		
+
 	}
 }

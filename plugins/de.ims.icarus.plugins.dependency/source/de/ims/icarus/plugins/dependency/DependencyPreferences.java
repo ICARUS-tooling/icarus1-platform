@@ -93,10 +93,10 @@ public class DependencyPreferences {
 //		builder.addBooleanEntry("showCorpusIndex", false); //$NON-NLS-1$
 		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
 				(Object[])HighlightType.values()),
-				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+				ConfigConstants.RENDERER, new TooltipListCellRenderer());
 		builder.setProperties(builder.addOptionsEntry("groupHighlightType", 0,  //$NON-NLS-1$
 				(Object[])HighlightType.values()),
-				ConfigConstants.RENDERER, TooltipListCellRenderer.getSharedInstance());
+				ConfigConstants.RENDERER, new TooltipListCellRenderer());
 		builder.addBooleanEntry("markMultipleAnnotations", true); //$NON-NLS-1$
 		builder.addColorEntry("nodeHighlight", DependencyHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
 		builder.addColorEntry("edgeHighlight", DependencyHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$

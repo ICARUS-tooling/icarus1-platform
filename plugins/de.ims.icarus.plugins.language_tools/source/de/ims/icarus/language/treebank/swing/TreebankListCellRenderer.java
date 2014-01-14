@@ -41,7 +41,6 @@ import de.ims.icarus.plugins.language_tools.treebank.DefaultSimpleTreebank;
 import de.ims.icarus.ui.DecoratedIcon;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
 
@@ -56,7 +55,7 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = -2941175073501767602L;
 
-	private static TreebankListCellRenderer sharedInstance;
+//	private static TreebankListCellRenderer sharedInstance;
 
 	private static final DecoratedIcon icon = new DecoratedIcon(UIUtil.getBlankIcon(8, 16));
 
@@ -65,15 +64,15 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 	private static final Icon invalidSettingsIcon = IconRegistry.getGlobalRegistry().getIcon("unconfigured_co.gif"); //$NON-NLS-1$
 	private static final Icon invalidLocationIcon = IconRegistry.getGlobalRegistry().getIcon("warning_co.gif"); //$NON-NLS-1$
 
-	/**
-	 * @return the sharedInstance
-	 */
-	public static TreebankListCellRenderer getSharedInstance() {
-		if(sharedInstance==null) {
-			sharedInstance = new TreebankListCellRenderer();
-		}
-		return sharedInstance;
-	}
+//	/**
+//	 * @return the sharedInstance
+//	 */
+//	public static TreebankListCellRenderer getSharedInstance() {
+//		if(sharedInstance==null) {
+//			sharedInstance = new TreebankListCellRenderer();
+//		}
+//		return sharedInstance;
+//	}
 
 	/**
 	 *
@@ -139,17 +138,5 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 		setIcon(icon);
 
 		return this;
-	}
-
-	/**
-	 * @see javax.swing.JLabel#updateUI()
-	 */
-	@Override
-	public void updateUI() {
-		if(!RendererCache.getInstance().requiresNewUI(this)) {
-			return;
-		}
-
-		super.updateUI();
 	}
 }

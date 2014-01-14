@@ -33,7 +33,6 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
 import de.ims.icarus.search_tools.annotation.ResultAnnotation;
-import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.Annotation;
@@ -42,18 +41,6 @@ import de.ims.icarus.util.annotation.Annotation;
 public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 	private static final long serialVersionUID = -7249622078036629896L;
-
-	private static DocumentListCellRenderer sharedInstance;
-
-	/**
-	 * @return the sharedInstance
-	 */
-	public static DocumentListCellRenderer getSharedInstance() {
-		if(sharedInstance==null) {
-			sharedInstance = new DocumentListCellRenderer();
-		}
-		return sharedInstance;
-	}
 
 	@Override
 	public Component getListCellRendererComponent(JList<?> list,
@@ -103,17 +90,5 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 	protected String getTextForValue(int index, CoreferenceDocumentData docData) {
 		return defaultGetTextForValue(index, docData);
-	}
-
-	/**
-	 * @see javax.swing.JLabel#updateUI()
-	 */
-	@Override
-	public void updateUI() {
-		if(!RendererCache.getInstance().requiresNewUI(this)) {
-			return;
-		}
-
-		super.updateUI();
 	}
 }

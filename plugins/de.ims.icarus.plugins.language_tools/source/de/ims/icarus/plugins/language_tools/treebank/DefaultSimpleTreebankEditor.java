@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.language_tools.treebank;
@@ -72,7 +72,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 	public void setEditingItem(Treebank treebank) {
 		if(!(treebank instanceof DefaultSimpleTreebank))
 			throw new IllegalArgumentException("Unsupported treebank class: "+treebank.getClass()); //$NON-NLS-1$
-		
+
 		super.setEditingItem(treebank);
 	}
 
@@ -87,7 +87,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 				LanguageToolsConstants.LANGUAGE_TOOLS_PLUGIN_ID, "SentenceDataReader"); //$NON-NLS-1$
 		ComboBoxModel<Extension> model = new ExtensionListModel(
 				extensionPoint.getConnectedExtensions(), true);
-		
+
 		ChoiceFormEntry entry = new ReaderChoiceFormEntry(
 				"plugins.languageTools.labels.reader", model); //$NON-NLS-1$
 		formBuilder.insertEntry("reader", entry, "location"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -101,13 +101,13 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 		if(super.hasChanges()) {
 			return true;
 		}
-		
+
 		DefaultSimpleTreebank simpleTreebank = getEditingItem();
-		
+
 		if(formBuilder.getValue("reader")!=simpleTreebank.getReader()) { //$NON-NLS-1$
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -117,7 +117,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 	@Override
 	protected void doResetEdit() {
 		super.doResetEdit();
-		
+
 		DefaultSimpleTreebank simpleTreebank = getEditingItem();
 		formBuilder.setValue("reader", simpleTreebank.getReader()); //$NON-NLS-1$
 	}
@@ -132,7 +132,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 		setIgnoreTreebankEvents(true);
 		try {
 			super.doApplyEdit();
-			
+
 			simpleTreebank.setReader((Extension) formBuilder.getValue("reader")); //$NON-NLS-1$
 			TreebankRegistry.getInstance().treebankChanged(simpleTreebank);
 		} finally {
@@ -155,16 +155,16 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 	protected boolean isPropertyKeyAllowed(String key) {
 		return !DefaultSimpleTreebank.READER_EXTENSION_PROPERTY.equals(key);
 	}
-	
+
 	protected static boolean isConfigurablePropertyOwner(Object obj) {
 		return obj instanceof Configurable && obj instanceof PropertyOwner;
 	}
-	
+
 	protected Map<String, Object> extractReaderProperties(Map<String, Object> source) {
 		Map<String, Object> result = new HashMap<>();
-		
+
 		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
-		
+
 		if(source!=null) {
 			for(Entry<String, Object> entry : source.entrySet()) {
 				if(entry.getKey().startsWith(prefix)) {
@@ -173,7 +173,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -181,11 +181,11 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 			Map<String, Object> readerProperties) {
 		if(source==null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
-		
+
 		if(readerProperties==null || readerProperties.isEmpty()) {
 			return;
 		}
-		
+
 		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
 
 		for(Entry<String, Object> entry : readerProperties.entrySet()) {
@@ -200,33 +200,33 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 			throw new NullPointerException("Invalid properties"); //$NON-NLS-1$
 
 		String prefix = DefaultSimpleTreebank.READER_PROPERTY_PREFIX;
-		
+
 		for(Iterator<Entry<String, Object>> i = properties.entrySet().iterator(); i.hasNext();) {
 			if(i.next().getKey().startsWith(prefix)) {
 				i.remove();
 			}
 		}
 	}
-	
-	
+
+
 	protected class ReaderChoiceFormEntry extends ChoiceFormEntry implements ActionListener {
-		
+
 		protected JButton openConfigButton;
 
 		public ReaderChoiceFormEntry(String label, ComboBoxModel<?> model) {
 			super(label, model);
-			
-			setRenderer(ExtensionListCellRenderer.getSharedInstance());
-			
+
+			setRenderer(new ExtensionListCellRenderer());
+
 			openConfigButton = new JButton();
 			openConfigButton.setFocusable(false);
 			openConfigButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("settings.gif")); //$NON-NLS-1$
 			openConfigButton.addActionListener(this);
 			openConfigButton.setPreferredSize(new Dimension(20, 20));
-			
+
 			comboBox.addActionListener(this);
 		}
-		
+
 		protected void refreshButtonEnabled() {
 			DefaultSimpleTreebank treebank = getEditingItem();
 			boolean enabled = treebank!=null;
@@ -238,7 +238,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 			}
 			openConfigButton.setEnabled(enabled);
 		}
-		
+
 		public JButton getOpenConfigButton() {
 			return openConfigButton;
 		}
@@ -252,7 +252,7 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 				refreshButtonEnabled();
 				return;
 			}
-			
+
 			DefaultSimpleTreebank treebank = getEditingItem();
 			if(treebank==null) {
 				return;
@@ -260,12 +260,12 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 			if(treebank.getReader()==null) {
 				return;
 			}
-			
+
 			SentenceDataReader reader = treebank.getSentenceDataReader();
 			if(reader==null) {
 				return;
 			}
-			
+
 			if(reader instanceof Configurable) {
 				try {
 					((Configurable)reader).openConfig();
@@ -284,20 +284,20 @@ public class DefaultSimpleTreebankEditor extends BasicTreebankEditor {
 		@Override
 		public ReaderChoiceFormEntry setValue(Object value) {
 			super.setValue(value);
-			
+
 			refreshButtonEnabled();
-			
+
 			return this;
 		}
 
 		@Override
 		public ReaderChoiceFormEntry clear() {
 			super.clear();
-			
+
 			refreshButtonEnabled();
-			
+
 			return this;
 		}
-		
+
 	}
 }

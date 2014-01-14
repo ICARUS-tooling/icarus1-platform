@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.data;
@@ -91,23 +91,23 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class DataListPresenter<T extends Object> extends PropertyChangeSource 
+public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		implements ListPresenter, AnnotationController {
-	
+
 	protected DataListModel<T> dataListModel;
 	protected DataList<T> dataList;
-	
+
 	protected AnnotationManager annotationManager;
 	protected AnnotationControl annotationControl;
-	
+
 	protected DynamicWidthList<T> list;
 	protected ListSelectionModel listSelectionModel;
-	
+
 	protected Filter filter;
 	protected FilteredListModel<T> filteredModel;
-	
+
 	protected String title;
-	
+
 	protected JPanel contentPanel;
 	protected JComboBox<Object> filterSelect;
 	protected JButton filterEditButton;
@@ -115,96 +115,96 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected JToggleButton widthToggleButton;
 	protected Map<Extension, Filter> filterInstances;
 	protected NavigationControl navigationControl;
-	
+
 	protected JTextArea textArea;
-	
+
 	protected final String dummyEntry = "minus"; //$NON-NLS-1$
-	
+
 	protected Handler handler;
-	
+
 	protected PrototypeSearchJob prototypeSearchJob;
 
 	public DataListPresenter() {
 		// no-op
 	}
-	
+
 	protected JPanel createContentPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
-		
+
 		list = createList();
 		list.addListSelectionListener(getHandler());
 		list.addPropertyChangeListener("trackViewportWidth", getHandler()); //$NON-NLS-1$
 		annotationControl = createAnnotationControl();
-		
+
 		navigationControl = createNavigationControl();
 
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setBorder(null);
-		
+
 		textArea = new JTextArea();
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
 		textArea.setVisible(false);
 		textArea.setBorder(BorderFactory.createCompoundBorder(
-				UIUtil.defaultBoxBorder, 
+				UIUtil.defaultBoxBorder,
 				BorderFactory.createEmptyBorder(0, 2, 0, 2)));
-		
+
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(navigationControl.getToolBar(), BorderLayout.NORTH);
 		topPanel.add(textArea, BorderLayout.CENTER);
 
 		panel.add(topPanel, BorderLayout.NORTH);
 		panel.add(scrollPane, BorderLayout.CENTER);
-		
+
 		refresh();
-		
+
 		return panel;
 	}
-	
+
 	protected DynamicWidthList<T> createList() {
 		DynamicWidthList<T> list = new DynamicWidthList<>(getFilteredListModel());
 		list.setSelectionModel(getSelectionModel());
 		list.setBorder(UIUtil.defaultContentBorder);
 		list.setTrackViewportWidth(true);
-		
+
 		return list;
 	}
-	
+
 	protected AnnotationControl createAnnotationControl() {
 		return new AnnotationControl(false);
 	}
-	
-	protected NavigationControl createNavigationControl() {	
-		
+
+	protected NavigationControl createNavigationControl() {
+
 		Options options = new Options();
 		options.put(NavigationControl.RIGHT_CONTENT_OPTION, rightNavigationContent());
 		options.put(NavigationControl.LEFT_CONTENT_OPTION, leftNavigationContent());
-		
+
 		return new NavigationControl(list, options);
 	}
-	
+
 	protected Object leftNavigationContent() {
 		List<Object> items = new ArrayList<>();
 		items.add(getOutlineToggleButton());
 		items.add(EntryType.SEPARATOR);
 		items.add(getWidthToggleButton());
-		
+
 		return items.toArray();
 	}
-	
+
 	protected Object rightNavigationContent() {
 		List<Object> items = new ArrayList<>();
 		items.add(getFilterSelect());
 		items.add(getFilterEditButton());
-		
+
 		if(annotationControl!=null) {
 			items.add(EntryType.SEPARATOR);
 			CollectionUtils.feedItems(items, (Object[])annotationControl.getComponents());
 		}
-		
+
 		return items.toArray();
 	}
-	
+
 	protected JButton getFilterEditButton() {
 		if(filterEditButton==null) {
 			filterEditButton = new JButton();
@@ -214,14 +214,14 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			filterEditButton.addActionListener(getHandler());
 			filterEditButton.setEnabled(getFilter() instanceof Editable);
 		}
-		
+
 		return filterEditButton;
 	}
-	
+
 	protected JToggleButton getOutlineToggleButton() {
 		if(outlineToggleButton==null) {
 			outlineToggleButton = new JToggleButton();
-			ResourceManager.getInstance().getGlobalDomain().prepareComponent(outlineToggleButton, 
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(outlineToggleButton,
 					"core.helpers.dataListPresenter.toggleOutlineAction.name",  //$NON-NLS-1$
 					"core.helpers.dataListPresenter.toggleOutlineAction.description"); //$NON-NLS-1$
 			ResourceManager.getInstance().getGlobalDomain().addComponent(outlineToggleButton);
@@ -232,14 +232,14 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			outlineToggleButton.addActionListener(getHandler());
 			outlineToggleButton.setEnabled(false);
 		}
-		
+
 		return outlineToggleButton;
 	}
-	
+
 	protected JToggleButton getWidthToggleButton() {
 		if(widthToggleButton==null) {
 			widthToggleButton = new JToggleButton();
-			ResourceManager.getInstance().getGlobalDomain().prepareComponent(widthToggleButton, 
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(widthToggleButton,
 					"core.helpers.dataListPresenter.toggleWidthAction.name",  //$NON-NLS-1$
 					"core.helpers.dataListPresenter.toggleWidthAction.description"); //$NON-NLS-1$
 			ResourceManager.getInstance().getGlobalDomain().addComponent(widthToggleButton);
@@ -251,28 +251,28 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			widthToggleButton.addActionListener(getHandler());
 			widthToggleButton.setSelected(list.isTrackViewportWidth());
 		}
-		
+
 		return widthToggleButton;
 	}
-	
+
 	protected JComboBox<Object> getFilterSelect() {
 		if(filterSelect==null) {
 			filterSelect = new JComboBox<>(new DefaultComboBoxModel<>());
 			filterSelect.setEditable(false);
 			filterSelect.setFocusable(false);
-			filterSelect.setRenderer(ExtensionListCellRenderer.getSharedInstance());
+			filterSelect.setRenderer(new ExtensionListCellRenderer());
 			filterSelect.addActionListener(getHandler());
 			UIUtil.fitToContent(filterSelect, 80, 150, 20);
 		}
-		
+
 		return filterSelect;
 	}
-	
+
 	protected Handler getHandler() {
 		if(handler==null) {
 			handler = new Handler();
 		}
-		
+
 		return handler;
 	}
 
@@ -284,7 +284,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		if(contentPanel==null) {
 			contentPanel = createContentPanel();
 		}
-		
+
 		return contentPanel;
 	}
 
@@ -296,27 +296,27 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		return ContentTypeRegistry.isCompatible(
 				"DataListContentType", type); //$NON-NLS-1$
 	}
-	
+
 	protected void displayData(DataList<T> data, Options options) {
 		if(dataList==null && dataList==data) {
 			return;
 		}
-		
+
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
-		
+
 		dataList = data;
 		filter = (Filter) options.get(Options.FILTER);
 		int index = options.get(Options.INDEX, -1);
-		
+
 		title = (String) options.get(Options.TITLE);
-		
+
 		if(contentPanel!=null) {
 			cancelPrototypeComputation();
-			
+
 			refresh();
-			
+
 			if(index!=-1) {
 				getSelectionModel().setSelectionInterval(index, index);
 			} else {
@@ -324,46 +324,46 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			}
 		}
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void refresh() {
-		
+
 		AnnotationManager annotationManager = null;
 		if(dataList instanceof AnnotationContainer) {
 			ContentType annotationType = ((AnnotationContainer)dataList).getAnnotationType();
-			
+
 			if(this.annotationManager!=null && this.annotationManager.supportsAnnotation(annotationType)) {
 				annotationManager = this.annotationManager;
 			}
-			
+
 			if(annotationManager==null && annotationType!=null) {
 				annotationManager = UIHelperRegistry.globalRegistry().findHelper(AnnotationManager.class, annotationType);
 			}
 		}
-		
+
 		setAnnotationManager(annotationManager);
-		
+
 		ListCellRenderer renderer = null;
 		if(dataList!=null) {
 			renderer = UIHelperRegistry.globalRegistry().findHelper(
-					ListCellRenderer.class, dataList.getContentType(), 
+					ListCellRenderer.class, dataList.getContentType(),
 					true, true);
 		}
 		if(renderer==null) {
 			renderer = new DefaultListCellRenderer();
 		}
-		
+
 		ListCellRenderer oldRenderer = list.getCellRenderer();
 		if(oldRenderer instanceof Installable) {
 			((Installable)oldRenderer).uninstall(this);
 		}
-		
+
 		if(renderer instanceof Installable) {
 			((Installable)renderer).install(this);
 		}
-		
+
 		list.setCellRenderer(renderer);
-		
+
 		getDataListModel().setDataList(dataList);
 		getFilteredListModel().setFilter(filter);
 		getSelectionModel().clearSelection();
@@ -376,47 +376,47 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		} else {
 			getOutlineToggleButton().setEnabled(true);
 		}
-		
+
 		navigationControl.setTitle(title);
-		
+
 		refreshFilterOptions();
 		refreshTextOutline();
 		refreshUtilities();
 	}
-	
+
 	protected void refreshUtilities() {
 		// for subclasses
 	}
-	
+
 	protected DataListModel<T> createListModel() {
 		return new DataListModel<>();
 	}
-	
+
 	public DataListModel<T> getDataListModel() {
 		if(dataListModel==null) {
 			dataListModel = createListModel();
 		}
 		return dataListModel;
 	}
-	
+
 	public FilteredListModel<T> getFilteredListModel() {
 		if(filteredModel==null) {
 			filteredModel = new FilteredListModel<>(getDataListModel(), filter);
 		}
-		
+
 		return filteredModel;
 	}
-	
+
 	protected void refreshFilterOptions() {
 		if(filterSelect==null || filterEditButton==null) {
 			return;
 		}
-		
+
 		Collection<Extension> filters = null;
 		if(dataList!=null) {
 			filters = ContentTypeRegistry.getInstance().getFilters(dataList.getContentType(), true);
 		}
-		
+
 		DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) filterSelect.getModel();
 		model.removeAllElements();
 		model.addElement(dummyEntry);
@@ -426,22 +426,22 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			}
 		}
 		model.setSelectedItem(dummyEntry);
-		
+
 		// TODO give some love to the filter stuff
 		boolean enabled = model.getSize()>1;
 		filterSelect.setEnabled(enabled);
 		filterEditButton.setEnabled(enabled);
-		
+
 		boolean visible = model.getSize()>1;
 		filterSelect.setVisible(visible);
 		filterEditButton.setVisible(visible);
 	}
-	
+
 	protected void refreshTextOutline() {
 		if(outlineToggleButton==null || textArea==null) {
 			return;
 		}
-		
+
 		Object item = list.getSelectedValue();
 		if(outlineToggleButton.isSelected() && item instanceof TextItem) {
 			textArea.setText(((TextItem)item).getText());
@@ -451,56 +451,56 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			textArea.setVisible(false);
 		}
 	}
-	
+
 	protected void setFilter(Filter filter) {
 		if(this.filter==filter) {
 			return;
 		}
-		
+
 		Filter oldValue = this.filter;
 		this.filter = filter;
-		
+
 		getSelectionModel().clearSelection();
 		getFilteredListModel().setFilter(filter);
-		
+
 		if(filterEditButton!=null) {
 			filterEditButton.setEnabled(filter instanceof Editable);
 		}
-		
+
 		if(!list.isTrackViewportWidth()) {
 			computeListCellPrototype();
 		}
-		
+
 		firePropertyChange("filter", oldValue, filter); //$NON-NLS-1$
 	}
-	
+
 	public Filter getFilter() {
 		return filter;
 	}
-	
+
 	protected PrototypeSearchJob createPrototypeSearchJob() {
 		return new PrototypeSearchJob();
 	}
-	
+
 	protected void computeListCellPrototype() {
 		if(prototypeSearchJob!=null) {
 			return;
 		}
-		
+
 		getWidthToggleButton().setEnabled(false);
-		
+
 		prototypeSearchJob = createPrototypeSearchJob();
 		prototypeSearchJob.execute();
 	}
-	
+
 	protected void cancelPrototypeComputation() {
 		if(prototypeSearchJob==null || prototypeSearchJob.isDone()) {
 			return;
 		}
-		
+
 		prototypeSearchJob.cancel(true);
 	}
-	
+
 	protected void listCellPrototypeComputationCompleted(T prototype) {
 		try {
 			if(prototype!=null) {
@@ -526,24 +526,24 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		if(this.annotationManager==annotationManager) {
 			return;
 		}
-		
+
 		if(this.annotationManager!=null) {
 			this.annotationManager.removePropertyChangeListener(getHandler());
 		}
-		
+
 		AnnotationManager oldValue = this.annotationManager;
 		this.annotationManager = annotationManager;
-		
+
 		if(this.annotationManager!=null) {
 			this.annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
 		}
-		
+
 		if(annotationControl!=null) {
 			annotationControl.setAnnotationManager(annotationManager);
 		}
-		
+
 		firePropertyChange("annotationManager", oldValue, annotationManager); //$NON-NLS-1$
-		
+
 		list.repaint();
 	}
 
@@ -556,12 +556,12 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			throws UnsupportedPresentationDataException {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
 		if(!(data instanceof DataList))
 			throw new UnsupportedPresentationDataException(
 					"Data is not of required type '"+DataList.class+"' : "+data.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
-	
-		
+
+
 		displayData((DataList<T>) data, options);
 	}
 
@@ -639,38 +639,38 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		if(list!=null) {
 			list.repaint();
 		}
-		
+
 		return true;
 	}
-	
+
 	protected int getEstimatedWidth(FontMetrics fm, T item) {
 		return fm.stringWidth(item.toString());
 	}
-	
+
 	protected Filter getFilter(Extension extension) {
 		if(extension==null) {
 			return null;
 		}
-		
+
 		if(filterInstances==null) {
 			filterInstances = new HashMap<>();
 		}
-		
+
 		Filter filter = filterInstances.get(extension);
-		
+
 		if(filter==null) {
 			try {
 				filter = (Filter) PluginUtil.instantiate(extension);
 				filterInstances.put(extension, filter);
 			} catch (Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to instantiate filter: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
 		}
-		
+
 		return filter;
 	}
-	
+
 	protected class Handler implements ActionListener, ListSelectionListener,
 			PropertyChangeListener {
 
@@ -683,7 +683,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 					|| outlineToggleButton==null || widthToggleButton==null) {
 				return;
 			}
-			
+
 			if(e.getSource()==filterEditButton) {
 				//TODO Show edit dialog
 			} else if(e.getSource()==outlineToggleButton) {
@@ -702,7 +702,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 				if(selectedValue instanceof Extension) {
 					filter = getFilter((Extension)selectedValue);
 				}
-				
+
 				setFilter(filter);
 			}
 		}
@@ -727,7 +727,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			}
 		}
 	}
-	
+
 	protected class PrototypeSearchJob extends SwingWorker<T, T> {
 
 		/**
@@ -737,25 +737,25 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		protected T doInBackground() throws Exception {
 			Font font = list.getFont();
 			FontMetrics fm = list.getFontMetrics(font);
-			
+
 			int maxWidth = 0;
 			T prototype = null;
-			
+
 			ListModel<T> model = getListModel();
 			for(int i=0; i<model.getSize(); i++) {
 				if(isCancelled() || Thread.currentThread().isInterrupted()) {
 					return null;
 				}
-				
+
 				T item = model.getElementAt(i);
 				int width = getEstimatedWidth(fm, item);
-				
+
 				if(width>maxWidth) {
 					maxWidth = width;
 					prototype = item;
 				}
 			}
-			
+
 			return prototype;
 		}
 
@@ -773,9 +773,9 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			} catch(CancellationException | InterruptedException e) {
 				// ignore
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to compute prototype cell value for list", e); //$NON-NLS-1$
-				
+
 				Core.getCore().handleThrowable(e);
 			} finally {
 				listCellPrototypeComputationCompleted(prototype);
