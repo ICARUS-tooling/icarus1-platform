@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins;
@@ -34,6 +34,7 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.id.Identity;
 
 /**
@@ -44,9 +45,9 @@ import de.ims.icarus.util.id.Identity;
 public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 144607075843240899L;
-	
+
 	private static ExtensionListCellRenderer sharedInstance;
-	
+
 	public static ExtensionListCellRenderer getSharedInstance() {
 		if(sharedInstance==null) {
 			synchronized (ExtensionListCellRenderer.class) {
@@ -64,7 +65,7 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus) {
-		
+
 		Extension extension = null;
 		Identity identity = null;
 		if(value instanceof Extension) {
@@ -84,16 +85,28 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 		} else if(value instanceof String) {
 			value = ResourceManager.getInstance().get((String)value);
 		}
-		
+
 		super.getListCellRendererComponent(list, value, index, isSelected,
 				cellHasFocus);
-		
+
 		if(identity!=null) {
 			setIcon(identity.getIcon());
 			setToolTipText(UIUtil.toSwingTooltip(identity.getDescription()));
 		}
-		
+
 		return this;
 	}
-	
+
+	/**
+	 * @see javax.swing.JLabel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		if(!RendererCache.getInstance().requiresNewUI(this)) {
+			return;
+		}
+
+		super.updateUI();
+	}
+
 }

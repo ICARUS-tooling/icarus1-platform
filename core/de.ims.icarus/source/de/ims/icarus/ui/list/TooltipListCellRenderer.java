@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.list;
@@ -33,6 +33,7 @@ import javax.swing.Icon;
 import javax.swing.JList;
 
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
@@ -46,9 +47,9 @@ import de.ims.icarus.util.id.Identity;
 public class TooltipListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = 4283938142282983275L;
-	
+
 	private static TooltipListCellRenderer sharedInstance;
-	
+
 	public static TooltipListCellRenderer getSharedInstance() {
 		if(sharedInstance==null) {
 			sharedInstance = new TooltipListCellRenderer();
@@ -80,33 +81,45 @@ public class TooltipListCellRenderer extends DefaultListCellRenderer {
 			tooltip = identity.getDescription();
 			icon = identity.getIcon();
 		}
-		
+
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		
+
 		int columnWidth = list.getWidth();
 		if(icon!=null) {
 			columnWidth -= icon.getIconWidth()+getIconTextGap();
 		}
 		int textWidth = 0;
-		
+
 		if(tooltip==null) {
 			tooltip = getText();
 		}
-		
+
 		if(tooltip!=null && !tooltip.isEmpty()) {
 			FontMetrics fm = getFontMetrics(getFont());
 			textWidth = fm.stringWidth(tooltip);
 		}
-		
+
 		if(textWidth<=columnWidth && tooltip.equals(getText())) {
 			tooltip = null;
 		}
-		
+
 		setIcon(icon);
 
 		setToolTipText(UIUtil.toSwingTooltip(tooltip));
-		
+
 		return this;
 	}
 
+
+	/**
+	 * @see javax.swing.JLabel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		if(!RendererCache.getInstance().requiresNewUI(this)) {
+			return;
+		}
+
+		super.updateUI();
+	}
 }

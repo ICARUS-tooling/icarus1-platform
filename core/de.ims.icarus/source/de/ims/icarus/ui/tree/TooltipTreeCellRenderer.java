@@ -19,8 +19,8 @@
  * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
  * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/de/ims/icarus/ui/helper/TooltipListCellRenderer.java $
  *
- * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $ 
- * $LastChangedRevision: 123 $ 
+ * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
+ * $LastChangedRevision: 123 $
  * $LastChangedBy: mcgaerty $
  */
 package de.ims.icarus.ui.tree;
@@ -33,6 +33,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
@@ -46,9 +47,9 @@ import de.ims.icarus.util.id.Identity;
 public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	private static final long serialVersionUID = -28033820708371349L;
-	
+
 	private static TooltipTreeCellRenderer sharedInstance;
-	
+
 	public static TooltipTreeCellRenderer getSharedInstance() {
 		if(sharedInstance==null) {
 			sharedInstance = new TooltipTreeCellRenderer();
@@ -67,7 +68,7 @@ public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {
 	public Component getTreeCellRendererComponent(JTree tree, Object value,
 			boolean sel, boolean expanded, boolean leaf, int row,
 			boolean hasFocus) {
-		
+
 		String tooltip = null;
 		Icon icon = null;
 		if(value instanceof Identifiable) {
@@ -84,30 +85,42 @@ public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {
 
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
 				row, hasFocus);
-		
+
 		int columnWidth = tree.getWidth();
 		if(icon!=null) {
 			columnWidth -= icon.getIconWidth()+getIconTextGap();
 		}
 		int textWidth = 0;
-		
+
 		if(tooltip==null) {
 			tooltip = getText();
 		}
-		
+
 		if(tooltip!=null && !tooltip.isEmpty()) {
 			FontMetrics fm = getFontMetrics(getFont());
 			textWidth = fm.stringWidth(tooltip);
 		}
-		
+
 		if(textWidth<=columnWidth) {
 			tooltip = null;
 		}
-		
+
 		setIcon(icon);
 
 		setToolTipText(UIUtil.toSwingTooltip(tooltip));
-		
+
 		return this;
+	}
+
+	/**
+	 * @see javax.swing.JLabel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		if(!RendererCache.getInstance().requiresNewUI(this)) {
+			return;
+		}
+
+		super.updateUI();
 	}
 }

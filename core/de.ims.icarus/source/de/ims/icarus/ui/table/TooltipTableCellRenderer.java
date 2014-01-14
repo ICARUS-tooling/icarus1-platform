@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.table;
@@ -31,6 +31,7 @@ import java.awt.FontMetrics;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.StringUtil;
 
 /**
@@ -41,7 +42,7 @@ import de.ims.icarus.util.StringUtil;
 public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = 2505308201912712643L;
-	
+
 	private static TooltipTableCellRenderer sharedInstance;
 
 	/**
@@ -64,28 +65,40 @@ public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		
+
 		if(value instanceof Integer) {
 			value = StringUtil.formatDecimal((int) value);
 		}
-		
+
 		super.getTableCellRendererComponent(table, value, isSelected, hasFocus,	row, column);
-		
+
 		String tooltip = getText();
 		int columnWidth = table.getColumnModel().getColumn(column).getWidth();
 		int textWidth = 0;
-		
+
 		if(tooltip!=null && !tooltip.isEmpty()) {
 			FontMetrics fm = getFontMetrics(getFont());
 			textWidth = fm.stringWidth(tooltip);
 		}
-		
+
 		if(textWidth<=columnWidth) {
 			tooltip = null;
 		}
 
 		setToolTipText(tooltip);
-		
+
 		return this;
-	}	
+	}
+
+	/**
+	 * @see javax.swing.JLabel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		if(!RendererCache.getInstance().requiresNewUI(this)) {
+			return;
+		}
+
+		super.updateUI();
+	}
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.treebank.swing;
@@ -41,6 +41,7 @@ import de.ims.icarus.plugins.language_tools.treebank.DefaultSimpleTreebank;
 import de.ims.icarus.ui.DecoratedIcon;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
 
@@ -54,9 +55,9 @@ import de.ims.icarus.util.location.Locations;
 public class TreebankListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = -2941175073501767602L;
-	
+
 	private static TreebankListCellRenderer sharedInstance;
-	
+
 	private static final DecoratedIcon icon = new DecoratedIcon(UIUtil.getBlankIcon(8, 16));
 
 	private static final Icon loadingIcon = IconRegistry.getGlobalRegistry().getIcon("waiting_ovr.gif"); //$NON-NLS-1$
@@ -75,11 +76,11 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public TreebankListCellRenderer() {
 		UIUtil.disableHtml(this);
-		
+
 		setHorizontalTextPosition(SwingConstants.RIGHT);
 	}
 
@@ -89,11 +90,11 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected, boolean cellHasFocus) {
-		
+
 		setToolTipText(null);
-		
+
 		Treebank treebank = null;
-		
+
 		if(value instanceof Treebank) {
 			treebank = (Treebank) value;
 			value = treebank.getName();
@@ -104,39 +105,51 @@ public class TreebankListCellRenderer extends DefaultListCellRenderer {
 		} else if(value instanceof TreebankInfo) {
 			value = ((TreebankInfo)value).getTreebankName();
 		}
-		
+
 		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
 		icon.removeDecorations();
-		
+
 		if(treebank!=null) {
 			Icon overlay = null;
-			
+
 			if(treebank.isLoading()) {
 				overlay = loadingIcon;
 			} else if(treebank.isLoaded()) {
 				overlay = loadedIcon;
 			}
-			
+
 			Extension readerExtension = null;
 			if(treebank instanceof DefaultSimpleTreebank) {
 				readerExtension = ((DefaultSimpleTreebank)treebank).getReader();
 			}
 			Location location = treebank.getLocation();
-			
+
 			if(readerExtension==null || location==null) {
 				overlay = invalidSettingsIcon;
 			} else if(!Locations.isValid(location)) {
 				overlay = invalidLocationIcon;
 			}
-			
+
 			if(overlay!=null) {
 				icon.addDecoration(overlay, SwingConstants.SOUTH_WEST);
 			}
 		}
-		
+
 		setIcon(icon);
-		
+
 		return this;
+	}
+
+	/**
+	 * @see javax.swing.JLabel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		if(!RendererCache.getInstance().requiresNewUI(this)) {
+			return;
+		}
+
+		super.updateUI();
 	}
 }

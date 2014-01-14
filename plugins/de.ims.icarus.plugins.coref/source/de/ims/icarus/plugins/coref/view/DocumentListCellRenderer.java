@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view;
@@ -33,6 +33,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
 import de.ims.icarus.search_tools.annotation.ResultAnnotation;
+import de.ims.icarus.ui.helper.RendererCache;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.Annotation;
@@ -41,9 +42,9 @@ import de.ims.icarus.util.annotation.Annotation;
 public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 	private static final long serialVersionUID = -7249622078036629896L;
-	
+
 	private static DocumentListCellRenderer sharedInstance;
-	
+
 	/**
 	 * @return the sharedInstance
 	 */
@@ -58,21 +59,21 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 	public Component getListCellRendererComponent(JList<?> list,
 			Object value, int index, boolean isSelected,
 			boolean cellHasFocus) {
-		
+
 		value = getTextForValue(index, (CoreferenceDocumentData) value);
-		
+
 		return super.getListCellRendererComponent(list, value, index, isSelected,
 				cellHasFocus);
 	}
-	
+
 	private static final StringBuilder sb = new StringBuilder(200);
-	
+
 	public static String defaultGetTextForValue(int index, CoreferenceDocumentData docData) {
 		if(docData==null) {
 			return null;
 		}
-		
-		sb.setLength(0);		
+
+		sb.setLength(0);
 		ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
 
 		if(registry.getBoolean("plugins.coref.appearance.showRowIndex")) { //$NON-NLS-1$
@@ -86,21 +87,33 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 				sb.append(StringUtil.formatDecimal(setIndex));
 			}
 		}
-		
-		String id = docData.getId();		
+
+		String id = docData.getId();
 		if(id==null) {
 			id = (String) docData.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(id==null) {
 			id = "document "+StringUtil.formatDecimal(index); //$NON-NLS-1$
 		}
-		
+
 		sb.append(id);
-		
+
 		return sb.toString();
 	}
 
 	protected String getTextForValue(int index, CoreferenceDocumentData docData) {
 		return defaultGetTextForValue(index, docData);
+	}
+
+	/**
+	 * @see javax.swing.JLabel#updateUI()
+	 */
+	@Override
+	public void updateUI() {
+		if(!RendererCache.getInstance().requiresNewUI(this)) {
+			return;
+		}
+
+		super.updateUI();
 	}
 }
