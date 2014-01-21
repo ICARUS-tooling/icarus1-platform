@@ -187,6 +187,8 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	 */
 	Context getDefaultContext();
 
+	List<Context> getCustomContexts();
+
 	/**
 	 * Registers the given listener to the internal list of registered
 	 * listeners. Does nothing if the provided listener is {@code null}.

@@ -27,7 +27,10 @@ package de.ims.icarus.language.model.registry;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.LayerType;
+import de.ims.icarus.language.model.manifest.CorpusManifest;
+import de.ims.icarus.language.model.manifest.Manifest;
 
 /**
  * @author Markus Gärtner
@@ -71,6 +74,14 @@ public final class CorpusRegistry {
 	}
 
 	public LayerType getLayerType(String name) {
+
+	}
+
+	public Corpus getCorpus(CorpusManifest manifest) {
+
+	}
+
+	public Manifest getTemplate(String id) {
 
 	}
 }

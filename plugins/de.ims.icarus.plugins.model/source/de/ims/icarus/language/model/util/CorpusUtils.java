@@ -52,10 +52,15 @@ import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.io.LocationType;
 import de.ims.icarus.language.model.io.Path;
+import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.manifest.HighlightLayerManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.Manifest;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.manifest.StructureManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 
 /**
@@ -67,6 +72,33 @@ public final class CorpusUtils {
 
 	private CorpusUtils() {
 		throw new AssertionError();
+	}
+
+	public static ContextManifest getContextManifest(Manifest manifest) {
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+
+		switch (manifest.getManifestType()) {
+		case ANNOTATION_LAYER_MANIFEST:
+			return ((AnnotationLayerManifest)manifest).getContextManifest();
+		case MARKABLE_LAYER_MANIFEST:
+			return ((MarkableLayerManifest)manifest).getContextManifest();
+		case STRUCTURE_LAYER_MANIFEST:
+			return ((StructureLayerManifest)manifest).getContextManifest();
+		case HIGHLIGHT_LAYER_MANIFEST:
+			return ((HighlightLayerManifest)manifest).getContextManifest();
+
+		case CONTEXT_MANIFEST:
+			return (ContextManifest) manifest;
+
+		case CONTAINER_MANIFEST:
+			return ((ContainerManifest) manifest).getLayerManifest().getContextManifest();
+		case STRUCTURE_MANIFEST:
+			return ((StructureManifest) manifest).getLayerManifest().getContextManifest();
+
+		default:
+			throw new IllegalArgumentException("Manifest does not procide scope to a context: "+manifest); //$NON-NLS-1$
+		}
 	}
 
 //	public static String getText(Container c) {

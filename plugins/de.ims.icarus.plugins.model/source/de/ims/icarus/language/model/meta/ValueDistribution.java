@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.meta;
@@ -33,4 +33,6 @@ package de.ims.icarus.language.model.meta;
 public interface ValueDistribution extends MetaData {
 
 	ValueSet getValueSet();
+
+	int getCount(Object value);
 }

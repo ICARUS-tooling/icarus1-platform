@@ -42,4 +42,6 @@ public interface ContextWriter {
 			throws UnsupportedLocationException, UnsupportedFormatException;
 
 	void write() throws IOException, UnsupportedFormatException;
+
+	boolean isWriting();
 }

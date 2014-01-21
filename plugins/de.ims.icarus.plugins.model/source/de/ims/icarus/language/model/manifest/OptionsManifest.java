@@ -108,75 +108,9 @@ public interface OptionsManifest {
 	ValueIterator getSupportedValues(String name);
 
 	/**
-	 * Helper interface to allow an {@code OptionsManifest} to declare a
-	 * fixed set of possible values for a property. Note that the values
-	 * returned by this iterator's {@link #nextValue()} method can be either
-	 * the value objects themselves or instances of {@link ValueManifest}
-	 * that wrap an actual value and provide a textual description and/or name.
 	 *
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
+	 * @param name
+	 * @return
 	 */
-	interface ValueIterator {
-
-		/**
-		 * Returns {@code true} iff there are more value definitions
-		 * available for this iterator.
-		 *
-		 * @return {@code true} iff this iterator has at least one more
-		 * value definitions available
-		 */
-		boolean hasMoreValues();
-
-		/**
-		 * Returns the next available value in this iterator.
-		 * <p>
-		 * Note that the returned object can be either
-		 * the value object itself or and instance of {@link ValueManifest}
-		 * that wraps an actual value and provide a textual description and/or name.
-		 *
-		 * @return
-		 * @throws IllegalStateException if there are no more values
-		 * available to be returned.
-		 */
-		Object nextValue();
-	}
-
-	/**
-	 * A helper class that wraps a value and provides additional textual information
-	 * like a description and an optional name. The purpose of those strings is so
-	 * that user interfaces can provide the user with information about the available
-	 * values for an option.
-	 *
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	interface ValueManifest {
-
-		/**
-		 * Returns the value this manifest wraps and describes.
-		 *
-		 * @return
-		 */
-		Object getValue();
-
-		/**
-		 * Returns the (optional) name for this value, which is not required to be
-		 * localized.
-		 * <p>
-		 * This is an optional method.
-		 *
-		 * @return The name of this value or {@code null} if the value is unnamed
-		 */
-		String getName();
-
-		/**
-		 * Returns the (preferably localized) textual description of this value.
-		 *
-		 * @return A textual description of this value
-		 */
-		String getDescription();
-	}
+	ValueRange getSupportedRange(String name);
 }

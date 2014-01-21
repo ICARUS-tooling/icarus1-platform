@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.io;
@@ -41,4 +41,6 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 public interface ContextReader {
 
 	List<Layer> readContext(ContextManifest manifest) throws IOException, UnsupportedFormatException, UnsupportedLocationException;
+
+	boolean isReading();
 }

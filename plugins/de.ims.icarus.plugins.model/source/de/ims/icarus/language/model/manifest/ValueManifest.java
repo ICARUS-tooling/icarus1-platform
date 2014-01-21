@@ -19,34 +19,45 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$
- * $LastChangedRevision$
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.io;
+package de.ims.icarus.language.model.manifest;
 
 /**
- * Utility class for accessing distributed data or for loading
- * little chunks from a very big database.
+ * A helper class that wraps a value and provides additional textual information
+ * like a description and an optional name. The purpose of those strings is so
+ * that user interfaces can provide the user with information about the available
+ * values for an option.
  *
  * @author Markus Gärtner
  * @version $Id$
- * @see Path
  *
  */
-public interface PathResolver {
+public interface ValueManifest {
 
 	/**
-	 * Translates the given {@code chunkIndex} into a {@code Path}
-	 * information that can be used to access data from an abstract
-	 * data source.
+	 * Returns the value this manifest wraps and describes.
 	 *
-	 * @param chunkIndex
 	 * @return
-	 * @throws IndexOutOfBoundsException if the {@code chunkIndex} violates
-	 * the bounds of this resolver. For example a resolver translating chunk indices
-	 * into row values for a database table might check for the overall size of that
-	 * table to make sure the returned rows do not exceed the table's row count.
 	 */
-	Path getPath(int chunkIndex);
+	Object getValue();
+
+	/**
+	 * Returns the (optional) name for this value, which is not required to be
+	 * localized.
+	 * <p>
+	 * This is an optional method.
+	 *
+	 * @return The name of this value or {@code null} if the value is unnamed
+	 */
+	String getName();
+
+	/**
+	 * Returns the (preferably localized) textual description of this value.
+	 *
+	 * @return A textual description of this value
+	 */
+	String getDescription();
 }

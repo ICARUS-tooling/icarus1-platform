@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model;
 
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.manifest.AnnotationManifest;
 import de.ims.icarus.util.id.Identity;
 
 /**
@@ -35,5 +35,5 @@ import de.ims.icarus.util.id.Identity;
  */
 public interface AnnotationType extends Identity {
 
-	AnnotationLayerManifest getSharedManifest();
+	AnnotationManifest getSharedManifest();
 }

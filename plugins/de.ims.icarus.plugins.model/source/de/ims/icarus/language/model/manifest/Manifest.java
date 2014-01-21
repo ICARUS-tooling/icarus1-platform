@@ -47,6 +47,8 @@ import de.ims.icarus.util.id.Identity;
  */
 public interface Manifest extends Identity {
 
+	ManifestType getManifestType();
+
 	/**
 	 * Allows for localization of corpus related components.
 	 * The returned name is not required to be equal to the
@@ -102,6 +104,8 @@ public interface Manifest extends Identity {
 	 * @throws IllegalArgumentException if the {@code value} argument does not
 	 * fulfill the contract described in the {@code OptionsManifest} of this
 	 * manifest.
+	 * @throws UnsupportedOperationException if the manifest does not declare
+	 * any properties the user can modify
 	 */
 	void setProperty(String name, Object value);
 

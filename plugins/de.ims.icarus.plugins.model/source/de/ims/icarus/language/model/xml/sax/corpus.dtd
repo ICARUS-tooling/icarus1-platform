@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE corpus>
+
+<!--
+	Element with mandatory identifier and optional
+	name and description
+-->
+
+<!ENTITY % identity 
+		id     ID #REQUIRED
+		name      CDATA #IMPLIED
+		description      CDATA #IMPLIED
+		icon      CDATA #IMPLIED
+>
+
+<!--
+	Element with optional name and description
+-->
+
+<!ENTITY % descriptor
+		name      		CDATA #IMPLIED
+		description      CDATA #IMPLIED
+>
+
+<!-- 
+    Type definition for some value. 
+	Default type is always "string".
+-->
+
+<!ENTITY % typed "type 		(unknown | custom | string | boolean | integer | double)">
+
+<!-- 
+    Type definition for container objects.
+-->
+
+<!ENTITY % container-type "container-type 		(singleton | set | list | span)">
+
+<!-- 
+    Type definition for structure objects.
+-->
+
+<!ENTITY % structure-type "structure-type 		(set | chain | tree | graph | directed-graph)">
+
+<!-- 
+    Type definition for locations.
+-->
+
+<!ENTITY % lcoation-type "location-type 		(file | network | database)">
+
+<!-- 
+    Boolean expression that supports more "human readable" values 
+-->
+
+<!ENTITY % boolean "(yes | no | true | false) #IMPLIED">
+
+<!-- 
+    Element with nested declaration of supported
+	options and optional predefined properties.
+-->
+
+<!ENTITY % manifest "options?,  property*">
+
+<!-- 
+    Lists possible nested layers
+-->
+
+<!ENTITY % layers "(markable-layer | structure-layer | annotation-layer)+">
+
+<!-- 
+    Extension of the manifest macro with oprional nested prerequisites
+-->
+
+<!ENTITY % layer "%manifest, prerequisites?">
+
+<!-- 
+    Attribute to allow inheritence for manifest declarations 
+	via template references.
+	Note that the exact point in time, the reference is
+	resolved at, is implementation specific. Therefore
+	the parsing enginge will not check the template identifier
+	while parsing! 
+-->
+
+<!ENTITY % template "template-id   	CDATA #IMPLIED">
+
+<!--
+	Multiple ways of describing the source of an implementation
+-->
+
+<!ENTITY % implementation
+		class			CDATA #IMPLIED
+		plugin-id		CDATA #IMPLIED
+		extension-id	CDATA #IMPLIED
+>
+
+<!-- 
+    Basic attributes for layer manifests that define whether or not
+	a layer is searchable and can be indexed.
+-->
+
+<!ENTITY % layeratts 
+	"%template
+	search %boolean #IMPLIED
+	index %boolean #IMPLIED"
+>
+
+<!--
+	Corpus manifest
+-->
+
+<!ELEMENT corpus (%manifest, context+)>
+<!ATTLIST corpus
+		%identity
+		editable	%boolean	"false"	
+>
+
+<!--
+	Context manifest
+-->
+
+<!ELEMENT context (%manifest, location?, context-reader, context-writer?, %layers)>
+<!ATTLIST context
+		%identity
+		%template
+		%implementation
+		independent	%boolean "true"
+		reader		CDATA	#IMPLIED
+		writer		CDATA	#IMPLIED
+>
+
+<!ELEMENT context-reader EMPTY>
+<!ATTLIST context-reader
+		%implementation
+		format		CDATA	#IMPLIED
+>
+
+<!ELEMENT context-writer EMPTY>
+<!ATTLIST context-writer
+		%implementation
+		format		CDATA	#IMPLIED
+>
+
+<!--
+	Layer that holds information about annotations
+-->
+
+<!ELEMENT annotation-layer (%layer, annotation+)>
+<!ATTLIST annotation-layer
+		%identity
+		%layeratts	
+		%implementation
+		deep-annotation %boolean #IMPLIED
+>
+
+<!--
+	Layer that holds information about markables
+-->
+
+<!ELEMENT markable-layer (%layer, container)>
+<!ATTLIST markable-layer
+		%identity
+		%layeratts
+		%implementation
+>
+
+<!--
+	Layer that holds information about structures
+-->
+
+<!ELEMENT structure-layer (%layer, structure)>
+<!ATTLIST structure-layer
+		%identity
+		%layeratts
+		%implementation
+		boundary		CDATA #IMPLIED
+>
+
+<!--
+	Container manifest
+-->
+
+<!ELEMENT container (%manifest, container)?>
+<!ATTLIST container
+		%identity
+		%template	
+		%implementation
+		%container-type #IMPLIED
+>
+
+<!--
+	Structure manifest
+-->
+
+<!ELEMENT structure (%manifest, container?)>
+<!ATTLIST structure
+		%identity
+		%template	
+		%implementation
+		%container-type #IMPLIED
+		%structure-type #IMPLIED
+>
+
+<!--
+	Location manifest
+-->
+
+<!ELEMENT location (path?, path-resolver?)>
+<!ATTLIST location
+		%location-type #REQUIRED
+		path		CDATA #IMPLIED
+		distributed	%boolean "false"
+		chunks		CDATA #IMPLIED
+>
+
+<!--
+	Path declaration
+-->
+
+<!ELEMENT path (PCDATA)>
+
+<!--
+	Path-resolver declaration
+-->
+
+<!ELEMENT path-resolver (PCDATA?)>
+<!ATTLIST path-resolver
+		%implementation
+		pattern		CDATA #IMPLIED
+>
+
+<!--
+	Specifies possible values for an annotation. The 'key' attribute is
+	taken as the key the annotation is associated with. If no key is
+	defined than the annotation is taken as the default annotation of the
+	surrounding annotation layer. Note that the behavior of the default implementation
+	is undefined if more than one annotation is declared as default annotation.
+	Therefore at most one annotation declaration should ommit the id attribute!	
+-->
+
+<!ELEMENT annotation (%manifest, alias*, range?, values?)>
+<!ATTLIST annotation
+		key		CDATA #IMPLIED
+		%template
+		%descriptor 
+		%typed
+>
+
+<!-- 
+	An alternate identifier for an annotation.
+	The name can either be set via attribute or 
+	as nested text.
+-->
+
+<!ELEMENT alias (#PCDATA)>
+<!ATTLIST alias
+		name	CDATA #IMPLIED
+>
+
+<!-- 
+	List of prerequisites a layer requires to work properly
+-->
+
+<!ELEMENT prerequisites (type-prerequisite | layer-prerequisite)+>
+
+<!-- 
+	Describes a required type of layer
+-->
+
+<!ELEMENT type-prerequisite EMPTY>
+<!ATTLIST type-prerequisite
+		type CDATA #REQUIRED
+>
+
+<!-- 
+	Describes the requirement that a specific layer identified by
+	its id has to be present.
+-->
+
+<!ELEMENT layer-prerequisite EMPTY>
+<!ATTLIST layer-prerequisite
+		id CDATA #REQUIRED
+>
+
+<!-- 
+	A single named property with its value either in attribute
+	form or as nested text.	Note that for the type of a property
+	to be resolved a vali options manifest declaration is required!	
+-->
+
+<!ELEMENT property (#PCDATA)>
+<!ATTLIST property
+		name	CDATA #REQUIRED
+		value	CDATA #IMPLIED
+>
+
+<!-- 
+	Defines descriptors for a set of available options.
+	The manifest can either define all options itself or
+	refer to some previously registered template.
+-->
+
+<!ELEMENT options (option)*>
+<!ATTLIST options 
+		id        	ID #IMPLIED
+		%template
+>
+
+<!--
+	Describes a single option in an options-manifest.
+	The option can have a default value assigned to it
+	and might either contain a predefined set of fixed
+	values or a range that bounds supported values.
+-->
+
+<!ELEMENT option (default-value?, range?, values?)>
+<!ATTLIST option 
+		%typed
+		%identity
+>
+
+<!--
+	Denotes a range of possible values bound by a lower and
+	upper limit.
+-->
+
+<!ELEMENT range EMPTY>
+<!ATTLIST range 
+		min 		CDATA #REQUIRED
+		max			CDATA #REQUIRED
+		include-min	%boolean
+		include-max	%boolean
+>
+
+<!--
+    Wraps a fixed set of possible values which are converted into
+	a de.ims.icarus.language.model.manifest.ValueIterator object when
+	read.
+	Note that values can be templated as well!
+-->
+
+<!ELEMENT values (value)* >
+<!ATTLIST values 
+		id        	ID #IMPLIED
+		%template
+>
+
+<!--
+	A single value in serialized (textual) form that denotes a default value
+	for an option. Type of the value is resolved by the surrounding 'option'
+	element.
+-->	
+<!ELEMENT default-value (#PCDATA) >
+
+<!--
+	A single value in serialized (textual) form with optional
+	name and description attributes
+-->	
+<!ELEMENT value (#PCDATA) >
+<!ATTLIST value %descriptor >

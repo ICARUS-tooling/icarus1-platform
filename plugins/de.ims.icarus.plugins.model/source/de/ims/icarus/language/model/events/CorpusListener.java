@@ -38,6 +38,11 @@ public interface CorpusListener {
 
 	/**
 	 * A general change in the corpus occurred.
+	 * <p>
+	 * This event fires at descriptor based changes for manifests
+	 * from the layer level upwards.
+	 * The {@code "manifest"} property holds the {@code Manifest}
+	 * that was changed.
 	 *
 	 * @param e
 	 */

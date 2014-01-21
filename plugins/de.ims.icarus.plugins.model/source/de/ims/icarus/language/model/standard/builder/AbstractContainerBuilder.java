@@ -34,7 +34,7 @@ import de.ims.icarus.language.model.manifest.ContainerManifest;
  * @version $Id$
  *
  */
-public abstract class AbstractContainerBuilder<C extends Container> extends AbstractBuilder implements ContainerBuilder {
+public abstract class AbstractContainerBuilder<C extends Container> extends AbstractMemberBuilder implements ContainerBuilder {
 
 	protected Container parent;
 	protected Container base;

@@ -25,14 +25,17 @@
  */
 package de.ims.icarus.language.model.standard.layer;
 
+import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Context;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.LayerType;
+import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
+import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
  * @author Markus Gärtner
@@ -48,6 +51,8 @@ public class AbstractLayer implements Layer {
 	private MarkableLayer baseLayer;
 	private LayerType layerType;
 
+	private final Markable markableProxy;
+
 	public AbstractLayer(Context context, LayerManifest manifest) {
 		if (context == null)
 			throw new NullPointerException("Invalid context");  //$NON-NLS-1$
@@ -56,6 +61,8 @@ public class AbstractLayer implements Layer {
 
 		this.context = context;
 		this.manifest = manifest;
+
+		markableProxy = new ProxyMarkable();
 	}
 
 	/**
@@ -155,4 +162,110 @@ public class AbstractLayer implements Layer {
 		// no-op
 	}
 
+	/**
+	 * @see de.ims.icarus.language.model.Layer#getMarkableProxy()
+	 */
+	@Override
+	public Markable getMarkableProxy() {
+		return markableProxy;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return (int) id;
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Layer) {
+			Layer other = (Layer) obj;
+			return other.getId()==id && other.getManifest()==manifest;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return getName();
+	}
+
+	public class ProxyMarkable implements Markable {
+
+		private final long id = getCorpus().getGlobalIdDomain().nextId();
+
+		/**
+		 * @see de.ims.icarus.language.model.CorpusMember#getId()
+		 */
+		@Override
+		public long getId() {
+			return id;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+		 */
+		@Override
+		public Corpus getCorpus() {
+			return AbstractLayer.this.getCorpus();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+		 */
+		@Override
+		public MemberType getMemberType() {
+			return MemberType.MARKABLE;
+		}
+
+		/**
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		@Override
+		public int compareTo(Markable o) {
+			return CorpusUtils.compare(this, o);
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.Markable#getContainer()
+		 */
+		@Override
+		public Container getContainer() {
+			return getCorpus().getOverlayLayer().getContainer();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.Markable#getLayer()
+		 */
+		@Override
+		public MarkableLayer getLayer() {
+			return getCorpus().getOverlayLayer();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+		 */
+		@Override
+		public int getBeginOffset() {
+			return -1;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+		 */
+		@Override
+		public int getEndOffset() {
+			return -1;
+		}
+
+	}
 }

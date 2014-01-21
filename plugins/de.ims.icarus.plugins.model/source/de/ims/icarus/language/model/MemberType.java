@@ -26,6 +26,11 @@
 package de.ims.icarus.language.model;
 
 /**
+ * Defines the possibles types a {@link CorpusMember} can declare to represent by
+ * its {@link CorpusMember#getMemberType()} method. Not although that a class can implement
+ * multiple interfaces of the corpus framework, it can only ever be assigned to exactly one
+ * <i>member role</i> specified by its {@code MemberType}.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *

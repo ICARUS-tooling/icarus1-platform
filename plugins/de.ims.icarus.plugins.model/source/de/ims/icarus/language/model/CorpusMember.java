@@ -19,14 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -37,15 +37,19 @@ public interface CorpusMember {
 	 * @return The globally unique id
 	 */
 	long getId();
-	
+
 	/**
-	 * 
+	 *
 	 * @return The corpus this member is a part of
 	 */
 	Corpus getCorpus();
-	
+
 	/**
-	 * 
+	 * Returns the type of this member. Note that the correct
+	 * way of performing type specific operations on a {@code CorpusMember}
+	 * is to query its type through this method and <b>not</b> by using the
+	 * {@code instanceof} operator!
+	 *
 	 * @return The type of this member
 	 */
 	MemberType getMemberType();

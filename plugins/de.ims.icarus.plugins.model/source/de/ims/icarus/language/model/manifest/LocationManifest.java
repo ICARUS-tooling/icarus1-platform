@@ -41,6 +41,8 @@ public interface LocationManifest {
 
 	boolean isDistributed();
 
+	int getChunkCount();
+
 	/**
 	 * If the data source is distributed as defined by {@link #isDistributed()}
 	 * then this method returns the object responsible for accessing different

@@ -29,11 +29,24 @@ import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.util.id.Identity;
 
 /**
+ * Implements a shared type descriptor for {@code Layer} objects. It is used to
+ * group layers according to an abstract description of their content. Besides
+ * serving as a mere identifier to that abstract description, a {@code LayerType}
+ * optionally provides a {@link LayerManifest} that contains further specifications
+ * on how the content might be structured or other informations.
+ *
  * @author Markus Gärtner
  * @version $Id$
+ * @see LayerManifest
  *
  */
 public interface LayerType extends Identity {
 
+	/**
+	 * Returns the shared {@code LayerManifest} that further describes layers of
+	 * this type or {@code null} if this type only serves as a identifier without
+	 * additional content restrictions.
+	 * @return
+	 */
 	LayerManifest getSharedManifest();
 }

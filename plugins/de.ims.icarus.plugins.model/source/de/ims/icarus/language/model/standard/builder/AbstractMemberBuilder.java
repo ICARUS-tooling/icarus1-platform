@@ -33,7 +33,7 @@ import de.ims.icarus.language.model.IdDomain;
  * @version $Id$
  *
  */
-public class AbstractBuilder {
+public class AbstractMemberBuilder {
 
 	protected Corpus corpus;
 	protected IdDomain idDomain;

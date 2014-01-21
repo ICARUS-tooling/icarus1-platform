@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.manifest;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Markus Gärtner
@@ -36,7 +36,7 @@ public interface CorpusManifest extends Manifest {
 
 	ContextManifest getDefaultContextManifest();
 
-	Set<ContextManifest> getCustomContextManifests();
+	List<ContextManifest> getCustomContextManifests();
 
 	/**
 	 * Returns {@code true} if the corpus described by this manifest can

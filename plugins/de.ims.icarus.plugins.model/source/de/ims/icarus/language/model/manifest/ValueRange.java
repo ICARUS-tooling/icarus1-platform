@@ -23,30 +23,20 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.io;
+package de.ims.icarus.language.model.manifest;
 
 /**
- * Utility class for accessing distributed data or for loading
- * little chunks from a very big database.
- *
  * @author Markus Gärtner
  * @version $Id$
- * @see Path
  *
  */
-public interface PathResolver {
+public interface ValueRange {
 
-	/**
-	 * Translates the given {@code chunkIndex} into a {@code Path}
-	 * information that can be used to access data from an abstract
-	 * data source.
-	 *
-	 * @param chunkIndex
-	 * @return
-	 * @throws IndexOutOfBoundsException if the {@code chunkIndex} violates
-	 * the bounds of this resolver. For example a resolver translating chunk indices
-	 * into row values for a database table might check for the overall size of that
-	 * table to make sure the returned rows do not exceed the table's row count.
-	 */
-	Path getPath(int chunkIndex);
+	Object getLowerBound();
+
+	Object getUpperBound();
+
+	boolean isLowerBoundInclusive();
+
+	boolean isUpperBoundInclusive();
 }

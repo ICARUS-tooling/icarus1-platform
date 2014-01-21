@@ -27,7 +27,6 @@ package de.ims.icarus.language.model.manifest;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.events.EventManager;
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.io.ContextWriter;
 
@@ -41,20 +40,14 @@ public interface ContextManifest extends Manifest {
 	CorpusManifest getCorpusManifest();
 
 	/**
-	 * Allows for changes of the layer's name at runtime. This is one of the
+	 * Allows for changes of the context's name at runtime. This is one of the
 	 * few situations where a direct modification of a manifest by the user is
 	 * possible.
 	 * <p>
-	 * Checks if the {@code newName} parameter is valid within the corpus
-	 * and assigns it as current name. Does nothing if the {@code newName}
-	 * argument is equal to the current name. Otherwise it will forward
-	 * notification of the change to the {@link EventManager} of the corpus.
 	 *
 	 * @param newName The desired new name of the layer
 	 * @throws UnsupportedOperationException if the manifest does not support renaming
 	 * @throws NullPointerException if the {@code newName} parameter is {@code null}
-	 * @throws IllegalArgumentException if the {@code newName} parameter is either empty or
-	 * another layer already has that name assigned to it
 	 */
 	void setName(String newName);
 
@@ -74,13 +67,19 @@ public interface ContextManifest extends Manifest {
 	 * or {@code null} if this context does not derive from a physical
 	 * data location.
 	 */
-	Class<? extends ContextReader> getReaderClass();
+	ContextReader getReader();
 
-	Class<? extends ContextWriter> getWriterClass();
+	/**
+	 * Returns the writer that can be used to serialize the layers in
+	 * this context to a new location.
+	 *
+	 * @return
+	 */
+	ContextWriter getWriter();
 
 	/**
 	 * Returns the manifest that describes where the data for this context's
-	 * layers is loaded from.
+	 * layers is loaded from and how to access distributed data sources.
 	 *
 	 * @return
 	 */
@@ -93,5 +92,11 @@ public interface ContextManifest extends Manifest {
 	 */
 	void setLocationManifest(LocationManifest manifest);
 
-	//TODO add flag to signal a context is usable as default context of a corpus
+	/**
+	 * Tells whether or not a context depends on other resources besides the
+	 * data contained in its own layers. Only a context that is independent of
+	 * external data can be assigned as default context of a corpus!
+	 * @return
+	 */
+	boolean isRootContext();
 }

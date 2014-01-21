@@ -47,7 +47,7 @@ public enum ContainerType {
 	 * of {@code Markable}s. The elements may appear in
 	 * any order.
 	 *
-	 * @deprecated There is currently no reason to do the hazzle of implementing
+	 * @deprecated There is currently no reason to do the hassle of implementing
 	 * a somehow "random" order container that still allows indexed access to its
 	 * members
 	 */
