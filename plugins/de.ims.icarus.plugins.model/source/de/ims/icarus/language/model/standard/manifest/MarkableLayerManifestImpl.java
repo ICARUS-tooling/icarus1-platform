@@ -32,6 +32,8 @@ import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
 
 /**
  * @author Markus Gärtner
@@ -50,6 +52,30 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
+	 * @param contextManifest
+	 */
+	public MarkableLayerManifestImpl(ContextManifest contextManifest, MarkableLayerManifest template) {
+		super(contextManifest, template);
+
+		ContainerManifestImpl lastAdded = null;
+
+		for(int i=0; i<template.getContainerDepth(); i++) {
+			ContainerManifestImpl containerManifest =
+					new ContainerManifestImpl(template.getContainerManifest(i));
+
+			if(lastAdded!=null) {
+				containerManifest.setParentManifest(lastAdded);
+				lastAdded.setElementManifest(containerManifest);;
+			}
+			containerManifest.setLayerManifest(this);
+
+			addContainerManifest(containerManifest);
+
+			lastAdded = containerManifest;
+		}
+	}
+
+	/**
 	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
 	 */
 	@Override
@@ -58,24 +84,10 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#templateLoaded(de.ims.icarus.language.model.manifest.LayerManifest)
-	 */
-	@Override
-	protected void templateLoaded(MarkableLayerManifest template) {
-		super.templateLoaded(template);
-
-		for(int i=0; i<template.getContainerDepth(); i++) {
-			addContainerManifest(template.getContainerManifest(i));
-		}
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.manifest.MarkableLayerManifest#getContainerDepth()
 	 */
 	@Override
 	public int getContainerDepth() {
-		checkTemplate();
-
 //		if(containerManifests==null)
 //			throw new IllegalStateException("Missing root container manifest"); //$NON-NLS-1$
 
@@ -87,7 +99,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	 */
 	@Override
 	public ContainerManifest getRootContainerManifest() {
-		return getContainerManifest(1);
+		return getContainerManifest(0);
 	}
 
 	/**
@@ -95,8 +107,6 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	 */
 	@Override
 	public ContainerManifest getContainerManifest(int level) {
-		checkTemplate();
-
 		if(containerManifests==null)
 			throw new IllegalStateException("Missing root container manifest"); //$NON-NLS-1$
 
@@ -112,5 +122,41 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 		}
 
 		containerManifests.add(manifest);
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		for(int i=getTemplate().getContainerDepth(); i<getContainerDepth(); i++) {
+			XmlWriter.writeContainerManifestElement(serializer, getContainerManifest(i));
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		for(int i=0; i<getContainerDepth(); i++) {
+			XmlWriter.writeContainerManifestElement(serializer, getContainerManifest(i));
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "markable-layer"; //$NON-NLS-1$
 	}
 }

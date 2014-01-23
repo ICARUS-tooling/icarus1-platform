@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,9 @@ import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
+import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -45,10 +49,26 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 
 	private Map<String, AnnotationManifest> annotationManifests;
 	private AnnotationManifest defaultAnnotationManifest;
-	private Boolean deepAnnotation, allowUnknownKeys;
+	private boolean deepAnnotation, allowUnknownKeys;
 
 	public AnnotationLayerManifestImpl(ContextManifest contextManifest) {
 		super(contextManifest);
+	}
+
+	public AnnotationLayerManifestImpl(ContextManifest contextManifest, AnnotationLayerManifest template) {
+		super(contextManifest, template);
+
+		defaultAnnotationManifest = template.getDefaultAnnotationManifest();
+
+		// Copy over all annotation manifests
+		for(String key : template.getAvailableKeys()) {
+			// Annotation manifests carry no links to any kind of
+			// manifest hierarchy above them, so they are save to share!
+			addAnnotationManifest(key, template.getAnnotationManifest(key));
+		}
+
+		deepAnnotation = template.isDeepAnnotation();
+		allowUnknownKeys = template.allowUnknownKeys();
 	}
 
 	/**
@@ -66,7 +86,6 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	public Set<String> getAvailableKeys() {
 		Set<String> keys = null;
 
-		checkTemplate();
 		if(annotationManifests!=null) {
 			keys = annotationManifests.keySet();
 		}
@@ -88,7 +107,6 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 		if (key == null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 
-		checkTemplate();
 		if(annotationManifests==null)
 			throw new UnsupportedOperationException();
 
@@ -97,19 +115,6 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 			throw new IllegalArgumentException("Unknown annotation key: "+key); //$NON-NLS-1$
 
 		return manifest;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#templateLoaded(de.ims.icarus.language.model.manifest.LayerManifest)
-	 */
-	@Override
-	protected void templateLoaded(AnnotationLayerManifest template) {
-		super.templateLoaded(template);
-
-		// Copy over all annotation manifests
-		for(String key : template.getAvailableKeys()) {
-			addAnnotationManifest(key, template.getAnnotationManifest(key));
-		}
 	}
 
 	public void addAnnotationManifest(String key, AnnotationManifest manifest) {
@@ -133,12 +138,6 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public AnnotationManifest getDefaultAnnotationManifest() {
-		AnnotationManifest defaultAnnotationManifest = this.defaultAnnotationManifest;
-
-		if(defaultAnnotationManifest==null && hasTemplate()) {
-			defaultAnnotationManifest = getTemplate().getDefaultAnnotationManifest();
-		}
-
 		return defaultAnnotationManifest;
 	}
 
@@ -158,13 +157,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public boolean isDeepAnnotation() {
-		Boolean deepAnnotation = this.deepAnnotation;
-
-		if(deepAnnotation==null && hasTemplate()) {
-			deepAnnotation = Boolean.valueOf(getTemplate().isDeepAnnotation());
-		}
-
-		return deepAnnotation==null ? false : deepAnnotation.booleanValue();
+		return deepAnnotation;
 	}
 
 	/**
@@ -172,27 +165,96 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public boolean allowUnknownKeys() {
-		Boolean allowUnknownKeys = this.allowUnknownKeys;
-
-		if(allowUnknownKeys==null && hasTemplate()) {
-			allowUnknownKeys = Boolean.valueOf(getTemplate().allowUnknownKeys());
-		}
-
-		return allowUnknownKeys==null ? false : allowUnknownKeys.booleanValue();
+		return allowUnknownKeys;
 	}
 
 	/**
 	 * @param deepAnnotation the deepAnnotation to set
 	 */
 	public void setDeepAnnotation(boolean deepAnnotation) {
-		this.deepAnnotation = Boolean.valueOf(deepAnnotation);
+		this.deepAnnotation = deepAnnotation;
 	}
 
 	/**
 	 * @param allowUnknownKeys the allowUnknownKeys to set
 	 */
 	public void setAllowUnknownKeys(boolean allowUnknownKeys) {
-		this.allowUnknownKeys = Boolean.valueOf(allowUnknownKeys);
+		this.allowUnknownKeys = allowUnknownKeys;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "annotation-layer"; //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "deep-annotation", deepAnnotation, getTemplate().isDeepAnnotation()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "unknown-keys", allowUnknownKeys, getTemplate().allowUnknownKeys()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("deep-annotation", deepAnnotation); //$NON-NLS-1$
+		serializer.writeAttribute("unknown-keys", allowUnknownKeys); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		if(!ClassUtils.equals(defaultAnnotationManifest, getTemplate().getDefaultAnnotationManifest())) {
+			XmlWriter.writeAnnotationManifestElement(serializer, defaultAnnotationManifest);
+		}
+
+		Set<String> derived = new HashSet<>(getTemplate().getAvailableKeys());
+		for(String key : getAvailableKeys()) {
+			if(derived.contains(key)
+					&& ClassUtils.equals(getAnnotationManifest(key),
+							getTemplate().getAnnotationManifest(key))) {
+				continue;
+			}
+
+			XmlWriter.writeAnnotationManifestElement(serializer, getAnnotationManifest(key));
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		XmlWriter.writeAnnotationManifestElement(serializer, defaultAnnotationManifest);
+
+		for(String key : getAvailableKeys()) {
+			XmlWriter.writeAnnotationManifestElement(serializer, getAnnotationManifest(key));
+		}
 	}
 
 }

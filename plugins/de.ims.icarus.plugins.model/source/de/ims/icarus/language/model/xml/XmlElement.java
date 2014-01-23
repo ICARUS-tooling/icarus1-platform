@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.xml;
 
-import java.io.IOException;
 
 /**
  * @author Markus Gärtner
@@ -34,5 +33,5 @@ import java.io.IOException;
  */
 public interface XmlElement {
 
-	void writeXml(XmlSerializer serializer) throws IOException;
+	void writeXml(XmlSerializer serializer) throws Exception;
 }

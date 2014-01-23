@@ -28,8 +28,8 @@ package de.ims.icarus.language.model.standard.manifest;
 import de.ims.icarus.language.model.StructureType;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureManifest;
+import de.ims.icarus.language.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -44,12 +44,10 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	/**
 	 * @param parentManifest
 	 */
-	public StructureManifestImpl(ContainerManifest parentManifest) {
-		super(parentManifest);
-	}
+	public StructureManifestImpl(StructureManifest template) {
+		super(template);
 
-	public StructureManifestImpl(StructureLayerManifest layerManifest) {
-		super(layerManifest);
+		structureType = template.getStructureType();
 	}
 
 	/**
@@ -73,12 +71,6 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	 */
 	@Override
 	public StructureType getStructureType() {
-		StructureType structureType = this.structureType;
-
-		if(structureType==null && hasTemplate()) {
-			structureType = getTemplate().getStructureType();
-		}
-
 		return structureType;
 	}
 
@@ -110,5 +102,45 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 			throw new NullPointerException("Invalid boundaryContainerManifest"); //$NON-NLS-1$
 
 		this.boundaryContainerManifest = boundaryContainerManifest;
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "structure-type", structureType, getTemplate().getStructureType()); //$NON-NLS-1$
+
+		if(boundaryContainerManifest!=null) {
+			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("structure-type", structureType.getValue()); //$NON-NLS-1$
+
+		if(boundaryContainerManifest!=null) {
+			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "structure"; //$NON-NLS-1$
 	}
 }

@@ -28,13 +28,14 @@ package de.ims.icarus.language.model.io;
 import java.net.URL;
 
 import de.ims.icarus.language.model.manifest.LocationManifest;
+import de.ims.icarus.language.model.xml.XmlResource;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum LocationType {
+public enum LocationType implements XmlResource {
 
 	/**
 	 * Specifies that a certain location denotes a local file object
@@ -53,4 +54,12 @@ public enum LocationType {
 	 * additional information to properly access the database.
 	 */
 	DATABASE;
+
+	/**
+	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 */
+	@Override
+	public String getValue() {
+		return name();
+	}
 }

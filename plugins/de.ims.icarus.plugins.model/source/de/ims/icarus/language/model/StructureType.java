@@ -28,13 +28,14 @@ package de.ims.icarus.language.model;
 import java.util.EnumSet;
 
 import de.ims.icarus.language.model.edit.EditOperation;
+import de.ims.icarus.language.model.xml.XmlResource;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum StructureType {
+public enum StructureType implements XmlResource {
 
 	/**
 	 * An unordered collection of nodes, not connected
@@ -155,5 +156,13 @@ public enum StructureType {
 	 */
 	public boolean isDirected() {
 		return directed;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 */
+	@Override
+	public String getValue() {
+		return name();
 	}
 }

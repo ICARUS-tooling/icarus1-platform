@@ -26,7 +26,9 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.java.plugin.registry.Extension;
 
@@ -37,6 +39,8 @@ import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.LocationManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -58,10 +62,19 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 
 	private LocationManifest locationManifest;
 
-	private Boolean root;
+	private boolean root;
 	private final CorpusManifest corpusManifest;
 
 	public ContextManifestImpl(CorpusManifest corpusManifest) {
+		if (corpusManifest == null)
+			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
+
+		this.corpusManifest = corpusManifest;
+	}
+
+	public ContextManifestImpl(CorpusManifest corpusManifest, ContextManifest template) {
+		super(template);
+
 		if (corpusManifest == null)
 			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
 
@@ -73,21 +86,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	 */
 	@Override
 	public List<LayerManifest> getLayerManifests() {
-		checkTemplate();
 		return CollectionUtils.getListProxy(layerManifests);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#templateLoaded(de.ims.icarus.language.model.manifest.Manifest)
-	 */
-	@Override
-	protected void templateLoaded(ContextManifest template) {
-		super.templateLoaded(template);
-
-		// Copy over all layer manifests
-		for(LayerManifest manifest : template.getLayerManifests()) {
-			addLayerManifest(manifest);
-		}
 	}
 
 	public void addLayerManifest(LayerManifest layerManifest) {
@@ -160,13 +159,8 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 			return;
 		}
 
-		if(readerSource==null) {
-			if(hasTemplate()) {
-				reader = getTemplate().getReader();
-				return;
-			} else
-				throw new IllegalStateException("No reader set for context: "+getName()); //$NON-NLS-1$
-		}
+		if(readerSource==null)
+			throw new IllegalStateException("No reader set for context: "+getName()); //$NON-NLS-1$
 
 		try {
 			reader = (ContextReader) ClassUtils.instantiate(readerSource);
@@ -232,11 +226,6 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 		}
 
 		if(writerSource==null) {
-
-			if(hasTemplate()) {
-				writer = getTemplate().getWriter();
-			}
-
 			return;
 		}
 
@@ -275,24 +264,26 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#isRootContext()
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#isIndependentContext()
 	 */
 	@Override
-	public boolean isRootContext() {
-		Boolean root = this.root;
-
-		if(root==null && hasTemplate()) {
-			root = Boolean.valueOf(getTemplate().isRootContext());
-		}
-
-		return root==null ? false : root.booleanValue();
+	public boolean isIndependentContext() {
+		return root;
 	}
 
 	/**
 	 * @param root the root to set
 	 */
 	public void setRoot(boolean root) {
-		this.root = Boolean.valueOf(root);
+		this.root = root;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#isDefaultContext()
+	 */
+	@Override
+	public boolean isDefaultContext() {
+		return corpusManifest.getDefaultContextManifest()==this;
 	}
 
 	/**
@@ -301,5 +292,71 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	@Override
 	public ManifestType getManifestType() {
 		return ManifestType.CONTEXT_MANIFEST;
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "independent", root, getTemplate().isIndependentContext()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("independent", root); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		Set<LayerManifest> derived = new HashSet<>(getTemplate().getLayerManifests());
+
+		for(LayerManifest layerManifest : layerManifests) {
+			if(derived.contains(layerManifest)) {
+				continue;
+			}
+
+			XmlWriter.writeLayerManifestElement(serializer, layerManifest);
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		for(LayerManifest layerManifest : layerManifests) {
+			XmlWriter.writeLayerManifestElement(serializer, layerManifest);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return isDefaultContext() ? "default-context" : "context"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

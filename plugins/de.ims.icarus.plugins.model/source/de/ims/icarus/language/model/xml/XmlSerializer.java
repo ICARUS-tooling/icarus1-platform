@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.xml;
 
-import java.io.IOException;
 
 /**
  * @author Markus Gärtner
@@ -34,14 +33,20 @@ import java.io.IOException;
  */
 public interface XmlSerializer {
 
-	void startElement(String name) throws IOException;
+	void startDocument() throws Exception;
 
-	void writeAttribute(String name, String value) throws IOException;
-	void writeAttribute(String name, int value) throws IOException;
-	void writeAttribute(String name, double value) throws IOException;
-	void writeAttribute(String name, boolean value) throws IOException;
+	void startElement(String name) throws Exception;
 
-	void endElement(String name) throws IOException;
+	void writeAttribute(String name, String value) throws Exception;
+	void writeAttribute(String name, int value) throws Exception;
+	void writeAttribute(String name, double value) throws Exception;
+	void writeAttribute(String name, boolean value) throws Exception;
 
-	void writeText(String text) throws IOException;
+	void endElement(String name) throws Exception;
+
+	void writeText(String text) throws Exception;
+
+	void endDocument() throws Exception;
+
+	void close() throws Exception;
 }

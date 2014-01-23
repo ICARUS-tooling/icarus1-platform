@@ -25,12 +25,14 @@
  */
 package de.ims.icarus.language.model.meta;
 
+import de.ims.icarus.language.model.xml.XmlResource;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ValueType {
+public enum ValueType implements XmlResource {
 
 	UNKNOWN,
 	CUSTOM,
@@ -38,4 +40,12 @@ public enum ValueType {
 	BOOLEAN,
 	INTEGER,
 	DOUBLE;
+
+	/**
+	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 */
+	@Override
+	public String getValue() {
+		return name();
+	}
 }

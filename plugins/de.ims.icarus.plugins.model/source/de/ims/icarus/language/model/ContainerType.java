@@ -28,6 +28,7 @@ package de.ims.icarus.language.model;
 import java.util.EnumSet;
 
 import de.ims.icarus.language.model.edit.EditOperation;
+import de.ims.icarus.language.model.xml.XmlResource;
 
 /**
  *
@@ -35,7 +36,7 @@ import de.ims.icarus.language.model.edit.EditOperation;
  * @version $Id$
  *
  */
-public enum ContainerType {
+public enum ContainerType implements XmlResource {
 
 	/**
 	 * The container holds a single {@code Markable}.
@@ -125,5 +126,13 @@ public enum ContainerType {
 	 */
 	public int getMaxSize() {
 		return maxSize;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 */
+	@Override
+	public String getValue() {
+		return name();
 	}
 }

@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model;
 
+import de.ims.icarus.language.model.xml.XmlResource;
+
 /**
  * Defines the possibles types a {@link CorpusMember} can declare to represent by
  * its {@link CorpusMember#getMemberType()} method. Not although that a class can implement
@@ -35,11 +37,19 @@ package de.ims.icarus.language.model;
  * @version $Id$
  *
  */
-public enum MemberType {
+public enum MemberType implements XmlResource {
 	FRAGMENT,
 	MARKABLE,
 	EDGE,
 	CONTAINER,
 	STRUCTURE,
 	LAYER;
+
+	/**
+	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 */
+	@Override
+	public String getValue() {
+		return name();
+	}
 }

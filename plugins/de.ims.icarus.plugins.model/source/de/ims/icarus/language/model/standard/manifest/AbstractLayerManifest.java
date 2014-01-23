@@ -26,11 +26,15 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -41,13 +45,30 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractManifest<L> implements LayerManifest {
 
 	private List<Prerequisite> prerequisites = new ArrayList<>(3);
-	private Boolean indexable, searchable;
+	private boolean indexable, searchable;
 	private final ContextManifest contextManifest;
 
 	protected AbstractLayerManifest(ContextManifest contextManifest) {
 		if (contextManifest == null)
 			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
 		this.contextManifest = contextManifest;
+	}
+
+	protected AbstractLayerManifest(ContextManifest contextManifest, L template) {
+		super(template);
+
+		if (contextManifest == null)
+			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+		this.contextManifest = contextManifest;
+
+		for(Prerequisite prerequisite : template.getPrerequisites()) {
+			if(!prerequisites.contains(prerequisite)) {
+				prerequisites.add(prerequisite);
+			}
+		}
+
+		indexable = template.isIndexable();
+		searchable = template.isSearchable();
 	}
 
 	/**
@@ -59,26 +80,10 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#templateLoaded(de.ims.icarus.language.model.manifest.Manifest)
-	 */
-	@Override
-	protected void templateLoaded(L template) {
-		super.templateLoaded(template);
-
-		// Copy over all prerequisites
-		for(Prerequisite prerequisite : template.getPrerequisites()) {
-			if(!prerequisites.contains(prerequisite)) {
-				prerequisites.add(prerequisite);
-			}
-		}
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.manifest.LayerManifest#getPrerequisites()
 	 */
 	@Override
 	public List<Prerequisite> getPrerequisites() {
-		checkTemplate();
 		return CollectionUtils.getListProxy(prerequisites);
 	}
 
@@ -105,13 +110,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	 */
 	@Override
 	public boolean isIndexable() {
-		Boolean indexable = this.indexable;
-
-		if(indexable==null && hasTemplate()) {
-			indexable = Boolean.valueOf(getTemplate().isIndexable());
-		}
-
-		return indexable==null ? false : indexable.booleanValue();
+		return indexable;
 	}
 
 	/**
@@ -119,26 +118,77 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	 */
 	@Override
 	public boolean isSearchable() {
-		Boolean searchable = this.searchable;
-
-		if(searchable==null && hasTemplate()) {
-			searchable = Boolean.valueOf(getTemplate().isSearchable());
-		}
-
-		return searchable==null ? false : searchable.booleanValue();
+		return searchable;
 	}
 
 	/**
 	 * @param indexable the indexable to set
 	 */
 	public void setIndexable(boolean indexable) {
-		this.indexable = Boolean.valueOf(indexable);
+		this.indexable = indexable;
 	}
 
 	/**
 	 * @param searchable the searchable to set
 	 */
 	public void setSearchable(boolean searchable) {
-		this.searchable = Boolean.valueOf(searchable);
+		this.searchable = searchable;
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "indexable", indexable, getTemplate().isIndexable()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "searchable", searchable, getTemplate().isSearchable()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("indexable", indexable); //$NON-NLS-1$
+		serializer.writeAttribute("searchable", searchable); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		Set<Prerequisite> tmp = new HashSet<>(prerequisites);
+		tmp.removeAll(getTemplate().getPrerequisites());
+
+		for(Prerequisite prerequisite : tmp) {
+			XmlWriter.writePrerequisiteElement(serializer, prerequisite);
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		for(Prerequisite prerequisite : prerequisites) {
+			XmlWriter.writePrerequisiteElement(serializer, prerequisite);
+		}
 	}
 }

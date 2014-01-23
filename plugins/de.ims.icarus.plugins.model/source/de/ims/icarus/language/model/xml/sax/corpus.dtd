@@ -109,7 +109,7 @@
 	Corpus manifest
 -->
 
-<!ELEMENT corpus (%manifest, context+)>
+<!ELEMENT corpus (%manifest, default-context, context*)>
 <!ATTLIST corpus
 		%identity
 		editable	%boolean	"false"	
@@ -125,6 +125,14 @@
 		%template
 		%implementation
 		independent	%boolean "true"
+		reader		CDATA	#IMPLIED
+		writer		CDATA	#IMPLIED
+>
+
+<!ELEMENT default-context (%manifest, location?, context-reader, context-writer?, %layers)>
+<!ATTLIST default-context
+		%identity
+		%implementation
 		reader		CDATA	#IMPLIED
 		writer		CDATA	#IMPLIED
 >
@@ -151,6 +159,7 @@
 		%layeratts	
 		%implementation
 		deep-annotation %boolean #IMPLIED
+		unknown-keys %boolean #IMPLIED
 >
 
 <!--
@@ -199,6 +208,7 @@
 		%implementation
 		%container-type #IMPLIED
 		%structure-type #IMPLIED
+		boundary		CDATA #IMPLIED
 >
 
 <!--

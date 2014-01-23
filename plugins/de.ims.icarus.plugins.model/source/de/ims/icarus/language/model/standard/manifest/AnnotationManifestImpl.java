@@ -27,13 +27,17 @@ package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.ValueIterator;
 import de.ims.icarus.language.model.manifest.ValueRange;
 import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
+import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -43,10 +47,48 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest> implements AnnotationManifest {
 
+	private String key;
 	private List<String> aliases;
 	private ValueType valueType = ValueType.UNKNOWN;
-	private Values.ValueIteratorFactory valueIteratorFactory;
+	private List<Object> values;
 	private ValueRange valueRange;
+
+	public AnnotationManifestImpl() {
+
+	}
+
+	public AnnotationManifestImpl(AnnotationManifest template) {
+		super(template);
+
+		for(String alias : template.getAliases()) {
+			addAlias(alias);
+		}
+		key = template.getKey();
+		valueType = template.getValueType();
+		valueRange = template.getSupportedRange();
+		List<Object> values = template.getSupportedValues();
+		if(values!=null) {
+			this.values = new ArrayList<>(values);
+		}
+	}
+
+	/**
+	 * @return the key
+	 */
+	@Override
+	public String getKey() {
+		return key;
+	}
+
+	/**
+	 * @param key the key to set
+	 */
+	public void setKey(String key) {
+		if (key == null)
+			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
+
+		this.key = key;
+	}
 
 	/**
 	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
@@ -61,8 +103,6 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 */
 	@Override
 	public List<String> getAliases() {
-		checkTemplate();
-
 		List<String> result = aliases;
 
 		if(result==null) {
@@ -89,18 +129,6 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#templateLoaded(de.ims.icarus.language.model.manifest.Manifest)
-	 */
-	@Override
-	protected void templateLoaded(AnnotationManifest template) {
-		super.templateLoaded(template);
-
-		for(String alias : template.getAliases()) {
-			addAlias(alias);
-		}
-	}
-
-	/**
 	 * This implementation returns {@code true} when at least one of
 	 * {@link ValueRange} or {@link Values.ValueIteratorFactory} previously
 	 * assigned to this manifest is non-null.
@@ -109,13 +137,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 */
 	@Override
 	public boolean isBounded() {
-		boolean bounded = valueRange!=null || valueIteratorFactory!=null;
-
-		if(bounded && hasTemplate()) {
-			bounded = getTemplate().isBounded();
-		}
-
-		return bounded;
+		return valueRange!=null || values!=null;
 	}
 
 	/**
@@ -123,12 +145,6 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 */
 	@Override
 	public ValueRange getSupportedRange() {
-		ValueRange valueRange = this.valueRange;
-
-		if(valueRange==null && hasTemplate()) {
-			valueRange = getTemplate().getSupportedRange();
-		}
-
 		return valueRange;
 	}
 
@@ -136,18 +152,8 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#getSupportedValues()
 	 */
 	@Override
-	public ValueIterator getSupportedValues() {
-		ValueIterator valueIterator = null;
-
-		if(valueIteratorFactory!=null) {
-			valueIterator = valueIteratorFactory.newIterator();
-		}
-
-		if(valueIterator==null && hasTemplate()) {
-			valueIterator = getTemplate().getSupportedValues();
-		}
-
-		return valueIterator;
+	public List<Object> getSupportedValues() {
+		return values;
 	}
 
 	/**
@@ -155,12 +161,6 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 */
 	@Override
 	public ValueType getValueType() {
-		ValueType valueType = this.valueType;
-
-		if(valueType==null && hasTemplate()) {
-			valueType = getTemplate().getValueType();
-		}
-
 		return valueType;
 	}
 
@@ -174,15 +174,15 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 		this.valueType = valueType;
 	}
 
-	/**
-	 * @param valueIteratorFactory the valueIteratorFactory to set
-	 */
-	public void setValueIteratorFactory(
-			Values.ValueIteratorFactory valueIteratorFactory) {
-		if (valueIteratorFactory == null)
-			throw new NullPointerException("Invalid valueIteratorFactory"); //$NON-NLS-1$
+	public void addValues(List<Object> values) {
+		if (values == null)
+			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
 
-		this.valueIteratorFactory = valueIteratorFactory;
+		if(this.values==null) {
+			this.values = new ArrayList<>(values);
+		} else {
+			this.values.addAll(values);
+		}
 	}
 
 	/**
@@ -193,6 +193,89 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 			throw new NullPointerException("Invalid valueRange"); //$NON-NLS-1$
 
 		this.valueRange = valueRange;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "annotation"; //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "key", key, getTemplate().getKey()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "type", valueType, getTemplate().getValueType()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("key", key); //$NON-NLS-1$
+		serializer.writeAttribute("type", valueType.getValue()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		Set<String> derived = new HashSet<>(getTemplate().getAliases());
+
+		for(String alias : getAliases()) {
+			if(derived.contains(alias)) {
+				continue;
+			}
+
+			XmlWriter.writeAliasElement(serializer, alias);
+		}
+
+		// Only write those values that do not appear in the template!
+		if(values!=null) {
+			List<Object> values = new ArrayList<>(this.values);
+			values.removeAll(getTemplate().getSupportedValues());
+
+			XmlWriter.writeValuesElement(serializer, values, valueType);
+		}
+
+		if(!ClassUtils.equals(valueRange, getTemplate().getSupportedRange())) {
+			XmlWriter.writeValueRangeElement(serializer, valueRange, valueType);
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		for(String alias : getAliases()) {
+			XmlWriter.writeAliasElement(serializer, alias);
+		}
+
+		XmlWriter.writeValuesElement(serializer, values, valueType);
+		XmlWriter.writeValueRangeElement(serializer, valueRange, valueType);
 	}
 
 }

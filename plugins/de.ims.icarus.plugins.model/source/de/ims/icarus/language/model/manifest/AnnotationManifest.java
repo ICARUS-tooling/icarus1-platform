@@ -36,13 +36,12 @@ import de.ims.icarus.language.model.meta.ValueType;
  */
 public interface AnnotationManifest extends Manifest {
 
-//	/**
-//	 * Returns the <i>base-name</i> of the key this manifest
-//	 * describes.
-//	 * @return
-//	 */
-//	String getKey();
-	//TODO use getId() or define getKey() as more specific replacement?
+	/**
+	 * Returns the <i>base-name</i> of the key this manifest
+	 * describes.
+	 * @return
+	 */
+	String getKey();
 
 	/**
 	 * Returns a list of supported aliases that can be used for this
@@ -108,7 +107,7 @@ public interface AnnotationManifest extends Manifest {
 	 * the values one by one.
 	 * @return
 	 */
-	ValueIterator getSupportedValues();
+	List<Object> getSupportedValues();
 
 	/**
 	 * Returns the type of this annotation

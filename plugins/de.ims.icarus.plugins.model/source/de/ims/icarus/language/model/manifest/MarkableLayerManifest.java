@@ -36,8 +36,6 @@ public interface MarkableLayerManifest extends LayerManifest {
 	/**
 	 * Returns the number of nested containers and/or structures within this
 	 * layer.
-	 * <p>
-	 * Note that the returned value is always at least {@code 1}.
 	 * @return
 	 */
 	int getContainerDepth();
@@ -51,13 +49,13 @@ public interface MarkableLayerManifest extends LayerManifest {
 
 	/**
 	 * Returns the manifest for the container at depth {@code level}.
-	 * For a {@code level} value of {@code 1} the result is equal to
+	 * For a {@code level} value of {@code 0} the result is equal to
 	 * {@link #getRootContainerManifest()}.
 	 *
 	 * @param level the depth for which the manifest should be returned
 	 * @return the manifest for the container at the given depth
      * @throws IndexOutOfBoundsException if the level is out of range
-     *         (<tt>level &lt; 1 || level &gt;= getContainerDepth()</tt>)
+     *         (<tt>level &lt; 0 || level &gt;= getContainerDepth()</tt>)
 	 */
 	ContainerManifest getContainerManifest(int level);
 }

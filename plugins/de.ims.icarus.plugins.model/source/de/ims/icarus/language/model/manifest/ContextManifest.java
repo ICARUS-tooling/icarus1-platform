@@ -98,5 +98,7 @@ public interface ContextManifest extends Manifest {
 	 * external data can be assigned as default context of a corpus!
 	 * @return
 	 */
-	boolean isRootContext();
+	boolean isIndependentContext();
+
+	boolean isDefaultContext();
 }

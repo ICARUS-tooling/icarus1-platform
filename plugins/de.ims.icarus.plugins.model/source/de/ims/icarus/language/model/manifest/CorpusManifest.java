@@ -38,6 +38,10 @@ public interface CorpusManifest extends Manifest {
 
 	List<ContextManifest> getCustomContextManifests();
 
+	void addCustomContextManifest(ContextManifest manifest);
+
+	void removeCustomContextManifest(ContextManifest manifest);
+
 	/**
 	 * Returns {@code true} if the corpus described by this manifest can
 	 * be edited by the user.

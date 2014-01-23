@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +39,29 @@ import de.ims.icarus.language.model.manifest.ValueRange;
  *
  */
 public class Values {
+
+	public static final List<Object> TRUE_FALSEO_VALUES = createValues(Boolean.TRUE, Boolean.FALSE);
+
+	@SafeVarargs
+	public static <T extends Object> List<Object> createValues(T...items) {
+		List<Object> values = new ArrayList<>(items.length);
+
+		for(T item : items) {
+			values.add(item);
+		}
+
+		return Collections.unmodifiableList(values);
+	}
+
+	public static List<Object> createValues(int from, int to) {
+		List<Object> values = new ArrayList<>(to-from+1);
+
+		for(int i=from; i<=to; i++) {
+			values.add(i);
+		}
+
+		return Collections.unmodifiableList(values);
+	}
 
 	public interface ValueIteratorFactory {
 		ValueIterator newIterator();

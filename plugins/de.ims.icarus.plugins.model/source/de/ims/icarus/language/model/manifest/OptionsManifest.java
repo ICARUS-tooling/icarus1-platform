@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.manifest;
 
+import java.util.List;
 import java.util.Set;
 
 import de.ims.icarus.language.model.meta.ValueType;
@@ -38,6 +39,8 @@ import de.ims.icarus.language.model.meta.ValueType;
  *
  */
 public interface OptionsManifest {
+
+	String getId();
 
 	/**
 	 * Returns the names of all available options for the target
@@ -105,7 +108,7 @@ public interface OptionsManifest {
 	 * @param name
 	 * @return
 	 */
-	ValueIterator getSupportedValues(String name);
+	List<Object> getSupportedValues(String name);
 
 	/**
 	 *

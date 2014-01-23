@@ -25,16 +25,19 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.OptionsManifest;
-import de.ims.icarus.language.model.manifest.ValueIterator;
 import de.ims.icarus.language.model.manifest.ValueRange;
 import de.ims.icarus.language.model.meta.ValueType;
-import de.ims.icarus.language.model.standard.manifest.Values.ValueIteratorFactory;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
+import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -42,10 +45,55 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class OptionsManifestImpl implements OptionsManifest {
+public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implements OptionsManifest {
+
+	private String id;
 
 	private Set<String> baseNames = new HashSet<>();
 	private Map<String, Option> options = new HashMap<>();
+
+	/**
+	 * Default constructor
+	 */
+	public OptionsManifestImpl() {
+
+	}
+
+	/**
+	 * Clone constructor for templates
+	 */
+	public OptionsManifestImpl(OptionsManifest template) {
+		super(template);
+
+		for(String key : template.getOptionNames()) {
+			addOption(key);
+
+			setName(key, template.getName(key));
+			setDescription(key, template.getDescription(key));
+			setValueType(key, template.getValueType(key));
+			setDefaultValue(key, template.getDefaultValue(key));
+			setValues(key, template.getSupportedValues(key));
+			setRange(key, template.getSupportedRange(key));
+		}
+	}
+
+	/**
+	 * @return the id
+	 */
+	@Override
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		this.id = id;
+	}
 
 	/**
 	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getOptionNames()
@@ -103,8 +151,63 @@ public class OptionsManifestImpl implements OptionsManifest {
 	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getSupportedValues(java.lang.String)
 	 */
 	@Override
-	public ValueIterator getSupportedValues(String name) {
-		return getOption(name).iteratorFactory.newIterator();
+	public List<Object> getSupportedValues(String name) {
+		List<Object> values = getOption(name).values;
+
+		if(values!=null) {
+			values = CollectionUtils.getListProxy(values);
+		}
+
+		return values;
+	}
+
+	public void addOption(String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+
+		Option option = options.get(name);
+		if(option!=null)
+			throw new IllegalArgumentException("Duplicate option name: "+name); //$NON-NLS-1$
+
+		option = new Option();
+
+		options.put(name, option);
+		baseNames.add(name);
+	}
+
+	public void setName(String key, String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+
+		getOption(key).name = name;
+	}
+
+	public void setDescription(String key, String description) {
+		if (description == null)
+			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
+
+		getOption(key).description = description;
+	}
+
+	public void setDefaultValue(String key, Object defaultValue) {
+		getOption(key).defaultValue = defaultValue;
+	}
+
+	public void setValueType(String key, ValueType valueType) {
+		if (valueType == null)
+			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
+
+		getOption(key).valueType = valueType;
+	}
+
+	public void setValues(String key, List<Object> values) {
+		if(values!=null && !values.isEmpty()) {
+			getOption(key).values = new ArrayList<>(values);
+		}
+	}
+
+	public void setRange(String key, ValueRange range) {
+		getOption(key).range = range;
 	}
 
 	/**
@@ -115,12 +218,87 @@ public class OptionsManifestImpl implements OptionsManifest {
 		return getOption(name).range;
 	}
 
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		serializer.writeAttribute("id", id); //$NON-NLS-1$
+		serializer.writeAttribute("template-id", getTemplate().getId()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("id", id); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		OptionsManifest template = getTemplate();
+		Set<String> derived = new HashSet<>(template.getOptionNames());
+
+		// Only serialize options that differ from the template definition
+		for(String option : baseNames) {
+			if(derived.contains(option)
+					&& ClassUtils.equals(getName(option), template.getName(option))
+					&& ClassUtils.equals(getDescription(option), template.getDescription(option))
+					&& ClassUtils.equals(getDefaultValue(option), template.getDefaultValue(option))
+					&& ClassUtils.equals(getValueType(option), template.getValueType(option))
+					&& ClassUtils.equals(getSupportedValues(option), template.getSupportedValues(option))
+					&& ClassUtils.equals(getSupportedRange(option), template.getSupportedRange(option))) {
+				continue;
+			}
+
+			XmlWriter.writeOptionElement(serializer, option, this);
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		for(String option : baseNames) {
+			XmlWriter.writeOptionElement(serializer, option, this);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "options"; //$NON-NLS-1$
+	}
+
 	private static class Option {
 		public Object defaultValue;
 		public ValueType valueType;
 		public String name;
 		public String description;
-		public ValueIteratorFactory iteratorFactory;
+		public List<Object> values;
 		public ValueRange range;
 	}
 }

@@ -26,12 +26,16 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
+import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -42,19 +46,11 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> implements CorpusManifest {
 
 	private ContextManifest defaultContextManifest;
-	private List<ContextManifest> contextManifests;
-	private Boolean editable;
+	private List<ContextManifest> contextManifests = new ArrayList<>(3);
+	private boolean editable;
 
-	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#templateLoaded(de.ims.icarus.language.model.manifest.Manifest)
-	 */
-	@Override
-	protected void templateLoaded(CorpusManifest template) {
-		super.templateLoaded(template);
+	public CorpusManifestImpl() {
 
-		for(ContextManifest contextManifest : template.getCustomContextManifests()) {
-			addCustomContextManifest(contextManifest);
-		}
 	}
 
 	/**
@@ -70,12 +66,6 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	 */
 	@Override
 	public ContextManifest getDefaultContextManifest() {
-		ContextManifest defaultContextManifest = this.defaultContextManifest;
-
-		if(defaultContextManifest==null && hasTemplate()) {
-			defaultContextManifest = getTemplate().getDefaultContextManifest();
-		}
-
 		return defaultContextManifest;
 	}
 
@@ -94,27 +84,31 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	 */
 	@Override
 	public List<ContextManifest> getCustomContextManifests() {
-		checkTemplate();
-		List<ContextManifest> result = contextManifests;
-
-		if(result==null) {
-			result = Collections.emptyList();
-		} else {
-			result = CollectionUtils.getListProxy(result);
-		}
-
-		return result;
+		return CollectionUtils.getListProxy(contextManifests);
 	}
 
+	/**
+	 *
+	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#addCustomContextManifest(de.ims.icarus.language.model.manifest.ContextManifest)
+	 */
+	@Override
 	public void addCustomContextManifest(ContextManifest manifest) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 
-		if(contextManifests==null) {
-			contextManifests = new ArrayList<>(3);
-		}
-
 		contextManifests.add(manifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#removeCustomContextManifest(de.ims.icarus.language.model.manifest.ContextManifest)
+	 */
+	@Override
+	public void removeCustomContextManifest(ContextManifest manifest) {
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+
+		if(!contextManifests.remove(manifest))
+			throw new IllegalArgumentException("Unknown context manifest: "+manifest); //$NON-NLS-1$
 	}
 
 	/**
@@ -122,13 +116,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	 */
 	@Override
 	public boolean isEditable() {
-		Boolean editable = this.editable;
-
-		if(editable==null && hasTemplate()) {
-			editable = Boolean.valueOf(getTemplate().isEditable());
-		}
-
-		return editable==null ? false : editable.booleanValue();
+		return editable;
 	}
 
 	/**
@@ -136,6 +124,78 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	 */
 	@Override
 	public void setEditable(boolean value) {
-		this.editable = Boolean.valueOf(value);
+		this.editable = value;
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "editable", editable, getTemplate().isEditable()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("editable", editable); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		XmlWriter.writeContextManifestElement(serializer, defaultContextManifest);
+
+		for(ContextManifest contextManifest : contextManifests) {
+			XmlWriter.writeContextManifestElement(serializer, contextManifest);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		if(!ClassUtils.equals(defaultContextManifest, getTemplate().getDefaultContextManifest())) {
+			XmlWriter.writeContextManifestElement(serializer, defaultContextManifest);
+		}
+
+		Set<ContextManifest> derived = new HashSet<>(getTemplate().getCustomContextManifests());
+
+		for(ContextManifest contextManifest : contextManifests) {
+			if(derived.contains(contextManifest)) {
+				continue;
+			}
+
+			XmlWriter.writeContextManifestElement(serializer, contextManifest);
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "corpus"; //$NON-NLS-1$
 	}
 }

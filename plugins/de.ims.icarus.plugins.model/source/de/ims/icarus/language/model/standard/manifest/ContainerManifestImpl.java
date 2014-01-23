@@ -29,6 +29,9 @@ import de.ims.icarus.language.model.ContainerType;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
+import de.ims.icarus.util.ClassUtils;
 
 /**
  * @author Markus Gärtner
@@ -37,26 +40,45 @@ import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
  */
 public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> implements ContainerManifest {
 
-	private final ContainerManifest parentManifest;
-	private final MarkableLayerManifest layerManifest;
+	private ContainerManifest parentManifest;
+	private MarkableLayerManifest layerManifest;
 
 	private ContainerManifest elementManifest;
-	private ContainerType containerType;
+	private ContainerType containerType = ContainerType.LIST;
 
-	public ContainerManifestImpl(MarkableLayerManifest layerManifest) {
-		if (layerManifest == null)
-			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
+	public ContainerManifestImpl() {
 
-		this.layerManifest = layerManifest;
-		this.parentManifest = null;
 	}
 
-	public ContainerManifestImpl(ContainerManifest parentManifest) {
-		if (parentManifest == null)
-			throw new NullPointerException("Invalid parentManifest"); //$NON-NLS-1$
+	public ContainerManifestImpl(ContainerManifest template) {
+		super(template);
 
-		this.parentManifest = parentManifest;
-		this.layerManifest = null;
+		containerType = template.getContainerType();
+		elementManifest = wrap(template.getElementManifest(), this);
+	}
+
+	public static ContainerManifest wrap(ContainerManifest template, ContainerManifest parent) {
+		if(template==null) {
+			return null;
+		}
+
+		ContainerManifestImpl manifest = new ContainerManifestImpl(template);
+
+		manifest.setParentManifest(parent);
+
+		return manifest;
+	}
+
+	public static ContainerManifest wrap(ContainerManifest template, MarkableLayerManifest layerManifest) {
+		if(template==null) {
+			return null;
+		}
+
+		ContainerManifestImpl manifest = new ContainerManifestImpl(template);
+
+		manifest.setLayerManifest(layerManifest);
+
+		return manifest;
 	}
 
 	/**
@@ -88,12 +110,6 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	 */
 	@Override
 	public ContainerManifest getElementManifest() {
-		ContainerManifest elementManifest = this.elementManifest;
-
-		if(elementManifest==null && hasTemplate()) {
-			elementManifest = getTemplate().getElementManifest();
-		}
-
 		return elementManifest;
 	}
 
@@ -108,16 +124,30 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
+	 * @param parentManifest the parentManifest to set
+	 */
+	public void setParentManifest(ContainerManifest parentManifest) {
+		if (parentManifest == null)
+			throw new NullPointerException("Invalid parentManifest"); //$NON-NLS-1$
+
+		this.parentManifest = parentManifest;
+	}
+
+	/**
+	 * @param layerManifest the layerManifest to set
+	 */
+	public void setLayerManifest(MarkableLayerManifest layerManifest) {
+		if (layerManifest == null)
+			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
+
+		this.layerManifest = layerManifest;
+	}
+
+	/**
 	 * @see de.ims.icarus.language.model.manifest.ContainerManifest#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
-		ContainerType containerType = this.containerType;
-
-		if(containerType==null && hasTemplate()) {
-			containerType = getTemplate().getContainerType();
-		}
-
 		return containerType;
 	}
 
@@ -130,6 +160,81 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 			throw new NullPointerException("Invalid containerType"); //$NON-NLS-1$
 
 		this.containerType = containerType;
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "container-type", containerType, getTemplate().getContainerType()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("container-type", containerType.getValue()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		if(!ClassUtils.equals(elementManifest, getTemplate().getElementManifest())) {
+			XmlWriter.writeContainerManifestElement(serializer, elementManifest);
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		XmlWriter.writeContainerManifestElement(serializer, elementManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "container"; //$NON-NLS-1$
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(!super.equals(obj)) {
+			return false;
+		}
+
+		if(obj instanceof ContainerManifest) {
+			ContainerManifest other = (ContainerManifest) obj;
+			return containerType==other.getContainerType()
+					&& (ClassUtils.equals(elementManifest, other.getElementManifest()));
+		}
+		return false;
 	}
 
 }

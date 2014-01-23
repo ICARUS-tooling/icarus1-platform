@@ -25,21 +25,18 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.Icon;
 
 import de.ims.icarus.language.model.manifest.Manifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
-import de.ims.icarus.language.model.xml.XmlResource;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
-import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -60,6 +57,34 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	private String description;
 	private String id;
 	private Icon icon;
+
+	/**
+	 * Default constructor
+	 */
+	public AbstractManifest() {
+		// Default constructor
+	}
+
+	/**
+	 * Clone constructor for templates
+	 */
+	public AbstractManifest(M template) {
+		super(template);
+
+		id = template.getId();
+		name = template.getName();
+		description = template.getDescription();
+		icon = template.getIcon();
+
+		OptionsManifest optionsManifest = template.getOptionsManifest();
+		if(optionsManifest!=null) {
+			this.optionsManifest = new OptionsManifestImpl(optionsManifest);
+		}
+
+		for(String key : template.getPropertyNames()) {
+			setProperty(key, template.getProperty(key));
+		}
+	}
 
 	/**
 	 * @see java.lang.Object#hashCode()
@@ -101,7 +126,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 */
 	@Override
 	public String getName() {
-		return name==null && hasTemplate() ? getTemplate().getName() : name;
+		return name;
 	}
 
 	/**
@@ -109,7 +134,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 */
 	@Override
 	public String getDescription() {
-		return description==null && hasTemplate() ? getTemplate().getDescription() : description;
+		return description;
 	}
 
 	/**
@@ -125,7 +150,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 */
 	@Override
 	public Icon getIcon() {
-		return icon==null && hasTemplate() ? getTemplate().getIcon() : icon;
+		return icon;
 	}
 
 	/**
@@ -186,10 +211,6 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 		this.optionsManifest = optionsManifest;
 	}
 
-	protected boolean isLocalKey(String name) {
-		return properties!=null && properties.containsKey(name);
-	}
-
 	protected boolean isTemplateKey(String name) {
 		return hasTemplate() && getTemplate().getPropertyNames().contains(name);
 	}
@@ -199,12 +220,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 */
 	@Override
 	public Object getProperty(String name) {
-		Object result = properties==null ? null : properties.get(name);
-		if(result==null && hasTemplate()) {
-			result = getTemplate().getProperty(name);
-		}
-
-		return result;
+		return properties==null ? null : properties.get(name);
 	}
 
 	/**
@@ -252,72 +268,81 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 */
 	@Override
 	public OptionsManifest getOptionsManifest() {
-		OptionsManifest optionsManifest = this.optionsManifest;
-
-		if(optionsManifest==null && hasTemplate()) {
-			optionsManifest = getTemplate().getOptionsManifest();
-		}
-
 		return optionsManifest;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#resolveTemplate(java.lang.String)
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	protected M resolveTemplate(String templateId) {
-		Manifest tpl = CorpusRegistry.getInstance().getTemplate(templateId);
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
 
-		if(tpl==null)
-			throw new IllegalStateException("No such template: "+templateId); //$NON-NLS-1$
-		if(tpl.getManifestType()!=getManifestType())
-			throw new IllegalStateException("Manifest type mismatch"); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "id", id, getTemplate().getId()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "name", name, getTemplate().getName()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "description", description, getTemplate().getDescription()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "icon", icon, getTemplate().getIcon()); //$NON-NLS-1$
 
-		return (M) tpl;
+		serializer.writeAttribute("template-id", getTemplate().getId()); //$NON-NLS-1$
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#templateLoaded(java.lang.Object)
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
-	protected void templateLoaded(M template) {
-		super.templateLoaded(template);
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
 
-		// Copy over all properties from the template
-		for(String key : template.getPropertyNames()) {
-			setProperty(key, template.getProperty(key));
-		}
-	}
-
-	/**
-	 * Writes out the set of current properties on this manifest and the
-	 * {@code OptionsManifest} if one was set.
-	 * <p>
-	 * Calls {@code super#defaultWriteXml(XmlSerializer)} to take care of
-	 * the template-id if present.
-	 *
-	 * @param serializer
-	 * @throws IOException
-	 * @see {@link DerivedObject#defaultWriteXml(XmlSerializer)}
-	 */
-	@Override
-	protected void defaultWriteXml(XmlSerializer serializer) throws IOException {
-		// Ensure serialization of template-id
-		super.defaultWriteXml(serializer);
-
-		// Serialize only local information, do NOT use
-		// default getter methods that might resolve values
-		// from template!
 		serializer.writeAttribute("id", id); //$NON-NLS-1$
 		serializer.writeAttribute("name", name); //$NON-NLS-1$
 		serializer.writeAttribute("description", description); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "icon", icon); //$NON-NLS-1$
+	}
 
-		if(icon instanceof XmlResource) {
-			serializer.writeAttribute("icon", ((XmlResource)icon).getValue()); //$NON-NLS-1$
-		} else if(icon != null) {
-			LoggerFactory.warning(XmlWriter.class, "Skipping serialization of icon for manifest: "+id); //$NON-NLS-1$
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		if(optionsManifest!=null) {
+			if(properties!=null) {
+
+				// Find properties that differ from the template and only
+				// serialize them
+				for(Entry<String, Object> entry : properties.entrySet()) {
+					String name = entry.getKey();
+					Object value = entry.getValue();
+
+					// Skip properties that are equal to those defined in the template
+					if(value.equals(getTemplate().getProperty(name))) {
+						continue;
+					}
+
+					XmlWriter.writePropertyElement(serializer, name,
+							value, optionsManifest.getValueType(name));
+				}
+			}
+
+			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
 		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
 
 		if(optionsManifest!=null) {
 			XmlWriter.writeProperties(serializer, properties, optionsManifest);

@@ -38,7 +38,7 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 	 * Returns the manifest for the members of the top-level
 	 * container in this layer. This is effectively the same as calling
 	 * {@link #getContainerManifest(int)} with a {@code level} value
-	 * of {@code 2} and casting the result to {@code StructureManifest}.
+	 * of {@code 1} and casting the result to {@code StructureManifest}.
 	 *
 	 * @return
 	 */

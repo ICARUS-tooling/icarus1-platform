@@ -88,5 +88,4 @@ public class LayerPrerequisite implements LayerManifest.Prerequisite {
 	public String toString() {
 		return "Required layer-id: "+layerId; //$NON-NLS-1$;
 	}
-
 }

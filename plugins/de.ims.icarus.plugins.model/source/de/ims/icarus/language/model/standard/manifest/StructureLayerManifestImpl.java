@@ -30,6 +30,7 @@ import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureManifest;
+import de.ims.icarus.language.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -40,10 +41,11 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 
 	private MarkableLayerManifest boundaryLayerManifest;
 
-	/**
-	 * @param contextManifest
-	 */
 	public StructureLayerManifestImpl(ContextManifest contextManifest) {
+		super(contextManifest);
+	}
+
+	public StructureLayerManifestImpl(ContextManifest contextManifest, StructureLayerManifest template) {
 		super(contextManifest);
 	}
 
@@ -87,6 +89,42 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
 
 		this.boundaryLayerManifest = boundaryLayerManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.MarkableLayerManifestImpl#getXmlTag()
+	 */
+	@Override
+	protected String getXmlTag() {
+		return "structure-layer"; //$NON-NLS-1$
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		if(boundaryLayerManifest!=null) {
+			serializer.writeAttribute("boundary", boundaryLayerManifest.getId()); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		if(boundaryLayerManifest!=null) {
+			serializer.writeAttribute("boundary", boundaryLayerManifest.getId()); //$NON-NLS-1$
+		}
 	}
 
 }
