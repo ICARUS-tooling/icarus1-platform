@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.xml;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -35,18 +34,23 @@ import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.manifest.ContextWriterManifest;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
+import de.ims.icarus.language.model.manifest.Implementation;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.LocationManifest;
 import de.ims.icarus.language.model.manifest.Manifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
+import de.ims.icarus.language.model.manifest.PathResolverManifest;
 import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureManifest;
 import de.ims.icarus.language.model.manifest.ValueIterator;
 import de.ims.icarus.language.model.manifest.ValueManifest;
 import de.ims.icarus.language.model.manifest.ValueRange;
+import de.ims.icarus.language.model.manifest.ValueSet;
 import de.ims.icarus.language.model.meta.ValueType;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.id.Identity;
@@ -184,7 +188,7 @@ public class XmlWriter {
 	}
 
 	public static void writeAliasElement(XmlSerializer serializer, String alias) throws Exception {
-		serializer.startElement("alias"); //$NON-NLS-1$
+		serializer.startEmptyElement("alias"); //$NON-NLS-1$
 		serializer.writeAttribute("name", alias); //$NON-NLS-1$
 		serializer.endElement("alias"); //$NON-NLS-1$
 	}
@@ -197,6 +201,9 @@ public class XmlWriter {
 		serializer.writeAttribute("type", type.getValue()); //$NON-NLS-1$
 		serializer.writeAttribute("name", manifest.getName(option)); //$NON-NLS-1$
 		serializer.writeAttribute("description", manifest.getDescription(option)); //$NON-NLS-1$
+		if(!manifest.isPublished(option)) {
+			serializer.writeAttribute("published", false); //$NON-NLS-1$
+		}
 		writeValueElement(serializer, "default-value", manifest.getDefaultValue(option), type); //$NON-NLS-1$
 		writeValuesElement(serializer, manifest.getSupportedValues(option), type);
 		writeValueRangeElement(serializer, manifest.getSupportedRange(option), type);
@@ -209,11 +216,11 @@ public class XmlWriter {
 			return;
 		}
 
-		serializer.startElement("range"); //$NON-NLS-1$
-		writeValueAttribute(serializer, "min", range.getLowerBound(), type); //$NON-NLS-1$
-		writeValueAttribute(serializer, "max", range.getUpperBound(), type); //$NON-NLS-1$
+		serializer.startEmptyElement("range"); //$NON-NLS-1$
 		serializer.writeAttribute("include-min", range.isLowerBoundInclusive()); //$NON-NLS-1$
 		serializer.writeAttribute("include-max", range.isUpperBoundInclusive()); //$NON-NLS-1$
+		writeValueElement(serializer, "min", range.getLowerBound(), type); //$NON-NLS-1$
+		writeValueElement(serializer, "max", range.getUpperBound(), type); //$NON-NLS-1$
 		serializer.endElement("range"); //$NON-NLS-1$
 	}
 
@@ -235,13 +242,16 @@ public class XmlWriter {
 		serializer.endElement("values"); //$NON-NLS-1$
 	}
 
-	public static void writeValuesElement(XmlSerializer serializer, List<Object> values, ValueType type) throws Exception {
+	public static void writeValuesElement(XmlSerializer serializer, ValueSet values, ValueType type) throws Exception {
 		if(tryWrite(serializer, values)) {
 			return;
 		}
 
 		serializer.startElement("values"); //$NON-NLS-1$
-		for(Object value : values) {
+		serializer.writeAttribute("id", values.getId()); //$NON-NLS-1$
+		for(int i=0; i<values.valueCount(); i++) {
+			Object value = values.getValueAt(i);
+
 			if(value instanceof ValueManifest) {
 				writeValueManifestElement(serializer, (ValueManifest) value, type);
 			} else {
@@ -339,14 +349,19 @@ public class XmlWriter {
 
 			writeOptionsManifestElement(serializer, optionsManifest);
 		}
+
+		Implementation implementation = manifest.getImplementation();
+		if(implementation!=null) {
+			implementation.writeXml(serializer);
+		}
 	}
 
 	private static void writeDefaultLayerAttributes(XmlSerializer serializer, LayerManifest manifest) throws Exception {
 
 		writeIdentityAttributes(serializer, manifest);
 
-		serializer.writeAttribute("indexable", manifest.isIndexable()); //$NON-NLS-1$
-		serializer.writeAttribute("searchable", manifest.isSearchable()); //$NON-NLS-1$
+		serializer.writeAttribute("index", manifest.isIndexable()); //$NON-NLS-1$
+		serializer.writeAttribute("search", manifest.isSearchable()); //$NON-NLS-1$
 	}
 
 	public static void writeAnnotationLayerManifestElement(XmlSerializer serializer, AnnotationLayerManifest manifest) throws Exception {
@@ -422,18 +437,28 @@ public class XmlWriter {
 		serializer.startElement("location"); //$NON-NLS-1$
 
 		serializer.writeAttribute("location-type", manifest.getType().getValue()); //$NON-NLS-1$
-		if(manifest.isDistributed()) {
-			serializer.writeAttribute("distributed", true); //$NON-NLS-1$
-			serializer.writeAttribute("chunks", manifest.getChunkCount()); //$NON-NLS-1$
-		}
 
 		writeValueElement(serializer, "path", manifest.getPath(), ValueType.STRING); //$NON-NLS-1$
 
-		if(manifest.isDistributed()) {
-			writeObjectElement(serializer, "path-resolver", manifest.getPathResolver()); //$NON-NLS-1$
+		PathResolverManifest pathResolverManifest = manifest.getPathResolverManifest();
+		if(pathResolverManifest!=null) {
+			writePathResolverManifestElement(serializer, pathResolverManifest);
 		}
 
 		serializer.endElement("location"); //$NON-NLS-1$
+	}
+
+
+	public static void writePathResolverManifestElement(XmlSerializer serializer, PathResolverManifest manifest) throws Exception {
+		if(tryWrite(serializer, manifest)) {
+			return;
+		}
+
+		serializer.startElement("path-resolver"); //$NON-NLS-1$
+
+		writeDefaultManifestElements(serializer, manifest);
+
+		serializer.endElement("path-resolver"); //$NON-NLS-1$
 	}
 
 	public static void writeLayerManifestElement(XmlSerializer serializer, LayerManifest manifest) throws Exception {
@@ -456,6 +481,36 @@ public class XmlWriter {
 		}
 	}
 
+	public static void writeContextReaderManifestElement(XmlSerializer serializer, ContextReaderManifest manifest) throws Exception {
+		if(tryWrite(serializer, manifest)) {
+			return;
+		}
+
+		serializer.startElement("context-reader"); //$NON-NLS-1$
+
+		writeIdentityAttributes(serializer, manifest);
+		serializer.writeAttribute("format", manifest.getFormatId()); //$NON-NLS-1$
+
+		writeDefaultManifestElements(serializer, manifest);
+
+		serializer.endElement("context-reader"); //$NON-NLS-1$
+	}
+
+	public static void writeContextWriterManifestElement(XmlSerializer serializer, ContextWriterManifest manifest) throws Exception {
+		if(tryWrite(serializer, manifest)) {
+			return;
+		}
+
+		serializer.startElement("context-writer"); //$NON-NLS-1$
+
+		writeIdentityAttributes(serializer, manifest);
+		serializer.writeAttribute("format", manifest.getFormatId()); //$NON-NLS-1$
+
+		writeDefaultManifestElements(serializer, manifest);
+
+		serializer.endElement("context-writer"); //$NON-NLS-1$
+	}
+
 	public static void writeContextManifestElement(XmlSerializer serializer, ContextManifest manifest) throws Exception {
 		if(tryWrite(serializer, manifest)) {
 			return;
@@ -470,6 +525,8 @@ public class XmlWriter {
 
 		writeDefaultManifestElements(serializer, manifest);
 		writeLocationManifestElement(serializer, manifest.getLocationManifest());
+		writeContextReaderManifestElement(serializer, manifest.getReaderManifest());
+		writeContextWriterManifestElement(serializer, manifest.getWriterManifest());
 
 		for(LayerManifest layerManifest : manifest.getLayerManifests()) {
 			writeLayerManifestElement(serializer, layerManifest);

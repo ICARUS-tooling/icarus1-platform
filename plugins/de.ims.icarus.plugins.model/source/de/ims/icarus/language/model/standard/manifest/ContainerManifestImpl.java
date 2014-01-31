@@ -30,7 +30,6 @@ import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
-import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
 
 /**
@@ -54,31 +53,6 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 		super(template);
 
 		containerType = template.getContainerType();
-		elementManifest = wrap(template.getElementManifest(), this);
-	}
-
-	public static ContainerManifest wrap(ContainerManifest template, ContainerManifest parent) {
-		if(template==null) {
-			return null;
-		}
-
-		ContainerManifestImpl manifest = new ContainerManifestImpl(template);
-
-		manifest.setParentManifest(parent);
-
-		return manifest;
-	}
-
-	public static ContainerManifest wrap(ContainerManifest template, MarkableLayerManifest layerManifest) {
-		if(template==null) {
-			return null;
-		}
-
-		ContainerManifestImpl manifest = new ContainerManifestImpl(template);
-
-		manifest.setLayerManifest(layerManifest);
-
-		return manifest;
 	}
 
 	/**
@@ -186,31 +160,31 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 		serializer.writeAttribute("container-type", containerType.getValue()); //$NON-NLS-1$
 	}
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
+//	/**
+//	 * @throws Exception
+//	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+//	 */
+//	@Override
+//	protected void writeTemplateXmlElements(XmlSerializer serializer)
+//			throws Exception {
+//		super.writeTemplateXmlElements(serializer);
+//
+//		if(!ClassUtils.equals(elementManifest, getTemplate().getElementManifest())) {
+//			XmlWriter.writeContainerManifestElement(serializer, elementManifest);
+//		}
+//	}
 
-		if(!ClassUtils.equals(elementManifest, getTemplate().getElementManifest())) {
-			XmlWriter.writeContainerManifestElement(serializer, elementManifest);
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		XmlWriter.writeContainerManifestElement(serializer, elementManifest);
-	}
+//	/**
+//	 * @throws Exception
+//	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+//	 */
+//	@Override
+//	protected void writeFullXmlElements(XmlSerializer serializer)
+//			throws Exception {
+//		super.writeFullXmlElements(serializer);
+//
+//		XmlWriter.writeContainerManifestElement(serializer, elementManifest);
+//	}
 
 	/**
 	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()

@@ -25,15 +25,14 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.OptionsManifest;
 import de.ims.icarus.language.model.manifest.ValueRange;
+import de.ims.icarus.language.model.manifest.ValueSet;
 import de.ims.icarus.language.model.meta.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -151,14 +150,16 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getSupportedValues(java.lang.String)
 	 */
 	@Override
-	public List<Object> getSupportedValues(String name) {
-		List<Object> values = getOption(name).values;
+	public ValueSet getSupportedValues(String name) {
+		return getOption(name).values;
+	}
 
-		if(values!=null) {
-			values = CollectionUtils.getListProxy(values);
-		}
-
-		return values;
+	/**
+	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#isPublished(java.lang.String)
+	 */
+	@Override
+	public boolean isPublished(String name) {
+		return getOption(name).published;
 	}
 
 	public void addOption(String name) {
@@ -200,14 +201,16 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 		getOption(key).valueType = valueType;
 	}
 
-	public void setValues(String key, List<Object> values) {
-		if(values!=null && !values.isEmpty()) {
-			getOption(key).values = new ArrayList<>(values);
-		}
+	public void setValues(String key, ValueSet values) {
+		getOption(key).values = values;
 	}
 
 	public void setRange(String key, ValueRange range) {
 		getOption(key).range = range;
+	}
+
+	public void setPublished(String name, boolean published) {
+		getOption(name).published = published;
 	}
 
 	/**
@@ -298,7 +301,8 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 		public ValueType valueType;
 		public String name;
 		public String description;
-		public List<Object> values;
+		public ValueSet values;
 		public ValueRange range;
+		public boolean published = true;
 	}
 }

@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model;
 
+import de.ims.icarus.language.model.io.PathResolver;
+
 
 /**
  * @author Markus Gärtner
@@ -38,4 +40,6 @@ public interface ChunkControl {
 	int getCurrentChunkIndex();
 
 	void loadChunk(int index);
+
+	PathResolver getPathResolver();
 }

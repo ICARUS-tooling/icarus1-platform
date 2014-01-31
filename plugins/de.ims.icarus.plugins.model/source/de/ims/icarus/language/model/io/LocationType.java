@@ -62,4 +62,8 @@ public enum LocationType implements XmlResource {
 	public String getValue() {
 		return name();
 	}
+
+	public static LocationType parseLocationType(String s) {
+		return valueOf(s.toUpperCase());
+	}
 }

@@ -26,23 +26,24 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.java.plugin.registry.Extension;
-
-import de.ims.icarus.language.model.io.ContextReader;
-import de.ims.icarus.language.model.io.ContextWriter;
+import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.manifest.ContextWriterManifest;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.LocationManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
-import de.ims.icarus.util.ClassProxy;
-import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -53,21 +54,21 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public class ContextManifestImpl extends AbstractManifest<ContextManifest> implements ContextManifest {
 
 	private final List<LayerManifest> layerManifests = new ArrayList<>();
+	private final Map<String, LayerManifest> layerManifestLookup = new HashMap<>();
 
-	private Object readerSource;
-	private Object writerSource;
-
-	private ContextReader reader;
-	private ContextWriter writer;
+	private ContextReaderManifest readerManifest;
+	private ContextWriterManifest writerManifest;
 
 	private LocationManifest locationManifest;
 
-	private boolean root;
+	private boolean independent;
+	private String baseId;
+	private ContextManifest baseContextManifest;
 	private final CorpusManifest corpusManifest;
 
 	public ContextManifestImpl(CorpusManifest corpusManifest) {
-		if (corpusManifest == null)
-			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
+//		if (corpusManifest == null)
+//			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
 
 		this.corpusManifest = corpusManifest;
 	}
@@ -75,10 +76,30 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	public ContextManifestImpl(CorpusManifest corpusManifest, ContextManifest template) {
 		super(template);
 
-		if (corpusManifest == null)
-			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
+//		if (corpusManifest == null)
+//			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
 
 		this.corpusManifest = corpusManifest;
+
+		ContextManifest baseContextManifest = template.getBaseContext();
+
+		for(LayerManifest layerManifest : template.getLayerManifests()) {
+			addLayerManifest(wrap(layerManifest));
+		}
+	}
+
+	private LayerManifest wrap(LayerManifest template) {
+		switch (template.getManifestType()) {
+		case ANNOTATION_LAYER_MANIFEST:
+			return new AnnotationLayerManifestImpl(this, (AnnotationLayerManifest) template);
+		case MARKABLE_LAYER_MANIFEST:
+			return new MarkableLayerManifestImpl(this, (MarkableLayerManifest) template);
+		case STRUCTURE_LAYER_MANIFEST:
+			return new StructureLayerManifestImpl(this, (StructureLayerManifest) template);
+
+		default:
+			throw new IllegalArgumentException("Not a valid manifest type definition on layer template: "+template.getId()); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -95,16 +116,36 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 //		if(layerManifests.contains(layerManifest))
 //			throw new IllegalArgumentException("Layer manifest already registered: "+layerManifest.getId()); //$NON-NLS-1$
 
+		LayerManifest current = layerManifestLookup.get(layerManifest.getId());
+		if(current!=null && !current.equals(layerManifest))
+			throw new IllegalArgumentException("Duplicate layer manifests for id: "+layerManifest.getId()); //$NON-NLS-1$
+
 		layerManifests.add(layerManifest);
+		layerManifestLookup.put(layerManifest.getId(), layerManifest);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#setName(java.lang.String)
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLayerManifest(java.lang.String)
 	 */
 	@Override
-	public void setName(String newName) {
-		throw new UnsupportedOperationException("Renaming not supported"); //$NON-NLS-1$
+	public LayerManifest getLayerManifest(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		LayerManifest layerManifest = layerManifestLookup.get(id);
+		if(layerManifest==null)
+			throw new IllegalArgumentException("No such layer: "+id); //$NON-NLS-1$
+
+		return layerManifest;
 	}
+
+//	/**
+//	 * @see de.ims.icarus.language.model.manifest.ContextManifest#setName(java.lang.String)
+//	 */
+//	@Override
+//	public void setName(String newName) {
+//		throw new UnsupportedOperationException("Renaming not supported"); //$NON-NLS-1$
+//	}
 
 	/**
 	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getCorpusManifest()
@@ -112,139 +153,6 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	@Override
 	public CorpusManifest getCorpusManifest() {
 		return corpusManifest;
-	}
-
-	private void setReader0(Object source) {
-		if(reader!=null && reader.isReading())
-			throw new IllegalStateException("Cannot change reader while loading context"); //$NON-NLS-1$
-
-		if(source.equals(readerSource)) {
-			return;
-		}
-
-		readerSource = source;
-		reader = null;
-	}
-
-	public void setReader(String className) {
-		if (className == null)
-			throw new NullPointerException("Invalid reader classname"); //$NON-NLS-1$
-
-		setReader0(className);
-	}
-
-	public void setReader(Class<? extends ContextReader> readerClass) {
-		if (readerClass == null)
-			throw new NullPointerException("Invalid reader class"); //$NON-NLS-1$
-
-		setReader0(readerClass);
-	}
-
-	public void setReader(ClassProxy proxy) {
-		if (proxy == null)
-			throw new NullPointerException("Invalid proxy"); //$NON-NLS-1$
-
-		setReader0(proxy);
-	}
-
-	public void setReader(Extension extension) {
-		if (extension == null)
-			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
-
-		setReader0(extension);
-	}
-
-	private void loadReader() {
-		if(reader!=null) {
-			return;
-		}
-
-		if(readerSource==null)
-			throw new IllegalStateException("No reader set for context: "+getName()); //$NON-NLS-1$
-
-		try {
-			reader = (ContextReader) ClassUtils.instantiate(readerSource);
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException e) {
-			throw new IllegalStateException("Failed to instantiate reader object: "+readerSource); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getReader()
-	 */
-	@Override
-	public ContextReader getReader() {
-		loadReader();
-
-		return reader;
-	}
-
-	private void setWriter0(Object source) {
-		if(writer!=null && writer.isWriting())
-			throw new IllegalStateException("Cannot change writer while writing context"); //$NON-NLS-1$
-
-		if(source.equals(writerSource)) {
-			return;
-		}
-
-		writerSource = source;
-		writer = null;
-	}
-
-	public void setWriter(String className) {
-		if (className == null)
-			throw new NullPointerException("Invalid writer classname"); //$NON-NLS-1$
-
-		setWriter0(className);
-	}
-
-	public void setWriter(Class<? extends ContextWriter> writerClass) {
-		if (writerClass == null)
-			throw new NullPointerException("Invalid writer class"); //$NON-NLS-1$
-
-		setWriter0(writerClass);
-	}
-
-	public void setWriter(ClassProxy proxy) {
-		if (proxy == null)
-			throw new NullPointerException("Invalid proxy"); //$NON-NLS-1$
-
-		setWriter0(proxy);
-	}
-
-	public void setWriter(Extension extension) {
-		if (extension == null)
-			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
-
-		setWriter0(extension);
-	}
-
-	private void loadWriter() {
-		if(writer!=null) {
-			return;
-		}
-
-		if(writerSource==null) {
-			return;
-		}
-
-		try {
-			writer = (ContextWriter) ClassUtils.instantiate(writerSource);
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException e) {
-			throw new IllegalStateException("Failed to instantiate writer object: "+writerSource); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getWriter()
-	 */
-	@Override
-	public ContextWriter getWriter() {
-		loadWriter();
-
-		return writer;
 	}
 
 	/**
@@ -268,14 +176,59 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	 */
 	@Override
 	public boolean isIndependentContext() {
-		return root;
+		return independent;
 	}
 
 	/**
-	 * @param root the root to set
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getReaderManifest()
 	 */
-	public void setRoot(boolean root) {
-		this.root = root;
+	@Override
+	public ContextReaderManifest getReaderManifest() {
+		return readerManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getWriterManifest()
+	 */
+	@Override
+	public ContextWriterManifest getWriterManifest() {
+		return writerManifest;
+	}
+
+	/**
+	 * @param readerManifest the readerManifest to set
+	 */
+	public void setReaderManifest(ContextReaderManifest readerManifest) {
+		if (readerManifest == null)
+			throw new NullPointerException("Invalid readerManifest"); //$NON-NLS-1$
+
+		this.readerManifest = readerManifest;
+	}
+
+	/**
+	 * @param writerManifest the writerManifest to set
+	 */
+	public void setWriterManifest(ContextWriterManifest writerManifest) {
+		if (writerManifest == null)
+			throw new NullPointerException("Invalid writerManifest");  //$NON-NLS-1$
+
+		this.writerManifest = writerManifest;
+	}
+
+	/**
+	 * @param independent the independent to set
+	 */
+	public void setIndependent(boolean independent) {
+		this.independent = independent;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getBaseContext()
+	 */
+	@Override
+	public ContextManifest getBaseContext() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -283,7 +236,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	 */
 	@Override
 	public boolean isDefaultContext() {
-		return corpusManifest.getDefaultContextManifest()==this;
+		return corpusManifest!=null && corpusManifest.getDefaultContextManifest()==this;
 	}
 
 	/**
@@ -303,7 +256,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 			throws Exception {
 		super.writeTemplateXmlAttributes(serializer);
 
-		writeXmlAttribute(serializer, "independent", root, getTemplate().isIndependentContext()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "independent", independent, getTemplate().isIndependentContext()); //$NON-NLS-1$
 	}
 
 	/**
@@ -315,7 +268,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 			throws Exception {
 		super.writeFullXmlAttributes(serializer);
 
-		serializer.writeAttribute("independent", root); //$NON-NLS-1$
+		serializer.writeAttribute("independent", independent); //$NON-NLS-1$
 	}
 
 	/**
@@ -327,7 +280,21 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 			throws Exception {
 		super.writeTemplateXmlElements(serializer);
 
-		Set<LayerManifest> derived = new HashSet<>(getTemplate().getLayerManifests());
+		ContextManifest template = getTemplate();
+
+		if(locationManifest!=null && !locationManifest.equals(template.getLocationManifest())) {
+			XmlWriter.writeLocationManifestElement(serializer, locationManifest);
+		}
+
+		if(readerManifest!=null && !readerManifest.equals(template.getReaderManifest())) {
+			XmlWriter.writeContextReaderManifestElement(serializer, readerManifest);
+		}
+
+		if(writerManifest!=null && !writerManifest.equals(template.getWriterManifest())) {
+			XmlWriter.writeContextWriterManifestElement(serializer, writerManifest);
+		}
+
+		Set<LayerManifest> derived = new HashSet<>(template.getLayerManifests());
 
 		for(LayerManifest layerManifest : layerManifests) {
 			if(derived.contains(layerManifest)) {
@@ -346,6 +313,10 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	protected void writeFullXmlElements(XmlSerializer serializer)
 			throws Exception {
 		super.writeFullXmlElements(serializer);
+
+		XmlWriter.writeLocationManifestElement(serializer, locationManifest);
+		XmlWriter.writeContextReaderManifestElement(serializer, readerManifest);
+		XmlWriter.writeContextWriterManifestElement(serializer, writerManifest);
 
 		for(LayerManifest layerManifest : layerManifests) {
 			XmlWriter.writeLayerManifestElement(serializer, layerManifest);

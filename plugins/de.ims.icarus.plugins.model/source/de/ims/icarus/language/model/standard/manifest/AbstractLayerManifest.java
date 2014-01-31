@@ -32,6 +32,7 @@ import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
+import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -47,19 +48,26 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	private List<Prerequisite> prerequisites = new ArrayList<>(3);
 	private boolean indexable, searchable;
 	private final ContextManifest contextManifest;
+	private String baseId;
+	private MarkableLayerManifest baseLayerManifest;
 
 	protected AbstractLayerManifest(ContextManifest contextManifest) {
-		if (contextManifest == null)
-			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+//		if (contextManifest == null)
+//			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
 		this.contextManifest = contextManifest;
 	}
 
 	protected AbstractLayerManifest(ContextManifest contextManifest, L template) {
 		super(template);
 
-		if (contextManifest == null)
-			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+//		if (contextManifest == null)
+//			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
 		this.contextManifest = contextManifest;
+
+		MarkableLayerManifest baseLayerManifest = template.getBaseLayerManifest();
+		if(baseLayerManifest!=null) {
+			baseId = baseLayerManifest.getId();
+		}
 
 		for(Prerequisite prerequisite : template.getPrerequisites()) {
 			if(!prerequisites.contains(prerequisite)) {
@@ -87,7 +95,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		return CollectionUtils.getListProxy(prerequisites);
 	}
 
-	public void addPrerequiriste(Prerequisite prerequisite) {
+	public void addPrerequisite(Prerequisite prerequisite) {
 		if(prerequisite==null)
 			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
 
@@ -136,6 +144,31 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
+	 * @return the baseId
+	 */
+	public String getBaseId() {
+		return baseId;
+	}
+
+	/**
+	 * @param baseId the baseId to set
+	 */
+	public void setBaseId(String baseId) {
+		this.baseId = baseId;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.LayerManifest#getBaseLayerManifest()
+	 */
+	@Override
+	public MarkableLayerManifest getBaseLayerManifest() {
+		if(baseLayerManifest==null && baseId!=null) {
+			baseLayerManifest = (MarkableLayerManifest) getContextManifest().getLayerManifest(baseId);
+		}
+		return baseLayerManifest;
+	}
+
+	/**
 	 * @throws Exception
 	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
@@ -144,8 +177,8 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 			throws Exception {
 		super.writeTemplateXmlAttributes(serializer);
 
-		writeXmlAttribute(serializer, "indexable", indexable, getTemplate().isIndexable()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "searchable", searchable, getTemplate().isSearchable()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "index", indexable, getTemplate().isIndexable()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "search", searchable, getTemplate().isSearchable()); //$NON-NLS-1$
 	}
 
 	/**
@@ -157,8 +190,8 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 			throws Exception {
 		super.writeFullXmlAttributes(serializer);
 
-		serializer.writeAttribute("indexable", indexable); //$NON-NLS-1$
-		serializer.writeAttribute("searchable", searchable); //$NON-NLS-1$
+		serializer.writeAttribute("index", indexable); //$NON-NLS-1$
+		serializer.writeAttribute("search", searchable); //$NON-NLS-1$
 	}
 
 	/**

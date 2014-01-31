@@ -6,6 +6,8 @@
 	<!--Application properties -->
 	<property name="app.name" value="ICARUS" />
 	<property name="app.version" value="1.0.5" />
+	
+	<property name="guide.file" value="${basedir}/quickstart-guide/Quickstart_Guide_for_ICARUS_${app.version}.pdf" />
 
 	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />
@@ -319,7 +321,7 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 			<!-- If there is an existing build script at the target location, use it! -->
 			<available file="${dir}/build.xml" />
 			<then>
-				<!-- Foward the ant call including parameters -->
+				<!-- Forward the ant call including parameters -->
 				<ant dir="${dir}" target="${target}" inheritrefs="true" />
 			</then>
 			<!-- Otherwise assume we are responsible for building -->
@@ -459,11 +461,7 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		</jar>
 
 		<!-- Copy utility stuff to build folder -->
-		<copy todir="${build.home}">
-			<fileset dir="${basedir}/quickstart-guide">
-				<include name="*.pdf"/>
-			</fileset>
-		</copy>
+		<copy todir="${build.home}" file="${guide.file}" />
 		<copy todir="${build.home}" file="${license.file}" />
 
 

@@ -57,6 +57,8 @@ public interface LayerManifest extends Manifest {
 
 	ContextManifest getContextManifest();
 
+	MarkableLayerManifest getBaseLayerManifest();
+
 	/**
 	 * Returns a list of prerequisites describing other layers a corpus
 	 * has to host in order for the new layer to be operational. If this

@@ -26,8 +26,10 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.ContextManifest;
@@ -47,10 +49,27 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	private ContextManifest defaultContextManifest;
 	private List<ContextManifest> contextManifests = new ArrayList<>(3);
+	private Map<String, ContextManifest> contextManifestLookup = new HashMap<>();
 	private boolean editable;
 
 	public CorpusManifestImpl() {
 
+	}
+
+	public CorpusManifestImpl(CorpusManifest template) {
+		super(template);
+
+		editable = template.isEditable();
+
+		defaultContextManifest = wrap(template.getDefaultContextManifest());
+
+		for(ContextManifest customContextManifest : template.getCustomContextManifests()) {
+			addCustomContextManifest(wrap(customContextManifest));
+		}
+	}
+
+	private ContextManifest wrap(ContextManifest template) {
+		return template==null ? null : new ContextManifestImpl(this, template);
 	}
 
 	/**
@@ -97,6 +116,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 
 		contextManifests.add(manifest);
+		contextManifestLookup.put(manifest.getId(), manifest);
 	}
 
 	/**
@@ -109,6 +129,22 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 		if(!contextManifests.remove(manifest))
 			throw new IllegalArgumentException("Unknown context manifest: "+manifest); //$NON-NLS-1$
+		contextManifestLookup.remove(manifest.getId());
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#getContextManifest(java.lang.String)
+	 */
+	@Override
+	public ContextManifest getContextManifest(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id");
+
+		ContextManifest contextManifest = contextManifestLookup.get(id);
+		if(contextManifest==null)
+			throw new IllegalArgumentException("No such context: "+id);
+
+		return contextManifest;
 	}
 
 	/**

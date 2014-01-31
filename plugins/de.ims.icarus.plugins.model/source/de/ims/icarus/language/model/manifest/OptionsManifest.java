@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.manifest;
 
-import java.util.List;
 import java.util.Set;
 
 import de.ims.icarus.language.model.meta.ValueType;
@@ -38,8 +37,9 @@ import de.ims.icarus.language.model.meta.ValueType;
  * @version $Id$
  *
  */
-public interface OptionsManifest {
+public interface OptionsManifest extends Template {
 
+	@Override
 	String getId();
 
 	/**
@@ -108,7 +108,7 @@ public interface OptionsManifest {
 	 * @param name
 	 * @return
 	 */
-	List<Object> getSupportedValues(String name);
+	ValueSet getSupportedValues(String name);
 
 	/**
 	 *
@@ -116,4 +116,17 @@ public interface OptionsManifest {
 	 * @return
 	 */
 	ValueRange getSupportedRange(String name);
+
+	/**
+	 * Returns whether or not the option in question should be published
+	 * to the user so he can modify it. Unpublished or <i>hidden</i> options
+	 * are meant as a way of configuring implementations without allowing
+	 * interference from the user.
+	 *
+	 * @param name
+	 * @return
+	 * @throws NullPointerException if the {@code name} argument
+	 * is {@code null}
+	 */
+	boolean isPublished(String name);
 }

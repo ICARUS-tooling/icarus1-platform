@@ -25,12 +25,15 @@
  */
 package de.ims.icarus.language.model.registry;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.LayerType;
+import de.ims.icarus.language.model.io.ContextReader;
+import de.ims.icarus.language.model.io.ContextWriter;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.Manifest;
+import de.ims.icarus.language.model.manifest.Template;
 
 /**
  * @author Markus Gärtner
@@ -58,7 +61,10 @@ public final class CorpusRegistry {
 		return tmp;
 	}
 
-	private final AtomicLong nextId = new AtomicLong();
+	private Map<String, Template> templates = new HashMap<>();
+	private Map<String, LayerType> layerTypes = new HashMap<>();
+	private Map<String, ContextReader> contextReaders = new HashMap<>();
+	private Map<String, ContextWriter> contextWriters = new HashMap<>();
 
 	private CorpusRegistry() {
 		if(instance!=null)
@@ -69,19 +75,68 @@ public final class CorpusRegistry {
 		// TODO
 	}
 
-	public long newId() {
-		return nextId.incrementAndGet();
+	public LayerType getLayerType(String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name");
+
+		LayerType layerType = layerTypes.get(name);
+
+		if(layerType==null)
+			throw new IllegalArgumentException("No such layer-type: "+name);
+
+		return layerType;
 	}
 
-	public LayerType getLayerType(String name) {
+	public void addCorpus(CorpusManifest manifest) {
+
+	}
+
+	public void removeCorpus(CorpusManifest manifest) {
 
 	}
 
 	public Corpus getCorpus(CorpusManifest manifest) {
-
+		//FIXME
+		return null;
 	}
 
-	public Manifest getTemplate(String id) {
+	public Template getTemplate(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id");
 
+		Template template = templates.get(id);
+
+		if(template==null)
+			throw new IllegalArgumentException("No template registered for id: "+id);
+
+		return template;
+	}
+
+	public void registerTemplate(Template template) {
+		//TODO
+	}
+
+	public ContextReader getContextReader(String formatId) {
+		if (formatId == null)
+			throw new NullPointerException("Invalid formatId");  //$NON-NLS-1$
+
+		ContextReader reader = contextReaders.get(formatId);
+
+		if(reader==null)
+			throw new IllegalArgumentException("No reader registered for format-id: "+formatId); //$NON-NLS-1$
+
+		return reader;
+	}
+
+	public ContextWriter getContextWriter(String formatId) {
+		if (formatId == null)
+			throw new NullPointerException("Invalid formatId");  //$NON-NLS-1$
+
+		ContextWriter writer = contextWriters.get(formatId);
+
+		if(writer==null)
+			throw new IllegalArgumentException("No writer registered for format-id: "+formatId); //$NON-NLS-1$
+
+		return writer;
 	}
 }

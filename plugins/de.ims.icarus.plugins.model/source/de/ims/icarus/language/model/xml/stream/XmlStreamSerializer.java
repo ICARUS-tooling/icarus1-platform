@@ -26,10 +26,6 @@
 package de.ims.icarus.language.model.xml.stream;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Stack;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -45,13 +41,11 @@ public class XmlStreamSerializer implements XmlSerializer {
 
 	private final XMLStreamWriter writer;
 
-	private Stack<String> trace = new Stack<>();
-	private Map<String, String> attributes = new LinkedHashMap<>();
 	private StringBuilder characters = new StringBuilder();
 
 	private char[] indentBuffer;
 
-	private int indent = 1;
+	private int indent = 0;
 	private boolean nested = false;
 
 	public XmlStreamSerializer(XMLStreamWriter writer) {
@@ -67,7 +61,6 @@ public class XmlStreamSerializer implements XmlSerializer {
 		indentBuffer = new char[length];
 
 		Arrays.fill(indentBuffer, '\t');
-		indentBuffer[0] = '\n';
 	}
 
 	private void writeIndent() throws XMLStreamException {
@@ -79,16 +72,8 @@ public class XmlStreamSerializer implements XmlSerializer {
 		writer.writeCharacters(indentBuffer, 0, indent);
 	}
 
-	private void flushAttributes() throws XMLStreamException {
-		if(attributes.isEmpty()) {
-			return;
-		}
-
-		for(Entry<String, String> entry : attributes.entrySet()) {
-			writer.writeAttribute(entry.getKey(), entry.getValue());
-		}
-
-		attributes.clear();
+	private void writeLineBreak() throws XMLStreamException {
+		writer.writeCharacters("\r\n"); //$NON-NLS-1$
 	}
 
 	private boolean flushCharacters() throws XMLStreamException {
@@ -103,51 +88,6 @@ public class XmlStreamSerializer implements XmlSerializer {
 		return true;
 	}
 
-	private void pushElement(String localName) throws XMLStreamException {
-		if (localName == null)
-			throw new NullPointerException("Invalid localName"); //$NON-NLS-1$
-
-		flushAttributes();
-
-		trace.push(localName);
-
-		writeIndent();
-		indent++;
-
-		writer.writeStartElement(localName);
-		nested = false;
-	}
-
-	private void popElement(String localName) throws XMLStreamException {
-		if (localName == null)
-			throw new NullPointerException("Invalid localName"); //$NON-NLS-1$
-		if (!localName.equals(trace.pop()))
-			throw new IllegalArgumentException("Unexpected end tag: "+localName); //$NON-NLS-1$
-
-		flushAttributes();
-		if(flushCharacters()) {
-			writer.writeEndElement();
-			indent--;
-		} else {
-			indent--;
-			if(nested) {
-				writeIndent();
-			}
-			writer.writeEndElement();
-		}
-
-		nested = true;
-	}
-
-	private void pushAttribute(String localName, String value) {
-		if (localName == null)
-			throw new NullPointerException("Invalid localName"); //$NON-NLS-1$
-		if (value == null)
-			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
-
-		attributes.put(localName, value);
-	}
-
 	private void pushCharacters(String text) {
 		characters.append(text);
 	}
@@ -157,7 +97,27 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void startElement(String name) throws XMLStreamException {
-		pushElement(name);
+		writeLineBreak();
+		writeIndent();
+
+		writer.writeStartElement(name);
+		indent++;
+		nested = false;
+//		pushElement(name, false);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.xml.XmlSerializer#startEmptyElement(java.lang.String)
+	 */
+	@Override
+	public void startEmptyElement(String name) throws XMLStreamException {
+		writeLineBreak();
+		writeIndent();
+
+		writer.writeEmptyElement(name);
+		indent++;
+		nested = false;
+//		pushElement(name, true);
 	}
 
 	/**
@@ -165,7 +125,11 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void writeAttribute(String name, String value) throws XMLStreamException {
-		pushAttribute(name, value);
+		if(value==null) {
+			return;
+		}
+//		pushAttribute(name, value);
+		writer.writeAttribute(name, value);
 	}
 
 	/**
@@ -173,7 +137,8 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void writeAttribute(String name, int value) throws XMLStreamException {
-		pushAttribute(name, String.valueOf(value));
+//		pushAttribute(name, String.valueOf(value));
+		writer.writeAttribute(name, String.valueOf(value));
 	}
 
 	/**
@@ -181,7 +146,8 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void writeAttribute(String name, double value) throws XMLStreamException {
-		pushAttribute(name, String.valueOf(value));
+//		pushAttribute(name, String.valueOf(value));
+		writer.writeAttribute(name, String.valueOf(value));
 	}
 
 	/**
@@ -189,7 +155,8 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void writeAttribute(String name, boolean value) throws XMLStreamException {
-		pushAttribute(name, String.valueOf(value));
+//		pushAttribute(name, String.valueOf(value));
+		writer.writeAttribute(name, String.valueOf(value));
 	}
 
 	/**
@@ -197,7 +164,19 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void endElement(String name) throws XMLStreamException {
-		popElement(name);
+		indent--;
+//		popElement(name);
+		if(nested) {
+			writeLineBreak();
+			writeIndent();
+			writer.writeEndElement();
+		} else {
+			if(flushCharacters()) {
+				writer.writeEndElement();
+			}
+		}
+
+		nested = true;
 	}
 
 	/**
@@ -205,6 +184,9 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void writeText(String text) throws XMLStreamException {
+		if(text==null) {
+			return;
+		}
 		pushCharacters(text);
 	}
 
@@ -214,6 +196,8 @@ public class XmlStreamSerializer implements XmlSerializer {
 	@Override
 	public void startDocument() throws XMLStreamException {
 		writer.writeStartDocument();
+		writeLineBreak();
+		writer.writeDTD("<!DOCTYPE model SYSTEM \"corpus.dtd\">"); //$NON-NLS-1$
 	}
 
 	/**

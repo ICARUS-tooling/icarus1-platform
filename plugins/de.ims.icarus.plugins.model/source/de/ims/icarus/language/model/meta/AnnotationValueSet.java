@@ -34,7 +34,7 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public interface ValueSet extends MetaData, Identity {
+public interface AnnotationValueSet extends MetaData, Identity {
 
 	/**
 	 * Returns the type of values stored in this {@code ValueSet}

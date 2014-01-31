@@ -28,6 +28,8 @@ package de.ims.icarus.language.model.standard.manifest;
 import de.ims.icarus.language.model.StructureType;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 
@@ -39,11 +41,12 @@ import de.ims.icarus.language.model.xml.XmlSerializer;
 public class StructureManifestImpl extends ContainerManifestImpl implements StructureManifest {
 
 	private StructureType structureType;
-	private ContainerManifest boundaryContainerManifest;
+//	private ContainerManifest boundaryContainerManifest;
 
-	/**
-	 * @param parentManifest
-	 */
+	public StructureManifestImpl() {
+
+	}
+
 	public StructureManifestImpl(StructureManifest template) {
 		super(template);
 
@@ -75,6 +78,14 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#getLayerManifest()
+	 */
+	@Override
+	public StructureLayerManifest getLayerManifest() {
+		return (StructureLayerManifest) super.getLayerManifest();
+	}
+
+	/**
 	 * @see de.ims.icarus.language.model.manifest.StructureManifest#setStructureType(de.ims.icarus.language.model.StructureType)
 	 */
 	@Override
@@ -90,19 +101,21 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	 */
 	@Override
 	public ContainerManifest getBoundaryContainerManifest() {
-		return boundaryContainerManifest;
+//		return boundaryContainerManifest;
+		MarkableLayerManifest boundaryLayerManifest = getLayerManifest().getBoundaryLayerManifest();
+		return boundaryLayerManifest==null ? null : boundaryLayerManifest.getRootContainerManifest();
 	}
 
-	/**
-	 * @param boundaryContainerManifest the boundaryContainerManifest to set
-	 */
-	public void setBoundaryContainerManifest(
-			ContainerManifest boundaryContainerManifest) {
-		if (boundaryContainerManifest == null)
-			throw new NullPointerException("Invalid boundaryContainerManifest"); //$NON-NLS-1$
-
-		this.boundaryContainerManifest = boundaryContainerManifest;
-	}
+//	/**
+//	 * @param boundaryContainerManifest the boundaryContainerManifest to set
+//	 */
+//	public void setBoundaryContainerManifest(
+//			ContainerManifest boundaryContainerManifest) {
+//		if (boundaryContainerManifest == null)
+//			throw new NullPointerException("Invalid boundaryContainerManifest"); //$NON-NLS-1$
+//
+//		this.boundaryContainerManifest = boundaryContainerManifest;
+//	}
 
 	/**
 	 * @throws Exception
@@ -115,9 +128,9 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 
 		writeXmlAttribute(serializer, "structure-type", structureType, getTemplate().getStructureType()); //$NON-NLS-1$
 
-		if(boundaryContainerManifest!=null) {
-			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
-		}
+//		if(boundaryContainerManifest!=null) {
+//			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
+//		}
 	}
 
 	/**
@@ -131,9 +144,9 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 
 		serializer.writeAttribute("structure-type", structureType.getValue()); //$NON-NLS-1$
 
-		if(boundaryContainerManifest!=null) {
-			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
-		}
+//		if(boundaryContainerManifest!=null) {
+//			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
+//		}
 	}
 
 	/**

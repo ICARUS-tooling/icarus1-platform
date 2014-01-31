@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
+import de.ims.icarus.language.model.manifest.Template;
 import de.ims.icarus.language.model.xml.XmlElement;
 import de.ims.icarus.language.model.xml.XmlResource;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -37,9 +38,11 @@ import de.ims.icarus.logging.LoggerFactory;
  * @version $Id$
  *
  */
-public abstract class DerivedObject<T extends Object> implements XmlElement {
+public abstract class DerivedObject<T extends Object> implements XmlElement, Template {
 
 	private final T template;
+
+	private boolean isTemplate = false;
 
 	public DerivedObject(T template) {
 		if (template == null)
@@ -150,4 +153,19 @@ public abstract class DerivedObject<T extends Object> implements XmlElement {
 	}
 
 	protected abstract String getXmlTag();
+
+	/**
+	 * @see de.ims.icarus.language.model.manifest.Template#isTemplate()
+	 */
+	@Override
+	public boolean isTemplate() {
+		return isTemplate;
+	}
+
+	/**
+	 * @param isTemplate the isTemplate to set
+	 */
+	public void setTemplate(boolean isTemplate) {
+		this.isTemplate = isTemplate;
+	}
 }

@@ -107,7 +107,7 @@ public interface AnnotationManifest extends Manifest {
 	 * the values one by one.
 	 * @return
 	 */
-	List<Object> getSupportedValues();
+	ValueSet getSupportedValues();
 
 	/**
 	 * Returns the type of this annotation

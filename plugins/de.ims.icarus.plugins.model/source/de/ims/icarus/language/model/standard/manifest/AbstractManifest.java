@@ -33,6 +33,7 @@ import java.util.Set;
 
 import javax.swing.Icon;
 
+import de.ims.icarus.language.model.manifest.Implementation;
 import de.ims.icarus.language.model.manifest.Manifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -52,6 +53,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 
 	private Map<String, Object> properties;
 	private OptionsManifest optionsManifest;
+	private Implementation implementation;
 
 	private String name;
 	private String description;
@@ -157,8 +159,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+//		if (name == null)
+//			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
 		this.name = name;
 	}
@@ -167,8 +169,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param description the description to set
 	 */
 	public void setDescription(String description) {
-		if (description == null)
-			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
+//		if (description == null)
+//			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
 
 		this.description = description;
 	}
@@ -177,8 +179,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param id the id to set
 	 */
 	public void setId(String id) {
-		if (id == null)
-			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+//		if (id == null)
+//			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
 		this.id = id;
 	}
@@ -187,8 +189,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param icon the icon to set
 	 */
 	public void setIcon(Icon icon) {
-		if (icon == null)
-			throw new NullPointerException("Invalid icon"); //$NON-NLS-1$
+//		if (icon == null)
+//			throw new NullPointerException("Invalid icon"); //$NON-NLS-1$
 
 		this.icon = icon;
 	}
@@ -199,6 +201,24 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	@Override
 	public Object getOwner() {
 		return this;
+	}
+
+	/**
+	 * @return the implementation
+	 */
+	@Override
+	public Implementation getImplementation() {
+		return implementation;
+	}
+
+	/**
+	 * @param implementation the implementation to set
+	 */
+	public void setImplementation(Implementation implementation) {
+		if (implementation == null)
+			throw new NullPointerException("Invalid implementation"); //$NON-NLS-1$
+
+		this.implementation = implementation;
 	}
 
 	/**
@@ -333,6 +353,10 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 
 			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
 		}
+
+		if(implementation!=null && !implementation.equals(getTemplate().getImplementation())) {
+			implementation.writeXml(serializer);
+		}
 	}
 
 	/**
@@ -348,5 +372,9 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 			XmlWriter.writeProperties(serializer, properties, optionsManifest);
 			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
 		}
+
+		if(implementation!=null) {
+			implementation.writeXml(serializer);
+		};
 	}
 }

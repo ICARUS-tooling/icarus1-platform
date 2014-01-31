@@ -135,4 +135,8 @@ public enum ContainerType implements XmlResource {
 	public String getValue() {
 		return name();
 	}
+
+	public static ContainerType parseContainerType(String s) {
+		return valueOf(s.toUpperCase());
+	}
 }

@@ -30,9 +30,9 @@ package de.ims.icarus.language.model.meta;
  * @version $Id$
  *
  */
-public interface ValueDistribution extends MetaData {
+public interface AnnotationValueDistribution extends MetaData {
 
-	ValueSet getValueSet();
+	AnnotationValueSet getValueSet();
 
 	int getCount(Object value);
 }

@@ -413,6 +413,7 @@ public class TreebankExplorerView extends View {
 		public void newTreebank(ActionEvent e) {
 			Extension extension = TreebankRegistry.getInstance().availableTypes().iterator().next();
 
+			// Create new name and treebank
 			String name = TreebankRegistry.getInstance().getUniqueName("New Treebank"); //$NON-NLS-1$
 			TreebankDescriptor descriptor = null;
 			try {
@@ -425,12 +426,41 @@ public class TreebankExplorerView extends View {
 				showError(ex);
 			}
 
-			if(descriptor==null)
+			if(descriptor==null) {
 				return;
+			}
 
-			treebanksList.setSelectedValue(descriptor.getTreebank(), true);
+			Treebank treebank = descriptor.getTreebank();
+			treebanksList.setSelectedValue(treebank, true);
 
-			editTreebank(null);
+			// Edit treebank and check for user cancellation
+			boolean cancelled = false;
+			Editor<Treebank> editor = null;
+			try {
+
+				editor = new DefaultSimpleTreebankEditor();
+
+				if(!DialogFactory.getGlobalFactory().showEditorDialog(
+						getFrame(), treebank, editor,
+						"plugins.languageTools.treebankExplorerView.dialogs.editTreebank.title")) { //$NON-NLS-1$
+					cancelled = true;
+				}
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to edit new treebank", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+				showError(ex);
+			} finally {
+				if(editor!=null) {
+					editor.close();
+				}
+			}
+
+			// If initial edit dialog was cancelled, delete treebank
+			if(cancelled) {
+				TreebankRegistry.getInstance().deleteTreebank(treebank);
+			}
 		}
 
 		public void deleteTreebank(ActionEvent e) {

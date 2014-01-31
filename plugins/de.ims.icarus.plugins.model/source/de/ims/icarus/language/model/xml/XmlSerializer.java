@@ -37,6 +37,8 @@ public interface XmlSerializer {
 
 	void startElement(String name) throws Exception;
 
+	void startEmptyElement(String name) throws Exception;
+
 	void writeAttribute(String name, String value) throws Exception;
 	void writeAttribute(String name, int value) throws Exception;
 	void writeAttribute(String name, double value) throws Exception;

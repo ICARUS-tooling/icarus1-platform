@@ -31,7 +31,6 @@ import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.Structure;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
 
 /**
  * @author Markus Gärtner
@@ -40,14 +39,15 @@ import de.ims.icarus.language.model.registry.CorpusRegistry;
  */
 public class Root implements Markable {
 
-	private final long id = CorpusRegistry.getInstance().newId();
+	private final long id;
 
 	private final Structure owner;
 
-	public Root(Structure owner) {
+	public Root(long id, Structure owner) {
 		if (owner == null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 
+		this.id = id;
 		this.owner = owner;
 	}
 

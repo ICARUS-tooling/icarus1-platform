@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import de.ims.icarus.language.model.test.member.LookupListTest;
+import de.ims.icarus.language.model.test.xml.ModelXmlTest;
 
 /**
  * @author Markus Gärtner
@@ -37,7 +38,7 @@ import de.ims.icarus.language.model.test.member.LookupListTest;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ LookupListTest.class })
+@SuiteClasses({ LookupListTest.class, ModelXmlTest.class })
 public class ModelPluginTest {
 	// no-op
 }

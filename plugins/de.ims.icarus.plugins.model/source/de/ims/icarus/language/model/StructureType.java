@@ -165,4 +165,8 @@ public enum StructureType implements XmlResource {
 	public String getValue() {
 		return name();
 	}
+
+	public static StructureType parseStructureType(String s) {
+		return valueOf(s.toUpperCase());
+	}
 }

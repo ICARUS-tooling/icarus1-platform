@@ -3,8 +3,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
@@ -19,25 +19,52 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.java.plugin.registry.Extension;
+
+import de.ims.icarus.plugins.PluginUtil;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
- * 
+ *
  */
 public final class ClassUtils {
 
 	private ClassUtils() {
 		// no-op
 	}
-	
+
 	public static boolean equals(Object o1, Object o2) {
 		return o1==null ? o2==null : o1.equals(o2);
+	}
+
+	public static Object instantiate(Object source) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		if (source == null)
+			throw new NullPointerException("Invalid source");
+
+		if(source instanceof String) {
+			source = Class.forName((String) source);
+		}
+
+		if(source instanceof ClassProxy) {
+			source = ((ClassProxy)source).loadClass();
+		}
+
+		if(source instanceof Class) {
+			return ((Class<?>) source).newInstance();
+		}
+
+		if(source instanceof Extension) {
+			return PluginUtil.instantiate((Extension) source);
+		}
+
+		return source;
 	}
 
 	/**
 	 * Get the underlying class for a type, or null if the type is a variable
 	 * type.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return the underlying class
@@ -64,7 +91,7 @@ public final class ClassUtils {
 	/**
 	 * Get the actual type arguments a child class has used to extend a generic
 	 * base class.
-	 * 
+	 *
 	 * @param baseClass
 	 *            the base class
 	 * @param childClass

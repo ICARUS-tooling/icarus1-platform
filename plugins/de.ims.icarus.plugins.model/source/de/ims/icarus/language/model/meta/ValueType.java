@@ -34,12 +34,18 @@ import de.ims.icarus.language.model.xml.XmlResource;
  */
 public enum ValueType implements XmlResource {
 
-	UNKNOWN,
-	CUSTOM,
-	STRING,
-	BOOLEAN,
-	INTEGER,
-	DOUBLE;
+	UNKNOWN(Object.class),
+	CUSTOM(Object.class),
+	STRING(String.class),
+	BOOLEAN(Boolean.class),
+	INTEGER(Integer.class),
+	DOUBLE(Double.class);
+
+	private final Class<?> baseClass;
+
+	private ValueType(Class<?> baseClass) {
+		this.baseClass = baseClass;
+	}
 
 	/**
 	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
@@ -47,5 +53,13 @@ public enum ValueType implements XmlResource {
 	@Override
 	public String getValue() {
 		return name();
+	}
+
+	public static ValueType parseValueType(String s) {
+		return valueOf(s.toUpperCase());
+	}
+
+	public boolean isValidValue(Object value) {
+		return value!=null && baseClass.isAssignableFrom(value.getClass());
 	}
 }

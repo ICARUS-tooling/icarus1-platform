@@ -26,13 +26,14 @@
 package de.ims.icarus.language.model.manifest;
 
 /**
- * Marker interface to signal that an object is a template and only
- * to be used for reading derived values/properties.
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface Template {
-	// marker interface
+
+	boolean isTemplate();
+
+	String getId();
 }

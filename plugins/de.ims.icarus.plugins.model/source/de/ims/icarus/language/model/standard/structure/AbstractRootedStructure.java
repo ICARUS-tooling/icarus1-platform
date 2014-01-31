@@ -90,7 +90,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	 * @return
 	 */
 	protected Markable createRoot() {
-		return new Root(this);
+		return new Root(getCorpus().getGlobalIdDomain().nextId(), this);
 	}
 
 	/**

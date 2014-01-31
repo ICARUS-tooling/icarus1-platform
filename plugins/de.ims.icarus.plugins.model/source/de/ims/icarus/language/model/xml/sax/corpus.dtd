@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<!DOCTYPE corpus>
-
 <!--
 	Element with mandatory identifier and optional
 	name and description
 -->
 
 <!ENTITY % identity 
-		id     ID #REQUIRED
+		"id     CDATA #IMPLIED
 		name      CDATA #IMPLIED
 		description      CDATA #IMPLIED
-		icon      CDATA #IMPLIED
+		icon      CDATA #IMPLIED"
 >
 
 <!--
@@ -19,8 +17,8 @@
 -->
 
 <!ENTITY % descriptor
-		name      		CDATA #IMPLIED
-		description      CDATA #IMPLIED
+		"name      		CDATA #IMPLIED
+		description      CDATA #IMPLIED"
 >
 
 <!-- 
@@ -46,20 +44,20 @@
     Type definition for locations.
 -->
 
-<!ENTITY % lcoation-type "location-type 		(file | network | database)">
+<!ENTITY % location-type "location-type 		(file | network | database)">
 
 <!-- 
     Boolean expression that supports more "human readable" values 
 -->
 
-<!ENTITY % boolean "(yes | no | true | false) #IMPLIED">
+<!ENTITY % boolean "(yes | no | true | false)">
 
 <!-- 
     Element with nested declaration of supported
 	options and optional predefined properties.
 -->
 
-<!ENTITY % manifest "options?,  property*">
+<!ENTITY % manifest "options?,  property*, implementation?">
 
 <!-- 
     Lists possible nested layers
@@ -71,7 +69,7 @@
     Extension of the manifest macro with oprional nested prerequisites
 -->
 
-<!ENTITY % layer "%manifest, prerequisites?">
+<!ENTITY % layer "%manifest;, prerequisites?">
 
 <!-- 
     Attribute to allow inheritence for manifest declarations 
@@ -84,68 +82,72 @@
 
 <!ENTITY % template "template-id   	CDATA #IMPLIED">
 
-<!--
-	Multiple ways of describing the source of an implementation
--->
-
-<!ENTITY % implementation
-		class			CDATA #IMPLIED
-		plugin-id		CDATA #IMPLIED
-		extension-id	CDATA #IMPLIED
->
-
 <!-- 
     Basic attributes for layer manifests that define whether or not
 	a layer is searchable and can be indexed.
 -->
 
 <!ENTITY % layeratts 
-	"%template
-	search %boolean #IMPLIED
-	index %boolean #IMPLIED"
+	"%template;
+	search %boolean; #IMPLIED
+	index %boolean; #IMPLIED
+	base CDATA #IMPLIED
+	layer-type CDATA #IMPLIED"
 >
+
+<!--
+	Model
+-->
+
+<!ELEMENT model (templates | corpus+)>
+
+<!--
+	Templates section
+-->
+
+<!ELEMENT templates (corpus|context|annotation-layer|markable-layer|structure-layer|container|structure|annotation|options|content-reader|content-writer|path-resolver|values)*>
 
 <!--
 	Corpus manifest
 -->
 
-<!ELEMENT corpus (%manifest, default-context, context*)>
+<!ELEMENT corpus (%manifest;, default-context, context*)>
 <!ATTLIST corpus
-		%identity
-		editable	%boolean	"false"	
+		%identity;
+		editable	%boolean;	"false"	
 >
 
 <!--
 	Context manifest
 -->
 
-<!ELEMENT context (%manifest, location?, context-reader, context-writer?, %layers)>
+<!ELEMENT context (documentation?, %manifest;, location?, context-reader?, context-writer?, %layers;)>
 <!ATTLIST context
-		%identity
-		%template
-		%implementation
-		independent	%boolean "true"
-		reader		CDATA	#IMPLIED
-		writer		CDATA	#IMPLIED
+		%identity;
+		%template;
+		base    CDATA #IMPLIED
+		independent	%boolean; "true"
 >
 
-<!ELEMENT default-context (%manifest, location?, context-reader, context-writer?, %layers)>
+<!ELEMENT documentation (#PCDATA)>
+
+<!ELEMENT default-context (%manifest;, location?, context-reader?, context-writer?, %layers;)>
 <!ATTLIST default-context
-		%identity
-		%implementation
-		reader		CDATA	#IMPLIED
-		writer		CDATA	#IMPLIED
+		%identity;
+		%template;
 >
 
-<!ELEMENT context-reader EMPTY>
-<!ATTLIST context-reader
-		%implementation
+<!ELEMENT context-reader (implementation?)>
+<!ATTLIST context-reader 
+		id        	CDATA #IMPLIED
+		%template;
 		format		CDATA	#IMPLIED
 >
 
-<!ELEMENT context-writer EMPTY>
-<!ATTLIST context-writer
-		%implementation
+<!ELEMENT context-writer (implementation?)>
+<!ATTLIST context-writer 
+		id        	CDATA #IMPLIED
+		%template;
 		format		CDATA	#IMPLIED
 >
 
@@ -153,35 +155,32 @@
 	Layer that holds information about annotations
 -->
 
-<!ELEMENT annotation-layer (%layer, annotation+)>
+<!ELEMENT annotation-layer (%layer;, annotation*)>
 <!ATTLIST annotation-layer
-		%identity
-		%layeratts	
-		%implementation
-		deep-annotation %boolean #IMPLIED
-		unknown-keys %boolean #IMPLIED
+		%identity;
+		%layeratts;
+		deep-annotation %boolean; #IMPLIED
+		unknown-keys %boolean; #IMPLIED
 >
 
 <!--
 	Layer that holds information about markables
 -->
 
-<!ELEMENT markable-layer (%layer, container)>
+<!ELEMENT markable-layer (%layer;, container*)>
 <!ATTLIST markable-layer
-		%identity
-		%layeratts
-		%implementation
+		%identity;
+		%layeratts;
 >
 
 <!--
 	Layer that holds information about structures
 -->
 
-<!ELEMENT structure-layer (%layer, structure)>
+<!ELEMENT structure-layer (%layer;, structure*)>
 <!ATTLIST structure-layer
-		%identity
-		%layeratts
-		%implementation
+		%identity;
+		%layeratts;
 		boundary		CDATA #IMPLIED
 >
 
@@ -189,25 +188,23 @@
 	Container manifest
 -->
 
-<!ELEMENT container (%manifest, container)?>
+<!ELEMENT container (%manifest;)>
 <!ATTLIST container
-		%identity
-		%template	
-		%implementation
-		%container-type #IMPLIED
+		%identity;
+		%template;	
+		%container-type; #IMPLIED
 >
 
 <!--
 	Structure manifest
 -->
 
-<!ELEMENT structure (%manifest, container?)>
+<!ELEMENT structure (%manifest;)>
 <!ATTLIST structure
-		%identity
-		%template	
-		%implementation
-		%container-type #IMPLIED
-		%structure-type #IMPLIED
+		%identity;
+		%template;	
+		%container-type; #IMPLIED
+		%structure-type; #IMPLIED
 		boundary		CDATA #IMPLIED
 >
 
@@ -217,26 +214,25 @@
 
 <!ELEMENT location (path?, path-resolver?)>
 <!ATTLIST location
-		%location-type #REQUIRED
+		%location-type; #REQUIRED
 		path		CDATA #IMPLIED
-		distributed	%boolean "false"
-		chunks		CDATA #IMPLIED
+		distributed	%boolean; "false"
 >
 
 <!--
 	Path declaration
 -->
 
-<!ELEMENT path (PCDATA)>
+<!ELEMENT path (#PCDATA)>
 
 <!--
 	Path-resolver declaration
 -->
 
-<!ELEMENT path-resolver (PCDATA?)>
+<!ELEMENT path-resolver (%manifest;)>
 <!ATTLIST path-resolver
-		%implementation
-		pattern		CDATA #IMPLIED
+		%identity;
+		%template;
 >
 
 <!--
@@ -248,12 +244,12 @@
 	Therefore at most one annotation declaration should ommit the id attribute!	
 -->
 
-<!ELEMENT annotation (%manifest, alias*, range?, values?)>
+<!ELEMENT annotation (%manifest;, alias*, range?, values?)>
 <!ATTLIST annotation
 		key		CDATA #IMPLIED
-		%template
-		%descriptor 
-		%typed
+		%template;
+		%descriptor; 
+		%typed; "string"
 >
 
 <!-- 
@@ -301,6 +297,7 @@
 <!ELEMENT property (#PCDATA)>
 <!ATTLIST property
 		name	CDATA #REQUIRED
+		%typed; "string"
 		value	CDATA #IMPLIED
 >
 
@@ -312,8 +309,8 @@
 
 <!ELEMENT options (option)*>
 <!ATTLIST options 
-		id        	ID #IMPLIED
-		%template
+		id        	CDATA #IMPLIED
+		%template;
 >
 
 <!--
@@ -325,8 +322,9 @@
 
 <!ELEMENT option (default-value?, range?, values?)>
 <!ATTLIST option 
-		%typed
-		%identity
+		%typed; "string"
+		%identity;
+		published %boolean; "true"
 >
 
 <!--
@@ -334,13 +332,14 @@
 	upper limit.
 -->
 
-<!ELEMENT range EMPTY>
+<!ELEMENT range (min, max)>
 <!ATTLIST range 
-		min 		CDATA #REQUIRED
-		max			CDATA #REQUIRED
-		include-min	%boolean
-		include-max	%boolean
+		include-min	%boolean; #IMPLIED
+		include-max	%boolean; #IMPLIED
 >
+
+<!ELEMENT min (#PCDATA|eval)* >
+<!ELEMENT max (#PCDATA|eval)* >
 
 <!--
     Wraps a fixed set of possible values which are converted into
@@ -351,8 +350,9 @@
 
 <!ELEMENT values (value)* >
 <!ATTLIST values 
-		id        	ID #IMPLIED
-		%template
+		id        	CDATA #IMPLIED
+		%typed; "string"
+		%template;
 >
 
 <!--
@@ -360,11 +360,28 @@
 	for an option. Type of the value is resolved by the surrounding 'option'
 	element.
 -->	
-<!ELEMENT default-value (#PCDATA) >
+<!ELEMENT default-value (#PCDATA|eval)* >
 
 <!--
 	A single value in serialized (textual) form with optional
 	name and description attributes
 -->	
-<!ELEMENT value (#PCDATA) >
-<!ATTLIST value %descriptor >
+<!ELEMENT value (#PCDATA|eval)* >
+<!ATTLIST value %descriptor; >
+
+<!--
+	Multiple ways of describing the source of an implementation
+-->
+
+<!ELEMENT implementation EMPTY>
+<!ATTLIST implementation
+		class			CDATA #IMPLIED
+		plugin-id		CDATA #IMPLIED
+		extension-id	CDATA #IMPLIED
+>
+
+<!--
+	Expression that will be evaluated at runtime
+-->
+
+<!ELEMENT eval (#PCDATA)>

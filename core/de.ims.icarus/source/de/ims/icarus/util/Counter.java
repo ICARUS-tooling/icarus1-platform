@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
@@ -36,7 +36,7 @@ import de.ims.icarus.util.collections.IntValueHashMap;
  *
  */
 public class Counter {
-	
+
 	private IntValueHashMap counts = new IntValueHashMap();
 
 	public Counter() {
@@ -48,10 +48,12 @@ public class Counter {
 		if(c==-1) {
 			c = 0;
 		}
-		
+
 		c++;
 		counts.put(data, c);
-		
+
+//		System.out.printf("%s: %d size=%d\n",data,c,counts.size());
+
 		return c;
 	}
 
@@ -59,35 +61,35 @@ public class Counter {
 		int c = counts.get(data);
 		if(c<1)
 			throw new IllegalStateException("Cannot decrement count for data: "+data); //$NON-NLS-1$
-		
+
 		c--;
 		if(c==0) {
 			counts.remove(data);
 		} else {
 			counts.put(data, c);
 		}
-		
+
 		return c;
 	}
-	
+
 	public void clear() {
 		counts.clear();
 	}
-	
+
 	public int getCount(Object data) {
 		int c = counts.get(data);
 		return c==-1 ? 0 : c;
 	}
-	
+
 	public boolean hasCount(Object data) {
 		int c = counts.get(data);
 		return c>0;
 	}
-	
+
 	public Collection<Object> getItems() {
 		return CollectionUtils.getCollectionProxy(counts.keySet());
 	}
-	
+
 	public boolean isEmpty() {
 		return counts.isEmpty();
 	}

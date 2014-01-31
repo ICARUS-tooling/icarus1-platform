@@ -26,7 +26,6 @@
 package de.ims.icarus.language.model.manifest;
 
 import de.ims.icarus.language.model.io.LocationType;
-import de.ims.icarus.language.model.io.PathResolver;
 
 /**
  * @author Markus Gärtner
@@ -39,17 +38,12 @@ public interface LocationManifest {
 
 	String getPath();
 
-	boolean isDistributed();
-
-	int getChunkCount();
-
 	/**
-	 * If the data source is distributed as defined by {@link #isDistributed()}
-	 * then this method returns the object responsible for accessing different
-	 * chunks of the data. If the data is not of distributed nature this method
-	 * returns {@code null}.
+	 * If the data source is distributed then this method returns the manifest
+	 * that describes the resolver to use when accessing different chunks of data.
+	 * If the data is not of distributed nature this method returns {@code null}.
 	 *
 	 * @return
 	 */
-	PathResolver getPathResolver();
+	PathResolverManifest getPathResolverManifest();
 }

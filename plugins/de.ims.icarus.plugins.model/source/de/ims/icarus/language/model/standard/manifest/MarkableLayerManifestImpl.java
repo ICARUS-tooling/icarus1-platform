@@ -61,11 +61,11 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 
 		for(int i=0; i<template.getContainerDepth(); i++) {
 			ContainerManifestImpl containerManifest =
-					new ContainerManifestImpl(template.getContainerManifest(i));
+					(ContainerManifestImpl) wrap(template.getContainerManifest(i));
 
 			if(lastAdded!=null) {
 				containerManifest.setParentManifest(lastAdded);
-				lastAdded.setElementManifest(containerManifest);;
+				lastAdded.setElementManifest(containerManifest);
 			}
 			containerManifest.setLayerManifest(this);
 
@@ -158,5 +158,9 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	@Override
 	protected String getXmlTag() {
 		return "markable-layer"; //$NON-NLS-1$
+	}
+
+	public ContainerManifest wrap(ContainerManifest template) {
+		return new ContainerManifestImpl(template);
 	}
 }

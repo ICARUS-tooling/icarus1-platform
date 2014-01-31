@@ -38,6 +38,8 @@ public interface CorpusManifest extends Manifest {
 
 	List<ContextManifest> getCustomContextManifests();
 
+	ContextManifest getContextManifest(String id);
+
 	void addCustomContextManifest(ContextManifest manifest);
 
 	void removeCustomContextManifest(ContextManifest manifest);

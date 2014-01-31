@@ -27,7 +27,7 @@ package de.ims.icarus.language.model;
 
 import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.ManifestOwner;
-import de.ims.icarus.language.model.meta.ValueSet;
+import de.ims.icarus.language.model.manifest.ValueSet;
 
 /**
  *

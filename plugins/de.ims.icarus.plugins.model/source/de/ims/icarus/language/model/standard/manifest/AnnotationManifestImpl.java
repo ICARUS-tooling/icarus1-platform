@@ -28,12 +28,14 @@ package de.ims.icarus.language.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.ValueRange;
+import de.ims.icarus.language.model.manifest.ValueSet;
 import de.ims.icarus.language.model.meta.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -50,7 +52,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	private String key;
 	private List<String> aliases;
 	private ValueType valueType = ValueType.UNKNOWN;
-	private List<Object> values;
+	private ValueSet values;
 	private ValueRange valueRange;
 
 	public AnnotationManifestImpl() {
@@ -66,9 +68,9 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 		key = template.getKey();
 		valueType = template.getValueType();
 		valueRange = template.getSupportedRange();
-		List<Object> values = template.getSupportedValues();
+		ValueSet values = template.getSupportedValues();
 		if(values!=null) {
-			this.values = new ArrayList<>(values);
+			this.values = new ValueSetImpl(values);
 		}
 	}
 
@@ -152,7 +154,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#getSupportedValues()
 	 */
 	@Override
-	public List<Object> getSupportedValues() {
+	public ValueSet getSupportedValues() {
 		return values;
 	}
 
@@ -174,15 +176,11 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 		this.valueType = valueType;
 	}
 
-	public void addValues(List<Object> values) {
+	public void setValues(ValueSet values) {
 		if (values == null)
 			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
 
-		if(this.values==null) {
-			this.values = new ArrayList<>(values);
-		} else {
-			this.values.addAll(values);
-		}
+		this.values = values;
 	}
 
 	/**
@@ -229,6 +227,19 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 		serializer.writeAttribute("type", valueType.getValue()); //$NON-NLS-1$
 	}
 
+	private Set<Object> valuesAsSet(ValueSet values) {
+		if(values==null) {
+			return Collections.emptySet();
+		}
+
+		Set<Object> set = new LinkedHashSet<>(values.valueCount());
+		for(int i=0; i<values.valueCount(); i++) {
+			set.add(values.getValueAt(i));
+		}
+
+		return set;
+	}
+
 	/**
 	 * @throws Exception
 	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
@@ -249,11 +260,11 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 		}
 
 		// Only write those values that do not appear in the template!
-		if(values!=null) {
-			List<Object> values = new ArrayList<>(this.values);
-			values.removeAll(getTemplate().getSupportedValues());
+		if(values!=null && values.valueCount()>0) {
+			Set<Object> items = valuesAsSet(values);
+			items.removeAll(valuesAsSet(getTemplate().getSupportedValues()));
 
-			XmlWriter.writeValuesElement(serializer, values, valueType);
+			XmlWriter.writeValuesElement(serializer, new ValueSetImpl(items), valueType);
 		}
 
 		if(!ClassUtils.equals(valueRange, getTemplate().getSupportedRange())) {

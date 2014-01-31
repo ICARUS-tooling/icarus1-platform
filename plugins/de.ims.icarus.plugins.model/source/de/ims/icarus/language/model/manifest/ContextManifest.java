@@ -27,9 +27,6 @@ package de.ims.icarus.language.model.manifest;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.io.ContextReader;
-import de.ims.icarus.language.model.io.ContextWriter;
-
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -38,6 +35,8 @@ import de.ims.icarus.language.model.io.ContextWriter;
 public interface ContextManifest extends Manifest {
 
 	CorpusManifest getCorpusManifest();
+
+	ContextManifest getBaseContext();
 
 	/**
 	 * Allows for changes of the context's name at runtime. This is one of the
@@ -58,24 +57,11 @@ public interface ContextManifest extends Manifest {
 	 */
 	List<LayerManifest> getLayerManifests();
 
-	/**
-	 * Returns the reader that is used to build the actual content
-	 * of this context. If the layers in this context are generated
-	 * programmatically then this method might return {@code null}.
-	 *
-	 * @return The {@link ContextReader} that is used for this context
-	 * or {@code null} if this context does not derive from a physical
-	 * data location.
-	 */
-	ContextReader getReader();
+	LayerManifest getLayerManifest(String id);
 
-	/**
-	 * Returns the writer that can be used to serialize the layers in
-	 * this context to a new location.
-	 *
-	 * @return
-	 */
-	ContextWriter getWriter();
+	ContextReaderManifest getReaderManifest();
+
+	ContextWriterManifest getWriterManifest();
 
 	/**
 	 * Returns the manifest that describes where the data for this context's

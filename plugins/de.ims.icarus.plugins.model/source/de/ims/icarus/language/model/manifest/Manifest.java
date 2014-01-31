@@ -45,9 +45,27 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public interface Manifest extends Identity {
+public interface Manifest extends Identity, Template {
 
+	/**
+	 * Returns the {@code type} of this manifest, i.e. that is
+	 * what kind of member in a corpus it describes. If type-specific
+	 * behavior is modeled, one should always use this method rather than
+	 * doing multiple {@code instanceof} checks.
+	 *
+	 * @return
+	 */
 	ManifestType getManifestType();
+
+	/**
+	 * Returns the {@code Implementation} object that holds information
+	 * about foreign implementations that should be used to instantiate
+	 * the corpus member this manifest describes. If no preferred implementation
+	 * is specified by the user, this method returns {@code null}.
+	 *
+	 * @return
+	 */
+	Implementation getImplementation();
 
 	/**
 	 * Allows for localization of corpus related components.

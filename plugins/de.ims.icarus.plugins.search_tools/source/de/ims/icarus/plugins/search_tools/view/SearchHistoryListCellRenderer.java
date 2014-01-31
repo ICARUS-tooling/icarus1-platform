@@ -19,12 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -64,33 +65,33 @@ import de.ims.icarus.util.id.Identity;
 public class SearchHistoryListCellRenderer extends JPanel implements ListCellRenderer<SearchDescriptor> {
 
 	private static final long serialVersionUID = 1927522962722110567L;
-	
+
 	private JLabel label;
 	private ProgressBar progressBar;
-	
+
 	private static final DecoratedIcon icon = new DecoratedIcon(UIUtil.getBlankIcon(16, 16));
-	
+
 	private static final Icon pendingIcon = IconRegistry.getGlobalRegistry().getIcon("synch_co.gif"); //$NON-NLS-1$
 	private static final Icon runningIcon = IconRegistry.getGlobalRegistry().getIcon("contention_ovr.gif"); //$NON-NLS-1$
 	private static final Icon cancelledIcon = IconRegistry.getGlobalRegistry().getIcon("error_co.gif"); //$NON-NLS-1$
 	private static final Icon doneIcon = IconRegistry.getGlobalRegistry().getIcon("installed_ovr.gif"); //$NON-NLS-1$
 	private static final Icon loadingIcon = IconRegistry.getGlobalRegistry().getIcon("waiting_ovr.gif"); //$NON-NLS-1$
 	private static final Icon loadedIcon = IconRegistry.getGlobalRegistry().getIcon("version_controlled.gif"); //$NON-NLS-1$
-	
+
 	private static final Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
 	public SearchHistoryListCellRenderer() {
 		super(new GridBagLayout());
-		
+
 		label = new JLabel();
 		label.setHorizontalTextPosition(SwingConstants.RIGHT);
 		label.setIconTextGap(4);
-		
+
 		progressBar = new ProgressBar(new Dimension(100, 10));
-		
+
 		GridBagConstraints gbc = GridBagUtil.makeGbcH(0, 0, 1, 1);
 		add(label, gbc);
-		
+
 		gbc = GridBagUtil.makeGbcH(0, 1, 1, 1);
 		gbc.insets = new Insets(1, 11, 0, 1);
 		add(progressBar, gbc);
@@ -101,18 +102,23 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
         Border border = UIManager.getBorder("List.cellNoFocusBorder"); //$NON-NLS-1$
         return border==null ? noFocusBorder : border;
     }
-    
+
 	@Override
 	public Component getListCellRendererComponent(JList<? extends SearchDescriptor> list,
 			SearchDescriptor descriptor, int index, boolean isSelected, boolean cellHasFocus) {
 
         setComponentOrientation(list.getComponentOrientation());
 
-        setBackground(list.getBackground());
-        setForeground(list.getForeground());
+        Color bg = isSelected ? list.getSelectionBackground()
+        		: list.getBackground();
+        Color fg = isSelected ? list.getSelectionForeground()
+        		: list.getForeground();
 
-        label.setBackground(list.getBackground());
-        label.setForeground(list.getForeground());
+        setBackground(bg);
+        setForeground(fg);
+
+        label.setBackground(bg);
+        label.setForeground(fg);
 
         setEnabled(list.isEnabled());
         label.setFont(list.getFont());
@@ -135,7 +141,7 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 		Object target = descriptor.getTarget();
 		Identity identity = PluginUtil.getIdentity(descriptor.getFactoryExtension());
 		ResourceManager rm = ResourceManager.getInstance();
-		
+
 		// Generate label
 		StringBuilder sb = new StringBuilder();
 		sb.append("[").append(index).append("] ").append(identity.getName()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -144,7 +150,7 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 			.append(" ").append(rm.get("plugins.searchTools.labels.matches")).append(")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		label.setText(sb.toString());
-		
+
 		// Generate tool-tip
 		sb.setLength(0);
 		// Factory
@@ -174,11 +180,11 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 		// Parameters
 		String parameterString = SearchUtils.getParameterStats(descriptor.getParameters());
 		sb.append(parameterString);
-		
+
 		setToolTipText(UIUtil.toSwingTooltip(sb.toString()));
-		
+
 		icon.removeDecorations();
-		
+
 		Icon stateIcon = null;
 		if(search!=null) {
 			if(search.isRunning()) {
@@ -191,28 +197,28 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 				stateIcon = pendingIcon;
 			}
 		}
-		
+
 		if(stateIcon!=null) {
 			icon.addDecoration(stateIcon, SwingConstants.SOUTH_WEST);
 		}
-		
+
 		if(target!=null && target instanceof Loadable) {
 			Loadable loadable = (Loadable) target;
 			Icon overlay = null;
-			
+
 			if(loadable.isLoading()) {
 				overlay = loadingIcon;
 			} else if(loadable.isLoaded()) {
 				overlay = loadedIcon;
 			}
-			
+
 			if(overlay!=null) {
 				icon.addDecoration(overlay, SwingConstants.SOUTH_EAST);
 			}
 		}
-		
+
 		label.setIcon(icon);
-		
+
 		if(search!=null && !search.isDone()) {
 			//progressBar.setIndeterminate(SearchUtils.isLoading(target));
 			progressBar.setValue(search.getProgress());
@@ -220,7 +226,7 @@ public class SearchHistoryListCellRenderer extends JPanel implements ListCellRen
 		} else {
 			progressBar.setVisible(false);
 		}
-		
+
 		return this;
 	}
 

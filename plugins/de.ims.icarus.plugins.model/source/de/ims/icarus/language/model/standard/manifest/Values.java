@@ -258,53 +258,6 @@ public class Values {
 		return new DoubleValueFactory(0, max, 1);
 	}
 
-	static class ValueRangeImpl implements ValueRange {
-
-		private final Object lower, upper;
-		private final boolean lowerIncluded, upperIncluded;
-
-		public ValueRangeImpl(Object lower, Object upper, boolean lowerIncluded,
-				boolean upperIncluded) {
-			this.lower = lower;
-			this.upper = upper;
-			this.lowerIncluded = lowerIncluded;
-			this.upperIncluded = upperIncluded;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueRange#getLowerBound()
-		 */
-		@Override
-		public Object getLowerBound() {
-			return lower;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueRange#getUpperBound()
-		 */
-		@Override
-		public Object getUpperBound() {
-			return upper;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueRange#isLowerBoundInclusive()
-		 */
-		@Override
-		public boolean isLowerBoundInclusive() {
-			return lowerIncluded;
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueRange#isUpperBoundInclusive()
-		 */
-		@Override
-		public boolean isUpperBoundInclusive() {
-			return upperIncluded;
-		}
-
-	}
-
 	public static ValueRange newValueRange(Object lower, Object upper) {
 		return new ValueRangeImpl(lower, upper, true, true);
 	}

@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
+import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
@@ -40,6 +41,7 @@ import de.ims.icarus.language.model.xml.XmlSerializer;
 public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implements StructureLayerManifest {
 
 	private MarkableLayerManifest boundaryLayerManifest;
+	private String boundaryId;
 
 	public StructureLayerManifestImpl(ContextManifest contextManifest) {
 		super(contextManifest);
@@ -78,17 +80,37 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 	 */
 	@Override
 	public MarkableLayerManifest getBoundaryLayerManifest() {
+		if(boundaryLayerManifest==null && boundaryId!=null) {
+			boundaryLayerManifest = (MarkableLayerManifest) getContextManifest().getLayerManifest(boundaryId);
+		}
 		return boundaryLayerManifest;
 	}
 
-	/**
-	 * @param boundaryLayerManifest the boundaryLayerManifest to set
-	 */
-	public void setBoundaryLayerManifest(MarkableLayerManifest boundaryLayerManifest) {
-		if (boundaryLayerManifest == null)
-			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
+//	/**
+//	 * @param boundaryLayerManifest the boundaryLayerManifest to set
+//	 */
+//	public void setBoundaryLayerManifest(MarkableLayerManifest boundaryLayerManifest) {
+//		if (boundaryLayerManifest == null)
+//			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
+//
+//		this.boundaryLayerManifest = boundaryLayerManifest;
+//	}
 
-		this.boundaryLayerManifest = boundaryLayerManifest;
+	/**
+	 * @return the boundaryId
+	 */
+	public String getBoundaryId() {
+		return boundaryId;
+	}
+
+	/**
+	 * @param boundaryId the boundaryId to set
+	 */
+	public void setBoundaryId(String boundaryId) {
+		if (boundaryId == null)
+			throw new NullPointerException("Invalid boundaryId"); //$NON-NLS-1$
+
+		this.boundaryId = boundaryId;
 	}
 
 	/**
@@ -124,6 +146,18 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 
 		if(boundaryLayerManifest!=null) {
 			serializer.writeAttribute("boundary", boundaryLayerManifest.getId()); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#wrap(de.ims.icarus.language.model.manifest.ContainerManifest)
+	 */
+	@Override
+	public ContainerManifest wrap(ContainerManifest template) {
+		if(template.getManifestType()==ManifestType.STRUCTURE_MANIFEST) {
+			return new StructureManifestImpl((StructureManifest) template);
+		} else {
+			return super.wrap(template);
 		}
 	}
 
