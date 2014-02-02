@@ -33,6 +33,7 @@ import java.util.Set;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.manifest.Prerequisite;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;

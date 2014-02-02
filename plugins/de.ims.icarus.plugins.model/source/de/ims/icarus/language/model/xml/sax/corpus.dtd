@@ -267,25 +267,18 @@
 	List of prerequisites a layer requires to work properly
 -->
 
-<!ELEMENT prerequisites (type-prerequisite | layer-prerequisite)+>
+<!ELEMENT prerequisites (prerequisite+)>
 
 <!-- 
 	Describes a required type of layer
 -->
 
-<!ELEMENT type-prerequisite EMPTY>
-<!ATTLIST type-prerequisite
-		type CDATA #REQUIRED
->
-
-<!-- 
-	Describes the requirement that a specific layer identified by
-	its id has to be present.
--->
-
-<!ELEMENT layer-prerequisite EMPTY>
-<!ATTLIST layer-prerequisite
-		id CDATA #REQUIRED
+<!ELEMENT prerequisite EMPTY>
+<!ATTLIST prerequisite
+		type-id CDATA #IMPLIED
+		layer-id CDATA #IMPLIED
+		context-id CDATA #IMPLIED
+		alias CDATA #IMPLIED
 >
 
 <!-- 

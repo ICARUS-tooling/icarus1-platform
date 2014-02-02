@@ -28,9 +28,9 @@ package de.ims.icarus.language.model.xml.sax.handlers;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import de.ims.icarus.language.model.manifest.Prerequisite;
 import de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest;
-import de.ims.icarus.language.model.standard.manifest.LayerPrerequisite;
-import de.ims.icarus.language.model.standard.manifest.TypePrerequisite;
+import de.ims.icarus.language.model.standard.manifest.PrerequisiteImpl;
 import de.ims.icarus.language.model.xml.sax.ModelElementHandler;
 
 /**
@@ -73,12 +73,27 @@ public class LayerElementHandler<L extends AbstractLayerManifest> extends Manife
 		case "prerequisites": //$NON-NLS-1$
 			break;
 
-		case "type-prerequisite": { //$NON-NLS-1$
-			getElement().addPrerequisite(new TypePrerequisite(attributes.getValue("type"))); //$NON-NLS-1$
-		} break;
+		case "prerequisite": { //$NON-NLS-1$
+			String layerId = attributes.getValue("layer-id"); //$NON-NLS-1$
+			String contextId = attributes.getValue("context-id"); //$NON-NLS-1$
+			String typeId = attributes.getValue("type-id"); //$NON-NLS-1$
+			String alias = attributes.getValue("alias"); //$NON-NLS-1$
 
-		case "layer-prerequisite": { //$NON-NLS-1$
-			getElement().addPrerequisite(new LayerPrerequisite(attributes.getValue("id"))); //$NON-NLS-1$
+			Prerequisite prerequisite = null;
+
+			if(alias==null) {
+				// report error
+			} else if(layerId!=null) {
+				prerequisite = new PrerequisiteImpl(layerId, contextId, alias);
+			} else if(typeId!=null) {
+				prerequisite = new PrerequisiteImpl(typeId, alias);
+			} else {
+				// report error
+			}
+
+			if(prerequisite!=null) {
+				getElement().addPrerequisite(prerequisite);
+			}
 		} break;
 
 		default:
@@ -98,10 +113,7 @@ public class LayerElementHandler<L extends AbstractLayerManifest> extends Manife
 		case "prerequisites": //$NON-NLS-1$
 			break;
 
-		case "type-prerequisite": //$NON-NLS-1$
-			break;
-
-		case "layer-prerequisite": //$NON-NLS-1$
+		case "prerequisite": //$NON-NLS-1$
 			break;
 
 		default:

@@ -69,34 +69,6 @@ public interface LayerManifest extends Manifest {
 	List<Prerequisite> getPrerequisites();
 
 	/**
-	 * Abstract description of a layer object this layer depends on.
-	 *
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	interface Prerequisite {
-
-		/**
-		 * Returns the id of the target layer or {@code null} if an exact id match
-		 * is not required.
-		 *
-		 * @return
-		 */
-		String getLayerId();
-
-		/**
-		 * If this layer only requires <i>some</i> layer of a certain type to be present
-		 * this method provides the mechanics to tell this. When the returned value is
-		 * {@code non-null} it is considered to be the exact name of a previously
-		 * defined layer type.
-		 *
-		 * @return
-		 */
-		String getTypeId();
-	}
-
-	/**
 	 * Defines if it is possible to build an index for the content of a layer.
 	 * This is of course only of importance if the layer in question actually
 	 * supports search operations as defined via the {@link #isSearchable()}

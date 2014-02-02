@@ -45,6 +45,7 @@ import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
 import de.ims.icarus.language.model.manifest.PathResolverManifest;
+import de.ims.icarus.language.model.manifest.Prerequisite;
 import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureManifest;
 import de.ims.icarus.language.model.manifest.ValueIterator;
@@ -118,7 +119,7 @@ public class XmlWriter {
 		serializer.endElement("property"); //$NON-NLS-1$
 	}
 
-	public static void writePrerequisiteElement(XmlSerializer serializer, LayerManifest.Prerequisite prerequisite) throws Exception {
+	public static void writePrerequisiteElement(XmlSerializer serializer, Prerequisite prerequisite) throws Exception {
 		if(prerequisite==null) {
 			return;
 		}

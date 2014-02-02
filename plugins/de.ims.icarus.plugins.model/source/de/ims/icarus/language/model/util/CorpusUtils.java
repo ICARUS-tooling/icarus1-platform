@@ -56,9 +56,9 @@ import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.HighlightLayerManifest;
-import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.Manifest;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.manifest.Prerequisite;
 import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.manifest.StructureManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
@@ -148,7 +148,7 @@ public final class CorpusUtils {
 		return manifest.getContainerManifest(level);
 	}
 
-	public static boolean matches(LayerManifest.Prerequisite prerequisite, Corpus corpus) {
+	public static boolean matches(Prerequisite prerequisite, Corpus corpus) {
 		if(prerequisite==null)
 			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
 		if(corpus==null)
@@ -174,7 +174,7 @@ public final class CorpusUtils {
 		return true;
 	}
 
-	public static String getName(LayerManifest.Prerequisite prerequisite) {
+	public static String getName(Prerequisite prerequisite) {
 		String id = prerequisite.getLayerId();
 		if(id!=null)
 			return "Required layer-id: "+id; //$NON-NLS-1$
