@@ -40,7 +40,7 @@ import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.Implementation;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.LocationManifest;
-import de.ims.icarus.language.model.manifest.Manifest;
+import de.ims.icarus.language.model.manifest.MemberManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
@@ -340,7 +340,7 @@ public class XmlWriter {
 		serializer.endElement("structure"); //$NON-NLS-1$
 	}
 
-	private static void writeDefaultManifestElements(XmlSerializer serializer, Manifest manifest) throws Exception {
+	private static void writeDefaultManifestElements(XmlSerializer serializer, MemberManifest manifest) throws Exception {
 		OptionsManifest optionsManifest = manifest.getOptionsManifest();
 		if(optionsManifest!=null) {
 			for(String name : manifest.getPropertyNames()) {

@@ -45,7 +45,7 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public interface Manifest extends Identity, Template {
+public interface MemberManifest extends Identity, Derivable {
 
 	/**
 	 * Returns the {@code type} of this manifest, i.e. that is
@@ -66,6 +66,32 @@ public interface Manifest extends Identity, Template {
 	 * @return
 	 */
 	Implementation getImplementation();
+
+	/**
+	 * Returns the public id of this manifest that can be used to
+	 * uniquely identify it. Note that uniqueness of public ids is
+	 * enforced on the corpus level. So for example there cannot be
+	 * two layers within a single corpus that share the same public id,
+	 * even when they are originating from different contexts.
+	 *
+	 * @see de.ims.icarus.util.id.Identity#getId()
+	 * @see #getRawId()
+	 */
+	@Override
+	String getId();
+
+	/**
+	 * Returns the private id of this manifest that is shared between all manifests
+	 * derived from the same template. This id can be used to resolve dependencies
+	 * defined in templates to actual public ids of the instantiated members in a
+	 * corpus. Note that unlike {@link #getId()} the uniqueness of raw ids is enforced
+	 * on the context level, so that no two layers within the same context share s
+	 * common raw id. This is a crucial requirement for id resolution, since ambiguity
+	 * of raw ids cannot be resolved by the framework!
+	 *
+	 * @see #getId()
+	 */
+	String getRawId();
 
 	/**
 	 * Allows for localization of corpus related components.

@@ -34,7 +34,7 @@ import java.util.Set;
 import javax.swing.Icon;
 
 import de.ims.icarus.language.model.manifest.Implementation;
-import de.ims.icarus.language.model.manifest.Manifest;
+import de.ims.icarus.language.model.manifest.MemberManifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -49,7 +49,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public abstract class AbstractManifest<M extends Manifest> extends DerivedObject<M> implements Manifest {
+public abstract class AbstractManifest<M extends MemberManifest> extends AbstractDerivable<M> implements MemberManifest {
 
 	private Map<String, Object> properties;
 	private OptionsManifest optionsManifest;
@@ -58,33 +58,44 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	private String name;
 	private String description;
 	private String id;
+	private String rawId;
 	private Icon icon;
 
 	/**
-	 * Default constructor
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#readTemplate()
 	 */
-	public AbstractManifest() {
-		// Default constructor
-	}
+	@Override
+	protected void readTemplate(M template) {
+		super.readTemplate(template);
 
-	/**
-	 * Clone constructor for templates
-	 */
-	public AbstractManifest(M template) {
-		super(template);
-
-		id = template.getId();
-		name = template.getName();
-		description = template.getDescription();
-		icon = template.getIcon();
+		if(id==null) {
+			id = template.getId();
+		}
+		if(rawId==null) {
+			rawId = template.getRawId();
+		}
+		if(name==null) {
+			name = template.getName();
+		}
+		if(description==null) {
+			description = template.getDescription();
+		}
+		if(icon==null) {
+			icon = template.getIcon();
+		}
 
 		OptionsManifest optionsManifest = template.getOptionsManifest();
 		if(optionsManifest!=null) {
-			this.optionsManifest = new OptionsManifestImpl(optionsManifest);
+			if(this.optionsManifest==null) {
+				this.optionsManifest = new OptionsManifestImpl();
+			}
+			this.optionsManifest.setTemplate(optionsManifest);
 		}
 
 		for(String key : template.getPropertyNames()) {
-			setProperty(key, template.getProperty(key));
+			if(getProperty(key)==null) {
+				setProperty(key, template.getProperty(key));
+			}
 		}
 	}
 
@@ -101,8 +112,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Manifest) {
-			Manifest other = (Manifest) obj;
+		if(obj instanceof MemberManifest) {
+			MemberManifest other = (MemberManifest) obj;
 			return getManifestType()==other.getManifestType()
 					&& ClassUtils.equals(id, other.getId());
 		}
@@ -148,6 +159,14 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	}
 
 	/**
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getRawId()
+	 */
+	@Override
+	public String getRawId() {
+		return rawId;
+	}
+
+	/**
 	 * @return the icon
 	 */
 	@Override
@@ -159,8 +178,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
-//		if (name == null)
-//			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+		if (name == null)
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
 		this.name = name;
 	}
@@ -169,8 +188,8 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param description the description to set
 	 */
 	public void setDescription(String description) {
-//		if (description == null)
-//			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
+		if (description == null)
+			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
 
 		this.description = description;
 	}
@@ -179,18 +198,23 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	 * @param id the id to set
 	 */
 	public void setId(String id) {
-//		if (id == null)
-//			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
 		this.id = id;
+
+		// Copy over raw id if not already defined
+		if(rawId==null) {
+			rawId = id;
+		}
 	}
 
 	/**
 	 * @param icon the icon to set
 	 */
 	public void setIcon(Icon icon) {
-//		if (icon == null)
-//			throw new NullPointerException("Invalid icon"); //$NON-NLS-1$
+		if (icon == null)
+			throw new NullPointerException("Invalid icon"); //$NON-NLS-1$
 
 		this.icon = icon;
 	}
@@ -236,7 +260,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getProperty(java.lang.String)
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getProperty(java.lang.String)
 	 */
 	@Override
 	public Object getProperty(String name) {
@@ -244,7 +268,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getPropertyNames()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getPropertyNames()
 	 */
 	@Override
 	public Set<String> getPropertyNames() {
@@ -284,7 +308,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getOptionsManifest()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getOptionsManifest()
 	 */
 	@Override
 	public OptionsManifest getOptionsManifest() {
@@ -293,7 +317,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -310,7 +334,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -325,7 +349,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -361,7 +385,7 @@ public abstract class AbstractManifest<M extends Manifest> extends DerivedObject
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

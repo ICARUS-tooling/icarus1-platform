@@ -34,7 +34,7 @@ import de.ims.icarus.language.model.meta.ValueType;
  * @version $Id$
  *
  */
-public interface AnnotationManifest extends Manifest {
+public interface AnnotationManifest extends MemberManifest {
 
 	/**
 	 * Returns the <i>base-name</i> of the key this manifest

@@ -56,7 +56,7 @@ import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.HighlightLayerManifest;
-import de.ims.icarus.language.model.manifest.Manifest;
+import de.ims.icarus.language.model.manifest.MemberManifest;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.manifest.Prerequisite;
 import de.ims.icarus.language.model.manifest.StructureLayerManifest;
@@ -74,7 +74,7 @@ public final class CorpusUtils {
 		throw new AssertionError();
 	}
 
-	public static ContextManifest getContextManifest(Manifest manifest) {
+	public static ContextManifest getContextManifest(MemberManifest manifest) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 
@@ -97,7 +97,7 @@ public final class CorpusUtils {
 			return ((StructureManifest) manifest).getLayerManifest().getContextManifest();
 
 		default:
-			throw new IllegalArgumentException("Manifest does not procide scope to a context: "+manifest); //$NON-NLS-1$
+			throw new IllegalArgumentException("MemberManifest does not procide scope to a context: "+manifest); //$NON-NLS-1$
 		}
 	}
 
@@ -246,7 +246,7 @@ public final class CorpusUtils {
 		return result;
 	}
 
-	public static Map<String, Object> getProperties(Manifest manifest) {
+	public static Map<String, Object> getProperties(MemberManifest manifest) {
 		if(manifest==null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 

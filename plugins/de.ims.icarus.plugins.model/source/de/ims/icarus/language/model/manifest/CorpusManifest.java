@@ -32,7 +32,7 @@ import java.util.List;
  * @version $Id$
  *
  */
-public interface CorpusManifest extends Manifest {
+public interface CorpusManifest extends MemberManifest {
 
 	ContextManifest getDefaultContextManifest();
 

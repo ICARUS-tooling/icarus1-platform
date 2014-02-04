@@ -28,7 +28,6 @@ package de.ims.icarus.language.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,22 +54,40 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	private ValueSet values;
 	private ValueRange valueRange;
 
-	public AnnotationManifestImpl() {
-
-	}
-
-	public AnnotationManifestImpl(AnnotationManifest template) {
-		super(template);
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 */
+	@Override
+	protected void readTemplate(AnnotationManifest template) {
+		super.readTemplate(template);
 
 		for(String alias : template.getAliases()) {
-			addAlias(alias);
+			if(aliases==null) {
+				aliases = new ArrayList<>();
+			}
+
+			if(!aliases.contains(alias)) {
+				aliases.add(alias);
+			}
 		}
-		key = template.getKey();
-		valueType = template.getValueType();
-		valueRange = template.getSupportedRange();
+
+		if(key==null) {
+			key = template.getKey();
+		}
+		if(valueType==null) {
+			valueType = template.getValueType();
+		}
+		if(valueRange==null) {
+			valueRange = template.getSupportedRange();
+		}
+
 		ValueSet values = template.getSupportedValues();
 		if(values!=null) {
-			this.values = new ValueSetImpl(values);
+			if(this.values==null) {
+				this.values = new ValueSetImpl();
+			}
+
+			this.values.setTemplate(values);
 		}
 	}
 
@@ -93,7 +110,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -194,7 +211,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -227,19 +244,6 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 		serializer.writeAttribute("type", valueType.getValue()); //$NON-NLS-1$
 	}
 
-	private Set<Object> valuesAsSet(ValueSet values) {
-		if(values==null) {
-			return Collections.emptySet();
-		}
-
-		Set<Object> set = new LinkedHashSet<>(values.valueCount());
-		for(int i=0; i<values.valueCount(); i++) {
-			set.add(values.getValueAt(i));
-		}
-
-		return set;
-	}
-
 	/**
 	 * @throws Exception
 	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
@@ -259,13 +263,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 			XmlWriter.writeAliasElement(serializer, alias);
 		}
 
-		// Only write those values that do not appear in the template!
-		if(values!=null && values.valueCount()>0) {
-			Set<Object> items = valuesAsSet(values);
-			items.removeAll(valuesAsSet(getTemplate().getSupportedValues()));
-
-			XmlWriter.writeValuesElement(serializer, new ValueSetImpl(items), valueType);
-		}
+		XmlWriter.writeValuesElement(serializer, values, valueType);
 
 		if(!ClassUtils.equals(valueRange, getTemplate().getSupportedRange())) {
 			XmlWriter.writeValueRangeElement(serializer, valueRange, valueType);

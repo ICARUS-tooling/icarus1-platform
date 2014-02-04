@@ -291,7 +291,7 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	 * with the same {@code ID} as defined by {@link Layer#getId()}.
 	 * @throws IllegalArgumentException if the layer is already part of another corpus
 	 * or if the layer implementation violates the contract of the {@code Layer} interface
-	 * and returns an invalid {@code Context} or {@code Manifest} object.
+	 * and returns an invalid {@code Context} or {@code MemberManifest} object.
 	 * @throws IllegalStateException if one or more of the layer's prerequisites cannot
 	 * be fulfilled (i.e. one of the required underlying layers is missing).
 	 */

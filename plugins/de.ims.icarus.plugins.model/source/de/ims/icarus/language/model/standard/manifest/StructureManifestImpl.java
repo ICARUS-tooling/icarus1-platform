@@ -43,18 +43,20 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	private StructureType structureType;
 //	private ContainerManifest boundaryContainerManifest;
 
-	public StructureManifestImpl() {
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#readTemplate(de.ims.icarus.language.model.manifest.ContainerManifest)
+	 */
+	@Override
+	protected void readTemplate(ContainerManifest template) {
+		super.readTemplate(template);
 
-	}
-
-	public StructureManifestImpl(StructureManifest template) {
-		super(template);
-
-		structureType = template.getStructureType();
+		if(structureType==null) {
+			structureType = ((StructureManifest)template).getStructureType();
+		}
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getTemplate()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getTemplate()
 	 */
 	@Override
 	public synchronized StructureManifest getTemplate() {
@@ -74,7 +76,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	 */
 	@Override
 	public StructureType getStructureType() {
-		return structureType;
+		return structureType==null ? StructureType.SET : structureType;
 	}
 
 	/**

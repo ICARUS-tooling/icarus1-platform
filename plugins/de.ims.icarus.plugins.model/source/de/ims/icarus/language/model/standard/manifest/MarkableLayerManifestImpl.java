@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -45,23 +44,20 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	private List<ContainerManifest> containerManifests;
 
 	/**
-	 * @param contextManifest
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.language.model.manifest.LayerManifest)
 	 */
-	public MarkableLayerManifestImpl(ContextManifest contextManifest) {
-		super(contextManifest);
-	}
-
-	/**
-	 * @param contextManifest
-	 */
-	public MarkableLayerManifestImpl(ContextManifest contextManifest, MarkableLayerManifest template) {
-		super(contextManifest, template);
+	@Override
+	protected void readTemplate(MarkableLayerManifest template) {
+		super.readTemplate(template);
 
 		ContainerManifestImpl lastAdded = null;
 
 		for(int i=0; i<template.getContainerDepth(); i++) {
+			ContainerManifest source = template.getContainerManifest(i);
 			ContainerManifestImpl containerManifest =
-					(ContainerManifestImpl) wrap(template.getContainerManifest(i));
+					(ContainerManifestImpl) clone(source);
+
+			containerManifest.setTemplate(source);
 
 			if(lastAdded!=null) {
 				containerManifest.setParentManifest(lastAdded);
@@ -76,7 +72,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -153,14 +149,15 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
 		return "markable-layer"; //$NON-NLS-1$
 	}
 
-	public ContainerManifest wrap(ContainerManifest template) {
-		return new ContainerManifestImpl(template);
+	protected ContainerManifest clone(ContainerManifest source) {
+		return source.getManifestType()==ManifestType.STRUCTURE_MANIFEST ?
+				new StructureManifestImpl() : new ContainerManifestImpl();
 	}
 }

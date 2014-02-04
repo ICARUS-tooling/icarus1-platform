@@ -44,7 +44,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implements OptionsManifest {
+public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> implements OptionsManifest {
 
 	private String id;
 
@@ -52,27 +52,44 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 	private Map<String, Option> options = new HashMap<>();
 
 	/**
-	 * Default constructor
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.language.model.manifest.Derivable)
 	 */
-	public OptionsManifestImpl() {
+	@Override
+	protected void readTemplate(OptionsManifest template) {
+		super.readTemplate(template);
 
-	}
-
-	/**
-	 * Clone constructor for templates
-	 */
-	public OptionsManifestImpl(OptionsManifest template) {
-		super(template);
+		Set<String> names = getOptionNames();
 
 		for(String key : template.getOptionNames()) {
-			addOption(key);
+			if(!names.contains(key)) {
+				addOption(key);
+			}
 
-			setName(key, template.getName(key));
-			setDescription(key, template.getDescription(key));
-			setValueType(key, template.getValueType(key));
-			setDefaultValue(key, template.getDefaultValue(key));
-			setValues(key, template.getSupportedValues(key));
-			setRange(key, template.getSupportedRange(key));
+			if(getName(key)==null) {
+				setName(key, template.getName(key));
+			}
+			if(getDescription(key)==null) {
+				setDescription(key, template.getDescription(key));
+			}
+			if(getValueType(key)==null) {
+				setValueType(key, template.getValueType(key));
+			}
+			if(getDefaultValue(key)==null) {
+				setDefaultValue(key, template.getDefaultValue(key));
+			}
+			if(getSupportedRange(key)==null) {
+				setRange(key, template.getSupportedRange(key));
+			}
+
+			ValueSet valueSet = template.getSupportedValues(key);
+			if(valueSet!=null) {
+				ValueSet currentValues = getSupportedValues(key);
+				if(currentValues==null) {
+					currentValues = new ValueSetImpl();
+					setSupportedValues(key, currentValues);
+				}
+				currentValues.setTemplate(valueSet);
+			}
 		}
 	}
 
@@ -201,7 +218,7 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 		getOption(key).valueType = valueType;
 	}
 
-	public void setValues(String key, ValueSet values) {
+	public void setSupportedValues(String key, ValueSet values) {
 		getOption(key).values = values;
 	}
 
@@ -223,7 +240,7 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -236,7 +253,7 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -248,7 +265,7 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -276,7 +293,7 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)
@@ -289,7 +306,7 @@ public class OptionsManifestImpl extends DerivedObject<OptionsManifest> implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

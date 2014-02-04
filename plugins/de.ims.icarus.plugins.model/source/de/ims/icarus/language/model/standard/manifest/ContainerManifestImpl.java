@@ -43,20 +43,22 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	private MarkableLayerManifest layerManifest;
 
 	private ContainerManifest elementManifest;
-	private ContainerType containerType = ContainerType.LIST;
+	private ContainerType containerType;
 
-	public ContainerManifestImpl() {
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 */
+	@Override
+	protected void readTemplate(ContainerManifest template) {
+		super.readTemplate(template);
 
-	}
-
-	public ContainerManifestImpl(ContainerManifest template) {
-		super(template);
-
-		containerType = template.getContainerType();
+		if(containerType==null) {
+			containerType = template.getContainerType();
+		}
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -122,7 +124,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	 */
 	@Override
 	public ContainerType getContainerType() {
-		return containerType;
+		return containerType==null ? ContainerType.LIST : containerType;
 	}
 
 	/**
@@ -187,7 +189,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 //	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

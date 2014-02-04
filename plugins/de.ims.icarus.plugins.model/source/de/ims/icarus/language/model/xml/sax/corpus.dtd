@@ -63,7 +63,7 @@
     Lists possible nested layers
 -->
 
-<!ENTITY % layers "(markable-layer | structure-layer | annotation-layer)+">
+<!ENTITY % layers "(markable-layer | structure-layer | annotation-layer)*">
 
 <!-- 
     Extension of the manifest macro with oprional nested prerequisites
@@ -91,21 +91,22 @@
 	"%template;
 	search %boolean; #IMPLIED
 	index %boolean; #IMPLIED
-	base CDATA #IMPLIED
+	base-layer CDATA #IMPLIED
+	base-context CDATA #IMPLIED
 	layer-type CDATA #IMPLIED"
 >
-
-<!--
-	Model
--->
-
-<!ELEMENT model (templates | corpus+)>
 
 <!--
 	Templates section
 -->
 
 <!ELEMENT templates (corpus|context|annotation-layer|markable-layer|structure-layer|container|structure|annotation|options|content-reader|content-writer|path-resolver|values)*>
+
+<!--
+	Model
+-->
+
+<!ELEMENT corpora (corpus+)>
 
 <!--
 	Corpus manifest
@@ -125,13 +126,12 @@
 <!ATTLIST context
 		%identity;
 		%template;
-		base    CDATA #IMPLIED
 		independent	%boolean; "true"
 >
 
 <!ELEMENT documentation (#PCDATA)>
 
-<!ELEMENT default-context (%manifest;, location?, context-reader?, context-writer?, %layers;)>
+<!ELEMENT default-context (documentation?, %manifest;, location?, context-reader?, context-writer?, %layers;)>
 <!ATTLIST default-context
 		%identity;
 		%template;
@@ -181,7 +181,8 @@
 <!ATTLIST structure-layer
 		%identity;
 		%layeratts;
-		boundary		CDATA #IMPLIED
+		boundary-layer		CDATA #IMPLIED
+		boundary-context		CDATA #IMPLIED
 >
 
 <!--
@@ -205,7 +206,6 @@
 		%template;	
 		%container-type; #IMPLIED
 		%structure-type; #IMPLIED
-		boundary		CDATA #IMPLIED
 >
 
 <!--
@@ -216,7 +216,6 @@
 <!ATTLIST location
 		%location-type; #REQUIRED
 		path		CDATA #IMPLIED
-		distributed	%boolean; "false"
 >
 
 <!--
@@ -249,6 +248,7 @@
 		key		CDATA #IMPLIED
 		%template;
 		%descriptor; 
+		default %boolean; "false" 
 		%typed; "string"
 >
 
@@ -278,7 +278,7 @@
 		type-id CDATA #IMPLIED
 		layer-id CDATA #IMPLIED
 		context-id CDATA #IMPLIED
-		alias CDATA #IMPLIED
+		alias CDATA #REQUIRED
 >
 
 <!-- 

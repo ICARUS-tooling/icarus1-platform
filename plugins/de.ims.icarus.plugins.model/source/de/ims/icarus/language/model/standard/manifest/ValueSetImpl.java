@@ -27,18 +27,30 @@ package de.ims.icarus.language.model.standard.manifest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.swing.Icon;
 
 import de.ims.icarus.language.model.manifest.ValueSet;
+import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class ValueSetImpl extends DerivedObject<ValueSet> implements ValueSet {
+public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSet {
 
+	private String name;
+	private String description;
 	private String id;
+	private Icon icon;
+	private ValueType valueType = ValueType.STRING;
 	private List<Object> values = new ArrayList<>();
 
 	public ValueSetImpl() {
@@ -52,20 +64,114 @@ public class ValueSetImpl extends DerivedObject<ValueSet> implements ValueSet {
 		values.addAll(items);
 	}
 
-	public ValueSetImpl(ValueSet template) {
-		super(template);
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.language.model.manifest.Derivable)
+	 */
+	@Override
+	protected void readTemplate(ValueSet template) {
+		super.readTemplate(template);
 
 		for(int i=0; i<template.valueCount(); i++) {
-			values.add(template.getValueAt(i));
+			values.add(i,template.getValueAt(i));
 		}
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Template#getId()
+	 * @return the name
+	 */
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the description
+	 */
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @return the id
 	 */
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	/**
+	 * @return the icon
+	 */
+	@Override
+	public Icon getIcon() {
+		return icon;
+	}
+
+	/**
+	 * @return the valueType
+	 */
+	@Override
+	public ValueType getValueType() {
+		return valueType;
+	}
+
+	/**
+	 * @param valueType the valueType to set
+	 */
+	public void setValueType(ValueType valueType) {
+		if (valueType == null)
+			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
+
+		this.valueType = valueType;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+
+		this.name = name;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		if (description == null)
+			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
+
+		this.description = description;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		this.id = id;
+	}
+
+	/**
+	 * @param icon the icon to set
+	 */
+	public void setIcon(Icon icon) {
+		if (icon == null)
+			throw new NullPointerException("Invalid icon"); //$NON-NLS-1$
+
+		this.icon = icon;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 
 	/**
@@ -92,18 +198,96 @@ public class ValueSetImpl extends DerivedObject<ValueSet> implements ValueSet {
 	}
 
 	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
 		return "values"; //$NON-NLS-1$
 	}
 
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeXmlAttribute(serializer, "id", id, getTemplate().getId()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "name", name, getTemplate().getName()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "description", description, getTemplate().getDescription()); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "icon", icon, getTemplate().getIcon()); //$NON-NLS-1$
+
+		serializer.writeAttribute("template-id", getTemplate().getId()); //$NON-NLS-1$
+
+		if(valueType!=ValueType.STRING) {
+			writeXmlAttribute(serializer, "type", valueType, getTemplate().getValueType()); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("id", id); //$NON-NLS-1$
+		serializer.writeAttribute("name", name); //$NON-NLS-1$
+		serializer.writeAttribute("description", description); //$NON-NLS-1$
+		writeXmlAttribute(serializer, "icon", icon); //$NON-NLS-1$
+		if(valueType!=ValueType.STRING) {
+			writeXmlAttribute(serializer, "type", valueType); //$NON-NLS-1$
+		}
+	}
+
+	private Set<Object> valuesAsSet(ValueSet values) {
+		if(values==null || values.valueCount()==0) {
+			return Collections.emptySet();
+		}
+
+		Set<Object> set = new LinkedHashSet<>(values.valueCount());
+		for(int i=0; i<values.valueCount(); i++) {
+			set.add(values.getValueAt(i));
+		}
+
+		return set;
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlElements(serializer);
+
+		Set<Object> derived = valuesAsSet(getTemplate());
+
+		for(Object value : values) {
+			if(derived.contains(value)) {
+				continue;
+			}
+
+			XmlWriter.writeValueElement(serializer, "value", value, valueType); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlElements(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlElements(serializer);
+
+		for(Object value : values) {
+			XmlWriter.writeValueElement(serializer, "value", value, valueType); //$NON-NLS-1$
+		}
+	}
 }

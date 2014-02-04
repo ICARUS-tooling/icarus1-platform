@@ -31,7 +31,7 @@ package de.ims.icarus.language.model.manifest;
  * @version $Id$
  *
  */
-public interface ContextWriterManifest extends Manifest {
+public interface ContextWriterManifest extends MemberManifest {
 
 	/**
 	 * If the writer is not defined via a specific class but rather

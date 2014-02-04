@@ -38,17 +38,21 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 
 	private String formatId;
 
-	public ContextWriterManifestImpl() {
-	}
 
-	public ContextWriterManifestImpl(ContextWriterManifest template) {
-		super(template);
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 */
+	@Override
+	protected void readTemplate(ContextWriterManifest template) {
+		super.readTemplate(template);
 
-		formatId = template.getFormatId();
+		if(formatId==null) {
+			formatId = template.getFormatId();
+		}
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -56,7 +60,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -75,8 +79,8 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	 * @param formatId the formatId to set
 	 */
 	public void setFormatId(String formatId) {
-//		if (formatId == null)
-//			throw new NullPointerException("Invalid formatId"); //$NON-NLS-1$
+		if (formatId == null)
+			throw new NullPointerException("Invalid formatId"); //$NON-NLS-1$
 
 		this.formatId = formatId;
 	}
@@ -90,6 +94,17 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 		super.writeTemplateXmlAttributes(serializer);
 
 		writeXmlAttribute(serializer, "format", formatId, getTemplate().getFormatId()); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		serializer.writeAttribute("format", formatId); //$NON-NLS-1$
 	}
 
 }

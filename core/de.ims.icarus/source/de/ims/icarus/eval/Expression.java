@@ -42,7 +42,8 @@ public class Expression {
 	}
 
 	public static Expression compile(String s, int flags) throws UnsupportedFormatException {
-
+		//FIXME
+		return new Expression(s, 0);
 	}
 
 	private Expression(String text, int flags) {

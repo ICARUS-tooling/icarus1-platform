@@ -577,7 +577,7 @@ public class PluginExplorerView extends View {
 		// View Element Action
 		actionManager.setEnabled(item instanceof PluginElement,
 				"plugins.core.pluginExplorerView.viewElementAction");  //$NON-NLS-1$
-		// View Manifest Action
+		// View MemberManifest Action
 		actionManager.setEnabled(descriptor!=null,
 				"plugins.core.pluginExplorerView.viewManifestAction");  //$NON-NLS-1$
 		// Show Plug-in Action

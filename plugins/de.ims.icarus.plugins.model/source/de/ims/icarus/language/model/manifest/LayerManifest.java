@@ -53,7 +53,7 @@ import de.ims.icarus.language.model.Layer;
  * @version $Id$
  *
  */
-public interface LayerManifest extends Manifest {
+public interface LayerManifest extends MemberManifest {
 
 	ContextManifest getContextManifest();
 

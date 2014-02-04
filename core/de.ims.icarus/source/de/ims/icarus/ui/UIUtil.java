@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui;
@@ -121,12 +121,12 @@ import de.ims.icarus.util.collections.CollectionUtils;
 
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class UIUtil {
-	
+
 	static {
 		// Disable event consumption by closing popups. This enables
 		// selection of JTree nodes when clicking outside the popup
@@ -137,32 +137,32 @@ public final class UIUtil {
 	private UIUtil() {
 		// no-op
 	}
-	
+
 	private static JLabel textDummy;
-	
+
 	private static JLabel getTextDummy() {
 		if(textDummy==null) {
 			textDummy = new JLabel();
 		}
-		
+
 		return textDummy;
 	}
-	
+
 	public static final int DEFAULT_TOOLTIP_WIDTH = 300;
-	
+
 	private static String[] fontNames;
-	
+
 	public synchronized static String[] getFontNames() {
 		if(fontNames==null) {
 			List<String> names = new LinkedList<>();
-			
+
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			
+
 			CollectionUtils.feedItems(names, ge.getAvailableFontFamilyNames());
-			
+
 			fontNames = names.toArray(new String[names.size()]);
 		}
-		
+
 		return fontNames.clone();
 	}
 
@@ -175,7 +175,7 @@ public final class UIUtil {
                 && !(Boolean) Toolkit.getDefaultToolkit().getDesktopProperty(
                         "win.xpstyle.themeActive"); //$NON-NLS-1$
     }
-    
+
     public static void beep() {
 		try {
 			Toolkit.getDefaultToolkit().beep();
@@ -183,13 +183,13 @@ public final class UIUtil {
 			// ignore
 		}
     }
-    
+
     /**
      * Generates a color out of a red-green gradient
      * <p>
      * 0.0 gets bright red
      * 1.0 gets bright green
-     * 
+     *
      * @see <a href="http://stackoverflow.com/questions/340209/generate-colors-between-red-and-green-for-a-power-meter">online source</a>
      */
     public static Color getColor(double power) {
@@ -199,7 +199,7 @@ public final class UIUtil {
 
         return Color.getHSBColor((float)H, (float)S, (float)B);
     }
-    
+
     public static Color generateRandomColor(Color mix) {
         Random random = new Random();
         int red = random.nextInt(256);
@@ -218,18 +218,18 @@ public final class UIUtil {
     }
 
 	public static final Color defaultBorderColor = new Color(128, 128, 128);
-	
+
 	public static final Border defaultAreaBorder = BorderFactory.createLineBorder(defaultBorderColor, 1, true);
 	public static final Border defaultBoxBorder = BorderFactory.createLineBorder(defaultBorderColor, 1);
-	
+
 	public static final Border topLineBorder = new SeparatingBorder(true, false, false, false);
 	public static final Border bottomLineBorder = new SeparatingBorder(false, false, true, false);
 	public static final Border emptyBorder = new EmptyBorder(0, 0, 0, 0);
-	
+
 	public static final Border defaultContentBorder = new EmptyBorder(1, 3, 1, 3);
-	
+
 	private static Map<String, Icon> blankIcons;
-	
+
 	public static Icon getBlankIcon(int width, int height) {
 		String key = width+"x"+height; //$NON-NLS-1$
 		if(blankIcons==null) {
@@ -242,29 +242,29 @@ public final class UIUtil {
 		}
 		return icon;
 	}
-	
+
 	public static Icon createBlankIcon(final int width, final int height) {
 		return new Icon() {
-			
+
 			@Override
 			public void paintIcon(Component c, Graphics g, int x, int y) {
 				// no-op
 			}
-			
+
 			@Override
 			public int getIconWidth() {
 				return width;
 			}
-			
+
 			@Override
 			public int getIconHeight() {
 				return height;
 			}
 		};
 	}
-	
+
 	private static MouseListener rightClickSelectionHandler = new MouseAdapter() {
-		
+
 		@Override
 		public void mousePressed(MouseEvent e) {
 			Object source = e.getSource();
@@ -275,14 +275,14 @@ public final class UIUtil {
 			} else if(source instanceof JList) {
 				JList<?> list = (JList<?>) source;
 				int index = list.locationToIndex(e.getPoint());
-				
+
 				if(index>-1) {
 					Rectangle bounds = list.getCellBounds(index, index);
 					if(!bounds.contains(e.getPoint())) {
 						index = -1;
 					}
 				}
-				
+
 				if(index>-1) {
 					list.setSelectedIndex(index);
 				} else {
@@ -292,7 +292,7 @@ public final class UIUtil {
 				JTable table = (JTable) source;
 				int row = table.rowAtPoint(e.getPoint());
 				int column = table.columnAtPoint(e.getPoint());
-				
+
 				if(row==-1 || column==-1) {
 					table.clearSelection();
 				} else {
@@ -302,30 +302,30 @@ public final class UIUtil {
 			}
 		}
 	};
-	
+
 	public static void enableToolTip(JComponent comp) {
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
 		toolTipManager.registerComponent(comp);
 	}
-	
+
 	public static void enableRighClickTreeSelection(JTree tree) {
 		Exceptions.testNullArgument(tree, "tree"); //$NON-NLS-1$
-		
+
 		tree.addMouseListener(rightClickSelectionHandler);
 	}
-	
+
 	public static void enableRighClickListSelection(JList<?> list) {
 		Exceptions.testNullArgument(list, "list"); //$NON-NLS-1$
-		
+
 		list.addMouseListener(rightClickSelectionHandler);
 	}
-	
+
 	public static void enableRighClickTableSelection(JTable table) {
 		Exceptions.testNullArgument(table, "table"); //$NON-NLS-1$
-		
+
 		table.addMouseListener(rightClickSelectionHandler);
 	}
-	
+
 	public static int getDirection(String s) {
 		if("north".equals(s) || "top".equals(s) || "up".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return SwingConstants.NORTH;
@@ -352,7 +352,7 @@ public final class UIUtil {
 	public static void fitToContent(JComboBox<?> comboBox, int minWidth, int maxWidth) {
 		fitToContent(comboBox, minWidth, maxWidth, -1);
 	}
-	
+
 	public static void fitToContent(JComboBox<?> comboBox, int minWidth, int maxWidth, int height) {
 		ComboBoxUI ui = comboBox.getUI();
 		Dimension size = ui.getPreferredSize(comboBox);
@@ -360,16 +360,16 @@ public final class UIUtil {
 			height = size.height;
 		}
 		int width = Math.min(maxWidth, Math.max(minWidth, size.width));
-		
+
 		Dimension newSize = new Dimension(width, height);
-		
+
 		comboBox.setPreferredSize(newSize);
 		comboBox.setMinimumSize(newSize);
 		comboBox.setMaximumSize(newSize);
 	}
-	
+
 	private static final String HTML_TAG = "<html>"; //$NON-NLS-1$
-	
+
 	public static String toSwingTooltip(String tooltip) {
 		if(tooltip==null || tooltip.isEmpty()) {
 			return null;
@@ -377,7 +377,7 @@ public final class UIUtil {
 		if(tooltip.startsWith(HTML_TAG)) {
 			return tooltip;
 		}
-		
+
 		Font font = UIManager.getFont("ToolTip.font"); //$NON-NLS-1$
 		FontMetrics fm = getTextDummy().getFontMetrics(font);
 		tooltip = StringUtil.wrap(tooltip, fm, DEFAULT_TOOLTIP_WIDTH);
@@ -386,10 +386,10 @@ public final class UIUtil {
 		if(convertedTooltip.length()!=tooltip.length()) {
 			tooltip = HTML_TAG+convertedTooltip;
 		}
-		
+
 		return tooltip;
 	}
-	
+
 	public static String toUnwrappedSwingTooltip(String tooltip) {
 		if(tooltip==null || tooltip.isEmpty()) {
 			return null;
@@ -397,28 +397,28 @@ public final class UIUtil {
 		if(tooltip.startsWith(HTML_TAG)) {
 			return tooltip;
 		}
-		
+
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(convertedTooltip.length()!=tooltip.length()) {
 			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$
 		}
-		
+
 		return tooltip;
 	}
-	
+
 	public static void pack(Component comp) {
 		Window wnd = SwingUtilities.getWindowAncestor(comp);
 		if(wnd!=null) {
 			wnd.pack();
 		}
 	}
-	
+
 	public static void invokeLater(final Runnable runnable) {
 		Exceptions.testNullArgument(runnable, "runnable"); //$NON-NLS-1$
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				try {
@@ -429,12 +429,12 @@ public final class UIUtil {
 			}
 		});
 	}
-	
+
 	public static void invokeAndWait(final Runnable runnable) throws InvocationTargetException, InterruptedException {
 		Exceptions.testNullArgument(runnable, "runnable"); //$NON-NLS-1$
-		
+
 		SwingUtilities.invokeAndWait(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				try {
@@ -488,24 +488,24 @@ public final class UIUtil {
 			dim.height = comp.getSize().height;
 		return resizeComponent(comp, dim);
 	}
-	
+
 	public static void expandAll(JTree tree, boolean expand) {
 		Exceptions.testNullArgument(tree, "tree"); //$NON-NLS-1$
-		
+
 		tree.cancelEditing();
 	    Object root = tree.getModel().getRoot();
 	    expandAll0(tree, new TreePath(root), expand);
-	    
+
 	    if(!tree.isRootVisible()) {
 		    // Ensure expanded root
 		    tree.expandPath(new TreePath(root));
 	    }
 	}
-	 
+
 	private static void expandAll0(JTree tree, TreePath parent, boolean expand) {
 	    // Traverse children
 	    Object node = parent.getLastPathComponent();
-	    int childCount = tree.getModel().getChildCount(node); 
+	    int childCount = tree.getModel().getChildCount(node);
 	    if (childCount>0) {
 	        for (int i=0; i<childCount; i++) {
 	            Object child = tree.getModel().getChild(node, i);
@@ -528,19 +528,19 @@ public final class UIUtil {
 		comp.setMaximumSize(null);
 		return comp;
 	}
-	
+
 	public static boolean equalsInsets(Insets a, Insets b) {
 		if((a==null) != (b==null))
 			return false;
-		
-		return a==null ? b==null : a.top==b.top && a.left==b.left 
+
+		return a==null ? b==null : a.top==b.top && a.left==b.left
 				&&a.bottom==b.bottom && a.right==b.right;
 	}
 
 	public static void feedPopupMenu(JPopupMenu menu, Actions actions, String... items) {
 		boolean allowSep = true;
 		Action action;
-		
+
 		for (String item : items) {
 			if (item == null && allowSep) {
 				menu.addSeparator();
@@ -555,7 +555,7 @@ public final class UIUtil {
 	public static void feedToolBar(JToolBar toolBar, Actions actions, String... items) {
 		boolean allowSep = true;
 		Action action;
-		
+
 		for (String item : items) {
 			if (item == null && allowSep) {
 				toolBar.addSeparator();
@@ -580,14 +580,14 @@ public final class UIUtil {
 			}
 		}
 	}
-	
+
 	public static void feedButtonGroup(ButtonGroup group, JToolBar toolBar, Actions actions, String...items) {
 		JToggleButton b;
 		Action action;
-		
+
 		for (int i=0; i<items.length; i++) {
 			String item = items[i];
-			
+
 			if(item==null) {
 				// allow separator only "inside" the list
 				if(i>0 && i<items.length-1)
@@ -596,20 +596,20 @@ public final class UIUtil {
 				b = new JToggleButton(action);
 				b.setHideActionText(true);
 				b.setFocusable(false);
-				
+
 				group.add(b);
 				toolBar.add(b);
 			}
 		}
 	}
-	
+
 	public static void feedButtonGroup(ButtonGroup group, JMenu menu, Actions actions, String...items) {
 		JToggleButton b;
 		Action action;
-		
+
 		for (int i=0; i<items.length; i++) {
 			String item = items[i];
-			
+
 			if(item==null) {
 				// allow separator only "inside" the list
 				if(i>0 && i<items.length-1)
@@ -618,7 +618,7 @@ public final class UIUtil {
 				b = new JToggleButton(action);
 				b.setHideActionText(true);
 				b.setFocusable(false);
-				
+
 				group.add(b);
 				menu.add(b);
 			}
@@ -630,14 +630,14 @@ public final class UIUtil {
 		MouseListener mouseListener = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				String hintText = resourceDomain==null ? null : resourceDomain.get(hint);  
+				String hintText = resourceDomain==null ? null : resourceDomain.get(hint);
 				// remove input hint for the editpane and allow for user input
 				if (component.getText().trim().equals(hintText)) {
 					component.setText(""); //$NON-NLS-1$
 				}
 			}
 		};
-		
+
 		component.addMouseListener(mouseListener);
 		component.putClientProperty("hint:mouseListener", mouseListener); //$NON-NLS-1$
 
@@ -654,7 +654,7 @@ public final class UIUtil {
 				}
 			}
 		};
-		
+
 		component.addFocusListener(focusListener);
 		component.putClientProperty("hint:focusListener", focusListener); //$NON-NLS-1$
 	}
@@ -662,6 +662,7 @@ public final class UIUtil {
 	/** */
 	public static void changeFocus(final Component target, final Component source) {
 		invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				target.dispatchEvent(new FocusEvent(source,	FocusEvent.FOCUS_GAINED));
 			}
@@ -700,11 +701,11 @@ public final class UIUtil {
 				- (int) (d.height * 0.5));
 		return comp;
 	}
-	
+
 	public static void openConfigDialog(String path) {
 		new ConfigDialog(ConfigRegistry.getGlobalRegistry(), path).setVisible(true);
 	}
-	
+
 	private static class UndecoratedTabbedPaneUI extends BasicTabbedPaneUI {
 		@Override
 		protected void installDefaults() {
@@ -713,15 +714,16 @@ public final class UIUtil {
 			tabAreaInsets = new Insets(2, 2, 2, 2);
 		}
 	}
-	
+
 	public static void defaultHideTabbedPaneDecoration(JTabbedPane tabbedPane) {
 		tabbedPane.setUI(new UndecoratedTabbedPaneUI());
 		tabbedPane.setBorder(defaultAreaBorder);
 		// Prevent focus border on tabs being drawn
 		tabbedPane.setFocusable(false);
 	}
-	
+
 	private static class UndecoratedSplitPaneUI extends BasicSplitPaneUI {
+		@Override
 		public BasicSplitPaneDivider createDefaultDivider() {
 			return new BasicSplitPaneDivider(this) {
 
@@ -729,35 +731,35 @@ public final class UIUtil {
 
 				@Override
 				public void setBorder(Border b) {
-					// Undecorated split pane should not draw a 
+					// Undecorated split pane should not draw a
 					// divider border
 				}
 			};
 		}
 	}
-	
+
 	public static void defaultHideSplitPaneDecoration(JSplitPane splitPane) {
 		splitPane.setUI(new UndecoratedSplitPaneUI());
 		splitPane.setDividerSize(4);
 		splitPane.setBorder(null);
 	}
-	
+
 	public static void disableHtml(Object item) {
 		if(item instanceof JComponent) {
 			JComponent comp = (JComponent) item;
 			comp.putClientProperty("html.disable", Boolean.TRUE); //$NON-NLS-1$
 		}
 	}
-	
+
 	public static void disableCaretScroll(JTextComponent comp) {
 		Caret caret = comp.getCaret();
 		if(caret instanceof DefaultCaret) {
 			((DefaultCaret) caret).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		}
 	}
-	
+
 	public static final int DEFAULT_SCROLL_UNIT_INCREMENT = 16;
-	
+
 	public static final void defaultSetUnitIncrement(Object obj) {
 		if(obj instanceof JScrollPane) {
 			((JScrollPane)obj).getHorizontalScrollBar().setUnitIncrement(DEFAULT_SCROLL_UNIT_INCREMENT);
@@ -766,7 +768,7 @@ public final class UIUtil {
 			((JScrollBar)obj).setUnitIncrement(DEFAULT_SCROLL_UNIT_INCREMENT);
 		}
 	}
-	
+
 	public static JTextArea defaultCreateInfoLabel(JComponent container) {
 		JTextArea infoLabel = new JTextArea();
 		infoLabel.setBackground(container.getBackground());
@@ -777,28 +779,28 @@ public final class UIUtil {
 		infoLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		UIUtil.disableHtml(infoLabel);
 		infoLabel.setMinimumSize(new Dimension(50, 50));
-		
+
 		return infoLabel;
 	}
-	
+
 	public static JLabel defaultCreateLoadingLabel(JComponent container) {
 		JLabel label = new JLabel();
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setVerticalAlignment(SwingConstants.CENTER);
 		label.setIcon(getLargeLoadingIcon());
 		label.setBorder(new EmptyBorder(5, 10, 5, 10));
-		
+
 		return label;
 	}
-	
+
 	public static Icon getSmallLoadingIcon() {
 		return IconRegistry.getGlobalRegistry().getIcon("ajax-loader_16.gif"); //$NON-NLS-1$
 	}
-	
+
 	public static Icon getLargeLoadingIcon() {
 		return IconRegistry.getGlobalRegistry().getIcon("ajax-loader_32.gif"); //$NON-NLS-1$
 	}
-	
+
 	public static Icon getInfoIcon() {
 		return IconRegistry.getGlobalRegistry().getIcon("smartmode_co.gif"); //$NON-NLS-1$
 	}
@@ -813,7 +815,7 @@ public final class UIUtil {
 			.createBevelBorder(BevelBorder.RAISED);
 
 	public static final Border FLAT_BUTTON_BORDER = new FlatButtonBorder();
-	
+
 	public static class RolloverButton extends JButton implements MouseListener {
 
 		private static final long serialVersionUID = 7040037926434543523L;
@@ -870,9 +872,9 @@ public final class UIUtil {
 			repaint();
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -884,54 +886,55 @@ public final class UIUtil {
 		public IconlessButton() {
 			super();
 		}
-		
+
 		public IconlessButton(Action a) {
 			super(a);
 		}
-		
+
 		@Override
 		public final Icon getIcon() {
 			return null;
 		}
-		
+
 		@Override
 		public final void setIcon(Icon i) {
 			// do nothing
 		}
 	}
-	
+
 	public static class PlainToolBar extends JToolBar {
 
 		private static final long serialVersionUID = 4560421380746793566L;
-		
+
 		public PlainToolBar() {
 			setFloatable(false);
 			setRollover(true);
 		}
 
+		@Override
 		protected JButton createActionComponent(Action a) {
 			JButton b = super.createActionComponent(a);
 			b.setFocusable(false);
-			
+
 			return b;
 		}
 	}
-	
+
 	public static class SeparatingBorder implements Border {
-		
+
 		private final Insets insets;
-		
+
 		public SeparatingBorder(boolean top, boolean right, boolean bottom, boolean left) {
 			insets = new Insets(
-					top ? 1 : 0, left ? 1 : 0, 
+					top ? 1 : 0, left ? 1 : 0,
 					bottom ? 1 : 0, right ? 1 :0);
 		}
-		
+
 		@Override
 		public void paintBorder(Component c, Graphics g, int x, int y, int width,
 				int height) {
 			g.setColor(defaultBorderColor);
-			
+
 			if(insets.top>0)
 				g.drawLine(x+1, y, x+width-2, y);
 			if(insets.right>0)
@@ -941,12 +944,12 @@ public final class UIUtil {
 			if(insets.bottom>0)
 				g.drawLine(x+1, y+height-1, x+width-2, y+height-1);
 		}
-		
+
 		@Override
 		public boolean isBorderOpaque() {
 			return false;
 		}
-		
+
 		@Override
 		public Insets getBorderInsets(Component c) {
 			return insets;
@@ -988,16 +991,16 @@ public final class UIUtil {
 			}
 		}
 	}
-	
+
 	public static Window getActiveWindow() {
 		Window w = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
 		while(w!=null && w.getOwner()!=null) {
 			w = w.getOwner();
 		}
-				
+
 		return w;
 	}
-	
+
 	public static final int DEFAULT_UNDO_LIMIT = 40;
 
 	public static UndoManager createUndoSupport(JTextComponent comp, int limit) {
@@ -1013,7 +1016,7 @@ public final class UIUtil {
 
 		return undoManager;
 	}
-	
+
 	public static UndoManager getUndoManager(JComponent comp) {
 		return (UndoManager) comp.getClientProperty("undoManager"); //$NON-NLS-1$
 	}
@@ -1138,9 +1141,9 @@ public final class UIUtil {
 	 * Action supporting the copy, paste, cut and selectAll operations with
 	 * localization awareness and dynamic enabled-checks regarding the state of
 	 * a designated JTextComponent
-	 * 
+	 *
 	 * @author Markus Gärtner
-	 * 
+	 *
 	 */
 	public static class TextAction extends AbstractAction implements
 			DocumentListener, PropertyChangeListener, CaretListener {
@@ -1186,7 +1189,7 @@ public final class UIUtil {
 				putValue(Action.ACCELERATOR_KEY, KeyStroke
 						.getKeyStroke("ctrl N")); //$NON-NLS-1$
 			}
-			
+
 			String nameKey = "textActions."+actionID+".name"; //$NON-NLS-1$ //$NON-NLS-2$
 			String descriptionKey = "textActions."+actionID+".description"; //$NON-NLS-1$ //$NON-NLS-2$
 

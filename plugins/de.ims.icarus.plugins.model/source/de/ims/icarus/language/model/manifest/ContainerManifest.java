@@ -35,7 +35,7 @@ import de.ims.icarus.language.model.Structure;
  * @version $Id$
  *
  */
-public interface ContainerManifest extends Manifest {
+public interface ContainerManifest extends MemberManifest {
 
 	/**
 	 * Returns the manifest of the {@code MarkableLayer} the container

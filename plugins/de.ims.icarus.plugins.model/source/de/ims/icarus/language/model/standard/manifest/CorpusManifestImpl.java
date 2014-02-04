@@ -52,28 +52,8 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	private Map<String, ContextManifest> contextManifestLookup = new HashMap<>();
 	private boolean editable;
 
-	public CorpusManifestImpl() {
-
-	}
-
-	public CorpusManifestImpl(CorpusManifest template) {
-		super(template);
-
-		editable = template.isEditable();
-
-		defaultContextManifest = wrap(template.getDefaultContextManifest());
-
-		for(ContextManifest customContextManifest : template.getCustomContextManifests()) {
-			addCustomContextManifest(wrap(customContextManifest));
-		}
-	}
-
-	private ContextManifest wrap(ContextManifest template) {
-		return template==null ? null : new ContextManifestImpl(this, template);
-	}
-
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -138,11 +118,11 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	@Override
 	public ContextManifest getContextManifest(String id) {
 		if (id == null)
-			throw new NullPointerException("Invalid id");
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
 		ContextManifest contextManifest = contextManifestLookup.get(id);
 		if(contextManifest==null)
-			throw new IllegalArgumentException("No such context: "+id);
+			throw new IllegalArgumentException("No such context: "+id); //$NON-NLS-1$
 
 		return contextManifest;
 	}
@@ -228,7 +208,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

@@ -30,7 +30,7 @@ package de.ims.icarus.language.model.manifest;
  * @version $Id$
  *
  */
-public interface ManifestOwner<M extends Manifest> {
+public interface ManifestOwner<M extends MemberManifest> {
 
 	M getManifest();
 }

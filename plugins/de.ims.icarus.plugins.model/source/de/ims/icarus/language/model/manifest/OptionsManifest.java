@@ -37,7 +37,7 @@ import de.ims.icarus.language.model.meta.ValueType;
  * @version $Id$
  *
  */
-public interface OptionsManifest extends Template {
+public interface OptionsManifest extends Derivable {
 
 	@Override
 	String getId();

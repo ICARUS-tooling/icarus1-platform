@@ -25,14 +25,22 @@
  */
 package de.ims.icarus.language.model.manifest;
 
+import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.util.id.Identity;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueSet extends Template {
+public interface ValueSet extends Derivable, Identity {
 
 	int valueCount();
 
 	Object getValueAt(int index);
+
+	/**
+	 * Returns the type of this set
+	 */
+	ValueType getValueType();
 }

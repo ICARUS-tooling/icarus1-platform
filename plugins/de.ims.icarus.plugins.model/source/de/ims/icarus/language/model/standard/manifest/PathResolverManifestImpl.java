@@ -35,16 +35,8 @@ import de.ims.icarus.language.model.manifest.PathResolverManifest;
  */
 public class PathResolverManifestImpl extends AbstractManifest<PathResolverManifest> implements PathResolverManifest {
 
-	public PathResolverManifestImpl() {
-
-	}
-
-	public PathResolverManifestImpl(PathResolverManifest template) {
-		super(template);
-	}
-
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -52,7 +44,7 @@ public class PathResolverManifestImpl extends AbstractManifest<PathResolverManif
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

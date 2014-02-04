@@ -33,7 +33,6 @@ import java.util.Set;
 
 import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -51,28 +50,42 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	private AnnotationManifest defaultAnnotationManifest;
 	private boolean deepAnnotation, allowUnknownKeys;
 
-	public AnnotationLayerManifestImpl(ContextManifest contextManifest) {
-		super(contextManifest);
-	}
+	/**
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.language.model.manifest.LayerManifest)
+	 */
+	@Override
+	protected void readTemplate(AnnotationLayerManifest template) {
+		super.readTemplate(template);
 
-	public AnnotationLayerManifestImpl(ContextManifest contextManifest, AnnotationLayerManifest template) {
-		super(contextManifest, template);
-
-		defaultAnnotationManifest = template.getDefaultAnnotationManifest();
+		AnnotationManifest defaultAnnotationManifest = template.getDefaultAnnotationManifest();
+		if(defaultAnnotationManifest!=null) {
+			if(this.defaultAnnotationManifest==null) {
+				this.defaultAnnotationManifest = new AnnotationManifestImpl();
+			}
+			this.defaultAnnotationManifest.setTemplate(defaultAnnotationManifest);
+		}
 
 		// Copy over all annotation manifests
 		for(String key : template.getAvailableKeys()) {
-			// Annotation manifests carry no links to any kind of
-			// manifest hierarchy above them, so they are save to share!
-			addAnnotationManifest(key, template.getAnnotationManifest(key));
+			if(annotationManifests==null) {
+				annotationManifests = new LinkedHashMap<>();
+			}
+
+			AnnotationManifest annotationManifest = annotationManifests.get(key);
+			if(annotationManifest==null) {
+				annotationManifest = new AnnotationManifestImpl();
+				annotationManifests.put(key, annotationManifest);
+			}
+
+			annotationManifest.setTemplate(template.getAnnotationManifest(key));
 		}
 
-		deepAnnotation = template.isDeepAnnotation();
-		allowUnknownKeys = template.allowUnknownKeys();
+		deepAnnotation |= template.isDeepAnnotation();
+		allowUnknownKeys |= template.allowUnknownKeys();
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -183,7 +196,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

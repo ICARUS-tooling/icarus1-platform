@@ -31,9 +31,13 @@ package de.ims.icarus.language.model.manifest;
  * @version $Id$
  *
  */
-public interface Template {
+public interface Derivable {
 
 	boolean isTemplate();
 
 	String getId();
+
+	Derivable getTemplate();
+
+	void setTemplate(Derivable template);
 }

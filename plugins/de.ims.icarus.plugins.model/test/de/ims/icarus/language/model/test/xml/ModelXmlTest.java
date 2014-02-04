@@ -77,14 +77,15 @@ public class ModelXmlTest {
 		template.setName("cores", "#Cores");
 		template.setDescription("cores", "Number of cores to use for calculation");
 
-		OptionsManifestImpl optionsManifest = new OptionsManifestImpl(template);
+		OptionsManifestImpl optionsManifest = new OptionsManifestImpl();
+		optionsManifest.setTemplate(template);
 
 		optionsManifest.setId("def:test:options");
 
 		optionsManifest.addOption("print");
 		optionsManifest.setValueType("print", ValueType.BOOLEAN);
 		optionsManifest.setDefaultValue("print", true);
-		optionsManifest.setValues("print", new ValueSetImpl(CollectionUtils.asList(Boolean.TRUE, Boolean.FALSE)));
+		optionsManifest.setSupportedValues("print", new ValueSetImpl(CollectionUtils.asList(Boolean.TRUE, Boolean.FALSE)));
 		optionsManifest.setName("print", "Print Data");
 		optionsManifest.setDescription("print", "Choose whether or not data should be printed");
 

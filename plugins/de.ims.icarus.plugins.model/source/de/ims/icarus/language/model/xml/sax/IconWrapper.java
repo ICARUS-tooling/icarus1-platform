@@ -34,7 +34,7 @@ import de.ims.icarus.language.model.xml.XmlResource;
 import de.ims.icarus.ui.IconRegistry;
 
 public class IconWrapper implements Icon, XmlResource {
-	private final Icon source;
+	private Icon source;
 	private final String name;
 
 	public IconWrapper(String name) {
@@ -42,7 +42,6 @@ public class IconWrapper implements Icon, XmlResource {
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
 		this.name = name;
-		this.source = IconRegistry.getGlobalRegistry().getIcon(name);
 	}
 
 	/**
@@ -53,12 +52,19 @@ public class IconWrapper implements Icon, XmlResource {
 		return name;
 	}
 
+	private Icon getSource() {
+		if(source==null) {
+			source = IconRegistry.getGlobalRegistry().getIcon(name);
+		}
+		return source;
+	}
+
 	/**
 	 * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
 	 */
 	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
-		if(source!=null) {
+		if(getSource()!=null) {
 			source.paintIcon(c, g, x, y);
 		}
 	}
@@ -68,7 +74,7 @@ public class IconWrapper implements Icon, XmlResource {
 	 */
 	@Override
 	public int getIconWidth() {
-		return source==null ? 0 : source.getIconWidth();
+		return getSource()==null ? 0 : source.getIconWidth();
 	}
 
 	/**
@@ -76,6 +82,6 @@ public class IconWrapper implements Icon, XmlResource {
 	 */
 	@Override
 	public int getIconHeight() {
-		return source==null ? 0 : source.getIconHeight();
+		return getSource()==null ? 0 : source.getIconHeight();
 	}
 }

@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.Template;
+import de.ims.icarus.language.model.manifest.Derivable;
 import de.ims.icarus.language.model.xml.XmlElement;
 import de.ims.icarus.language.model.xml.XmlResource;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -38,23 +38,34 @@ import de.ims.icarus.logging.LoggerFactory;
  * @version $Id$
  *
  */
-public abstract class DerivedObject<T extends Object> implements XmlElement, Template {
+public abstract class AbstractDerivable<T extends Derivable> implements XmlElement, Derivable {
 
-	private final T template;
+	private T template;
 
 	private boolean isTemplate = false;
 
-	public DerivedObject(T template) {
-		if (template == null)
-			throw new NullPointerException("Invalid template"); //$NON-NLS-1$
-
-		this.template = template;
-	}
-
-	public DerivedObject() {
+	public AbstractDerivable() {
 		template = null;
 	}
 
+	/**
+	 * @see de.ims.icarus.language.model.manifest.Derivable#setTemplate(de.ims.icarus.language.model.manifest.Derivable)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setTemplate(Derivable template) {
+		if (template == null)
+			throw new NullPointerException("Invalid template"); //$NON-NLS-1$
+
+		this.template = (T) template;
+		readTemplate((T) template);
+	}
+
+	protected void readTemplate(T template) {
+		// for subclasses
+	}
+
+	@Override
 	public T getTemplate() {
 		return template;
 	}
@@ -155,7 +166,7 @@ public abstract class DerivedObject<T extends Object> implements XmlElement, Tem
 	protected abstract String getXmlTag();
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Template#isTemplate()
+	 * @see de.ims.icarus.language.model.manifest.Derivable#isTemplate()
 	 */
 	@Override
 	public boolean isTemplate() {
@@ -167,5 +178,14 @@ public abstract class DerivedObject<T extends Object> implements XmlElement, Tem
 	 */
 	public void setTemplate(boolean isTemplate) {
 		this.isTemplate = isTemplate;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String id = getId();
+		return id==null ? super.toString() : getClass().getName()+"@"+id; //$NON-NLS-1$
 	}
 }

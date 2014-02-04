@@ -80,6 +80,8 @@ public class LocationManifestImpl implements LocationManifest {
 	public void setPath(String path) {
 		if (path == null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
+		if(path.isEmpty())
+			throw new IllegalArgumentException("Empty path"); //$NON-NLS-1$
 
 		this.path = path;
 	}

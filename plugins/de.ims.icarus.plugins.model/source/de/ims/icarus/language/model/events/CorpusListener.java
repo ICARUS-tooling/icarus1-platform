@@ -41,7 +41,7 @@ public interface CorpusListener {
 	 * <p>
 	 * This event fires at descriptor based changes for manifests
 	 * from the layer level upwards.
-	 * The {@code "manifest"} property holds the {@code Manifest}
+	 * The {@code "manifest"} property holds the {@code MemberManifest}
 	 * that was changed.
 	 *
 	 * @param e

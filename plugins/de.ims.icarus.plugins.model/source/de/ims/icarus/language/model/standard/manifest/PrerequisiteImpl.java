@@ -42,21 +42,22 @@ public class PrerequisiteImpl implements Prerequisite {
 
 	private final int hash;
 
-	public PrerequisiteImpl(String layerId, String contextId, String alias) {
-		if(layerId==null)
-			throw new NullPointerException("Invalid layer id"); //$NON-NLS-1$
-		if(layerId.isEmpty())
-			throw new IllegalArgumentException("Empty layer id"); //$NON-NLS-1$
-		if(alias==null)
-			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
-		if(alias.isEmpty())
-			throw new IllegalArgumentException("Empty alias"); //$NON-NLS-1$
+	public PrerequisiteImpl(String layerId, String typeId, String contextId, String alias) {
+		if(layerId==null && typeId==null)
+			throw new NullPointerException("Invalid layer and type id"); //$NON-NLS-1$
 
 		this.layerId = layerId;
 		this.contextId = contextId;
 		this.alias = alias;
+		this.typeId = typeId;
 
-		int hash = layerId.hashCode()+1;
+		int hash = 1;
+		if(layerId!=null) {
+			hash *= layerId.hashCode()+1;
+		}
+		if(typeId!=null) {
+			hash *= typeId.hashCode()+1;
+		}
 		if(contextId!=null) {
 			hash *= contextId.hashCode()+1;
 		}
@@ -64,30 +65,6 @@ public class PrerequisiteImpl implements Prerequisite {
 			hash += alias.hashCode()+1;
 		}
 
-		this.typeId = null;
-		this.hash = hash;
-	}
-
-	public PrerequisiteImpl(String typeId, String alias) {
-		if(typeId==null)
-			throw new NullPointerException("Invalid type id"); //$NON-NLS-1$
-		if(typeId.isEmpty())
-			throw new IllegalArgumentException("Empty type id"); //$NON-NLS-1$
-		if(alias==null)
-			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
-		if(alias.isEmpty())
-			throw new IllegalArgumentException("Empty alias"); //$NON-NLS-1$
-
-		this.alias = alias;
-		this.typeId = typeId;
-
-		int hash = typeId.hashCode()+1;
-		if(alias!=null) {
-			hash += alias.hashCode()+1;
-		}
-
-		this.layerId = null;
-		this.contextId = null;
 		this.hash = hash;
 	}
 
@@ -159,7 +136,7 @@ public class PrerequisiteImpl implements Prerequisite {
 			sb.append("type-id=").append(typeId).append(' '); //$NON-NLS-1$
 		}
 		if(alias!=null) {
-			sb.append("alias").append(alias).append(' '); //$NON-NLS-1$
+			sb.append("alias=").append(alias).append(' '); //$NON-NLS-1$
 		}
 		StringUtil.trim(sb);
 		sb.append(']');

@@ -32,11 +32,9 @@ import java.util.List;
  * @version $Id$
  *
  */
-public interface ContextManifest extends Manifest {
+public interface ContextManifest extends MemberManifest {
 
 	CorpusManifest getCorpusManifest();
-
-	ContextManifest getBaseContext();
 
 	/**
 	 * Allows for changes of the context's name at runtime. This is one of the

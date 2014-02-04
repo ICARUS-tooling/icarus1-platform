@@ -37,7 +37,7 @@ import de.ims.icarus.language.model.manifest.ContextWriterManifest;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.LocationManifest;
-import de.ims.icarus.language.model.manifest.Manifest;
+import de.ims.icarus.language.model.manifest.MemberManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.manifest.OptionsManifest;
@@ -56,7 +56,7 @@ public class CorpusVerifier {
 	private final CorpusManifest corpusManifest;
 	private final LogReport report;
 
-	private Stack<Manifest> stack = new Stack<>();
+	private Stack<MemberManifest> stack = new Stack<>();
 
 	private CorpusVerifier(CorpusManifest corpusManifest, LogReport report) {
 		if (corpusManifest == null)
@@ -84,7 +84,7 @@ public class CorpusVerifier {
 
 	}
 
-	private void push(Manifest manifest) {
+	private void push(MemberManifest manifest) {
 		stack.push(manifest);
 	}
 
@@ -92,7 +92,7 @@ public class CorpusVerifier {
 		stack.pop();
 	}
 
-	private void checkManifest0(Manifest manifest) {
+	private void checkManifest0(MemberManifest manifest) {
 		if(manifest.getId()==null) {
 			error("Missing id"); //$NON-NLS-1$
 		}
@@ -298,7 +298,7 @@ public class CorpusVerifier {
 
 	}
 
-	private void checkType(Manifest manifest, ManifestType type) {
+	private void checkType(MemberManifest manifest, ManifestType type) {
 
 		if(manifest.getManifestType()==null) {
 			error("Missing manifest type"); //$NON-NLS-1$

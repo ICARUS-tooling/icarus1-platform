@@ -31,7 +31,7 @@ package de.ims.icarus.language.model.manifest;
  * @version $Id$
  *
  */
-public interface ContextReaderManifest extends Manifest {
+public interface ContextReaderManifest extends MemberManifest {
 
 	/**
 	 * If the reader is not defined via a specific class but rather

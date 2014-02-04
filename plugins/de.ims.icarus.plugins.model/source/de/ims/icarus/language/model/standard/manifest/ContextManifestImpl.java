@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.ContextReaderManifest;
 import de.ims.icarus.language.model.manifest.ContextWriterManifest;
@@ -40,8 +39,6 @@ import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.LayerManifest;
 import de.ims.icarus.language.model.manifest.LocationManifest;
 import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -62,45 +59,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	private LocationManifest locationManifest;
 
 	private boolean independent;
-	private String baseId;
-	private ContextManifest baseContextManifest;
-	private final CorpusManifest corpusManifest;
-
-	public ContextManifestImpl(CorpusManifest corpusManifest) {
-//		if (corpusManifest == null)
-//			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
-
-		this.corpusManifest = corpusManifest;
-	}
-
-	public ContextManifestImpl(CorpusManifest corpusManifest, ContextManifest template) {
-		super(template);
-
-//		if (corpusManifest == null)
-//			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
-
-		this.corpusManifest = corpusManifest;
-
-		ContextManifest baseContextManifest = template.getBaseContext();
-
-		for(LayerManifest layerManifest : template.getLayerManifests()) {
-			addLayerManifest(wrap(layerManifest));
-		}
-	}
-
-	private LayerManifest wrap(LayerManifest template) {
-		switch (template.getManifestType()) {
-		case ANNOTATION_LAYER_MANIFEST:
-			return new AnnotationLayerManifestImpl(this, (AnnotationLayerManifest) template);
-		case MARKABLE_LAYER_MANIFEST:
-			return new MarkableLayerManifestImpl(this, (MarkableLayerManifest) template);
-		case STRUCTURE_LAYER_MANIFEST:
-			return new StructureLayerManifestImpl(this, (StructureLayerManifest) template);
-
-		default:
-			throw new IllegalArgumentException("Not a valid manifest type definition on layer template: "+template.getId()); //$NON-NLS-1$
-		}
-	}
+	private CorpusManifest corpusManifest;
 
 	/**
 	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLayerManifests()
@@ -113,12 +72,12 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	public void addLayerManifest(LayerManifest layerManifest) {
 		if(layerManifest==null)
 			throw new NullPointerException("Invalid layer manifest"); //$NON-NLS-1$
-//		if(layerManifests.contains(layerManifest))
-//			throw new IllegalArgumentException("Layer manifest already registered: "+layerManifest.getId()); //$NON-NLS-1$
+		if(layerManifests.contains(layerManifest))
+			throw new IllegalArgumentException("Layer manifest already registered: "+layerManifest.getId()); //$NON-NLS-1$
 
 		LayerManifest current = layerManifestLookup.get(layerManifest.getId());
 		if(current!=null && !current.equals(layerManifest))
-			throw new IllegalArgumentException("Duplicate layer manifests for id: "+layerManifest.getId()); //$NON-NLS-1$
+			throw new IllegalArgumentException("Duplicate layer manifests for rawId: "+layerManifest.getId()); //$NON-NLS-1$
 
 		layerManifests.add(layerManifest);
 		layerManifestLookup.put(layerManifest.getId(), layerManifest);
@@ -130,7 +89,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	@Override
 	public LayerManifest getLayerManifest(String id) {
 		if (id == null)
-			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid rawId"); //$NON-NLS-1$
 
 		LayerManifest layerManifest = layerManifestLookup.get(id);
 		if(layerManifest==null)
@@ -168,6 +127,9 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	 */
 	@Override
 	public void setLocationManifest(LocationManifest manifest) {
+		if(isTemplate())
+			throw new UnsupportedOperationException("Cannot assign location manifest to template"); //$NON-NLS-1$
+
 		this.locationManifest = manifest;
 	}
 
@@ -193,6 +155,16 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	@Override
 	public ContextWriterManifest getWriterManifest() {
 		return writerManifest;
+	}
+
+	/**
+	 * @param corpusManifest the corpusManifest to set
+	 */
+	public void setCorpusManifest(CorpusManifest corpusManifest) {
+		if (corpusManifest == null)
+			throw new NullPointerException("Invalid corpusManifest");  //$NON-NLS-1$
+
+		this.corpusManifest = corpusManifest;
 	}
 
 	/**
@@ -223,15 +195,6 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getBaseContext()
-	 */
-	@Override
-	public ContextManifest getBaseContext() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.manifest.ContextManifest#isDefaultContext()
 	 */
 	@Override
@@ -240,7 +203,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Manifest#getManifestType()
+	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -324,7 +287,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.DerivedObject#getXmlTag()
+	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
