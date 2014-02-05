@@ -58,7 +58,7 @@
 		
 	<!-- Clear Filter -->
 	<action id="plugins.coref.coreferenceDocumentPresenter.clearFilterAction"
-		template="actions.default.removeAction"
+		template="actions.default.clearFilterAction"
 		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Toggle Document Filter -->
