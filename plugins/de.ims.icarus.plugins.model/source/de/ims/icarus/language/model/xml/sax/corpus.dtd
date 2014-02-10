@@ -177,7 +177,7 @@
 	Layer that holds information about structures
 -->
 
-<!ELEMENT structure-layer (%layer;, structure*)>
+<!ELEMENT structure-layer (%layer;, container?, structure*)>
 <!ATTLIST structure-layer
 		%identity;
 		%layeratts;

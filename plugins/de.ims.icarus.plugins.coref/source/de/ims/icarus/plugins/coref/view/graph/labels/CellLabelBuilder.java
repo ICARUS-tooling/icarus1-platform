@@ -23,33 +23,20 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model;
+package de.ims.icarus.plugins.coref.view.graph.labels;
 
-import de.ims.icarus.language.model.xml.XmlResource;
+import de.ims.icarus.language.coref.CoreferenceData;
+import de.ims.icarus.language.coref.Edge;
+import de.ims.icarus.language.coref.Span;
 
 /**
- * Defines the possibles types a {@link CorpusMember} can declare to represent by
- * its {@link CorpusMember#getMemberType()} method. Not although that a class can implement
- * multiple interfaces of the corpus framework, it can only ever be assigned to exactly one
- * <i>member role</i> specified by its {@code MemberType}.
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum MemberType implements XmlResource {
-	FRAGMENT,
-	MARKABLE,
-	EDGE,
-	CONTAINER,
-	STRUCTURE,
-	LAYER; // No distinction between different layer types. they are defined by the manifest type
+public interface CellLabelBuilder {
 
-	/**
-	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return name();
-	}
+	String getLabel(Span span, CoreferenceData sentence);
+
+	String getLabel(Edge edge);
 }

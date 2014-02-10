@@ -23,17 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.coref.view.grid.labels;
+package de.ims.icarus.plugins.coref.view.graph.labels;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceData;
+import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.plugins.coref.view.grid.EntityGridNode;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -41,35 +40,60 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class PatternLabelBuilder implements GridLabelBuilder {
+public class PatternLabelBuilder implements CellLabelBuilder {
 
-	protected String pattern;
+	private String nodePattern;
+	private String edgePattern;
 
-	protected Element[] elements;
-	protected StringBuilder buffer = new StringBuilder();
+	private Element[] nodeElements;
+	private Element[] edgeElements;
+	private StringBuilder buffer = new StringBuilder();
 
-	public PatternLabelBuilder(String pattern) {
-		setPattern(pattern);
+	public PatternLabelBuilder(String nodePattern, String edgePattern) {
+		setNodePattern(nodePattern);
+		setEdgePattern(edgePattern);
 	}
 
-	public String getPattern() {
-		return pattern;
+	public String getNodePattern() {
+		return nodePattern;
 	}
 
-	public void setPattern(String pattern) {
-		if(pattern==null)
-			throw new NullPointerException("Invalid pattern"); //$NON-NLS-1$
+	public String getEdgePattern() {
+		return edgePattern;
+	}
 
-		if(pattern.equals(this.pattern)) {
+	public void setNodePattern(String nodePattern) {
+		if(nodePattern==null)
+			throw new NullPointerException("Invalid nodePattern"); //$NON-NLS-1$
+
+		if(nodePattern.equals(this.nodePattern)) {
 			return;
 		}
 
-		this.pattern = pattern;
-
-		elements = compile(pattern);
+		Element[] elements = compile(nodePattern);
 
 		if(elements==null || elements.length==0)
 			throw new IllegalStateException("No valid element array available"); //$NON-NLS-1$
+
+		this.nodeElements = elements;
+		this.nodePattern = nodePattern;
+	}
+
+	public void setEdgePattern(String edgePattern) {
+		if(edgePattern==null)
+			throw new NullPointerException("Invalid edgePattern"); //$NON-NLS-1$
+
+		if(edgePattern.equals(this.edgePattern)) {
+			return;
+		}
+
+		Element[] elements = compile(edgePattern);
+
+		if(elements==null)
+			throw new IllegalStateException("No valid element array available"); //$NON-NLS-1$
+
+		this.edgeElements = elements;
+		this.edgePattern = edgePattern;
 	}
 
 	/**
@@ -80,11 +104,11 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * <tr><td>\</td><td>escaping character to allow for magic characters to be used without substitution</td></tr>
 	 * <tr><td>b</td><td><i>begin index</i> of the {@link Span}</td></tr>
 	 * <tr><td>e</td><td><i>end index</i> of the {@code Span}</td></tr>
-	 * <tr><td>c</td><td>number of {@code Span}s within the given ones {@link Cluster} in this sentence</td></tr>
+	 * <tr><td>s</td><td>index of the sentence</td></tr>
 	 * <tr><td>r</td><td><i>range</i> of the given {@code Span}, i.e. the number of tokens it spans across in the surrounding sentence</td></tr>
 	 * <tr><td>l</td><td><i>length</i> of the current {@code Span} in terms of characters (note that whitespace characters are included)</td></tr>
 	 * <tr><td>%...%</td><td>value of the span property associated with the given key (%name% would cause the value for the 'name' property to be inserted)</td></tr>
-	 * <tr><td>$...$</td><td>value of the sentence property associated with the given key (%form% would cause the value for the 'form' property to be inserted)</td></tr>
+	 * <tr><td>$...$</td><td>value of the sentence property associated with the given key ($form$ would cause the value for the 'form' property to be inserted)</td></tr>
 	 * </table>
 	 * <p>
 	 * All characters not listed as magic characters remain untouched by the
@@ -153,8 +177,8 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 				element = new BoundaryElement(false);
 				break;
 
-			case 'c':
-				element = new CountElement();
+			case 's':
+				element = new SentenceIndexElement();
 				break;
 
 			case 'r':
@@ -165,9 +189,14 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 				element = new LengthElement(true);
 				break;
 
-			default:
-				sb.append(c);
-				break;
+			default: {
+				int l = sb.length();
+				if(l>0 && sb.charAt(l-1)=='\\' && c=='n') {
+					sb.setCharAt(l-1, '\n');
+				} else {
+					sb.append(c);
+				}
+			} break;
 			}
 
 			if(sb.length()>0 && (collectChars || element!=null || i==size-1)) {
@@ -185,14 +214,28 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	}
 
 	/**
-	 * @see de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder#getLabel(de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+	 * @see de.ims.icarus.plugins.coref.view.graph.labels.CellLabelBuilder#getLabel(de.ims.icarus.language.coref.Span, de.ims.icarus.language.coref.CoreferenceData)
 	 */
 	@Override
-	public String getLabel(EntityGridNode node, int spanIndex) {
+	public String getLabel(Span span, CoreferenceData sentence) {
 		buffer.setLength(0);
 
-		for(Element element : elements) {
-			element.append(buffer, node, spanIndex);
+		for(Element element : nodeElements) {
+			element.append(buffer, span, sentence);
+		}
+
+		return buffer.toString();
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.coref.view.graph.labels.CellLabelBuilder#getLabel(de.ims.icarus.language.coref.Edge)
+	 */
+	@Override
+	public String getLabel(Edge edge) {
+		buffer.setLength(0);
+
+		for(Element element : edgeElements) {
+			element.append(buffer, edge);
 		}
 
 		return buffer.toString();
@@ -217,8 +260,14 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public interface Element {
-		void append(StringBuilder buffer, EntityGridNode node, int spanIndex);
+	public static abstract class Element {
+		public void append(StringBuilder buffer, Span span, CoreferenceData sentence) {
+			// for subclasses
+		}
+
+		public void append(StringBuilder buffer, Edge edge) {
+			// for subclasses
+		}
 	}
 
 	/**
@@ -227,7 +276,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static class CharacterElement implements Element {
+	public static class CharacterElement extends Element {
 		private final char[] characters;
 
 		public CharacterElement(char[] characters) {
@@ -238,11 +287,18 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span)
 		 */
 		@Override
-		public void append(StringBuilder buffer, EntityGridNode node,
-				int spanIndex) {
+		public void append(StringBuilder buffer, Span span, CoreferenceData sentence) {
+			buffer.append(characters);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Edge)
+		 */
+		@Override
+		public void append(StringBuilder buffer, Edge edge) {
 			buffer.append(characters);
 		}
 	}
@@ -253,26 +309,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static class CountElement implements Element {
-
-		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
-		 */
-		@Override
-		public void append(StringBuilder buffer, EntityGridNode node,
-				int spanIndex) {
-			buffer.append(node.getSpanCount());
-		}
-
-	}
-
-	/**
-	 *
-	 * @author Markus Gärtner
-	 * @version $Id$
-	 *
-	 */
-	public static class BoundaryElement implements Element {
+	public static class BoundaryElement extends Element {
 		private final boolean isStart;
 
 		public BoundaryElement(boolean isStart) {
@@ -280,11 +317,10 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span)
 		 */
 		@Override
-		public void append(StringBuilder buffer, EntityGridNode node, int spanIndex) {
-			Span span = node.getSpan(spanIndex);
+		public void append(StringBuilder buffer, Span span, CoreferenceData sentence) {
 			if(isStart) {
 				buffer.append(span.getBeginIndex()+1);
 			} else {
@@ -299,21 +335,39 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static class LengthElement implements Element {
+	public static class SentenceIndexElement extends Element {
+
+		/**
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span)
+		 */
+		@Override
+		public void append(StringBuilder buffer, Span span, CoreferenceData sentence) {
+			int sentenceIndex = span.getSentenceIndex();
+			if(sentenceIndex!=-1) {
+				buffer.append(sentenceIndex+1);
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public static class LengthElement extends Element {
 
 		private final boolean charLength;
 		public LengthElement(boolean charLength) {
 			this.charLength = charLength;
 		}
+
 		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span)
 		 */
 		@Override
-		public void append(StringBuilder buffer, EntityGridNode node,
-				int spanIndex) {
-			Span span = node.getSpan(spanIndex);
+		public void append(StringBuilder buffer, Span span, CoreferenceData sentence) {
 			if(charLength) {
-				CoreferenceData sentence = node.getSentence();
 				int len = 0;
 				for(int i=span.getBeginIndex(); i<=span.getEndIndex(); i++) {
 					len += sentence.getForm(i).length();
@@ -327,7 +381,6 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 				buffer.append(span.getRange());
 			}
 		}
-
 	}
 
 	/**
@@ -336,7 +389,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static class PropertyElement implements Element {
+	public static class PropertyElement extends Element {
 
 		private final String key;
 
@@ -348,13 +401,24 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span, de.ims.icarus.language.coref.CoreferenceData)
 		 */
 		@Override
-		public void append(StringBuilder buffer, EntityGridNode node,
-				int spanIndex) {
-			Object value = node.getSpan(spanIndex).getProperty(key);
+		public void append(StringBuilder buffer, Span span,
+				CoreferenceData sentence) {
+			Object value = span.getProperty(key);
 			buffer.append(value==null ? '-' : value);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Edge)
+		 */
+		@Override
+		public void append(StringBuilder buffer, Edge edge) {
+			Object value = edge.getProperty(key);
+			if(value!=null) {
+				buffer.append(value);
+			}
 		}
 	}
 
@@ -364,7 +428,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static class SentencePropertyElement implements Element {
+	public static class SentencePropertyElement extends Element {
 
 		private final String key;
 
@@ -376,14 +440,11 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span, de.ims.icarus.language.coref.CoreferenceData)
 		 */
 		@Override
-		public void append(StringBuilder buffer, EntityGridNode node,
-				int spanIndex) {
-			CoreferenceData sentence = node.getSentence();
-			Span span = node.getSpan(spanIndex);
-
+		public void append(StringBuilder buffer, Span span,
+				CoreferenceData sentence) {
 			int length = buffer.length();
 
 			int beginIndex = span.getBeginIndex();
@@ -407,7 +468,7 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 	 * @version $Id$
 	 *
 	 */
-	public static class HeadPropertyElement implements Element {
+	public static class HeadPropertyElement extends Element {
 
 		private final String key;
 
@@ -419,14 +480,11 @@ public class PatternLabelBuilder implements GridLabelBuilder {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
+		 * @see de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder.Element#append(java.lang.StringBuilder, de.ims.icarus.language.coref.Span, de.ims.icarus.language.coref.CoreferenceData)
 		 */
 		@Override
-		public void append(StringBuilder buffer, EntityGridNode node,
-				int spanIndex) {
-			CoreferenceData sentence = node.getSentence();
-			Span span = node.getSpan(spanIndex);
-
+		public void append(StringBuilder buffer, Span span,
+				CoreferenceData sentence) {
 			int length = buffer.length();
 
 			int head = span.getHead();

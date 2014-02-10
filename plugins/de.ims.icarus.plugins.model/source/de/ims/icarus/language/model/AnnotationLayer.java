@@ -69,11 +69,16 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @return
 	 * @throws NullPointerException if either the {@code markable} or {@code key}
 	 * is {@code null}
+	 * @throws UnsupportedOperationException if this layer does not support additional keys
 	 */
 	Object getValue(Markable markable, String key);
 
 	/**
 	 * Deletes all annotations in this layer
+	 * <p>
+	 * Note that this does include all annotations for all keys,
+	 * not only those declares for the default annotation.
+	 *
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable
 	 */
@@ -150,4 +155,6 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * is not editable
 	 */
 	void setValue(Markable markable, String key, Object value);
+
+	boolean hasAnnotations();
 }

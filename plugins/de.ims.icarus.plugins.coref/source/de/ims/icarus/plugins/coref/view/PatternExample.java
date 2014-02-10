@@ -14,44 +14,61 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
  *
- * $LastChangedDate$
- * $LastChangedRevision$
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.coref.view.grid.labels;
+package de.ims.icarus.plugins.coref.view;
 
-import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.plugins.coref.view.grid.EntityGridNode;
+import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.util.NamedObject;
 
-/**
- * @author Markus Gärtner
- * @version $Id$
- *
- */
-public class PropertyLabelBuilder implements GridLabelBuilder {
+public class PatternExample implements NamedObject {
+	private String pattern;
+	private String key;
 
-	private final String key;
+	public PatternExample(String pattern, String key) {
+		setPattern(pattern);
+		setKey(key);
+	}
 
-	public PropertyLabelBuilder(String key) {
-		if(key==null)
+	public String getPattern() {
+		return pattern;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setPattern(String pattern) {
+		if(pattern==null || pattern.isEmpty())
+			throw new NullPointerException("Invalid pattern"); //$NON-NLS-1$
+
+		this.pattern = pattern;
+	}
+
+	public void setKey(String key) {
+		if(key==null || key.isEmpty())
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 
 		this.key = key;
 	}
 
-	/**
-	 * @see de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder#getLabel(de.ims.icarus.plugins.coref.view.grid.EntityGridNode, int)
-	 */
 	@Override
-	public String getLabel(EntityGridNode node, int spanIndex) {
-		Span span = node.getSpan(spanIndex);
-		Object value = span.getProperty(key);
-		return value==null ? "-" : value.toString();  //$NON-NLS-1$
+	public String toString() {
+		return getKey()+": "+getPattern(); //$NON-NLS-1$
 	}
 
+	/**
+	 * @see de.ims.icarus.util.NamedObject#getName()
+	 */
+	@Override
+	public String getName() {
+		return ResourceManager.getInstance().get(key);
+	}
 }

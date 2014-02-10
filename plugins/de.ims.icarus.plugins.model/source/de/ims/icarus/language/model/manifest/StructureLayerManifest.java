@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.manifest;
 
+import de.ims.icarus.language.model.Container;
+
 
 
 /**
@@ -39,6 +41,9 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 	 * container in this layer. This is effectively the same as calling
 	 * {@link #getContainerManifest(int)} with a {@code level} value
 	 * of {@code 1} and casting the result to {@code StructureManifest}.
+	 * Note that a structure layer always contains a regular container
+	 * as root of its container hierarchy. Only on the subsequent levels
+	 * the structures themselves are hosted!
 	 *
 	 * @return
 	 */
@@ -49,6 +54,10 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 	 * <i>boundary containers</i> for the structures in this manifests'
 	 * {@code StructureLayer}. If the structures are not restricted by <i>boundary containers</i>
 	 * this method should return {@code null}.
+	 * <p>
+	 * Note that the size of the boundary layers's root container must be equal to the number of
+	 * structures hosted in this layer's container (as defined by {@link Container#getMarkableCount()}.
+	 * This is equal to a 1:1 relationship between the contents of the two root containers.
 	 * @return
 	 */
 	MarkableLayerManifest getBoundaryLayerManifest();

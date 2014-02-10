@@ -34,7 +34,6 @@ import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -42,23 +41,24 @@ import de.ims.icarus.language.model.util.CorpusUtils;
  * @version $Id$
  *
  */
-public class AbstractLayer implements Layer {
+public class AbstractLayer<M extends LayerManifest> implements Layer {
 
-	private long id = CorpusRegistry.getInstance().newId();
+	private final long id;
 
 	private final Context context;
-	private final LayerManifest manifest;
+	private final M manifest;
 	private MarkableLayer baseLayer;
 	private LayerType layerType;
 
 	private final Markable markableProxy;
 
-	public AbstractLayer(Context context, LayerManifest manifest) {
+	public AbstractLayer(long id, Context context, M manifest) {
 		if (context == null)
 			throw new NullPointerException("Invalid context");  //$NON-NLS-1$
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest");  //$NON-NLS-1$
 
+		this.id = id;
 		this.context = context;
 		this.manifest = manifest;
 
@@ -142,7 +142,7 @@ public class AbstractLayer implements Layer {
 	 * @see de.ims.icarus.language.model.Layer#getManifest()
 	 */
 	@Override
-	public LayerManifest getManifest() {
+	public M getManifest() {
 		return manifest;
 	}
 

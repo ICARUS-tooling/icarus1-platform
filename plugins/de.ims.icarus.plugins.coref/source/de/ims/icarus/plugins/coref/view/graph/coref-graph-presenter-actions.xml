@@ -30,6 +30,10 @@
 	<action id="plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction"
 		name="${id}.name" desc="${id}.description" icon="register_view.png" type="toggle" />
 		
+	<!-- EditLabelPatterns -->
+	<action id="plugins.coref.coreferenceGraphPresenter.editLabelPatternsAction"
+		name="${id}.name" desc="${id}.description" icon="url.gif" />
+		
 	<!-- Main ToolBar List for editable graph -->
 	<action-list id="plugins.coref.coreferenceGraphPresenter.editableMainToolBarList">
 		<item type="action" value="plugins.jgraph.graphPresenter.openPreferencesAction" />
@@ -58,7 +62,7 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleAutoZoomAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.toggleCompressAction" />
 		<separator />
-		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.editLabelPatternsAction" />
 		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />
@@ -85,7 +89,7 @@
 		<item type="action" value="plugins.jgraph.graphPresenter.undoEditAction" />
 		<item type="action" value="plugins.jgraph.graphPresenter.redoEditAction" />
 		<separator />
-		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction" />
+		<item type="action" value="plugins.coref.coreferenceGraphPresenter.editLabelPatternsAction" />
 		<!--
 		<separator />
 		<item type="action" value="plugins.jgraph.graphPresenter.collapseCellsAction" />

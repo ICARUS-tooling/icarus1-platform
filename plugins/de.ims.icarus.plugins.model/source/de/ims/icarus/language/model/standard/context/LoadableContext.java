@@ -31,7 +31,12 @@ import java.util.List;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.Layer;
 import de.ims.icarus.language.model.io.ContextReader;
+import de.ims.icarus.language.model.io.ContextWriter;
 import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.manifest.ContextWriterManifest;
+import de.ims.icarus.language.model.manifest.Implementation;
+import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -47,6 +52,9 @@ public class LoadableContext extends AbstractContext {
 	private volatile State state = State.BLANK;
 	private final Object lock = new Object();
 
+	private volatile ContextReader reader;
+	private volatile ContextWriter writer;
+
 	protected enum State {
 		BLANK,
 		LOADING,
@@ -57,7 +65,7 @@ public class LoadableContext extends AbstractContext {
 		super(corpus, manifest);
 	}
 
-	protected Object getLock() {
+	protected final Object getLock() {
 		return lock;
 	}
 
@@ -66,7 +74,7 @@ public class LoadableContext extends AbstractContext {
 	 * matches the expected state. Returns {@code true} if the operation was
 	 * successful.
 	 */
-	protected boolean setState(State expected, State newState) {
+	protected final boolean setState(State expected, State newState) {
 		synchronized (getLock()) {
 			if(state==expected) {
 				state = newState;
@@ -76,7 +84,7 @@ public class LoadableContext extends AbstractContext {
 		}
 	}
 
-	protected State getState() {
+	protected final State getState() {
 		synchronized (getLock()) {
 			return state;
 		}
@@ -86,7 +94,7 @@ public class LoadableContext extends AbstractContext {
 	 * @see de.ims.icarus.io.Loadable#isLoaded()
 	 */
 	@Override
-	public boolean isLoaded() {
+	public final boolean isLoaded() {
 		return getState()==State.LAODED;
 	}
 
@@ -94,7 +102,7 @@ public class LoadableContext extends AbstractContext {
 	 * @see de.ims.icarus.io.Loadable#isLoading()
 	 */
 	@Override
-	public boolean isLoading() {
+	public final boolean isLoading() {
 		return getState()==State.LOADING;
 	}
 
@@ -102,13 +110,13 @@ public class LoadableContext extends AbstractContext {
 	 * @see de.ims.icarus.io.Loadable#load()
 	 */
 	@Override
-	public void load() throws Exception {
+	public final void load() throws Exception {
 		// Abort if loading already in progress
 		if(!setState(State.BLANK, State.LOADING))
 			return;
 
 
-		ContextReader reader = createReader();
+		ContextReader reader = getReader();
 
 		if(reader==null)
 			throw new IllegalStateException("Failed to instantiate reader"); //$NON-NLS-1$
@@ -120,6 +128,12 @@ public class LoadableContext extends AbstractContext {
 					"Layer source was empty: "+getManifest().getLocationManifest().getPath()); //$NON-NLS-1$
 		}
 
+		Corpus corpus = getCorpus();
+
+		for(Layer layer : newLayers) {
+			corpus.addLayer(layer);
+		}
+
 		layers.addAll(newLayers);
 	}
 
@@ -127,17 +141,75 @@ public class LoadableContext extends AbstractContext {
 	 * @see de.ims.icarus.language.model.Context#getLayers()
 	 */
 	@Override
-	public List<Layer> getLayers() {
+	public final List<Layer> getLayers() {
 		return CollectionUtils.getListProxy(layers);
 	}
 
-	protected ContextReader createReader() throws Exception {
-		Class<? extends ContextReader> clazz = getManifest().getReaderClass();
+	private ContextReader loadReader() throws Exception {
 
-		if(clazz==null)
-			throw new IllegalStateException("No reader defined"); //$NON-NLS-1$
+		ContextReaderManifest readerManifest = getManifest().getReaderManifest();
+		if(readerManifest==null)
+			throw new IllegalStateException("Missing reader manifest on context: "+getManifest()); //$NON-NLS-1$
 
-		return clazz.newInstance();
+		String formatId = readerManifest.getFormatId();
+		if(formatId!=null) {
+			return CorpusRegistry.getInstance().getContextReader(formatId);
+		}
+
+		Implementation implementation = readerManifest.getImplementation();
+		if(implementation!=null) {
+			return implementation.instantiate(ContextReader.class);
+		}
+
+		throw new IllegalStateException("No reader information available"); //$NON-NLS-1$
+	}
+
+	public ContextReader getReader() throws Exception {
+		if(reader==null) {
+			synchronized (getLock()) {
+				if(reader==null) {
+					reader = loadReader();
+				}
+			}
+		}
+
+		return reader;
+	}
+
+	private ContextWriter loadWriter() throws Exception {
+
+		ContextWriterManifest writerManifest = getManifest().getWriterManifest();
+		if(writerManifest==null) {
+			// Note that for a writer it is perfectly legal to provide no manifest
+			return null;
+		}
+
+		String formatId = writerManifest.getFormatId();
+		if(formatId!=null) {
+			return CorpusRegistry.getInstance().getContextWriter(formatId);
+		}
+
+		Implementation implementation = writerManifest.getImplementation();
+		if(implementation!=null) {
+			return implementation.instantiate(ContextWriter.class);
+		}
+
+		// While it is legal to provide no writer manifest at all, in
+		// the case that one such manifest was defined it must declare either
+		// a format id or a valid implementation!
+		throw new IllegalStateException("No reader information available"); //$NON-NLS-1$
+	}
+
+	public ContextWriter getWriter() throws Exception {
+		if(writer==null) {
+			synchronized (getLock()) {
+				if(writer==null) {
+					writer = loadWriter();
+				}
+			}
+		}
+
+		return writer;
 	}
 
 	/**

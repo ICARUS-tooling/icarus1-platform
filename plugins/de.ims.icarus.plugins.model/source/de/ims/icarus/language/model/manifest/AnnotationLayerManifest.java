@@ -45,6 +45,8 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 *
 	 * @return An immutable {@code Set} containing all the available keys used
 	 * for annotations.
+	 *
+	 * @see #getDefaultAnnotationManifest()
 	 */
 	Set<String> getAvailableKeys();
 

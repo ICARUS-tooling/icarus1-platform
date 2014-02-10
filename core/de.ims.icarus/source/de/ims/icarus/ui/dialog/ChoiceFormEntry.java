@@ -43,6 +43,15 @@ public class ChoiceFormEntry extends LabeledFormEntry<ChoiceFormEntry> {
 
 	protected final JComboBox<?> comboBox;
 
+	public ChoiceFormEntry(String label, JComboBox<?> comboBox) {
+		super(label);
+		if (comboBox == null)
+			throw new NullPointerException("Invalid comboBox"); //$NON-NLS-1$
+
+		this.comboBox = comboBox;
+		setResizeMode(FormBuilder.RESIZE_HORIZONTAL);
+	}
+
 	public ChoiceFormEntry(String label, ComboBoxModel<?> model, boolean editable) {
 		super(label);
 		if(model==null) {

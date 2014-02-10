@@ -71,12 +71,19 @@ public interface Layer extends NamedCorpusMember {
 	 * Returns the {@code Context} object that defines the physical
 	 * source of this layer and provides information about other
 	 * layers sharing the same origin.
+	 * <p>
+	 * Note that some layers do not require a host context (e.g. the
+	 * virtual overlay layer each corpus provides in order to access
+	 * its layers as markables). Therefore this method is allowed to
+	 * return {@code null}. However, each layer that is hosted within
+	 * a context (i.e. is accessible through it) {@code must} return
+	 * that host context!
 	 */
 	Context getContext();
 
 	/**
 	 * Returns the {@code MarkableLayer} that this layer
-	 * depends on.
+	 * depends on or {@code null}.
 	 *
 	 * @return
 	 */

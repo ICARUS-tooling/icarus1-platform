@@ -65,7 +65,7 @@ public class RootContainer extends AbstractListContainer {
 
 	/**
 	 * Since this implementation represents the top-level container
-	 * of a corpus there is no enclosing container. Therefore this
+	 * of a layer there is no enclosing container. Therefore this
 	 * method always returns {@code null}.
 	 *
 	 * @see de.ims.icarus.language.model.Markable#getContainer()

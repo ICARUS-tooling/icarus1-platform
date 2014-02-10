@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import de.ims.icarus.language.model.ChunkControl;
 import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.ContainerType;
 import de.ims.icarus.language.model.Context;
@@ -78,11 +79,12 @@ public class DefaultCorpus implements Corpus {
 	private final List<Layer> layers = new ArrayList<>();
 
 	private final OverlayLayer overlayLayer;
-
 	private final OverlayContainer overlayContainer;
 
 	// Id pools
 	private final IdPool globalIdDomain;
+
+	private final IdDomain internalIdDomain;
 
 	private LongHashMap<CorpusMember> globalLookup = new LongHashMap<>();
 	private boolean useGlobalCache = false;
@@ -93,6 +95,30 @@ public class DefaultCorpus implements Corpus {
 
 		this.manifest = manifest;
 		this.defaultContext = new DefaultContext(this, manifest.getDefaultContextManifest());
+
+		globalIdDomain = new IdPool();
+		internalIdDomain = globalIdDomain.reserve(100);
+
+		overlayLayer = new OverlayLayer(internalIdDomain.nextId());
+		overlayContainer = new OverlayContainer(internalIdDomain.nextId());
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Corpus#getChunkControl()
+	 */
+	@Override
+	public ChunkControl getChunkControl() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.Corpus#getCustomContexts()
+	 */
+	@Override
+	public List<Context> getCustomContexts() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -157,36 +183,6 @@ public class DefaultCorpus implements Corpus {
 	@Override
 	public CorpusUndoManager getUndoManager() {
 		return undoManager;
-	}
-
-//	/**
-//	 * @see de.ims.icarus.language.model.Corpus#addMember(de.ims.icarus.language.model.CorpusMember)
-//	 */
-//	@Override
-//	public void addMember(CorpusMember member) {
-//		// TODO Auto-generated method stub
-//
-//	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Corpus#getUniqueName(java.lang.String)
-	 */
-	@Override
-	public String getUniqueName(String baseName) {
-		if (baseName == null)
-			throw new NullPointerException("Invalid baseName"); //$NON-NLS-1$
-
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Corpus#getUniqueId(java.lang.String)
-	 */
-	@Override
-	public String getUniqueId(String baseId) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**
@@ -338,7 +334,11 @@ public class DefaultCorpus implements Corpus {
 
 	private class OverlayLayer implements MarkableLayer {
 
-		private final long id = CorpusRegistry.getInstance().newId();
+		private final long id;
+
+		public OverlayLayer(long id) {
+			this.id = id;
+		}
 
 		/**
 		 * @see de.ims.icarus.language.model.Layer#getName()
@@ -362,6 +362,7 @@ public class DefaultCorpus implements Corpus {
 		 */
 		@Override
 		public LayerType getLayerType() {
+			return CorpusRegistry.getInstance().getOverlayLayerType();
 		}
 
 		/**

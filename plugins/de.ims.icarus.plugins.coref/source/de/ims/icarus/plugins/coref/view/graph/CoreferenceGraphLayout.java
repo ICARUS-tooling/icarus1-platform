@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.graph;
@@ -43,13 +43,13 @@ import de.ims.icarus.util.Options;
  *
  */
 public class CoreferenceGraphLayout implements GraphLayout {
-	
+
 	protected mxIGraphLayout layout;
 
 	public CoreferenceGraphLayout() {
 		// no-op
 	}
-	
+
 	protected mxIGraphLayout createLayout(mxGraph graph) {
 		return new TreeLayout(graph);
 	}
@@ -58,7 +58,7 @@ public class CoreferenceGraphLayout implements GraphLayout {
 	 * @see de.ims.icarus.util.Installable#install(java.lang.Object)
 	 */
 	@Override
-	public void install(Object target) {		
+	public void install(Object target) {
 		if(target instanceof GraphPresenter) {
 			layout = createLayout(((GraphPresenter)target).getGraph());
 		} else {
@@ -92,21 +92,25 @@ public class CoreferenceGraphLayout implements GraphLayout {
 		if(layout==null) {
 			return owner.getGraph().getGraphBounds();
 		}
-		
+
 		mxGraph graph = owner.getGraph();
 		Object parent = graph.getDefaultParent();
-		
+
+
 		graph.getModel().beginUpdate();
 		try {
+			for(Object cell : cells) {
+				graph.cellSizeUpdated(cell, false);
+			}
+
 			layout.execute(parent);
-			
+
 			double offset = graph.getGridSize()*2;
-			
 			graph.moveCells(cells, offset, offset);
 		} finally {
 			graph.getModel().endUpdate();
 		}
-		
+
 		return graph.getGraphBounds();
 	}
 
@@ -128,12 +132,12 @@ public class CoreferenceGraphLayout implements GraphLayout {
 			Options options) {
 		return cells==null || cells.length==0 ? null : cells[0];
 	}
-	
+
 	protected class TreeLayout extends mxCompactTreeLayout {
 
 		public TreeLayout(mxGraph graph) {
 			super(graph, false);
-			
+
 			setEdgeRouting(false);
 			setNodeDistance(5);
 			setLevelDistance(15);
@@ -142,31 +146,31 @@ public class CoreferenceGraphLayout implements GraphLayout {
 		@Override
 		public boolean isEdgeIgnored(Object edge) {
 			boolean ignored = super.isEdgeIgnored(edge);
-			
+
 			if(ignored) {
 				return true;
 			}
-			
+
 			mxIGraphModel model = graph.getModel();
 			Object value = model.getValue(edge);
 			if(value instanceof CorefEdgeData) {
 				CorefEdgeData data = (CorefEdgeData) value;
 				Object target = model.getTerminal(edge, false);
 				CorefNodeData nodeData = (CorefNodeData) model.getValue(target);
-				
+
 				if(data.getEdge().getSource().isROOT()) {
 					return false;
 				}
-				
+
 				if(GraphUtils.getIncomingEdgeCount(model, target)==1) {
 					return false;
 				}
-				
+
 				return (nodeData.isGold() || data.isGold());
 			}
-			
+
 			return false;
 		}
-		
+
 	}
 }

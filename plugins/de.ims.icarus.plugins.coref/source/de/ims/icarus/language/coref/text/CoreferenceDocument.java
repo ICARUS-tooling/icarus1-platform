@@ -499,6 +499,10 @@ public class CoreferenceDocument extends BatchDocument {
 		EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(data, allocation);
 		EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(data, goldAllocation);
 
+		if(edgeSet==null) {
+			edgeSet = CoreferenceUtils.defaultEmptyEdgeSet;
+		}
+
 		CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, filterSingletons);
 
 		cacheSpans(edgeSet, goldSet);

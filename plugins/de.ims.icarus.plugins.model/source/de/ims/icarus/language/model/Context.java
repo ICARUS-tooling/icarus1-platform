@@ -47,14 +47,20 @@ public interface Context extends Loadable, ManifestOwner<ContextManifest> {
 
 	/**
 	 * Called by a corpus to signal a context that it has been added.
-	 * 
+	 * <p>
+	 * Note that this method will <b>not</b> be called when a context is
+	 * assigned default context for a corpus!
+	 *
 	 * @param corpus The corpus this context has been added to
 	 */
 	void addNotify(Corpus corpus);
 
 	/**
 	 * Called by a corpus to signal a context that it has been removed.
-	 * 
+	 * <p>
+	 * Note that this method will <b>not</b> be called when a context is
+	 * assigned default context for a corpus!
+	 *
 	 * @param corpus The corpus this context has been removed from
 	 */
 	void removeNotify(Corpus corpus);

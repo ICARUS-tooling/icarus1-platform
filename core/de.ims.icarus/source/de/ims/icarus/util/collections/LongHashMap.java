@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.collections;
@@ -31,7 +31,7 @@ import java.util.Collection;
 /**
  * @author Markus
  * @version $Id$
- * 
+ *
  */
 public class LongHashMap<E extends Object> {
 
@@ -48,14 +48,14 @@ public class LongHashMap<E extends Object> {
 	/**
 	 * The table is rehashed when its size exceeds this threshold. (The value of
 	 * this field is (int)(capacity * loadFactor).)
-	 * 
+	 *
 	 * @serial
 	 */
 	private int threshold;
 
 	/**
 	 * The load factor for the hash-table.
-	 * 
+	 *
 	 * @serial
 	 */
 	private float loadFactor;
@@ -71,7 +71,7 @@ public class LongHashMap<E extends Object> {
 
 		/**
 		 * Create a new entry with the given values.
-		 * 
+		 *
 		 * @param key The key used to enter this in the table
 		 * @param value The value for this key
 		 * @param next A reference to the next entry in the table
@@ -94,7 +94,7 @@ public class LongHashMap<E extends Object> {
 	/**
 	 * Constructs a new, empty hash-table with the specified initial capacity and
 	 * default load factor, which is <code>0.75</code>.
-	 * 
+	 *
 	 * @param initialCapacity the initial capacity of the hash-table.
 	 * @throws IllegalArgumentException if the initial capacity is less than zero.
 	 */
@@ -105,20 +105,20 @@ public class LongHashMap<E extends Object> {
 	/**
 	 * Constructs a new, empty hash-table with the specified initial capacity and
 	 * the specified load factor.
-	 * 
+	 *
 	 * @param initialCapacity the initial capacity of the hash-table.
 	 * @param loadFactor the load factor of the hash-table.
 	 * @throws IllegalArgumentException if the initial capacity is less than zero, or if the load
 	 *             factor is non-positive.
 	 */
 	public LongHashMap(int initialCapacity, float loadFactor) {
-		
+
 		if (initialCapacity < 0)
 			throw new IllegalArgumentException("Illegal capacity (negative): " //$NON-NLS-1$
 					+ initialCapacity);
 		if (loadFactor <= 0)
 			throw new IllegalArgumentException("Illegal load-factor (zero or less): " + loadFactor); //$NON-NLS-1$
-		
+
 		if (initialCapacity == 0) {
 			initialCapacity = 1;
 		}
@@ -130,7 +130,7 @@ public class LongHashMap<E extends Object> {
 
 	/**
 	 * Returns the number of keys in this hash-table.
-	 * 
+	 *
 	 * @return the number of keys in this hash-table.
 	 */
 	public int size() {
@@ -139,7 +139,7 @@ public class LongHashMap<E extends Object> {
 
 	/**
 	 * Tests if this hash-table maps no keys to values.
-	 * 
+	 *
 	 * @return {@code true} if this hash-table maps no keys to values;
 	 *         {@code false} otherwise.
 	 */
@@ -150,10 +150,10 @@ public class LongHashMap<E extends Object> {
 	/**
 	 * Tests if some key maps into the specified value in this hash-table. This
 	 * operation is more expensive than the <code>containsKey</code> method.
-	 * 
+	 *
 	 * Note that this method is identical in functionality to containsValue,
 	 * (which is part of the Map interface in the collections framework).
-	 * 
+	 *
 	 * @param value
 	 *            a value to search for.
 	 * @return {@code true} if and only if some key maps to the
@@ -181,7 +181,7 @@ public class LongHashMap<E extends Object> {
 
 	/**
 	 * Tests if the specified object is a key in this hash-table.
-	 * 
+	 *
 	 * @param key
 	 *            possible key.
 	 * @return {@code true} if and only if the specified object is a key in
@@ -203,7 +203,7 @@ public class LongHashMap<E extends Object> {
 
 	/**
 	 * Returns the value to which the specified key is mapped in this map.
-	 * 
+	 *
 	 * @param key
 	 *            a key in the hash-table.
 	 * @return the value to which the key is mapped in this hash-table;
@@ -227,7 +227,7 @@ public class LongHashMap<E extends Object> {
 	/**
 	 * Increases the capacity of and internally reorganizes this hash-table, in
 	 * order to accommodate and access its entries more efficiently.
-	 * 
+	 *
 	 * This method is called automatically when the number of keys in the
 	 * hash-table exceeds this hash-table's capacity and load factor.
 	 */
@@ -256,10 +256,10 @@ public class LongHashMap<E extends Object> {
 	/**
 	 * Maps the specified {@code key} to the specified {@code value}
 	 * in this hash-table.
-	 * 
+	 *
 	 * The value can be retrieved by calling the {@link #get(long)} method with a
 	 * key that is equal to the original key.
-	 * 
+	 *
 	 * @param key the hash-table key.
 	 * @param value the value.
 	 * @return the previous value of the specified key in this hash-table, or
@@ -297,9 +297,9 @@ public class LongHashMap<E extends Object> {
 
 	/**
 	 * Removes the key (and its corresponding value) from this hash-table.
-	 * 
+	 *
 	 * This method does nothing if the key is not present in the hash-table.
-	 * 
+	 *
 	 * @param key the key that needs to be removed.
 	 * @return the value to which the key had been mapped in this hash-table, or
 	 *         {@code null} if the key did not have a mapping.
@@ -337,6 +337,45 @@ public class LongHashMap<E extends Object> {
 	}
 
 	@SuppressWarnings("unchecked")
+	public void save(long[] keys, E[] values) {
+		if (keys == null)
+			throw new NullPointerException("Invalid keys"); //$NON-NLS-1$
+		if (values == null)
+			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
+
+		if(keys.length!=values.length)
+			throw new IllegalArgumentException("Different size for keys and values buffer"); //$NON-NLS-1$
+		if(keys.length!=count)
+			throw new IllegalArgumentException("Buffer size does not match current size of table"); //$NON-NLS-1$
+
+		int index = 0;
+		Entry tab[] = table;
+		for (int i = tab.length; i-- > 0;) {
+			for (Entry e = tab[i]; e != null; e = e.next) {
+				keys[index] = e.key;
+				values[index] = (E) e.value;
+			}
+		}
+	}
+
+	public void load(long[] keys, E[] values) {
+		if (keys == null)
+			throw new NullPointerException("Invalid keys"); //$NON-NLS-1$
+		if (values == null)
+			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
+
+		if(keys.length!=values.length)
+			throw new IllegalArgumentException("Different size for keys and values buffer"); //$NON-NLS-1$
+
+		clear();
+
+		int size = keys.length;
+		for (int i = 0; i<size; i++) {
+			put(keys[i], values[i]);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
 	public Collection<E> values() {
 		Collection<E> result = new ArrayList<>(count);
 
@@ -346,7 +385,7 @@ public class LongHashMap<E extends Object> {
 				result.add((E) e.value);
 			}
 		}
-		
+
 		return result;
 	}
 

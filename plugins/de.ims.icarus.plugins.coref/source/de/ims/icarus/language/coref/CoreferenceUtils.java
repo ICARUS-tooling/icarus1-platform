@@ -496,6 +496,9 @@ public final class CoreferenceUtils {
 		return edgeSet;
 	}
 
+	public static final SpanSet defaultEmptySpanSet = new SpanSet();
+	public static final EdgeSet defaultEmptyEdgeSet = new EdgeSet();
+
 	public static SpanSet getSpanSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
 		SpanSet spanSet = allocation==null ? null : allocation.getSpanSet(document.getId());
 		if(spanSet==null) {

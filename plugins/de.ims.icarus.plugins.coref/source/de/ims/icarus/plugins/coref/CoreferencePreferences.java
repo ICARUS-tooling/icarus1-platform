@@ -66,6 +66,8 @@ public class CoreferencePreferences {
 		builder.addBooleanEntry("markFalseEdges", true); //$NON-NLS-1$
 		builder.addBooleanEntry("includeGoldEdges", false); //$NON-NLS-1$
 		builder.addBooleanEntry("filterSingletons", true); //$NON-NLS-1$
+		builder.addStringEntry("defaultNodeLabelPattern", "$form$\\\\ns-b-e"); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addStringEntry("defaultEdgeLabelPattern", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		Options options = new Options();
 		options.put("gridEnabled", false); //$NON-NLS-1$
 //		options.put("selectedVertexShape", 1); //$NON-NLS-1$

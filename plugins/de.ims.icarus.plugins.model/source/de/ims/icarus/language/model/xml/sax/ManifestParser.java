@@ -436,8 +436,8 @@ public class ManifestParser {
 		private void appendLayer(AbstractLayerManifest<?> layerManifest) {
 			ContextManifestImpl contextManifest = current(ContextManifestImpl.class);
 
-			contextManifest.addLayerManifest(layerManifest);
 			layerManifest.setContextManifest(contextManifest);
+			contextManifest.addLayerManifest(layerManifest);
 		}
 
 		private void appendContainer(ContainerManifestImpl containerManifest) {
@@ -450,8 +450,8 @@ public class ManifestParser {
 				containerManifest.setParentManifest(lastContainer);
 			}
 
-			layerManifest.addContainerManifest(containerManifest);
 			containerManifest.setLayerManifest(layerManifest);
+			layerManifest.addContainerManifest(containerManifest);
 		}
 
 		private void readTemplateAttributes(Attributes attributes, AbstractDerivable<?> derivable) {

@@ -33,11 +33,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.MutableComboBoxModel;
 
 import org.java.plugin.registry.Extension;
 
@@ -68,16 +71,28 @@ import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
+import de.ims.icarus.plugins.coref.view.PatternExample;
+import de.ims.icarus.plugins.coref.view.graph.labels.CellLabelBuilder;
+import de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder;
 import de.ims.icarus.plugins.jgraph.layout.GraphLayout;
 import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.layout.GraphStyle;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
+import de.ims.icarus.resources.Localizable;
+import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
+import de.ims.icarus.ui.dialog.ChoiceFormEntry;
+import de.ims.icarus.ui.dialog.DialogFactory;
+import de.ims.icarus.ui.dialog.DummyFormEntry;
+import de.ims.icarus.ui.dialog.FormBuilder;
+import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationControl;
@@ -108,6 +123,13 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 
 	protected SpanCache cache = new SpanCache();
+
+	protected PatternLabelBuilder labelBuilder = new PatternLabelBuilder(
+			"$form$\\\\ns-b-e", ""); //$NON-NLS-1$ //$NON-NLS-2$
+
+	protected JComboBox<Object> nodePatternSelect;
+	protected JComboBox<Object> edgePatternSelect;
+	protected JLabel patternSelectInfo;
 
 	public CoreferenceGraphPresenter() {
 		// no-op
@@ -252,6 +274,26 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		presenterMenu = new CoreferenceDocumentDataPresenter.PresenterMenu(this, getHandler());
 	}
 
+	protected JComboBox<Object> createPatternSelect(String defaultPattern) {
+		JComboBox<Object> patternSelect = new JComboBox<>();
+		String pattern = defaultPattern;
+
+		if(pattern!=null && pattern.trim().isEmpty()) {
+			pattern = null;
+		}
+
+		patternSelect.setEditable(true);
+		if(pattern!=null) {
+			MutableComboBoxModel<Object> model = (MutableComboBoxModel<Object>) patternSelect.getModel();
+			model.addElement(pattern);
+		}
+		patternSelect.setSelectedItem(pattern);
+		patternSelect.addActionListener(getHandler());
+		UIUtil.resizeComponent(patternSelect, 300, 24);
+
+		return patternSelect;
+	}
+
 	/**
 	 * @see de.ims.icarus.plugins.jgraph.view.GraphPresenter#createUpperToolBar()
 	 */
@@ -262,6 +304,31 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		builder.addOption("errorInfoLabel", CoreferenceUtils.createErrorInfoLabel()); //$NON-NLS-1$
 
 		return builder;
+	}
+
+	protected String createPatternSelectTooltip() {
+		StringBuilder sb = new StringBuilder(300);
+		ResourceManager rm = ResourceManager.getInstance();
+
+		sb.append("<html>"); //$NON-NLS-1$
+		sb.append("<h3>").append(rm.get("plugins.coref.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("<table>"); //$NON-NLS-1$
+		sb.append("<tr><th>") //$NON-NLS-1$
+			.append(rm.get("plugins.coref.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
+			.append(rm.get("plugins.coref.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		Map<Object, Object> mc = PatternLabelBuilder.magicCharacters;
+		for(Entry<Object, Object> entry : mc.entrySet()) {
+			String c = entry.getKey().toString();
+			String key = entry.getValue().toString();
+
+			sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
+			.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		sb.append("</table>"); //$NON-NLS-1$
+
+		return sb.toString();
 	}
 
 	/**
@@ -329,8 +396,6 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				"plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction"); //$NON-NLS-1$
 		actionManager.setSelected(isFilterSingletons(),
 				"plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction"); //$NON-NLS-1$
-		actionManager.setSelected(isShowSpanBounds(),
-				"plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction"); //$NON-NLS-1$
 
 		// Register callback functions
 		actionManager.addHandler(
@@ -351,6 +416,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		actionManager.addHandler(
 				"plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction",  //$NON-NLS-1$
 				callbackHandler, "showSpanBounds"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.coref.coreferenceGraphPresenter.editLabelPatternsAction",  //$NON-NLS-1$
+				callbackHandler, "editLabelPatterns"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -442,6 +510,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 			EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(document, allocation);
 			EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
+
+			if(edgeSet==null) {
+				edgeSet = CoreferenceUtils.defaultEmptyEdgeSet;
+			}
 
 			// Clear gold set if it is the same as the one displayed
 			if(edgeSet==goldSet) {
@@ -655,28 +727,22 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	}
 
 	/**
-	 * @return the showSpanBounds
+	 * @return the labelBuilder
 	 */
-	public boolean isShowSpanBounds() {
-		return showSpanBounds;
+	public CellLabelBuilder getLabelBuilder() {
+		return labelBuilder;
 	}
 
 	/**
-	 * @param showSpanBounds the showSpanBounds to set
+	 * @param labelBuilder the labelBuilder to set
 	 */
-	public void setShowSpanBounds(boolean showSpanBounds) {
-		if(showSpanBounds==this.showSpanBounds)
-			return;
+	public void setLabelBuilder(PatternLabelBuilder labelBuilder) {
+		if (labelBuilder == null)
+			throw new NullPointerException("Invalid labelBuilder"); //$NON-NLS-1$
 
-		boolean oldValue = this.showSpanBounds;
-		this.showSpanBounds = showSpanBounds;
+		this.labelBuilder = labelBuilder;
 
-		rebuildGraph();
-
-		getActionManager().setSelected(showSpanBounds,
-				"plugins.coref.coreferenceGraphPresenter.toggleShowSpanBoundsAction"); //$NON-NLS-1$
-
-		firePropertyChange("showSpanBounds", oldValue, showSpanBounds); //$NON-NLS-1$
+		refreshLayout();
 	}
 
 	protected void outlineProperties(Object value) {
@@ -818,42 +884,17 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 //			System.out.println(value);
 
-			String label = ((CorefCellData<?>)value).getLabel();
-
-			if(label!=null)
-				return label;
+			String label = null;
 
 			if(value instanceof CorefEdgeData) {
-//				CorefEdgeData edgeData = (CorefEdgeData) value;
-//				label = edgeData.getEdge().toString();
-				label = ""; //$NON-NLS-1$
+				label = labelBuilder.getLabel(((CorefEdgeData)value).getEdge());
 			} else if(value instanceof CorefNodeData) {
 				CorefNodeData nodeData = (CorefNodeData) value;
-				Span data = nodeData.getSpan();
 
-				if(data==null) {
-					label = "-"; //$NON-NLS-1$
-				} else if(data.isROOT()) {
-					label = "\n  Document Root  \n "; //$NON-NLS-1$
+				if(nodeData.getSpan().isROOT()) {
+					label = nodeData.getSpan().toString();
 				} else {
-					StringBuilder sb = new StringBuilder();
-
-					int i0 = data.getBeginIndex();
-					int i1 = data.getEndIndex();
-
-					for(int i=i0; i<=i1; i++) {
-						if(i>i0) {
-							sb.append(' ');
-						}
-						sb.append(nodeData.getSentence().getForm(i));
-					}
-
-					if(isShowSpanBounds()) {
-						sb.append('\n');
-						data.appendTo(sb);
-					}
-
-					label = sb.toString();
+					label = labelBuilder.getLabel(nodeData.getSpan(), nodeData.getSentence());
 				}
 			}
 
@@ -932,12 +973,131 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			// ignore
 		}
 
-		public void showSpanBounds(boolean b) {
-			setShowSpanBounds(b);
+		private String getPattern(JComboBox<Object> comboBox) {
+			Object value = comboBox.getSelectedItem();
+			String pattern = null;
+
+			if(value instanceof String) {
+				pattern = (String) value;
+			} else if(value instanceof PatternExample) {
+				pattern = ((PatternExample)value).getPattern();
+			}
+
+			return pattern;
 		}
 
-		public void showSpanBounds(ActionEvent e) {
-			// ignore
+		private void addPattern(Object pattern, JComboBox<Object> comboBox) {
+
+			// Legal pattern
+			MutableComboBoxModel<Object> model =
+					(MutableComboBoxModel<Object>) comboBox.getModel();
+
+			int index = ListUtils.indexOf(pattern, model);
+
+			if(index==-1) {
+				model.addElement(pattern);
+			}
+		}
+
+		public void editLabelPatterns(ActionEvent e) {
+			if(nodePatternSelect==null) {
+				String pattern = ConfigRegistry.getGlobalRegistry().getString(
+						"plugins.jgraph.appearance.coref.defaultNodeLabelPattern"); //$NON-NLS-1$
+				nodePatternSelect = createPatternSelect(pattern);
+			}
+			if(edgePatternSelect==null) {
+				String pattern = ConfigRegistry.getGlobalRegistry().getString(
+						"plugins.jgraph.appearance.coref.defaultEdgeLabelPattern"); //$NON-NLS-1$
+				edgePatternSelect = createPatternSelect(pattern);
+			}
+
+			if(patternSelectInfo==null) {
+				final JLabel label = new JLabel();
+				label.addMouseListener(new TooltipFreezer());label.setIcon(UIUtil.getInfoIcon());
+
+				Localizable localizable = new Localizable() {
+
+					@Override
+					public void localize() {
+						label.setToolTipText(createPatternSelectTooltip());
+					}
+				};
+
+				localizable.localize();
+				ResourceManager.getInstance().getGlobalDomain().addItem(localizable);
+
+				patternSelectInfo = label;
+			}
+
+			nodePatternSelect.setSelectedItem(labelBuilder.getNodePattern());
+			edgePatternSelect.setSelectedItem(labelBuilder.getEdgePattern());
+
+			FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
+			formBuilder.addEntry("info", new DummyFormEntry( //$NON-NLS-1$
+					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.info", patternSelectInfo)); //$NON-NLS-1$
+			formBuilder.addEntry("nodePattern", new ChoiceFormEntry( //$NON-NLS-1$
+					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.nodePattern", nodePatternSelect)); //$NON-NLS-1$
+			formBuilder.addEntry("edgePattern", new ChoiceFormEntry( //$NON-NLS-1$
+					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.edgePattern", edgePatternSelect)); //$NON-NLS-1$
+
+			formBuilder.buildForm();
+
+			if(DialogFactory.getGlobalFactory().showGenericDialog(
+					null,
+					DialogFactory.OK_CANCEL_OPTION,
+					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.title", //$NON-NLS-1$
+					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.message", //$NON-NLS-1$
+					formBuilder.getContainer(),
+					true)) {
+
+				// Node pattern
+				String nodePattern = getPattern(nodePatternSelect);
+				if(nodePattern==null || nodePattern.isEmpty()) {
+					// Ensure minimum label!
+					nodePattern = "$form$"; //$NON-NLS-1$
+				}
+
+				try {
+					labelBuilder.setNodePattern(nodePattern);
+					addPattern(nodePattern, nodePatternSelect);
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Invalid node pattern: "+nodePattern, ex); //$NON-NLS-1$
+
+					UIUtil.beep();
+					DialogFactory.getGlobalFactory().showError(null,
+							"plugins.coref.coreferenceGraphPresenter.dialogs.invalidNodePattern.title",  //$NON-NLS-1$
+							"plugins.coref.coreferenceGraphPresenter.dialogs.invalidNodePattern.message",  //$NON-NLS-1$
+							nodePattern);
+
+					return;
+				}
+
+				// Edge pattern
+				String edgePattern = getPattern(edgePatternSelect);
+				if(edgePattern==null) {
+					edgePattern = ""; //$NON-NLS-1$
+				}
+
+				try {
+					labelBuilder.setEdgePattern(edgePattern);
+					addPattern(edgePattern, edgePatternSelect);
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Invalid edge pattern: "+edgePattern, ex); //$NON-NLS-1$
+
+					UIUtil.beep();
+					DialogFactory.getGlobalFactory().showError(null,
+							"plugins.coref.coreferenceGraphPresenter.dialogs.invalidEdgePattern.title",  //$NON-NLS-1$
+							"plugins.coref.coreferenceGraphPresenter.dialogs.invalidEdgePattern.message",  //$NON-NLS-1$
+							edgePattern);
+
+					return;
+				}
+
+//				refreshLayout();
+				CoreferenceGraphPresenter.this.rebuildGraph();
+			}
 		}
 	}
 }

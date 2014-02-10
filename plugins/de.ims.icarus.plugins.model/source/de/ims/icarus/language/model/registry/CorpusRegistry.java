@@ -421,4 +421,8 @@ public final class CorpusRegistry {
 	public void removeEventListener(EventListener listener, String eventName) {
 		eventSource.removeEventListener(listener, eventName);
 	}
+
+	public LayerType getOverlayLayerType() {
+
+	}
 }

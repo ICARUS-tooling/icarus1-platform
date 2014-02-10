@@ -66,6 +66,7 @@ import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
+import de.ims.icarus.plugins.coref.view.PatternExample;
 import de.ims.icarus.plugins.coref.view.grid.labels.GridLabelBuilder;
 import de.ims.icarus.plugins.coref.view.grid.labels.PatternLabelBuilder;
 import de.ims.icarus.resources.Localizable;
@@ -86,7 +87,6 @@ import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Installable;
-import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.annotation.AnnotationControl;
@@ -525,8 +525,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 
 					UIUtil.beep();
 					DialogFactory.getGlobalFactory().showError(null,
-							"plugins.coref.entityGridPresenterdialogs.invalidPattern.title",  //$NON-NLS-1$
-							"plugins.coref.entityGridPresenterdialogs.invalidPattern.message",  //$NON-NLS-1$
+							"plugins.coref.entityGridPresenter.dialogs.invalidPattern.title",  //$NON-NLS-1$
+							"plugins.coref.entityGridPresenter.dialogs.invalidPattern.message",  //$NON-NLS-1$
 							pattern);
 				}
 			}
@@ -837,51 +837,6 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to refresh grid", ex); //$NON-NLS-1$
 			}
-		}
-	}
-
-	public static class PatternExample implements NamedObject {
-		private String pattern;
-		private String key;
-
-		public PatternExample(String pattern, String key) {
-			setPattern(pattern);
-			setKey(key);
-		}
-
-		public String getPattern() {
-			return pattern;
-		}
-
-		public String getKey() {
-			return key;
-		}
-
-		public void setPattern(String pattern) {
-			if(pattern==null || pattern.isEmpty())
-				throw new NullPointerException("Invalid pattern"); //$NON-NLS-1$
-
-			this.pattern = pattern;
-		}
-
-		public void setKey(String key) {
-			if(key==null || key.isEmpty())
-				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
-
-			this.key = key;
-		}
-
-		@Override
-		public String toString() {
-			return getKey()+": "+getPattern(); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see de.ims.icarus.util.NamedObject#getName()
-		 */
-		@Override
-		public String getName() {
-			return ResourceManager.getInstance().get(key);
 		}
 	}
 }
