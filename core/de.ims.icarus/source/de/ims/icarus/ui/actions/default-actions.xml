@@ -166,11 +166,17 @@
 		desc="export"
 		icon="export_wiz.gif" />
 	
-	<!-- Export -->
+	<!-- Filter -->
 	<action id="actions.default.filterAction" virtual="true"
 		name="filter" 
 		desc="filter"
-		icon="filter_tsk.gif" />
+		icon="filter_apply.png" />
+	
+	<!-- Filter clear -->
+	<action id="actions.default.clearFilterAction" virtual="true"
+		name="clearFilter" 
+		desc="clearFilter"
+		icon="filter_reset.png" />
 	
 	<!-- First Element -->
 	<action id="actions.default.firstElementAction" virtual="true"

@@ -45,9 +45,9 @@
 	<action id="plugins.searchTools.searchResultPresenter.flipTableAction"
 		name="${id}.name" desc="${id}.description" icon="flip.gif" />
 	<action id="plugins.searchTools.searchResultPresenter.resetTableAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="sort_reset.png" />
 	<action id="plugins.searchTools.searchResultPresenter.resetFixedTableAction"
-		name="${id}.name" desc="${id}.description" icon="delete_obj.gif" />
+		name="${id}.name" desc="${id}.description" icon="sort_reset.png" />
 		
 	<!-- ToolBar List for header area ( 1D result )-->
 	<action-list id="plugins.searchTools.searchResultPresenter.toolBarList1D">
@@ -55,7 +55,6 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction" />
 		<item type="custom" value="sortButtons" />
-		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
 	</action-list>
 		
@@ -65,7 +64,6 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction" />
 		<item type="custom" value="sortButtons" />
-		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.flipTableAction" />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
 	</action-list>
@@ -76,10 +74,8 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction" />
 		<item type="custom" value="fixedDimensionSortButtons" />
-		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.resetFixedTableAction" />
 		<item type="custom" value="sortButtons" />
-		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.flipTableAction" />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
 		<separator />
