@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.registry;
@@ -71,13 +71,13 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
  */
 @XmlRootElement(name="documentSet")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class DocumentSetDescriptor implements Loadable, 
+public class DocumentSetDescriptor implements Loadable,
 		Wrapper<CoreferenceDocumentSet>, DataList<AllocationDescriptor>, NamedObject {
 
 	// User defined id for the document set
 	@XmlElement(name="name", defaultValue="<unnamed>")
 	private String name;
-	
+
 	// Internal id
 	@XmlID
 	@XmlAttribute(name="id")
@@ -87,24 +87,24 @@ public class DocumentSetDescriptor implements Loadable,
 	@XmlElement(name="location")
 	@XmlJavaTypeAdapter(LocationAdapter.class)
 	private Location location;
-	
+
 	@XmlElement(name="properties", required=false)
 	@XmlJavaTypeAdapter(MapAdapter.class)
 	private Map<String, Object> properties;
-	
+
 	@XmlTransient
 	private CoreferenceDocumentSet documentSet;
-		
+
 	@XmlElement(name="reader")
 	@XmlJavaTypeAdapter(ExtensionAdapter.class)
 	private Extension readerExtension;
-	
+
 	@XmlElement(name="allocations")
 	private List<AllocationDescriptor> allocations = new ArrayList<>();
-	
+
 	@XmlTransient
 	private AtomicBoolean loading = new AtomicBoolean();
-	
+
 	@XmlTransient
 	private EventListenerList listeners;
 
@@ -137,9 +137,9 @@ public class DocumentSetDescriptor implements Loadable,
 			throw new IllegalStateException("Loading process already started"); //$NON-NLS-1$
 
 		Reader<CoreferenceDocumentData> reader = null;
-		
+
 		try {
-			
+
 			Location location = getLocation();
 			if(location==null)
 				throw new IllegalStateException("No location specified"); //$NON-NLS-1$
@@ -147,14 +147,14 @@ public class DocumentSetDescriptor implements Loadable,
 			reader = createReader();
 			if(reader==null)
 				throw new IllegalStateException("No valid reader available"); //$NON-NLS-1$
-			
+
 			Options options = new Options(getProperties());
 			CoreferenceDocumentSet documentSet = getDocumentSet();
 			documentSet.free();
-			
+
 			CoreferenceUtils.loadDocumentSet(reader, location, options, documentSet);
 		} finally {
-			
+
 			if(reader!=null) {
 				try {
 					reader.close();
@@ -162,11 +162,12 @@ public class DocumentSetDescriptor implements Loadable,
 					LoggerFactory.error(this, "Failed to close reader", e); //$NON-NLS-1$
 				}
 			}
-			
+
 			loading.set(false);
 		}
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -203,7 +204,7 @@ public class DocumentSetDescriptor implements Loadable,
 		try {
 			return (Reader<CoreferenceDocumentData>) PluginUtil.instantiate(readerExtension);
 		} catch (Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to instantiate reader: "+readerExtension.getUniqueId(), e); //$NON-NLS-1$
 		}
 		return null;
@@ -219,7 +220,7 @@ public class DocumentSetDescriptor implements Loadable,
 		if(name.equals(this.name)) {
 			return;
 		}
-		
+
 		this.name = name;
 	}
 
@@ -229,7 +230,7 @@ public class DocumentSetDescriptor implements Loadable,
 		if(id.equals(this.id)) {
 			return;
 		}
-		
+
 		this.id = id;
 	}
 
@@ -241,16 +242,23 @@ public class DocumentSetDescriptor implements Loadable,
 		if(readerExtension!=null && readerExtension.equals(this.readerExtension)) {
 			return;
 		}
-		
+
 		this.readerExtension = readerExtension;
 		free();
 	}
 
+	@Override
 	public void free() {
 		CoreferenceDocumentSet documentSet = getDocumentSet();
-		
+
 		documentSet.free();
-		
+
+		for(AllocationDescriptor allocation : allocations) {
+			if(allocation.isLoaded()) {
+				allocation.free();
+			}
+		}
+
 		fireChangeEvent();
 	}
 
@@ -294,7 +302,7 @@ public class DocumentSetDescriptor implements Loadable,
 		if (listeners==null) {
 			listeners = new EventListenerList();
 		}
-		
+
 		listeners.add(ChangeListener.class, listener);
 	}
 
@@ -306,15 +314,15 @@ public class DocumentSetDescriptor implements Loadable,
 		if(listeners==null) {
 			return;
 		}
-		
+
 		listeners.remove(ChangeListener.class, listener);
 	}
-	
+
 	private void fireChangeEvent() {
 		if(listeners==null) {
 			return;
 		}
-		
+
 		ChangeListener[] changeListeners = listeners.getListeners(ChangeListener.class);
 		if(changeListeners==null) {
 			return;
@@ -324,53 +332,53 @@ public class DocumentSetDescriptor implements Loadable,
 			listener.stateChanged(event);
 		}
 	}
-	
+
 	public void addAllocation(AllocationDescriptor allocation) {
 		if(allocation==null)
 			throw new NullPointerException("Invalid allocation"); //$NON-NLS-1$
-		
+
 		allocation.setParent(this);
 		allocations.add(allocation);
-		
+
 		fireChangeEvent();
 	}
-	
+
 	public void removeAllocation(int index) {
 		if(allocations.isEmpty()) {
 			return;
 		}
-		
+
 		AllocationDescriptor allocation = allocations.remove(index);
 		allocation.setParent(null);
-		
+
 		fireChangeEvent();
 	}
-	
+
 	public int removeAllocation(AllocationDescriptor allocation) {
 		if(allocation==null)
 			throw new NullPointerException("Invalid allocation"); //$NON-NLS-1$
-		
+
 		if(allocations.isEmpty()) {
 			return -1;
 		}
-		
+
 		int index = allocations.indexOf(allocation);
-		
+
 		if(index==-1)
 			throw new IllegalArgumentException("Allocation not found in list: "+allocation.getName()); //$NON-NLS-1$
-		
+
 		allocations.remove(index);
 		allocation.setParent(null);
-		
+
 		fireChangeEvent();
-		
+
 		return index;
 	}
-	
+
 	public int indexOfAllocation(AllocationDescriptor allocation) {
 		return allocations.isEmpty() ? -1 : allocations.indexOf(allocation);
 	}
-	
+
 	private static ContentType allocationDescriptorContentType;
 	public static ContentType getEntryType() {
 		if(allocationDescriptorContentType==null) {
@@ -380,7 +388,7 @@ public class DocumentSetDescriptor implements Loadable,
 				}
 			}
 		}
-		
+
 		return allocationDescriptorContentType;
 	}
 }

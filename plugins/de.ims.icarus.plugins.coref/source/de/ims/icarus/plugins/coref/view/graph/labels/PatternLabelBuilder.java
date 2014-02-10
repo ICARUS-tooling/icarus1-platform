@@ -73,7 +73,7 @@ public class PatternLabelBuilder implements CellLabelBuilder {
 		Element[] elements = compile(nodePattern);
 
 		if(elements==null || elements.length==0)
-			throw new IllegalStateException("No valid element array available"); //$NON-NLS-1$
+			throw new IllegalStateException("No valid node element array available"); //$NON-NLS-1$
 
 		this.nodeElements = elements;
 		this.nodePattern = nodePattern;
@@ -90,7 +90,7 @@ public class PatternLabelBuilder implements CellLabelBuilder {
 		Element[] elements = compile(edgePattern);
 
 		if(elements==null)
-			throw new IllegalStateException("No valid element array available"); //$NON-NLS-1$
+			throw new IllegalStateException("No valid edge element array available"); //$NON-NLS-1$
 
 		this.edgeElements = elements;
 		this.edgePattern = edgePattern;

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.registry;
@@ -61,7 +61,7 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
  */
 @XmlRootElement(name="allocation")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class AllocationDescriptor implements Loadable, 
+public class AllocationDescriptor implements Loadable,
 		Wrapper<CoreferenceAllocation>, NamedObject {
 
 	// User defined id for the allocation
@@ -77,10 +77,10 @@ public class AllocationDescriptor implements Loadable,
 	@XmlElement(name="location")
 	@XmlJavaTypeAdapter(LocationAdapter.class)
 	private Location location;
-	
+
 	@XmlTransient
 	private CoreferenceAllocation allocation;
-	
+
 	@XmlElement(name="properties", required=false)
 	@XmlJavaTypeAdapter(MapAdapter.class)
 	private Map<String, Object> properties;
@@ -89,28 +89,28 @@ public class AllocationDescriptor implements Loadable,
 	@XmlJavaTypeAdapter(ExtensionAdapter.class)
 	private Extension readerExtension;
 
-	@XmlTransient
-	private AtomicBoolean loading = new AtomicBoolean();
+	private transient AtomicBoolean loading = new AtomicBoolean();
+	private transient AtomicBoolean loaded = new AtomicBoolean();
 
 	@XmlIDREF
 	@XmlElement(name="parent")
 	private DocumentSetDescriptor parent;
-	
+
 	protected AllocationDescriptor() {
 		// no-op
 	}
-	
+
 	public AllocationDescriptor(DocumentSetDescriptor parent) {
 		if(parent==null)
 			throw new IllegalArgumentException("Invaldi parent"); //$NON-NLS-1$
-		
+
 		setParent(parent);
 	}
-	
+
 	public DocumentSetDescriptor getParent() {
 		return parent;
 	}
-	
+
 	void setParent(DocumentSetDescriptor parent) {
 		this.parent = parent;
 	}
@@ -128,7 +128,7 @@ public class AllocationDescriptor implements Loadable,
 	 */
 	@Override
 	public boolean isLoaded() {
-		return getAllocation().size()>0;
+		return loaded.get();
 	}
 
 	/**
@@ -146,9 +146,10 @@ public class AllocationDescriptor implements Loadable,
 	public void load() throws Exception {
 		if(!loading.compareAndSet(false, true))
 			throw new IllegalStateException("Loading process already started"); //$NON-NLS-1$
-		
+		loaded.set(false);
+
 		try {
-			
+
 			Location location = getLocation();
 			if(location==null)
 				throw new IllegalStateException("No location specified"); //$NON-NLS-1$
@@ -156,20 +157,23 @@ public class AllocationDescriptor implements Loadable,
 			AllocationReader reader = createReader();
 			if(reader==null)
 				throw new IllegalStateException("No valid reader available"); //$NON-NLS-1$
-			
+
 			Options options = new Options(getProperties());
 			CoreferenceAllocation allocation = getAllocation();
 			allocation.free();
-			
+
 			DocumentSetDescriptor parent = getParent();
 			if(parent==null)
 				throw new IllegalStateException("No parent set"); //$NON-NLS-1$
-			
+
 			reader.init(location, options, parent.getDocumentSet());
-			
+
 			reader.readAllocation(allocation);
 		} finally {
 			loading.set(false);
+
+			//TODO is it save to force loaded state after error?
+			loaded.set(true);
 		}
 	}
 
@@ -186,12 +190,13 @@ public class AllocationDescriptor implements Loadable,
 		try {
 			return (AllocationReader) PluginUtil.instantiate(readerExtension);
 		} catch (Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to instantiate allocation reader: "+readerExtension.getUniqueId(), e); //$NON-NLS-1$
 		}
 		return null;
 	}
-	
+
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -203,7 +208,7 @@ public class AllocationDescriptor implements Loadable,
 	public Location getLocation() {
 		return location;
 	}
-	
+
 	protected void setAllocation(CoreferenceAllocation allocation) {
 		this.allocation = allocation;
 	}
@@ -225,7 +230,7 @@ public class AllocationDescriptor implements Loadable,
 		if(name.equals(this.name)) {
 			return;
 		}
-		
+
 		this.name = name;
 	}
 
@@ -235,7 +240,7 @@ public class AllocationDescriptor implements Loadable,
 		if(id.equals(this.id)) {
 			return;
 		}
-		
+
 		this.id = id;
 	}
 
@@ -247,12 +252,17 @@ public class AllocationDescriptor implements Loadable,
 		if(readerExtension!=null && readerExtension.equals(this.readerExtension)) {
 			return;
 		}
-		
+
 		this.readerExtension = readerExtension;
 		free();
 	}
-	
+
+	@Override
 	public void free() {
-		getAllocation().free();
+		try {
+			getAllocation().free();
+		} finally {
+			loaded.set(false);
+		}
 	}
 }
