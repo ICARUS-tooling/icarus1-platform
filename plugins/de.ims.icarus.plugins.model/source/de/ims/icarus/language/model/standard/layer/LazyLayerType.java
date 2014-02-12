@@ -39,7 +39,7 @@ import de.ims.icarus.util.id.Identity;
  */
 public class LazyLayerType implements LayerType {
 
-	private String id;
+	private final String id;
 	private String name;
 	private String description;
 	private Icon icon;
@@ -47,8 +47,11 @@ public class LazyLayerType implements LayerType {
 	private String layerId;
 	private LayerManifest sharedManifest;
 
-	public LazyLayerType() {
+	public LazyLayerType(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
+		this.id = id;
 	}
 
 	public LazyLayerType(Identity identity, String layerId) {
@@ -56,6 +59,8 @@ public class LazyLayerType implements LayerType {
 			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
 		if (layerId == null)
 			throw new NullPointerException("Invalid layerId"); //$NON-NLS-1$
+		if(identity.getId()==null)
+			throw new IllegalArgumentException("Missing 'id' calue from identity"); //$NON-NLS-1$
 
 		id = identity.getId();
 		name = identity.getName();
@@ -115,16 +120,6 @@ public class LazyLayerType implements LayerType {
 		}
 
 		return sharedManifest;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		if (id == null)
-			throw new NullPointerException("Invalid id");  //$NON-NLS-1$
-
-		this.id = id;
 	}
 
 	/**

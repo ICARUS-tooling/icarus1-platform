@@ -376,6 +376,19 @@ public class LongHashMap<E extends Object> {
 	}
 
 	@SuppressWarnings("unchecked")
+	public void traverse(Visitor<? super E> visitor) {
+		if (visitor == null)
+			throw new NullPointerException("Invalid visitor"); //$NON-NLS-1$
+
+		Entry tab[] = table;
+		for (int i = tab.length; i-- > 0;) {
+			for (Entry e = tab[i]; e != null; e = e.next) {
+				visitor.visit(e.key, (E) e.value);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
 	public Collection<E> values() {
 		Collection<E> result = new ArrayList<>(count);
 
@@ -389,4 +402,7 @@ public class LongHashMap<E extends Object> {
 		return result;
 	}
 
+	public interface Visitor<V extends Object> {
+		void visit(long key, V value);
+	}
 }

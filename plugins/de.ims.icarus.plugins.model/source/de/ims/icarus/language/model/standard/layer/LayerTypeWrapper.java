@@ -31,8 +31,8 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.model.LayerType;
 import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
-import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.ClassUtils;
 
 /**
@@ -40,17 +40,59 @@ import de.ims.icarus.util.ClassUtils;
  * @version $Id$
  *
  */
-public class LazyExtensionLayerType implements LayerType {
+public class LayerTypeWrapper implements LayerType {
 
-	private final Extension extension;
+	private LayerType proxy;
 
-	private LayerManifest sharedManifest;
+	private final Object source;
+	private final String id;
 
-	public LazyExtensionLayerType(Extension extension) {
+	public LayerTypeWrapper(String id, ClassProxy proxy) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		if (proxy == null)
+			throw new NullPointerException("Invalid proxy"); //$NON-NLS-1$
+
+		this.id = id;
+		this.source = proxy;
+	}
+
+	public LayerTypeWrapper(String id, String className) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		if (className == null)
+			throw new NullPointerException("Invalid className"); //$NON-NLS-1$
+
+		this.id = id;
+		this.source = className;
+	}
+
+	public LayerTypeWrapper(String id, Extension extension) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		if (extension == null)
 			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 
-		this.extension = extension;
+		this.id = id;
+		this.source = extension;
+	}
+
+	private LayerType getProxy() {
+		if(proxy==null) {
+			synchronized (this) {
+				if(proxy==null) {
+					try {
+						proxy = (LayerType) ClassUtils.instantiate(source);
+					} catch (ClassNotFoundException | InstantiationException
+							| IllegalAccessException e) {
+						LoggerFactory.error(this, "Failed to instantiate layer type proxy: "+source, e); //$NON-NLS-1$
+
+						throw new IllegalStateException("Unable to load layer type proxy", e); //$NON-NLS-1$
+					}
+				}
+			}
+		}
+		return proxy;
 	}
 
 	/**
@@ -58,7 +100,7 @@ public class LazyExtensionLayerType implements LayerType {
 	 */
 	@Override
 	public String getId() {
-		return extension.getId();
+		return id;
 	}
 
 	/**
@@ -66,7 +108,7 @@ public class LazyExtensionLayerType implements LayerType {
 	 */
 	@Override
 	public String getName() {
-		return PluginUtil.getIdentity(extension).getName();
+		return getProxy().getName();
 	}
 
 	/**
@@ -74,7 +116,7 @@ public class LazyExtensionLayerType implements LayerType {
 	 */
 	@Override
 	public String getDescription() {
-		return PluginUtil.getIdentity(extension).getDescription();
+		return getProxy().getDescription();
 	}
 
 	/**
@@ -82,7 +124,7 @@ public class LazyExtensionLayerType implements LayerType {
 	 */
 	@Override
 	public Icon getIcon() {
-		return PluginUtil.getIdentity(extension).getIcon();
+		return getProxy().getIcon();
 	}
 
 	/**
@@ -90,7 +132,7 @@ public class LazyExtensionLayerType implements LayerType {
 	 */
 	@Override
 	public Object getOwner() {
-		return this;
+		return getProxy().getOwner();
 	}
 
 	/**
@@ -98,42 +140,6 @@ public class LazyExtensionLayerType implements LayerType {
 	 */
 	@Override
 	public LayerManifest getSharedManifest() {
-		if(sharedManifest==null) {
-			Extension.Parameter param = extension.getParameter("template"); //$NON-NLS-1$
-			if(param!=null) {
-				String layerId = param.valueAsString();
-				sharedManifest = (LayerManifest) CorpusRegistry.getInstance().getTemplate(layerId);
-			}
-		}
-
-		return sharedManifest;
-	}
-
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return extension.hashCode();
-	}
-
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof LayerType) {
-			LayerType other = (LayerType) obj;
-			return ClassUtils.equals(getId(), other.getId());
-		}
-		return false;
-	}
-
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "Layer-Type:"+extension.getId(); //$NON-NLS-1$
+		return getProxy().getSharedManifest();
 	}
 }

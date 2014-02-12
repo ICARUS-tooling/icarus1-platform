@@ -5,8 +5,7 @@
 	
 	<doc>
 		<doc-text>
-			Base plug-in for search engine utilization and several search erlated
-			visualization factories.
+			TODO
 		</doc-text>
 	</doc>
 	
@@ -29,6 +28,90 @@
 	</runtime>
 	
 	<!-- Extension-Points -->
+	
+	<extension-point id="LayerType" parent-point-id="Localizable" 
+		parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Defines an abstract layer type that can be used to identify layers
+				according to their "role" in the corpus. Each layer type is unique and
+				represented by exactly one implementation of the 
+				de.ims.icarus.language.model.LayerType class. Layer types can either be
+				registered at plugin-registration time using the plugin manifests or at
+				runtime via the CorpusRegistry. If done via the extension point, there are
+				essentially 2 different ways:
+				One is to provide a complete implementation of the LayerType interface and
+				pass on its class name. 
+				The second way is to describe the layer type by means of the parameters 
+				given by the Localizable extension point and (optionally) linking it with a
+				layer template.
+				In either way it should be noted that an implementation is to not resolve any
+				template prior to the entire loading process of the CorpusRegistry is finished!
+			</doc-text>
+		</doc>
+		<parameter-def id="class" multiplicity="none-or-one">
+			<doc>
+				<doc-text>
+					Layer type class itself, required to have no-args constructor and
+					implement de.ims.icarus.language.model.LayerType!
+					Note that this parameter will be checked before any other. So if a
+					extension declares a valid layer type implementation, all localization
+					information or links to existing template definitions will be ignored!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="template" multiplicity="none-or-one">
+			<doc>
+				<doc-text>
+					Unique id of a previously defined template that is used as shared
+					manifest for this layer type. The default implementation used by the
+					corpus registry will use lazy resolution, i.e. it will only check
+					the availability of the specified template the first time it is requested.
+					Note that together will all the parameters defined in the "Localizable"
+					extension point this argument will only be used once there is no valid
+					class parameter defined!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+	
+	<extension-point id="ModelTemplates">
+		<doc>
+			<doc-text>
+				Allows plugins to declare a collection of files that contain template definitions
+				for various members of the model framework.
+			</doc-text>
+		</doc>
+		<parameter-def id="path" multiplicity="one-or-more" type="resource">
+			<doc>
+				<doc-text>
+					Relative or absolute url that points to a template file. If the url is
+					relative it will be resolved against the plugins home directory.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+	
+	<extension-point id="ModelFolder">
+		<doc>
+			<doc-text>
+				Declares an entire folder to be the source of template files. When reading the folder,
+				all files ending with ".xml" will be treated as template files and attempted to be
+				parsed. Note that errors encountered while parsing and registering templates only prevent
+				further processing of the current file. Empty folders will be ignored and the parsing
+				process is non-recursive, so child folders will be ignored.
+			</doc-text>
+		</doc>
+		<parameter-def id="folder" multiplicity="one-or-more">
+			<doc>
+				<doc-text>
+					Path relative to the plugins root folder (not to be confused with the plugins home
+					directory, which is defined by the location of the manifest file!). The resolved url
+					must point to a valid directory.
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
 	
 	<!-- Standard Extensions -->
 </plugin>

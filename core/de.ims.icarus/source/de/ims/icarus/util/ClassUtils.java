@@ -40,7 +40,7 @@ public final class ClassUtils {
 
 	public static Object instantiate(Object source) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		if (source == null)
-			throw new NullPointerException("Invalid source");
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 
 		if(source instanceof String) {
 			source = Class.forName((String) source);
@@ -52,9 +52,7 @@ public final class ClassUtils {
 
 		if(source instanceof Class) {
 			return ((Class<?>) source).newInstance();
-		}
-
-		if(source instanceof Extension) {
+		} else if(source instanceof Extension) {
 			return PluginUtil.instantiate((Extension) source);
 		}
 

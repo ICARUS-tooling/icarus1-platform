@@ -25,26 +25,53 @@
  */
 package de.ims.icarus.language.model.registry;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.PluginDescriptor;
+
+import de.ims.icarus.Core;
 import de.ims.icarus.language.model.Corpus;
 import de.ims.icarus.language.model.LayerType;
+import de.ims.icarus.language.model.ModelPlugin;
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.io.ContextWriter;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.Derivable;
+import de.ims.icarus.language.model.standard.layer.LayerTypeWrapper;
+import de.ims.icarus.language.model.standard.layer.LazyExtensionLayerType;
+import de.ims.icarus.language.model.xml.XmlSerializer;
+import de.ims.icarus.language.model.xml.XmlWriter;
+import de.ims.icarus.language.model.xml.sax.ManifestParser;
+import de.ims.icarus.language.model.xml.stream.XmlStreamSerializer;
+import de.ims.icarus.logging.LogReport;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.events.WeakEventSource;
+import de.ims.icarus.ui.tasks.TaskManager;
+import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 
@@ -92,7 +119,224 @@ public final class CorpusRegistry {
 	}
 
 	private void init() {
-		// TODO
+
+		registerTemplates();
+
+		registerLayerTypes();
+
+		loadCorpora();
+	}
+
+	private static final FileFilter xmlFileFilter = new FileFilter() {
+
+		@Override
+		public boolean accept(File pathname) {
+			return pathname.exists() && pathname.getName().endsWith(".xml"); //$NON-NLS-1$
+		}
+	};
+
+	private void registerTemplates() {
+		synchronized (templates) {
+			// Load default template file
+			loadTemplates(CorpusRegistry.class.getResource("model-templates.xml")); //$NON-NLS-1$
+
+			PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
+					.getPluginDescriptor(ModelPlugin.PLUGIN_ID);
+
+			// Load explicit template files
+			for(Extension extension : descriptor.getExtensionPoint("ModelTemplates").getConnectedExtensions()) { //$NON-NLS-1$
+				for(Extension.Parameter parameter : extension.getParameters("path")) { //$NON-NLS-1$
+					try {
+						URL url = parameter.valueAsUrl();
+						loadTemplates(url);
+					} catch (Exception e) {
+						LoggerFactory.error(this, "Failed to load templates for path: " //$NON-NLS-1$
+								+extension.getUniqueId()+" ("+parameter.rawValue()+")", e); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+			}
+
+			// Process template folders
+			for(Extension extension : descriptor.getExtensionPoint("ModelFolder").getConnectedExtensions()) { //$NON-NLS-1$
+
+				File pluginFolder = PluginUtil.getPluginFolder(extension);
+
+				for(Extension.Parameter parameter : extension.getParameters("folder")) { //$NON-NLS-1$
+					File folder = new File(pluginFolder, parameter.valueAsString());
+
+					if(!folder.exists()) {
+						LoggerFactory.warning(this, "Missing template folder: "+folder.getPath()); //$NON-NLS-1$
+						continue;
+					}
+
+					File[] files = folder.listFiles(xmlFileFilter);
+
+					if(files==null || files.length==0) {
+						LoggerFactory.warning(this, "Template folder is empty: "+folder.getPath()); //$NON-NLS-1$
+						continue;
+					}
+
+					for(File file : files) {
+						try {
+							loadTemplates(file.toURI().toURL());
+						} catch (Exception e) {
+							LoggerFactory.error(this, "Failed to load file from template folder: " //$NON-NLS-1$
+									+extension.getUniqueId()+" ("+file.getPath()+")", e); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void loadTemplates(URL url) {
+		LogReport report = null;
+		try {
+			report = ManifestParser.getInstance().loadTemplates(url);
+		} catch(Exception e) {
+			LoggerFactory.error(this, "Unexpected error while loading templates: "+url, e); //$NON-NLS-1$
+		} finally {
+			if(report!=null) {
+				report.publish();
+			}
+		}
+	}
+
+	private void registerLayerTypes() {
+
+		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
+				.getPluginDescriptor(ModelPlugin.PLUGIN_ID);
+
+		// Load explicit template files
+		for(Extension extension : descriptor.getExtensionPoint("LayerType").getConnectedExtensions()) { //$NON-NLS-1$
+
+			LayerType layerType = null;
+
+			Extension.Parameter classParam = extension.getParameter("class"); //$NON-NLS-1$
+			if(classParam!=null) {
+				layerType = new LayerTypeWrapper(extension.getId(), extension);
+			} else {
+				layerType = new LazyExtensionLayerType(extension);
+			}
+
+			try {
+				registerLayerType(layerType);
+			} catch(Exception e) {
+				LoggerFactory.error(this, "Failed to register layer type: "+extension, e); //$NON-NLS-1$
+			}
+		}
+	}
+
+	private void loadCorpora() {
+		synchronized (corpora) {
+			corpora.clear();
+
+			File file = getCorporaFile();
+			URL url = null;
+			try {
+				url = file.toURI().toURL();
+			} catch (MalformedURLException e) {
+				LoggerFactory.error(this, "Failed to resolve corpora.xml url", e); //$NON-NLS-1$
+			}
+
+			if(url==null) {
+				return;
+			}
+
+			// Note: the parser will handle all the registration of corpora
+			// that it can find in the xml file. We hold the lock on the
+			// corpora list so that no interference is possible.
+			LogReport report = ManifestParser.getInstance().loadCorpora(url);
+
+			//TODO extract errors from report and display dialog to user
+			report.publish();
+		}
+	}
+
+	public void saveCorpora() {
+		generation.incrementAndGet();
+
+		scheduleUpdate();
+	}
+
+	private File getCorporaFile() {
+		return new File(Core.getCore().getDataFolder(), "corpora.xml"); //$NON-NLS-1$
+	}
+
+	private static final Object writeLock = new Object();
+	private final AtomicInteger generation = new AtomicInteger();
+
+	private final AtomicBoolean updatePending = new AtomicBoolean(false);
+
+	private void scheduleUpdate() {
+		if(updatePending.compareAndSet(false, true)) {
+			TaskManager.getInstance().execute(new SaveTask());
+		}
+	}
+
+	private void save() {
+		File file = getCorporaFile();
+		XMLOutputFactory factory = XMLOutputFactory.newFactory();
+
+		XmlSerializer serializer = null;
+		try {
+			@SuppressWarnings("resource")
+			XMLStreamWriter writer = factory.createXMLStreamWriter(new FileOutputStream(file), "UTF-8"); //$NON-NLS-1$
+			serializer = new XmlStreamSerializer(writer);
+
+			serializer.startDocument();
+
+			synchronized (corpora) {
+				for(CorpusManifest manifest : corpora) {
+					XmlWriter.writeCorpusManifestElement(serializer, manifest);
+				}
+			}
+
+			serializer.endDocument();
+
+		} catch (FileNotFoundException e) {
+			LoggerFactory.error(this, "Failed to access corpora file: "+file, e); //$NON-NLS-1$
+		} catch (XMLStreamException e) {
+			LoggerFactory.error(this, "Xml-Stream error while writing corpora file: "+file, e); //$NON-NLS-1$
+		} catch (Exception e) {
+			LoggerFactory.error(this, "Failed to write corpora file: "+file, e); //$NON-NLS-1$
+		} finally {
+			if(serializer!=null) {
+				try {
+					serializer.close();
+				} catch (Exception e) {
+					LoggerFactory.error(this, "Failed to close xml stream writer", e); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+
+	private class SaveTask implements Runnable {
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+
+			int savedGeneration;
+
+			synchronized (writeLock) {
+				if(!updatePending.compareAndSet(true, false))
+					throw new CorruptedStateException();
+				savedGeneration = generation.get();
+
+				try {
+					save();
+				} catch (Exception e) {
+					LoggerFactory.error(this, "Failed to save corpora", e); //$NON-NLS-1$
+				}
+			}
+
+			if(savedGeneration!=generation.get()) {
+				scheduleUpdate();
+			}
+		}
 	}
 
 	private static final Pattern idPattern = Pattern.compile(
@@ -106,6 +350,7 @@ public final class CorpusRegistry {
 	 * <li>they have a minimum length of 3 characters</li>
 	 * <li>they start with an alphabetic character (lower and upper case are allowed)</li>
 	 * <li>subsequent characters may be alphabetic or digits</li>
+	 * <li>no whitespaces, control characters or code points with 2 or more bytes are allowed</li>
 	 * <li>no special characters are allowed besides the following 3: _-: (underscore, hyphen, colon)</li>
 	 * </ul>
 	 *
@@ -120,12 +365,31 @@ public final class CorpusRegistry {
 		if (name == null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
-		LayerType layerType = layerTypes.get(name);
+		synchronized (layerTypes) {
+			LayerType layerType = layerTypes.get(name);
 
-		if(layerType==null)
-			throw new IllegalArgumentException("No such layer-type: "+name); //$NON-NLS-1$
+			if(layerType==null)
+				throw new IllegalArgumentException("No such layer-type: "+name); //$NON-NLS-1$
 
-		return layerType;
+			return layerType;
+		}
+	}
+
+	public void registerLayerType(LayerType layerType) {
+		if (layerType == null)
+			throw new NullPointerException("Invalid layerType"); //$NON-NLS-1$
+
+		String id = layerType.getId();
+		if(id==null)
+			throw new IllegalArgumentException("Missing id on layer type"); //$NON-NLS-1$
+
+		synchronized (layerTypes) {
+			LayerType currentType = layerTypes.get(id);
+			if(currentType!=null && currentType!=layerType)
+				throw new DuplicateIdentifierException("Type id already in use: "+id); //$NON-NLS-1$
+
+			layerTypes.put(id, layerType);
+		}
 	}
 
 	public void addCorpus(CorpusManifest manifest) {
@@ -138,11 +402,13 @@ public final class CorpusRegistry {
 		if(!isValidId(id))
 			throw new IllegalArgumentException("Invaid corpus id: "+id); //$NON-NLS-1$
 
-		if(corpusLookup.containsKey(id))
-			throw new DuplicateIdentifierException("Corpus id already in use: "+id); //$NON-NLS-1$
+		synchronized (corpora) {
+			if(corpusLookup.containsKey(id))
+				throw new DuplicateIdentifierException("Corpus id already in use: "+id); //$NON-NLS-1$
 
-		corpora.add(manifest);
-		corpusLookup.put(id, manifest);
+			corpora.add(manifest);
+			corpusLookup.put(id, manifest);
+		}
 
 		eventSource.fireEventEDT(new EventObject(Events.ADDED, "corpus", manifest)); //$NON-NLS-1$
 	}
@@ -155,11 +421,13 @@ public final class CorpusRegistry {
 		if(id==null)
 			throw new IllegalArgumentException("Missing corpus id"); //$NON-NLS-1$
 
-		if(!corpusLookup.containsKey(id))
-			throw new IllegalArgumentException("Unknown corpus id: "+id); //$NON-NLS-1$
+		synchronized (corpora) {
+			if(!corpusLookup.containsKey(id))
+				throw new IllegalArgumentException("Unknown corpus id: "+id); //$NON-NLS-1$
 
-		corpusLookup.remove(id);
-		corpora.remove(manifest);
+			corpusLookup.remove(id);
+			corpora.remove(manifest);
+		}
 
 		// Clear up
 		Corpus corpus = corpusIncstances.remove(manifest);
@@ -220,7 +488,8 @@ public final class CorpusRegistry {
 		if(instance==null) {
 			instance = instantiate(manifest);
 			corpusIncstances.put(manifest, instance);
-		}
+		} else if(instance.getManifest()!=manifest)
+			throw new CorruptedStateException("Illegal modification of corpus menifest detected: "+manifest); //$NON-NLS-1$
 
 		return instance;
 	}
@@ -229,12 +498,16 @@ public final class CorpusRegistry {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
-		Derivable template = templates.get(id);
+		synchronized (templates) {
+			Derivable template = templates.get(id);
 
-		if(template==null)
-			throw new IllegalArgumentException("No template registered for id: "+id); //$NON-NLS-1$
+			if(template==null)
+				throw new IllegalArgumentException("No template registered for id: "+id); //$NON-NLS-1$
+			if(!id.equals(template.getId()))
+				throw new CorruptedStateException("Illegal modification of template id detected. Expected "+id+" - got "+template.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 
-		return template;
+			return template;
+		}
 	}
 
 
@@ -274,6 +547,8 @@ public final class CorpusRegistry {
 
 		eventSource.fireEvent(new EventObject(Events.CHANGED,
 				"corpus", corpus)); //$NON-NLS-1$
+
+		saveCorpora();
 	}
 
 	public void contextChanged(ContextManifest context) {
@@ -339,11 +614,13 @@ public final class CorpusRegistry {
 		if(!isValidId(id))
 			throw new IllegalArgumentException("Invalid template id: "+id); //$NON-NLS-1$
 
-		Derivable current = templates.get(id);
-		if(current==null) {
-			templates.put(id, template);
-		} else if(current!=template)
-			throw new DuplicateIdentifierException("Template id already in use: "+id); //$NON-NLS-1$
+		synchronized (templates) {
+			Derivable current = templates.get(id);
+			if(current==null) {
+				templates.put(id, template);
+			} else if(current!=template)
+				throw new DuplicateIdentifierException("Template id already in use: "+id); //$NON-NLS-1$
+		}
 	}
 
 	public void registerContextReader(String formatId, ContextReader reader) {
@@ -352,23 +629,27 @@ public final class CorpusRegistry {
 		if (reader == null)
 			throw new NullPointerException("Invalid reader"); //$NON-NLS-1$
 
-		ContextReader currentReader = contextReaders.get(formatId);
-		if(currentReader==null) {
-			contextReaders.put(formatId, reader);
-		} else if(currentReader!=reader)
-			throw new DuplicateIdentifierException("Format-id for context reader already in use: "+formatId); //$NON-NLS-1$
+		synchronized (contextReaders) {
+			ContextReader currentReader = contextReaders.get(formatId);
+			if(currentReader==null) {
+				contextReaders.put(formatId, reader);
+			} else if(currentReader!=reader)
+				throw new DuplicateIdentifierException("Format-id for context reader already in use: "+formatId); //$NON-NLS-1$
+		}
 	}
 
 	public ContextReader getContextReader(String formatId) {
 		if (formatId == null)
 			throw new NullPointerException("Invalid formatId");  //$NON-NLS-1$
 
-		ContextReader reader = contextReaders.get(formatId);
+		synchronized (contextReaders) {
+			ContextReader reader = contextReaders.get(formatId);
 
-		if(reader==null)
-			throw new IllegalArgumentException("No reader registered for format-id: "+formatId); //$NON-NLS-1$
+			if(reader==null)
+				throw new IllegalArgumentException("No reader registered for format-id: "+formatId); //$NON-NLS-1$
 
-		return reader;
+			return reader;
+		}
 	}
 
 	public void registerContextWriter(String formatId, ContextWriter writer) {
@@ -377,23 +658,27 @@ public final class CorpusRegistry {
 		if (writer == null)
 			throw new NullPointerException("Invalid writer"); //$NON-NLS-1$
 
-		ContextWriter currentWriter = contextWriters.get(formatId);
-		if(currentWriter==null) {
-			contextWriters.put(formatId, writer);
-		} else if(currentWriter!=writer)
-			throw new DuplicateIdentifierException("Format-id for context writer already in use: "+formatId); //$NON-NLS-1$
+		synchronized (contextWriters) {
+			ContextWriter currentWriter = contextWriters.get(formatId);
+			if(currentWriter==null) {
+				contextWriters.put(formatId, writer);
+			} else if(currentWriter!=writer)
+				throw new DuplicateIdentifierException("Format-id for context writer already in use: "+formatId); //$NON-NLS-1$
+		}
 	}
 
 	public ContextWriter getContextWriter(String formatId) {
 		if (formatId == null)
 			throw new NullPointerException("Invalid formatId");  //$NON-NLS-1$
 
-		ContextWriter writer = contextWriters.get(formatId);
+		synchronized (contextWriters) {
+			ContextWriter writer = contextWriters.get(formatId);
 
-		if(writer==null)
-			throw new IllegalArgumentException("No writer registered for format-id: "+formatId); //$NON-NLS-1$
+			if(writer==null)
+				throw new IllegalArgumentException("No writer registered for format-id: "+formatId); //$NON-NLS-1$
 
-		return writer;
+			return writer;
+		}
 	}
 
 	/**
@@ -423,6 +708,6 @@ public final class CorpusRegistry {
 	}
 
 	public LayerType getOverlayLayerType() {
-
+		return getLayerType(DefaultLayerTypes.MARK_LAYER_OVERLAY);
 	}
 }

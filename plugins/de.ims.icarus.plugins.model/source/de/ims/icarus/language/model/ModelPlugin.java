@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
@@ -33,6 +33,8 @@ import org.java.plugin.Plugin;
  *
  */
 public class ModelPlugin extends Plugin {
+
+	public static final String PLUGIN_ID = "de.ims.icarus.model"; //$NON-NLS-1$
 
 	/**
 	 * @see org.java.plugin.Plugin#doStart()
