@@ -56,6 +56,8 @@ import de.ims.icarus.language.model.io.ContextWriter;
 import de.ims.icarus.language.model.manifest.ContextManifest;
 import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.Derivable;
+import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.manifest.MemberManifest;
 import de.ims.icarus.language.model.standard.layer.LayerTypeWrapper;
 import de.ims.icarus.language.model.standard.layer.LazyExtensionLayerType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -578,6 +580,44 @@ public final class CorpusRegistry {
 		return result;
 	}
 
+	private static boolean isManifestOfType(Derivable template, ManifestType type) {
+		if(template instanceof MemberManifest) {
+			return ((MemberManifest)template).getManifestType()==type;
+		}
+
+		return false;
+	}
+
+	public List<? extends MemberManifest> getTemplatesOfType(ManifestType type) {
+		if (type == null)
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
+
+		List<MemberManifest> result = new ArrayList<>();
+
+		for(Derivable template : templates.values()) {
+			if(isManifestOfType(template, type)) {
+				result.add((MemberManifest) template);
+			}
+		}
+
+		return result;
+	}
+
+	public <E extends Derivable> List<E> getTemplatesOfClass(Class<E> clazz) {
+		if (clazz == null)
+			throw new NullPointerException("Invalid clazz"); //$NON-NLS-1$
+
+		List<E> result = new ArrayList<>();
+
+		for(Derivable template : templates.values()) {
+			if(clazz.isAssignableFrom(template.getClass())) {
+				result.add(clazz.cast(template));
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Returns a list of {@code ContextManifest} objects that can be used to
 	 * create a new corpus by serving as the default context of that corpus.
@@ -590,7 +630,7 @@ public final class CorpusRegistry {
 		List<ContextManifest> result = new ArrayList<>();
 
 		for(Derivable template : templates.values()) {
-			if(template instanceof ContextManifest) {
+			if(isManifestOfType(template, ManifestType.CONTEXT_MANIFEST)) {
 				ContextManifest manifest = (ContextManifest) template;
 				if(manifest.isIndependentContext()) {
 					result.add(manifest);

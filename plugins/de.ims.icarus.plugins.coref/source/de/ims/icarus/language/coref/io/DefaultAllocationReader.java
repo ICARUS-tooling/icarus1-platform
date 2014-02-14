@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.io;
@@ -66,9 +66,9 @@ public class DefaultAllocationReader implements AllocationReader {
 
 	public static final String BEGIN_EDGES = "#begin edges"; //$NON-NLS-1$
 	public static final String END_EDGES = "#end edges"; //$NON-NLS-1$
-	
+
 	public static final String COMMENT_PREFIX = "#"; //$NON-NLS-1$
-	
+
 	private BufferedReader reader;
 	private CoreferenceDocumentSet documentSet;
 	private int lineCount;
@@ -76,15 +76,16 @@ public class DefaultAllocationReader implements AllocationReader {
 	public DefaultAllocationReader() {
 		// no-op
 	}
-	
-	public void init(Location location, 
+
+	@Override
+	public void init(Location location,
 			Options options, CoreferenceDocumentSet documentSet) throws Exception {
 
 		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));
 		lineCount = 0;
-		this.documentSet = documentSet; 
+		this.documentSet = documentSet;
 	}
-	
+
 	private String readLine() throws IOException {
 		String line = reader.readLine();
 		if(line!=null) {
@@ -92,7 +93,7 @@ public class DefaultAllocationReader implements AllocationReader {
 		}
 		return line;
 	}
-	
+
 	@Override
 	public void readAllocation(CoreferenceAllocation allocation) throws Exception {
 		Set<String> ids = new HashSet<>();
@@ -101,26 +102,30 @@ public class DefaultAllocationReader implements AllocationReader {
 			ids.addAll(documentSet.getDocumentIds());
 			checkIds = true;
 		}
-		
+
 		main : while(true) {
+
+			if(Thread.currentThread().isInterrupted())
+				throw new InterruptedException();
+
 			String line = skipEmptyLines();
 			if(line==null) {
 				break main;
 			}
-			
+
 			if(!line.startsWith(BEGIN_DOCUMENT))
 				throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+line); //$NON-NLS-1$ //$NON-NLS-2$
-			
+
 			int startLine = lineCount;
 			String documentId = line.substring(BEGIN_DOCUMENT.length()).trim();
-			
+
 			if(checkIds && !ids.remove(documentId))
 				throw new IllegalArgumentException(String.format(
 						"Unknown document id '%s' at line %s ", lineCount, documentId)); //$NON-NLS-1$
-			
-			CoreferenceDocumentData document = documentSet==null ? 
+
+			CoreferenceDocumentData document = documentSet==null ?
 					null : documentSet.getDocument(documentId);
-			
+
 			// Read in properties
 			while((line=readLine())!=null) {
 				if(BEGIN_NODES.equals(line)) {
@@ -131,58 +136,58 @@ public class DefaultAllocationReader implements AllocationReader {
 					throw new IllegalArgumentException(String.format(
 							"Invalid property statement '%s' at line %d", line, lineCount)); //$NON-NLS-1$
 			}
-			
+
 			// Read nodes
 			SpanSet spanSet = readNodes(document);
-			
+
 			// Read edges
 			EdgeSet edgeSet = readEdges(spanSet);
-			
+
 			allocation.setSpanSet(documentId, spanSet);
 			allocation.setEdgeSet(documentId, edgeSet);
-			
-			// Check for closing declaration			
+
+			// Check for closing declaration
 			if(!END_DOCUMENT.equals(skipEmptyLines()))
 				throw new IllegalArgumentException(String.format(
 						"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 						END_DOCUMENT, BEGIN_DOCUMENT, startLine));
 		}
-		
+
 		if(checkIds && !ids.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Missing allocations for documents:\n"); //$NON-NLS-1$
 			sb.append(CollectionUtils.toString(ids));
-			
+
 			throw new IllegalArgumentException(sb.toString());
 		}
 	}
-	
+
 	private static void readProperty(String s, CorefMember member) {
 		int sep = s.indexOf(' ');
 		member.setProperty(s.substring(1, sep), s.substring(sep+1));
 	}
-	
+
 	private String skipEmptyLines() throws IOException {
 		String line = null;
-		
+
 		while((line = readLine())!=null) {
 			if(!line.isEmpty()) {
 				break;
 			}
 		}
-		
+
 		return line;
 	}
-	
+
 	private SpanSet readNodes(CoreferenceDocumentData document) throws IOException {
 		String line = null;
 		boolean closed = false;
-		
+
 		SpanSet spanSet = new SpanSet();
 		List<Span> buffer = new ArrayList<>();
 		int sentenceId = -1;
 		int beginLine = lineCount;
-		
+
 		while((line = readLine()) != null) {
 			if(END_NODES.equals(line)) {
 				closed = true;
@@ -192,22 +197,22 @@ public class DefaultAllocationReader implements AllocationReader {
 			} else if(line.startsWith(COMMENT_PREFIX)) {
 				readProperty(line, spanSet);
 			} else {
-				
+
 				Span span = Span.parse(line);
 				if(span.isROOT()) {
 					continue;
 				}
-				
+
 				if(span.getSentenceIndex()!=sentenceId && !buffer.isEmpty()) {
 					Span[] spans = new Span[buffer.size()];
 					buffer.toArray(spans);
 					spanSet.setSpans(sentenceId, spans);
 					buffer.clear();
 				}
-				
+
 				buffer.add(span);
 				sentenceId = span.getSentenceIndex();
-				
+
 				if(document!=null) {
 					CoreferenceData sentence = document.get(sentenceId);
 					if(span.getBeginIndex()<0 || span.getEndIndex()>=sentence.length())
@@ -215,29 +220,29 @@ public class DefaultAllocationReader implements AllocationReader {
 				}
 			}
 		}
-		
+
 		if(!buffer.isEmpty()) {
 			Span[] spans = new Span[buffer.size()];
 			buffer.toArray(spans);
 			spanSet.setSpans(sentenceId, spans);
 			buffer.clear();
 		}
-		
+
 		if(!closed)
 			throw new IllegalArgumentException(String.format(
 					"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 					END_NODES, BEGIN_NODES, beginLine));
-		
+
 		return spanSet;
 	}
-	
+
 	private EdgeSet readEdges(SpanSet spanSet) throws IOException {
 		String line = null;
 		boolean closed = false;
-		
+
 		EdgeSet edgeSet = new EdgeSet();
 		int beginLine = lineCount;
-		
+
 		while((line = readLine()) != null) {
 			if(END_EDGES.equals(line)) {
 				closed = true;
@@ -250,21 +255,22 @@ public class DefaultAllocationReader implements AllocationReader {
 				edgeSet.addEdge(Edge.parse(line, spanSet));
 			}
 		}
-		
+
 		if(!closed)
 			throw new IllegalArgumentException(String.format(
 					"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 					END_EDGES, BEGIN_EDGES, beginLine));
-		
+
 		allocateClusters(edgeSet);
-		
+
 		return edgeSet;
 	}
-	
+
 	private void allocateClusters(EdgeSet edgeSet) {
 		Queue<Edge> pending = new LinkedList<>(edgeSet.getEdges());
 		Map<Integer, Cluster> clusterMap = new HashMap<>();
 		Map<Span, Cluster> heads = new HashMap<>();
+		Set<Edge> postproned = new HashSet<>();
 		while(!pending.isEmpty()) {
 			Edge edge = pending.poll();
 			if(edge.getSource().isROOT()) {
@@ -278,8 +284,11 @@ public class DefaultAllocationReader implements AllocationReader {
 				cluster.addSpan(edge.getTarget(), edge);
 				edge.getTarget().setCluster(cluster);
 				heads.put(edge.getTarget(), cluster);
-			} else {
+			} else if(!postproned.contains(edge)) {
 				pending.offer(edge);
+				postproned.add(edge);
+			} else {
+				throw new IllegalArgumentException("Unable to to assign cluster - source is unknown: "+edge); //$NON-NLS-1$
 			}
 		}
 	}
