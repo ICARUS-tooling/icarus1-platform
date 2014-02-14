@@ -237,8 +237,6 @@ public class NGramResultView<JListModel> extends View{
 		container.setLayout(new BorderLayout());
 		container.add(headerPanel, BorderLayout.NORTH);
 		container.add(jsp, BorderLayout.CENTER);
-		//TODO needed?
-		//container.add(detailedView, BorderLayout.SOUTH);
 		
 		showDefaultInfo();
 		
@@ -316,7 +314,7 @@ public class NGramResultView<JListModel> extends View{
 		
 		header.setText("Found " + nGramResult.size() + " NGrams"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-		//TODO Create and initialize JList
+		//Create and initialize JList
 		ngramListModel = new NGramResultViewListModel();
 		ngramList = new JList<Object>(ngramListModel);
 		ngramList.setBorder(UIUtil.defaultContentBorder);
@@ -340,7 +338,7 @@ public class NGramResultView<JListModel> extends View{
 		scrollPane.setViewportView(ngramList);
 		
 		
-		//TODO Detailed Stuff
+		//Detailed Stuff
 		initializeDetailed();
 	}
 
@@ -366,7 +364,7 @@ public class NGramResultView<JListModel> extends View{
 		
 		header.setText("Found " + nGramResultDependency.size() + " NGrams"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-		//TODO Create and initialize JList
+		//Create and initialize JList
 //		ngramListModel = new NGramResultViewListModel();
 //		ngramList = new JList<Object>(ngramListModel);
 //		ngramList.setBorder(UIUtil.defaultContentBorder);
@@ -389,7 +387,7 @@ public class NGramResultView<JListModel> extends View{
 //		
 //		scrollPane.setViewportView(ngramList);		
 		
-		//TODO Detailed Stuff
+		//Detailed Stuff
 		//initializeDetailedDependency();
 	}
 	
@@ -422,7 +420,7 @@ public class NGramResultView<JListModel> extends View{
 //				refreshActions();
 //				return message.successResult(this, null);
 //			}
-			System.out.println(data.toString());
+			//System.out.println(data.toString());
 			if (data != null && (data instanceof NGramDataList)) {
 				System.out.println("PoS Data Result"); //$NON-NLS-1$
 				nGramResult = ((NGramDataList) data).getnGramMap();
@@ -463,7 +461,7 @@ public class NGramResultView<JListModel> extends View{
 		public void mouseClicked(MouseEvent me) {
 		    if (me.getClickCount() == 2) {
 		        int index = ngramList.locationToIndex(me.getPoint());
-		        System.out.println("Double clicked on Item " + index);
+		        //System.out.println("Double clicked on Item " + index);
 		        
 		        ngramListModel.getElementAt(index);
 		        //System.out.println(ngramListModel.getElementAt(index));
@@ -516,7 +514,7 @@ public class NGramResultView<JListModel> extends View{
 		 */
 		@Override
 		public void invoke(Object sender, EventObject event) {
-			// TODO Auto-generated method stub
+			// TO DOAuto-generated method stub
 			
 		}
 

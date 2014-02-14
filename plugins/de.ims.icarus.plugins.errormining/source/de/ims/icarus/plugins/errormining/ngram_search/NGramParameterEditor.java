@@ -27,6 +27,8 @@ package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.awt.Component;
 
+import javax.swing.SpinnerNumberModel;
+
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
 import de.ims.icarus.ui.NumberDocument;
 import de.ims.icarus.ui.dialog.FormBuilder;
@@ -61,15 +63,23 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 		formBuilder.addToggleFormEntry(USE_FRINGE_HEURISTIC,
 				"plugins.errormining.labels.fringe"); //$NON-NLS-1$
 		
-		FormEntry entry = new InputFormEntry(
-				"plugins.errormining.labels.fringeStart") //$NON-NLS-1$
-			.setDocument(new NumberDocument());
-		formBuilder.addEntry(FRINGE_START, entry);
+//		formBuilder.addSpinnerFormEntry(FRINGE_SIZE,
+//						"plugins.errormining.labels.fringeSize", //$NON-NLS-1$
+//						new SpinnerNumberModel(1,1,100,1));
 		
-		entry = new InputFormEntry(
-				"plugins.errormining.labels.fringeEnd") //$NON-NLS-1$
+		formBuilder.addSpinnerFormEntry(FRINGE_SIZE,
+				"plugins.errormining.labels.fringeSize", //$NON-NLS-1$
+				null);
+		
+		FormEntry entry = new InputFormEntry(
+				"plugins.errormining.labels.fringeSize") //$NON-NLS-1$
 			.setDocument(new NumberDocument());
-		formBuilder.addEntry(FRINGE_END, entry);
+		//formBuilder.addEntry(FRINGE_SIZE, entry);
+		
+//		entry = new InputFormEntry(
+//				"plugins.errormining.labels.fringeEnd") //$NON-NLS-1$
+//			.setDocument(new NumberDocument());
+//		formBuilder.addEntry(FRINGE_END, entry);
 		
 		formBuilder.addSeperator();
 		
@@ -89,7 +99,7 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 		entry = new InputFormEntry(
 				"plugins.errormining.labels.onlyGramsGreaterX") //$NON-NLS-1$
 			.setDocument(new NumberDocument());
-		formBuilder.addEntry(GRAMS_GREATERX, entry);
+		formBuilder.addEntry(GRAMS_GREATERX, entry);		
 		
 		
 		formBuilder.addToggleFormEntry(CREATE_XML_OUTPUT,
@@ -134,12 +144,9 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 		formBuilder.setValue(USE_FRINGE_HEURISTIC,
 							options.get(USE_FRINGE_HEURISTIC,
 										DEFAULT_USE_FRINGE_HEURISTIC));
-		formBuilder.setValue(FRINGE_START,
-				String.valueOf(options.get(FRINGE_START,
-										DEFAULT_FRINGE_START)));
-		formBuilder.setValue(FRINGE_END,
-				String.valueOf(options.get(FRINGE_END,
-										DEFAULT_FRINGE_END)));		
+		formBuilder.setValue(FRINGE_SIZE,
+				String.valueOf(options.get(FRINGE_SIZE,
+										DEFAULT_FRINGE_SIZE)));
 		
 		formBuilder.setValue(NGRAM_RESULT_LIMIT,
 				String.valueOf(options.get(NGRAM_RESULT_LIMIT,
@@ -157,10 +164,6 @@ public class NGramParameterEditor implements Editor<Options>, NGramParameters {
 							options.get(CREATE_XML_OUTPUT,
 										DEFAULT_CREATE_XML_OUTPUT));
 		
-//		formBuilder.setValue(NIL_SENTENCE_MATCH,
-//				String.valueOf(options.get(NIL_SENTENCE_MATCH,
-//										DEFAULT_NIL_SENTENCE_MATCH)));
-
 	}
 	
 

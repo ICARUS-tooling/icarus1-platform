@@ -41,6 +41,7 @@ import javax.xml.transform.TransformerException;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.location.DefaultFileLocation;
@@ -55,8 +56,7 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 public class NGrams {
 	
 	protected int nGramCount;
-	protected int fringeStart;
-	protected int fringeEnd;
+	protected int fringeSize;
 	protected int nGramLimit;
 	protected boolean useFringe;
 	protected boolean useNumberWildcard;
@@ -68,6 +68,7 @@ public class NGrams {
 	
 	protected List<DependencyData> corpus;
 	
+	private boolean usedFringe = false;
 	private static Pattern numberPattern = Pattern.compile("^[0-9]"); //$NON-NLS-1$
 	private static String numberString = "[number-wildcard]"; //$NON-NLS-1$
 
@@ -125,8 +126,8 @@ public class NGrams {
 //		System.out.println("Options NumberWC " + options.getBoolean("UseNumberWildcard"));
 		
 		//option defined in NGramSearch createOptions();
-		this.fringeStart = options.getInteger("FringeSTART"); //$NON-NLS-1$
-		this.fringeEnd = options.getInteger("FringeEND"); //$NON-NLS-1$
+
+		this.fringeSize = options.getInteger("FringeSIZE"); //$NON-NLS-1$
 		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
 		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
@@ -155,8 +156,7 @@ public class NGrams {
 		
 //		//0 collect ngrams until no new ngrams are found
 		this.nGramLimit = options.getInteger("NGramLIMIT");  //$NON-NLS-1$
-		this.fringeStart = options.getInteger("FringeSTART");  //$NON-NLS-1$
-		this.fringeEnd = options.getInteger("FringeEND");  //$NON-NLS-1$
+		this.fringeSize = options.getInteger("FringeSIZE");  //$NON-NLS-1$
 		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 		
@@ -480,7 +480,7 @@ public class NGrams {
 			int nonfringeItems = 0;
 			
 			String[] keySplitted = key.split(" "); //$NON-NLS-1$
-			for (int k = 1; k < keySplitted.length-1; k++) {			
+			for (int k = fringeSize; k < keySplitted.length-fringeSize; k++) {			
 				if(containsNonFringe(k, arrItem)){
 					nonfringeItems++;					
 				}
@@ -843,6 +843,11 @@ public class NGrams {
 //		System.out.println("SizeR " + outputNGramR.size());
 		outputNGram = mergeResults(outputNGram, outputNGramR);
 //		System.out.println("SizeMerged " + outputNGram.size());
+		
+//		//TODO enable filter option for dependency?
+//		if(nGramCount == 4){
+//			nGramPoSFilter(outputNGram);
+//		}
 
 		
 //		for(Iterator<String> i = outputNGram.keySet().iterator(); i.hasNext();){
@@ -854,26 +859,22 @@ public class NGrams {
 //			}
 //		}
 
-		
-//		System.out.println("###################");
-//		nGramResults(outputNGramR);
-//		System.out.println("###################");
 		if (outputNGram.size() > 0) {
 			
 			// items with length one -> no longer variation --> remove
 			outputNGram = removeItemsLengthOne(outputNGram);
 			
 			// remove items at the fringe
-			if (useFringe) {
-				if(nGramCount >= 2){
-//					if(nGramCount <= fringeEnd){
-//					System.out.println("Fringe Triggered [N-Gram " + nGramCount //$NON-NLS-1$
-//										+ "| Start " + fringeStart //$NON-NLS-1$
-//										+ " | END " + fringeEnd + " ]"); //$NON-NLS-1$ //$NON-NLS-2$
 
+			if (useFringe) {
+				//System.out.println(fringeSize);
+				if(nGramCount >= fringeSize*2){
 					outputNGram = distrustFringeHeuristic(outputNGram);
+					if(!usedFringe) {
+						usedFringe = true;
 					}
-//				}				
+				}
+				
 			}
 			
 			//add results into Cache
@@ -887,6 +888,7 @@ public class NGrams {
 				nGramResults(outputNGram);	
 				createNGrams(outputNGram, false, false);
 			}
+
 		}
 	}
 	
@@ -982,7 +984,7 @@ public class NGrams {
 		if(nGramLimit == 0){
 			return true;
 		}
-		return (nGramLimit > nGramCount);
+		return (nGramLimit > nGramCount+1);
 	}
 
 	
@@ -1183,8 +1185,7 @@ public class NGrams {
 
 
 
-	// Print out Resulting nGrams:		
-	@SuppressWarnings("nls")
+	// Print out Resulting nGrams:
 	protected void nGramResults(Map<String, ArrayList<ItemInNuclei>> inputNGram){
 	
 		
@@ -1220,7 +1221,6 @@ public class NGrams {
 	 *  
 	 */
 	
-	@SuppressWarnings("nls")
 	public void nGramResults(){
 		//System.out.println("Corpussize: " + corpus.size());
 		
@@ -1250,7 +1250,56 @@ public class NGrams {
 //			}
 //		}
 
-		createNGrams(nGramCache, false, false);
+
+		if(nGramLimit != 1) {
+			createNGrams(nGramCache, false, false);
+		}
+		
+		
+		//show fringe info dialog the following  must apply:
+		// 1) fringe must be used but
+		// 2) fringe was never triggered
+		// 3) only show when n-gram found > 3 (fringe only triggered for n-grams | n > 3)
+		if (useFringe && !usedFringe && nGramCount+1 > 2){
+				DialogFactory.getGlobalFactory().showInfo(null,
+						"plugins.errormining.dialogs.fringeSizeWarning.title", //$NON-NLS-1$
+						"plugins.errormining.dialogs.fringeSizeWarning.message", //$NON-NLS-1$
+						nGramCount+1, fringeSize, fringeSize*2 + 1);
+		}
+	}
+	
+	
+	/**
+	 * maybe extension filter for dependency structure
+	 * (show error pos + dependency)
+	 * @param outputNGram
+	 * @param filter 
+	 * @return
+	 */
+	public List<String> nGramPoSFilter(Map<String, ArrayList<ItemInNuclei>> outputNGram, int filter){
+		List<Integer> indexList = new ArrayList<Integer>();
+		List<String> filterList = new ArrayList<String>();
+		for(String key : nGramCache.keySet()){
+			String[] tmp = key.split(" "); //$NON-NLS-1$
+			if(tmp.length == filter){
+				//System.out.println(key);
+				if(!filterList.contains(key)){
+					filterList.add(key);
+				}
+				
+				ArrayList<ItemInNuclei> iinL = nGramCache.get(key);
+				for(int i = 0; i < iinL.size(); i++){
+					for(int s = 0; s < iinL.get(i).getSentenceInfoSize(); s++){
+						if(!indexList.contains(iinL.get(i).getSentenceInfoAt(s).getSentenceNr())){
+							indexList.add(iinL.get(i).getSentenceInfoAt(s).getSentenceNr());
+						}
+					}
+				}
+			}
+		}		
+		System.out.println("Filter " + indexList);
+		System.out.println("Filter Keys " + filterList);
+		return filterList;		
 	}
 	
 	@SuppressWarnings("unused")
@@ -1271,10 +1320,10 @@ public class NGrams {
 		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$		
 		//String  inputFileName = "E:\\test_small_modded_v2.txt"; //$NON-NLS-1$
 		//String  inputFileName = "E:\\tiger_release_aug07_short"; //$NON-NLS-1$
-		String  inputFileName = "E:\\double_nucleus.txt"; //$NON-NLS-1$
+		//String  inputFileName = "E:\\double_nucleus.txt"; //$NON-NLS-1$
 		
 		//CONLL Training English (1334 Sentences)
-		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-development.txt";
+		String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\Icarus\\data\\treebanks\\CoNLL2009-ST-English-development.txt"; //$NON-NLS-1$
 		
 		//CONLL Training English (39279 Sentences)
 		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-train.txt";
@@ -1286,7 +1335,7 @@ public class NGrams {
 		//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
 
 		
-		int sentencesToRead = 2;
+		int sentencesToRead = 500;
 		
 		File file = new File(inputFileName);		
 		
@@ -1306,9 +1355,8 @@ public class NGrams {
 		NGrams ngrams = new NGrams(1, on);
 		try {	
 			conellReader.init(dloc, o);			
-			int sentenceNr = 1;
+			int sentenceNr = 0;
 			
-			//while (cr.next() != null) {
 			for(int i = 0; i < sentencesToRead; i++){
 				DependencyData dd = (DependencyData) conellReader.next();
 				
@@ -1316,6 +1364,9 @@ public class NGrams {
 				sentenceNr++;				
 			}
 			ngrams.nGramResults();
+			
+			//Filter for Dependency structures?
+			ngrams.nGramPoSFilter(ngrams.getResult(), 4);
 			
 			//ngrams.outputToFile();
 

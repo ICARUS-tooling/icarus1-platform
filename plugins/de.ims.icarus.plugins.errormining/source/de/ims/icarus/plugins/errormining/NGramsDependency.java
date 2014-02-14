@@ -56,8 +56,7 @@ public class NGramsDependency {
 	protected int nGramCount;
 	protected final int nGramLimit;
 	protected final boolean useFringe;
-	protected int fringeStart;
-	protected int fringeEnd;
+	protected int fringeSize;
 	
 	//protected List<DependencyItemInNuclei> items;
 	protected Map<String,ArrayList<DependencyItemInNuclei>> nGramCache;	
@@ -94,12 +93,11 @@ public class NGramsDependency {
 		options = Options.emptyOptions;
 
 		this.nGramCount = 1; //normally we start with unigrams so n will be 1
-		
+
 		
 		//0 collect ngrams until no new ngrams are found
 		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
-		this.fringeStart = (int) options.get("FringeSTART", 0);  //$NON-NLS-1$
-		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		this.fringeSize = (int) options.get("FringeSIZE", 1);  //$NON-NLS-1$
 		this.useFringe = false;
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
@@ -120,8 +118,7 @@ public class NGramsDependency {
 		
 		//0 collect ngrams until no new ngrams are found
 
-		this.fringeStart = (int) options.get("FringeSTART", 3);  //$NON-NLS-1$
-		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		this.fringeSize = (int) options.get("FringeSIZE", 1);  //$NON-NLS-1$
 		
 		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
@@ -143,8 +140,7 @@ public class NGramsDependency {
 		
 		
 		//0 collect ngrams until no new ngrams are found
-		this.fringeStart = (int) options.get("FringeSTART", 3);  //$NON-NLS-1$
-		this.fringeEnd = (int) options.get("FringeEND", 0);  //$NON-NLS-1$
+		this.fringeSize = (int) options.get("FringeSIZE", 1);  //$NON-NLS-1$
 		
 		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
@@ -175,6 +171,7 @@ public class NGramsDependency {
 		
 		for (int i = 0; i < l1.size(); i++){
 			DependencyItemInNuclei item = l1.get(i);
+			//System.out.println("EQUAL-SNR-TAG " + item.getPosTag());
 			for (int j = 0 ; j < item.getSentenceInfoSize(); j++){
 				DependencySentenceInfo si = (DependencySentenceInfo) item.getSentenceInfoAt(j);
 				if(si.getSentenceNr() == sentenceNR){
@@ -436,7 +433,8 @@ public class NGramsDependency {
 		return input;
 	}
 	
-	
+	@Deprecated
+	//only test stuff
 	private Map<String, ArrayList<DependencyItemInNuclei>> addNilLabels(Map<String,ArrayList<DependencyItemInNuclei>> input){
 
 		for (Iterator<String> i = input.keySet().iterator(); i.hasNext();) {
@@ -598,7 +596,6 @@ public class NGramsDependency {
 				sb.append(dd.getForm(i));
 			}			
 		}
-		
 		return sb.toString();
 	}
 	
@@ -704,8 +701,8 @@ public class NGramsDependency {
 									
 //									System.out.println("leftContains " + leftKey.toString());
 //									System.out.println(item.getPosTag() + " vs "+ iin.getPosTag());
-					
-
+									
+									
 									if (item.getPosTag().equals(iin.getPosTag())) {
 										if (addNewNuclei){											
 											String nucleiKey = getNucleiForm(startIndex-1, dd);
@@ -848,8 +845,7 @@ public class NGramsDependency {
 									//System.out.println("rigthContains " + rightKey.toString());
 									//System.out.println(item.getPosTag() + " vs "+ iin.getPosTag());
 									//System.out.println("EQTAG: " + item.getPosTag().equals(iin.getPosTag()));
-									
-
+																		
 									if (item.getPosTag().equals(iin.getPosTag())) {
 										//int oldCount = item.getCount();
 										if (addNewNuclei){
@@ -869,12 +865,12 @@ public class NGramsDependency {
 									}
 								}
 								
-
+								
 								// new pos tag found; add to list
 								if (!knownTag) {
 									DependencyItemInNuclei item = new DependencyItemInNuclei();
 									//already an unigram
-									if (addNewNuclei){										
+									if (addNewNuclei){
 										String nucleiKey = getNucleiForm(endIndex+2, dd);
 										DependencySentenceInfo sitemp = returnDependencySentenceInfoNREqual(nGramCache.get(nucleiKey), si.getSentenceNr());
 										//addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
@@ -884,7 +880,8 @@ public class NGramsDependency {
 											addNucleiRigth(item, iin.getPosTag(), si, sitemp, false);
 										}
 										itemsTemp.add(item);
-									} else {		
+									} else {
+										//System.out.println(iin.getPosTag());
 										addSentenceInfoRigth(item, si, iin.getPosTag(), false);
 										itemsTemp.add(item);
 									}
@@ -960,14 +957,14 @@ public class NGramsDependency {
 			//items with length one -> no longer variation --> remove
 			outputNGram = removeItemsLengthOne(outputNGram);
 			
-			// remove items at the fringe
-			//TODO fixfringe
-			if(nGramCount <= fringeEnd && nGramCount >= fringeStart){
-//				System.out.println(nGramCount + " | " 
-//								+ fringeStart + " | " 
-//								+ fringeEnd);
-				//outputNGram = distrustFringeHeuristic(outputNGram);
-			}
+//			// remove items at the fringe
+//			//TODO fixfringe
+//			if(nGramCount <= fringeEnd && nGramCount >= fringeSize){
+////				System.out.println(nGramCount + " | " 
+////								+ fringeStart + " | " 
+////								+ fringeEnd);
+//				//outputNGram = distrustFringeHeuristic(outputNGram);
+//			}
 			
 			//add results into Cache
 			nGramCache.putAll(outputNGram);
@@ -1007,8 +1004,7 @@ public class NGramsDependency {
 //				//System.out.println("key" + key);			
 //				ArrayList<DependencyItemInNuclei> arrL = outputNGram.get(key);
 //				arrL.addAll(outputNGramR.get(key));
-//				result.put(key, arrL);
-//				
+//				result.put(key, arrL);				
 //			} else {
 //				result.put(key, outputNGram.get(key));
 //			}	
@@ -1017,21 +1013,158 @@ public class NGramsDependency {
 		//missing results from right side
 		for(Iterator<String> it = outputNGramR.keySet().iterator(); it.hasNext();){
 			String key = it.next();
-			if (result.containsKey(key)){
+			if(key.equals("Dutch / Shell-Gruppe")){
+//				//System.out.println("LEFT" + result.containsKey(key));
+//				System.out.println("LEFT" + outputNGram.get(key));
+//				System.out.println("RIGHT" + outputNGramR.get(key));
+//				ArrayList<DependencyItemInNuclei> right = outputNGramR.get(key);
+//				for(int r = 0; r < right.size();r++){
+//					DependencyItemInNuclei di = right.get(r);
+//					System.out.println(di.getPosTag());
+//				}
+			}
+			
+//			ArrayList<DependencyItemInNuclei> test = new ArrayList<>();
+//			if(outputNGram.containsKey(key) && !outputNGramR.containsKey(key)){
+//				result.put(key, outputNGram.get(key));
+//			}
+//			else if(!outputNGram.containsKey(key) && outputNGramR.containsKey(key)){
+//				result.put(key, outputNGramR.get(key));
+//			}
+//			else{
+//				ArrayList<DependencyItemInNuclei> left = outputNGram.get(key);
+//				ArrayList<DependencyItemInNuclei> right = outputNGramR.get(key);
+//				for(int r = 0; r < right.size();r++){
+//					DependencyItemInNuclei di = right.get(r);
+//					System.out.println(di.getPosTag());
+//				}
+//			}
+//			//System.out.println(test.size());
+//			result.put(key, test);
+			
+			
+//			//alt (bugged)
+			if (!result.containsKey(key)){
 //				System.out.println("MergeKEY " +key);
 //				System.out.println("TAG " + outputNGram.get(key).get(0).getPosTag());
 //				System.out.println(outputNGram.get(key).get(0).getSentenceInfoAt(0).getSentenceHeadIndex());
-				result.put(key, outputNGram.get(key));
+				result.put(key, outputNGramR.get(key));
 			} else {
 //				System.out.println("MergeKEY-R " +key);
 //				System.out.println("TAG-R " + outputNGramR.get(key).get(0).getPosTag());
 //				System.out.println(outputNGramR.get(key).get(0).getSentenceInfoAt(0).getSentenceHeadIndex());
-				result.put(key, outputNGramR.get(key));			
+			
+				
+				ArrayList<DependencyItemInNuclei> right = outputNGramR.get(key);				
+				ArrayList<DependencyItemInNuclei> left = outputNGram.get(key);
+
+				ArrayList<DependencyItemInNuclei> merged = new ArrayList<DependencyItemInNuclei>();
+//				System.out.println(key);
+//				System.out.println("R "+ right.size());
+//				System.out.println("L "+ left.size());
+//				merged.addAll(left);
+//				merged.addAll(right);
+//				System.out.println("M "+ merged.size() );
+//				for(int r = 0; r < right.size(); r++){
+//					left.add(right.get(r));
+//				}
+				
+				//mergeDIINList(right,left);
+					
+				// for(int r = 0; r < left.size();r++){
+				// DependencyItemInNuclei di = left.get(r);
+				// System.out.println(di.getPosTag());
+				// }
+				//
+				// System.out.println("---");
+				//
+				// for(int r = 0; r < right.size();r++){
+				// DependencyItemInNuclei di = right.get(r);
+				// System.out.println(di.getPosTag());
+				// }
+					
+				for (int b = 0; b < right.size(); b++) {
+					if (left.contains(right.get(b))) {
+						DependencyItemInNuclei di = right.get(b);
+						// System.out.println("INSIDE " + di.getPosTag());
+					}
+				}
+
+				
+//					
+//					//HashMap<Integer,ArrayList<Integer>> tmpSentences= new LinkedHashMap<Integer,ArrayList<Integer>>();
+//					HashMap<Integer,Integer> tmpSentences= new LinkedHashMap<Integer,Integer>();
+//					for(int l = 0; l < left.size();l++){
+//						DependencyItemInNuclei di = right.get(l);
+//						
+//						for(int s = 0;  s < di.getSentenceInfoSize(); s++){
+//							int snr = di.getSentenceInfoAt(s).getSentenceNr();
+//							if(!tmpSentences.containsKey(snr)){
+//								ArrayList<Integer> newSNR = new ArrayList<Integer>();
+//								newSNR.add(s);
+//								tmpSentences.put(snr, s);
+//							}else {								
+//								//ArrayList<Integer> newSNR = tmpSentences.get(snr);
+//								//newSNR.add(s);
+//								tmpSentences.put(snr, s);
+//							}
+//						}						
+//					}	
+//					System.out.println(tmpSentences);
+//					
+//					for(int r = 0; r < right.size();r++){
+//						DependencyItemInNuclei di = right.get(r);
+//						
+//						for(int s = 0;  s < di.getSentenceInfoSize(); s++){
+//							int snr = di.getSentenceInfoAt(s).getSentenceNr();
+//							if(tmpSentences.containsKey(snr)){
+////								left.get(tmpSentences.get(snr).get(0));
+////								ArrayList<Integer> newSNR = tmpSentences.get(snr);
+////								newSNR.add(s);
+////								tmpSentences.put(snr, newSNR);
+//
+//								System.out.println("LLIST" + left.get(snr).getSentenceInfoAt(0).getNucleusList());
+//								for(Integer nucleusInteger : di.getSentenceInfoAt(s).getNucleusList()){
+//									System.out.println(nucleusInteger);
+//									if(!left.get(snr).getSentenceInfoAt(0).getNucleusList().contains(nucleusInteger)){
+//										left.get(snr).getSentenceInfoAt(0).addNucleiIndexList(nucleusInteger);
+//										System.out.println("add " + nucleusInteger);
+//									}
+//								}
+//								System.out.println(di.getSentenceInfoAt(s).getNucleusList());
+//								
+//							}
+//						}						
+//					}
+//					System.out.println(tmpSentences);
+//					
+//					//left.get(1).getSentenceInfoAt(0).addNucleiIndexList(6);
+//				}
+				
+				result.put(key, outputNGram.get(key));
 			}
 		}
 
 		return result;
 	}
+
+
+	/**
+	 * @param right
+	 * @param left
+	 */
+	private void mergeDIINList(ArrayList<DependencyItemInNuclei> right,
+			ArrayList<DependencyItemInNuclei> left) {
+		
+		System.out.println("MergeList");
+		for(int i = 0 ; i < left.size(); i++){
+			for(int j = 0 ; j < left.size(); j++){
+				
+			}
+		}		
+	}
+
+
 
 
 	/**
@@ -1068,14 +1201,12 @@ public class NGramsDependency {
 		
 		if (headIndex > 0 ){
 			nucleiTag = dd.getForm(i) + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
-		
-		//TODO
+
 //		System.out.println("NUCLEI: " + dd.getForm(i)
 ////					+ " Index " + i 
 ////					+ " Head " + dd.getHead(i) 
 //					+ " TAG " + nucleiTag
 //					+ " " + nGramCache.containsKey(nucleiTag));
-			
 		}
 		
 		return nGramCache.containsKey(nucleiTag);
@@ -1291,9 +1422,11 @@ public class NGramsDependency {
 //		for (Integer snr : nilEqualSentencesCache.keySet()){;
 //			System.out.println(snr + ": " + nilEqualSentencesCache.get(snr));
 //		}
-		
-		
-		generateNIL(nGramCache);
+
+		//fringe for dependency = nil heuristic
+		if(useFringe){
+			generateNIL(nGramCache);
+		}
 		
 
 		
@@ -1338,13 +1471,15 @@ public class NGramsDependency {
 	
 	
 	/**
-	 * @param nGramCache2
+	 * @param nGra´ßmCache2
 	 */
 	private void generateNIL(Map<String, ArrayList<DependencyItemInNuclei>> ngrams) {
 		
 //		System.out.println(nilLexiconCache.keySet());
 //		System.out.println("von" + nilLexiconCache.get("von"));
 //		System.out.println("UN" + nilLexiconCache.get("UN"));
+		
+
 	
 		//we have to check the entire keyset
 		//nevertheless only pairs where one "real" edge occurs are interesting
@@ -1356,6 +1491,8 @@ public class NGramsDependency {
 			
 			//List including all sentenceNo where the current keypair occurs
 			List<Integer> list = sentencesWithSameKeypair(keySplit);
+			
+			boolean nilAdded = false;
 			
 			if(list.size() > 1){
 				//System.out.println(key + list);
@@ -1381,11 +1518,36 @@ public class NGramsDependency {
 						// System.out.println("A" + nilItem.getA() + " B" +
 						// nilItem.getB());
 						
-						DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+						if(!nilAdded){						
+							DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
+							if (head < dependent) {
+								newDIIN.addNewDependencySentenceInfoUniGrams(corpusIndex, nilItem.getA(), nilItem.getB());
+							} else {
+								newDIIN.addNewDependencySentenceInfoUniGrams(corpusIndex, nilItem.getB(), nilItem.getA());
+							}
+							newDIIN.setPosTag("nil"); //$NON-NLS-1$
+							diinL.add(newDIIN);
+							nilAdded = true;
+							
+						} else {
+							for(int w = 0; w < diinL.size(); w++){
+								DependencyItemInNuclei diTemp = diinL.get(w);
+								if(diTemp.getPosTag().equals("nil")){ //$NON-NLS-1$
+//									diTemp.addNewDependencySentenceInfoUniGrams(
+//											corpusIndex,
+//											nilItem.getA(),
+//											nilItem.getB());
+									if (head < dependent) {
+										diTemp.addNewDependencySentenceInfoUniGrams(corpusIndex, nilItem.getA(), nilItem.getB());
+									} else {
+										diTemp.addNewDependencySentenceInfoUniGrams(corpusIndex, nilItem.getB(), nilItem.getA());
+									}
+									diTemp.count++;
+								}
+							}
+						}
+
 						
-						newDIIN.addNewDependencySentenceInfoUniGrams(corpusIndex, nilItem.getA(), nilItem.getB());
-						newDIIN.setPosTag("nil"); //$NON-NLS-1$
-						diinL.add(newDIIN);
 
 //						if (head < dependent) {
 //							//DependencyItemInNuclei newDIIN = new DependencyItemInNuclei();
@@ -1502,12 +1664,13 @@ public class NGramsDependency {
 
 	/**
 	 * @param dd 
+	 * @param diin 
+	 * @param diin 
 	 * @param string
 	 * @param indexOfTokens
 	 * @return
 	 */
 	private int getIndex2Key(DependencyData dd, String key, List<Integer> list) {
-		
 		for(Integer i : list){
 			if(dd.getForm(i).equals(key)){
 				return i+1;

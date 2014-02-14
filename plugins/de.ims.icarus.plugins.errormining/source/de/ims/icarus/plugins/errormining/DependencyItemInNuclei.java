@@ -33,7 +33,7 @@ import java.util.List;
  * @version $Id$
  *
  */
-public class DependencyItemInNuclei {
+public class DependencyItemInNuclei{
 	
 	protected String posTag;
 	//protected ArrayList<String> posTagList;
@@ -44,16 +44,13 @@ public class DependencyItemInNuclei {
 	
 	public DependencyItemInNuclei(){
 		List<DependencySentenceInfo> sl = new ArrayList<>();
-		ArrayList<String> posTagList = new ArrayList<>();
 		this.sl = sl;
-		count = 1; //innitialize with 1 occurences +1 when found
-		count = 1;
+		count = 1; //Initialize with 1 occurrences +1 when found
 	}
 	
 	
 	public DependencyItemInNuclei(int count, String Tag){
 		List<DependencySentenceInfo> sl = new ArrayList<>();
-		ArrayList<String> posTagList = new ArrayList<>();
 		this.sl = sl;
 		this.count = count;
 	}
@@ -231,6 +228,47 @@ public class DependencyItemInNuclei {
 	public int indexOfSentenceInfo(DependencySentenceInfo si){
 		return sl.indexOf(si);
 	}
+
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof DependencyItemInNuclei){
+			DependencyItemInNuclei diin  = (DependencyItemInNuclei)obj;
+
+			//if(diin.getPosTag().equals(posTag)){
+			for(int st = 0; st < this.getSentenceInfoSize(); st++){
+				
+				for(int s = 0; s < diin.getSentenceInfoSize(); s++){
+					if(this.getSentenceInfoAt(st).getSentenceNr() == diin.getSentenceInfoAt(s).getSentenceNr()){
+//						System.out.println(this.posTag + " " +	this.getSentenceInfoAt(st).getSentenceNr());
+//						System.out.println(diin.getPosTag() + " " +	diin.getSentenceInfoAt(s).getSentenceNr());
+//						System.out.println("##"+ this.posTag);
+//						System.out.println(this.getSentenceInfoAt(st).getNucleusList());
+
+						for(int n = 0; n < this.getSentenceInfoAt(st).getNucleiIndexListSize(); n++){
+						 if(!diin.getSentenceInfoAt(s).getNucleusList().contains(this.getSentenceInfoAt(st).getNucleiIndexListAt(n))){
+							 diin.getSentenceInfoAt(s).addNucleiIndexList(this.getSentenceInfoAt(st).getNucleiIndexListAt(n));
+
+						 }	
+						}						
+						//System.out.println(this.getSentenceInfoAt(st).getNucleusList());
+					}					
+				}
+			}
+			return ((DependencyItemInNuclei)obj).getPosTag().equals(posTag);
+			
+		} else {
+			return false;
+		}
+		
+
+	}
+
+
+
 	
 	
 //	/**

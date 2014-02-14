@@ -162,6 +162,10 @@ public class SentenceInfo {
 
 	public int indexOfNucleiIndexList(SentenceInfo si){
 		return nucleiIndexList.indexOf(si);
-	}	
+	}
+	
+	public List<Integer> getNucleusList(){
+		return nucleiIndexList;
+	}
 
 }

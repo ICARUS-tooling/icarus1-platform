@@ -71,8 +71,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 	
 	protected ErrorminingMatcher matcher;
 	protected final boolean useFringe;
-	protected final int fringeStart;
-	protected final int fringeEnd;
+	protected final int fringeSize;
 	protected final boolean useNumberWildcard;
 	protected final int ngramResultLimit;
 	protected final int gramsGreaterX;
@@ -93,8 +92,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 
 		useNumberWildcard = getParameters().getBoolean(USE_NUMBER_WILDCARD, DEFAULT_USE_NUMBER_WILDCARD);
 		useFringe = getParameters().getBoolean(USE_FRINGE_HEURISTIC, DEFAULT_USE_FRINGE_HEURISTIC);
-		fringeStart = getParameters().getInteger(FRINGE_START, DEFAULT_FRINGE_START);
-		fringeEnd = getParameters().getInteger(FRINGE_END, DEFAULT_FRINGE_END);
+		fringeSize = getParameters().getInteger(FRINGE_SIZE, DEFAULT_FRINGE_SIZE);
 		ngramResultLimit = getParameters().getInteger(NGRAM_RESULT_LIMIT, DEFAULT_NGRAM_RESULT_LIMIT);
 		sentenceLimit = getParameters().getInteger(SENTENCE_LIMIT, DEFAULT_SENTENCE_LIMIT);
 		gramsGreaterX = getParameters().getInteger(GRAMS_GREATERX, DEFAULT_GRAMS_GREATERX);
@@ -108,8 +106,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 		
 		useNumberWildcard = getParameters().getBoolean(USE_NUMBER_WILDCARD, DEFAULT_USE_NUMBER_WILDCARD);
 		useFringe = getParameters().getBoolean(USE_FRINGE_HEURISTIC, DEFAULT_USE_FRINGE_HEURISTIC);
-		fringeStart = getParameters().getInteger(FRINGE_START, DEFAULT_FRINGE_START);
-		fringeEnd = getParameters().getInteger(FRINGE_END, DEFAULT_FRINGE_END);
+		fringeSize = getParameters().getInteger(FRINGE_SIZE, DEFAULT_FRINGE_SIZE);
 		ngramResultLimit = getParameters().getInteger(NGRAM_RESULT_LIMIT, DEFAULT_NGRAM_RESULT_LIMIT);
 		sentenceLimit = getParameters().getInteger(SENTENCE_LIMIT, DEFAULT_SENTENCE_LIMIT);
 		gramsGreaterX = getParameters().getInteger(GRAMS_GREATERX, DEFAULT_GRAMS_GREATERX);
@@ -262,9 +259,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 		
 		Options options = new Options();
 		options.put("UseFringe", useFringe); //$NON-NLS-1$
-		options.put("FringeSTART", fringeStart); //$NON-NLS-1$
-		options.put("FringeEND", fringeEnd); //$NON-NLS-1$ // 0 = infinity , number = limit
-
+		options.put("FringeSIZE", fringeSize); //$NON-NLS-1$		
 		options.put("NGramLIMIT", ngramResultLimit); //$NON-NLS-1$
 		options.put("UseNumberWildcard", useNumberWildcard); //$NON-NLS-1$
 		return options;
@@ -341,7 +336,16 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 				matcher = createNGramResultMatcher();
 				
 				Options ngramOptions = createOptions();
-	
+				
+				//TODO test stuff only using pos filtering
+				Options posFilterOptions = new Options();
+				posFilterOptions.put("FringeSTART", 3); //$NON-NLS-1$
+				posFilterOptions.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
+				posFilterOptions.put("NGramLIMIT", 0); //$NON-NLS-1$
+				posFilterOptions.put("UseFringe", true); //$NON-NLS-1$
+				posFilterOptions.put("UseNumberWildcard", false); //$NON-NLS-1$
+				NGrams posFilter = new NGrams(posFilterOptions, createQueryList());
+		
 				
 				ngrams = new NGramsDependency(ngramOptions, createQueryList());
 				
@@ -367,11 +371,19 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 					ngrams.initializeUniGrams((DependencyData) sd, i);
 					progress = (double) i / maxSentences * 50d;
 					setProgress((int) progress);
+					
+					posFilter.initializeUniGrams((DependencyData) sd, i);
 				}
+				
+				posFilter.nGramResults();
+				posFilter.nGramPoSFilter(posFilter.getResult(),4);
+				
 				
 				ngrams.nGramResults();					
 				
 				ngramsResultMap = ngrams.getResult();
+				
+
 	
 				helferList = new ArrayList<MappedNGramResult>();
 	
@@ -422,6 +434,9 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 				result.setProperty("LARGEST_NGRAM", ngrams.getPasses()); //$NON-NLS-1$
 				result.setProperty("MODE", 1); //$NON-NLS-1$
 				
+				
+				result.setProperty("POSFILTER", posFilter.nGramPoSFilter(posFilter.getResult(),4)); //$NON-NLS-1$
+				//System.out.println(posFilter.nGramPoSFilter(posFilter.getResult(),4));
 				
 				//Debug output for all sentences in result with largest ngram-span
 	//			for (int i = 0; i < helferList.size();i++){

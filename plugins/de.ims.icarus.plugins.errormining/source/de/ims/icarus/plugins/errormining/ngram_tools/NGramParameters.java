@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.errormining.ngram_tools;
 
+
 /**
  * @author Gregor Thiele
  * @version $Id$
@@ -38,9 +39,7 @@ public interface NGramParameters {
 	
 	public static final String USE_FRINGE_HEURISTIC = "fringe"; //$NON-NLS-1$
 	
-	public static final String FRINGE_START = "fringeStart";  //$NON-NLS-1$	
-
-	public static final String FRINGE_END = "fringeEnd"; //$NON-NLS-1$
+	public static final String FRINGE_SIZE = "fringeSize";  //$NON-NLS-1$	
 	
 	public static final String GRAMS_GREATERX = "gramsGreaterX"; //$NON-NLS-1$
 	
@@ -48,18 +47,13 @@ public interface NGramParameters {
 	
 	public static final String CREATE_XML_OUTPUT = "createxmlOutput"; //$NON-NLS-1$
 	
-	//public static final String NIL_SENTENCE_MATCH = "nilSentenceMatch"; //$NON-NLS-1$
-	
-	//public static final String NIL_SENTENCE_EXHAUSTIVE = "nilExhaustive"; //$NON-NLS-1$
-	
+
 	//default values
 	public static final boolean DEFAULT_USE_NUMBER_WILDCARD = true;
 	public static final int DEFAULT_NGRAM_RESULT_LIMIT = 0;
 	public static final boolean DEFAULT_USE_FRINGE_HEURISTIC = true;
-	public static final int DEFAULT_FRINGE_START = 3;
-	public static final int DEFAULT_FRINGE_END = 5;
+	public static final int DEFAULT_FRINGE_SIZE = 1;
 	public static final int DEFAULT_GRAMS_GREATERX = 0;
 	public static final int DEFAULT_SENTENCE_LIMIT = 0;
-	public static final boolean DEFAULT_CREATE_XML_OUTPUT = false;
-	//public static final int DEFAULT_NIL_SENTENCE_MATCH = 0;
+	public static final boolean DEFAULT_CREATE_XML_OUTPUT = false; 
 }

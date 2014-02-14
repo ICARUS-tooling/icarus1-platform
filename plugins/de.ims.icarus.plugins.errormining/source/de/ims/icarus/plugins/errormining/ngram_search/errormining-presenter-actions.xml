@@ -9,11 +9,11 @@
 
 	<!-- Filter Results -->
 	<action id="plugins.errormining.nGramResultView.applyFilterAction"
-		name="${id}.name" desc="${id}.description" icon="filter_tsk.gif" />
+		name="${id}.name" desc="${id}.description" icon="filter_apply.png" />
 
 	<!-- Reset -->
 	<action id="plugins.errorMining.nGramResultView.resetFilterAction"
-		name="${id}.name" desc="${id}.description" icon="nav_refresh.gif" />
+		name="${id}.name" desc="${id}.description" icon="filter_reset.png" />
 	
 	<!-- Sort Results ASC -->
 	<action id="plugins.errormining.nGramResultView.sortAscAction"
@@ -48,8 +48,6 @@
 		<item type="label" value="plugins.errormining.nGramResultView.filteredResults.label" />
 		<item type="custom" value="resultCounter" />		
 		<separator />
-		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
-		<separator />		
 		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
 		<item type="custom" value="textfield" />
 		<item type="label" value="plugins.errormining.nGramResultView.lowerBound.label" />
@@ -57,7 +55,8 @@
 		<item type="label" value="plugins.errormining.nGramResultView.upperBound.label" />
 		<item type="custom" value="upperBound" />
 		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
-		<separator />
+		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
+		<separator />			
 		<item type="action" value="plugins.errormining.nGramResultView.sortAscAction" />
 		<item type="action" value="plugins.errormining.nGramResultView.sortDescAction" />
 		<separator />
@@ -70,13 +69,12 @@
 		<separator />		
 		<item type="label" value="plugins.errormining.nGramResultView.filteredResults.label" />
 		<item type="custom" value="statisticCounter" />		
-		<separator />
-		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
-		<separator />		
+		<separator />	
 		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
 		<item type="custom" value="statisticTextFilterField" />
 		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
-		<separator />
+		<item type="action" value="plugins.errorMining.nGramResultView.resetFilterAction" />
+		<separator />	
 		<item type="action" value="plugins.errormining.nGramResultView.showDetailAction" />
 		<separator />
 		<item type="label" value="plugins.errormining.nGramResultView.statsSpinner.label" />

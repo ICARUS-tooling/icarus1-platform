@@ -38,6 +38,7 @@ import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 
 import de.ims.icarus.resources.ResourceDomain;
@@ -300,6 +301,18 @@ public class FormBuilder {
 	public ToggleFormEntry addToggleFormEntry(String id, String label) {
 		return addEntry(id, new ToggleFormEntry(label));
 	}
+	
+	public SpinnerFormEntry addSpinnerFormEntry(String id) {
+		return addEntry(id, new SpinnerFormEntry());
+	}
+	
+	public SpinnerFormEntry addSpinnerFormEntry(String id, String label, SpinnerNumberModel model) {
+		return addSpinnerFormEntry(id).setLabel(label).setSpinnerNumberModel(model);
+		//return addEntry(id, new SpinnerFormEntry(label));
+	}
+	
+
+	
 	
 	public void addSeperator() {
 		addEntry("sep_"+System.currentTimeMillis(), new SeparatorFormEntry()); //$NON-NLS-1$
