@@ -23,25 +23,29 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.manifest;
+package de.ims.icarus.util.mem;
 
-import java.awt.Color;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface HighlightLayerManifest extends LayerManifest {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Link {
 
-	List<LayerManifest> getHighlightedLayerManifests();
+	ReferenceType type() default ReferenceType.UNDEFINED;
 
-	Color getHighlightColor(int groupId);
-
-	Color getHighlighColor(int layerIndex);
-
-	Object getHighlightSource();
-
-	boolean isDeepHighlighting();
+	/**
+	 * If {@code true} the value of the annotated field should be
+	 * cached.
+	 * <p>
+	 * Default value is {@code false}
+	 */
+	boolean cache() default false;
 }

@@ -19,11 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.collections;
+
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
 
 
 /**
@@ -31,47 +35,56 @@ package de.ims.icarus.util.collections;
  * @version $Id$
  *
  */
+@HeapMember
 public class LongIntHashMap {
-	
+
 	private static final int DEFAULT_RESULT = -1;
 
 	/**
 	 * The hash table data.
 	 */
+	@Link
 	private transient Entry table[];
 
 	/**
 	 * The total number of entries in the hash table.
 	 */
+	@Primitive
 	private transient int count;
 
 	/**
 	 * The table is rehashed when its size exceeds this threshold. (The value of
 	 * this field is (int)(capacity * loadFactor).)
-	 * 
+	 *
 	 * @serial
 	 */
+	@Primitive
 	private int threshold;
 
 	/**
 	 * The load factor for the hash-table.
-	 * 
+	 *
 	 * @serial
 	 */
+	@Primitive
 	private float loadFactor;
 
 	/**
 	 * Inner class that acts as a data structure to create a new entry in the
 	 * table.
 	 */
+	@HeapMember
 	private static class Entry {
+		@Primitive
 		long key;
+		@Primitive
 		int value;
+		@Link
 		Entry next;
 
 		/**
 		 * Create a new entry with the given values.
-		 * 
+		 *
 		 * @param key The key used to enter this in the table
 		 * @param value The value for this key
 		 * @param next A reference to the next entry in the table
@@ -94,7 +107,7 @@ public class LongIntHashMap {
 	/**
 	 * Constructs a new, empty hash-table with the specified initial capacity and
 	 * default load factor, which is <code>0.75</code>.
-	 * 
+	 *
 	 * @param initialCapacity the initial capacity of the hash-table.
 	 * @throws IllegalArgumentException if the initial capacity is less than zero.
 	 */
@@ -105,20 +118,20 @@ public class LongIntHashMap {
 	/**
 	 * Constructs a new, empty hash-table with the specified initial capacity and
 	 * the specified load factor.
-	 * 
+	 *
 	 * @param initialCapacity the initial capacity of the hash-table.
 	 * @param loadFactor the load factor of the hash-table.
 	 * @throws IllegalArgumentException if the initial capacity is less than zero, or if the load
 	 *             factor is non-positive.
 	 */
 	public LongIntHashMap(int initialCapacity, float loadFactor) {
-		
+
 		if (initialCapacity < 0)
 			throw new IllegalArgumentException("Illegal capacity (negative): " //$NON-NLS-1$
 					+ initialCapacity);
 		if (loadFactor <= 0)
 			throw new IllegalArgumentException("Illegal load-factor (zero or less): " + loadFactor); //$NON-NLS-1$
-		
+
 		if (initialCapacity == 0) {
 			initialCapacity = 1;
 		}
@@ -130,7 +143,7 @@ public class LongIntHashMap {
 
 	/**
 	 * Returns the number of keys in this hash-table.
-	 * 
+	 *
 	 * @return the number of keys in this hash-table.
 	 */
 	public int size() {
@@ -139,7 +152,7 @@ public class LongIntHashMap {
 
 	/**
 	 * Tests if this hash-table maps no keys to values.
-	 * 
+	 *
 	 * @return {@code true} if this hash-table maps no keys to values;
 	 *         {@code false} otherwise.
 	 */
@@ -150,10 +163,10 @@ public class LongIntHashMap {
 	/**
 	 * Tests if some key maps into the specified value in this hash-table. This
 	 * operation is more expensive than the <code>containsKey</code> method.
-	 * 
+	 *
 	 * Note that this method is identical in functionality to containsValue,
 	 * (which is part of the Map interface in the collections framework).
-	 * 
+	 *
 	 * @param value
 	 *            a value to search for.
 	 * @return {@code true} if and only if some key maps to the
@@ -180,7 +193,7 @@ public class LongIntHashMap {
 
 	/**
 	 * Tests if the specified object is a key in this hash-table.
-	 * 
+	 *
 	 * @param key
 	 *            possible key.
 	 * @return {@code true} if and only if the specified object is a key in
@@ -203,7 +216,7 @@ public class LongIntHashMap {
 
 	/**
 	 * Returns the value to which the specified key is mapped in this map.
-	 * 
+	 *
 	 * @param key
 	 *            a key in the hash-table.
 	 * @return the value to which the key is mapped in this hash-table;
@@ -227,7 +240,7 @@ public class LongIntHashMap {
 	/**
 	 * Increases the capacity of and internally reorganizes this hash-table, in
 	 * order to accommodate and access its entries more efficiently.
-	 * 
+	 *
 	 * This method is called automatically when the number of keys in the
 	 * hash-table exceeds this hash-table's capacity and load factor.
 	 */
@@ -256,10 +269,10 @@ public class LongIntHashMap {
 	/**
 	 * Maps the specified {@code key} to the specified {@code value}
 	 * in this hash-table. The key cannot be {@code null}.
-	 * 
+	 *
 	 * The value can be retrieved by calling the {@link #get(long)} method with a
 	 * key that is equal to the original key.
-	 * 
+	 *
 	 * @param key the hash-table key.
 	 * @param value the value.
 	 * @return the previous value of the specified key in this hash-table, or
@@ -298,9 +311,9 @@ public class LongIntHashMap {
 
 	/**
 	 * Removes the key (and its corresponding value) from this hash-table.
-	 * 
+	 *
 	 * This method does nothing if the key is not present in the hash-table.
-	 * 
+	 *
 	 * @param key the key that needs to be removed.
 	 * @return the value to which the key had been mapped in this hash-table, or
 	 *         {@code -1} if the key did not have a mapping.

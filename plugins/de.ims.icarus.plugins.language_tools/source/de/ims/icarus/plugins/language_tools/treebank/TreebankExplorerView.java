@@ -87,6 +87,7 @@ import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.mem.AssessmentWorker;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 
@@ -250,6 +251,7 @@ public class TreebankExplorerView extends View {
 
 		actionManager.setEnabled(isTreebank && isLoaded,
 				"plugins.languageTools.treebankExplorerView.inspectTreebankAction",  //$NON-NLS-1$
+				"plugins.languageTools.treebankExplorerView.assessTreebankAction",  //$NON-NLS-1$
 				"plugins.languageTools.treebankExplorerView.freeTreebankAction"); //$NON-NLS-1$
 
 		actionManager.setEnabled(isTreebank && !isLoaded && !isLoading,
@@ -289,6 +291,8 @@ public class TreebankExplorerView extends View {
 				callbackHandler, "exportTreebanks"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.languageTools.treebankExplorerView.importTreebanksAction",  //$NON-NLS-1$
 				callbackHandler, "importTreebanks"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.languageTools.treebankExplorerView.assessTreebankAction",  //$NON-NLS-1$
+				callbackHandler, "assessTreebank"); //$NON-NLS-1$
 	}
 
 	private class LoadTracker implements EventListener, Runnable {
@@ -498,6 +502,7 @@ public class TreebankExplorerView extends View {
 
 			if(doDelete) {
 				try {
+					treebanksList.clearSelection();
 					TreebankRegistry.getInstance().deleteTreebank(treebank);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,
@@ -928,6 +933,15 @@ public class TreebankExplorerView extends View {
 					duplicates.size(),
 					importResult.getUnavailableTreebankCount(),
 					errorCount);
+		}
+
+		public void assessTreebank(ActionEvent e) {
+			Treebank treebank = treebanksList.getSelectedValue();
+			if(treebank==null) {
+				return;
+			}
+
+			TaskManager.getInstance().schedule(new AssessmentWorker(treebank), TaskPriority.DEFAULT, true);
 		}
 	}
 }

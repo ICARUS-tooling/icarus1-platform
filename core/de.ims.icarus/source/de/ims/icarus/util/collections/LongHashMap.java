@@ -28,21 +28,28 @@ package de.ims.icarus.util.collections;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
+
 /**
  * @author Markus
  * @version $Id$
  *
  */
+@HeapMember
 public class LongHashMap<E extends Object> {
 
 	/**
 	 * The hash table data.
 	 */
+	@Link
 	private transient Entry table[];
 
 	/**
 	 * The total number of entries in the hash table.
 	 */
+	@Primitive
 	private transient int count;
 
 	/**
@@ -51,6 +58,7 @@ public class LongHashMap<E extends Object> {
 	 *
 	 * @serial
 	 */
+	@Primitive
 	private int threshold;
 
 	/**
@@ -58,15 +66,20 @@ public class LongHashMap<E extends Object> {
 	 *
 	 * @serial
 	 */
+	@Primitive
 	private float loadFactor;
 
 	/**
 	 * Inner class that acts as a data structure to create a new entry in the
 	 * table.
 	 */
+	@HeapMember
 	private static class Entry {
+		@Primitive
 		long key;
+		@Link(cache=true)
 		Object value;
+		@Link
 		Entry next;
 
 		/**

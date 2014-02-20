@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -30,6 +30,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
 
 
 /**
@@ -37,24 +40,30 @@ import de.ims.icarus.language.LanguageConstants;
  * @version $Id$
  *
  */
+@HeapMember
 public class Span extends CorefMember implements Serializable, Comparable<Span>, Cloneable {
-	
+
 	private static final long serialVersionUID = 7035991391272077675L;
-	
+
+	@Primitive
 	private int sentenceIndex = -1;
+	@Primitive
 	private int beginIndex;
+	@Primitive
 	private int endIndex;
-	
+
+	@Primitive
 	private boolean root = false;
-	
+
+	@Link(cache=true)
 	private Cluster cluster;
-	
+
 	private static final char TAB_CHAR = '\t';
-	
+
 	public static final String ROOT_ID = "ROOT"; //$NON-NLS-1$
-	
+
 	private static Span sharedRoot;
-	
+
 	public static Span getROOT() {
 		if(sharedRoot==null) {
 			sharedRoot = new Span();
@@ -67,13 +76,13 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		this.beginIndex = beginIndex;
 		this.endIndex = endIndex;
 	}
-	
+
 	public Span(int beginIndex, int endIndex, int sentenceId) {
 		this.beginIndex = beginIndex;
 		this.endIndex = endIndex;
 		this.sentenceIndex = sentenceId;
 	}
-	
+
 	public Span() {
 		// no-op
 	}
@@ -105,7 +114,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	public int getClusterId() {
 		return cluster==null ? LanguageConstants.DATA_UNDEFINED_VALUE : cluster.getId();
 	}
-	
+
 	public Cluster getCluster() {
 		return cluster;
 	}
@@ -121,23 +130,23 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		clone.setSentenceIndex(getSentenceIndex());
 		clone.setProperties(cloneProperties());
 		clone.setROOT(isROOT());
-		
+
 		return clone;
 	}
-	
+
 	public void set(int sentenceIndex, int beginIndex, int endIndex) {
 		setSentenceIndex(sentenceIndex);
 		setBeginIndex(beginIndex);
 		setEndIndex(endIndex);
 	}
-	
+
 	private static final char MINUS_CHAR = '-';
-	
+
 	@Override
 	public String toString() {
 		return asString(this);
 	}
-	
+
 	public static String asString(Span span) {
 		if(span.isROOT()) {
 			return ROOT_ID;
@@ -145,7 +154,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		return String.format("%d-%d-%d", span.sentenceIndex,  //$NON-NLS-1$
 				span.beginIndex+1, span.endIndex+1);
 	}
-	
+
 	public void appendTo(StringBuilder sb) {
 		if(isROOT()) {
 			sb.append(ROOT_ID);
@@ -153,20 +162,20 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 			sb.append(sentenceIndex).append(MINUS_CHAR).append(beginIndex+1).append(MINUS_CHAR).append(endIndex+1);
 		}
 	}
-	
+
 	private static Pattern pattern;
-	
+
 	private static Pattern getPattern() {
 		if(pattern==null) {
 			pattern = Pattern.compile("(\\d+)-(\\d+)-(\\d+)"); //$NON-NLS-1$
 		}
 		return pattern;
 	}
-	
+
 	public static Span parse(String s) {
 		if(s==null || s.isEmpty())
 			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
-		
+
 		if(s.startsWith("ROOT")) { //$NON-NLS-1$
 			return getROOT();
 		} else {
@@ -174,24 +183,24 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 			if(tabIndex==-1) {
 				tabIndex = s.length();
 			}
-			
+
 			Matcher m = getPattern().matcher(s.substring(0, tabIndex));
 			if(!m.find())
 				throw new IllegalArgumentException("Unrecognized format for span: "+s); //$NON-NLS-1$
 
-			Span span = new Span();	
+			Span span = new Span();
 			span.setSentenceIndex(Integer.parseInt(m.group(1)));
 			span.setBeginIndex(Integer.parseInt(m.group(2))-1);
 			span.setEndIndex(Integer.parseInt(m.group(3))-1);
-			
+
 			if(tabIndex<s.length()-1) {
 				span.setProperties(CorefProperties.parse(s.substring(tabIndex+1)));
 			}
-			
+
 			return span;
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Span) {
@@ -215,29 +224,29 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		if(other==null) {
 			return 1;
 		}
-		
+
 		if(sentenceIndex!=other.sentenceIndex) {
-			return sentenceIndex-other.sentenceIndex; 
+			return sentenceIndex-other.sentenceIndex;
 		}
 		if(beginIndex!=other.beginIndex) {
 			return beginIndex-other.beginIndex;
 		}
-		
+
 		return getRange() - other.getRange();
 	}
-	
+
 	public int getRange() {
 		return endIndex - beginIndex + 1;
 	}
-	
+
 	public void setROOT(boolean root) {
 		this.root = root;
 	}
-	
+
 	public boolean isROOT() {
 		return root;
 	}
-	
+
 	public int getHead() {
 		// TODO evaluate need to decrement head value
 		Object hp = getProperty("HEAD"); //$NON-NLS-1$

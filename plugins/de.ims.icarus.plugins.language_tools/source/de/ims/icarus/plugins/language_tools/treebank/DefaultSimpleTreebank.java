@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.language_tools.treebank;
@@ -53,33 +53,37 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank {
 
 	public static final String READER_EXTENSION_PROPERTY = "DefaultSimpleTreebank::reader_extension"; //$NON-NLS-1$
-	
+
 	public static final String READER_PROPERTY_PREFIX = "DefaultSimpleTreebank::reader::"; //$NON-NLS-1$
-	
+
+	@Link
 	protected List<SentenceData> buffer;
-	
+
 	protected boolean editable = false;
-	
+
 	protected Grammar grammar;
-	
+
 	protected final AtomicBoolean loading = new AtomicBoolean();
 	protected boolean loaded = false;
-	
+
 	protected transient SentenceDataReader reader;
-	
+
 	protected Extension readerExtension;
-	
-	protected TreebankMetaData metaData; 
-	
+
+	protected TreebankMetaData metaData;
+
 	public DefaultSimpleTreebank() {
 		// no-op
 	}
@@ -87,9 +91,10 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	/**
 	 * @see de.ims.icarus.language.treebank.Treebank#saveState(de.ims.icarus.language.treebank.TreebankDescriptor)
 	 */
+	@Override
 	public void saveState(TreebankDescriptor descriptor) {
 		super.saveState(descriptor);
-		
+
 		if(readerExtension!=null) {
 			descriptor.getProperties().put(READER_EXTENSION_PROPERTY, readerExtension.getUniqueId());
 		}
@@ -98,19 +103,20 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	/**
 	 * @see de.ims.icarus.language.treebank.Treebank#loadState(de.ims.icarus.language.treebank.TreebankDescriptor)
 	 */
-	public void loadState(TreebankDescriptor descriptor) {		
+	@Override
+	public void loadState(TreebankDescriptor descriptor) {
 		super.loadState(descriptor);
-		
+
 		String uid = (String) properties.get(READER_EXTENSION_PROPERTY);
 		if(uid!=null) {
 			readerExtension = PluginUtil.getExtension(uid);
 		} else {
 			readerExtension = TreebankRegistry.getInstance().getDefaultReaderExtension();
 		}
-		
+
 		reader = null;
 	}
-	
+
 	@Override
 	public void setLocation(Location location) {
 		super.setLocation(location);
@@ -121,31 +127,31 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 		if(readerExtension!=null && readerExtension.equals(this.readerExtension)) {
 			return;
 		}
-		
+
 		this.readerExtension = readerExtension;
 		reader = null;
 		free();
 	}
-	
+
 	public Extension getReader() {
 		return readerExtension;
 	}
-	
+
 	public SentenceDataReader getSentenceDataReader() {
 		if(reader!=null) {
 			return reader;
 		}
-		
+
 		if(readerExtension==null)
 			throw new IllegalStateException("No reader defined"); //$NON-NLS-1$
-				
+
 		try {
 			reader = (SentenceDataReader) PluginUtil.instantiate(readerExtension);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to instantiate reader: "+readerExtension.getUniqueId(), e); //$NON-NLS-1$
 		}
-		
+
 		return reader;
 	}
 
@@ -156,53 +162,55 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	public boolean isEditable() {
 		return editable;
 	}
-	
+
 	public void setEditable(boolean editable) {
 		this.editable = editable;
-		
+
 		eventSource.fireEvent(new EventObject(TreebankEvents.EDITABLE));
 	}
 
 	/**
 	 * @see de.ims.icarus.language.treebank.Treebank#set(de.ims.icarus.language.SentenceData, int, de.ims.icarus.language.DataType)
 	 */
+	@Override
 	public void set(SentenceData item, int index, DataType type) {
 		if(!isEditable())
 			throw new UnsupportedOperationException();
 		if(!ContentTypeRegistry.isCompatible(getContentType(), item))
 			throw new UnsupportedSentenceDataException("Unsupported data: "+item); //$NON-NLS-1$
-		
+
 		if(!supportsType(type)) {
 			return;
 		}
-		
+
 		if(buffer==null) {
 			buffer = new ArrayList<>();
 		}
-		
+
 		if(index==buffer.size()) {
 			buffer.add(item);
 		} else {
 			buffer.set(index, item);
 		}
-		
-		eventSource.fireEvent(new EventObject(TreebankEvents.ADDED, 
+
+		eventSource.fireEvent(new EventObject(TreebankEvents.ADDED,
 				"item", item, "index", index)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
 	 * @see de.ims.icarus.language.treebank.Treebank#remove(int, de.ims.icarus.language.DataType)
 	 */
+	@Override
 	public void remove(int index, DataType type) {
 		if(!isEditable())
 			throw new UnsupportedOperationException();
-		
+
 		if(buffer==null) {
 			return;
 		}
-		
+
 		SentenceData item = buffer.remove(index);
-		eventSource.fireEvent(new EventObject(TreebankEvents.REMOVED, 
+		eventSource.fireEvent(new EventObject(TreebankEvents.REMOVED,
 				"item", item, "index", index)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -228,7 +236,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	@Override
 	public void load() throws Exception {
 		SentenceDataReader reader = getSentenceDataReader();
-		
+
 		if(location==null)
 			throw new IllegalStateException("Invalid location"); //$NON-NLS-1$
 		if(reader==null)
@@ -242,14 +250,14 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 			List<SentenceData> buffer = new ArrayList<>(200);
 			TreebankMetaDataBuilder metaDataBuilder = new TreebankMetaDataBuilder();
 			SentenceData item;
-			
+
 			while((item = reader.next())!=null) {
 				if(Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
-				
+
 				buffer.add(item);
 				metaDataBuilder.process(item);
-				
+
 				//eventSource.fireEvent(new EventObject(TreebankEvents.ADDED, "item", item)); //$NON-NLS-1$
 			}
 			synchronized (this) {
@@ -257,15 +265,15 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 				loaded = true;
 				metaData = metaDataBuilder.buildMetaData();
 			}
-		} finally {			
-			loading.set(false);	
+		} finally {
+			loading.set(false);
 			try {
 				reader.close();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to close reader for treebank: "+getName(), e); //$NON-NLS-1$
 			}
 			eventSource.fireEvent(new EventObject(TreebankEvents.LOADED));
-			
+
 			TreebankRegistry.getInstance().treebankChanged(this);
 		}
 	}
@@ -285,20 +293,20 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	public void free() {
 		if(loading.get())
 			throw new IllegalStateException("Cannot free treebank while loading is still in progress!"); //$NON-NLS-1$
-		
+
 		synchronized (this) {
 			eventSource.fireEvent(new EventObject(TreebankEvents.FREEING));
-			
+
 			loaded = false;
-			int size = size(); 
+			int size = size();
 			buffer = null;
-			
+
 			eventSource.fireEvent(new EventObject(TreebankEvents.FREED));
-			
+
 			if(size>0) {
 				fireChangeEvent();
 			}
-			
+
 			TreebankRegistry.getInstance().treebankChanged(this);
 		}
 	}
@@ -308,7 +316,7 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public ContentType getContentType() {
-		return readerExtension==null ? LanguageManager.getInstance().getSentenceDataContentType() 
+		return readerExtension==null ? LanguageManager.getInstance().getSentenceDataContentType()
 				: getSentenceDataReader().getContentType();
 	}
 

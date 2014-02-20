@@ -19,37 +19,42 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.highlight;
 
 import java.awt.Color;
-import java.awt.Container;
 
+import de.ims.icarus.language.model.Container;
 import de.ims.icarus.language.model.Markable;
 
 /**
+ * Models a set of highlight informations for a given {@link Container}
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface Highlight {
 
+	/**
+	 * Returns the container that contains legal {@code Markable} objects
+	 * that can be passed to the various methods in this interface.
+	 */
 	Container getContainer();
-	
-	HighlightIterator getHighlightIterator();
-	
+
+	HighlightCursor getHighlightCursor();
+
 	boolean isHighlighted(Markable markable);
-	
+
 	boolean isHighlighted(Markable markable, int layerIndex);
-	
+
 	Color getHighlightColor(Markable markable);
-	
+
 	Color getHighlightColor(Markable markable, int layerIndex);
-	
+
 	int getGroupId(Markable markable);
-	
+
 	int getGroupId(Markable markable, int layerIndex);
 }

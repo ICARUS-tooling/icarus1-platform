@@ -46,6 +46,7 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.util.StringUtil;
 
 
 /**
@@ -209,10 +210,10 @@ public final class CONLL12Utils {
 			forms[i] = cols[FORM_COL];
 
 			if(documentId==null) {
-				documentId = cols[DOC_COL];
+				documentId = StringUtil.intern(cols[DOC_COL]);
 			}
 			if(partId==null) {
-				partId = cols[PART_COL];
+				partId = StringUtil.intern(cols[PART_COL]);
 			}
 
 			String coref = cols[cols.length-1];
@@ -265,14 +266,14 @@ public final class CONLL12Utils {
 			}
 
 			// Assign properties
-			properties.put(FORM_KEY+'_'+i, cols[FORM_COL]);
-			properties.put(TAG_KEY+'_'+i, cols[TAG_COL]);
-			properties.put(PARSE_KEY+'_'+i, cols[PARSE_COL]);
-			properties.put(LEMMA_KEY+'_'+i, cols[LEMMA_COL]);
-			properties.put(FRAMESET_KEY+'_'+i, cols[FRAMESET_COL]);
-			properties.put(SENSE_KEY+'_'+i, cols[SENSE_COL]);
-			properties.put(SPEAKER_KEY+'_'+i, cols[SPEAKER_COL]);
-			properties.put(ENTITY_KEY+'_'+i, cols[ENTITY_COL]);
+			properties.put(StringUtil.intern(FORM_KEY+'_'+i), StringUtil.intern(cols[FORM_COL]));
+			properties.put(StringUtil.intern(TAG_KEY+'_'+i), StringUtil.intern(cols[TAG_COL]));
+			properties.put(StringUtil.intern(PARSE_KEY+'_'+i), StringUtil.intern(cols[PARSE_COL]));
+			properties.put(StringUtil.intern(LEMMA_KEY+'_'+i), StringUtil.intern(cols[LEMMA_COL]));
+			properties.put(StringUtil.intern(FRAMESET_KEY+'_'+i), StringUtil.intern(cols[FRAMESET_COL]));
+			properties.put(StringUtil.intern(SENSE_KEY+'_'+i), StringUtil.intern(cols[SENSE_COL]));
+			properties.put(StringUtil.intern(SPEAKER_KEY+'_'+i), StringUtil.intern(cols[SPEAKER_COL]));
+			properties.put(StringUtil.intern(ENTITY_KEY+'_'+i), StringUtil.intern(cols[ENTITY_COL]));
 		}
 
 		if(!spanStack.isEmpty())

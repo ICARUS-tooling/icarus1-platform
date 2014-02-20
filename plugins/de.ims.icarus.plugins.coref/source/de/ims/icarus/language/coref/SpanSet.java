@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -29,34 +29,39 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.collections.IntHashMap;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class SpanSet extends CorefListMember<Span> {
-	
-	protected Map<Integer, Span[]> blockMap;
+
+	@Link
+	protected IntHashMap<Span[]> blockMap;
+	@Link
 	protected Map<String, Span> spanMap;
 
 	public SpanSet() {
 		// no-op
 	}
-	
+
 	public Span[] getSpans(int sentenceIndex) {
 		return blockMap==null ? null : blockMap.get(sentenceIndex);
 	}
-	
+
 	public void setSpans(int sentenceIndex, Span[] spans) {
 		if(blockMap==null) {
-			blockMap = new HashMap<>();
+			blockMap = new IntHashMap<>();
 		}
 		if(spanMap==null) {
 			spanMap = new LinkedHashMap<>();
@@ -67,14 +72,18 @@ public class SpanSet extends CorefListMember<Span> {
 
 		// Ensure sorted spans array!
 		Arrays.sort(spans);
-		
+
 		blockMap.put(sentenceIndex, spans);
 		for(Span span : spans) {
 			spanMap.put(Span.asString(span), span);
 			items.add(span);
 		}
 	}
-	
+
+	public boolean contains(Span span) {
+		return spanMap!=null && spanMap.containsKey(Span.asString(span));
+	}
+
 	public Span getSpan(String id) {
 		if(Span.ROOT_ID.equals(id)) {
 			return Span.getROOT();
@@ -82,7 +91,7 @@ public class SpanSet extends CorefListMember<Span> {
 			return spanMap==null ? null : spanMap.get(id);
 		}
 	}
-	
+
 	public Collection<Span> getSpans() {
 		Collection<Span> result = items;
 		if(result==null) {
@@ -92,20 +101,20 @@ public class SpanSet extends CorefListMember<Span> {
 		}
 		return result;
 	}
-	
-	@Override
-	public SpanSet clone() {
-		SpanSet clone = new SpanSet();
-		clone.setProperties(cloneProperties());
-		if(blockMap!=null) {
-			clone.blockMap = new HashMap<>(blockMap);
-		}
-		if(spanMap!=null) {
-			clone.spanMap = new HashMap<>(spanMap);
-		}
-		
-		return clone;
-	}
+
+//	@Override
+//	public SpanSet clone() {
+//		SpanSet clone = new SpanSet();
+//		clone.setProperties(cloneProperties());
+//		if(blockMap!=null) {
+//			clone.blockMap = new HashMap<>(blockMap);
+//		}
+//		if(spanMap!=null) {
+//			clone.spanMap = new HashMap<>(spanMap);
+//		}
+//
+//		return clone;
+//	}
 
 	/**
 	 * @see de.ims.icarus.util.data.DataList#getContentType()

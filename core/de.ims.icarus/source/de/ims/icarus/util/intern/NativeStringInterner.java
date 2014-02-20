@@ -19,36 +19,25 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.highlight;
-
-import de.ims.icarus.language.model.HighlightLayer;
+package de.ims.icarus.util.intern;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface HighlightIterator {
-	
-	HighlightLayer getHighlightLayer();
+public class NativeStringInterner implements Interner<String> {
 
-	int highlightCount();
-	
-	Highlight navigate(int position);
-	
-	Highlight current();
-	
-	int position();
-	
-	boolean hasNext();
-	
-	Highlight next();
-	
-	boolean hasPrevious();
-	
-	Highlight previous();
+	/**
+	 * @see de.ims.icarus.util.intern.Interner#intern(java.lang.Object)
+	 */
+	@Override
+	public String intern(String item) {
+		return item.intern();
+	}
+
 }

@@ -19,8 +19,8 @@
  * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
  * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/language/coref/CoreferenceDocumentData.java $
  *
- * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $ 
- * $LastChangedRevision: 123 $ 
+ * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
+ * $LastChangedRevision: 123 $
  * $LastChangedBy: mcgaerty $
  */
 package de.ims.icarus.language.coref;
@@ -29,6 +29,11 @@ import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
+import de.ims.icarus.util.mem.Reference;
+import de.ims.icarus.util.mem.ReferenceType;
 
 
 /**
@@ -36,15 +41,19 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id: CoreferenceDocumentData.java 123 2013-07-31 15:22:01Z mcgaerty $
  *
  */
+@HeapMember
 public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData> implements CoreferenceDocumentData {
-	
+
+	@Reference(ReferenceType.UPLINK)
 	protected CoreferenceDocumentSet documentSet;
-	
+
+	@Primitive
 	protected final int documentIndex;
-	
+
+	@Link(cache=true)
 	protected String id;
-	
-	public DefaultCoreferenceDocumentData(CoreferenceDocumentSet documentSet, int documentIndex) {		
+
+	public DefaultCoreferenceDocumentData(CoreferenceDocumentSet documentSet, int documentIndex) {
 		setDocumentSet(documentSet);
 		this.documentIndex = documentIndex;
 	}
@@ -56,7 +65,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	public CoreferenceData get(int index) {
 		return (CoreferenceData) super.get(index);
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#add(de.ims.icarus.language.coref.CoreferenceData)
 	 */
@@ -64,12 +73,12 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	public void add(CoreferenceData data) {
 		super.add(data);
 	}
-	
+
 	public DefaultCoreferenceData newData(String[] forms) {
 		DefaultCoreferenceData data = new DefaultCoreferenceData(this, forms);
 		data.setSentenceIndex(size());
 		add(data);
-		
+
 		return data;
 	}
 
@@ -117,10 +126,10 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	public void setDocumentSet(CoreferenceDocumentSet documentSet) {
 		if(documentSet==null)
 			throw new NullPointerException("Invalid document-set"); //$NON-NLS-1$
-		
+
 		this.documentSet = documentSet;
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getSpanSet()
 	 */
@@ -136,7 +145,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	public EdgeSet getEdgeSet() {
 		return getDocumentSet().getAllocation().getEdgeSet(getId());
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDefaultSpanSet()
 	 */
@@ -144,7 +153,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	public SpanSet getDefaultSpanSet() {
 		return getDocumentSet().getDefaultAllocation().getSpanSet(getId());
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDefaultEdgeSet()
 	 */

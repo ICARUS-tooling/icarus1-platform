@@ -27,20 +27,29 @@ package de.ims.icarus.language.coref;
 
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
+import de.ims.icarus.util.mem.Reference;
+import de.ims.icarus.util.mem.ReferenceType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class DefaultCoreferenceData extends CorefMember implements CoreferenceData {
 
 	private static final long serialVersionUID = 1641469565583964051L;
 
+	@Link
 	protected final String[] forms;
 
+	@Reference(ReferenceType.UPLINK)
 	protected CoreferenceDocumentData document;
 
+	@Primitive
 	protected int sentenceIndex = -1;
 
 	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {

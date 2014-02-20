@@ -30,15 +30,20 @@ import java.util.Arrays;
 import de.ims.icarus.language.model.Edge;
 import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.util.collections.LongHashMap;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class GraphStruct {
 
+	@Link
 	private LongHashMap<Object> incoming = new LongHashMap<>();
+	@Link
 	private LongHashMap<Object> outgoing = new LongHashMap<>();
 
 	public int getEdgeCount(boolean incoming, Markable markable) {

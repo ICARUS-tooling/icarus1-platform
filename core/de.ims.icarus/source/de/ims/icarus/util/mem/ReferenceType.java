@@ -23,25 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.manifest;
-
-import java.awt.Color;
-import java.util.List;
+package de.ims.icarus.util.mem;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface HighlightLayerManifest extends LayerManifest {
+public enum ReferenceType {
 
-	List<LayerManifest> getHighlightedLayerManifests();
-
-	Color getHighlightColor(int groupId);
-
-	Color getHighlighColor(int layerIndex);
-
-	Object getHighlightSource();
-
-	boolean isDeepHighlighting();
+	UPLINK,
+	DOWNLINK,
+	UNDEFINED;
 }

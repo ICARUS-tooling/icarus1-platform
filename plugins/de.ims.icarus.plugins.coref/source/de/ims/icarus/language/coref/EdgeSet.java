@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -31,26 +31,28 @@ import java.util.List;
 
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.mem.HeapMember;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class EdgeSet extends CorefListMember<Edge> {
-	
+
 	public EdgeSet() {
 		// no-op
 	}
-	
+
 	public void addEdge(Edge edge) {
 		if(items==null) {
 			items = new ArrayList<>();
 		}
-		
+
 		items.add(edge);
 	}
-	
+
 	/**
 	 * Returns a read-only view of all the edges in this {@code EdgeSet}
 	 */
@@ -63,7 +65,7 @@ public class EdgeSet extends CorefListMember<Edge> {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public EdgeSet clone() {
 		EdgeSet clone = new EdgeSet();
@@ -71,7 +73,7 @@ public class EdgeSet extends CorefListMember<Edge> {
 		if(items!=null) {
 			clone.items = new ArrayList<>(items);
 		}
-		
+
 		return clone;
 	}
 

@@ -58,6 +58,7 @@ import de.ims.icarus.language.model.manifest.CorpusManifest;
 import de.ims.icarus.language.model.manifest.Derivable;
 import de.ims.icarus.language.model.manifest.ManifestType;
 import de.ims.icarus.language.model.manifest.MemberManifest;
+import de.ims.icarus.language.model.manifest.OptionsManifest;
 import de.ims.icarus.language.model.standard.layer.LayerTypeWrapper;
 import de.ims.icarus.language.model.standard.layer.LazyExtensionLayerType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -569,13 +570,9 @@ public final class CorpusRegistry {
 	 * @see #getRootContextTemplates()
 	 */
 	public List<ContextManifest> getContextTemplates() {
-		List<ContextManifest> result = new ArrayList<>();
-
-		for(Derivable template : templates.values()) {
-			if(template instanceof ContextManifest) {
-				result.add((ContextManifest) template);
-			}
-		}
+		@SuppressWarnings("unchecked")
+		List<ContextManifest> result = (List<ContextManifest>)
+				getTemplatesOfType(ManifestType.CONTEXT_MANIFEST);
 
 		return result;
 	}
@@ -588,6 +585,17 @@ public final class CorpusRegistry {
 		return false;
 	}
 
+	/**
+	 * Returns all previously registered templates that are of the given
+	 * {@code ManifestType}. Note that this method only returns templates
+	 * implementing the {@link MemberManifest} interface! So for example
+	 * it is not possible to collect templates for the {@link OptionsManifest}
+	 * interface this way. Use the {@link #getTemplatesOfClass(Class)} for
+	 * such cases.
+	 *
+	 * @throws NullPointerException if the {@code type} argument is {@code null}
+	 * @see #getTemplatesOfClass(Class)
+	 */
 	public List<? extends MemberManifest> getTemplatesOfType(ManifestType type) {
 		if (type == null)
 			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
@@ -603,6 +611,11 @@ public final class CorpusRegistry {
 		return result;
 	}
 
+	/**
+	 * Returns all previously templates that derive from the given {@code Class}.
+	 *
+	 * @throws NullPointerException if the {@code clazz} argument is {@code null}
+	 */
 	public <E extends Derivable> List<E> getTemplatesOfClass(Class<E> clazz) {
 		if (clazz == null)
 			throw new NullPointerException("Invalid clazz"); //$NON-NLS-1$

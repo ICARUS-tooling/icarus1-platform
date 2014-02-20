@@ -892,7 +892,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				CorefNodeData nodeData = (CorefNodeData) value;
 
 				if(nodeData.getSpan().isROOT()) {
-					label = nodeData.getSpan().toString();
+					label = "\n   Document Root   \n \n";
 				} else {
 					label = labelBuilder.getLabel(nodeData.getSpan(), nodeData.getSentence());
 				}

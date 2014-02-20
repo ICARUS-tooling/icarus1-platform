@@ -23,25 +23,20 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.manifest;
+package de.ims.icarus.util.mem;
 
-import java.awt.Color;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface HighlightLayerManifest extends LayerManifest {
-
-	List<LayerManifest> getHighlightedLayerManifests();
-
-	Color getHighlightColor(int groupId);
-
-	Color getHighlighColor(int layerIndex);
-
-	Object getHighlightSource();
-
-	boolean isDeepHighlighting();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Reference {
+	ReferenceType value() default ReferenceType.UNDEFINED;
 }

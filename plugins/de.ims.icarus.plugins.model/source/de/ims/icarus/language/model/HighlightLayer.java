@@ -19,15 +19,16 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.highlight.HighlightIterator;
+import de.ims.icarus.language.model.highlight.Highlight;
+import de.ims.icarus.language.model.highlight.HighlightCursor;
 import de.ims.icarus.language.model.manifest.HighlightLayerManifest;
 import de.ims.icarus.language.model.manifest.ManifestOwner;
 
@@ -37,24 +38,43 @@ import de.ims.icarus.language.model.manifest.ManifestOwner;
  *
  */
 public interface HighlightLayer extends Layer, ManifestOwner<HighlightLayerManifest> {
-	
+
+	/**
+	 * Returns the {@code Layer}s that highlightings within this layer refer to.
+	 * Note that the order of {@code Layer} instances in the returned list corresponds
+	 * to the indices used in the {@link Highlight} interface.
+	 * @see Highlight
+	 */
 	List<Layer> getHighlightedLayers();
 
 	/**
-	 * Returns a {@code HighlightIterator} that can be used to navigate over
-	 * top-level highlights on the underlying {@code MarkableLayer}
-	 * 
+	 * Returns a {@code HighlightCursor} that can be used to navigate over
+	 * top-level highlights on the underlying {@code MarkableLayer}. If there are no
+	 * top-level highlights available, this method should return {@code null}.
+	 * <p>
+	 * Note that this method is equivalent to calling {@link #getHighlightCursor(Markable)}
+	 * with the root container of this layers <i>base-layer</i>.
+	 *
 	 * @return
 	 */
-	HighlightIterator getHighlighIterator();
-	
+	HighlightCursor getHighlightCursor();
+
 	/**
-	 * Returns a {@code HighlightIterator} that can be used to navigate over
+	 * Returns a {@code HighlightCursor} that can be used to navigate over
 	 * highlights of the referenced layers top-level members (top-level members
-	 * are the markables in that layers root container).
-	 * 
-	 * @param markable
-	 * @return
+	 * are the markables in that layers root container). If the container in
+	 * question is not highlighted at all, this method returns {@code null}.
+	 * Note that this method is intended for fetching highlights on nested containers
+	 * and therefore will only be available if the <i>base-layer</i> is indeed
+	 * built as a hierarchy of containers. If provided with the <i>base-layers</i>
+	 * root container this method is essentially equal to calling {@link #getHighlightCursor()}.
+	 *
+	 * @param container The {@code Markable} to fetch highlight information about
+	 *
+	 * @throws NullPointerException if the {@code markable} argument is {@code null}
+	 * @throws IllegalArgumentException if the {@code Markable} is not a member of this
+	 * layers <i>base-layer</i> as defined by {@link #getBaseLayer()} or if it is not a
+	 * {@code Container}
 	 */
-	HighlightIterator getHighlightIterator(Markable markable);
+	HighlightCursor getHighlightCursor(Markable markable);
 }

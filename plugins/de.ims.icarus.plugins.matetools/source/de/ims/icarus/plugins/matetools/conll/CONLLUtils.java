@@ -30,6 +30,7 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
+import de.ims.icarus.util.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -37,6 +38,9 @@ import de.ims.icarus.language.dependency.SimpleDependencyData;
  *
  */
 public final class CONLLUtils {
+
+	//DEBUG
+	private static final boolean intern = true;
 
 	private CONLLUtils() {
 		// no-op
@@ -149,7 +153,12 @@ public final class CONLLUtils {
 
 	private static String get(String[] vals, int index, String def) {
 		String v = vals==null ? def : vals[index];
-		return v==null ? def : v;
+		if(v==null) {
+			v = def;
+		} else if(intern) {
+			v = StringUtil.intern(v);
+		}
+		return v;
 	}
 
 	public static String ensureValid(String input) {

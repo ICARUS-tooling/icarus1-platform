@@ -61,6 +61,14 @@
 	<!-- Show Property Dialog -->
 	<action id="plugins.coref.coreferenceManagerView.showPropertyDialogAction"
 		name="${id}.name" desc="${id}.description" icon="container_obj.gif" />
+	
+	<!-- Assess Document-Set -->
+	<action id="plugins.coref.coreferenceManagerView.assessDocumentSetAction"
+		name="${id}.name" desc="${id}.description" icon="jwatch_obj.gif" />
+	
+	<!-- Assess Allocation -->
+	<action id="plugins.coref.coreferenceManagerView.assessAllocationAction"
+		name="${id}.name" desc="${id}.description" icon="jwatch_obj.gif" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.coref.coreferenceManagerView.toolBarList">
@@ -94,6 +102,9 @@
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceManagerView.loadAllocationAction" />
 		<item type="action" value="plugins.coref.coreferenceManagerView.freeAllocationAction" />
+		<separator />
+		<item type="action" value="plugins.coref.coreferenceManagerView.assessDocumentSetAction" />
+		<item type="action" value="plugins.coref.coreferenceManagerView.assessAllocationAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceManagerView.showPropertyDialogAction" />
 	</action-list>

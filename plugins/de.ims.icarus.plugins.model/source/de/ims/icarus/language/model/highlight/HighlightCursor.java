@@ -23,25 +23,44 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.manifest;
+package de.ims.icarus.language.model.highlight;
 
-import java.awt.Color;
-import java.util.List;
+import de.ims.icarus.language.model.HighlightLayer;
 
 /**
+ *
  * @author Markus Gärtner
  * @version $Id$
+ * @see Highlight
  *
  */
-public interface HighlightLayerManifest extends LayerManifest {
+public interface HighlightCursor {
 
-	List<LayerManifest> getHighlightedLayerManifests();
+	/**
+	 * Returns the {@code HighlightLayer} this cursor originated from
+	 */
+	HighlightLayer getHighlightLayer();
 
-	Color getHighlightColor(int groupId);
+	/**
+	 * Returns the number of concurrently available highlight information
+	 * accessible through this cursor.
+	 */
+	int highlightCount();
 
-	Color getHighlighColor(int layerIndex);
+	/**
+	 * Returns the position of the given {@code Highlight} object within this cursor.
+	 *
+	 * @throws NullPointerException if the {@code highlight} argument is {@code null}
+	 * @throws IllegalArgumentException if the given {@code Highlight} is not a member of
+	 * this cursor
+	 */
+	int indexOf(Highlight highlight);
 
-	Object getHighlightSource();
-
-	boolean isDeepHighlighting();
+	/**
+	 * Returns the {@code Highlight} stored at the given index.
+	 *
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *         (<tt>index &lt; 0 || index &gt;= highlightCount()</tt>)
+	 */
+	Highlight getHighlight(int index);
 }

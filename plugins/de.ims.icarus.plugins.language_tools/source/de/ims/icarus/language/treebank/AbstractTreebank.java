@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.treebank;
@@ -42,39 +42,41 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.mem.HeapMember;
 
 
 /**
  * Skeleton class for {@code Treebank} implementations. This class
  * provides all the common methods of basic treebank classes.
  * <p>
- * Note that it only provides many of the methods defined in the 
+ * Note that it only provides many of the methods defined in the
  * {@link Treebank} interface but does {@code not} implement the
  * interface itself! This is because there exist "sub-interfaces"
  * like {@link DerivedTreebank} and it should be up to the actually
  * implementing class to decide which particular interface to
  * implement.
- * 
- * @author Markus Gärtner 
+ *
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class AbstractTreebank {
-	
+
 	protected Location location;
 	protected EventSource eventSource = new EventSource(this);
 	protected Map<String, Object> properties;
-	
+
 	protected String name = TreebankRegistry.getTempName((Treebank)this);
-	
+
 	protected List<ChangeListener> changeListeners;
-	
-	
+
+
 	@Override
 	public String toString() {
 		return getName();
 	}
-	
+
 	public boolean isEditable() {
 		return false;
 	}
@@ -94,22 +96,22 @@ public abstract class AbstractTreebank {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * @see Identity#getId()
 	 */
 	public String getId() {
 		return TreebankRegistry.getInstance().getDescriptor((Treebank)this).getId();
 	}
-	
+
 	public Object getOwner() {
 		return this;
 	}
-	
+
 	public String getDescription() {
 		return null;
 	}
-	
+
 	public Icon getIcon() {
 		return null;
 	}
@@ -133,17 +135,17 @@ public abstract class AbstractTreebank {
 	}
 
 	/**
-	 * Sets the new {@code Location} to be used for this 
+	 * Sets the new {@code Location} to be used for this
 	 * {@code Treebank}. Subsequent calls to {@link #isLoaded()}
 	 * will return {@code false} at least until the first call
-	 * to {@link #load()} is performed 
+	 * to {@link #load()} is performed
 	 * @param location the new {@code Location} to be used
 	 */
 	public void setLocation(Location location) {
 		if(this.location!=null && this.location.equals(location)) {
 			return;
 		}
-		
+
 		this.location = location;
 		eventSource.fireEvent(new EventObject(TreebankEvents.LOCATION));
 	}
@@ -160,7 +162,7 @@ public abstract class AbstractTreebank {
 	public Object getProperty(String key) {
 		return properties==null ? null : properties.get(key);
 	}
-	
+
 	public void setProperty(String key, Object value) {
 		if(properties==null) {
 			properties = new HashMap<>();
@@ -171,18 +173,18 @@ public abstract class AbstractTreebank {
 			properties.put(key, value);
 		}
 	}
-	
+
 	public Map<String, Object> getProperties() {
 		if(properties==null) {
 			properties = new HashMap<>();
 		}
 		return properties;
 	}
-	
+
 	public SentenceData get(int index) {
 		return ((Treebank)this).get(index, DataType.SYSTEM);
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.ui.events.EventSource#addListener(java.lang.String, de.ims.icarus.ui.events.EventListener)
 	 */
@@ -219,19 +221,19 @@ public abstract class AbstractTreebank {
 		if(!isEditable())
 			throw new UnsupportedOperationException();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @see SentenceDataList#addChangeListener(ChangeListener)
 	 */
 	public void addChangeListener(ChangeListener listener) {
 		if(changeListeners==null) {
 			changeListeners = new ArrayList<>();
 		}
-		
+
 		changeListeners.add(listener);
 	}
-	
+
 	/**
 	 * @see SentenceDataList#removeChangeListener(ChangeListener)
 	 */
@@ -239,15 +241,15 @@ public abstract class AbstractTreebank {
 		if(changeListeners==null) {
 			return;
 		}
-		
+
 		changeListeners.remove(listener);
 	}
-	
+
 	protected void fireChangeEvent() {
 		if(changeListeners==null || changeListeners.isEmpty()) {
 			return;
 		}
-		
+
 		ChangeEvent event = new ChangeEvent(this);
 		Object[] listeners = changeListeners.toArray();
 		for(Object listener : listeners) {

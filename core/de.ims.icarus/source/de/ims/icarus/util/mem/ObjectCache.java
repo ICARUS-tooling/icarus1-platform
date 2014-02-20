@@ -23,25 +23,38 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.manifest;
+package de.ims.icarus.util.mem;
 
-import java.awt.Color;
-import java.util.List;
+import de.ims.icarus.util.collections.IdentityHashSet;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface HighlightLayerManifest extends LayerManifest {
+public class ObjectCache {
 
-	List<LayerManifest> getHighlightedLayerManifests();
+	private final IdentityHashSet<Object> cache = new IdentityHashSet<>();
 
-	Color getHighlightColor(int groupId);
+	public synchronized boolean contains(Object object) {
+		if (object == null)
+			throw new NullPointerException("Invalid object"); //$NON-NLS-1$
 
-	Color getHighlighColor(int layerIndex);
+		return cache.contains(object);
+	}
 
-	Object getHighlightSource();
+	public synchronized boolean containsEquals(Object object) {
+		if (object == null)
+			throw new NullPointerException("Invalid object"); //$NON-NLS-1$
 
-	boolean isDeepHighlighting();
+		return cache.containsEquals(object);
+	}
+
+	public synchronized boolean addIfAbsent(Object object) {
+		return cache.add(object);
+	}
+
+	public synchronized boolean addIfAbsentEquals(Object object) {
+		return cache.addEquals(object);
+	}
 }

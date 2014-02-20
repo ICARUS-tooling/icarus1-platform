@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -33,18 +33,22 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import de.ims.icarus.util.data.DataList;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class CorefListMember<T extends Object> extends CorefMember implements DataList<T> {
 
 	protected EventListenerList listenerList = new EventListenerList();
-	
+
+	@Link
 	protected List<T> items;
-	
+
 	protected CorefListMember() {
 		// no-op
 	}
@@ -64,21 +68,25 @@ public abstract class CorefListMember<T extends Object> extends CorefMember impl
 	public T get(int index) {
 		return items==null ? null : items.get(index);
 	}
-	
+
 	public void add(T data) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
 		if(items==null) {
 			items = new ArrayList<>();
 		}
-		
+
 		items.add(data);
-		
+
 		fireChangeEvent();
 	}
-	
+
 	public void free() {
+		if(items!=null) {
+			items.clear();
+		}
+
 		items = null;
 		properties = null;
 		fireChangeEvent();
@@ -99,16 +107,16 @@ public abstract class CorefListMember<T extends Object> extends CorefMember impl
 	public void removeChangeListener(ChangeListener listener) {
 		listenerList.remove(ChangeListener.class, listener);
 	}
-	
+
 	protected void fireChangeEvent() {
 		Object[] listeners = listenerList.getListeners(ChangeListener.class);
-		
+
 		if(listeners==null || listeners.length==0) {
 			return;
 		}
-		
+
 		ChangeEvent evt = new ChangeEvent(this);
-		
+
 		for(Object listener : listeners) {
 			((ChangeListener)listener).stateChanged(evt);
 		}

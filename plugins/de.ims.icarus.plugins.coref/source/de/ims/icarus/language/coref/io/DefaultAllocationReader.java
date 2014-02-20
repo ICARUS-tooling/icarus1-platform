@@ -73,6 +73,8 @@ public class DefaultAllocationReader implements AllocationReader {
 	private CoreferenceDocumentSet documentSet;
 	private int lineCount;
 
+	private String documentId;
+
 	public DefaultAllocationReader() {
 		// no-op
 	}
@@ -117,7 +119,7 @@ public class DefaultAllocationReader implements AllocationReader {
 				throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+line); //$NON-NLS-1$ //$NON-NLS-2$
 
 			int startLine = lineCount;
-			String documentId = line.substring(BEGIN_DOCUMENT.length()).trim();
+			documentId = line.substring(BEGIN_DOCUMENT.length()).trim();
 
 			if(checkIds && !ids.remove(documentId))
 				throw new IllegalArgumentException(String.format(
@@ -133,8 +135,8 @@ public class DefaultAllocationReader implements AllocationReader {
 				} else if(line.startsWith(COMMENT_PREFIX)) {
 					readProperty(line, allocation);
 				} else
-					throw new IllegalArgumentException(String.format(
-							"Invalid property statement '%s' at line %d", line, lineCount)); //$NON-NLS-1$
+					throw new IllegalArgumentException(errMsg(String.format(
+							"Invalid property statement '%s' at line %d", line, lineCount))); //$NON-NLS-1$
 			}
 
 			// Read nodes
@@ -148,9 +150,9 @@ public class DefaultAllocationReader implements AllocationReader {
 
 			// Check for closing declaration
 			if(!END_DOCUMENT.equals(skipEmptyLines()))
-				throw new IllegalArgumentException(String.format(
+				throw new IllegalArgumentException(errMsg(String.format(
 						"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
-						END_DOCUMENT, BEGIN_DOCUMENT, startLine));
+						END_DOCUMENT, BEGIN_DOCUMENT, startLine)));
 		}
 
 		if(checkIds && !ids.isEmpty()) {
@@ -203,6 +205,10 @@ public class DefaultAllocationReader implements AllocationReader {
 					continue;
 				}
 
+				if(spanSet.contains(span))
+					throw new IllegalArgumentException(
+							errMsg("Duplicate span declaration: "+span)); //$NON-NLS-1$
+
 				if(span.getSentenceIndex()!=sentenceId && !buffer.isEmpty()) {
 					Span[] spans = new Span[buffer.size()];
 					buffer.toArray(spans);
@@ -216,7 +222,7 @@ public class DefaultAllocationReader implements AllocationReader {
 				if(document!=null) {
 					CoreferenceData sentence = document.get(sentenceId);
 					if(span.getBeginIndex()<0 || span.getEndIndex()>=sentence.length())
-						throw new IllegalArgumentException("Span range out of bounds: "+span); //$NON-NLS-1$
+						throw new IllegalArgumentException(errMsg("Span range out of bounds: "+span)); //$NON-NLS-1$
 				}
 			}
 		}
@@ -229,9 +235,9 @@ public class DefaultAllocationReader implements AllocationReader {
 		}
 
 		if(!closed)
-			throw new IllegalArgumentException(String.format(
+			throw new IllegalArgumentException(errMsg(String.format(
 					"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
-					END_NODES, BEGIN_NODES, beginLine));
+					END_NODES, BEGIN_NODES, beginLine)));
 
 		return spanSet;
 	}
@@ -242,6 +248,7 @@ public class DefaultAllocationReader implements AllocationReader {
 
 		EdgeSet edgeSet = new EdgeSet();
 		int beginLine = lineCount;
+		Set<Edge> lookup = new HashSet<>();
 
 		while((line = readLine()) != null) {
 			if(END_EDGES.equals(line)) {
@@ -252,14 +259,20 @@ public class DefaultAllocationReader implements AllocationReader {
 			} else if(line.startsWith(COMMENT_PREFIX)) {
 				readProperty(line, edgeSet);
 			} else {
-				edgeSet.addEdge(Edge.parse(line, spanSet));
+				Edge edge = Edge.parse(line, spanSet);
+
+				if(lookup.contains(edge))
+					throw new IllegalArgumentException(errMsg("Duplicate edge delcaration: "+edge)); //$NON-NLS-1$
+				lookup.add(edge);
+
+				edgeSet.addEdge(edge);
 			}
 		}
 
 		if(!closed)
-			throw new IllegalArgumentException(String.format(
+			throw new IllegalArgumentException(errMsg(String.format(
 					"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
-					END_EDGES, BEGIN_EDGES, beginLine));
+					END_EDGES, BEGIN_EDGES, beginLine)));
 
 		allocateClusters(edgeSet);
 
@@ -288,8 +301,13 @@ public class DefaultAllocationReader implements AllocationReader {
 				pending.offer(edge);
 				postproned.add(edge);
 			} else {
-				throw new IllegalArgumentException("Unable to to assign cluster - source is unknown: "+edge); //$NON-NLS-1$
+				throw new IllegalArgumentException(errMsg("Unable to to assign node to cluster " //$NON-NLS-1$
+						+ "- source of edge has no connection to ROOT: "+edge+" ")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
+	}
+
+	private String errMsg(String s) {
+		return "Error in document '"+documentId+"': "+s; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

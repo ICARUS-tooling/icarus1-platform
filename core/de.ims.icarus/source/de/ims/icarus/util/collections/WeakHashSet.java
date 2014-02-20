@@ -3,8 +3,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.collections;
@@ -20,11 +20,11 @@ import java.util.WeakHashMap;
  *
  */
 public class WeakHashSet<E extends Object> extends AbstractSet<E> {
-	
+
 	private static final Object dummy = "DUMMY"; //$NON-NLS-1$
 
 	private WeakHashMap<E, Object> store = new WeakHashMap<>();
-	
+
 	public WeakHashSet() {
 		// no-op
 	}

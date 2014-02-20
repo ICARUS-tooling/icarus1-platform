@@ -57,7 +57,10 @@ import de.ims.icarus.plugins.coref.view.properties.PropertyInfoDialog;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
+import de.ims.icarus.ui.tasks.TaskManager;
+import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.mem.AssessmentWorker;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 
@@ -165,6 +168,7 @@ public class CoreferenceManagerView extends View {
 		actionManager.setEnabled(canLoadDocumentSet,
 				"plugins.coref.coreferenceManagerView.loadDocumentSetAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canFreeDocumentSet,
+				"plugins.coref.coreferenceManagerView.assessDocumentSetAction", //$NON-NLS-1$
 				"plugins.coref.coreferenceManagerView.freeDocumentSetAction"); //$NON-NLS-1$
 		actionManager.setEnabled(isDocumentSetPath,
 				"plugins.coref.coreferenceManagerView.addAllocationAction"); //$NON-NLS-1$
@@ -174,6 +178,7 @@ public class CoreferenceManagerView extends View {
 		actionManager.setEnabled(canLoadAllocation,
 				"plugins.coref.coreferenceManagerView.loadAllocationAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canFreeAllocation,
+				"plugins.coref.coreferenceManagerView.assessAllocationAction", //$NON-NLS-1$
 				"plugins.coref.coreferenceManagerView.freeAllocationAction"); //$NON-NLS-1$
 	}
 
@@ -215,6 +220,11 @@ public class CoreferenceManagerView extends View {
 
 		actionManager.addHandler("plugins.coref.coreferenceManagerView.showPropertyDialogAction",  //$NON-NLS-1$
 				callbackHandler, "showPropertyDialog"); //$NON-NLS-1$
+
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.assessDocumentSetAction",  //$NON-NLS-1$
+				callbackHandler, "assessDocumentSet"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.coref.coreferenceManagerView.assessAllocationAction",  //$NON-NLS-1$
+				callbackHandler, "assessAllocation"); //$NON-NLS-1$
 	}
 
 	private void showPopup(MouseEvent trigger) {
@@ -643,6 +653,28 @@ public class CoreferenceManagerView extends View {
 				UIUtil.beep();
 				showError(ex);
 			}
+		}
+
+		public void assessAllocation(ActionEvent e) {
+
+			AllocationDescriptor descriptor = getSelectedAllocation();
+
+			if(descriptor==null || !descriptor.isLoaded()) {
+				return;
+			}
+
+			TaskManager.getInstance().schedule(new AssessmentWorker(descriptor.get()), TaskPriority.DEFAULT, true);
+		}
+
+		public void assessDocumentSet(ActionEvent e) {
+
+			DocumentSetDescriptor descriptor = getSelectedDocumentSet();
+
+			if(descriptor==null || !descriptor.isLoaded()) {
+				return;
+			}
+
+			TaskManager.getInstance().schedule(new AssessmentWorker(descriptor.get()), TaskPriority.DEFAULT, true);
 		}
 	}
 }

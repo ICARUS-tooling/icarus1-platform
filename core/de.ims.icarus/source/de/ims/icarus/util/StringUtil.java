@@ -41,6 +41,7 @@ import de.ims.icarus.ui.helper.TextItem;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.intern.Interner;
+import de.ims.icarus.util.intern.NativeStringInterner;
 import de.ims.icarus.util.intern.StrongInterner;
 import de.ims.icarus.util.intern.WeakInterner;
 
@@ -57,14 +58,24 @@ public final class StringUtil {
 	public static final String WEAK_INTERN_PROPERTY =
 			"de.ims.icarus.strings.useWeakIntern"; //$NON-NLS-1$
 
+	public static final String NATIVE_INTERN_PROPERTY =
+			"de.ims.icarus.strings.useNativeIntern"; //$NON-NLS-1$
+
 	private StringUtil() {
 		// no-op
 	}
+
+	//DEBUG
+//	private static Interner<String> interner = new EmptyInterner<>();
 
 	private static Interner<String> interner;
 	private static final int defaultInternerCapacity = 500;
 
 	public static String intern(String s) {
+		if(s==null) {
+			return null;
+		}
+
 		Interner<String> i = interner;
 		if(i==null) {
 			synchronized (StringUtil.class) {
@@ -72,6 +83,8 @@ public final class StringUtil {
 				if(i==null) {
 					if("true".equals(Core.getCore().getProperty(WEAK_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						i = new WeakInterner<>(defaultInternerCapacity);
+					} else if("true".equals(Core.getCore().getProperty(NATIVE_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
+						i = new NativeStringInterner();
 					} else {
 						i = new StrongInterner<>(defaultInternerCapacity);
 					}
@@ -199,6 +212,11 @@ public final class StringUtil {
 	private static DecimalFormat decimalFormat = new DecimalFormat("#,###"); //$NON-NLS-1$
 
 	public static String formatDecimal(int value) {
+		synchronized (decimalFormat) {
+			return decimalFormat.format(value);
+		}
+	}
+	public static String formatDecimal(long value) {
 		synchronized (decimalFormat) {
 			return decimalFormat.format(value);
 		}

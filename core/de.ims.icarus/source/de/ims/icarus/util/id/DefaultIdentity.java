@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.id;
@@ -35,23 +35,23 @@ import de.ims.icarus.resources.ResourceManager;
 
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class DefaultIdentity implements Identity {
-	
+
 	protected final ResourceDomain resourceDomain;
-	
+
 	protected final Identity base;
-	
+
 	protected final String id;
 	protected final Object owner;
 	protected String nameKey;
 	protected String descriptionKey;
 	protected URL iconLocation;
 	protected Icon icon;
-	
+
 	protected boolean locked = false;
 
 	public DefaultIdentity(String id, Object owner) {
@@ -71,15 +71,19 @@ public class DefaultIdentity implements Identity {
 	}
 
 	protected DefaultIdentity(Identity base, String id, Object owner, ResourceDomain domain) {
-		if(base==null && id==null)
+		if((base==null || base.getId()==null) && id==null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 		if(owner==null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
-		
+
 		if(domain==null) {
 			domain = ResourceManager.getInstance().getGlobalDomain();
 		}
-		
+
+		if(id==null) {
+			id = base.getId();
+		}
+
 		this.base = base;
 		this.id = id;
 		this.owner = owner;
@@ -102,19 +106,19 @@ public class DefaultIdentity implements Identity {
 	@Override
 	public String getName() {
 		String name = null;
-		
+
 		if(nameKey!=null) {
 			name = resourceDomain.get(nameKey);
 		}
-		
+
 		if(name==null && base!=null) {
 			name = base.getName();
 		}
-		
+
 		if(name==null) {
 			name = getId();
 		}
-		
+
 		return name;
 	}
 
@@ -125,15 +129,15 @@ public class DefaultIdentity implements Identity {
 	@Override
 	public String getDescription() {
 		String description = null;
-		
+
 		if(descriptionKey!=null) {
 			description = resourceDomain.get(descriptionKey);
 		}
-		
+
 		if(description==null && base!=null) {
 			description = base.getDescription();
 		}
-		
+
 		return description;
 	}
 
@@ -144,15 +148,15 @@ public class DefaultIdentity implements Identity {
 	@Override
 	public Icon getIcon() {
 		Icon icon = this.icon;
-		
+
 		if(icon==null && iconLocation!=null) {
 			icon = new ImageIcon(iconLocation);
 		}
-		
+
 		if(icon==null && base!=null) {
 			icon = base.getIcon();
 		}
-		
+
 		return icon;
 	}
 
@@ -168,7 +172,7 @@ public class DefaultIdentity implements Identity {
 	public boolean isLocked() {
 		return locked;
 	}
-	
+
 	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -207,7 +211,7 @@ public class DefaultIdentity implements Identity {
 	public void setNameKey(String nameKey) {
 		if(locked)
 			throw new IllegalArgumentException("Name key already set"); //$NON-NLS-1$
-		
+
 		this.nameKey = nameKey;
 	}
 
@@ -226,7 +230,7 @@ public class DefaultIdentity implements Identity {
 	public void setDescriptionKey(String descriptionKey) {
 		if(locked)
 			throw new IllegalArgumentException("Description key already set"); //$NON-NLS-1$
-		
+
 		this.descriptionKey = descriptionKey;
 	}
 
@@ -245,7 +249,7 @@ public class DefaultIdentity implements Identity {
 	public void setIconLocation(URL iconLocation) {
 		if(locked)
 			throw new IllegalArgumentException("Icon location key already set"); //$NON-NLS-1$
-		
+
 		this.iconLocation = iconLocation;
 		icon = null;
 	}
@@ -265,7 +269,7 @@ public class DefaultIdentity implements Identity {
 	public void setIcon(Icon icon) {
 		if(locked)
 			throw new IllegalArgumentException("Icon already set"); //$NON-NLS-1$
-		
+
 		this.icon = icon;
 	}
 

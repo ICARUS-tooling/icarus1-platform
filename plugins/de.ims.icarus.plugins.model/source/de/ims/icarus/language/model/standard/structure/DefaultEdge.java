@@ -33,6 +33,10 @@ import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.Structure;
 import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Primitive;
+import de.ims.icarus.util.mem.Reference;
+import de.ims.icarus.util.mem.ReferenceType;
 
 /**
  * Implements a simple directed edge.
@@ -41,10 +45,16 @@ import de.ims.icarus.language.model.util.CorpusUtils;
  * @version $Id$
  *
  */
+@HeapMember
 public class DefaultEdge implements Edge {
 
-	private Markable source, target;
+	@Reference(ReferenceType.DOWNLINK)
+	private Markable source;
+	@Reference(ReferenceType.DOWNLINK)
+	private Markable target;
+	@Primitive
 	private final long id;
+	@Reference(ReferenceType.UPLINK)
 	private final Structure structure;
 
 	/**

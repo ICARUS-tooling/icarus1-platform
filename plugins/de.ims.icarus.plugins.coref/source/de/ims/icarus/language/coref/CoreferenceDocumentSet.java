@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -34,6 +34,8 @@ import java.util.Set;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 
 
 /**
@@ -41,17 +43,21 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  * @version $Id$
  *
  */
+@HeapMember
 public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentData> {
-	
+
+	@Link
 	private Map<String, CoreferenceDocumentData> idMap;
-	
+
+	@Link
 	private CoreferenceAllocation allocation;
+	@Link
 	private CoreferenceAllocation defaultAllocation = new CoreferenceAllocation();
-		
+
 	public CoreferenceDocumentData getDocument(String documentId) {
 		return idMap==null ? null : idMap.get(documentId);
 	}
-	
+
 	public Set<String> getDocumentIds() {
 		Set<String> result = null;
 		if(idMap!=null) {
@@ -60,14 +66,15 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 		if(result==null) {
 			result = Collections.emptySet();
 		}
-		
+
 		return result;
 	}
-	
+
 	public Collection<CoreferenceDocumentData> getDocuments() {
 		return CollectionUtils.getCollectionProxy(items);
 	}
-	
+
+	@Override
 	public void add(CoreferenceDocumentData data) {
 		if(idMap==null) {
 			idMap = new HashMap<>();
@@ -75,10 +82,10 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 		if(idMap.containsKey(data.getDocumentIndex()))
 			throw new DuplicateIdentifierException("Duplicate document id: "+data.getDocumentIndex()); //$NON-NLS-1$
 		idMap.put(data.getId(), data);
-		
+
 		super.add(data);
 	}
-	
+
 	public CoreferenceDocumentData newDocument(String id) {
 		DefaultCoreferenceDocumentData data = new DefaultCoreferenceDocumentData(this, size());
 		data.setId(id);
@@ -111,9 +118,14 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 	 */
 	@Override
 	public void free() {
+		if(idMap!=null) {
+			idMap.clear();
+		}
+
+		idMap = null;
 		allocation = null;
 		defaultAllocation = new CoreferenceAllocation();
-		
+
 		super.free();
 	}
 }

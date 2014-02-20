@@ -31,14 +31,19 @@ import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.manifest.ContainerManifest;
 import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Reference;
+import de.ims.icarus.util.mem.ReferenceType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class AbstractNestedContainer extends AbstractContainer {
 
+	@Reference(ReferenceType.UPLINK)
 	private final Container parent;
 
 	public AbstractNestedContainer(long id, Container parent) {

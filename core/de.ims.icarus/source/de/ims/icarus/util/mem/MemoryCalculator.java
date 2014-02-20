@@ -23,25 +23,15 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.manifest;
+package de.ims.icarus.util.mem;
 
-import java.awt.Color;
-import java.util.List;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface HighlightLayerManifest extends LayerManifest {
+public interface MemoryCalculator {
 
-	List<LayerManifest> getHighlightedLayerManifests();
-
-	Color getHighlightColor(int groupId);
-
-	Color getHighlighColor(int layerIndex);
-
-	Object getHighlightSource();
-
-	boolean isDeepHighlighting();
+	long appendFootprint(Object obj, FootprintBuffer buffer, ObjectCache cache);
 }

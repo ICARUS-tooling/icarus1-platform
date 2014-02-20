@@ -19,25 +19,30 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
+
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class CorefMember {
 
+	@Link
 	protected CorefProperties properties;
-	
+
 	protected CorefMember() {
 		// no-op
 	}
-	
+
 	public Object getProperty(String key) {
 		return properties==null ? null : properties.get(key);
 	}
@@ -46,14 +51,14 @@ public abstract class CorefMember {
 		if(properties==null) {
 			properties = new CorefProperties();
 		}
-		
+
 		properties.put(key, value);
 	}
-	
+
 	public void setProperties(CorefProperties properties) {
 		this.properties = properties;
 	}
-	
+
 	public CorefProperties getProperties() {
 		return properties;
 	}

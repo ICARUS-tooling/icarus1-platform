@@ -31,14 +31,18 @@ import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.util.CorpusUtils;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Primitive;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class AbstractContainer implements Container {
 
+	@Primitive
 	private final long id;
 
 	/**

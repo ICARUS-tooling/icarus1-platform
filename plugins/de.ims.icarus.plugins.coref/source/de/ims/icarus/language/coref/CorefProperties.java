@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
@@ -32,16 +32,19 @@ import java.util.Map.Entry;
 
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Counter;
+import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.mem.HeapMember;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class CorefProperties extends CompactProperties {
-	
+
 	private static final long serialVersionUID = 4855184362661793838L;
-	
+
 	private static final char ASSIGNMENT_CHAR = ':';
 	private static final char SEPARATOR_CHAR = ';';
 
@@ -53,16 +56,16 @@ public class CorefProperties extends CompactProperties {
 	public String toString() {
 		if(table==null) {
 			return ""; //$NON-NLS-1$
-		} 
-		
+		}
+
 		StringBuilder sb = new StringBuilder();
 		appendTo(sb);
-		
+
 		return sb.toString();
 	}
-	
+
 	public void appendTo(StringBuilder sb) {
-		
+
 		if(table instanceof Object[]) {
 			Object[] items = (Object[]) table;
 			int maxI = items.length-1;
@@ -84,12 +87,12 @@ public class CorefProperties extends CompactProperties {
 			}
 		}
 	}
-	
+
 	public static CorefProperties parse(String s) {
 		if(s==null || s.isEmpty()) {
 			return null;
 		}
-		
+
 		CorefProperties properties = new CorefProperties();
 		int maxIndex = s.length()-1;
 		int startIndex = 0;
@@ -101,15 +104,15 @@ public class CorefProperties extends CompactProperties {
 			if(endIndex==-1) {
 				endIndex = s.length();
 			}
-			properties.put(s.substring(startIndex, offset0), 
+			properties.put(StringUtil.intern(s.substring(startIndex, offset0)),
 					toValue(s.substring(offset0+1, endIndex)));
-			
+
 			startIndex = endIndex+1;
 		}
-		
+
 		return properties;
 	}
-	
+
 	private static Object toValue(String s) {
 		try {
 			return Integer.parseInt(s);
@@ -121,15 +124,15 @@ public class CorefProperties extends CompactProperties {
 		} catch(NumberFormatException e) {
 			// ignore
 		}
-		
-		return s;
+
+		return StringUtil.intern(s);
 	}
 
 	@Override
 	public CorefProperties clone() {
 		return (CorefProperties) super.clone();
 	}
-	
+
 	public static CorefProperties subset(CorefProperties source, int index) {
 		if(source==null) {
 			return null;
@@ -137,9 +140,9 @@ public class CorefProperties extends CompactProperties {
 		CorefProperties properties = new CorefProperties();
 
 		String suffix = '_'+String.valueOf(index);
-		
+
 		Object table = source.table;
-		
+
 		if(table instanceof Object[]) {
 			Object[] items = (Object[]) table;
 			int maxI = items.length-1;
@@ -167,54 +170,54 @@ public class CorefProperties extends CompactProperties {
 				}
 			}
 		}
-		
+
 		return properties;
 	}
-	
-	public static CorefProperties subset(CorefProperties source, 
+
+	public static CorefProperties subset(CorefProperties source,
 			int index0, int index1) {
 		if(source==null) {
 			return null;
 		}
 		CorefProperties properties = new CorefProperties();
-		
+
 		Map<String, Object> map = source.asMap();
-		
+
 		for(int i=index0; i<=index1; i++) {
 			String suffix = '_'+String.valueOf(i);
 			Iterator<Entry<String, Object>> it = map.entrySet().iterator();
 			while(it.hasNext()) {
 				Entry<String, Object> entry = it.next();
 				String key = (String) entry.getKey();
-				
+
 				if(entry.getValue()==null) {
 					it.remove();
 					continue;
 				}
 
 				if(key.endsWith(suffix)) {
-					key = key.substring(0, key.length()-suffix.length());
+					key = StringUtil.intern(key.substring(0, key.length()-suffix.length()));
 					properties.put(key, entry.getValue());
 					it.remove();
 				}
 			}
 		}
-		
+
 		return properties;
 	}
-	
-	public static void countKeys(CorefProperties properties, 
+
+	public static void countKeys(CorefProperties properties,
 			Counter counter) {
-		
+
 		if(counter==null)
 			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
-		
+
 		if(properties==null || properties.size()==0) {
 			return;
 		}
-		
+
 		Object table = properties.table;
-		
+
 		if(table instanceof Object[]) {
 			Object[] items = (Object[]) table;
 			int maxI = items.length-1;
@@ -230,23 +233,23 @@ public class CorefProperties extends CompactProperties {
 				if(entry.getValue()==null) {
 					continue;
 				}
-				
+
 				counter.increment(getRawKey((String) entry.getKey()));
 			}
 		}
 	}
-	
-	public static void collectKeys(CorefProperties properties, 
+
+	public static void collectKeys(CorefProperties properties,
 			Collection<String> target) {
 		if(target==null)
 			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
-		
+
 		if(properties==null || properties.size()==0) {
 			return;
 		}
-		
+
 		Object table = properties.table;
-		
+
 		if(table instanceof Object[]) {
 			Object[] items = (Object[]) table;
 			int maxI = items.length-1;
@@ -262,25 +265,25 @@ public class CorefProperties extends CompactProperties {
 				if(entry.getValue()==null) {
 					continue;
 				}
-				
+
 				target.add(getRawKey((String) entry.getKey()));
 			}
 		}
 	}
-	
+
 	private static String getRawKey(String key) {
 		int idx = key.lastIndexOf('_');
 		if(idx==-1) {
 			return key;
 		}
-		
+
 		int len = key.length();
 		for(int i=idx+1; i<len; i++) {
 			if(!Character.isDigit(key.charAt(i))) {
 				return key;
 			}
 		}
-		
+
 		return key.substring(0, idx);
 	}
 }

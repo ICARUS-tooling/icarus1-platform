@@ -35,6 +35,9 @@ import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
 import de.ims.icarus.language.model.standard.LookupList;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.ReferenceType;
 
 /**
  * Implements a rooted structure of arbitrary type (chain, tree or graph).
@@ -45,10 +48,13 @@ import de.ims.icarus.util.CorruptedStateException;
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class AbstractRootedStructure extends EmptyStructure {
 
+	@Link
 	private final LookupList<Edge> edges = new LookupList<>();
 
+	@Link(type=ReferenceType.DOWNLINK)
 	private final Markable root;
 
 	public AbstractRootedStructure(long id, Container parent) {

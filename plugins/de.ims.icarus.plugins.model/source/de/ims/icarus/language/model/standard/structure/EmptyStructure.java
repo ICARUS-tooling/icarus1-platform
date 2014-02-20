@@ -44,6 +44,10 @@ import de.ims.icarus.language.model.standard.LookupList;
 import de.ims.icarus.language.model.standard.container.AbstractNestedContainer;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
+import de.ims.icarus.util.mem.Reference;
 
 /**
  * Implements an empty structure.
@@ -69,11 +73,17 @@ import de.ims.icarus.util.CorruptedStateException;
  * @version $Id$
  *
  */
+@HeapMember
 public class EmptyStructure extends AbstractNestedContainer implements Structure {
 
+	@Reference
 	private final Container boundary;
+	@Link
 	private final LookupList<Markable> augmentation;
-	private final boolean boundaryAsBase, augment;
+	@Primitive
+	private final boolean boundaryAsBase;
+	@Primitive
+	private boolean augment;
 
 	public EmptyStructure(long id, Container parent) {
 		this(id, parent, null, true, false);

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
@@ -30,41 +30,46 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class CompactProperties implements Cloneable, Serializable {
 
 	private static final long serialVersionUID = -492641053997637443L;
 
+	@Link
 	protected Object table;
-	
+
 	protected static final int ARRAY_SIZE_LIMIT = 8;
 
 
 	@SuppressWarnings("unchecked")
 	public Object get(String key) {
 		Exceptions.testNullArgument(key, "key"); //$NON-NLS-1$
-		
+
 		if(table==null)
 			return null;
-		
+
 		if(table instanceof Object[]) {
 			Object[] table = (Object[]) this.table;
 			for(int i = 0; i<table.length-1; i+=2)
 				if(table[i]!=null && key.equals(table[i]))
 					return table[i+1];
-			
+
 			return null;
 		} else {
 			return ((Map<String, Object>) table).get(key);
 		}
 	}
-	
+
 	public int size() {
 		if(table==null) {
 			return 0;
@@ -74,18 +79,18 @@ public class CompactProperties implements Cloneable, Serializable {
 			return ((Map<?, ?>)table).size();
 		}
 	}
-	
+
 	protected void grow() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		Object[] table = (Object[]) this.table;
-		
+
 		for(int i=1; i<table.length; i+=2)
 			if(table[i-1]!=null && table[i]!=null)
 				map.put((String)table[i-1], table[i]);
-		
+
 		this.table = map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	protected void shrink() {
 		Map<String,Object> map = (Map<String, Object>) this.table;
@@ -95,10 +100,10 @@ public class CompactProperties implements Cloneable, Serializable {
 			table[index++] = entry.getKey();
 			table[index++] = entry.getValue();
 		}
-		
+
 		this.table = table;
 	}
-	
+
 	protected void clear() {
 		table = null;
 	}
@@ -106,23 +111,23 @@ public class CompactProperties implements Cloneable, Serializable {
 	@SuppressWarnings("unchecked")
 	public void put(String key, Object value) {
 		Exceptions.testNullArgument(key, "key"); //$NON-NLS-1$
-		
+
 		// nothing to do here
 		if(value==null && table==null)
 			return;
-		
+
 		if(table==null) {
 			// INITIAL mode
 			Object[] table = new Object[4];
 			table[0] = key;
 			table[1] = value;
-			
+
 			this.table = table;
 		} else if(table instanceof Object[]) {
 			// ARRAY mode and array is set
 			Object[] table = (Object[]) this.table;
 			int emptyIndex = -1;
-			
+
 			// try to insert
 			for(int i=0; i<table.length-1; i+=2) {
 				if(table[i]==null) {
@@ -134,7 +139,7 @@ public class CompactProperties implements Cloneable, Serializable {
 					return;
 				}
 			}
-			
+
 			// key not present
 			if(emptyIndex!=-1) {
 				// empty slot available
@@ -148,31 +153,31 @@ public class CompactProperties implements Cloneable, Serializable {
 				newTable[size] = key;
 				newTable[size+1] = value;
 				this.table = newTable;
-				
+
 				if(++size > ARRAY_SIZE_LIMIT) {
 					grow();
 				}
 			}
-			
+
 		} else {
 			// TABLE mode
 			Map<String,Object> table = (Map<String, Object>)this.table;
-			
+
 			if(value==null)
 				table.remove(key);
 			else
 				table.put(key, value);
-			
+
 			if(table.size()<ARRAY_SIZE_LIMIT) {
 				shrink();
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> asMap() {
 		Map<String, Object> map;
-		
+
 		if(table==null) {
 			map = null;
 		} else if(table instanceof Object[]) {
@@ -186,10 +191,10 @@ public class CompactProperties implements Cloneable, Serializable {
 		} else {
 			map = new LinkedHashMap<>((Map<String, Object>)this.table);
 		}
-		
+
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public CompactProperties clone() {
@@ -199,13 +204,13 @@ public class CompactProperties implements Cloneable, Serializable {
 		} catch (CloneNotSupportedException e) {
 			// ignore
 		}
-		
+
 		if(table instanceof Object[]) {
 			clone.table = ((Object[])table).clone();
 		} else if(table!=null) {
 			clone.table = new LinkedHashMap<>((Map<String, Object>) clone.table);
 		}
-		
+
 		return clone;
 	}
 }

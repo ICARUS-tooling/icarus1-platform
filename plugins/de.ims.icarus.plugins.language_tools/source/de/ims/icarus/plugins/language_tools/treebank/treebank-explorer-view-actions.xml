@@ -56,6 +56,10 @@
 		template="actions.default.importAction"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Assess Treebanks -->
+	<action id="plugins.languageTools.treebankExplorerView.assessTreebankAction"
+		name="${id}.name" desc="${id}.description" icon="jwatch_obj.gif" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.languageTools.treebankExplorerView.toolBarList">
 		<item type="action" value="plugins.languageTools.treebankExplorerView.newTreebankAction" />
@@ -85,6 +89,8 @@
 		<separator />
 		<item type="action" value="plugins.languageTools.treebankExplorerView.editTreebankAction" />
 		<item type="action" value="plugins.languageTools.treebankExplorerView.exportTreebankAction" />
+		<separator />
+		<item type="action" value="plugins.languageTools.treebankExplorerView.assessTreebankAction" />
 	</action-list>
 	
 </actions>

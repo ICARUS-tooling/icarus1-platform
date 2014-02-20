@@ -31,16 +31,23 @@ import de.ims.icarus.language.model.Markable;
 import de.ims.icarus.language.model.MarkableLayer;
 import de.ims.icarus.language.model.MemberType;
 import de.ims.icarus.language.model.Structure;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Primitive;
+import de.ims.icarus.util.mem.Reference;
+import de.ims.icarus.util.mem.ReferenceType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class Root implements Markable {
 
+	@Primitive
 	private final long id;
 
+	@Reference(ReferenceType.UPLINK)
 	private final Structure owner;
 
 	public Root(long id, Structure owner) {

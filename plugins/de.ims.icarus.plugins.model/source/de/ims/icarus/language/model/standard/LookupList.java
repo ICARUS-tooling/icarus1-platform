@@ -34,12 +34,16 @@ import java.util.NoSuchElementException;
 import de.ims.icarus.language.model.CorpusMember;
 import de.ims.icarus.util.collections.AbstractPrimitiveList;
 import de.ims.icarus.util.collections.LongIntHashMap;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@HeapMember
 public class LookupList<E extends CorpusMember> extends AbstractPrimitiveList implements Iterable<E> {
 
 	private static final int MIN_LOOKUP_SIZE = 6;
@@ -48,8 +52,11 @@ public class LookupList<E extends CorpusMember> extends AbstractPrimitiveList im
 
     private static final Object[] EMPTY_ITEMS = {};
 
+    @Link
 	private Object[] items;
+    @Link
 	private LongIntHashMap lookup;
+    @Primitive
 	private int modCount = 0;
 
 	public LookupList() {
