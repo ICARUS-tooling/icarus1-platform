@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.sun.xml.internal.txw2.IllegalSignatureException;
-
 import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.collections.IntValueHashMap;
@@ -369,7 +367,7 @@ public class FootprintBuffer implements MemoryFootprint {
 		if(active.get())
 			throw new IllegalStateException("Calculation still active"); //$NON-NLS-1$
 		if(!finished)
-			throw new IllegalSignatureException("Calculations not finished yet"); //$NON-NLS-1$
+			throw new IllegalStateException("Calculations not finished yet"); //$NON-NLS-1$
 	}
 
 	private void checkActive() {
