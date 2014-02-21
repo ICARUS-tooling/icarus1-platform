@@ -39,7 +39,7 @@ import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

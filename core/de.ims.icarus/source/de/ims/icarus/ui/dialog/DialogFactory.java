@@ -49,8 +49,8 @@ import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.KeyValuePair;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
+import de.ims.icarus.util.strings.StringUtil;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 
 
 /**

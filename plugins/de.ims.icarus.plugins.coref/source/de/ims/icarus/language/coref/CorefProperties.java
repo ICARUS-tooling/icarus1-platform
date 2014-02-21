@@ -32,8 +32,8 @@ import java.util.Map.Entry;
 
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Counter;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

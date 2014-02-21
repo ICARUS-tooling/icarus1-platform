@@ -89,13 +89,13 @@ import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.DataContainer;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

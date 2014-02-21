@@ -41,7 +41,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.tasks.TaskManager;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

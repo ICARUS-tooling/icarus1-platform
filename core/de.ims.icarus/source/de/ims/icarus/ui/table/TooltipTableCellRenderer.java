@@ -31,7 +31,7 @@ import java.awt.FontMetrics;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

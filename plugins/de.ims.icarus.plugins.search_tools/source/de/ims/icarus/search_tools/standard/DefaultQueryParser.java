@@ -49,9 +49,9 @@ import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Order;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

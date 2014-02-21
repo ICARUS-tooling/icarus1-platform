@@ -51,7 +51,7 @@ import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.plugins.coref.view.grid.EntityGridTableModel.EntityGridColumnModel;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.table.MultilineTableHeaderRenderer.MultilineListModel;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

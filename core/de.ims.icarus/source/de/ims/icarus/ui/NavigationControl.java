@@ -57,7 +57,7 @@ import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

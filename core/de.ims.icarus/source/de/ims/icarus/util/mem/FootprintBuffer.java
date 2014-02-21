@@ -31,9 +31,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.collections.IntValueHashMap;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

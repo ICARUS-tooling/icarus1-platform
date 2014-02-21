@@ -40,11 +40,11 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
 import de.ims.icarus.ui.list.DynamicWidthList;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.DataListModel;
 import de.ims.icarus.util.data.DataListPresenter;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

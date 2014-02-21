@@ -54,7 +54,6 @@ import de.ims.icarus.ui.DummyTextPane;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.text.BatchDocument;
 import de.ims.icarus.util.Installable;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationDisplayMode;
@@ -63,6 +62,7 @@ import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.annotation.HighlightUtils;
 import de.ims.icarus.util.annotation.HighlightUtils.OutlineHighlightPainter;
 import de.ims.icarus.util.annotation.HighlightUtils.UnderlineHighlightPainter;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

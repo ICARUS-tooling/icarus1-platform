@@ -46,7 +46,7 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

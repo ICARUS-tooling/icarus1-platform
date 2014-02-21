@@ -30,7 +30,7 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

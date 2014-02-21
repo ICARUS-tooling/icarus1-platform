@@ -102,7 +102,6 @@ import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -112,6 +111,7 @@ import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Gregor Thiele

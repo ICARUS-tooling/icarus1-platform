@@ -44,8 +44,8 @@ import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.Counter;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

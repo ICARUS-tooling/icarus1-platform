@@ -54,8 +54,8 @@ import de.ims.icarus.ui.GridBagUtil;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.ProgressBar;
 import de.ims.icarus.ui.UIUtil;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

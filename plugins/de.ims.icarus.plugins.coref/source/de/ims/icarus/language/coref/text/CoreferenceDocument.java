@@ -58,13 +58,13 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.text.BatchDocument;
 import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.Filter;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.AnnotatedData;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.cache.LRUCache;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

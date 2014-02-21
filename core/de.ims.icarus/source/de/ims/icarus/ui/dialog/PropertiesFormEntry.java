@@ -53,7 +53,7 @@ import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.table.PropertiesTableModel;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.KeyValuePair;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

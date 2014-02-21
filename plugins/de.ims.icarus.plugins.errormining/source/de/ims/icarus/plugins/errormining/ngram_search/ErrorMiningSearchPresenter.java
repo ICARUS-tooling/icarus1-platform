@@ -147,10 +147,10 @@ import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataList;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Gregor Thiele

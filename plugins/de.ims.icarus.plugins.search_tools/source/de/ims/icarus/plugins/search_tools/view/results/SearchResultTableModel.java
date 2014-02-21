@@ -44,8 +44,8 @@ import de.ims.icarus.ui.NumberDisplayMode;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.ui.table.TableSortMode;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

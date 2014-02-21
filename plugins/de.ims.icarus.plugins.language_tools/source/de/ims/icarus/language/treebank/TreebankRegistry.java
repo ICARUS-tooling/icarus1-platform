@@ -79,10 +79,10 @@ import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.events.WeakEventSource;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.UnknownIdentifierException;
 import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.strings.StringUtil;
 import de.ims.icarus.xml.jaxb.JAXBUtils;
 
 

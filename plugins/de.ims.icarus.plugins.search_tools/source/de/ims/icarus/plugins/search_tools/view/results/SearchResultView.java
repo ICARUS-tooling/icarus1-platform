@@ -66,10 +66,10 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

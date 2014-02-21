@@ -30,7 +30,7 @@ import java.util.concurrent.CancellationException;
 import javax.swing.SwingWorker;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

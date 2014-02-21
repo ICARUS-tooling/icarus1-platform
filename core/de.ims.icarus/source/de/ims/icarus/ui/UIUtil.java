@@ -116,8 +116,8 @@ import de.ims.icarus.ui.actions.Actions;
 import de.ims.icarus.ui.config.ConfigDialog;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.HtmlUtils;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

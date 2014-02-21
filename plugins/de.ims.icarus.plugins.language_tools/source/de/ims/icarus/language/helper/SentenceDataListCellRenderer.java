@@ -33,8 +33,8 @@ import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Installable;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.annotation.AnnotationController;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

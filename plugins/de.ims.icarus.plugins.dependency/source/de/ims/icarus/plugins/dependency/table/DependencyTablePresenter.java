@@ -51,8 +51,8 @@ import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.table.TablePresenter;
 import de.ims.icarus.ui.table.TooltipTableCellRenderer;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

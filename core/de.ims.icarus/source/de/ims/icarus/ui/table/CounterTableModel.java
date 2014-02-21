@@ -33,7 +33,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.ims.icarus.util.Counter;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

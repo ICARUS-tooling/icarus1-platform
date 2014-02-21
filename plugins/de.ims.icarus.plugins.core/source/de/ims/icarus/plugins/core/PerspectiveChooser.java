@@ -88,9 +88,9 @@ import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.Filter;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.cache.LRUCache;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.strings.StringUtil;
 import de.ims.icarus.xml.jaxb.MapAdapter;
 
 /**

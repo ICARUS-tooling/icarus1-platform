@@ -26,7 +26,7 @@
 package de.ims.icarus.language.model.standard.manifest;
 
 import de.ims.icarus.language.model.manifest.Prerequisite;
-import de.ims.icarus.util.StringUtil;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

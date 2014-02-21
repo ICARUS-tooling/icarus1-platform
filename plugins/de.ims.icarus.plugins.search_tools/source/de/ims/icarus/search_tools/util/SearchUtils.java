@@ -63,9 +63,9 @@ import de.ims.icarus.search_tools.standard.DefaultGraphNode;
 import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Orientation;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**

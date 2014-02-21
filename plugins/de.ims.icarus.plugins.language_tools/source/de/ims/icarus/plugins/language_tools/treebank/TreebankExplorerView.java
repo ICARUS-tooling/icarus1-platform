@@ -83,13 +83,13 @@ import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.StringUtil;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.mem.AssessmentWorker;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner

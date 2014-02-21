@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.util;
+package de.ims.icarus.util.strings;
 
 import java.awt.Component;
 import java.awt.FontMetrics;
@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.helper.TextItem;
+import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.intern.Interner;
