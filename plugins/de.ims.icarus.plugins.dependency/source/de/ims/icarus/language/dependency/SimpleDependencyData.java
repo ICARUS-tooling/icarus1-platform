@@ -32,6 +32,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.mem.Primitive;
 
 
 /**
@@ -40,32 +43,41 @@ import de.ims.icarus.language.LanguageUtils;
  * @version $Id$
  *
  */
+@HeapMember
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SimpleDependencyData implements DependencyData {
 
 	private static final long serialVersionUID = -6877590672027658180L;
 
+	@Primitive
 	private int index;
 
+	@Link
 	@XmlElement(name="form")
 	protected String[] forms;
 
+	@Link
 	@XmlElement(name="pos")
 	protected String[] poss;
 
+	@Link
 	@XmlElement(name="lemma")
 	protected String[] lemmas;
 
+	@Link
 	@XmlElement(name="feature")
 	protected String[] features;
 
+	@Link
 	@XmlElement(name="relation")
 	protected String[] relations;
 
+	@Link
 	@XmlElement(name="head")
 	protected short[] heads;
 
+	@Link
 	@XmlElement(name="flag", required=false)
 	protected long[] flags;
 

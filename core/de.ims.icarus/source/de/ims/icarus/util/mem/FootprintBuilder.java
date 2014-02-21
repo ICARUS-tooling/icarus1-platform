@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
 
@@ -71,7 +72,16 @@ public class FootprintBuilder {
 		@Override
 		public long appendFootprint(Object obj, FootprintBuffer buffer,
 				ObjectCache cache) {
-			return buffer.addReference();
+			return 0;
+		}
+	};
+
+	private static final MemoryCalculator objectCalculator = new MemoryCalculator() {
+
+		@Override
+		public long appendFootprint(Object obj, FootprintBuffer buffer,
+				ObjectCache cache) {
+			return buffer.addObject();
 		}
 	};
 
@@ -146,25 +156,13 @@ public class FootprintBuilder {
 			throw new NullPointerException("Invalid clazz"); //$NON-NLS-1$
 
 		if(clazz.isArray()) {
-			return clazz.getComponentType().isPrimitive() ?
-					primitiveArrayCalculator : arrayCalculator;
+			return arrayCalculator;
 		}
 
 		MemoryCalculator calculator = calculators.get(clazz);
 
 		if(calculator==null) {
-
-			if(isIgnored(clazz)) {
-				calculator = emptyCalculator;
-			} else {
-				HeapMember heapMember = clazz.getAnnotation(HeapMember.class);
-
-				if(heapMember!=null) {
-					calculator = new HeapMemberCalculator(clazz);
-				} else {
-					calculator = new GeneralCalculator(clazz);
-				}
-			}
+			calculator = createCalculator(clazz);
 
 			calculators.put(clazz, calculator);
 		}
@@ -172,8 +170,34 @@ public class FootprintBuilder {
 		return calculator;
 	}
 
+	private MemoryCalculator createCalculator(Class<?> clazz) {
+		if(isIgnored(clazz) || clazz==Object.class) {
+			return emptyCalculator;
+		}
+
+		Calculator calc = clazz.getAnnotation(Calculator.class);
+		if(calc!=null) {
+			try {
+				return calc.value().newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				LoggerFactory.error(this, "Failed to instantiate memory calculator assigned to class: "+clazz, e); //$NON-NLS-1$
+				return emptyCalculator;
+			}
+		}
+
+
+		HeapMember heapMember = clazz.getAnnotation(HeapMember.class);
+
+		if(heapMember!=null) {
+			return new HeapMemberCalculator(clazz);
+		} else {
+			return new GeneralCalculator(clazz);
+		}
+	}
+
 	public FootprintBuilder() {
 //		calculators.put(String.class, stringCalculator);
+		calculators.put(Object.class, objectCalculator);
 	}
 
 	public void addToWhitelist(Class<?> clazz) {
@@ -243,7 +267,7 @@ public class FootprintBuilder {
 
 			Class<?> parentClazz = clazz.getSuperclass();
 			MemoryCalculator parent = null;
-			if(parentClazz!=null && parentClazz!=Object.class) {
+			if(parentClazz!=null) {
 				parent = getCalculator(parentClazz);
 			}
 			this.parent = parent;
@@ -294,13 +318,17 @@ public class FootprintBuilder {
 					Field field = complexFields.get(i);
 					try {
 						Object value = field.get(obj);
+						footprint += buffer.addReference();
 
-						// If value is null or already cached simply count reference
-						if(value==null || !cache.addIfAbsent(value)) {
-							footprint += buffer.addReference();
-						} else {
-							long fp = getCalculator(value).appendFootprint(value, buffer, cache);
-							buffer.addObject(value.getClass(), fp);
+						// If value is null or already cached only count reference
+						if(value!=null && cache.addIfAbsent(value)) {
+							long fp = 0;
+							if(value.getClass().isArray()) {
+								fp = addArray(value, buffer, cache);
+							} else {
+								fp = getCalculator(value).appendFootprint(value, buffer, cache);
+							}
+							buffer.addFootprint(value.getClass(), fp);
 							footprint += fp;
 						}
 					} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -377,16 +405,7 @@ public class FootprintBuilder {
 					}
 
 					field.setAccessible(true);
-
-					if(type.isArray()) {
-						if(type.getComponentType().isPrimitive()) {
-							complexFields.add(new PrimitiveArrayFieldHandler(field));
-						} else {
-							complexFields.add(new ArrayFieldHandler(field));
-						}
-					} else {
-						complexFields.add(new DefaultLinkHandler(field, link));
-					}
+					complexFields.add(new DefaultLinkHandler(field, link));
 					continue;
 				}
 			}
@@ -437,38 +456,37 @@ public class FootprintBuilder {
 		}
 	}
 
-	private static long addPrimitiveArray(Object array, FootprintBuffer buffer) {
-		if(array==null) {
-			return buffer.addReference();
-		} else {
-			return buffer.addPrimitiveArray(array.getClass().getComponentType(), array);
-		}
-	}
-
 	private long addArray(Object array, FootprintBuffer buffer, ObjectCache cache) {
 		if (array == null)
-			throw new NullPointerException("Invalid array");
+			throw new NullPointerException("Invalid array"); //$NON-NLS-1$
 
+		// Fetch base size of array structure
 		long footprint = buffer.addArray(array);
 
-		int size = Array.getLength(array);
-		for(int i=0; i<size; i++) {
-			Object value = Array.get(array, i);
+		// If array contains 'real' objects traverse and collect their footprint recursively
+		// NOTE: the memory used for references in the array is already included in the
+		// footprint returned by buffer.addArray()
+		if(!array.getClass().getComponentType().isPrimitive()) {
+			int size = Array.getLength(array);
+			for(int i=0; i<size; i++) {
+				Object value = Array.get(array, i);
 
-			if(value==null) {
-				continue;
-			}
+				if(value==null) {
+					continue;
+				}
 
-			if(value.getClass().isArray()) {
-				footprint += addArray(value, buffer, cache);
-			} else {
-				long fp = getCalculator(value).appendFootprint(value, buffer, cache);
+				if(value.getClass().isArray()) {
+					footprint += addArray(value, buffer, cache);
+				} else if(cache.addIfAbsent(value)) {
+					long fp = getCalculator(value).appendFootprint(value, buffer, cache);
+					buffer.addFootprint(value.getClass(), fp);
 
-				buffer.addObject(value.getClass(), fp);
-
-				footprint += fp;
+					footprint += fp;
+				}
 			}
 		}
+
+
 
 		return footprint;
 	}
@@ -482,19 +500,6 @@ public class FootprintBuilder {
 		public long appendFootprint(Object obj, FootprintBuffer buffer,
 				ObjectCache cache) {
 			return addArray(obj, buffer, cache);
-		}
-
-	};
-
-	private MemoryCalculator primitiveArrayCalculator = new MemoryCalculator() {
-
-		/**
-		 * @see de.ims.icarus.util.mem.MemoryCalculator#appendFootprint(java.lang.Object, de.ims.icarus.util.mem.FootprintBuffer, de.ims.icarus.util.mem.ObjectCache)
-		 */
-		@Override
-		public long appendFootprint(Object obj, FootprintBuffer buffer,
-				ObjectCache cache) {
-			return addPrimitiveArray(obj, buffer);
 		}
 
 	};
@@ -527,61 +532,25 @@ public class FootprintBuilder {
 				ObjectCache cache) throws Exception {
 			Object value = field.get(obj);
 
-			// Simple count reference in case the value is null or
+			// Always calculate at least footprint for reference and
+			// tell buffer about link type!
+			long footprint = getDefaultLinkdHandler(link.type()).appendFootprint(obj, buffer, cache);
+
+			// Simply count reference in case the value is null or
 			// already cached (given that caching is active)
-			if(value==null || (link.cache() && !cache.addIfAbsent(value))) {
-				return getDefaultLinkdHandler(link.type()).appendFootprint(obj, buffer, cache);
-			} else {
-				long fp = getCalculator(value).appendFootprint(value, buffer, cache);
+			if(value!=null && (!link.cache() || cache.addIfAbsent(value))) {
+				long fp = 0;
+				if(value.getClass().isArray()) {
+					fp = addArray(value, buffer, cache);
+				} else {
+					fp = getCalculator(value).appendFootprint(value, buffer, cache);
+				}
+				buffer.addFootprint(value.getClass(), fp);
 
-				buffer.addObject(value.getClass(), fp);
-
-				return fp;
+				footprint += fp;
 			}
-		}
 
-	}
-
-	private class ArrayFieldHandler implements FieldHandler {
-
-		private final Field field;
-
-		ArrayFieldHandler(Field field) {
-			if (field == null)
-				throw new NullPointerException("Invalid field"); //$NON-NLS-1$
-
-			this.field = field;
-		}
-
-		/**
-		 * @see de.ims.icarus.util.mem.FootprintBuilder.FieldHandler#appendFootprint(java.lang.Object, de.ims.icarus.util.mem.FootprintBuffer, de.ims.icarus.util.collections.IdentityHashSet)
-		 */
-		@Override
-		public long appendFootprint(Object obj, FootprintBuffer buffer,
-				ObjectCache cache) throws Exception {
-			return addArray(field.get(obj), buffer, cache);
-		}
-
-	}
-
-	private class PrimitiveArrayFieldHandler implements FieldHandler {
-
-		private final Field field;
-
-		PrimitiveArrayFieldHandler(Field field) {
-			if (field == null)
-				throw new NullPointerException("Invalid field"); //$NON-NLS-1$
-
-			this.field = field;
-		}
-
-		/**
-		 * @see de.ims.icarus.util.mem.FootprintBuilder.FieldHandler#appendFootprint(java.lang.Object, de.ims.icarus.util.mem.FootprintBuffer, de.ims.icarus.util.collections.IdentityHashSet)
-		 */
-		@Override
-		public long appendFootprint(Object obj, FootprintBuffer buffer,
-				ObjectCache cache) throws Exception {
-			return buffer.addPrimitiveArray(field.getType(), field.get(obj));
+			return footprint;
 		}
 
 	}

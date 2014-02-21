@@ -39,5 +39,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Calculator {
 
-	Class<? extends MemoryCalculator> calculator();
+	Class<? extends MemoryCalculator> value();
 }

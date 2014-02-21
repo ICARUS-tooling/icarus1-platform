@@ -144,7 +144,6 @@ public class FootprintBuffer implements MemoryFootprint {
 			// Now sum up the footprint
 			footprint += objectCount*OBJECT_SHELL_SIZE;
 			footprint += referenceCount*refsize;
-			//footprint += stringFootprint;
 
 			for(int type =0; type<primitiveFootprints.length; type++) {
 				int size = primitiveFootprints[type];
@@ -173,17 +172,20 @@ public class FootprintBuffer implements MemoryFootprint {
 	}
 
 
-	public long addObject(Class<?> clazz, long footprint) {
+	public long addObject() {
+		checkActive();
+
+		objectCount++;
+
+		return OBJECT_SHELL_SIZE;
+	}
+
+	public void addFootprint(Class<?> clazz, long footprint) {
 		checkActive();
 
 		ClassInfo info = ensureClassInfo(clazz);
 		info.count++;
 		info.footprint += footprint;
-
-		referenceCount++;
-		objectCount++;
-
-		return OBJECT_SHELL_SIZE;
 	}
 
 	public long addReference() {
@@ -220,17 +222,25 @@ public class FootprintBuffer implements MemoryFootprint {
 		if (array == null)
 			throw new NullPointerException("Invalid array"); //$NON-NLS-1$
 
-		long footprint = OBJECT_SHELL_SIZE;
+		long footprint = addObject();
 
+		int size = Array.getLength(array);
 		long fieldsize = refsize;
-		int type = typeLookup.get(array.getClass());
+		int type = typeLookup.get(array.getClass().getComponentType());
 		if(type!=-1) {
+			// For primitive array directly calculate memory for fields
 			fieldsize = primitiveFootprints[type];
+			primitivesCount += size;
+			primitiveCounts[type] += size;
+		} else {
+			// For complexe array only calculate memory for references
+			referenceCount += size;
 		}
 
-		footprint += fieldsize*Array.getLength(array);
+		footprint += fieldsize*size;
 
-		addObject(array.getClass(), footprint);
+//		addFootprint(array.getClass(), footprint);
+
 		arrayCount++;
 
 		return footprint;
@@ -245,17 +255,6 @@ public class FootprintBuffer implements MemoryFootprint {
 		return primitiveFootprints[type];
 	}
 
-	private long addPrimitiveArray(int type, Object array) {
-		addArray(array);
-
-		int size = Array.getLength(array);
-
-		primitivesCount += size;
-		primitiveCounts[type] += size;
-
-		return addArray(array);
-	}
-
 	public static boolean isPrimitiveClass(Class<?> clazz) {
 		return typeLookup.containsKey(clazz);
 	}
@@ -268,76 +267,36 @@ public class FootprintBuffer implements MemoryFootprint {
 		return addPrimitive(type);
 	}
 
-	public long addPrimitiveArray(Class<?> clazz, Object array) {
-		int type = typeLookup.get(clazz);
-		if(type==-1)
-			throw new IllegalArgumentException("Not a primitive class: "+clazz); //$NON-NLS-1$
-
-		return addPrimitiveArray(type, array);
-	}
-
 	public long addInteger() {
 		return addPrimitive(INTEGER);
-	}
-
-	public long addIntegerArray(int[] array) {
-		return addPrimitiveArray(INTEGER, array);
 	}
 
 	public long addLong() {
 		return addPrimitive(LONG);
 	}
 
-	public long addLongArray(long[] array) {
-		return addPrimitiveArray(LONG, array);
-	}
-
 	public long addShort() {
 		return addPrimitive(SHORT);
-	}
-
-	public long addShortArray(short[] array) {
-		return addPrimitiveArray(SHORT, array);
 	}
 
 	public long addByte() {
 		return addPrimitive(BYTE);
 	}
 
-	public long addByteArray(byte[] array) {
-		return addPrimitiveArray(BYTE, array);
-	}
-
 	public long addDouble() {
 		return addPrimitive(DOUBLE);
-	}
-
-	public long addDoubleArray(double[] array) {
-		return addPrimitiveArray(DOUBLE, array);
 	}
 
 	public long addFloat() {
 		return addPrimitive(FLOAT);
 	}
 
-	public long addFloatArray(float[] array) {
-		return addPrimitiveArray(FLOAT, array);
-	}
-
 	public long addBoolean() {
 		return addPrimitive(BOOLEAN);
 	}
 
-	public long addBooleanArray(boolean[] array) {
-		return addPrimitiveArray(BOOLEAN, array);
-	}
-
 	public long addCharacter() {
 		return addPrimitive(CHARACTER);
-	}
-
-	public long addCharacterArray(char[] array) {
-		return addPrimitiveArray(CHARACTER, array);
 	}
 
 //	public void merge(MemoryFootprint other) {
