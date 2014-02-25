@@ -127,6 +127,11 @@ public class ErrorMiningPreferences {
 //		for(String token : NGramHighlighting.getInstance().getTokens()) {
 //			builder.addColorEntry(token+"Highlight", NGramHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
 //		}
+		
+		//Tagmining Configuration
+		builder.addGroup("tagmining", true); //$NON-NLS-1$
+		builder.addStringEntry("variationTag", "$pos");
+		builder.back();
 
 
 		builder.back();

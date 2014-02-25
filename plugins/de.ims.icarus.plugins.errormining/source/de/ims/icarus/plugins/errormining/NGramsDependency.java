@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -53,10 +54,13 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
  */
 public class NGramsDependency {
 	
+	
+	//options
 	protected int nGramCount;
 	protected final int nGramLimit;
 	protected final boolean useFringe;
 	protected int fringeSize;
+	protected boolean useNumberWildcard;
 	
 	//protected List<DependencyItemInNuclei> items;
 	protected Map<String,ArrayList<DependencyItemInNuclei>> nGramCache;	
@@ -74,6 +78,9 @@ public class NGramsDependency {
 	
 	
 	private static NGramsDependency instance;
+	
+	private static Pattern numberPattern = Pattern.compile("^[0-9]"); //$NON-NLS-1$
+	private static String numberString = "[number-wildcard]"; //$NON-NLS-1$
 	
 	public static NGramsDependency getInstance() {
 		if (instance == null) {
@@ -99,6 +106,7 @@ public class NGramsDependency {
 		this.nGramLimit = (int) options.get("NGramLIMIT");  //$NON-NLS-1$
 		this.fringeSize = (int) options.get("FringeSIZE", 1);  //$NON-NLS-1$
 		this.useFringe = false;
+		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
@@ -122,6 +130,7 @@ public class NGramsDependency {
 		
 		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
+		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
@@ -144,6 +153,7 @@ public class NGramsDependency {
 		
 		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 		this.nGramLimit = options.getInteger("NGramLIMIT"); //$NON-NLS-1$
+		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 		
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
@@ -264,7 +274,7 @@ public class NGramsDependency {
 		
 		
 		for (int wordIndex = 0; wordIndex < dd.length(); wordIndex++) {
-			String currentWord = dd.getForm(wordIndex);
+			String currentWord = checkForNumber(dd.getForm(wordIndex));
 			//System.out.print(currentWord + " "); //$NON-NLS-1$
 			
 			
@@ -296,16 +306,16 @@ public class NGramsDependency {
 
 			if (headIndex > 0 ){
 //				System.out.println("RLabel " + dd.getRelation(wordIndex)
-//						+ " Head " + head + " " + dd.getForm(head)
+//						+ " Head " + head + " " + checkForNumber(dd.getForm(head))
 //						+ " WIndex " + wordIndex);
 				//TODO doublecheck working correct way? no more workaround needed
 				if (wordIndex < headIndex){
-					addedword = currentWord + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
+					addedword = currentWord + " " + getTagQueryDependency(checkForNumber(dd.getForm(headIndex))); //$NON-NLS-1$
 				} else {
-					addedword = getTagQueryDependency(dd.getForm(headIndex)) + " " + currentWord; //$NON-NLS-1$
+					addedword = getTagQueryDependency(checkForNumber(dd.getForm(headIndex))) + " " + currentWord; //$NON-NLS-1$
 				}
 				
-				//addedword = currentWord + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
+				//addedword = currentWord + " " + getTagQueryDependency(checkForNumber(dd.getForm(headIndex))); //$NON-NLS-1$
 				sb.append("<").append(addedword).append(" {")  //$NON-NLS-1$//$NON-NLS-2$
 				.append(tag)
 				.append("}>"); //$NON-NLS-1$
@@ -463,7 +473,7 @@ public class NGramsDependency {
 						for (Integer sentenceIndex : sameSentenceIDList) {
 							DependencyData dd = corpus.get(sentenceIndex);
 							int nucleiIndex = dsi.getNucleiIndex() - 1;
-							//System.out.println(dd.getForm(nucleiIndex)+dd.getHead(nucleiIndex));
+							//System.out.println(checkForNumber(dd.getForm(nucleiIndex))+dd.getHead(nucleiIndex));
 							int headIndex = dsi.getSentenceHeadIndex() - 1;
 							
 							
@@ -505,6 +515,19 @@ public class NGramsDependency {
 			input.remove(removeFromNGrams.get(i));
 		}
 		return input;
+	}
+	
+	//method used for replace numbers by general number token
+	private String checkForNumber(String currentWord) {
+		//System.out.print("INput " + currentWord);
+		if (useNumberWildcard){
+			if (numberPattern.matcher(currentWord).find()){
+				//System.out.println(" out " + numberString);
+				return numberString;
+			}
+		}
+		//System.out.println(" out " + currentWord);
+		return currentWord;
 	}
 	
 	
@@ -576,11 +599,11 @@ public class NGramsDependency {
 	private StringBuilder rebuildGapTag(int startIndex, DependencySentenceInfo si, DependencyData dd){
 		StringBuilder sb = new StringBuilder();
 		for (int i = startIndex; i < si.getSentenceHeadIndex(); i++){
-			//sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+			//sb.append(checkForNumber(dd.getForm(i))).append(" "); //$NON-NLS-1$
 			if(i < (si.getSentenceEnd()-1)){
-				sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+				sb.append(checkForNumber(dd.getForm(i))).append(" "); //$NON-NLS-1$
 			} else {
-				sb.append(dd.getForm(i));
+				sb.append(checkForNumber(dd.getForm(i)));
 			}
 		}
 		
@@ -591,9 +614,9 @@ public class NGramsDependency {
 		StringBuilder sb = new StringBuilder();
 		for (int i = startIndex; i < si.getSentenceEnd(); i++){
 			if(i < (si.getSentenceEnd()-1)){
-				sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+				sb.append(checkForNumber(dd.getForm(i))).append(" "); //$NON-NLS-1$
 			} else {
-				sb.append(dd.getForm(i));
+				sb.append(checkForNumber(dd.getForm(i)));
 			}			
 		}
 		return sb.toString();
@@ -642,7 +665,7 @@ public class NGramsDependency {
 //						StringBuilder sb = new StringBuilder();
 //						
 //						for (int i = startIndex; i < si.getSentenceHeadIndex(); i++){
-//							sb.append(dd.getForm(i)).append(" "); //$NON-NLS-1$
+//							sb.append(checkForNumber(dd.getForm(i))).append(" "); //$NON-NLS-1$
 //						}					
 //						System.out.println(sb.toString() + hasGap);
 //					}
@@ -663,7 +686,7 @@ public class NGramsDependency {
 						// new key
 						if (startIndex > 0) {
 
-							String leftForm = dd.getForm(startIndex - 1);
+							String leftForm = checkForNumber(checkForNumber(dd.getForm(startIndex - 1)));
 							//System.out.println(leftForm + " " + startIndex);
 							//String leftPOS = dd.getPos(startIndex - 1);
 							
@@ -812,7 +835,7 @@ public class NGramsDependency {
 						
 						if (endIndex < sentenceSize-1) {
 
-							String rightForm = dd.getForm(endIndex + 1);
+							String rightForm = checkForNumber(dd.getForm(endIndex + 1));
 							//String rightPOS = dd.getPos(endIndex + 2);
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
@@ -820,6 +843,7 @@ public class NGramsDependency {
 							//boolean addNewNuclei = nGramCache.containsKey(rightForm);
 							
 							boolean addNewNuclei = newNucleiCheck(endIndex+2, dd);
+
 
 							if (hasGap){
 								rightKey = rebuildGapTag(startIndex, si, dd);
@@ -1177,10 +1201,11 @@ public class NGramsDependency {
 		String nucleiTag = null;
 		
 		if (headIndex > 0 ){
-			nucleiTag = dd.getForm(i) + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
+			nucleiTag = checkForNumber(dd.getForm(i)) + " "  //$NON-NLS-1$
+								+ 	getTagQueryDependency(checkForNumber(dd.getForm(headIndex)));
 		
 		
-//		System.out.println("NUCLEI: " + dd.getForm(i)
+//		System.out.println("NUCLEI: " + checkForNumber(dd.getForm(i))
 ////					+ " Index " + i 
 ////					+ " Head " + dd.getHead(i) 
 //					+ " TAG " + nucleiTag
@@ -1200,9 +1225,9 @@ public class NGramsDependency {
 		String nucleiTag = null;
 		
 		if (headIndex > 0 ){
-			nucleiTag = dd.getForm(i) + " " + getTagQueryDependency(dd.getForm(headIndex)); //$NON-NLS-1$
+			nucleiTag = checkForNumber(dd.getForm(i)) + " " + getTagQueryDependency(checkForNumber(dd.getForm(headIndex))); //$NON-NLS-1$
 
-//		System.out.println("NUCLEI: " + dd.getForm(i)
+//		System.out.println("NUCLEI: " + checkForNumber(dd.getForm(i))
 ////					+ " Index " + i 
 ////					+ " Head " + dd.getHead(i) 
 //					+ " TAG " + nucleiTag
@@ -1614,23 +1639,24 @@ public class NGramsDependency {
 		
 		//System.out.println("k0: " + keySplit[0] + " k1 " + keySplit[1]); //$NON-NLS-1$ //$NON-NLS-2$
 		for(int d = 0; d < dd.length(); d++){			
-			//System.out.println(dd.getForm(d) + dIndex + " " + hIndex);
-			if(dd.getForm(d).equals(keySplit[0])){
+			//System.out.println(checkForNumber(dd.getForm(d)) + dIndex + " " + hIndex);
+			if(checkForNumber(dd.getForm(d)).equals(keySplit[0])){
 				indexOfTokens.add(d);
 //				if(dd.getHead(d) == -1){
-//					System.out.println(dd.getForm(d) + " nil");
+//					System.out.println(checkForNumber(dd.getForm(d)) + " nil");
 //					indexOfTokens.add(d);
 //				} else {
-//					System.out.println(dd.getForm(dd.getHead(d)));
-//					if(!dd.getForm(dd.getHead(d)).equals(keySplit[1])){
-//						//System.out.println(nGramCache.containsKey(dd.getForm(d) + " " + dd.getForm(dd.getHead(d))));
-//						//System.out.println("D>"+dd.getForm(d) + " " + dd.getForm(dd.getHead(d)));
+//					System.out.println(checkForNumber(dd.getForm(dd.getHead(d))));
+//					if(!checkForNumber(dd.getForm(dd.getHead(d))).equals(keySplit[1])){
+//						//System.out.println(nGramCache.containsKey(checkForNumber(dd.getForm(d))
+						//+ " " + checkForNumber(dd.getForm(dd.getHead(d)))));
+//						//System.out.println("D>"+checkForNumber(dd.getForm(d)) + " " + checkForNumber(dd.getForm(dd.getHead(d))));
 //						indexOfTokens.add(d);
 //					}
 //				}
 			}
 			
-			else if(dd.getForm(d).equals(keySplit[1])){
+			else if(checkForNumber(dd.getForm(d)).equals(keySplit[1])){
 				indexOfTokens2.add(d);
 			}
 		}
@@ -1672,7 +1698,7 @@ public class NGramsDependency {
 	 */
 	private int getIndex2Key(DependencyData dd, String key, List<Integer> list) {
 		for(Integer i : list){
-			if(dd.getForm(i).equals(key)){
+			if(checkForNumber(dd.getForm(i)).equals(key)){
 				return i+1;
 			}
 		}
@@ -1753,11 +1779,11 @@ public class NGramsDependency {
 		int midIndex = dd.length()/2;
 		
 		//check if form in the middle is the same
-		if(!dd.getForm(midIndex).equals(ddTemp.getForm(midIndex))){
+		if(!checkForNumber(dd.getForm(midIndex)).equals(checkForNumber(ddTemp.getForm(midIndex)))){
 			return false;
 		} else {		
 			for(int index = 0; index < dd.length(); index++){
-				if(!dd.getForm(index).equals(ddTemp.getForm(index))){
+				if(!checkForNumber(dd.getForm(index)).equals(checkForNumber(ddTemp.getForm(index)))){
 					return false;
 				}
 			}

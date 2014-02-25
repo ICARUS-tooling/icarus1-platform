@@ -141,9 +141,11 @@ public class SentenceInfo {
 
 
 
-	//Nucleiliststuff
+	//Nucleiliststuff only "add" when in range?
 	public void addNucleiIndexList(int nucleiPosition){
-		nucleiIndexList.add(nucleiPosition);
+		if(!nucleiIndexList.contains(nucleiPosition)){
+			nucleiIndexList.add(nucleiPosition);
+		}
 	}
 	
 	public void deleteNucleiAtIndex(int index){

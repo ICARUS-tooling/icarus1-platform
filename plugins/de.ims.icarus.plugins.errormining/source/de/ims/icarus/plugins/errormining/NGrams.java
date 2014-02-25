@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
@@ -55,6 +56,7 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
  */
 public class NGrams {
 	
+	//options
 	protected int nGramCount;
 	protected int fringeSize;
 	protected int nGramLimit;
@@ -71,6 +73,14 @@ public class NGrams {
 	private boolean usedFringe = false;
 	private static Pattern numberPattern = Pattern.compile("^[0-9]"); //$NON-NLS-1$
 	private static String numberString = "[number-wildcard]"; //$NON-NLS-1$
+
+	
+	private static final int pos_flag = 1;  // Binary 00001
+	private static final int dependency_flag = 2;  // Binary 00010
+	private static final int form_flag = 4;  // Binary 00100
+	private static final int lemma_flag = 8;  // Binary 01000
+	
+	private int miningMode = 0;
 
 	
 	
@@ -134,9 +144,40 @@ public class NGrams {
 				
 		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
 		corpus = new ArrayList<DependencyData>();
+		
+		miningMode = setMiningMode();
+		System.out.println(miningMode);
 	}
 	
 	
+	/**
+	 * @return
+	 */
+	private int setMiningMode() {
+		String tag = ConfigRegistry.getGlobalRegistry().getString(
+				"plugins.errorMining.tagmining.variationTag"); //$NON-NLS-1$
+		
+		String[] stringArray = tag.split("#"); //$NON-NLS-1$
+		
+		for(String key : stringArray){
+			switch (key) {
+			case "pos": //$NON-NLS-1$
+				miningMode = miningMode | pos_flag;
+				break;
+			case "dependency": //$NON-NLS-1$
+				miningMode = miningMode | dependency_flag;
+				break;
+			case "form": //$NON-NLS-1$
+				miningMode = miningMode | form_flag;
+				break;
+			case "lemma": //$NON-NLS-1$
+				miningMode = miningMode | lemma_flag;
+			}
+		}
+		return miningMode;
+	}
+
+
 	public NGrams(int nGramCount, Options options){
 		
 		if (options == null) {
@@ -244,7 +285,7 @@ public class NGrams {
 //		if (!knownTag) {
 //			//System.out.println("faulty Tag@ " + sentenceNr + " " + sentencelength);
 //			ItemInNuclei item = new ItemInNuclei();
-//			//item.setPosTag(ensureValid(getTagQuery(dd.getPos(wordIndex))));
+//			//item.setPosTag(ensureValid(getTagQuery(getTag(dd,wordIndex))));
 //			item.addNewSentenceInfoLeft(si);
 //			items.add(item);
 //		}
@@ -273,9 +314,13 @@ public class NGrams {
 			//checkForNumber(dd.getForm(wordIndex));
 			//System.out.print(currentWord + " ");
 
+			//System.out.println(dd.getForm(wordIndex) + ": " + getDependencyLabel(dd, wordIndex));
+			
+
 			// item already in list? only add new tags
 			if (nGramCache.containsKey(currentWord)) {
-				if (getTagQuery(dd.getPos(wordIndex)) != null){
+				 
+				if (getTagQuery(getTag(dd,wordIndex)) != null){
 					ArrayList<ItemInNuclei> items = nGramCache.get(currentWord);
 	
 					boolean knownTag = false;
@@ -283,8 +328,8 @@ public class NGrams {
 					for (int i = 0; i < items.size(); i++) {
 						// increment when tag found again
 						ItemInNuclei item = items.get(i);
-						//System.out.println(item.getPosTag() +" vs "+ getTagQuery(getTagQuery(dd.getPos(wordIndex))));
-						if (item.getPosTag().equals(getTagQuery(dd.getPos(wordIndex)))) {
+						//System.out.println(item.getPosTag() +" vs "+ getTagQuery(getTagQuery(getTag(dd,wordIndex))));
+						if (item.getPosTag().equals(getTagQuery(getTag(dd,wordIndex)))) {
 							int oldCount = item.getCount();
 							item.setCount(oldCount + 1);
 							item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
@@ -296,16 +341,16 @@ public class NGrams {
 					if (!knownTag) {
 						//System.out.println("faulty Tag@ " + sentenceNr + " " + sentencelength);
 						ItemInNuclei item = new ItemInNuclei();
-						item.setPosTag(ensureValid(getTagQuery(dd.getPos(wordIndex))));
+						item.setPosTag(ensureValid(getTagQuery(getTag(dd,wordIndex))));
 						item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
 						items.add(item);
 					}
 				}
 			} else {
-				if (getTagQuery(dd.getPos(wordIndex)) != null){
+				if (getTagQuery(getTag(dd,wordIndex)) != null){
 					ArrayList<ItemInNuclei> items = new ArrayList<ItemInNuclei>();
 					ItemInNuclei item = new ItemInNuclei();
-					item.setPosTag(ensureValid(getTagQuery(dd.getPos(wordIndex))));
+					item.setPosTag(ensureValid(getTagQuery(getTag(dd,wordIndex))));
 					item.addNewSentenceInfoUniGrams(sentenceNr, wordIndex+1);
 					items.add(item);
 	
@@ -315,6 +360,96 @@ public class NGrams {
 		}
 	}
 	
+
+	/**
+	 * @param dd
+	 * @param wordIndex
+	 * @return
+	 */
+	private String getTag(DependencyData dd, int wordIndex) {
+		
+		switch (miningMode) {
+		
+		//pos (1)
+		case 1:
+			return dd.getPos(wordIndex);
+		
+		//dependency (2)
+		case 2:
+			return getDependencyLabel(dd, wordIndex);
+			
+		//pos(1) + dependency(2)
+		case 3:
+			String pd = dd.getPos(wordIndex)
+					+ "_" + getDependencyLabel(dd, wordIndex); //$NON-NLS-1$
+			return pd;
+			
+		//form(4)
+		case 4:			
+			return dd.getForm(wordIndex);
+		
+		//pos(1) + form(4)
+		case 5:			
+			String pf = dd.getPos(wordIndex) + "_" + dd.getForm(wordIndex); //$NON-NLS-1$
+			return pf;	
+			
+		//dependency(2) + form(4)
+		case 6:
+			String df = getDependencyLabel(dd, wordIndex) 
+						+ "_" + dd.getForm(wordIndex); //$NON-NLS-1$
+			return df;
+		
+		//pos(1) + dependency(2) + form(4)
+		case 7:
+			String pdf = dd.getPos(wordIndex)
+						+ "_" + getDependencyLabel(dd, wordIndex)  //$NON-NLS-1$
+						+ "_" + dd.getForm(wordIndex); //$NON-NLS-1$
+			return pdf;				
+		
+		//lemma(8)
+		case 8:			
+			return dd.getLemma(wordIndex);
+				
+		//pos(1) + lemma(8)
+		case 9:
+			String pl = dd.getPos(wordIndex) + "_" + dd.getLemma(wordIndex); //$NON-NLS-1$
+			return pl;
+		
+		//dependency(2) + lemma(8)
+		case 10:
+			String dl = getDependencyLabel(dd, wordIndex)
+						+ "_" + dd.getLemma(wordIndex); //$NON-NLS-1$
+			return dl;
+			
+		//default normales pos mining (fallback)	
+		default:
+			return dd.getPos(wordIndex);
+		}
+	}
+
+
+	/**
+	 * @param dd 
+	 * @param wordIndex
+	 * @return
+	 */
+	private String getDependencyLabel(DependencyData dd, int wordIndex) {
+
+		int offset = wordIndex - dd.getHead(wordIndex);
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(dd.getRelation(wordIndex));
+		
+		if(!sb.toString().equals("ROOT")){ //$NON-NLS-1$
+			sb.append("_").append(offset); //$NON-NLS-1$
+//			if(wordIndex != -1){
+//				sb.append("_").append(dd.getForm(dd.getHead(wordIndex))); //$NON-NLS-1$
+//			}
+		}
+
+		return sb.toString();
+	}
+
 
 	//method used for replace numbers by general number token
 	private String checkForNumber(String currentWord) {
@@ -348,8 +483,10 @@ public class NGrams {
 			
 			//System.out.println("RL1: >>> " + key + " key " + arrItem.size() );
 			
-			if (arrItem.size() == 1){				
-				ItemInNuclei iin = arrItem.get(0);				
+			if (arrItem.size() == 1){
+				
+				//ItemInNuclei iin = arrItem.get(0);		
+
 				
 //				//simple firsat path
 				if(nGramCount == 1){
@@ -549,14 +686,27 @@ public class NGrams {
 			if(!test.contains(s[k])){
 				test.add(s[k]);
 			}
-		}
-		
+		}		
 		if (test.size() > 1){
 			return true;
-		}
+		}		
+		return false;		
+	}
+	
+	
+	private boolean containsVariation(int k, ArrayList<ItemInNuclei> iinList) {
+		List<String> test = new ArrayList<>();
 		
-		return false;
-		
+		for(int i = 0; i < iinList.size(); i++){
+			String[] s = iinList.get(i).getPosTag().split(" "); //$NON-NLS-1$
+			if(!test.contains(s[k])){
+				test.add(s[k]);
+			}
+		}		
+		if (test.size() > 1){
+			return true;
+		}		
+		return false;	
 	}
 
 
@@ -660,7 +810,7 @@ public class NGrams {
 						if (startIndex > 0) {
 
 							String leftForm = checkForNumber(dd.getForm(startIndex -1));
-							String leftPOS = getTagQuery(dd.getPos(startIndex - 1));
+							String leftPOS = getTagQuery(getTag(dd,startIndex - 1));
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
 							boolean addNewNuclei = nGramCache.containsKey(leftForm);
@@ -757,7 +907,7 @@ public class NGrams {
 						if (endIndex < sentenceSize) {
 
 							String rightForm = checkForNumber(dd.getForm(endIndex + 1));
-							String rightPOS = getTagQuery(dd.getPos(endIndex + 1));
+							String rightPOS = getTagQuery(getTag(dd,endIndex + 1));
 							
 							//check if leftword is found in grams -> add new nucleipos to sentence
 							boolean addNewNuclei = nGramCache.containsKey(rightForm);
@@ -779,7 +929,7 @@ public class NGrams {
 									ItemInNuclei item = itemsTemp.get(i);
 									
 									// System.out.println(item.getPosTag()
-									// +" vs "+ getTagQuery(dd.getPos(wordIndex)));
+									// +" vs "+ getTagQuery(getTag(dd,wordIndex)));
 
 									if (item.getPosTag().equals(posTagBuilder.toString())) {
 										//int oldCount = item.getCount();
@@ -1253,22 +1403,164 @@ public class NGrams {
 
 		if(nGramLimit != 1) {
 			createNGrams(nGramCache, false, false);
-		}
-		
+		}		
 		
 		//show fringe info dialog the following  must apply:
 		// 1) fringe must be used but
 		// 2) fringe was never triggered
 		// 3) only show when n-gram found > 3 (fringe only triggered for n-grams | n > 3)
-		if (useFringe && !usedFringe && nGramCount+1 > 2){
+		if (useFringe && !usedFringe && nGramCount > 2){
 				DialogFactory.getGlobalFactory().showInfo(null,
 						"plugins.errormining.dialogs.fringeSizeWarning.title", //$NON-NLS-1$
 						"plugins.errormining.dialogs.fringeSizeWarning.message", //$NON-NLS-1$
 						nGramCount+1, fringeSize, fringeSize*2 + 1);
 		}
+		
+		
+
+		System.out.println("Before " + nGramCache.size());
+		clearResults();
+		System.out.println("After " + nGramCache.size());
 	}
 	
 	
+	
+	/**
+	 * 
+	 */
+	private void clearResults() {
+		
+		List<String> removeFromNGrams = new ArrayList<String>();
+		
+//		List<Integer> senteceNumberList = new ArrayList<Integer>();		
+//		List<Integer> tempSentenceNumber = new ArrayList<Integer>();
+		
+		List<String> invertedKeyList = new ArrayList<String>(nGramCache.keySet());
+
+		//Collections.reverse(invertedKeyList);
+
+		//for (String key : nGramCache.keySet()) {
+
+		for(int k = invertedKeyList.size()-1; k > 0; k--){
+			String key = invertedKeyList.get(k);
+			nGramCache.get(key);
+
+			if (key.split(" ").length > 1) { //$NON-NLS-1$
+
+				ArrayList<ItemInNuclei> arrL = nGramCache.get(key);
+				ArrayList<Integer> removeList = variationIndex(arrL);
+				
+				int entry = 0;		
+				
+				//tempSentenceNumber.clear();
+
+				for (int i = 0; i < arrL.size(); i++) {
+
+					
+					ItemInNuclei iin = arrL.get(i);
+					for (int s = 0; s < iin.getSentenceInfoSize(); s++) {
+						SentenceInfo si = iin.getSentenceInfoAt(s);
+						int start = si.getSentenceBegin() - 1;
+						int end = si.getSentenceEnd() - 1;
+						
+//						if(!tempSentenceNumber.contains(si.getSentenceNr())){
+//							tempSentenceNumber.add(si.getSentenceNr());	
+//						}
+
+						DependencyData dd = corpus.get(si.getSentenceNr());
+
+//						System.out.println(key);
+//						System.out.println("Start " + start + " Ende " + end);
+						int tmp = removeList.size();
+
+						for (Integer index : removeList) {
+							int head = dd.getHead(start + index);
+
+							if (head < start || head > end) {
+								tmp--;
+							}
+						}
+						
+						
+//						System.out.println(removeList);
+//						System.out.println(tmp);
+
+						// for(int t = start; t < end; t++){
+						// int head = dd.getHead(t);
+						// System.out.print(dd.getForm(t));
+						// if(head != -1){
+						// if (head < start || head > end) {
+						// System.out.println("  ---> REMOVE " + head +" ");
+						// // System.out.println(" " +dd.getForm(t) + " "
+						// // + dd.getForm(head));
+						// // remove = true;
+						// // System.out.println("NL " + si.getNucleusList());
+						// // System.out.println("RL " + removeList);
+						// // System.out.println(t-start);
+						// if(removeList.contains(t-start)){
+						// removeList.remove(removeList.indexOf(t-start));
+						// }
+						// } else {
+						// System.out.println(" ---> KEEP");
+						// // System.out.println(dd.getForm(t) + " "
+						// // + dd.getForm(head));
+						// }
+						// }
+						// }
+
+						//System.out.println("RL-2 " + removeList);
+
+						if (tmp == 0) {
+						//if (tmp == 0 && !senteceNumberList.contains(si.getSentenceNr())) {							
+							//System.out.println("REMOVE");
+							entry++;
+						}
+					}
+					
+					if (entry == arrL.size()) {
+						removeFromNGrams.add(key);
+						//tempSentenceNumber.clear();
+					}
+//						else {
+//						senteceNumberList.addAll(tempSentenceNumber);
+//						tempSentenceNumber.clear();
+//					}
+				}
+				
+
+			}
+
+		}		
+		
+		System.out.println("-----------------------------");
+		for(int i = 0; i < removeFromNGrams.size(); i++){
+			//System.out.println(">>>"+removeFromNGrams.get(i));
+			nGramCache.remove(removeFromNGrams.get(i));			
+		}
+		
+		//removeItemsLengthOne(nGramCache);
+		
+	}
+
+
+	/**
+	 * @param arrL
+	 * @return 
+	 */
+	private ArrayList<Integer> variationIndex(ArrayList<ItemInNuclei> arrL) {
+
+		ArrayList<Integer> variIndex = new ArrayList<Integer>();
+		
+		for(int i = 0 ; i < arrL.get(0).getPosTag().split(" ").length; i++){ //$NON-NLS-1$
+			if(containsVariation(i, arrL)){
+				//System.out.println("VARIATION " + i);
+				variIndex.add(i);
+			}
+		}		
+		return variIndex;		
+	}
+
+
 	/**
 	 * maybe extension filter for dependency structure
 	 * (show error pos + dependency)

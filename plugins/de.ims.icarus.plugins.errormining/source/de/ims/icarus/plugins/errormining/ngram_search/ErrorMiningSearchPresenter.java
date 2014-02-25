@@ -122,6 +122,7 @@ import de.ims.icarus.plugins.errormining.ngram_tools.DependencyNucleusCache;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataList;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramDataListDependency;
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
+import de.ims.icarus.plugins.errormining.ngram_tools.NucleusCache;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter;
 import de.ims.icarus.resources.ResourceManager;
@@ -545,6 +546,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		if(searchResult.getTotalMatchCount() > 0){
 			displayResult();
 		}
+		
+		refreshCount();
 	}
 	
 	
@@ -2268,6 +2271,29 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 		return nucleusList;
 	}
+	
+	/**
+	 * @param s
+	 * @param value
+	 */
+	private List<String> getNucleus(String key, ItemInNuclei iin) {
+	
+		List<String> list = new ArrayList<String>();
+		
+		String[] splittedKey = key.split(" ");  //$NON-NLS-1$		
+		
+		SentenceInfo si = iin.getSentenceInfoAt(0); 
+		
+		//System.out.println(colorOffset);
+		for(int c = 0; c < splittedKey.length; c++){			
+			if(isNuclei(splittedKey[c])){
+				//System.out.println(splittedKey[c]);
+				list.add(splittedKey[c]);
+			}		
+		}
+		
+		return list;
+	}
 
 
 	/**
@@ -2284,10 +2310,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		DependencySentenceInfo dsi = diin.getSentenceInfoAt(0); 
 		colorOffset = dsi.getSentenceBegin();
 		
-		//TODO remove if
-		if(dsi.getSentenceEnd()-dsi.getSentenceBegin() > 1){
-				//colorOffset = dsi.getSentenceEnd();
-		}
+//		//TO DO remove if
+//		if(dsi.getSentenceEnd()-dsi.getSentenceBegin() > 1){
+//				//colorOffset = dsi.getSentenceEnd();
+//		}
 		
 		//System.out.println(colorOffset);
 		for(int c = 0; c < splittedKey.length; c++){			
@@ -3658,10 +3684,21 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 * @param iinList
 	 */
 	private boolean isNucleiItem(int j, ArrayList<ItemInNuclei> iinList) {
-		List<String> test = new ArrayList<>();
+		List<String> test = new ArrayList<String>();
+		//List<Integer> sentencesList = new ArrayList<Integer>();
+
 		
 		for(int i = 0; i < iinList.size(); i++){
 			String[] s = iinList.get(i).getPosTag().split(" "); //$NON-NLS-1$
+			
+//			for(int s = 0; s < iinList.get(i).getSentenceInfoSize(); s++){
+//				int currentNo = iinList.get(i).getSentenceInfoAt(s).getSentenceNr();
+//				if(sentencesList.contains(currentNo)){
+//					return true;
+//				}
+//			}
+			
+			
 			if(!test.contains(s[j])){
 				test.add(s[j]);
 			}
@@ -3671,8 +3708,40 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			return true;
 		}
 		
-		return false;
+		return false;		
+	}
+	
+	
+	/**
+	 * @param arrL
+	 * @return 
+	 */
+	private ArrayList<Integer> variationIndex(ArrayList<ItemInNuclei> arrL) {
+
+		ArrayList<Integer> variIndex = new ArrayList<Integer>();
 		
+		for(int i = 0 ; i < arrL.get(0).getPosTag().split(" ").length; i++){ //$NON-NLS-1$
+			if(containsVariation(i, arrL)){
+				//System.out.println("VARIATION " + i);
+				variIndex.add(i);
+			}
+		}		
+		return variIndex;		
+	}
+	
+	private boolean containsVariation(int k, ArrayList<ItemInNuclei> iinList) {
+		List<String> test = new ArrayList<>();
+		
+		for(int i = 0; i < iinList.size(); i++){
+			String[] s = iinList.get(i).getPosTag().split(" "); //$NON-NLS-1$
+			if(!test.contains(s[k])){
+				test.add(s[k]);
+			}
+		}		
+		if (test.size() > 1){
+			return true;
+		}		
+		return false;	
 	}
 
 
@@ -3686,7 +3755,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public boolean isCellEditable(int row, int col) {
-			//TODO option do copy sentences
+			//TODO option sätze in zwischenablage kopieren
 //			if(col == 3){
 //				return true;
 //			}
@@ -3697,8 +3766,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		protected boolean ascending = true;
 		protected ArrayList<ItemInNuclei> iinList;
 		protected ArrayList<DependencyItemInNuclei> iinDList;
-		protected Map<Integer, String> tmpMap;
-		
+		protected Map<Integer, NucleusCache> tmpMap;		
 		protected Map<Integer, DependencyNucleusCache> nucleusMap;
 		
 		String[] keySplitted = null;
@@ -3716,34 +3784,80 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			} else {
 
 				itemsAdded = 0;
-				tmpMap = new LinkedHashMap<>();
+
 				
 				if(isPoSErrorMiningResult()){
-					//iinList = nGramResult.get(key);					
+					//iinList = nGramResult.get(key);
 
 					iinList = new ArrayList<>();
-
+					iinList.addAll(nGramResult.get(key));
+					
+					tmpMap = new LinkedHashMap<>();
+					
 					this.keySplitted = key.split(" ");	 //$NON-NLS-1$	
 					
-					for (int i = 0; i < keySplitted.length; i++) {
-						//System.out.println(keySplitted[i]);
-						if (isNucleiItem(i, nGramResult.get(key))) {
-							iinList.addAll(nGramResult.get(keySplitted[i]));
-							
-							/*
-							 * size sets rowcount in table, (e.g. size = 2 row 0 and
-							 * row 1 must get assigned with keySplitted[i] tag.
-							 * Therefore put tmpMap the keys with the used row/index
-							 */
-	
-							for (int j = 0; j < nGramResult.get(keySplitted[i])
-									.size(); j++) {
-								tmpMap.put(itemsAdded, keySplitted[i]);
-								itemsAdded++;
-							}
+					List<Integer> nucleusIndexList = variationIndex(nGramResult.get(key));
+					
+					
+					int length = iinList.size();
+					//System.out.println(nucleusIndexList);
+					//System.out.println(length + "<" + iinList.size()
+					//						  + "<" + nucleusIndexList.size());
+					
+					for(int i = 0; i < length; i++){
+						for(Integer index : nucleusIndexList){
+							//System.out.println(keySplitted[index]);
+							NucleusCache nc = new NucleusCache();
+							nc.setKey(keySplitted[index]);
+							nc.setIIN(iinList.get(i));
+							tmpMap.put(itemsAdded, nc);
+							itemsAdded++;
 						}
 					}
+
 					
+					
+
+//					this.keySplitted = key.split(" ");	 //$NON-NLS-1$	
+//					
+//					for (int i = 0; i < keySplitted.length; i++) {
+//						System.out.println(keySplitted[i]);
+//						
+//						System.out.println(involvedSentences(key));
+//
+//						if (isNucleiItem(i, nGramResult.get(key)) ) {
+//
+//							if (nGramResult.get(keySplitted[i]) != null) {
+//								
+//								iinList.addAll(nGramResult.get(keySplitted[i]));
+//
+//								/*
+//								 * size sets rowcount in table, (e.g. size = 2
+//								 * row 0 and row 1 must get assigned with
+//								 * keySplitted[i] tag. Therefore put tmpMap the
+//								 * keys with the used row/index
+//								 */
+//
+//								for (int j = 0; j < nGramResult.get(
+//										keySplitted[i]).size(); j++) {
+//
+//									if (containSentenceNo(
+//											nGramResult.get(keySplitted[i])
+//													.get(j),
+//											involvedSentences(key))) {
+//										 System.out.println(i + " - "
+//										 + keySplitted[i]
+//										 + " " +
+//										 containSentenceNo(nGramResult.get(
+//										 keySplitted[i]).get(j),involvedSentences(key))
+//										 );
+//									}
+//									tmpMap.put(itemsAdded, keySplitted[i]);
+//									itemsAdded++;
+//								}
+//							}
+//						}
+//					}					
 					
 				} else {
 					
@@ -3793,9 +3907,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public int getColumnCount() {
+			//TODO lower pos table cells
+			
+			
 			if(isPoSErrorMiningResult()){
-				return 3;
-				//return 6;
+				//return 3;
+				return 4;
 			} else {
 				//return 4;
 				return 7;
@@ -3867,7 +3984,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		@Override
 		public int getRowCount() {
 			if(isPoSErrorMiningResult()) {
-				return iinList==null ? 0 : iinList.size();
+				return tmpMap==null ? 0 : tmpMap.size();
 			} else {
 				return nucleusMap==null ? 0 : nucleusMap.size();	
 			}
@@ -3885,7 +4002,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 			if(isPoSErrorMiningResult()){
 				//pos
-				ItemInNuclei iin = iinList.get(rowIndex);			
+
+				//ItemInNuclei iin = iinList.get(rowIndex);
+				
+				ItemInNuclei iin = tmpMap.get(rowIndex).getIIN();
+				
 				
 				
 				int nucleiCount = iin.getSentenceInfoAt(0).getNucleiIndexListSize();
@@ -3903,7 +4024,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				if (!multinuclei) {				
 					switch (columnIndex) {
 					case 0:
-						return tmpMap.get(rowIndex);//keySplitted[nucleiGenIndex-start];
+						return tmpMap.get(rowIndex).getKey();//keySplitted[nucleiGenIndex-start];
 					case 1:
 						return iin.getPosTag(); 
 					case 2:
@@ -3920,7 +4041,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				} else {
 					switch (columnIndex) {
 					case 0:
-						return tmpMap.get(rowIndex);
+						return tmpMap.get(rowIndex).getKey();
 					case 1:
 						return iin.getPosTag();
 					case 2:
@@ -4071,8 +4192,18 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,int row,int col) {
 
 		    Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-			if(col == 0){
-			    String s = table.getModel().getValueAt(row, col).toString();
+			
+		    
+		    if(col == 0){
+		    	
+		    	// nullcheck <select first listentry (upper ngram list) must be
+		    	// checked because when filtering the results the preselected
+		    	// ngram may be removed (e.g. doesent occur within the x-grams)
+		    	if(table.getModel().getValueAt(row, col) == null){
+		    		ngramList.setSelectedIndex(0);
+		    	}
+		    	
+		    	String s = table.getModel().getValueAt(row, col).toString();
 
 			    String selectedKey = (String) ngramList.getSelectedValue();			    
 
