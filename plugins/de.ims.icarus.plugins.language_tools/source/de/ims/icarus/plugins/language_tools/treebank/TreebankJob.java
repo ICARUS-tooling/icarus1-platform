@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.language_tools.treebank;
@@ -40,6 +40,7 @@ import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.tasks.TaskConstants;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**
@@ -48,14 +49,14 @@ import de.ims.icarus.util.id.Identity;
  *
  */
 public class TreebankJob extends SwingWorker<Treebank, Object> implements Identity {
-	
+
 	private final boolean load;
 	private final Treebank treebank;
 
 	public TreebankJob(Treebank treebank, boolean load) {
 		if(treebank==null)
 			throw new NullPointerException("Invalid treebank"); //$NON-NLS-1$
-		
+
 		this.treebank = treebank;
 		this.load = load;
 	}
@@ -72,18 +73,26 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 		}
 		return treebank;
 	}
-	
+
 	private void load() throws Exception {
 		try {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, true);
-			
+
+			long start = System.currentTimeMillis();
+
 			treebank.load();
-			LoggerFactory.log(this, Level.INFO, "Loaded treebank: "+treebank.getName()); //$NON-NLS-1$
+
+			long end = System.currentTimeMillis();
+
+
+			LoggerFactory.log(this, Level.INFO, String.format(
+					"Loaded treebank '%s' in %s", treebank.getName(), //$NON-NLS-1$
+					StringUtil.formatDuration(end-start)));
 		} finally {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, false);
 		}
 	}
-	
+
 	@Override
 	protected void done() {
 		try {
@@ -96,10 +105,10 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 			// ignore
 		} catch(Exception ex) {
 			String operation = load ? "load" : "free"; //$NON-NLS-1$ //$NON-NLS-2$
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Unable to "+operation+" treebank: "+treebank.getName(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			UIUtil.beep();
-			
+
 			if(!Core.getCore().handleThrowable(ex)) {
 				IcarusFrame.defaultShowError(ex);
 			}
@@ -109,7 +118,7 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 	private void free() throws Exception {
 		try {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, true);
-			
+
 			treebank.free();
 			LoggerFactory.log(this, Level.INFO, "Freed treebank: "+treebank.getName()); //$NON-NLS-1$
 		} finally {
@@ -130,7 +139,7 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 	 */
 	@Override
 	public String getName() {
-		return load ? 
+		return load ?
 				ResourceManager.getInstance().get("plugins.languageTools.treebankLoadTask.title") //$NON-NLS-1$
 				: ResourceManager.getInstance().get("plugins.languageTools.treebankFreeTask.title"); //$NON-NLS-1$
 	}
@@ -140,7 +149,7 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 	 */
 	@Override
 	public String getDescription() {
-		return load ? 
+		return load ?
 				ResourceManager.getInstance().get("plugins.languageTools.treebankLoadTask.description") //$NON-NLS-1$
 				: ResourceManager.getInstance().get("plugins.languageTools.treebankFreeTask.description"); //$NON-NLS-1$
 	}
@@ -150,10 +159,10 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 	 */
 	@Override
 	public Icon getIcon() {
-		return load ? 
+		return load ?
 				IconRegistry.getGlobalRegistry().getIcon("refresh_remote.gif")  //$NON-NLS-1$
 				 : IconRegistry.getGlobalRegistry().getIcon("release_rls.gif"); //$NON-NLS-1$
-		
+
 	}
 
 	/**

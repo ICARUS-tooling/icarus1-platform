@@ -58,13 +58,6 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 	protected int count;
 
 	/**
-	 *
-	 */
-	public CONLL09SentenceDataPredictedReader() {
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
 	 * @see de.ims.icarus.language.SentenceDataReader#init(de.ims.icarus.util.location.Location,
 	 *      de.ims.icarus.util.Options)
 	 */
@@ -111,7 +104,7 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 
 		// more sentences left?
 		if ((input = reader.getNext()) != null) {
-			resultdd = CONLLUtils.readPredicted(input, count++, true, true);
+			resultdd = MatetoolsCONLLUtils.readPredicted(input, count++, true, true);
 		}
 
 		// catch illegal state getcause -> originale

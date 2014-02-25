@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.grid;
@@ -59,37 +59,37 @@ import de.ims.icarus.util.strings.StringUtil;
  *
  */
 public class EntityGridTableHeaderRenderer extends JComponent implements TableCellRenderer {
-	
+
 	private static final long serialVersionUID = -7801155678991387167L;
-	
+
 	public static final int DEFAULT_HEADER_LINES = 3;
-	
+
 	private boolean showErrorLabels = true;
 	private boolean prototypeMode = false;
-	
+
 	private final TableCellRenderer renderer;
 	private JList<String> list;
 	private MultilineListModel listModel;
-	
+
 	private JLabel countLabel;
 	private ClusterIcon clusterIcon;
 	private JLabel[] errorLabels;
 	private ErrorIcon[] errorIcons;
 
 	public EntityGridTableHeaderRenderer(TableCellRenderer renderer) {
-		if(renderer==null) 
+		if(renderer==null)
 			throw new NullPointerException("Invalid renderer"); //$NON-NLS-1$
-		
+
 		setOpaque(false);
-		
+
 		this.renderer = renderer;
-		
+
 		JComponent comp = (JComponent) renderer;
-		
+
 		CorefErrorType[] errorTypes = CorefErrorType.values();
 		errorLabels = new JLabel[errorTypes.length];
 		errorIcons = new ErrorIcon[errorTypes.length];
-		
+
 		listModel = new MultilineListModel();
 		//listModel.setMinLineCount(DEFAULT_HEADER_LINES);
 		listModel.setMaxLineCount(DEFAULT_HEADER_LINES);
@@ -97,15 +97,15 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 	    list.setOpaque(false);
 	    list.setForeground(comp.getForeground());
 	    list.setBorder(UIUtil.defaultContentBorder);
-	    
+
 	    DefaultListCellRenderer listRenderer = new DefaultListCellRenderer();
 	    listRenderer.setOpaque(false);
 	    UIUtil.disableHtml(listRenderer);
 	    listRenderer.setHorizontalAlignment(SwingConstants.LEFT);
 	    list.setCellRenderer(listRenderer);
-	    
+
 	    clusterIcon = new ClusterIcon();
-	    
+
 	    countLabel = new JLabel();
 	    countLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	    countLabel.setVerticalAlignment(SwingConstants.TOP);
@@ -115,18 +115,18 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 	    countLabel.setOpaque(false);
 	    countLabel.setIcon(clusterIcon);
 	    countLabel.setBorder(new EmptyBorder(0, 4, 0, 7));
-		
+
 		FormLayout layout = new FormLayout(
 				"2dlu, l:m:grow, l:m, 2dlu, l:m, 2dlu, l:m, 2dlu, l:m, 2dlu, l:m, 2dlu, l:m, 2dlu, l:m, r:m:grow, 2dlu",  //$NON-NLS-1$
 				"2dlu, t:p, 2dlu, t:p, 2dlu"); //$NON-NLS-1$
-		
+
 		setLayout(layout);
 		add(list, CC.xyw(2, 2, 15));
 		add(countLabel, CC.xy(3, 4, CellConstraints.CENTER, CellConstraints.FILL));
-		
+
 		for(int i=0; i<errorTypes.length; i++) {
 			ErrorIcon icon = new ErrorIcon(errorTypes[i]);
-			
+
 			JLabel label = new JLabel(icon);
 			label.setHorizontalAlignment(SwingConstants.CENTER);
 			label.setVerticalAlignment(SwingConstants.TOP);
@@ -134,13 +134,13 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 			label.setVerticalTextPosition(SwingConstants.BOTTOM);
 			label.setIconTextGap(2);
 			label.setOpaque(false);
-			
+
 			errorLabels[i] = label;
 			errorIcons[i] = icon;
-			
+
 			add(label, CC.xy(i*2+5, 4));
 		}
-		
+
 		setShowErrorLabels(false);
 	}
 
@@ -172,9 +172,9 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		if(this.showErrorLabels==showErrorLabels) {
 			return;
 		}
-		
+
 		this.showErrorLabels = showErrorLabels;
-		
+
 		countLabel.setVisible(showErrorLabels);
 		for(JLabel label : errorLabels) {
 			label.setVisible(showErrorLabels);
@@ -184,35 +184,39 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		
+
+		if(table!=null) {
+			isSelected |= table.getColumnModel().getSelectionModel().isSelectedIndex(column);
+		}
+
 		EntityGridTableModel model = (EntityGridTableModel) table.getModel();
 		ErrorSummary summary = model.getErrorSummary(column);
-		
+
 		clusterIcon.setErrorType(summary.getClusterType());
 		countLabel.setText(String.valueOf(summary.getTotalMentionCount()));
-		
+
 		for(int i=0; i<errorLabels.length; i++) {
 			ErrorIcon icon = errorIcons[i];
 			JLabel label = errorLabels[i];
-			
+
 			icon.setState(summary);
 			int count = summary.getCount(icon.getErrorType());
 			label.setText(count==0 ? null : String.valueOf(count));
 		}
-				
-//		// Provide quick info about complete clusters being 
+
+//		// Provide quick info about complete clusters being
 //		// false positives or false negatives
 //		Color bg = defaultBackground;
-//		
+//
 //		ErrorSummary summary = model.getErrorSummary(column);
 //		CorefErrorType errorType = summary==null ? null : summary.getClusterType();
-//		
+//
 //		if(errorType!=null) {
 //			bg = CoreferenceUtils.getErrorColor(errorType);
 //		}
-//		
+//
 //		setBackground(bg);
-		
+
 		if(prototypeMode) {
 			EntityGridColumnModel columnModel = model.getColumnModel();
 			String prototypeLabel = columnModel.getPrototypeLabel();
@@ -222,27 +226,27 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		}
 
 		String str = (value == null) ? "" : value.toString(); //$NON-NLS-1$
-		
+
 		int width = table.getColumnModel().getColumn(column).getWidth()-5;
 		width = Math.max(width, StringUtil.MIN_WRAP_WIDTH);
 		JComponent listRenderer = (JComponent) list.getCellRenderer();
 		String[] lines = StringUtil.split(str, listRenderer, width);
-		
+
 		listModel.setLines(lines);
-		
+
 //		System.out.printf("lines: %d text: %s\n", listModel.getSize(), Arrays.toString(lines));
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append('"').append(str).append('"');
 		summary.append(sb);
-		
+
 		setToolTipText(UIUtil.toSwingTooltip(sb.toString()));
-		
+
 		renderer.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column);
-				
+
 		return this;
 	}
-	
+
 	public void setAutoAdjustEnabled(boolean autoAdjust) {
 		if (autoAdjust) {
 			listModel.setMinLineCount(0);
@@ -256,15 +260,15 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 	 */
 	@Override
 	public void paint(Graphics g) {
-		
+
 		// Required trick for our little hack to work:
 		// Apparently some renderers require a valid parent to
-		// work properly. Therefore we shift our current parent 
+		// work properly. Therefore we shift our current parent
 		// component to the original renderer and let him paint
 		// what we use as background.
 		// Afterwards we reclaim our parent and draw the overlay
 		// with all components set to be not opaque.
-		
+
 		// Assign parent to renderer
 		Container parent = getParent();
 		Component comp = (Component) renderer;
@@ -273,10 +277,10 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		comp.setBounds(getBounds());
 		// Let renderer paint "background"
 		comp.paint(g);
-		
+
 		// Reclaim parent
 		parent.add(this);
-		
+
 		// Perform default painting of child components
 		super.paint(g);
 	}
@@ -286,9 +290,9 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		SOME,
 		ALL;
 	}
-	
+
 	public static class ClusterIcon implements Icon {
-		
+
 		private CorefErrorType errorType = null;
 
 		/**
@@ -313,21 +317,21 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 			if(errorType==null) {
 				return;
 			}
-			
+
 			Graphics2D g = (Graphics2D) graphics;
-			
+
 			Color col = g.getColor();
-			
+
 			Color errorCol = CoreferenceUtils.getErrorColor(errorType);
 			if(errorCol==null) {
 				errorCol = Color.black;
 			}
 			g.setColor(errorCol);
-			
+
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			
+
 			g.fillOval(x, y, getIconWidth(), getIconHeight());
-			
+
 			g.setColor(col);
 		}
 
@@ -346,21 +350,21 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		public int getIconHeight() {
 			return 8;
 		}
-		
+
 	}
 
 	public static class ErrorIcon implements Icon {
-		
+
 		private final CorefErrorType errorType;
 		private ErrorIconState state = ErrorIconState.NONE;
 
 		public ErrorIcon(CorefErrorType errorType) {
 			if(errorType==null)
 				throw new NullPointerException("Invalid error type"); //$NON-NLS-1$
-			
+
 			this.errorType = errorType;
 		}
-		
+
 		public void setState(ErrorSummary summary) {
 			if(summary.getClusterType()==errorType) {
 				state = ErrorIconState.ALL;
@@ -377,23 +381,23 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y) {
 			Color col = g.getColor();
-			
+
 			Color errorCol = CoreferenceUtils.getErrorColor(errorType);
 			if(errorCol==null) {
 				errorCol = Color.black;
 			}
 			g.setColor(errorCol);
-			
+
 			int w = getIconWidth()-1;
 			int h = getIconHeight()-1;
 
 			g.drawRect(x, y, w, h);
-			
+
 			switch (state) {
 			case ALL:
 				g.fillRect(x, y, w, h);
 				break;
-				
+
 			case SOME:
 				g.fillRect(x, y+h/2+1, w, h/2);
 				break;
@@ -401,7 +405,7 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 			default:
 				break;
 			}
-						
+
 			g.setColor(col);
 		}
 
@@ -427,6 +431,6 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 		public CorefErrorType getErrorType() {
 			return errorType;
 		}
-		
+
 	}
 }

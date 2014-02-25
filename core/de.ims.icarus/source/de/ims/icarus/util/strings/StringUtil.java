@@ -42,7 +42,6 @@ import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.intern.Interner;
-import de.ims.icarus.util.intern.NativeStringInterner;
 import de.ims.icarus.util.intern.StrongInterner;
 import de.ims.icarus.util.intern.WeakInterner;
 
@@ -69,33 +68,203 @@ public final class StringUtil {
 	//DEBUG
 //	private static Interner<String> interner = new EmptyInterner<>();
 
-	private static Interner<String> interner;
+	private static Interner<CharSequence> interner;
 	private static final int defaultInternerCapacity = 500;
 
-	public static String intern(String s) {
-		if(s==null) {
-			return null;
-		}
+	static {
+		Interner<CharSequence> i;
+		Core core = Core.getCore();
+		if(core!=null && "true".equals(Core.getCore().getProperty(WEAK_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
+			i = new WeakInterner<CharSequence>(defaultInternerCapacity){
 
-		Interner<String> i = interner;
-		if(i==null) {
-			synchronized (StringUtil.class) {
-				i = interner;
-				if(i==null) {
-					if("true".equals(Core.getCore().getProperty(WEAK_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
-						i = new WeakInterner<>(defaultInternerCapacity);
-					} else if("true".equals(Core.getCore().getProperty(NATIVE_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
-						i = new NativeStringInterner();
-					} else {
-						i = new StrongInterner<>(defaultInternerCapacity);
-					}
-					interner = i;
+				/**
+				 * @see de.ims.icarus.util.intern.WeakInterner#delegate(java.lang.Object)
+				 */
+				@Override
+				protected CharSequence delegate(CharSequence item) {
+					return item instanceof String ? item : _toString(item);
+				}
+
+			};
+		} else if(core!=null && "true".equals(Core.getCore().getProperty(NATIVE_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
+			i = new NativeStringInterner();
+		} else {
+			i = new StrongInterner<CharSequence>(defaultInternerCapacity){
+
+				/**
+				 * @see de.ims.icarus.util.intern.StrongInterner#delegate(java.lang.Object)
+				 */
+				@Override
+				protected CharSequence delegate(CharSequence item) {
+					return item instanceof String ? item : _toString(item);
+				}
+
+			};
+		}
+		interner = i;
+	}
+
+	/**
+	 * Interns the given {@code CharSequence} and returns the shared {@code String} instance
+	 * that equals its content. Allowing {@code CharSequence} objects to being interned is done
+	 * to greatly speed up processes such as parsing, when millions of small strings would have
+	 * to be created just to be interned and discarded a moment later. With the help of utility
+	 * classes such as {@link CharTableBuffer} it is possible to buffer big chunks of character
+	 * data and perform string operations on them by the use of cursor-like {@code CharSequence}
+	 * implementations without having to keep unnecessary string objects in memory.
+	 *
+	 * @param s
+	 * @return
+	 */
+	public static String intern(CharSequence s) {
+		return s==null ? null : (String)interner.intern(s);
+	}
+
+	// EQUALITY
+
+	static boolean _equals(CharSequence cs, Object obj) {
+		if(obj instanceof CharSequence) {
+			CharSequence other = (CharSequence) obj;
+
+			if(cs.length()!=other.length()) {
+				return false;
+			}
+
+			for(int i=cs.length()-1; i>0; i--) {
+				if(cs.charAt(i)!=other.charAt(i)) {
+					return false;
 				}
 			}
+
+			return true;
 		}
 
-		return interner.intern(s);
+		return false;
 	}
+
+	// HASHING
+	//
+	// both hash functions mirror the default behavior of String.hashCode() so that
+	// substitution in hash-tables is possible.
+	// If the hash function of String should ever be changed this needs to be addressed!
+
+	static int _hash(CharSequence cs) {
+
+		int h = 0;
+
+        for (int i = 0; i < cs.length(); i++) {
+            h = 31 * h + cs.charAt(i);
+        }
+
+        return h;
+	}
+
+	static int _hash(char[] c, int offset, int len) {
+
+		int h = 0;
+
+        for (int i = 0; i < len; i++) {
+            h = 31 * h + c[offset+i];
+        }
+
+        return h;
+	}
+
+	// STRING CONVERSION
+
+	static String _toString(CharSequence cs) {
+		char[] tmp = new char[cs.length()];
+
+		for(int i=cs.length()-1; i>=0; i--) {
+			tmp[i] = cs.charAt(i);
+		}
+
+		return new String(tmp);
+	}
+
+    static int indexOf(CharSequence source, int sourceOffset, int sourceCount,
+    		CharSequence target, int targetOffset, int targetCount,
+            int fromIndex) {
+        if (fromIndex >= sourceCount) {
+            return (targetCount == 0 ? sourceCount : -1);
+        }
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        if (targetCount == 0) {
+            return fromIndex;
+        }
+
+        char first = target.charAt(targetOffset);
+        int max = sourceOffset + (sourceCount - targetCount);
+
+        for (int i = sourceOffset + fromIndex; i <= max; i++) {
+            /* Look for first character. */
+            if (source.charAt(i) != first) {
+                while (++i <= max && source.charAt(i) != first);
+            }
+
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                int j = i + 1;
+                int end = j + targetCount - 1;
+                for (int k = targetOffset + 1; j < end && source.charAt(j)
+                        == target.charAt(k); j++, k++);
+
+                if (j == end) {
+                    /* Found whole string. */
+                    return i - sourceOffset;
+                }
+            }
+        }
+        return -1;
+    }
+
+    static int lastIndexOf(CharSequence source, int sourceOffset, int sourceCount,
+    		CharSequence target, int targetOffset, int targetCount,
+            int fromIndex) {
+        /*
+         * Check arguments; return immediately where possible. For
+         * consistency, don't check for null str.
+         */
+        int rightIndex = sourceCount - targetCount;
+        if (fromIndex < 0) {
+            return -1;
+        }
+        if (fromIndex > rightIndex) {
+            fromIndex = rightIndex;
+        }
+        /* Empty string always matches. */
+        if (targetCount == 0) {
+            return fromIndex;
+        }
+
+        int strLastIndex = targetOffset + targetCount - 1;
+        char strLastChar = target.charAt(strLastIndex);
+        int min = sourceOffset + targetCount - 1;
+        int i = min + fromIndex;
+
+        startSearchForLastChar:
+        while (true) {
+            while (i >= min && source.charAt(i) != strLastChar) {
+                i--;
+            }
+            if (i < min) {
+                return -1;
+            }
+            int j = i - 1;
+            int start = j - (targetCount - 1);
+            int k = strLastIndex - 1;
+
+            while (j > start) {
+                if (source.charAt(j--) != target.charAt(k--)) {
+                    i--;
+                    continue startSearchForLastChar;
+                }
+            }
+            return start - sourceOffset + 1;
+        }
+    }
 
 	private static Pattern indexPattern;
 
@@ -247,6 +416,38 @@ public final class StringUtil {
 			return formatDecimal(value/1_000)+'K';
 		else
 			return formatDecimal(value);
+	}
+
+	public static String formatDuration(long time) {
+		if(time<=0)
+			return null;
+
+		long s = time/1000;
+		long m = s/60;
+		long h = m/60;
+		long d = h/24;
+
+		s = s%60;
+		m = m%60;
+		h = h%24;
+
+		StringBuilder sb = new StringBuilder();
+		if(d>0) {
+			sb.append(' ').append(d).append('D');
+		}
+		if(h>0) {
+			sb.append(' ').append(h).append('H');
+		}
+		if(m>0) {
+			sb.append(' ').append(m).append('M');
+		}
+		if(s>0) {
+			sb.append(' ').append(s).append('S');
+		}
+
+		StringUtil.trim(sb);
+
+		return sb.toString();
 	}
 
 	public static void trim(StringBuilder sb) {

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.location;
@@ -42,22 +42,22 @@ import de.ims.icarus.io.IOUtil;
  *
  */
 public class DefaultURLLocation implements Location {
-	
+
 	private final URL url;
 
 	public DefaultURLLocation(URL url) {
 		if(url==null)
 			throw new NullPointerException("Invalid url"); //$NON-NLS-1$
-			
+
 		this.url = url;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Location) {
 			return Locations.equals(this, (Location)obj);
 		}
-		
+
 		return false;
 	}
 
@@ -99,7 +99,7 @@ public class DefaultURLLocation implements Location {
 	@Override
 	public InputStream openInputStream() throws IOException {
 		InputStream in = url.openStream();
-		if(IOUtil.isZipSource(url.toExternalForm())) {
+		if(IOUtil.isGZipSource(url.toExternalForm())) {
 			in = new GZIPInputStream(in);
 		}
 		return in;

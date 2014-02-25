@@ -23,21 +23,23 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.util.intern;
+package de.ims.icarus.util.strings;
+
+import de.ims.icarus.util.intern.Interner;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class NativeStringInterner implements Interner<String> {
+public class NativeStringInterner implements Interner<CharSequence> {
 
 	/**
 	 * @see de.ims.icarus.util.intern.Interner#intern(java.lang.Object)
 	 */
 	@Override
-	public String intern(String item) {
-		return item.intern();
+	public String intern(CharSequence item) {
+		return item.toString().intern();
 	}
 
 }

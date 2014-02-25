@@ -34,6 +34,38 @@
 	
 	<!-- PROPERTIES AND VIEWS -->
 	
+	<!-- Readers -->
+	
+	<extension id="CONLL09SentenceDataGoldReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="CoNLL 09 Reader (gold)" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL09SentenceDataGoldReader" />
+	</extension>
+	
+	<extension id="CONLL09SentenceDataPredictedReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="CoNLL 09 Reader (predicted)" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL09SentenceDataPredictedReader" />
+	</extension>
+	
+	<extension id="CONLL06SentenceDataReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="name" value="CoNLL 06 Reader" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL06SentenceDataReader" />
+	</extension>
+	
 	<!-- HELPERS -->
 	
 	<extension id="DependencyGraphPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">

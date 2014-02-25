@@ -25,13 +25,8 @@
  */
 package de.ims.icarus.plugins.coref.io;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -46,6 +41,13 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.util.collections.IntHashMap;
+import de.ims.icarus.util.strings.CharTableBuffer;
+import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
+import de.ims.icarus.util.strings.CharTableBuffer.Row;
+import de.ims.icarus.util.strings.CharTableBuffer.RowAction;
+import de.ims.icarus.util.strings.CharTableBuffer.RowFilter;
+import de.ims.icarus.util.strings.StringPrimitives;
 import de.ims.icarus.util.strings.StringUtil;
 
 
@@ -111,59 +113,37 @@ public final class CONLL12Utils {
 	public static final String BEGIN_DOCUMENT = "#begin document"; //$NON-NLS-1$
 	public static final String END_DOCUMENT = "#end document"; //$NON-NLS-1$
 
-	public static DefaultCoreferenceData readData(CoreferenceDocumentData document, BufferedReader reader) throws IOException {
-		DefaultCoreferenceData result = null;
-		List<String> lines = new ArrayList<>();
-		String line;
-		while((line = reader.readLine()) != null) {
-			if(line.isEmpty()) {
-				result = createData(document, lines, null);
-				break;
-			}
+	private static final String US = "_"; //$NON-NLS-1$
+	private static final String DELIMITER = "\\s+"; //$NON-NLS-1$
+	private static final String EMPTY = ""; //$NON-NLS-1$
 
-			lines.add(line);
-		}
+	public static DefaultCoreferenceData readData(CoreferenceDocumentData document, CharTableBuffer buffer) {
+		if(buffer.isEmpty())
+			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 
-		return result;
+		return createData(document, buffer, null);
 	}
 
-	public static CoreferenceDocumentData readDocumentData(CoreferenceDocumentSet documentSet, BufferedReader reader) throws IOException {
-		String header = reader.readLine();
-		if(header==null)
-			return null;
+	public static CoreferenceDocumentData readDocumentData(CoreferenceDocumentSet documentSet,
+			CharTableBuffer buffer, BlockHandler blockHandler) throws IOException {
 
-		if(!header.startsWith(BEGIN_DOCUMENT))
-			throw new IllegalArgumentException("Illegal '#begin document' definition: "+header); //$NON-NLS-1$
+		CoreferenceDocumentData result = null;
+		IntHashMap<Cluster> clusterMap = new IntHashMap<>();
 
-		header = header.substring(BEGIN_DOCUMENT.length()).trim();
-
-		CoreferenceDocumentData result = documentSet.newDocument(header);
-		Map<Integer, Cluster> clusterMap = new HashMap<>();
-		List<String> lines = new ArrayList<>();
-		boolean closed = false;
-		String line;
-		while((line = reader.readLine()) != null) {
-			if(line.isEmpty()) {
-				createData(result, lines, clusterMap);
-				lines.clear();
-			} else {
-				lines.add(line);
+		while(buffer.next()) {
+			if(result==null) {
+				result = documentSet.newDocument(blockHandler.getExpectedId());
 			}
-
-			if(line.startsWith(END_DOCUMENT)) {
-				closed = true;
-				break;
-			}
+			createData(result, buffer, clusterMap);
 		}
 
-		if(!closed)
-			throw new IllegalArgumentException("Missing '"+END_DOCUMENT+"' statement"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		SpanSet spanSet = result.getDefaultSpanSet();
-		if(spanSet!=null) {
-			CoreferenceAllocation allocation = result.getDocumentSet().getDefaultAllocation();
-			EdgeSet edgeSet = CoreferenceUtils.defaultBuildEdgeSet(spanSet);
-			allocation.setEdgeSet(result.getId(), edgeSet);
+		if(result!=null) {
+			SpanSet spanSet = result.getDefaultSpanSet();
+			if(spanSet!=null) {
+				CoreferenceAllocation allocation = result.getDocumentSet().getDefaultAllocation();
+				EdgeSet edgeSet = CoreferenceUtils.defaultBuildEdgeSet(spanSet);
+				allocation.setEdgeSet(result.getId(), edgeSet);
+			}
 		}
 
 		return result;
@@ -189,8 +169,8 @@ public final class CONLL12Utils {
 	 *
 	 */
 	private static DefaultCoreferenceData createData(CoreferenceDocumentData document,
-			List<String> lines, Map<Integer, Cluster> clusterMap) {
-		int size = lines.size();
+			CharTableBuffer buffer, IntHashMap<Cluster> clusterMap) {
+		int size = buffer.getRowCount();
 		String[] forms = new String[size];
 		LinkedList<Span> spanBuffer = new LinkedList<>();
 		Stack<Span> spanStack = new Stack<>();
@@ -199,32 +179,39 @@ public final class CONLL12Utils {
 		String partId = null;
 
 		CorefProperties properties = new CorefProperties();
+		Row row;
 
 		// TODO evaluate need to expand storage to cover more than just form and spans
 		for(int i=0; i<size; i++) {
-			String[] cols = WS.split(lines.get(i));
+			row = buffer.getRow(i);
+			row.split(DELIMITER);
 
 //			if(!String.valueOf(i).equals(cols[WORD_COL]))
 //				throw new NullPointerException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
 
-			forms[i] = cols[FORM_COL];
+			forms[i] = get(row, FORM_COL, EMPTY);
 
 			if(documentId==null) {
-				documentId = StringUtil.intern(cols[DOC_COL]);
+				documentId = get(row, DOC_COL, null);
 			}
 			if(partId==null) {
-				partId = StringUtil.intern(cols[PART_COL]);
+				partId = get(row, PART_COL, null);
 			}
 
-			String coref = cols[cols.length-1];
+			Cursor coref = row.getSplitCursor(row.getSplitCount()-1);
 			if(!HYPHEN.equals(coref)) {
 				// Build spans
-				String[] chunks = BAR.split(coref);
-				for(String chunk : chunks) {
+				coref.split('|');
+				for(int j=0; j<coref.getSplitCount(); j++) {
+					Cursor chunk = coref.getSplitCursor(j);
 					if(chunk.startsWith(OBR)) {
+						int i1 = chunk.length()-1;
+						if(chunk.endsWith(CBR)) {
+							i1--;
+						}
+						int clusterId = StringPrimitives.parseInt(chunk, 1, i1);
+
 						// Start of span definition
-						int clusterId = Integer.parseInt(chunk.endsWith(CBR) ?
-								chunk.substring(1, chunk.length()-1) : chunk.substring(1));
 						Span span = new Span(i, i, document.size());
 
 						if(clusterMap!=null) {
@@ -240,8 +227,8 @@ public final class CONLL12Utils {
 						spanStack.push(span);
 					}
 					if(chunk.endsWith(CBR)) {
-						int clusterId = Integer.parseInt(chunk.startsWith(OBR) ?
-								chunk.substring(1, chunk.length()-1) : chunk.substring(0, chunk.length()-1));
+						int i0 = chunk.startsWith(OBR) ? 1 : 0;
+						int clusterId = StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
 
 						// End of span definition
 						Span span = null;
@@ -262,18 +249,22 @@ public final class CONLL12Utils {
 							spanBuffer.offerLast(span);
 						}
 					}
+
+					chunk.recycle();
 				}
 			}
 
+			coref.recycle();
+
 			// Assign properties
-			properties.put(StringUtil.intern(FORM_KEY+'_'+i), StringUtil.intern(cols[FORM_COL]));
-			properties.put(StringUtil.intern(TAG_KEY+'_'+i), StringUtil.intern(cols[TAG_COL]));
-			properties.put(StringUtil.intern(PARSE_KEY+'_'+i), StringUtil.intern(cols[PARSE_COL]));
-			properties.put(StringUtil.intern(LEMMA_KEY+'_'+i), StringUtil.intern(cols[LEMMA_COL]));
-			properties.put(StringUtil.intern(FRAMESET_KEY+'_'+i), StringUtil.intern(cols[FRAMESET_COL]));
-			properties.put(StringUtil.intern(SENSE_KEY+'_'+i), StringUtil.intern(cols[SENSE_COL]));
-			properties.put(StringUtil.intern(SPEAKER_KEY+'_'+i), StringUtil.intern(cols[SPEAKER_COL]));
-			properties.put(StringUtil.intern(ENTITY_KEY+'_'+i), StringUtil.intern(cols[ENTITY_COL]));
+			properties.put(StringUtil.intern(FORM_KEY+'_'+i), get(row, FORM_COL, EMPTY));
+			properties.put(StringUtil.intern(TAG_KEY+'_'+i), get(row, TAG_COL, EMPTY));
+			properties.put(StringUtil.intern(PARSE_KEY+'_'+i), get(row, PARSE_COL, EMPTY));
+			properties.put(StringUtil.intern(LEMMA_KEY+'_'+i), get(row, LEMMA_COL, EMPTY));
+			properties.put(StringUtil.intern(FRAMESET_KEY+'_'+i), get(row, FRAMESET_COL, EMPTY));
+			properties.put(StringUtil.intern(SENSE_KEY+'_'+i), get(row, SENSE_COL, EMPTY));
+			properties.put(StringUtil.intern(SPEAKER_KEY+'_'+i), get(row, SPEAKER_COL, EMPTY));
+			properties.put(StringUtil.intern(ENTITY_KEY+'_'+i), get(row, ENTITY_COL, EMPTY));
 		}
 
 		if(!spanStack.isEmpty())
@@ -293,5 +284,62 @@ public final class CONLL12Utils {
 		}
 
 		return result;
+	}
+
+	private static String get(Row row, int index, String def) {
+		Cursor cursor = row.getSplitCursor(index);
+		String s = EMPTY;
+		if(US.equals(cursor) || cursor.isEmpty()) {
+			s = def;
+		} else {
+			s = cursor.toString();
+		}
+
+		cursor.recycle();
+
+		return s;
+	}
+
+	public static class BlockHandler implements RowFilter {
+		private String expectedId;
+
+		/**
+		 * @return the expectedId
+		 */
+		public String getExpectedId() {
+			if(expectedId==null)
+				throw new IllegalStateException("No document begin defined"); //$NON-NLS-1$
+
+			return expectedId;
+		}
+
+		public boolean isDocumentActive() {
+			return expectedId!=null;
+		}
+
+		/**
+		 * @see de.ims.icarus.util.strings.CharTableBuffer.RowFilter#getRowAction(de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 */
+		@Override
+		public RowAction getRowAction(Row row) {
+			if(row.isEmpty()) {
+				return expectedId==null ? RowAction.IGNORE : RowAction.END_OF_TABLE;
+			} if(row.startsWith(BEGIN_DOCUMENT)) {
+				if(expectedId!=null)
+					throw new IllegalStateException("Unexpected begin of document: "+row); //$NON-NLS-1$
+				expectedId = row.subSequence(BEGIN_DOCUMENT.length(), row.length()-1).toString().trim();
+				return RowAction.IGNORE;
+			} else if(row.startsWith(END_DOCUMENT)) {
+				if(expectedId==null)
+					throw new IllegalStateException("Missing begin of document: "+row); //$NON-NLS-1$
+//				if(!row.regionMatches(END_DOCUMENT.length(), expectedId, 0, expectedId.length()))
+//					throw new IllegalStateException("Unexpected end of document: "+row);
+
+				expectedId = null;
+				return RowAction.END_OF_TABLE;
+			} else {
+				return RowAction.VALID;
+			}
+		}
 	}
 }

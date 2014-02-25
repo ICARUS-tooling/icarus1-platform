@@ -23,29 +23,25 @@
  * $LastChangedRevision: 123 $
  * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.plugins.matetools.conll;
-
-import is2.data.SentenceData09;
-import is2.io.CONLLReader09;
+package de.ims.icarus.language.dependency.conll;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import de.ims.icarus.language.DataType;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataReader;
-import de.ims.icarus.language.dependency.CompoundDependencyData;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
-import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
+import de.ims.icarus.util.strings.CharTableBuffer;
 
 
 /**
@@ -55,10 +51,9 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
  */
 public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 
-	protected CONLLReader09 reader;
-	protected boolean normalize;
-	protected int inputFormat; // 0 (default) or 1
+	protected CharTableBuffer buffer;
 	protected int count;
+
 
 	/**
 	 * @see de.ims.icarus.language.SentenceDataReader#init(de.ims.icarus.util.location.Location,
@@ -81,16 +76,14 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 			options = Options.emptyOptions;
 		}
 
-		normalize = true;
-		inputFormat = 0;
 		count = 0;
 
 		try {
-			reader = new CONLLReader09(normalize);
-			reader.startReading(location.openInputStream());
+			buffer = new CharTableBuffer();
+			buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
 		} catch (IllegalArgumentException e) {
 			LoggerFactory.log(this, Level.SEVERE,
-					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$
+					"Failed to start reading CoNLL file: "+location, e.getCause()); //$NON-NLS-1$
 		}
 
 	}
@@ -101,16 +94,12 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 	@Override
 	public SentenceData next() throws IOException, UnsupportedFormatException {
 
-		SentenceData09 input;
-
 		DependencyData resultdd = null;
 
-		// more sentences left?
-		if ((input = reader.getNext()) != null) {
-			resultdd = MatetoolsCONLLUtils.readGold(input, count++, true, true);
+		if (buffer.next()) {
+			resultdd = CONLLUtils.readGold09(buffer, count++);
 		}
 
-		// catch illegal state getcause -> originale
 		return resultdd;
 	}
 
@@ -119,8 +108,11 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 	 */
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-
+		try {
+			buffer.close();
+		} catch (IOException e) {
+			LoggerFactory.error(this, "Failed to close buffer", e); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -130,47 +122,4 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 	public ContentType getContentType() {
 		return DependencyUtils.getDependencyContentType();
 	}
-
-	protected String ensureValid(String input) {
-		return input == null ? "" : input; //$NON-NLS-1$
-	}
-
-	protected String ensureDummy(String input, String dummy) {
-		return input == null ? dummy : input;
-	}
-
-	public static void main(String[] args) throws UnsupportedFormatException {
-
-		File file = new File("E:\\test_small.txt"); //$NON-NLS-1$
-
-		DefaultFileLocation dloc = new DefaultFileLocation(file);
-
-		Options o = null;
-
-		CONLL09SentenceDataGoldReader cr = new CONLL09SentenceDataGoldReader();
-		try {
-			cr.init(dloc, o);
-
-			while (cr.next() != null) {
-				SentenceData sd = cr.next();
-				if (sd instanceof CompoundDependencyData) {
-					CompoundDependencyData cdd = (CompoundDependencyData) sd;
-					System.out.println("Gold: " + cdd.getData(DataType.GOLD)); //$NON-NLS-1$
-					System.out
-							.println("System: " + cdd.getData(DataType.SYSTEM)); //$NON-NLS-1$
-				} else {
-					System.out.println(sd);
-				}
-			}
-			System.out.println("Finished reading"); //$NON-NLS-1$
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.intern;
@@ -66,13 +66,13 @@ public class StrongInterner<E extends Object> implements Interner<E> {
 	}
 
 	public StrongInterner(int initialCapacity, float loadFactor) {
-		
+
 		if (initialCapacity < 0)
 			throw new IllegalArgumentException("Illegal capacity (negative): " //$NON-NLS-1$
 					+ initialCapacity);
 		if (loadFactor <= 0)
 			throw new IllegalArgumentException("Illegal load-factor (zero or less): " + loadFactor); //$NON-NLS-1$
-		
+
 		if (initialCapacity == 0) {
 			initialCapacity = 1;
 		}
@@ -89,7 +89,7 @@ public class StrongInterner<E extends Object> implements Interner<E> {
 	public boolean isEmpty() {
 		return count == 0;
 	}
-	
+
 	protected void rehash() {
 		int oldCapacity = table.length;
 		Entry oldMap[] = table;
@@ -111,7 +111,7 @@ public class StrongInterner<E extends Object> implements Interner<E> {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public E intern(final E item) {
@@ -119,7 +119,7 @@ public class StrongInterner<E extends Object> implements Interner<E> {
 			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
 
 		Object element = null;
-		
+
 		Entry tab[] = table;
 		int hash = item.hashCode();
 		int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -129,7 +129,7 @@ public class StrongInterner<E extends Object> implements Interner<E> {
 				break;
 			}
 		}
-		
+
 		if(element==null) {
 
 			if (count >= threshold) {
@@ -139,14 +139,18 @@ public class StrongInterner<E extends Object> implements Interner<E> {
 				tab = table;
 				index = (hash & 0x7FFFFFFF) % tab.length;
 			}
-			
-			element = item;
+
+			element = delegate(item);
 			// Creates the new entry.
 			Entry e = new Entry(hash, element, tab[index]);
 			tab[index] = e;
 			count++;
 		}
-		
+
 		return (E) element;
+	}
+
+	protected E delegate(E item) {
+		return item;
 	}
 }

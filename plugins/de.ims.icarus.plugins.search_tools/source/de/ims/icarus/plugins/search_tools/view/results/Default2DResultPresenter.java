@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -189,6 +190,8 @@ public class Default2DResultPresenter extends SearchResultTabbedPresenter {
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setRowHeaderView(rowHeader);
 		scrollPane.setBorder(UIUtil.topLineBorder);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		Grouping.decorate(scrollPane, true);
 
 		CompoundMenuButton menuButtonRows = createCompoundButton(SORT_ROWS_BUTTON);

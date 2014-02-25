@@ -37,12 +37,12 @@ import de.ims.icarus.util.strings.StringUtil;
  * @version $Id$
  *
  */
-public final class CONLLUtils {
+public final class MatetoolsCONLLUtils {
 
 	//DEBUG
 	private static final boolean intern = true;
 
-	private CONLLUtils() {
+	private MatetoolsCONLLUtils() {
 		// no-op
 	}
 

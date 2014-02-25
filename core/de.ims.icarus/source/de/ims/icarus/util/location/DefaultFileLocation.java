@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.location;
@@ -46,22 +46,22 @@ import de.ims.icarus.io.IOUtil;
  *
  */
 public class DefaultFileLocation implements Location {
-	
+
 	private final File file;
 
 	public DefaultFileLocation(File file) {
 		if(file==null)
 			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
-		
+
 		this.file = file;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Location) {
 			return Locations.equals(this, (Location)obj);
 		}
-		
+
 		return false;
 	}
 
@@ -99,10 +99,10 @@ public class DefaultFileLocation implements Location {
 	@Override
 	public OutputStream openOutputStream() throws IOException {
 		OutputStream out = new FileOutputStream(file);
-		if(IOUtil.isZipSource(file.getName())) {
+		if(IOUtil.isGZipSource(file.getName())) {
 			out = new GZIPOutputStream(out);
 		}
-		
+
 		return out;
 	}
 
@@ -117,7 +117,7 @@ public class DefaultFileLocation implements Location {
 			throw new FileNotFoundException("File not found: "+file.getAbsolutePath()); //$NON-NLS-1$
 		if(file.length()==0)
 			throw new IOException("File is empty: "+file.getAbsolutePath()); //$NON-NLS-1$
-		
+
 		InputStream in = new FileInputStream(file);
 		if(IOUtil.isGZipSource(file.getName())) {
 			in = new GZIPInputStream(in);

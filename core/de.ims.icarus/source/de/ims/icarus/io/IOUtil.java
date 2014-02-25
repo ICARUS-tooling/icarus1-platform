@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.io;
@@ -54,19 +54,19 @@ import de.ims.icarus.util.Options;
  *
  */
 public final class IOUtil {
-	
+
 	public static final String UTF8_ENCODING = "UTF-8"; //$NON-NLS-1$
 
 	private IOUtil() {
 		// no-op
 	}
-	
+
 	public static boolean isZipSource(String name) {
-		return name.endsWith("zip"); //$NON-NLS-1$ 
+		return name.endsWith(".zip"); //$NON-NLS-1$
 	}
-	
+
 	public static boolean isGZipSource(String name) {
-		return name.endsWith(".gzip") || name.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		return name.endsWith(".gzip") || name.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static String readStream(InputStream input) throws IOException {
@@ -94,10 +94,10 @@ public final class IOUtil {
 		} catch (IOException e) {
 			// ignore
 		}
-		
+
 		return null;
 	}
-	
+
     public static void copyStream(final InputStream in, final OutputStream out,
             int bufferSize) throws IOException {
     	if(bufferSize==0) {
@@ -139,36 +139,36 @@ public final class IOUtil {
 			return false;
 		}
 	}
-	
+
 	public static BufferedReader getReader(InputStream is, Charset cs) throws IOException {
 		return new BufferedReader(new InputStreamReader(is, cs));
 	}
-	
+
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
-	
+
 	public static final String CHARSET_OPTION = "charset"; //$NON-NLS-1$
 	public static final String CHARSET_NAME_OPTION = "charsetName"; //$NON-NLS-1$
 	public static final String ENCODING_OPTION = "encoding"; //$NON-NLS-1$
-	
+
 	public static Charset getCharset(Options options, Charset defaultCharset) {
 		Object charset = null;
 		if(options!=null) {
-			charset = options.firstSet(CHARSET_OPTION, 
+			charset = options.firstSet(CHARSET_OPTION,
 					CHARSET_NAME_OPTION, ENCODING_OPTION);
 		}
-		
+
 		if(charset == null) {
 			charset = defaultCharset==null ? DEFAULT_CHARSET : defaultCharset;
 		} else if(charset instanceof String) {
 			charset = Charset.forName((String)charset);
 		}
-		
+
 		if(!(charset instanceof Charset))
 			throw new NullPointerException("Invalid charset: "+charset.getClass()); //$NON-NLS-1$
-		
+
 		return (Charset) charset;
 	}
-	
+
 	public static Charset getCharset(Options options) {
 		return getCharset(options, null);
 	}
@@ -275,7 +275,7 @@ public final class IOUtil {
             return new File(URLDecoder.decode(url.getFile()));
         }
     }
-    
+
     /**
      * Utility method to convert a {@link File} object to a local URL.
      * @param file a file object
@@ -293,25 +293,25 @@ public final class IOUtil {
             		+ file + " " + ioe); //$NON-NLS-1$
         }
     }
-    
+
     public static File toRelativeFile(File f) {
     	if(f==null) {
     		return f;
     	}
-    	
+
     	String root = Core.getCore().getRootFolder().getAbsolutePath();
     	String path = null;
     	try {
     		path = f.getCanonicalPath();
     	} catch(Exception e) {
-    		LoggerFactory.log(IOUtil.class, Level.WARNING, 
+    		LoggerFactory.log(IOUtil.class, Level.WARNING,
     				"Error converting file to canonical path: "+f.getAbsolutePath(), e); //$NON-NLS-1$
     	}
-    	
+
     	if(path==null) {
     		return f;
     	}
-    	
+
     	if(path.startsWith(root)) {
     		path = path.substring(root.length()+1);
     		return new File(path);
@@ -323,21 +323,21 @@ public final class IOUtil {
     public static boolean canFree(Loadable loadable) {
     	if(loadable==null)
     		throw new NullPointerException("Invalid loadable"); //$NON-NLS-1$
-    	
+
     	return loadable.isLoaded() && !loadable.isLoading();
     }
-	
+
 	public static class LoadJob extends SwingWorker<Loadable, Object> {
-		
+
 		private final Loadable loadable;
-		
+
 		public LoadJob(Loadable loadable) {
-			if(loadable==null) 
+			if(loadable==null)
 				throw new NullPointerException("Invalid loadable"); //$NON-NLS-1$
-			
+
 			this.loadable = loadable;
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			if(obj instanceof LoadJob) {
@@ -352,21 +352,21 @@ public final class IOUtil {
 		@Override
 		protected Loadable doInBackground() throws Exception {
 			TaskManager.getInstance().setIndeterminate(this, true);
-			
+
 			try {
 				// Wait while target is loading
 				while(loadable.isLoading());
-				
+
 				if(loadable.isLoaded()) {
 					return null;
 				}
-				
+
 				loadable.load();
 			} finally {
 				TaskManager.getInstance().setIndeterminate(this, false);
 			}
-			
+
 			return loadable;
-		}		
+		}
 	}
 }

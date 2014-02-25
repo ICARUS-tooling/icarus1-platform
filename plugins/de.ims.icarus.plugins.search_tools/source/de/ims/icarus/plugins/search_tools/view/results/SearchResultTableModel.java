@@ -32,6 +32,7 @@ import java.util.Comparator;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -474,6 +475,7 @@ public class SearchResultTableModel extends AbstractTableModel
 
 		ColumnModel() {
 			setColumnSelectionAllowed(false);
+			getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 
 		public boolean rebuild() {

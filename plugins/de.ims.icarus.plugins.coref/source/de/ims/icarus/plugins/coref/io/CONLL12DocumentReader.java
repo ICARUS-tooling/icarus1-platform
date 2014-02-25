@@ -15,17 +15,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 159 $
+ * $Date: 2013-11-04 11:20:05 +0100 (Mo, 04 Nov 2013) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/plugins/coref/io/CONLL12DocumentReader.java $
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
- * $LastChangedBy$
+ * $LastChangedDate: 2013-11-04 11:20:05 +0100 (Mo, 04 Nov 2013) $
+ * $LastChangedRevision: 159 $
+ * $LastChangedBy: mcgaerty $
  */
 package de.ims.icarus.plugins.coref.io;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 import de.ims.icarus.io.IOUtil;
@@ -33,23 +32,26 @@ import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.plugins.coref.io.CONLL12Utils.BlockHandler;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
+import de.ims.icarus.util.strings.CharTableBuffer;
 
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: CONLL12DocumentReader.java 159 2013-11-04 10:20:05Z mcgaerty $
  *
  */
 public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 
-	private BufferedReader reader;
+	private CharTableBuffer buffer;
+	private BlockHandler blockHandler;
 	private CoreferenceDocumentSet documentSet;
-	
+
 	public CONLL12DocumentReader() {
 		// no-op
 	}
@@ -62,9 +64,14 @@ public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 			UnsupportedLocationException {
 		if(location==null)
 			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
-		
+
 		documentSet = (CoreferenceDocumentSet) options.get("documentSet"); //$NON-NLS-1$
-		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));
+
+		blockHandler = new BlockHandler();
+
+		buffer = new CharTableBuffer();
+		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
+		buffer.setRowFilter(blockHandler);
 	}
 
 	/**
@@ -72,7 +79,7 @@ public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 	 */
 	@Override
 	public CoreferenceDocumentData next() throws IOException, UnsupportedFormatException {
-		return CONLL12Utils.readDocumentData(documentSet, reader);
+		return CONLL12Utils.readDocumentData(documentSet, buffer, blockHandler);
 	}
 
 	/**
@@ -81,9 +88,9 @@ public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {
 	@Override
 	public void close() throws IOException {
 		try {
-			reader.close();
+			buffer.close();
 		} finally {
-			reader = null;
+			buffer = null;
 		}
 	}
 

@@ -39,7 +39,7 @@ import java.util.logging.Level;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.matetools.conll.CONLLUtils;
+import de.ims.icarus.plugins.matetools.conll.MatetoolsCONLLUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.dialog.DialogDispatcher;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -213,7 +213,7 @@ public class MatetoolsPipeline {
 		}
 		if(useLemmatizer && lemmatizer!=null) {
 			data = lemmatizer.apply(data);
-			output = CONLLUtils.readPredicted(data, -1, true, true);
+			output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Lemmatizer result:\n%s",  //$NON-NLS-1$
 						runCt, data.toString());
@@ -231,7 +231,7 @@ public class MatetoolsPipeline {
 		}
 		if(useTagger && tagger!=null) {
 			data = tagger.apply(data);
-			output = CONLLUtils.readPredicted(data, -1, true, true);
+			output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Tagger result:\n%s",  //$NON-NLS-1$
 						runCt, data.toString());
@@ -259,7 +259,7 @@ public class MatetoolsPipeline {
 				}
 			}
 
-			output = CONLLUtils.readPredicted(data, -1, true, true);
+			output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Morphologic-Tagger result:\n%s",  //$NON-NLS-1$
 						runCt, data.toString());
@@ -284,7 +284,7 @@ public class MatetoolsPipeline {
 		}
 		if(useParser && parser!=null) {
 			data = parser.applyQuick(data);
-			output = CONLLUtils.readPredicted(data, -1, false, true);
+			output = MatetoolsCONLLUtils.readPredicted(data, -1, false, true);
 			if(verbose) {
 				String msg = String.format("Matetools pipeline (run %d) - Parser result:\n%s",  //$NON-NLS-1$
 						runCt, data.toString());

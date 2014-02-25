@@ -84,6 +84,10 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
         Color fg = null;
         Color bg = null;
 
+        if(table.getColumnModel().getSelectionModel().isSelectedIndex(column)) {
+        	isSelected = true;
+        }
+
         JTable.DropLocation dropLocation = table.getDropLocation();
         if (dropLocation != null
                 && !dropLocation.isInsertRow()

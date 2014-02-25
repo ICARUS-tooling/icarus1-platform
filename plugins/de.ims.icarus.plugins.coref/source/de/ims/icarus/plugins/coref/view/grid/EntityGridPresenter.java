@@ -79,6 +79,7 @@ import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.ui.list.RowHeaderList;
+import de.ims.icarus.ui.table.ColumnSelectionSynchronizer;
 import de.ims.icarus.ui.table.TableColumnAdjuster;
 import de.ims.icarus.ui.table.TableIndexListModel;
 import de.ims.icarus.ui.table.TablePresenter;
@@ -407,6 +408,8 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getSelectionModel().addListSelectionListener(getHandler());
 		table.getColumnModel().getSelectionModel().addListSelectionListener(getHandler());
+		new ColumnSelectionSynchronizer(table);
+
 		JTableHeader header = table.getTableHeader();
 		header.setReorderingAllowed(false);
 		headerRenderer = new EntityGridTableHeaderRenderer(header.getDefaultRenderer());
@@ -414,7 +417,6 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 		header.setDefaultRenderer(headerRenderer);
 		//renderer.setPreferredSize(new Dimension(0, DEFAULT_CELL_HEIGHT));
 		gridModel.getColumnModel().setHeaderRenderer(headerRenderer);
-
 
 		return table;
 	}

@@ -92,7 +92,7 @@
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="name" value="CoNLL 09 Reader (gold)" />
+		<parameter id="name" value="Mate-Tools CoNLL 09 Reader (gold)" />
 		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader" />
 	</extension>
 	
@@ -102,7 +102,7 @@
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="name" value="CoNLL 09 Reader (predicted)" />
+		<parameter id="name" value="Mate-Tools CoNLL 09 Reader (predicted)" />
 		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataPredictedReader" />
 	</extension>
 	
