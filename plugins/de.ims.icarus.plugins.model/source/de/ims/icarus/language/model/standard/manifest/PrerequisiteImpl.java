@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.Prerequisite;
+import de.ims.icarus.language.model.api.manifest.Prerequisite;
 import de.ims.icarus.util.strings.StringUtil;
 
 /**
@@ -69,7 +69,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Prerequisite#getLayerId()
+	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getLayerId()
 	 */
 	@Override
 	public String getLayerId() {
@@ -77,7 +77,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Prerequisite#getTypeId()
+	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getTypeId()
 	 */
 	@Override
 	public String getTypeId() {
@@ -85,7 +85,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Prerequisite#getContextId()
+	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getContextId()
 	 */
 	@Override
 	public String getContextId() {
@@ -93,7 +93,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Prerequisite#getAlias()
+	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getAlias()
 	 */
 	@Override
 	public String getAlias() {

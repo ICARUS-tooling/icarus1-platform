@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.Derivable;
+import de.ims.icarus.language.model.api.manifest.Derivable;
 import de.ims.icarus.language.model.xml.XmlElement;
 import de.ims.icarus.language.model.xml.XmlResource;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -49,7 +49,7 @@ public abstract class AbstractDerivable<T extends Derivable> implements XmlEleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Derivable#setTemplate(de.ims.icarus.language.model.manifest.Derivable)
+	 * @see de.ims.icarus.language.model.api.manifest.Derivable#setTemplate(de.ims.icarus.language.model.api.manifest.Derivable)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -132,7 +132,7 @@ public abstract class AbstractDerivable<T extends Derivable> implements XmlEleme
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.xml.XmlElement#writeXml(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.xml.XmlElement#writeXml(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	public void writeXml(XmlSerializer serializer) throws Exception {
@@ -166,7 +166,7 @@ public abstract class AbstractDerivable<T extends Derivable> implements XmlEleme
 	protected abstract String getXmlTag();
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.Derivable#isTemplate()
+	 * @see de.ims.icarus.language.model.api.manifest.Derivable#isTemplate()
 	 */
 	@Override
 	public boolean isTemplate() {

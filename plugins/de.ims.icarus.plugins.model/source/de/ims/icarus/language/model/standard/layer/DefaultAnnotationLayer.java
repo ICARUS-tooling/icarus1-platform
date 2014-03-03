@@ -28,17 +28,17 @@ package de.ims.icarus.language.model.standard.layer;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.AnnotationLayer;
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
-import de.ims.icarus.language.model.manifest.AnnotationManifest;
+import de.ims.icarus.language.model.api.AnnotationLayer;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.LongHashMap;
@@ -67,7 +67,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#hasAnnotations()
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#hasAnnotations()
 	 */
 	@Override
 	public boolean hasAnnotations() {
@@ -75,7 +75,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#getValue(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Object getValue(Markable markable) {
@@ -83,7 +83,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#getValue(de.ims.icarus.language.model.Markable, java.lang.String)
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable, java.lang.String)
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
@@ -91,7 +91,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#removeAllValues()
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#removeAllValues()
 	 */
 	@Override
 	public void removeAllValues() {
@@ -99,7 +99,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#removeAllValues(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#removeAllValues(java.lang.String)
 	 */
 	@Override
 	public void removeAllValues(String key) {
@@ -107,7 +107,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#removeAllValues(de.ims.icarus.language.model.Markable, boolean)
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#removeAllValues(de.ims.icarus.language.model.api.Markable, boolean)
 	 */
 	@Override
 	public void removeAllValues(Markable markable, boolean recursive) {
@@ -162,7 +162,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#setValue(de.ims.icarus.language.model.Markable, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.Object)
 	 */
 	@Override
 	public void setValue(Markable markable, Object value) {
@@ -188,7 +188,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.AnnotationLayer#setValue(de.ims.icarus.language.model.Markable, java.lang.String, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.AnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.String, java.lang.Object)
 	 */
 	@Override
 	public void setValue(Markable markable, String key, Object value) {
@@ -219,7 +219,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		int expectedSize = annotations.size();
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -245,7 +245,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -278,7 +278,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -293,7 +293,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {

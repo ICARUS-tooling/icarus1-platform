@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.builder;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Markable;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Markable;
 
 /**
  * @author Markus Gärtner

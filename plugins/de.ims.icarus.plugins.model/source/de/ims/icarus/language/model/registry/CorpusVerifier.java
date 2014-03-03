@@ -28,22 +28,22 @@ package de.ims.icarus.language.model.registry;
 import java.util.Set;
 import java.util.Stack;
 
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
-import de.ims.icarus.language.model.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ContextReaderManifest;
-import de.ims.icarus.language.model.manifest.ContextWriterManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.language.model.manifest.LocationManifest;
-import de.ims.icarus.language.model.manifest.MemberManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.OptionsManifest;
-import de.ims.icarus.language.model.manifest.PathResolverManifest;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.api.manifest.ContextWriterManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.manifest.LocationManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.manifest.MemberManifest;
+import de.ims.icarus.language.model.api.manifest.OptionsManifest;
+import de.ims.icarus.language.model.api.manifest.PathResolverManifest;
+import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.logging.LogReport;
 
 /**

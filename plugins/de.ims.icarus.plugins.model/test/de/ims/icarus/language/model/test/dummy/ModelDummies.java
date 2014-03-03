@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.test.dummy;
 
-import de.ims.icarus.language.model.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.manifest.ValueRange;
-import de.ims.icarus.language.model.manifest.ValueSet;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.language.model.api.manifest.ValueRange;
+import de.ims.icarus.language.model.api.manifest.ValueSet;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.standard.manifest.AnnotationManifestImpl;
 
 /**

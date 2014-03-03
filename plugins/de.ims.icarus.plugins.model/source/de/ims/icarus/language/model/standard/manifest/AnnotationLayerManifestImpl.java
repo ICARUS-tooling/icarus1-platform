@@ -31,9 +31,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
-import de.ims.icarus.language.model.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
@@ -51,7 +51,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	private boolean deepAnnotation, allowUnknownKeys;
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.language.model.manifest.LayerManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.language.model.api.manifest.LayerManifest)
 	 */
 	@Override
 	protected void readTemplate(AnnotationLayerManifest template) {
@@ -85,7 +85,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -93,7 +93,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationLayerManifest#getAvailableKeys()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest#getAvailableKeys()
 	 */
 	@Override
 	public Set<String> getAvailableKeys() {
@@ -113,7 +113,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationLayerManifest#getAnnotationManifest(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest#getAnnotationManifest(java.lang.String)
 	 */
 	@Override
 	public AnnotationManifest getAnnotationManifest(String key) {
@@ -147,7 +147,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationLayerManifest#getDefaultAnnotationManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest#getDefaultAnnotationManifest()
 	 */
 	@Override
 	public AnnotationManifest getDefaultAnnotationManifest() {
@@ -166,7 +166,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationLayerManifest#isDeepAnnotation()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest#isDeepAnnotation()
 	 */
 	@Override
 	public boolean isDeepAnnotation() {
@@ -174,7 +174,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationLayerManifest#allowUnknownKeys()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest#allowUnknownKeys()
 	 */
 	@Override
 	public boolean allowUnknownKeys() {
@@ -196,7 +196,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -205,7 +205,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -218,7 +218,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -231,7 +231,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -256,7 +256,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

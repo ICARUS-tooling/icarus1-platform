@@ -28,11 +28,10 @@ package de.ims.icarus.language.model.standard.container;
 import java.util.Iterator;
 import java.util.List;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.ContainerType;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.ContainerType;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
 import de.ims.icarus.language.model.standard.LookupList;
 import de.ims.icarus.language.model.standard.builder.AbstractContainerBuilder;
@@ -64,7 +63,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getContainerType()
+	 * @see de.ims.icarus.language.model.api.Container#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -72,7 +71,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 	 */
 	@Override
 	public int getBeginOffset() {
@@ -80,7 +79,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 	 */
 	@Override
 	public int getEndOffset() {
@@ -96,15 +95,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getBaseContainer()
-	 */
-	@Override
-	public Container getBaseContainer() {
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Container#getMarkableCount()
+	 * @see de.ims.icarus.language.model.api.Container#getMarkableCount()
 	 */
 	@Override
 	public int getMarkableCount() {
@@ -112,7 +103,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.language.model.api.Container#getMarkableAt(int)
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
@@ -120,7 +111,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#indexOfMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#indexOfMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
@@ -131,7 +122,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#containsMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#containsMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public boolean containsMarkable(Markable markable) {
@@ -142,20 +133,15 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeAllMarkables()
+	 * @see de.ims.icarus.language.model.api.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
 		execute(new ClearChange());
 	}
 
-	protected void checkMarkable(Markable markable) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
-	}
-
 	/**
-	 * @see de.ims.icarus.language.model.Container#addMarkable(int)
+	 * @see de.ims.icarus.language.model.api.Container#addMarkable(int)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -165,7 +151,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeMarkable(int)
+	 * @see de.ims.icarus.language.model.api.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -177,7 +163,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#removeMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Markable removeMarkable(Markable markable) {
@@ -189,7 +175,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.language.model.api.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {
@@ -197,7 +183,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#moveMarkable(de.ims.icarus.language.model.Markable, int)
+	 * @see de.ims.icarus.language.model.api.Container#moveMarkable(de.ims.icarus.language.model.api.Markable, int)
 	 */
 	@Override
 	public void moveMarkable(Markable markable, int index) {
@@ -237,7 +223,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -262,7 +248,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -288,7 +274,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -321,7 +307,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -336,7 +322,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		private int expectedSize = list.size();
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -358,7 +344,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -370,7 +356,7 @@ public abstract class AbstractListContainer extends AbstractContainer {
 	public static abstract class ListContainerBuilder<C extends AbstractListContainer> extends AbstractContainerBuilder<C> {
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.builder.ContainerBuilder#addMarkable(de.ims.icarus.language.model.Markable)
+		 * @see de.ims.icarus.language.model.api.standard.builder.ContainerBuilder#addMarkable(de.ims.icarus.language.model.api.Markable)
 		 */
 		@Override
 		public void addMarkable(Markable markable) {

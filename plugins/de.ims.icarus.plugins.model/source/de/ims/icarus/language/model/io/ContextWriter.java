@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.io;
 
 import java.io.IOException;
 
-import de.ims.icarus.language.model.Context;
+import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 

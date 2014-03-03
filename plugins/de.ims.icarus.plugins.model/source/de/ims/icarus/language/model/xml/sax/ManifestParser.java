@@ -49,17 +49,17 @@ import org.xml.sax.ext.EntityResolver2;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.ims.icarus.eval.Expression;
-import de.ims.icarus.language.model.ContainerType;
-import de.ims.icarus.language.model.StructureType;
+import de.ims.icarus.language.model.api.ContainerType;
+import de.ims.icarus.language.model.api.StructureType;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.Derivable;
+import de.ims.icarus.language.model.api.manifest.Implementation;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.manifest.OptionsManifest;
+import de.ims.icarus.language.model.api.manifest.Prerequisite;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.io.LocationType;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.Derivable;
-import de.ims.icarus.language.model.manifest.Implementation;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.OptionsManifest;
-import de.ims.icarus.language.model.manifest.Prerequisite;
-import de.ims.icarus.language.model.meta.ValueType;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.standard.manifest.AbstractDerivable;
 import de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest;
@@ -131,18 +131,18 @@ public class ManifestParser {
 		return parserFactory;
 	}
 
-	private synchronized XMLReader getReader() throws ParserConfigurationException, SAXException {
+	private synchronized XMLReader newReader() throws ParserConfigurationException, SAXException {
 		SAXParserFactory parserFactory = getParserFactory();
 		SAXParser parser = parserFactory.newSAXParser();
 		return parser.getXMLReader();
 	}
 
 	public LogReport loadCorpora(URL url) {
-		ModelHandler handler = new ModelHandler(ParseMode.CORPORA);
+
+		LogReport report = new LogReport(this);
+		ModelHandler handler = new ModelHandler(ParseMode.CORPORA, report);
 
 		loadResource(url, handler);
-
-		LogReport report = handler.getReport();
 
 		if(!report.hasErrorRecords()) {
 			for(CorpusManifest manifest : handler.getCorpora()) {
@@ -158,11 +158,11 @@ public class ManifestParser {
 	}
 
 	public LogReport loadTemplates(URL url) {
-		ModelHandler handler = new ModelHandler(ParseMode.TEMPLATES);
+
+		LogReport report = new LogReport(this);
+		ModelHandler handler = new ModelHandler(ParseMode.TEMPLATES, report);
 
 		loadResource(url, handler);
-
-		LogReport report = handler.getReport();
 
 		if(!report.hasErrorRecords()) {
 			for(Derivable template : handler.getTemplates()) {
@@ -184,7 +184,7 @@ public class ManifestParser {
 			throw new NullPointerException("Invalid handler"); //$NON-NLS-1$
 
 		try {
-			XMLReader reader = getReader();
+			XMLReader reader = newReader();
 
 			reader.setEntityResolver(handler);
 			reader.setContentHandler(handler);
@@ -201,14 +201,14 @@ public class ManifestParser {
 		}
 	}
 
-	private enum ParseMode {
+	public enum ParseMode {
 		TEMPLATES,
 		CORPORA;
 	}
 
-	private class ModelHandler extends DefaultHandler implements EntityResolver2 {
+	public static class ModelHandler extends DefaultHandler implements EntityResolver2 {
 
-		private final LogReport report = new LogReport(ManifestParser.this);
+		private final LogReport report;
 
 		private final StringBuilder buffer = new StringBuilder();
 
@@ -225,6 +225,20 @@ public class ManifestParser {
 		private Expression expression;
 
 		public ModelHandler(ParseMode parseMode) {
+			if (parseMode == null)
+				throw new NullPointerException("Invalid parseMode"); //$NON-NLS-1$
+
+			report = new LogReport(this);
+			this.parseMode = parseMode;
+		}
+
+		public ModelHandler(ParseMode parseMode, LogReport report) {
+			if (parseMode == null)
+				throw new NullPointerException("Invalid parseMode"); //$NON-NLS-1$
+			if (report == null)
+				throw new NullPointerException("Invalid report"); //$NON-NLS-1$
+
+			this.report = report;
 			this.parseMode = parseMode;
 		}
 
@@ -407,6 +421,47 @@ public class ManifestParser {
 
 				if(layerManifest!=null) {
 					manifest.setBaseLayerManifest(layerManifest);
+				}
+			}
+		}
+
+		private void readMarkableLayerAttributes(Attributes attributes, MarkableLayerManifestImpl manifest) {
+			readLayerAttributes(attributes, manifest);
+
+			String boundaryLayer = normalize(attributes, "boundary-layer"); //$NON-NLS-1$
+			String boundaryContext = normalize(attributes, "boundary-context"); //$NON-NLS-1$
+
+			if(boundaryLayer==null) {
+				return;
+			}
+
+			if(isTemplateMode()) {
+				manifest.setBoundaryLayer(boundaryLayer);
+				if(boundaryContext!=null) {
+					warning("Boundary context declaration not supported in template mode"); //$NON-NLS-1$
+				}
+			} else {
+				ContextManifest contextManifest = current(ContextManifest.class);
+				CorpusManifest corpusManifest = contextManifest.getCorpusManifest();
+
+				if(boundaryContext!=null) {
+					try {
+						contextManifest = corpusManifest.getContextManifest(boundaryContext);
+					} catch(IllegalArgumentException e) {
+						error("No such boundary context in scope: "+boundaryContext); //$NON-NLS-1$
+					}
+				}
+
+				MarkableLayerManifest layerManifest = null;
+
+				try {
+					layerManifest = (MarkableLayerManifest) contextManifest.getLayerManifest(boundaryLayer);
+				} catch(IllegalArgumentException e) {
+					error("No such boundary layer in scope: "+boundaryLayer); //$NON-NLS-1$
+				}
+
+				if(layerManifest!=null) {
+					manifest.setBoundaryLayerManifest(layerManifest);
 				}
 			}
 		}
@@ -801,7 +856,7 @@ public class ManifestParser {
 			case "markable-layer": { //$NON-NLS-1$
 				MarkableLayerManifestImpl manifest = new MarkableLayerManifestImpl();
 
-				readLayerAttributes(attributes, manifest);
+				readMarkableLayerAttributes(attributes, manifest);
 
 				if(isRoot()) {
 					addTemplate(manifest);
@@ -815,44 +870,7 @@ public class ManifestParser {
 			case "structure-layer": { //$NON-NLS-1$
 				StructureLayerManifestImpl manifest = new StructureLayerManifestImpl();
 
-				readLayerAttributes(attributes, manifest);
-
-				String boundaryLayer = normalize(attributes, "boundary-layer"); //$NON-NLS-1$
-				String boundaryContext = normalize(attributes, "boundary-context"); //$NON-NLS-1$
-
-				if(boundaryLayer==null) {
-					return;
-				}
-
-				if(isTemplateMode()) {
-					manifest.setBoundaryLayer(boundaryLayer);
-					if(boundaryContext!=null) {
-						warning("Boundary context declaration not supported in template mode"); //$NON-NLS-1$
-					}
-				} else {
-					ContextManifest contextManifest = current(ContextManifest.class);
-					CorpusManifest corpusManifest = contextManifest.getCorpusManifest();
-
-					if(boundaryContext!=null) {
-						try {
-							contextManifest = corpusManifest.getContextManifest(boundaryContext);
-						} catch(IllegalArgumentException e) {
-							error("No such boundary context in scope: "+boundaryContext); //$NON-NLS-1$
-						}
-					}
-
-					MarkableLayerManifest layerManifest = null;
-
-					try {
-						layerManifest = (MarkableLayerManifest) contextManifest.getLayerManifest(boundaryLayer);
-					} catch(IllegalArgumentException e) {
-						error("No such boundary layer in scope: "+boundaryLayer); //$NON-NLS-1$
-					}
-
-					if(layerManifest!=null) {
-						manifest.setBoundaryLayerManifest(layerManifest);
-					}
-				}
+				readMarkableLayerAttributes(attributes, manifest);
 
 				if(isRoot()) {
 					addTemplate(manifest);

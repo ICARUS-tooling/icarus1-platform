@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.PathResolverManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.PathResolverManifest;
 
 /**
  * @author Markus Gärtner
@@ -36,7 +36,7 @@ import de.ims.icarus.language.model.manifest.PathResolverManifest;
 public class PathResolverManifestImpl extends AbstractManifest<PathResolverManifest> implements PathResolverManifest {
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -44,7 +44,7 @@ public class PathResolverManifestImpl extends AbstractManifest<PathResolverManif
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

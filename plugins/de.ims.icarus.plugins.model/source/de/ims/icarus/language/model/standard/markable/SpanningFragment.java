@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.markable;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 
 /**
  * @author Markus Gärtner
@@ -67,7 +67,7 @@ public class SpanningFragment extends AbstractFragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Fragment#getFragmentBeginIndex()
+	 * @see de.ims.icarus.language.model.api.Fragment#getFragmentBeginIndex()
 	 */
 	@Override
 	public int getFragmentBeginIndex() {
@@ -75,7 +75,7 @@ public class SpanningFragment extends AbstractFragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Fragment#getFragmentEndIndex()
+	 * @see de.ims.icarus.language.model.api.Fragment#getFragmentEndIndex()
 	 */
 	@Override
 	public int getFragmentEndIndex() {
@@ -83,7 +83,7 @@ public class SpanningFragment extends AbstractFragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Fragment#setFragmentBeginIndex(int)
+	 * @see de.ims.icarus.language.model.api.Fragment#setFragmentBeginIndex(int)
 	 */
 	@Override
 	public void setFragmentBeginIndex(int index) {
@@ -91,7 +91,7 @@ public class SpanningFragment extends AbstractFragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Fragment#setFragmentEndIndex(int)
+	 * @see de.ims.icarus.language.model.api.Fragment#setFragmentEndIndex(int)
 	 */
 	@Override
 	public void setFragmentEndIndex(int index) {
@@ -109,7 +109,7 @@ public class SpanningFragment extends AbstractFragment {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -125,7 +125,7 @@ public class SpanningFragment extends AbstractFragment {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {

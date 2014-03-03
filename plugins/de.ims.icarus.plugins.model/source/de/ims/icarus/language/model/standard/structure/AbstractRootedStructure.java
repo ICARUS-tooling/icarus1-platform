@@ -27,13 +27,14 @@ package de.ims.icarus.language.model.standard.structure;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
 import de.ims.icarus.language.model.standard.LookupList;
+import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
@@ -42,7 +43,7 @@ import de.ims.icarus.util.mem.ReferenceType;
 /**
  * Implements a rooted structure of arbitrary type (chain, tree or graph).
  * <p>
- *
+ * It defines a virtual root node and a storage for {@code Edge} objects.
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -61,6 +62,8 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		super(id, parent);
 
 		root = createRoot();
+		if(!CorpusUtils.isVirtual(root))
+			throw new IllegalStateException("Root node must be virtual"); //$NON-NLS-1$
 	}
 
 	public AbstractRootedStructure(long id, Container parent, Container boundary,
@@ -68,6 +71,8 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		super(id, parent, boundary, augment, boundaryAsBase);
 
 		root = createRoot();
+		if(!CorpusUtils.isVirtual(root))
+			throw new IllegalStateException("Root node must be virtual"); //$NON-NLS-1$
 	}
 
 	protected void addAllEdges0(List<? extends Edge> edges) {
@@ -100,7 +105,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getRoot()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getRoot()
 	 */
 	@Override
 	public Markable getRoot() {
@@ -108,7 +113,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#isRoot(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#isRoot(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public boolean isRoot(Markable node) {
@@ -124,7 +129,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#isMultiRoot()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#isMultiRoot()
 	 */
 	@Override
 	public boolean isMultiRoot() {
@@ -132,7 +137,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getEdgeCount()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getEdgeCount()
 	 */
 	@Override
 	public int getEdgeCount() {
@@ -140,7 +145,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getEdgeAt(int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getEdgeAt(int)
 	 */
 	@Override
 	public Edge getEdgeAt(int index) {
@@ -148,7 +153,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#indexOfEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#indexOfEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public int indexOfEdge(Edge edge) {
@@ -156,7 +161,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#containsEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#containsEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public boolean containsEdge(Edge edge) {
@@ -164,7 +169,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#removeAllEdges()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#removeAllEdges()
 	 */
 	@Override
 	public void removeAllEdges() {
@@ -173,7 +178,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 
 	/**
 	 * Verifies that the given {@code edge} is allowed to be added to this structure.
-	 * THe default implementation only checks the source and target of the edge using the
+	 * The default implementation only checks the source and target of the edge using the
 	 * {@link #checkMarkable(Markable)} method. Subclasses should override this method to
 	 * perform structure type specific checks to ensure that certain constraints are not
 	 * violated (like having at most one incoming edge in the case of a tree structure).
@@ -191,7 +196,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.Structure#addEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public Edge addEdge(Edge edge) {
@@ -199,7 +204,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.Structure#addEdge(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	public Edge addEdge(Edge edge, int index) {
@@ -251,7 +256,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#removeEdge(int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#removeEdge(int)
 	 */
 	@Override
 	public Edge removeEdge(int index) {
@@ -263,7 +268,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#removeEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#removeEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public Edge removeEdge(Edge edge) {
@@ -275,7 +280,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#moveEdge(int, int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#moveEdge(int, int)
 	 */
 	@Override
 	public void moveEdge(int index0, int index1) {
@@ -283,7 +288,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#moveEdge(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#moveEdge(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	public void moveEdge(Edge edge, int index) {
@@ -293,7 +298,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#setTerminal(de.ims.icarus.language.model.Edge, de.ims.icarus.language.model.Markable, boolean)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#setTerminal(de.ims.icarus.language.model.api.Edge, de.ims.icarus.language.model.api.Markable, boolean)
 	 */
 	@Override
 	public void setTerminal(Edge edge, Markable markable, boolean isSource) {
@@ -366,7 +371,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -393,7 +398,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -419,7 +424,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -452,7 +457,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -467,7 +472,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		private int expectedSize = edges.size();
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -489,7 +494,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -519,7 +524,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -542,7 +547,7 @@ public abstract class AbstractRootedStructure extends EmptyStructure {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {

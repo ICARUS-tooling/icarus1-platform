@@ -27,11 +27,11 @@ package de.ims.icarus.language.model.standard.container;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 
 /**
  * @author Markus Gärtner
@@ -68,7 +68,7 @@ public class RootContainer extends AbstractListContainer {
 	 * of a layer there is no enclosing container. Therefore this
 	 * method always returns {@code null}.
 	 *
-	 * @see de.ims.icarus.language.model.Markable#getContainer()
+	 * @see de.ims.icarus.language.model.api.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -76,7 +76,7 @@ public class RootContainer extends AbstractListContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getLayer()
+	 * @see de.ims.icarus.language.model.api.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -84,7 +84,7 @@ public class RootContainer extends AbstractListContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -92,7 +92,7 @@ public class RootContainer extends AbstractListContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getManifest()
+	 * @see de.ims.icarus.language.model.api.Container#getManifest()
 	 */
 	@Override
 	public ContainerManifest getManifest() {
@@ -102,7 +102,7 @@ public class RootContainer extends AbstractListContainer {
 	public static class RootContainerBuilder extends ListContainerBuilder<RootContainer> {
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.builder.AbstractContainerBuilder#createContainer()
+		 * @see de.ims.icarus.language.model.api.standard.builder.AbstractContainerBuilder#createContainer()
 		 */
 		@Override
 		protected RootContainer createContainer() {

@@ -28,10 +28,10 @@ package de.ims.icarus.language.model.standard.context;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Layer;
-import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -65,7 +65,7 @@ public class VirtualContext extends AbstractContext {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#getLayers()
+	 * @see de.ims.icarus.language.model.api.Context#getLayers()
 	 */
 	@Override
 	public List<Layer> getLayers() {

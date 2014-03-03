@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.builder;
 
-import de.ims.icarus.language.model.Edge;
+import de.ims.icarus.language.model.api.Edge;
 
 /**
  * @author Markus Gärtner

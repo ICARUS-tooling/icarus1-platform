@@ -25,13 +25,13 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.Structure;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.Structure;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Primitive;
@@ -92,7 +92,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 	 */
 	@Override
 	public int getBeginOffset() {
@@ -100,7 +100,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 	 */
 	@Override
 	public int getEndOffset() {
@@ -108,7 +108,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -116,7 +116,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Edge#getStructure()
+	 * @see de.ims.icarus.language.model.api.Edge#getStructure()
 	 */
 	@Override
 	public Structure getStructure() {
@@ -124,7 +124,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Edge#getSource()
+	 * @see de.ims.icarus.language.model.api.Edge#getSource()
 	 */
 	@Override
 	public Markable getSource() {
@@ -132,7 +132,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Edge#getTarget()
+	 * @see de.ims.icarus.language.model.api.Edge#getTarget()
 	 */
 	@Override
 	public Markable getTarget() {
@@ -140,7 +140,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Edge#isDirected()
+	 * @see de.ims.icarus.language.model.api.Edge#isDirected()
 	 */
 	@Override
 	public boolean isDirected() {
@@ -148,7 +148,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getContainer()
+	 * @see de.ims.icarus.language.model.api.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -157,7 +157,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getLayer()
+	 * @see de.ims.icarus.language.model.api.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -165,7 +165,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 	 */
 	@Override
 	public long getId() {
@@ -173,7 +173,7 @@ public class DefaultEdge implements Edge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {

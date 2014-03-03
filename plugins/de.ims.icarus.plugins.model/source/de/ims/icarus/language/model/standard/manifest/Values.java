@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import de.ims.icarus.language.model.manifest.ValueIterator;
-import de.ims.icarus.language.model.manifest.ValueRange;
+import de.ims.icarus.language.model.api.manifest.ValueIterator;
+import de.ims.icarus.language.model.api.manifest.ValueRange;
 
 /**
  * @author Markus Gärtner
@@ -81,7 +81,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.manifest.Values.ValueIteratorFactory#newIterator()
+		 * @see de.ims.icarus.language.model.api.standard.manifest.Values.ValueIteratorFactory#newIterator()
 		 */
 		@Override
 		public ValueIterator newIterator() {
@@ -102,7 +102,7 @@ public class Values {
 
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueIterator#hasMoreValues()
+		 * @see de.ims.icarus.language.model.api.manifest.ValueIterator#hasMoreValues()
 		 */
 		@Override
 		public boolean hasMoreValues() {
@@ -110,7 +110,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueIterator#nextValue()
+		 * @see de.ims.icarus.language.model.api.manifest.ValueIterator#nextValue()
 		 */
 		@Override
 		public Object nextValue() {
@@ -138,7 +138,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.manifest.Values.ValueIteratorFactory#newIterator()
+		 * @see de.ims.icarus.language.model.api.standard.manifest.Values.ValueIteratorFactory#newIterator()
 		 */
 		@Override
 		public ValueIterator newIterator() {
@@ -158,7 +158,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueIterator#hasMoreValues()
+		 * @see de.ims.icarus.language.model.api.manifest.ValueIterator#hasMoreValues()
 		 */
 		@Override
 		public boolean hasMoreValues() {
@@ -166,7 +166,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueIterator#nextValue()
+		 * @see de.ims.icarus.language.model.api.manifest.ValueIterator#nextValue()
 		 */
 		@Override
 		public Object nextValue() {
@@ -206,7 +206,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.manifest.Values.ValueIteratorFactory#newIterator()
+		 * @see de.ims.icarus.language.model.api.standard.manifest.Values.ValueIteratorFactory#newIterator()
 		 */
 		@Override
 		public ValueIterator newIterator() {
@@ -226,7 +226,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueIterator#hasMoreValues()
+		 * @see de.ims.icarus.language.model.api.manifest.ValueIterator#hasMoreValues()
 		 */
 		@Override
 		public boolean hasMoreValues() {
@@ -234,7 +234,7 @@ public class Values {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.ValueIterator#nextValue()
+		 * @see de.ims.icarus.language.model.api.manifest.ValueIterator#nextValue()
 		 */
 		@Override
 		public Object nextValue() {

@@ -28,9 +28,10 @@ package de.ims.icarus.language.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 
@@ -43,8 +44,13 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 
 	private List<ContainerManifest> containerManifests;
 
+	private MarkableLayerManifest boundaryLayerManifest;
+
+	private String boundaryLayer;
+	private String boundaryContext;
+
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.language.model.manifest.LayerManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.language.model.api.manifest.LayerManifest)
 	 */
 	@Override
 	protected void readTemplate(MarkableLayerManifest template) {
@@ -72,7 +78,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -80,7 +86,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MarkableLayerManifest#getContainerDepth()
+	 * @see de.ims.icarus.language.model.api.manifest.MarkableLayerManifest#getContainerDepth()
 	 */
 	@Override
 	public int getContainerDepth() {
@@ -91,7 +97,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MarkableLayerManifest#getRootContainerManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.MarkableLayerManifest#getRootContainerManifest()
 	 */
 	@Override
 	public ContainerManifest getRootContainerManifest() {
@@ -99,7 +105,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MarkableLayerManifest#getContainerManifest(int)
+	 * @see de.ims.icarus.language.model.api.manifest.MarkableLayerManifest#getContainerManifest(int)
 	 */
 	@Override
 	public ContainerManifest getContainerManifest(int level) {
@@ -121,8 +127,77 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
+	 * @see de.ims.icarus.language.model.api.manifest.StructureLayerManifest#getBoundaryLayerManifest()
+	 */
+	@Override
+	public MarkableLayerManifest getBoundaryLayerManifest() {
+		return boundaryLayerManifest;
+	}
+
+	/**
+	 * @param boundaryLayerManifest the boundaryLayerManifest to set
+	 */
+	public void setBoundaryLayerManifest(MarkableLayerManifest boundaryLayerManifest) {
+		if (boundaryLayerManifest == null)
+			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
+
+		this.boundaryLayerManifest = boundaryLayerManifest;
+	}
+
+	/**
+	 * @return the boundaryLayer
+	 */
+	public String getBoundaryLayer() {
+		return boundaryLayer;
+	}
+
+	/**
+	 * @return the boundaryContext
+	 */
+	public String getBoundaryContext() {
+		return boundaryContext;
+	}
+
+	/**
+	 * @param boundaryLayer the boundaryLayer to set
+	 */
+	public void setBoundaryLayer(String boundaryLayer) {
+		if (boundaryLayer == null)
+			throw new NullPointerException("Invalid boundaryLayer"); //$NON-NLS-1$
+		if(!isTemplate())
+			throw new UnsupportedOperationException("Cannot define lazy boundary layer link"); //$NON-NLS-1$
+		this.boundaryLayer = boundaryLayer;
+	}
+
+	/**
+	 * @param boundaryContext the boundaryContext to set
+	 */
+	public void setBoundaryContext(String boundaryContext) {
+		if (boundaryContext == null)
+			throw new NullPointerException("Invalid boundaryContext"); //$NON-NLS-1$
+		if(!isTemplate())
+			throw new UnsupportedOperationException("Cannot define lazy boundary context link"); //$NON-NLS-1$
+		this.boundaryContext = boundaryContext;
+	}
+
+	private void writeBoundaryXmlAttributes(XmlSerializer serializer) throws Exception {
+		if(isTemplate()) {
+			serializer.writeAttribute("boundary-layer", boundaryLayer); //$NON-NLS-1$
+			serializer.writeAttribute("boundary-context", boundaryContext); //$NON-NLS-1$
+		} else if(boundaryLayerManifest!=null) {
+			ContextManifest boundaryContext = boundaryLayerManifest.getContextManifest();
+
+			serializer.writeAttribute("boundary-layer", boundaryLayerManifest.getId()); //$NON-NLS-1$
+
+			if(boundaryContext!=getContextManifest()) {
+				serializer.writeAttribute("boundary-context", boundaryContext.getId()); //$NON-NLS-1$
+			}
+		}
+	}
+
+	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -136,7 +211,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)
@@ -149,7 +224,31 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeTemplateXmlAttributes(serializer);
+
+		writeBoundaryXmlAttributes(serializer);
+	}
+
+	/**
+	 * @throws Exception
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeFullXmlAttributes(XmlSerializer serializer)
+			throws Exception {
+		super.writeFullXmlAttributes(serializer);
+
+		writeBoundaryXmlAttributes(serializer);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

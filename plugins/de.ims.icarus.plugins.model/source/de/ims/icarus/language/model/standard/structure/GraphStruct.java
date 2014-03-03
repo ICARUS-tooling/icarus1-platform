@@ -27,8 +27,8 @@ package de.ims.icarus.language.model.standard.structure;
 
 import java.util.Arrays;
 
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.util.collections.LongHashMap;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
@@ -42,12 +42,26 @@ import de.ims.icarus.util.mem.Link;
 public class GraphStruct {
 
 	@Link
-	private LongHashMap<Object> incoming = new LongHashMap<>();
+	private LongHashMap<Object> incoming;
 	@Link
-	private LongHashMap<Object> outgoing = new LongHashMap<>();
+	private LongHashMap<Object> outgoing;
+
+	private LongHashMap<Object> getMap(boolean incoming) {
+		if(incoming) {
+			if(this.incoming==null) {
+				this.incoming = new LongHashMap<>();
+			}
+			return this.incoming;
+		} else {
+			if(this.outgoing==null) {
+				this.outgoing = new LongHashMap<>();
+			}
+			return this.outgoing;
+		}
+	}
 
 	public int getEdgeCount(boolean incoming, Markable markable) {
-		LongHashMap<Object> map = incoming ? this.incoming : this.outgoing;
+		LongHashMap<Object> map = getMap(incoming);
 		Object edges = map.get(markable.getId());
 		if(edges ==null) {
 			return 0;
@@ -59,7 +73,7 @@ public class GraphStruct {
 	}
 
 	public Edge getEdgeAt(boolean incoming, Markable markable, int index) {
-		LongHashMap<Object> map = incoming ? this.incoming : this.outgoing;
+		LongHashMap<Object> map = getMap(incoming);
 		Object edges = map.get(markable.getId());
 		if(edges ==null) {
 			throw new IndexOutOfBoundsException();
@@ -73,12 +87,16 @@ public class GraphStruct {
 	}
 
 	public void clear() {
-		incoming.clear();
-		outgoing.clear();
+		if(incoming!=null) {
+			incoming.clear();
+		}
+		if(outgoing!=null) {
+			outgoing.clear();
+		}
 	}
 
 	public void removeEdge(boolean incoming, Markable markable, Edge edge) {
-		LongHashMap<Object> map = incoming ? this.incoming : this.outgoing;
+		LongHashMap<Object> map = getMap(incoming);
 		Object edges = map.get(markable.getId());
 		if(edges==null) {
 			throw new IllegalArgumentException("No edges defined for markable: "+markable); //$NON-NLS-1$
@@ -105,6 +123,7 @@ public class GraphStruct {
 		}
 	}
 
+	// Removes a single edge from an array of edges
 	private Object remove(Edge[] edges, Edge edge) {
 
 		int index = -1;
@@ -136,7 +155,7 @@ public class GraphStruct {
 	}
 
 	public void addEdge(boolean incoming, Markable markable, Edge edge) {
-		LongHashMap<Object> map = incoming ? this.incoming : this.outgoing;
+		LongHashMap<Object> map = getMap(incoming);
 		Object edges = map.get(markable.getId());
 		if(edges==null) {
 			edges = edge;

@@ -25,14 +25,15 @@
  */
 package de.ims.icarus.language.model.standard.container;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Primitive;
+import de.ims.icarus.util.mem.Reference;
 
 /**
  * @author Markus Gärtner
@@ -41,6 +42,11 @@ import de.ims.icarus.util.mem.Primitive;
  */
 @HeapMember
 public abstract class AbstractContainer implements Container {
+
+	@Reference
+	private Container boundary;
+	@Reference
+	private Container base;
 
 	@Primitive
 	private final long id;
@@ -54,7 +60,7 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 	 */
 	@Override
 	public long getId() {
@@ -62,7 +68,7 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -70,7 +76,7 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 	 */
 	@Override
 	public int getBeginOffset() {
@@ -81,7 +87,7 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 	 */
 	@Override
 	public int getEndOffset() {
@@ -100,7 +106,7 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#containsMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#containsMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public boolean containsMarkable(Markable markable) {
@@ -108,15 +114,37 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getBaseContainer()
+	 * @param base the base to set
 	 */
-	@Override
-	public Container getBaseContainer() {
-		return null;
+	public void setBaseContainer(Container base) {
+		this.base = base;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#indexOfMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#getBaseContainer()
+	 */
+	@Override
+	public Container getBaseContainer() {
+		return base;
+	}
+
+	/**
+	 * @param boundary the boundary to set
+	 */
+	public void setBoundaryContainer(Container boundary) {
+		this.boundary = boundary;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.Structure#getBoundaryContainer()
+	 */
+	@Override
+	public Container getBoundaryContainer() {
+		return boundary;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.Container#indexOfMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
@@ -137,7 +165,7 @@ public abstract class AbstractContainer implements Container {
 	// Shorthand edit methods
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#addMarkable()
+	 * @see de.ims.icarus.language.model.api.Container#addMarkable()
 	 */
 	@Override
 	public void addMarkable(Markable markable) {
@@ -145,7 +173,7 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#removeMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Markable removeMarkable(Markable markable) {
@@ -153,11 +181,20 @@ public abstract class AbstractContainer implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#moveMarkable(de.ims.icarus.language.model.Markable, int)
+	 * @see de.ims.icarus.language.model.api.Container#moveMarkable(de.ims.icarus.language.model.api.Markable, int)
 	 */
 	@Override
 	public void moveMarkable(Markable markable, int index) {
 		moveMarkable(indexOfMarkable(markable), index);
+	}
+
+	protected void checkMarkable(Markable markable) {
+		if (markable == null)
+			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+
+		if(boundary!=null && !CorpusUtils.isVirtual(markable)
+				&& !CorpusUtils.contains(boundary, markable))
+			throw new IllegalArgumentException("Markable violates boundary"); //$NON-NLS-1$
 	}
 
 	/**

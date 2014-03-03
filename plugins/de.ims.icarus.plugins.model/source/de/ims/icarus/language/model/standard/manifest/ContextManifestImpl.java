@@ -32,13 +32,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ContextReaderManifest;
-import de.ims.icarus.language.model.manifest.ContextWriterManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.language.model.manifest.LocationManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.api.manifest.ContextWriterManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.manifest.LocationManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -62,7 +62,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	private CorpusManifest corpusManifest;
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLayerManifests()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#getLayerManifests()
 	 */
 	@Override
 	public List<LayerManifest> getLayerManifests() {
@@ -84,7 +84,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLayerManifest(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#getLayerManifest(java.lang.String)
 	 */
 	@Override
 	public LayerManifest getLayerManifest(String id) {
@@ -99,7 +99,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 //	/**
-//	 * @see de.ims.icarus.language.model.manifest.ContextManifest#setName(java.lang.String)
+//	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#setName(java.lang.String)
 //	 */
 //	@Override
 //	public void setName(String newName) {
@@ -107,7 +107,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 //	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getCorpusManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#getCorpusManifest()
 	 */
 	@Override
 	public CorpusManifest getCorpusManifest() {
@@ -115,7 +115,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getLocationManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#getLocationManifest()
 	 */
 	@Override
 	public LocationManifest getLocationManifest() {
@@ -123,7 +123,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#setLocationManifest(de.ims.icarus.language.model.manifest.LocationManifest)
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#setLocationManifest(de.ims.icarus.language.model.api.manifest.LocationManifest)
 	 */
 	@Override
 	public void setLocationManifest(LocationManifest manifest) {
@@ -134,7 +134,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#isIndependentContext()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#isIndependentContext()
 	 */
 	@Override
 	public boolean isIndependentContext() {
@@ -142,7 +142,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getReaderManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#getReaderManifest()
 	 */
 	@Override
 	public ContextReaderManifest getReaderManifest() {
@@ -150,7 +150,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#getWriterManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#getWriterManifest()
 	 */
 	@Override
 	public ContextWriterManifest getWriterManifest() {
@@ -195,7 +195,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextManifest#isDefaultContext()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextManifest#isDefaultContext()
 	 */
 	@Override
 	public boolean isDefaultContext() {
@@ -203,7 +203,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -212,7 +212,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -224,7 +224,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -236,7 +236,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -270,7 +270,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)
@@ -287,7 +287,7 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.language.model.test.member;
 
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.MemberType;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.MemberType;
 
 /**
  * @author Markus Gärtner
@@ -43,7 +43,7 @@ public class MemberDummy implements CorpusMember {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 	 */
 	@Override
 	public long getId() {
@@ -51,7 +51,7 @@ public class MemberDummy implements CorpusMember {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -60,7 +60,7 @@ public class MemberDummy implements CorpusMember {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {

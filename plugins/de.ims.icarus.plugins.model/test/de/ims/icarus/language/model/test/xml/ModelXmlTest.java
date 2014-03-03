@@ -33,7 +33,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.Test;
 
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.standard.manifest.OptionsManifestImpl;
 import de.ims.icarus.language.model.standard.manifest.ValueSetImpl;
 import de.ims.icarus.language.model.standard.manifest.Values;

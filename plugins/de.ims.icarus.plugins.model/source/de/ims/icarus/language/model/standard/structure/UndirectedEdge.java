@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.Structure;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.Structure;
 
 /**
  * @author Markus Gärtner
@@ -45,7 +45,7 @@ public class UndirectedEdge extends DefaultEdge {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.DefaultEdge#isDirected()
+	 * @see de.ims.icarus.language.model.api.standard.structure.DefaultEdge#isDirected()
 	 */
 	@Override
 	public boolean isDirected() {

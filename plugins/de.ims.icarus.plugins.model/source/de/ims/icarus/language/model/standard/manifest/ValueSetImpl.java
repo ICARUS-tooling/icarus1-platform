@@ -34,8 +34,8 @@ import java.util.Set;
 
 import javax.swing.Icon;
 
-import de.ims.icarus.language.model.manifest.ValueSet;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.manifest.ValueSet;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 
@@ -65,7 +65,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.language.model.manifest.Derivable)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.language.model.api.manifest.Derivable)
 	 */
 	@Override
 	protected void readTemplate(ValueSet template) {
@@ -175,7 +175,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueSet#valueCount()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueSet#valueCount()
 	 */
 	@Override
 	public int valueCount() {
@@ -183,7 +183,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueSet#getValueAt(int)
+	 * @see de.ims.icarus.language.model.api.manifest.ValueSet#getValueAt(int)
 	 */
 	@Override
 	public Object getValueAt(int index) {
@@ -198,7 +198,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -207,7 +207,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -228,7 +228,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -259,7 +259,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -279,7 +279,7 @@ public class ValueSetImpl extends AbstractDerivable<ValueSet> implements ValueSe
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

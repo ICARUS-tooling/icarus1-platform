@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.StructureType;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.StructureType;
 
 
 /**
@@ -57,7 +57,7 @@ public class Chain extends Tree {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.DirectedGraph#getStructureType()
+	 * @see de.ims.icarus.language.model.api.standard.structure.DirectedGraph#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {

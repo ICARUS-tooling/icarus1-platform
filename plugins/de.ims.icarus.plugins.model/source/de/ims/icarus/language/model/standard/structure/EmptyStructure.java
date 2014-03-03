@@ -30,15 +30,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.ContainerType;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.Structure;
-import de.ims.icarus.language.model.StructureType;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
-import de.ims.icarus.language.model.manifest.StructureManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.ContainerType;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.Structure;
+import de.ims.icarus.language.model.api.StructureType;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.manifest.StructureManifest;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
 import de.ims.icarus.language.model.standard.LookupList;
 import de.ims.icarus.language.model.standard.container.AbstractNestedContainer;
@@ -47,7 +47,6 @@ import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
 import de.ims.icarus.util.mem.Primitive;
-import de.ims.icarus.util.mem.Reference;
 
 /**
  * Implements an empty structure.
@@ -56,7 +55,7 @@ import de.ims.icarus.util.mem.Reference;
  * but throws an {@code UnsupportedOperationException} for any attempt to
  * add or remove an {@code Edge}.
  * <p>
- * As defined in the {@link Structure} specification an optional <i>boundary container</i>
+ * As defined in the {@link Container} specification an optional <i>boundary container</i>
  * can be set at construction time. When a non-null container is set as boundary then all
  * {@code Markable} objects to be added will first be checked for possible boundary violation.
  * Note that no boundary checks are performed for <i>virtual</i> markables
@@ -76,15 +75,18 @@ import de.ims.icarus.util.mem.Reference;
 @HeapMember
 public class EmptyStructure extends AbstractNestedContainer implements Structure {
 
-	@Reference
-	private final Container boundary;
 	@Link
 	private final LookupList<Markable> augmentation;
 	@Primitive
 	private final boolean boundaryAsBase;
 	@Primitive
-	private boolean augment;
+	private final boolean augment;
 
+	/**
+	 * Creates an empty structure with no boundary container
+	 * @param id
+	 * @param parent
+	 */
 	public EmptyStructure(long id, Container parent) {
 		this(id, parent, null, true, false);
 	}
@@ -97,7 +99,8 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		if(boundaryAsBase && boundary==null)
 			throw new IllegalArgumentException("Cannot declare null boundary as base"); //$NON-NLS-1$
 
-		this.boundary = boundary;
+		setBoundaryContainer(boundary);
+
 		this.boundaryAsBase = boundaryAsBase;
 
 		this.augment = augment;
@@ -126,7 +129,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getStructureType()
+	 * @see de.ims.icarus.language.model.api.Structure#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -134,7 +137,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.container.AbstractNestedContainer#getManifest()
+	 * @see de.ims.icarus.language.model.api.standard.container.AbstractNestedContainer#getManifest()
 	 */
 	@Override
 	public StructureManifest getManifest() {
@@ -142,7 +145,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#isMultiRoot()
+	 * @see de.ims.icarus.language.model.api.Structure#isMultiRoot()
 	 */
 	@Override
 	public boolean isMultiRoot() {
@@ -150,15 +153,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getBoundaryContainer()
-	 */
-	@Override
-	public Container getBoundaryContainer() {
-		return boundary;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.Structure#getEdgeCount()
+	 * @see de.ims.icarus.language.model.api.Structure#getEdgeCount()
 	 */
 	@Override
 	public int getEdgeCount() {
@@ -166,7 +161,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getEdgeAt(int)
+	 * @see de.ims.icarus.language.model.api.Structure#getEdgeAt(int)
 	 */
 	@Override
 	public Edge getEdgeAt(int index) {
@@ -174,7 +169,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#indexOfEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.Structure#indexOfEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public int indexOfEdge(Edge edge) {
@@ -182,7 +177,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#containsEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.Structure#containsEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public boolean containsEdge(Edge edge) {
@@ -190,7 +185,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getEdgeCount(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Structure#getEdgeCount(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public int getEdgeCount(Markable node) {
@@ -198,7 +193,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getEdgeAt(de.ims.icarus.language.model.Markable, int)
+	 * @see de.ims.icarus.language.model.api.Structure#getEdgeAt(de.ims.icarus.language.model.api.Markable, int)
 	 */
 	@Override
 	public Edge getEdgeAt(Markable node, int index) {
@@ -206,7 +201,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getParent(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Structure#getParent(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Markable getParent(Markable node) {
@@ -214,7 +209,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#getRoot()
+	 * @see de.ims.icarus.language.model.api.Structure#getRoot()
 	 */
 	@Override
 	public Markable getRoot() {
@@ -222,7 +217,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#isRoot(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Structure#isRoot(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public boolean isRoot(Markable markable) {
@@ -230,7 +225,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#removeAllEdges()
+	 * @see de.ims.icarus.language.model.api.Structure#removeAllEdges()
 	 */
 	@Override
 	public void removeAllEdges() {
@@ -238,7 +233,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.Structure#addEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public Edge addEdge(Edge edge) {
@@ -246,7 +241,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.Structure#addEdge(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	public Edge addEdge(Edge edge, int index) {
@@ -254,7 +249,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Structure#addEdge(de.ims.icarus.language.model.api.Markable, de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Edge addEdge(Markable source, Markable target) {
@@ -262,7 +257,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#addEdge(de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable, int)
+	 * @see de.ims.icarus.language.model.api.Structure#addEdge(de.ims.icarus.language.model.api.Markable, de.ims.icarus.language.model.api.Markable, int)
 	 */
 	@Override
 	public Edge addEdge(Markable source, Markable target, int index) {
@@ -270,7 +265,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#removeEdge(int)
+	 * @see de.ims.icarus.language.model.api.Structure#removeEdge(int)
 	 */
 	@Override
 	public Edge removeEdge(int index) {
@@ -278,7 +273,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#removeEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.Structure#removeEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	public Edge removeEdge(Edge edge) {
@@ -286,7 +281,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#moveEdge(int, int)
+	 * @see de.ims.icarus.language.model.api.Structure#moveEdge(int, int)
 	 */
 	@Override
 	public void moveEdge(int index0, int index1) {
@@ -294,7 +289,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#moveEdge(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.Structure#moveEdge(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	public void moveEdge(Edge edge, int index) {
@@ -302,7 +297,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Structure#setTerminal(de.ims.icarus.language.model.Edge, de.ims.icarus.language.model.Markable, boolean)
+	 * @see de.ims.icarus.language.model.api.Structure#setTerminal(de.ims.icarus.language.model.api.Edge, de.ims.icarus.language.model.api.Markable, boolean)
 	 */
 	@Override
 	public void setTerminal(Edge edge, Markable markable, boolean isSource) {
@@ -310,7 +305,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getContainerType()
+	 * @see de.ims.icarus.language.model.api.Container#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -318,13 +313,13 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getMarkableCount()
+	 * @see de.ims.icarus.language.model.api.Container#getMarkableCount()
 	 */
 	@Override
 	public int getMarkableCount() {
 		int size = 0;
 		if(boundaryAsBase) {
-			size += boundary.getMarkableCount();
+			size += getBoundaryContainer().getMarkableCount();
 		}
 		if(augment) {
 			size += augmentation.size();
@@ -333,11 +328,12 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.language.model.api.Container#getMarkableAt(int)
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
 		if(boundaryAsBase) {
+			Container boundary = getBoundaryContainer();
 			if(index<boundary.getMarkableCount()) {
 				return boundary.getMarkableAt(index);
 			} else {
@@ -352,7 +348,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.container.AbstractContainer#indexOfMarkable(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.container.AbstractContainer#indexOfMarkable(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
@@ -360,8 +356,8 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		int offset = 0;
 
 		if(boundaryAsBase) {
-			offset = boundary.getMarkableCount();
-			result = boundary.indexOfMarkable(markable);
+			offset = getBoundaryContainer().getMarkableCount();
+			result = getBoundaryContainer().indexOfMarkable(markable);
 		}
 		if(result==-1 && augment) {
 			result = augmentation.indexOf(markable);
@@ -390,21 +386,22 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws IllegalArgumentException if the {@code markable} violates the boundary
 	 */
+	@Override
 	protected void checkMarkable(Markable markable) {
 		if (markable == null)
 			throw new NullPointerException("Invalid markable");  //$NON-NLS-1$
 
-		if(boundary==null || CorpusUtils.isVirtual(markable)) {
+		if(getBoundaryContainer()==null || CorpusUtils.isVirtual(markable)) {
 			return;
 		}
 
-		if(markable.getBeginOffset()<boundary.getBeginOffset()
-				|| markable.getEndOffset()>boundary.getEndOffset())
+		if(markable.getBeginOffset()<getBoundaryContainer().getBeginOffset()
+				|| markable.getEndOffset()>getBoundaryContainer().getEndOffset())
 			throw new IllegalArgumentException("Markable not within boundary: "+markable); //$NON-NLS-1$
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeAllMarkables()
+	 * @see de.ims.icarus.language.model.api.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
@@ -415,7 +412,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#addMarkable(int, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#addMarkable(int, de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -425,14 +422,14 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		checkMarkable(markable);
 
 		if(boundaryAsBase) {
-			index -= boundary.getMarkableCount();
+			index -= getBoundaryContainer().getMarkableCount();
 		}
 
 		execute(new MarkableChange(index, markable.getId(), markable));
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeMarkable(int)
+	 * @see de.ims.icarus.language.model.api.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -440,7 +437,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 			throw new UnsupportedOperationException();
 
 		if(boundaryAsBase) {
-			index -= boundary.getMarkableCount();
+			index -= getBoundaryContainer().getMarkableCount();
 		}
 
 		Markable markable = augmentation.get(index);
@@ -451,7 +448,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.language.model.api.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {
@@ -460,8 +457,8 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 			throw new UnsupportedOperationException();
 
 		if(boundaryAsBase) {
-			index0 -= boundary.getMarkableCount();
-			index1 -= boundary.getMarkableCount();
+			index0 -= getBoundaryContainer().getMarkableCount();
+			index1 -= getBoundaryContainer().getMarkableCount();
 		}
 
 		execute(new MoveMarkableChange(index0, index1));
@@ -475,6 +472,11 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		return new ComboItr();
 	}
 
+	/**
+	 * Called when a structural change occurred that makes all
+	 * cached data invalid. Subclasses should override this method
+	 * and clear internal data structures when called.
+	 */
 	protected void invalidate() {
 		// hook for subclasses to clear caches
 	}
@@ -543,7 +545,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -570,7 +572,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -596,7 +598,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -629,7 +631,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -644,7 +646,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		private int expectedSize = getMarkableCount();
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -666,7 +668,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -678,7 +680,7 @@ public class EmptyStructure extends AbstractNestedContainer implements Structure
 	private class ComboItr implements Iterator<Markable> {
 
 		private final int expectedSize = getMarkableCount();
-		private final Iterator<Markable> baseItr = boundaryAsBase ? boundary.iterator() : null;
+		private final Iterator<Markable> baseItr = boundaryAsBase ? getBoundaryContainer().iterator() : null;
 		private final Iterator<Markable> augmentItr = augment ? augmentation.iterator() : null;
 
 		/**

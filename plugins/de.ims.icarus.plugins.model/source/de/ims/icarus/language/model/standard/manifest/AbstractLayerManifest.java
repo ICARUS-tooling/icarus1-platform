@@ -30,10 +30,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.Prerequisite;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.manifest.Prerequisite;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -55,7 +55,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	private String baseContext;
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.api.manifest.MemberManifest)
 	 */
 	@Override
 	protected void readTemplate(L template) {
@@ -82,7 +82,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest#getContextManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.LayerManifest#getContextManifest()
 	 */
 	@Override
 	public ContextManifest getContextManifest() {
@@ -90,7 +90,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest#getPrerequisites()
+	 * @see de.ims.icarus.language.model.api.manifest.LayerManifest#getPrerequisites()
 	 */
 	@Override
 	public List<Prerequisite> getPrerequisites() {
@@ -116,7 +116,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest#isIndexable()
+	 * @see de.ims.icarus.language.model.api.manifest.LayerManifest#isIndexable()
 	 */
 	@Override
 	public boolean isIndexable() {
@@ -124,7 +124,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest#isSearchable()
+	 * @see de.ims.icarus.language.model.api.manifest.LayerManifest#isSearchable()
 	 */
 	@Override
 	public boolean isSearchable() {
@@ -146,7 +146,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LayerManifest#getBaseLayerManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.LayerManifest#getBaseLayerManifest()
 	 */
 	@Override
 	public MarkableLayerManifest getBaseLayerManifest() {
@@ -218,7 +218,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -233,7 +233,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -248,7 +248,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -265,7 +265,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

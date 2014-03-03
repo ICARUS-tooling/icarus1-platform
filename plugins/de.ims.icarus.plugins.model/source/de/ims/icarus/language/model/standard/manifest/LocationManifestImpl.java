@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
+import de.ims.icarus.language.model.api.manifest.LocationManifest;
+import de.ims.icarus.language.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.language.model.io.LocationType;
-import de.ims.icarus.language.model.manifest.LocationManifest;
-import de.ims.icarus.language.model.manifest.PathResolverManifest;
 
 /**
  * @author Markus Gärtner
@@ -41,7 +41,7 @@ public class LocationManifestImpl implements LocationManifest {
 	private PathResolverManifest pathResolverManifest;
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LocationManifest#getType()
+	 * @see de.ims.icarus.language.model.api.manifest.LocationManifest#getType()
 	 */
 	@Override
 	public LocationType getType() {
@@ -49,7 +49,7 @@ public class LocationManifestImpl implements LocationManifest {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LocationManifest#getPath()
+	 * @see de.ims.icarus.language.model.api.manifest.LocationManifest#getPath()
 	 */
 	@Override
 	public String getPath() {
@@ -57,7 +57,7 @@ public class LocationManifestImpl implements LocationManifest {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.LocationManifest#getPathResolverManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.LocationManifest#getPathResolverManifest()
 	 */
 	@Override
 	public PathResolverManifest getPathResolverManifest() {

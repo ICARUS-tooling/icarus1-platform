@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.markable;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.MemberType;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.MemberType;
 
 /**
  * @author Markus Gärtner
@@ -40,7 +40,7 @@ public class VirtualMarkable extends AbstractMarkable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 	 */
 	@Override
 	public int getBeginOffset() {
@@ -48,7 +48,7 @@ public class VirtualMarkable extends AbstractMarkable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 	 */
 	@Override
 	public int getEndOffset() {
@@ -56,7 +56,7 @@ public class VirtualMarkable extends AbstractMarkable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {

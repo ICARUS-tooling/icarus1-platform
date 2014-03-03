@@ -28,8 +28,8 @@ package de.ims.icarus.language.model.io;
 import java.io.IOException;
 import java.util.List;
 
-import de.ims.icarus.language.model.Layer;
-import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 

@@ -27,8 +27,8 @@ package de.ims.icarus.language.model.standard.meta;
 
 import java.util.Set;
 
-import de.ims.icarus.language.model.meta.AnnotationValueSet;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.meta.AnnotationValueSet;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.standard.ProxyIdentity;
 
 /**
@@ -39,7 +39,7 @@ import de.ims.icarus.language.model.standard.ProxyIdentity;
 public class FixedValueSet extends ProxyIdentity implements AnnotationValueSet {
 
 	/**
-	 * @see de.ims.icarus.language.model.meta.ValueSet#getValues()
+	 * @see de.ims.icarus.language.model.api.meta.ValueSet#getValues()
 	 */
 	@Override
 	public Set<String> getValues() {
@@ -48,7 +48,7 @@ public class FixedValueSet extends ProxyIdentity implements AnnotationValueSet {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.meta.ValueSet#getName(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.meta.ValueSet#getName(java.lang.String)
 	 */
 	@Override
 	public String getName(String value) {
@@ -57,7 +57,7 @@ public class FixedValueSet extends ProxyIdentity implements AnnotationValueSet {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.meta.ValueSet#getDescription(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.meta.ValueSet#getDescription(java.lang.String)
 	 */
 	@Override
 	public String getDescription(String value) {
@@ -66,7 +66,7 @@ public class FixedValueSet extends ProxyIdentity implements AnnotationValueSet {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.meta.ValueSet#getValueType()
+	 * @see de.ims.icarus.language.model.api.meta.ValueSet#getValueType()
 	 */
 	@Override
 	public ValueType getValueType() {

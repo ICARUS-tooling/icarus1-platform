@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.language.model.standard.builder;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 
 /**
  * @author Markus Gärtner
@@ -105,7 +105,7 @@ public abstract class AbstractContainerBuilder<C extends Container> extends Abst
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.builder.ContainerBuilder#reset()
+	 * @see de.ims.icarus.language.model.api.standard.builder.ContainerBuilder#reset()
 	 */
 	@Override
 	public void reset() {

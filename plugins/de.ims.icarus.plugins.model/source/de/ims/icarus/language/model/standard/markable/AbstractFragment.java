@@ -25,12 +25,12 @@
  */
 package de.ims.icarus.language.model.standard.markable;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Fragment;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Fragment;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -58,7 +58,7 @@ public abstract class AbstractFragment extends AbstractMarkable implements Fragm
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 	 */
 	@Override
 	public int getBeginOffset() {
@@ -66,7 +66,7 @@ public abstract class AbstractFragment extends AbstractMarkable implements Fragm
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 	 */
 	@Override
 	public int getEndOffset() {
@@ -74,7 +74,7 @@ public abstract class AbstractFragment extends AbstractMarkable implements Fragm
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -82,7 +82,7 @@ public abstract class AbstractFragment extends AbstractMarkable implements Fragm
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Fragment#getMarkable()
+	 * @see de.ims.icarus.language.model.api.Fragment#getMarkable()
 	 */
 	@Override
 	public Markable getMarkable() {
@@ -106,7 +106,7 @@ public abstract class AbstractFragment extends AbstractMarkable implements Fragm
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.markable.AbstractMarkable#compareTo(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.markable.AbstractMarkable#compareTo(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public int compareTo(Markable o) {

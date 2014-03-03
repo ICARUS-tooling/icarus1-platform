@@ -29,13 +29,13 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.ContainerType;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.Structure;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.ContainerType;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.Structure;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 import de.ims.icarus.language.model.standard.container.AbstractContainer;
 
 /**
@@ -62,7 +62,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getContainerType()
+	 * @see de.ims.icarus.language.model.api.Container#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -70,7 +70,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getManifest()
+	 * @see de.ims.icarus.language.model.api.Container#getManifest()
 	 */
 	@Override
 	public ContainerManifest getManifest() {
@@ -78,7 +78,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getMarkableCount()
+	 * @see de.ims.icarus.language.model.api.Container#getMarkableCount()
 	 */
 	@Override
 	public int getMarkableCount() {
@@ -86,7 +86,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.language.model.api.Container#getMarkableAt(int)
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
@@ -94,7 +94,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeAllMarkables()
+	 * @see de.ims.icarus.language.model.api.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
@@ -102,7 +102,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#addMarkable(int, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.Container#addMarkable(int, de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -110,7 +110,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#removeMarkable(int)
+	 * @see de.ims.icarus.language.model.api.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -118,7 +118,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.language.model.api.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {
@@ -126,7 +126,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getContainer()
+	 * @see de.ims.icarus.language.model.api.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -134,7 +134,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getLayer()
+	 * @see de.ims.icarus.language.model.api.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -142,7 +142,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {

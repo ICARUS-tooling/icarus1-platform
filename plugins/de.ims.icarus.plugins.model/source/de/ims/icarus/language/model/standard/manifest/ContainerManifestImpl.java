@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.ContainerType;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.ContainerType;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.util.ClassUtils;
 
@@ -46,7 +46,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	private ContainerType containerType;
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.api.manifest.MemberManifest)
 	 */
 	@Override
 	protected void readTemplate(ContainerManifest template) {
@@ -58,7 +58,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -66,7 +66,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContainerManifest#getLayerManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContainerManifest#getLayerManifest()
 	 */
 	@Override
 	public MarkableLayerManifest getLayerManifest() {
@@ -74,7 +74,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContainerManifest#getParentManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContainerManifest#getParentManifest()
 	 */
 	@Override
 	public ContainerManifest getParentManifest() {
@@ -82,11 +82,21 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContainerManifest#getElementManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.ContainerManifest#getElementManifest()
 	 */
 	@Override
 	public ContainerManifest getElementManifest() {
 		return elementManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.manifest.ContainerManifest#getBoundaryContainerManifest()
+	 */
+	@Override
+	public ContainerManifest getBoundaryContainerManifest() {
+//		return boundaryContainerManifest;
+		MarkableLayerManifest boundaryLayerManifest = getLayerManifest().getBoundaryLayerManifest();
+		return boundaryLayerManifest==null ? null : boundaryLayerManifest.getRootContainerManifest();
 	}
 
 	/**
@@ -120,7 +130,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContainerManifest#getContainerType()
+	 * @see de.ims.icarus.language.model.api.manifest.ContainerManifest#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -128,7 +138,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContainerManifest#setContainerType(de.ims.icarus.language.model.ContainerType)
+	 * @see de.ims.icarus.language.model.api.manifest.ContainerManifest#setContainerType(de.ims.icarus.language.model.api.ContainerType)
 	 */
 	@Override
 	public void setContainerType(ContainerType containerType) {
@@ -140,7 +150,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -152,7 +162,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -164,7 +174,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 
 //	/**
 //	 * @throws Exception
-//	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+//	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 //	 */
 //	@Override
 //	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -178,7 +188,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 
 //	/**
 //	 * @throws Exception
-//	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+//	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 //	 */
 //	@Override
 //	protected void writeFullXmlElements(XmlSerializer serializer)
@@ -189,7 +199,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 //	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -197,7 +207,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#equals(java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {

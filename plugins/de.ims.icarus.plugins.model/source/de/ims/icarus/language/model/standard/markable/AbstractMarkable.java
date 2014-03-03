@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.markable;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -50,7 +50,7 @@ public abstract class AbstractMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 	 */
 	@Override
 	public long getId() {
@@ -58,7 +58,7 @@ public abstract class AbstractMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -74,7 +74,7 @@ public abstract class AbstractMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getContainer()
+	 * @see de.ims.icarus.language.model.api.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -82,7 +82,7 @@ public abstract class AbstractMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getLayer()
+	 * @see de.ims.icarus.language.model.api.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {

@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.builder;
 
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.IdDomain;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.IdDomain;
 
 /**
  * @author Markus Gärtner

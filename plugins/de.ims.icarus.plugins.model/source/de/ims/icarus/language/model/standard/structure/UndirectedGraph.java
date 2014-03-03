@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.StructureType;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.StructureType;
 
 /**
  * @author Markus Gärtner
@@ -47,7 +47,7 @@ public class UndirectedGraph extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getStructureType()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -55,7 +55,7 @@ public class UndirectedGraph extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.AbstractRootedStructure#createEdge(de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.AbstractRootedStructure#createEdge(de.ims.icarus.language.model.api.Markable, de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	protected Edge createEdge(Markable source, Markable target) {

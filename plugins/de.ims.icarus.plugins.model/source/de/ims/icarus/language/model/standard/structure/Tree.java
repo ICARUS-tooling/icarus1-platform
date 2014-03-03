@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.StructureType;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.StructureType;
 
 /**
  * Implements a simple tree structure with the following constraints:
@@ -56,7 +56,7 @@ public class Tree extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.DirectedGraph#getStructureType()
+	 * @see de.ims.icarus.language.model.api.standard.structure.DirectedGraph#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -64,7 +64,7 @@ public class Tree extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.DirectedGraph#edgeAdded(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.DirectedGraph#edgeAdded(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	protected void edgeAdded(Edge edge, int index) {
@@ -74,7 +74,7 @@ public class Tree extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.DirectedGraph#terminalChanged(de.ims.icarus.language.model.Edge, boolean, de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.DirectedGraph#terminalChanged(de.ims.icarus.language.model.api.Edge, boolean, de.ims.icarus.language.model.api.Markable, de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	protected void terminalChanged(Edge edge, boolean isSource,
@@ -85,7 +85,7 @@ public class Tree extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.DirectedGraph#getParent(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.DirectedGraph#getParent(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Markable getParent(Markable node) {
@@ -101,7 +101,7 @@ public class Tree extends DirectedGraph {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.AbstractRootedStructure#checkEdge(de.ims.icarus.language.model.Edge)
+	 * @see de.ims.icarus.language.model.api.standard.structure.AbstractRootedStructure#checkEdge(de.ims.icarus.language.model.api.Edge)
 	 */
 	@Override
 	protected void checkEdge(Edge edge) {

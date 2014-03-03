@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.util;
 
 import javax.swing.SwingWorker;
 
-import de.ims.icarus.language.model.Corpus;
+import de.ims.icarus.language.model.api.Corpus;
 
 /**
  * @author Markus Gärtner

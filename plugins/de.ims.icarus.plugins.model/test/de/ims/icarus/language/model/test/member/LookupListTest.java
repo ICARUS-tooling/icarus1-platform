@@ -33,7 +33,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.standard.LookupList;
 
 /**

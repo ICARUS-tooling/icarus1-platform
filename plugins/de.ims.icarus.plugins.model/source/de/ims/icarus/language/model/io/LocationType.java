@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.io;
 
 import java.net.URL;
 
-import de.ims.icarus.language.model.manifest.LocationManifest;
+import de.ims.icarus.language.model.api.manifest.LocationManifest;
 import de.ims.icarus.language.model.xml.XmlResource;
 
 /**
@@ -56,7 +56,7 @@ public enum LocationType implements XmlResource {
 	DATABASE;
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 * @see de.ims.icarus.language.model.api.xml.XmlResource#getValue()
 	 */
 	@Override
 	public String getValue() {

@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.markable;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.MemberType;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.MemberType;
 
 /**
  *
@@ -36,36 +36,47 @@ import de.ims.icarus.language.model.MemberType;
  */
 public class BaseMarkable extends AbstractMarkable {
 
-	private final int index;
+//	private final int index;
+
+//	/**
+//	 * @param id
+//	 * @param container
+//	 */
+//	public BaseMarkable(long id, Container container, int index) {
+//		super(id, container);
+//
+//		this.index = index;
+//	}
 
 	/**
+	 *
 	 * @param id
 	 * @param container
 	 */
-	public BaseMarkable(long id, Container container, int index) {
+	public BaseMarkable(long id, Container container) {
 		super(id, container);
-
-		this.index = index;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 	 */
 	@Override
 	public int getBeginOffset() {
-		return index;
+//		return index;
+		return getContainer().indexOfMarkable(this);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+	 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 	 */
 	@Override
 	public int getEndOffset() {
-		return index;
+//		return index;
+		return getContainer().indexOfMarkable(this);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {

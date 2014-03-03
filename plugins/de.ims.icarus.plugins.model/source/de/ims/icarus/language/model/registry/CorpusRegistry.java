@@ -48,17 +48,17 @@ import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
 
 import de.ims.icarus.Core;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.LayerType;
-import de.ims.icarus.language.model.ModelPlugin;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.LayerType;
+import de.ims.icarus.language.model.api.ModelPlugin;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.Derivable;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.MemberManifest;
+import de.ims.icarus.language.model.api.manifest.OptionsManifest;
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.io.ContextWriter;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.Derivable;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MemberManifest;
-import de.ims.icarus.language.model.manifest.OptionsManifest;
 import de.ims.icarus.language.model.standard.layer.LayerTypeWrapper;
 import de.ims.icarus.language.model.standard.layer.LazyExtensionLayerType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
@@ -385,6 +385,8 @@ public final class CorpusRegistry {
 		String id = layerType.getId();
 		if(id==null)
 			throw new IllegalArgumentException("Missing id on layer type"); //$NON-NLS-1$
+		if(!isValidId(id))
+			throw new IllegalArgumentException("Invaid layer id: "+id); //$NON-NLS-1$
 
 		synchronized (layerTypes) {
 			LayerType currentType = layerTypes.get(id);

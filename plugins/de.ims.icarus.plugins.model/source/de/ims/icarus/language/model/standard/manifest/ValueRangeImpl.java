@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.ValueRange;
+import de.ims.icarus.language.model.api.manifest.ValueRange;
 
 public class ValueRangeImpl implements ValueRange {
 
@@ -47,7 +47,7 @@ public class ValueRangeImpl implements ValueRange {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueRange#getLowerBound()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueRange#getLowerBound()
 	 */
 	@Override
 	public Object getLowerBound() {
@@ -55,7 +55,7 @@ public class ValueRangeImpl implements ValueRange {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueRange#getUpperBound()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueRange#getUpperBound()
 	 */
 	@Override
 	public Object getUpperBound() {
@@ -63,7 +63,7 @@ public class ValueRangeImpl implements ValueRange {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueRange#isLowerBoundInclusive()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueRange#isLowerBoundInclusive()
 	 */
 	@Override
 	public boolean isLowerBoundInclusive() {
@@ -71,7 +71,7 @@ public class ValueRangeImpl implements ValueRange {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueRange#isUpperBoundInclusive()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueRange#isUpperBoundInclusive()
 	 */
 	@Override
 	public boolean isUpperBoundInclusive() {

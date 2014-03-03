@@ -40,27 +40,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.AnnotationLayer;
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Fragment;
-import de.ims.icarus.language.model.Layer;
-import de.ims.icarus.language.model.LayerType;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
+import de.ims.icarus.language.model.api.AnnotationLayer;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Fragment;
+import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.LayerType;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.HighlightLayerManifest;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.manifest.MemberManifest;
+import de.ims.icarus.language.model.api.manifest.Prerequisite;
+import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.manifest.StructureManifest;
 import de.ims.icarus.language.model.io.LocationType;
 import de.ims.icarus.language.model.io.Path;
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.HighlightLayerManifest;
-import de.ims.icarus.language.model.manifest.MemberManifest;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.Prerequisite;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
-import de.ims.icarus.language.model.manifest.StructureManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 
 /**
@@ -118,6 +119,37 @@ public final class CorpusUtils {
 
 	public static boolean isVirtual(Markable markable) {
 		return markable.getBeginOffset()==-1 || markable.getEndOffset()==-1;
+	}
+
+	public static boolean isOverlayContainer(Container container) {
+		return container.getCorpus().getOverlayLayer().getContainer()==container;
+	}
+
+	public static boolean isOverlayLayer(MarkableLayer layer) {
+		return layer.getCorpus().getOverlayLayer()==layer;
+	}
+
+	public static boolean isOverlayMember(Markable markable) {
+		return isOverlayLayer(markable.getLayer());
+	}
+
+	public static boolean isLayerMember(CorpusMember member) {
+		return member.getMemberType()==MemberType.LAYER;
+	}
+
+	public static boolean isMarkableMember(CorpusMember member) {
+		return member.getMemberType()!=MemberType.LAYER;
+	}
+
+	public static boolean isContainerMember(CorpusMember member) {
+		return member.getMemberType()==MemberType.CONTAINER
+				|| member.getMemberType()==MemberType.STRUCTURE;
+	}
+
+	public static boolean isElementMember(CorpusMember member) {
+		return member.getMemberType()==MemberType.MARKABLE
+				|| member.getMemberType()==MemberType.EDGE
+				|| member.getMemberType()==MemberType.FRAGMENT;
 	}
 
 	public static ContainerManifest getContainerManifest(Container container) {
@@ -298,6 +330,15 @@ public final class CorpusUtils {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Returns {@code true} if {@code m2} is located within the span
+	 * defined by {@code m1}.
+	 */
+	public static boolean contains(Markable m1, Markable m2) {
+		return m2.getBeginOffset()>=m1.getBeginOffset()
+				&& m2.getEndOffset()<=m1.getEndOffset();
 	}
 
 	public static File pathToFile(Path path) {

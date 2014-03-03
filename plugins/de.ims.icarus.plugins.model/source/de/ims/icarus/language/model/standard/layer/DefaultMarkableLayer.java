@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.layer;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 
 /**
  * @author Markus Gärtner
@@ -38,6 +38,7 @@ import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
 public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> implements MarkableLayer {
 
 	private Container container;
+	private MarkableLayer boundaryLayer;
 
 	/**
 	 * @param id
@@ -61,11 +62,29 @@ public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.MarkableLayer#getContainer()
+	 * @see de.ims.icarus.language.model.api.MarkableLayer#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
 		return container;
+	}
+
+	/**
+	 * @param boundaryLayer the boundaryLayer to set
+	 */
+	public void setBoundaryLayer(MarkableLayer boundaryLayer) {
+		if (boundaryLayer == null)
+			throw new NullPointerException("Invalid boundaryLayer"); //$NON-NLS-1$
+
+		this.boundaryLayer = boundaryLayer;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.StructureLayer#getBoundaryLayer()
+	 */
+	@Override
+	public MarkableLayer getBoundaryLayer() {
+		return boundaryLayer;
 	}
 
 }

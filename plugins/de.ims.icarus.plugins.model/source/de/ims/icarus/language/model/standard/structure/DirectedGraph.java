@@ -25,10 +25,10 @@
  */
 package de.ims.icarus.language.model.standard.structure;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Edge;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.StructureType;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Edge;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.StructureType;
 
 /**
  * @author Markus Gärtner
@@ -57,7 +57,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.language.model.standard.structure.AbstractRootedStructure#edgeAdded(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.AbstractRootedStructure#edgeAdded(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	protected void edgeAdded(Edge edge, int index) {
@@ -71,7 +71,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.language.model.standard.structure.AbstractRootedStructure#edgeRemoved(de.ims.icarus.language.model.Edge, int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.AbstractRootedStructure#edgeRemoved(de.ims.icarus.language.model.api.Edge, int)
 	 */
 	@Override
 	protected void edgeRemoved(Edge edge, int index) {
@@ -85,7 +85,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.language.model.standard.structure.AbstractRootedStructure#terminalChanged(de.ims.icarus.language.model.Edge, boolean, de.ims.icarus.language.model.Markable, de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.AbstractRootedStructure#terminalChanged(de.ims.icarus.language.model.api.Edge, boolean, de.ims.icarus.language.model.api.Markable, de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	protected void terminalChanged(Edge edge, boolean isSource,
@@ -97,7 +97,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getStructureType()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -105,7 +105,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getEdgeCount(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getEdgeCount(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public int getEdgeCount(Markable node) {
@@ -113,7 +113,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getEdgeAt(de.ims.icarus.language.model.Markable, int)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getEdgeAt(de.ims.icarus.language.model.api.Markable, int)
 	 */
 	@Override
 	public Edge getEdgeAt(Markable node, int index) {
@@ -121,7 +121,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#getParent(de.ims.icarus.language.model.Markable)
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#getParent(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Markable getParent(Markable node) {
@@ -129,7 +129,7 @@ public class DirectedGraph extends AbstractRootedStructure {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.structure.EmptyStructure#invalidate()
+	 * @see de.ims.icarus.language.model.api.standard.structure.EmptyStructure#invalidate()
 	 */
 	@Override
 	protected void invalidate() {

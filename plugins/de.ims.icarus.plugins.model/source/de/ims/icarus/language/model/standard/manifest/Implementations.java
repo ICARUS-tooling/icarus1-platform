@@ -28,7 +28,7 @@ package de.ims.icarus.language.model.standard.manifest;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.PluginDescriptor;
 
-import de.ims.icarus.language.model.manifest.Implementation;
+import de.ims.icarus.language.model.api.manifest.Implementation;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.plugins.PluginUtil;
 
@@ -60,7 +60,7 @@ public class Implementations {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.manifest.Implementation#instantiate(java.lang.Class)
+		 * @see de.ims.icarus.language.model.api.manifest.Implementation#instantiate(java.lang.Class)
 		 */
 		@SuppressWarnings("unchecked")
 		@Override
@@ -89,7 +89,7 @@ public class Implementations {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.xml.XmlElement#writeXml(de.ims.icarus.language.model.xml.XmlSerializer)
+		 * @see de.ims.icarus.language.model.api.xml.XmlElement#writeXml(de.ims.icarus.language.model.api.xml.XmlSerializer)
 		 */
 		@Override
 		public void writeXml(XmlSerializer serializer) throws Exception {

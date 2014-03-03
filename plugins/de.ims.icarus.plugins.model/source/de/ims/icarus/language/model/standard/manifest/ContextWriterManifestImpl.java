@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.ContextWriterManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.ContextWriterManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 
 /**
@@ -40,7 +40,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.api.manifest.MemberManifest)
 	 */
 	@Override
 	protected void readTemplate(ContextWriterManifest template) {
@@ -52,7 +52,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -60,7 +60,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -68,7 +68,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ContextReaderManifest#getFormatId()
+	 * @see de.ims.icarus.language.model.api.manifest.ContextReaderManifest#getFormatId()
 	 */
 	@Override
 	public String getFormatId() {
@@ -86,7 +86,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -97,7 +97,7 @@ public class ContextWriterManifestImpl extends AbstractManifest<ContextWriterMan
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)

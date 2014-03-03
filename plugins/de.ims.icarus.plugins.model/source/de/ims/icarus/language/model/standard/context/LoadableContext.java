@@ -28,14 +28,14 @@ package de.ims.icarus.language.model.standard.context;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Layer;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.api.manifest.ContextWriterManifest;
+import de.ims.icarus.language.model.api.manifest.Implementation;
 import de.ims.icarus.language.model.io.ContextReader;
 import de.ims.icarus.language.model.io.ContextWriter;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ContextReaderManifest;
-import de.ims.icarus.language.model.manifest.ContextWriterManifest;
-import de.ims.icarus.language.model.manifest.Implementation;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -138,7 +138,7 @@ public class LoadableContext extends AbstractContext {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#getLayers()
+	 * @see de.ims.icarus.language.model.api.Context#getLayers()
 	 */
 	@Override
 	public final List<Layer> getLayers() {

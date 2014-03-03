@@ -33,9 +33,10 @@ import java.util.Set;
 
 import javax.swing.Icon;
 
-import de.ims.icarus.language.model.manifest.Implementation;
-import de.ims.icarus.language.model.manifest.MemberManifest;
-import de.ims.icarus.language.model.manifest.OptionsManifest;
+import de.ims.icarus.language.model.api.manifest.Implementation;
+import de.ims.icarus.language.model.api.manifest.MemberManifest;
+import de.ims.icarus.language.model.api.manifest.OptionsManifest;
+import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
@@ -62,7 +63,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	private Icon icon;
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#readTemplate()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#readTemplate()
 	 */
 	@Override
 	protected void readTemplate(M template) {
@@ -159,7 +160,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getRawId()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getRawId()
 	 */
 	@Override
 	public String getRawId() {
@@ -200,6 +201,8 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	public void setId(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		if(!CorpusRegistry.isValidId(id))
+			throw new IllegalArgumentException("Id format not supported: "+id); //$NON-NLS-1$
 
 		this.id = id;
 
@@ -260,7 +263,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getProperty(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getProperty(java.lang.String)
 	 */
 	@Override
 	public Object getProperty(String name) {
@@ -268,7 +271,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getPropertyNames()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getPropertyNames()
 	 */
 	@Override
 	public Set<String> getPropertyNames() {
@@ -308,7 +311,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getOptionsManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getOptionsManifest()
 	 */
 	@Override
 	public OptionsManifest getOptionsManifest() {
@@ -317,7 +320,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -334,7 +337,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -349,7 +352,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -385,7 +388,7 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

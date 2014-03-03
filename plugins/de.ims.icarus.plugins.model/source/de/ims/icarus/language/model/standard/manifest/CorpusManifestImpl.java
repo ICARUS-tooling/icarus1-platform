@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
@@ -53,7 +53,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	private boolean editable;
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -61,7 +61,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#getDefaultContextManifest()
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#getDefaultContextManifest()
 	 */
 	@Override
 	public ContextManifest getDefaultContextManifest() {
@@ -79,7 +79,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#getCustomContextManifests()
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#getCustomContextManifests()
 	 */
 	@Override
 	public List<ContextManifest> getCustomContextManifests() {
@@ -88,7 +88,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	/**
 	 *
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#addCustomContextManifest(de.ims.icarus.language.model.manifest.ContextManifest)
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#addCustomContextManifest(de.ims.icarus.language.model.api.manifest.ContextManifest)
 	 */
 	@Override
 	public void addCustomContextManifest(ContextManifest manifest) {
@@ -100,7 +100,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#removeCustomContextManifest(de.ims.icarus.language.model.manifest.ContextManifest)
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#removeCustomContextManifest(de.ims.icarus.language.model.api.manifest.ContextManifest)
 	 */
 	@Override
 	public void removeCustomContextManifest(ContextManifest manifest) {
@@ -113,7 +113,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#getContextManifest(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#getContextManifest(java.lang.String)
 	 */
 	@Override
 	public ContextManifest getContextManifest(String id) {
@@ -128,7 +128,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#isEditable()
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#isEditable()
 	 */
 	@Override
 	public boolean isEditable() {
@@ -136,7 +136,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.CorpusManifest#setEditable(boolean)
+	 * @see de.ims.icarus.language.model.api.manifest.CorpusManifest#setEditable(boolean)
 	 */
 	@Override
 	public void setEditable(boolean value) {
@@ -145,7 +145,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -157,7 +157,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -169,7 +169,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)
@@ -184,7 +184,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -208,7 +208,7 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

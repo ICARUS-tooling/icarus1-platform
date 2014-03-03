@@ -61,7 +61,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	protected abstract void writeCharacters0(String text);
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#startElement(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#startElement(java.lang.String)
 	 */
 	@Override
 	public void startElement(String name) throws IOException {
@@ -70,7 +70,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#writeAttribute(java.lang.String, java.lang.String)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void writeAttribute(String name, String value) throws IOException {
@@ -79,7 +79,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#writeAttribute(java.lang.String, int)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, int)
 	 */
 	@Override
 	public void writeAttribute(String name, int value) throws IOException {
@@ -88,7 +88,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#writeAttribute(java.lang.String, double)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, double)
 	 */
 	@Override
 	public void writeAttribute(String name, double value) throws IOException {
@@ -97,7 +97,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#writeAttribute(java.lang.String, boolean)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, boolean)
 	 */
 	@Override
 	public void writeAttribute(String name, boolean value) throws IOException {
@@ -106,7 +106,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#endElement(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#endElement(java.lang.String)
 	 */
 	@Override
 	public void endElement(String name) throws IOException {
@@ -115,7 +115,7 @@ public abstract class AbstractXmlSerializer implements XmlSerializer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlSerializer#writeText(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.xml.XmlSerializer#writeText(java.lang.String)
 	 */
 	@Override
 	public void writeText(String text) throws IOException {

@@ -25,15 +25,15 @@
  */
 package de.ims.icarus.language.model.standard.layer;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.Layer;
-import de.ims.icarus.language.model.LayerType;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.LayerType;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**
@@ -83,7 +83,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getId()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 	 */
 	@Override
 	public long getId() {
@@ -91,7 +91,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -99,7 +99,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -107,7 +107,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getName()
+	 * @see de.ims.icarus.language.model.api.Layer#getName()
 	 */
 	@Override
 	public String getName() {
@@ -115,7 +115,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getLayerType()
+	 * @see de.ims.icarus.language.model.api.Layer#getLayerType()
 	 */
 	@Override
 	public LayerType getLayerType() {
@@ -123,7 +123,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getContext()
+	 * @see de.ims.icarus.language.model.api.Layer#getContext()
 	 */
 	@Override
 	public Context getContext() {
@@ -131,7 +131,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getBaseLayer()
+	 * @see de.ims.icarus.language.model.api.Layer#getBaseLayer()
 	 */
 	@Override
 	public MarkableLayer getBaseLayer() {
@@ -139,7 +139,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getManifest()
+	 * @see de.ims.icarus.language.model.api.Layer#getManifest()
 	 */
 	@Override
 	public M getManifest() {
@@ -147,7 +147,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#addNotify(de.ims.icarus.language.model.Corpus)
+	 * @see de.ims.icarus.language.model.api.Layer#addNotify(de.ims.icarus.language.model.api.Corpus)
 	 */
 	@Override
 	public void addNotify(Corpus corpus) {
@@ -155,7 +155,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#removeNotify(de.ims.icarus.language.model.Corpus)
+	 * @see de.ims.icarus.language.model.api.Layer#removeNotify(de.ims.icarus.language.model.api.Corpus)
 	 */
 	@Override
 	public void removeNotify(Corpus corpus) {
@@ -163,7 +163,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Layer#getMarkableProxy()
+	 * @see de.ims.icarus.language.model.api.Layer#getMarkableProxy()
 	 */
 	@Override
 	public Markable getMarkableProxy() {
@@ -204,7 +204,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		private final long id = getCorpus().getGlobalIdDomain().nextId();
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getId()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 		 */
 		@Override
 		public long getId() {
@@ -212,7 +212,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 		 */
 		@Override
 		public Corpus getCorpus() {
@@ -220,7 +220,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 		 */
 		@Override
 		public MemberType getMemberType() {
@@ -236,7 +236,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getContainer()
+		 * @see de.ims.icarus.language.model.api.Markable#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -244,7 +244,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getLayer()
+		 * @see de.ims.icarus.language.model.api.Markable#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -252,7 +252,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+		 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 		 */
 		@Override
 		public int getBeginOffset() {
@@ -260,7 +260,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+		 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 		 */
 		@Override
 		public int getEndOffset() {

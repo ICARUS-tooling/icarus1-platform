@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.manifest.ValueManifest;
+import de.ims.icarus.language.model.api.manifest.ValueManifest;
 
 /**
  * @author Markus Gärtner
@@ -39,7 +39,7 @@ public class ValueManifestImpl implements ValueManifest {
 	private String description;
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueManifest#getValue()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueManifest#getValue()
 	 */
 	@Override
 	public Object getValue() {
@@ -47,7 +47,7 @@ public class ValueManifestImpl implements ValueManifest {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueManifest#getName()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueManifest#getName()
 	 */
 	@Override
 	public String getName() {
@@ -55,7 +55,7 @@ public class ValueManifestImpl implements ValueManifest {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.ValueManifest#getDescription()
+	 * @see de.ims.icarus.language.model.api.manifest.ValueManifest#getDescription()
 	 */
 	@Override
 	public String getDescription() {

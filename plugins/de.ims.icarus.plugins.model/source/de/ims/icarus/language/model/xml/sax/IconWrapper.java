@@ -45,7 +45,7 @@ public class IconWrapper implements Icon, XmlResource {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.xml.XmlResource#getValue()
+	 * @see de.ims.icarus.language.model.api.xml.XmlResource#getValue()
 	 */
 	@Override
 	public String getValue() {

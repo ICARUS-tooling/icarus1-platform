@@ -31,11 +31,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.ValueRange;
-import de.ims.icarus.language.model.manifest.ValueSet;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.ValueRange;
+import de.ims.icarus.language.model.api.manifest.ValueSet;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
@@ -55,7 +55,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	private ValueRange valueRange;
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.manifest.MemberManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.language.model.api.manifest.MemberManifest)
 	 */
 	@Override
 	protected void readTemplate(AnnotationManifest template) {
@@ -110,7 +110,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.MemberManifest#getManifestType()
+	 * @see de.ims.icarus.language.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -118,7 +118,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#getAliases()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationManifest#getAliases()
 	 */
 	@Override
 	public List<String> getAliases() {
@@ -152,7 +152,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	 * {@link ValueRange} or {@link Values.ValueIteratorFactory} previously
 	 * assigned to this manifest is non-null.
 	 *
-	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#isBounded()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationManifest#isBounded()
 	 */
 	@Override
 	public boolean isBounded() {
@@ -160,7 +160,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#getSupportedRange()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationManifest#getSupportedRange()
 	 */
 	@Override
 	public ValueRange getSupportedRange() {
@@ -168,7 +168,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#getSupportedValues()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationManifest#getSupportedValues()
 	 */
 	@Override
 	public ValueSet getSupportedValues() {
@@ -176,7 +176,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.AnnotationManifest#getValueType()
+	 * @see de.ims.icarus.language.model.api.manifest.AnnotationManifest#getValueType()
 	 */
 	@Override
 	public ValueType getValueType() {
@@ -211,7 +211,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {
@@ -220,7 +220,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -233,7 +233,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -246,7 +246,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -272,7 +272,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

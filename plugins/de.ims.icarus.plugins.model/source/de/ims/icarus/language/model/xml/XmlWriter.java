@@ -30,29 +30,29 @@ import java.util.Map.Entry;
 
 import javax.swing.Icon;
 
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
-import de.ims.icarus.language.model.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ContextManifest;
-import de.ims.icarus.language.model.manifest.ContextReaderManifest;
-import de.ims.icarus.language.model.manifest.ContextWriterManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.Implementation;
-import de.ims.icarus.language.model.manifest.LayerManifest;
-import de.ims.icarus.language.model.manifest.LocationManifest;
-import de.ims.icarus.language.model.manifest.MemberManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.OptionsManifest;
-import de.ims.icarus.language.model.manifest.PathResolverManifest;
-import de.ims.icarus.language.model.manifest.Prerequisite;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
-import de.ims.icarus.language.model.manifest.StructureManifest;
-import de.ims.icarus.language.model.manifest.ValueIterator;
-import de.ims.icarus.language.model.manifest.ValueManifest;
-import de.ims.icarus.language.model.manifest.ValueRange;
-import de.ims.icarus.language.model.manifest.ValueSet;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ContextReaderManifest;
+import de.ims.icarus.language.model.api.manifest.ContextWriterManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.Implementation;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.manifest.LocationManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.manifest.MemberManifest;
+import de.ims.icarus.language.model.api.manifest.OptionsManifest;
+import de.ims.icarus.language.model.api.manifest.PathResolverManifest;
+import de.ims.icarus.language.model.api.manifest.Prerequisite;
+import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.manifest.StructureManifest;
+import de.ims.icarus.language.model.api.manifest.ValueIterator;
+import de.ims.icarus.language.model.api.manifest.ValueManifest;
+import de.ims.icarus.language.model.api.manifest.ValueRange;
+import de.ims.icarus.language.model.api.manifest.ValueSet;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.id.Identity;
 
@@ -113,6 +113,7 @@ public class XmlWriter {
 
 		default:
 			serializer.writeAttribute("name", name); //$NON-NLS-1$
+			serializer.writeAttribute("type", type.getValue()); //$NON-NLS-1$
 			serializer.writeText(String.valueOf(value));
 			break;
 		}

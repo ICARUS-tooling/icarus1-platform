@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.language.model.standard.context;
 
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
 
 /**
  * @author Markus Gärtner
@@ -84,7 +84,7 @@ public abstract class AbstractContext implements Context {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#getCorpus()
+	 * @see de.ims.icarus.language.model.api.Context#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -92,7 +92,7 @@ public abstract class AbstractContext implements Context {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#getManifest()
+	 * @see de.ims.icarus.language.model.api.Context#getManifest()
 	 */
 	@Override
 	public ContextManifest getManifest() {
@@ -100,7 +100,7 @@ public abstract class AbstractContext implements Context {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
+	 * @see de.ims.icarus.language.model.api.Context#addNotify(de.ims.icarus.language.model.api.Corpus)
 	 */
 	@Override
 	public void addNotify(Corpus corpus) {
@@ -108,7 +108,7 @@ public abstract class AbstractContext implements Context {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
+	 * @see de.ims.icarus.language.model.api.Context#removeNotify(de.ims.icarus.language.model.api.Corpus)
 	 */
 	@Override
 	public void removeNotify(Corpus corpus) {

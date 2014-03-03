@@ -32,14 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange;
-import de.ims.icarus.language.model.manifest.AnnotationLayerManifest;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.LongHashMap;
 
@@ -82,7 +82,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.layer.DefaultAnnotationLayer#hasAnnotations()
+	 * @see de.ims.icarus.language.model.api.standard.layer.DefaultAnnotationLayer#hasAnnotations()
 	 */
 	@Override
 	public boolean hasAnnotations() {
@@ -100,7 +100,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.layer.DefaultAnnotationLayer#getValue(de.ims.icarus.language.model.Markable, java.lang.String)
+	 * @see de.ims.icarus.language.model.api.standard.layer.DefaultAnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable, java.lang.String)
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
@@ -113,7 +113,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.layer.DefaultAnnotationLayer#removeAllValues()
+	 * @see de.ims.icarus.language.model.api.standard.layer.DefaultAnnotationLayer#removeAllValues()
 	 */
 	@Override
 	public void removeAllValues() {
@@ -125,7 +125,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.layer.DefaultAnnotationLayer#removeAllValues(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.standard.layer.DefaultAnnotationLayer#removeAllValues(java.lang.String)
 	 */
 	@Override
 	public void removeAllValues(String key) {
@@ -141,7 +141,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.layer.DefaultAnnotationLayer#removeAllValues(de.ims.icarus.language.model.Markable, boolean)
+	 * @see de.ims.icarus.language.model.api.standard.layer.DefaultAnnotationLayer#removeAllValues(de.ims.icarus.language.model.api.Markable, boolean)
 	 */
 	@Override
 	public void removeAllValues(Markable markable, boolean recursive) {
@@ -213,7 +213,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.layer.DefaultAnnotationLayer#setValue(de.ims.icarus.language.model.Markable, java.lang.String, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.standard.layer.DefaultAnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.String, java.lang.Object)
 	 */
 	@Override
 	public void setValue(Markable markable, String key, Object value) {
@@ -236,7 +236,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		private final List<Object[]> valueList = new ArrayList<>();
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -300,7 +300,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -365,7 +365,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -382,7 +382,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
@@ -423,7 +423,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#execute()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
@@ -446,7 +446,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
+		 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange#getAffectedMember()
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {

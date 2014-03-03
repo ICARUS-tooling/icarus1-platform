@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.corpus;
 
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.IdDomain;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.IdDomain;
 import de.ims.icarus.util.collections.LongHashMap;
 
 /**
@@ -42,7 +42,7 @@ public class IdPool implements IdDomain {
 	private LongHashMap<CorpusMember> lookup = new LongHashMap<>(1000);
 
 	/**
-	 * @see de.ims.icarus.language.model.IdDomain#getMinId()
+	 * @see de.ims.icarus.language.model.api.IdDomain#getMinId()
 	 */
 	@Override
 	public long getMinId() {
@@ -50,7 +50,7 @@ public class IdPool implements IdDomain {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.IdDomain#getMaxId()
+	 * @see de.ims.icarus.language.model.api.IdDomain#getMaxId()
 	 */
 	@Override
 	public long getMaxId() {
@@ -58,7 +58,7 @@ public class IdPool implements IdDomain {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.IdDomain#isRestricted()
+	 * @see de.ims.icarus.language.model.api.IdDomain#isRestricted()
 	 */
 	@Override
 	public boolean isRestricted() {
@@ -66,7 +66,7 @@ public class IdPool implements IdDomain {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.IdDomain#nextId()
+	 * @see de.ims.icarus.language.model.api.IdDomain#nextId()
 	 */
 	@Override
 	public synchronized long nextId() {
@@ -74,7 +74,7 @@ public class IdPool implements IdDomain {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.IdDomain#reserve(long)
+	 * @see de.ims.icarus.language.model.api.IdDomain#reserve(long)
 	 */
 	@Override
 	public synchronized IdDomain reserve(long n) {
@@ -92,7 +92,7 @@ public class IdPool implements IdDomain {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.IdDomain#lookup(long)
+	 * @see de.ims.icarus.language.model.api.IdDomain#lookup(long)
 	 */
 	@Override
 	public CorpusMember lookup(long id) {
@@ -130,7 +130,7 @@ public class IdPool implements IdDomain {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.IdDomain#getMinId()
+		 * @see de.ims.icarus.language.model.api.IdDomain#getMinId()
 		 */
 		@Override
 		public long getMinId() {
@@ -138,7 +138,7 @@ public class IdPool implements IdDomain {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.IdDomain#getMaxId()
+		 * @see de.ims.icarus.language.model.api.IdDomain#getMaxId()
 		 */
 		@Override
 		public long getMaxId() {
@@ -146,7 +146,7 @@ public class IdPool implements IdDomain {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.IdDomain#isRestricted()
+		 * @see de.ims.icarus.language.model.api.IdDomain#isRestricted()
 		 */
 		@Override
 		public boolean isRestricted() {
@@ -154,7 +154,7 @@ public class IdPool implements IdDomain {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.IdDomain#nextId()
+		 * @see de.ims.icarus.language.model.api.IdDomain#nextId()
 		 */
 		@Override
 		public long nextId() {
@@ -165,7 +165,7 @@ public class IdPool implements IdDomain {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.IdDomain#reserve(long)
+		 * @see de.ims.icarus.language.model.api.IdDomain#reserve(long)
 		 */
 		@Override
 		public IdDomain reserve(long n) {
@@ -173,7 +173,7 @@ public class IdPool implements IdDomain {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.IdDomain#lookup(long)
+		 * @see de.ims.icarus.language.model.api.IdDomain#lookup(long)
 		 */
 		@Override
 		public CorpusMember lookup(long id) {

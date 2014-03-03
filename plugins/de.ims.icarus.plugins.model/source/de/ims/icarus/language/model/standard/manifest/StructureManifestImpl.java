@@ -25,12 +25,11 @@
  */
 package de.ims.icarus.language.model.standard.manifest;
 
-import de.ims.icarus.language.model.StructureType;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.ManifestType;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
-import de.ims.icarus.language.model.manifest.StructureManifest;
+import de.ims.icarus.language.model.api.StructureType;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
+import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.manifest.StructureManifest;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 
 /**
@@ -44,7 +43,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 //	private ContainerManifest boundaryContainerManifest;
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#readTemplate(de.ims.icarus.language.model.manifest.ContainerManifest)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.ContainerManifestImpl#readTemplate(de.ims.icarus.language.model.api.manifest.ContainerManifest)
 	 */
 	@Override
 	protected void readTemplate(ContainerManifest template) {
@@ -56,7 +55,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getTemplate()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getTemplate()
 	 */
 	@Override
 	public synchronized StructureManifest getTemplate() {
@@ -64,7 +63,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#getManifestType()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.ContainerManifestImpl#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
@@ -72,7 +71,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.StructureManifest#getStructureType()
+	 * @see de.ims.icarus.language.model.api.manifest.StructureManifest#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -80,7 +79,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#getLayerManifest()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.ContainerManifestImpl#getLayerManifest()
 	 */
 	@Override
 	public StructureLayerManifest getLayerManifest() {
@@ -88,7 +87,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.StructureManifest#setStructureType(de.ims.icarus.language.model.StructureType)
+	 * @see de.ims.icarus.language.model.api.manifest.StructureManifest#setStructureType(de.ims.icarus.language.model.api.StructureType)
 	 */
 	@Override
 	public void setStructureType(StructureType structureType) {
@@ -96,16 +95,6 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 			throw new NullPointerException("Invalid structureType"); //$NON-NLS-1$
 
 		this.structureType = structureType;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.manifest.StructureManifest#getBoundaryContainerManifest()
-	 */
-	@Override
-	public ContainerManifest getBoundaryContainerManifest() {
-//		return boundaryContainerManifest;
-		MarkableLayerManifest boundaryLayerManifest = getLayerManifest().getBoundaryLayerManifest();
-		return boundaryLayerManifest==null ? null : boundaryLayerManifest.getRootContainerManifest();
 	}
 
 //	/**
@@ -121,7 +110,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.ContainerManifestImpl#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -137,7 +126,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.ContainerManifestImpl#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -152,7 +141,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.ContainerManifestImpl#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.ContainerManifestImpl#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

@@ -31,7 +31,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import de.ims.icarus.language.model.CorpusMember;
+import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.util.collections.AbstractPrimitiveList;
 import de.ims.icarus.util.collections.LongIntHashMap;
 import de.ims.icarus.util.mem.HeapMember;

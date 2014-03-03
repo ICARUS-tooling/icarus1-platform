@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.standard.context;
 
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
 
 /**
  * Implements a {@code Context} suitable as a the default context of a
@@ -45,7 +45,7 @@ public class DefaultContext extends LoadableContext {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#addNotify(de.ims.icarus.language.model.Corpus)
+	 * @see de.ims.icarus.language.model.api.Context#addNotify(de.ims.icarus.language.model.api.Corpus)
 	 */
 	@Override
 	public void addNotify(Corpus corpus) {
@@ -53,7 +53,7 @@ public class DefaultContext extends LoadableContext {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Context#removeNotify(de.ims.icarus.language.model.Corpus)
+	 * @see de.ims.icarus.language.model.api.Context#removeNotify(de.ims.icarus.language.model.api.Corpus)
 	 */
 	@Override
 	public void removeNotify(Corpus corpus) {

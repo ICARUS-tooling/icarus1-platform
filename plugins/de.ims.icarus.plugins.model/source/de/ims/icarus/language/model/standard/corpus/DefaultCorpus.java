@@ -32,26 +32,26 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import de.ims.icarus.language.model.ChunkControl;
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.ContainerType;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.Corpus;
-import de.ims.icarus.language.model.CorpusMember;
-import de.ims.icarus.language.model.IdDomain;
-import de.ims.icarus.language.model.Layer;
-import de.ims.icarus.language.model.LayerType;
-import de.ims.icarus.language.model.Markable;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.MemberType;
-import de.ims.icarus.language.model.edit.CorpusEditModel;
-import de.ims.icarus.language.model.edit.CorpusUndoManager;
-import de.ims.icarus.language.model.events.CorpusListener;
-import de.ims.icarus.language.model.events.EventManager;
-import de.ims.icarus.language.model.manifest.ContainerManifest;
-import de.ims.icarus.language.model.manifest.CorpusManifest;
-import de.ims.icarus.language.model.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.meta.MetaData;
+import de.ims.icarus.language.model.api.ChunkControl;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.ContainerType;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.CorpusMember;
+import de.ims.icarus.language.model.api.IdDomain;
+import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.LayerType;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.edit.CorpusEditModel;
+import de.ims.icarus.language.model.api.edit.CorpusUndoManager;
+import de.ims.icarus.language.model.api.events.CorpusListener;
+import de.ims.icarus.language.model.api.events.EventManager;
+import de.ims.icarus.language.model.api.manifest.ContainerManifest;
+import de.ims.icarus.language.model.api.manifest.CorpusManifest;
+import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.api.meta.MetaData;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.standard.container.AbstractContainer;
 import de.ims.icarus.language.model.standard.context.DefaultContext;
@@ -104,7 +104,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getChunkControl()
+	 * @see de.ims.icarus.language.model.api.Corpus#getChunkControl()
 	 */
 	@Override
 	public ChunkControl getChunkControl() {
@@ -113,7 +113,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getCustomContexts()
+	 * @see de.ims.icarus.language.model.api.Corpus#getCustomContexts()
 	 */
 	@Override
 	public List<Context> getCustomContexts() {
@@ -130,7 +130,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getGlobalIdDomain()
+	 * @see de.ims.icarus.language.model.api.Corpus#getGlobalIdDomain()
 	 */
 	@Override
 	public IdDomain getGlobalIdDomain() {
@@ -162,7 +162,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getLock()
+	 * @see de.ims.icarus.language.model.api.Corpus#getLock()
 	 */
 	@Override
 	public Lock getLock() {
@@ -170,7 +170,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getEditModel()
+	 * @see de.ims.icarus.language.model.api.Corpus#getEditModel()
 	 */
 	@Override
 	public CorpusEditModel getEditModel() {
@@ -178,7 +178,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getUndoManager()
+	 * @see de.ims.icarus.language.model.api.Corpus#getUndoManager()
 	 */
 	@Override
 	public CorpusUndoManager getUndoManager() {
@@ -186,7 +186,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getDefaultContext()
+	 * @see de.ims.icarus.language.model.api.Corpus#getDefaultContext()
 	 */
 	@Override
 	public Context getDefaultContext() {
@@ -194,7 +194,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#addCorpusListener(de.ims.icarus.language.model.events.CorpusListener)
+	 * @see de.ims.icarus.language.model.api.Corpus#addCorpusListener(de.ims.icarus.language.model.api.events.CorpusListener)
 	 */
 	@Override
 	public void addCorpusListener(CorpusListener listener) {
@@ -202,7 +202,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#removeCorpusListener(de.ims.icarus.language.model.events.CorpusListener)
+	 * @see de.ims.icarus.language.model.api.Corpus#removeCorpusListener(de.ims.icarus.language.model.api.events.CorpusListener)
 	 */
 	@Override
 	public void removeCorpusListener(CorpusListener listener) {
@@ -210,7 +210,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getManifest()
+	 * @see de.ims.icarus.language.model.api.Corpus#getManifest()
 	 */
 	@Override
 	public CorpusManifest getManifest() {
@@ -218,7 +218,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getBaseLayer()
+	 * @see de.ims.icarus.language.model.api.Corpus#getBaseLayer()
 	 */
 	@Override
 	public MarkableLayer getBaseLayer() {
@@ -227,7 +227,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getContexts()
+	 * @see de.ims.icarus.language.model.api.Corpus#getContexts()
 	 */
 	@Override
 	public Set<Context> getContexts() {
@@ -236,7 +236,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getOverlayLayer()
+	 * @see de.ims.icarus.language.model.api.Corpus#getOverlayLayer()
 	 */
 	@Override
 	public MarkableLayer getOverlayLayer() {
@@ -244,7 +244,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getLayers()
+	 * @see de.ims.icarus.language.model.api.Corpus#getLayers()
 	 */
 	@Override
 	public List<Layer> getLayers() {
@@ -252,7 +252,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getLayer(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.Corpus#getLayer(java.lang.String)
 	 */
 	@Override
 	public Layer getLayer(String id) {
@@ -261,7 +261,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getLayers(de.ims.icarus.language.model.LayerType)
+	 * @see de.ims.icarus.language.model.api.Corpus#getLayers(de.ims.icarus.language.model.api.LayerType)
 	 */
 	@Override
 	public List<Layer> getLayers(LayerType type) {
@@ -270,7 +270,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#addLayer(de.ims.icarus.language.model.Layer)
+	 * @see de.ims.icarus.language.model.api.Corpus#addLayer(de.ims.icarus.language.model.api.Layer)
 	 */
 	@Override
 	public void addLayer(Layer layer) {
@@ -279,7 +279,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#removeLayer(de.ims.icarus.language.model.Layer)
+	 * @see de.ims.icarus.language.model.api.Corpus#removeLayer(de.ims.icarus.language.model.api.Layer)
 	 */
 	@Override
 	public void removeLayer(Layer layer) {
@@ -288,7 +288,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#removeContext(de.ims.icarus.language.model.Context)
+	 * @see de.ims.icarus.language.model.api.Corpus#removeContext(de.ims.icarus.language.model.api.Context)
 	 */
 	@Override
 	public void removeContext(Context context) {
@@ -297,7 +297,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#addMetaData(de.ims.icarus.util.data.ContentType, de.ims.icarus.language.model.Layer, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.Corpus#addMetaData(de.ims.icarus.util.data.ContentType, de.ims.icarus.language.model.api.Layer, java.lang.Object)
 	 */
 	@Override
 	public void addMetaData(ContentType type, Layer layer, Object data) {
@@ -306,7 +306,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#removeMetaData(de.ims.icarus.util.data.ContentType, de.ims.icarus.language.model.Layer, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.Corpus#removeMetaData(de.ims.icarus.util.data.ContentType, de.ims.icarus.language.model.api.Layer, java.lang.Object)
 	 */
 	@Override
 	public void removeMetaData(ContentType type, Layer layer, Object data) {
@@ -315,7 +315,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#getMetaData(de.ims.icarus.util.data.ContentType, de.ims.icarus.language.model.Layer)
+	 * @see de.ims.icarus.language.model.api.Corpus#getMetaData(de.ims.icarus.util.data.ContentType, de.ims.icarus.language.model.api.Layer)
 	 */
 	@Override
 	public Set<MetaData> getMetaData(ContentType type, Layer layer) {
@@ -324,7 +324,7 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.Corpus#free()
+	 * @see de.ims.icarus.language.model.api.Corpus#free()
 	 */
 	@Override
 	public void free() {
@@ -341,7 +341,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#getName()
+		 * @see de.ims.icarus.language.model.api.Layer#getName()
 		 */
 		@Override
 		public String getName() {
@@ -349,7 +349,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#getMarkableProxy()
+		 * @see de.ims.icarus.language.model.api.Layer#getMarkableProxy()
 		 */
 		@Override
 		public Markable getMarkableProxy() {
@@ -358,7 +358,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#getLayerType()
+		 * @see de.ims.icarus.language.model.api.Layer#getLayerType()
 		 */
 		@Override
 		public LayerType getLayerType() {
@@ -366,7 +366,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#getContext()
+		 * @see de.ims.icarus.language.model.api.Layer#getContext()
 		 */
 		@Override
 		public Context getContext() {
@@ -374,7 +374,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#getBaseLayer()
+		 * @see de.ims.icarus.language.model.api.Layer#getBaseLayer()
 		 */
 		@Override
 		public MarkableLayer getBaseLayer() {
@@ -382,7 +382,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#addNotify(de.ims.icarus.language.model.Corpus)
+		 * @see de.ims.icarus.language.model.api.Layer#addNotify(de.ims.icarus.language.model.api.Corpus)
 		 */
 		@Override
 		public void addNotify(Corpus corpus) {
@@ -390,7 +390,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Layer#removeNotify(de.ims.icarus.language.model.Corpus)
+		 * @see de.ims.icarus.language.model.api.Layer#removeNotify(de.ims.icarus.language.model.api.Corpus)
 		 */
 		@Override
 		public void removeNotify(Corpus corpus) {
@@ -398,7 +398,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getId()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
 		 */
 		@Override
 		public long getId() {
@@ -406,7 +406,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 		 */
 		@Override
 		public Corpus getCorpus() {
@@ -414,7 +414,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getMemberType()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
 		 */
 		@Override
 		public MemberType getMemberType() {
@@ -422,7 +422,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.MarkableLayer#getManifest()
+		 * @see de.ims.icarus.language.model.api.MarkableLayer#getManifest()
 		 */
 		@Override
 		public MarkableLayerManifest getManifest() {
@@ -430,11 +430,20 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.MarkableLayer#getContainer()
+		 * @see de.ims.icarus.language.model.api.MarkableLayer#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
 			return overlayContainer;
+		}
+
+		/**
+		 * No boundary on overlay layer!
+		 * @see de.ims.icarus.language.model.api.MarkableLayer#getBoundaryLayer()
+		 */
+		@Override
+		public MarkableLayer getBoundaryLayer() {
+			return null;
 		}
 
 	}
@@ -450,7 +459,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getContainer()
+		 * @see de.ims.icarus.language.model.api.Markable#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -458,7 +467,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getLayer()
+		 * @see de.ims.icarus.language.model.api.Markable#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -466,7 +475,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getBeginOffset()
+		 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 		 */
 		@Override
 		public int getBeginOffset() {
@@ -474,7 +483,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Markable#getEndOffset()
+		 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 		 */
 		@Override
 		public int getEndOffset() {
@@ -482,7 +491,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 		 */
 		@Override
 		public Corpus getCorpus() {
@@ -498,7 +507,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#getContainerType()
+		 * @see de.ims.icarus.language.model.api.Container#getContainerType()
 		 */
 		@Override
 		public ContainerType getContainerType() {
@@ -506,7 +515,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#getManifest()
+		 * @see de.ims.icarus.language.model.api.Container#getManifest()
 		 */
 		@Override
 		public ContainerManifest getManifest() {
@@ -514,7 +523,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#getMarkableCount()
+		 * @see de.ims.icarus.language.model.api.Container#getMarkableCount()
 		 */
 		@Override
 		public int getMarkableCount() {
@@ -522,7 +531,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#getMarkableAt(int)
+		 * @see de.ims.icarus.language.model.api.Container#getMarkableAt(int)
 		 */
 		@Override
 		public Markable getMarkableAt(int index) {
@@ -530,7 +539,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#removeAllMarkables()
+		 * @see de.ims.icarus.language.model.api.Container#removeAllMarkables()
 		 */
 		@Override
 		public void removeAllMarkables() {
@@ -538,7 +547,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#addMarkable(int, de.ims.icarus.language.model.Markable)
+		 * @see de.ims.icarus.language.model.api.Container#addMarkable(int, de.ims.icarus.language.model.api.Markable)
 		 */
 		@Override
 		public void addMarkable(int index, Markable markable) {
@@ -546,7 +555,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#removeMarkable(int)
+		 * @see de.ims.icarus.language.model.api.Container#removeMarkable(int)
 		 */
 		@Override
 		public Markable removeMarkable(int index) {
@@ -554,7 +563,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.Container#moveMarkable(int, int)
+		 * @see de.ims.icarus.language.model.api.Container#moveMarkable(int, int)
 		 */
 		@Override
 		public void moveMarkable(int index0, int index1) {

@@ -30,10 +30,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.manifest.OptionsManifest;
-import de.ims.icarus.language.model.manifest.ValueRange;
-import de.ims.icarus.language.model.manifest.ValueSet;
-import de.ims.icarus.language.model.meta.ValueType;
+import de.ims.icarus.language.model.api.manifest.OptionsManifest;
+import de.ims.icarus.language.model.api.manifest.ValueRange;
+import de.ims.icarus.language.model.api.manifest.ValueSet;
+import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
@@ -52,7 +52,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	private Map<String, Option> options = new HashMap<>();
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.language.model.manifest.Derivable)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.language.model.api.manifest.Derivable)
 	 */
 	@Override
 	protected void readTemplate(OptionsManifest template) {
@@ -112,7 +112,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getOptionNames()
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getOptionNames()
 	 */
 	@Override
 	public Set<String> getOptionNames() {
@@ -131,7 +131,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getDefaultValue(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getDefaultValue(java.lang.String)
 	 */
 	@Override
 	public Object getDefaultValue(String name) {
@@ -139,7 +139,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getValueType(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getValueType(java.lang.String)
 	 */
 	@Override
 	public ValueType getValueType(String name) {
@@ -147,7 +147,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getName(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getName(java.lang.String)
 	 */
 	@Override
 	public String getName(String name) {
@@ -156,7 +156,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getDescription(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getDescription(java.lang.String)
 	 */
 	@Override
 	public String getDescription(String name) {
@@ -164,7 +164,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getSupportedValues(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getSupportedValues(java.lang.String)
 	 */
 	@Override
 	public ValueSet getSupportedValues(String name) {
@@ -172,7 +172,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#isPublished(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#isPublished(java.lang.String)
 	 */
 	@Override
 	public boolean isPublished(String name) {
@@ -231,7 +231,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.manifest.OptionsManifest#getSupportedRange(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.manifest.OptionsManifest#getSupportedRange(java.lang.String)
 	 */
 	@Override
 	public ValueRange getSupportedRange(String name) {
@@ -240,7 +240,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -253,7 +253,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -265,7 +265,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -293,7 +293,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.language.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)
@@ -306,7 +306,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.language.model.api.standard.manifest.AbstractDerivable#getXmlTag()
 	 */
 	@Override
 	protected String getXmlTag() {

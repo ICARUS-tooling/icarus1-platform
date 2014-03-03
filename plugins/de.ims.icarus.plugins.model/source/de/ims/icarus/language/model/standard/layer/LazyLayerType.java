@@ -27,8 +27,8 @@ package de.ims.icarus.language.model.standard.layer;
 
 import javax.swing.Icon;
 
-import de.ims.icarus.language.model.LayerType;
-import de.ims.icarus.language.model.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.LayerType;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.util.id.Identity;
 
@@ -111,7 +111,7 @@ public class LazyLayerType implements LayerType {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.LayerType#getSharedManifest()
+	 * @see de.ims.icarus.language.model.api.LayerType#getSharedManifest()
 	 */
 	@Override
 	public LayerManifest getSharedManifest() {

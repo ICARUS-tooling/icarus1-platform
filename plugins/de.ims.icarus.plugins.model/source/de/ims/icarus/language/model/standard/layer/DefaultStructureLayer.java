@@ -25,21 +25,16 @@
  */
 package de.ims.icarus.language.model.standard.layer;
 
-import de.ims.icarus.language.model.Container;
-import de.ims.icarus.language.model.Context;
-import de.ims.icarus.language.model.MarkableLayer;
-import de.ims.icarus.language.model.StructureLayer;
-import de.ims.icarus.language.model.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.StructureLayer;
+import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends AbstractLayer<StructureLayerManifest> implements StructureLayer {
-
-	private Container container;
-	private MarkableLayer boundaryLayer;
+public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
 
 	/**
 	 * @param id
@@ -52,41 +47,10 @@ public class DefaultStructureLayer extends AbstractLayer<StructureLayerManifest>
 	}
 
 	/**
-	 * @param container the container to set
-	 */
-	public void setContainer(Container container) {
-		if (container == null)
-			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
-		if(container.getLayer()!=this)
-			throw new IllegalArgumentException("Container is a member of a foreign layer"); //$NON-NLS-1$
-
-		this.container = container;
-	}
-
-	/**
-	 * @param boundaryLayer the boundaryLayer to set
-	 */
-	public void setBoundaryLayer(MarkableLayer boundaryLayer) {
-		if (boundaryLayer == null)
-			throw new NullPointerException("Invalid boundaryLayer"); //$NON-NLS-1$
-
-		this.boundaryLayer = boundaryLayer;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.MarkableLayer#getContainer()
+	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
 	 */
 	@Override
-	public Container getContainer() {
-		return container;
+	public StructureLayerManifest getManifest() {
+		return (StructureLayerManifest) super.getManifest();
 	}
-
-	/**
-	 * @see de.ims.icarus.language.model.StructureLayer#getBoundaryLayer()
-	 */
-	@Override
-	public MarkableLayer getBoundaryLayer() {
-		return boundaryLayer;
-	}
-
 }
