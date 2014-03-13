@@ -71,18 +71,18 @@ public enum StructureType implements XmlResource {
 	 */
 	GRAPH(false, -1, -1, 0);
 
-	private final int maxChildCount;
-	private final int maxParentCount;
+	private final int outgoingEdgeLimit;
+	private final int incomingEdgeLimit;
 	private final int minEdgeCount;
 	private final boolean directed;
 	private final EnumSet<EditOperation> operations;
 
-	private StructureType(boolean directed, int maxChildCount,
-			int maxParentCount, int minEdgeCount,
+	private StructureType(boolean directed, int outgoingEdgeLimit,
+			int incomingEdgeLimit, int minEdgeCount,
 			EditOperation...operations) {
 
-		this.maxChildCount = maxChildCount;
-		this.maxParentCount = maxParentCount;
+		this.outgoingEdgeLimit = outgoingEdgeLimit;
+		this.incomingEdgeLimit = incomingEdgeLimit;
 		this.minEdgeCount = minEdgeCount;
 		this.directed = directed;
 
@@ -125,10 +125,10 @@ public enum StructureType implements XmlResource {
 	 * <p>
 	 * Note that this does <b>not</b> affect the root node!
 	 *
-	 * @return the maxChildCount
+	 * @return the outgoingEdgeLimit
 	 */
-	public int getMaxChildCount() {
-		return maxChildCount;
+	public int getOutgoingEdgeLimit() {
+		return outgoingEdgeLimit;
 	}
 
 	/**
@@ -137,10 +137,10 @@ public enum StructureType implements XmlResource {
 	 * <p>
 	 * Note that this does <b>not</b> affect the root node!
 	 *
-	 * @return the maxParentCount
+	 * @return the incomingEdgeLimit
 	 */
-	public int getMaxParentCount() {
-		return maxParentCount;
+	public int getIncomingEdgeLimit() {
+		return incomingEdgeLimit;
 	}
 
 	/**

@@ -29,9 +29,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -419,9 +419,9 @@ public final class PluginUtil {
 		return getPluginRegistry().getPluginDescriptor(pluginId).getExtension(elementId);
 	}
 
-	public static File getPluginFolder(PluginElement<?> element) {
+	public static Path getPluginFolder(PluginElement<?> element) {
 		PluginDescriptor descriptor = element.getDeclaringPluginDescriptor();
-		return new File(Core.getCore().getPluginFolder(), descriptor.getId());
+		return Core.getCore().getPluginFolder().resolve(descriptor.getId());
 	}
 
 	public static void activatePlugin(PluginElement<?> element) throws PluginLifecycleException {

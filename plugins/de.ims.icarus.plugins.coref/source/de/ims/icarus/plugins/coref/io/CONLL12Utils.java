@@ -199,7 +199,7 @@ public final class CONLL12Utils {
 			}
 
 			Cursor coref = row.getSplitCursor(row.getSplitCount()-1);
-			if(!HYPHEN.equals(coref)) {
+			if(!coref.equals(HYPHEN)) {
 				// Build spans
 				coref.split('|');
 				for(int j=0; j<coref.getSplitCount(); j++) {

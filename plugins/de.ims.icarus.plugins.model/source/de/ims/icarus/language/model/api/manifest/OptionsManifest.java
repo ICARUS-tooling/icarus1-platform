@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.api.manifest;
 
 import java.util.Set;
 
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 
 /**
  * Helper manifest (not describing a corpus member/entity of its own)

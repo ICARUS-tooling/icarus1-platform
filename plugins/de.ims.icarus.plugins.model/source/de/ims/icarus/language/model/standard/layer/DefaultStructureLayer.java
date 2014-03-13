@@ -26,7 +26,7 @@
 package de.ims.icarus.language.model.standard.layer;
 
 import de.ims.icarus.language.model.api.Context;
-import de.ims.icarus.language.model.api.StructureLayer;
+import de.ims.icarus.language.model.api.layer.StructureLayer;
 import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 
 /**

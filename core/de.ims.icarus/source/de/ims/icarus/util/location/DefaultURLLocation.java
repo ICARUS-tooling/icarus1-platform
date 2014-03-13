@@ -25,16 +25,17 @@
  */
 package de.ims.icarus.util.location;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
-import org.java.plugin.util.IoUtil;
-
 import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.logging.LoggerFactory;
 
 /**
  * @author Markus Gärtner
@@ -74,15 +75,20 @@ public class DefaultURLLocation implements Location {
 	 */
 	@Override
 	public boolean isLocal() {
-		return getFile()!=null;
+		return getLocalPath()!=null;
 	}
 
 	/**
-	 * @see de.ims.icarus.util.location.Location#getFile()
+	 * @see de.ims.icarus.util.location.Location#getLocalPath()
 	 */
 	@Override
-	public File getFile() {
-		return IoUtil.url2file(url);
+	public Path getLocalPath() {
+		try {
+			return Paths.get(url.toURI());
+		} catch (URISyntaxException e) {
+			LoggerFactory.error(this, "Unable to convert url into path: "+url, e); //$NON-NLS-1$
+			return null;
+		}
 	}
 
 	/**

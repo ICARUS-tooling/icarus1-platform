@@ -23,23 +23,21 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.api.driver;
 
-import de.ims.icarus.language.model.io.PathResolver;
-
+import de.ims.icarus.language.model.api.Context;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ChunkControl {
+public interface DriverFactory {
 
-	int getChunkCount();
-
-	int getCurrentChunkIndex();
-
-	void loadChunk(int index);
-
-	PathResolver getPathResolver();
+	/**
+	 * Creates a
+	 * @param context
+	 * @return
+	 */
+	Driver createDriver(Context context);
 }

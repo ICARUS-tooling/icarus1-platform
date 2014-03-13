@@ -19,32 +19,32 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.location;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Path;
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface Location {
 
 	public URL getURL();
-	
+
 	public boolean isLocal();
-	
-	public File getFile();
-	
+
+	public Path getLocalPath();
+
 	public OutputStream openOutputStream() throws IOException;
-	
+
 	public InputStream openInputStream() throws IOException;
 }

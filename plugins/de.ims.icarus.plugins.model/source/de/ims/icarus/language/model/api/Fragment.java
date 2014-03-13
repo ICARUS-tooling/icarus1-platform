@@ -61,7 +61,7 @@ public interface Fragment extends Markable {
 	 *
 	 * @return
 	 */
-	int getFragmentBeginIndex();
+	long getFragmentBeginIndex();
 
 	/**
 	 * Returns the character-based index within the surrounding markable of
@@ -69,7 +69,7 @@ public interface Fragment extends Markable {
 	 *
 	 * @return
 	 */
-	int getFragmentEndIndex();
+	long getFragmentEndIndex();
 
 	// Modification methods
 
@@ -81,7 +81,7 @@ public interface Fragment extends Markable {
 	 * or exceeds either the current end index or the maximal possible index as
 	 * specified by the textual size of the hosting markable
 	 */
-	void setFragmentBeginIndex(int index);
+	void setFragmentBeginIndex(long index);
 
 	/**
 	 * Changes the end offset of the fragment to the new {@code index}.
@@ -91,5 +91,5 @@ public interface Fragment extends Markable {
 	 * or less than the current end index or if it exceeds the maximal possible
 	 * index as specified by the textual size of the hosting markable
 	 */
-	void setFragmentEndIndex(int index);
+	void setFragmentEndIndex(long index);
 }

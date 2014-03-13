@@ -35,8 +35,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -133,14 +134,14 @@ public class PerspectiveChooser {
 
 	public void init(JComponent container) {
 		// Load statistics
-		File file = new File(Core.getCore().getDataFolder(), STATISTICS_FILE);
-		if(file.exists()) {
+		Path file = Core.getCore().getDataFolder().resolve(STATISTICS_FILE);
+		if(Files.exists(file)) {
 			try {
 				JAXBContext context = JAXBContext.newInstance(PerspectiveUsageStatistic.class);
 				Unmarshaller unmarshaller = context.createUnmarshaller();
-				statistics = (PerspectiveUsageStatistic)unmarshaller.unmarshal(file);
+				statistics = (PerspectiveUsageStatistic)unmarshaller.unmarshal(Files.newInputStream(file));
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, "Failed to load usage statistics from file: "+file.getAbsolutePath(), e); //$NON-NLS-1$
+				LoggerFactory.log(this, Level.SEVERE, "Failed to load usage statistics from file: "+file, e); //$NON-NLS-1$
 			}
 		}
 		if(statistics==null) {
@@ -302,14 +303,14 @@ public class PerspectiveChooser {
 
 			@Override
 			public void run() {
-				File file = new File(Core.getCore().getDataFolder(), STATISTICS_FILE);
+				Path file = Core.getCore().getDataFolder().resolve(STATISTICS_FILE);
 				try {
 					JAXBContext context = JAXBContext.newInstance(PerspectiveUsageStatistic.class);
 					Marshaller marshaller = context.createMarshaller();
 					marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-					marshaller.marshal(statistics, file);
+					marshaller.marshal(statistics, Files.newOutputStream(file));
 				} catch(Exception e) {
-					LoggerFactory.log(this, Level.SEVERE, "Failed to save usage statistics to file: "+file.getAbsolutePath(), e); //$NON-NLS-1$
+					LoggerFactory.log(this, Level.SEVERE, "Failed to save usage statistics to file: "+file, e); //$NON-NLS-1$
 				}
 			}
 		});

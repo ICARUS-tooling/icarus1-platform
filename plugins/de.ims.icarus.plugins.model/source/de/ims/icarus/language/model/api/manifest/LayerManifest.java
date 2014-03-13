@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.api.manifest;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.layer.Layer;
 
 /**
  * A {@code LayerManifest} describes a single {@link Layer} in a corpus and

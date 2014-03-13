@@ -26,7 +26,7 @@
 package de.ims.icarus.language.model.api.meta;
 
 import de.ims.icarus.language.model.api.Corpus;
-import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.util.Options;
 
 /**

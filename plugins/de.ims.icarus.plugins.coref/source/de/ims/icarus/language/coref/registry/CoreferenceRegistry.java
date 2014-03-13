@@ -25,9 +25,10 @@
  */
 package de.ims.icarus.language.coref.registry;
 
-import java.io.File;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -693,14 +694,15 @@ public final class CoreferenceRegistry {
 	private static final String list_file = "corefDocuments.xml"; //$NON-NLS-1$
 
 	private void load() throws Exception {
-		File file = new File(Core.getCore().getDataFolder(), list_file);
-		if(!file.exists() || file.length()==0) {
+		Path file = Core.getCore().getDataFolder().resolve(list_file);
+		if(Files.notExists(file) || Files.size(file)==0) {
 			return;
 		}
 
 		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
-		DocumentSetBuffer buffer = (DocumentSetBuffer) unmarshaller.unmarshal(file);
+		DocumentSetBuffer buffer = (DocumentSetBuffer) unmarshaller.unmarshal(
+				Files.newInputStream(file));
 
 		documentSetList.clear();
 		documentSetMap.clear();
@@ -723,15 +725,15 @@ public final class CoreferenceRegistry {
 
 	private void save(DocumentSetBuffer buffer) throws Exception {
 		synchronized (saveLock) {
-			File file = new File(Core.getCore().getDataFolder(), list_file);
-			if(!file.exists()) {
-				file.createNewFile();
+			Path file = Core.getCore().getDataFolder().resolve(list_file);
+			if(Files.notExists(file)) {
+				Files.createFile(file);
 			}
 
 			JAXBContext context = JAXBUtils.getSharedJAXBContext();
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			marshaller.marshal(buffer, file);
+			marshaller.marshal(buffer, Files.newOutputStream(file));
 		}
 	}
 

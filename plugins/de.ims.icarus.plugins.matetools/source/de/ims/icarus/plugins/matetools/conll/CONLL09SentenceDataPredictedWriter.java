@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,21 +15,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.matetools.conll;
 
 import is2.data.SentenceData09;
 import is2.io.CONLLWriter09;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 import de.ims.icarus.language.LanguageUtils;
@@ -49,10 +49,10 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class CONLL09SentenceDataPredictedWriter implements SentenceDataWriter {
-	
+
 	protected CONLLWriter09 writer;
 	protected boolean writeRoot;
 	protected int outputFormat; // 0 (default) or 1
@@ -64,16 +64,16 @@ public class CONLL09SentenceDataPredictedWriter implements SentenceDataWriter {
 	@Override
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
-		
-		File file = location.getFile();
+
+		Path file = location.getLocalPath();
 
 		if (file == null)
-			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$		
-		
+			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
+
 		if (options == null){
 			options = Options.emptyOptions;
 		}
-			
+
 		//TODO extend me
 		writeRoot = false;
 
@@ -89,35 +89,35 @@ public class CONLL09SentenceDataPredictedWriter implements SentenceDataWriter {
 	@Override
 	public void write(SentenceData data) throws IOException,
 			UnsupportedSentenceDataException {
-		
+
 		//null check
 		if (data == null){
 			return;
 		}
 
 		SentenceData09 currentData = new SentenceData09();
-		
+
 		SimpleDependencyData sdd;
-				
+
 		try {
 			if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
-				
+
 				sdd = (SimpleDependencyData) data;
 				currentData.init(LanguageUtils.getForms(sdd));
-				
+
 				initSystem(currentData, sdd.length());
-				
+
 
 				//Sentence Debug
 				/*
 				for (int j = 0 ; j < sdd.getForms().length;j++){
 					String [] t = sdd.getForms();
-					System.out.println(t[j]);		
+					System.out.println(t[j]);
 				}
-				*/			
+				*/
 
-				for(short i=0; i<currentData.length(); i++) {	
+				for(short i=0; i<currentData.length(); i++) {
 					/*
 					System.out.print("Form: "+ sdd.getForm(i));
 					System.out.print(" Head: "+ sdd.getHead(i));
@@ -126,37 +126,37 @@ public class CONLL09SentenceDataPredictedWriter implements SentenceDataWriter {
 					System.out.print(" Lemma: "+ sdd.getLemma(i));
 					System.out.println(" Relation: "+ sdd.getRelation(i));
 					*/
-					
+
 					currentData.forms[i] = sdd.getForm(i);
  					currentData.pheads[i] = sdd.getHead(i) + 1;
-					currentData.ppos[i] = sdd.getPos(i);						
+					currentData.ppos[i] = sdd.getPos(i);
 					currentData.pfeats[i] = sdd.getFeatures(i);
 					currentData.plemmas[i] = sdd.getLemma(i);
 					currentData.plabels[i] = sdd.getRelation(i);
 				}
 
 				writer.write(currentData, writeRoot);
-			
+
 		} catch (InterruptedException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"Write to File interrupted", e); //$NON-NLS-1$
 		} catch (IllegalArgumentException e) {
 			LoggerFactory.log(this, Level.SEVERE,
-					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$			
+					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$
 		} finally {
 			writer.finishWriting();
 		}
 
 	}
-	
-	
+
+
 	private void initSystem(SentenceData09 data, int size){
 		if (data.forms == null)		data.forms  = new String[size];
 		if (data.pheads == null)	data.pheads = new int[size];
-		if (data.ppos == null)		data.ppos = new String[size];					
+		if (data.ppos == null)		data.ppos = new String[size];
 		if (data.pfeats == null)	data.pfeats = new String[size];
 		if (data.plemmas == null)	data.plemmas = new String[size];
-		if (data.plabels == null)	data.plabels = new String[size];		
+		if (data.plabels == null)	data.plabels = new String[size];
 	}
 
 	/**

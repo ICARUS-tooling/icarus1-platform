@@ -50,7 +50,7 @@ public enum LocationType implements XmlResource {
 
 	/**
 	 * Locations with this type denote a database of arbitrary implementation.
-	 * It is up to the {@link Path} or {@link LocationManifest} to provide
+	 * It is up to the {@link ResourcePath} or {@link LocationManifest} to provide
 	 * additional information to properly access the database.
 	 */
 	DATABASE;

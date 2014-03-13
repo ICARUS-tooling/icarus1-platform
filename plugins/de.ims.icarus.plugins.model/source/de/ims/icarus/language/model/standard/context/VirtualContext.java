@@ -30,7 +30,7 @@ import java.util.List;
 
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
-import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.collections.CollectionUtils;

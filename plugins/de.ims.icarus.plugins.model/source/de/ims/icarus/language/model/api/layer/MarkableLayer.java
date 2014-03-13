@@ -23,14 +23,15 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.api.layer;
 
+import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 
 /**
  * A {@code MarkableLayer} defines a collection of markables. If it is
- * the <i>base layer</> of a corpus it describes the basic collection
+ * the <i>base layer<i/> of a corpus it describes the basic collection
  * of available markables for that corpus. In any other case it serves
  * as a sort of aggregated view, grouping markables of the underlying
  * layers in its container.
@@ -94,4 +95,21 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 * layer defines are not mapped to existing layer boundaries.
 	 */
 	MarkableLayer getBoundaryLayer();
+
+	/**
+	 * Translates an index currently used to access members in this layer's
+	 * root container into a value that can be used to reference elements in
+	 * the entirety of the backing data.
+	 * Implementations are advised to optimize internal lookup structures for this
+	 * translation or try to avoid them altogether. The latter is possible for
+	 * corpora that are small enough to not be worth the overhead of chunk-wise
+	 * loading. For them this method could simply return the index value itself
+	 * since there is a direct 1:1 projection between the two index spaces.
+	 *
+	 * @param index
+	 * @return
+	 * @throws IndexOutOfBoundsException if the given index is negative or
+	 * 			exceeds the values allowed by the root container
+	 */
+	long translateMarkableIndex(int index);
 }

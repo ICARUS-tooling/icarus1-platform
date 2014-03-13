@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.plugins.core;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,7 +56,7 @@ public class IcarusCorePreferences {
 		builder.addOptionsEntry("language", 0,  //$NON-NLS-1$
 				"en"); // TODO add more language options //$NON-NLS-1$
 		builder.addEntry("workingDirectory", EntryType.FOLDER,  //$NON-NLS-1$
-				new File(System.getProperty("user.dir")).getAbsolutePath()); //$NON-NLS-1$
+				Paths.get(System.getProperty("user.dir"))); //$NON-NLS-1$
 		builder.addBooleanEntry("eula", false);  //$NON-NLS-1$
 
 		// APPEARANCE GROUP

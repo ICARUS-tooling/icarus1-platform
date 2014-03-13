@@ -26,7 +26,7 @@
 package de.ims.icarus.config;
 
 import java.awt.Color;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -95,7 +95,7 @@ public class ConfigRegistry implements ConfigConstants {
 		if(globalRegistry==null) {
 			synchronized (ConfigRegistry.class) {
 				if(globalRegistry==null) {
-					File configFile = new File(Core.getCore().getDataFolder(),
+					Path configFile = Core.getCore().getDataFolder().resolve(
 							"config.xml"); //$NON-NLS-1$
 					JAXBConfigStorage storage = new JAXBConfigStorage(
 							configFile, IMMEDIATE_SAVING);
@@ -1314,12 +1314,12 @@ public class ConfigRegistry implements ConfigConstants {
 		return (String)getValue(path);
 	}
 
-	public File getFile(Handle handle) {
-		return (File)getValue(handle);
+	public Path getFile(Handle handle) {
+		return (Path)getValue(handle);
 	}
 
-	public File getFile(String path) {
-		return (File)getValue(path);
+	public Path getFile(String path) {
+		return (Path)getValue(path);
 	}
 
 	public boolean getBoolean(Handle handle) {

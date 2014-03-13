@@ -23,11 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.api.layer;
 
+import de.ims.icarus.language.model.api.Annotation;
+import de.ims.icarus.language.model.api.Container;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.Structure;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.manifest.ValueSet;
+import de.ims.icarus.util.Consumer;
 
 /**
  *
@@ -57,6 +62,21 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @throws NullPointerException if the {@code markable} is {@code null}
 	 */
 	Object getValue(Markable markable);
+
+	/**
+	 * Collects all the keys in this layer which are mapped to valid annotation values for
+	 * the given markable. This method returns {@code true} iff at least one key was added
+	 * to the supplied {@code buffer}. Note that this method does <b>not</b> take
+	 * default annotations into consideration, since they are not accessed via a dedicated
+	 * key!
+	 *
+	 * @param markable
+	 * @param buffer
+	 * @return
+	 * @throws NullPointerException if any one of the two arguments is {@code null}
+	 * @throws UnsupportedOperationException if this layer does not support additional keys
+	 */
+	boolean collectKeys(Markable markable, Consumer<String> buffer);
 
 	/**
 	 * Returns the annotation for a given markable and key or {@code null} if that markable
@@ -156,5 +176,9 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 */
 	void setValue(Markable markable, String key, Object value);
 
+	/**
+	 *
+	 * @return {@code true} iff this layer holds at least one valid annotation object.
+	 */
 	boolean hasAnnotations();
 }

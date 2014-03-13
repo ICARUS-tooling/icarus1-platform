@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.api;
 
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.StructureManifest;
 
 /**
@@ -54,14 +55,15 @@ public interface Structure extends Container {
 	 */
 	StructureType getStructureType();
 
-	/**
-	 * Returns {@code true} if this structure is allowed to have multiple root nodes.
-	 *
-	 * @return {@code true} if and only if the structure represented
-	 * is allowed to contain multiple root nodes.
-	 * @throws UnsupportedOperationException if this container is not a structure
-	 */
-	boolean isMultiRoot();
+	//FIXME moved to StructureManifest
+//	/**
+//	 * Returns {@code true} if this structure is allowed to have multiple root nodes.
+//	 *
+//	 * @return {@code true} if and only if the structure represented
+//	 * is allowed to contain multiple root nodes.
+//	 * @throws UnsupportedOperationException if this container is not a structure
+//	 */
+//	boolean isMultiRoot();
 
 	/**
 	 * Returns the total number of edges this structure hosts.

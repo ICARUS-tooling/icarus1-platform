@@ -26,7 +26,7 @@
 package de.ims.icarus.plugins.errormining;
 
 import java.awt.Color;
-import java.io.File;
+import java.nio.file.Paths;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
@@ -61,7 +61,7 @@ public class ErrorMiningPreferences {
 		//ConfigUtils.buildDefaultFontConfig(builder, "Tahoma"); //$NON-NLS-1$
 		builder.addBooleanEntry("useDefaultFile", false); //$NON-NLS-1$
 		builder.addEntry("filepath", EntryType.FILE,  //$NON-NLS-1$
-				new File("errormining_result.xml")); //$NON-NLS-1$
+				Paths.get("errormining_result.xml")); //$NON-NLS-1$
 		builder.back();
 
 		// APPEARANCE GROUP
@@ -127,7 +127,7 @@ public class ErrorMiningPreferences {
 //		for(String token : NGramHighlighting.getInstance().getTokens()) {
 //			builder.addColorEntry(token+"Highlight", NGramHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
 //		}
-		
+
 		//Tagmining Configuration
 		builder.addGroup("tagmining", true); //$NON-NLS-1$
 		builder.addStringEntry("variationTag", "$pos");

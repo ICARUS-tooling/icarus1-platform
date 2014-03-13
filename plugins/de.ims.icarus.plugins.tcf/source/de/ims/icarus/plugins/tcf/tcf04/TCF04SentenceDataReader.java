@@ -25,10 +25,11 @@
  */
 package de.ims.icarus.plugins.tcf.tcf04;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.logging.Level;
 
@@ -82,15 +83,15 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
 
-		File file = location.getFile();
+		Path file = location.getLocalPath();
 
 		if(file == null)
 			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
 
 
-		if(!file.exists())
+		if(Files.notExists(file))
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
-											+file.getAbsolutePath());
+											+file);
 
 		if (options == null){
 			options = Options.emptyOptions;
@@ -111,12 +112,10 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 		// TextCorpusStreamed object with the layers specified in (layersToRead)
 		// and file-inputstream. This object will _only_ load the specified layers to
 		// memory and skip other layers (if there are other layers inside the tcf)
-
-		FileInputStream fis = new FileInputStream(file);
 		sentenceIndex = 0;
 
 		try {
-			textCorpusStreamed = new TextCorpusStreamed(fis, layersToRead);
+			textCorpusStreamed = new TextCorpusStreamed(Files.newInputStream(file), layersToRead);
 		} catch (WLFormatException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"TextCorpusFormat Exception", e); //$NON-NLS-1$
@@ -295,7 +294,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 
 	public static void main(String[] args) throws UnsupportedFormatException {
 
-		File file = new File ("E:\\tcf04-karin-wl.xml"); //$NON-NLS-1$
+		Path file = Paths.get("E:\\tcf04-karin-wl.xml"); //$NON-NLS-1$
 
 		DefaultFileLocation dloc = new DefaultFileLocation(file);
 		Options o = null;

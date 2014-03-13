@@ -58,7 +58,6 @@ import de.ims.icarus.language.model.api.manifest.Implementation;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.api.manifest.OptionsManifest;
 import de.ims.icarus.language.model.api.manifest.Prerequisite;
-import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.io.LocationType;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.language.model.standard.manifest.AbstractDerivable;
@@ -81,6 +80,7 @@ import de.ims.icarus.language.model.standard.manifest.StructureLayerManifestImpl
 import de.ims.icarus.language.model.standard.manifest.StructureManifestImpl;
 import de.ims.icarus.language.model.standard.manifest.ValueRangeImpl;
 import de.ims.icarus.language.model.standard.manifest.ValueSetImpl;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.logging.LogReport;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.UnsupportedFormatException;

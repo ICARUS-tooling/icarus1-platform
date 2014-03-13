@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.language.model.io;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
@@ -36,29 +36,29 @@ import de.ims.icarus.util.location.Location;
  * of some {@link LocationType}. Depending on the type of the source data the
  * meaning of the returned {@code path} string may vary. While for {@value LocationType#FILE}
  * or {@value LocationType#NETWORK} the {@code path} itself is sufficient for accessing
- * the data by translating it into a {@link File} or {@link URL} object and then opening
+ * the data by translating it into a {@link Path} or {@link URL} object and then opening
  * the respective input stream, the matter becomes more complicated when data is stored within
  * a database system. In this case the {@code path} denotes the address of the database and
  * additional information (like the row index of a table to start from, etc...) can be
- * obtained via property values set on the {@code Path} object.
+ * obtained via property values set on the {@code ResourcePath} object.
  * <p>
- * Note that unlike the {@link Location} interface, the {@code Path} model does not provide
+ * Note that unlike the {@link Location} interface, the {@code ResourcePath} model does not provide
  * translation of the abstract path to the data into a readable stream. All {@code LocationType}
- * specific behavior is to be implemented by the objects that use a {@code Path} instance to
+ * specific behavior is to be implemented by the objects that use a {@code ResourcePath} instance to
  * load data from!
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class Path extends Options {
+public class ResourcePath extends Options {
 
 	private static final long serialVersionUID = 4608518181833150521L;
 
 	private final String path;
 	private final LocationType type;
 
-	public Path(String path, LocationType type) {
+	public ResourcePath(String path, LocationType type) {
 		if (path == null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 		if (type == null)

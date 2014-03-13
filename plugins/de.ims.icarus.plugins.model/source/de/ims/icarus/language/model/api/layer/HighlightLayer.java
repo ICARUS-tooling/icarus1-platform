@@ -23,10 +23,11 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.api.layer;
 
 import java.util.List;
 
+import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.highlight.Highlight;
 import de.ims.icarus.language.model.api.highlight.HighlightCursor;
 import de.ims.icarus.language.model.api.manifest.HighlightLayerManifest;

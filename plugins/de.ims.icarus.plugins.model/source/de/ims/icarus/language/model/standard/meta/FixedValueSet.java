@@ -28,8 +28,8 @@ package de.ims.icarus.language.model.standard.meta;
 import java.util.Set;
 
 import de.ims.icarus.language.model.api.meta.AnnotationValueSet;
-import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.standard.ProxyIdentity;
+import de.ims.icarus.language.model.util.ValueType;
 
 /**
  * @author Markus Gärtner

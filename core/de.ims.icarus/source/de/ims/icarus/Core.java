@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 
@@ -32,10 +32,6 @@ package de.ims.icarus;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
@@ -45,6 +41,10 @@ import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,20 +93,20 @@ import de.ims.icarus.util.Exceptions;
  * <li>Plug-in properties</li>
  * <li>Application properties</li>
  * </ol>
- * 
+ *
  * <i>System properties</i> are the collection of system wide properties
  * accessible by Java via the {@link System#getProperties()} method.
  * <p>
  * <i>Plug-in properties</i> are properties defined within the {@code attributes}
  * section of a plug-in manifest file. Only attributes that are declared as child attributes
- * of the first {@value #PROPERTIES_KEY} attribute are considered to be 
+ * of the first {@value #PROPERTIES_KEY} attribute are considered to be
  * property definitions and will be processed in order of their
  * definition and checked for being a plain property definition (using the
  * {@code id} field as key and {@code value} field as value for a new property
  * entry) or a link pointing to a resource that can be used to load properties from.
  * Such links have to use the {@value #PROPERTIES_PATH_KEY} string as {@code id} and their
  * {@code value} field will be used to locate the properties resource(s).<br>
- * Note that there can be multiple attributes legally sharing the same {@code id}, 
+ * Note that there can be multiple attributes legally sharing the same {@code id},
  * however only the <b>last</b> attribute's {@code value} will be used for the
  * property in question! In the case of multiple attributes linking to property
  * resources all of them will be read following the same pattern of overwriting.
@@ -114,7 +114,7 @@ import de.ims.icarus.util.Exceptions;
  * it can simply define an attribute with the {@value #IGNORE_ATTRIBUTES_KEY} {@code id}
  * and a {@code value} that causes a call to {@code Boolean#parseBoolean(String)} to
  * return {@code true} (any mix of upper and lower cases of the string "true").
- * This flag will prevent the traversal of all property definitions within the 
+ * This flag will prevent the traversal of all property definitions within the
  * declaring plug-in!
  * <p>
  * <i>Application properties</i> can be specified on startup via the {@code -config}
@@ -133,31 +133,31 @@ import de.ims.icarus.util.Exceptions;
  * will be checked in reverse order of the levels described above until a mapping for the given
  * key is found. So for a call to {@link #getProperty(String)} a property defined on
  * plug-in level will override default system settings but will be hidden by
- * an application property defined as command line argument or in a config file 
- * linked via command line argument. Additionally there are methods defined to 
+ * an application property defined as command line argument or in a config file
+ * linked via command line argument. Additionally there are methods defined to
  * query specific collections of properties and all properties related methods
  * exist in two forms, one allowing for a default value to be supplied that will
- * be used in case no property for the given key could be found. 
- * 
- * 
- * @author Markus Gärtner 
+ * be used in case no property for the given key could be found.
+ *
+ *
+ * @author Markus Gärtner
  *
  */
 public class Core {
-	
+
 	private static Core core;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
 		try {
 			if(core!=null)
 				throw new IllegalStateException("Core already started!"); //$NON-NLS-1$
-						
+
 			core = new Core(args);
-			
+
 			SplashWindow.setMaxProgress(7);
 
 			SplashWindow.setText("Collecting plug-ins"); //$NON-NLS-1$
@@ -175,50 +175,50 @@ public class Core {
 			SplashWindow.step();
 			// Launch core plug-in
 			core.launchCorePlugin();
-			
+
 		} catch(Throwable e) {
 			new CoreErrorDialog(e);
 		}
 	}
-	
+
 	private final Logger logger;
-	
-	private final File rootFolder;
-	private final File logFolder;
-	private final File pluginFolder;
-	private final File cacheFolder;
-	private final File dataFolder;
-	private final File tempFolder;
-	
-	public static final String IGNORE_STREAM_REDIRECT_PROPERTY = 
+
+	private final Path rootFolder;
+	private final Path logFolder;
+	private final Path pluginFolder;
+	private final Path cacheFolder;
+	private final Path dataFolder;
+	private final Path tempFolder;
+
+	public static final String IGNORE_STREAM_REDIRECT_PROPERTY =
 			"de.ims.icarus.ignoreStreamRedirect"; //$NON-NLS-1$
-	
-	public static final String DEFAULT_CORE_PLUGIN_ID = 
+
+	public static final String DEFAULT_CORE_PLUGIN_ID =
 			"de.ims.icarus.core"; //$NON-NLS-1$
-	
-	public static final String PROPERTIES_PATH_KEY = 
+
+	public static final String PROPERTIES_PATH_KEY =
 			"de.ims.icarus.propertiesPath"; //$NON-NLS-1$
-	
-	public static final String PROPERTIES_KEY = 
+
+	public static final String PROPERTIES_KEY =
 			"de.ims.icarus.properties"; //$NON-NLS-1$
-	
-	public static final String IGNORE_ATTRIBUTES_KEY = 
+
+	public static final String IGNORE_ATTRIBUTES_KEY =
 			"de.ims.icarus.ignoreAttributes"; //$NON-NLS-1$
-	
-	public static final String CORE_PLUGIN_KEY =  
+
+	public static final String CORE_PLUGIN_KEY =
 			"de.ims.icarus.corePlugin"; //$NON-NLS-1$
-	
+
 	private Map<String, String> applicationProperties;
 	private Map<String, String> pluginProperties;
 	private Map<String, String> versionProperties;
-	
+
 	private List<NamedRunnable> shutdownHooks;
-	
+
 	private final CoreOptions options;
 
 	private Core(String[] args) {
 		logger = Logger.getLogger("icarus.launcher"); //$NON-NLS-1$
-		
+
 		SplashWindow.setText("Processing options"); //$NON-NLS-1$
 		SplashWindow.step();
 		// Init options
@@ -226,53 +226,48 @@ public class Core {
 
 		SplashWindow.setText("Checking folders"); //$NON-NLS-1$
 		// init folders
-		rootFolder = new File(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		rootFolder = Paths.get(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
+
 		// init log folder
-		logFolder = new File(rootFolder, "logs"); //$NON-NLS-1$
-		if(!logFolder.isDirectory() && !logFolder.mkdir())
-			throw new Error("Unable to create logging directory"); //$NON-NLS-1$
-		
+		logFolder = rootFolder.resolve("logs"); //$NON-NLS-1$
+		ensureDir(logFolder, "logging"); //$NON-NLS-1$
+
 		// init plugins folder
-		pluginFolder = new File(rootFolder, "plugins"); //$NON-NLS-1$
-		if(!pluginFolder.isDirectory() && !pluginFolder.mkdir())
-			throw new Error("Unable to create plugins directory"); //$NON-NLS-1$
-		
+		pluginFolder = rootFolder.resolve("plugins"); //$NON-NLS-1$
+		ensureDir(pluginFolder, "plugins"); //$NON-NLS-1$
+
 		// init data folder
-		dataFolder = new File(rootFolder, "data"); //$NON-NLS-1$
-		if(!dataFolder.isDirectory() && !dataFolder.mkdir())
-			throw new Error("Unable to create data directory"); //$NON-NLS-1$
+		dataFolder = rootFolder.resolve("data"); //$NON-NLS-1$
+		ensureDir(dataFolder, "data"); //$NON-NLS-1$
 
 		// init temp folder
-		tempFolder = new File(rootFolder, "temp"); //$NON-NLS-1$
-		if(!tempFolder.isDirectory() && !tempFolder.mkdir())
-			throw new Error("Unable to create temp directory"); //$NON-NLS-1$
+		tempFolder = rootFolder.resolve("temp"); //$NON-NLS-1$
+		ensureDir(tempFolder, "temp"); //$NON-NLS-1$
 
 		// init cache folder
-		cacheFolder = new File(rootFolder, "cache"); //$NON-NLS-1$
-		if(!cacheFolder.isDirectory() && !cacheFolder.mkdir())
-			throw new Error("Unable to create cache directory"); //$NON-NLS-1$
-		
+		cacheFolder = rootFolder.resolve("cache"); //$NON-NLS-1$
+		ensureDir(cacheFolder, "cache"); //$NON-NLS-1$
+
 		// Redirect default output
 		if(!ignoreRedirect()) {
-			File outFile = new File(logFolder, "out.txt"); //$NON-NLS-1$
+			Path outFile = logFolder.resolve("out.txt"); //$NON-NLS-1$
 			PrintStream defaultOut = System.out;
 			PrintStream defaultErr = System.err;
 			try {
-				if(!outFile.isFile()) {
-					outFile.createNewFile();
+				if(!Files.isRegularFile(outFile)) {
+					Files.createFile(outFile);
 				}
-				
+
 				@SuppressWarnings("resource")
-				PrintStream ps = new PrintStream(new FileOutputStream(outFile), 
+				PrintStream ps = new PrintStream(Files.newOutputStream(outFile),
 					true, "UTF-8"); //$NON-NLS-1$
-				
+
 				System.setOut(ps);
 				System.setErr(ps);
 			} catch(Exception e) {
 				System.setOut(defaultOut);
 				System.setErr(defaultErr);
-				
+
 				e.printStackTrace(defaultOut);
 			}
 		}
@@ -280,22 +275,23 @@ public class Core {
 		SplashWindow.setText("Starting logger"); //$NON-NLS-1$
 		SplashWindow.step();
 		// Init default log file
-		File logFile = new File(logFolder, "launcher.log"); //$NON-NLS-1$
+		Path logFile = logFolder.resolve("launcher.log"); //$NON-NLS-1$
 		try {
-			logger.addHandler(new FileHandler(logFile.getPath()));
+			logger.addHandler(new FileHandler(logFile.toString()));
 		} catch (SecurityException e) {
-			throw new Error("Unable to define log file: "+logFile.getAbsolutePath(), e); //$NON-NLS-1$
+			throw new Error("Unable to define log file: "+logFile, e); //$NON-NLS-1$
 		} catch (IOException e) {
-			throw new Error("Unable to access log file: "+logFile.getAbsolutePath(), e); //$NON-NLS-1$
+			throw new Error("Unable to access log file: "+logFile, e); //$NON-NLS-1$
 		}
 
 		SplashWindow.setText("Ensuring license file"); //$NON-NLS-1$
 		SplashWindow.step();
 		// Ensure license file
-		File licenseFile = new File(rootFolder, "license.txt"); //$NON-NLS-1$
+		Path licenseFile = rootFolder.resolve("license.txt"); //$NON-NLS-1$
 		try {
-			if(!licenseFile.exists() && licenseFile.createNewFile()) {
-				IOUtil.copyStream(getLicense(), new FileOutputStream(licenseFile), 0);
+			if(Files.notExists(licenseFile)) {
+				Files.createFile(licenseFile);
+				IOUtil.copyStream(getLicense(), Files.newOutputStream(licenseFile), 0);
 			}
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "Failed to export license file", ex); //$NON-NLS-1$
@@ -309,30 +305,40 @@ public class Core {
 		} catch (Exception e) {
 			throw new Error("Failed to load plug-in framework objects", e); //$NON-NLS-1$
 		}
-		
+
 		PluginUtil.getPluginManager().registerListener(new PluginManagerLog());
 	}
-	
+
+	private void ensureDir(Path path, String name) {
+		if(!Files.isDirectory(path) && Files.notExists(path)) {
+			try {
+				Files.createDirectory(path);
+			} catch (IOException e) {
+				throw new Error("Unable to create "+name+" directory"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+	}
+
 	private static boolean ignoreRedirect() {
 		String ignore = System.getProperty(IGNORE_STREAM_REDIRECT_PROPERTY);
 		return ignore!=null && Boolean.parseBoolean(ignore);
 	}
-	
+
 	// prevent multiple deserialization
 	private Object readResolve() throws ObjectStreamException {
 		throw new NotSerializableException(Core.class.getName());
 	}
-	
+
 	// prevent cloning
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
-	
+
 	private void collectProperties() {
 		// Just use the options set of properties as application properties
 		applicationProperties = options.properties;
-		
+
 		// Load the "version.properties" file generated by the build script
 		try {
 			URL url = Core.class.getResource("version.properties"); //$NON-NLS-1$
@@ -347,29 +353,29 @@ public class Core {
 		} catch(Exception e) {
 			logger.log(Level.WARNING, "Failed to load version information from 'version.properties' file", e); //$NON-NLS-1$
 		}
-		
+
 		// Read in all attributes from plug-ins
 		for(PluginDescriptor descriptor : PluginUtil.getPluginRegistry().getPluginDescriptors()) {
-			
+
 			// Check if ignore flag is set
 			PluginAttribute ignoreAttr = descriptor.getAttribute(IGNORE_ATTRIBUTES_KEY);
 			if(ignoreAttr!=null && Boolean.parseBoolean(ignoreAttr.getValue())) {
 				continue;
 			}
-			
+
 			// Check if plug-in defines properties
 			PluginAttribute propertiesAttr = descriptor.getAttribute(PROPERTIES_KEY);
 			if(propertiesAttr==null) {
 				continue;
 			}
-			
+
 			// Fetch and read property attributes
 			for(PluginAttribute attribute : propertiesAttr.getSubAttributes()) {
 				readProperty(attribute);
 			}
 		}
 	}
-	
+
 	private void readProperty(PluginAttribute attribute) {
 		if(PROPERTIES_PATH_KEY.equals(attribute.getId())) {
 			// Read in properties resource file
@@ -380,7 +386,7 @@ public class Core {
 				logger.log(Level.WARNING, "Could not locate properties file: "+path); //$NON-NLS-1$
 				return;
 			}
-			
+
 			Properties properties = readProperties(url, path.endsWith(".xml")); //$NON-NLS-1$
 			if(properties==null) {
 				// Logging is done on the readProperties() method
@@ -401,13 +407,13 @@ public class Core {
 			pluginProperties.put(attribute.getId(), attribute.getValue());
 		}
 	}
-	
+
 	private void collectPlugins() {
 		List<PluginLocation> pluginLocations = new LinkedList<>();
 		logger.fine("Collecting plug-ins"); //$NON-NLS-1$
 		processFolder(pluginFolder, pluginLocations);
 		logger.info(String.format("Collected %d plug-ins", pluginLocations.size())); //$NON-NLS-1$
-		
+
 		try {
 			logger.fine("Publishing plug-ins"); //$NON-NLS-1$
 			PluginUtil.getPluginManager().publishPlugins(pluginLocations.toArray(new PluginLocation[pluginLocations.size()]));
@@ -415,12 +421,12 @@ public class Core {
 			logger.log(Level.SEVERE, "Failed to publish plug-ins", e); //$NON-NLS-1$
 			exit(new Error("JpfException encountered: "+e.getMessage(), e)); //$NON-NLS-1$
 		}
-		
+
 		if(logger.isLoggable(Level.FINE)) {
 			IntegrityCheckReport report = PluginUtil.getPluginRegistry().getRegistrationReport();
 			logger.fine(integrityCheckReport2str("Registration report", report)); //$NON-NLS-1$
 		}
-		
+
 		// check plug-ins integrity
 		logger.fine("Checking plug-ins set integrity"); //$NON-NLS-1$
 		IntegrityCheckReport report = PluginUtil.getPluginRegistry().checkIntegrity(
@@ -433,13 +439,13 @@ public class Core {
 		} else if(logger.isLoggable(Level.FINE)) {
 			logger.fine(integrityCheckReport2str("Integrity check report", report)); //$NON-NLS-1$
 		}
-		
+
 		// in case of errors simply exit launcher completely
 		if(report.countErrors()>0) {
 			exit(new Error("Integrity check failed - check log")); //$NON-NLS-1$
 		}
 	}
-    
+
     private String integrityCheckReport2str(final String header, final IntegrityCheckReport report) {
         StringBuilder buf = new StringBuilder();
         buf.append(header).append(":\r\n"); //$NON-NLS-1$
@@ -455,10 +461,10 @@ public class Core {
         return buf.toString();
     }
 
-    private void processFolder(final File folder, final List<PluginLocation> result) {
+    private void processFolder(final Path folder, final List<PluginLocation> result) {
     	logger.fine("processing folder - " + folder); //$NON-NLS-1$
         try {
-            PluginLocation pluginLocation = StandardPluginLocation.create(folder);
+            PluginLocation pluginLocation = StandardPluginLocation.create(folder.toFile());
             if (pluginLocation != null) {
                 result.add(pluginLocation);
                 return;
@@ -467,23 +473,25 @@ public class Core {
             logger.log(Level.WARNING, "Failed collecting plug-in folder " + folder, e); //$NON-NLS-1$
             return;
         }
-        
+
         // Recursively traverse content of folder till we find plug-ins
-        File[] files = folder.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
-            if (file.isDirectory()) {
-                processFolder(file, result);
-            } else if (file.isFile()) {
-                processFile(file, result);
-            }
-        }
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(folder)) {
+        	for(Path path : stream) {
+        		if(Files.isDirectory(path)) {
+                    processFolder(path, result);
+        		} else if(Files.isRegularFile(path)) {
+                    processFile(path, result);
+        		}
+        	}
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Failed traversing files in plug-in folder " + folder, e); //$NON-NLS-1$
+		}
     }
-    
-    private void processFile(final File file, final List<PluginLocation> result) {
+
+    private void processFile(final Path file, final List<PluginLocation> result) {
     	logger.fine("processing file - " + file); //$NON-NLS-1$
         try {
-            PluginLocation pluginLocation = StandardPluginLocation.create(file);
+            PluginLocation pluginLocation = StandardPluginLocation.create(file.toFile());
             if (pluginLocation != null) {
                 result.add(pluginLocation);
             }
@@ -491,34 +499,34 @@ public class Core {
             logger.log(Level.WARNING, "Failed collecting plug-in file " + file , e); //$NON-NLS-1$
         }
     }
-	
+
 	private void launchCorePlugin() {
 		try {
 			logger.fine("Starting core plugin"); //$NON-NLS-1$
-			
+
 			// DEBUG
 			LoggerFactory.setInitialLevel(Level.ALL);
-			
+
 			String corePluginId = getProperty(CORE_PLUGIN_KEY, DEFAULT_CORE_PLUGIN_ID);
-			
+
 			Plugin corePlugin = PluginUtil.getPluginManager().getPlugin(corePluginId);
 			logger.info("Started core plugin: "+corePlugin); //$NON-NLS-1$
 		} catch (PluginLifecycleException e) {
 			exit(new Error("Failed to start core plugin: "+e.getMessage(), e)); //$NON-NLS-1$
 		}
 	}
-	
+
 	// Exits the launcher by throwing the provided Error
 	// after closing all handlers on the internal logger
 	private void exit(Error e) {
 		logger.log(Level.SEVERE, "Fatal error encountered - launcher will exit", e); //$NON-NLS-1$
-		
+
 		for(Handler handler : logger.getHandlers()) {
 			if(handler instanceof StreamHandler) {
 				((StreamHandler)handler).close();
 			}
 		}
-		
+
 		throw e;
 	}
 
@@ -528,44 +536,44 @@ public class Core {
 	public static Core getCore() {
 		return core;
 	}
-	
+
 	public synchronized void addShutdownHook(NamedRunnable hook) {
 		if(shutdownHooks==null) {
 			shutdownHooks = new ArrayList<>();
 		}
-		
+
 		shutdownHooks.add(hook);
 	}
-	
+
 	public synchronized void addShutdownHook(final String name, final Runnable r) {
 		NamedRunnable hook = new NamedRunnable() {
-			
+
 			@Override
 			public void run() throws Exception {
-				r.run();				
+				r.run();
 			}
-			
+
 			@Override
 			public String getName() {
 				return name;
 			}
 		};
-		
+
 		addShutdownHook(hook);
 	}
-	
+
 	public synchronized NamedRunnable[] getShutdownHooks() {
 		if(shutdownHooks==null) {
 			return new NamedRunnable[0];
 		}
-		
+
 		NamedRunnable[] hooks = new NamedRunnable[shutdownHooks.size()];
-		
+
 		return shutdownHooks.toArray(hooks);
 	}
-	
+
 	private volatile boolean shuttingDown = false;
-	
+
 	/**
 	 * @return the shuttingDown
 	 */
@@ -575,9 +583,9 @@ public class Core {
 
 	public synchronized void shutdown(UncaughtExceptionHandler handler) {
 		shuttingDown = true;
-		
+
 		NamedRunnable[] hooks = getShutdownHooks();
-		
+
 		for(NamedRunnable hook : hooks) {
 			try {
 				hook.run();
@@ -585,13 +593,13 @@ public class Core {
 				if(handler!=null) {
 					handler.uncaughtException(Thread.currentThread(), e);
 				} else {
-					LoggerFactory.log(this, Level.SEVERE, 
+					LoggerFactory.log(this, Level.SEVERE,
 							"Uncaught exception in shutdown hook: "+hook.getName(), e); //$NON-NLS-1$
 				}
 			}
 		}
 	}
-	
+
 	public CoreOptions getOptions() {
 		return options;
 	}
@@ -599,55 +607,55 @@ public class Core {
 	/**
 	 * @return the rootFolder
 	 */
-	public File getRootFolder() {
+	public Path getRootFolder() {
 		return rootFolder;
 	}
 
 	/**
 	 * @return the logFolder
 	 */
-	public File getLogFolder() {
+	public Path getLogFolder() {
 		return logFolder;
 	}
 
 	/**
 	 * @return the pluginFolder
 	 */
-	public File getPluginFolder() {
+	public Path getPluginFolder() {
 		return pluginFolder;
 	}
 
 	/**
 	 * @return the dataFolder
 	 */
-	public File getDataFolder() {
+	public Path getDataFolder() {
 		return dataFolder;
 	}
 
 	/**
 	 * @return the tempFolder
 	 */
-	public File getTempFolder() {
+	public Path getTempFolder() {
 		return tempFolder;
 	}
 
 	/**
 	 * @return the tempFolder
 	 */
-	public File getCacheFolder() {
+	public Path getCacheFolder() {
 		return cacheFolder;
 	}
-	
-	public File createTempFile(String baseName) throws IOException {
-		return File.createTempFile(baseName, "tmp", getTempFolder()); //$NON-NLS-1$
+
+	public Path createTempFile(String baseName) throws IOException {
+		return Files.createTempFile(tempFolder, baseName, "tmp"); //$NON-NLS-1$
 	}
-	
+
 	// PROPERTIES ACCESS
 
 	public String getProperty(String key) {
 		return getProperty(key, null);
 	}
-	
+
 	public String getProperty(String key, String defaultValue) {
 		String value = applicationProperties==null ? null : applicationProperties.get(key);
 		if(value==null) {
@@ -656,23 +664,23 @@ public class Core {
 		if(value==null) {
 			value = System.getProperty(key, defaultValue);
 		}
-		
+
 		return value;
 	}
-	
+
 	public String getApplicationProperty(String key) {
 		return getApplicationProperty(key, null);
 	}
-	
+
 	public String getApplicationProperty(String key, String defaultValue) {
 		String value = applicationProperties==null ? null : applicationProperties.get(key);
 		return value==null ? defaultValue : value;
 	}
-	
+
 	public String getPluginProperty(String key) {
 		return getPluginProperty(key, null);
 	}
-	
+
 	public String getPluginProperty(String key, String defaultValue) {
 		String value = pluginProperties==null ? null : pluginProperties.get(key);
 		return value==null ? defaultValue : value;
@@ -681,14 +689,14 @@ public class Core {
 	public Map<String, String> getApplicationProperties() {
 		return Collections.unmodifiableMap(applicationProperties);
 	}
-	
+
 	public Map<String, String> getPluginProperties() {
 		return Collections.unmodifiableMap(pluginProperties);
 	}
-	
+
 	private Properties readProperties(InputStream in, boolean xml) {
 		Properties properties = new Properties();
-		
+
 		try {
 			if(xml) {
 				properties.loadFromXML(in);
@@ -699,19 +707,19 @@ public class Core {
 			logger.log(Level.SEVERE, "Failed to read properties", e); //$NON-NLS-1$
 			properties = null;
 		}
-		
+
 		return properties;
 	}
-	
-	private Properties readProperties(File file, boolean xml) {
+
+	private Properties readProperties(Path file, boolean xml) {
 		try {
-			return readProperties(new FileInputStream(file), xml);
-		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, "Properties file does not exist: "+file.getAbsolutePath(), e); //$NON-NLS-1$
+			return readProperties(Files.newInputStream(file), xml);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Properties file does not exist: "+file, e); //$NON-NLS-1$
 		}
 		return null;
 	}
-	
+
 	private Properties readProperties(URL url, boolean xml) {
 		try {
 			return readProperties(url.openStream(), xml);
@@ -720,29 +728,29 @@ public class Core {
 		}
 		return null;
 	}
-	
+
 	public static void showNotice() {
 		JLabel label = new JLabel("Soon "+(char)0x2122); //$NON-NLS-1$
 		label.setForeground(Color.blue.brighter());
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setFont(new Font("Dialog", Font.PLAIN, 30)); //$NON-NLS-1$
-		
+
 		DialogFactory.getGlobalFactory().showGenericDialog(
 				null, "Coming...", null, label, false); //$NON-NLS-1$
 	}
-	
+
 	private static InputStream getLicense() {
 		return Core.class.getResourceAsStream("license.txt"); //$NON-NLS-1$
 	}
-	
+
 	public static String getLicenseText() {
 		InputStream in = getLicense();
 		try {
 			return IOUtil.readStream(in);
 		} catch (IOException e) {
-			LoggerFactory.log(Core.class, Level.SEVERE, 
+			LoggerFactory.log(Core.class, Level.SEVERE,
 					"Failed to load license file", e); //$NON-NLS-1$
-			
+
 			return null;
 		} finally {
 			try {
@@ -752,43 +760,43 @@ public class Core {
 			}
 		}
 	}
-	
+
 	public static Icon getLicenseIcon() {
 		return new ImageIcon(Core.class.getResource("cc-by-nc-sa.png")); //$NON-NLS-1$
 	}
-	
+
 	private static ImageIcon logo_16;
 	private static ImageIcon logo_32;
 	private static ImageIcon logo_64;
-	
+
 	public static ImageIcon getSmallIcon() {
 		if(logo_16==null) {
 			logo_16 = new ImageIcon(Core.class.getResource("logo_16x16.png")); //$NON-NLS-1$
 		}
 		return logo_16;
 	}
-	
+
 	public static ImageIcon getLargeIcon() {
 		if(logo_64==null) {
 			logo_64 = new ImageIcon(Core.class.getResource("logo_64x64.png")); //$NON-NLS-1$
 		}
 		return logo_64;
 	}
-	
+
 	public static ImageIcon getMediumIcon() {
 		if(logo_32==null) {
 			logo_32 = new ImageIcon(Core.class.getResource("logo_32x32.png")); //$NON-NLS-1$
 		}
 		return logo_32;
 	}
-	
+
 	public static List<Image> getIconImages() {
 		List<Image> images = new ArrayList<>(3);
-		
+
 		images.add(getSmallIcon().getImage());
 		images.add(getMediumIcon().getImage());
 		images.add(getLargeIcon().getImage());
-		
+
 		return images;
 	}
 
@@ -796,35 +804,35 @@ public class Core {
 		ensureResource(null, filename, path, loader);
 	}
 
-	public void ensureResource(String foldername, String filename, 
+	public void ensureResource(String foldername, String filename,
 			String path, ClassLoader loader) {
-		
+
 		InputStream in = null;
 		OutputStream out = null;
-		
+
 		try {
-			File folder = dataFolder;
+			Path folder = dataFolder;
 			if(foldername!=null) {
-				folder = new File(folder, foldername);
-				if(!folder.exists()) {
-					folder.mkdir();
+				folder = folder.resolve(foldername);
+				if(Files.notExists(folder)) {
+					Files.createDirectory(folder);
 				}
 			}
-			
-			File file = new File(folder, filename);
-			if(file.isFile()) {
+
+			Path file = folder.resolve(filename);
+			if(Files.isRegularFile(file)) {
 				return;
 			}
-			
-			file.createNewFile();
-			
-			System.out.println(path);
-			
+
+			Files.createFile(file);
+
+//			System.out.println(path);
+
 			in = loader.getResourceAsStream(path);
-			out = new FileOutputStream(file);
-			
-			IOUtil.copyStream(in, out, 4096);
-			
+			out = Files.newOutputStream(file);
+
+			IOUtil.copyStream(in, out);
+
 		} catch(Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to ensure resource: "+filename, e); //$NON-NLS-1$
 		} finally {
@@ -845,64 +853,64 @@ public class Core {
 			}
 		}
 	}
-	
+
 	public String getVersionProperty(String key) {
 		return versionProperties==null ? null : versionProperties.get(key);
 	}
-	
+
 	public String getAppVendor() {
 		String vendor = getVersionProperty("app.vendor"); //$NON-NLS-1$
 		return vendor==null ? "???" : vendor; //$NON-NLS-1$
 	}
-	
+
 	public String getAppName() {
 		String name = getVersionProperty("app.name"); //$NON-NLS-1$
 		return name==null ? "???" : name; //$NON-NLS-1$
 	}
-	
+
 	public String getAppRevision() {
 		String revision = getVersionProperty("app.revision"); //$NON-NLS-1$
 		return revision==null ? "???" : revision; //$NON-NLS-1$
 	}
-	
+
 	public String getAppBuildDate() {
 		String date = getVersionProperty("build.date"); //$NON-NLS-1$
 		return date==null ? "???" : date; //$NON-NLS-1$
 	}
-	
+
 	public String getAppVersion() {
 		String version = getVersionProperty("app.version"); //$NON-NLS-1$
 		return version==null ? "???" : version; //$NON-NLS-1$
 	}
-	
-	
+
+
 	public boolean handleThrowable(Throwable t) {
-		
+
 		OutOfMemoryError oom = Exceptions.getThrowableOfType(t, OutOfMemoryError.class);
-		
+
 		if(oom!=null) {
 			long used = SystemMonitor.getInstance().getUsed();
 			long committed = SystemMonitor.getInstance().getCommitted();
-			
+
 			DialogDispatcher dispatcher = new DialogDispatcher(
-					null, 
+					null,
 					"core.dialogs.outOfMemory.title",  //$NON-NLS-1$
 					"core.dialogs.outOfMemory.message",  //$NON-NLS-1$
 					SystemMonitor.formatMemory(used),
 					SystemMonitor.formatMemory(committed));
-			
+
 			dispatcher.showAsError();
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Command line argument wrapper
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -911,12 +919,12 @@ public class Core {
 		private Map<String,String> properties;
 		private boolean verbose = false;
 		private boolean devMode = false;
-		
+
 		private final String[] args;
-		
+
 		public CoreOptions(String[] args) {
 			this.args = args;
-			
+
 			for(int i=0; i<args.length; i++) {
 				String token = args[i];
 				if("-v".equals(token)) { //$NON-NLS-1$
@@ -927,7 +935,7 @@ public class Core {
 					devMode = true;
 				} else if("-config".equals(token)) { //$NON-NLS-1$
 					String path = args[++i];
-					File file = new File(path);
+					Path file = Paths.get(path);
 					Properties props = readProperties(file, path.endsWith(".xml")); //$NON-NLS-1$
 					putProperties(props);
 				} else if(token.startsWith("-D")) { //$NON-NLS-1$
@@ -940,17 +948,17 @@ public class Core {
 					if(value.startsWith("\"") && value.endsWith("\"")) { //$NON-NLS-1$ //$NON-NLS-2$
 						value = value.substring(1, value.length()-1);
 					}
-					
+
 					putProperty(key, value);
 				}
 			}
 		}
-		
+
 		private void putProperties(Properties props) {
 			if(props==null || props.isEmpty()) {
 				return;
 			}
-			
+
 			if(properties==null) {
 				properties = new HashMap<>();
 			}
@@ -959,47 +967,47 @@ public class Core {
 				properties.put(key, props.getProperty(key));
 			}
 		}
-		
+
 		private void putProperty(String key, String value) {
 			if(properties==null) {
 				properties = new HashMap<>();
 			}
 			properties.put(key, value);
 		}
-		
+
 		public boolean isVerbose() {
 			return verbose;
 		}
-		
+
 		public boolean isDevMode() {
 			return devMode;
 		}
-		
+
 		public String[] getArgs() {
 			return Arrays.copyOf(args, args.length);
 		}
-		
+
 		public String getProperty(String key) {
 			return properties==null ? null : properties.get(key);
 		}
 	}
-	
+
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	public static interface NamedRunnable {
-		
+
 		String getName();
-		
+
 		void run() throws Exception;
 	}
-	
+
 	private class PluginManagerLog implements PluginManager.EventListener {
-		
+
 
 		/**
 		 * @see org.java.plugin.PluginManager.EventListener#pluginActivated(org.java.plugin.Plugin)
@@ -1010,7 +1018,7 @@ public class Core {
                     + " (active/total: " + PluginUtil.countActive() //$NON-NLS-1$
                     + " of "  //$NON-NLS-1$
                     + PluginUtil.getPluginRegistry().getPluginDescriptors().size() + ")"; //$NON-NLS-1$
-            
+
             LoggerFactory.log(this, Level.INFO, msg);
 		}
 
@@ -1052,6 +1060,6 @@ public class Core {
 
             LoggerFactory.log(this, Level.INFO, msg);
 		}
-		
+
 	}
 }

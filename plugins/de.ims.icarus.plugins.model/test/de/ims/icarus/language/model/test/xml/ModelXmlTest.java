@@ -25,18 +25,19 @@
  */
 package de.ims.icarus.language.model.test.xml;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.Test;
 
-import de.ims.icarus.language.model.api.meta.ValueType;
 import de.ims.icarus.language.model.standard.manifest.OptionsManifestImpl;
 import de.ims.icarus.language.model.standard.manifest.ValueSetImpl;
 import de.ims.icarus.language.model.standard.manifest.Values;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.language.model.xml.sax.ManifestParser;
@@ -54,11 +55,11 @@ public class ModelXmlTest {
 //	@Test
 	public void testStreamSerializer() throws Exception {
 
-		File file = new File("temp/streamTest.xml");
+		Path file = Paths.get("temp/streamTest.xml");
 
 		XMLOutputFactory factory = XMLOutputFactory.newFactory();
 
-		XMLStreamWriter writer = factory.createXMLStreamWriter(new FileOutputStream(file), "UTF-8");
+		XMLStreamWriter writer = factory.createXMLStreamWriter(Files.newOutputStream(file), "UTF-8");
 //		XMLStreamWriter writer = factory.createXMLStreamWriter(System.out, "UTF-8");
 
 		XmlSerializer serializer = new XmlStreamSerializer(writer);
@@ -102,18 +103,18 @@ public class ModelXmlTest {
 	@Test
 	public void testModelTemplateParser() throws Exception {
 
-		File file = new File("temp/streamInTest1.xml");
+		Path file = Paths.get("temp/streamInTest1.xml");
 
-		LogReport report = ManifestParser.getInstance().loadTemplates(file.toURI().toURL());
+		LogReport report = ManifestParser.getInstance().loadTemplates(file.toUri().toURL());
 		report.publish();
 	}
 
 	@Test
 	public void testModelCorporaParser() throws Exception {
 
-		File file = new File("temp/streamInTest2.xml");
+		Path file = Paths.get("temp/streamInTest2.xml");
 
-		LogReport report = ManifestParser.getInstance().loadCorpora(file.toURI().toURL());
+		LogReport report = ManifestParser.getInstance().loadCorpora(file.toUri().toURL());
 		report.publish();
 	}
 }

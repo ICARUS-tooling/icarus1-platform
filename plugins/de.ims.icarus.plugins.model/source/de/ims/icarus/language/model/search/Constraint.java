@@ -19,28 +19,17 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$
- * $LastChangedRevision$
+ * $LastChangedDate$ 
+ * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
-
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+package de.ims.icarus.language.model.search;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface StructureLayer extends MarkableLayer {
+public interface Constraint {
 
-	/**
-	 * Returns the shared {@code StructureLayerManifest} that holds
-	 * information about markable composition and possible structures
-	 * in this layer.
-	 *
-	 * @return The manifest that describes this collection of markables
-	 */
-	@Override
-	StructureLayerManifest getManifest();
 }

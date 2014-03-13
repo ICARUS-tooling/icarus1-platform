@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus G�rtner and Gregor Thiele
  *
@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining;
 
@@ -34,11 +34,13 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -91,7 +93,7 @@ import de.ims.icarus.util.mpi.ResultMessage;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class NGramQueryView extends View {
 
@@ -100,7 +102,7 @@ public class NGramQueryView extends View {
 	protected Collection<JComponent> localizedComponents;
 
 	private JScrollPane scrollPane;
-	
+
 	//Tablestuff
 	protected NGramQTableModel qtm;
 	protected JTable qt;
@@ -114,9 +116,9 @@ public class NGramQueryView extends View {
 
 	private Handler handler;
 	private CallbackHandler callbackHandler;
-	
+
 	protected SearchDescriptor searchDescriptor;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -136,7 +138,7 @@ public class NGramQueryView extends View {
 		if (actionLocation == null)
 			throw new CorruptedStateException(
 					"Missing resources: query-editor-actions.xml"); //$NON-NLS-1$
-		
+
 		ActionManager actionManager = getDefaultActionManager();
 		try {
 			actionManager.loadActions(actionLocation);
@@ -146,15 +148,15 @@ public class NGramQueryView extends View {
 			UIDummies.createDefaultErrorOutput(container, e);
 			return;
 		}
-		
+
 		localizedComponents = new ArrayList<>();
-		
+
 		contentPanel = new JPanel();
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
+
 
 		handler = createHandler();
-		
+
 		// Header label
 		header = new JLabel(""); //$NON-NLS-1$
 		header.setBorder(new EmptyBorder(3, 5, 10, 20));
@@ -167,10 +169,10 @@ public class NGramQueryView extends View {
 		ResourceManager.getInstance().getGlobalDomain()
 				.prepareComponent(infoLabel,"plugins.errormining.nGramQueryView.notAvailable", null); //$NON-NLS-1$
 		ResourceManager.getInstance().getGlobalDomain().addComponent(infoLabel);
-		
-		
+
+
 		ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
-		
+
 		//Buttons (Add/Edit/Remove)
 		qtAddButton = new JButton();
 		qtAddButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("add_obj.gif")); //$NON-NLS-1$
@@ -178,33 +180,33 @@ public class NGramQueryView extends View {
 		resourceDomain.addComponent(qtAddButton);
 		localizedComponents.add(qtAddButton);
 		qtAddButton.addActionListener(handler);
-		
+
 		qtEditButton = new JButton();
 		qtEditButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("write_obj.gif")); //$NON-NLS-1$
 		resourceDomain.prepareComponent(qtEditButton, "edit", null); //$NON-NLS-1$
 		resourceDomain.addComponent(qtEditButton);
 		localizedComponents.add(qtEditButton);
 		qtEditButton.addActionListener(handler);
-		
+
 		qtRemoveButton = new JButton();
 		qtRemoveButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("delete_obj.gif")); //$NON-NLS-1$
 		resourceDomain.prepareComponent(qtRemoveButton, "delete", null); //$NON-NLS-1$
 		resourceDomain.addComponent(qtRemoveButton);
 		localizedComponents.add(qtRemoveButton);
 		qtRemoveButton.addActionListener(handler);
-		
+
 //		qtIncludeButton = new JButton();
 //		qtIncludeButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("include_on-off.png")); //$NON-NLS-1$
 //		resourceDomain.prepareComponent(qtIncludeButton, "include", null); //$NON-NLS-1$
 //		resourceDomain.addComponent(qtIncludeButton);
 //		localizedComponents.add(qtIncludeButton);
-//		qtIncludeButton.addActionListener(handler);	
+//		qtIncludeButton.addActionListener(handler);
 
-		
-		
+
+
 		// Description Scrollpane
 		scrollPane = new JScrollPane();
-		scrollPane.setBorder(null);	
+		scrollPane.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
 		scrollPane.setPreferredSize(new Dimension(400, 400));
 
@@ -214,38 +216,38 @@ public class NGramQueryView extends View {
 		footer.add(new JButton(actionManager.getAction(
 				"plugins.errorMining.nGramQueryView.loadQueryAction"))); //$NON-NLS-1$
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.errorMining.nGramQueryView.saveQueryAction"))); //$NON-NLS-1$	
+				"plugins.errorMining.nGramQueryView.saveQueryAction"))); //$NON-NLS-1$
 		footer.add(new JButton(actionManager.getAction(
-				"plugins.errorMining.nGramQueryView.resetQueryAction"))); //$NON-NLS-1$	
+				"plugins.errorMining.nGramQueryView.resetQueryAction"))); //$NON-NLS-1$
 
-		
+
 
 		//put all on viewcontainer
 		container.setLayout(new BorderLayout());
 		container.add(header, BorderLayout.NORTH);
 		container.add(scrollPane, BorderLayout.CENTER);
 		container.add(footer, BorderLayout.SOUTH);
-		
+
 		registerActionCallbacks();
-				
-		showDefaultInfo();	
-					
-		
+
+		showDefaultInfo();
+
+
 		buildDialog();
-		
-		
+
+
 		refreshActions();
-		
+
 	}
-	
-	
-	
+
+
+
 	private void showDefaultInfo() {
 		scrollPane.setViewportView(infoLabel);
 		header.setText(""); //$NON-NLS-1$
-	
+
 	}
-	
+
 
 	protected void refreshActions() {
 		//nullcheck
@@ -254,8 +256,8 @@ public class NGramQueryView extends View {
 			qtEditButton.setEnabled(false);
 			qtRemoveButton.setEnabled(false);
 		}
-		
-		//empty no items inside -> only allow adding new 
+
+		//empty no items inside -> only allow adding new
 		System.out.println(qt.getRowCount());
 		if (qt.getRowCount() == 0){
 			qtAddButton.setEnabled(true);
@@ -269,12 +271,12 @@ public class NGramQueryView extends View {
 			//qtIncludeButton.setEnabled(true);
 		}
 	}
-	
+
 
 
 	public void buildDialog() {
-		
-		
+
+
 		//Buttons
 		JPanel buttonPanel = new JPanel(new GridLayout(4, 1));
 		buttonPanel.setBorder(new EmptyBorder(0, 5, 5, 5));
@@ -282,15 +284,15 @@ public class NGramQueryView extends View {
 		buttonPanel.add(qtEditButton);
 		buttonPanel.add(qtRemoveButton);
 		//buttonPanel.add(qtIncludeButton);
-		
-		
+
+
 		//Table
 		JScrollPane scrollPaneTable = new JScrollPane();
-		scrollPaneTable.setBorder(null);	
+		scrollPaneTable.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(scrollPaneTable);
 		scrollPaneTable.setPreferredSize(new Dimension(500, 300));
 		qtm = new NGramQTableModel();
-		
+
 		qt = new JTable(qtm);
 		qt.setRowHeight(25);
 
@@ -304,25 +306,25 @@ public class NGramQueryView extends View {
 		qt.addMouseListener(handler);
 		qt.setIntercellSpacing(new Dimension(4, 4));
 		scrollPaneTable.setViewportView(qt);
-	
+
 
 		JPanel jp = new JPanel(new GridBagLayout());
 		//GridBagConstraints gbc = GridBagUtil.makeGbcN(0, 1, 1, 1);
-		
+
 		jp.add(header, GridBagUtil.makeGbcN(0, 0, 1, 1));
 		jp.add(buttonPanel, GridBagUtil.makeGbcN(0, 1, 1, 1));
-		jp.add(scrollPaneTable, GridBagUtil.makeGbcN(1, 1, 1, 1));		
-		
-		
-		
+		jp.add(scrollPaneTable, GridBagUtil.makeGbcN(1, 1, 1, 1));
+
+
+
 //		contentPanel.add(buttonPanel);
 //		contentPanel.add(scrollPaneTable);
 //		contentPanel.add(jp);
 		scrollPane.setViewportView(jp);
-		
+
 	}
-	
-	
+
+
 
 	private void addQueryInput() {
 
@@ -338,14 +340,14 @@ public class NGramQueryView extends View {
 		// return cuz of empty attributename
 		if (att.getKey().equals("")) { //$NON-NLS-1$
 			return;
-		}		
+		}
 
 
 		// System.out.println(wio.getAttributename() + " " +
 		// wio.getAttributevalues());
 		// -1 create item
 		qtm.setQueryAttributes(att, -1);
-		
+
 		refreshActions();
 	}
 
@@ -383,15 +385,15 @@ public class NGramQueryView extends View {
 	}
 
 	/**
-	 * @param row 
-	 * @param attributevalue 
-	 * @param attribute 
-	 * 
+	 * @param row
+	 * @param attributevalue
+	 * @param attribute
+	 *
 	 */
 	private void includeQueryTag(int row) {
 		qtm.setInclueQueryAttribute(row);
 		refreshActions();
-		
+
 	}
 
 	protected void registerActionCallbacks() {
@@ -420,57 +422,57 @@ public class NGramQueryView extends View {
 	protected CallbackHandler createCallbackHandler() {
 		return new CallbackHandler();
 	}
-	
-	private void loadQueryXML(File fXmlFile) throws Exception {		
+
+	private void loadQueryXML(Path fXmlFile) throws Exception {
 		//File fXmlFile = new File(Core.getCore().getDataFolder(), "ngramquery.xml"); //$NON-NLS-1$
-		
-		if(!fXmlFile.exists() || fXmlFile.length()==0) {
+
+		if(Files.notExists(fXmlFile) || Files.size(fXmlFile)==0) {
 			return;
 		}
-		
+
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		Document doc = dBuilder.parse(fXmlFile);
+		Document doc = dBuilder.parse(Files.newInputStream(fXmlFile));
 
 		doc.getDocumentElement().normalize();
-		
+
 		ArrayList<NGramQAttributes>  qList = new ArrayList<NGramQAttributes>();
-		
+
 		NodeList itemList = doc.getElementsByTagName("Queryitem"); //$NON-NLS-1$
 
 		for (int i = 0; i < itemList.getLength(); i++) {
 			Node sNode = itemList.item(i);
-			
+
 			if (sNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element eElement = (Element) sNode;
-				
+
 				NGramQAttributes qatt = new NGramQAttributes();
 				qatt.setKey(eElement.getAttribute("Tagclass")); //$NON-NLS-1$
 				qatt.setValue(eElement.getAttribute("Value")); //$NON-NLS-1$
-				
+
 //				System.out.print(eElement.getAttribute("Tagclass"));
 //				System.out.println(+ " " + eElement.getAttribute("Value"));
-				qList.add(qatt);				
+				qList.add(qatt);
 			}
 		}
 		qtm.reload(qList);
 		setUpQuery();
 	}
-	
-	
-	
-	private void saveQueryXML(File file) throws Exception{
+
+
+
+	private void saveQueryXML(Path file) throws Exception{
 		String root = "NGram-Query"; //$NON-NLS-1$
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 				.newInstance();
-		
+
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 
 		Element rootElement = document.createElement(root);
 
 		document.appendChild(rootElement);
-		
+
 		for (int i = 0; i < qt.getRowCount(); i++){
 			Element query = document.createElement("Queryitem"); //$NON-NLS-1$
 			Boolean include = (Boolean) qt.getModel().getValueAt(i, 0);
@@ -483,10 +485,10 @@ public class NGramQueryView extends View {
 			System.out.println(include);
 			rootElement.appendChild(query);
 		}
-		
+
 	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
-        
+
         //format output
         transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", //$NON-NLS-1$
@@ -494,12 +496,12 @@ public class NGramQueryView extends View {
         DOMSource source = new DOMSource(document);
         StreamResult result =  new StreamResult(new StringWriter());
         transformer.transform(source, result);
-        
+
 
         saveXMLToFile(result, file);
 	}
-	
-	private void saveXMLToFile (StreamResult result, File file) throws Exception{
+
+	private void saveXMLToFile (StreamResult result, Path file) throws Exception{
 
 //		if (file.getName().equalsIgnoreCase("xml")) {
 //		    // filename is OK as-is
@@ -507,41 +509,35 @@ public class NGramQueryView extends View {
 //		    file = new File(file.toString() + ".xml");  // append .xml if "foo.jpg.xml" is OK
 //		    file = new File(file.getParentFile(), FilenameUtils.getBaseName(file.getName())+".xml"); // ALTERNATIVELY: remove the extension (if any) and replace it with ".xml"
 //		}
-		
-		
+
+
 		//writing to file
-        FileOutputStream fop = null;
-        
-        //debug        
+
+        //debug
         //File file = new File("E:/ngramquery.xml"); //$NON-NLS-1$
         //File  file = new File(Core.getCore().getDataFolder(), "ngramquery.xml"); //$NON-NLS-1$
-        fop = new FileOutputStream(file);
-
-        // if file doesnt exists, then create it
-        if (!file.exists()) {
-            file.createNewFile();
-        }
 
         // get the content in bytes
         String xmlString = result.getWriter().toString();
         // System.out.println(xmlString);
         byte[] contentInBytes = xmlString.getBytes();
 
-        fop.write(contentInBytes);
-        fop.flush();
-        fop.close();
+        try (OutputStream out = Files.newOutputStream(file)) {
+        	out.write(contentInBytes);
+        	out.flush();
+        }
 	}
-	
-	
+
+
 	public void setSearchDescriptor(SearchDescriptor searchDescriptor) {
 		if(searchDescriptor!=null && searchDescriptor.equals(this.searchDescriptor)) {
 			return;
 		}
-		
+
 		this.searchDescriptor = searchDescriptor;
-		
+
 		SearchQuery searchQuery = searchDescriptor==null ? null : searchDescriptor.getQuery();
-		
+
 		if(searchQuery==null) {
 			//TODO clear all
 			qtm.removeAllQueryAttributes();
@@ -555,7 +551,7 @@ public class NGramQueryView extends View {
 //			try {
 //				graphPresenter.present(searchQuery.getSearchGraph(), null);
 //			} catch (UnsupportedPresentationDataException e) {
-//				LoggerFactory.log(this, Level.SEVERE, 
+//				LoggerFactory.log(this, Level.SEVERE,
 //						"Failed to forward presentation of search graph for query:\n"+searchQuery.getQueryString(), e); //$NON-NLS-1$
 //				graph = null;
 //			}
@@ -564,18 +560,18 @@ public class NGramQueryView extends View {
 
 		infoLabel.setVisible(false);
 	}
-	
-	
+
+
 	public SearchDescriptor getSearchDescriptor() {
 		return searchDescriptor;
 	}
-	
+
 	public void setUpQuery() throws Exception {
 		System.out.println("setupquery");
 		if(searchDescriptor==null) {
 			return;
 		}
-					
+
 		SearchQuery searchQuery = searchDescriptor.getQuery();
 		if(searchQuery==null) {
 			return;
@@ -590,29 +586,29 @@ public class NGramQueryView extends View {
 		System.out.println("SetQueryString in Editor " + query); //$NON-NLS-1$
 		searchQuery.parseQueryString(query);
 	}
-	
+
 	public void commitQuery() throws Exception {
-		
-		Message message = new Message(this, Commands.SELECT, 
+
+		Message message = new Message(this, Commands.SELECT,
 				getSearchDescriptor(), null);
-		
+
 		sendRequest(ErrorMiningConstants.ERRORMINING_PERSPECTIVE_ID, message);
 	}
-	
-	
+
+
 	@Override
 	public void reset() {
 		setSearchDescriptor(null);
 	}
-	
-	
+
+
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		if(Commands.PRESENT.equals(message.getCommand())
 				|| Commands.DISPLAY.equals(message.getCommand())) {
 			if(message.getData() instanceof SearchDescriptor) {
 				selectViewTab();
-				
+
 				setSearchDescriptor((SearchDescriptor)message.getData());
 				return message.successResult(this, null);
 			} else {
@@ -628,7 +624,7 @@ public class NGramQueryView extends View {
 			return message.unknownRequestResult(this);
 		}
 	}
-	
+
 
 	protected class Handler extends MouseAdapter implements ActionListener,
 			ListSelectionListener {
@@ -696,12 +692,12 @@ public class NGramQueryView extends View {
 				}
 				return;
 			}
-			
-			
+
+
 //			// Include Y/N
 //			if (e.getSource() == qtIncludeButton) {
 //				int row = qt.getSelectedRow();
-//				
+//
 //				//no selection
 //				if (row == -1) {
 //					return;
@@ -781,7 +777,7 @@ public class NGramQueryView extends View {
 	            FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter(
 	                    "xml files (*.xml)", //$NON-NLS-1$
 	                    "xml"); //$NON-NLS-1$
-				File file = DialogFactory.getGlobalFactory().showSourceFileDialog(
+	            Path file = DialogFactory.getGlobalFactory().showSourceFileDialog(
 						null,
 						"plugins.errormining.dialogs.selectQueryLoadFile.title", //$NON-NLS-1$
 						Core.getCore().getDataFolder()
@@ -790,7 +786,7 @@ public class NGramQueryView extends View {
 				if (file == null){
 					return;
 				}
-				
+
 				loadQueryXML(file);
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
@@ -803,28 +799,27 @@ public class NGramQueryView extends View {
 	            FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter(
 	                    "xml files (*.xml)", //$NON-NLS-1$
 	                    "xml"); //$NON-NLS-1$
-				File file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+	            Path file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
 						null,
 						"plugins.errormining.dialogs.selectQuerySaveFile.title", //$NON-NLS-1$
 						Core.getCore().getDataFolder(),
 						xmlfilter);
-				
+
 				//user cancelled
 				if(file == null){
 					return;
 				}
-				
-				
+
+
 				//workaround to ensure .xml / .XML file ending
-				String fname = file.getAbsolutePath();
 	            //if(!fname.toLowerCase().endsWith(".xml")) { //$NON-NLS-1$
-	            if(!fname.endsWith(".xml")) { //$NON-NLS-1$
-	                file = new File(fname + ".xml"); //$NON-NLS-1$
+	            if(!file.endsWith(".xml")) { //$NON-NLS-1$
+	                file = Paths.get(file.toString() + ".xml"); //$NON-NLS-1$
 	            }
 				//System.out.println(file.getName());
-				
+
 				saveQueryXML(file);
-				
+
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to save query to file", ex); //$NON-NLS-1$
@@ -836,9 +831,9 @@ public class NGramQueryView extends View {
 					null,
 					"plugins.errormining.dialogs.resetQuery.title", //$NON-NLS-1$
 					"plugins.errormining.dialogs.resetQuery.message"); //$NON-NLS-1$
-			
+
 			if (reset){
-				qtm.removeAllQueryAttributes();				
+				qtm.removeAllQueryAttributes();
 			}
 		}
 

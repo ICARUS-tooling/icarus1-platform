@@ -19,18 +19,19 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.treebank;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -95,38 +96,38 @@ import de.ims.icarus.xml.jaxb.JAXBUtils;
 public class TreebankRegistry {
 
 	private static TreebankRegistry instance;
-	
+
 	public static TreebankRegistry getInstance() {
 		if(instance==null) {
 			synchronized (TreebankRegistry.class) {
 				if(instance==null) {
 					JAXBUtils.registerClass(TreebankInfoSet.class);
 					JAXBUtils.registerClass(TreebankSet.class);
-					
+
 					instance = new TreebankRegistry();
 				}
 			}
 		}
 		return instance;
 	}
-	
+
 	private EventSource eventSource;
-	
+
 	// maps uuid to descriptor
-	private Map<String, TreebankDescriptor> descriptorMap = 
+	private Map<String, TreebankDescriptor> descriptorMap =
 			Collections.synchronizedMap(new HashMap<String, TreebankDescriptor>());
-	
+
 	private Extension defaultReaderExtension;
-	
+
 	// maps instantiated treebank to its descriptor
 	private Map<Treebank, TreebankDescriptor> treebankMap = new HashMap<>();
-	
+
 	private Map<String, Extension> treebankTypes = new HashMap<>();
-	
+
 	private Map<String, Reference<TreebankListDelegate>> delegateMap;
 	private TreebankRegistry() {
 		eventSource = new WeakEventSource(this);
-		
+
 		// Load all connected treebank extensions
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry().getPluginDescriptor(
 				LanguageToolsConstants.LANGUAGE_TOOLS_PLUGIN_ID);
@@ -136,63 +137,63 @@ public class TreebankRegistry {
 		List<Extension> readerExtensions = new ArrayList<>(extensionPoint.getConnectedExtensions());
 		Collections.sort(readerExtensions, PluginUtil.EXTENSION_COMPARATOR);
 		defaultReaderExtension = readerExtensions.isEmpty() ? null : readerExtensions.get(0);
-		
+
 		for(Extension extension : descriptor.getExtensionPoint("Treebank").getConnectedExtensions()) { //$NON-NLS-1$
 			treebankTypes.put(extension.getId(), extension);
 		}
-		
+
 		// Attempt to load treebank list
 		try {
 			load();
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to load treebank list", e); //$NON-NLS-1$
 		}
-		
+
 		Core.getCore().addShutdownHook(new ShutdownHook());
-		
+
 		// Show example data if required
 		if(!IcarusCorePlugin.isShowExampleData()) {
 			return;
 		}
 	}
-	
+
 	// prevent multiple deserialization
 	private Object readResolve() throws ObjectStreamException {
 		throw new NotSerializableException();
 	}
-	
+
 	// prevent cloning
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
-	
+
 	public Extension getDefaultReaderExtension() {
 		return defaultReaderExtension;
 	}
-	
+
 	public Set<Extension> availableTypes() {
 		return new HashSet<>(treebankTypes.values());
 	}
-	
+
 	public int availableTypeCount() {
 		return treebankTypes.size();
 	}
-	
+
 	public Collection<Treebank> availableTreebanks() {
 		return Collections.unmodifiableCollection(treebankMap.keySet());
 	}
-	
+
 	public int availableTreebankCount() {
 		return treebankMap.size();
 	}
-	
+
 	public Set<Extension> compatibleTypes(String grammar) {
 		if(grammar==null)
 			throw new NullPointerException("Invalid grammar"); //$NON-NLS-1$
-		
+
 		Set<Extension> compatibleTypes = new HashSet<>();
-		
+
 		loop_extensions : for(Extension extension : treebankTypes.values()) {
 			Collection<Extension.Parameter> params = extension.getParameters("grammar"); //$NON-NLS-1$
 			if(params==null || params.isEmpty()) {
@@ -205,92 +206,92 @@ public class TreebankRegistry {
 				}
 			}
 		}
-		
+
 		return compatibleTypes;
 	}
-	
+
 	public List<Treebank> getInstances(Extension type) {
 		List<Treebank> treebanks = new ArrayList<>();
-		
+
 		for(Entry<Treebank, TreebankDescriptor> entry : treebankMap.entrySet()) {
 			if(entry.getValue().getExtension()==type) {
 				treebanks.add(entry.getKey());
 			}
 		}
-		
+
 		return treebanks;
 	}
-	
+
 	public List<DerivedTreebank> getDerived(Treebank base) {
 		List<DerivedTreebank> treebanks = new ArrayList<>();
-		
+
 		for(Treebank treebank : treebankMap.keySet()) {
 			if(!(treebank instanceof DerivedTreebank)) {
 				continue;
 			}
-			
+
 			DerivedTreebank derivedTreebank = (DerivedTreebank) treebank;
 			if(derivedTreebank.getBase()==base) {
 				treebanks.add(derivedTreebank);
 			}
 		}
-		
+
 		return treebanks;
 	}
-	
+
 	public TreebankDescriptor getDescriptor(String id) {
 		TreebankDescriptor descriptor = descriptorMap.get(id);
 		if(descriptor==null)
 			throw new UnknownIdentifierException("No such treebank: "+id); //$NON-NLS-1$
-		
+
 		return descriptor;
 	}
-	
+
 	public TreebankDescriptor getDescriptorByName(String name) {
 		if(name==null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
-		
+
 		for(Treebank treebank : treebankMap.keySet()) {
 			if(name.equals(treebank.getName())) {
 				return treebankMap.get(treebank);
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public TreebankDescriptor getDescriptor(Treebank treebank) {
 		TreebankDescriptor descriptor = treebankMap.get(treebank);
 		if(descriptor==null)
 			throw new IllegalArgumentException("Treebank not managed by this registry: "+treebank.getName()); //$NON-NLS-1$
-		
+
 		return descriptor;
 	}
-	
+
 	public Extension getExtension(Treebank treebank) {
 		TreebankDescriptor descriptor = treebankMap.get(treebank);
 		if(descriptor==null)
 			throw new IllegalArgumentException("Treebank not managed by this registry: "+treebank.getName()); //$NON-NLS-1$
-		
+
 		return descriptor.getExtension();
 	}
-	
+
 	public Treebank getTreebank(String id) {
 		TreebankDescriptor descriptor = descriptorMap.get(id);
 		if(descriptor==null)
 			throw new UnknownIdentifierException("No such treebank: "+id); //$NON-NLS-1$
-		
+
 		return descriptor.getTreebank();
 	}
-	
+
 	public Treebank getTreebankByName(String name) {
 		if(name==null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
-		
+
 		TreebankDescriptor descriptor = getDescriptorByName(name);
 		return descriptor==null ? null : descriptor.getTreebank();
 	}
-	
+
 	public String getUniqueName(String baseName) {
 		Set<String> usedNames = new HashSet<>(treebankMap.size());
 		for(Treebank treebank : treebankMap.keySet()) {
@@ -299,7 +300,7 @@ public class TreebankRegistry {
 
 		return StringUtil.getUniqueName(baseName, usedNames);
 	}
-	
+
 	public TreebankListDelegate getListDelegate(Treebank treebank) {
 		TreebankDescriptor descriptor = getDescriptor(treebank);
 		if(delegateMap==null) {
@@ -310,49 +311,49 @@ public class TreebankRegistry {
 		if(ref!=null) {
 			delegate = ref.get();
 		}
-		
+
 		if(delegate==null) {
 			delegate = new TreebankListDelegate(treebank);
 			ref = new WeakReference<>(delegate);
 			delegateMap.put(descriptor.getId(), ref);
 		}
-		
+
 		if(!delegate.hasTreebank()) {
 			delegate.setTreebank(treebank);
 		}
-		
+
 		return delegate;
 	}
-	
+
 	public void deleteTreebank(Treebank treebank) {
 		TreebankDescriptor descriptor = treebankMap.get(treebank);
-		if(descriptor!=null) {	
-			
+		if(descriptor!=null) {
+
 			// Release treebank resources
 			try {
 				treebank.free();
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$
 			}
-			
+
 			treebankMap.remove(treebank);
 			descriptorMap.remove(descriptor.getId());
 			if(delegateMap!=null) {
 				delegateMap.remove(descriptor.getId());
 			}
-			
+
 			// Reset all the derived treebanks pointing to this one
 			List<DerivedTreebank> derivedTreebanks = getDerived(treebank);
 			for(DerivedTreebank derivedTreebank : derivedTreebanks) {
 				derivedTreebank.setBase(DUMMY_TREEBANK);
 			}
-			
+
 			// Finally notify listeners
-			eventSource.fireEvent(new EventObject(Events.REMOVED, 
+			eventSource.fireEvent(new EventObject(Events.REMOVED,
 					"treebank", treebank, //$NON-NLS-1$
 					"extension", descriptor.getExtension())); //$NON-NLS-1$
-			
+
 			saveBackground();
 		}
 	}
@@ -360,37 +361,37 @@ public class TreebankRegistry {
 	public TreebankDescriptor newTreebank(String type, String name) throws Exception {
 		return newTreebank(treebankTypes.get(type), name);
 	}
-	
+
 	public TreebankDescriptor newTreebank(Extension type, String name) throws Exception {
 		if(type==null)
 			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
 		if(name==null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
-		
+
 		TreebankDescriptor descriptor = new TreebankDescriptor();
 		descriptor.setId(UUID.randomUUID().toString());
 		descriptor.setExtension(type);
 		descriptor.setName(name);
 		descriptor.instantiateTreebank();
-		
+
 		addTreebank(descriptor);
-		
+
 		return descriptor;
 	}
-	
+
 	public void addTreebank(TreebankDescriptor descriptor) throws Exception {
-		
+
 		addTreebank0(descriptor);
-		
-		eventSource.fireEvent(new EventObject(Events.ADDED, 
+
+		eventSource.fireEvent(new EventObject(Events.ADDED,
 				"treebank", descriptor.getTreebank(),  //$NON-NLS-1$
 				"extension", descriptor.getExtension())); //$NON-NLS-1$
-		
+
 		saveBackground();
 	}
-	
+
 	private void addTreebank0(TreebankDescriptor descriptor) throws Exception {
-		
+
 		// Ensure uniqueness of ids
 		TreebankDescriptor presentDescriptor = descriptorMap.get(descriptor.getId());
 		if(presentDescriptor==descriptor) {
@@ -399,63 +400,63 @@ public class TreebankRegistry {
 		if(presentDescriptor!=null) {
 			descriptor.setId(UUID.randomUUID().toString());
 		}
-		
+
 		if(!descriptor.hasTreebank()) {
 			descriptor.instantiateTreebank();
 		}
-		
+
 		descriptorMap.put(descriptor.getId(), descriptor);
 		treebankMap.put(descriptor.getTreebank(), descriptor);
 	}
-	
+
 	public void treebankChanged(Treebank treebank) {
-		eventSource.fireEvent(new EventObject(Events.CHANGED, 
+		eventSource.fireEvent(new EventObject(Events.CHANGED,
 				"treebank", treebank)); //$NON-NLS-1$
 
 		saveBackground();
 	}
-	
+
 	public static String getTempName(Treebank treebank) {
 		return treebank.hashCode()+"@"+System.currentTimeMillis(); //$NON-NLS-1$
 	}
-	
-	public void setProperties(Treebank treebank, Map<String, Object> properties) {		
+
+	public void setProperties(Treebank treebank, Map<String, Object> properties) {
 		Map<String, Object> oldProperties = treebank.getProperties();
 		oldProperties.clear();
-		
+
 		if(properties!=null) {
 			oldProperties.putAll(properties);
 		}
-		
+
 		treebankChanged(treebank);
 	}
-	
+
 	public void setProperty(Treebank treebank, String key, Object value) {
 		if(key==null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
-		
+
 		Object oldValue = treebank.getProperty(key);
 		if(oldValue==value || (value!=null && value.equals(oldValue))) {
 			return;
 		}
-		
+
 		treebank.setProperty(key, value);
-		
+
 		treebankChanged(treebank);
 	}
-	
+
 	public void setName(Treebank treebank, String name) {
 		if(name==null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(treebank.getName())) {
 			return;
 		}
-		
+
 		treebank.setName(name);
-		
+
 		treebankChanged(treebank);
 	}
-	
+
 	/**
 	 * Allows {@code null} location
 	 */
@@ -463,9 +464,9 @@ public class TreebankRegistry {
 		if(location!=null && location.equals(treebank.getLocation())) {
 			return;
 		}
-		
+
 		treebank.setLocation(location);
-		
+
 		treebankChanged(treebank);
 	}
 
@@ -489,102 +490,102 @@ public class TreebankRegistry {
 	public void removeListener(EventListener listener, String eventName) {
 		eventSource.removeEventListener(listener, eventName);
 	}
-	
+
 	public static final Treebank DUMMY_TREEBANK = new Treebank() {
-		
+
 		private Map<String, Object> properties = Collections.emptyMap();
-		
+
 		@Override
 		public int size() {
 			return 0;
 		}
-		
+
 		@Override
 		public void setProperty(String key, Object value) {
 			// no-op
 		}
-		
+
 		@Override
 		public void setName(String name) {
 			// no-op
 		}
-		
+
 		@Override
 		public void setLocation(Location location) {
 			// no-op
 		}
-		
+
 		@Override
 		public void saveState(TreebankDescriptor descriptor) {
 			// no-op
 		}
-		
+
 		@Override
 		public void removeListener(EventListener listener, String eventName) {
 			// no-op
 		}
-		
+
 		@Override
 		public void removeListener(EventListener listener) {
 			// no-op
 		}
-		
+
 		@Override
 		public void loadState(TreebankDescriptor descriptor) {
 			// no-op
 		}
-		
+
 		@Override
 		public void load() throws Exception {
 			// no-op
 		}
-		
+
 		@Override
 		public boolean isLoaded() {
 			return true;
 		}
-		
+
 		@Override
 		public boolean isEditable() {
 			return false;
 		}
-		
+
 		@Override
 		public Object getProperty(String key) {
 			return null;
 		}
-		
+
 		@Override
 		public Map<String, Object> getProperties() {
 			return properties;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "DummyTreebank"; //$NON-NLS-1$
 		}
-		
+
 		@Override
 		public TreebankMetaData getMetaData() {
 			return null;
 		}
-		
+
 		@Override
 		public Location getLocation() {
 			return null;
 		}
-		
+
 		@Override
-		
+
 		public ContentType getContentType() {
 			return LanguageManager.getInstance().getSentenceDataContentType();
 		}
-		
+
 		@Override
 		public void free() {
 			// no-op
 		}
-		
+
 		@Override
 		public void addListener(String eventName, EventListener listener) {
 			// no-op
@@ -656,21 +657,21 @@ public class TreebankRegistry {
 			return false;
 		}
 	};
-	
+
 	public static final Comparator<Treebank> TREEBANK_NAME_COMPARATOR = new Comparator<Treebank>() {
 
 		@Override
 		public int compare(Treebank c1, Treebank c2) {
 			return c1.getName().compareTo(c2.getName());
 		}
-		
+
 	};
-	
+
 	private synchronized void saveBackground() {
 		final TreebankSet treebankSet = new TreebankSet(descriptorMap.values());
-		
+
 		Runnable saveTask = new Runnable() {
-			
+
 			@Override
 			public void run() {
 				try {
@@ -680,48 +681,48 @@ public class TreebankRegistry {
 				}
 			}
 		};
-		
+
 		String title = ResourceManager.getInstance().get(
 				"plugins.languageTools.treebankSaveTask.title"); //$NON-NLS-1$
 		String info = ResourceManager.getInstance().get(
 				"plugins.languageTools.treebankSaveTask.description", availableTreebankCount()); //$NON-NLS-1$
 		Icon icon = IconRegistry.getGlobalRegistry().getIcon("treebank_saveas_edit.gif"); //$NON-NLS-1$
-		
-		TaskManager.getInstance().schedule(saveTask, title, 
+
+		TaskManager.getInstance().schedule(saveTask, title,
 				info, icon, TaskPriority.DEFAULT, true);
 	}
-	
+
 	private static final String list_file = "treebanks.xml"; //$NON-NLS-1$
-	
+
 	private void load() throws Exception {
-		File file = new File(Core.getCore().getDataFolder(), list_file);
-		if(!file.exists() || file.length()==0) {
+		Path file = Core.getCore().getDataFolder().resolve(list_file);
+		if(Files.notExists(file) || Files.size(file)==0) {
 			return;
 		}
 
 		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
-		TreebankSet treebankSet = (TreebankSet) unmarshaller.unmarshal(file);
-		
+		TreebankSet treebankSet = (TreebankSet) unmarshaller.unmarshal(Files.newInputStream(file));
+
 		descriptorMap.clear();
 		for(int i=0; i<treebankSet.getItemCount(); i++) {
 			TreebankDescriptor descriptor = treebankSet.getItem(i);
 			try {
 				addTreebank0(descriptor);
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to add treebank: "+descriptor, e); //$NON-NLS-1$
 			}
 		}
 	}
-	
+
 	private final Object saveLock = new Object();
-	
+
 	private void save(TreebankSet treebankSet) throws Exception {
 		synchronized (saveLock) {
-			File file = new File(Core.getCore().getDataFolder(), list_file);
-			if(!file.exists()) {
-				file.createNewFile();
+			Path file = Core.getCore().getDataFolder().resolve(list_file);
+			if(Files.notExists(file)) {
+				Files.createFile(file);
 			}
 
 			for(int i=0; i<treebankSet.getItemCount(); i++) {
@@ -731,91 +732,91 @@ public class TreebankRegistry {
 			JAXBContext context = JAXBUtils.getSharedJAXBContext();
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			marshaller.marshal(treebankSet, file);
+			marshaller.marshal(treebankSet, Files.newOutputStream(file));
 		}
 	}
-	
+
 	@XmlRootElement
 	@XmlAccessorType(XmlAccessType.FIELD)
 	static class TreebankInfoSet {
 		@XmlElement(name="info")
 		private List<TreebankInfo> items = new ArrayList<>();
-		
+
 		@XmlElement(name="treebank")
 		private List<TreebankDescriptor> descriptors = new ArrayList<>();
-		
+
 		public TreebankInfoSet() {
 			// no-op
 		}
-		
+
 		public TreebankInfoSet(List<Treebank> treebanks) {
 			for(Treebank treebank : treebanks) {
 				TreebankDescriptor descriptor = getInstance().getDescriptor(treebank);
 				TreebankInfo info = new TreebankInfo(descriptor);
-				
+
 				items.add(info);
 				descriptors.add(descriptor);
 			}
 		}
-		
+
 		public int getItemCount() {
 			if(items.size()!=descriptors.size())
 				throw new IllegalStateException();
-			
+
 			return items.size();
 		}
-		
+
 		public TreebankInfo getInfo(int index) {
 			return items.get(index);
 		}
-		
+
 		public TreebankDescriptor getDescriptor(int index) {
 			return descriptors.get(index);
 		}
 	}
-	
+
 	@XmlRootElement(name="treebanks")
 	@XmlAccessorType(XmlAccessType.FIELD)
 	static class TreebankSet {
 		@XmlElement(name="treebank")
 		private List<TreebankDescriptor> items = new ArrayList<>();
-		
+
 		public TreebankSet() {
 			// no-op
 		}
-		
+
 		public TreebankSet(Collection<TreebankDescriptor> treebanks) {
 			items.addAll(treebanks);
 		}
-		
+
 		int getItemCount() {
 			return items.size();
 		}
-		
+
 		TreebankDescriptor getItem(int index) {
 			return items.get(index);
 		}
 	}
-	
-	public void exportTreebanks(File file, List<Treebank> treebanks) throws IOException, Exception {
+
+	public void exportTreebanks(Path file, List<Treebank> treebanks) throws IOException, Exception {
 		if(file==null)
 			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		if(treebanks==null)
 			throw new NullPointerException("Invalid treebanks"); //$NON-NLS-1$
-		
+
 		if(treebanks.isEmpty()) {
 			return;
 		}
-		
+
 		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		
+
 		TreebankInfoSet infoSet = new TreebankInfoSet(treebanks);
-		
-		marshaller.marshal(infoSet, file);
+
+		marshaller.marshal(infoSet, Files.newOutputStream(file));
 	}
-	
+
 	private boolean isTreebankAvailable(TreebankInfo info) {
 		if(!PluginUtil.getPluginRegistry().isPluginDescriptorAvailable(info.getPluginId())) {
 			return false;
@@ -823,25 +824,25 @@ public class TreebankRegistry {
 		PluginDescriptor pluginDescriptor = PluginUtil.getPluginRegistry().getPluginDescriptor(info.getPluginId());
 		Version currentVersion = pluginDescriptor.getVersion();
 		Version requiredVersion = Version.parse(info.getPluginVersion());
-		
+
 		return currentVersion.isCompatibleWith(requiredVersion);
 	}
-	
-	public TreebankImportResult importTreebanks(File file) throws IOException, Exception {
+
+	public TreebankImportResult importTreebanks(Path file) throws IOException, Exception {
 		if(file==null)
 			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
-		
-		if(file.length()==0) {
+
+		if(Files.size(file)==0) {
 			return null;
 		}
 
 		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
-		
-		TreebankInfoSet infoSet = (TreebankInfoSet) unmarshaller.unmarshal(file);
-		
+
+		TreebankInfoSet infoSet = (TreebankInfoSet) unmarshaller.unmarshal(Files.newInputStream(file));
+
 		TreebankImportResult result = new TreebankImportResult();
-		
+
 		for(int i = 0; i<infoSet.getItemCount(); i++) {
 			TreebankInfo info = infoSet.getInfo(i);
 			TreebankDescriptor descriptor = infoSet.getDescriptor(i);
@@ -852,10 +853,10 @@ public class TreebankRegistry {
 				result.addAvailable(info, descriptor);
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	private class ShutdownHook implements NamedRunnable {
 
 		/**

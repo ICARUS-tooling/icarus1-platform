@@ -26,7 +26,7 @@
 package de.ims.icarus.language.model.standard.builder;
 
 import de.ims.icarus.language.model.api.Container;
-import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 
 /**

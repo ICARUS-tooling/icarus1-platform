@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.api;
 
 
+
 /**
  *
  * @author Markus Gärtner
@@ -40,7 +41,8 @@ public interface CorpusMember {
 	long getId();
 
 	/**
-	 *
+	 * Returns the corpus this member is a part of.
+	 * This call is usually forwarded to the host {@code Segment}
 	 * @return The corpus this member is a part of
 	 */
 	Corpus getCorpus();

@@ -27,7 +27,8 @@ package de.ims.icarus.language.model.api;
 
 import java.util.List;
 
-import de.ims.icarus.io.Loadable;
+import de.ims.icarus.language.model.api.driver.Driver;
+import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 
@@ -36,7 +37,7 @@ import de.ims.icarus.language.model.api.manifest.ManifestOwner;
  * @version $Id$
  *
  */
-public interface Context extends Loadable, ManifestOwner<ContextManifest> {
+public interface Context extends ManifestOwner<ContextManifest> {
 
 	Corpus getCorpus();
 
@@ -44,6 +45,12 @@ public interface Context extends Loadable, ManifestOwner<ContextManifest> {
 
 	@Override
 	ContextManifest getManifest();
+
+	/**
+	 * Returns the shared {@code Driver} instance that is used to access
+	 * and manage the content represented by this context.
+	 */
+	Driver getDriver();
 
 	/**
 	 * Called by a corpus to signal a context that it has been added.

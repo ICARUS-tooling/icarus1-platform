@@ -32,8 +32,8 @@ import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusMember;
-import de.ims.icarus.language.model.api.Layer;
 import de.ims.icarus.language.model.api.Structure;
+import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.meta.MetaData;
 import de.ims.icarus.util.collections.CollectionUtils;
 

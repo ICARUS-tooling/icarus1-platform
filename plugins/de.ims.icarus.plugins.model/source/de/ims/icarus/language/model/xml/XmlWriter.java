@@ -52,7 +52,7 @@ import de.ims.icarus.language.model.api.manifest.ValueIterator;
 import de.ims.icarus.language.model.api.manifest.ValueManifest;
 import de.ims.icarus.language.model.api.manifest.ValueRange;
 import de.ims.icarus.language.model.api.manifest.ValueSet;
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.id.Identity;
 

@@ -25,12 +25,13 @@
  */
 package de.ims.icarus.language.model.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,17 +41,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.ims.icarus.language.model.api.AnnotationLayer;
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.api.Fragment;
-import de.ims.icarus.language.model.api.Layer;
-import de.ims.icarus.language.model.api.LayerType;
 import de.ims.icarus.language.model.api.Markable;
-import de.ims.icarus.language.model.api.MarkableLayer;
 import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.layer.AnnotationLayer;
+import de.ims.icarus.language.model.api.layer.Layer;
+import de.ims.icarus.language.model.api.layer.LayerType;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
@@ -61,7 +62,7 @@ import de.ims.icarus.language.model.api.manifest.Prerequisite;
 import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.api.manifest.StructureManifest;
 import de.ims.icarus.language.model.io.LocationType;
-import de.ims.icarus.language.model.io.Path;
+import de.ims.icarus.language.model.io.ResourcePath;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 
 /**
@@ -341,33 +342,33 @@ public final class CorpusUtils {
 				&& m2.getEndOffset()<=m1.getEndOffset();
 	}
 
-	public static File pathToFile(Path path) {
+	public static Path pathToFile(ResourcePath path) {
 		if (path == null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 		if(path.getType()!=LocationType.FILE)
-			throw new IllegalArgumentException("Path needs to be a file: "+path.getPath()); //$NON-NLS-1$
+			throw new IllegalArgumentException("ResourcePath needs to be a file: "+path.getPath()); //$NON-NLS-1$
 
-		return new File(path.getPath());
+		return Paths.get(path.getPath());
 	}
 
-	public static URL pathToURL(Path path) throws MalformedURLException {
+	public static URL pathToURL(ResourcePath path) throws MalformedURLException {
 		if (path == null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 		if(path.getType()!=LocationType.NETWORK)
-			throw new IllegalArgumentException("Path needs to be a url: "+path.getPath()); //$NON-NLS-1$
+			throw new IllegalArgumentException("ResourcePath needs to be a url: "+path.getPath()); //$NON-NLS-1$
 
 		return new URL(path.getPath());
 	}
 
 
 
-	public static InputStream openPath(Path path) throws IOException {
+	public static InputStream openPath(ResourcePath path) throws IOException {
 		if (path == null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 
 		switch (path.getType()) {
 		case FILE:
-			return new FileInputStream(path.getPath());
+			return Files.newInputStream(pathToFile(path));
 
 		case NETWORK:
 			return new URL(path.getPath()).openStream();

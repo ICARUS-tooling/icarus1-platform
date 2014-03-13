@@ -29,17 +29,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
-import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.model.api.edit.CorpusEditModel;
 import de.ims.icarus.language.model.api.edit.CorpusUndoListener;
 import de.ims.icarus.language.model.api.edit.CorpusUndoManager;
 import de.ims.icarus.language.model.api.events.CorpusAdapter;
 import de.ims.icarus.language.model.api.events.CorpusListener;
 import de.ims.icarus.language.model.api.events.EventManager;
+import de.ims.icarus.language.model.api.layer.Layer;
+import de.ims.icarus.language.model.api.layer.LayerType;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.CorpusManifest;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.meta.MetaData;
+import de.ims.icarus.language.model.api.seg.Segment;
+import de.ims.icarus.language.model.api.seg.SegmentSpec;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
@@ -100,7 +104,7 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  * @version $Id$
  *
  */
-public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusManifest> {
+public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 
 	/**
 	 * Returns the lock object that should be used when performing <i>write</i>
@@ -142,17 +146,7 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	 */
 	IdDomain getGlobalIdDomain();
 
-
-	/**
-	 * Returns the object that manages the resolution and loading
-	 * of data chunks if this corpus is distributed across multiple
-	 * physical locations or {@code null} if it does not support
-	 * chunks.
-	 *
-	 * @return The {@code ChunkControl} for this corpus or {@code null}
-	 * if the corpus does not support chunks.
-	 */
-	ChunkControl getChunkControl();
+	Segment getSegment(SegmentSpec spec) throws CorpusException;
 
 //	/**
 //	 * Resolves a given id and returns the member within this corpus
@@ -360,14 +354,4 @@ public interface Corpus extends Iterable<Layer>, Loadable, ManifestOwner<CorpusM
 	 * and the layer is not part of this corpus
 	 */
 	Set<MetaData> getMetaData(ContentType type, Layer layer);
-
-	/**
-	 * Releases {@code all} the loaded data for this corpus. This is a shorthand method for
-	 * fetching all {@code Context} objects for the corpus and calling {@code Context#free()}
-	 * on each of them.
-	 *
-	 * @see de.ims.icarus.io.Loadable#free()
-	 */
-	@Override
-	void free();
 }

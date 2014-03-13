@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.api.manifest;
 
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.util.id.Identity;
 
 /**

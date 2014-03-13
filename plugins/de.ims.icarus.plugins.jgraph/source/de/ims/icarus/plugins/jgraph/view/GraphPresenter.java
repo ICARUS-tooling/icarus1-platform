@@ -51,9 +51,10 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2800,7 +2801,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				fileChooser.setFileFilter(defaultFilter);
 				fileChooser.setFileFilter(defaultFilter);
 
-				fileChooser.setCurrentDirectory(Core.getCore().getDataFolder());
+				fileChooser.setCurrentDirectory(Core.getCore().getDataFolder().toFile());
 				fileChooser.setApproveButtonText(ResourceManager.getInstance().get("save")); //$NON-NLS-1$
 				fileChooser.setDialogTitle(ResourceManager.getInstance().get("plugins.jgraph.graphPresenter.messages.export")); //$NON-NLS-1$
 
@@ -2823,7 +2824,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				}
 
 				// Overwrite if already existing?
-				if (new File(filename).exists()
+				if (Files.exists(Paths.get(filename))
 						&& !DialogFactory.getGlobalFactory().showConfirm(null,
 								"plugins.jgraph.graphPresenter.messages.export",  //$NON-NLS-1$
 								"plugins.jgraph.graphPresenter.messages.overwriteExisting")) { //$NON-NLS-1$
@@ -2849,7 +2850,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 					JAXBContext context = JAXBUtils.getSharedJAXBContext();
 					Marshaller marshaller = context.createMarshaller();
 					marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-					marshaller.marshal(buffer, new File(filename));
+					marshaller.marshal(buffer, Files.newOutputStream(Paths.get(filename)));
 				} else {
 
 					// IMAGE
@@ -2868,7 +2869,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 							getCanvas());
 
 					if (image != null) {
-						ImageIO.write(image, extension, new File(filename));
+						ImageIO.write(image, extension, Files.newOutputStream(Paths.get(filename)));
 					} else {
 						DialogFactory.getGlobalFactory().showError(null,
 								"plugins.jgraph.graphPresenter.messages.export",  //$NON-NLS-1$
@@ -2905,7 +2906,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 				fileChooser.addChoosableFileFilter(defaultFilter);
 				fileChooser.setFileFilter(defaultFilter);
 
-				fileChooser.setCurrentDirectory(Core.getCore().getDataFolder());
+				fileChooser.setCurrentDirectory(Core.getCore().getDataFolder().toFile());
 				fileChooser.setApproveButtonText(ResourceManager.getInstance().get("open")); //$NON-NLS-1$
 				fileChooser.setDialogTitle(ResourceManager.getInstance().get("plugins.jgraph.graphPresenter.messages.import")); //$NON-NLS-1$
 

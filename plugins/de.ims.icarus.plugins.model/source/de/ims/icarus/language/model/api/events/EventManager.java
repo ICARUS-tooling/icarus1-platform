@@ -31,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusMember;
-import de.ims.icarus.language.model.api.Layer;
+import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.meta.MetaData;
 
 /**

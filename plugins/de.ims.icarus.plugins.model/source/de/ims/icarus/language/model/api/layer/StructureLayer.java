@@ -23,30 +23,42 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.api.layer;
 
-import de.ims.icarus.language.model.api.manifest.LayerManifest;
-import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 
 /**
- * Implements a shared type descriptor for {@code Layer} objects. It is used to
- * group layers according to an abstract description of their content. Besides
- * serving as a mere identifier to that abstract description, a {@code LayerType}
- * optionally provides a {@link LayerManifest} that contains further specifications
- * on how the content might be structured or other informations.
- *
  * @author Markus Gärtner
  * @version $Id$
- * @see LayerManifest
  *
  */
-public interface LayerType extends Identity {
+public interface StructureLayer extends MarkableLayer {
 
 	/**
-	 * Returns the shared {@code LayerManifest} that further describes layers of
-	 * this type or {@code null} if this type only serves as a identifier without
-	 * additional content restrictions.
-	 * @return
+	 * Returns the shared {@code StructureLayerManifest} that holds
+	 * information about markable composition and possible structures
+	 * in this layer.
+	 *
+	 * @return The manifest that describes this collection of markables
 	 */
-	LayerManifest getSharedManifest();
+	@Override
+	StructureLayerManifest getManifest();
+
+	int getMixinLayerCount();
+
+	MarkableLayer getMixinLayerAt(int index);
+
+	/**
+	 * Translates an index currently used to access edges in this layer's
+	 * root container into a value that can be used to reference elements in
+	 * the entirety of the backing data.
+	 * The advise from the {@link #translateMarkableIndex(int)} applies
+	 * here, too.
+	 *
+	 * @param index
+	 * @return
+	 * @throws IndexOutOfBoundsException if the given index is negative or
+	 * 			exceeds the values allowed by the root structure
+	 */
+	long translateEdgeIndex(int index);
 }

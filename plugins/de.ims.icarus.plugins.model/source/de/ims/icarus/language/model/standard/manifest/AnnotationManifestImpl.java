@@ -35,7 +35,7 @@ import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestType;
 import de.ims.icarus.language.model.api.manifest.ValueRange;
 import de.ims.icarus.language.model.api.manifest.ValueSet;
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;

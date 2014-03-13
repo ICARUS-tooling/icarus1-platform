@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.api.manifest;
 
 import java.util.List;
 
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 
 /**
  * @author Markus Gärtner

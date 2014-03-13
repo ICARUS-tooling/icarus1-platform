@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,19 +15,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.weblicht.webservice;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -62,18 +63,18 @@ import de.ims.icarus.ui.events.WeakEventSource;
  * @version $Id$
  *
  */
-public class WebchainRegistry {	
+public class WebchainRegistry {
 
 	protected List<Webchain> webchainList;
 	protected WebchainInputType defaultInputType;
-	
+
 	private boolean hasChanges;
-	
+
 	//protected Webservice webservice;
-	
+
 	private EventSource eventSource;
 	private static WebchainRegistry instance;
-	
+
 	public static WebchainRegistry getInstance() {
 		if(instance==null) {
 			synchronized (WebchainRegistry.class) {
@@ -84,35 +85,35 @@ public class WebchainRegistry {
 		}
 		return instance;
 	}
-	
+
 	//--
 
-	
+
 	private WebchainRegistry() {
 		//webservice = new Webservice();
 		eventSource = new WeakEventSource(this);
 		//webchain = new Webchain();
 		webchainList = new ArrayList<Webchain>();
-		
+
 		//set defaultInputType
 		defaultInputType = new WebchainInputType();
 		defaultInputType.setInputType("dynamic"); //$NON-NLS-1$
 		defaultInputType.setInputTypeValue(""); //$NON-NLS-1$
-		
+
 		// Attempt to load webservice list
-		try {			
-			loadWebchainXML();			
+		try {
+			loadWebchainXML();
 		} catch (Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to load webservice chain list", e); //$NON-NLS-1$
 		}
 
-		//System.out.println(webchainList.get(0).getWebserviceIDList());	
-		//System.out.println(webchainList.get(1).getWebserviceIDList());	
+		//System.out.println(webchainList.get(0).getWebserviceIDList());
+		//System.out.println(webchainList.get(1).getWebserviceIDList());
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param document
 	 * @param eName
 	 * @param eData
@@ -121,42 +122,42 @@ public class WebchainRegistry {
 	private Element generateChainElement(Document document, String eName, String eData){
 		Element em = document.createElement(eName);
 		em.setAttribute("uid", eData); //$NON-NLS-1$
-		return em;		
+		return em;
 	}
-	
-	
+
+
 	private Element generateChainInputElement(Document document, String eName, String type, String value){
 		Element em = document.createElement(eName);
 		em.setAttribute("type", type); //$NON-NLS-1$
 		em.setTextContent(value);
-		return em;		
+		return em;
 	}
-	
+
 	private Element generateChainOutputElement(Document document, String eName, String type, String value, String used){
 		Element em = document.createElement(eName);
 		em.setAttribute("type", type); //$NON-NLS-1$
 		em.setAttribute("value", value); //$NON-NLS-1$
 		em.setAttribute("outputused", used); //$NON-NLS-1$
-		return em;		
+		return em;
 	}
-	
-	
+
+
 	public void saveWebchains() throws Exception{
 
 		String root = "Webchains"; //$NON-NLS-1$
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 				.newInstance();
-		
+
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 
 		Element rootElement = document.createElement(root);
 
 		document.appendChild(rootElement);
-		
+
 		for (int i = 0; i < webchainList.size(); i++){
 			Webchain webchain = getWebchainAt(i);
-	
+
 			Element chain = document.createElement("Chain"); //$NON-NLS-1$
 			chain.setAttribute("chainname", webchain.getName()); //$NON-NLS-1$
 
@@ -166,7 +167,7 @@ public class WebchainRegistry {
 					chain.appendChild(
 							generateChainElement(document, "chainelement", //$NON-NLS-1$
 													service.get().getUID()));
-					
+
 				}
 				if (webchain.getElementAt(j) instanceof WebchainInputType){
 					WebchainInputType wi = (WebchainInputType) webchain.getElementAt(j);
@@ -175,7 +176,7 @@ public class WebchainRegistry {
 													wi.getInputType(),
 													wi.getInputTypeValue())
 							);
-					
+
 				}
 				if (webchain.getElementAt(j) instanceof WebchainOutputType){
 					WebchainOutputType wo = (WebchainOutputType) webchain.getElementAt(j);
@@ -186,17 +187,17 @@ public class WebchainRegistry {
 													wo.getOutputTypeValue(),
 													used)
 							);
-					
+
 				}
 			}
-				
-			
+
+
 			rootElement.appendChild(chain);
 		}
-		
+
 	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
-        
+
         //format output
         transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", //$NON-NLS-1$
@@ -204,141 +205,135 @@ public class WebchainRegistry {
         DOMSource source = new DOMSource(document);
         StreamResult result =  new StreamResult(new StringWriter());
         transformer.transform(source, result);
-        
+
 
         saveXMLToFile(result);
         hasChanges=false;
 	}
-	
-	
+
+
 	private void saveXMLToFile (StreamResult result) throws Exception{
         //writing to file
-        FileOutputStream fop = null;
-        
+
         //debug
         //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain_out.xml"); //$NON-NLS-1$
         //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
-        File  file = new File(Core.getCore().getDataFolder(), "webchain.xml"); //$NON-NLS-1$
-        fop = new FileOutputStream(file);
-
-        // if file doesnt exists, then create it
-        if (!file.exists()) {
-            file.createNewFile();
-        }
+        Path  file = Core.getCore().getDataFolder().resolve("webchain.xml"); //$NON-NLS-1$
 
         // get the content in bytes
         String xmlString = result.getWriter().toString();
         // System.out.println(xmlString);
         byte[] contentInBytes = xmlString.getBytes();
 
-        fop.write(contentInBytes);
-        fop.flush();
-        fop.close();
+        try (OutputStream out = Files.newOutputStream(file)) {
+        	out.write(contentInBytes);
+        	out.flush();
+        }
 	}
 
-	
+
 	private void loadWebchainXML() throws Exception {
-			
-			File fXmlFile = new File(Core.getCore().getDataFolder(),"webchain.xml"); //$NON-NLS-1$
-					
+
+			Path fXmlFile = Core.getCore().getDataFolder().resolve("webchain.xml"); //$NON-NLS-1$
+
 			//File fXmlFile = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/webchain.xml"); //$NON-NLS-1$
-			if(!fXmlFile.exists() || fXmlFile.length()==0) {
+			if(Files.notExists(fXmlFile) || Files.size(fXmlFile)==0) {
 				return;
 			}
-			
+
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(fXmlFile);
+			Document doc = dBuilder.parse(Files.newInputStream(fXmlFile));
 
 			doc.getDocumentElement().normalize();
-			
+
 			Webchain webchain;
 
 			//System.out.println("Root element :"	+ doc.getDocumentElement().getNodeName());
 
 			NodeList servicesList = doc.getElementsByTagName("Chain"); //$NON-NLS-1$
 			for (int i = 0; i < servicesList.getLength(); i++) {
-				
+
 				Node sNode = servicesList.item(i);
-				
-				//System.out.println("\nCurrent Element :" + sNode.getNodeName());							
+
+				//System.out.println("\nCurrent Element :" + sNode.getNodeName());
 
 				if (sNode.getNodeType() == Node.ELEMENT_NODE) {
 					webchain = new Webchain();
-					
+
 					Element eElement = (Element) sNode;
-					
+
 					//System.out.println("Chainname : " +	eElement.getAttribute("chainname"));
 					webchain.setName(eElement.getAttribute("chainname"));	 //$NON-NLS-1$
 
-					
+
 					/*
 					System.out.println("Type: "
 							+ getNodeFromElement(eElement, "input", "type")
 							+ " Value: "
 							+ getTextFromElement(eElement, "input"));
 					*/
-					
+
 					WebchainInputType inputType = new WebchainInputType();
 					inputType.setInputType(getNodeFromElement(eElement, "input", "type")); //$NON-NLS-1$ //$NON-NLS-2$
-					
+
 					if (inputType.getInputType().equals("static")){ //$NON-NLS-1$
 						inputType.setInputTypeValue(getTextFromElement(eElement, "input")); //$NON-NLS-1$
 					}
-					
+
 					if (inputType.getInputType().equals("location")){ //$NON-NLS-1$
 						inputType.setInputTypeValue(getTextFromElement(eElement, "input")); //$NON-NLS-1$
 					}
-					
+
 					if (inputType.getInputType().equals("dynamic")){ //$NON-NLS-1$
 						inputType.setInputTypeValue(""); //$NON-NLS-1$
 					}
-					
+
 					webchain.setWebchainInputType(inputType);
-					
+
 					//addinput
 					webchain.addWebchainElement(inputType);
-					
+
 					//Grab all chainelements from chain
 					NodeList uidList = eElement.getElementsByTagName("chainelement"); //$NON-NLS-1$
-					
-					for (int j = 0; j < uidList.getLength(); j++) {						
+
+					for (int j = 0; j < uidList.getLength(); j++) {
 						Node uidNode = uidList.item(j);
 						//System.out.println("Chainname : " +	eElement.getAttribute("uname"));
 						if (uidNode.getNodeType() == Node.ELEMENT_NODE) {
 							Element idElement = (Element) uidNode;
 							String uniqueID = idElement.getAttribute("uid"); //$NON-NLS-1$
-							
+
 							//we found an output element
-							if (uniqueID.equals("")){ //$NON-NLS-1$								
+							if (uniqueID.equals("")){ //$NON-NLS-1$
 								webchain.addWebchainElement(
 										new WebchainOutputType(
 												idElement.getAttribute("type"), //$NON-NLS-1$
 												idElement.getAttribute("value"), //$NON-NLS-1$
 												getBoolean(idElement.getAttribute("outputused")))); //$NON-NLS-1$
-												
+
 							}
-							
+
 							//webservice
 							else {
 								webchain.addWebchainElement(uniqueID);
 								webchain.addWebservice(uniqueID);
 							}
 						}
-					}					
-										
+					}
+
 					addNewWebchain(webchain);
-					
-					
+
+
 					// reset change flag after loading chains - otherwise we will
 					// get unsaved changes dialog even after loading chains from file
 					hasChanges = false;
 				}
-			}			
+			}
 	}
-	
-	
+
+
 
 	/**
 	 * @param attribute
@@ -351,7 +346,7 @@ public class WebchainRegistry {
 
 	/**
 	 * e is XML Element, s is the Name of our Node Element
-	 * 
+	 *
 	 * @param e
 	 * @param s
 	 * @return xml node text content
@@ -359,9 +354,9 @@ public class WebchainRegistry {
 	private String getTextFromElement(Element e, String s) {
 		return e.getElementsByTagName(s).item(0).getTextContent();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param e
 	 * @param s
 	 * @return
@@ -369,18 +364,18 @@ public class WebchainRegistry {
 	private String getNodeFromElement(Element e, String s, String item) {
 		return e.getElementsByTagName(s).item(0).getAttributes().getNamedItem(item).getNodeValue();
 	}
-	
+
 	/**
 	 * @return the hasChanges
 	 */
 	public boolean isHasChanges() {
 		return hasChanges;
 	}
-	
-	
-	
+
+
+
 	/**
-	 * 
+	 *
 	 * @param uniquename
 	 * @param list
 	 */
@@ -392,7 +387,7 @@ public class WebchainRegistry {
 				"webchain",webchain, //$NON-NLS-1$
 				"index",index));//$NON-NLS-1$
 	}
-	
+
 	public void deleteWebchain(Webchain webchain){
 		int index = indexOfWebchain(webchain);
 		if (webchainList.remove(webchain)){
@@ -402,52 +397,52 @@ public class WebchainRegistry {
 					"index",index)); //$NON-NLS-1$
 		}
 	}
-	
+
 	public int indexOfWebchain(Webchain webchain){
 		return webchainList.indexOf(webchain);
 	}
 
-	
+
 	public int getWebchainCount(){
 		return webchainList.size();
 	}
-	
+
 	public Webchain getWebchainAt(int index){
 		return webchainList.get(index);
 	}
 
-	
-	
-	
+
+
+
 	/**
 	 * @param name
 	 */
 	public Webchain createWebchain(String name, WebchainInputType inputType) {
 		Webchain webchain = new Webchain();
-		webchain.setName(name);	
+		webchain.setName(name);
 		webchain.setWebchainInputType(inputType);
 		//addinput to chainelements
 		webchain.addWebchainElement(inputType);
 		return webchain;
 		//addNewWebchain(webchain);
 	}
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param name
 	 * @param oldWebchain
 	 */
 	public void cloneWebchain(String name, Webchain old) {
 		Webchain webchain = new Webchain();
 		webchain.setName(name);
-		
+
 		for(int i = 0; i < old.getElementsCount();i++){
 			if(old.getElementAt(i) instanceof WebserviceProxy){
 				WebserviceProxy wp = (WebserviceProxy) old.getElementAt(i);
 				webchain.addWebchainElement(wp.get().getUID());
 				webchain.addWebservice(wp.get().getUID());
-			}			
+			}
 			if(old.getElementAt(i) instanceof WebchainInputType){
 				webchain.addWebchainElement((WebchainInputType) old.getElementAt(i));
 				WebchainInputType wi = new WebchainInputType();
@@ -459,31 +454,31 @@ public class WebchainRegistry {
 				webchain.addWebchainElement((WebchainOutputType) old.getElementAt(i));
 			}
 		}
-		addNewWebchain(webchain);	
+		addNewWebchain(webchain);
 	}
-	
-	
+
+
 	protected void hasChange(Webchain webchain){
 		int index = indexOfWebchain(webchain);
 		hasChanges=true;
 		eventSource.fireEvent(new EventObject(Events.CHANGED,
 				"webchain",webchain //$NON-NLS-1$
 				,"index",index));//NON-NLS-1$ //$NON-NLS-1$
-		
+
 	}
-	
+
 	public void setName(Webchain webchain, String name) {
 		if(name==null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 		if(name.equals(webchain.getName())) {
 			return;
 		}
-		
+
 		webchain.setName(name);
 		hasChange(webchain);
 	}
-	
-	
+
+
 	/**
 	 * @param webchain
 	 * @param webchainElements
@@ -492,12 +487,12 @@ public class WebchainRegistry {
 
 		//prepare Proxylist
 		//clearAllWebservices(webchain);
-		
-		if (webchainElements==null){			
+
+		if (webchainElements==null){
 			return;
 		}
-		
-		
+
+
 		boolean refreshAll = webchain.getElementsCount() != webchainElements.size();
 		System.out.println(refreshAll);
 		//lists are different replace old webchainelement list
@@ -515,17 +510,17 @@ public class WebchainRegistry {
 			hasChange(webchain);
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
-	 * @param webchain 
+	 * @param webchain
 	 * @param nameFromSelectedButton
 	 * @param text
 	 */
 	public void setWebserviceInput(Webchain webchain, String type, String value) {
-		if (type==null){			
+		if (type==null){
 			return;
 		}
 		WebchainInputType chainInput = new WebchainInputType();
@@ -537,34 +532,34 @@ public class WebchainRegistry {
 
 	//compare 2 webservice element lists
 	public boolean equalElements(List<WebchainElements> w1, List<WebchainElements> w2){
-		
+
 		boolean equal = true;
 		if (w1.size() != w2.size()){
 			return false;
 		} else {
 			//same listsize we need to check items
 			for (int i = 0; i < w1.size(); i++){
-				
+
 				//TODO Check equal = replace with return?! - should also work that way
 				if (w1.get(i) instanceof WebserviceProxy
 						&& w2.get(i) instanceof WebserviceProxy) {
-					
+
 					if (!(((WebserviceProxy) w1.get(i)).getServiceID()
 							.equals(((WebserviceProxy) w2.get(i)).getServiceID()))){
 						equal = false;
 					}
 					//System.out.println("proxy" + equal);
 				}
-				
+
 				//Check Input
 				if (w1.get(i) instanceof WebchainInputType
 						&& w2.get(i) instanceof WebchainInputType) {
 					equal = compareWebchainInputType(
-								(WebchainInputType) w1.get(i), 
+								(WebchainInputType) w1.get(i),
 								(WebchainInputType) w2.get(i));
 					//System.out.println("wio" + equal);
 				}
-				
+
 				// Check Output
 				if (w1.get(i) instanceof WebchainOutputType
 						&& w2.get(i) instanceof WebchainOutputType) {
@@ -574,17 +569,17 @@ public class WebchainRegistry {
 							(WebchainOutputType) w2.get(i));
 					// System.out.println("wot" + equal);
 				}
-				
+
 				if(!equal){
 					//System.out.println("Changes " + w1.get(i) + w2.get(i));
 					return equal;
 				}
-				
+
 			}
 		}
-		return equal;		
+		return equal;
 	}
-	
+
 	/**
 	 * Compare 2 Webchain Input Types
 	 * @param t1
@@ -593,13 +588,13 @@ public class WebchainRegistry {
 	 */
 	public boolean compareWebchainInputType(WebchainInputType t1, WebchainInputType t2){
 		if (t1.equals(t2)){
-			return true;			
+			return true;
 		}
 		return false;
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Compare 2 Webchain Output Types
 	 * @param t1
@@ -609,17 +604,17 @@ public class WebchainRegistry {
 	public boolean compareWebchainOutputType(WebchainOutputType t1, WebchainOutputType t2){
 		//same type, value and activatestatus
 		if (t1.equals(t2)){
-			return true;			
+			return true;
 		}
 		return false;
-		
+
 	}
 
 
 	//check if webservice occurs in any chain before delete possible
 	public boolean webserviceUsed(Webservice webservice){
 		for(int i = 0; i < getWebchainCount(); i++){
-			
+
 			for (int j = 0; j < getWebchainAt(i).getWebserviceCount();j++){
 				Webservice w = (Webservice) getWebchainAt(i).getWebserviceAt(j).get();
 				if (w.equals(webservice)) return true;
@@ -627,7 +622,7 @@ public class WebchainRegistry {
 		}
 		return false;
 	}
-	
+
 	//return first chain webservice is used in
 	public Webchain webserviceFirstOccurence(Webservice webservice){
 		for(int i = 0; i < getWebchainCount(); i++){
@@ -638,21 +633,21 @@ public class WebchainRegistry {
 		}
 		return null;
 	}
-	
-	
+
+
 	// return webservice chain query
 	public List<String> getQueryFromWebchain(Webchain webchain){
-		List<String> query = new ArrayList<>();	
-		String type = null;		
+		List<String> query = new ArrayList<>();
+		String type = null;
 		//collect webservices
 		for (int i = 0; i < webchain.getWebserviceCount(); i++){
 			Webservice webservice = webchain.getWebserviceAt(i).get();
-			
+
 			//collect output attributes
 			StringBuilder sb = new StringBuilder();
 			for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
-				WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);	
-				
+				WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);
+
 				if (attribute.getAttributename().equals("type")){ //$NON-NLS-1$
 					type = //attribute.getAttributename() +"="+
 							attribute.getAttributevalues();
@@ -663,46 +658,46 @@ public class WebchainRegistry {
 					sb.append(attribute.getAttributename());
 				} else {
 					sb.append(attribute.getAttributename()).append("=") //$NON-NLS-1$
-						.append(attribute.getAttributevalues()); 
-				}				
-				
+						.append(attribute.getAttributevalues());
+				}
+
 				//only add if type not in list
 				if (!query.contains(sb.toString())){
 					query.add(sb.toString());
 				}
 				sb.delete(0, sb.length());
 				}
-			} 
+			}
 		}
-		
+
 		//add type from last item
 		query.add(type);
-		
+
 		/*
 		for (int i = 0; i< query.size(); i++){
 			System.out.println(query.get(i));
 		}
 		*/
-		
+
 		//System.out.println(query.get(query.size()-1));
 		return query;
 	}
-	
-	
-	
-	
+
+
+
+
 	public boolean hasChainOutput(Webchain webchain){
 		for(int i = 0; i < webchain.getElementsCount(); i++){
 			if (webchain.getElementAt(i) instanceof WebchainOutputType){
 				return true;
-			}			
+			}
 		}
 		return false;
 	}
-	
 
-	
-	
+
+
+
 
 	//##############################
 	private static Pattern indexPattern;
@@ -712,34 +707,34 @@ public class WebchainRegistry {
 		for(int i = 0; i< webchainList.size(); i++) {
 			usedNames.add(webchainList.get(i).getName());
 		}
-	
+
 		String name = baseName;
 		int count = 2;
-		
+
 		if(indexPattern==null) {
 			indexPattern = Pattern.compile("\\((\\d+)\\)$"); //$NON-NLS-1$
 		}
-		
+
 		Matcher matcher = indexPattern.matcher(baseName);
 		if(matcher.find()) {
 			int currentCount = 0;
 			try {
 				currentCount = Integer.parseInt(matcher.group(1));
 			} catch(NumberFormatException e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to parse existing base name index suffix: "+baseName, e); //$NON-NLS-1$
 			}
-			
+
 			count = Math.max(count, currentCount+1);
 			baseName = baseName.substring(0, baseName.length()-matcher.group().length()).trim();
 		}
-		
+
 		if(usedNames.contains(name)) {
 			while(usedNames.contains((name = baseName+" ("+count+")"))) { //$NON-NLS-1$ //$NON-NLS-2$
 				count++;
 			}
 		}
-		
+
 		return name;
 	}
 
@@ -763,12 +758,12 @@ public class WebchainRegistry {
 	public void removeListener(EventListener listener, String eventName) {
 		eventSource.removeEventListener(listener, eventName);
 	}
-	
-	
-	
-	
+
+
+
+
 	public static void main(String[] args) {
-		
+
 		WebchainRegistry wcl = new WebchainRegistry();
 		//List<String> list = WebchainRegistry.getInstance().getQueryFromWebchain(w);
 		try {
@@ -781,5 +776,5 @@ public class WebchainRegistry {
 		System.out.println("fertig"); //$NON-NLS-1$
 
 	}
-	
+
 }

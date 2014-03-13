@@ -19,14 +19,16 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.config;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,49 +55,49 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class JAXBConfigStorage extends AbstractConfigStorage {
-	
+
 	static {
 		JAXBUtils.registerClass(Buffer.class);
 	}
-	
-	protected File file;
-	
+
+	protected Path file;
+
 	protected Map<String, Object> map;
-	
+
 	public JAXBConfigStorage(String path, int strategy) {
-		this(new File(path), strategy);
+		this(Paths.get(path), strategy);
 	}
-	
+
 	public JAXBConfigStorage(String path) {
-		this(new File(path), MANUAL_SAVING);
+		this(Paths.get(path), MANUAL_SAVING);
 	}
-	
-	public JAXBConfigStorage(File file) {
+
+	public JAXBConfigStorage(Path file) {
 		this(file, MANUAL_SAVING);
 	}
-	
-	public JAXBConfigStorage(File file, int strategy) {
+
+	public JAXBConfigStorage(Path file, int strategy) {
 		Exceptions.testNullArgument(file, "file"); //$NON-NLS-1$
-		
+
 		//System.out.println(file.getAbsolutePath());
-		
+
 		this.file = file;
-		
-		if(!file.exists()) {
+
+		if(Files.notExists(file)) {
 			try {
-				file.createNewFile();
+				Files.createFile(file);
 			} catch (IOException e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to create config storage file: "+file, e); //$NON-NLS-1$
 			}
 		}
-		
+
 		setStrategy(strategy);
 	}
 
@@ -115,18 +117,18 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			return true;
 		}
 		return false;
-		
+
 	}
 
 	@Override
 	protected void read() throws Exception {
-		if(!file.exists() || file.length()==0) {
+		if(Files.notExists(file) || Files.size(file)==0) {
 			return;
 		}
 
 		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Unmarshaller unmarshaller = context.createUnmarshaller();
-		Buffer buffer = (Buffer) unmarshaller.unmarshal(file);
+		Buffer buffer = (Buffer) unmarshaller.unmarshal(Files.newInputStream(file));
 		map = buffer.toMap();
 	}
 
@@ -135,45 +137,45 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 		JAXBContext context = JAXBUtils.getSharedJAXBContext();
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		
+
 		Buffer buffer = new Buffer();
 		buffer.fromMap(map);
-		
-		marshaller.marshal(buffer, file);
+
+		marshaller.marshal(buffer, Files.newOutputStream(file));
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	@XmlRootElement(name="properties")
 	private static class Buffer {
-		
+
 		@XmlElements({
 			@XmlElement(name="entry", type=Entry.class),
 			@XmlElement(name="listEntry", type=ListEntry.class),
 			@XmlElement(name="mapEntry", type=MapEntry.class),
 		})
 		private List<Entry> entries = new ArrayList<>();
-		
+
 		private Map<String, Object> toMap() {
 			Map<String, Object> map = new HashMap<>(entries.size());
-			
+
 			for(Entry entry : entries) {
 				map.put(entry.getKey(), entry.getValue());
 			}
-			
+
 			return map;
 		}
-		
+
 		private void fromMap(Map<String, Object> map) {
 			entries = new ArrayList<>(map.size());
-			
+
 			for(Map.Entry<String, Object> mapEntry : map.entrySet()) {
 				Entry entry;
-				
+
 				if(mapEntry.getValue() instanceof Map) {
 					entry = new MapEntry(mapEntry);
 				} else if(mapEntry.getValue() instanceof List) {
@@ -181,14 +183,14 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 				} else {
 					entry = new Entry(mapEntry);
 				}
-				
+
 				entries.add(entry);
 			}
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -196,10 +198,10 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement
 	private static class Entry {
-		
+
 		@XmlAttribute
 		private String key;
-		
+
 		@XmlElements({
 			@XmlElement(name="integer", type=Integer.class),
 			@XmlElement(name="float", type=Float.class),
@@ -213,27 +215,27 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			@XmlElement(name="value"),
 		})
 		private Object value;
-		
+
 		private Entry() {
 			// no-op
 		}
-		
+
 		private Entry(Map.Entry<String, Object> mapEntry) {
 			key = mapEntry.getKey();
 			value = mapEntry.getValue();
 		}
-		
+
 		String getKey() {
 			return key;
 		}
-		
+
 		Object getValue() {
 			return value;
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -241,10 +243,10 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement
 	private static class ListEntry extends Entry {
-		
+
 		@XmlAttribute
 		private String key;
-		
+
 		@XmlElements({
 			@XmlElement(name="integer", type=Integer.class),
 			@XmlElement(name="float", type=Float.class),
@@ -258,16 +260,16 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			@XmlElement(name="item"),
 		})
 		private Object[] value;
-		
+
 		private ListEntry() {
 			// no-op
 		}
-		
+
 		private ListEntry(Map.Entry<String, Object> mapEntry) {
 			key = mapEntry.getKey();
 			value = ((List<?>) mapEntry.getValue()).toArray();
 		}
-		
+
 		@Override
 		Object getValue() {
 			return CollectionUtils.asList(value);
@@ -275,7 +277,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -283,23 +285,23 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement
 	private static class MapEntry extends Entry {
-		
+
 		@XmlAttribute
 		private String key;
-		
+
 		@XmlElement
 		@XmlJavaTypeAdapter(value=MapAdapter.class)
 		private Map<?,?> value;
-		
+
 		private MapEntry() {
 			// no-op
 		}
-		
+
 		private MapEntry(Map.Entry<String, Object> mapEntry) {
 			key = mapEntry.getKey();
 			value = (Map<?,?>) mapEntry.getValue();
 		}
-		
+
 		@Override
 		Object getValue() {
 			return (Map<?, ?>) value;

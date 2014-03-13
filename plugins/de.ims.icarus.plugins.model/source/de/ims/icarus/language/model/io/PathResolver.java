@@ -31,13 +31,13 @@ package de.ims.icarus.language.model.io;
  *
  * @author Markus Gärtner
  * @version $Id$
- * @see Path
+ * @see ResourcePath
  *
  */
 public interface PathResolver {
 
 	/**
-	 * Translates the given {@code chunkIndex} into a {@code Path}
+	 * Translates the given {@code chunkIndex} into a {@code ResourcePath}
 	 * information that can be used to access data from an abstract
 	 * data source.
 	 *
@@ -48,5 +48,5 @@ public interface PathResolver {
 	 * into row values for a database table might check for the overall size of that
 	 * table to make sure the returned rows do not exceed the table's row count.
 	 */
-	Path getPath(int chunkIndex);
+	ResourcePath getPath(int chunkIndex);
 }

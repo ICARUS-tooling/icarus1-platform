@@ -45,4 +45,8 @@ public interface StructureManifest extends ContainerManifest {
 	 * @param structureType
 	 */
 	void setStructureType(StructureType structureType);
+
+	boolean isMultiRootAllowed();
+
+	void setMultiRootAllowed(boolean value);
 }

@@ -23,8 +23,12 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.api.layer;
 
+import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.NamedCorpusMember;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
 
 /**

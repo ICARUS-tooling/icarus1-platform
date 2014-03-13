@@ -31,8 +31,9 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -585,7 +586,7 @@ public class TreebankExplorerView extends View {
 				Desktop desktop = Desktop.getDesktop();
 				if(location.isLocal()) {
 					// Open local treebanks in the default explorer
-					desktop.open(location.getFile().getParentFile());
+					desktop.open(location.getLocalPath().getParent().toFile());
 				} else {
 					// Use the systems browser for remote treebanks
 					desktop.browse(location.getURL().toURI());
@@ -744,27 +745,30 @@ public class TreebankExplorerView extends View {
 				treebanks.add(list.getModel().getElementAt(index));
 			}
 
-			// Obtain destination file (factory handles the 'overwrite' dialog)
-			File file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
-					getFrame(),
-					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
-					null);
-
-			if(file==null)
-				return;
+			Path file = null;
 
 			try {
+
+				// Obtain destination file (factory handles the 'overwrite' dialog)
+				file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+						getFrame(),
+						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
+						null);
+
+				if(file==null)
+					return;
+
 				// Perform export
 				TreebankRegistry.getInstance().exportTreebanks(file, treebanks);
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to export treebanks to file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
+						"Failed to export treebanks to file: "+file, ex); //$NON-NLS-1$
 				UIUtil.beep();
 
 				DialogFactory.getGlobalFactory().showError(getFrame(),
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.ioException",  //$NON-NLS-1$
-						StringUtil.fit(file.getAbsolutePath(), 100),
+						StringUtil.fit(file.toString(), 100),
 						StringUtil.fit(ex.getMessage(), 100));
 				return;
 			}
@@ -773,19 +777,19 @@ public class TreebankExplorerView extends View {
 			DialogFactory.getGlobalFactory().showInfo(getFrame(),
 					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.title",  //$NON-NLS-1$
 					"plugins.languageTools.treebankExplorerView.dialogs.exportTreebanks.result",  //$NON-NLS-1$
-					treebanks.size(), StringUtil.fit(file.getAbsolutePath(), 100));
+					treebanks.size(), StringUtil.fit(file.toString(), 100));
 		}
 
 		// TODO switch execution to background task?
 		public void importTreebanks(ActionEvent e) {
 
 			// Obtain source file
-			File file = DialogFactory.getGlobalFactory().showSourceFileDialog(
+			Path file = DialogFactory.getGlobalFactory().showSourceFileDialog(
 					getFrame(),
 					"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 					null);
 
-			if(file==null || !file.exists())
+			if(file==null || Files.notExists(file))
 				return;
 
 			TreebankImportResult importResult = null;
@@ -795,22 +799,22 @@ public class TreebankExplorerView extends View {
 				importResult = TreebankRegistry.getInstance().importTreebanks(file);
 			} catch (IOException ex) {
 				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to import treebanks from file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
+						"Failed to import treebanks from file: "+file, ex); //$NON-NLS-1$
 				DialogFactory.getGlobalFactory().showError(getFrame(),
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.ioException",  //$NON-NLS-1$
-						StringUtil.fit(file.getAbsolutePath(), 100),
+						StringUtil.fit(file.toString(), 100),
 						StringUtil.fit(ex.toString(), 100));
 				return;
 			} catch (Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
-						"Cannot import treebank data from file: "+file.getAbsolutePath(), ex); //$NON-NLS-1$
+						"Cannot import treebank data from file: "+file, ex); //$NON-NLS-1$
 				UIUtil.beep();
 
 				DialogFactory.getGlobalFactory().showError(getFrame(),
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankExplorerView.dialogs.importTreebanks.invalidContent",  //$NON-NLS-1$
-						StringUtil.fit(file.getAbsolutePath(), 100),
+						StringUtil.fit(file.toString(), 100),
 						StringUtil.fit(ex.toString(), 100));
 				return;
 			}
@@ -886,7 +890,7 @@ public class TreebankExplorerView extends View {
 			}
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("Result of import from file (").append(file.getAbsolutePath()).append("):\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append("Result of import from file (").append(file).append("):\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			if(importResult.getUnavailableTreebankCount()>0) {
 				for(TreebankInfo info : importResult.getUnavailableTreebanks()) {
 					sb.append("  -skipped ").append(info.fullInfo()).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$

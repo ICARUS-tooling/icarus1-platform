@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.model.api.highlight;
 
-import de.ims.icarus.language.model.api.HighlightLayer;
+import de.ims.icarus.language.model.api.layer.HighlightLayer;
 
 /**
  *

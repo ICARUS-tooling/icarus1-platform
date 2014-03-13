@@ -106,7 +106,7 @@ public abstract class Splitable extends AbstractString {
 	        		off = m.end();
 	        	}
 
-	        	if(off<length()-1 && (limit==0 || splitCount<limit)) {
+	        	if(off<length() && (limit==0 || splitCount<limit)) {
 	        		addSplit(off, length()-1);
 	        	}
 	            return splitCount;

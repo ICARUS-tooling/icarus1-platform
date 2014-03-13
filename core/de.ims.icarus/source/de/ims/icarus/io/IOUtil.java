@@ -27,16 +27,18 @@ package de.ims.icarus.io;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 
@@ -69,6 +71,10 @@ public final class IOUtil {
 		return name.endsWith(".gzip") || name.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	public static boolean isGZipSource(Path path) {
+		return path.endsWith(".gzip") || path.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	public static String readStream(InputStream input) throws IOException {
 		return readStream(input, UTF8_ENCODING);
 	}
@@ -98,10 +104,14 @@ public final class IOUtil {
 		return null;
 	}
 
+    public static void copyStream(final InputStream in, final OutputStream out) throws IOException {
+    	copyStream(in, out, 0);
+    }
+
     public static void copyStream(final InputStream in, final OutputStream out,
             int bufferSize) throws IOException {
     	if(bufferSize==0) {
-    		bufferSize = 4096;
+    		bufferSize = 8000;
     	}
         byte[] buf = new byte[bufferSize];
         int len;
@@ -153,8 +163,10 @@ public final class IOUtil {
 	public static Charset getCharset(Options options, Charset defaultCharset) {
 		Object charset = null;
 		if(options!=null) {
-			charset = options.firstSet(CHARSET_OPTION,
-					CHARSET_NAME_OPTION, ENCODING_OPTION);
+			charset = options.firstSet(
+					CHARSET_OPTION,
+					CHARSET_NAME_OPTION,
+					ENCODING_OPTION);
 		}
 
 		if(charset == null) {
@@ -179,14 +191,18 @@ public final class IOUtil {
      * @return <code>true</code> if given URL points to an existing resource
      */
     public static boolean isResourceExists(final URL url) {
-        File file = urlToFile(url);
-        if (file != null) {
-            return file.canRead();
-        }
-        if ("jar".equalsIgnoreCase(url.getProtocol())) { //$NON-NLS-1$
-            return isJarResourceExists(url);
-        }
-        return isUrlResourceExists(url);
+    	try {
+	        Path path = Paths.get(url.toURI());
+	        if (path != null) {
+	            return Files.isReadable(path);
+	        }
+	        if ("jar".equalsIgnoreCase(url.getProtocol())) { //$NON-NLS-1$
+	            return isJarResourceExists(url);
+	        }
+	        return isUrlResourceExists(url);
+    	} catch(URISyntaxException e) {
+    		return false;
+    	}
     }
 
     /**
@@ -220,104 +236,63 @@ public final class IOUtil {
             if (p == -1) {// this is invalid JAR file URL
                 return false;
             }
-            URL fileUrl = new URL(urlStr.substring(4, p));
-            File file = urlToFile(fileUrl);
-            if (file == null) {// this is non-local JAR file URL
+            Path path = Paths.get(url.toURI());
+            if (path == null) {// this is non-local JAR file URL
                 return isUrlResourceExists(url);
             }
-            if (!file.canRead()) {
+            if (!Files.isReadable(path)) {
                 return false;
             }
             if (p == urlStr.length() - 2) {// URL points to the root entry of JAR file
                 return true;
             }
-            JarFile jarFile = new JarFile(file);
+            JarFile jarFile = new JarFile(path.toFile());
             try {
                 return jarFile.getEntry(urlStr.substring(p + 2)) != null;
             } finally {
                 jarFile.close();
             }
-        } catch (IOException ioe) {
+        } catch (IOException | URISyntaxException ioe) {
             return false;
         }
     }
 
     /**
-     * Utility method to convert local URL to a {@link File} object.
-     * @param url an URL
-     * @return file object for given URL or <code>null</code> if URL is not
-     *         local
-     */
-    @SuppressWarnings("deprecation")
-    public static File urlToFile(final URL url) {
-        String prot = url.getProtocol();
-        if ("jar".equalsIgnoreCase(prot)) { //$NON-NLS-1$
-            if (url.getFile().endsWith("!/")) { //$NON-NLS-1$
-                String urlStr = url.toExternalForm();
-                try {
-                    return urlToFile(
-                            new URL(urlStr.substring(4, urlStr.length() - 2)));
-                } catch (MalformedURLException mue) {
-                    // ignore
-                }
-            }
-            return null;
-        }
-        if (!"file".equalsIgnoreCase(prot)) { //$NON-NLS-1$
-            return null;
-        }
-        try {
-            // Method URL.toURI() may produce URISyntaxException for some
-            // "valid" URL's that contain spaces or other "illegal" characters.
-            //return new File(url.toURI());
-            return new File(URLDecoder.decode(url.getFile(), "UTF-8")); //$NON-NLS-1$
-        } catch (UnsupportedEncodingException e) {
-            return new File(URLDecoder.decode(url.getFile()));
-        }
-    }
-
-    /**
-     * Utility method to convert a {@link File} object to a local URL.
-     * @param file a file object
+     * Utility method to convert a {@link Path} object to a local URL.
+     * @param p a file object
      * @return absolute URL that points to the given file
      * @throws MalformedURLException if file can't be represented as URL for
      *         some reason
      */
-    public static URL fileToUrl(final File file) throws MalformedURLException {
+    public static URL fileToUrl(Path p) throws MalformedURLException {
         try {
-            return file.getCanonicalFile().toURI().toURL();
+            return p.toAbsolutePath().toUri().toURL();
         } catch (MalformedURLException mue) {
             throw mue;
-        } catch (IOException ioe) {
-            throw new MalformedURLException("unable to create canonical file: "  //$NON-NLS-1$
-            		+ file + " " + ioe); //$NON-NLS-1$
+        } catch (IOError ioe) {
+            throw new MalformedURLException("unable to create absolute path: "  //$NON-NLS-1$
+            		+ p + " " + ioe); //$NON-NLS-1$
         }
     }
 
-    public static File toRelativeFile(File f) {
-    	if(f==null) {
-    		return f;
+    public static Path toRelativePath(Path p) {
+    	if(p==null) {
+    		return p;
     	}
 
-    	String root = Core.getCore().getRootFolder().getAbsolutePath();
-    	String path = null;
+    	Path root = Core.getCore().getRootFolder();
     	try {
-    		path = f.getCanonicalPath();
-    	} catch(Exception e) {
+    		p = p.toAbsolutePath();
+    	} catch(IOError e) {
     		LoggerFactory.log(IOUtil.class, Level.WARNING,
-    				"Error converting file to canonical path: "+f.getAbsolutePath(), e); //$NON-NLS-1$
+    				"Error converting to absolute path: "+p, e); //$NON-NLS-1$
+    		return p;
     	}
 
-    	if(path==null) {
-    		return f;
+    	if(p.startsWith(root)) {
+    		p = p.subpath(root.getNameCount(), p.getNameCount());
     	}
-
-    	if(path.startsWith(root)) {
-    		path = path.substring(root.length()+1);
-    		return new File(path);
-    	} else {
-    		return f;
-    	}
+		return p;
     }
 
     public static boolean canFree(Loadable loadable) {

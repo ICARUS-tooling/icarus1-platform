@@ -25,12 +25,14 @@
  */
 package de.ims.icarus.language.model.registry;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +51,8 @@ import org.java.plugin.registry.PluginDescriptor;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.language.model.api.Corpus;
-import de.ims.icarus.language.model.api.LayerType;
 import de.ims.icarus.language.model.api.ModelPlugin;
+import de.ims.icarus.language.model.api.layer.LayerType;
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
 import de.ims.icarus.language.model.api.manifest.CorpusManifest;
 import de.ims.icarus.language.model.api.manifest.Derivable;
@@ -85,25 +87,6 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  */
 public final class CorpusRegistry {
 
-	private static volatile CorpusRegistry instance;
-
-	public static CorpusRegistry getInstance() {
-		CorpusRegistry tmp = instance;
-		if(tmp==null) {
-			synchronized (CorpusRegistry.class) {
-				tmp = instance;
-				if(tmp==null) {
-					tmp = new CorpusRegistry();
-					tmp.init();
-
-					instance = tmp;
-				}
-			}
-		}
-
-		return tmp;
-	}
-
 	private final Map<String, Derivable> templates = new HashMap<>();
 	private final Map<String, LayerType> layerTypes = new HashMap<>();
 	private final Map<String, ContextReader> contextReaders = new HashMap<>();
@@ -116,11 +99,11 @@ public final class CorpusRegistry {
 
 	private final EventSource eventSource = new WeakEventSource(this);
 
-	private CorpusRegistry() {
-		if(instance!=null)
-			throw new IllegalStateException("Cannot instantiate additional registry"); //$NON-NLS-1$
+	public CorpusRegistry() {
+
 	}
 
+	//TODO externalize init call
 	private void init() {
 
 		registerTemplates();
@@ -130,11 +113,11 @@ public final class CorpusRegistry {
 		loadCorpora();
 	}
 
-	private static final FileFilter xmlFileFilter = new FileFilter() {
+	private static final Filter<Path> xmlPathFilter = new Filter<Path>() {
 
 		@Override
-		public boolean accept(File pathname) {
-			return pathname.exists() && pathname.getName().endsWith(".xml"); //$NON-NLS-1$
+		public boolean accept(Path entry) throws IOException {
+			return Files.exists(entry) && entry.endsWith(".xml"); //$NON-NLS-1$
 		}
 	};
 
@@ -162,30 +145,38 @@ public final class CorpusRegistry {
 			// Process template folders
 			for(Extension extension : descriptor.getExtensionPoint("ModelFolder").getConnectedExtensions()) { //$NON-NLS-1$
 
-				File pluginFolder = PluginUtil.getPluginFolder(extension);
+				Path pluginFolder = PluginUtil.getPluginFolder(extension);
 
 				for(Extension.Parameter parameter : extension.getParameters("folder")) { //$NON-NLS-1$
-					File folder = new File(pluginFolder, parameter.valueAsString());
+					Path folder = pluginFolder.resolve(parameter.valueAsString());
 
-					if(!folder.exists()) {
-						LoggerFactory.warning(this, "Missing template folder: "+folder.getPath()); //$NON-NLS-1$
+					if(Files.notExists(folder)) {
+						LoggerFactory.warning(this, "Missing template folder: "+folder); //$NON-NLS-1$
 						continue;
 					}
 
-					File[] files = folder.listFiles(xmlFileFilter);
+			        // Recursively traverse content of folder till we find plug-ins
+			        try(DirectoryStream<Path> stream = Files.newDirectoryStream(folder, xmlPathFilter)) {
 
-					if(files==null || files.length==0) {
-						LoggerFactory.warning(this, "Template folder is empty: "+folder.getPath()); //$NON-NLS-1$
-						continue;
-					}
+			        	int numEntries = 0;
 
-					for(File file : files) {
-						try {
-							loadTemplates(file.toURI().toURL());
-						} catch (Exception e) {
-							LoggerFactory.error(this, "Failed to load file from template folder: " //$NON-NLS-1$
-									+extension.getUniqueId()+" ("+file.getPath()+")", e); //$NON-NLS-1$ //$NON-NLS-2$
+						for(Path file : stream) {
+							try {
+								loadTemplates(file.toUri().toURL());
+							} catch (Exception e) {
+								LoggerFactory.error(this, "Failed to load file from template folder: " //$NON-NLS-1$
+										+extension.getUniqueId()+" ("+file+")", e); //$NON-NLS-1$ //$NON-NLS-2$
+							} finally {
+								numEntries++;
+							}
 						}
+
+						if(numEntries==0) {
+							LoggerFactory.warning(this, "Template folder is empty: "+folder); //$NON-NLS-1$
+							continue;
+						}
+			        } catch (IOException e) {
+			            LoggerFactory.error(this, "Failed traversing files in plug-in folder " + folder, e); //$NON-NLS-1$
 					}
 				}
 			}
@@ -234,10 +225,10 @@ public final class CorpusRegistry {
 		synchronized (corpora) {
 			corpora.clear();
 
-			File file = getCorporaFile();
+			Path file = getCorporaFile();
 			URL url = null;
 			try {
-				url = file.toURI().toURL();
+				url = file.toUri().toURL();
 			} catch (MalformedURLException e) {
 				LoggerFactory.error(this, "Failed to resolve corpora.xml url", e); //$NON-NLS-1$
 			}
@@ -262,8 +253,8 @@ public final class CorpusRegistry {
 		scheduleUpdate();
 	}
 
-	private File getCorporaFile() {
-		return new File(Core.getCore().getDataFolder(), "corpora.xml"); //$NON-NLS-1$
+	private Path getCorporaFile() {
+		return Core.getCore().getDataFolder().resolve("corpora.xml"); //$NON-NLS-1$
 	}
 
 	private static final Object writeLock = new Object();
@@ -278,13 +269,13 @@ public final class CorpusRegistry {
 	}
 
 	private void save() {
-		File file = getCorporaFile();
+		Path file = getCorporaFile();
 		XMLOutputFactory factory = XMLOutputFactory.newFactory();
 
 		XmlSerializer serializer = null;
 		try {
 			@SuppressWarnings("resource")
-			XMLStreamWriter writer = factory.createXMLStreamWriter(new FileOutputStream(file), "UTF-8"); //$NON-NLS-1$
+			XMLStreamWriter writer = factory.createXMLStreamWriter(Files.newOutputStream(file), "UTF-8"); //$NON-NLS-1$
 			serializer = new XmlStreamSerializer(writer);
 
 			serializer.startDocument();
@@ -343,7 +334,7 @@ public final class CorpusRegistry {
 	}
 
 	private static final Pattern idPattern = Pattern.compile(
-			"^\\p{Alpha}[\\w_-:]{2,}$"); //$NON-NLS-1$
+			"^\\p{Alpha}[\\w_-]{2,}$"); //$NON-NLS-1$
 
 	/**
 	 * Verifies the validity of the given {@code id} string.
@@ -354,7 +345,7 @@ public final class CorpusRegistry {
 	 * <li>they start with an alphabetic character (lower and upper case are allowed)</li>
 	 * <li>subsequent characters may be alphabetic or digits</li>
 	 * <li>no whitespaces, control characters or code points with 2 or more bytes are allowed</li>
-	 * <li>no special characters are allowed besides the following 3: _-: (underscore, hyphen, colon)</li>
+	 * <li>no special characters are allowed besides the following 2: _- (underscore, hyphen)</li>
 	 * </ul>
 	 *
 	 * Attempting to use any other string as an identifier for arbitrary members of a corpus will

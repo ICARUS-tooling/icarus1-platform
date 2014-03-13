@@ -29,7 +29,7 @@ import javax.swing.Icon;
 
 import org.java.plugin.registry.Extension;
 
-import de.ims.icarus.language.model.api.LayerType;
+import de.ims.icarus.language.model.api.layer.LayerType;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
 import de.ims.icarus.plugins.PluginUtil;
@@ -94,7 +94,7 @@ public class LazyExtensionLayerType implements LayerType {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.LayerType#getSharedManifest()
+	 * @see de.ims.icarus.language.model.api.layer.LayerType#getSharedManifest()
 	 */
 	@Override
 	public LayerManifest getSharedManifest() {

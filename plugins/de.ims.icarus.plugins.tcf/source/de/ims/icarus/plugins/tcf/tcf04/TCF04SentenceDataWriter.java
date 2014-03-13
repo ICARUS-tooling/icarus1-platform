@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,19 +15,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.tcf.tcf04;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -64,11 +66,11 @@ import de.tuebingen.uni.sfs.wlf1.xb.WLData;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class TCF04SentenceDataWriter implements SentenceDataWriter {
 
-	protected FileOutputStream fos;
+	protected OutputStream fos;
 	protected TextCorpusStored textCorpusStored;
 
 	// options
@@ -85,25 +87,23 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
 
-		File file = location.getFile();
+		Path file = location.getLocalPath();
 
 		if (file == null)
-			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$		
-				
+			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
+
 		if (options == null){
 			options = Options.emptyOptions;
 		}
-		
-		
-		fos = new FileOutputStream(file);
+
+
+		fos = Files.newOutputStream(file);
 
 		// TODO extend
 		language = "de"; //$NON-NLS-1$
 		parser = "tiger"; //$NON-NLS-1$
 		multiGovernors = false;
 		emptyNode = false;
-
-		fos = new FileOutputStream(file.getAbsoluteFile());
 
 		// create TextCorpus object, specifying that the data will be in German
 		// language (de)
@@ -122,7 +122,7 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 		if (data == null){
 			return;
 		}
-		
+
 		// create needed annotation layers
 		TokensLayer tokenLayer = textCorpusStored.createTokensLayer();
 		SentencesLayer sentenceLayer = textCorpusStored.createSentencesLayer();
@@ -134,16 +134,16 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 
 		SimpleDependencyData sdd;
 		StringBuilder sb = new StringBuilder(1000);
-		
+
 		List<Feature> featureList = new ArrayList<Feature>();
 		List<Dependency> dependencyParse = new ArrayList<Dependency>();
 		String text = null;
 
 		try {
-			
+
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException();
-			
+
 
 			sdd = (SimpleDependencyData) data;
 
@@ -281,10 +281,10 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 
 	public static void main(String[] args) throws UnsupportedFormatException {
 
-		File fileIn = new File("E:\\test.xml"); //$NON-NLS-1$		
+		Path fileIn = Paths.get("E:\\test.xml"); //$NON-NLS-1$
 		DefaultFileLocation dloc = new DefaultFileLocation(fileIn);
 
-		File fileOut = new File("E:\\test_out.xml"); //$NON-NLS-1$		
+		Path fileOut = Paths.get("E:\\test_out.xml"); //$NON-NLS-1$
 		DefaultFileLocation dlocOut = new DefaultFileLocation(fileOut);
 
 		Options o = null;

@@ -19,30 +19,27 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api;
+package de.ims.icarus.language.model.search;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface MarkableLevels {
+public class SearchException extends Exception {
 
-	public static final String TOKENS = "tokens"; //$NON-NLS-1$
+	private static final long serialVersionUID = 4820006466710714891L;
 
-	public static final String SPANS = "spans"; //$NON-NLS-1$
+	public SearchException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-	public static final String SENTENCES = "sentences"; //$NON-NLS-1$
+	public SearchException(String message) {
+		super(message);
+	}
 
-	public static final String CLUSTERS = "clusters"; //$NON-NLS-1$
-
-	public static final String SECTIONS = "sections"; //$NON-NLS-1$
-
-	public static final String CHAPTERS = "chapters"; //$NON-NLS-1$
-
-	public static final String DOCUMENTS = "documents"; //$NON-NLS-1$
 }

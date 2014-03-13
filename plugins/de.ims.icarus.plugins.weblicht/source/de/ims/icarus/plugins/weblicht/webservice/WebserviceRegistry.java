@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,19 +15,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.weblicht.webservice;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -70,7 +71,7 @@ import de.ims.icarus.util.id.StaticIdentity;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class WebserviceRegistry {
 
@@ -78,8 +79,8 @@ public class WebserviceRegistry {
 	private List<Webservice> webserviceList;
 	// protected List<String> uniqueIDList;
 	// protected Webservice webservice;
-	
-	
+
+
 	private boolean hasChanges;
 
 	// --
@@ -110,8 +111,8 @@ public class WebserviceRegistry {
 
 	}
 
-	
-	
+
+
 	@SuppressWarnings("unused")
 	private void loadWebserviceExtensions() {
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
@@ -134,10 +135,10 @@ public class WebserviceRegistry {
 					"WebserviceFormat")); //$NON-NLS-1$
 			// TODO in/out
 
-			
-			
+
+
 			addNewWebservice(webservice);
-			
+
 			// reset change flag after loading services - otherwise we will
 			// get unsaved changes dialog even after loading services from file
 			hasChanges = false;
@@ -146,18 +147,18 @@ public class WebserviceRegistry {
 	}
 
 	private void loadWebserviceXML() throws Exception {
-		
-		File fXmlFile = new File(Core.getCore().getDataFolder(), "weblicht.xml"); //$NON-NLS-1$
+
+		Path fXmlFile = Core.getCore().getDataFolder().resolve("weblicht.xml"); //$NON-NLS-1$
 
 		//File fXmlFile = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht.xml"); //$NON-NLS-1$
-		
-		if(!fXmlFile.exists() || fXmlFile.length()==0) {
+
+		if(Files.notExists(fXmlFile) || Files.size(fXmlFile)==0) {
 			return;
 		}
-		
+
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		Document doc = dBuilder.parse(fXmlFile);
+		Document doc = dBuilder.parse(Files.newInputStream(fXmlFile));
 
 		doc.getDocumentElement().normalize();
 
@@ -172,7 +173,7 @@ public class WebserviceRegistry {
 
 			if (sNode.getNodeType() == Node.ELEMENT_NODE) {
 
-				
+
 				Element eElement = (Element) sNode;
 				NamedNodeMap inputMap = getAttributesFromElement(eElement,
 						"Input"); //$NON-NLS-1$
@@ -197,7 +198,7 @@ public class WebserviceRegistry {
 				 * System.out.println("URL : " +
 				 * eElement.getElementsByTagName("URL"
 				 * ).item(0).getTextContent());
-				 * 
+				 *
 				 * for (int j = 0; j < inputMap.getLength(); j++) {
 				 * System.out.println("Key: " + inputMap.item(j).getNodeName() +
 				 * " | Value: " + inputMap.item(j).getNodeValue()); } for (int j
@@ -244,21 +245,21 @@ public class WebserviceRegistry {
 
 				//webserviceHashMap.put(eElement.getAttribute("uid"), webservice); //$NON-NLS-1$
 				// webserviceList.add(webservice);
-				
-				
-				
+
+
+
 				addNewWebservice(webservice);
-				
+
 				// reset change flag after loading services - otherwise we will
 				// get unsaved changes dialog even after loading services from file
 				hasChanges = false;
 			}
 		}
 	}
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param document
 	 * @param eName
 	 * @param eData
@@ -267,15 +268,15 @@ public class WebserviceRegistry {
 	private Element generateElement(Document document, String eName, String eData){
 		Element em = document.createElement(eName);
 		em.appendChild(document.createTextNode(eData));
-		return em;		
+		return em;
 	}
-	
+
 	private Element ioAttributesToXML(Element element, List<WebserviceIOAttributes> wioList){
 		for (int i = 0; i < wioList.size(); i++){
 			WebserviceIOAttributes attribute = wioList.get(i);
 			element.setAttribute(attribute.getAttributename(), attribute.getAttributevalues());
 		}
-		
+
 		return element;
 	}
 
@@ -284,20 +285,20 @@ public class WebserviceRegistry {
 		String root = "Webservice"; //$NON-NLS-1$
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 				.newInstance();
-		
+
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 
 		Element rootElement = document.createElement(root);
 
 		document.appendChild(rootElement);
-		
+
 		for (int i = 0; i < webserviceList.size(); i++){
 			Webservice webservice = getWebserviceAt(i);
-			
+
 			Element service = document.createElement("Service"); //$NON-NLS-1$
 			service.setAttribute("uid", webservice.getUID()); //$NON-NLS-1$
-			
+
 			service.appendChild(generateElement(document, "Name", webservice.getName())); //$NON-NLS-1$
 			service.appendChild(generateElement(document, "Description", webservice.getDescription())); //$NON-NLS-1$
 			service.appendChild(generateElement(document, "Creator", webservice.getCreator())); //$NON-NLS-1$
@@ -305,20 +306,20 @@ public class WebserviceRegistry {
 			service.appendChild(generateElement(document, "URL", webservice.getURL())); //$NON-NLS-1$
 			service.appendChild(generateElement(document, "ID", webservice.getServiceID())); //$NON-NLS-1$
 			service.appendChild(generateElement(document, "WebserviceFormat", webservice.getWebresourceFormat())); //$NON-NLS-1$
-			
+
 			service.appendChild(ioAttributesToXML(document.createElement("Input"), //$NON-NLS-1$
 					webservice.getInput()));
 			service.appendChild(ioAttributesToXML(document.createElement("Output"), //$NON-NLS-1$
 					webservice.getOutput()));
-			
-			
-			
+
+
+
 			rootElement.appendChild(service);
 		}
-		
+
 	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
-        
+
         //format output
         transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", //$NON-NLS-1$
@@ -326,33 +327,26 @@ public class WebserviceRegistry {
         DOMSource source = new DOMSource(document);
         StreamResult result =  new StreamResult(new StringWriter());
         transformer.transform(source, result);
-        
+
 
         saveXMLToFile(result);
         hasChanges=false;
 	}
-	
-	
-	private void saveXMLToFile (StreamResult result) throws Exception{
-        //writing to file
-        FileOutputStream fop = null;
-        //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht_out.xml"); //$NON-NLS-1$
-        File  file = new File(Core.getCore().getDataFolder(), "weblicht.xml");  //$NON-NLS-1$
-        fop = new FileOutputStream(file);
 
-        // if file doesnt exists, then create it
-        if (!file.exists()) {
-            file.createNewFile();
-        }
+
+	private void saveXMLToFile (StreamResult result) throws Exception{
+        //File file = new File("D:/Eigene Dateien/smashii/workspace/Icarus/data/weblicht_out.xml"); //$NON-NLS-1$
+        Path  file = Core.getCore().getDataFolder().resolve("weblicht.xml");  //$NON-NLS-1$
 
         // get the content in bytes
         String xmlString = result.getWriter().toString();
         System.out.println(xmlString);
         byte[] contentInBytes = xmlString.getBytes();
 
-        fop.write(contentInBytes);
-        fop.flush();
-        fop.close();
+        try (OutputStream out = Files.newOutputStream(file)) {
+        	out.write(contentInBytes);
+        	out.flush();
+        }
 	}
 
 	private String getTextFromExtension(Extension extension, String s) {
@@ -361,7 +355,7 @@ public class WebserviceRegistry {
 
 	/**
 	 * e is XML Element, s is the Name of our Node Element
-	 * 
+	 *
 	 * @param e
 	 * @param s
 	 * @return xml node text content
@@ -369,11 +363,11 @@ public class WebserviceRegistry {
 	private String getTextFromElement(Element e, String s) {
 		return e.getElementsByTagName(s).item(0).getTextContent();
 	}
-	
+
 
 	/**
 	 * e is XML Element, s is the Name of our Node Element
-	 * 
+	 *
 	 * @param e
 	 * @param s
 	 * @return xml node attributes
@@ -381,13 +375,13 @@ public class WebserviceRegistry {
 	private NamedNodeMap getAttributesFromElement(Element e, String s) {
 		return e.getElementsByTagName(s).item(0).getAttributes();
 	}
-	
+
 
 
 	// protected List<String> uniqueIDList;
 	// protected Webservice webservice;
-	
-	
+
+
 	/**
 	 * @return the hasChanges
 	 */
@@ -417,9 +411,9 @@ public class WebserviceRegistry {
 		// return webserviceHashMap.get(serviceid).getName();
 		return serviceName;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param webservice
 	 */
 	public void cloneWebservice(Webservice webservice, Webservice webserviceOld) {
@@ -434,7 +428,7 @@ public class WebserviceRegistry {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param webservice
 	 */
 	public void addNewWebservice(Webservice webservice) {
@@ -455,7 +449,7 @@ public class WebserviceRegistry {
 					"index", index)); //$NON-NLS-1$
 		}
 	}
-	
+
 	public void sortEvent(WebserviceViewListModel webserviceViewListModel, boolean ascending){
 		if (webserviceList.get(0) == null){
 			return;
@@ -464,13 +458,13 @@ public class WebserviceRegistry {
 		webserviceViewListModel.setSort(ascending);
 		eventSource.fireEvent(new EventObject(Events.CHANGE,
 					"webservice", webserviceList.get(0), //$NON-NLS-1$
-					"index", 0)); //$NON-NLS-1$	
-	
+					"index", 0)); //$NON-NLS-1$
+
 	}
 
 	/**
 	 * used in webservice dialogs to create new Webservices
-	 * 
+	 *
 	 * @param uid
 	 * @param name
 	 * @param desc
@@ -527,7 +521,7 @@ public class WebserviceRegistry {
 	 */
 	public void webserviceChanged(Webservice webservice) {
 		eventSource.fireEvent(new EventObject(Events.CHANGED,
-				"webservice", webservice)); //$NON-NLS-1$		
+				"webservice", webservice)); //$NON-NLS-1$
 	}
 
 	public int indexOfWebservice(Webservice webservice) {
@@ -603,7 +597,7 @@ public class WebserviceRegistry {
 
 	/**
 	 * could be empty
-	 * 
+	 *
 	 * @param webservice
 	 * @param newDesc
 	 */
@@ -686,7 +680,7 @@ public class WebserviceRegistry {
 		webservice.setServiceID(serviceID);
 		reportChange(webservice);
 	}
-	
+
 	/**
 	 * @param webservice
 	 * @param newInput
@@ -751,33 +745,33 @@ public class WebserviceRegistry {
 		}
 		return equal;
 	}
-	
-	
+
+
 	// return webservice chain query string
 	public List<String> getQueryFromWebserviceList(List<Webservice> webserviceList){
-		List<String> query = new ArrayList<>();	
-		String type = null;		
+		List<String> query = new ArrayList<>();
+		String type = null;
 		//collect webservices
 		for (int i = 0; i < webserviceList.size(); i++){
 				Webservice webservice = (Webservice) webserviceList.get(i);
-				
-				//collect output attributes			
+
+				//collect output attributes
 				for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
-					WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);	
+					WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);
 					StringBuilder sb = new StringBuilder();
 					if (attribute.getAttributename().equals("type")){ //$NON-NLS-1$
 						type = attribute.getAttributename() +"="+ //$NON-NLS-1$
 								attribute.getAttributevalues();
 						//System.out.println("Last Webchain Type " + type);
 					} else {
-	
+
 					if (attribute.getAttributevalues().equals("")){ //$NON-NLS-1$
 						sb.append(attribute.getAttributename());
 					} else {
 						sb.append(attribute.getAttributename()).append("=") //$NON-NLS-1$
-							.append(attribute.getAttributevalues()); 
-					}				
-					
+							.append(attribute.getAttributevalues());
+					}
+
 					//only add if type not in list
 					if (!query.contains(sb.toString())){
 						query.add(sb.toString());
@@ -786,75 +780,75 @@ public class WebserviceRegistry {
 					}
 			}
 		}
-		
+
 		//add type from last item
 		query.add(type);
-		
+
 		/*
 		for (int i = 0; i< query.size(); i++){
 			System.out.println(query.get(i));
 		}
 		*/
-		
+
 		//System.out.println(query.get(query.size()-1));
 		return query;
 	}
-	
-	
+
+
 	// return webservice chain query string
 	public List<WebserviceIOAttributes> getWIOQueryFromWebserviceList(List<Webservice> webservices){
-		List<WebserviceIOAttributes> query = new ArrayList<>();	
-	
+		List<WebserviceIOAttributes> query = new ArrayList<>();
+
 		//collect webservices
 		for (int i = 0; i < webservices.size(); i++){
 			Webservice webservice = webservices.get(i);
-			
+
 			//collect output attributes
 			for (int j = 0; j < webservice.getOutputAttributesSize(); j++){
 				WebserviceIOAttributes attribute = webservice.getOutputAttributesAt(j);
 				if (!query.contains(attribute))	query.add(attribute);
-			} 
+			}
 		}
 
 		return query;
 	}
-	
-	
+
+
 	private static Pattern indexPattern;
-	
+
 	public String getUniqueName(String baseName) {
 		Set<String> usedNames = new HashSet<>(webserviceList.size());
 		for(int i = 0; i< webserviceList.size(); i++) {
 			usedNames.add(webserviceList.get(i).getName());
 		}
-	
+
 		String name = baseName;
 		int count = 2;
-		
+
 		if(indexPattern==null) {
 			indexPattern = Pattern.compile("\\((\\d+)\\)$"); //$NON-NLS-1$
 		}
-		
+
 		Matcher matcher = indexPattern.matcher(baseName);
 		if(matcher.find()) {
 			int currentCount = 0;
 			try {
 				currentCount = Integer.parseInt(matcher.group(1));
 			} catch(NumberFormatException e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to parse existing base name index suffix: "+baseName, e); //$NON-NLS-1$
 			}
-			
+
 			count = Math.max(count, currentCount+1);
 			baseName = baseName.substring(0, baseName.length()-matcher.group().length()).trim();
 		}
-		
+
 		if(usedNames.contains(name)) {
 			while(usedNames.contains((name = baseName+" ("+count+")"))) { //$NON-NLS-1$ //$NON-NLS-2$
 				count++;
 			}
 		}
-		
+
 		return name;
 	}
 
@@ -863,7 +857,7 @@ public class WebserviceRegistry {
 		WebserviceRegistry wl = new WebserviceRegistry();
 
 		List<String> test = wl.getQueryFromWebserviceList(wl.webserviceList);
-		
+
 		try {
 			//wl.saveWebservices();
 		} catch (Exception e) {

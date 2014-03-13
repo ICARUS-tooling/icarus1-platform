@@ -25,15 +25,15 @@
  */
 package de.ims.icarus.util.location;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -47,13 +47,13 @@ import de.ims.icarus.io.IOUtil;
  */
 public class DefaultFileLocation implements Location {
 
-	private final File file;
+	private final Path path;
 
-	public DefaultFileLocation(File file) {
-		if(file==null)
-			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
+	public DefaultFileLocation(Path path) {
+		if(path==null)
+			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 
-		this.file = file;
+		this.path = path;
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class DefaultFileLocation implements Location {
 	@Override
 	public URL getURL() {
 		try {
-			return file.toURI().toURL();
+			return path.toUri().toURL();
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -86,11 +86,11 @@ public class DefaultFileLocation implements Location {
 	}
 
 	/**
-	 * @see de.ims.icarus.util.location.Location#getFile()
+	 * @see de.ims.icarus.util.location.Location#getLocalPath()
 	 */
 	@Override
-	public File getFile() {
-		return file;
+	public Path getLocalPath() {
+		return path;
 	}
 
 	/**
@@ -98,8 +98,8 @@ public class DefaultFileLocation implements Location {
 	 */
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		OutputStream out = new FileOutputStream(file);
-		if(IOUtil.isGZipSource(file.getName())) {
+		OutputStream out = Files.newOutputStream(path);
+		if(IOUtil.isGZipSource(path)) {
 			out = new GZIPOutputStream(out);
 		}
 
@@ -111,15 +111,15 @@ public class DefaultFileLocation implements Location {
 	 */
 	@Override
 	public InputStream openInputStream() throws IOException {
-		if(file==null)
-			throw new IllegalStateException("No file defined"); //$NON-NLS-1$
-		if(!file.exists())
-			throw new FileNotFoundException("File not found: "+file.getAbsolutePath()); //$NON-NLS-1$
-		if(file.length()==0)
-			throw new IOException("File is empty: "+file.getAbsolutePath()); //$NON-NLS-1$
+		if(path==null)
+			throw new IllegalStateException("No path defined"); //$NON-NLS-1$
+		if(Files.notExists(path, LinkOption.NOFOLLOW_LINKS))
+			throw new FileNotFoundException("File not found: "+path.toString()); //$NON-NLS-1$
+		if(Files.size(path)==0)
+			throw new IOException("File is empty: "+path.toString()); //$NON-NLS-1$
 
-		InputStream in = new FileInputStream(file);
-		if(IOUtil.isGZipSource(file.getName())) {
+		InputStream in = Files.newInputStream(path);
+		if(IOUtil.isGZipSource(path)) {
 			in = new GZIPInputStream(in);
 		}
 		return in;
@@ -130,7 +130,7 @@ public class DefaultFileLocation implements Location {
 	 */
 	@Override
 	public int hashCode() {
-		return file.hashCode();
+		return path.hashCode();
 	}
 
 }

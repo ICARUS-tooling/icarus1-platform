@@ -43,7 +43,7 @@ import de.ims.icarus.language.model.api.manifest.MemberManifest;
 import de.ims.icarus.language.model.api.manifest.OptionsManifest;
 import de.ims.icarus.language.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.logging.LogReport;
 
 /**

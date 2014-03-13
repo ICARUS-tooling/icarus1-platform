@@ -19,15 +19,16 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.launcher;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -35,27 +36,27 @@ import java.util.jar.Manifest;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class SplashWindow {
-	
+
 	private static SplashDelegate splashDelegate;
-	
+
 	private static String[] delegateClasses = {
 		"de.ims.icarus.launcher.NativeSplashDelegate", //$NON-NLS-1$
 		"de.ims.icarus.launcher.AWTSplashDelegate", //$NON-NLS-1$
 	};
-	
+
 	static void splash(URL imageURL) {
 		for(String className : delegateClasses) {
 			try {
 				// Try to instantiate the delegate, ignore any exceptions
 				splashDelegate = (SplashDelegate) Class.forName(className)
 						.getConstructor(URL.class).newInstance(imageURL);
-				
+
 				// Use the first successfully created and visible delegate
 				if(splashDelegate.isVisible()) {
 					break;
@@ -67,27 +68,27 @@ public class SplashWindow {
 			}
 		}
 	}
-	
+
 	static void invokeMain(String jarName, String className, String[] args) {
 		setText("Invoking ICARUS core");; //$NON-NLS-1$
-		
+
 		try {
 			// If we can access class directly then don't bother
 			// with the jar file
 			Class<?> clazz = tryLoadClass(className);
-			
+
 			// Class not accessible directly, so we have to use
 			// an additional class loader using the specified jar file
 			if(clazz==null) {
 				JarFile jarFile = new JarFile(jarName);
-				
-				File file = new File(jarName);
-				File dir = file.getParentFile();
-				
+
+				Path file = Paths.get(jarName);
+				Path dir = file.getParent();
+
 				int urlCount = 1;
 				URL[] urls = new URL[10];
-				urls[0] = file.toURI().toURL();
-				
+				urls[0] = file.toUri().toURL();
+
 				try {
 					Manifest manifest = jarFile.getManifest();
 					if(manifest!=null) {
@@ -96,7 +97,7 @@ public class SplashWindow {
 							String cp = attr.getValue(Attributes.Name.CLASS_PATH);
 							if(cp!=null) {
 								for(String path : cp.split(" ")) { //$NON-NLS-1$
-									urls[urlCount++] = new File(dir, path).toURI().toURL();
+									urls[urlCount++] = dir.resolve(path).toUri().toURL();
 								}
 							}
 						}
@@ -104,14 +105,14 @@ public class SplashWindow {
 				} finally {
 					jarFile.close();
 				}
-				
+
 				urls = Arrays.copyOf(urls, urlCount);
-								
+
 				@SuppressWarnings("resource")
 				ClassLoader loader = new URLClassLoader(urls, SplashWindow.class.getClassLoader());
 				clazz = loader.loadClass(className);
 			}
-			
+
 			clazz.getMethod("main", new Class[] {String[].class}) //$NON-NLS-1$
 				.invoke(null, new Object[] {args});
 		} catch (Exception e) {
@@ -120,7 +121,7 @@ public class SplashWindow {
 			showError(err);
 		}
 	}
-	
+
 	private static Class<?> tryLoadClass(String className) {
 		try {
 			return Class.forName(className);
@@ -128,12 +129,12 @@ public class SplashWindow {
 			return null;
 		}
 	}
-	
+
 	private static void showError(Throwable t) {
 		try {
 			// FIXME DEBUG
 			//t.printStackTrace();
-			
+
 			// Load and show dialog instance
 			Class.forName("de.ims.icarus.launcher.LauncherErrorDialog") //$NON-NLS-1$
 				.getConstructor(Throwable.class).newInstance(t);
@@ -142,7 +143,7 @@ public class SplashWindow {
 			System.exit(1);
 		}
 	}
-	
+
 	static void disposeSplash() {
 		if(splashDelegate!=null) {
 			try {
@@ -152,7 +153,7 @@ public class SplashWindow {
 			}
 		}
 	}
-	
+
 	public static void setText(String text) {
 		if(splashDelegate!=null) {
 			try {
@@ -162,7 +163,7 @@ public class SplashWindow {
 			}
 		}
 	}
-	
+
 	public static void setMaxProgress(int maxValue) {
 		if(splashDelegate!=null) {
 			try {
@@ -172,7 +173,7 @@ public class SplashWindow {
 			}
 		}
 	}
-	
+
 	public static void setProgress(int value) {
 		if(splashDelegate!=null) {
 			try {
@@ -182,7 +183,7 @@ public class SplashWindow {
 			}
 		}
 	}
-	
+
 	public static void step() {
 		if(splashDelegate!=null) {
 			try {
@@ -192,20 +193,20 @@ public class SplashWindow {
 			}
 		}
 	}
-	
+
 	public interface SplashDelegate {
-		
+
 		/**
 		 * Checks whether the underlying splash object is visible
 		 */
 		boolean isVisible();
-		
+
 		/**
 		 * Hide the underlying splash implementation and release
 		 * all associated resources.
 		 */
 		void dispose();
-		
+
 		/**
 		 * Set the current progress value to the provided argument
 		 * and refresh the progress bar.
@@ -213,14 +214,14 @@ public class SplashWindow {
 		 * or {@code value}&gt;{@code maxValue}
 		 */
 		void setProgress(int value);
-		
+
 		/**
 		 * Increments the progress by one.
 		 * @throws IllegalStateException if the current progress
 		 * has already reached the maximum allowed value
 		 */
 		void step();
-		
+
 		/**
 		 * Change the maximum progress value to the given argument
 		 * and refresh the progress bar.
@@ -228,7 +229,7 @@ public class SplashWindow {
 		 * {@code value}
 		 */
 		void setMaxProgress(int maxValue);
-		
+
 		/**
 		 * Display the given {@code text} next to the progress bar.
 		 */

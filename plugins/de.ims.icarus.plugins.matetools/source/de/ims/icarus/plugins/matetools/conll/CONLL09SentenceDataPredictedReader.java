@@ -28,9 +28,10 @@ package de.ims.icarus.plugins.matetools.conll;
 import is2.data.SentenceData09;
 import is2.io.CONLLReader09;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 import de.ims.icarus.language.SentenceData;
@@ -65,14 +66,14 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
 
-		File file = location.getFile();
+		Path file = location.getLocalPath();
 
 		if (file == null)
 			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
 
-		if (!file.exists())
+		if (Files.notExists(file))
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
-					+ file.getAbsolutePath());
+					+ file);
 
 		if (options == null) {
 			options = Options.emptyOptions;

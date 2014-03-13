@@ -35,7 +35,7 @@ import java.util.Set;
 import javax.swing.Icon;
 
 import de.ims.icarus.language.model.api.manifest.ValueSet;
-import de.ims.icarus.language.model.api.meta.ValueType;
+import de.ims.icarus.language.model.util.ValueType;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
 

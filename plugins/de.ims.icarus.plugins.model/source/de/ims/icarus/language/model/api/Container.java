@@ -169,7 +169,7 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	void addMarkable(int index, Markable markable);
+	void addMarkable(long index, Markable markable);
 
 	/**
 	 * Removes and returns the markable at the given index. Shifts the

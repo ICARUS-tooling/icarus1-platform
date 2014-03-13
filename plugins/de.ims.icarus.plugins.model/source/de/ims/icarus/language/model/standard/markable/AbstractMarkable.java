@@ -28,7 +28,7 @@ package de.ims.icarus.language.model.standard.markable;
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.Markable;
-import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.util.CorpusUtils;
 
 /**

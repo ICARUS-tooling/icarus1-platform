@@ -28,15 +28,15 @@ package de.ims.icarus.language.model.standard.layer;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.model.api.AnnotationLayer;
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.api.Markable;
-import de.ims.icarus.language.model.api.MarkableLayer;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.layer.AnnotationLayer;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.standard.CorpusMemberUtils;
@@ -67,7 +67,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#hasAnnotations()
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#hasAnnotations()
 	 */
 	@Override
 	public boolean hasAnnotations() {
@@ -75,7 +75,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable)
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable)
 	 */
 	@Override
 	public Object getValue(Markable markable) {
@@ -83,7 +83,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable, java.lang.String)
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.language.model.api.Markable, java.lang.String)
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
@@ -91,7 +91,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#removeAllValues()
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#removeAllValues()
 	 */
 	@Override
 	public void removeAllValues() {
@@ -99,7 +99,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#removeAllValues(java.lang.String)
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#removeAllValues(java.lang.String)
 	 */
 	@Override
 	public void removeAllValues(String key) {
@@ -107,7 +107,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#removeAllValues(de.ims.icarus.language.model.api.Markable, boolean)
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#removeAllValues(de.ims.icarus.language.model.api.Markable, boolean)
 	 */
 	@Override
 	public void removeAllValues(Markable markable, boolean recursive) {
@@ -162,7 +162,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.Object)
 	 */
 	@Override
 	public void setValue(Markable markable, Object value) {
@@ -188,7 +188,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.AnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.String, java.lang.Object)
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.language.model.api.Markable, java.lang.String, java.lang.Object)
 	 */
 	@Override
 	public void setValue(Markable markable, String key, Object value) {

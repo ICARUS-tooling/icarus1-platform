@@ -19,13 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.xml.jaxb;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.bind.JAXBContext;
@@ -42,127 +43,124 @@ import de.ims.icarus.ui.tasks.TaskManager;
  */
 public abstract class JAXBGate<B extends Object> {
 
-	private final File file;
+	private final Path file;
 	private final Object fileLock = new Object();
-	
+
 	private B pendingBuffer;
 	private final Object bufferLock = new Object();
-	
+
 	private final Object gateLock = new Object();
-	
+
 	private AtomicBoolean updatePending = new AtomicBoolean(false);
-	
-	public JAXBGate(File file) {
+
+	public JAXBGate(Path file) {
 		if(file==null)
 			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
-		
+
 		this.file = file;
 	}
 
 	/**
 	 * @return the file
 	 */
-	public File getFile() {
+	public Path getFile() {
 		return file;
 	}
-	
+
 	protected abstract void readBuffer(B buffer) throws Exception;
-	
+
 	protected abstract B createBuffer() throws Exception;
-	
+
 	@SuppressWarnings("unchecked")
 	public void loadBuffer() throws Exception {
-		
+
 		B buffer = null;
 		synchronized (bufferLock) {
 			buffer = pendingBuffer;
 		}
-		
+
 		// Try to load new buffer
 		if(buffer==null) {
 			synchronized (fileLock) {
-				File file = getFile();
-				if(!file.exists() || file.length()==0) {
+				Path file = getFile();
+				if(Files.notExists(file) || Files.size(file)==0) {
 					return;
 				}
-	
+
 				JAXBContext context = JAXBUtils.getSharedJAXBContext();
 				Unmarshaller unmarshaller = context.createUnmarshaller();
-				buffer = (B) unmarshaller.unmarshal(file);
+				buffer = (B) unmarshaller.unmarshal(Files.newInputStream(file));
 			}
 		}
-		
+
 		if(buffer==null) {
 			return;
 		}
-		
+
 		synchronized (gateLock) {
 			readBuffer(buffer);
 		}
 	}
-	
+
 	public void saveBuffer() throws Exception {
 		B buffer = null;
-		
+
 		synchronized (gateLock) {
 			buffer = createBuffer();
 		}
-		
+
 		if(buffer==null) {
 			return;
 		}
-		
+
 		synchronized (bufferLock) {
 			pendingBuffer = buffer;
-			
+
 			scheduleUpdate();
 		}
 	}
-	
+
 	public void saveBufferNow() throws Exception {
 		B buffer = null;
-		
+
 		synchronized (gateLock) {
 			buffer = createBuffer();
 		}
-		
+
 		if(buffer==null) {
 			return;
 		}
-		
+
 		synchronized (bufferLock) {
 			pendingBuffer = buffer;
-			
+
 			scheduleUpdate();
 		}
 	}
-	
+
 	private void scheduleUpdate() {
 		synchronized (bufferLock) {
 			if(pendingBuffer==null) {
 				return;
 			}
-			
+
 			if(updatePending.compareAndSet(false, true)) {
 				TaskManager.getInstance().execute(new SaveTask());
 			}
 		}
 	}
-	
+
 	private void save(B buffer) throws Exception {
 		synchronized (fileLock) {
-			File file = getFile();
-			if(!file.exists()) {
-				file.createNewFile();
-			}
-			
+			Path file = getFile();
+
 			JAXBContext context = JAXBUtils.getSharedJAXBContext();
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			marshaller.marshal(buffer, file);
+			marshaller.marshal(buffer, Files.newOutputStream(file));
 		}
 	}
-	
+
 	private class SaveTask implements Runnable {
 
 		/**
@@ -171,25 +169,25 @@ public abstract class JAXBGate<B extends Object> {
 		@Override
 		public void run() {
 			updatePending.set(false);
-			
+
 			B buffer = null;
 			synchronized (bufferLock) {
 				buffer = pendingBuffer;
 				pendingBuffer = null;
 			}
-			
+
 			if(buffer==null) {
 				return;
 			}
-			
+
 			try {
 				save(buffer);
 			} catch (Exception e) {
 				LoggerFactory.error(this, "Failed to save buffer", e); //$NON-NLS-1$
 			}
-			
+
 			scheduleUpdate();
 		}
-		
+
 	}
 }

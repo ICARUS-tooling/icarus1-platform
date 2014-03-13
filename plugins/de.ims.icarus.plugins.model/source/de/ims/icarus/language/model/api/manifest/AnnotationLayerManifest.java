@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.api.manifest;
 
 import java.util.Set;
 
-import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 
 /**
  * @author Markus Gärtner

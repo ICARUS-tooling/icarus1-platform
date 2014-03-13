@@ -38,7 +38,7 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
  */
 public interface ContextWriter {
 
-	void init(Context context, Path path)
+	void init(Context context, ResourcePath path)
 			throws UnsupportedLocationException, UnsupportedFormatException;
 
 	void write() throws IOException, UnsupportedFormatException;

@@ -27,7 +27,7 @@ package de.ims.icarus.language.model.standard.layer;
 
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
-import de.ims.icarus.language.model.api.MarkableLayer;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 
 /**
@@ -62,7 +62,7 @@ public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.MarkableLayer#getContainer()
+	 * @see de.ims.icarus.language.model.api.layer.MarkableLayer#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -80,7 +80,7 @@ public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.StructureLayer#getBoundaryLayer()
+	 * @see de.ims.icarus.language.model.api.layer.StructureLayer#getBoundaryLayer()
 	 */
 	@Override
 	public MarkableLayer getBoundaryLayer() {

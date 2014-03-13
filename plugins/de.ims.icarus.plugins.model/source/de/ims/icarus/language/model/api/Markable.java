@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.api;
 
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
+
 /**
  *
  * @author Markus Gärtner
@@ -33,20 +35,20 @@ package de.ims.icarus.language.model.api;
  */
 public interface Markable extends CorpusMember, Comparable<Markable> {
 
-	/**
-	 * Returns the text fragment of the underlying corpus this
-	 * {@code Markable} covers. Note that this does not necessarily
-	 * have to be continuous text. For example an {@link Edge} would
-	 * concatenate the text portions covered by its source and target
-	 * {@code Markable}s respectively (typically separated by some sort
-	 * of delimiter).
-	 * <p>
-	 * Note that when dealing with {@code Container}s it is advised
-	 * to cache results of the {@link #getText()} calls since they might
-	 * be expensive to create depending on the 'size' of the container.
-	 *
-	 * @return The portion of text this markable covers in the underlying corpus.
-	 */
+//	/**
+//	 * Returns the text fragment of the underlying corpus this
+//	 * {@code Markable} covers. Note that this does not necessarily
+//	 * have to be continuous text. For example an {@link Edge} would
+//	 * concatenate the text portions covered by its source and target
+//	 * {@code Markable}s respectively (typically separated by some sort
+//	 * of delimiter).
+//	 * <p>
+//	 * Note that when dealing with {@code Container}s it is advised
+//	 * to cache results of the {@link #getText()} calls since they might
+//	 * be expensive to create depending on the 'size' of the container.
+//	 *
+//	 * @return The portion of text this markable covers in the underlying corpus.
+//	 */
 	// TODO evaluate if we need it here or better leave it to the form layer
 //	String getText();
 
@@ -93,7 +95,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * @return The zero-based offset of this markable's begin within the corpus
 	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
-	int getBeginOffset();
+	long getBeginOffset();
 
 	/**
 	 * Returns the zero-based offset of this markable's end within the corpus.
@@ -110,5 +112,5 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * @return The zero-based offset of this markable's end within the corpus
 	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
-	int getEndOffset();
+	long getEndOffset();
 }

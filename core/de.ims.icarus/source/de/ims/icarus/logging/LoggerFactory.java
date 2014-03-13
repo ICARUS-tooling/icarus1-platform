@@ -19,14 +19,16 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.logging;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.FileHandler;
@@ -38,73 +40,74 @@ import de.ims.icarus.util.Exceptions;
 
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class LoggerFactory {
 
-	private static final File logFolder;
-	
+	private static final Path logFolder;
+
 	private static Level initialLevel = Level.INFO;
-	
+
 	private static Map<String, Logger> loggers = new HashMap<>();
-	private static Map<String, File> logFiles = new HashMap<>();
-	
+	private static Map<String, Path> logFiles = new HashMap<>();
+
 	private static BufferedHandler rootHandler;
-	
+
 	// obtain valid log folder
 	static {
-		File rootFolder = new File(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		logFolder = new File(rootFolder, "logs"); //$NON-NLS-1$
-		
+		Path rootFolder = Paths.get(System.getProperty("user.dir", "")); //$NON-NLS-1$ //$NON-NLS-2$
+
+		logFolder = rootFolder.resolve("logs"); //$NON-NLS-1$
+
 		try {
-			if(!logFolder.exists())
-				logFolder.createNewFile();
-			
-			if(!logFolder.isDirectory())
+			if(Files.notExists(logFolder)) {
+				Files.createDirectory(logFolder);
+			}
+
+			if(!Files.isDirectory(logFolder))
 				throw new Error("Log folder is not a directory!"); //$NON-NLS-1$
 		} catch(Exception e) {
 			throw new Error("Unable to init logging facility", e); //$NON-NLS-1$
 		}
-		
+
 		registerLogFile("de.ims.icarus", "icarus"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		getLogger(LoggerFactory.class);
 	}
-	
+
 	private LoggerFactory() {
 		// no-op
 	}
-	
+
 	public static void registerLogFile(String name, String fileName) {
 		Exceptions.testNullArgument(name, "name"); //$NON-NLS-1$
 		Exceptions.testNullArgument(fileName, "fileName"); //$NON-NLS-1$
-		
-		File file = getLogFile(fileName);
-		
-		File currentFile = logFiles.get(name);
-		
+
+		Path file = getLogFile(fileName);
+
+		Path currentFile = logFiles.get(name);
+
 		if(currentFile!=null && currentFile.equals(file)) {
 			return;
 		}
-		
+
 		if(currentFile!=null)
 			throw new IllegalArgumentException("Log file already set for logger: "+name); //$NON-NLS-1$
-		
+
 		logFiles.put(name, file);
-		
+
 		if(loggers.containsKey(name)) {
 			addFileHandler(loggers.get(name), file);
 		}
 	}
-	
-	private static File getLogFile(String name) {
+
+	private static Path getLogFile(String name) {
 		name = name.toLowerCase()+".log"; //$NON-NLS-1$
-		return new File(logFolder, name);
+		return logFolder.resolve(name);
 	}
-    
+
     private static String getParentName(String name) {
     	int idx = name.lastIndexOf('.');
     	if(idx==-1) {
@@ -112,73 +115,73 @@ public final class LoggerFactory {
     	}
     	return name.substring(0, idx);
     }
-    
-    private static void addFileHandler(Logger logger, File file) {
+
+    private static void addFileHandler(Logger logger, Path file) {
 		try {
-			logger.addHandler(new FileHandler(file.getPath()));
-			
+			logger.addHandler(new FileHandler(file.toString()));
+
 			logger.setLevel(getInitialLevel());
 		} catch (SecurityException | IOException e) {
 			throw new IllegalStateException("Unable to create file based logger: "+file, e); //$NON-NLS-1$
 		}
     }
-	
-	private static Logger createLogger(String name) {		
+
+	private static Logger createLogger(String name) {
 		// Load parents if required
 		String parentName = getParentName(name);
 		if(parentName!=null && !loggers.containsKey(parentName)) {
 			createLogger(parentName);
 		}
-		
+
 		Logger logger = Logger.getLogger(name);
-		
+
 		// Special handling for the root logger
 		if(loggers.isEmpty()) {
 			rootHandler = new BufferedHandler();
 			logger.addHandler(rootHandler);
 		}
-		
+
 		loggers.put(name, logger);
-		
-		File logFile = logFiles.get(name);
+
+		Path logFile = logFiles.get(name);
 		if(logFile!=null) {
 			addFileHandler(logger, logFile);
 		}
-		
+
 		return logger;
 	}
-	
+
 	public static synchronized Logger getLogger(Object owner) {
 		if(!(owner instanceof Class<?>)) {
 			owner = owner.getClass();
 		}
 		return getLogger((Class<?>) owner);
 	}
-	
+
 	public static synchronized Logger getLogger(Class<?> owner) {
 		String name = owner.getName();
-		
+
 		Logger logger = loggers.get(name);
-		
+
 		if(logger==null) {
 			logger = createLogger(name);
 		}
-		
+
 		return logger;
 	}
-	
+
 	public static synchronized Logger getRootLogger() {
 		if(loggers.isEmpty()) {
 			return null;
 		}
-		
+
 		Logger logger = loggers.values().iterator().next();
 		while(logger.getParent()!=null) {
 			logger = logger.getParent();
 		}
 		return logger;
 	}
-	
+
 	public static BufferedHandler getRootHandler() {
 		return rootHandler;
 	}
@@ -196,56 +199,56 @@ public final class LoggerFactory {
 	public static void setInitialLevel(Level initialLevel) {
 		LoggerFactory.initialLevel = initialLevel;
 	}
-	
+
 	public static LogRecord record(Level level, String message) {
 		LogRecord record = new LogRecord(level, message);
 		setCallerFields(record);
 		return record;
 	}
-	
+
 	public static LogRecord record(Level level, String message, Throwable t) {
 		LogRecord record = new LogRecord(level, message);
 		record.setThrown(t);
 		setCallerFields(record);
 		return record;
 	}
-	
+
 	public static LogRecord log(Object owner, Level level, String message, Throwable t) {
 		LogRecord record = record(level, message, t);
 		getLogger(owner).log(record);
 		return record;
 	}
-	
+
 	public static LogRecord log(Object owner, Level level, String message) {
 		LogRecord record = record(level, message);
 		getLogger(owner).log(record);
 		return record;
 	}
-	
+
 	public static LogRecord debug(Object owner, String message) {
 		return log(owner, Level.FINE, message);
 	}
-	
+
 	public static LogRecord debug(Object owner, String message, Throwable t) {
 		return log(owner, Level.FINE, message, t);
 	}
-	
+
 	public static LogRecord info(Object owner, String message) {
 		return log(owner, Level.INFO, message);
 	}
-	
+
 	public static LogRecord warning(Object owner, String message) {
 		return log(owner, Level.WARNING, message);
 	}
-	
+
 	public static LogRecord warning(Object owner, String message, Throwable t) {
 		return log(owner, Level.WARNING, message, t);
 	}
-	
+
 	public static LogRecord error(Object owner, String message) {
 		return log(owner, Level.SEVERE, message);
 	}
-	
+
 	public static LogRecord error(Object owner, String message, Throwable t) {
 		return log(owner, Level.SEVERE, message, t);
 	}

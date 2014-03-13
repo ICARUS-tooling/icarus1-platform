@@ -23,43 +23,14 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.api.meta;
-
-import de.ims.icarus.language.model.xml.XmlResource;
+package de.ims.icarus.util;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ValueType implements XmlResource {
+public interface Consumer<E extends Object> {
 
-	UNKNOWN(Object.class),
-	CUSTOM(Object.class),
-	STRING(String.class),
-	BOOLEAN(Boolean.class),
-	INTEGER(Integer.class),
-	DOUBLE(Double.class);
-
-	private final Class<?> baseClass;
-
-	private ValueType(Class<?> baseClass) {
-		this.baseClass = baseClass;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.xml.XmlResource#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return name().toLowerCase();
-	}
-
-	public static ValueType parseValueType(String s) {
-		return valueOf(s.toUpperCase());
-	}
-
-	public boolean isValidValue(Object value) {
-		return value!=null && baseClass.isAssignableFrom(value.getClass());
-	}
+	void consume(E item);
 }
