@@ -2,11 +2,8 @@ package de.ims.icarus.plugins.errormining.ngram_tools;
 
 import java.awt.Color;
 
-import javax.swing.JSplitPane;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -44,6 +41,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
  *
  */
 public class JfreeTest{
+@SuppressWarnings("nls")
 public static void main(String arg[]){
   DefaultCategoryDataset dataset = new DefaultCategoryDataset();
   dataset.setValue(2, "Marks", "Rahul");

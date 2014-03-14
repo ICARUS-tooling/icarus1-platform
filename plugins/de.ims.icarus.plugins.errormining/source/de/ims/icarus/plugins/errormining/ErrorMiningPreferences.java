@@ -130,7 +130,7 @@ public class ErrorMiningPreferences {
 
 		//Tagmining Configuration
 		builder.addGroup("tagmining", true); //$NON-NLS-1$
-		builder.addStringEntry("variationTag", "$pos");
+		builder.addStringEntry("variationTag", "#pos"); //$NON-NLS-1$ //$NON-NLS-2$
 		builder.back();
 
 

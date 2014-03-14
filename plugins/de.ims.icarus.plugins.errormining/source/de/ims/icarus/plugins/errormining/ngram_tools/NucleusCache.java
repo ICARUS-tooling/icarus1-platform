@@ -35,13 +35,41 @@ import de.ims.icarus.plugins.errormining.ItemInNuclei;
 public class NucleusCache {
 	
 	protected String key;
+	protected String tag;
+	protected String head;
 	protected ItemInNuclei iin;
-	
-	
 	public NucleusCache(){
 			//noop
 	}
-	
+
+	/**
+	 * @return the tag
+	 */
+	public String getTag() {
+		return tag;
+	}
+
+	/**
+	 * @param tag the tag to set
+	 */
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
+	/**
+	 * @return the head
+	 */
+	public String getHead() {
+		return head;
+	}
+
+	/**
+	 * @param head the head to set
+	 */
+	public void setHead(String head) {
+		this.head = head;
+	}
+
 	/**
 	 * @return the key
 	 */

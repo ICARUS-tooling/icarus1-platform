@@ -167,7 +167,7 @@ public class MappedNGramResult {
 	}
 
 
-	//TODO write hash function!?
+	//TO DO write hash function!?
 	/**
 	 * @see java.lang.Object#hashCode()
 	 */

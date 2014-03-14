@@ -433,6 +433,7 @@ public class NGramSearch extends AbstractParallelSearch implements NGramParamete
 				result.setProperty("COMPLETE_NGRAM", ngramsResultMap); //$NON-NLS-1$
 				result.setProperty("LARGEST_NGRAM", ngrams.getPasses()); //$NON-NLS-1$
 				result.setProperty("MODE", 1); //$NON-NLS-1$
+				result.setProperty("ADVANCEDMINING", -1); //$NON-NLS-1$
 				
 				
 				result.setProperty("POSFILTER", posFilter.nGramPoSFilter(posFilter.getResult(),4)); //$NON-NLS-1$
@@ -624,6 +625,7 @@ protected class NGramWorker extends Worker{
 			result.setProperty("COMPLETE_NGRAM", ngramsResultMap); //$NON-NLS-1$
 			result.setProperty("LARGEST_NGRAM", ngrams.getPasses()); //$NON-NLS-1$
 			result.setProperty("MODE", 0); //$NON-NLS-1$
+			result.setProperty("ADVANCEDMINING", ngrams.getMiningMode()); //$NON-NLS-1$
 			
 			//Debug output for all sentences in result with largest ngram-span
 //			for (int i = 0; i < helferList.size();i++){

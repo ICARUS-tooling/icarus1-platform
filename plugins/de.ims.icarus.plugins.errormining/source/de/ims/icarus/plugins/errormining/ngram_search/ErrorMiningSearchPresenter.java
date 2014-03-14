@@ -115,6 +115,7 @@ import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
 import de.ims.icarus.plugins.errormining.DependencySentenceInfo;
 import de.ims.icarus.plugins.errormining.DetailedNGramSentenceDataList;
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
+import de.ims.icarus.plugins.errormining.NGrams;
 import de.ims.icarus.plugins.errormining.SentenceInfo;
 import de.ims.icarus.plugins.errormining.annotation.NGramAnnotation;
 import de.ims.icarus.plugins.errormining.ngram_tools.CompareStringLength;
@@ -1555,14 +1556,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		for(int n = 0; n < dsi.getNucleiIndexListSize(); n++){
 
-			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-			DependencyData dd = (DependencyData) dl.get(0);
+			//DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			//DependencyData dd = (DependencyData) dl.get(0);
 
 			//FIXME painting
 
 			int head = dsi.getSentenceHeadIndex();
 			//int offset = headIndex - dsi.getSentenceBegin();
-			int nucleus = dsi.getNucleiIndexListAt(n)-1;
+			//int nucleus = dsi.getNucleiIndexListAt(n)-1;
 			//int head = dd.getHead(nucleus) + 1;
 			int offset = head - dsi.getSentenceBegin();
 
@@ -2076,7 +2077,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 
 		List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
-		//System.out.println("selectedKey " + sentences + key); //$NON-NLS-1$
+		System.out.println("selectedKey: " + key + " sNR: " +sentences); //$NON-NLS-1$
 
 		DataList<?> dl = ((AbstractSearchResult)searchResult).getTarget();
 
@@ -2172,7 +2173,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 				//SentenceData sentenceData = (SentenceData) dl.get(sentenceNr);
 				//System.out.println(sentenceData.getText() + "TEXT");
-				List<Integer> nilSNO = new ArrayList<Integer>();
+				//List<Integer> nilSNO = new ArrayList<Integer>();
 
 				for(int j = 0; j < diinL.size(); j++){
 					DependencyItemInNuclei diin = diinL.get(j);
@@ -2276,6 +2277,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 * @param s
 	 * @param value
 	 */
+
 	private List<String> getNucleus(String key, ItemInNuclei iin) {
 
 		List<String> list = new ArrayList<String>();
@@ -2300,6 +2302,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 * @param s
 	 * @param value
 	 */
+
 	private List<String> getNucleusDependency(String key, DependencyItemInNuclei diin) {
 
 		List<String> list = new ArrayList<String>();
@@ -2787,7 +2790,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					}
 				} else {
 					//System.out.println(statisticList.getSelectedIndices().length);
-					//TODO maybe enable multi selection
+					//TO DO maybe enable multi selection
 					if(statisticList.getSelectedIndices().length != 0){
 						if(statisticList.getSelectedIndices().length == 1){
 							showDetails(createDetailList((String)statisticList.getSelectedValue()));
@@ -2882,12 +2885,17 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							selectedRow, 0);
 					String label = (String) ngramTable.getModel().getValueAt(
 							selectedRow, 1);
-					String sentences = (String) ngramTable.getModel()
-							.getValueAt(selectedRow, 3);
+					String sentences = String.valueOf(ngramTable.getModel()
+							.getValueAt(selectedRow, 4));					
 
 					if (!isPoSErrorMiningResult()) {
 						label = reFormatDependencyKey(label);
 					}
+
+					
+					//nucleus = (String) ngramTable.getModel().getValueAt(
+					//		selectedRow, 1);
+					
 					showDetails(createDetailListFromTable(nucleus,
 							sentences, label));
 
@@ -3751,6 +3759,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		private static final long serialVersionUID = -196214722892607695L;
 
+		
+		int advancedMining = (int) searchResult.getProperty("ADVANCEDMINING"); //$NON-NLS-1$
+
 
 		/**
 		 * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
@@ -3788,8 +3799,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				itemsAdded = 0;
 
 
-				if(isPoSErrorMiningResult()){
-					//iinList = nGramResult.get(key);
+				if(isPoSErrorMiningResult()){				
 
 					iinList = new ArrayList<>();
 					iinList.addAll(nGramResult.get(key));
@@ -3806,61 +3816,28 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					//System.out.println(length + "<" + iinList.size()
 					//						  + "<" + nucleusIndexList.size());
 
+					int advancedMining = (int) searchResult.getProperty("ADVANCEDMINING"); //$NON-NLS-1$
+					
 					for(int i = 0; i < length; i++){
 						for(Integer index : nucleusIndexList){
 							//System.out.println(keySplitted[index]);
 							NucleusCache nc = new NucleusCache();
 							nc.setKey(keySplitted[index]);
-							nc.setIIN(iinList.get(i));
+							ItemInNuclei iin = iinList.get(i);
+							nc.setIIN(iin);
+							//System.out.println(index+iin.getSentenceInfoAt(0).getSentenceBegin());
+							int offsetIndex = index + iin.getSentenceInfoAt(0).getSentenceBegin()-1;
+							nc.setTag( getTag(offsetIndex, 
+										iin.getSentenceInfoAt(0).getSentenceNr()));
+							if(advancedMining != 1){
+								nc.setHead( getHead(offsetIndex, 
+										iin.getSentenceInfoAt(0).getSentenceNr()));
+							}
+							//System.out.println(nc.getTag() + " " + nc.getHead());
 							tmpMap.put(itemsAdded, nc);
 							itemsAdded++;
 						}
 					}
-
-
-
-
-//					this.keySplitted = key.split(" ");	 //$NON-NLS-1$
-//
-//					for (int i = 0; i < keySplitted.length; i++) {
-//						System.out.println(keySplitted[i]);
-//
-//						System.out.println(involvedSentences(key));
-//
-//						if (isNucleiItem(i, nGramResult.get(key)) ) {
-//
-//							if (nGramResult.get(keySplitted[i]) != null) {
-//
-//								iinList.addAll(nGramResult.get(keySplitted[i]));
-//
-//								/*
-//								 * size sets rowcount in table, (e.g. size = 2
-//								 * row 0 and row 1 must get assigned with
-//								 * keySplitted[i] tag. Therefore put tmpMap the
-//								 * keys with the used row/index
-//								 */
-//
-//								for (int j = 0; j < nGramResult.get(
-//										keySplitted[i]).size(); j++) {
-//
-//									if (containSentenceNo(
-//											nGramResult.get(keySplitted[i])
-//													.get(j),
-//											involvedSentences(key))) {
-//										 System.out.println(i + " - "
-//										 + keySplitted[i]
-//										 + " " +
-//										 containSentenceNo(nGramResult.get(
-//										 keySplitted[i]).get(j),involvedSentences(key))
-//										 );
-//									}
-//									tmpMap.put(itemsAdded, keySplitted[i]);
-//									itemsAdded++;
-//								}
-//							}
-//						}
-//					}
-
 				} else {
 
 					//dependency stuff
@@ -3896,6 +3873,37 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 
 		/**
+		 * @param wordIndex
+		 * @param sentenceNr
+		 * @return
+		 */
+		private String getTag(Integer wordIndex, int sentenceNr) {
+			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			DependencyData dd = (DependencyData) dl.get(sentenceNr);
+
+			return NGrams.getInstance().getTag(dd,
+									wordIndex, 
+									(int) searchResult.getProperty("ADVANCEDMINING")); //$NON-NLS-1$
+		}
+		
+		/**
+		 * @param wordIndex
+		 * @param sentenceNr
+		 * @return
+		 */
+		private String getHead(Integer wordIndex, int sentenceNr) {
+			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
+			DependencyData dd = (DependencyData) dl.get(sentenceNr);
+			if(dd.getHead(wordIndex) != -1){
+				return dd.getForm(dd.getHead(wordIndex));
+			} else {
+				return ""; //$NON-NLS-1$
+			}
+		}
+		
+
+
+		/**
 		 * @see javax.swing.table.TableModel#getColumnClass(int)
 		 */
 		@Override
@@ -3909,12 +3917,19 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public int getColumnCount() {
-			//TODO lower pos table cells
 
+			//TODO lower pos table cells			
 
 			if(isPoSErrorMiningResult()){
-				//return 3;
-				return 4;
+				int advancedMining = (int) searchResult.getProperty(
+											"ADVANCEDMINING"); //$NON-NLS-1$
+				
+				//System.out.println(advancedMining);
+				if(advancedMining == 1){
+					return 3;
+				} else {
+					return 4;
+				}
 			} else {
 				//return 4;
 				return 7;
@@ -3930,18 +3945,32 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		      if(isPoSErrorMiningResult()){
 				switch (columnIndex) {
+				case 0:
+				if(advancedMining == 1){
+					return ResourceManager.getInstance().get(
+							"plugins.errormining.labels.Token"); //$NON-NLS-1$
+				} else {
+					return ResourceManager.getInstance().get(
+							"plugins.errormining.labels.DependentNode"); //$NON-NLS-1$
+				}
 				case 1:
 					return ResourceManager.getInstance().get(
 							"plugins.errormining.labels.Tag"); //$NON-NLS-1$
 				case 2:
-					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.Count"); //$NON-NLS-1$
+					if(advancedMining == 1){
+						return ResourceManager.getInstance().get(
+								"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
+					} else {
+						return ResourceManager.getInstance().get(
+								"plugins.errormining.labels.HeadNode"); //$NON-NLS-1$
+					}
+
 				case 3:
 					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
+							"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
 				case 4:
 					return ResourceManager.getInstance().get(
-							"plugins.errormining.labels.NucleiCount"); //$NON-NLS-1$
+							"plugins.errormining.labels.SentenceNR"); //$NON-NLS-1$
 				case 5:
 					return ResourceManager.getInstance().get(
 							"plugins.errormining.labels.NucleiIndex"); //$NON-NLS-1$
@@ -4007,11 +4036,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 				//ItemInNuclei iin = iinList.get(rowIndex);
 
-				ItemInNuclei iin = tmpMap.get(rowIndex).getIIN();
+				ItemInNuclei iin = tmpMap.get(rowIndex).getIIN();				
+	
+				int nucleiCount = iin.getSentenceInfoAt(0).getNucleiIndexListSize();				
 
-
-
-				int nucleiCount = iin.getSentenceInfoAt(0).getNucleiIndexListSize();
 
 //				System.out.println(multinuclei + " MULTI"
 //									+ " " + getNucleis(iin));
@@ -4028,14 +4056,21 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					case 0:
 						return tmpMap.get(rowIndex).getKey();//keySplitted[nucleiGenIndex-start];
 					case 1:
-						return iin.getPosTag();
+						return tmpMap.get(rowIndex).getTag();//iin.getPosTag(); 
+
 					case 2:
-						return StringUtil.formatDecimal(iin.getCount());
+						if(advancedMining == 1){
+							return StringUtil.formatDecimal(iin.getCount());
+						} else {
+							return tmpMap.get(rowIndex).getHead();
+						}
 					case 3:
-						return sentenceOccurences(iin);
+						return StringUtil.formatDecimal(iin.getCount());						
 					case 4:
-						return nucleiCount;
+						return sentenceOccurences(iin);
 					case 5:
+						return nucleiCount;
+					case 6:
 						return getNucleis(iin);
 					default:
 						break;
@@ -4045,14 +4080,21 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					case 0:
 						return tmpMap.get(rowIndex).getKey();
 					case 1:
-						return iin.getPosTag();
+						return tmpMap.get(rowIndex).getTag();//iin.getPosTag();
 					case 2:
-						return iin.getCount();
+						if(advancedMining == 1){
+							return StringUtil.formatDecimal(iin.getCount());
+						} else {
+							return tmpMap.get(rowIndex).getHead();
+						}
 					case 3:
-						return sentenceOccurences(iin);
+						return iin.getCount();
+
 					case 4:
-						return iin.getSentenceInfoAt(0).getNucleiIndexListSize();
+						return sentenceOccurences(iin);					
 					case 5:
+						return iin.getSentenceInfoAt(0).getNucleiIndexListSize();
+					case 6:
 						return getNucleis(iin);
 					default:
 						break;
