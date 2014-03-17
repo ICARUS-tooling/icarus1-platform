@@ -3321,7 +3321,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					UIUtil.beep();
 				} catch (ExecutionException e) {
 					LoggerFactory.log(this, Level.SEVERE,
-							"Executino exception when filtering the results", e); //$NON-NLS-1$
+							"Execution exception when filtering the results", e); //$NON-NLS-1$
 					UIUtil.beep();
 				}
 			}
@@ -3418,7 +3418,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				UIUtil.beep();
 			} catch (ExecutionException e) {
 				LoggerFactory.log(this, Level.SEVERE,
-						"Executino exception when filtering statistic", e); //$NON-NLS-1$
+						"Execution exception when filtering statistic", e); //$NON-NLS-1$
 				UIUtil.beep();
 			}
 		}
