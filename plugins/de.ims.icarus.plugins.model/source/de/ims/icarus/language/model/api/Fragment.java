@@ -28,7 +28,8 @@ package de.ims.icarus.language.model.api;
 /**
  * A {@code Fragment} allows for the definition of {@code Markable} objects that
  * are not bound by the logical structure of a corpus's base layer. A regular
- * markable references pre-tokenized and/or split objects in a text that forms
+ * markable references parts of other existing markables, like pre-tokenized
+ * and/or split objects in a text that forms
  * the actual corpus. With the use of fragments it is possible to handle <i>raw</i>
  * text data. Note however, that using fragments is much more expensive than using
  * markables, since a lookup structure has to be built for each markable object that

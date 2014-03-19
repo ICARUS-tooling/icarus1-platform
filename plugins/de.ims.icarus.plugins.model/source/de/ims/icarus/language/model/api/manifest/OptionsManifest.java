@@ -39,9 +39,6 @@ import de.ims.icarus.language.model.util.ValueType;
  */
 public interface OptionsManifest extends Derivable {
 
-	@Override
-	String getId();
-
 	/**
 	 * Returns the names of all available options for the target
 	 * manifest. This {@code Set} is guaranteed to be non-null and
@@ -129,4 +126,16 @@ public interface OptionsManifest extends Derivable {
 	 * is {@code null}
 	 */
 	boolean isPublished(String name);
+
+	/**
+	 * Returns whether an option is allowed to be assigned multiple values.
+	 * This can be the case when the option in question presents the user a
+	 * selective choice with several values.
+	 *
+	 * @param name
+	 * @return
+	 * @throws NullPointerException if the {@code name} argument
+	 * is {@code null}
+	 */
+	boolean isMultiValue(String name);
 }

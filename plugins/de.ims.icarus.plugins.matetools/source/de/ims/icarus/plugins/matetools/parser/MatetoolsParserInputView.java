@@ -166,8 +166,12 @@ public class MatetoolsParserInputView extends TextInputView {
 			enabled = text!=null && !text.trim().isEmpty();
 		}
 
+		boolean running = MatetoolsPipeline.isPipelineRunning();
+
 		getDefaultActionManager().setEnabled(enabled,
 				"plugins.matetools.matetoolsParserInputView.startPipelineAction"); //$NON-NLS-1$
+		getDefaultActionManager().setEnabled(!running,
+				"plugins.matetools.matetoolsParserInputView.unloadModelsAction"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -183,6 +187,8 @@ public class MatetoolsParserInputView extends TextInputView {
 		ActionManager actionManager = getDefaultActionManager();
 		actionManager.addHandler("plugins.matetools.matetoolsParserInputView.startPipelineAction",  //$NON-NLS-1$
 				callbackHandler, "startPipeline"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.matetools.matetoolsParserInputView.unloadModelsAction",  //$NON-NLS-1$
+				callbackHandler, "unloadModels"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.matetools.matetoolsParserInputView.openPreferencesAction",  //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
 	}
@@ -468,6 +474,28 @@ public class MatetoolsParserInputView extends TextInputView {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to start parser-pipeline", ex); //$NON-NLS-1$
+				UIUtil.beep();
+
+				showError(ex);
+			}
+		}
+
+		public void unloadModels(ActionEvent e) {
+
+			MatetoolsPipeline pipeline = MatetoolsPipeline.getPipeline(pipelineOwner);
+
+			// Ensure we have ownership of the pipeline or abort otherwise
+			// This is required to make sure that we cannot interfere with a planned operation
+			// from another pipeline owner!
+			if(pipeline==null) {
+				return;
+			}
+
+			try {
+				 pipeline.unloadModels();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to unload models for parser-pipeline", ex); //$NON-NLS-1$
 				UIUtil.beep();
 
 				showError(ex);

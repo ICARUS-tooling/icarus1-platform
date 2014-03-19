@@ -23,46 +23,19 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.util;
+package de.ims.icarus.language.model.test.chunk;
 
-import org.java.plugin.registry.Extension;
-
-import de.ims.icarus.language.model.xml.XmlResource;
+import org.junit.Test;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ValueType implements XmlResource {
+public class ChunkIndexTest {
 
-	UNKNOWN(Object.class),
-	CUSTOM(Object.class),
-	STRING(String.class),
-	BOOLEAN(Boolean.class),
-	INTEGER(Integer.class),
-	DOUBLE(Double.class),
-	EXTENSION(Extension.class);
+	@Test
+	public void testIntIndexAdapter() throws Exception {
 
-	private final Class<?> baseClass;
-
-	private ValueType(Class<?> baseClass) {
-		this.baseClass = baseClass;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.xml.XmlResource#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return name().toLowerCase();
-	}
-
-	public static ValueType parseValueType(String s) {
-		return valueOf(s.toUpperCase());
-	}
-
-	public boolean isValidValue(Object value) {
-		return value!=null && baseClass.isAssignableFrom(value.getClass());
 	}
 }

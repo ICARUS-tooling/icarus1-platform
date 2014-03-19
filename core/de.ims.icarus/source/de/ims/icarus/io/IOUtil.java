@@ -27,11 +27,13 @@ package de.ims.icarus.io;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -61,6 +63,16 @@ public final class IOUtil {
 
 	private IOUtil() {
 		// no-op
+	}
+
+	public static void ensureFolder(Path path) {
+		if(!Files.isDirectory(path) && Files.notExists(path)) {
+			try {
+				Files.createDirectory(path);
+			} catch (IOException e) {
+				throw new Error("Unable to create directory: "+path); //$NON-NLS-1$
+			}
+		}
 	}
 
 	public static boolean isZipSource(String name) {
@@ -118,6 +130,50 @@ public final class IOUtil {
         while ((len = in.read(buf)) != -1) {
             out.write(buf, 0, len);
         }
+    }
+
+    /**
+     * @see RandomAccessFile#writeInt(int)
+     */
+    public static void writeInt(OutputStream out, int v) throws IOException {
+        out.write((v >>> 24) & 0xFF);
+        out.write((v >>> 16) & 0xFF);
+        out.write((v >>>  8) & 0xFF);
+        out.write((v >>>  0) & 0xFF);
+    }
+
+    /**
+     * @see RandomAccessFile#writeLong(long)
+     */
+    public final void writeLong(OutputStream out, long v) throws IOException {
+    	out.write((int)(v >>> 56) & 0xFF);
+    	out.write((int)(v >>> 48) & 0xFF);
+    	out.write((int)(v >>> 40) & 0xFF);
+    	out.write((int)(v >>> 32) & 0xFF);
+    	out.write((int)(v >>> 24) & 0xFF);
+    	out.write((int)(v >>> 16) & 0xFF);
+    	out.write((int)(v >>>  8) & 0xFF);
+    	out.write((int)(v >>>  0) & 0xFF);
+    }
+
+    /**
+     * @see RandomAccessFile#readInt()
+     */
+    public static int readInt(InputStream in) throws IOException {
+        int ch1 = in.read();
+        int ch2 = in.read();
+        int ch3 = in.read();
+        int ch4 = in.read();
+        if ((ch1 | ch2 | ch3 | ch4) < 0)
+            throw new EOFException();
+        return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+    }
+
+    /**
+     * @see RandomAccessFile#readLong()
+     */
+    public static long readLong(InputStream in) throws IOException {
+        return ((long)(readInt(in)) << 32) + (readInt(in) & 0xFFFFFFFFL);
     }
 
 	public static boolean isLocalFile(URL url) {

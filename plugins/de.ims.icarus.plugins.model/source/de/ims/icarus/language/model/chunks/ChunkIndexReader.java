@@ -25,22 +25,88 @@
  */
 package de.ims.icarus.language.model.chunks;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
+ * Implements a reader for {@code ChunkIndex} data.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ChunkIndexReader {
+public interface ChunkIndexReader extends Closeable {
 
-	ChunkIndex getIndex();
+	/**
+	 * Returns the data source of this reader.
+	 */
+	ChunkIndex getChunkIndex();
 
+	boolean open() throws IOException;
+
+	/**
+	 * Returns the number of chunks in the underlying
+	 * {@code ChunkIndex}.
+	 *
+	 * @return
+	 */
+	long getChunkCount();
+
+	/**
+	 * Returns the position at the file level a chunk specified
+	 * via the {@code index} parameter is located at. Note that for
+	 * chunk indices that only cover a single corpus file this method
+	 * will always return {@code 0}
+	 *
+	 * @param index
+	 * @return
+	 */
 	int getFileId(long index);
 
+	/**
+	 * Points to the exact byte offset within a file obtained via
+	 * {@link #getFileId(long)} (with the same {@code index} argument!)
+	 * that marks the <i>begin</i> of the specified data chunk.
+	 *
+	 * @param index
+	 * @return
+	 */
 	long getBeginOffset(long index);
 
+	/**
+	 * Points to the exact byte offset within a file obtained via
+	 * {@link #getFileId(long)} (with the same {@code index} argument!)
+	 * that marks the <i>end</i> of the specified data chunk.
+	 *
+	 * @param index
+	 * @return
+	 */
 	long getEndOffset(long index);
 
+	/**
+	 * When the underlying index stores mappings for the bounds of containers
+	 * (signaled by {@link ChunkIndex#isMappingElements()} than this method
+	 * will return the index of the first element in the specified container
+	 * relative to the underlying layer.
+	 *
+	 * @param index
+	 * @return
+	 * @throws UnsupportedOperationException if the underlying index does not
+	 * support mapping of members
+	 */
 	long getBeginIndex(long index);
 
+
+	/**
+	 * When the underlying index stores mappings for the bounds of containers
+	 * (signaled by {@link ChunkIndex#isMappingElements()} than this method
+	 * will return the index of the last element in the specified container
+	 * relative to the underlying layer.
+	 *
+	 * @param index
+	 * @return
+	 * @throws UnsupportedOperationException if the underlying index does not
+	 * support mapping of members
+	 */
 	long getEndIndex(long index);
 }

@@ -92,7 +92,7 @@ public class LookupListTest {
 
 		// Test clear
 		list = new LookupList<>();
-		list .add(dummy1);
+		list.add(dummy1);
 		list.add(dummy2);
 		list.add(dummy3);
 

@@ -10,6 +10,10 @@
 	<action id="plugins.matetools.matetoolsParserInputView.startPipelineAction"
 		name="${id}.name" desc="${id}.description" icon="matetools_run.png" />
 		
+	<!-- Start Pipeline -->
+	<action id="plugins.matetools.matetoolsParserInputView.unloadModelsAction"
+		name="${id}.name" desc="${id}.description" icon="matetools_unload.png" />
+		
 	<!-- Open Preferences -->
 	<action id="plugins.matetools.matetoolsParserInputView.openPreferencesAction"
 		template="actions.default.openPreferencesAction" />
@@ -28,6 +32,7 @@
 		<item type="glue" />
 		<item type="label" value="plugins.matetools.matetoolsParserInputView.labels.modelSet" />
 		<item type="custom" value="selectModelSet" />
+		<item type="action" value="plugins.matetools.matetoolsParserInputView.unloadModelsAction" />
 		<separator />
 		<item type="label" value="plugins.matetools.matetoolsParserInputView.labels.tokenizer" />
 		<item type="custom" value="selectTokenizer" />

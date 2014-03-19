@@ -33,6 +33,7 @@ import is2.parser.Pipe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -112,6 +113,12 @@ public class MatetoolsPipeline {
 		}
 	}
 
+	public static boolean isPipelineRunning() {
+		synchronized (lock) {
+			return instance!=null && instance.isRunning();
+		}
+	}
+
 	private Lemmatizer lemmatizer;
 	private is2.tag.Tagger tagger;
 	private is2.mtag.Tagger mtag;
@@ -119,184 +126,204 @@ public class MatetoolsPipeline {
 
 	private ModelStorage storage;
 
+	private AtomicBoolean running = new AtomicBoolean();
+
 	private MatetoolsPipeline() {
 		// no-op
 	}
 
+	public boolean isRunning() {
+		return running.get();
+	}
+
 	public DependencyData runPipeline(String[] tokens, ModelStorage storage, Options options) throws Exception {
-		if(tokens==null || tokens.length==0)
-			throw new NullPointerException("Invalid tokens"); //$NON-NLS-1$
-		if(storage==null || storage.isEmpty())
-			throw new NullPointerException("Invalid storage"); //$NON-NLS-1$
+		if(!running.compareAndSet(false, true))
+			throw new IllegalStateException("Pipeline already running"); //$NON-NLS-1$
 
-		if(options==null) {
-			options = Options.emptyOptions;
-		}
+		try {
+			if(tokens==null || tokens.length==0)
+				throw new NullPointerException("Invalid tokens"); //$NON-NLS-1$
+			if(storage==null || storage.isEmpty())
+				throw new NullPointerException("Invalid storage"); //$NON-NLS-1$
 
-		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
-
-		// Load language
-		String language = (String) options.get(Options.LANGUAGE);
-		if(language==null) {
-			language = config.getString("plugins.matetools.parser.language"); //$NON-NLS-1$
-		}
-
-		// Set new models, this may clear some tools
-		setModels(storage);
-
-		boolean verbose = config.getBoolean("plugins.matetools.parser.verbose"); //$NON-NLS-1$
-		boolean doUppercaseLemmas = config.getBoolean("plugins.matetools.parser.doUppercaseLemmas"); //$NON-NLS-1$
-		boolean fastRelease = config.getBoolean("plugins.matetools.parser.fastRelease"); //$NON-NLS-1$
-		boolean useParser = config.getBoolean("plugins.matetools.parser.useParser"); //$NON-NLS-1$
-		boolean useLemmatizer = config.getBoolean("plugins.matetools.parser.useLemmatizer"); //$NON-NLS-1$
-		boolean useTagger = config.getBoolean("plugins.matetools.parser.useTagger"); //$NON-NLS-1$
-		boolean useMTagger = config.getBoolean("plugins.matetools.parser.useMorphTagger"); //$NON-NLS-1$
-
-		int cores = config.getInteger("plugins.matetools.parser.maxCores"); //$NON-NLS-1$
-		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
-		if(cores>0) {
-			cores = Math.min(cores, availableCores);
-		}
-		cores = Math.max(cores, 1);
-
-		List<String> missingModels = new ArrayList<>();
-		storage.clear();
-
-		// LEMMATIZER
-		if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()==null) {
-			missingModels.add("plugins.matetools.parserModelEditor.lemmatizerModelLabel"); //$NON-NLS-1$
-		}
-
-		// TAGGER
-		if(useTagger && tagger==null && storage.getTaggerModelPath()==null) {
-			missingModels.add("plugins.matetools.parserModelEditor.taggerModelLabel"); //$NON-NLS-1$
-		}
-
-		// MTAG
-		if(useMTagger && mtag==null && storage.getMorphTaggerModelPath()==null) {
-			missingModels.add("plugins.matetools.parserModelEditor.morphTaggerModelLabel"); //$NON-NLS-1$
-		}
-
-		// PARSER
-		if(useParser && parser==null && storage.getParserModelPath()==null) {
-			missingModels.add("plugins.matetools.parserModelEditor.parserModelLabel"); //$NON-NLS-1$
-		}
-
-		// Allow user to abort midway
-		if(!missingModels.isEmpty()) {
-			StringBuilder sb = new StringBuilder(200);
-			for(String key : missingModels) {
-				sb.append(ResourceManager.getInstance().get(key)).append("\n"); //$NON-NLS-1$
+			if(options==null) {
+				options = Options.emptyOptions;
 			}
 
-			if(!DialogFactory.getGlobalFactory().showConfirm(null,
-					"plugins.matetools.parserPipeline.title",  //$NON-NLS-1$
-					"plugins.matetools.parserPipeline.missingModels",  //$NON-NLS-1$
-					sb.toString().trim())) {
-				return null;
+			ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
+
+			// Load language
+			String language = (String) options.get(Options.LANGUAGE);
+			if(language==null) {
+				language = config.getString("plugins.matetools.parser.language"); //$NON-NLS-1$
 			}
-		}
 
-		int runCt = runCount.getAndIncrement();
+			// Set new models, this may clear some tools
+			setModels(storage);
 
-		// Generate initial data
-		SentenceData09 data = new SentenceData09();
-		data.init(tokens);
+			boolean verbose = config.getBoolean("plugins.matetools.parser.verbose"); //$NON-NLS-1$
+			boolean doUppercaseLemmas = config.getBoolean("plugins.matetools.parser.doUppercaseLemmas"); //$NON-NLS-1$
+			boolean fastRelease = config.getBoolean("plugins.matetools.parser.fastRelease"); //$NON-NLS-1$
+			boolean useParser = config.getBoolean("plugins.matetools.parser.useParser"); //$NON-NLS-1$
+			boolean useLemmatizer = config.getBoolean("plugins.matetools.parser.useLemmatizer"); //$NON-NLS-1$
+			boolean useTagger = config.getBoolean("plugins.matetools.parser.useTagger"); //$NON-NLS-1$
+			boolean useMTagger = config.getBoolean("plugins.matetools.parser.useMorphTagger"); //$NON-NLS-1$
 
-		DependencyData output = null;
-
-		// Now load tools if required and apply pipeline
-
-		// LEMMATIZER
-		if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()!=null) {
-			lemmatizer=new Lemmatizer(storage.getLemmatizerModelPath(),doUppercaseLemmas);
-		}
-		if(useLemmatizer && lemmatizer!=null) {
-			data = lemmatizer.apply(data);
-			output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
-			if(verbose) {
-				String msg = String.format("Matetools pipeline (run %d) - Lemmatizer result:\n%s",  //$NON-NLS-1$
-						runCt, data.toString());
-				LoggerFactory.log(this, Level.INFO, msg);
+			int cores = config.getInteger("plugins.matetools.parser.maxCores"); //$NON-NLS-1$
+			int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
+			if(cores>0) {
+				cores = Math.min(cores, availableCores);
 			}
-		}
-		currentOwner.outputChanged(output);
-		if(fastRelease) {
-			lemmatizer = null;
-		}
+			cores = Math.max(cores, 1);
 
-		// TAGGER
-		if(useTagger && tagger==null && storage.getTaggerModelPath()!=null) {
-			tagger=new is2.tag.Tagger(storage.getTaggerModelPath());
-		}
-		if(useTagger && tagger!=null) {
-			data = tagger.apply(data);
-			output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
-			if(verbose) {
-				String msg = String.format("Matetools pipeline (run %d) - Tagger result:\n%s",  //$NON-NLS-1$
-						runCt, data.toString());
-				LoggerFactory.log(this, Level.INFO, msg);
+			List<String> missingModels = new ArrayList<>();
+			storage.clear();
+
+			// LEMMATIZER
+			if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()==null) {
+				missingModels.add("plugins.matetools.parserModelEditor.lemmatizerModelLabel"); //$NON-NLS-1$
 			}
-		}
-		currentOwner.outputChanged(output);
-		if(fastRelease) {
-			tagger = null;
-		}
 
+			// TAGGER
+			if(useTagger && tagger==null && storage.getTaggerModelPath()==null) {
+				missingModels.add("plugins.matetools.parserModelEditor.taggerModelLabel"); //$NON-NLS-1$
+			}
 
-		// MTAG
-		if(useMTagger && mtag==null && storage.getMorphTaggerModelPath()!=null) {
-			mtag=new is2.mtag.Tagger(storage.getMorphTaggerModelPath());
-		}
-		if(useMTagger && mtag!=null) {
-			data = mtag.apply(data);
+			// MTAG
+			if(useMTagger && mtag==null && storage.getMorphTaggerModelPath()==null) {
+				missingModels.add("plugins.matetools.parserModelEditor.morphTaggerModelLabel"); //$NON-NLS-1$
+			}
 
-			// Workaround
-			if(storage.getParserModelPath()!=null && data.pfeats!=null){
-				for(int i=1;i<data.pfeats.length;++i){
-					if(data.pfeats[i]!=null && !data.pfeats[i].equals("_")) //$NON-NLS-1$
-						data.feats[i]=data.pfeats[i].split("\\|"); //$NON-NLS-1$
+			// PARSER
+			if(useParser && parser==null && storage.getParserModelPath()==null) {
+				missingModels.add("plugins.matetools.parserModelEditor.parserModelLabel"); //$NON-NLS-1$
+			}
+
+			// Allow user to abort midway
+			if(!missingModels.isEmpty()) {
+				StringBuilder sb = new StringBuilder(200);
+				for(String key : missingModels) {
+					sb.append(ResourceManager.getInstance().get(key)).append("\n"); //$NON-NLS-1$
+				}
+
+				if(!DialogFactory.getGlobalFactory().showConfirm(null,
+						"plugins.matetools.parserPipeline.title",  //$NON-NLS-1$
+						"plugins.matetools.parserPipeline.missingModels",  //$NON-NLS-1$
+						sb.toString().trim())) {
+					return null;
 				}
 			}
 
-			output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
-			if(verbose) {
-				String msg = String.format("Matetools pipeline (run %d) - Morphologic-Tagger result:\n%s",  //$NON-NLS-1$
-						runCt, data.toString());
-				LoggerFactory.log(this, Level.INFO, msg);
-			}
-		}
-		currentOwner.outputChanged(output);
-		if(fastRelease) {
-			mtag = null;
-		}
+			int runCt = runCount.getAndIncrement();
 
-		// PARSER
-		if(useParser && parser==null && storage.getParserModelPath()!=null) {
-			is2.parser.Options opts=new is2.parser.Options(new String[]{"-model",storage.getParserModelPath()}); //$NON-NLS-1$
-			Parser.THREADS=cores;
-			Parser p = new Parser();
-			p.options=opts;
-			p. pipe = new Pipe(opts);
-			p. params = new ParametersFloat(0);
-			p.readModel(opts, p.pipe, p.params);
-			parser=p;
-		}
-		if(useParser && parser!=null) {
-			data = parser.applyQuick(data);
-			output = MatetoolsCONLLUtils.readPredicted(data, -1, false, true);
-			if(verbose) {
-				String msg = String.format("Matetools pipeline (run %d) - Parser result:\n%s",  //$NON-NLS-1$
-						runCt, data.toString());
-				LoggerFactory.log(this, Level.INFO, msg);
-			}
-		}
-		currentOwner.outputChanged(output);
-		if(fastRelease) {
-			parser = null;
-		}
+			// Generate initial data
+			SentenceData09 data = new SentenceData09();
+			data.init(tokens);
 
-		return output;
+			DependencyData output = null;
+
+			// Now load tools if required and apply pipeline
+
+			// LEMMATIZER
+			if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()!=null) {
+				lemmatizer=new Lemmatizer(storage.getLemmatizerModelPath(),doUppercaseLemmas);
+			}
+			if(useLemmatizer && lemmatizer!=null) {
+				data = lemmatizer.apply(data);
+				output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
+				if(verbose) {
+					String msg = String.format("Matetools pipeline (run %d) - Lemmatizer result:\n%s",  //$NON-NLS-1$
+							runCt, data.toString());
+					LoggerFactory.log(this, Level.INFO, msg);
+				}
+			}
+			currentOwner.outputChanged(output);
+			if(fastRelease) {
+				lemmatizer = null;
+			}
+
+			// TAGGER
+			if(useTagger && tagger==null && storage.getTaggerModelPath()!=null) {
+				tagger=new is2.tag.Tagger(storage.getTaggerModelPath());
+			}
+			if(useTagger && tagger!=null) {
+				data = tagger.apply(data);
+				output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
+				if(verbose) {
+					String msg = String.format("Matetools pipeline (run %d) - Tagger result:\n%s",  //$NON-NLS-1$
+							runCt, data.toString());
+					LoggerFactory.log(this, Level.INFO, msg);
+				}
+			}
+			currentOwner.outputChanged(output);
+			if(fastRelease) {
+				tagger = null;
+			}
+
+
+			// MTAG
+			if(useMTagger && mtag==null && storage.getMorphTaggerModelPath()!=null) {
+				mtag=new is2.mtag.Tagger(storage.getMorphTaggerModelPath());
+			}
+			if(useMTagger && mtag!=null) {
+				data = mtag.apply(data);
+
+				// Workaround
+				if(storage.getParserModelPath()!=null && data.pfeats!=null){
+					for(int i=1;i<data.pfeats.length;++i){
+						if(data.pfeats[i]!=null && !data.pfeats[i].equals("_")) //$NON-NLS-1$
+							data.feats[i]=data.pfeats[i].split("\\|"); //$NON-NLS-1$
+					}
+				}
+
+				output = MatetoolsCONLLUtils.readPredicted(data, -1, true, true);
+				if(verbose) {
+					String msg = String.format("Matetools pipeline (run %d) - Morphologic-Tagger result:\n%s",  //$NON-NLS-1$
+							runCt, data.toString());
+					LoggerFactory.log(this, Level.INFO, msg);
+				}
+			}
+			currentOwner.outputChanged(output);
+			if(fastRelease) {
+				mtag = null;
+			}
+
+			// PARSER
+			if(useParser && parser==null && storage.getParserModelPath()!=null) {
+				is2.parser.Options opts=new is2.parser.Options(new String[]{"-model",storage.getParserModelPath()}); //$NON-NLS-1$
+				Parser.THREADS=cores;
+				Parser p = new Parser();
+				p.options=opts;
+				p. pipe = new Pipe(opts);
+				p. params = new ParametersFloat(0);
+				p.readModel(opts, p.pipe, p.params);
+				parser=p;
+			}
+			if(useParser && parser!=null) {
+				data = parser.applyQuick(data);
+				output = MatetoolsCONLLUtils.readPredicted(data, -1, false, true);
+				if(verbose) {
+					String msg = String.format("Matetools pipeline (run %d) - Parser result:\n%s",  //$NON-NLS-1$
+							runCt, data.toString());
+					LoggerFactory.log(this, Level.INFO, msg);
+				}
+			}
+			currentOwner.outputChanged(output);
+			if(fastRelease) {
+				parser = null;
+			}
+
+			return output;
+		} finally {
+			running.set(false);
+		}
+	}
+
+	public void unloadModels() {
+		lemmatizer = null;
+		tagger = null;
+		mtag = null;
+		parser = null;
 	}
 
 	private void setModels(ModelStorage newStorage) {

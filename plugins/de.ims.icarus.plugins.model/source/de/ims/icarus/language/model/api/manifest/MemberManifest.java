@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.api.manifest;
 
+import java.util.Collection;
 import java.util.Set;
 
 import de.ims.icarus.language.model.api.NamedCorpusMember;
@@ -137,6 +138,8 @@ public interface MemberManifest extends Identity, Derivable {
 	 */
 	Object getProperty(String name);
 
+	Collection<Object> getProperties(String name);
+
 	/**
 	 * Changes the value of the property specified by {@code name} to
 	 * the new {@code value}.
@@ -152,6 +155,8 @@ public interface MemberManifest extends Identity, Derivable {
 	 * any properties the user can modify
 	 */
 	void setProperty(String name, Object value);
+
+	void setProperties(String name, Collection<Object> values);
 
 	/**
 	 * Returns a {@link Set} view of all the available property names

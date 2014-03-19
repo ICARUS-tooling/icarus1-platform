@@ -2,13 +2,17 @@
 
 <!--
 	Element with mandatory identifier and optional
-	name and description
+	name and description. The 'resources' parameter
+	can be used to link to a set of localization
+	files that will be used to interprete the declared
+	name and description as localization keys.
 -->
 
 <!ENTITY % identity 
 		"id     CDATA #IMPLIED
 		name      CDATA #IMPLIED
 		description      CDATA #IMPLIED
+		resources      CDATA #IMPLIED
 		icon      CDATA #IMPLIED"
 >
 
@@ -26,7 +30,7 @@
 	Default type is always "string".
 -->
 
-<!ENTITY % typed "type 		(unknown | custom | string | boolean | integer | double)">
+<!ENTITY % typed "type 		(unknown | custom | extension | string | boolean | integer | double)">
 
 <!-- 
     Type definition for container objects.
@@ -318,6 +322,7 @@
 		%typed; "string"
 		%identity;
 		published %boolean; "true"
+		multi-value %boolean; "true"
 >
 
 <!--
@@ -339,12 +344,15 @@
 	a de.ims.icarus.language.model.manifest.ValueIterator object when
 	read.
 	Note that values can be templated as well!
+	In addition one can define an extension-point and the values for
+	this set are the extensions connected to that point.
 -->
 
 <!ELEMENT values (value)* >
 <!ATTLIST values 
 		id        	CDATA #IMPLIED
 		%typed; "string"
+		extension-point    	CDATA #IMPLIED
 		%template;
 >
 
