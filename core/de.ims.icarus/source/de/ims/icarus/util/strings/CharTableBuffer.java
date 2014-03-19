@@ -242,17 +242,23 @@ public class CharTableBuffer {
 			}
 			rows = null;
 		}
+
+		for(Cursor cursor : cursorCache) {
+			cursor.closeSplits();
+		}
 	}
 
 	private Row nextRow() {
 		int index = height;
 
 		if(index>=rows.length) {
+//			System.out.println("Expanding row buffer to "+(index*2+1));
 			rows = Arrays.copyOf(rows, index*2+1);
 		}
 
 		Row row = rows[index];
 		if(row==null) {
+//			System.out.println("creating new row for index "+index);
 			row = rows[index] = new Row(index, columns);
 		}
 
@@ -286,6 +292,7 @@ public class CharTableBuffer {
 
 		// Create new cursor only if required
 		if(cursor==null) {
+//			System.out.printf("creating new cursor: row=%d from=%d to=%d\n",row, index0, index1);
 			cursor = new Cursor();
 		} else {
 			cursor.resetSplits();
@@ -303,12 +310,10 @@ public class CharTableBuffer {
 	private void recycleCursor(Cursor cursor) {
 		if (cursor == null)
 			throw new NullPointerException("Invalid cursor"); //$NON-NLS-1$
-
-		cursor.closeSplits();
 		cursorCache.push(cursor);
 	}
 
-	Pattern getPattern(String regex) {
+	private Pattern getPattern(String regex) {
 		if (regex == null)
 			throw new NullPointerException("Invalid regex"); //$NON-NLS-1$
 
@@ -319,6 +324,7 @@ public class CharTableBuffer {
 		Pattern p = regexCache.get(regex);
 
 		if(p==null) {
+//			System.out.println("Compiling pattern: "+regex);
 			p = Pattern.compile(regex);
 			regexCache.put(regex, p);
 		}

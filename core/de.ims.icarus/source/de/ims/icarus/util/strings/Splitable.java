@@ -48,7 +48,7 @@ public abstract class Splitable extends AbstractString {
 			int idx = splitCount*2;
 
 			if (splitIndices==null) {
-				splitIndices = new int[Math.max(20, idx*2+2)];
+				splitIndices = new int[Math.max(32, idx*2+2)];
 			} else if(splitIndices.length<idx+1) {
 				splitIndices = Arrays.copyOf(splitIndices, idx*2+2);
 			}

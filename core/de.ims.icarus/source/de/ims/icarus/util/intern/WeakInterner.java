@@ -50,10 +50,14 @@ public class WeakInterner<E extends Object> implements Interner<E> {
 		int hash;
 		Entry next;
 
+		String tmp;
+
 		protected Entry(int hash, Object element, ReferenceQueue<Object> queue, Entry next) {
 			super(element, queue);
 			this.hash = hash;
 			this.next = next;
+
+			tmp = new String(element.toString());
 		}
 	}
 
@@ -97,6 +101,8 @@ public class WeakInterner<E extends Object> implements Interner<E> {
 		int newCapacity = (oldCapacity * 2) + 1;
 		Entry newMap[] = new Entry[newCapacity];
 
+//		System.out.println("rehashing table to size: "+newCapacity);
+
 		threshold = (int) (newCapacity * loadFactor);
 		table = newMap;
 
@@ -116,6 +122,9 @@ public class WeakInterner<E extends Object> implements Interner<E> {
         for (Object x; (x = queue.poll()) != null; ) {
             synchronized (queue) {
                 Entry e = (Entry)x;
+
+//                System.out.println("purging element: "+e.tmp);
+
         		int index = (e.hash & 0x7FFFFFFF) % table.length;
 
                 Entry prev = table[index];
@@ -169,6 +178,9 @@ public class WeakInterner<E extends Object> implements Interner<E> {
 			}
 
 			element = delegate(item);
+
+//			System.out.println("interning new item: '"+element+"'");
+
 			// Creates the new entry.
 			Entry e = new Entry(hash, element, queue, tab[index]);
 			tab[index] = e;

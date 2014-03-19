@@ -84,7 +84,10 @@ public final class IOUtil {
 	}
 
 	public static boolean isGZipSource(Path path) {
-		return path.endsWith(".gzip") || path.endsWith(".gz"); //$NON-NLS-1$ //$NON-NLS-2$
+		if(path.getNameCount()>0) {
+			path = path.getFileName();
+		}
+		return isGZipSource(path.toString());
 	}
 
 	public static String readStream(InputStream input) throws IOException {

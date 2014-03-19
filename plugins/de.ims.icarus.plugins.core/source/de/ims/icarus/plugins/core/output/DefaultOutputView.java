@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core.output;
@@ -39,6 +39,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.ManagementConstants;
@@ -65,11 +66,11 @@ import de.ims.icarus.util.mpi.ResultMessage;
  *
  */
 public class DefaultOutputView extends View implements ManagementConstants {
-	
+
 	public static final String VIEW_ID = ManagementConstants.DEFAULT_OUTPUT_VIEW_ID;
-	
+
 	private JTabbedPane presenterPane;
-	
+
 	private Handler handler;
 
 	public DefaultOutputView() {
@@ -82,19 +83,20 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	@Override
 	public void init(JComponent container) {
 		handler = new Handler();
-		
+
 		addBroadcastListener(ManagementConstants.EXPLORER_SELECTION_CHANGED, handler);
 		addBroadcastListener(ManagementConstants.LOG_SELECTION_CHANGED, handler);
-		
+
 		if(ConfigRegistry.getGlobalRegistry().getBoolean(
-				"general.appearance.showSystemStreams")) { //$NON-NLS-1$
+				"general.appearance.showSystemStreams") //$NON-NLS-1$
+				&& !Core.ignoreRedirect()) {
 			Console console = Console.getInstance();
-			
+
 			// Display sys.out redirect
-			Options options = new Options();			
+			Options options = new Options();
 			options.put(Options.TITLE, "System.out"); //$NON-NLS-1$
 			displayData(console.getOutputDocument(), console, options);
-			
+
 			if(!console.isMergeStreams()) {
 				// Display sys.err redirect
 				options = new Options();
@@ -120,7 +122,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		if(presenterPane==null) {
 			return;
 		}
-		
+
 		for(int i=presenterPane.getTabCount()-1; i>-1; i--) {
 			TabComponent tabComponent = (TabComponent) presenterPane.getTabComponentAt(i);
 			if(tabComponent.presenter!=null) {
@@ -129,24 +131,24 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		}
 		presenterPane.removeAll();
 	}
-	
+
 	private TabComponent findTabForOwner(Object owner) {
 		if(owner==null) {
 			return null;
 		}
-		
+
 		TabComponent comp = null;
-		
+
 		for(int i=0; i<presenterPane.getTabCount(); i++) {
 			comp = (TabComponent)presenterPane.getTabComponentAt(i);
 			if(comp.getOwner()==owner) {
 				return comp;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private boolean canDisplay(Object data) {
 		if(data==null) {
 			return false;
@@ -154,19 +156,19 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		return UIHelperRegistry.globalRegistry().hasHelper(
 				AWTPresenter.class, data);
 	}
-	
+
 	public void displayData(Object data, Object owner, Options options) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(owner==null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
-		
+
 		selectViewTab();
-		
+
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
-		
+
 		// Lazily create presenter pane
 		if(presenterPane==null) {
 			presenterPane = new JTabbedPane();
@@ -176,9 +178,9 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			container.setLayout(new BorderLayout());
 			container.add(presenterPane, BorderLayout.CENTER);
 		}
-		
+
 		TabComponent tabComponent = null;
-		
+
 		// Recycle tabs if allowed
 		if(options.get(ManagementConstants.REUSE_TAB_OPTION, false)) {
 			tabComponent = findTabForOwner(owner);
@@ -193,9 +195,9 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		} else {
 			tabIndex = presenterPane.indexOfTabComponent(tabComponent);
 		}
-		
+
 		tabComponent.setPresentedObject(data, options);
-		
+
 		presenterPane.setSelectedIndex(tabIndex);
 	}
 
@@ -206,35 +208,35 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	 * <li>{@link Commands#PRESENT}</li>
 	 * <li>{@link Commands#CLEAR}</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.core.View#handleRequest(de.ims.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
-		
+
 		Object data = message.getData();
-		
+
 		// Unwrap wrapped data
 		if(data instanceof Wrapper) {
 			data = ((Wrapper<?>)data).get();
 		}
-		
+
 		Object owner = message.getOption(Options.OWNER);
-		
+
 		if(Commands.DISPLAY.equals(message.getCommand())
 				|| Commands.PRESENT.equals(message.getCommand())) {
-			
+
 			if(owner==null) {
 				return message.errorResult(this, new IllegalArgumentException("Missing owner")); //$NON-NLS-1$
 			}
-			
+
 			// Check if there is a presenter available for the supplied object
 			if(!canDisplay(data)) {
 				return message.unsupportedDataResult(this);
 			}
-			
+
 			displayData(data, owner, message.getOptions());
-			
+
 			return message.successResult(this, null);
 		} else if(Commands.CLEAR.equals(message.getCommand())) {
 			reset();
@@ -243,51 +245,51 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			return message.unknownRequestResult(this);
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	private class TabComponent extends JLabel implements MouseListener {
-		
+
 		private static final long serialVersionUID = -9157665763570448381L;
-		
+
 		private AWTPresenter presenter;
 		@SuppressWarnings("unused")
 		private Object presentedObject;
 		private Options options;
 		private final Object owner;
-		
+
 		TabComponent(Object owner) {
 			this.owner = owner;
 			addMouseListener(this);
 		}
-		
+
 		@SuppressWarnings("unused")
 		private void close() {
 			if(presenter!=null) {
 				presenter.clear();
 			}
-			
+
 			presenter = null;
 			presentedObject = null;
 			options = null;
 		}
-		
+
 		@Override
 		public String getText() {
 			int tabIndex = presenterPane.indexOfTabComponent(this);
 			return tabIndex==-1 ? null : presenterPane.getTitleAt(tabIndex);
 		}
-		
+
 		@Override
 		public Icon getIcon() {
 			int tabIndex = presenterPane.indexOfTabComponent(this);
 			return tabIndex==-1 ? null : presenterPane.getIconAt(tabIndex);
 		}
-		
+
 		@Override
 		public String getToolTipText() {
 			int tabIndex = presenterPane.indexOfTabComponent(this);
@@ -300,7 +302,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		public Object getOwner() {
 			return owner;
 		}
-		
+
 		private void showInfoLabel(String infoText) {
 			int tabIndex = presenterPane.indexOfTabComponent(this);
 			if(tabIndex==-1) {
@@ -310,7 +312,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 			infoLabel.setBorder(new EmptyBorder(50, 100, 100, 100));
 			infoLabel.setVerticalAlignment(SwingConstants.TOP);
 			infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-			
+
 			presenterPane.setComponentAt(tabIndex, infoLabel);
 		}
 
@@ -326,9 +328,9 @@ public class DefaultOutputView extends View implements ManagementConstants {
 				showInfoLabel(infoText);
 				return;
 			}
-			
+
 			AWTPresenter presenter = this.presenter;
-			
+
 			// Try to find a suitable presenter if no presenter
 			// is present or the current presenter is not able to
 			// present the given data
@@ -336,20 +338,20 @@ public class DefaultOutputView extends View implements ManagementConstants {
 				presenter = UIHelperRegistry.globalRegistry().findHelper(
 						AWTPresenter.class, presentedObject);
 			}
-			
+
 			// Only with a suitable presenter show the content
 			if(presenter!=null && PresenterUtils.presenterSupports(presenter, presentedObject)) {
 				this.presentedObject = presentedObject;
 				this.options = options;
 				this.presenter = presenter;
-				
+
 				if(this.options==null) {
 					this.options = Options.emptyOptions;
 				}
-				
+
 				try {
 					presenter.present(presentedObject, options);
-					
+
 					// Display presenter component
 					int tabIndex = presenterPane.indexOfTabComponent(this);
 					Component comp = presenter.getPresentingComponent();
@@ -362,7 +364,7 @@ public class DefaultOutputView extends View implements ManagementConstants {
 					presenterPane.setToolTipTextAt(tabIndex, title);
 				} catch (UnsupportedPresentationDataException e) {
 					LoggerFactory.log(this, Level.SEVERE, "Failed to present data: "+presentedObject, e); //$NON-NLS-1$
-					
+
 					// Show info if data not supported
 					String infoText = ResourceManager.getInstance().get(
 							"plugins.core.outputView.presentationFailed"); //$NON-NLS-1$
@@ -421,20 +423,20 @@ public class DefaultOutputView extends View implements ManagementConstants {
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	public final class CallbackHandler {
-		
+
 		private CallbackHandler() {
 			// no-op
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -447,22 +449,22 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		@Override
 		public void invoke(Object sender, EventObject event) {
 			Object item = event.getProperty("item"); //$NON-NLS-1$
-			
+
 			if(!canDisplay(item)) {
 				return;
 			}
-			
+
 			Options options = (Options)event.getProperty("options"); //$NON-NLS-1$
 			if(options==null) {
 				options = Options.emptyOptions;
 			}
-			
+
 			Object owner = options.get(Options.OWNER);
 			if(owner==null) {
 				LoggerFactory.log(this, Level.INFO, "No owner set for item to display: "+item); //$NON-NLS-1$
 				return;
 			}
-			
+
 			displayData(item, owner, options);
 		}
 	}

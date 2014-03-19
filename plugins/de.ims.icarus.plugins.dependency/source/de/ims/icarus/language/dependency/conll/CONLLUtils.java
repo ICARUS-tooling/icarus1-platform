@@ -102,10 +102,6 @@ public class CONLLUtils {
 
 		int index = -1;
 
-		if(index==-1) {
-			index = corpusIndex;
-		}
-
 		Row row;
 		boolean checkIdForIndex = true;
 
@@ -135,6 +131,10 @@ public class CONLLUtils {
 			}
 		}
 
+		if(index==-1) {
+			index = corpusIndex;
+		}
+
 		DependencyUtils.fillProjectivityFlags(heads, flags);
 
 		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
@@ -155,10 +155,6 @@ public class CONLLUtils {
 		long[] flags = new long[size];
 
 		int index = -1;
-
-		if(index==-1) {
-			index = corpusIndex;
-		}
 
 		Row row;
 		boolean checkIdForIndex = true;
@@ -189,6 +185,10 @@ public class CONLLUtils {
 			}
 		}
 
+		if(index==-1) {
+			index = corpusIndex;
+		}
+
 		DependencyUtils.fillProjectivityFlags(heads, flags);
 
 		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
@@ -209,10 +209,6 @@ public class CONLLUtils {
 		long[] flags = new long[size];
 
 		int index = -1;
-
-		if(index==-1) {
-			index = corpusIndex;
-		}
 
 		Row row;
 		boolean checkIdForIndex = true;
@@ -241,6 +237,10 @@ public class CONLLUtils {
 				}
 				cursor.recycle();
 			}
+		}
+
+		if(index==-1) {
+			index = corpusIndex;
 		}
 
 		DependencyUtils.fillProjectivityFlags(heads, flags);

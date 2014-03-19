@@ -258,7 +258,6 @@ public class Core {
 					Files.createFile(outFile);
 				}
 
-				@SuppressWarnings("resource")
 				PrintStream ps = new PrintStream(Files.newOutputStream(outFile),
 					true, "UTF-8"); //$NON-NLS-1$
 
@@ -319,7 +318,7 @@ public class Core {
 		}
 	}
 
-	private static boolean ignoreRedirect() {
+	public static boolean ignoreRedirect() {
 		String ignore = System.getProperty(IGNORE_STREAM_REDIRECT_PROPERTY);
 		return ignore!=null && Boolean.parseBoolean(ignore);
 	}

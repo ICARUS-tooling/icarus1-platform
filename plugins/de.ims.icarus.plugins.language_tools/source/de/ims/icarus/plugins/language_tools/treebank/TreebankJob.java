@@ -84,10 +84,14 @@ public class TreebankJob extends SwingWorker<Treebank, Object> implements Identi
 
 			long end = System.currentTimeMillis();
 
+			String durationString = StringUtil.formatDuration(end-start);
+			if(durationString.isEmpty()) {
+				durationString = "<1S"; //$NON-NLS-1$
+			}
 
 			LoggerFactory.log(this, Level.INFO, String.format(
 					"Loaded treebank '%s' in %s", treebank.getName(), //$NON-NLS-1$
-					StringUtil.formatDuration(end-start)));
+					durationString));
 		} finally {
 			firePropertyChange(TaskConstants.INDETERMINATE_PROPERTY, null, false);
 		}

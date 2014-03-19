@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.ims.icarus.language.SentenceData;
-import de.ims.icarus.util.Counter;
+import de.ims.icarus.util.collections.IntIntHashMap;
 
 
 /**
@@ -44,7 +44,7 @@ public class TreebankMetaDataBuilder {
 	private int maxLength = 0;
 	private int minLength = Integer.MAX_VALUE;
 
-	private Counter counter = new Counter();
+	private IntIntHashMap counter = new IntIntHashMap(100);
 
 	public TreebankMetaDataBuilder() {
 		// no-op
@@ -58,7 +58,12 @@ public class TreebankMetaDataBuilder {
 		maxLength = Math.max(maxLength, len);
 		minLength = Math.min(minLength, len);
 
-		counter.increment(len);
+		int count = counter.get(len);
+		if(count<0) {
+			count = 0;
+		}
+		count++;
+		counter.put(len, count);
 	}
 
 	public TreebankMetaData buildMetaData() {
@@ -73,10 +78,10 @@ public class TreebankMetaDataBuilder {
 		avgLength = Math.floor(avgLength*100)/100;
 		metaData.put(TreebankMetaData.AVERAGE_LENGTH, avgLength);
 
-		for(int i=minLength; i<=maxLength; i++) {
-			int count = counter.getCount(i);
+		for(int len=minLength; len<=maxLength; len++) {
+			int count = counter.get(len);
 			if(count>0) {
-				metaData.put("itemCount_"+i, count); //$NON-NLS-1$
+				metaData.put("itemCount_"+len, count); //$NON-NLS-1$
 			}
 		}
 
