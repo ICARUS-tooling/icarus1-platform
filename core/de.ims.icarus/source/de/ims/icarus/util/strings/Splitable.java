@@ -27,7 +27,6 @@ package de.ims.icarus.util.strings;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class Splitable extends AbstractString {
 
@@ -38,7 +37,9 @@ public abstract class Splitable extends AbstractString {
 		@Override
 		public abstract Splitable subSequence(int begin, int end);
 
-		protected abstract Pattern getCachedPattern(String regex);
+		protected abstract Matcher getCachedMatcher(String regex);
+
+		protected abstract void recycleMatcher(Matcher matcher);
 
 		private void addSplit(int index0, int index1) {
 			if(index0>index1) {
@@ -48,8 +49,10 @@ public abstract class Splitable extends AbstractString {
 			int idx = splitCount*2;
 
 			if (splitIndices==null) {
+//				System.out.println("creating split buffer");
 				splitIndices = new int[Math.max(32, idx*2+2)];
 			} else if(splitIndices.length<idx+1) {
+//				System.out.println("expanding split buffer to capacity: "+(idx*2+1));
 				splitIndices = Arrays.copyOf(splitIndices, idx*2+2);
 			}
 
@@ -95,8 +98,7 @@ public abstract class Splitable extends AbstractString {
 	        } else {
 	        	resetSplits();
 
-	        	Pattern pattern = getCachedPattern(regex.toString());
-	        	Matcher m = pattern.matcher(this);
+	        	Matcher m = getCachedMatcher(regex.toString());
 	        	int off = 0;
 	        	while(m.find() && (limit==0 || splitCount<limit)) {
 	        		if(m.start()>off) {
@@ -109,6 +111,9 @@ public abstract class Splitable extends AbstractString {
 	        	if(off<length() && (limit==0 || splitCount<limit)) {
 	        		addSplit(off, length()-1);
 	        	}
+
+	        	recycleMatcher(m);
+
 	            return splitCount;
 	        }
 		}
@@ -158,6 +163,7 @@ public abstract class Splitable extends AbstractString {
 
 		protected void closeSplits() {
 			splitCount = 0;
+//			System.out.println("deleting split buffer");
 			splitIndices = null;
 		}
 	}

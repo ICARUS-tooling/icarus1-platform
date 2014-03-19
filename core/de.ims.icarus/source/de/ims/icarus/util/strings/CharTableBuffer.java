@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
@@ -86,7 +87,7 @@ public class CharTableBuffer {
 
 	// Cursor cursorCache
 	private Stack<Cursor> cursorCache = new Stack<>();
-	private Map<String, Pattern> regexCache;
+	private Map<String, Matcher> regexCache;
 
 	public CharTableBuffer() {
 		this(50, 100);
@@ -108,7 +109,7 @@ public class CharTableBuffer {
 		this.reader = reader;
 
 		if(buffer==null) {
-			buffer = new char[4096];
+			buffer = new char[8000];
 		}
 
 		ignoreLF = false;
@@ -282,7 +283,7 @@ public class CharTableBuffer {
 		return height==0;
 	}
 
-	private Cursor getCursor(int row, int index0, int index1) {
+	private Cursor getCursor0(int row, int index0, int index1) {
 		Cursor cursor = null;
 
 		// Check cursorCache
@@ -307,13 +308,13 @@ public class CharTableBuffer {
 		return cursor;
 	}
 
-	private void recycleCursor(Cursor cursor) {
+	private void recycleCursor0(Cursor cursor) {
 		if (cursor == null)
 			throw new NullPointerException("Invalid cursor"); //$NON-NLS-1$
 		cursorCache.push(cursor);
 	}
 
-	private Pattern getPattern(String regex) {
+	private Matcher getMatcher0(String regex, CharSequence input) {
 		if (regex == null)
 			throw new NullPointerException("Invalid regex"); //$NON-NLS-1$
 
@@ -321,15 +322,31 @@ public class CharTableBuffer {
 			regexCache = new HashMap<>();
 		}
 
-		Pattern p = regexCache.get(regex);
+		Matcher m = regexCache.get(regex);
 
-		if(p==null) {
+		if(m==null) {
 //			System.out.println("Compiling pattern: "+regex);
-			p = Pattern.compile(regex);
-			regexCache.put(regex, p);
+			Pattern p = Pattern.compile(regex);
+			m = p.matcher(input);
+
+//			regexCache.put(regex, m);
+		} else {
+			m.reset(input);
 		}
 
-		return p;
+		return m;
+	}
+
+	private void recycleMatcher0(Matcher matcher) {
+		if (matcher == null)
+			throw new NullPointerException("Invalid matcher"); //$NON-NLS-1$
+
+		if(regexCache==null) {
+			regexCache = new HashMap<>();
+		}
+
+		matcher.reset();
+		regexCache.put(matcher.pattern().pattern(), matcher);
 	}
 
 	public class Cursor extends Splitable {
@@ -370,7 +387,7 @@ public class CharTableBuffer {
 		public void recycle() {
 			row = index0 = index1 = -1;
 
-			recycleCursor(this);
+			recycleCursor0(this);
 		}
 
 		/**
@@ -378,15 +395,23 @@ public class CharTableBuffer {
 		 */
 		@Override
 		public Cursor subSequence(int start, int end) {
-			return getCursor(row, index0+start, index0+end);
+			return getCursor0(row, index0+start, index0+end);
 		}
 
 		/**
-		 * @see de.ims.icarus.util.strings.Splitable#getCachedPattern(java.lang.String)
+		 * @see de.ims.icarus.util.strings.Splitable#getCachedMatcher(java.lang.String)
 		 */
 		@Override
-		protected Pattern getCachedPattern(String regex) {
-			return getPattern(regex);
+		protected Matcher getCachedMatcher(String regex) {
+			return getMatcher0(regex, this);
+		}
+
+		/**
+		 * @see de.ims.icarus.util.strings.Splitable#recycleMatcher(java.util.regex.Matcher)
+		 */
+		@Override
+		protected void recycleMatcher(Matcher matcher) {
+			recycleMatcher0(matcher);
 		}
 
 		/**
@@ -427,29 +452,30 @@ public class CharTableBuffer {
 		private void ensureCapacity(int capacity) {
 			if(capacity>=buffer.length) {
 				capacity = 2*capacity+1;
+//				System.out.println("expanding capacity of row "+rowIndex+" to "+capacity);
 				buffer = Arrays.copyOf(buffer, capacity);
 			}
 		}
 
-		private void append(CharSequence s) {
-			int l = s.length();
-			ensureCapacity(width+l);
+//		private void append(CharSequence s) {
+//			int l = s.length();
+//			ensureCapacity(width+l);
+//
+//			for(int i=0; i<l;i++) {
+//				buffer[width++] = s.charAt(i);
+//			}
+//
+//			resetHash();
+//		}
 
-			for(int i=0; i<l;i++) {
-				buffer[width++] = s.charAt(i);
-			}
-
-			resetHash();
-		}
-
-		private void append(char[] c, int offset, int len) {
-			ensureCapacity(width+len);
-
-			System.arraycopy(c, offset, buffer, width, len);
-			width += len;
-
-			resetHash();
-		}
+//		private void append(char[] c, int offset, int len) {
+//			ensureCapacity(width+len);
+//
+//			System.arraycopy(c, offset, buffer, width, len);
+//			width += len;
+//
+//			resetHash();
+//		}
 
 		private void set(char[] c, int offset, int len) {
 			ensureCapacity(len);
@@ -484,15 +510,23 @@ public class CharTableBuffer {
 		 */
 		@Override
 		public Cursor subSequence(int start, int end) {
-			return getCursor(rowIndex, start, end);
+			return getCursor0(rowIndex, start, end);
 		}
 
 		/**
-		 * @see de.ims.icarus.util.strings.Splitable#getCachedPattern(java.lang.String)
+		 * @see de.ims.icarus.util.strings.Splitable#getCachedMatcher(java.lang.String)
 		 */
 		@Override
-		protected Pattern getCachedPattern(String regex) {
-			return getPattern(regex);
+		protected Matcher getCachedMatcher(String regex) {
+			return getMatcher0(regex, this);
+		}
+
+		/**
+		 * @see de.ims.icarus.util.strings.Splitable#recycleMatcher(java.util.regex.Matcher)
+		 */
+		@Override
+		protected void recycleMatcher(Matcher matcher) {
+			recycleMatcher0(matcher);
 		}
 
 		/**

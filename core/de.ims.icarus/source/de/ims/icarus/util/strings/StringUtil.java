@@ -69,12 +69,12 @@ public final class StringUtil {
 //	private static Interner<String> interner = new EmptyInterner<>();
 
 	private static Interner<CharSequence> interner;
-	private static final int defaultInternerCapacity = 500;
+	private static final int defaultInternerCapacity = 2000;
 
 	static {
 		Interner<CharSequence> i;
 		Core core = Core.getCore();
-		if(core!=null && "true".equals(core.getProperty(WEAK_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
+		if(core!=null && "true".equals(core.getProperty(WEAK_INTERN_PROPERTY, "false"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			i = new WeakInterner<CharSequence>(defaultInternerCapacity){
 
 				/**
@@ -86,7 +86,7 @@ public final class StringUtil {
 				}
 
 			};
-		} else if(core!=null && "true".equals(core.getProperty(NATIVE_INTERN_PROPERTY, "true"))) { //$NON-NLS-1$ //$NON-NLS-2$
+		} else if(core!=null && "true".equals(core.getProperty(NATIVE_INTERN_PROPERTY, "false"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			i = new NativeStringInterner();
 		} else {
 			i = new StrongInterner<CharSequence>(defaultInternerCapacity){

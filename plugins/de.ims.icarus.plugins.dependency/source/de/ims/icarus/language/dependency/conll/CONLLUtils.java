@@ -108,8 +108,9 @@ public class CONLLUtils {
 		for(int i=0; i<size; i++) {
 
 			row = buffer.getRow(i);
-			if(row.split(DELIMITER, COL_LIMIT09)<COL_LIMIT09)
-				throw new IllegalArgumentException("Insufficient columns"); //$NON-NLS-1$
+			if(row.split(DELIMITER, COL_LIMIT09)!=COL_LIMIT09)
+				throw new IllegalArgumentException("Incorrect column count in data file, " //$NON-NLS-1$
+						+ "are you sure this is the right format for CoNLL 09?"); //$NON-NLS-1$
 
 			forms[i] = get(row, FORM09, "<empty>"); //$NON-NLS-1$
 			heads[i] = (short) get(row, HEAD09);
@@ -162,8 +163,9 @@ public class CONLLUtils {
 		for(int i=0; i<size; i++) {
 
 			row = buffer.getRow(i);
-			if(row.split(DELIMITER, COL_LIMIT09)<COL_LIMIT09)
-				throw new IllegalArgumentException("Insufficient columns"); //$NON-NLS-1$
+			if(row.split(DELIMITER, COL_LIMIT09)!=COL_LIMIT09)
+				throw new IllegalArgumentException("Incorrect column count in data file, " //$NON-NLS-1$
+						+ "are you sure this is the right format for CoNLL 09?"); //$NON-NLS-1$
 
 			forms[i] = get(row, FORM09, "<empty>"); //$NON-NLS-1$
 			heads[i] = (short) get(row, PHEAD09);
@@ -216,8 +218,9 @@ public class CONLLUtils {
 		for(int i=0; i<size; i++) {
 
 			row = buffer.getRow(i);
-			if(row.split(DELIMITER, COL_LIMIT06)<COL_LIMIT06)
-				throw new IllegalArgumentException("Insufficient columns"); //$NON-NLS-1$
+			if(row.split(DELIMITER, COL_LIMIT06)!=COL_LIMIT06)
+				throw new IllegalArgumentException("Incorrect column count in data file, " //$NON-NLS-1$
+						+ "are you sure this is the right format for CoNLL 06?"); //$NON-NLS-1$
 
 			forms[i] = get(row, FORM06, "<empty>"); //$NON-NLS-1$
 			heads[i] = (short) get(row, HEAD06);

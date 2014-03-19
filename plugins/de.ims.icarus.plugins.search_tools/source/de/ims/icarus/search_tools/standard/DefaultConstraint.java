@@ -19,13 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
 
-import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -34,10 +34,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchOperator;
-import de.ims.icarus.search_tools.util.SearchUtils;
 
 
 /**
@@ -47,31 +47,31 @@ import de.ims.icarus.search_tools.util.SearchUtils;
  */
 @XmlRootElement(name="constraint")
 public class DefaultConstraint implements SearchConstraint {
-	
+
 	private static final long serialVersionUID = 8086598627849516305L;
 
 	private String token;
 
 	private Object value;
-	
+
 	private Object specifier;
-	
+
 	private boolean active = true;
-	
+
 	private SearchOperator operator;
-	
+
 	public DefaultConstraint(String token, Object value, SearchOperator operator) {
 		setToken(token);
 		setValue(value);
 		setOperator(operator);
 	}
-	
+
 	public DefaultConstraint(String token, Object value, SearchOperator operator, Object specifier) {
 		this(token, value, operator);
-		
+
 		setSpecifier(specifier);
 	}
-	
+
 	@SuppressWarnings("unused")
 	private DefaultConstraint() {
 		// no-op
@@ -100,29 +100,29 @@ public class DefaultConstraint implements SearchConstraint {
 	public boolean matches(Object value) {
 		return operator.apply(getInstance(value), getConstraint());
 	}
-	
+
 	protected Object getConstraint() {
 		return value;
 	}
-	
+
 	protected boolean equals(Object value, Object constraint) {
 		return value.equals(constraint);
 	}
-	
+
 	protected boolean contains(Object value, Object constraint) {
 		return ((String)value).contains((String)constraint);
 	}
-	
+
 	protected boolean matches(Object value, Object constraint) {
-		Pattern pattern = SearchManager.getPattern((String)constraint);
-		return pattern==null ? false : pattern.matcher((String)value).find();
+		Matcher matcher = SearchManager.getMatcher((String)constraint, (String)value);
+		return matcher==null ? false : matcher.find();
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected int compare(Object value, Object constraint) {
 		return ((Comparable)value).compareTo((Comparable)constraint);
 	}
-	
+
 	@Override
 	public Object getInstance(Object value) {
 		return value;
@@ -133,7 +133,7 @@ public class DefaultConstraint implements SearchConstraint {
 		// Note that the 'active' state is not cloned!
 		return new DefaultConstraint(token, value, operator);
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("[%s: %s%s%s]", getClass().getSimpleName(),  //$NON-NLS-1$
@@ -168,8 +168,8 @@ public class DefaultConstraint implements SearchConstraint {
 	@Override
 	public boolean isUndefined() {
 		return !SearchManager.isGroupingOperator(operator)
-				&& (value==null || value.equals(SearchUtils.DATA_UNDEFINED_LABEL)
-				|| value.equals(SearchUtils.DATA_UNDEFINED_VALUE)
+				&& (value==null || value.equals(LanguageConstants.DATA_UNDEFINED_LABEL)
+				|| value.equals(LanguageConstants.DATA_UNDEFINED_VALUE)
 				|| "".equals(value)); //$NON-NLS-1$
 	}
 

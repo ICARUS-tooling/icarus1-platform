@@ -55,7 +55,6 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 	protected CharTableBuffer buffer;
 	protected int count;
 
-
 	/**
 	 * @see de.ims.icarus.language.SentenceDataReader#init(de.ims.icarus.util.location.Location,
 	 *      de.ims.icarus.util.Options)
@@ -81,6 +80,7 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 
 		try {
 			buffer = new CharTableBuffer();
+
 			buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
 		} catch (IllegalArgumentException e) {
 			LoggerFactory.log(this, Level.SEVERE,
