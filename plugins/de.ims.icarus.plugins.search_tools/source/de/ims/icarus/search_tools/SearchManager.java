@@ -129,13 +129,12 @@ public final class SearchManager {
 			return null;
 		}
 
-		Matcher matcher = matcherCache.get(s);
+		Matcher matcher = matcherCache.remove(s);
 		if(matcher==null) {
 			// Do not catch PatternSyntaxException!
 			// We want whatever operation the pattern request was originated
 			// from to be terminated by the exception.
-			Pattern p = Pattern.compile(s);
-			matcher = p.matcher(input);
+			matcher = Pattern.compile(s).matcher(input);
 
 			// Do not bother with 'duplicates' since all Pattern
 			// compiled from the same string are in fact identical in

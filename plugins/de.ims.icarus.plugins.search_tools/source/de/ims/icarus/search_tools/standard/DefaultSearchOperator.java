@@ -75,7 +75,10 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 
 		Matcher matcher = SearchManager.getMatcher((String)constraint, (String)value);
-		return matcher==null ? false : matcher.find();
+		boolean result = matcher==null ? false : matcher.find();
+		SearchManager.recycleMatcher(matcher);
+
+		return result;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

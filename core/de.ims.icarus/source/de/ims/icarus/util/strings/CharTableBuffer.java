@@ -322,12 +322,11 @@ public class CharTableBuffer {
 			regexCache = new HashMap<>();
 		}
 
-		Matcher m = regexCache.get(regex);
+		Matcher m = regexCache.remove(regex);
 
 		if(m==null) {
 //			System.out.println("Compiling pattern: "+regex);
-			Pattern p = Pattern.compile(regex);
-			m = p.matcher(input);
+			m = Pattern.compile(regex).matcher(input);
 
 //			regexCache.put(regex, m);
 		} else {
