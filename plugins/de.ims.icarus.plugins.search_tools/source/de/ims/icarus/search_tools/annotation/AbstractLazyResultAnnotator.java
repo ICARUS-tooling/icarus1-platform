@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.annotation;
@@ -43,24 +43,24 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 
 	protected long[] baseHighlights;
-	
+
 	protected final BitmaskHighlighting highlighting;
-	
+
 	protected AbstractLazyResultAnnotator(BitmaskHighlighting highlighting) {
 		if(highlighting==null)
 			throw new NullPointerException("Invalid highlighting"); //$NON-NLS-1$
-		
+
 		this.highlighting = highlighting;
 	}
-	
+
 	public BitmaskHighlighting getHighlighting() {
 		return highlighting;
 	}
-	
+
 	protected abstract int getHighlightCount();
-	
+
 	protected abstract long createBaseHighlight(int index);
-	
+
 	protected long[] getBaseHighlights() {
 		if(baseHighlights==null) {
 			baseHighlights = new long[getHighlightCount()];
@@ -70,7 +70,7 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 		}
 		return baseHighlights;
 	}
-	
+
 	protected abstract boolean supports(Object data);
 
 	@Override
@@ -81,43 +81,43 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 			return createAnnotatedData(data, entry);
 		} else if(data!=null)
 			throw new IllegalArgumentException("Unable to annotate unsupported data: "+data.getClass()); //$NON-NLS-1$
-		
+
 		return null;
 	}
-	
+
 	protected Annotation createAnnotation(Object data, ResultEntry entry) {
 		return new LazyAnnotation(data, entry);
 	}
-	
+
 	protected abstract AnnotatedData createAnnotatedData(Object data, ResultEntry entry);
 
-	
+
 	protected abstract Highlight createHighlight(Object data, Hit hit);
-	
+
 	public interface Highlight {
 
 		public long getHighlight(int index);
 	}
-	
+
 	public static class DefaultHighlight implements Highlight {
 		protected BitSet highlightedIndices;
 		protected int[] indexMap;
 		protected long[] highlights;
-		
+
 		public DefaultHighlight(int[] indexMap, long[] highlights) {
-			int size = CollectionUtils.max(indexMap);
+			int size = CollectionUtils.max(indexMap)+1;
 			highlightedIndices = new BitSet(size);
-			
+
 			this.indexMap = indexMap;
 			this.highlights = highlights;
-			
+
 			for(int index : indexMap) {
 				if(index!=-1) {
 					highlightedIndices.set(index);
 				}
 			}
 		}
-		
+
 		@Override
 		public long getHighlight(int index) {
 			if(highlightedIndices.get(index)) {
@@ -126,32 +126,32 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 						return highlights[i];
 					}
 				}
-			} 
-			
+			}
+
 			return 0L;
 		}
 	}
 
 	public class LazyAnnotation extends AbstractAnnotation implements ResultAnnotation, SearchAnnotation {
-		
+
 		protected final ResultEntry entry;
 		protected final Object data;
-		
+
 		protected Highlight[] highlights;
-		
+
 		public LazyAnnotation(Object data, ResultEntry entry) {
 			this.data = data;
 			this.entry = entry;
 		}
-		
+
 		public ResultEntry getEntry() {
 			return entry;
 		}
-		
+
 		public Hit getHit() {
 			if(isBeforeFirst() || isAfterLast())
 				throw new IllegalStateException();
-			
+
 			return entry.getHit(getIndex());
 		}
 
@@ -166,15 +166,15 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 		public Highlight getHighlight() {
 			if(isBeforeFirst() || isAfterLast())
 				throw new IllegalStateException();
-			
+
 			if(highlights==null) {
 				highlights = new Highlight[getAnnotationCount()];
 			}
-			
+
 			if(highlights[getIndex()]==null) {
 				highlights[getIndex()] = createHighlight(data, getHit());
 			}
-			
+
 			return highlights[getIndex()];
 		}
 

@@ -19,13 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.model.search;
 
 /**
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *

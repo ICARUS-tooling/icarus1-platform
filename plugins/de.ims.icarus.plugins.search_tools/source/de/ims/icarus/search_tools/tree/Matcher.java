@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
@@ -42,7 +42,7 @@ import de.ims.icarus.util.CorruptedStateException;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -50,50 +50,50 @@ import de.ims.icarus.util.CorruptedStateException;
 public class Matcher implements Cloneable, Comparable<Matcher> {
 	protected final SearchNode node;
 	protected final SearchEdge edge;
-	
+
 	// Flag to indicate that this matcher is part of
 	// a sub-tree that serves as exclusion and therefore
 	// no successful match should ever be committed
 	protected boolean exclusionMember;
-	
+
 	protected int id;
-	
+
 	protected SearchConstraint[] constraints;
-	
+
 	protected Matcher parent;
 	protected Matcher[] exclusions;
 	protected Matcher next, previous;
 	protected Matcher alternate;
-	
+
 	protected Matcher[] before;
 	protected Matcher[] after;
-	
+
 	protected Matcher[] options;
-	
+
 	protected TargetTree targetTree;
 	protected GroupCache cache;
 	protected EntryBuilder entryBuilder;
-	
+
 	protected int allocation = -1;
-	
+
 	protected int height;
 	protected int descendantCount;
 	protected int childCount;
 	protected NodeType type;
-			
+
 	protected boolean exhaustive = false;
 	protected SearchMode searchMode = SearchMode.MATCHES;
 	protected boolean leftToRight = true;
-	
+
 	protected IndexIterator indexIterator = new LTRIterator();
-	
+
 	public Matcher(SearchNode node, SearchEdge edge) {
 		if(node==null)
 			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
-		
+
 		this.node = node;
 		this.edge = edge;
-		
+
 		// Refresh childCount
 		if(node!=null) {
 			for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
@@ -101,29 +101,29 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				if(type==EdgeType.PRECEDENCE || type==EdgeType.LINK) {
 					continue;
 				}
-				
+
 				childCount++;
 			}
-			
+
 			type = node.getNodeType();
 		}
 	}
-	
-	public boolean matches() {		
+
+	public boolean matches() {
 		int parentAllocation = parent.getAllocation();
 		targetTree.viewNode(parentAllocation);
 		indexIterator.setMax(targetTree.getEdgeCount()-1);
-		
+
 		int minIndex = getMinIndex();
 		int maxIndex = getMaxIndex();
-		
+
 		boolean matched = false;
-		
+
 		if(minIndex<=maxIndex) {
 			while(indexIterator.hasNext()) {
 				targetTree.viewNode(parentAllocation);
 				targetTree.viewChild(indexIterator.next());
-				
+
 				if(entryBuilder.getIndex()==49 && targetTree.getNodeIndex()==15) {
 					System.out.println();
 				}
@@ -133,7 +133,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 						|| targetTree.getNodeIndex()>maxIndex) {
 					continue;
 				}
-				
+
 				// Honor locked nodes that are allocated to other matchers!
 				if(targetTree.isNodeLocked()) {
 					continue;
@@ -143,18 +143,18 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				if(!matchesType()) {
 					continue;
 				}
-				
-				// Check for structural constraints 
+
+				// Check for structural constraints
 				if(targetTree.getDescendantCount()<descendantCount
 						|| targetTree.getHeight()<height) {
 					continue;
 				}
-				
+
 				// Check for required number of children
 				if(targetTree.getEdgeCount()<childCount) {
 					continue;
 				}
-				
+
 				// Check if the current node is a potential match
 				if(!matchesConstraints()) {
 					continue;
@@ -163,16 +163,16 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				// Lock allocation
 				allocate();
 
-				// Search for child matchers that serve as exclusions			
+				// Search for child matchers that serve as exclusions
 				if(!matchesExclusions()) {
 					// Delegate further search to the next matcher
 					// or otherwise commit current match
 					matched |= matchesNext();
 				}
-	
+
 				// Release lock
 				deallocate();
-				
+
 				// Stop search if only one successful hit is required
 				// This is the case when either a non-exhaustive search
 				// takes place or the matcher is a part of a sub-tree
@@ -182,19 +182,19 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				}
 			}
 		}
-		
+
 		// Return scope to parent node
 		targetTree.viewNode(parentAllocation);
-		
-		// If unsuccessful and part of a disjunction let the 
+
+		// If unsuccessful and part of a disjunction let the
 		// alternate matcher have a try.
 		if((!matched || exhaustive) && alternate!=null) {
 			matched |= alternate.matches();
 		}
-		
+
 		return matched;
 	}
-	
+
 	/**
 	 * Returns {@code true} if at least on of the
 	 * {@code Matcher} instances registered as exclusions
@@ -208,10 +208,10 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	protected boolean matchesType() {
 		switch (type) {
 		case LEAF:
@@ -220,12 +220,14 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			return targetTree.isRoot();
 		case INTERMEDIATE:
 			return targetTree.getEdgeCount()>0;
+		case PARENT:
+			return !targetTree.isRoot() && targetTree.getEdgeCount()>0;
 
 		default:
 			return true;
 		}
 	}
-	
+
 	protected boolean matchesNext() {
 		if(next!=null) {
 			return next.matches();
@@ -233,64 +235,64 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			// ONLY cache here if this matcher is not a
 			// member of a sub-tree that serves as exclusion
 			cacheHits();
-			
+
 			// Commit if every hit should be reported independently
 			if(searchMode==SearchMode.INDEPENDENT_HITS) {
 				commit();
 			}
-			
+
 			//return true;
 		}
-		
+
 		// return false
 		return true;
 	}
-	
+
 	protected boolean matchesConstraints() {
 		if(constraints==null) {
 			return true;
 		}
-		
+
 		for(SearchConstraint constraint : constraints) {
 			if(!constraint.matches(getTargetTree())) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	protected void commit() {
 		cache.commit(entryBuilder.toEntry());
 	}
-	
+
 	protected void cacheHits() {
 		entryBuilder.commitAllocation();
 	}
-	
+
 	public int getAllocation() {
 		return allocation;
 	}
-	
+
 	public void deallocate() {
 		targetTree.unlockNode(allocation);
 		allocation = -1;
 		entryBuilder.deallocate(id);
 	}
-	
+
 	protected void allocate() {
 		targetTree.lockNode();
 		allocation = targetTree.getNodeIndex();
 		entryBuilder.allocate(id, allocation);
 	}
-	
+
 	/**
 	 * Finds the minimum allowed index for this matcher
 	 * considering the allocation of all previous matchers.
 	 */
 	public int getMinIndex() {
 		int min = -1;
-		
+
 		if(before!=null) {
 			for(Matcher matcher : before) {
 				int alloc = matcher.getAllocation();
@@ -300,7 +302,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			}
 		}
 		min++;
-		
+
 		return min;
 	}
 
@@ -310,7 +312,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	 */
 	public int getMaxIndex() {
 		int max = targetTree.size();
-		
+
 		if(after!=null) {
 			for(Matcher matcher : after) {
 				int alloc = matcher.getAllocation();
@@ -320,10 +322,10 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			}
 		}
 		max--;
-		
+
 		return max;
 	}
-	
+
 	public int getChildCount() {
 		return childCount;
 	}
@@ -403,7 +405,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	public void setLeftToRight(boolean leftToRight) {
 		this.leftToRight = leftToRight;
 		indexIterator = leftToRight ? new LTRIterator() : new RTLIterator();
-		
+
 		if(next!=null) {
 			next.setLeftToRight(leftToRight);
 		}
@@ -481,50 +483,50 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	public SearchMode getSearchMode() {
 		return searchMode;
 	}
-	
+
 	protected void prepareGroupConstraints() {
 		if(constraints==null || cache==null) {
 			return;
 		}
-		
+
 		Arrays.sort(constraints, CONSTRAINT_PRIORITY_SORTER);
-		
+
 		for(int i=0; i<constraints.length; i++) {
 			SearchConstraint constraint = constraints[i];
 			if(constraint instanceof DummyGroupConstraint) {
 				continue;
 			}
-			
+
 			if(SearchManager.isGroupingOperator(constraint.getOperator())) {
 				constraints[i] = new DummyGroupConstraint(constraint, getCache());
 			}
 		}
 	}
-	
+
 	public static Comparator<SearchConstraint> CONSTRAINT_PRIORITY_SORTER = new Comparator<SearchConstraint>() {
 
 		@Override
 		public int compare(SearchConstraint c1, SearchConstraint c2) {
 			boolean isGrp1 = SearchManager.isGroupingOperator(c1.getOperator());
 			boolean isGrp2 = SearchManager.isGroupingOperator(c2.getOperator());
-			
+
 			return isGrp1==isGrp2 ? 0 : isGrp1 ? 1 : -1;
 		}
-		
+
 	};
 
 	public void setConstraints(SearchConstraint[] constraints) {
 		this.constraints = constraints;
-		
+
 		prepareGroupConstraints();
 	}
-	
+
 	// RECURSIVE TREE OPERATIONS
 
 	public void setTargetTree(TargetTree targetTree) {
 		if(targetTree==null)
 			throw new NullPointerException("Invalid target-tree"); //$NON-NLS-1$
-		
+
 		this.targetTree = targetTree;
 		if(next!=null) {
 			next.setTargetTree(targetTree);
@@ -547,10 +549,10 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	public void setCache(GroupCache cache) {
 		if(cache==null)
 			throw new NullPointerException("Invalid cache"); //$NON-NLS-1$
-		
+
 		this.cache = cache;
 		prepareGroupConstraints();
-		
+
 		if(next!=null) {
 			next.setCache(cache);
 		}
@@ -572,7 +574,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	public void setEntryBuilder(EntryBuilder entryBuilder) {
 		if(entryBuilder==null)
 			throw new NullPointerException("Invalid entry-builder"); //$NON-NLS-1$
-		
+
 		this.entryBuilder = entryBuilder;
 		if(next!=null) {
 			next.setEntryBuilder(entryBuilder);
@@ -595,10 +597,10 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	public void setSearchMode(SearchMode searchMode) {
 		if(searchMode==null)
 			throw new NullPointerException("Invalid search mode"); //$NON-NLS-1$
-		
+
 		this.searchMode = searchMode;
 		exhaustive = searchMode.isExhaustive();
-		
+
 		if(next!=null) {
 			next.setSearchMode(searchMode);
 		}
@@ -616,7 +618,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			}
 		}
 	}
-	
+
 	protected void innerClose() {
 		// for subclasses
 	}
@@ -639,7 +641,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			}
 		}
 	}
-	
+
 	public void link() {
 		if(next!=null) {
 			next.setPrevious(this);
@@ -667,23 +669,24 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	public int compareTo(Matcher other) {
 		return id-other.id;
 	}
-	
+
+	@Override
 	public Matcher clone() {
 		Matcher clone = null;
-		
+
 		try {
 			clone = (Matcher) super.clone();
 		} catch (CloneNotSupportedException e) {
 			throw new CorruptedStateException("Cannot clone cloneable super type: "+getClass(), e); //$NON-NLS-1$
 		}
-		
+
 		return clone;
 	}
-	
+
 	protected static abstract class IndexIterator implements Iterator<Integer> {
 
 		public abstract void setMax(int max);
-		
+
 		public abstract int getRange();
 
 		/**
@@ -693,18 +696,20 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		public void remove() {
 			// no-op
 		}
-		
+
+		@Override
 		public abstract IndexIterator clone();
 	}
-	
+
 	protected static class LTRIterator extends IndexIterator {
-		
+
 		private int max = -1;
 		private int current = -1;
-		
+
+		@Override
 		public void setMax(int max) {
 			this.max = max;
-			
+
 			current = -1;
 		}
 
@@ -740,12 +745,13 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			return Math.max(max, 0);
 		}
 	}
-	
+
 	protected static class RTLIterator extends IndexIterator {
-		
+
 		private int current = -1;
 		private int max = -1;
-		
+
+		@Override
 		public void setMax(int max) {
 			this.max = max;
 			current = max+1;

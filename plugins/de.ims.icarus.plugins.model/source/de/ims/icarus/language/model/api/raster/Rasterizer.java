@@ -23,24 +23,19 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.search;
+package de.ims.icarus.language.model.api.raster;
 
-import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.layer.FragmentLayer;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Query {
+public interface Rasterizer {
 
-	/**
-	 * Creates a new query object that holds all the constraints and
-	 * information of this query instance, minus all the data, that
-	 * has not been introduced by means of a {@link Context} definition.
-	 * This includes (but is not limited to) for example {@link Function},
-	 * {@link Predicate} or {@code Relation} objects or types of <i>inter-layer</i>
-	 * edges.
-	 */
-	Query simplify();
+	long getRasterSize(Markable markable, FragmentLayer layer, Object value);
+
+	long getGranularity();
 }

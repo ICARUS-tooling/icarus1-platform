@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.api;
 
+import de.ims.icarus.language.model.api.layer.FragmentLayer;
+
 /**
  * A {@code Fragment} allows for the definition of {@code Markable} objects that
  * are not bound by the logical structure of a corpus's base layer. A regular
@@ -46,6 +48,9 @@ package de.ims.icarus.language.model.api;
  *@see Markable
  */
 public interface Fragment extends Markable {
+
+	@Override
+	FragmentLayer getLayer();
 
 	/**
 	 * Returns the markable this fragment is a part of.
@@ -80,7 +85,7 @@ public interface Fragment extends Markable {
 	 * @param index
 	 * @throws IndexOutOfBoundsException if the {@code index} argument is negative
 	 * or exceeds either the current end index or the maximal possible index as
-	 * specified by the textual size of the hosting markable
+	 * specified by the raster size of the hosting markable
 	 */
 	void setFragmentBeginIndex(long index);
 
@@ -90,7 +95,7 @@ public interface Fragment extends Markable {
 	 * @param index
 	 * @throws IndexOutOfBoundsException if the {@code index} argument is negative
 	 * or less than the current end index or if it exceeds the maximal possible
-	 * index as specified by the textual size of the hosting markable
+	 * index as specified by the raster size of the hosting markable
 	 */
 	void setFragmentEndIndex(long index);
 }

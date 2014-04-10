@@ -548,6 +548,10 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 			return;
 		}
 
+		if(requiresUIUpdate) {
+			refreshUIState();
+		}
+
 		try {
 			presenter.present(document, options);
 		} catch(Exception e) {
@@ -561,10 +565,6 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		}
 
 		headerLabel.setText(getHeaderText(document, this.options));
-
-		if(requiresUIUpdate) {
-			refreshUIState();
-		}
 
 		refreshActions();
 	}

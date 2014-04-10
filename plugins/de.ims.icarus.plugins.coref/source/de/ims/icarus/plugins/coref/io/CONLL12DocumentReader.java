@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 159 $
- * $Date: 2013-11-04 11:20:05 +0100 (Mo, 04 Nov 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/plugins/coref/io/CONLL12DocumentReader.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-11-04 11:20:05 +0100 (Mo, 04 Nov 2013) $
- * $LastChangedRevision: 159 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.io;
 
@@ -43,7 +43,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
 
 /**
  * @author Markus Gärtner
- * @version $Id: CONLL12DocumentReader.java 159 2013-11-04 10:20:05Z mcgaerty $
+ * @version $Id$
  *
  */
 public class CONLL12DocumentReader implements Reader<CoreferenceDocumentData> {

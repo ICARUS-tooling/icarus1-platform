@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 123 $
- * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.matetools/source/de/ims/icarus/plugins/matetools/conll/CONLL09SentenceDataReader.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
- * $LastChangedRevision: 123 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.conll;
 
@@ -47,7 +47,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
 
 /**
  * @author Gregor Thiele
- * @version $Id: CONLL09SentenceDataReader.java 123 2013-07-31 15:22:01Z mcgaerty $
+ * @version $Id$
  *
  */
 public class CONLL06SentenceDataReader implements SentenceDataReader {

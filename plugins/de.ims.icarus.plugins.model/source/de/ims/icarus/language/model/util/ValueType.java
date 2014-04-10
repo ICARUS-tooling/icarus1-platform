@@ -41,6 +41,7 @@ public enum ValueType implements XmlResource {
 	STRING(String.class),
 	BOOLEAN(Boolean.class),
 	INTEGER(Integer.class),
+	LONG(Long.class),
 	DOUBLE(Double.class),
 	EXTENSION(Extension.class);
 

@@ -25,22 +25,28 @@
  */
 package de.ims.icarus.language.model.search;
 
-import de.ims.icarus.language.model.api.Context;
-
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Query {
+public interface Expression {
 
-	/**
-	 * Creates a new query object that holds all the constraints and
-	 * information of this query instance, minus all the data, that
-	 * has not been introduced by means of a {@link Context} definition.
-	 * This includes (but is not limited to) for example {@link Function},
-	 * {@link Predicate} or {@code Relation} objects or types of <i>inter-layer</i>
-	 * edges.
-	 */
-	Query simplify();
+	Class<?> getResultType();
+
+	boolean isConstant();
+
+	// Result retrieval
+
+	Object value();
+
+	int intValue();
+
+	long longValue();
+
+	float floatValue();
+
+	double doubleValue();
+
+	boolean booleanValue();
 }

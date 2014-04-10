@@ -43,7 +43,7 @@ import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.meta.MetaData;
 import de.ims.icarus.language.model.api.seg.Segment;
-import de.ims.icarus.language.model.api.seg.SegmentSpec;
+import de.ims.icarus.language.model.search.Query;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
@@ -146,7 +146,7 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 */
 	IdDomain getGlobalIdDomain();
 
-	Segment getSegment(SegmentSpec spec) throws CorpusException;
+	Segment getSegment(Query spec) throws CorpusException;
 
 //	/**
 //	 * Resolves a given id and returns the member within this corpus

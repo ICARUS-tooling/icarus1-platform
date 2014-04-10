@@ -66,7 +66,6 @@ import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanCache;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
-import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
@@ -108,6 +107,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	private static final long serialVersionUID = -6564065119073757454L;
 
 	protected CoreferenceDocumentDataPresenter parent;
+
+	protected Filter filter;
 
 	protected CoreferenceDocumentData document;
 	protected CoreferenceAllocation allocation;
@@ -160,7 +161,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 	@Override
 	protected GraphRenderer createDefaultGraphRenderer() {
-		return super.createDefaultGraphRenderer();
+		return new CoreferenceGraphRenderer();
 	}
 
 	/**
@@ -200,6 +201,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	@Override
 	protected mxGraph createGraph() {
 		return new CorefGraph();
+	}
+
+	public Filter getfFilter() {
+		return filter;
 	}
 
 	@Override
@@ -257,6 +262,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		}
 		allocation = (CoreferenceAllocation) options.get("allocation"); //$NON-NLS-1$
 		goldAllocation = (CoreferenceAllocation) options.get("goldAllocation"); //$NON-NLS-1$
+
+		filter = (Filter) options.get("filter"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -440,22 +447,75 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		return new CorefHandler();
 	}
 
+	/**
+	 * @see de.ims.icarus.plugins.jgraph.view.GraphPresenter#refreshAll()
+	 */
+	@Override
+	public void refreshAll() {
+		super.refreshAll();
+
+
+		Filter filter = getfFilter();
+
+		if(filter==null) {
+			return;
+		}
+
+//		this.filter = null;
+		Collection<Object> selection = new ArrayList<>();
+
+		mxIGraphModel model = graph.getModel();
+		final Object parent = graph.getDefaultParent();
+		int cellCount = model.getChildCount(parent);
+
+		for(int i=0; i<cellCount; i++) {
+			Object cell = model.getChildAt(parent, i);
+
+			if(model.isEdge(cell)) {
+				continue;
+			}
+
+			CorefNodeData value = (CorefNodeData) model.getValue(cell);
+
+			if(filter.accepts(value.getSpan())) {
+				selection.add(cell);
+			}
+		}
+
+		if(selection.isEmpty()) {
+			return;
+		}
+
+		final Object[] cells = new Object[selection.size()];
+		selection.toArray(cells);
+
+		UIUtil.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				graph.setSelectionCells(cells);
+//				mxRectangle bounds = graph.getBoundsForGroup(parent, cells, 0);
+//				scrollRectToVisible(bounds.getRectangle());
+			}
+		});
+	}
+
 	protected Object createVertex(Span span, CorefErrorType nodeType, boolean gold) {
 		CoreferenceData sentence = span.isROOT() ?
 				CoreferenceUtils.emptySentence
 				: document.get(span.getSentenceIndex());
 
 		long highlight = 0L;
-		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
-		if(annotationManager!=null && annotationManager.hasAnnotation() && !span.isROOT()) {
-			int index = cache.getIndex(span);
-			long hl = getAnnotationManager().getHighlight(index);
-			if(CoreferenceDocumentHighlighting.getInstance().isNodeHighlighted(hl)) {
-				long mask = ~(CoreferenceDocumentHighlighting.getInstance().getEdgeGroupingMask()
-						| CoreferenceDocumentHighlighting.getInstance().getEdgeHighlightMask());
-				highlight |= (hl & mask);
-			}
-		}
+//		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
+//		if(annotationManager!=null && annotationManager.hasAnnotation() && !span.isROOT()) {
+//			int index = cache.getIndex(span);
+//			long hl = annotationManager.getHighlight(index);
+//			if(CoreferenceDocumentHighlighting.getInstance().isNodeHighlighted(hl)) {
+//				long mask = ~(CoreferenceDocumentHighlighting.getInstance().getEdgeGroupingMask()
+//						| CoreferenceDocumentHighlighting.getInstance().getEdgeHighlightMask());
+//				highlight |= (hl & mask);
+//			}
+//		}
 
 		mxCell cell = new mxCell(new CorefNodeData(span, sentence, nodeType, gold, highlight));
 		cell.setVertex(true);
@@ -467,16 +527,16 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	protected Object createEdge(Edge edge, Object source, Object target, boolean gold) {
 
 		long highlight = 0L;
-		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
-		if(annotationManager!=null && annotationManager.hasAnnotation()) {
-			int index = cache.getIndex(edge.getTarget());
-			long hl = getAnnotationManager().getHighlight(index);
-			if(CoreferenceDocumentHighlighting.getInstance().isEdgeHighlighted(hl)) {
-				long mask = ~(CoreferenceDocumentHighlighting.getInstance().getNodeGroupingMask()
-						| CoreferenceDocumentHighlighting.getInstance().getNodeHighlightMask());
-				highlight |= (hl & mask);
-			}
-		}
+//		CoreferenceDocumentAnnotationManager annotationManager = getAnnotationManager();
+//		if(annotationManager!=null && annotationManager.hasAnnotation()) {
+//			int index = cache.getIndex(edge.getTarget());
+//			long hl = annotationManager.getHighlight(index);
+//			if(CoreferenceDocumentHighlighting.getInstance().isEdgeHighlighted(hl)) {
+//				long mask = ~(CoreferenceDocumentHighlighting.getInstance().getNodeGroupingMask()
+//						| CoreferenceDocumentHighlighting.getInstance().getNodeHighlightMask());
+//				highlight |= (hl & mask);
+//			}
+//		}
 
 		mxCell cell = new mxCell(new CorefEdgeData(edge, gold, highlight));
 		cell.setEdge(true);
@@ -505,8 +565,9 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			// Clear graph
 			GraphUtils.clearGraph(graph);
 
-			if(document==null)
+			if(document==null) {
 				return;
+			}
 
 			EdgeSet edgeSet = CoreferenceUtils.getEdgeSet(document, allocation);
 			EdgeSet goldSet = CoreferenceUtils.getGoldEdgeSet(document, goldAllocation);
@@ -629,6 +690,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	@Override
 	protected void syncToData() {
 		// TODO enable modifications as soon as the inner data storage is a clone of supplied data!
+	}
+
+	public int getIndex(Span span) {
+		return cache.getIndex(span);
 	}
 
 	public boolean isIncludeGoldEdges() {
@@ -865,6 +930,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			setCellsEditable(false);
 			setGridEnabled(false);
 			setMultigraph(true);
+			setBorder(20);
 		}
 
 //		@Override
@@ -892,7 +958,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				CorefNodeData nodeData = (CorefNodeData) value;
 
 				if(nodeData.getSpan().isROOT()) {
-					label = "\n   Document Root   \n \n";
+					label = "\n   Document Root   \n \n"; //$NON-NLS-1$
 				} else {
 					label = labelBuilder.getLabel(nodeData.getSpan(), nodeData.getSentence());
 				}

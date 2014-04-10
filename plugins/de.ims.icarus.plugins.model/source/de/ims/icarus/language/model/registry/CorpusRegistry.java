@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -336,6 +337,8 @@ public final class CorpusRegistry {
 	private static final Pattern idPattern = Pattern.compile(
 			"^\\p{Alpha}[\\w_-]{2,}$"); //$NON-NLS-1$
 
+	private static Matcher idMatcher;
+
 	/**
 	 * Verifies the validity of the given {@code id} string.
 	 * <p>
@@ -352,7 +355,15 @@ public final class CorpusRegistry {
 	 * result in them being rejected by the registry.
 	 */
 	public static boolean isValidId(String id) {
-		return idPattern.matcher(id).matches();
+		synchronized (idPattern) {
+			if(idMatcher==null) {
+				idMatcher = idPattern.matcher(id);
+			} else {
+				idMatcher.reset(id);
+			}
+
+			return idMatcher.matches();
+		}
 	}
 
 	public LayerType getLayerType(String name) {

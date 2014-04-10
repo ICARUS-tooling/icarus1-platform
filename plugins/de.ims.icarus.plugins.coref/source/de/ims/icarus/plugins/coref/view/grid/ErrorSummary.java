@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.grid;
@@ -34,73 +34,73 @@ import de.ims.icarus.resources.ResourceManager;
  *
  */
 public class ErrorSummary {
-	
+
 	private static final CorefErrorType[] ERROR_TYPES = CorefErrorType.values();
 
 	private int[] counters = new int[ERROR_TYPES.length];
-	
+
 	private int totalMentionCount = 0;
-	
+
 	public void clear() {
 		totalMentionCount = 0;
-		
+
 		for(int i=0; i<counters.length; i++) {
 			counters[i] = 0;
 		}
 	}
-	
+
 	public void add(CorefErrorType errorType) {
 		totalMentionCount++;
-		
+
 		if(errorType==null) {
 			errorType = CorefErrorType.TRUE_POSITIVE_MENTION;
 		}
-		
+
 		counters[errorType.ordinal()]++;
 	}
-	
+
 	public int getCount(CorefErrorType errorType) {
 		if(errorType==null) {
 			errorType = CorefErrorType.TRUE_POSITIVE_MENTION;
 		}
-		
+
 		return counters[errorType.ordinal()];
 	}
-	
+
 	public int getTotalMentionCount() {
 		return totalMentionCount;
 	}
-	
+
 	public boolean hasErrors() {
 		return getCount(null)!=getTotalMentionCount();
 	}
-	
+
 	public CorefErrorType getClusterType() {
 		for(CorefErrorType errorType : ERROR_TYPES) {
 			if(getCount(errorType)==totalMentionCount) {
 				return errorType;
 			}
 		}
-		
+
 		return null;
 	}
 
 	public void append(StringBuilder sb) {
 		sb.append('\n');
 		sb.append('\n');
-		
+
 		if(hasErrors()) {
 			sb.append(ResourceManager.getInstance().get(
 					"plugins.errorTypes.summary.title")); //$NON-NLS-1$
 			sb.append(':');
 			sb.append('\n');
-			
+
 			for(CorefErrorType errorType : ERROR_TYPES) {
 				int count = getCount(errorType);
 				if(count<=0) {
 					continue;
 				}
-				
+
 				sb.append(count);
 				sb.append(' ');
 				sb.append(errorType.getName());

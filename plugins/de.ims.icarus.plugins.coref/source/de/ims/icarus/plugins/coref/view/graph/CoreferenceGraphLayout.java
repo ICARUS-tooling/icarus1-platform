@@ -31,10 +31,13 @@ import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.jgraph.layout.GraphLayout;
 import de.ims.icarus.plugins.jgraph.layout.GraphOwner;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
+import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Options;
 
 /**
@@ -104,9 +107,9 @@ public class CoreferenceGraphLayout implements GraphLayout {
 			}
 
 			layout.execute(parent);
-
-			double offset = graph.getGridSize()*2;
-			graph.moveCells(cells, offset, offset);
+//
+//			double offset = graph.getGridSize()*2;
+//			graph.moveCells(cells, offset, offset);
 		} finally {
 			graph.getModel().endUpdate();
 		}
@@ -130,7 +133,49 @@ public class CoreferenceGraphLayout implements GraphLayout {
 	@Override
 	public Object getSignificantCell(GraphOwner owner, Object[] cells,
 			Options options) {
-		return cells==null || cells.length==0 ? null : cells[0];
+
+		if(cells==null || cells.length==0) {
+			return null;
+		}
+
+		CoreferenceGraphPresenter presenter = (CoreferenceGraphPresenter) owner;
+		mxIGraphModel model = owner.getGraph().getModel();
+
+		Filter filter = presenter.getfFilter();
+
+		if(filter!=null) {
+			for(Object cell : cells) {
+				if(!model.isVertex(cell)) {
+					continue;
+				}
+
+				CorefNodeData value = (CorefNodeData) model.getValue(cell);
+				if(filter.accepts(value.getSpan())) {
+					return cell;
+				}
+			}
+		}
+
+		CoreferenceDocumentAnnotationManager annotationManager = (CoreferenceDocumentAnnotationManager) presenter.getAnnotationManager();
+
+		for(Object cell : cells) {
+			if(!model.isVertex(cell)) {
+				continue;
+			}
+
+			CorefNodeData value = (CorefNodeData) model.getValue(cell);
+			if(value.getSpan().isROOT()) {
+				continue;
+			}
+
+			long highlight = annotationManager.getHighlight(presenter.getIndex(value.getSpan()));
+
+			if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
+				return cell;
+			}
+		}
+
+		return cells[0];
 	}
 
 	protected class TreeLayout extends mxCompactTreeLayout {
@@ -141,6 +186,7 @@ public class CoreferenceGraphLayout implements GraphLayout {
 			setEdgeRouting(false);
 			setNodeDistance(5);
 			setLevelDistance(15);
+			setMoveTree(true);
 		}
 
 		@Override

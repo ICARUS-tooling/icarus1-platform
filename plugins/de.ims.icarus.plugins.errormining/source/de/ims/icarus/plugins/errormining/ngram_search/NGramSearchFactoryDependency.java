@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 126 $ 
- * $Date: 2013-08-02 15:07:35 +0200 (Fr, 02 Aug 2013) $ 
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.errormining/source/de/ims/icarus/plugins/errormining/ngram_search/NGramSearchFactory.java $ 
+ * $Revision$ 
+ * $Date$ 
+ * $URL$ 
  * 
- * $LastChangedDate: 2013-08-02 15:07:35 +0200 (Fr, 02 Aug 2013) $  
- * $LastChangedRevision: 126 $  
- * $LastChangedBy: mcgaerty $ 
+ * $LastChangedDate$  
+ * $LastChangedRevision$  
+ * $LastChangedBy$ 
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
@@ -48,7 +48,7 @@ import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Gregor Thiele
- * @version $Id: NGramSearchFactory.java 126 2013-08-02 13:07:35Z mcgaerty $
+ * @version $Id$
  *
  */
 public class NGramSearchFactoryDependency implements SearchFactory {

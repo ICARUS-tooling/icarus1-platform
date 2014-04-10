@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 123 $
- * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/core/de.ims.icarus/source/de/ims/icarus/ui/helper/TooltipListCellRenderer.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
- * $LastChangedRevision: 123 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.ui.tree;
 
@@ -40,7 +40,7 @@ import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
- * @version $Id: TooltipListCellRenderer.java 123 2013-07-31 15:22:01Z mcgaerty $
+ * @version $Id$
  *
  */
 public class TooltipTreeCellRenderer extends DefaultTreeCellRenderer {

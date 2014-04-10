@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 123 $
- * $Date: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/language/coref/CoreferenceDocumentData.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-07-31 17:22:01 +0200 (Mi, 31 Jul 2013) $
- * $LastChangedRevision: 123 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.language.coref;
 
@@ -38,7 +38,7 @@ import de.ims.icarus.util.mem.ReferenceType;
 
 /**
  * @author Markus Gärtner
- * @version $Id: CoreferenceDocumentData.java 123 2013-07-31 15:22:01Z mcgaerty $
+ * @version $Id$
  *
  */
 @HeapMember

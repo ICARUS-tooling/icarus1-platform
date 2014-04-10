@@ -75,6 +75,7 @@
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction" />
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction" />
 		<item type="custom" value="errorInfoLabel" />
+		<item type="custom" value="annotationControl" />
 		<item type="glue" />
 	</action-list>
 		
@@ -102,6 +103,7 @@
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleIncludeGoldNodesAction" />
 		<item type="action" value="plugins.coref.coreferenceGraphPresenter.toggleFilterSingletonsAction" />
 		<item type="custom" value="errorInfoLabel" />
+		<item type="custom" value="annotationControl" />
 		<item type="glue" />
 	</action-list>
 	

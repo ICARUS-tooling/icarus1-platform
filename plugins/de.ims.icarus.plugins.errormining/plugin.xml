@@ -66,7 +66,7 @@
 		<parameter id="extension-point" value="de.ims.icarus.errormining@ErrorMiningManagementView" />
 	</extension>
 	
-	<extension id="ErrorMiningPerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
+	<!--<extension id="ErrorMiningPerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
 				Perspective that allows the management of the ErrorMining Service
@@ -78,7 +78,7 @@
 		<parameter id="class" value="de.ims.icarus.plugins.errormining.ErrorMiningPerspective" />
 		<parameter id="icon" value="de/ims/icarus/plugins/errormining/errormining-perspective.gif" />
 		<parameter id="preview" value="de/ims/icarus/plugins/errormining/errormining-preview.jpg" />	
-	</extension>
+	</extension>-->
 	
 	<extension id="ErrorMiningView" plugin-id="de.ims.icarus.errormining" point-id="ErrorMiningManagementView">
 		<doc>
