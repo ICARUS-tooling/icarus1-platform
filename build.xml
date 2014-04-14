@@ -5,9 +5,9 @@
 	
 	<!--Application properties -->
 	<property name="app.name" value="ICARUS" />
-	<property name="app.version" value="1.0.6" />
+	<property name="app.version" value="1.1.0" />
 	
-	<property name="guide.file" value="${basedir}/quickstart-guide/Quickstart_Guide_for_ICARUS_${app.version}.pdf" />
+	<property name="guide.file" value="${basedir}/quickstart-guide/Quickstart_Guide_for_ICARUS_1.0.5.pdf" />
 
 	<property name="implementation.version" value="${app.version}" />
 	<property name="implementation.vendor" value="Markus Gaertner, Gregor Thiele" />

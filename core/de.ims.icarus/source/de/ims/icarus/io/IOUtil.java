@@ -50,6 +50,7 @@ import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**
@@ -395,7 +396,25 @@ public final class IOUtil {
 					return null;
 				}
 
+				long start = System.currentTimeMillis();
+
 				loadable.load();
+
+				long end = System.currentTimeMillis();
+
+				String durationString = StringUtil.formatDuration(end-start);
+				if(durationString.isEmpty()) {
+					durationString = "<1S"; //$NON-NLS-1$
+				}
+
+				String name = StringUtil.getName(loadable);
+				if(name==null) {
+					name = "<anonymous loadable>"; //$NON-NLS-1$
+				}
+
+				LoggerFactory.log(this, Level.INFO, String.format(
+						"Loaded '%s' in %s", name, //$NON-NLS-1$
+						durationString));
 			} finally {
 				TaskManager.getInstance().setIndeterminate(this, false);
 			}

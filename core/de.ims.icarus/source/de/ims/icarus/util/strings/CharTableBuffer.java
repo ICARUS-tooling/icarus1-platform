@@ -209,6 +209,9 @@ public class CharTableBuffer {
 				break;
 
 			default:
+				if(nextChar>=buffer.length) {
+					buffer = Arrays.copyOf(buffer, nextChar*2+1);
+				}
 				buffer[nextChar++] = (char) c;
 				ignoreLF = false;
 				break;
@@ -383,6 +386,7 @@ public class CharTableBuffer {
 			this.index1 = index1;
 		}
 
+		@Override
 		public void recycle() {
 			row = index0 = index1 = -1;
 
@@ -534,6 +538,14 @@ public class CharTableBuffer {
 		@Override
 		public Cursor getSplitCursor(int index) {
 			return (Cursor) super.getSplitCursor(index);
+		}
+
+		/**
+		 * @see de.ims.icarus.util.strings.Splitable#recycle()
+		 */
+		@Override
+		public void recycle() {
+			// no-op
 		}
 	}
 

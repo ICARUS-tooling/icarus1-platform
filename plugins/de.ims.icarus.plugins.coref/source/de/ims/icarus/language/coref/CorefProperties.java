@@ -33,6 +33,8 @@ import java.util.Map.Entry;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Counter;
 import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.strings.Splitable;
+import de.ims.icarus.util.strings.StringPrimitives;
 import de.ims.icarus.util.strings.StringUtil;
 
 /**
@@ -88,7 +90,11 @@ public class CorefProperties extends CompactProperties {
 		}
 	}
 
-	public static CorefProperties parse(String s) {
+	public static CorefProperties parse(Splitable s) {
+		return parse(s, 0);
+	}
+
+	public static CorefProperties parse(Splitable s, int from) {
 		if(s==null || s.isEmpty()) {
 			return null;
 		}
@@ -104,8 +110,14 @@ public class CorefProperties extends CompactProperties {
 			if(endIndex==-1) {
 				endIndex = s.length();
 			}
-			properties.put(StringUtil.intern(s.substring(startIndex, offset0)),
-					toValue(s.substring(offset0+1, endIndex)));
+
+			Splitable sKey = s.subSequence(startIndex, offset0);
+			Splitable sValue = s.subSequence(offset0+1, endIndex);
+
+			properties.put(sKey.toString(), toValue(sValue));
+
+			sKey.recycle();
+			sValue.recycle();
 
 			startIndex = endIndex+1;
 		}
@@ -113,19 +125,19 @@ public class CorefProperties extends CompactProperties {
 		return properties;
 	}
 
-	private static Object toValue(String s) {
+	private static Object toValue(Splitable s) {
 		try {
-			return Integer.parseInt(s);
+			return StringPrimitives.parseInt(s);
 		} catch(NumberFormatException e) {
 			// ignore
 		}
 		try {
-			return Double.parseDouble(s);
+			return StringPrimitives.parseDouble(s);
 		} catch(NumberFormatException e) {
 			// ignore
 		}
 
-		return StringUtil.intern(s);
+		return s.toString();
 	}
 
 	@Override

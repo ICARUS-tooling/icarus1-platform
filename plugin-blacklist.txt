@@ -1,2 +1,0 @@
-de.ims.icarus.coref
-de.ims.icarus.errormining

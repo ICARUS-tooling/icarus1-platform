@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.coref.io;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +49,7 @@ import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.location.Location;
+import de.ims.icarus.util.strings.CharLineBuffer;
 
 /**
  * @author Markus Gärtner
@@ -69,7 +69,7 @@ public class DefaultAllocationReader implements AllocationReader {
 
 	public static final String COMMENT_PREFIX = "#"; //$NON-NLS-1$
 
-	private BufferedReader reader;
+	private CharLineBuffer buffer;
 	private CoreferenceDocumentSet documentSet;
 	private int lineCount;
 
@@ -83,17 +83,19 @@ public class DefaultAllocationReader implements AllocationReader {
 	public void init(Location location,
 			Options options, CoreferenceDocumentSet documentSet) throws Exception {
 
-		reader = IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options));
+		buffer = new CharLineBuffer();
+		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
+
 		lineCount = 0;
 		this.documentSet = documentSet;
 	}
 
-	private String readLine() throws IOException {
-		String line = reader.readLine();
-		if(line!=null) {
+	private boolean readLine() throws IOException {
+		boolean hasNext = buffer.next();
+		if(hasNext) {
 			lineCount++;
 		}
-		return line;
+		return hasNext;
 	}
 
 	@Override
@@ -110,33 +112,32 @@ public class DefaultAllocationReader implements AllocationReader {
 			if(Thread.currentThread().isInterrupted())
 				throw new InterruptedException();
 
-			String line = skipEmptyLines();
-			if(line==null) {
+			if(!skipEmptyLines()) {
 				break main;
 			}
 
-			if(!line.startsWith(BEGIN_DOCUMENT))
-				throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+line); //$NON-NLS-1$ //$NON-NLS-2$
+			if(!buffer.startsWith(BEGIN_DOCUMENT))
+				throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+buffer); //$NON-NLS-1$ //$NON-NLS-2$
 
 			int startLine = lineCount;
-			documentId = line.substring(BEGIN_DOCUMENT.length()).trim();
+			documentId = buffer.substring(BEGIN_DOCUMENT.length()).trim();
 
 			if(checkIds && !ids.remove(documentId))
 				throw new IllegalArgumentException(String.format(
-						"Unknown document id '%s' at line %s ", lineCount, documentId)); //$NON-NLS-1$
+						"Unknown document id '%s' at line %s ", documentId, lineCount)); //$NON-NLS-1$
 
 			CoreferenceDocumentData document = documentSet==null ?
 					null : documentSet.getDocument(documentId);
 
 			// Read in properties
-			while((line=readLine())!=null) {
-				if(BEGIN_NODES.equals(line)) {
+			while(buffer.next()) {
+				if(buffer.equals(BEGIN_NODES)) {
 					break;
-				} else if(line.startsWith(COMMENT_PREFIX)) {
-					readProperty(line, allocation);
+				} else if(buffer.startsWith(COMMENT_PREFIX)) {
+					readProperty(allocation);
 				} else
 					throw new IllegalArgumentException(errMsg(String.format(
-							"Invalid property statement '%s' at line %d", line, lineCount))); //$NON-NLS-1$
+							"Invalid property statement '%s' at line %d", buffer, lineCount))); //$NON-NLS-1$
 			}
 
 			// Read nodes
@@ -149,7 +150,7 @@ public class DefaultAllocationReader implements AllocationReader {
 			allocation.setEdgeSet(documentId, edgeSet);
 
 			// Check for closing declaration
-			if(!END_DOCUMENT.equals(skipEmptyLines()))
+			if(!skipEmptyLines() || !buffer.equals(END_DOCUMENT))
 				throw new IllegalArgumentException(errMsg(String.format(
 						"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 						END_DOCUMENT, BEGIN_DOCUMENT, startLine)));
@@ -164,43 +165,43 @@ public class DefaultAllocationReader implements AllocationReader {
 		}
 	}
 
-	private static void readProperty(String s, CorefMember member) {
-		int sep = s.indexOf(' ');
-		member.setProperty(s.substring(1, sep), s.substring(sep+1));
+	private void readProperty(CorefMember member) {
+		int sep = buffer.indexOf(' ');
+		member.setProperty(buffer.substring(1, sep),
+				buffer.substring(sep+1));
 	}
 
-	private String skipEmptyLines() throws IOException {
-		String line = null;
+	private boolean skipEmptyLines() throws IOException {
+		boolean hasNext = false;
 
-		while((line = readLine())!=null) {
-			if(!line.isEmpty()) {
+		while((hasNext = readLine())==true) {
+			if(!buffer.isEmpty()) {
 				break;
 			}
 		}
 
-		return line;
+		return hasNext;
 	}
 
 	private SpanSet readNodes(CoreferenceDocumentData document) throws IOException {
-		String line = null;
 		boolean closed = false;
 
 		SpanSet spanSet = new SpanSet();
-		List<Span> buffer = new ArrayList<>();
+		List<Span> spanBuffer = new ArrayList<>();
 		int sentenceId = -1;
 		int beginLine = lineCount;
 
-		while((line = readLine()) != null) {
-			if(END_NODES.equals(line)) {
+		while(readLine()) {
+			if(buffer.equals(END_NODES)) {
 				closed = true;
 				break;
-			} else if(BEGIN_NODES.equals(line)) {
+			} else if(buffer.equals(BEGIN_NODES)) {
 				beginLine = lineCount;
-			} else if(line.startsWith(COMMENT_PREFIX)) {
-				readProperty(line, spanSet);
+			} else if(buffer.startsWith(COMMENT_PREFIX)) {
+				readProperty(spanSet);
 			} else {
 
-				Span span = Span.parse(line);
+				Span span = Span.parse(buffer);
 				if(span.isROOT()) {
 					continue;
 				}
@@ -210,13 +211,13 @@ public class DefaultAllocationReader implements AllocationReader {
 							errMsg("Duplicate span declaration: "+span)); //$NON-NLS-1$
 
 				if(span.getSentenceIndex()!=sentenceId && !buffer.isEmpty()) {
-					Span[] spans = new Span[buffer.size()];
-					buffer.toArray(spans);
+					Span[] spans = new Span[spanBuffer.size()];
+					spanBuffer.toArray(spans);
 					spanSet.setSpans(sentenceId, spans);
-					buffer.clear();
+					spanBuffer.clear();
 				}
 
-				buffer.add(span);
+				spanBuffer.add(span);
 				sentenceId = span.getSentenceIndex();
 
 				if(document!=null) {
@@ -227,11 +228,11 @@ public class DefaultAllocationReader implements AllocationReader {
 			}
 		}
 
-		if(!buffer.isEmpty()) {
-			Span[] spans = new Span[buffer.size()];
-			buffer.toArray(spans);
+		if(!spanBuffer.isEmpty()) {
+			Span[] spans = new Span[spanBuffer.size()];
+			spanBuffer.toArray(spans);
 			spanSet.setSpans(sentenceId, spans);
-			buffer.clear();
+			spanBuffer.clear();
 		}
 
 		if(!closed)
@@ -243,23 +244,22 @@ public class DefaultAllocationReader implements AllocationReader {
 	}
 
 	private EdgeSet readEdges(SpanSet spanSet) throws IOException {
-		String line = null;
 		boolean closed = false;
 
 		EdgeSet edgeSet = new EdgeSet();
 		int beginLine = lineCount;
 		Set<Edge> lookup = new HashSet<>();
 
-		while((line = readLine()) != null) {
-			if(END_EDGES.equals(line)) {
+		while(readLine()) {
+			if(buffer.equals(END_EDGES)) {
 				closed = true;
 				break;
-			} else if(BEGIN_EDGES.equals(line)) {
+			} else if(buffer.equals(BEGIN_EDGES)) {
 				beginLine = lineCount;
-			} else if(line.startsWith(COMMENT_PREFIX)) {
-				readProperty(line, edgeSet);
+			} else if(buffer.startsWith(COMMENT_PREFIX)) {
+				readProperty(edgeSet);
 			} else {
-				Edge edge = Edge.parse(line, spanSet);
+				Edge edge = Edge.parse(buffer, spanSet);
 
 				if(lookup.contains(edge))
 					throw new IllegalArgumentException(errMsg("Duplicate edge delcaration: "+edge)); //$NON-NLS-1$

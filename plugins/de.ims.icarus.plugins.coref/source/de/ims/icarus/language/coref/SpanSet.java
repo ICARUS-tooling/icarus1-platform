@@ -85,7 +85,7 @@ public class SpanSet extends CorefListMember<Span> {
 	}
 
 	public Span getSpan(String id) {
-		if(Span.ROOT_ID.equals(id)) {
+		if(id.equals(Span.ROOT_ID)) {
 			return Span.getROOT();
 		} else {
 			return spanMap==null ? null : spanMap.get(id);

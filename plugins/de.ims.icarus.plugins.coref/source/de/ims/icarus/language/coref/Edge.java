@@ -26,11 +26,11 @@
 package de.ims.icarus.language.coref;
 
 import java.io.Serializable;
-import java.util.regex.Pattern;
 
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Reference;
 import de.ims.icarus.util.mem.ReferenceType;
+import de.ims.icarus.util.strings.Splitable;
 
 /**
  * @author Markus Gärtner
@@ -81,46 +81,75 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		}
 	}
 
-	private static final Pattern DIR = Pattern.compile(DIRECTION_STRING);
+	public static Edge parse(Splitable s) {
+		return parse(s, 0);
+	}
 
-	public static Edge parse(String s) {
+	public static Edge parse(Splitable s, int from) {
 		if(s==null || s.isEmpty())
 			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 
-		int tabIndex = s.indexOf(TAB_CHAR);
-		String[] spans = DIR.split(s.substring(0, tabIndex));
+		int tabIndex = s.indexOf(TAB_CHAR, from);
+		if(tabIndex==-1) {
+			tabIndex = s.length();
+		}
+		Splitable part = s.subSequence(from, tabIndex);
+		if(part.split(DIRECTION_STRING)!=2)
+			throw new IllegalArgumentException("Invalid edge format"); //$NON-NLS-1$
 
-		Span source = Span.parse(spans[0]);
-		Span target = Span.parse(spans[1]);
+		Splitable s0 = part.getSplitCursor(0);
+		Splitable s1 = part.getSplitCursor(1);
+
+		Span source = Span.parse(s0);
+		Span target = Span.parse(s1);
+
+		s0.recycle();
+		s1.recycle();
+
+		part.recycle();
 
 		Edge edge = new Edge(source, target);
 
 		if(tabIndex<s.length()-1) {
-			edge.setProperties(CorefProperties.parse(s.substring(tabIndex+1)));
+			edge.setProperties(CorefProperties.parse(s, tabIndex+1));
 		}
 
 		return edge;
 	}
 
-	public static Edge parse(String s, SpanSet spanSet) {
+	public static Edge parse(Splitable s, SpanSet spanSet) {
+		return parse(s, 0, spanSet);
+	}
+
+	public static Edge parse(Splitable s, int from, SpanSet spanSet) {
 		if(s==null || s.isEmpty())
 			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
 		if(spanSet==null)
 			throw new NullPointerException("Invalid span set"); //$NON-NLS-1$
 
-		int tabIndex = s.indexOf(TAB_CHAR);
+		int tabIndex = s.indexOf(TAB_CHAR, from);
 		if(tabIndex==-1) {
 			tabIndex = s.length();
 		}
-		String[] spans = DIR.split(s.substring(0, tabIndex));
+		Splitable part = s.subSequence(from, tabIndex-1);
+		if(part.split(DIRECTION_STRING)!=2)
+			throw new IllegalArgumentException("Invalid edge format"); //$NON-NLS-1$
 
-		Span source = spanSet.getSpan(spans[0]);
-		Span target = spanSet.getSpan(spans[1]);
+		Splitable s0 = part.getSplitCursor(0);
+		Splitable s1 = part.getSplitCursor(1);
+
+		Span source = spanSet.getSpan(s0.toString());
+		Span target = spanSet.getSpan(s1.toString());
+
+		s0.recycle();
+		s1.recycle();
+
+		part.recycle();
 
 		Edge edge = new Edge(source, target);
 
 		if(tabIndex<s.length()-1) {
-			edge.setProperties(CorefProperties.parse(s.substring(tabIndex+1)));
+			edge.setProperties(CorefProperties.parse(s, tabIndex+1));
 		}
 
 		return edge;
@@ -165,7 +194,7 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 	}
 
 	public void setTarget(Span target) {
-		if(source==null)
+		if(target==null)
 			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		this.target = target;
 	}

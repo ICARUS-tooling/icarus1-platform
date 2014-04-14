@@ -75,6 +75,20 @@ public abstract class Splitable extends AbstractString {
 			return subSequence(splitIndices[index], splitIndices[index+1]);
 		}
 
+		public int getStart(int index) {
+			if(index<0 || index>=splitCount)
+				throw new IndexOutOfBoundsException();
+
+			return splitIndices[index+index];
+		}
+
+		public int getEnd(int index) {
+			if(index<0 || index>=splitCount)
+				throw new IndexOutOfBoundsException();
+
+			return splitIndices[index+index+1];
+		}
+
 		public int split(CharSequence regex, int limit) {
 
 	        /* fastpath if the regex is a
@@ -156,6 +170,8 @@ public abstract class Splitable extends AbstractString {
 		public int split(char c) {
 			return split(c, 0);
 		}
+
+		public abstract void recycle();
 
 		protected void resetSplits() {
 			splitCount = 0;
