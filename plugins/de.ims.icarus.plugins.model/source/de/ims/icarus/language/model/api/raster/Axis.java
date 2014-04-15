@@ -25,23 +25,16 @@
  */
 package de.ims.icarus.language.model.api.raster;
 
-import de.ims.icarus.language.model.api.Markable;
-import de.ims.icarus.language.model.api.layer.FragmentLayer;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Rasterizer {
+public interface Axis extends Identity, Comparable<Axis> {
 
-	int getAxisCount();
+	long getMaxValue();
 
-	Axis getAxisAt(int index);
-
-	long getRasterSize(Markable markable, FragmentLayer layer, Object value);
-
-	long getGranularity();
-
-	FragmentLayer getFragmentLayer();
+	long getMinValue();
 }

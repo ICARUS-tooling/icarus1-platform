@@ -26,6 +26,8 @@
 package de.ims.icarus.language.model.api;
 
 import de.ims.icarus.language.model.api.layer.FragmentLayer;
+import de.ims.icarus.language.model.api.raster.Position;
+import de.ims.icarus.language.model.api.raster.PositionOutOfBoundsException;
 
 /**
  * A {@code Fragment} allows for the definition of {@code Markable} objects that
@@ -54,48 +56,44 @@ public interface Fragment extends Markable {
 
 	/**
 	 * Returns the markable this fragment is a part of.
-	 * Note that fragments cannot be nested and that only markables
-	 * residing in the <i>base layer</i> of a corpus can be fragmented!
 	 *
 	 * @return
 	 */
 	Markable getMarkable();
 
 	/**
-	 * Returns the character-based index within the surrounding markable of
+	 * Returns the position within the surrounding markable of
 	 * this fragment that denotes the actual begin of the fragment itself.
 	 *
 	 * @return
 	 */
-	long getFragmentBeginIndex();
+	Position getFragmentBegin();
 
 	/**
-	 * Returns the character-based index within the surrounding markable of
+	 * Returns the position within the surrounding markable of
 	 * this fragment that denotes the actual end of the fragment itself.
 	 *
 	 * @return
 	 */
-	long getFragmentEndIndex();
+	Position getFragmentEnd();
 
 	// Modification methods
 
 	/**
-	 * Changes the begin offset of the fragment to the new {@code index}.
+	 * Changes the begin position of the fragment to the new {@code position}.
 	 *
-	 * @param index
-	 * @throws IndexOutOfBoundsException if the {@code index} argument is negative
-	 * or exceeds either the current end index or the maximal possible index as
-	 * specified by the raster size of the hosting markable
+	 * @param position
+	 * @throws PositionOutOfBoundsException if the {@code position} violates
+	 * the bounds specified by the raster size of the hosting markable
 	 */
-	void setFragmentBeginIndex(long index);
+	void setFragmentBegin(Position position);
 
 	/**
-	 * Changes the end offset of the fragment to the new {@code index}.
+	 * Changes the end position of the fragment to the new {@code position}.
 	 *
-	 * @param index
-	 * @throws IndexOutOfBoundsException if the {@code index} argument is negative
-	 * or less than the current end index or if it exceeds the maximal possible
-	 * index as specified by the raster size of the hosting markable
+	 * @param position
+	 * @throws PositionOutOfBoundsException if the {@code position} violates
+	 * the bounds specified by the raster size of the hosting markable
 	 */
-	void setFragmentEndIndex(long index);
+	void setFragmentEnd(Position position);
 }

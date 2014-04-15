@@ -56,9 +56,9 @@ public class Scope {
 
 	private final Corpus corpus;
 	private final List<Context> contexts;
-	private  Set<Context> contextsLut;
+	private Set<Context> contextsLut;
 	private final List<Layer> layers;
-	private  Set<Layer> layersLut;
+	private Set<Layer> layersLut;
 	private final MarkableLayer primaryLayer;
 
 	public Scope(Corpus corpus, List<Context> contexts,

@@ -43,12 +43,12 @@ import java.nio.file.Path;
  * neither host too great a number of elements, nor reside in multi-gigabyte files.</li>
  * <li><b>Medium</b> indices that still only host a number of elements that can be
  * addressed with integer values, but map to one or more files which exceed the
- * {@link Integer#MAX_VALUE} limit. This type of index differs from the <i>small</i>
+ * {@link Integer#MAX_VALUE} limit in terms of total size. This type of index differs from the <i>small</i>
  * version only in the value range available for byte offsets, which in this case is {@code long}.</li>
  * <li><b>Large</b> indices finally provide the means to map extremely big corpora that by far exceed
  * the value range of {@link Integer#MAX_VALUE} for both element index and byte offset. Unlike the
  * aforementioned two types, this one no longer can be represented as one big primitive array holding
- * all the index data. Quite the opposite it requires another level of caching to account for the fact,
+ * all the index data. Quite the opposite, it requires another level of caching to account for the fact,
  * that an index this large would itself be too memory consuming to be loaded as a whole. Implementations
  * for this type will try to keep the footprint of loaded chunks as small as possible while still
  * providing fast response times for read/write operations.</li>

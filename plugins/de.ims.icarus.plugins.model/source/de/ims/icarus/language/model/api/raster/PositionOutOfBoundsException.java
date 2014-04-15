@@ -25,23 +25,23 @@
  */
 package de.ims.icarus.language.model.api.raster;
 
-import de.ims.icarus.language.model.api.Markable;
-import de.ims.icarus.language.model.api.layer.FragmentLayer;
-
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Rasterizer {
+public class PositionOutOfBoundsException extends RuntimeException {
 
-	int getAxisCount();
+	private static final long serialVersionUID = -7514906546260292062L;
 
-	Axis getAxisAt(int index);
+	public PositionOutOfBoundsException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
-	long getRasterSize(Markable markable, FragmentLayer layer, Object value);
+	public PositionOutOfBoundsException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
 
-	long getGranularity();
-
-	FragmentLayer getFragmentLayer();
 }

@@ -400,6 +400,11 @@ public class CoreferenceDocument extends BatchDocument {
 				Span span = spanStack.isEmpty() ? null : spanStack.peek();
 				Color col = highlightStack.isEmpty() ? null : highlightStack.peek();
 				attr = createHighlightedAttr(attr, span, col, 0);
+
+				if(spanBuffer.isEnd(index)) {
+					StringUtil.trimRight(builder);
+				}
+
 				appendBatchString(builder.toString(), attr);
 
 				builder.setLength(0);

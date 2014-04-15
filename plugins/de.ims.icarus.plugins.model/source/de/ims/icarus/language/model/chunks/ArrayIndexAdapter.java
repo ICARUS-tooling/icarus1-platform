@@ -197,7 +197,7 @@ public class ArrayIndexAdapter extends AbstractIndexAdapter {
 
 		try (SeekableByteChannel channel = getChannel()) {
 
-			long available = channel.size();
+			long available = channel.size()-HEADER_BYTE_SIZE;
 			// Number of chunks stored in the index file
 			long blockCount = available/getBlockSize();
 			if(blockCount>getMaxChunkCount())
@@ -225,6 +225,9 @@ public class ArrayIndexAdapter extends AbstractIndexAdapter {
 			// Number of fields to read
 			int validFields = chunkCount * fieldSize;
 
+			// Move cursor to first real data position
+			channel.position(HEADER_BYTE_SIZE);
+
 			// Now read in all the fields
 			for(int i=0; i<chunkCount; i++) {
 
@@ -246,8 +249,10 @@ public class ArrayIndexAdapter extends AbstractIndexAdapter {
 					Array.setInt(data, index++, buffer.getInt());
 				}
 
-				Array.setInt(data, index++, buffer.getInt());
-				Array.setInt(data, index++, buffer.getInt());
+				if(isReadElements()) {
+					Array.setInt(data, index++, buffer.getInt());
+					Array.setInt(data, index++, buffer.getInt());
+				}
 
 				buffer.clear();
 			}

@@ -199,7 +199,7 @@ public abstract class AbstractIndexAdapter implements ChunkIndexReader, ChunkInd
 	}
 
 	protected void checkHeader(SeekableByteChannel channel) throws IOException {
-		ByteBuffer buffer = ByteBuffer.wrap(new byte[1]);
+		ByteBuffer buffer = ByteBuffer.wrap(new byte[HEADER_BYTE_SIZE]);
 		channel.position(0);
 		channel.read(buffer);
 

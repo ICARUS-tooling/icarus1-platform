@@ -463,6 +463,18 @@ public final class StringUtil {
 		}
 	}
 
+	public static void trimLeft(StringBuilder sb) {
+		while(sb.length()>0 && Character.isWhitespace(sb.charAt(0))) {
+			sb.delete(0, 1);
+		}
+	}
+
+	public static void trimRight(StringBuilder sb) {
+		while(sb.length()>0 && Character.isWhitespace(sb.charAt(sb.length()-1))) {
+			sb.delete(sb.length()-1, sb.length());
+		}
+	}
+
 	public static final int MIN_WRAP_WIDTH = 50;
 
 	public static String wrap(String s, Component comp, int width) {
