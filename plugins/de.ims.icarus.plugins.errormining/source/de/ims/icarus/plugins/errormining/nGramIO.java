@@ -28,6 +28,7 @@ package de.ims.icarus.plugins.errormining;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,7 +71,10 @@ public class nGramIO {
 
 	protected XMLOutputFactory xof;
 	protected XMLStreamWriter xtw;
+	protected static final String ENCODING = "UTF-8"; //$NON-NLS-1$
+	protected static final String VERSION = "1.0"; //$NON-NLS-1$
 	private static final String NGRAM_ATOM = "ngram"; //$NON-NLS-1$
+	
 
 	public nGramIO() {
 
@@ -94,7 +98,8 @@ public class nGramIO {
 	private void saveXMLToFile (StreamResult result) throws Exception{
         //writing to file
 
-        Path file = null;
+		//get userdir (icarus working folder)
+        Path file = FileSystems.getDefault().getPath(System.getProperty("user.dir")); //$NON-NLS-1$
 
         //File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$
 
@@ -114,6 +119,9 @@ public class nGramIO {
 
 
 		if(file == null){
+			DialogFactory.getGlobalFactory().showWarning(null,
+					"plugins.errormining.dialogs.noPath.title", //$NON-NLS-1$
+					"plugins.errormining.dialogs.noPath.message"); //$NON-NLS-1$
 			return;
 		}
 
@@ -135,8 +143,12 @@ public class nGramIO {
 	public void nGramsToXMLDependency(Map<String, ArrayList<DependencyItemInNuclei>> nGramResult) throws Exception {
 
 		openWriter();
-
-        xtw.writeStartDocument("UTF-8", "1.0");  //$NON-NLS-1$//$NON-NLS-2$
+		
+		if(xtw == null){
+			return;
+		}
+		
+        xtw.writeStartDocument(ENCODING, VERSION);  
         xtw.writeCharacters("\n"); //$NON-NLS-1$
         xtw.setDefaultNamespace(NGRAM_ATOM); // setze Default-Namespace
 
@@ -373,44 +385,46 @@ public class nGramIO {
 //	}
 
 
-	public void openWriter() throws XMLStreamException, FactoryConfigurationError, IOException {
+	protected void openWriter() throws XMLStreamException, FactoryConfigurationError, IOException {
 //		FileOutputStream fos = new FileOutputStream(file);
 //		XMLOutputFactory xof = XMLOutputFactory.newInstance();
-//		xtw = xof.createXMLStreamWriter(fos, "UTF-8"); //$NON-NLS-1$
+//		xtw = xof.createXMLStreamWriter(fos, ENCODING); //$NON-NLS-1$
 
-        //writing to file
-
-        Path file = null;
+		//get userdir (icarus working folder)
+        Path path = FileSystems.getDefault().getPath(System.getProperty("user.dir")); //$NON-NLS-1$
+		//Path path = FileSystems.getDefault().getPath("E:/");
 
         //File file = new File("E:\\nuclei_out.xml"); //$NON-NLS-1$
+        
+        FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", //$NON-NLS-1$
+				"xml"); //$NON-NLS-1$
+
 
 		if(ConfigRegistry.getGlobalRegistry()
 				.getBoolean("plugins.errorMining.fileOutput.useDefaultFile")){ //$NON-NLS-1$
-
-			file = ConfigRegistry.getGlobalRegistry().getFile("plugins.errorMining.fileOutput.filepath"); //$NON-NLS-1$
+			path = ConfigRegistry.getGlobalRegistry().getFile("plugins.errorMining.fileOutput.filepath"); //$NON-NLS-1$
 		} else {
-			FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", //$NON-NLS-1$
-																			"xml"); //$NON-NLS-1$
-			file = DialogFactory.getGlobalFactory().showDestinationFileDialog(
+			path = DialogFactory.getGlobalFactory().showDestinationFileDialog(
 					null,
 					"chooseXMLfile", //$NON-NLS-1$
-					file,
+					path,
 					xmlfilter);
 		}
 
-
-		if(file == null){
+		if(path == null){
+			DialogFactory.getGlobalFactory().showWarning(null,
+					"plugins.errormining.dialogs.noPath.title", //$NON-NLS-1$
+					"plugins.errormining.dialogs.noPath.message"); //$NON-NLS-1$
 			return;
+		} else {
+	    	XMLOutputFactory xof = XMLOutputFactory.newInstance();  
+	    	xtw = xof.createXMLStreamWriter(Files.newOutputStream(path), ENCODING); 
+	    	//xtw = xof.createXMLStreamWriter(new FileWriter(path.toFile())); 
 		}
-
-        try (OutputStream out = Files.newOutputStream(file)) {
-    		XMLOutputFactory xof = XMLOutputFactory.newInstance();
-    		xtw = xof.createXMLStreamWriter(out, "UTF-8"); //$NON-NLS-1$
-        }
-
 	}
 
-	public void closeWriter() throws XMLStreamException {
+
+	protected void closeWriter() throws XMLStreamException {
         xtw.flush();
         xtw.close();
 	}

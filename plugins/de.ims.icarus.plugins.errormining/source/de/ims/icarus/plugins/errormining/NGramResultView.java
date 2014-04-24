@@ -285,9 +285,9 @@ public class NGramResultView<JListModel> extends View{
 	 */
 	private void showResults(NGramDataList data) {
 		for(int i = 0; i < data.size(); i++){
-			System.out.println(data.get(i).toString());
+			//System.out.println(data.get(i).toString());
 			SentenceData sd = data.get(i);
-			System.out.println(sd.getForm(i));
+			//System.out.println(sd.getForm(i));
 		}
 		
 //		ngramList = new JList<Object>(data);
@@ -422,7 +422,7 @@ public class NGramResultView<JListModel> extends View{
 //			}
 			//System.out.println(data.toString());
 			if (data != null && (data instanceof NGramDataList)) {
-				System.out.println("PoS Data Result"); //$NON-NLS-1$
+				//System.out.println("PoS Data Result"); //$NON-NLS-1$
 				nGramResult = ((NGramDataList) data).getnGramMap();
 				corpus = ((NGramDataList) data).getCorpus();
 				ngList = (NGramDataList) data;
@@ -431,12 +431,12 @@ public class NGramResultView<JListModel> extends View{
 				return message.successResult(this, null);
 			}
 			if (data != null && (data instanceof NGramDataListDependency)) {
-				System.out.println("Dependency Data Result"); //$NON-NLS-1$
+				//System.out.println("Dependency Data Result"); //$NON-NLS-1$
 				nGramResultDependency = ((NGramDataListDependency) data).getnGramMap();
 				corpus = ((NGramDataListDependency) data).getCorpus();
 				ngListDependency = (NGramDataListDependency) data;
-				System.out.println("ngsize: " + ngListDependency.size());
-				System.out.println("keyset" + nGramResultDependency.keySet());
+				//System.out.println("ngsize: " + ngListDependency.size());
+				//System.out.println("keyset" + nGramResultDependency.keySet());
 				showResultsDependency(data);
 				refreshActions();
 				return message.successResult(this, null);
@@ -733,6 +733,7 @@ public class NGramResultView<JListModel> extends View{
 		}
 		
 		public void reload (String key){
+			
 			if (key == null) {
 				iinList = null;
 			} else {

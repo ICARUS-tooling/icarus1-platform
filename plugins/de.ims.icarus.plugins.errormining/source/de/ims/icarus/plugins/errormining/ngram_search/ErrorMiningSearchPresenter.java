@@ -36,6 +36,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
@@ -277,7 +279,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		minimumGramsize = searchResult.getSource().getParameters().getInteger(NGramParameters.GRAMS_GREATERX);
 		maximumGramsize = Math.max(searchResult.getSource().getParameters().getInteger(NGramParameters.NGRAM_RESULT_LIMIT),
 									(int) searchResult.getProperty("LARGEST_NGRAM")); //$NON-NLS-1$
-
+		
 		initializeSpinners();
 		refresh();
 
@@ -653,12 +655,14 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		lowerBound.setMinimumSize(new Dimension(10,20));
 		lowerBound.setToolTipText(ResourceManager.getInstance()
 					.get("plugins.errormining.nGramResultView.lowerBound.description")); //$NON-NLS-1$
+		((JSpinner.DefaultEditor) lowerBound.getEditor()).getTextField().addKeyListener(getHandler());  
+		lowerBound.setBorder(UIUtil.defaultContentBorder);
 
 		upperBound = new JSpinner(ubm);
 		upperBound.setMinimumSize(new Dimension(10,20));
 		upperBound.setToolTipText(ResourceManager.getInstance()
 					.get("plugins.errormining.nGramResultView.upperBound.description")); //$NON-NLS-1$
-
+		((JSpinner.DefaultEditor) upperBound.getEditor()).getTextField().addKeyListener(getHandler());  
 		upperBound.setBorder(UIUtil.defaultContentBorder);
 
 		textFilterField = new JTextField();
@@ -701,7 +705,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		statsSpinner.setMinimumSize(new Dimension(10,20));
 		statsSpinner.setToolTipText(ResourceManager.getInstance()
 					.get("plugins.errormining.nGramResultView.statsSpinner.description")); //$NON-NLS-1$
-
+		((JSpinner.DefaultEditor) statsSpinner.getEditor()).getTextField().addKeyListener(getHandler());  
 
 		ActionComponentBuilder acb = new ActionComponentBuilder(getActionManager());
 		acb.setActionListId("plugins.errormining.nGramResultView.toolBarStatistic"); //$NON-NLS-1$
@@ -757,7 +761,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			sbm.setMaximum(maximumGramsize-1);
 			sbm.setValue(minimum);
 
-		}
+		}		
+
 	}
 
 	//	protected void displaySelectedData() throws Exception {
@@ -941,6 +946,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		TaskManager.getInstance().schedule(new StatsFilterWorker(),
 				TaskPriority.DEFAULT, true);
 	}
+	
 
 
 	private void generateFilteredStatistic(){
@@ -1143,8 +1149,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		//System.out.println(tmp.get(0));
 
 		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-
-
 		refreshBarChart(key, statsResultFiltered.get(key));
 		statisticTableModel.generateListEntryFromString(key);
 		statisticList.clearSelection();
@@ -2077,7 +2081,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 
 		List<SentenceData> sentenceDataDetailedList = new ArrayList<SentenceData>();
-		System.out.println("selectedKey: " + key + " sNR: " +sentences); //$NON-NLS-1$
+		//System.out.println("selectedKey: " + key + " sNR: " +sentences); //$NON-NLS-1$
 
 		DataList<?> dl = ((AbstractSearchResult)searchResult).getTarget();
 
@@ -2165,7 +2169,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				//System.out.println("key " + ngramList.getSelectedValue() +"#" + label);
 				key = (String) ngramList.getSelectedValue();
 
-				//FIXME workaround list manchmal null?! fire event?
+				//workaround list manchmal null?! fire event?
 				if(key == null){
 					key = ""; //$NON-NLS-1$
 				}
@@ -2281,10 +2285,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	private List<String> getNucleus(String key, ItemInNuclei iin) {
 
 		List<String> list = new ArrayList<String>();
-
 		String[] splittedKey = key.split(" ");  //$NON-NLS-1$
-
-		SentenceInfo si = iin.getSentenceInfoAt(0);
 
 		//System.out.println(colorOffset);
 		for(int c = 0; c < splittedKey.length; c++){
@@ -2778,7 +2779,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		public void showDetail(ActionEvent e) {
 			try {
-				//TODO noch richten
+				
 				if(isOverviewSelected()){
 					if(ngramList.getSelectedIndex() != -1){
 						int index = ngramList.getSelectedIndex();
@@ -2855,7 +2856,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 	protected class HandlerErrorMining extends Handler implements
 			ActionListener, ListSelectionListener, EventListener,
-			ListDataListener, ComponentListener, ChartMouseListener {
+			ListDataListener, ComponentListener, ChartMouseListener, KeyListener {
 
 		protected boolean trackResizing = true;
 
@@ -2864,6 +2865,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public void mouseClicked(MouseEvent me) {
+			
 
 			if (me.getClickCount() == 2) {
 
@@ -2872,7 +2874,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					// System.out.println("Double clicked on Item " + index);
 					// System.out.println(ngramListModel.getElementAt(index));
 					String key = (String) ngramListModel.getElementAt(index);
-
 					showDetails(createDetailList(key));
 				}
 
@@ -2938,7 +2939,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			 */
 			@Override
 			public void invoke(Object sender, EventObject event) {
-				// TO DO Auto-generated method stub
+				// TO DO Auto-generated method stub				
 			}
 
 			/**
@@ -2956,7 +2957,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					Object selectedObject = ngramList.getSelectedValue();
 					//System.out.println((String) selectedObject);
 					ngramTableModel.reload((String) selectedObject);
-					ngramTableAdjuster.adjustColumns();
+					//removed (due to performance issues)
+					//ngramTableAdjuster.adjustColumns();
 
 				} else if (e.getSource() == statisticTable.getSelectionModel()){
 					//no selection check
@@ -3252,6 +3254,55 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	        	barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 			}
+
+
+			/**
+			 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
+			 */
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TO DO Auto-generated method stub
+				
+			}
+
+
+			/**
+			 * @see java.awt.event.KeyListener#keyPressed(java.awt.event.KeyEvent)
+			 */
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TO DO Auto-generated method stub
+				
+			}
+
+
+			/**
+			 * @see java.awt.event.KeyListener#keyReleased(java.awt.event.KeyEvent)
+			 */
+			@Override
+			public void keyReleased(KeyEvent e) {
+
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					//Enter pressed for lower
+			        if (SwingUtilities.getAncestorOfClass(JSpinner.class, (Component) e.getSource()) == lowerBound) {
+			          doResultFiltering();
+			        } 
+					//Enter pressed for upper
+			        else if (SwingUtilities.getAncestorOfClass(JSpinner.class, (Component) e.getSource()) == upperBound) {
+			        	doResultFiltering();
+			        }
+					//Enter pressed for stat
+			        else if (SwingUtilities.getAncestorOfClass(JSpinner.class, (Component) e.getSource()) == statsSpinner) {
+			            doStatisticFiltering();
+			        }
+			        else {
+			            //noop
+			        }
+			    }
+				
+			}
+
+
 		}
 
 
@@ -3287,6 +3338,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			 */
 			@Override
 			protected Object doInBackground() throws Exception {
+				
 				if ((int) lbm.getValue() > (int) ubm.getValue()){
 					DialogFactory.getGlobalFactory().showError(null,
 							"plugins.errormining.nGramResultView.boundsError.title", //$NON-NLS-1$
@@ -3482,9 +3534,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		public Object getOwner() {
 			return this;
 		}
-
 	}
-
+	
 	/**
 	 * Stuff for List Visualization
 	 *
@@ -3792,17 +3843,19 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 
 		public void reload (String key){
+			
 			if (key == null) {
 				iinList = null;
 			} else {
 
 				itemsAdded = 0;
 
-
 				if(isPoSErrorMiningResult()){				
 
 					iinList = new ArrayList<>();
 					iinList.addAll(nGramResult.get(key));
+					
+					//System.out.println(key);
 
 					tmpMap = new LinkedHashMap<>();
 
@@ -3860,13 +3913,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							nucleusMap.put(itemsAdded, dnc);
 							itemsAdded++;
 						}
-
 					}
 				}
 
-
 				if (itemsAdded > 1) multinuclei = true;
-
 			}
 			fireTableDataChanged();
 		}
@@ -3917,13 +3967,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public int getColumnCount() {
-
-			//TODO lower pos table cells			
-
+			//TODO lower pos table cells
 			if(isPoSErrorMiningResult()){
 				int advancedMining = (int) searchResult.getProperty(
 											"ADVANCEDMINING"); //$NON-NLS-1$
-				
 				//System.out.println(advancedMining);
 				if(advancedMining == 1){
 					return 3;
@@ -4033,9 +4080,13 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 			if(isPoSErrorMiningResult()){
 				//pos
+								
+				//nullcheck
+				if(tmpMap.get(rowIndex) == null){
+					return null;
+				}
 
 				//ItemInNuclei iin = iinList.get(rowIndex);
-
 				ItemInNuclei iin = tmpMap.get(rowIndex).getIIN();				
 	
 				int nucleiCount = iin.getSentenceInfoAt(0).getNucleiIndexListSize();				
@@ -4106,6 +4157,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				/**
 				 * Dependency Visialization stuff
 				 */
+				
+				//nullcheck
+				if(nucleusMap.get(rowIndex) == null){
+					return null;
+				}
+				
 				DependencyItemInNuclei iinD = nucleusMap.get(rowIndex).getDiin();
 
 				int nucleiDCount = iinD.getSentenceInfoAt(0).getNucleiIndexListSize();
@@ -4248,7 +4305,13 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		    		ngramList.setSelectedIndex(0);
 		    	}
 
-		    	String s = table.getModel().getValueAt(row, col).toString();
+		    	//TODO FIX NULLPOINTER
+		    	String s;
+		    	if(table.getModel().getValueAt(row, col) == null){
+		    		s =""; //$NON-NLS-1$
+		    	} else {
+		    	s = table.getModel().getValueAt(row, col).toString();
+		    	}
 
 			    String selectedKey = (String) ngramList.getSelectedValue();
 

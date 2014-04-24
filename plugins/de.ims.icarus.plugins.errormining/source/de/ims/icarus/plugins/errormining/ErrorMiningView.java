@@ -556,7 +556,7 @@ public class ErrorMiningView extends View {
 			on.put("FringeSTART", 3); //$NON-NLS-1$
 			on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
 			on.put("NGramLIMIT", 0); //$NON-NLS-1$
-			final NGrams ngrams = new NGrams(1, on);
+			final NGrams ngrams = new NGrams(1, on, null);
 
 			CONLL09SentenceDataGoldReader conellReader = new CONLL09SentenceDataGoldReader();
 			DefaultFileLocation dloc = new DefaultFileLocation(file);
@@ -640,7 +640,7 @@ public class ErrorMiningView extends View {
 			on.put("FringeSTART", 3); //$NON-NLS-1$
 			on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
 			on.put("NGramLIMIT", 0); //$NON-NLS-1$
-			final NGramsDependency ngrams = new NGramsDependency(1, on);
+			final NGramsDependency ngrams = new NGramsDependency(1, on, null);
 
 			CONLL09SentenceDataGoldReader conellReader = new CONLL09SentenceDataGoldReader();
 			DefaultFileLocation dloc = new DefaultFileLocation(file);

@@ -467,7 +467,7 @@ public final class SearchManager {
 		}
 
 		private void showErrorDialog(Throwable e) {
-			String title = "plugins.searchTools.searchManager.loadTargetJob.title"; //$NON-NLS-1$
+			String title = "plugins.searchTools.searchManager.loadTargetJob.errorTitle"; //$NON-NLS-1$
 			String message = null;
 
 			// Set message based on error type

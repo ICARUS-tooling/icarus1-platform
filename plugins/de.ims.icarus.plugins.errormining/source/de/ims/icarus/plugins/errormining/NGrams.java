@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.errormining;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -42,12 +39,9 @@ import javax.xml.transform.TransformerException;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.dependency.DependencyData;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataGoldReader;
+import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.UnsupportedFormatException;
-import de.ims.icarus.util.location.DefaultFileLocation;
-import de.ims.icarus.util.location.UnsupportedLocationException;
 
 
 /**
@@ -63,7 +57,7 @@ public class NGrams {
 	protected int nGramLimit;
 	protected boolean useFringe;
 	protected boolean useNumberWildcard;
-	
+
 	//protected List<ItemInNuclei> items;
 	protected Map<String, ArrayList<ItemInNuclei>> nGramCache;	
 	protected List<NGramQAttributes> queryList;
@@ -82,8 +76,7 @@ public class NGrams {
 	private static final int lemma_flag = 8;  // Binary 01000
 	
 	private int miningMode = 0;
-
-	
+	private Search search;
 	
 	private static NGrams instance;
 	
@@ -121,14 +114,18 @@ public class NGrams {
 	 * Constructor for NGramSearch (main plugin)
 	 * @param options
 	 * @param queryList
+	 * @param nGramSearch 
+	 * @param search 
 	 */
-	public NGrams(Options options, List<NGramQAttributes> queryList){
+	public NGrams(Options options, List<NGramQAttributes> queryList, Search search){
 		
 		this.options = options;
 		
 		this.nGramCount = 1; //normally we start with unigrams so n will be 1
 		
 		this.queryList = queryList;	
+		
+		this.search = search;
 		
 //		System.out.println("Options limit " + options.getInteger("NGramLIMIT"));
 //		System.out.println("Options f-start " + options.getInteger("FringeSTART"));
@@ -151,6 +148,36 @@ public class NGrams {
 	}
 	
 	
+	public NGrams(int nGramCount, Options options, Search search){
+			
+			if (options == null) {
+				options = Options.emptyOptions;
+			}
+			
+			this.search = search;
+			
+			this.nGramCount = nGramCount; //normally we start with unigrams so n will be 1
+			
+			this.queryList = new ArrayList<NGramQAttributes>();
+	//		this.useFringe = true;
+			
+	//		System.out.println("Options limit " + options.getInteger("NGramLIMIT"));
+	//		System.out.println("Options f-start " + options.getInteger("FringeSTART"));
+	//		System.out.println("Options f-end " + options.getInteger("FringeEND"));
+	//		System.out.println("Options fringe " + options.getBoolean("UseFringe"));
+	//		System.out.println("Options NumberWC " + options.getBoolean("UseNumberWildcard"));
+			
+	//		//0 collect ngrams until no new ngrams are found
+			this.nGramLimit = options.getInteger("NGramLIMIT");  //$NON-NLS-1$
+			this.fringeSize = options.getInteger("FringeSIZE");  //$NON-NLS-1$
+			this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
+			this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
+			
+			nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
+			corpus = new ArrayList<DependencyData>();
+		}
+
+
 	/**
 	 * @return
 	 */
@@ -195,35 +222,6 @@ public class NGrams {
 	}
 
 
-	public NGrams(int nGramCount, Options options){
-		
-		if (options == null) {
-			options = Options.emptyOptions;
-		}
-		
-		this.nGramCount = nGramCount; //normally we start with unigrams so n will be 1
-		
-		this.queryList = new ArrayList<NGramQAttributes>();
-//		this.useFringe = true;
-		
-//		System.out.println("Options limit " + options.getInteger("NGramLIMIT"));
-//		System.out.println("Options f-start " + options.getInteger("FringeSTART"));
-//		System.out.println("Options f-end " + options.getInteger("FringeEND"));
-//		System.out.println("Options fringe " + options.getBoolean("UseFringe"));
-//		System.out.println("Options NumberWC " + options.getBoolean("UseNumberWildcard"));
-		
-//		//0 collect ngrams until no new ngrams are found
-		this.nGramLimit = options.getInteger("NGramLIMIT");  //$NON-NLS-1$
-		this.fringeSize = options.getInteger("FringeSIZE");  //$NON-NLS-1$
-		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
-		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
-		
-		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
-		corpus = new ArrayList<DependencyData>();
-	}
-	
-
-	
 	protected String ensureValid(String input) {
 		return input==null ? "NULL" : input; //$NON-NLS-1$
 	}
@@ -789,10 +787,16 @@ public class NGrams {
 		boolean reachedLeftBoarder = lb;
 		boolean reachedRightBoarder = rb;
 
+
 		for(Iterator<String> it = inputNGram.keySet().iterator(); it.hasNext();){
 			String key = it.next();
 			ArrayList<ItemInNuclei> iiArr = inputNGram.get(key);
-			//System.out.println(key);
+			//System.out.println(key);			
+
+			if(search.isCancelled()){
+				//System.out.println(search.isCancelled());
+				return;
+			}
 			
 			for (int tagSize = 0 ; tagSize < iiArr.size(); tagSize++){
 				
@@ -1060,7 +1064,6 @@ public class NGrams {
 				nGramResults(outputNGram);	
 				createNGrams(outputNGram, false, false);
 			}
-
 		}
 	}
 	
@@ -1265,9 +1268,9 @@ public class NGrams {
 //		System.out.println("SentenceLeft: posTag " + posTag);
 //		System.out.println("SentenceLeft INDEX " + si.getNucleiIndex());
 		item.setPosTag(ensureValid(posTag));
-		item.addNewSentenceInfoLeft(si);	
-
+		item.addNewSentenceInfoLeft(si);
 	}
+
 	
 	protected String getTagQuery(String qtag){
 		String tag = qtag;
@@ -1310,7 +1313,8 @@ public class NGrams {
 	}
 	
 	public int getPasses(){
-		return nGramCount;
+		//decrement for zerobased index
+		return nGramCount-1;
 	}
 	
 
@@ -1358,12 +1362,11 @@ public class NGrams {
 
 
 	// Print out Resulting nGrams:
-	protected void nGramResults(Map<String, ArrayList<ItemInNuclei>> inputNGram){
-	
+	protected void nGramResults(Map<String, ArrayList<ItemInNuclei>> inputNGram){	
 		
 //		System.out.print("\n###################################\n"+ nGramCount + "-Gram: ");
 //		System.out.println("Found " + inputNGram.size() + " different nGrams");
-		
+//	
 //		for(Iterator<String> i = inputNGram.keySet().iterator(); i.hasNext();){
 //			String key = i.next();
 //			ArrayList<ItemInNuclei> arrItem = inputNGram.get(key);
@@ -1390,6 +1393,7 @@ public class NGrams {
 	
 	/**
 	 * Print out Resulting nGrams:
+	 * @throws InterruptedException 
 	 *  
 	 */
 	
@@ -1424,7 +1428,7 @@ public class NGrams {
 
 
 		if(nGramLimit != 1) {
-			createNGrams(nGramCache, false, false);
+			createNGrams(nGramCache, false, false);				
 		}		
 		
 		//show fringe info dialog the following  must apply:
@@ -1611,8 +1615,9 @@ public class NGrams {
 				}
 			}
 		}		
-		System.out.println("Filter " + indexList);
-		System.out.println("Filter Keys " + filterList);
+		
+		//System.out.println("Filter " + indexList);
+		//System.out.println("Filter Keys " + filterList);
 		return filterList;		
 	}
 	
@@ -1620,7 +1625,7 @@ public class NGrams {
 	private void printNuclei(SentenceInfo sentenceInfo){
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < sentenceInfo.getNucleiIndexListSize(); i++){
-			sb.append(sentenceInfo.getNucleiIndexListAt(i)).append(" ");			 //$NON-NLS-1$
+			sb.append(sentenceInfo.getNucleiIndexListAt(i)).append(" "); //$NON-NLS-1$
 		}
 		sb.append(" | "); //$NON-NLS-1$
 		System.out.print(sb.toString());
@@ -1628,75 +1633,75 @@ public class NGrams {
 
 
 
-	public static void main(String[] args) throws UnsupportedFormatException {
-		
-		//18 Sentences
-		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$		
-		//String  inputFileName = "E:\\test_small_modded_v2.txt"; //$NON-NLS-1$
-		//String  inputFileName = "E:\\tiger_release_aug07_short"; //$NON-NLS-1$
-		//String  inputFileName = "E:\\double_nucleus.txt"; //$NON-NLS-1$
-		
-		//CONLL Training English (1334 Sentences)
-		String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\Icarus\\data\\treebanks\\CoNLL2009-ST-English-development.txt"; //$NON-NLS-1$
-		
-		//CONLL Training English (39279 Sentences)
-		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-train.txt";
-		
-		//CONLL Training German 50472 Sentences (Aug)
-		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\tiger_release_aug07.corrected.conll09.txt";
-		
-		//CONLL Training German 50472 Sentences (Aug)
-		//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
-
-		
-		int sentencesToRead = 500;
-		
-		Path file = Paths.get(inputFileName);		
-		
-		CONLL09SentenceDataGoldReader conellReader = new CONLL09SentenceDataGoldReader();	
-		DefaultFileLocation dloc = new DefaultFileLocation(file);
-		Options o = null;
-		
-		
-		Options on = new Options();
-		on.put("FringeSTART", 3); //$NON-NLS-1$
-		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
-		on.put("NGramLIMIT", 0); //$NON-NLS-1$
-		on.put("UseFringe", true); //$NON-NLS-1$
-		on.put("UseNumberWildcard", false); //$NON-NLS-1$
-
-	
-		NGrams ngrams = new NGrams(1, on);
-		try {	
-			conellReader.init(dloc, o);			
-			int sentenceNr = 0;
-			
-			for(int i = 0; i < sentencesToRead; i++){
-				DependencyData dd = (DependencyData) conellReader.next();
-				
-				ngrams.initializeUniGrams(dd, sentenceNr);
-				sentenceNr++;				
-			}
-			ngrams.nGramResults();
-			
-			//Filter for Dependency structures?
-			ngrams.nGramPoSFilter(ngrams.getResult(), 4);
-			
-			//ngrams.outputToFile();
-
-			System.out.println("Finished nGram Processing"); //$NON-NLS-1$		
-
-			
-		} catch (IOException e) {
-			System.out.println("Main Debug IOExeption"); //$NON-NLS-1$
-			e.printStackTrace();
-		} catch (UnsupportedLocationException e) {
-			System.out.println("Main Debug UnsupportedLocationException"); //$NON-NLS-1$
-			e.printStackTrace();
-		} catch (Exception e) {
-			System.out.println("Main Debug Exception"); //$NON-NLS-1$
-			e.printStackTrace();
-		}
-	}	
+//	public static void main(String[] args) throws UnsupportedFormatException {
+//		
+//		//18 Sentences
+//		//String  inputFileName = "E:\\test_small_modded.txt"; //$NON-NLS-1$		
+//		//String  inputFileName = "E:\\test_small_modded_v2.txt"; //$NON-NLS-1$
+//		//String  inputFileName = "E:\\tiger_release_aug07_short"; //$NON-NLS-1$
+//		//String  inputFileName = "E:\\double_nucleus.txt"; //$NON-NLS-1$
+//		
+//		//CONLL Training English (1334 Sentences)
+//		String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\Icarus\\data\\treebanks\\CoNLL2009-ST-English-development.txt"; //$NON-NLS-1$
+//		
+//		//CONLL Training English (39279 Sentences)
+//		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\CoNLL2009-ST-English-train.txt";
+//		
+//		//CONLL Training German 50472 Sentences (Aug)
+//		//String  inputFileName = "D:\\Eigene Dateien\\smashii\\workspace\\IMS Explorer\\corpora\\tiger_release_aug07.corrected.conll09.txt";
+//		
+//		//CONLL Training German 50472 Sentences (Aug)
+//		//String  inputFileName = "E:\\tiger_release_aug07.corrected.16012013.conll09";
+//
+//		
+//		int sentencesToRead = 500;
+//		
+//		Path file = Paths.get(inputFileName);		
+//		
+//		CONLL09SentenceDataGoldReader conellReader = new CONLL09SentenceDataGoldReader();	
+//		DefaultFileLocation dloc = new DefaultFileLocation(file);
+//		Options o = null;
+//		
+//		
+//		Options on = new Options();
+//		on.put("FringeSTART", 3); //$NON-NLS-1$
+//		on.put("FringeEND", 5); //$NON-NLS-1$ // 0 = infinity , number = limit
+//		on.put("NGramLIMIT", 0); //$NON-NLS-1$
+//		on.put("UseFringe", true); //$NON-NLS-1$
+//		on.put("UseNumberWildcard", false); //$NON-NLS-1$
+//
+//	
+//		NGrams ngrams = new NGrams(1, on, );
+//		try {	
+//			conellReader.init(dloc, o);			
+//			int sentenceNr = 0;
+//			
+//			for(int i = 0; i < sentencesToRead; i++){
+//				DependencyData dd = (DependencyData) conellReader.next();
+//				
+//				ngrams.initializeUniGrams(dd, sentenceNr);
+//				sentenceNr++;				
+//			}
+//			ngrams.nGramResults();
+//			
+//			//Filter for Dependency structures?
+//			ngrams.nGramPoSFilter(ngrams.getResult(), 4);
+//			
+//			//ngrams.outputToFile();
+//
+//			System.out.println("Finished nGram Processing"); //$NON-NLS-1$		
+//
+//			
+//		} catch (IOException e) {
+//			System.out.println("Main Debug IOExeption"); //$NON-NLS-1$
+//			e.printStackTrace();
+//		} catch (UnsupportedLocationException e) {
+//			System.out.println("Main Debug UnsupportedLocationException"); //$NON-NLS-1$
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			System.out.println("Main Debug Exception"); //$NON-NLS-1$
+//			e.printStackTrace();
+//		}
+//	}	
 
 }
