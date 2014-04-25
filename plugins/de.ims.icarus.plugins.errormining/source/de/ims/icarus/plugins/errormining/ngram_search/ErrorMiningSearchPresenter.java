@@ -725,37 +725,39 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		if(!isPoSErrorMiningResult()){
 			minimum = minDependencyGram;
 		}
-
+		
+		
 		//lower bound spinner (overview)
 		if(lbm == null){
 			lbm = new SpinnerNumberModel(minimum, //initial value
 					minimum, //min
-	                maximumGramsize-1, //max
+	                Math.max(maximumGramsize-1,minimum), //max
 	                1);          //step
 		} else {
 			//lbm.setMinimum(Math.max(minimumGramsize, minimum));
 			lbm.setMaximum(maximumGramsize-1);
 			lbm.setValue(minimum);
-		}
+		}		
 
 
 		//upper bound spinner (overview)
 		if(ubm == null){
-			ubm = new SpinnerNumberModel(maximumGramsize-1, //initial value
+			ubm = new SpinnerNumberModel(Math.max(maximumGramsize-1,minimum), //initial value
 			minimum, //min
-			maximumGramsize-1, //max
+			Math.max(maximumGramsize-1,minimum), //max
 			1);          //step
 		} else {
 			ubm.setMaximum(maximumGramsize-1);
-			ubm.setValue(maximumGramsize-1);
+			ubm.setValue(Math.max(maximumGramsize-1,minimum));
 		}
+		
 
 
 		//statistic spinner
 		if(sbm == null){
 			sbm = new SpinnerNumberModel(minimum, //initial value
 			minimum, //min
-			maximumGramsize-1, //max
+			Math.max(maximumGramsize-1,minimum), //max
 			1);          //step
 		} else {
 			sbm.setMaximum(maximumGramsize-1);
@@ -3346,7 +3348,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				} else {
 					minimumGramsize = (int) lbm.getValue();
 					maximumGramsize = (int) ubm.getValue();
-
+//					System.out.println("Min: " + minimumGramsize);
+//					System.out.println("Max: " + maximumGramsize);
+//					
 					if(isPoSErrorMiningResult()){
 						generateFilteredResult();
 					}
