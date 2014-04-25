@@ -722,6 +722,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 */
 	private void initializeSpinners() {
 		int minimum = 1;
+		int maximum = Math.max(maximumGramsize-1,minimum);
 		if(!isPoSErrorMiningResult()){
 			minimum = minDependencyGram;
 		}
@@ -731,24 +732,24 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		if(lbm == null){
 			lbm = new SpinnerNumberModel(minimum, //initial value
 					minimum, //min
-	                Math.max(maximumGramsize-1,minimum), //max
+	                maximum, //max
 	                1);          //step
 		} else {
 			//lbm.setMinimum(Math.max(minimumGramsize, minimum));
-			lbm.setMaximum(maximumGramsize-1);
+			lbm.setMaximum(maximum);
 			lbm.setValue(minimum);
 		}		
 
 
 		//upper bound spinner (overview)
 		if(ubm == null){
-			ubm = new SpinnerNumberModel(Math.max(maximumGramsize-1,minimum), //initial value
+			ubm = new SpinnerNumberModel(maximum, //initial value
 			minimum, //min
-			Math.max(maximumGramsize-1,minimum), //max
+			maximum, //max
 			1);          //step
 		} else {
-			ubm.setMaximum(maximumGramsize-1);
-			ubm.setValue(Math.max(maximumGramsize-1,minimum));
+			ubm.setMaximum(maximum);
+			ubm.setValue(maximum);
 		}
 		
 
@@ -757,10 +758,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		if(sbm == null){
 			sbm = new SpinnerNumberModel(minimum, //initial value
 			minimum, //min
-			Math.max(maximumGramsize-1,minimum), //max
+			maximum, //max
 			1);          //step
 		} else {
-			sbm.setMaximum(maximumGramsize-1);
+			sbm.setMaximum(maximum);
 			sbm.setValue(minimum);
 
 		}		
