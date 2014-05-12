@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import de.ims.icarus.language.model.test.footprint.CorpusFootprint;
 import de.ims.icarus.language.model.test.member.LookupListTest;
 import de.ims.icarus.language.model.test.xml.ModelXmlTest;
 
@@ -38,7 +39,7 @@ import de.ims.icarus.language.model.test.xml.ModelXmlTest;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ LookupListTest.class, ModelXmlTest.class })
+@SuiteClasses({ LookupListTest.class, ModelXmlTest.class, CorpusFootprint.class })
 public class ModelPluginTest {
 	// no-op
 }

@@ -37,13 +37,11 @@ import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
 
 	/**
-	 * @param id
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultStructureLayer(long id, Context context,
-			StructureLayerManifest manifest) {
-		super(id, context, manifest);
+	public DefaultStructureLayer(Context context, StructureLayerManifest manifest) {
+		super(context, manifest);
 	}
 
 	/**

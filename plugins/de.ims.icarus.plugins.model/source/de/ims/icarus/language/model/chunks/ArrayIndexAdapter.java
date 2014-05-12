@@ -176,7 +176,7 @@ public class ArrayIndexAdapter extends AbstractIndexAdapter {
 	private boolean copy(ByteBuffer buffer, Object array, int index, boolean isLong) {
 		long value = Array.getLong(array, index);
 
-		if(value==-1) {
+		if(value==-1L) {
 			return true;
 		}
 

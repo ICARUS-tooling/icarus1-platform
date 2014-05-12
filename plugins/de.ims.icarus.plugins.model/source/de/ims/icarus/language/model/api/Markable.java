@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.api;
 
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
+import de.ims.icarus.language.model.api.seg.Segment;
 
 /**
  *
@@ -79,6 +80,34 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * @return The enclosing {@code MarkableLayer} that hosts this markable object.
 	 */
 	MarkableLayer getLayer();
+
+	/**
+	 * Returns the markable's global position in the hosting container. For base markables
+	 * this value will be equal to the begin and end offsets, but for aggregating objects
+	 * like containers or structures the returned value will actually differ from their
+	 * bounding offsets.
+	 * <p>
+	 * Do <b>not</b> mix up the returned index with the result of a call to
+	 * {@link Container#indexOfMarkable(Markable)}! The latter is limited to integer values
+	 * and returns the <i>current</i> position of a markable within that container's internal storage.
+	 * This index can change over time and is most likely different when using containers from
+	 * multiple {@link Segment}s.
+	 * The result of the {@code #getIndex()} method on the other features a much larger value space
+	 * and is constant, no matter where the markable in question is stored. The only way to modify
+	 * a markable's index is to remove or insert other markables into the underlying data.
+	 *
+	 * @return
+	 */
+	long getIndex();
+
+	/**
+	 * Changes the index value associated with this markable object to {@code newIndex}.
+	 * Note that inserting or removing markables from containers or structures might result
+	 * in huge numbers of index changes!
+	 *
+	 * @param newIndex
+	 */
+	void setIndex(long newIndex);
 
 	/**
 	 * Returns the zero-based offset of this markable's begin within the corpus.

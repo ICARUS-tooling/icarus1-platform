@@ -29,6 +29,7 @@ import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.Edge;
 import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.Structure;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 
 /**
@@ -74,15 +75,16 @@ public interface ChunkManager {
 	void chunkSkipped(long index, MarkableLayer layer, boolean corrupted);
 
 	/**
-	 * Lookup up an existing chunk in the specified layer. If no markable could be found in the data
+	 * Lookup an existing chunk in the specified layer. If no markable could be found in the data
 	 * storage for the given {@code index} then this method should return {@code null}.
 	 * <p>
 	 * Note that there is no dedicated method for the lookup of {@link Edge}s, since it is not possible
-	 * to partially load the edges of a structure. Unlike regular {@code Container}s they would lose an
+	 * to partially load the edges of a {@link Structure}. Unlike regular {@link Container}s they would lose an
 	 * important aspect of their content in discarding edges.
 	 *
 	 * @param layer
-	 * @param index
+	 * @param index the global index of the {@code Markable} to be fetched, unaffected by horizontal
+	 * filtering and without index translation.
 	 * @return
 	 */
 	Markable getChunk(MarkableLayer layer, long index);

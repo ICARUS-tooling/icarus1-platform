@@ -43,14 +43,6 @@ public class MemberDummy implements CorpusMember {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
-	 */
-	@Override
-	public long getId() {
-		return id;
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
 	 */
 	@Override

@@ -44,7 +44,6 @@ import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
@@ -95,12 +94,12 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	private final long id;
 
 	/**
-	 * Holds the corpus of the mutation.
+	 * Holds the corpus of the edit.
 	 */
 	private final Corpus corpus;
 
 	/**
-	 * Holds the list of atomic changes that make up this undoable mutation.
+	 * Holds the list of atomic changes that make up this undoable edit.
 	 */
 	private final List<AtomicChange> changes = new ArrayList<>();
 
@@ -143,8 +142,9 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	 * Notifies listeners of the execution of this edit
 	 */
 	public void dispatch() {
-		getCorpus().getEditModel().fireEvent(
-				new EventObject(CorpusEditEvents.CHANGE, "edit", this)); //$NON-NLS-1$
+//		getCorpus().getEditModel().fireEvent(
+//				new EventObject(CorpusEditEvents.CHANGE, "edit", this)); //$NON-NLS-1$
+		// for subclasses
 	}
 
 	/**

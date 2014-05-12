@@ -88,7 +88,7 @@ public interface Structure extends Container {
 	 * list of edges or {@code -1} if the markable is not hosted within this
 	 * structure.
 	 * <p>
-	 * Note that for every edge <i>m</i> that is hosted within some structure the
+	 * Note that for every edge <i>e</i> that is hosted within some structure the
 	 * following will always return a result different from {@code -1}:<br>
 	 * {@code e.getStructure().indexOfEdge(e)}
 	 *
@@ -109,13 +109,10 @@ public interface Structure extends Container {
 	boolean containsEdge(Edge edge);
 
 	/**
-	 * Return the number of <b>outgoing</i> edges for a given node.
-	 * <p>
-	 * This is an optional method and only to be expected when the type of
-	 * this structure is not {@value StructureType#SET}.
+	 * Return the total number of edges for a given node.
 	 *
 	 * @param node the node to query for the number of outgoing edges.
-	 * @return the number of <b>outgoing</i> edges for a given node.
+	 * @return the total number of edges for a given node.
 	 * @throws NullPointerException if the {@code node} is {@code null}
 	 * @throws IllegalArgumentException if the {@code node} is not a member
 	 * of this structure's node-container
@@ -123,20 +120,31 @@ public interface Structure extends Container {
 	int getEdgeCount(Markable node);
 
 	/**
-	 * Return the <b>outgoing</i> edge at position {@code index} for a given node.
-	 * <p>
-	 * This is an optional method and only to be expected when the type of
-	 * this structure is not {@value StructureType#SET}.
+	 * Return the number of either outgoing or incoming edges for a given node
+	 * depending on the {@code isSource} argument.
+	 *
+	 * @param node the node to query for the number of outgoing edges.
+	 * @return the number of <b>outgoing</i> edges for a given node.
+	 * @throws NullPointerException if the {@code node} is {@code null}
+	 * @throws IllegalArgumentException if the {@code node} is not a member
+	 * of this structure's node-container
+	 */
+	int getEdgeCount(Markable node, boolean isSource);
+
+	/**
+	 * Return the either outgoing or incoming edge at position {@code index}
+	 * for a given node depending on the {@code isSource} argument.
 	 *
 	 * @param node the {@code Markable} in question
 	 * @param index the position of the desired {@code Edge} in the list of
 	 * <i>outgoing</i> edges for the given node
-	 * @return the <b>outgoing</i> edge at position {@code index} for a given node.
+	 * @return the edge at position {@code index} for a given node.
 	 * @throws NullPointerException if the {@code node} is {@code null}
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Markable)</tt>)
+	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Markable,boolean)</tt>)
+	 *         with the given {@code node} and {@code isSource} parameters
 	 */
-	Edge getEdgeAt(Markable node, int index);
+	Edge getEdgeAt(Markable node, int index, boolean isSource);
 
 	/**
 	 * Utility method to fetch the <i>parent</i> of a given markable in this
@@ -173,7 +181,9 @@ public interface Structure extends Container {
 	Markable getRoot();
 
 	/**
-	 * Returns whether or not the given {@code Markable} is a root in this structure
+	 * Returns whether or not the given {@code Markable} is a root in this structure.
+	 * The {@code root} property is determined by a node being directly linked to the
+	 * <i>generic root</i> node as returned by {@link #getRoot()}.
 	 *
 	 * @param node The {@code Markable} in question
 	 * @return {@code true} iff the given {@code node} is a root in this structure
@@ -241,7 +251,7 @@ public interface Structure extends Container {
 	 * @param index The position to insert the new edge at
 	 * @return The newly created edge of the structure
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt; getSubject().getEdgeCount()</tt>)
+	 *         (<tt>index &lt; 0 || index &gt; getEdgeCount()</tt>)
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 *
@@ -257,7 +267,7 @@ public interface Structure extends Container {
 	 * @param index The position of the edge to be removed
 	 * @return The edge previously at position {@code index}.
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt;= getSubject().getEdgeCount()</tt>)
+	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount()</tt>)
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
@@ -281,7 +291,7 @@ public interface Structure extends Container {
 	 * @param index1
 	 * @throws IllegalArgumentException if <tt>index0 == index1</tt>
 	 * @throws IndexOutOfBoundsException if either {@code index0} or {@code index1}
-	 * is out of range (<tt>index &lt; 0 || index &gt;= getSubject().getEdgeCount()</tt>)
+	 * is out of range (<tt>index &lt; 0 || index &gt;= getEdgeCount()</tt>)
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */

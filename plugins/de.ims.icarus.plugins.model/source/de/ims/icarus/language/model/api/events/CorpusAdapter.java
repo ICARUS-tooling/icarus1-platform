@@ -105,4 +105,20 @@ public class CorpusAdapter implements CorpusListener {
 		// no-op
 	}
 
+	/**
+	 * @see de.ims.icarus.language.model.api.events.CorpusListener#segmentAdded(de.ims.icarus.language.model.api.events.CorpusEvent)
+	 */
+	@Override
+	public void segmentAdded(CorpusEvent e) {
+		// no-op
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.events.CorpusListener#segmentRemoved(de.ims.icarus.language.model.api.events.CorpusEvent)
+	 */
+	@Override
+	public void segmentRemoved(CorpusEvent e) {
+		// no-op
+	}
+
 }

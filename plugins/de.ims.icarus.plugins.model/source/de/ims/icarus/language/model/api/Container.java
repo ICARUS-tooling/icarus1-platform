@@ -57,10 +57,10 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	ContainerManifest getManifest();
 
 	/**
-	 * @return The underlying container if this container relies on the
-	 * elements of another container object or {@code null} otherwise.
+	 * @return The underlying containers if this container relies on the
+	 * elements of other container objects or {@code null} otherwise.
 	 */
-	Container getBaseContainer();
+	MemberSet<Container> getBaseContainers();
 
 	/**
 	 * Returns the {@code Container} that serves as bounding
@@ -164,12 +164,12 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @param index The position to insert the new markable at
 	 * @param markable
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt; getSubject().getMarkableCount()</tt>)
+	 *         (<tt>index &lt; 0 || index &gt; getMarkableCount()</tt>)
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	void addMarkable(long index, Markable markable);
+	void addMarkable(int index, Markable markable);
 
 	/**
 	 * Removes and returns the markable at the given index. Shifts the
@@ -179,7 +179,7 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @param index The position of the markable to be removed
 	 * @return The markable previously at position {@code index}.
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt;= getSubject().getMarkableCount()</tt>)
+	 *         (<tt>index &lt; 0 || index &gt;= getMarkableCount()</tt>)
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
@@ -204,7 +204,7 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @param index1
 	 * @throws IllegalArgumentException if <tt>index0 == index1</tt>
 	 * @throws IndexOutOfBoundsException if either {@code index0} or {@code index1}
-	 * is out of range (<tt>index &lt; 0 || index &gt;= getSubject().getMarkableCount()</tt>)
+	 * is out of range (<tt>index &lt; 0 || index &gt;= getMarkableCount()</tt>)
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */

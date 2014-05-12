@@ -443,7 +443,7 @@ public class CoreferenceDocument extends BatchDocument {
 //					}
 
 					ClusterAttributes attributes = attributeStack.pop();
-					//					System.out.printf("attr::pop %s %s\n",attributeStack, span);
+//					System.out.printf("attr::pop %s %s\n",attributeStack, span);
 					span = spanStack.pop();
 					AttributeSet attr;
 

@@ -35,7 +35,7 @@ import de.ims.icarus.language.model.api.Context;
 public interface DriverFactory {
 
 	/**
-	 * Creates a
+	 * Creates a driver for the given {@code Context}.
 	 * @param context
 	 * @return
 	 */

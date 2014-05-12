@@ -94,7 +94,7 @@ public class IntValueHashMap {
 	 * factor, which is <code>20</code> and <code>0.75</code> respectively.
 	 */
 	public IntValueHashMap() {
-		this(20, 0.75f);
+		this(CollectionUtils.DEFAULT_CAPACITY, CollectionUtils.DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class IntValueHashMap {
 	 * @throws IllegalArgumentException if the initial capacity is less than zero.
 	 */
 	public IntValueHashMap(int initialCapacity) {
-		this(initialCapacity, 0.75f);
+		this(initialCapacity, CollectionUtils.DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
@@ -241,11 +241,16 @@ public class IntValueHashMap {
 	 * This method is called automatically when the number of keys in the
 	 * hash-table exceeds this hash-table's capacity and load factor.
 	 */
-	protected void rehash() {
+	private void rehash() {
+		rehash(-1);
+	}
+	private void rehash(int newCapacity) {
 		int oldCapacity = table.length;
 		Entry oldMap[] = table;
 
-		int newCapacity = (oldCapacity * 2) + 1;
+		if(newCapacity<0) {
+			newCapacity = (oldCapacity * 2) + 1;
+		}
 		Entry newMap[] = new Entry[newCapacity];
 
 		threshold = (int) (newCapacity * loadFactor);
@@ -366,6 +371,16 @@ public class IntValueHashMap {
 		}
 
 		return result;
+	}
+
+	public void trim() {
+		int capacity = table.length;
+		float load = (float)count/capacity;
+
+		if(capacity>CollectionUtils.DEFAULT_CAPACITY
+				&& load<CollectionUtils.DEFAULT_MIN_LOAD) {
+			rehash(count);
+		}
 	}
 
 }

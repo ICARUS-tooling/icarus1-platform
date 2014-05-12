@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.vm;
@@ -51,66 +51,66 @@ import de.ims.icarus.util.strings.StringUtil;
 public final class SystemMonitor {
 
 	private static volatile SystemMonitor instance;
-	
+
 	public static SystemMonitor getInstance() {
 		SystemMonitor monitor = instance;
-		
+
 		if(monitor==null) {
 			synchronized (SystemMonitor.class) {
 				monitor = instance;
 				if(monitor==null) {
 					monitor = new SystemMonitor();
-					
+
 					monitor.init();
-					
+
 					instance = monitor;
 				}
 			}
 		}
-		
+
 		return monitor;
 	}
-	
+
 	public static final double DEFAULT_THRESHOLD = 0.8;
 
 	private static final long KILO = 1024;
 	private static final long MEGA = KILO * KILO;
-	
+
 	public static String formatMemory(long value) {
 		if(value<=0) {
 			return "<undefined>"; //$NON-NLS-1$
 		}
-		
+
 		value /= MEGA;
-		
+
 		if(value < 10000) {
 			return StringUtil.formatDecimal((int) value)+'M';
 		} else {
-			return String.format("%1.02dG", value / 1000d); //$NON-NLS-1$
+			return String.format("%1.02fG", value / 1000d); //$NON-NLS-1$
 		}
 	}
-	
+
 	private Timer timer;
-	
+
 	private ActionListener timerTask;
-	
+
 	private EventListenerList listenerList = new EventListenerList();
-	
+
 	private AtomicBoolean gcActive = new AtomicBoolean(false);
 	private volatile boolean mayWarnUser = false;
 	private volatile boolean ignoreThreshold = false;
-	
+
 	// Cached state
 	private MemoryUsage currentUsage;
-	
+
 	private SystemMonitor() {
 		if(instance!=null)
 			throw new IllegalStateException("Duplicate instance of system monitor"); //$NON-NLS-1$
 	}
-	
+
 	private void init() {
 		ConfigBuilder builder = new ConfigBuilder();
-		
+
 		builder.addGroup("general", true); //$NON-NLS-1$
 		builder.addGroup("performance", true); //$NON-NLS-1$
 		builder.addBooleanEntry("showMemoryMonitor", true); //$NON-NLS-1$s
@@ -119,19 +119,19 @@ public final class SystemMonitor {
 		builder.addBooleanEntry("performDoubleCycle", true); //$NON-NLS-1$
 		builder.addDoubleEntry("memoryThreshold", DEFAULT_THRESHOLD, 0.0, 0.95); //$NON-NLS-1$
 	}
-	
+
 	private synchronized Timer getTimer() {
 		if (timer==null) {
 			timer = new Timer(1000, getTimerTask());
 		}
-		
+
 		return timer;
 	}
-	
+
 	private ActionListener getTimerTask() {
 		if(timerTask==null) {
 			timerTask = new ActionListener() {
-				
+
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -139,105 +139,105 @@ public final class SystemMonitor {
 				}
 			};
 		}
-		
+
 		return timerTask;
 	}
-	
+
 	private synchronized void runCheck() {
 		try {
 			checkMemory();
 		} catch(Exception ex) {
-			LoggerFactory.error(this, 
+			LoggerFactory.error(this,
 					"Failed to check memory usage", ex); //$NON-NLS-1$
 		}
 
-		
+
 		notifyListeners();
 	}
-	
+
 	public boolean isGcRunning() {
 		return gcActive.get();
 	}
-	
+
 	public void runGc() {
 		if(!gcActive.get()) {
 			TaskManager.getInstance().execute(new GcTask());
-			
+
 			notifyListeners();
 		}
 	}
-	
+
 	private void checkMemory() {
 		currentUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-		
+
 		// Don't bother with memory checking while last gc run is still active
 		if(gcActive.get()) {
 			return;
 		}
-		
+
 		double used = currentUsage.getUsed();
 		double max = currentUsage.getCommitted();
-		
+
 		double threshold = ConfigRegistry.getGlobalRegistry().getDouble(
 				"general.performance.memoryThreshold"); //$NON-NLS-1$
-		
+
 		if(threshold<=0.1) {
 			threshold = DEFAULT_THRESHOLD;
 		}
-		
+
 		if(used/max >= threshold) {
 			runGc();
-			
+
 			if(mayWarnUser && !ignoreThreshold && ConfigRegistry.getGlobalRegistry().getBoolean(
 					"general.performance.showMemoryWarning")) { //$NON-NLS-1$
-				
+
 				ignoreThreshold = true;
-				
+
 				showMemoryWarning();
 			}
 		}
 	}
-	
-	public static void showMemoryWarning() {
-		
 
-		DialogFactory.getGlobalFactory().showWarning(null, 
+	public static void showMemoryWarning() {
+
+
+		DialogFactory.getGlobalFactory().showWarning(null,
 				"core.systemMonitor.dialogs.lowMemory.title",  //$NON-NLS-1$
 				"core.systemMonitor.dialogs.lowMemory.message",  //$NON-NLS-1$
-				formatMemory(getInstance().getUsed()), 
+				formatMemory(getInstance().getUsed()),
 				formatMemory(getInstance().getCommitted()));
 	}
-	
+
 	public long getThreshold() {
 
 		double threshold = ConfigRegistry.getGlobalRegistry().getDouble(
 				"general.performance.memoryThreshold"); //$NON-NLS-1$
-		
+
 		long max = getMax();
-		
+
 		if(threshold<0.1) {
 			return -1;
 		}
-		
+
 		return (long) (max * threshold);
 	}
-	
+
 	public long getMin() {
 		return currentUsage==null ? 0 : currentUsage.getInit();
 	}
-	
+
 	public long getUsed() {
 		return currentUsage==null ? 0 : currentUsage.getUsed();
 	}
-	
+
 	public long getCommitted() {
 		return currentUsage==null ? 0 : currentUsage.getCommitted();
 	}
-	
+
 	public long getMax() {
 		return currentUsage==null ? 0 : currentUsage.getMax();
 	}
-	
+
 	private void notifyListeners() {
 		Object[] pairs = listenerList.getListenerList();
 
@@ -253,24 +253,24 @@ public final class SystemMonitor {
 			}
 		}
 	}
-	
+
 	public void addChangeListener(ChangeListener listener) {
 		listenerList.remove(ChangeListener.class, listener);
 		listenerList.add(ChangeListener.class, listener);
-		
+
 		if(listenerList.getListenerCount(ChangeListener.class)==1) {
 			getTimer().start();
 		}
 	}
-	
+
 	public void removeChangeListener(ChangeListener listener) {
 		listenerList.remove(ChangeListener.class, listener);
-		
+
 		if(listenerList.getListenerCount(ChangeListener.class)==0) {
 			getTimer().stop();
 		}
 	}
-	
+
 	private class GcTask implements Runnable {
 
 		/**
@@ -278,14 +278,14 @@ public final class SystemMonitor {
 		 */
 		@Override
 		public void run() {
-			
+
 			if(!gcActive.compareAndSet(false, true)) {
 				return;
 			}
-			
+
 			try {
 				System.gc();
-				
+
 				if(ConfigRegistry.getGlobalRegistry().getBoolean(
 						"general.performance.performDoubleCycle")) { //$NON-NLS-1$
 					System.gc();
@@ -293,9 +293,9 @@ public final class SystemMonitor {
 			} finally {
 				gcActive.set(false);
 			}
-			
+
 			mayWarnUser = true;
 		}
-		
+
 	}
 }

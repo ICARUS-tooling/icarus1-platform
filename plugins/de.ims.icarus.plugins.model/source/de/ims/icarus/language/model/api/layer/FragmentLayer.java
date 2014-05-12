@@ -27,6 +27,7 @@ package de.ims.icarus.language.model.api.layer;
 
 import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.manifest.FragmentLayerManifest;
+import de.ims.icarus.language.model.api.raster.Rasterizer;
 
 /**
  * @author Markus Gärtner
@@ -40,10 +41,7 @@ public interface FragmentLayer extends MarkableLayer {
 
 	AnnotationLayer getValueLayer();
 
-	/**
-	 * Returns the size of
-	 * @param markable
-	 * @return
-	 */
-	long getRasterSize(Markable markable);
+	Rasterizer getRasterizer();
+
+	long getRasterSize(Markable markable, int axis);
 }

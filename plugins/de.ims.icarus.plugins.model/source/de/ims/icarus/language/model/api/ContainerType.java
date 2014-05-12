@@ -41,7 +41,7 @@ public enum ContainerType implements XmlResource {
 	/**
 	 * The container holds a single {@code Markable}.
 	 */
-	SINGLETON(1, 1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE),
+	SINGLETON(0, 1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE),
 
 	/**
 	 * The container holds a non-continuous collection
@@ -52,6 +52,7 @@ public enum ContainerType implements XmlResource {
 	 * a somehow "random" order container that still allows indexed access to its
 	 * members
 	 */
+	@Deprecated
 	SET(0, -1),
 
 	/**

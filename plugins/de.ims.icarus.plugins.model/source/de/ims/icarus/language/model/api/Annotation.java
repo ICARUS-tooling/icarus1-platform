@@ -26,6 +26,8 @@
 package de.ims.icarus.language.model.api;
 
 /**
+ * Wrapper interface for complex annotation types.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *

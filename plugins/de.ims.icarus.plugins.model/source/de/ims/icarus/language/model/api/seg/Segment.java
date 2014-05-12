@@ -29,7 +29,7 @@ import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusException;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
-import de.ims.icarus.language.model.search.Query;
+import de.ims.icarus.language.model.iql.Query;
 
 /**
  * @author Markus Gärtner
@@ -74,13 +74,16 @@ public interface Segment {
 	 */
 	Container getBaseContainer();
 
-	int translateToBase(int index);
-	int translateFromBase(int index);
-
 	// Page support
 
 	int getPageSize();
 
+	/**
+	 * Returns the number of available pages for this segment, or {@code 0}
+	 * in case the segment does not support paging.
+	 *
+	 * @return
+	 */
 	int getPageCount();
 
 	/**

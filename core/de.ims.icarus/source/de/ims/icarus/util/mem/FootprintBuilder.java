@@ -398,7 +398,7 @@ public class FootprintBuilder {
 				Link link = field.getAnnotation(Link.class);
 				if(link!=null) {
 					if(type.isPrimitive())
-						throw new IllegalArgumentException("Illegal @Reference annotation on primitive field: "+field); //$NON-NLS-1$
+						throw new IllegalArgumentException("Illegal @Link annotation on primitive field: "+field); //$NON-NLS-1$
 
 					if(complexFields==null) {
 						complexFields = new ArrayList<>(5);

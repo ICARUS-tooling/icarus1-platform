@@ -28,6 +28,7 @@ package de.ims.icarus.language.model.api.layer;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MemberSet;
 import de.ims.icarus.language.model.api.NamedCorpusMember;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
 
@@ -86,12 +87,12 @@ public interface Layer extends NamedCorpusMember {
 	Context getContext();
 
 	/**
-	 * Returns the {@code MarkableLayer} that this layer
+	 * Returns the {@code MarkableLayer}s that this layer
 	 * depends on or {@code null}.
 	 *
 	 * @return
 	 */
-	MarkableLayer getBaseLayer();
+	MemberSet<MarkableLayer> getBaseLayers();
 
 	/**
 	 * Returns the manifest object that describes the content of

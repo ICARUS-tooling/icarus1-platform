@@ -29,6 +29,7 @@ import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MemberSet;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.layer.LayerType;
@@ -43,22 +44,19 @@ import de.ims.icarus.language.model.util.CorpusUtils;
  */
 public class AbstractLayer<M extends LayerManifest> implements Layer {
 
-	private final long id;
-
 	private final Context context;
 	private final M manifest;
-	private MarkableLayer baseLayer;
+	private MemberSet<MarkableLayer> baseLayers;
 	private LayerType layerType;
 
 	private final Markable markableProxy;
 
-	public AbstractLayer(long id, Context context, M manifest) {
+	public AbstractLayer(Context context, M manifest) {
 		if (context == null)
 			throw new NullPointerException("Invalid context");  //$NON-NLS-1$
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest");  //$NON-NLS-1$
 
-		this.id = id;
 		this.context = context;
 		this.manifest = manifest;
 
@@ -68,8 +66,8 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	/**
 	 * @param baseLayer the baseLayer to set
 	 */
-	public void setBaseLayer(MarkableLayer baseLayer) {
-		this.baseLayer = baseLayer;
+	public void setBaseLayers(MemberSet<MarkableLayer> baseLayers) {
+		this.baseLayers = baseLayers;
 	}
 
 	/**
@@ -80,14 +78,6 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 			throw new NullPointerException("Invalid layer-type");  //$NON-NLS-1$
 
 		this.layerType = layerType;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
-	 */
-	@Override
-	public long getId() {
-		return id;
 	}
 
 	/**
@@ -134,8 +124,8 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	 * @see de.ims.icarus.language.model.api.layer.Layer#getBaseLayer()
 	 */
 	@Override
-	public MarkableLayer getBaseLayer() {
-		return baseLayer;
+	public MemberSet<MarkableLayer> getBaseLayers() {
+		return baseLayers;
 	}
 
 	/**
@@ -171,27 +161,6 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return (int) id;
-	}
-
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Layer) {
-			Layer other = (Layer) obj;
-			return other.getId()==id && other.getManifest()==manifest;
-		}
-
-		return false;
-	}
-
-	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -200,16 +169,6 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	public class ProxyMarkable implements Markable {
-
-		private final long id = getCorpus().getGlobalIdDomain().nextId();
-
-		/**
-		 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
-		 */
-		@Override
-		public long getId() {
-			return id;
-		}
 
 		/**
 		 * @see de.ims.icarus.language.model.api.CorpusMember#getCorpus()
@@ -240,7 +199,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		 */
 		@Override
 		public Container getContainer() {
-			return getCorpus().getOverlayLayer().getContainer();
+			return getCorpus().getOverlayContainer();
 		}
 
 		/**
@@ -255,7 +214,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 		 */
 		@Override
-		public int getBeginOffset() {
+		public long getBeginOffset() {
 			return -1;
 		}
 
@@ -263,8 +222,24 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 		 */
 		@Override
-		public int getEndOffset() {
+		public long getEndOffset() {
 			return -1;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Markable#getIndex()
+		 */
+		@Override
+		public long getIndex() {
+			return -1;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Markable#setIndex(long)
+		 */
+		@Override
+		public void setIndex(long newIndex) {
+			throw new UnsupportedOperationException("Proxy markables cannot have index values assigned"); //$NON-NLS-1$
 		}
 
 	}

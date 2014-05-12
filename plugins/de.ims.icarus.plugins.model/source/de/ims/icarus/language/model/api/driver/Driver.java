@@ -28,10 +28,11 @@ package de.ims.icarus.language.model.api.driver;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.CorpusException;
 import de.ims.icarus.language.model.api.layer.AnnotationLayer;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.language.model.api.meta.AnnotationValueSet;
 import de.ims.icarus.language.model.api.seg.Scope;
-import de.ims.icarus.language.model.search.Query;
+import de.ims.icarus.language.model.iql.Query;
 
 /**
  * @author Markus Gärtner
@@ -81,6 +82,18 @@ public interface Driver {
 	 * @see Scope
 	 */
 	long load(IndexSet indices, Scope scope, ChunkManager manager) throws CorpusException, InterruptedException;
+
+	/**
+	 * Attempts to fetch the number of elements stored in the top-level container for the given
+	 * layer. The returned value is meant to be the total number of markables in that container,
+	 * unaffected by horizontal filtering. Driver implementations should cache these counts for all
+	 * layers they are meant to manage.
+	 *
+	 * @param layer
+	 * @return
+	 * @throws CorpusException
+	 */
+	long getMemberCount(MarkableLayer layer) throws CorpusException;
 
 	/**
 	 * Accesses the driver's internal indexing system and tries to fetch all the occurring values for a given

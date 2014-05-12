@@ -33,6 +33,7 @@ import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.meta.MetaData;
+import de.ims.icarus.language.model.api.seg.Segment;
 
 /**
  * @author Markus Gärtner
@@ -207,6 +208,38 @@ public class EventManager {
 
 		for(CorpusListener listener : listeners) {
 			listener.metaDataRemoved(event);
+		}
+	}
+
+	public void fireSegmentAdded(Segment segment) {
+		if (segment == null)
+			throw new NullPointerException("Invalid segment"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"segment", segment); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.segmentAdded(event);
+		}
+	}
+
+	public void fireSegmentRemoved(Segment segment) {
+		if (segment == null)
+			throw new NullPointerException("Invalid segment"); //$NON-NLS-1$
+
+		if(listeners.isEmpty()) {
+			return;
+		}
+
+		CorpusEvent event = new CorpusEvent(corpus,
+				"segment", segment); //$NON-NLS-1$
+
+		for(CorpusListener listener : listeners) {
+			listener.segmentRemoved(event);
 		}
 	}
 }

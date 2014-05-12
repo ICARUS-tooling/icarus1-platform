@@ -26,7 +26,11 @@
 package de.ims.icarus.language.model.standard.layer;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.WeakHashMap;
 
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
@@ -39,9 +43,9 @@ import de.ims.icarus.language.model.api.layer.AnnotationLayer;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.standard.CorpusMemberUtils;
+import de.ims.icarus.language.model.util.CorpusMemberUtils;
+import de.ims.icarus.util.Consumer;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.collections.LongHashMap;
 
 /**
  * @author Markus Gärtner
@@ -50,19 +54,18 @@ import de.ims.icarus.util.collections.LongHashMap;
  */
 public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifest> implements AnnotationLayer {
 
-	private final LongHashMap<Object> annotations = new LongHashMap<>();
+	private final Map<Markable, Object> annotations = new WeakHashMap<>();
 
 	/**
 	 * @param id
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultAnnotationLayer(long id, Context context,
-			AnnotationLayerManifest manifest) {
-		super(id, context, manifest);
+	public DefaultAnnotationLayer(Context context, AnnotationLayerManifest manifest) {
+		super(context, manifest);
 	}
 
-	protected LongHashMap<Object> getDefaultAnnotations() {
+	protected Map<Markable, Object> getDefaultAnnotations() {
 		return annotations;
 	}
 
@@ -79,7 +82,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 */
 	@Override
 	public Object getValue(Markable markable) {
-		return annotations.get(markable.getId());
+		return annotations.get(markable);
 	}
 
 	/**
@@ -87,6 +90,14 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
+		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.language.model.api.Markable, de.ims.icarus.util.Consumer)
+	 */
+	@Override
+	public boolean collectKeys(Markable markable, Consumer<String> buffer) {
 		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
 	}
 
@@ -122,7 +133,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 		List<Markable> buffer = new ArrayList<>();
 
-		if(annotations.get(markable.getId())!=null) {
+		if(annotations.get(markable)!=null) {
 			buffer.add(markable);
 		}
 
@@ -135,14 +146,10 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 			return;
 		}
 
-		int size = buffer.size();
-		long[] keys = new long[size];
+		Markable[] markables = new Markable[buffer.size()];
+		buffer.toArray(markables);
 
-		for(int i=0; i<size; i++) {
-			keys[i] = buffer.get(i).getId();
-		}
-
-		execute(new AnnotationChange(keys));
+		execute(new AnnotationChange(markables));
 	}
 
 	private void collectAnnotatedMarkables(Container container, List<Markable> buffer) {
@@ -150,7 +157,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		for(int i=0; i<size; i++) {
 			Markable markable = container.getMarkableAt(i);
 
-			if(annotations.get(markable.getId())!=null) {
+			if(annotations.get(markable)!=null) {
 				buffer.add(markable);
 			}
 
@@ -180,11 +187,23 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		if(value!=null && !annotationManifest.getValueType().isValidValue(value))
 			throw new IllegalArgumentException("Invalid annotation value: "+value); //$NON-NLS-1$
 
-		execute(new AnnotationChange(markable.getId(), value));
+		execute(new AnnotationChange(markable, value));
 	}
 
-	protected void setValue0(Markable markable, Object value) {
-		annotations.put(markable.getId(), value);
+	/**
+	 * Directly saves a given annotation value, bypassing most of the default
+	 * sanity checks of the {@link #setValue(Markable, Object)} method.
+	 *
+	 * @param markable
+	 * @param value
+	 */
+	public void putValue(Markable markable, Object value) {
+		if (markable == null)
+			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+		if (value == null)
+			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
+
+		annotations.put(markable, value);
 	}
 
 	/**
@@ -213,7 +232,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 	private class ClearChange implements AtomicChange {
 
-		private long[] keys = null;
+		private Markable[] markables = null;
 		private Object[] values = null;
 
 		int expectedSize = annotations.size();
@@ -228,16 +247,24 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
 						"Clear failed", expectedSize, annotations.size())); //$NON-NLS-1$
 
-			if(keys==null) {
-				keys = new long[size];
+			if(markables==null) {
+				markables = new Markable[size];
 				values = new Object[size];
 
-				annotations.save(keys, values);
+				Iterator<Entry<Markable, Object>> it = annotations.entrySet().iterator();
+				for(int i=0; i<size; i++) {
+					Entry<Markable, Object> entry = it.next();
+					markables[i] = entry.getKey();
+					values[i] = entry.getValue();
+				}
+
 				annotations.clear();
 			} else {
-				annotations.load(keys, values);
+				for(int i=0; i<size; i++) {
+					annotations.put(markables[i], values[i]);
+				}
 
-				keys = null;
+				markables = null;
 				values = null;
 			}
 
@@ -256,25 +283,25 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 	private class AnnotationChange implements AtomicChange {
 
-		private final long[] keys;
+		private final Markable[] markables;
 		private final Object[] values;
 
-		private AnnotationChange(long[] keys, Object[] values) {
-			if(keys.length!=values.length)
-				throw new IllegalArgumentException("Size mismatch between keys and values array"); //$NON-NLS-1$
+		private AnnotationChange(Markable[] markables, Object[] values) {
+			if(markables.length!=values.length)
+				throw new IllegalArgumentException("Size mismatch between markables and values array"); //$NON-NLS-1$
 
-			this.keys = keys;
+			this.markables = markables;
 			this.values = values;
 		}
 
-		private AnnotationChange(long key, Object value) {
-			keys = new long[]{key};
+		private AnnotationChange(Markable markable, Object value) {
+			markables = new Markable[]{markable};
 			values = new Object[]{value};
 		}
 
-		private AnnotationChange(long[] keys) {
-			this.keys = keys;
-			this.values = new Object[keys.length];
+		private AnnotationChange(Markable[] markables) {
+			this.markables = markables;
+			this.values = new Object[markables.length];
 		}
 
 		/**
@@ -282,11 +309,11 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		 */
 		@Override
 		public void execute() {
-			for(int i=keys.length-1; i>-1; i--) {
-				long key = keys[i];
+			for(int i=markables.length-1; i>-1; i--) {
+				Markable markable = markables[i];
 				Object value = values[i];
-				Object current = annotations.get(key);
-				annotations.put(key, value);
+				Object current = annotations.get(markable);
+				annotations.put(markable, value);
 
 				values[i] = current;
 			}

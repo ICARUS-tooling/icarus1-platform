@@ -27,10 +27,12 @@ package de.ims.icarus.language.model.standard.layer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.WeakHashMap;
 
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
@@ -50,16 +52,15 @@ import de.ims.icarus.util.collections.LongHashMap;
  */
 public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 
-	private final Map<String, LongHashMap<Object>> keyAnnotations = new HashMap<>();
+	private final Map<Markable, AnnotationBundle> keyAnnotations = new WeakHashMap<>();
 
 	/**
 	 * @param id
 	 * @param context
 	 * @param manifest
 	 */
-	public ComplexAnnotationLayer(long id, Context context,
-			AnnotationLayerManifest manifest) {
-		super(id, context, manifest);
+	public ComplexAnnotationLayer(Context context, AnnotationLayerManifest manifest) {
+		super(context, manifest);
 	}
 
 	private void checkKey(String key) {
@@ -71,11 +72,15 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 			throw new IllegalArgumentException("Key not allowed in annotation layer: "+key); //$NON-NLS-1$
 	}
 
-	private LongHashMap<Object> getAnnotations(String key) {
-		LongHashMap<Object> annotations = keyAnnotations.get(key);
+	private AnnotationBundle createBundle() {
+
+	}
+
+	private AnnotationBundle getAnnotations(Markable markable) {
+		AnnotationBundle annotations = keyAnnotations.get(markable);
 		if(annotations==null) {
-			annotations = new LongHashMap<>();
-			keyAnnotations.put(key, annotations);
+			annotations = createBundle();
+			keyAnnotations.put(markable, annotations);
 		}
 
 		return annotations;
@@ -90,13 +95,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 			return true;
 		}
 
-		for(LongHashMap<Object> annotations : keyAnnotations.values()) {
-			if(!annotations.isEmpty()) {
-				return true;
-			}
-		}
-
-		return false;
+		return !keyAnnotations.isEmpty();
 	}
 
 	/**
@@ -108,8 +107,8 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 		checkKey(key);
 
-		LongHashMap<Object> annotations = keyAnnotations.get(key);
-		return annotations==null ? null : annotations.get(markable.getId());
+		AnnotationBundle annotations = keyAnnotations.get(markable);
+		return annotations==null ? null : annotations.getValue(key);
 	}
 
 	/**
@@ -451,6 +450,93 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		@Override
 		public CorpusMember getAffectedMember() {
 			return ComplexAnnotationLayer.this;
+		}
+
+	}
+
+	private interface AnnotationBundle {
+		Object getValue(String key);
+		boolean setValue(String key, Object value);
+		void collectKeys(Collection<String> buffer);
+	}
+
+	private static class LargeAnnotationBundle extends HashMap<String, Object> implements AnnotationBundle {
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#getValue(java.lang.String)
+		 */
+		@Override
+		public Object getValue(String key) {
+			return get(key);
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#setValue(java.lang.String, java.lang.Object)
+		 */
+		@Override
+		public boolean setValue(String key, Object value) {
+			put(key, value);
+			return true;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#collectKeys(java.util.Collection)
+		 */
+		@Override
+		public void collectKeys(Collection<String> buffer) {
+			buffer.addAll(keySet());
+		}
+
+	}
+
+	private static class CompactAnnotationBundle implements AnnotationBundle {
+
+		private final Object[] data;
+
+		private CompactAnnotationBundle(int size) {
+			data = new Object[size];
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#getValue(java.lang.String)
+		 */
+		@Override
+		public Object getValue(String key) {
+			for(int i=0; i<data.length-1; i+=2) {
+				if(data[i]!=null && data[i].equals(key)) {
+					return data[i+1];
+				}
+			}
+
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#setValue(java.lang.String, java.lang.Object)
+		 */
+		@Override
+		public boolean setValue(String key, Object value) {
+			for(int i=0; i<data.length-1; i+=2) {
+				if(data[i]==null || data[i].equals(key)) {
+					data[i] = key;
+					data[i+1] = value;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#collectKeys(java.util.Collection)
+		 */
+		@Override
+		public void collectKeys(Collection<String> buffer) {
+			for(int i=0; i<data.length-1; i+=2) {
+				if(data[i]!=null) {
+					buffer.add((String) data[i]);
+				}
+			}
 		}
 
 	}

@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.standard.layer;
 
-import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
@@ -37,36 +36,14 @@ import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
  */
 public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> implements MarkableLayer {
 
-	private Container container;
 	private MarkableLayer boundaryLayer;
 
 	/**
-	 * @param id
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultMarkableLayer(long id, Context context, MarkableLayerManifest manifest) {
-		super(id, context, manifest);
-	}
-
-	/**
-	 * @param container the container to set
-	 */
-	public void setContainer(Container container) {
-		if (container == null)
-			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
-		if(container.getLayer()!=this)
-			throw new IllegalArgumentException("Container is a member of a foreign layer"); //$NON-NLS-1$
-
-		this.container = container;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.layer.MarkableLayer#getContainer()
-	 */
-	@Override
-	public Container getContainer() {
-		return container;
+	public DefaultMarkableLayer(Context context, MarkableLayerManifest manifest) {
+		super(context, manifest);
 	}
 
 	/**

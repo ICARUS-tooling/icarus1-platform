@@ -35,10 +35,10 @@ package de.ims.icarus.language.model.api;
  */
 public interface CorpusMember {
 
-	/**
-	 * @return The globally unique id
-	 */
-	long getId();
+//	/**
+//	 * @return The globally unique id
+//	 */
+//	long getId();
 
 	/**
 	 * Returns the corpus this member is a part of.

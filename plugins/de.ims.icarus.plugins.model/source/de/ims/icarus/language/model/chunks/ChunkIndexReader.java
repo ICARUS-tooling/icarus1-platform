@@ -29,7 +29,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Implements a reader for {@code ChunkIndex} data.
+ * Specifies a reader for {@code ChunkIndex} data.
  *
  * @author Markus Gärtner
  * @version $Id$

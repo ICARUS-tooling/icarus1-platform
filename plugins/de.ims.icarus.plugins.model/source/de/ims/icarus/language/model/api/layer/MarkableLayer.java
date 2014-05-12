@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.api.layer;
 
-import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 
@@ -52,12 +51,14 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	@Override
 	MarkableLayerManifest getManifest();
 
-	/**
-	 * Returns the container holding all the {@code Markable} objects this
-	 * layer defines.
-	 * @return The root container of this layer
-	 */
-	Container getContainer();
+//	/**
+//	 * Returns the container holding all the {@code Markable} objects this
+//	 * layer defines.
+//	 * @return The root container of this layer
+//	 */
+//	Container getContainer();
+
+	long getMemberCount();
 
 	/**
 	 * Returns the {@code MarkableLayer} that holds the bounding
@@ -66,7 +67,7 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 * another layer that holds word tokens then this layer would
 	 * be referenced via {@link Layer#getBaseLayer()} and the
 	 * layer representing sentences would be accessed by
-	 * this method. Note that for structures that do not correspond
+	 * this method. Note that for containers that do not correspond
 	 * to the groups defined by other {@code MarkableLayer}s this
 	 * method is allowed to return {@code null}. A {@code non-null}
 	 * return value is a hint for visualization facilities on
@@ -82,7 +83,7 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 * <li>Containers B therefore define the <i>base</i> collection
 	 * of markables that is available for containers C to build upon</li>
 	 * <li>For each C there has to be exactly one matching B</li>
-	 * <li>Not every B is required to have a structure C build upon it!</li>
+	 * <li>Not every B is required to have a container C referencing it!</li>
 	 * </ul>
 	 * If the markables in this layer are mere containers then the members
 	 * of the boundary layer define borders that those containers are not allowed
@@ -95,21 +96,4 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 * layer defines are not mapped to existing layer boundaries.
 	 */
 	MarkableLayer getBoundaryLayer();
-
-	/**
-	 * Translates an index currently used to access members in this layer's
-	 * root container into a value that can be used to reference elements in
-	 * the entirety of the backing data.
-	 * Implementations are advised to optimize internal lookup structures for this
-	 * translation or try to avoid them altogether. The latter is possible for
-	 * corpora that are small enough to not be worth the overhead of chunk-wise
-	 * loading. For them this method could simply return the index value itself
-	 * since there is a direct 1:1 projection between the two index spaces.
-	 *
-	 * @param index
-	 * @return
-	 * @throws IndexOutOfBoundsException if the given index is negative or
-	 * 			exceeds the values allowed by the root container
-	 */
-	long translateMarkableIndex(int index);
 }

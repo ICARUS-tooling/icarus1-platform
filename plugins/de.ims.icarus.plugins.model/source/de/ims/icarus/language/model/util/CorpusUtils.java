@@ -49,6 +49,7 @@ import de.ims.icarus.language.model.api.Fragment;
 import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.layer.AnnotationLayer;
+import de.ims.icarus.language.model.api.layer.FragmentLayer;
 import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.layer.LayerType;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
@@ -61,6 +62,9 @@ import de.ims.icarus.language.model.api.manifest.MemberManifest;
 import de.ims.icarus.language.model.api.manifest.Prerequisite;
 import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.api.manifest.StructureManifest;
+import de.ims.icarus.language.model.api.raster.Position;
+import de.ims.icarus.language.model.api.raster.PositionOutOfBoundsException;
+import de.ims.icarus.language.model.api.raster.Rasterizer;
 import de.ims.icarus.language.model.io.LocationType;
 import de.ims.icarus.language.model.io.ResourcePath;
 import de.ims.icarus.language.model.registry.CorpusRegistry;
@@ -160,23 +164,14 @@ public final class CorpusUtils {
 		// Fetch the container level and ask the
 		// hosting markable layer manifest for the container
 		// manifest at the specific level
+		int level = 0;
 
-		// We assume that this container is nested at least one level
-		// below a root container
-		int level = 2;
-
-		Container parent = container.getContainer();
-
-		if(parent==null) {
-			return container.getLayer().getManifest().getRootContainerManifest();
-		}
-
-		while(parent.getContainer()!=null) {
+		while(container.getContainer()!=null) {
 			level++;
-			parent = parent.getContainer();
+			container = container.getContainer();
 		}
 
-		MarkableLayerManifest manifest = parent.getLayer().getManifest();
+		MarkableLayerManifest manifest = container.getLayer().getManifest();
 
 		return manifest.getContainerManifest(level);
 	}
@@ -307,27 +302,62 @@ public final class CorpusUtils {
 		return layer==null ? null : layer.getContext();
 	}
 
+	private static char getTypePrefix(MemberType type) {
+		switch (type) {
+		case MARKABLE:
+			return 'M';
+		case FRAGMENT:
+			return 'F';
+		case CONTAINER:
+			return 'C';
+		case STRUCTURE:
+			return 'S';
+		case LAYER:
+			return 'L';
+		case EDGE:
+			return 'E';
+
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
+
+	public static String toString(CorpusMember m) {
+		MemberType type = m.getMemberType();
+
+		if(type==MemberType.LAYER) {
+			Layer layer = (Layer)m;
+			return "[Layer: "+layer.getName()+"]"; //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			Markable markable = (Markable)m;
+			return "["+getTypePrefix(type)+"_"+markable.getBeginOffset()+"-"+markable.getEndOffset()+"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+	}
+
 	public static int compare(Markable m1, Markable m2) {
-		int result = m1.getBeginOffset()-m2.getBeginOffset();
+		long result = m1.getBeginOffset()-m2.getBeginOffset();
 
 		if(result==0) {
 			result = m1.getEndOffset()-m2.getEndOffset();
 		}
 
-		return result;
+		return (int) result;
 	}
 
 	public static int compare(Fragment f1, Fragment f2) {
-		int result = f1.getBeginOffset()-f2.getBeginOffset();
+		if(f1.getLayer()!=f2.getLayer())
+			throw new IllegalArgumentException("Cannot compare fragments from different fragment layers"); //$NON-NLS-1$
+
+		if(f1.getMarkable()!=f2.getMarkable()) {
+			return f1.getMarkable().compareTo(f2.getMarkable());
+		}
+
+		Rasterizer rasterizer = f1.getLayer().getRasterizer();
+
+		int result = rasterizer.compare(f1.getFragmentBegin(), f2.getFragmentBegin());
 
 		if(result==0) {
-			result = f1.getEndOffset()-f2.getEndOffset();
-		}
-		if(result==0) {
-			result = f1.getFragmentBeginIndex()-f2.getFragmentBeginIndex();
-		}
-		if(result==0) {
-			result = f1.getFragmentEndIndex()-f2.getFragmentEndIndex();
+			result = rasterizer.compare(f1.getFragmentEnd(), f2.getFragmentEnd());
 		}
 
 		return result;
@@ -340,6 +370,43 @@ public final class CorpusUtils {
 	public static boolean contains(Markable m1, Markable m2) {
 		return m2.getBeginOffset()>=m1.getBeginOffset()
 				&& m2.getEndOffset()<=m1.getEndOffset();
+	}
+
+	public static void checkFragmentPositions(Fragment fragment, Position begin, Position end) {
+		if(begin==null && end==null)
+			throw new IllegalArgumentException("At least one position must be non-null!"); //$NON-NLS-1$
+
+		Markable markable = fragment.getMarkable();
+		FragmentLayer layer = fragment.getLayer();
+		Rasterizer rasterizer = layer.getRasterizer();
+
+		int dimensionality = rasterizer.getAxisCount();
+		if(begin!=null && begin.getDimensionality()!=dimensionality)
+			throw new IllegalArgumentException("Begin position dimensionality mismatch: expected " //$NON-NLS-1$
+					+dimensionality+" - got "+begin.getDimensionality()); //$NON-NLS-1$
+		if(end!=null && end.getDimensionality()!=dimensionality)
+			throw new IllegalArgumentException("End position dimensionality mismatch: expected " //$NON-NLS-1$
+					+dimensionality+" - got "+end.getDimensionality()); //$NON-NLS-1$
+
+		for(int axis=0; axis<dimensionality; axis++) {
+			long size = layer.getRasterSize(markable, axis);
+			checkPosition(size, begin, axis);
+			checkPosition(size, end, axis);
+		}
+
+		if(begin!=null && end!=null && rasterizer.compare(begin, end)>0)
+			throw new IllegalArgumentException("Begin position must not exceed end position: "+begin+" - "+end); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private static void checkPosition(long size, Position p, int axis) {
+		if(p==null) {
+			return;
+		}
+
+		long value = p.getValue(axis);
+
+		if(value<0 || value>=size)
+			throw new PositionOutOfBoundsException("Invalid value for axis "+axis+" on position "+p+" - max size "+size); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public static Path pathToFile(ResourcePath path) {

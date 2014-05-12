@@ -89,4 +89,6 @@ public interface ContainerManifest extends MemberManifest {
 	 * other containers!
 	 */
 	ContainerManifest getBoundaryContainerManifest();
+
+	ContainerManifest getBaseContainerManifest();
 }

@@ -144,42 +144,47 @@ public abstract class AbstractIndexAdapter implements ChunkIndexReader, ChunkInd
 	}
 
 	/**
-	 * @return the largeIndex
+	 * @return {@code true} iff the number of chunks this adapter can read exceeds the
+	 * {@value Integer#MAX_VALUE} limit.
 	 */
 	public boolean isLargeIndex() {
 		return largeIndex;
 	}
 
 	/**
-	 * @return the longIndex
+	 * @return {@code true} iff this adapter is set to read index values as
+	 * {@code long} types.
 	 */
 	public boolean isLongIndex() {
 		return longIndex;
 	}
 
 	/**
-	 * @return the blockSize
+	 * @return the size in bytes required to store a single chunk of data
 	 */
 	public int getBlockSize() {
 		return blockSize;
 	}
 
 	/**
-	 * @return the fieldSize
+	 * @return the number of elements in the internal storage that is
+	 * required to represent one data chunk.
 	 */
 	public int getFieldSize() {
 		return fieldSize;
 	}
 
 	/**
-	 * @return the maxChunkCount
+	 * @return the maximum number of chunks this adapter can handle. This number
+	 * might be affected by the block size as returned by {@link #getBlockSize()}.
 	 */
 	public long getMaxChunkCount() {
 		return maxChunkCount;
 	}
 
 	/**
-	 * @return the header
+	 * @return the 1 byte header value comprising the flags that allow
+	 * consistency checks between this adapter and a given target {@link ChunkIndex}
 	 */
 	public byte getHeader() {
 		return header;
@@ -193,11 +198,32 @@ public abstract class AbstractIndexAdapter implements ChunkIndexReader, ChunkInd
 		return index<maxChunkCount;
 	}
 
+	/**
+	 * Writes the 1 byte header of this adapter to the given channel.
+	 * This is done by first changing the channels position to {@code 0}
+	 * and then writing the header as returned by {@link #getHeader()}.
+	 *
+	 * @param channel
+	 * @throws IOException
+	 */
 	protected void writeHeader(SeekableByteChannel channel) throws IOException {
-		ByteBuffer buffer = ByteBuffer.wrap(new byte[]{header});
+		ByteBuffer buffer = ByteBuffer.wrap(new byte[]{getHeader()});
+
+		channel.position(0L);
 		channel.write(buffer);
 	}
 
+	/**
+	 * Reads and verifies the header stored in the given channel.
+	 * This is done by moving the channel's cursor to position {@code 0},
+	 * reading the header value and then comparing it to this adapter's own
+	 * expected header.
+	 *
+	 * @param channel
+	 * @throws IOException
+	 * @throws IndexFormatException if a mismatch is encountered between this
+	 * adapter's own header and the one read through the channel.
+	 */
 	protected void checkHeader(SeekableByteChannel channel) throws IOException {
 		ByteBuffer buffer = ByteBuffer.wrap(new byte[HEADER_BYTE_SIZE]);
 		channel.position(0);
@@ -210,7 +236,7 @@ public abstract class AbstractIndexAdapter implements ChunkIndexReader, ChunkInd
 			StringBuilder sb = new StringBuilder("Incompatible index data source - header corrupted: expected header ") //$NON-NLS-1$
 			.append(Integer.toBinaryString(expected)).append(" - got ") //$NON-NLS-1$
 			.append(Integer.toBinaryString(header))
-			.append(" (long_index, long_offset, elements, file_id)"); //$NON-NLS-1$
+			.append(" legend: (long_index, long_offset, elements, file_id)"); //$NON-NLS-1$
 
 			throw new IndexFormatException(sb.toString());
 		}
@@ -228,6 +254,14 @@ public abstract class AbstractIndexAdapter implements ChunkIndexReader, ChunkInd
 
 	protected abstract void delete();
 
+	/**
+	 * Ensures that the channel to the underlying {@code ChunkIndex} is opened and returns it.
+	 *
+	 * @return
+	 * @throws IOException
+	 *
+	 * @see ChunkIndex#openChannel()
+	 */
 	protected SeekableByteChannel getChannel() throws IOException {
 		if(channel==null) {
 			channel = getChunkIndex().openChannel();

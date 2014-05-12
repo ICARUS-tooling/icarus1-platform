@@ -43,7 +43,7 @@ import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.meta.MetaData;
 import de.ims.icarus.language.model.api.seg.Segment;
-import de.ims.icarus.language.model.search.Query;
+import de.ims.icarus.language.model.iql.Query;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
@@ -93,12 +93,6 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  * (Note that there exists the {@link CorpusAdapter} class that implements the {@code CorpusListener}
  * interface with empty methods so that a new listener implementation only needs to define the methods
  * it actually requires).
- * <p>
- * To allow the handling of large corpora, the {@link ChunkControl} offers a mechanism to load a big corpus
- * in relatively little parts, so called <i>chunks</i>, each fitting easily into the main memory of the
- * current machine. The control object ensures that at most one chunk is loaded into memory at any time
- * and that requesting a new chunk to be loaded causes the current chunk (if present) to be unloaded.
- * Note that this
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -113,12 +107,6 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * is it absolutely crucial to perform the entire process while holding the
 	 * write lock. Not doing so could mean that another layer might be registered
 	 * with the exact same <i>unique</i> name and render the new layer invalid.
-	 * <p>
-	 * It is also advised that any implementation of the {@code Mutator} interface
-	 * make use of this lock. Since a {@code Mutator} is intended to represent the
-	 * process of user-originated modification it is indeed a valid option to perform
-	 * the locking of resources on the top-most level (a user can only perform one
-	 * modification at a given point of time).
 	 *
 	 * @return the <i>write-lock</i> of this corpus object
 	 */
@@ -139,14 +127,12 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	CorpusUndoManager getUndoManager();
 
 	/**
-	 * Returns the <i>root</i> {@code IdDomain} that is used for pooling
-	 * ids in this corpus.
 	 *
+	 * @param query
 	 * @return
+	 * @throws CorpusException
 	 */
-	IdDomain getGlobalIdDomain();
-
-	Segment getSegment(Query spec) throws CorpusException;
+	Segment getSegment(Query query) throws CorpusException;
 
 //	/**
 //	 * Resolves a given id and returns the member within this corpus
@@ -211,14 +197,14 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	CorpusManifest getManifest();
 
 	/**
-	 * Returns the bottom-most layer responsible for representing the bare
-	 * tokens of this corpus.
+	 * Returns the bottom-most layer responsible for representing the atomic
+	 * elements of this corpus.
 	 * <p>
 	 * This is a shorthand method. The returned {@code MarkableLayer} is the
 	 * reference for all offset related indices used by {@code Markable}s in
 	 * this corpus.
 	 *
-	 * @return The {@code MarkableLayer} hosting the tokens of this corpus.
+	 * @return The {@code MarkableLayer} hosting the atomic elements of this corpus.
 	 */
 	MarkableLayer getBaseLayer();
 
@@ -241,10 +227,14 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 */
 	MarkableLayer getOverlayLayer();
 
+	Container getOverlayContainer();
+
 	/**
 	 * Returns all layers registered for this corpus in the order of their
 	 * registration. If this corpus does not yet host any layers the returned
 	 * list is empty. Either way the returned list should be immutable.
+	 * <p>
+	 * Note that the returned list does <b>not</b> contain the virtual overlay layer!
 	 *
 	 * @return A list containing all the layers currently hosted within this corpus.
 	 */

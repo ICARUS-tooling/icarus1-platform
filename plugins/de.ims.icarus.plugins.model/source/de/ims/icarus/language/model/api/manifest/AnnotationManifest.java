@@ -28,6 +28,7 @@ package de.ims.icarus.language.model.api.manifest;
 import java.util.List;
 
 import de.ims.icarus.language.model.util.ValueType;
+import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
@@ -113,4 +114,13 @@ public interface AnnotationManifest extends MemberManifest {
 	 * Returns the type of this annotation
 	 */
 	ValueType getValueType();
+
+	/**
+	 * For annotations of type {@value ValueType#CUSTOM} this method returns the
+	 * required {@code ContentType}. For all other value types, the returned value
+	 * is {@code null}.
+	 *
+	 * @return
+	 */
+	ContentType getContentType();
 }

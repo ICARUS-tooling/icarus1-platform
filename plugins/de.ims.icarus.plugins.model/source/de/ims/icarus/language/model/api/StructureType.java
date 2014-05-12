@@ -41,7 +41,10 @@ public enum StructureType implements XmlResource {
 	 * An unordered collection of nodes, not connected
 	 * by any edges. This is by far the most basic type of
 	 * structure.
+	 *
+	 * @deprecated no need to support empty structures
 	 */
+	@Deprecated
 	SET(false, 0, 0, 0),
 
 	/**
@@ -124,6 +127,8 @@ public enum StructureType implements XmlResource {
 	 * allows to have in this structure type.
 	 * <p>
 	 * Note that this does <b>not</b> affect the root node!
+	 * <p>
+	 * A value of {@code -1} indicated no limit.
 	 *
 	 * @return the outgoingEdgeLimit
 	 */
@@ -131,11 +136,17 @@ public enum StructureType implements XmlResource {
 		return outgoingEdgeLimit;
 	}
 
+	public boolean isLegalOutgoingEdgeCount(int count) {
+		return outgoingEdgeLimit!=-1 && count<=outgoingEdgeLimit;
+	}
+
 	/**
 	 * Returns the maximum number of parent nodes a single node is
 	 * allows to have in this structure type.
 	 * <p>
 	 * Note that this does <b>not</b> affect the root node!
+	 * <p>
+	 * A value of {@code -1} indicated no limit.
 	 *
 	 * @return the incomingEdgeLimit
 	 */
@@ -143,12 +154,26 @@ public enum StructureType implements XmlResource {
 		return incomingEdgeLimit;
 	}
 
+	public boolean isLegalIncomingEdgeCount(int count) {
+		return incomingEdgeLimit!=-1 && count<=incomingEdgeLimit;
+	}
+
 	/**
-	 * Returns the minimum
+	 * Returns the minimum number of edges a single node must
+	 * have assigned.
+	 * <p>
+	 * Note that this does <b>not</b> affect the root node!
+	 * <p>
+	 * A value of {@code -1} indicated no limit.
+	 *
 	 * @return the minEdgeCount
 	 */
 	public int getMinEdgeCount() {
 		return minEdgeCount;
+	}
+
+	public boolean isLegalEdgeCount(int count) {
+		return minEdgeCount!=-1 && count>=minEdgeCount;
 	}
 
 	/**

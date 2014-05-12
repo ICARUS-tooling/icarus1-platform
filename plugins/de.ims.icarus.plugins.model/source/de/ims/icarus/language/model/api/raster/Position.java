@@ -30,7 +30,7 @@ package de.ims.icarus.language.model.api.raster;
  * @version $Id$
  *
  */
-public interface Position extends Comparable<Position> {
+public interface Position {
 
 	int getDimensionality();
 

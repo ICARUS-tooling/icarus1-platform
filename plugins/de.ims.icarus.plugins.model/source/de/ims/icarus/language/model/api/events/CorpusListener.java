@@ -145,4 +145,8 @@ public interface CorpusListener {
 	 * @param e
 	 */
 	void metaDataRemoved(CorpusEvent e);
+
+	void segmentAdded(CorpusEvent e);
+
+	void segmentRemoved(CorpusEvent e);
 }

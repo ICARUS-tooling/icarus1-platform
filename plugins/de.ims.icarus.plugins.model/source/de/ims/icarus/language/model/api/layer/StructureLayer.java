@@ -43,22 +43,4 @@ public interface StructureLayer extends MarkableLayer {
 	 */
 	@Override
 	StructureLayerManifest getManifest();
-
-	int getMixinLayerCount();
-
-	MarkableLayer getMixinLayerAt(int index);
-
-	/**
-	 * Translates an index currently used to access edges in this layer's
-	 * root container into a value that can be used to reference elements in
-	 * the entirety of the backing data.
-	 * The advise from the {@link #translateMarkableIndex(int)} applies
-	 * here, too.
-	 *
-	 * @param index
-	 * @return
-	 * @throws IndexOutOfBoundsException if the given index is negative or
-	 * 			exceeds the values allowed by the root structure
-	 */
-	long translateEdgeIndex(int index);
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.collections;
@@ -50,126 +50,130 @@ import de.ims.icarus.util.Filter;
  *
  */
 public final class CollectionUtils {
-	
+
+	public static final int DEFAULT_CAPACITY = 10;
+	public static final float DEFAULT_LOAD_FACTOR = 0.75f;
+	public static final float DEFAULT_MIN_LOAD = 0.25f;
+
 	private static Map<Class<?>, Map<Object, Object>> proxyMaps;
 	private static final Object proxyLock = new Object();
-	
+
 	private CollectionUtils() {
 		// no-op
 	}
-	
+
 	public static <E extends Object> Set<E> getSetProxy(Set<E> set) {
 		if(set==null)
 			throw new NullPointerException("Invalid set"); //$NON-NLS-1$
-		
+
 		synchronized (proxyLock) {
 			if(proxyMaps==null) {
 				proxyMaps = new HashMap<>();
 			}
-			
+
 			Map<Object, Object> proxies = proxyMaps.get(Set.class);
 			if(proxies==null) {
 				proxies = new WeakHashMap<>();
 				proxyMaps.put(Set.class, proxies);
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			Set<E> proxy = (Set<E>) proxies.get(set);
 			if(proxy==null) {
 				proxy = Collections.unmodifiableSet(set);
 				proxies.put(set, proxy);
 			}
-			
+
 			return proxy;
 		}
 	}
-	
+
 	public static <E extends Object> Collection<E> getCollectionProxy(Collection<E> collection) {
 		if(collection==null)
 			throw new NullPointerException("Invalid collection"); //$NON-NLS-1$
-		
+
 		synchronized (proxyLock) {
 			if(proxyMaps==null) {
 				proxyMaps = new HashMap<>();
 			}
-			
+
 			Map<Object, Object> proxies = proxyMaps.get(Collection.class);
 			if(proxies==null) {
 				proxies = new WeakHashMap<>();
 				proxyMaps.put(Collection.class, proxies);
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			Collection<E> proxy = (Collection<E>) proxies.get(collection);
 			if(proxy==null) {
 				proxy = Collections.unmodifiableCollection(collection);
 				proxies.put(collection, proxy);
 			}
-			
+
 			return proxy;
 		}
 	}
-	
+
 	public static <E extends Object> List<E> getListProxy(List<E> list) {
 		if(list==null)
 			throw new NullPointerException("Invalid list"); //$NON-NLS-1$
-		
+
 		synchronized (proxyLock) {
 			if(proxyMaps==null) {
 				proxyMaps = new HashMap<>();
 			}
-			
+
 			Map<Object, Object> proxies = proxyMaps.get(List.class);
 			if(proxies==null) {
 				proxies = new WeakHashMap<>();
 				proxyMaps.put(List.class, proxies);
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			List<E> proxy = (List<E>) proxies.get(list);
 			if(proxy==null) {
 				proxy = Collections.unmodifiableList(list);
 				proxies.put(list, proxy);
 			}
-			
+
 			return proxy;
 		}
 	}
-	
+
 	public static <K extends Object, V extends Object> Map<K, V> getMapProxy(Map<K, V> map) {
 		if(map==null)
 			throw new NullPointerException("Invalid map"); //$NON-NLS-1$
-		
+
 		synchronized (proxyLock) {
 			if(proxyMaps==null) {
 				proxyMaps = new HashMap<>();
 			}
-			
+
 			Map<Object, Object> proxies = proxyMaps.get(Map.class);
 			if(proxies==null) {
 				proxies = new WeakHashMap<>();
 				proxyMaps.put(Map.class, proxies);
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			Map<K, V> proxy = (Map<K, V>) proxies.get(map);
 			if(proxy==null) {
 				proxy = Collections.unmodifiableMap(map);
 				proxies.put(map, proxy);
 			}
-			
+
 			return proxy;
 		}
 	}
-	
+
 	public static boolean equals(Object o1, Object o2) {
 		if(o1==null || o2==null) {
 			return false;
 		}
-		
+
 		return o1.equals(o2);
 	}
-	
+
 	/**
 	 * Tests whether a specific key maps to some value that represents
 	 * the boolean value {@code true} either directly by being of type
@@ -182,20 +186,20 @@ public final class CollectionUtils {
 		if(map==null || map.isEmpty()) {
 			return false;
 		}
-		
+
 		Object value = map.get(key);
 		if(value instanceof Boolean) {
 			return (boolean)value;
 		} else if(value instanceof String) {
 			return Boolean.parseBoolean((String)value);
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * Checks whether the given {@code key} is mapped to an object equal
-	 * to the {@code value} parameter. If the {@code map} argument is 
+	 * to the {@code value} parameter. If the {@code map} argument is
 	 * {@code null} then the return value is {@code true} in case that
 	 * the {@code value} parameter is {@code null} and {@code false} in any
 	 * other case.
@@ -204,7 +208,7 @@ public final class CollectionUtils {
 		if(map==null || map.isEmpty()) {
 			return value==null;
 		}
-		
+
 		Object v = map.get(key);
 		if(v==null) {
 			return value==null;
@@ -212,43 +216,59 @@ public final class CollectionUtils {
 			return value.equals(v);
 		}
 	}
-	
+
 	public static <V extends Object> V get(Map<?, V> map, Object key) {
 		return map==null ? null : map.get(key);
 	}
-	
+
 	public static <T extends Object> Collection<T> filter(Collection<T> col, Filter filter) {
 		Collection<T> result = new LinkedList<>();
-		
+
 		for(T element : col) {
 			if(filter==null || filter.accepts(element)) {
 				result.add(element);
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	public static <T extends Object> boolean contains(Iterable<T> iterable, T target) {
 		if(iterable!=null) {
-			for(Object item : iterable) {
-				if(target.equals(item)) {
-					return true;
+			if(target==null) {
+				for(Object item : iterable) {
+					if(item==null) {
+						return true;
+					}
+				}
+			} else {
+				for(Object item : iterable) {
+					if(target.equals(item)) {
+						return true;
+					}
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	public static <T extends Object> boolean contains(T[] array, T target) {
 		return indexOf(array, target)!=-1;
 	}
-	
+
 	public static <T extends Object> int indexOf(T[] array, T target) {
 		if(array!=null) {
-			for(int i=0; i<array.length; i++) {
-				if(target.equals(array[i])) {
-					return i;
+			if(target==null) {
+				for(int i=0; i<array.length; i++) {
+					if(array[i]==null) {
+						return i;
+					}
+				}
+			} else {
+				for(int i=0; i<array.length; i++) {
+					if(target.equals(array[i])) {
+						return i;
+					}
 				}
 			}
 		}
@@ -288,93 +308,93 @@ public final class CollectionUtils {
 		feedItems(list, items);
 		return list;
 	}
-	
+
 	public static Map<Object, Object> asMap(Object...items) {
     	int size = items==null ? 0 : items.length;
 		Map<Object, Object> map = new HashMap<>(Math.min(10, size/2));
-		
+
 		if(items!=null) {
 			for(int i = 0, len = items.length-1; i<len; i+=2) {
 				map.put(items[i], items[i+1]);
 			}
 		}
-		
-		return map;
-	}
-	
-	public static Map<Object, Object> asLinkedMap(Object...items) {
-    	int size = items==null ? 0 : items.length;
-		Map<Object, Object> map = new LinkedHashMap<>(Math.min(10, size/2));
-		
-		if(items!=null) {
-			for(int i = 0, len = items.length-1; i<len; i+=2) {
-				map.put(items[i], items[i+1]);
-			}
-		}
-		
+
 		return map;
 	}
 
-	
+	public static Map<Object, Object> asLinkedMap(Object...items) {
+    	int size = items==null ? 0 : items.length;
+		Map<Object, Object> map = new LinkedHashMap<>(Math.min(10, size/2));
+
+		if(items!=null) {
+			for(int i = 0, len = items.length-1; i<len; i+=2) {
+				map.put(items[i], items[i+1]);
+			}
+		}
+
+		return map;
+	}
+
+
 	public static int min(int...values) {
 		/*if(values.length<2)
 			throw new IllegalArgumentException();*/
-		
+
 		int min = Integer.MAX_VALUE;
-		
+
 		for(int val : values)
 			if(val<min)
 				min = val;
-		
+
 		return min;
 	}
-	
+
 	public static int max(int...values) {
 		/*if(values.length<2)
 			throw new IllegalArgumentException();*/
-		
+
 		int max = Integer.MIN_VALUE;
-		
+
 		for(int val : values)
 			if(val>max)
 				max = val;
-		
+
 		return max;
 	}
-	
+
 	public static void fillAscending(int[] a) {
 		for(int i=0; i<a.length; i++)
 			a[i] = i;
 	}
-	
+
 	public static void fillAscending(Integer[] a) {
 		for(int i=0; i<a.length; i++)
 			a[i] = i;
 	}
-	
+
 	public static boolean isAscending(int[] a) {
 		for(int i=0; i<a.length; i++)
 			if(a[i]!=i)
 				return false;
-		
+
 		return true;
 	}
-	
+
 	public static void permutate(int[] a, int[] permutation) {
 		if(a.length<permutation.length)
 			throw new IllegalArgumentException();
-		
+
 		int[] tmp = new int[permutation.length];
 		for(int i=0; i<permutation.length; i++) {
 			if(permutation[i]>=permutation.length)
 				throw new IllegalArgumentException();
-			
+
 			tmp[i] = a[permutation[i]];
 		}
-		
+
 		System.arraycopy(tmp, 0, a, 0, permutation.length);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static<T extends Object> void permutate(T[] a, int[] permutation) {
 		if(a.length<permutation.length)
@@ -382,24 +402,24 @@ public final class CollectionUtils {
 
         T[] tmp = (T[])Array.newInstance(
         		a.getClass().getComponentType(), permutation.length);
-        
+
 		for(int i=0; i<permutation.length; i++) {
 			if(permutation[i]>=permutation.length)
 				throw new IllegalArgumentException();
 			tmp[i] = a[permutation[i]];
 		}
-		
+
 		System.arraycopy(tmp, 0, a, 0, permutation.length);
 	}
-	
+
 	public static void reverse(int[] array, int offset, int length) {
 		Exceptions.testNullArgument(array, "array"); //$NON-NLS-1$
-		
+
 		if(length==-1)
 			length = array.length;
-		
+
 		length = Math.min(length, array.length-offset);
-		
+
 		int tmp, flipIndex;
 		int steps = length/2;
 		for(int i = 0; i<steps; i++) {
@@ -409,25 +429,25 @@ public final class CollectionUtils {
 			array[flipIndex] = tmp;
 		}
 	}
-	
+
 	public static int count(boolean[] a, boolean value) {
 		int count = 0;
-		
+
 		for(boolean val : a)
 			if(val==value)
 				count++;
-		
+
 		return count;
 	}
-	
+
 	public static void reverse(Object[] array, int offset, int length) {
 		Exceptions.testNullArgument(array, "array"); //$NON-NLS-1$
-		
+
 		if(length==-1)
 			length = array.length;
-		
+
 		length = Math.min(length, array.length-offset);
-		
+
 		int flipIndex;
 		Object tmp;
 		int steps = length/2;
@@ -438,33 +458,33 @@ public final class CollectionUtils {
 			array[flipIndex] = tmp;
 		}
 	}
-	
+
 	public static boolean isUniform(Iterable<?> list) {
 		Object prev = null;
 		for(Iterator<?> i = list.iterator(); i.hasNext();) {
 			Object item = i.next();
 			if(item==null)
 				throw new IllegalArgumentException("Null not supported by uniformity check!"); //$NON-NLS-1$
-			
+
 			if(prev!=null && !prev.equals(item)) {
 				return false;
 			}
-			
+
 			prev = item;
 		}
 		return true;
 	}
-	
+
 	public static boolean isUniform(Object[] list) {
 		Object prev = null;
 		for(Object item : list) {
 			if(item==null)
 				throw new IllegalArgumentException("Null not supported by uniformity check!"); //$NON-NLS-1$
-			
+
 			if(prev!=null && !prev.equals(item)) {
 				return false;
 			}
-			
+
 			prev = item;
 		}
 		return true;
@@ -473,24 +493,24 @@ public final class CollectionUtils {
 	public static String toString(Collection<?> collection) {
 		return toString(collection, '_');
 	}
-	
+
 	public static String toString(Collection<?> collection, char delimiter) {
 		StringBuilder sb = new StringBuilder();
-		
+
 		for(Iterator<?> i = collection.iterator(); i.hasNext(); ) {
 			sb.append(i.next());
 			if(i.hasNext()) {
 				sb.append(delimiter);
 			}
 		}
-		
+
 		return sb.toString();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static String toString(Map map) {
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append('[');
 		for(Iterator<Entry> i = map.entrySet().iterator(); i.hasNext();) {
 			Entry entry = i.next();
@@ -500,10 +520,10 @@ public final class CollectionUtils {
 			}
 		}
 		sb.append(']');
-		
+
 		return sb.toString();
 	}
-	
+
 	public static int hashCode(Iterable<? extends Object> source) {
 		int hc = 1;
 		for(Iterator<?> i = source.iterator(); i.hasNext();) {
@@ -511,7 +531,7 @@ public final class CollectionUtils {
 		}
 		return hc;
 	}
-	
+
 	public static int hashCode(int[] source) {
 		int hc = 1;
 		for(int i : source) {
@@ -519,43 +539,43 @@ public final class CollectionUtils {
 		}
 		return hc;
 	}
-	
+
 	public static <E extends Object> boolean equals(Collection<E> c1, Collection<E> c2) {
 		if(c1==null || c2==null) {
 			return c1==c2;
 		}
-		
+
 		if(c1.size()!=c2.size()) {
 			return false;
 		}
-		
+
 		Iterator<E> i1 = c1.iterator();
 		Iterator<E> i2 = c2.iterator();
-		
+
 		while(i1.hasNext() && i2.hasNext()) {
 			if(!i1.next().equals(i2.next())) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public static <K extends Object, V extends Object> boolean equals(Map<K, V> m1, Map<K, V> m2) {
 		if(m1==null || m2==null) {
 			return m1==m2;
 		}
-		
+
 		if(m1.size()!=m2.size()) {
 			return false;
 		}
-		
+
 		for(K key : m1.keySet()) {
 			if(!m1.get(key).equals(m2.get(key))) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 }

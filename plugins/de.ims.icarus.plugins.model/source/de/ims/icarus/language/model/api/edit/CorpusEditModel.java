@@ -65,10 +65,14 @@ public class CorpusEditModel extends WeakEventSource {
 		fireEvent(new EventObject(CorpusEditEvents.BEGIN_UPDATE));
 	}
 
+	boolean hasActiveUpdate() {
+		return updateLevel>0;
+	}
+
 	public void beginUpdate(String nameKey) {
 		if(nameKey==null)
 			throw new NullPointerException("Invalid edit name"); //$NON-NLS-1$
-		if(updateLevel!=0)
+		if(hasActiveUpdate())
 			throw new IllegalStateException("Cannot start named edit '"+nameKey+"'- edit already in progress."); //$NON-NLS-1$ //$NON-NLS-2$
 
 		currentEdit = createUndoableEdit(nameKey);
@@ -104,21 +108,20 @@ public class CorpusEditModel extends WeakEventSource {
 	 * @return
 	 */
 	protected UndoableCorpusEdit createUndoableEdit(String nameKey) {
-		return new UndoableCorpusEdit(getCorpus(), nameKey);
-//		{
-//
-//			private static final long serialVersionUID = -471363052764925086L;
-//
-//			/**
-//			 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit#dispatch()
-//			 */
-//			@Override
-//			public void dispatch() {
-//				getCorpus().getEditModel().fireEvent(
-//						new EventObject(CorpusEditEvents.CHANGE, "edit", this)); //$NON-NLS-1$
-//			}
-//
-//		};
+		return new UndoableCorpusEdit(getCorpus(), nameKey)
+		{
+
+			private static final long serialVersionUID = -471363052764925086L;
+
+			/**
+			 * @see de.ims.icarus.language.model.api.edit.UndoableCorpusEdit#dispatch()
+			 */
+			@Override
+			public void dispatch() {
+				fireEvent(new EventObject(CorpusEditEvents.CHANGE, "edit", this)); //$NON-NLS-1$
+			}
+
+		};
 	}
 
 	/**
@@ -165,12 +168,18 @@ public class CorpusEditModel extends WeakEventSource {
 	 * fired for every atomic change!
 	 *
 	 * @param change
+	 * @throws UnsupportedOperationException if the corpus is not editable
 	 */
 	public void execute(UndoableCorpusEdit.AtomicChange change) {
+
+		if(!getCorpus().getManifest().isEditable())
+			throw new UnsupportedOperationException("Corpus does not support modifications"); //$NON-NLS-1$
+
 		Lock lock = getCorpus().getLock();
 
 		lock.lock();
 		try {
+			// Execute change before update level is modified
 			change.execute();
 
 			beginUpdate();
