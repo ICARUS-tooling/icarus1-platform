@@ -418,7 +418,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Defaults
 			fillPluginElement(template, extensionPoint);
 			
-			// Multiplicity
+			// Relation
 			template.setValue("captionMultiplicity", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.multiplicity")); //$NON-NLS-1$
 			template.setValue("multiplicity", noneOrNonempty(extensionPoint.getMultiplicity())); //$NON-NLS-1$
@@ -806,7 +806,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 					"plugins.core.outputView.captions.declaringExtensionPoint")); //$NON-NLS-1$
 			template.setValue("declaringExtensionPoint", getId(def.getDeclaringExtensionPoint())); //$NON-NLS-1$
 			
-			// Multiplicity
+			// Relation
 			template.setValue("captionMultiplicity", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.multiplicity")); //$NON-NLS-1$
 			template.setValue("multiplicity", noneOrNonempty(def.getMultiplicity())); //$NON-NLS-1$
