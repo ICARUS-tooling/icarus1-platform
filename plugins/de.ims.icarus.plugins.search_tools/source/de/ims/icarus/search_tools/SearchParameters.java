@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
@@ -43,10 +43,19 @@ public interface SearchParameters {
 	public static final String OPTIMIZE_SEARCH = "optimizeSearch"; //$NON-NLS-1$
 
 	public static final String SEARCH_RESULT_LIMIT = "searchResultLimit"; //$NON-NLS-1$
-	
+
+	public static final String SEARCH_MIN_LENGTH = "searchMinLength"; //$NON-NLS-1$
+
+	public static final String SEARCH_MAX_LENGTH = "searchMaxLength"; //$NON-NLS-1$
+
+	public static final String SEARCH_NON_PROJECTIVE = "searchNonProjective"; //$NON-NLS-1$
+
 	public static final SearchMode DEFAULT_SEARCH_MODE = SearchMode.MATCHES;
 	public static final Orientation DEFAULT_SEARCH_ORIENTATION = Orientation.LEFT_TO_RIGHT;
 	public static final boolean DEFAULT_SEARCH_CASESENSITIVE = true;
 	public static final boolean DEFAULT_OPTIMIZE_SEARCH = false;
 	public static final int DEFAULT_SEARCH_RESULT_LIMIT = 0;
+	public static final int DEFAULT_SEARCH_MIN_LENGTH = 0;
+	public static final int DEFAULT_SEARCH_MAX_LENGTH = 0;
+	public static final boolean DEFAULT_SEARCH_NON_PROJECTIVE = false;
 }

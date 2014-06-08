@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.language.coref;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +60,6 @@ import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
-import de.ims.icarus.util.collections.IntValueHashMap;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
@@ -175,7 +177,7 @@ public final class CoreferenceUtils {
 
 		Set<Span> goldLut = collectSpans(goldEdges);
 		Map<Span, Span> goldRootLut = new LinkedHashMap<>();
-		IntValueHashMap goldClusterIds = new IntValueHashMap(goldLut.size());
+		TObjectIntMap<Object> goldClusterIds = new TObjectIntHashMap<>(goldLut.size());
 
 		// Cache gold information
 		for(Edge edge : goldSet.getEdges()) {

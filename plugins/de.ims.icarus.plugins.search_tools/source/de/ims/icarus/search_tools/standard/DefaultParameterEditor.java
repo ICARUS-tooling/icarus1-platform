@@ -78,6 +78,19 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 			.setDocument(new NumberDocument());
 		formBuilder.addEntry(SEARCH_RESULT_LIMIT, entry);
 
+		entry = new InputFormEntry(
+				"plugins.searchTools.labels.minLength") //$NON-NLS-1$
+			.setDocument(new NumberDocument());
+		formBuilder.addEntry(SEARCH_MIN_LENGTH, entry);
+
+		entry = new InputFormEntry(
+				"plugins.searchTools.labels.maxLength") //$NON-NLS-1$
+			.setDocument(new NumberDocument());
+		formBuilder.addEntry(SEARCH_MAX_LENGTH, entry);
+
+		formBuilder.addToggleFormEntry(SEARCH_NON_PROJECTIVE,
+				"plugins.searchTools.labels.nonProjective"); //$NON-NLS-1$
+
 		return formBuilder;
 	}
 
@@ -108,6 +121,9 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 		formBuilder.setValue(SEARCH_CASESENSITIVE, options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE));
 //		formBuilder.setValue(OPTIMIZE_SEARCH, options.get(OPTIMIZE_SEARCH, DEFAULT_OPTIMIZE_SEARCH));
 		formBuilder.setValue(SEARCH_RESULT_LIMIT, String.valueOf(options.get(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT)));
+		formBuilder.setValue(SEARCH_MIN_LENGTH, String.valueOf(options.get(SEARCH_MIN_LENGTH, DEFAULT_SEARCH_MIN_LENGTH)));
+		formBuilder.setValue(SEARCH_MAX_LENGTH, String.valueOf(options.get(SEARCH_MAX_LENGTH, DEFAULT_SEARCH_MAX_LENGTH)));
+		formBuilder.setValue(SEARCH_NON_PROJECTIVE, options.get(SEARCH_NON_PROJECTIVE, DEFAULT_SEARCH_NON_PROJECTIVE));
 	}
 
 	/**

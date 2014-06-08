@@ -29,6 +29,15 @@
 			</doc>
 			<export prefix="*" />
 		</library>
+		<library id="Trove Collections" path="lib/trove-3.0.3.jar" type="code">
+			<doc>
+				<doc-text>
+					Trove Collections for primitive types version 3.0.3
+					(http://sourceforge.net/projects/trove4j/)
+				</doc-text>
+			</doc>
+			<export prefix="*" />
+		</library>
 	</runtime>
 	
 	<!-- Extension-Points -->

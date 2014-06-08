@@ -25,11 +25,13 @@
  */
 package de.ims.icarus.language.treebank;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import de.ims.icarus.language.SentenceData;
-import de.ims.icarus.util.collections.IntIntHashMap;
 
 
 /**
@@ -44,7 +46,7 @@ public class TreebankMetaDataBuilder {
 	private int maxLength = 0;
 	private int minLength = Integer.MAX_VALUE;
 
-	private IntIntHashMap counter = new IntIntHashMap(100);
+	private TIntIntMap counter = new TIntIntHashMap(100);
 
 	public TreebankMetaDataBuilder() {
 		// no-op

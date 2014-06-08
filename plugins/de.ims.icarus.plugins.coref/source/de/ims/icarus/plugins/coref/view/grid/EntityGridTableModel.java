@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.coref.view.grid;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +58,6 @@ import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
-import de.ims.icarus.util.collections.IntHashMap;
 
 /**
  * @author Markus Gärtner
@@ -69,7 +71,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 	protected CoreferenceDocumentData document;
 
 	protected Map<String, EntityGridNode> nodes;
-	protected IntHashMap<ErrorSummary> columnSummaries = new IntHashMap<>();
+	protected TIntObjectMap<ErrorSummary> columnSummaries = new TIntObjectHashMap<>();
 
 	protected EntityGridColumnModel columnModel = new EntityGridColumnModel();
 

@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.language.coref;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +36,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.collections.IntHashMap;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
@@ -47,7 +49,7 @@ import de.ims.icarus.util.mem.Link;
 public class SpanSet extends CorefListMember<Span> {
 
 	@Link
-	protected IntHashMap<Span[]> blockMap;
+	protected TIntObjectMap<Span[]> blockMap;
 	@Link
 	protected Map<String, Span> spanMap;
 
@@ -61,7 +63,7 @@ public class SpanSet extends CorefListMember<Span> {
 
 	public void setSpans(int sentenceIndex, Span[] spans) {
 		if(blockMap==null) {
-			blockMap = new IntHashMap<>();
+			blockMap = new TIntObjectHashMap<>();
 		}
 		if(spanMap==null) {
 			spanMap = new LinkedHashMap<>();

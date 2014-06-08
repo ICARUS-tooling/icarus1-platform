@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.coref.io;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -41,7 +44,6 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
-import de.ims.icarus.util.collections.IntHashMap;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -128,7 +130,7 @@ public final class CONLL12Utils {
 			CharTableBuffer buffer, BlockHandler blockHandler) throws IOException {
 
 		CoreferenceDocumentData result = null;
-		IntHashMap<Cluster> clusterMap = new IntHashMap<>();
+		TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
 
 		while(buffer.next()) {
 			if(result==null) {
@@ -169,7 +171,7 @@ public final class CONLL12Utils {
 	 *
 	 */
 	private static DefaultCoreferenceData createData(CoreferenceDocumentData document,
-			CharTableBuffer buffer, IntHashMap<Cluster> clusterMap) {
+			CharTableBuffer buffer, TIntObjectMap<Cluster> clusterMap) {
 		int size = buffer.getRowCount();
 		String[] forms = new String[size];
 		LinkedList<Span> spanBuffer = new LinkedList<>();

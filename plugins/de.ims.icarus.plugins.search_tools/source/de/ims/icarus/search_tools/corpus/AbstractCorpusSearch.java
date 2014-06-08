@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.corpus;
@@ -44,39 +44,47 @@ import de.ims.icarus.util.Options;
  *
  */
 public abstract class AbstractCorpusSearch extends AbstractTreeSearch {
-	
+
 	protected AvailabilityObserver observer;
 	protected final DataType dataType;
-	
-	protected AbstractCorpusSearch(SearchFactory factory, SearchQuery query, 
+
+	protected AbstractCorpusSearch(SearchFactory factory, SearchQuery query,
 			Options parameters,	Object target) {
 		super(factory, query, parameters, target);
-		
+
 		observer = createObserver();
 		dataType = getDefaultDataType();
 	}
-	
+
 	protected DataType getDefaultDataType() {
 		return DataType.SYSTEM;
 	}
-	
+
 	protected AvailabilityObserver createObserver() {
 		return new CorpusObserver();
 	}
-	
+
+	/**
+	 * @see de.ims.icarus.search_tools.tree.AbstractTreeSearch#createWorker(int)
+	 */
+	@Override
+	protected Worker createWorker(int id) {
+		return new SentenceWorker(id);
+	}
+
 	@Override
 	protected SearchResult createResult(List<SearchConstraint> groupConstraints) {
-		
+
 		/* Only distinguish between 0D and ND where N>0 since 0D
 		 * can be implemented efficiently by using a simple list storage.
 		 */
 		if(groupConstraints.isEmpty()) {
 			return new CorpusSearchResult0D(this);
 		} else {
-			return new CorpusSearchResultND(this, 
+			return new CorpusSearchResultND(this,
 					groupConstraints.toArray(new SearchConstraint[0]));
 		}
-		
+
 	}
 
 	@Override
@@ -86,7 +94,7 @@ public abstract class AbstractCorpusSearch extends AbstractTreeSearch {
 	protected Object getTargetItem(int index) {
 		return ((SentenceDataList)source).get(index, dataType, observer);
 	}
-	
+
 	protected class CorpusObserver implements AvailabilityObserver {
 
 		/**
@@ -96,5 +104,58 @@ public abstract class AbstractCorpusSearch extends AbstractTreeSearch {
 		public void dataAvailable(int index, SentenceData item) {
 			offerItem(index, item);
 		}
+	}
+
+	protected class SentenceWorker extends SearchWorker {
+
+		protected int minLength;
+		protected int maxLength;
+
+		/**
+		 * @param id
+		 */
+		protected SentenceWorker(int id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.tree.AbstractTreeSearch.SearchWorker#init()
+		 */
+		@Override
+		protected void init() {
+
+			minLength = getParameters().getInteger(SEARCH_MIN_LENGTH);
+			maxLength = getParameters().getInteger(SEARCH_MAX_LENGTH);
+
+			if(minLength<=0) {
+				minLength = 0;
+			}
+
+			if(maxLength<=0) {
+				maxLength = Integer.MAX_VALUE;
+			}
+
+			if(minLength>maxLength)
+				throw new IllegalStateException("Value of minimum sentence length must be less than value for maxium length!"); //$NON-NLS-1$
+
+			super.init();
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.tree.AbstractTreeSearch.SearchWorker#process()
+		 */
+		@Override
+		protected void process() {
+			// NOTE: inevitably forces searched "items" to be SentenceData instances
+			//FIXME not quite the best way to filter out sentence length
+			int length = ((SentenceData) buffer.getData()).length();
+
+			if(length<minLength || length>maxLength) {
+				return;
+			}
+
+			super.process();
+		}
+
 	}
 }
