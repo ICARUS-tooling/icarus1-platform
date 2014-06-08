@@ -25,8 +25,12 @@
  */
 package de.ims.icarus.util.collections;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -50,7 +54,7 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
     @Link
 	private Object[] items;
     @Link
-	private IntValueHashMap lookup;
+	private TObjectIntMap<Object> lookup;
     @Primitive
 	private int modCount = 0;
 
@@ -210,6 +214,8 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
 		size = elements.length;
 		lookup = null;
 
+		checkRequiresLookup();
+
 		modCount++;
 	}
 
@@ -217,13 +223,34 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
 		int capacity = items.length;
 		float load = (float)size/capacity;
 
-		if(capacity>CollectionUtils.DEFAULT_CAPACITY
+		if(capacity>CollectionUtils.DEFAULT_COLLECTION_CAPACITY
 				&& load<CollectionUtils.DEFAULT_MIN_LOAD) {
 			items = Arrays.copyOf(items, size);
 		}
 
+		lookup = null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public E first() {
+		return (E) items[0];
+	}
+
+	@SuppressWarnings("unchecked")
+	public E last() {
+		return (E) items[size-1];
+	}
+
+	public synchronized void sort(Comparator<E> comparator) {
+		@SuppressWarnings("unchecked")
+		Comparator<Object> comp =(Comparator<Object>)comparator;
+		Arrays.sort(items, 0, size, comp);
+
 		if(lookup!=null) {
-			lookup.trim();
+			lookup.clear();
+			for(int i=0; i<size; i++) {
+				lookup.put(items[i], i);
+			}
 		}
 	}
 
@@ -241,10 +268,10 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
 
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    private void ensureCapacity(int minCapacity) {
+    public void ensureCapacity(int minCapacity) {
 
         if (items == EMPTY_ITEMS) {
-            minCapacity = Math.max(CollectionUtils.DEFAULT_CAPACITY, minCapacity);
+            minCapacity = Math.max(CollectionUtils.DEFAULT_COLLECTION_CAPACITY, minCapacity);
         }
 
         modCount++;
@@ -269,12 +296,10 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
 
     	if(requires && lookup==null) {
     		// Create and fill lookup
-    		lookup = new IntValueHashMap(size);
+    		lookup = new TObjectIntHashMap<>(size);
 
             for (int i = 0; i < size; i++) {
-            	@SuppressWarnings("unchecked")
-				E item = (E) items[i];
-            	lookup.put(item, i);
+            	lookup.put(items[i], i);
             }
     	}
 

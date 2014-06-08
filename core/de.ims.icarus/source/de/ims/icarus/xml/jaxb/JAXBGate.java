@@ -132,9 +132,7 @@ public abstract class JAXBGate<B extends Object> {
 		}
 
 		synchronized (bufferLock) {
-			pendingBuffer = buffer;
-
-			scheduleUpdate();
+			save(buffer);
 		}
 	}
 

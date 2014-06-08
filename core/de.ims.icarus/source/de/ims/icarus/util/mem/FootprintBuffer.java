@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.util.mem;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.collections.IntValueHashMap;
 import de.ims.icarus.util.strings.StringUtil;
 
 /**
@@ -51,7 +53,7 @@ public class FootprintBuffer implements MemoryFootprint {
 	private static final int FLOAT = 6;
 	private static final int DOUBLE = 7;
 
-	private static final IntValueHashMap typeLookup = new IntValueHashMap();
+	private static final TObjectIntMap<Class<?>> typeLookup = new TObjectIntHashMap<>();
 	static {
 		typeLookup.put(int.class, INTEGER);
 		typeLookup.put(short.class, SHORT);

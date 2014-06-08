@@ -141,4 +141,32 @@ public final class ClassUtils {
 		}
 		return typeArgumentsAsClasses;
 	}
+
+	public static int cast(Integer value) {
+		return value==null ? 0 : value.intValue();
+	}
+
+	public static long cast(Long value) {
+		return value==null ? 0L : value.intValue();
+	}
+
+	public static double cast(Double value) {
+		return value==null ? 0D : value.doubleValue();
+	}
+
+	public static float cast(Float value) {
+		return value==null ? 0F : value.floatValue();
+	}
+
+	public static short cast(Short value) {
+		return value==null ? 0 : value.shortValue();
+	}
+
+	public static byte cast(Byte value) {
+		return value==null ? 0 : value.byteValue();
+	}
+
+	public static boolean cast(Boolean value) {
+		return value==null ? false : value.booleanValue();
+	}
 }

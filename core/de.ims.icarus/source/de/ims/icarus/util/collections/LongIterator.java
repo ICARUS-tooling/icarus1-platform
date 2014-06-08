@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.util.collections;
 
+
 /**
  * @author Markus Gärtner
  * @version $Id$

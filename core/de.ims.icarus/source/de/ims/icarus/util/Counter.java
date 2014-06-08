@@ -25,10 +25,12 @@
  */
 package de.ims.icarus.util;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.util.Collection;
 
 import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.collections.IntValueHashMap;
 
 /**
  * @author Markus Gärtner
@@ -37,7 +39,7 @@ import de.ims.icarus.util.collections.IntValueHashMap;
  */
 public class Counter {
 
-	private IntValueHashMap counts = new IntValueHashMap();
+	private TObjectIntMap<Object> counts = new TObjectIntHashMap<>();
 
 	public Counter() {
 		// no-op

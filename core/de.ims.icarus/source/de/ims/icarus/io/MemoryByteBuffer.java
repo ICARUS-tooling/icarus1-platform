@@ -143,10 +143,10 @@ public class MemoryByteBuffer {
 		int newCapacity = Math.max((int)(capacity*growthFactor), required);
 
 		//FIXME
-		byte[] newBuffer = new byte[newCapacity];
-		System.arraycopy(buffer, 0, newBuffer, 0, size);
+//		byte[] newBuffer = new byte[newCapacity];
+//		System.arraycopy(buffer, 0, newBuffer, 0, size);
 
-		buffer = newBuffer;
+		buffer = Arrays.copyOf(buffer, newCapacity);
 	}
 
 	private class SlaveChannel implements SeekableByteChannel {
