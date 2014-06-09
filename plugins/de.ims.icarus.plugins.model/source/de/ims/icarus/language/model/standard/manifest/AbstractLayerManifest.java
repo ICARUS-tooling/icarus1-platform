@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.Set;
 
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
-import de.ims.icarus.language.model.api.manifest.Prerequisite;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.language.model.xml.XmlSerializer;
 import de.ims.icarus.language.model.xml.XmlWriter;
@@ -46,7 +46,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractManifest<L> implements LayerManifest {
 
-	private List<Prerequisite> prerequisites = new ArrayList<>(3);
+	private List<PrerequisiteManifest> prerequisites = new ArrayList<>(3);
 	private boolean indexable = true, searchable = true;
 	private ContextManifest contextManifest;
 	private MarkableLayerManifest baseLayerManifest;
@@ -61,7 +61,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	protected void readTemplate(L template) {
 		super.readTemplate(template);
 
-		for(Prerequisite prerequisite : template.getPrerequisites()) {
+		for(PrerequisiteManifest prerequisite : template.getPrerequisites()) {
 			if(!prerequisites.contains(prerequisite)) {
 				prerequisites.add(prerequisite);
 			}
@@ -93,11 +93,11 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	 * @see de.ims.icarus.language.model.api.manifest.LayerManifest#getPrerequisites()
 	 */
 	@Override
-	public List<Prerequisite> getPrerequisites() {
+	public List<PrerequisiteManifest> getPrerequisites() {
 		return CollectionUtils.getListProxy(prerequisites);
 	}
 
-	public void addPrerequisite(Prerequisite prerequisite) {
+	public void addPrerequisite(PrerequisiteManifest prerequisite) {
 		if(prerequisite==null)
 			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
 
@@ -107,7 +107,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		prerequisites.add(prerequisite);
 	}
 
-	public void removePrerequisite(Prerequisite prerequisite) {
+	public void removePrerequisite(PrerequisiteManifest prerequisite) {
 		if(prerequisite==null)
 			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
 
@@ -255,10 +255,10 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 			throws Exception {
 		super.writeTemplateXmlElements(serializer);
 
-		Set<Prerequisite> tmp = new HashSet<>(prerequisites);
+		Set<PrerequisiteManifest> tmp = new HashSet<>(prerequisites);
 		tmp.removeAll(getTemplate().getPrerequisites());
 
-		for(Prerequisite prerequisite : tmp) {
+		for(PrerequisiteManifest prerequisite : tmp) {
 			XmlWriter.writePrerequisiteElement(serializer, prerequisite);
 		}
 	}
@@ -272,7 +272,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 			throws Exception {
 		super.writeFullXmlElements(serializer);
 
-		for(Prerequisite prerequisite : prerequisites) {
+		for(PrerequisiteManifest prerequisite : prerequisites) {
 			XmlWriter.writePrerequisiteElement(serializer, prerequisite);
 		}
 	}

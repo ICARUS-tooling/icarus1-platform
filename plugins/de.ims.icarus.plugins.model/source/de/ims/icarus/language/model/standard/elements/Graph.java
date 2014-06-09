@@ -75,7 +75,7 @@ public class Graph {
 	@HeapMember
 	private static class Entry {
 		// Node for which edges need to be stored
-		@Link
+		@Reference
 		Markable node;
 		// Array index of the first incoming edge
 		@Primitive
@@ -84,7 +84,7 @@ public class Graph {
 		@Primitive
 		int countOut = 0;
 		// Edges, incoming first, then outgoing
-		@Reference(ReferenceType.DOWNLINK)
+		@Reference
 		Edge[] edges;
 		@Link
 		Entry next;
@@ -96,7 +96,7 @@ public class Graph {
 	}
 
 	public Graph() {
-		this(CollectionUtils.DEFAULT_CAPACITY);
+		this(CollectionUtils.DEFAULT_COLLECTION_CAPACITY);
 	}
 
 
@@ -115,6 +115,9 @@ public class Graph {
 	}
 
 	private Entry get(Markable node, boolean createIfMissing) {
+		if (node == null)
+			throw new NullPointerException("Invalid node");  //$NON-NLS-1$
+
 		Entry tab[] = table;
 		int hash = node.hashCode();
 		int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -156,9 +159,6 @@ public class Graph {
 	}
 
 	public int edgeCount(Markable node) {
-		if(node==null)
-			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
-
 		Entry entry = get(node, false);
 		if(entry==null) {
 			return 0;
@@ -168,9 +168,6 @@ public class Graph {
 	}
 
 	public int edgeCount(Markable node, boolean incoming) {
-		if(node==null)
-			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
-
 		Entry entry = get(node, false);
 		if(entry==null) {
 			return 0;
@@ -180,9 +177,6 @@ public class Graph {
 	}
 
 	public Edge edgeAt(Markable node, int index) {
-		if(node==null)
-			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
-
 		Entry entry = get(node, false);
 		if(entry==null || entry.edges==null)
 			throw new IndexOutOfBoundsException("No edges for node "+node); //$NON-NLS-1$
@@ -191,9 +185,6 @@ public class Graph {
 	}
 
 	public Edge edgeAt(Markable node, boolean incoming, int index) {
-		if(node==null)
-			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
-
 		Entry entry = get(node, false);
 		if(entry==null || entry.edges==null)
 			throw new IndexOutOfBoundsException("No edges for node "+node); //$NON-NLS-1$
@@ -334,7 +325,12 @@ public class Graph {
 		for (int index = tab.length; --index >= 0;) {
 			for (int i = tab.length; i-- > 0;) {
 				for (Entry e = tab[i]; e != null; e = e.next) {
-					e.edges = new Edge[e.countIn+e.countOut];
+					// Expand storage only if insufficient
+					//TODO consider if contunally expanding storage is a good idea?
+					int size = e.countIn+e.countOut;
+					if(e.edges==null || e.edges.length<size) {
+						e.edges = new Edge[size];
+					}
 				}
 			}
 		}
@@ -377,7 +373,7 @@ public class Graph {
 		int capacity = table.length;
 		float load = (float)count/capacity;
 
-		if(capacity>CollectionUtils.DEFAULT_CAPACITY
+		if(capacity>CollectionUtils.DEFAULT_COLLECTION_CAPACITY
 				&& load<CollectionUtils.DEFAULT_MIN_LOAD) {
 			rehash(count);
 		}

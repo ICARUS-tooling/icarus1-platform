@@ -23,33 +23,36 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.layer;
+package de.ims.icarus.language.model.standard.driver.file.index;
 
-import de.ims.icarus.language.model.api.layer.LayerGroup;
-import de.ims.icarus.language.model.api.layer.StructureLayer;
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
+public interface IndexSourceReader extends Closeable {
+
+	boolean open() throws IOException;
 
 	/**
+	 * Returns the number of chunks in the underlying
+	 * {@code ChunkIndex}.
 	 *
-	 * @param manifest
-	 * @param group
+	 * @return
 	 */
-	public DefaultStructureLayer(StructureLayerManifest manifest, LayerGroup group) {
-		super(manifest, group);
-	}
+	long getEntryCount();
 
 	/**
-	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
+	 * Returns the position at the file level a chunk specified
+	 * via the {@code index} parameter is located at. Note that for
+	 * chunk indices that only cover a single corpus file this method
+	 * will always return {@code 0}
+	 *
+	 * @param index
+	 * @return
 	 */
-	@Override
-	public StructureLayerManifest getManifest() {
-		return (StructureLayerManifest) super.getManifest();
-	}
+	int getFileId(long index);
 }

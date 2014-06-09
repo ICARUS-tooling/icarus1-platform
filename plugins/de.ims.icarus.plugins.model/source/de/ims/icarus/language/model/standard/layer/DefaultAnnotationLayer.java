@@ -33,17 +33,16 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
 import de.ims.icarus.language.model.api.Container;
-import de.ims.icarus.language.model.api.Context;
-import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.api.layer.AnnotationLayer;
-import de.ims.icarus.language.model.api.layer.MarkableLayer;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.language.model.util.CorpusMemberUtils;
+import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.Consumer;
 import de.ims.icarus.util.CorruptedStateException;
 
@@ -61,8 +60,8 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultAnnotationLayer(Context context, AnnotationLayerManifest manifest) {
-		super(context, manifest);
+	public DefaultAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
+		super(manifest, group);
 	}
 
 	protected Map<Markable, Object> getDefaultAnnotations() {
@@ -125,10 +124,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		if (markable == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 
-		boolean deepAnnotation = getManifest().isDeepAnnotation();
-
-		MarkableLayer markableLayer = markable.getLayer();
-		if(markableLayer!=getBaseLayer() && !deepAnnotation)
+		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
 			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		List<Markable> buffer = new ArrayList<>();
@@ -176,8 +172,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		if (markable == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 
-		MarkableLayer markableLayer = markable.getLayer();
-		if(markableLayer!=getBaseLayer() && !getManifest().isDeepAnnotation())
+		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
 			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		AnnotationManifest annotationManifest = getManifest().getDefaultAnnotationManifest();
@@ -222,12 +217,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 * @throws UnsupportedOperationException if the corpus is not editable
 	 */
 	protected void execute(AtomicChange change) {
-		Corpus corpus = getCorpus();
-
-		if(!corpus.getManifest().isEditable())
-			throw new UnsupportedOperationException("Corpus does not support modifications"); //$NON-NLS-1$
-
-		corpus.getEditModel().execute(change);
+		CorpusUtils.dispatchChange(this, change);
 	}
 
 	private class ClearChange implements AtomicChange {

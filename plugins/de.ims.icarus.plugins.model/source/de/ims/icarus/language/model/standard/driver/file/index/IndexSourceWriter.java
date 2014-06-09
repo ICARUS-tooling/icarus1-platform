@@ -23,33 +23,46 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.layer;
+package de.ims.icarus.language.model.standard.driver.file.index;
 
-import de.ims.icarus.language.model.api.layer.LayerGroup;
-import de.ims.icarus.language.model.api.layer.StructureLayer;
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
+public interface IndexSourceWriter extends Closeable, Flushable {
 
 	/**
+	 * Attempts to open a data channel to the underlying chunk index and
+	 * returns true if not already open.
 	 *
-	 * @param manifest
-	 * @param group
+	 * @return
+	 * @throws IOException
 	 */
-	public DefaultStructureLayer(StructureLayerManifest manifest, LayerGroup group) {
-		super(manifest, group);
-	}
+	boolean open() throws IOException;
 
 	/**
-	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
+	 * Erases all data in the underlying index source.
+	 * @return
+	 * @throws IOException
 	 */
-	@Override
-	public StructureLayerManifest getManifest() {
-		return (StructureLayerManifest) super.getManifest();
-	}
+	long clear() throws IOException;
+
+	int setFileId(long index, int fileId);
+
+	/**
+	 * Returns whether or not this writer is able to handle the
+	 * given {@code index}, i.e. if its implementation is capable
+	 * of addressing or storing values in that magnitude. Note that
+	 * any value that passes this check by returning {@code true} must
+	 * not yield {@code IndexOutOfBoundsException}s when passed to any
+	 * of the modification methods!
+	 *
+	 * @return
+	 */
+	boolean isIndexSupported(long index);
 }

@@ -23,33 +23,50 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.layer;
+package de.ims.icarus.language.model.standard.index;
 
-import de.ims.icarus.language.model.api.layer.LayerGroup;
-import de.ims.icarus.language.model.api.layer.StructureLayer;
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.driver.IndexSet;
+import de.ims.icarus.language.model.api.driver.indexing.IndexCollector;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
+public class IndexSetBuilder implements IndexCollector {
 
-	/**
-	 *
-	 * @param manifest
-	 * @param group
-	 */
-	public DefaultStructureLayer(StructureLayerManifest manifest, LayerGroup group) {
-		super(manifest, group);
+	private final int setSizeLimit;
+
+	public IndexSetBuilder(int setSizeLimit) {
+		if(setSizeLimit<1)
+			throw new IllegalArgumentException("Size limit of index sets must be greater than 0: "+setSizeLimit); //$NON-NLS-1$
+
+		this.setSizeLimit = setSizeLimit;
 	}
 
-	/**
-	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
-	 */
 	@Override
-	public StructureLayerManifest getManifest() {
-		return (StructureLayerManifest) super.getManifest();
+	public void add(long index) {
+
+	}
+
+	public void add(long fromIndex, long toIndex) {
+
+	}
+
+	@Override
+	public void add(IndexSet indexSet) {
+
+	}
+
+	public void add(long[] indices) {
+
+	}
+
+	public void add(IndexSet[] indices) {
+
+	}
+
+	public IndexSet[] build() {
+
 	}
 }

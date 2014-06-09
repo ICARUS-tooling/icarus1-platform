@@ -35,11 +35,11 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
 import de.ims.icarus.language.model.api.Container;
-import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.util.CorruptedStateException;
@@ -59,8 +59,8 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	 * @param context
 	 * @param manifest
 	 */
-	public ComplexAnnotationLayer(Context context, AnnotationLayerManifest manifest) {
-		super(context, manifest);
+	public ComplexAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
+		super(manifest, group);
 	}
 
 	private void checkKey(String key) {

@@ -35,6 +35,7 @@ import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.mem.HeapMember;
+import de.ims.icarus.util.mem.Link;
 import de.ims.icarus.util.mem.Reference;
 
 /**
@@ -47,8 +48,8 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 
 	@Reference
 	private Container boundary;
-	@Reference
-	private MemberSet<Container> base;
+	@Link
+	private MemberSet<Container> base = EMPTY_BASE_SET;
 
 	/**
 	 * @param id

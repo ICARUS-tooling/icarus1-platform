@@ -147,7 +147,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	/**
 	 * @return the boundaryLayer
 	 */
-	public String getBoundaryLayer() {
+	public String getBoundaryLayerManifest() {
 		return boundaryLayer;
 	}
 

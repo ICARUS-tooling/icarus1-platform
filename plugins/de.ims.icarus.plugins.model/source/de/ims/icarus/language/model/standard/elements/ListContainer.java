@@ -75,12 +75,17 @@ public class ListContainer extends AbstractContainer {
 		list().add(markable);
 	}
 
+	public void clear() {
+		list().clear();
+	}
+
 	/**
 	 * @see de.ims.icarus.language.model.standard.elements.AbstractContainer#recycle()
 	 */
 	@Override
 	public void recycle() {
 		super.recycle();
+
 		if(list!=null); {
 			list.clear();
 		}

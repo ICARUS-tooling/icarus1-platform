@@ -23,33 +23,54 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.layer;
+package de.ims.icarus.language.model.standard.index;
 
-import de.ims.icarus.language.model.api.layer.LayerGroup;
-import de.ims.icarus.language.model.api.layer.StructureLayer;
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.language.model.api.driver.IndexSet;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
+public class SingletonIndexSet implements IndexSet {
 
-	/**
-	 *
-	 * @param manifest
-	 * @param group
-	 */
-	public DefaultStructureLayer(StructureLayerManifest manifest, LayerGroup group) {
-		super(manifest, group);
+	private final long index;
+
+	public SingletonIndexSet(long index) {
+		if(index<0)
+			throw new IllegalArgumentException("Index is negative: "+index); //$NON-NLS-1$
+
+		this.index = index;
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
+	 * @see de.ims.icarus.language.model.api.driver.IndexSet#size()
 	 */
 	@Override
-	public StructureLayerManifest getManifest() {
-		return (StructureLayerManifest) super.getManifest();
+	public int size() {
+		return 1;
 	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.driver.IndexSet#indexAt(int)
+	 */
+	@Override
+	public long indexAt(int index) {
+		if(index!=0)
+			throw new IndexOutOfBoundsException();
+
+		return this.index;
+	}
+
+	/**
+	 * This implementation wraps itself into a new array of size {@code 1} and returns
+	 * that array.
+	 *
+	 * @see de.ims.icarus.language.model.api.driver.IndexSet#split(int)
+	 */
+	@Override
+	public IndexSet[] split(int chunkSize) {
+		return new IndexSet[]{this};
+	}
+
 }

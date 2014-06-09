@@ -23,33 +23,25 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.layer;
+package de.ims.icarus.language.model.standard.driver.file.index.chunks;
 
-import de.ims.icarus.language.model.api.layer.LayerGroup;
-import de.ims.icarus.language.model.api.layer.StructureLayer;
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import java.io.IOException;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
+public class IndexFormatException extends IOException {
 
-	/**
-	 *
-	 * @param manifest
-	 * @param group
-	 */
-	public DefaultStructureLayer(StructureLayerManifest manifest, LayerGroup group) {
-		super(manifest, group);
+	private static final long serialVersionUID = 290232354113252546L;
+
+	public IndexFormatException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	/**
-	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
-	 */
-	@Override
-	public StructureLayerManifest getManifest() {
-		return (StructureLayerManifest) super.getManifest();
+	public IndexFormatException(String message) {
+		super(message);
 	}
+
 }

@@ -23,33 +23,32 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.standard.layer;
+package de.ims.icarus.language.model.standard.driver.file.index.chunks;
 
-import de.ims.icarus.language.model.api.layer.LayerGroup;
-import de.ims.icarus.language.model.api.layer.StructureLayer;
-import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
+import java.io.Flushable;
+
+import de.ims.icarus.language.model.io.SynchronizedAccessor;
 
 /**
+ * Defines the writer interface to get data into a {@link ChunkIndex}.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultStructureLayer extends DefaultMarkableLayer implements StructureLayer {
+public interface ChunkIndexWriter extends SynchronizedAccessor<ChunkIndex>, Flushable {
 
 	/**
+	 * Changes the file id for the given {@code index} to the new value
+	 * and returns the old value if one was set.
 	 *
-	 * @param manifest
-	 * @param group
+	 * @param index
+	 * @param fileId
+	 * @return the value previously stored as file id for the given {@code index}
 	 */
-	public DefaultStructureLayer(StructureLayerManifest manifest, LayerGroup group) {
-		super(manifest, group);
-	}
+	int setFileId(long index, int fileId);
 
-	/**
-	 * @see de.ims.icarus.language.model.api.standard.layer.AbstractLayer#getManifest()
-	 */
-	@Override
-	public StructureLayerManifest getManifest() {
-		return (StructureLayerManifest) super.getManifest();
-	}
+	long setBeginOffset(long index, long offset);
+
+	long setEndOffset(long index, long offset);
 }

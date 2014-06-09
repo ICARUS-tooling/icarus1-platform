@@ -44,17 +44,105 @@ import de.ims.icarus.util.mem.ReferenceType;
  */
 public class MemberSets {
 
+	@SuppressWarnings("rawtypes")
+	public static final MemberSet EMPTY_SET = new EmptySet<>();
+
+	@SuppressWarnings("unchecked")
+	public static <E> MemberSet<E> emptySet() {
+		return (MemberSet<E>) EMPTY_SET;
+	}
+
+	public static final int ARRAY_SET_THRESHOLD = 7;
+
+	public static <E extends Object> MemberSet<E> createMemberSet(List<E> items) {
+		if (items == null)
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
+
+		int size = items.size();
+
+		if(size==0) {
+			return null;
+		} else if(size==1) {
+			return new SingletonSet<>(items.get(0));
+		} else if(size<=ARRAY_SET_THRESHOLD) {
+			return new ArraySet<>(items);
+		} else {
+			return new CachedSet<>(items);
+		}
+	}
+
 	@HeapMember
-	public abstract static class AbstractContainerSet<E extends Object> implements MemberSet<E>, Recyclable {
+	public abstract static class AbstractMemberSet<E extends Object> implements MemberSet<E>, Recyclable {
 
 		public abstract void add(E element);
 	}
 
+
+	public static class EmptySet<E extends Object> extends AbstractMemberSet<E> {
+
+		/**
+		 * @see de.ims.icarus.language.model.api.MemberSet#size()
+		 */
+		@Override
+		public int size() {
+			return 0;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.MemberSet#elementAt(int)
+		 */
+		@Override
+		public E elementAt(int index) {
+			throw new IndexOutOfBoundsException();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.MemberSet#contains(java.lang.Object)
+		 */
+		@Override
+		public boolean contains(E member) {
+			return false;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.util.Recyclable#recycle()
+		 */
+		@Override
+		public void recycle() {
+			// no-op
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.util.Recyclable#revive()
+		 */
+		@Override
+		public boolean revive() {
+			return true;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractMemberSet#add(java.lang.Object)
+		 */
+		@Override
+		public void add(E element) {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
 	@HeapMember
-	public static class SingletonSet<E extends Object> extends AbstractContainerSet<E> {
+	public static class SingletonSet<E extends Object> extends AbstractMemberSet<E> {
 
 		@Reference(ReferenceType.DOWNLINK)
 		private E item;
+
+		public SingletonSet() {
+			// no-op
+		}
+
+		public SingletonSet(E item) {
+			reset(item);
+		}
 
 		/**
 		 * @see de.ims.icarus.language.model.api.MemberSet#size()
@@ -116,7 +204,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractContainerSet#add(java.lang.Object)
+		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractMemberSet#add(java.lang.Object)
 		 */
 		@Override
 		public void add(E element) {
@@ -129,10 +217,23 @@ public class MemberSets {
 	}
 
 	@HeapMember
-	public static class ArraySet<E extends Object> extends AbstractContainerSet<E> {
+	public static class ArraySet<E extends Object> extends AbstractMemberSet<E> {
 
 		@Reference(ReferenceType.DOWNLINK)
 		private Object[] items;
+
+		public ArraySet() {
+			// no-op
+		}
+
+		@SafeVarargs
+		public ArraySet(E...items) {
+			reset(items);
+		}
+
+		public ArraySet(List<? extends E> items) {
+			reset(items);
+		}
 
 		/**
 		 * @see de.ims.icarus.language.model.api.MemberSet#size()
@@ -222,7 +323,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractContainerSet#add(java.lang.Object)
+		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractMemberSet#add(java.lang.Object)
 		 */
 		@Override
 		public void add(E element) {
@@ -243,9 +344,22 @@ public class MemberSets {
 	}
 
 	@HeapMember
-	public static class CachedSet<E extends Object> extends AbstractContainerSet<E> {
+	public static class CachedSet<E extends Object> extends AbstractMemberSet<E> {
 
 		private final LookupList<E> items = new LookupList<>();
+
+		public CachedSet() {
+			// no-op
+		}
+
+		@SafeVarargs
+		public CachedSet(E...items) {
+			reset(items);
+		}
+
+		public CachedSet(List<? extends E> items) {
+			reset(items);
+		}
 
 		/**
 		 * @see de.ims.icarus.language.model.api.MemberSet#size()
@@ -310,7 +424,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractContainerSet#add(java.lang.Object)
+		 * @see de.ims.icarus.language.model.standard.elements.MemberSets.AbstractMemberSet#add(java.lang.Object)
 		 */
 		@Override
 		public void add(E element) {

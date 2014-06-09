@@ -25,25 +25,29 @@
  */
 package de.ims.icarus.language.model.standard.layer;
 
-import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.standard.driver.cache.MemberCache;
+import de.ims.icarus.language.model.standard.driver.cache.MemberPool;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> implements MarkableLayer {
+public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> implements MarkableLayer, CachedLayer {
 
 	private MarkableLayer boundaryLayer;
+	private MemberCache cache;
+	private MemberPool pool;
 
 	/**
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultMarkableLayer(Context context, MarkableLayerManifest manifest) {
-		super(context, manifest);
+	public DefaultMarkableLayer(MarkableLayerManifest manifest, LayerGroup group) {
+		super(manifest, group);
 	}
 
 	/**
@@ -64,4 +68,39 @@ public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> i
 		return boundaryLayer;
 	}
 
+	/**
+	 * @see de.ims.icarus.language.model.standard.layer.CachedLayer#getCache()
+	 */
+	@Override
+	public MemberCache getCache() {
+		return cache;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.standard.layer.CachedLayer#getPool()
+	 */
+	@Override
+	public MemberPool getPool() {
+		return pool;
+	}
+
+	/**
+	 * @param cache the cache to set
+	 */
+	public void setCache(MemberCache cache) {
+		if (cache == null)
+			throw new NullPointerException("Invalid cache");  //$NON-NLS-1$
+
+		this.cache = cache;
+	}
+
+	/**
+	 * @param pool the pool to set
+	 */
+	public void setPool(MemberPool pool) {
+		if (pool == null)
+			throw new NullPointerException("Invalid pool");  //$NON-NLS-1$
+
+		this.pool = pool;
+	}
 }

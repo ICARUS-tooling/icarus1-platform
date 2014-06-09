@@ -32,7 +32,7 @@ import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.MemberSet;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.layer.Layer;
-import de.ims.icarus.language.model.api.layer.LayerType;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.util.CorpusUtils;
@@ -46,19 +46,20 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 
 	private final Context context;
 	private final M manifest;
-	private MemberSet<MarkableLayer> baseLayers;
-	private LayerType layerType;
+	private MemberSet<MarkableLayer> baseLayers = EMPTY_BASE_SET;
+	private final LayerGroup group;
 
 	private final Markable markableProxy;
 
-	public AbstractLayer(Context context, M manifest) {
-		if (context == null)
-			throw new NullPointerException("Invalid context");  //$NON-NLS-1$
+	public AbstractLayer(M manifest, LayerGroup group) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest");  //$NON-NLS-1$
+		if (group == null)
+			throw new NullPointerException("Invalid group"); //$NON-NLS-1$
 
-		this.context = context;
+		this.context = group.getContext();
 		this.manifest = manifest;
+		this.group = group;
 
 		markableProxy = new ProxyMarkable();
 	}
@@ -67,17 +68,10 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	 * @param baseLayer the baseLayer to set
 	 */
 	public void setBaseLayers(MemberSet<MarkableLayer> baseLayers) {
+		if (baseLayers == null)
+			throw new NullPointerException("Invalid baseLayers"); //$NON-NLS-1$
+
 		this.baseLayers = baseLayers;
-	}
-
-	/**
-	 * @param layerType the layerType to set
-	 */
-	public void setLayerType(LayerType layerType) {
-		if (layerType == null)
-			throw new NullPointerException("Invalid layer-type");  //$NON-NLS-1$
-
-		this.layerType = layerType;
 	}
 
 	/**
@@ -102,14 +96,6 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	@Override
 	public String getName() {
 		return getManifest().getName();
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.layer.Layer#getLayerType()
-	 */
-	@Override
-	public LayerType getLayerType() {
-		return layerType;
 	}
 
 	/**
@@ -158,6 +144,14 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	@Override
 	public Markable getMarkableProxy() {
 		return markableProxy;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.model.api.layer.Layer#getLayerGroup()
+	 */
+	@Override
+	public LayerGroup getLayerGroup() {
+		return group;
 	}
 
 	/**

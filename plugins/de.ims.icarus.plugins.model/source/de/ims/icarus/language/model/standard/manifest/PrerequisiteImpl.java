@@ -33,7 +33,7 @@ import de.ims.icarus.util.strings.StringUtil;
  * @version $Id$
  *
  */
-public class PrerequisiteImpl implements Prerequisite {
+public class PrerequisiteImpl implements PrerequisiteManifest {
 
 	private final String layerId;
 	private final String typeId;
@@ -69,7 +69,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getLayerId()
+	 * @see de.ims.icarus.language.model.api.manifest.PrerequisiteManifest#getLayerId()
 	 */
 	@Override
 	public String getLayerId() {
@@ -77,7 +77,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getTypeId()
+	 * @see de.ims.icarus.language.model.api.manifest.PrerequisiteManifest#getTypeId()
 	 */
 	@Override
 	public String getTypeId() {
@@ -85,7 +85,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getContextId()
+	 * @see de.ims.icarus.language.model.api.manifest.PrerequisiteManifest#getContextId()
 	 */
 	@Override
 	public String getContextId() {
@@ -93,7 +93,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.manifest.Prerequisite#getAlias()
+	 * @see de.ims.icarus.language.model.api.manifest.PrerequisiteManifest#getAlias()
 	 */
 	@Override
 	public String getAlias() {
@@ -113,8 +113,8 @@ public class PrerequisiteImpl implements Prerequisite {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Prerequisite) {
-			String name = ((Prerequisite) obj).getLayerId();
+		if(obj instanceof PrerequisiteManifest) {
+			String name = ((PrerequisiteManifest) obj).getLayerId();
 			return name!=null && layerId.equals(name);
 		}
 		return false;
@@ -125,7 +125,7 @@ public class PrerequisiteImpl implements Prerequisite {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("Prerequisite["); //$NON-NLS-1$
+		StringBuilder sb = new StringBuilder("PrerequisiteManifest["); //$NON-NLS-1$
 		if(contextId!=null) {
 			sb.append("context-id=").append(contextId).append(' '); //$NON-NLS-1$
 		}

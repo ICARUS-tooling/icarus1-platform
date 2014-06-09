@@ -34,6 +34,7 @@ import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.language.model.util.Recyclable;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Primitive;
 import de.ims.icarus.util.mem.Reference;
 import de.ims.icarus.util.mem.ReferenceType;
@@ -45,6 +46,7 @@ import de.ims.icarus.util.mem.ReferenceType;
  * @version $Id$
  *
  */
+@HeapMember
 public abstract class AbstractMarkable implements Markable, Recyclable {
 
 	@Primitive
@@ -110,7 +112,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	 * @throws UnsupportedOperationException if the corpus is not editable
 	 */
 	protected void execute(AtomicChange change) {
-		getCorpus().getEditModel().execute(change);
+		CorpusUtils.dispatchChange(this, change);
 	}
 
 
