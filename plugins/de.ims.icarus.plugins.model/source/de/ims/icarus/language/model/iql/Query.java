@@ -41,7 +41,7 @@ public interface Query {
 	 * information of this query instance, minus all the data, that
 	 * has not been introduced by means of a {@link Context} definition.
 	 * This includes (but is not limited to) for example {@link Function},
-	 * {@link Predicate} or {@code Relation} objects or types of <i>inter-layer</i>
+	 * {@link Predicate} or {link Relation} objects or types of <i>inter-layer</i>
 	 * edges.
 	 */
 	Query simplify();
@@ -64,7 +64,12 @@ public interface Query {
 	 * @throws IllegalStateException if the query is not derived from another request and therefore
 	 * cannot provide a list of pre-filtered candidates
 	 */
-	IndexSet getCandidates();
+	IndexSet[] getCandidates();
 
-	Scope getScope();
+	Scope getResultScope();
+
+	Query clone();
+
+	@Override
+	String toString();
 }

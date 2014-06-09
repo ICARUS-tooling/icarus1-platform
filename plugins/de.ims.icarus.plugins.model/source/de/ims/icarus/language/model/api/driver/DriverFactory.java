@@ -25,7 +25,8 @@
  */
 package de.ims.icarus.language.model.api.driver;
 
-import de.ims.icarus.language.model.api.Context;
+import de.ims.icarus.language.model.api.Corpus;
+import de.ims.icarus.language.model.api.manifest.ContextManifest;
 
 /**
  * @author Markus Gärtner
@@ -35,9 +36,9 @@ import de.ims.icarus.language.model.api.Context;
 public interface DriverFactory {
 
 	/**
-	 * Creates a driver for the given {@code Context}.
-	 * @param context
+	 * Creates a driver for the given {@code ContextManifest}.
+	 * @param manifest
 	 * @return
 	 */
-	Driver createDriver(Context context);
+	Driver createDriver(ContextManifest manifest, Corpus corpus);
 }

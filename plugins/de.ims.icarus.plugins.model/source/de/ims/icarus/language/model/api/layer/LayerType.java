@@ -33,7 +33,8 @@ import de.ims.icarus.util.id.Identity;
  * group layers according to an abstract description of their content. Besides
  * serving as a mere identifier to that abstract description, a {@code LayerType}
  * optionally provides a {@link LayerManifest} that contains further specifications
- * on how the content might be structured or other informations.
+ * on how the content might be structured or other informations. Each layer type
+ * is globally identifiably by its unique id.
  *
  * @author Markus Gärtner
  * @version $Id$

@@ -25,33 +25,51 @@
  */
 package de.ims.icarus.language.model.api;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class CorpusException extends Exception {
+public class CorpusException extends RuntimeException {
 
 	private static final long serialVersionUID = -3508678907020081630L;
 
-	private final Corpus corpus;
+	private final Reference<Corpus> source;
+	private final CorpusError error;
 
-	public CorpusException(Corpus corpus, String message, Throwable cause) {
+	public CorpusException(Corpus corpus, CorpusError error, String message, Throwable cause) {
 		super(message, cause);
 
-		this.corpus = corpus;
+		if(error==null) {
+			error = CorpusError.UNKNOWN_ERROR;
+		}
+
+		this.source = corpus==null ? null : new WeakReference<>(corpus);
+		this.error = error;
+	}
+
+	public CorpusException(Corpus corpus, CorpusError error, String message) {
+		this(corpus, error, message, null);
 	}
 
 	public CorpusException(Corpus corpus, String message) {
-		super(message);
-
-		this.corpus = corpus;
+		this(corpus, null, message, null);
 	}
 
 	/**
-	 * @return the corpus
+	 * @return the corpus this exception is bound to
 	 */
 	public Corpus getCorpus() {
-		return corpus;
+		return source.get();
+	}
+
+	/**
+	 * @return the error
+	 */
+	public CorpusError getError() {
+		return error;
 	}
 }

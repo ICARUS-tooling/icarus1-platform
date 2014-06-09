@@ -30,7 +30,7 @@ package de.ims.icarus.language.model.api.manifest;
  * @version $Id$
  *
  */
-public interface PathResolverManifest extends MemberManifest {
+public interface PathResolverManifest extends MemberManifest, ImplementationManifest {
 
 	// no-op
 }

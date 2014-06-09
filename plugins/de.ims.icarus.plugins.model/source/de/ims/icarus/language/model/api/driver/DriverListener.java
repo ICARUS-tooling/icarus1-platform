@@ -26,16 +26,13 @@
 package de.ims.icarus.language.model.api.driver;
 
 import de.ims.icarus.language.model.api.Container;
-import de.ims.icarus.language.model.api.Corpus;
-import de.ims.icarus.language.model.api.Edge;
 import de.ims.icarus.language.model.api.Markable;
-import de.ims.icarus.language.model.api.Structure;
-import de.ims.icarus.language.model.api.layer.MarkableLayer;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 
 /**
  * Provides the uplink from a {@code Driver} implementation to
  * the {@code Corpus} that hosts the actual model objects. Each
- * {@code ChunkManager} is coupled with a single {@code Corpus} and
+ * {@code DriverListener} is coupled with a single {@code Corpus} and
  * has full access to all the loaded data within this corpus instance.
  * Its task is providing an interface to {@code Driver} objects to
  * fetch and register chunks of data.
@@ -44,9 +41,9 @@ import de.ims.icarus.language.model.api.layer.MarkableLayer;
  * @version $Id$
  *
  */
-public interface ChunkManager {
+public interface DriverListener {
 
-	Corpus getCorpus();
+//	Corpus getCorpus();
 
 	/**
 	 * Callback to signal the successful loading of a new data chunk
@@ -54,7 +51,7 @@ public interface ChunkManager {
 	 * @param id
 	 * @param markable
 	 */
-	void chunkLoaded(long index, MarkableLayer layer, Markable markable);
+	void chunkLoaded(long index, LayerGroup layerGroup, Markable markable);
 
 	/**
 	 * Signals that a certain data chunk could not be loaded. The reason is typically
@@ -64,28 +61,30 @@ public interface ChunkManager {
 	 * to additional layers</li>
 	 * <li>The driver detected an inconsistency and considers the data chunk for the given
 	 * index invalid. This only happens when there is a markable object already existing for this
-	 * index. As a result to this method call the {@code ChunkManager} should discard all stored data
+	 * index. As a result to this method call the {@code DriverListener} should discard all stored data
 	 * for the specified chunk and later attempt to load it again.</li>
 	 * </ol>
 	 * The latter case is signaled with the {@code corrupted} argument being {@code true}.
+	 * Note that the {@code Markable} associated with the given index will still be available
+	 * through the layer's cache as long as the {@code corrupted} argument is {@code false}.
 	 *
 	 * @param index
 	 * @param corrupted
 	 */
-	void chunkSkipped(long index, MarkableLayer layer, boolean corrupted);
+	void chunkSkipped(long index, LayerGroup layerGroup, ChunkStatus status);
 
-	/**
-	 * Lookup an existing chunk in the specified layer. If no markable could be found in the data
-	 * storage for the given {@code index} then this method should return {@code null}.
-	 * <p>
-	 * Note that there is no dedicated method for the lookup of {@link Edge}s, since it is not possible
-	 * to partially load the edges of a {@link Structure}. Unlike regular {@link Container}s they would lose an
-	 * important aspect of their content in discarding edges.
-	 *
-	 * @param layer
-	 * @param index the global index of the {@code Markable} to be fetched, unaffected by horizontal
-	 * filtering and without index translation.
-	 * @return
-	 */
-	Markable getChunk(MarkableLayer layer, long index);
+//	/**
+//	 * Lookup an existing chunk in the specified layer. If no markable could be found in the data
+//	 * storage for the given {@code index} then this method should return {@code null}.
+//	 * <p>
+//	 * Note that there is no dedicated method for the lookup of {@link Edge}s, since it is not possible
+//	 * to partially load the edges of a {@link Structure}. Unlike regular {@link Container}s they would lose an
+//	 * important aspect of their content in discarding edges.
+//	 *
+//	 * @param layer
+//	 * @param index the global index of the {@code Markable} to be fetched, unaffected by horizontal
+//	 * filtering and without index translation.
+//	 * @return
+//	 */
+//	Markable getChunk(MarkableLayer layer, long index);
 }

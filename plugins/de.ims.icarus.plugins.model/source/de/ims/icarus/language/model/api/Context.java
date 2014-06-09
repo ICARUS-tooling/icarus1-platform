@@ -29,6 +29,8 @@ import java.util.List;
 
 import de.ims.icarus.language.model.api.driver.Driver;
 import de.ims.icarus.language.model.api.layer.Layer;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
+import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 
@@ -43,8 +45,19 @@ public interface Context extends ManifestOwner<ContextManifest> {
 
 	List<Layer> getLayers();
 
+	/**
+	 * If this context contains one or more markable layers it has to define
+	 * one primary layer among them.
+	 * @return
+	 */
+	MarkableLayer getPrimaryLayer();
+
+	List<LayerGroup> getLayerGroups();
+
 	@Override
 	ContextManifest getManifest();
+
+	Layer getLayer(String id);
 
 	/**
 	 * Returns the shared {@code Driver} instance that is used to access

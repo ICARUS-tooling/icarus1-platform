@@ -23,32 +23,54 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.io;
+package de.ims.icarus.language.model.api.layer;
 
 /**
- * Utility class for accessing distributed data or for loading
- * little chunks from a very big database.
- *
  * @author Markus Gärtner
  * @version $Id$
- * @see ResourcePath
  *
  */
-public interface PathResolver {
+public final class Dependency<E extends Object> {
+
+	private final E target;
+	private final DependencyType type;
+
+	public Dependency(E target, DependencyType type) {
+		if (target == null)
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
+		if (type == null)
+			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
+
+		this.target = target;
+		this.type = type;
+	}
+
+	public E getTarget() {
+		return target;
+	}
+
+	public DependencyType getType() {
+		return type;
+	}
 
 	/**
-	 * Translates the given {@code chunkIndex} into a {@code ResourcePath}
-	 * information that can be used to access data from an abstract
-	 * data source.
-	 *
-	 * @param chunkIndex
-	 * @return
-	 * @throws IndexOutOfBoundsException if the {@code chunkIndex} violates
-	 * the bounds of this resolver. For example a resolver translating chunk indices
-	 * into row values for a database table might check for the overall size of that
-	 * table to make sure the returned rows do not exceed the table's row count.
+	 * @see java.lang.Object#hashCode()
 	 */
-	ResourcePath getPath(int chunkIndex);
+	@Override
+	public int hashCode() {
+		return target.hashCode()*type.hashCode();
+	}
 
-	int getPathCount();
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Dependency) {
+			Dependency<?> other = (Dependency<?>) obj;
+			return target==other.target && type==other.type;
+		}
+
+		return false;
+	}
 }

@@ -27,6 +27,10 @@ package de.ims.icarus.language.model.api;
 
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.seg.Segment;
+import de.ims.icarus.language.model.iql.access.AccessControl;
+import de.ims.icarus.language.model.iql.access.AccessMode;
+import de.ims.icarus.language.model.iql.access.AccessPolicy;
+import de.ims.icarus.language.model.iql.access.AccessRestriction;
 
 /**
  *
@@ -34,6 +38,7 @@ import de.ims.icarus.language.model.api.seg.Segment;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface Markable extends CorpusMember, Comparable<Markable> {
 
 //	/**
@@ -68,6 +73,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * @return The enclosing container of this markable or {@code null} if this
 	 * markable is not hosted within a container.
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	Container getContainer();
 
 	/**
@@ -79,6 +85,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 *
 	 * @return The enclosing {@code MarkableLayer} that hosts this markable object.
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	MarkableLayer getLayer();
 
 	/**
@@ -98,6 +105,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	long getIndex();
 
 	/**
@@ -107,6 +115,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 *
 	 * @param newIndex
 	 */
+	@AccessRestriction(AccessMode.WRITE)
 	void setIndex(long newIndex);
 
 	/**
@@ -124,6 +133,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * @return The zero-based offset of this markable's begin within the corpus
 	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	long getBeginOffset();
 
 	/**
@@ -141,5 +151,10 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * @return The zero-based offset of this markable's end within the corpus
 	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	long getEndOffset();
+
+	@Override
+	@AccessRestriction(AccessMode.ALL)
+	int compareTo(Markable o);
 }

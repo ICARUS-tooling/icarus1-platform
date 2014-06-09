@@ -28,26 +28,12 @@ package de.ims.icarus.language.model.api.manifest;
 import java.util.List;
 
 import de.ims.icarus.language.model.api.layer.Layer;
+import de.ims.icarus.language.model.api.layer.LayerType;
 
 /**
  * A {@code LayerManifest} describes a single {@link Layer} in a corpus and
  * defines an optional set of prerequisites that have to be met for the layer
- * to work properly. In addition it defines whether or not a layer can be
- * accessed for searching and if so, whether it can be indexed to speed up a
- * search operation. Note that those two flags are fixed properties of the
- * layer manifest and therefore not modifiable by the user. Not being able to
- * search a layer does however {@code not} imply it can't be used by the user at
- * all. It simply means the possible interactions besides looking at the visualized
- * form are restricted to manual operations like annotating or exploring it without
- * the help of the search engine.
- * <p>
- * Side note on indexing:
- * <br>
- * For an actual index to be constructed for a given layer, itself and <b>all</b> the layers
- * it depends on (even indirectly) have to be indexable. For the simple case of indexing
- * an annotation layer this is trivial, since most annotations will refer to basic
- * markable or structure layers which should be indexable. Therefore the annotation layer
- * makes the choice regarding the option of indexing being available.
+ * to work properly.
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -57,36 +43,66 @@ public interface LayerManifest extends MemberManifest {
 
 	ContextManifest getContextManifest();
 
-	MarkableLayerManifest getBaseLayerManifest();
-
 	/**
-	 * Returns a list of prerequisites describing other layers a corpus
-	 * has to host in order for the new layer to be operational. If this
-	 * layer does not depend on other layers the returned list is empty.
+	 * Returns the group manifest this layer is a part of.
 	 *
 	 * @return
 	 */
-	List<Prerequisite> getPrerequisites();
+	LayerGroupManifest getGroupManifest();
 
 	/**
-	 * Defines if it is possible to build an index for the content of a layer.
-	 * This is of course only of importance if the layer in question actually
-	 * supports search operations as defined via the {@link #isSearchable()}
-	 * method.
+	 * Returns the optional layer type that acts as another abstraction layer
+	 * to unify layers that share a common content structure. Note that all
+	 * layer type instances are globally unique and are shared between all the
+	 * layers of that type.
 	 *
 	 * @return
 	 */
-	boolean isIndexable();
+	LayerType getLayerType();
 
 	/**
-	 * Returns whether or not search operations on this layer are supported.
-	 * For most layers this method will returns {@code true} but there are types
-	 * of data for which searching is a non-trivial task and not easily implemented.
-	 * For example an annotation layer containing web links to wikipedia articles or
-	 * audio recordings of human speakers would most likely decide to not support
-	 * searches.
-	 *
+	 * Returns the list of resolved base layers for this layer manifest.
 	 * @return
 	 */
-	boolean isSearchable();
+	List<TargetLayerManifest> getBaseLayerManifests();
+
+	/**
+	 * Models a resolved dependency on the layer level. A target layer may either be
+	 * a local layer, hosted within the same context, or a foreign layer that has been
+	 * resolved by means of binding a prerequisite manifest declaration to a layer manifest.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public interface TargetLayerManifest {
+
+		/**
+		 * Returns the source layer manifest for the dependency this manifest describes
+		 * (that is the layer actually hosting a {@code TargetLayerManifest}).
+		 *
+		 * @return
+		 */
+		LayerManifest getLayerManifest();
+
+		/**
+		 * When the target layer resides in a foreign context and was resolved using
+		 * a prerequisite manifest, this method returns the used prerequisite. In the
+		 * case of a local layer being targeted, the return value is {@code null}.
+		 * @return
+		 */
+		ContextManifest.PrerequisiteManifest getPrerequisite();
+
+		/**
+		 * Returns the actual target layer manifest this manifest refers to. Note that the
+		 * return type is chosen to be the general {@link LayerManifest} class instead of the
+		 * {@link MarkableLayerManifest} usually used for base or boundary layer declarations.
+		 * This is so that {@link FragmentLayerManifest}s do not have to declare another linking
+		 * manifest to account for their value layer declaration. The actually required type of
+		 * layer should be concluded from the context in which the target layer is to be resolved.
+		 *
+		 * @return
+		 */
+		LayerManifest getResolvedLayerManifest();
+	}
 }

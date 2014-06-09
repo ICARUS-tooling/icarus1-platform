@@ -23,32 +23,14 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.io;
+package de.ims.icarus.language.model.api.manifest;
 
 /**
- * Utility class for accessing distributed data or for loading
- * little chunks from a very big database.
- *
  * @author Markus Gärtner
  * @version $Id$
- * @see ResourcePath
  *
  */
-public interface PathResolver {
+public interface RasterizerManifest extends MemberManifest, ImplementationManifest {
 
-	/**
-	 * Translates the given {@code chunkIndex} into a {@code ResourcePath}
-	 * information that can be used to access data from an abstract
-	 * data source.
-	 *
-	 * @param chunkIndex
-	 * @return
-	 * @throws IndexOutOfBoundsException if the {@code chunkIndex} violates
-	 * the bounds of this resolver. For example a resolver translating chunk indices
-	 * into row values for a database table might check for the overall size of that
-	 * table to make sure the returned rows do not exceed the table's row count.
-	 */
-	ResourcePath getPath(int chunkIndex);
-
-	int getPathCount();
+	// no-op
 }

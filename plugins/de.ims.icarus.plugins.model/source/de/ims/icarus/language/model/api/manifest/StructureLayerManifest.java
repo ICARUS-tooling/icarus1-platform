@@ -45,6 +45,8 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 	 * the structures themselves are hosted!
 	 *
 	 * @return
+	 * @see #getRootContainerManifest()
+	 * @see #getContextManifest()
 	 */
 	StructureManifest getStructureManifest();
 }

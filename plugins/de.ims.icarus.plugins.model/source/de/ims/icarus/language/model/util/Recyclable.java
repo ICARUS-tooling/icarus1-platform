@@ -40,12 +40,18 @@ public interface Recyclable {
 
 	/**
 	 * Verifies the internal state of the item after it has been revived from an
-	 * object pool. Returns {@code true} if and only if all internal states are
+	 * object pool. Returns {@code true} if and only if all internal properties are
 	 * properly initialized and the item is in a valid state.
 	 * <p>
 	 * All internal refreshing logic should go into this method to ensure a pooled
 	 * object gets revived properly. Note that this method should be called <b>after</b>
 	 * a pooled object has been filled with new data!
+	 * <p>
+	 * It is perfectly legal for an object to remain in an inconsistent state once this
+	 * method has detected a corrupted property and returned {@code false}. Once the
+	 * consistency check failed, surrounding client code should treat the object as
+	 * garbage and either discard it or recycle it again. Under no circumstances should
+	 * such an object be used in the regular lifecycle of a client!
 	 *
 	 * @return
 	 */

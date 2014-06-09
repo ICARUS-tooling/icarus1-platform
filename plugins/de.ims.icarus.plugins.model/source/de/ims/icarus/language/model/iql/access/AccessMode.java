@@ -23,25 +23,35 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.chunks;
-
-import java.io.IOException;
+package de.ims.icarus.language.model.iql.access;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class IndexFormatException extends IOException {
+public enum AccessMode {
 
-	private static final long serialVersionUID = 290232354113252546L;
+	/**
+	 * A client attempts to read data from an object
+	 */
+	READ,
 
-	public IndexFormatException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	/**
+	 * A client attempts to modify the state of an object
+	 */
+	WRITE,
 
-	public IndexFormatException(String message) {
-		super(message);
-	}
+	/**
+	 * Privileged write access - used to mark methods that
+	 * are intended for framework internal usage only but need
+	 * to be publicly declared.
+	 */
+	MANAGE,
 
+	/**
+	 * Unlimited access is granted to the annotated method, regardless
+	 * of the context in which it is being called.
+	 */
+	ALL;
 }

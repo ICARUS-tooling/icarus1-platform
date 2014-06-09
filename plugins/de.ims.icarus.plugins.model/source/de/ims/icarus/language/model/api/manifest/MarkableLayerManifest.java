@@ -27,6 +27,7 @@ package de.ims.icarus.language.model.api.manifest;
 
 
 
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -70,7 +71,8 @@ public interface MarkableLayerManifest extends LayerManifest {
 	 * container (or structure) must reside within the same range of indices defined by the boundary.
 	 * So for example in the case of containers they are not allowed to span across borders of
 	 * their respective <i>boundary container</i>.
+	 *
 	 * @return
 	 */
-	MarkableLayerManifest getBoundaryLayerManifest();
+	TargetLayerManifest getBoundaryLayerManifest();
 }

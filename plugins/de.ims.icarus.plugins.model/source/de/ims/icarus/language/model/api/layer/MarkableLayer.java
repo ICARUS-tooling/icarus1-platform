@@ -27,6 +27,10 @@ package de.ims.icarus.language.model.api.layer;
 
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.language.model.iql.access.AccessControl;
+import de.ims.icarus.language.model.iql.access.AccessMode;
+import de.ims.icarus.language.model.iql.access.AccessPolicy;
+import de.ims.icarus.language.model.iql.access.AccessRestriction;
 
 /**
  * A {@code MarkableLayer} defines a collection of markables. If it is
@@ -39,6 +43,7 @@ import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifest> {
 
 	/**
@@ -48,6 +53,7 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 *
 	 * @return The manifest that describes this collection of markables
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	@Override
 	MarkableLayerManifest getManifest();
 
@@ -58,7 +64,57 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 //	 */
 //	Container getContainer();
 
-	long getMemberCount();
+//	/**
+//	 * Returns the number of members in this layer. This is the total number
+//	 * of members as present in the corpus data. Legal indices used for member
+//	 * lookups are {@code 0} to <tt>getMemberCount()-1</tt>. A return value of
+//	 * {@code -1} indicates that the layer has not yet obtained cached information
+//	 * about the number of elements it hosts.
+//	 * @return
+//	 */
+//	@AccessRestriction(AccessMode.ALL)
+//	long getMemberCount();
+//
+//	/**
+//	 * Returns the number of members currently present in the layer's cache.
+//	 * @return
+//	 */
+//	@AccessRestriction(AccessMode.ALL)
+//	int getCachedMemberCount();
+
+//	/**
+//	 * Returns the member cached for the specified {@code index} or {@code null} if
+//	 * no member is cached for that index.
+//	 * @param index
+//	 * @return
+//	 */
+//	Markable getCachedMember(long index);
+
+//	/**
+//	 *
+//	 * @param index
+//	 * @return
+//	 */
+//	int getReferenceCount(long index);
+//
+//	/**
+//	 * Registers the given member, incrementing its reference count if already present in
+//	 * the cache or creating a new cache entry otherwise.
+//	 *
+//	 * @param member
+//	 * @return {@code true} iff the given {@code member} has not been present in the cache
+//	 * 			and a new entry was created
+//	 */
+//	boolean registerMember(Markable member);
+//
+//	/**
+//	 * Decrements the reference count for the given {@code member}, removing it from the
+//	 * cache if the reference count reaches zero.
+//	 * @param member
+//	 * @return {@code true} iff unregistering the given {@code member} caused the reference
+//	 * 			count to reach zero and the associated cache entry has been removed
+//	 */
+//	boolean unregisterMember(Markable member);
 
 	/**
 	 * Returns the {@code MarkableLayer} that holds the bounding
@@ -95,5 +151,6 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 * the structures in this layer or {@code null} if the structures this
 	 * layer defines are not mapped to existing layer boundaries.
 	 */
+	@AccessRestriction(AccessMode.ALL)
 	MarkableLayer getBoundaryLayer();
 }

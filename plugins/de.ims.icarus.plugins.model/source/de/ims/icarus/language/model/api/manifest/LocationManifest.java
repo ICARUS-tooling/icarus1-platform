@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.language.model.api.manifest;
 
-import de.ims.icarus.language.model.io.LocationType;
 
 /**
  * @author Markus Gärtner
@@ -34,8 +33,16 @@ import de.ims.icarus.language.model.io.LocationType;
  */
 public interface LocationManifest {
 
-	LocationType getType();
+//	LocationType getType();
 
+	/**
+	 * Returns the "root" path to the location described by this manifest.
+	 * Depending on the exact location type, the meaning of this root path
+	 * may vary. It can denote a single corpus file, an entire folder or the
+	 * identifier of a database, for example.
+	 *
+	 * @return
+	 */
 	String getPath();
 
 	/**
@@ -46,4 +53,6 @@ public interface LocationManifest {
 	 * @return
 	 */
 	PathResolverManifest getPathResolverManifest();
+
+	void setPathResolverManifest(PathResolverManifest manifest);
 }

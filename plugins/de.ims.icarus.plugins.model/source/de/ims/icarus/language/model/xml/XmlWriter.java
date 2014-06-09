@@ -120,7 +120,7 @@ public class XmlWriter {
 		serializer.endElement("property"); //$NON-NLS-1$
 	}
 
-	public static void writePrerequisiteElement(XmlSerializer serializer, Prerequisite prerequisite) throws Exception {
+	public static void writePrerequisiteElement(XmlSerializer serializer, PrerequisiteManifest prerequisite) throws Exception {
 		if(prerequisite==null) {
 			return;
 		}

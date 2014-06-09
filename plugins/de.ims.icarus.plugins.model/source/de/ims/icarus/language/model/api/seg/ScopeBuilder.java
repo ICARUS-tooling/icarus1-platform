@@ -186,6 +186,9 @@ public class ScopeBuilder {
 		if(layers.contains(layer))
 			throw new IllegalArgumentException("Layer already contained: "+layer); //$NON-NLS-1$
 
+		if(!contexts.contains(layer.getContext()))
+			throw new IllegalArgumentException("Unknown context for layer: "+layer); //$NON-NLS-1$
+
 		layers.add(layer);
 
 		return this;

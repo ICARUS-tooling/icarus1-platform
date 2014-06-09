@@ -23,32 +23,36 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.io;
+package de.ims.icarus.language.model.api.manifest;
+
+import java.util.List;
+
 
 /**
- * Utility class for accessing distributed data or for loading
- * little chunks from a very big database.
+ * Layer groups describe logical
  *
  * @author Markus Gärtner
  * @version $Id$
- * @see ResourcePath
  *
  */
-public interface PathResolver {
+public interface LayerGroupManifest {
+
+	ContextManifest getContextManifest();
+
+	List<LayerManifest> getLayerManifests();
+
+	MarkableLayerManifest getPrimaryLayerManifest();
 
 	/**
-	 * Translates the given {@code chunkIndex} into a {@code ResourcePath}
-	 * information that can be used to access data from an abstract
-	 * data source.
+	 * Signals that the layers in this group do not depend on external data hosted in other
+	 * groups within the same context. Note that this does <b>not</b> mean the layers are totally
+	 * independent of content that resides in another context! Full independence is given when
+	 * both this method and {@link ContextManifest#isIndependentContext()} of the describing
+	 * manifest of the surrounding context return {@code true}.
 	 *
-	 * @param chunkIndex
 	 * @return
-	 * @throws IndexOutOfBoundsException if the {@code chunkIndex} violates
-	 * the bounds of this resolver. For example a resolver translating chunk indices
-	 * into row values for a database table might check for the overall size of that
-	 * table to make sure the returned rows do not exceed the table's row count.
 	 */
-	ResourcePath getPath(int chunkIndex);
+	boolean isIndependent();
 
-	int getPathCount();
+	String getName();
 }

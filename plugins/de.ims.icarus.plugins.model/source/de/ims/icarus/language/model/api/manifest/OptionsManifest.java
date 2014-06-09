@@ -28,6 +28,7 @@ package de.ims.icarus.language.model.api.manifest;
 import java.util.Set;
 
 import de.ims.icarus.language.model.util.ValueType;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * Helper manifest (not describing a corpus member/entity of its own)
@@ -113,6 +114,35 @@ public interface OptionsManifest extends Derivable {
 	 * @return
 	 */
 	ValueRange getSupportedRange(String name);
+
+	/**
+	 * To support graphical visualizations in their job of presenting configuration
+	 * options, those options can be grouped together in logical collections. For reasons
+	 * of simplicity there are no dedicated data structures to represent those groups, but
+	 * the group's identifier is simply attached to an option as an id property. If further
+	 * localization or additional complexity is required, the {@link #getGroupIdentifiers()}
+	 * method can be used to obtain groups for this options manifest in the form of
+	 * {@link Identity} implementations.
+	 * <p>
+	 * Note that is legal to assign groups to an option that have no dedicated identifier
+	 * registered.
+	 *
+	 * @param name
+	 * @return
+	 * @see #getOptionNames()
+	 */
+	String getOptionGroup(String name);
+
+	/**
+	 * Returns a collection of dedicated identifiers for groups in this options manifest.
+	 * Note that a group used as result of {@link #getOptionGroup(String)} is not required
+	 * to have a matching identity implementation in the returned set of this method. The
+	 * returned identifiers are merely an additional chunk of localization and/or visualization
+	 * hints for user interfaces.
+	 *
+	 * @return
+	 */
+	Set<Identity> getGroupIdentifiers();
 
 	/**
 	 * Returns whether or not the option in question should be published

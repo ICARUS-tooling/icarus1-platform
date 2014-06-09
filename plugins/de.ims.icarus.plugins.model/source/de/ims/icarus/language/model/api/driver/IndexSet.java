@@ -25,10 +25,15 @@
  */
 package de.ims.icarus.language.model.api.driver;
 
-import de.ims.icarus.util.collections.LongIterator;
 
 /**
- * Models an arbitrary collection of {@code long} ids.
+ * Models an arbitrary collection of {@code long} index values. Note that
+ * the elements in an index-set must always occur in sorted order! This
+ * condition is mandatory to enable an easy check for continuous collections
+ * of indices:<br>
+ * <i>Let i_0 be the first index in the set and i_n the last, with the set holding
+ * n indices, then the collection of indices is continuous, if and only if the
+ * difference i_n-i_0 is exactly n-1</i>
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -36,7 +41,20 @@ import de.ims.icarus.util.collections.LongIterator;
  */
 public interface IndexSet {
 
-	long getIndexCount();
+	int size();
 
-	LongIterator getIterator();
+//	LongIterator getIterator();
+
+	long indexAt(int index);
+
+	/**
+	 * Splits the current set of indices so that each new subset contains at most
+	 * the given number of indices. This method is forced to be implemented by actual
+	 * {@code IndexSet} classes to better exploit their underlying data structure since
+	 * framework code cannot optimize for unknown implementation details.
+	 *
+	 * @param chunkSize
+	 * @return
+	 */
+	IndexSet[] split(int chunkSize);
 }

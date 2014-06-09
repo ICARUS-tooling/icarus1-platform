@@ -27,6 +27,7 @@ package de.ims.icarus.language.model.api;
 
 import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
+import de.ims.icarus.language.model.standard.elements.MemberSets;
 
 
 /**
@@ -36,6 +37,8 @@ import de.ims.icarus.language.model.api.manifest.ManifestOwner;
  *
  */
 public interface Container extends Markable, Iterable<Markable>, ManifestOwner<ContainerManifest> {
+
+	public static final MemberSet<Container> EMPTY_BASE_SET = MemberSets.emptySet();
 
 	/**
 	 * Returns the type of this container. This provides
@@ -58,7 +61,9 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 
 	/**
 	 * @return The underlying containers if this container relies on the
-	 * elements of other container objects or {@code null} otherwise.
+	 * elements of other container objects. If the container is independent of any
+	 * other containers it should return the shared empty {@code MemberSet} available
+	 * via {@link #EMPTY_BASE_SET}.
 	 */
 	MemberSet<Container> getBaseContainers();
 

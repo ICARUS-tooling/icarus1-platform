@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.language.model.api.seg;
 
+import java.util.Set;
+
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.Corpus;
 import de.ims.icarus.language.model.api.CorpusException;
@@ -66,28 +68,76 @@ public interface Segment {
 	 */
 	Container getContainer(MarkableLayer layer);
 
+	// Destruction support
+
 	/**
-	 * If this segment involved vertical filtering than the container assigned to be the
-	 * <i>primary container</i> of this segment's scope will be returned. Otherwise this
-	 * method will return the container mapped to the <i>base layer</i> of the backing
-	 * corpus.
+	 * Attempts to acquire shared ownership of this segment by the given {@code owner}.
+	 * If the given owner already holds shared ownership if this segment, the method
+	 * simply returns.
+	 *
+	 * @param owner
+	 * @throws NullPointerException if the {@code owner} argument is {@code null}.
+	 * @throws CorpusException if {@link #close()} has already been called on this
+	 * 			segment and it's in the process of releasing its data.
 	 */
-	Container getBaseContainer();
+	void acquire(SegmentOwner owner) throws CorpusException;
+
+	/**
+	 * Removes the given {@code owner}'s shared ownership on this segment. If no
+	 * more owners are registered to this segment, a subsequent call to {@link #closable()}
+	 * will return {@code true}.
+	 *
+	 * @param owner
+	 * @throws NullPointerException if the {@code owner} argument is {@code null}.
+	 * @throws CorpusException if {@link #close()} has already been called on this
+	 * 			segment and it's in the process of releasing its data.
+	 * @throws IllegalArgumentException if the given owner does not hold shared ownership
+	 * 			of this segment.
+	 */
+	void release(SegmentOwner owner) throws CorpusException;
+
+	Set<SegmentOwner> getOwners();
+
+	/**
+	 *
+	 * @return
+	 */
+	boolean closable();
+
+	/**
+	 * Checks whether this segment is allowed to be closed and if so, releases
+	 * all currently held data. Note that if there are still {@code SegmentOwner}s holding
+	 * on to this segment, they will be asked to release their ownership. If after this
+	 * initial release phase there is still at least one ownership pending, the call will
+	 * fail with an {@code IllegalStateException}.
+	 * Otherwise the segment will release its data and disconnect any links to the hosting
+	 * corpus.
+	 *
+	 * @throws CorpusException
+	 * @throws IllegalStateException in case there are still owners that could not be made to
+	 * 			release their partial ownership of this segment
+	 */
+	void close() throws CorpusException;
 
 	// Page support
 
+	/**
+	 * Returns the maximum number of elements per page, or {@code -1} if this
+	 * segment only contains 1 page and that page's size is therefore determined by
+	 * the container of this segment's <i>primary layer</i>.
+	 * @return
+	 */
 	int getPageSize();
 
 	/**
-	 * Returns the number of available pages for this segment, or {@code 0}
-	 * in case the segment does not support paging.
+	 * Returns the number of available pages for this segment, at least {@code 1}.
 	 *
 	 * @return
 	 */
 	int getPageCount();
 
 	/**
-	 * Returns the index of the current page
+	 * Returns the index of the current page, initially {@code -1}
 	 * @return
 	 */
 	int getPageIndex();

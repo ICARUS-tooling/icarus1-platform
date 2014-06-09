@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import de.ims.icarus.language.model.api.driver.Driver;
 import de.ims.icarus.language.model.api.edit.CorpusEditModel;
 import de.ims.icarus.language.model.api.edit.CorpusUndoListener;
 import de.ims.icarus.language.model.api.edit.CorpusUndoManager;
@@ -39,7 +40,6 @@ import de.ims.icarus.language.model.api.layer.Layer;
 import de.ims.icarus.language.model.api.layer.LayerType;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.CorpusManifest;
-import de.ims.icarus.language.model.api.manifest.LayerManifest;
 import de.ims.icarus.language.model.api.manifest.ManifestOwner;
 import de.ims.icarus.language.model.api.meta.MetaData;
 import de.ims.icarus.language.model.api.seg.Segment;
@@ -127,12 +127,22 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	CorpusUndoManager getUndoManager();
 
 	/**
+	 * Creates a new segment object that provides a filtered view on the sub-corpus
+	 * defined by the given query. A corpus implementation should try to narrow down
+	 * possible candidates using the {@link Driver#lookup(Query, de.ims.icarus.language.model.api.seg.Scope)}
+	 * method of all involved {@link Driver} objects and calculate the intersection of those
+	 * candidate lists if possible. If computing candidates failed or if the intersection is very large,
+	 * it is up to the corpus implementation to decide on a paging policy of the segment or ask the user
+	 * if accessing a potentially very large data set is truly desired.
+	 * <p>
+	 * This method is intended to be executed on a background thread, since it has the potential
+	 * for involving very expensive calculations!
 	 *
 	 * @param query
 	 * @return
 	 * @throws CorpusException
 	 */
-	Segment getSegment(Query query) throws CorpusException;
+	Segment createSegment(Query query) throws CorpusException;
 
 //	/**
 //	 * Resolves a given id and returns the member within this corpus
@@ -161,13 +171,16 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 
 	/**
 	 * Returns the {@code Context} object all the default members of
-	 * this corpus have been added to.
+	 * this corpus have been added to. If the default context has not yet been instantiated
+	 * this method will load the appropriate driver implementation and construct the context.
 	 *
 	 * @return The {@code Context} hosting all the default members of the corpus
 	 */
 	Context getDefaultContext();
 
 	List<Context> getCustomContexts();
+
+	Context getContext(String id);
 
 	/**
 	 * Registers the given listener to the internal list of registered
@@ -241,18 +254,6 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	List<Layer> getLayers();
 
 	/**
-	 * Returns the layer that has the given id. This is a bridging method to
-	 * fetch the actual {@code Layer} that is described by a {@link LayerManifest}.
-	 *
-	 * @param id
-	 * @return
-	 * @throws NullPointerException if the {@code id} argument is {@code null}
-	 * @throws IllegalArgumentException if there is no layer in this corpus whose
-	 * assigned identifier matches the given {@code id}.
-	 */
-	Layer getLayer(String id);
-
-	/**
 	 * Returns all the layers in this corpus that are of the given type as defined
 	 * by their {@link Layer#getLayerType()} method. If this corpus does not yet host any layers the returned
 	 * list is empty. Either way the returned list should be immutable.
@@ -299,7 +300,8 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * @throws NullPointerException if the {@code context} argument is {@code null}
 	 * @throws IllegalArgumentException if the context is not part of this corpus
 	 * @throws IllegalStateException if the context is in a state that prevents it
-	 * from being removed (e.g. if it is currently loading content)
+	 * from being removed (e.g. if it is currently loading content or other contexts
+	 * within this corpus depend on it)
 	 */
 	void removeContext(Context context);
 

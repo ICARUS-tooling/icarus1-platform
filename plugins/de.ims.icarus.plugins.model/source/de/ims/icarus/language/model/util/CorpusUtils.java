@@ -32,12 +32,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,18 +45,23 @@ import de.ims.icarus.language.model.api.CorpusMember;
 import de.ims.icarus.language.model.api.Fragment;
 import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.MemberType;
+import de.ims.icarus.language.model.api.edit.CorpusEditModel;
+import de.ims.icarus.language.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.language.model.api.layer.AnnotationLayer;
 import de.ims.icarus.language.model.api.layer.FragmentLayer;
 import de.ims.icarus.language.model.api.layer.Layer;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 import de.ims.icarus.language.model.api.layer.LayerType;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 import de.ims.icarus.language.model.api.manifest.ContextManifest;
+import de.ims.icarus.language.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.language.model.api.manifest.HighlightLayerManifest;
+import de.ims.icarus.language.model.api.manifest.LayerManifest;
+import de.ims.icarus.language.model.api.manifest.ManifestType;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.api.manifest.MemberManifest;
-import de.ims.icarus.language.model.api.manifest.Prerequisite;
 import de.ims.icarus.language.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.language.model.api.manifest.StructureManifest;
 import de.ims.icarus.language.model.api.raster.Position;
@@ -127,7 +129,14 @@ public final class CorpusUtils {
 	}
 
 	public static boolean isOverlayContainer(Container container) {
-		return container.getCorpus().getOverlayLayer().getContainer()==container;
+		return container.getCorpus().getOverlayContainer()==container;
+	}
+
+	public static boolean isMarkableLayer(Layer layer) {
+		ManifestType type = layer.getManifest().getManifestType();
+		return type==ManifestType.MARKABLE_LAYER_MANIFEST
+				|| type==ManifestType.STRUCTURE_LAYER_MANIFEST
+				|| type==ManifestType.FRAGMENT_LAYER_MANIFEST;
 	}
 
 	public static boolean isOverlayLayer(MarkableLayer layer) {
@@ -157,6 +166,33 @@ public final class CorpusUtils {
 				|| member.getMemberType()==MemberType.FRAGMENT;
 	}
 
+	public static boolean isResolvedPrerequisite(PrerequisiteManifest manifest) {
+		return manifest.getContextId()!=null && manifest.getLayerId()!=null;
+	}
+
+	public static void dispatchChange(CorpusMember source, AtomicChange change) {
+		if (source == null)
+			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
+		if (change == null)
+			throw new NullPointerException("Invalid change"); //$NON-NLS-1$
+
+		Corpus corpus = source.getCorpus();
+
+		if(corpus==null) {
+			change.execute();
+			return;
+		}
+
+		CorpusEditModel editModel = corpus.getEditModel();
+
+		if(editModel==null) {
+			change.execute();
+			return;
+		}
+
+		editModel.execute(change);
+	}
+
 	public static ContainerManifest getContainerManifest(Container container) {
 		if (container == null)
 			throw new NullPointerException("Invalid container"); //$NON-NLS-1$
@@ -176,7 +212,13 @@ public final class CorpusUtils {
 		return manifest.getContainerManifest(level);
 	}
 
-	public static boolean matches(Prerequisite prerequisite, Corpus corpus) {
+	public static Layer getLayer(Corpus corpus, LayerManifest manifest) {
+		ContextManifest contextManifest = manifest.getContextManifest();
+		Context context = corpus.getContext(contextManifest.getId());
+		return context.getLayer(manifest.getId());
+	}
+
+	public static boolean matches(PrerequisiteManifest prerequisite, Corpus corpus) {
 		if(prerequisite==null)
 			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
 		if(corpus==null)
@@ -202,7 +244,7 @@ public final class CorpusUtils {
 		return true;
 	}
 
-	public static String getName(Prerequisite prerequisite) {
+	public static String getName(PrerequisiteManifest prerequisite) {
 		String id = prerequisite.getLayerId();
 		if(id!=null)
 			return "Required layer-id: "+id; //$NON-NLS-1$
@@ -216,6 +258,10 @@ public final class CorpusUtils {
 
 	public static String getName(Layer layer) {
 		return layer.getName()+" ("+layer.getLayerType().getName()+")"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public static String getName(LayerGroup layerGroup) {
+		return layerGroup.getManifest().getName();
 	}
 
 	public static Set<MarkableLayer> getMarkableLayers(Corpus corpus) {
@@ -237,37 +283,6 @@ public final class CorpusUtils {
 		for(Layer layer : layers) {
 			if(clazz.isAssignableFrom(layer.getClass())) {
 				result.add(clazz.cast(layer));
-			}
-		}
-
-		return result;
-	}
-
-	public static List<Layer> getBaseLayers(Layer layer) {
-		if(layer==null)
-			throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
-
-		List<Layer> result = new ArrayList<>();
-
-		while((layer=layer.getBaseLayer())!=null) {
-			result.add(layer);
-		}
-
-		Collections.reverse(result);
-
-		return result;
-	}
-
-	public static List<Layer> getDependingLayers(Layer target) {
-		if(target==null)
-			throw new NullPointerException("Invalid target layer"); //$NON-NLS-1$
-
-		List<Layer> result = new ArrayList<>();
-
-		for(Layer layer : target.getCorpus()) {
-			// Identity check, since layers should not be duplicated etc...
-			if(layer.getBaseLayer()==target) {
-				result.add(layer);
 			}
 		}
 

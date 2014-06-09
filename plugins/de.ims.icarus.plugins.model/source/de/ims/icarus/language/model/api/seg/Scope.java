@@ -75,6 +75,8 @@ public class Scope {
 		if(contexts.isEmpty())
 			throw new IllegalArgumentException("List of contexts is empty"); //$NON-NLS-1$
 
+		// Note that layers list is allowed to be empty!
+
 		this.corpus = corpus;
 		this.contexts = new ArrayList<>(contexts);
 		this.primaryLayer = primaryLayer;

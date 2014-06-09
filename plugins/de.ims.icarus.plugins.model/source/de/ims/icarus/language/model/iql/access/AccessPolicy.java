@@ -23,32 +23,30 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.io;
+package de.ims.icarus.language.model.iql.access;
 
 /**
- * Utility class for accessing distributed data or for loading
- * little chunks from a very big database.
+ * Specifies default behavior for methods that are not explicitly assigned
+ * a {@link AccessRestriction} annotation.
  *
  * @author Markus Gärtner
  * @version $Id$
- * @see ResourcePath
  *
  */
-public interface PathResolver {
+public enum AccessPolicy {
 
 	/**
-	 * Translates the given {@code chunkIndex} into a {@code ResourcePath}
-	 * information that can be used to access data from an abstract
-	 * data source.
-	 *
-	 * @param chunkIndex
-	 * @return
-	 * @throws IndexOutOfBoundsException if the {@code chunkIndex} violates
-	 * the bounds of this resolver. For example a resolver translating chunk indices
-	 * into row values for a database table might check for the overall size of that
-	 * table to make sure the returned rows do not exceed the table's row count.
+	 * Access to unmarked methods is prohibited in any case.
 	 */
-	ResourcePath getPath(int chunkIndex);
+	DENY,
 
-	int getPathCount();
+	/**
+	 * Unmarked methods are subject to read-only restriction.
+	 */
+	ALLOW_READ,
+
+	/**
+	 * Full access to unmarked methods is granted.
+	 */
+	ALLOW_ALL;
 }

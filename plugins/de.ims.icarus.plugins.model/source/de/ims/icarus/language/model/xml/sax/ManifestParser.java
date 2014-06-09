@@ -1004,7 +1004,7 @@ public class ManifestParser {
 				String contextId = normalize(attributes, "context-id"); //$NON-NLS-1$
 				String alias = normalize(attributes, "alias"); //$NON-NLS-1$
 
-				Prerequisite prerequisite = new PrerequisiteImpl(layerId, typeId, contextId, alias);
+				PrerequisiteManifest prerequisite = new PrerequisiteImpl(layerId, typeId, contextId, alias);
 
 				if(isTemplateMode()) {
 					current(AbstractLayerManifest.class).addPrerequisite(prerequisite);

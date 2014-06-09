@@ -31,6 +31,7 @@ import de.ims.icarus.language.model.api.Markable;
 import de.ims.icarus.language.model.api.MemberSet;
 import de.ims.icarus.language.model.api.NamedCorpusMember;
 import de.ims.icarus.language.model.api.manifest.LayerManifest;
+import de.ims.icarus.language.model.standard.elements.MemberSets;
 
 /**
  *
@@ -39,6 +40,8 @@ import de.ims.icarus.language.model.api.manifest.LayerManifest;
  *
  */
 public interface Layer extends NamedCorpusMember {
+
+	public static final MemberSet<MarkableLayer> EMPTY_BASE_SET = MemberSets.emptySet();
 
 	/**
 	 * Returns the name of the layer. This call is typically forwarded
@@ -60,19 +63,6 @@ public interface Layer extends NamedCorpusMember {
 	Markable getMarkableProxy();
 
 	/**
-	 * Returns the 'type' of this layer. This is an object
-	 * previously defined via a plugin.xml declaration. The corpus
-	 * uses this type information to group top-level members for
-	 * easier access.
-	 * <p>
-	 * TODO provide more ways of defining layer types!
-	 *
-	 * @return the shared type of the group the member belongs to
-	 * (e.g. 'Lemma', 'Part-of-Speech', etc.)
-	 */
-	LayerType getLayerType();
-
-	/**
 	 * Returns the {@code Context} object that defines the physical
 	 * source of this layer and provides information about other
 	 * layers sharing the same origin.
@@ -86,9 +76,12 @@ public interface Layer extends NamedCorpusMember {
 	 */
 	Context getContext();
 
+	LayerGroup getLayerGroup();
+
 	/**
 	 * Returns the {@code MarkableLayer}s that this layer
-	 * depends on or {@code null}.
+	 * depends on. If the layer is independent of any other layers, it
+	 * should simply return a shared empty {@code MemberSet}.
 	 *
 	 * @return
 	 */

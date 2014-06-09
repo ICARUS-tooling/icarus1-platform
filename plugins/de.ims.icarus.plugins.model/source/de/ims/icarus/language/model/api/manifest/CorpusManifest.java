@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.api.manifest;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,6 +46,19 @@ public interface CorpusManifest extends MemberManifest {
 	void removeCustomContextManifest(ContextManifest manifest);
 
 	/**
+	 * Returns the notes added to this corpus. The order is not specified and
+	 * may be random. However, most times it will be convenient to have the
+	 * notes sorted in lexicographical order of their titles or in chronological
+	 * order according to the dates of their last individual modifications.
+	 *
+	 * @return
+	 */
+	List<Note> getNotes();
+
+	void addNote(Note note);
+	void removeNote(Note note);
+
+	/**
 	 * Returns {@code true} if the corpus described by this manifest can
 	 * be edited by the user.
 	 *
@@ -57,4 +71,39 @@ public interface CorpusManifest extends MemberManifest {
 	 * @param value
 	 */
 	void setEditable(boolean value);
+
+	/**
+	 * Notes are user made textual additions that are saved together with the corpus manifest.
+	 * They allow the storage of information outside predefined options and/or properties and
+	 * can hold arbitrary text, but are limited to 10.000 characters. Each note is given a name
+	 * that serves as a title for the content text. Those names do not have to be unique, however,
+	 * they have to be non-empty.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	interface Note {
+
+		public static final int MAX_CHARACTER_LIMIT = 10_000;
+
+		/**
+		 * Returns the date of the last modification. If there have not been any modifications since
+		 * the note was created, this method will return the date of the note's creation.
+		 * @return
+		 */
+		Date getModificationDate();
+
+		/**
+		 * Returns the title of this note. The returned {@code String} is always non-null and never empty.
+		 * @return
+		 */
+		String getName();
+
+		/**
+		 * Returns the (potentially) empty content of this note.
+		 * @return
+		 */
+		String getContent();
+	}
 }

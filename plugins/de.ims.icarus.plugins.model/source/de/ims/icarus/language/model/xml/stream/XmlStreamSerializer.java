@@ -73,6 +73,7 @@ public class XmlStreamSerializer implements XmlSerializer {
 	}
 
 	private void writeLineBreak() throws XMLStreamException {
+		//TODO maybe reduce linebreak to a single newline character?
 		writer.writeCharacters("\r\n"); //$NON-NLS-1$
 	}
 

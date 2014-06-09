@@ -33,6 +33,21 @@ package de.ims.icarus.language.model.api.manifest;
  */
 public interface FragmentLayerManifest extends MarkableLayerManifest {
 
-	AnnotationLayerManifest getValueManifest();
+	/**
+	 * Links to the annotation layer that is used to fetch the annotation
+	 * values to be rasterized.
+	 *
+	 * @return
+	 */
+	TargetLayerManifest getValueLayerManifest();
 
+	/**
+	 * If an annotation other than the default annotation of the linked
+	 * annotation layer should be used, this method returns the key associated
+	 * with the desired annotation. Otherwise it returns {@code null}.
+	 * @return
+	 */
+	String getAnnotationKey();
+
+	RasterizerManifest getRasterizerManifest();
 }

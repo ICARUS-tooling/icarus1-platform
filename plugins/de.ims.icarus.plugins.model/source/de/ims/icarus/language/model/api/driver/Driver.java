@@ -25,13 +25,19 @@
  */
 package de.ims.icarus.language.model.api.driver;
 
+import java.util.Set;
+
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.CorpusException;
+import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.driver.indexing.Index;
 import de.ims.icarus.language.model.api.layer.AnnotationLayer;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
+import de.ims.icarus.language.model.api.manifest.DriverManifest;
 import de.ims.icarus.language.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.language.model.api.meta.AnnotationValueSet;
 import de.ims.icarus.language.model.api.seg.Scope;
+import de.ims.icarus.language.model.api.seg.Segment;
 import de.ims.icarus.language.model.iql.Query;
 
 /**
@@ -41,20 +47,38 @@ import de.ims.icarus.language.model.iql.Query;
  */
 public interface Driver {
 
+//	void createContext(ContextManifest manifest) throws CorpusException;
+
 	Context getContext();
+
+	DriverManifest getManifest();
+
+	/**
+	 * Returns all the indices available for the context this driver manages.
+	 * @return
+	 */
+	Set<Index> getIndices();
+
+	/**
+	 *
+	 * @param sourceLayer
+	 * @param targetLayer
+	 * @return
+	 */
+	Index getIndex(MarkableLayer sourceLayer, MarkableLayer targetLayer);
 
 	/**
 	 * Attempts to contact whatever indexing system the driver internally uses
 	 * and asks it to narrow down the number of potential candidates for the given
 	 * query. The query is provided in raw form since there is no a priori limitation
 	 * on what parts of a query a driver can or cannot use for indexing/filtering.
-	 * Potential ids of candidates are to be returned wrapped into an {@code IndexSet}.
+	 * Potential ids of candidates are to be returned wrapped into an {@code IndexSet} array.
 	 * If the information in the query is not sufficient to filter candidates, than
 	 * this method should return {@code null} instead of collecting all available ids.
 	 *
 	 * @param query the query to use in order to narrow down potential candidates
-	 * @param scope the vertical filter that defines the layer members of the returned
-	 * 			{@code IndexSet} refer to.
+	 * @param layer the primary layer of the vertical filter that index values of the returned
+	 * 			{@code IndexSet} array refer to.
 	 * @return
 	 * @throws CorpusException if the driver encountered problems while contacting the index
 	 * 			(note that incompatibility between constraints in the query and the capabilities
@@ -63,37 +87,102 @@ public interface Driver {
 	 * @throws InterruptedException
 	 * @throws NullPointerException if either one of the {@code query} or {@code scope} arguments is {@code null}
 	 */
-	IndexSet lookup(Query query, Scope scope) throws CorpusException, InterruptedException;
+	IndexSet[] lookup(Query query, MarkableLayer layer) throws CorpusException, InterruptedException;
 
 	/**
 	 * Synchronously attempts to load the given set of indices referencing chunks in the primary layer of the
-	 * supplied {@code Scope}. To lookup and register chunks the given {@link ChunkManager} should be used.
-	 * The returned value signals the total number of chunks that have been loaded successfully.
+	 * supplied {@code Scope}. The driver is responsible for translating the scope related indices into indices
+	 * of the respective layer group and load chunks of that group. Note that this method does automatically
+	 * increment the reference counters of each of the affected primary layer members by exactly {@code 1}, no matter
+	 * how many lower members are referenced via the original indices. For every resolved markable covered by the
+	 * given indices the supplied {@code storage} implementation is used.
 	 *
 	 * @param indices
 	 * @param scope
-	 * @param manager
+	 * @param storage
 	 * @return
+	 * @throws IllegalArgumentException if the
 	 * @throws CorpusException
 	 * @throws InterruptedException
 	 * @throws NullPointerException if any of the arguments is {@code null}
 	 *
-	 * @see ChunkManager
+	 * @see DriverListener
 	 * @see Scope
 	 */
-	long load(IndexSet indices, Scope scope, ChunkManager manager) throws CorpusException, InterruptedException;
+	long load(IndexSet[] indices, Scope scope, ChunkStorage storage) throws CorpusException, InterruptedException;
 
 	/**
 	 * Attempts to fetch the number of elements stored in the top-level container for the given
-	 * layer. The returned value is meant to be the total number of markables in that container,
+	 * layer. The returned value is meant to be the total number of markables in that layer,
 	 * unaffected by horizontal filtering. Driver implementations should cache these counts for all
-	 * layers they are meant to manage.
+	 * layers they are meant to manage. A return value of {@code -1} indicates that the driver has
+	 * no information about the specified layer's member count.
 	 *
 	 * @param layer
 	 * @return
 	 * @throws CorpusException
 	 */
 	long getMemberCount(MarkableLayer layer) throws CorpusException;
+
+	/**
+	 * Accesses the internal cache for the specified layer and attempts to lookup the
+	 * markable mapped to the given index value. If no markable is stored for that index
+	 * this method returns {@code null}.
+	 *
+	 * @param index
+	 * @param layer
+	 * @return
+	 * @throws CorpusException
+	 */
+	Markable load(long index, MarkableLayer layer) throws CorpusException;
+
+	/**
+	 * Performs a reverse lookup to return indices of markables in the designated target layer
+	 * that contain the specified elements in the given {@code source} layer.
+	 *
+	 * @param targetLayer
+	 * @param sourceLayer
+	 * @param indices
+	 * @return
+	 * @throws NullPointerException if any of the arguments is {@code null}
+	 * @throws IllegalArgumentException if {@code targetLayer} is neither directly nor indirectly
+	 * 			depending on {@code sourceLayer} or if the {@code sourceLayer} is not a member of
+	 * 			the context this driver manages.
+	 * @throws CorpusException
+	 * @throws InterruptedException
+	 */
+	IndexSet[] getHostIndices(MarkableLayer targetLayer, MarkableLayer sourceLayer, IndexSet[] indices) throws CorpusException, InterruptedException;
+
+	/**
+	 * Called by a {@link Segment} when it gets closed or it otherwise decided to discard its current
+	 * content. The driver is responsible for collecting the layer groups affected by the segment which
+	 * it is able handle and then release their content from its internal cache, potentially moving
+	 * members it no longer requires to a markable pool.
+	 *
+	 * @param container
+	 * @param segment
+	 */
+	void release(Segment segment);
+
+	/**
+	 * Called when a context is removed from a corpus or the entire model framework is shutting down.
+	 * The driver implementation is meant to release all previously held resources and to disconnect
+	 * from databases or other remote storages.
+	 * <p>
+	 * Note that the behavior of a driver is undefined once it has been closed! References to closed
+	 * driver instances should be discarded immediately.
+	 */
+	void close() throws CorpusException;
+//
+//	/**
+//	 * Returns the cache instance that is used to store loaded markables for the
+//	 * specified layer.
+//	 *
+//	 * @param layer
+//	 * @return
+//	 * @throws NullPointerException if the {@code layer} argument is {@code null}
+//	 */
+//	MemberCache<Markable> getCache(MarkableLayer layer);
 
 	/**
 	 * Accesses the driver's internal indexing system and tries to fetch all the occurring values for a given

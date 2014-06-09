@@ -33,11 +33,33 @@ package de.ims.icarus.language.model.api.manifest;
  */
 public interface Derivable {
 
+	/**
+	 * Returns whether or not this {@code Derivable} is meant to be a template,
+	 * i.e. an abstract base description that cannot be used to directly instantiate
+	 * objects from.
+	 *
+	 * @return
+	 */
 	boolean isTemplate();
 
+	/**
+	 * Returns the namespace wide unique id of this template/derivable.
+	 * @return
+	 */
 	String getId();
 
+	/**
+	 * If derived from another template, this method returns the object used for
+	 * templating or {@code null} otherwise.
+	 *
+	 * @return
+	 */
 	Derivable getTemplate();
 
+	/**
+	 * Changes the template used to derive content from.
+	 *
+	 * @param template
+	 */
 	void setTemplate(Derivable template);
 }
