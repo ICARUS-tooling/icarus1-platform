@@ -32,31 +32,30 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import de.ims.icarus.language.model.api.ChunkControl;
 import de.ims.icarus.language.model.api.Container;
 import de.ims.icarus.language.model.api.ContainerType;
 import de.ims.icarus.language.model.api.Context;
 import de.ims.icarus.language.model.api.Corpus;
-import de.ims.icarus.language.model.api.CorpusMember;
-import de.ims.icarus.language.model.api.IdDomain;
+import de.ims.icarus.language.model.api.CorpusException;
 import de.ims.icarus.language.model.api.Markable;
+import de.ims.icarus.language.model.api.MemberSet;
 import de.ims.icarus.language.model.api.MemberType;
 import de.ims.icarus.language.model.api.edit.CorpusEditModel;
 import de.ims.icarus.language.model.api.edit.CorpusUndoManager;
 import de.ims.icarus.language.model.api.events.CorpusListener;
 import de.ims.icarus.language.model.api.events.EventManager;
 import de.ims.icarus.language.model.api.layer.Layer;
+import de.ims.icarus.language.model.api.layer.LayerGroup;
 import de.ims.icarus.language.model.api.layer.LayerType;
 import de.ims.icarus.language.model.api.layer.MarkableLayer;
 import de.ims.icarus.language.model.api.manifest.ContainerManifest;
 import de.ims.icarus.language.model.api.manifest.CorpusManifest;
 import de.ims.icarus.language.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.language.model.api.meta.MetaData;
-import de.ims.icarus.language.model.registry.CorpusRegistry;
-import de.ims.icarus.language.model.standard.context.DefaultContext;
-import de.ims.icarus.language.model.standard.elements.AbstractContainer;
+import de.ims.icarus.language.model.api.seg.Segment;
+import de.ims.icarus.language.model.iql.Query;
+import de.ims.icarus.language.model.util.CorpusUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
-import de.ims.icarus.util.collections.LongHashMap;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -76,18 +75,11 @@ public class DefaultCorpus implements Corpus {
 
 	private final Lock lock = new ReentrantLock();
 
+	// All contained layers, not including the overlay layer!
 	private final List<Layer> layers = new ArrayList<>();
 
 	private final OverlayLayer overlayLayer;
 	private final OverlayContainer overlayContainer;
-
-	// Id pools
-	private final IdPool globalIdDomain;
-
-	private final IdDomain internalIdDomain;
-
-	private LongHashMap<CorpusMember> globalLookup = new LongHashMap<>();
-	private boolean useGlobalCache = false;
 
 	public DefaultCorpus(CorpusManifest manifest) {
 		if (manifest == null)
@@ -96,20 +88,8 @@ public class DefaultCorpus implements Corpus {
 		this.manifest = manifest;
 		this.defaultContext = new DefaultContext(this, manifest.getDefaultContextManifest());
 
-		globalIdDomain = new IdPool();
-		internalIdDomain = globalIdDomain.reserve(100);
-
-		overlayLayer = new OverlayLayer(internalIdDomain.nextId());
-		overlayContainer = new OverlayContainer(internalIdDomain.nextId());
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.Corpus#getChunkControl()
-	 */
-	@Override
-	public ChunkControl getChunkControl() {
-		// TODO Auto-generated method stub
-		return null;
+		overlayLayer = new OverlayLayer();
+		overlayContainer = new OverlayContainer();
 	}
 
 	/**
@@ -127,38 +107,6 @@ public class DefaultCorpus implements Corpus {
 	@Override
 	public Iterator<Layer> iterator() {
 		return new LayerIterator();
-	}
-
-	/**
-	 * @see de.ims.icarus.language.model.api.Corpus#getGlobalIdDomain()
-	 */
-	@Override
-	public IdDomain getGlobalIdDomain() {
-		return globalIdDomain;
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#isLoaded()
-	 */
-	@Override
-	public boolean isLoaded() {
-		return defaultContext.isLoaded();
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#isLoading()
-	 */
-	@Override
-	public boolean isLoading() {
-		return defaultContext.isLoading();
-	}
-
-	/**
-	 * @see de.ims.icarus.io.Loadable#load()
-	 */
-	@Override
-	public void load() throws Exception {
-		defaultContext.load();
 	}
 
 	/**
@@ -222,8 +170,8 @@ public class DefaultCorpus implements Corpus {
 	 */
 	@Override
 	public MarkableLayer getBaseLayer() {
-		// TODO Auto-generated method stub
-		return null;
+		//FIXME need more elegant solution!
+		return (MarkableLayer) getDefaultContext().getLayers().get(0);
 	}
 
 	/**
@@ -252,21 +200,22 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.Corpus#getLayer(java.lang.String)
-	 */
-	@Override
-	public Layer getLayer(String id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
 	 * @see de.ims.icarus.language.model.api.Corpus#getLayers(de.ims.icarus.language.model.api.layer.LayerType)
 	 */
 	@Override
 	public List<Layer> getLayers(LayerType type) {
-		// TODO Auto-generated method stub
-		return null;
+		if (type == null)
+			throw new NullPointerException("Invalid type");
+
+		List<Layer> result = new ArrayList<>();
+
+		for(Layer layer : layers) {
+			if(layer.getManifest().getLayerType()==type) {
+				result.add(layer);
+			}
+		}
+
+		return result;
 	}
 
 	/**
@@ -324,21 +273,24 @@ public class DefaultCorpus implements Corpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.model.api.Corpus#free()
+	 * @see de.ims.icarus.language.model.api.Corpus#getSegment(de.ims.icarus.language.model.iql.Query)
 	 */
 	@Override
-	public void free() {
+	public Segment createSegment(Query query) throws CorpusException {
 		// TODO Auto-generated method stub
+		return null;
+	}
 
+	/**
+	 * @see de.ims.icarus.language.model.api.Corpus#getOverlayContainer()
+	 */
+	@Override
+	public Container getOverlayContainer() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private class OverlayLayer implements MarkableLayer {
-
-		private final long id;
-
-		public OverlayLayer(long id) {
-			this.id = id;
-		}
 
 		/**
 		 * @see de.ims.icarus.language.model.api.layer.Layer#getName()
@@ -358,14 +310,6 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.api.layer.Layer#getLayerType()
-		 */
-		@Override
-		public LayerType getLayerType() {
-			return CorpusRegistry.getInstance().getOverlayLayerType();
-		}
-
-		/**
 		 * @see de.ims.icarus.language.model.api.layer.Layer#getContext()
 		 */
 		@Override
@@ -377,7 +321,7 @@ public class DefaultCorpus implements Corpus {
 		 * @see de.ims.icarus.language.model.api.layer.Layer#getBaseLayer()
 		 */
 		@Override
-		public MarkableLayer getBaseLayer() {
+		public MemberSet<MarkableLayer> getBaseLayers() {
 			return null;
 		}
 
@@ -395,14 +339,6 @@ public class DefaultCorpus implements Corpus {
 		@Override
 		public void removeNotify(Corpus corpus) {
 			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * @see de.ims.icarus.language.model.api.CorpusMember#getId()
-		 */
-		@Override
-		public long getId() {
-			return id;
 		}
 
 		/**
@@ -430,14 +366,6 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.model.api.layer.MarkableLayer#getContainer()
-		 */
-		@Override
-		public Container getContainer() {
-			return overlayContainer;
-		}
-
-		/**
 		 * No boundary on overlay layer!
 		 * @see de.ims.icarus.language.model.api.layer.MarkableLayer#getBoundaryLayer()
 		 */
@@ -446,17 +374,23 @@ public class DefaultCorpus implements Corpus {
 			return null;
 		}
 
+		/**
+		 * The artificial overlay layer is so far the only layer that is allowed to be
+		 * without a hosting layer group!
+		 *
+		 * FIXME: re-evaluate that situation and maybe introduce a dummy group
+		 *
+		 * @see de.ims.icarus.language.model.api.layer.Layer#getLayerGroup()
+		 */
+		@Override
+		public LayerGroup getLayerGroup() {
+			return null;
+		}
+
 	}
 
 
-	private class OverlayContainer extends AbstractContainer {
-
-		/**
-		 * @param id
-		 */
-		public OverlayContainer(long id) {
-			super(id);
-		}
+	private class OverlayContainer implements Container {
 
 		/**
 		 * @see de.ims.icarus.language.model.api.Markable#getContainer()
@@ -478,7 +412,7 @@ public class DefaultCorpus implements Corpus {
 		 * @see de.ims.icarus.language.model.api.Markable#getBeginOffset()
 		 */
 		@Override
-		public int getBeginOffset() {
+		public long getBeginOffset() {
 			return -1;
 		}
 
@@ -486,7 +420,7 @@ public class DefaultCorpus implements Corpus {
 		 * @see de.ims.icarus.language.model.api.Markable#getEndOffset()
 		 */
 		@Override
-		public int getEndOffset() {
+		public long getEndOffset() {
 			return -1;
 		}
 
@@ -567,6 +501,100 @@ public class DefaultCorpus implements Corpus {
 		 */
 		@Override
 		public void moveMarkable(int index0, int index1) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Markable#getIndex()
+		 */
+		@Override
+		public long getIndex() {
+			return -1;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Markable#setIndex(long)
+		 */
+		@Override
+		public void setIndex(long newIndex) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.CorpusMember#getMemberType()
+		 */
+		@Override
+		public MemberType getMemberType() {
+			return MemberType.CONTAINER;
+		}
+
+		/**
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		@Override
+		public int compareTo(Markable o) {
+			return CorpusUtils.compare(this, o);
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#getBaseContainers()
+		 */
+		@Override
+		public MemberSet<Container> getBaseContainers() {
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#getBoundaryContainer()
+		 */
+		@Override
+		public Container getBoundaryContainer() {
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#indexOfMarkable(de.ims.icarus.language.model.api.Markable)
+		 */
+		@Override
+		public int indexOfMarkable(Markable markable) {
+			for(int i=layers.size(); --i>=0;) {
+				if(layers.get(i).getMarkableProxy()==markable) {
+					return i;
+				}
+			}
+
+			return -1;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#containsMarkable(de.ims.icarus.language.model.api.Markable)
+		 */
+		@Override
+		public boolean containsMarkable(Markable markable) {
+			return indexOfMarkable(markable)!=-1;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#addMarkable(de.ims.icarus.language.model.api.Markable)
+		 */
+		@Override
+		public void addMarkable(Markable markable) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#removeMarkable(de.ims.icarus.language.model.api.Markable)
+		 */
+		@Override
+		public Markable removeMarkable(Markable markable) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @see de.ims.icarus.language.model.api.Container#moveMarkable(de.ims.icarus.language.model.api.Markable, int)
+		 */
+		@Override
+		public void moveMarkable(Markable markable, int index) {
 			throw new UnsupportedOperationException();
 		}
 
