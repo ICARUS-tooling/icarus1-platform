@@ -27,9 +27,9 @@ package de.ims.icarus.model.api.seg;
 
 import java.util.Set;
 
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusException;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.iql.Query;
 
@@ -77,10 +77,10 @@ public interface Segment {
 	 *
 	 * @param owner
 	 * @throws NullPointerException if the {@code owner} argument is {@code null}.
-	 * @throws CorpusException if {@link #close()} has already been called on this
+	 * @throws ModelException if {@link #close()} has already been called on this
 	 * 			segment and it's in the process of releasing its data.
 	 */
-	void acquire(SegmentOwner owner) throws CorpusException;
+	void acquire(SegmentOwner owner) throws ModelException;
 
 	/**
 	 * Removes the given {@code owner}'s shared ownership on this segment. If no
@@ -89,12 +89,12 @@ public interface Segment {
 	 *
 	 * @param owner
 	 * @throws NullPointerException if the {@code owner} argument is {@code null}.
-	 * @throws CorpusException if {@link #close()} has already been called on this
+	 * @throws ModelException if {@link #close()} has already been called on this
 	 * 			segment and it's in the process of releasing its data.
 	 * @throws IllegalArgumentException if the given owner does not hold shared ownership
 	 * 			of this segment.
 	 */
-	void release(SegmentOwner owner) throws CorpusException;
+	void release(SegmentOwner owner) throws ModelException;
 
 	Set<SegmentOwner> getOwners();
 
@@ -113,11 +113,11 @@ public interface Segment {
 	 * Otherwise the segment will release its data and disconnect any links to the hosting
 	 * corpus.
 	 *
-	 * @throws CorpusException
+	 * @throws ModelException
 	 * @throws IllegalStateException in case there are still owners that could not be made to
 	 * 			release their partial ownership of this segment
 	 */
-	void close() throws CorpusException;
+	void close() throws ModelException;
 
 	// Page support
 
@@ -149,12 +149,12 @@ public interface Segment {
 	 * @param index the index of the page to load
 	 * @return {@code true} iff loading the requested page succeeded without errors
 	 * and the content of this segment changed as a result.
-	 * @throws CorpusException if there was an IO error or other problem encountered
+	 * @throws ModelException if there was an IO error or other problem encountered
 	 * 			while loading data
 	 * @throws UnsupportedOperationException if this segment does not support paging
 	 * 			(this is the case when {@code #getPageCount()} returns {@code 0})
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= getPageCount()</tt>)
 	 */
-	boolean loadPage(int index) throws CorpusException;
+	boolean loadPage(int index) throws ModelException;
 }

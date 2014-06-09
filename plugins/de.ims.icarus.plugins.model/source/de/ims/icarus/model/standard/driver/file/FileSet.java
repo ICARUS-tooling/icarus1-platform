@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.driver.file;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelException;
 
 /**
  * Stores a collection of files together with their respective checksums.
@@ -69,7 +69,7 @@ public interface FileSet {
      *
 	 * @see FileChecksum
 	 */
-	FileChecksum getChecksum(int fileIndex) throws CorpusException;
+	FileChecksum getChecksum(int fileIndex) throws ModelException;
 
 	/**
 	 * Recomputes the checksum for the specified file and compares it with the
@@ -80,7 +80,7 @@ public interface FileSet {
      * @throws IndexOutOfBoundsException if the fileIndex is out of range
      *         (<tt>index &lt; 0 || index &gt;= getFileCount()</tt>)
 	 */
-	boolean verifyChecksum(int fileIndex) throws IOException, CorpusException;
+	boolean verifyChecksum(int fileIndex) throws IOException, ModelException;
 
 	/**
 	 * Forces the index to recompute the checksum for a specified file and
@@ -93,7 +93,7 @@ public interface FileSet {
 	 *
 	 * @see FileChecksum
 	 */
-	void refreshChecksum(int fileIndex) throws IOException, CorpusException;
+	void refreshChecksum(int fileIndex) throws IOException, ModelException;
 
 	/**
 	 *

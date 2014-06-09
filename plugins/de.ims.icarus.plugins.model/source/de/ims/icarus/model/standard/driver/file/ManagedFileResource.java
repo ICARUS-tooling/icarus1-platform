@@ -41,8 +41,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import de.ims.icarus.model.api.CorpusError;
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
@@ -51,6 +51,18 @@ import de.ims.icarus.util.CorruptedStateException;
  *
  */
 public abstract class ManagedFileResource {
+
+	/**
+	 * Maximum size of supported files, limited to 32 Gigabytes
+	 */
+	public static final long MAX_FILE_SIZE = 1024L * 1024L * 1024L * 32L;
+
+	/**
+	 * Minimum size of cache blocks in bytes. Chosen to be {@value #MIN_BLOCK_SIZE}
+	 * so that a file within the size limitations of {@link #MAX_FILE_SIZE} can still
+	 * be addressed on the block level by means of integer values.
+	 */
+	public static final long MIN_BLOCK_SIZE = 1000L;
 
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -62,7 +74,7 @@ public abstract class ManagedFileResource {
 
 	private final TIntSet changedBlocks = new TIntHashSet();
 
-	private int bytesPerBlock;
+	private int bytesPerBlock = -1;
 	private final int cacheSize;
 
 	private ByteBuffer buffer;
@@ -71,6 +83,15 @@ public abstract class ManagedFileResource {
 	protected ManagedFileResource(Path file, BlockCache cache, int cacheSize) {
 		if (file == null)
 			throw new NullPointerException("Invalid folder"); //$NON-NLS-1$
+
+		if(!Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
+			try {
+				Files.createFile(file);
+			} catch (IOException e) {
+				throw new ModelException(null, ModelError.DRIVER_INDEX_IO,
+						"Failed to open managed resource", e); //$NON-NLS-1$
+			}
+		}
 
 		if(!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
 			throw new IllegalArgumentException("Supplied file is not regular file: "+file); //$NON-NLS-1$
@@ -84,6 +105,11 @@ public abstract class ManagedFileResource {
 	}
 
 	protected void setBytesPerBlock(int bytesPerBlock) {
+		// Ensure we never have to worry about block id values
+		// exceeding Integer.MAX_VALUE
+		if(bytesPerBlock<MIN_BLOCK_SIZE)
+			throw new IllegalArgumentException("Invalid block size: "+bytesPerBlock+" - minimum size is "+MIN_BLOCK_SIZE); //$NON-NLS-1$ //$NON-NLS-2$
+
 		this.bytesPerBlock = bytesPerBlock;
 	}
 
@@ -112,6 +138,13 @@ public abstract class ManagedFileResource {
 		block.lock();
 	}
 
+	protected final void refreshBlockSize(Block block, int size) {
+		if(size<0 || size>block.getSize()+1)
+			throw new ModelException(ModelError.DRIVER_INDEX_WRITE_VIOLATION,
+					"Entry index out of boundy for block: "+size+" - expected non negative value up to "+block.getSize()+1); //$NON-NLS-1$ //$NON-NLS-2$
+		block.setSize(size);
+	}
+
 	protected final Block getBlock(int id, boolean writeAccess) {
 		Block block = cache.getBlock(id);
 
@@ -122,7 +155,7 @@ public abstract class ManagedFileResource {
 				try {
 					flush();
 				} catch (IOException e) {
-					throw new CorpusException(null, CorpusError.DRIVER_INDEX_IO,
+					throw new ModelException(ModelError.DRIVER_INDEX_IO,
 							"Failed to automatically flush index changes", e); //$NON-NLS-1$
 				}
 			}
@@ -139,7 +172,7 @@ public abstract class ManagedFileResource {
 				}
 
 				if(tmpBlock==null) {
-					tmpBlock = new Block(newBlockData(), 0);
+					tmpBlock = new Block(newBlockData());
 				}
 
 				block = tmpBlock;
@@ -150,7 +183,7 @@ public abstract class ManagedFileResource {
 
 				tmpBlock = cache.addBlock(block, id);
 			} catch(IOException e) {
-				throw new CorpusException(null, CorpusError.DRIVER_INDEX_IO,
+				throw new ModelException(null, ModelError.DRIVER_INDEX_IO,
 						"Failed to read block "+id+" in file "+file, e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
@@ -226,20 +259,13 @@ public abstract class ManagedFileResource {
 		int count = useCount.getAndIncrement();
 
 		if(count==0) {
-			try {
-				open();
-			} catch (IOException e) {
-				throw new CorpusException(null, CorpusError.DRIVER_INDEX_IO,
-						"Failed to open managed resource", e); //$NON-NLS-1$
-			}
+			open();
 		}
 	}
 
-	protected void open() throws IOException {
-
-		if(!Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
-			Files.createFile(file);
-		}
+	protected void open() {
+		if(bytesPerBlock<0)
+			throw new IllegalStateException("No block size defined - cannot allocate buffer"); //$NON-NLS-1$
 
 		buffer = ByteBuffer.allocateDirect(bytesPerBlock);
 
@@ -254,7 +280,7 @@ public abstract class ManagedFileResource {
 			try {
 				close();
 			} catch (IOException e) {
-				throw new CorpusException(null, CorpusError.DRIVER_INDEX_IO,
+				throw new ModelException(null, ModelError.DRIVER_INDEX_IO,
 						"Failed to close managed resource", e); //$NON-NLS-1$
 			}
 		}
@@ -277,15 +303,14 @@ public abstract class ManagedFileResource {
 	public static final class Block {
 
 		// To check if a block differs from default
-		private int size;
+		private int size = 0;
 		// Storage data
 		private Object data;
 		// Flag to prevent removal from cache
 		private boolean locked;
 
-		Block(Object data, int size) {
+		Block(Object data) {
 			this.data = data;
-			this.size = size;
 		}
 
 		public int getSize() {

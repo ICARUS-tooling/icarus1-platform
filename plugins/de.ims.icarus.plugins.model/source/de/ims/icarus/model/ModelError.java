@@ -23,11 +23,14 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import de.ims.icarus.model.api.driver.Driver;
-import de.ims.icarus.model.api.manifest.ImplementationManifest;
+import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
+import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 
 /**
@@ -35,7 +38,7 @@ import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
  * @version $Id$
  *
  */
-public enum CorpusError {
+public enum ModelError {
 
 	//**************************************************
 	//       1xx  GENERAL ERRORS
@@ -55,7 +58,7 @@ public enum CorpusError {
 	 * Wraps an {@link OutOfMemoryError} object that was thrown when
 	 * the Java VM ran out of memory to allocate objects.
 	 */
-	INSUFFICIENT_MEMORY(101),
+	INSUFFICIENT_MEMORY(102),
 
 	//**************************************************
 	//       2xx  IMPLEMENTATION ERRORS
@@ -131,11 +134,21 @@ public enum CorpusError {
 	 * {@link Driver}.
 	 */
 	DRIVER_INDEX_IO(401),
+
+	/**
+	 * Client code attempted to write to an index file in a manner other than using existing index
+	 * values or appending to the greatest current index value. This restriction is imposed by the default
+	 * implementations for the {@link Index} interface provided by file based {@link Driver}s. Note that
+	 * the {@code Index} interface does not define write mechanics itself, since for example database
+	 * backed implementations might directly link to the database's own indexing system and therefore
+	 * not support client originated write operations on the index!
+	 */
+	DRIVER_INDEX_WRITE_VIOLATION(402),
 	;
 
 	private final int errorCode;
 
-	CorpusError(int errorCode) {
+	ModelError(int errorCode) {
 		this.errorCode = errorCode;
 	}
 
@@ -147,4 +160,28 @@ public enum CorpusError {
 	public String toString() {
 		return name()+" ("+errorCode+")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
+
+	private static final TIntObjectMap<ModelError> codeLookup = new TIntObjectHashMap<>();
+
+	public static ModelError forCode(int code) {
+		if(codeLookup.isEmpty()) {
+			synchronized (codeLookup) {
+				if (codeLookup.isEmpty()) {
+					for(ModelError error : values()) {
+						//TODO Maybe add extra sanity check against duplicate error codes?
+						codeLookup.put(error.errorCode, error);
+					}
+				}
+
+			}
+		}
+
+		ModelError error = codeLookup.get(code);
+
+		if(error==null)
+			throw new IllegalArgumentException("Unknown error code: "+code); //$NON-NLS-1$
+
+		return error;
+	}
+
 }

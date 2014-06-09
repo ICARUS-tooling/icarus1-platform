@@ -28,10 +28,10 @@ package de.ims.icarus.model.standard.driver;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusError;
-import de.ims.icarus.model.api.CorpusException;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.Dependency;
@@ -68,7 +68,7 @@ import de.ims.icarus.model.util.CorpusUtils;
  */
 public class ContextFactory {
 
-	public Context createContext(Corpus corpus, ContextManifest manifest, Driver driver) throws CorpusException {
+	public Context createContext(Corpus corpus, ContextManifest manifest, Driver driver) throws ModelException {
 		if (corpus == null)
 			throw new NullPointerException("Invalid corpus");  //$NON-NLS-1$
 		if (manifest == null)
@@ -197,7 +197,7 @@ public class ContextFactory {
 		 * adds all necessary base layers. In addition it assumes that layer groups used for
 		 * supplied layers (not those of foreign contexts!) will be of type {@link DefaultLayerGroup}.
 		 */
-		public void link() throws CorpusException {
+		public void link() throws ModelException {
 			LayerManifest layerManifest = layer.getManifest();
 
 			// Link base layers
@@ -259,7 +259,7 @@ public class ContextFactory {
 		 * @see de.ims.icarus.model.standard.driver.ContextFactory.LayerLinker#link()
 		 */
 		@Override
-		public void link() throws CorpusException {
+		public void link() throws ModelException {
 			// Allow regular base layer linking to perform as usual
 			super.link();
 
@@ -299,7 +299,7 @@ public class ContextFactory {
 		 * @see de.ims.icarus.model.standard.driver.ContextFactory.LayerLinker#link()
 		 */
 		@Override
-		public void link() throws CorpusException {
+		public void link() throws ModelException {
 			// Allow regular base layer linking to perform as usual
 			super.link();
 
@@ -324,7 +324,7 @@ public class ContextFactory {
 
 			// No default implementation available, therefore notify with exception
 			if(rasterizerManifest==null) {
-				throw new CorpusException(layer.getCorpus(), CorpusError.IMPLEMENTATION_MISSING,
+				throw new ModelException(layer.getCorpus(), ModelError.IMPLEMENTATION_MISSING,
 						"Missing rasterizer manifest for fragment layer: "+CorpusUtils.getName(layer)); //$NON-NLS-1$
 			}
 
@@ -333,13 +333,13 @@ public class ContextFactory {
 				Rasterizer rasterizer = rasterizerManifest.instantiate(Rasterizer.class);
 				layer.setRasterizer(rasterizer);
 			} catch (ClassNotFoundException e) {
-				throw new CorpusException(layer.getCorpus(), CorpusError.IMPLEMENTATION_NOT_FOUND,
+				throw new ModelException(layer.getCorpus(), ModelError.IMPLEMENTATION_NOT_FOUND,
 						"Implementing rasterizer class for fragment layer not found: "+CorpusUtils.getName(layer), e); //$NON-NLS-1$
 			} catch (IllegalAccessException | InstantiationException e) {
-				throw new CorpusException(layer.getCorpus(), CorpusError.IMPLEMENTATION_NOT_ACCESSIBLE,
+				throw new ModelException(layer.getCorpus(), ModelError.IMPLEMENTATION_NOT_ACCESSIBLE,
 						"Implementing rasterizer class for fragment layer not accessible: "+CorpusUtils.getName(layer), e); //$NON-NLS-1$
 			} catch (ClassCastException e) {
-				throw new CorpusException(layer.getCorpus(), CorpusError.IMPLEMENTATION_INCOMPATIBLE,
+				throw new ModelException(layer.getCorpus(), ModelError.IMPLEMENTATION_INCOMPATIBLE,
 						"Implementing rasterizer class for fragment layer incompatible: "+CorpusUtils.getName(layer), e); //$NON-NLS-1$
 			}
 		}

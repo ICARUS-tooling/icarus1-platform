@@ -27,8 +27,8 @@ package de.ims.icarus.model.api.driver;
 
 import java.util.Set;
 
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
-import de.ims.icarus.model.api.CorpusException;
 import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
@@ -47,7 +47,7 @@ import de.ims.icarus.model.iql.Query;
  */
 public interface Driver {
 
-//	void createContext(ContextManifest manifest) throws CorpusException;
+//	void createContext(ContextManifest manifest) throws ModelException;
 
 	Context getContext();
 
@@ -80,14 +80,14 @@ public interface Driver {
 	 * @param layer the primary layer of the vertical filter that index values of the returned
 	 * 			{@code IndexSet} array refer to.
 	 * @return
-	 * @throws CorpusException if the driver encountered problems while contacting the index
+	 * @throws ModelException if the driver encountered problems while contacting the index
 	 * 			(note that incompatibility between constraints in the query and the capabilities
 	 * 			of the driver should lead the latter to ignore said constraints instead of throwing
 	 * 			an exception or aborting the call in some other way)
 	 * @throws InterruptedException
 	 * @throws NullPointerException if either one of the {@code query} or {@code scope} arguments is {@code null}
 	 */
-	IndexSet[] lookup(Query query, MarkableLayer layer) throws CorpusException, InterruptedException;
+	IndexSet[] lookup(Query query, MarkableLayer layer) throws ModelException, InterruptedException;
 
 	/**
 	 * Synchronously attempts to load the given set of indices referencing chunks in the primary layer of the
@@ -102,14 +102,14 @@ public interface Driver {
 	 * @param storage
 	 * @return
 	 * @throws IllegalArgumentException if the
-	 * @throws CorpusException
+	 * @throws ModelException
 	 * @throws InterruptedException
 	 * @throws NullPointerException if any of the arguments is {@code null}
 	 *
 	 * @see DriverListener
 	 * @see Scope
 	 */
-	long load(IndexSet[] indices, Scope scope, ChunkStorage storage) throws CorpusException, InterruptedException;
+	long load(IndexSet[] indices, Scope scope, ChunkStorage storage) throws ModelException, InterruptedException;
 
 	/**
 	 * Attempts to fetch the number of elements stored in the top-level container for the given
@@ -120,9 +120,9 @@ public interface Driver {
 	 *
 	 * @param layer
 	 * @return
-	 * @throws CorpusException
+	 * @throws ModelException
 	 */
-	long getMemberCount(MarkableLayer layer) throws CorpusException;
+	long getMemberCount(MarkableLayer layer) throws ModelException;
 
 	/**
 	 * Accesses the internal cache for the specified layer and attempts to lookup the
@@ -132,9 +132,9 @@ public interface Driver {
 	 * @param index
 	 * @param layer
 	 * @return
-	 * @throws CorpusException
+	 * @throws ModelException
 	 */
-	Markable load(long index, MarkableLayer layer) throws CorpusException;
+	Markable load(long index, MarkableLayer layer) throws ModelException;
 
 	/**
 	 * Performs a reverse lookup to return indices of markables in the designated target layer
@@ -148,10 +148,10 @@ public interface Driver {
 	 * @throws IllegalArgumentException if {@code targetLayer} is neither directly nor indirectly
 	 * 			depending on {@code sourceLayer} or if the {@code sourceLayer} is not a member of
 	 * 			the context this driver manages.
-	 * @throws CorpusException
+	 * @throws ModelException
 	 * @throws InterruptedException
 	 */
-	IndexSet[] getHostIndices(MarkableLayer targetLayer, MarkableLayer sourceLayer, IndexSet[] indices) throws CorpusException, InterruptedException;
+	IndexSet[] getHostIndices(MarkableLayer targetLayer, MarkableLayer sourceLayer, IndexSet[] indices) throws ModelException, InterruptedException;
 
 	/**
 	 * Called by a {@link Segment} when it gets closed or it otherwise decided to discard its current
@@ -172,7 +172,7 @@ public interface Driver {
 	 * Note that the behavior of a driver is undefined once it has been closed! References to closed
 	 * driver instances should be discarded immediately.
 	 */
-	void close() throws CorpusException;
+	void close() throws ModelException;
 //
 //	/**
 //	 * Returns the cache instance that is used to store loaded markables for the
@@ -196,10 +196,10 @@ public interface Driver {
 	 * @throws NullPointerException if the {@code layer} argument is {@code null}
 	 * @throws IllegalArgumentException if the specified {@code key} does not represent a legal entry in the
 	 * 			given {@code AnnotationLayer}
-	 * @throws CorpusException
+	 * @throws ModelException
 	 * @throws InterruptedException
 	 */
-	AnnotationValueSet lookupValues(AnnotationLayer layer, String key) throws CorpusException, InterruptedException;
+	AnnotationValueSet lookupValues(AnnotationLayer layer, String key) throws ModelException, InterruptedException;
 
 	/**
 	 * Performs a lookup very similar to {@link #lookupValues(AnnotationLayer, String)} but in addition returns
@@ -212,8 +212,8 @@ public interface Driver {
 	 * @throws NullPointerException if the {@code layer} argument is {@code null}
 	 * @throws IllegalArgumentException if the specified {@code key} does not represent a legal entry in the
 	 * 			given {@code AnnotationLayer}
-	 * @throws CorpusException
+	 * @throws ModelException
 	 * @throws InterruptedException
 	 */
-	AnnotationValueDistribution lookupDistribution(AnnotationLayer layer, String key) throws CorpusException, InterruptedException;
+	AnnotationValueDistribution lookupDistribution(AnnotationLayer layer, String key) throws ModelException, InterruptedException;
 }

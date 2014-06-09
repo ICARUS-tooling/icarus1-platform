@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.io;
 
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelException;
 
 /**
  * Models a reader or writer linked to a specific source that can be used by multiple
@@ -47,5 +47,5 @@ public interface SynchronizedAccessor<E extends Object> extends AutoCloseable {
 	void end();
 
 	@Override
-	void close() throws CorpusException;
+	void close() throws ModelException;
 }

@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.model.standard.driver;
 
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusException;
 import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
@@ -54,7 +54,7 @@ public abstract class AbstractDriver implements Driver {
 	private final Context context;
 	private final DriverManifest manifest;
 
-	protected AbstractDriver(ContextManifest manifest, Corpus corpus) throws CorpusException {
+	protected AbstractDriver(ContextManifest manifest, Corpus corpus) throws ModelException {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 		if (corpus == null)
@@ -81,7 +81,7 @@ public abstract class AbstractDriver implements Driver {
 		return manifest;
 	}
 
-	protected Context createContext(ContextManifest manifest, Corpus corpus) throws CorpusException {
+	protected Context createContext(ContextManifest manifest, Corpus corpus) throws ModelException {
 		return new ContextFactory().createContext(corpus, manifest, this);
 	}
 
@@ -92,7 +92,7 @@ public abstract class AbstractDriver implements Driver {
 	 */
 	@Override
 	public IndexSet[] lookup(Query query, MarkableLayer layer)
-			throws CorpusException, InterruptedException {
+			throws ModelException, InterruptedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -102,7 +102,7 @@ public abstract class AbstractDriver implements Driver {
 	 */
 	@Override
 	public long load(IndexSet[] indices, Scope scope, ChunkStorage storage)
-			throws CorpusException, InterruptedException {
+			throws ModelException, InterruptedException {
 		if (indices == null)
 			throw new NullPointerException("Invalid indices");
 		if (scope == null)
@@ -119,7 +119,7 @@ public abstract class AbstractDriver implements Driver {
 	 */
 	@Override
 	public Markable load(long index, MarkableLayer layer)
-			throws CorpusException {
+			throws ModelException {
 		//TODO check of layer is managed by this driver?
 		MemberCache cache = ((CachedLayer)layer).getCache();
 		return cache==null ? null : cache.lookupMember(index);
@@ -131,7 +131,7 @@ public abstract class AbstractDriver implements Driver {
 	@Override
 	public IndexSet[] getHostIndices(MarkableLayer targetLayer,
 			MarkableLayer sourceLayer, IndexSet[] indices)
-			throws CorpusException, InterruptedException {
+			throws ModelException, InterruptedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -150,7 +150,7 @@ public abstract class AbstractDriver implements Driver {
 	 */
 	@Override
 	public AnnotationValueSet lookupValues(AnnotationLayer layer, String key)
-			throws CorpusException, InterruptedException {
+			throws ModelException, InterruptedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -160,7 +160,7 @@ public abstract class AbstractDriver implements Driver {
 	 */
 	@Override
 	public AnnotationValueDistribution lookupDistribution(
-			AnnotationLayer layer, String key) throws CorpusException,
+			AnnotationLayer layer, String key) throws ModelException,
 			InterruptedException {
 		// TODO Auto-generated method stub
 		return null;

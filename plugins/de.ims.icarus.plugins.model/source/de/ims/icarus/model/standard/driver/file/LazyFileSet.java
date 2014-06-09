@@ -41,7 +41,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.io.PathResolver;
 import de.ims.icarus.model.io.ResourcePath;
@@ -164,7 +164,7 @@ public class LazyFileSet extends JAXBGate<LazyFileSet.StorageBuffer> implements 
 	 * @see de.ims.icarus.model.standard.driver.file.FileSet#verifyChecksum(int)
 	 */
 	@Override
-	public synchronized boolean verifyChecksum(int fileIndex) throws IOException, CorpusException {
+	public synchronized boolean verifyChecksum(int fileIndex) throws IOException, ModelException {
 		Path path = getFileAt(fileIndex);
 
 		FileChecksum oldValue = getChecksum(path);

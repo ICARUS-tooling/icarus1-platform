@@ -33,10 +33,10 @@ import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusException;
 import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.MemberSet;
 import de.ims.icarus.model.api.MemberType;
@@ -120,7 +120,7 @@ abstract class AbstractSegment implements Segment {
 
 		try {
 			memberCount = driver.getMemberCount(layer);
-		} catch (CorpusException e) {
+		} catch (ModelException e) {
 			LoggerFactory.error(this, "Failed to fetch cached number of members in markable layer: "+layer, e); //$NON-NLS-1$
 		}
 
@@ -194,7 +194,7 @@ abstract class AbstractSegment implements Segment {
 	 * @see de.ims.icarus.model.api.seg.Segment#close()
 	 */
 	@Override
-	public void close() throws CorpusException {
+	public void close() throws ModelException {
 		synchronized (owners) {
 			checkOpen();
 
@@ -218,9 +218,9 @@ abstract class AbstractSegment implements Segment {
 	/**
 	 * Releases all the data stored in the current page.
 	 *
-	 * @throws CorpusException
+	 * @throws ModelException
 	 */
-	protected void freePage() throws CorpusException {
+	protected void freePage() throws ModelException {
 
 		for(ProxyContainer container : containers.values()) {
 			Driver driver = container.getLayer().getContext().getDriver();
@@ -230,7 +230,7 @@ abstract class AbstractSegment implements Segment {
 		}
 	}
 
-	protected void loadPage(IndexSet[] indices) throws CorpusException {
+	protected void loadPage(IndexSet[] indices) throws ModelException {
 		if (indices == null)
 			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
 		if(indices.length==0)
@@ -253,7 +253,7 @@ abstract class AbstractSegment implements Segment {
 	 * @see de.ims.icarus.model.api.seg.Segment#acquire(de.ims.icarus.model.api.seg.SegmentOwner)
 	 */
 	@Override
-	public void acquire(SegmentOwner owner) throws CorpusException {
+	public void acquire(SegmentOwner owner) throws ModelException {
 		if (owner == null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 
@@ -272,7 +272,7 @@ abstract class AbstractSegment implements Segment {
 	 * @see de.ims.icarus.model.api.seg.Segment#release(de.ims.icarus.model.api.seg.SegmentOwner)
 	 */
 	@Override
-	public void release(SegmentOwner owner) throws CorpusException {
+	public void release(SegmentOwner owner) throws ModelException {
 		if (owner == null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 

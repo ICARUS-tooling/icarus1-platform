@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.edit.CorpusEditModel;
 import de.ims.icarus.model.api.edit.CorpusUndoListener;
@@ -140,9 +141,9 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 *
 	 * @param query
 	 * @return
-	 * @throws CorpusException
+	 * @throws ModelException
 	 */
-	Segment createSegment(Query query) throws CorpusException;
+	Segment createSegment(Query query) throws ModelException;
 
 //	/**
 //	 * Resolves a given id and returns the member within this corpus

@@ -32,11 +32,11 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusException;
 import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.MemberSet;
 import de.ims.icarus.model.api.MemberType;
@@ -276,7 +276,7 @@ public class DefaultCorpus implements Corpus {
 	 * @see de.ims.icarus.model.api.Corpus#getSegment(de.ims.icarus.model.iql.Query)
 	 */
 	@Override
-	public Segment createSegment(Query query) throws CorpusException {
+	public Segment createSegment(Query query) throws ModelException {
 		// TODO Auto-generated method stub
 		return null;
 	}

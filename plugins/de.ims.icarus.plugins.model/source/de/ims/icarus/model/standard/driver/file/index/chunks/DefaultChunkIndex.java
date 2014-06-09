@@ -31,7 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.standard.driver.file.FileSet;
 import de.ims.icarus.model.standard.driver.file.ManagedFileResource;
 import de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter;
@@ -229,7 +229,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		 * @see de.ims.icarus.model.io.SynchronizedAccessor#close()
 		 */
 		@Override
-		public void close() throws CorpusException {
+		public void close() throws ModelException {
 			decrementUseCount();
 		}
 
@@ -301,7 +301,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		 * @see de.ims.icarus.model.io.SynchronizedAccessor#close()
 		 */
 		@Override
-		public void close() throws CorpusException {
+		public void close() throws ModelException {
 			decrementUseCount();
 		}
 

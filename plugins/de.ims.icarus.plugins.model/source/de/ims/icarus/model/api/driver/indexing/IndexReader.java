@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.driver.indexing;
 
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.driver.IndexSet;
 import de.ims.icarus.model.io.SynchronizedAccessor;
 
@@ -40,19 +40,19 @@ public interface IndexReader extends SynchronizedAccessor<Index> {
 
 	// Single index lookups
 
-	void lookup(long sourceIndex, IndexCollector collector) throws CorpusException, InterruptedException;
+	void lookup(long sourceIndex, IndexCollector collector) throws ModelException, InterruptedException;
 
-	IndexSet[] lookup(long sourceIndex) throws CorpusException, InterruptedException;
+	IndexSet[] lookup(long sourceIndex) throws ModelException, InterruptedException;
 
-	long getBeginIndex(long sourceIndex) throws CorpusException, InterruptedException;
-	long getEndIndex(long sourceIndex) throws CorpusException, InterruptedException;
+	long getBeginIndex(long sourceIndex) throws ModelException, InterruptedException;
+	long getEndIndex(long sourceIndex) throws ModelException, InterruptedException;
 
 	// Bulk index lookups
 
-	IndexSet[] lookup(IndexSet[] sourceIndices) throws CorpusException, InterruptedException;
+	IndexSet[] lookup(IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 
-	void lookup(IndexSet[] sourceIndices, IndexCollector collector) throws CorpusException, InterruptedException;
+	void lookup(IndexSet[] sourceIndices, IndexCollector collector) throws ModelException, InterruptedException;
 
-	long getBeginIndex(IndexSet[] sourceIndices) throws CorpusException, InterruptedException;
-	long getEndIndex(IndexSet[] sourceIndices) throws CorpusException, InterruptedException;
+	long getBeginIndex(IndexSet[] sourceIndices) throws ModelException, InterruptedException;
+	long getEndIndex(IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 }

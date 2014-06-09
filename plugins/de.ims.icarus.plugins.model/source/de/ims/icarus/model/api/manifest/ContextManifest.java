@@ -28,8 +28,8 @@ package de.ims.icarus.model.api.manifest;
 import java.util.List;
 import java.util.Map;
 
-import de.ims.icarus.model.api.CorpusError;
-import de.ims.icarus.model.api.CorpusException;
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 
 /**
  * @author Markus Gärtner
@@ -59,15 +59,15 @@ public interface ContextManifest extends MemberManifest {
 	 * @param corpusManifest the new hosting corpus manifest
 	 * @param resolutionMap
 	 * @return
-	 * @throws CorpusException if the {@code resolutionMap} contains prerequisites that are either
-	 * 			unresolved or invalid according to the prerequisite errors defined in {@link CorpusError}.
+	 * @throws ModelException if the {@code resolutionMap} contains prerequisites that are either
+	 * 			unresolved or invalid according to the prerequisite errors defined in {@link ModelError}.
 	 * @throws NullPointerException if the {@code corpusManifest} argument is {@code null}
 	 * @throws IllegalArgumentException if not every unresolved prerequisite in this manifest is
 	 * 			covered as a key in the {@code resolutionMap} parameter.
 	 * @throws UnsupportedOperationException if this manifest is not a template and therefore cannot
 	 * 			be instantiated to a resolved form.
 	 */
-	ContextManifest getResolvedForm(CorpusManifest corpusManifest, Map<PrerequisiteManifest, PrerequisiteManifest> resolutionMap) throws CorpusException;
+	ContextManifest getResolvedForm(CorpusManifest corpusManifest, Map<PrerequisiteManifest, PrerequisiteManifest> resolutionMap) throws ModelException;
 
 	/**
 	 * Allows for changes of the context's name at runtime. This is one of the
