@@ -414,9 +414,20 @@ public class NGrams {
 			return pf;	
 			
 		//dependency(2) + form(4)
+		//use head form; form already shown by token?
 		case 6:
 			String df = getDependencyLabel(dd, wordIndex) 
-						+ "_" + dd.getForm(wordIndex); //$NON-NLS-1$
+			+ "_" + dd.getForm(wordIndex); //$NON-NLS-1$
+
+//			String df ;
+//			if(dd.getHead(wordIndex) == -1){
+//				df = getDependencyLabel(dd, wordIndex); //$NON-NLS-1$
+//				
+//			} else {
+//			   df = getDependencyLabel(dd, wordIndex) 
+//						//+ "_" + dd.getForm(wordIndex); //$NON-NLS-1$
+//						+ "_" + dd.getForm(dd.getHead(wordIndex)); //$NON-NLS-1$
+//			}			
 			return df;
 		
 		//pos(1) + dependency(2) + form(4)

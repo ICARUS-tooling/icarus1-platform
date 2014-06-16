@@ -31,17 +31,25 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.text.AttributedString;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,11 +62,14 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractListModel;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
@@ -84,6 +95,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
@@ -91,19 +103,39 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.entity.CategoryItemEntity;
 import org.jfree.chart.entity.CategoryLabelEntity;
 import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.LegendItemEntity;
+import org.jfree.chart.entity.PieSectionEntity;
+import org.jfree.chart.entity.TitleEntity;
 import org.jfree.chart.event.RendererChangeEvent;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.labels.CategoryToolTipGenerator;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.labels.PieToolTipGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.DefaultDrawingSupplier;
+import org.jfree.chart.plot.MultiplePiePlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.PlotState;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.urls.PieURLGenerator;
+import org.jfree.chart.urls.StandardPieURLGenerator;
+import org.jfree.chart.util.ParamChecks;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.PieDataset;
+import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.TextAnchor;
+import org.jfree.util.TableOrder;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
@@ -192,7 +224,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected JSpinner upperBound;
 	protected SpinnerNumberModel ubm;
 	protected JLabel resultCounter;
+	protected JCheckBox exactTextMatch;
 	protected JTextField textFilterField;
+	protected JCheckBox onlyFilterNuclei;
 	protected JToolBar toolBarOverview;
 
 
@@ -203,6 +237,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected JSpinner statsSpinner;
 	protected SpinnerNumberModel sbm;
 	protected JTextField statisticTextFilterField;
+	protected JCheckBox exactTagMatch;
 	protected JLabel statisticCounter;
 	protected JSplitPane splitpaneStats;
 	protected JList<Object> statisticList;
@@ -213,9 +248,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected Map<String, List<StatsData>> statsResult;
 	protected Map<String, List<StatsData>> statsResultFiltered;
 	//protected DefaultCategoryDataset dataset;
-	protected ChartPanel barchartPanel;
+	protected ChartPanel barChartPanel;
 	protected JFreeChart chart;
-	protected CategoryPlot plot;
+	protected Plot plot;
 
 
 	//result stuff dependency
@@ -231,6 +266,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 	private int minimumGramsize;
 	private int maximumGramsize;
+	private boolean showPercentage = false;
+	private boolean barCompare = false;
 
 
 	//Color Stuff
@@ -246,6 +283,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	private static final int maximumCharPerTab = 40;
 	private static final String labelmatrix = "Total#"; //$NON-NLS-1$
 	private static final String nilString = "nil"; //$NON-NLS-1$
+	private static final String barChart = "barchart"; //$NON-NLS-1$
+	private static final String pieChart = "piechart"; //$NON-NLS-1$
+	private static final String percentA = "percentA"; //$NON-NLS-1$
+	private static final String percentB = "percentB"; //$NON-NLS-1$
 
 
 	/**
@@ -376,11 +417,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 
 		if(plot != null){
-			refreshBarChart("", null); //$NON-NLS-1$
+			refreshChart("", null); //$NON-NLS-1$
 		}
 
 		if(textFilterField != null){
 			textFilterField.setText(null);
+		}
+		
+		if(onlyFilterNuclei != null){
+			onlyFilterNuclei.setSelected(false);
 		}
 
 		if(statisticTextFilterField != null){
@@ -579,7 +624,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						"plugins.errormining.labels.barChart.x-axis"), //$NON-NLS-1$
 				ResourceManager.getInstance().get(
 						"plugins.errormining.labels.barChart.y-axis"), //$NON-NLS-1$
-				null, PlotOrientation.VERTICAL, // orientation
+				null, //data
+				PlotOrientation.VERTICAL, // orientation
 				true, // include legend
 				true, // tooltips?
 				false); // URLs?
@@ -596,20 +642,25 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		plot = chart.getCategoryPlot();
 		plot.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
 			.getColor("plugins.errorMining.appearance.resultMatrix.defaultPlotBackgroundPaint")); //$NON-NLS-1$
-		plot.setRenderer(new CustomBarHighlightRenderer());
+		((CategoryPlot) plot).setRenderer(new CustomBarHighlightRenderer());
+		//percentage test
+//		plot.getRenderer().setSeriesItemLabelGenerator(1,
+//				new StandardCategoryItemLabelGenerator("{3}",
+//							NumberFormat.getPercentInstance())
+//				);
 
 
 		// only integer ticks
-		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+		NumberAxis rangeAxis = (NumberAxis) ((CategoryPlot) plot).getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		rangeAxis.setAutoRange(true);
 		rangeAxis.setUpperMargin(0.15);
 
 
-		plot.setRangeGridlinePaint(ConfigRegistry
+		((CategoryPlot) plot).setRangeGridlinePaint(ConfigRegistry
 				.getGlobalRegistry()
 				.getColor("plugins.errorMining.appearance.resultMatrix.defaultGridlinePaint")); //$NON-NLS-1$
-		CustomBarHighlightRenderer br = (CustomBarHighlightRenderer) plot.getRenderer();
+		CustomBarHighlightRenderer br = (CustomBarHighlightRenderer) ((CategoryPlot) plot).getRenderer();
 		br.setMaximumBarWidth(ConfigRegistry.getGlobalRegistry().getDouble(
 				"plugins.errorMining.appearance.resultMatrix.defaultBarWidth")); //$NON-NLS-1$
 		br.setDrawBarOutline(true);
@@ -622,7 +673,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		Font font = ConfigUtils.defaultReadFont(handle);
 
-		CategoryItemRenderer renderer = plot.getRenderer();
+		CategoryItemRenderer renderer = ((CategoryPlot) plot).getRenderer();
 		renderer.setBaseItemLabelGenerator(new CustomLabelGenerator());
 		renderer.setBaseItemLabelFont(font);
 		renderer.setBaseItemLabelsVisible(true);
@@ -634,12 +685,207 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								TextAnchor.BASELINE_CENTER));
 
 		//add tooltip (current value of bar)
-		renderer.setSeriesToolTipGenerator(0, new CustomToolTipGenerator());
+		//renderer.setSeriesToolTipGenerator(0, new CustomToolTipGenerator());
+		initializeChartTooltip(renderer);
 
-		barchartPanel = new ChartPanel(chart);
-		barchartPanel.addChartMouseListener(getHandler());
-		return barchartPanel;
+		barChartPanel = new ChartPanel(chart);
+		barChartPanel.addChartMouseListener(getHandler());
+		return barChartPanel;
 	}
+	
+	
+	
+	private JFreeChart createBarChart(CategoryDataset data) {
+
+		if(ConfigRegistry.getGlobalRegistry()
+				.getBoolean("plugins.errorMining.appearance.resultMatrix.useSimpleBarChart")){ //$NON-NLS-1$
+			ChartFactory.setChartTheme(StandardChartTheme.createLegacyTheme());
+		}
+		
+
+
+		//chart customization
+		chart = ChartFactory.createBarChart(
+				ResourceManager.getInstance().get(
+						"plugins.errormining.labels.barChart.head"), //$NON-NLS-1$
+				ResourceManager.getInstance().get(
+						"plugins.errormining.labels.barChart.x-axis"), //$NON-NLS-1$
+				ResourceManager.getInstance().get(
+						"plugins.errormining.labels.barChart.y-axis"), //$NON-NLS-1$
+				data, //data
+				PlotOrientation.VERTICAL, // orientation
+				true, // include legend
+				true, // tooltips?
+				false); // URLs?
+
+		
+		
+		chart.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
+			.getColor("plugins.errorMining.appearance.resultMatrix.defaultChartBackgroundPaint")); //$NON-NLS-1$
+		chart.setAntiAlias(true);
+		
+		// empty data check: when nothing is selected, only when switching the first
+		// time to stats tab. ignore further configurations and return empty barchart
+		if(data.getColumnCount() == 0 && data.getRowCount() == 0){
+			chart.setTitle(""); //$NON-NLS-1$
+		} else {
+		
+		chart.setTitle(formatDependencyKey((String) statisticTable.getModel().getValueAt(statisticTable.getSelectedRow(), 1)));
+		}
+
+
+		// plot customization
+		plot = chart.getCategoryPlot();
+		plot.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
+			.getColor("plugins.errorMining.appearance.resultMatrix.defaultPlotBackgroundPaint")); //$NON-NLS-1$
+		((CategoryPlot) plot).setRenderer(new CustomBarHighlightRenderer());
+		//percentage test
+//		plot.getRenderer().setSeriesItemLabelGenerator(1,
+//				new StandardCategoryItemLabelGenerator("{3}",
+//							NumberFormat.getPercentInstance())
+//				);
+
+
+		// only integer ticks
+		NumberAxis rangeAxis = (NumberAxis) ((CategoryPlot) plot).getRangeAxis();
+		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		rangeAxis.setAutoRange(true);
+		rangeAxis.setUpperMargin(0.15);
+
+
+		((CategoryPlot) plot).setRangeGridlinePaint(ConfigRegistry
+				.getGlobalRegistry()
+				.getColor("plugins.errorMining.appearance.resultMatrix.defaultGridlinePaint")); //$NON-NLS-1$
+		CustomBarHighlightRenderer br = (CustomBarHighlightRenderer) ((CategoryPlot) plot).getRenderer();
+		br.setMaximumBarWidth(ConfigRegistry.getGlobalRegistry().getDouble(
+				"plugins.errorMining.appearance.resultMatrix.defaultBarWidth")); //$NON-NLS-1$
+		br.setDrawBarOutline(true);
+		br.setShadowVisible(false);
+
+
+		Handle handle = ConfigRegistry.getGlobalRegistry().getHandle(
+				"plugins.errorMining.appearance.font"); //$NON-NLS-1$
+
+		Font font = ConfigUtils.defaultReadFont(handle);
+
+		CategoryItemRenderer renderer = ((CategoryPlot) plot).getRenderer();
+		renderer.setBaseItemLabelGenerator(new CustomLabelGenerator());
+		renderer.setBaseItemLabelFont(font);
+		renderer.setBaseItemLabelsVisible(true);
+		//TODO add option
+		renderer.setBaseItemLabelPaint(Color.black);
+		renderer.setSeriesPositiveItemLabelPosition(
+								1,
+								new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12,
+								TextAnchor.BASELINE_CENTER));
+
+		//add tooltip (current value of bar)
+		//renderer.setSeriesToolTipGenerator(0, new CustomToolTipGenerator());
+		initializeChartTooltip(renderer);
+		return chart;
+	}
+	
+	private JFreeChart createPieChart(CategoryDataset data) {		
+
+		//NOTE: explode only supported when using 2D piecharts :-(
+		/*
+		 * title the chart title (null permitted).
+		 * dataset the dataset (null permitted).
+		 * order the order that the data is extracted (by row or by column) (null not permitted).
+		 * legend include a legend?
+		 * tooltips generate tooltips?
+		 * urls generate URLs? 
+		 */
+		
+		// empty data check: when nothing is selected, only when switching the first
+		// time to stats tab. ignore further configurations and return empty barchart
+		if(statisticTable.getSelectedRow() == -1){
+			chart = ChartFactory.createMultiplePieChart("", //$NON-NLS-1$
+					data,
+					TableOrder.BY_ROW,
+					true,
+					true,
+					false);
+			
+		} else{
+			chart = ChartFactory.createMultiplePieChart(
+			formatDependencyKey((String) statisticTable.getModel()
+					.getValueAt(statisticTable.getSelectedRow(), 1)),
+			data,
+			TableOrder.BY_ROW,
+			true,
+			true,
+			false);
+			//TODO change to tooltips (title entity?
+//			chart = CustomMultiPie.createMultiplePieChart3D(
+//					formatDependencyKey((String) statisticTable.getModel()
+//							.getValueAt(statisticTable.getSelectedRow(), 1)),
+//					data,
+//					TableOrder.BY_ROW,
+//					true,
+//					true,
+//					false);
+		}
+		
+		
+//		chart.setBackgroundPaint(ConfigRegistry
+//				.getGlobalRegistry()
+//				.getColor("plugins.errorMining.appearance.resultMatrix.defaultPlotBackgroundPaint")); //$NON-NLS-1$
+
+		MultiplePiePlot mpp = (MultiplePiePlot) chart.getPlot(); 
+		mpp.setDrawingSupplier(new CustomPieDrawingSupplier(), true);
+		
+
+		Handle handle = ConfigRegistry.getGlobalRegistry().getHandle(
+				"plugins.errorMining.appearance.font"); //$NON-NLS-1$
+		Font font = ConfigUtils.defaultReadFont(handle);
+		
+		JFreeChart subchart = mpp.getPieChart();
+		
+		PiePlot pp = (PiePlot) subchart.getPlot();
+		pp.setBackgroundPaint(ConfigRegistry.getGlobalRegistry()
+				.getColor("plugins.errorMining.appearance.resultMatrix.defaultPlotBackgroundPaint")); //$NON-NLS-1$
+        pp.setLabelGenerator(new CustomPieLabelGenerator());
+        pp.setToolTipGenerator(new CustomPieToolTipGenerator());
+
+        pp.setLabelFont(font);
+
+        
+                
+//        pp.setAutoPopulateSectionPaint(true);
+//        pp.setAutoPopulateSectionOutlineStroke(true);
+//        pp.setAutoPopulateSectionOutlinePaint(true);
+        
+        
+        //mpp.setDrawingSupplier(new DefaultDrawingSupplier(), true);
+        
+        
+//        for(int i = 0 ; i <= data.getRowCount(); i++){
+//        	if(i % 2 == 0){
+//        		pp.setBaseSectionPaint(Color.red);	
+//        		System.out.println("red");
+//        	}else {
+//        		pp.setBaseSectionPaint(Color.blue);
+//        		System.out.println("blue");
+//        	}
+//        }
+        //pp.setInteriorGap(0.30);
+          
+        return chart;
+	}
+	
+	protected void initializeChartTooltip(CategoryItemRenderer renderer){
+		int size = 0;
+		
+		if(((CategoryPlot) plot).getDataset() != null){
+			size = ((CategoryPlot) plot).getDataset().getRowCount();
+		}
+		
+		for(int i = 0; i < size; i++){
+			renderer.setSeriesToolTipGenerator(i, new CustomToolTipGenerator());	
+		}
+	}
+	
 
 	/**
 	 * @return
@@ -672,13 +918,27 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		textFilterField.addActionListener(getHandler());
 		UIUtil.createUndoSupport(textFilterField, 10);
 		UIUtil.createDefaultTextMenu(textFilterField, true);
+		
+		onlyFilterNuclei = new JCheckBox();
+		onlyFilterNuclei.setToolTipText(ResourceManager.getInstance()
+				.get("plugins.errormining.nGramResultView.onlyNuclei.description")); //$NON-NLS-1$
+		onlyFilterNuclei.addActionListener(getHandler());	
+		
+		exactTextMatch = new JCheckBox();
+		exactTextMatch.setToolTipText(ResourceManager.getInstance()
+				.get("plugins.errormining.nGramResultView.exactTextMatch.description")); //$NON-NLS-1$
+		exactTextMatch.addActionListener(getHandler());
+		
+		
 
 		ActionComponentBuilder acb = new ActionComponentBuilder(getActionManager());
 		acb.setActionListId("plugins.errormining.nGramResultView.toolBarList"); //$NON-NLS-1$
 		acb.addOption("resultCounter", resultCounter); //$NON-NLS-1$
 		acb.addOption("textfield", textFilterField); //$NON-NLS-1$
+		acb.addOption("onlyNuclei", onlyFilterNuclei); //$NON-NLS-1$
+		acb.addOption("exactTextMatch", exactTextMatch); //$NON-NLS-1$
 		acb.addOption("lowerBound", lowerBound); //$NON-NLS-1$
-		acb.addOption("upperBound", upperBound); //$NON-NLS-1$
+		acb.addOption("upperBound", upperBound); //$NON-NLS-1$		
 		toolBarOverview = acb.buildToolBar();
 
 		return toolBarOverview;
@@ -699,6 +959,11 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		statisticTextFilterField.addActionListener(getHandler());
 		UIUtil.createUndoSupport(statisticTextFilterField, 10);
 		UIUtil.createDefaultTextMenu(statisticTextFilterField, true);
+		
+		exactTagMatch = new JCheckBox();
+		exactTagMatch.setToolTipText(ResourceManager.getInstance()
+				.get("plugins.errormining.nGramResultView.exactTagMatch.description")); //$NON-NLS-1$
+		exactTagMatch.addActionListener(getHandler());
 
 
 		statsSpinner = new JSpinner(sbm);
@@ -707,14 +972,97 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					.get("plugins.errormining.nGramResultView.statsSpinner.description")); //$NON-NLS-1$
 		((JSpinner.DefaultEditor) statsSpinner.getEditor()).getTextField().addKeyListener(getHandler());  
 
+		//----------------------------------------------------
+		//percentageSwitch
+		//switch chart styles (bar or pie)
+		JPanel percentModePanel = new JPanel(new GridLayout(0, 2));
+		percentModePanel.setMaximumSize(new Dimension(60, 30));
+		//GridBagConstraints gbc = GridBagUtil.makeGbcN(0, 0, 1, 1);
+
+
+	    percentModePanel.setBorder(UIUtil.emptyBorder);
+		ButtonGroup percentButtonGroup = new ButtonGroup();
+		
+		//use another button to switch or keep numeric/percent toggle?
+		
+//	    JRadioButton numericButton = new JRadioButton(
+//	    		buildHTMLimgLabel(IconRegistry.getGlobalRegistry()
+//				.getIcon("percent.png").toString()),true); //$NON-NLS-1$
+//	    numericButton.addItemListener(getHandler());
+//	    numericButton.setName(numeric);
+//	    percentButtonGroup.add(numericButton);
+//	    percentModePanel.add(BorderLayout.WEST, numericButton);
+
+	    JRadioButton percentAButton = new JRadioButton(
+	    		buildHTMLimgLabel(IconRegistry.getGlobalRegistry()
+				.getIcon("percentA.png").toString()),true); //$NON-NLS-1$
+	    percentAButton.addItemListener(getHandler());
+	    percentAButton.setName(percentA);
+	    percentButtonGroup.add(percentAButton);
+	    percentModePanel.add(percentAButton);
+
+	    JRadioButton percentBButton = new JRadioButton(
+	    		buildHTMLimgLabel(IconRegistry. getGlobalRegistry()
+        		.getIcon("percentB.png").toString())); //$NON-NLS-1$
+	    percentBButton.addItemListener(getHandler());
+	    percentBButton.setName(percentB);
+	    percentButtonGroup.add(percentBButton);
+	    percentModePanel.add(percentBButton);
+	    
+
+		
+		
+		//----------------------------------------------------
+		//switch chart styles (bar or pie)
+		JPanel chartStylePanel = new JPanel(new GridLayout(0, 2));
+		chartStylePanel.setMaximumSize(new Dimension(60, 30));
+		chartStylePanel.setBorder(UIUtil.emptyBorder);
+		ButtonGroup buttonGroup = new ButtonGroup();
+
+		//barchart
+	    JRadioButton barChartButton = new JRadioButton(buildHTMLimgLabel(
+				IconRegistry.getGlobalRegistry()
+				.getIcon("chart-bar.png").toString()),true); //$NON-NLS-1$
+	    barChartButton.addItemListener(getHandler());
+	    barChartButton.setName(barChart);
+	    buttonGroup.add(barChartButton);
+	    chartStylePanel.add(barChartButton);
+	    
+	    //piechart
+	    JRadioButton pieChartButton = new JRadioButton(buildHTMLimgLabel(
+        		IconRegistry. getGlobalRegistry()
+        		.getIcon("chart-pie.png").toString())); //$NON-NLS-1$
+	    pieChartButton.addItemListener(getHandler());
+	    pieChartButton.setName(pieChart);
+	    buttonGroup.add(pieChartButton);	    
+	    chartStylePanel.add(pieChartButton);
+
+		
 		ActionComponentBuilder acb = new ActionComponentBuilder(getActionManager());
 		acb.setActionListId("plugins.errormining.nGramResultView.toolBarStatistic"); //$NON-NLS-1$
 		acb.addOption("statisticCounter", statisticCounter); //$NON-NLS-1$
 		acb.addOption("statisticTextFilterField", statisticTextFilterField); //$NON-NLS-1$
+		acb.addOption("exactTagMatch", exactTagMatch); //$NON-NLS-1$
 		acb.addOption("statsSpinner", statsSpinner); //$NON-NLS-1$
+		acb.addOption("chartStyleSwitch", chartStylePanel); //$NON-NLS-1$
+		acb.addOption("percenModeSwitch", percentModePanel); //$NON-NLS-1$
+		
 		toolBarStatistic = acb.buildToolBar();
 
+
 		return toolBarStatistic;
+	}
+
+	/**
+	 * @param location
+	 * @return
+	 */
+	private String buildHTMLimgLabel(String location) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body><img src='"); //$NON-NLS-1$
+        sb.append(location);
+        sb.append("' width=16 height=16>"); //$NON-NLS-1$
+		return sb.toString();
 	}
 
 	/**
@@ -824,7 +1172,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			String count = StringUtil.formatDecimal(statisticTableModel.getRowCount());
 			statisticCounter.setText(count);
 		}
-
+		refreshChart("",null); //$NON-NLS-1$
 	}
 
 	//	protected void displaySelectedData() throws Exception {
@@ -866,12 +1214,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 * @param title
 	 * @param list
 	 */
-	private void refreshBarChart(String title, List<StatsData> list) {
+	private void refreshChart(String title, List<StatsData> list) {
 
 		chart.setTitle(formatDependencyKey(title));
 
 		if(list == null){
-			plot.setDataset(0, new DefaultCategoryDataset());
+			((CategoryPlot) plot).setDataset(0, new DefaultCategoryDataset());
 			return;
 		}
 
@@ -895,12 +1243,60 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					labelmatrix,
 					formatDependencyKey(sd.getTagKey()));
 		}
+		
+		initializeChartTooltip(((CategoryPlot) plot).getRenderer());
 
 //		for(int d = 0; d < dataset.getRowCount(); d++){
 //			plot.getRenderer().setSeriesPaint(d, Color.red);
 //		}
-		plot.setDataset(0, dataset);
+		setCategoryChartData(dataset);
 
+	}
+	
+	
+	private void setCategoryChartData(DefaultCategoryDataset dataset){
+		//switch between barchart and piechart
+		if(chart.getPlot() instanceof MultiplePiePlot){
+		
+			((CategoryPlot) plot).setDataset(0, dataset);
+			//System.out.println("mp");
+
+			MultiplePiePlot mpp = (MultiplePiePlot) chart.getPlot();
+			//mpp.setDrawingSupplier(new DefaultDrawingSupplier());
+			//reset dataset
+			mpp.setDataset(null);
+			mpp.setDataset(dataset);
+			
+//			JFreeChart subchart = mpp.getPieChart();
+			
+//			PiePlot pp = (PiePlot) subchart.getPlot();
+//			pp.clearSectionPaints(true);
+			
+//			PiePlot pp = (PiePlot) subchart.getPlot();
+
+			//System.out.println("PI " +pp.getPieIndex());
+			//System.out.println("DSC " +mpp.getDataset().getRowCount());
+//			//TODO fix title entitys....
+//			System.out.println("PieIndex: " + 	pp.getPieIndex());
+//			System.out.println("SCC " + subchart.getSubtitleCount());
+//
+//			
+//			for(int i = 0; i < mpp.getDataset().getRowCount(); i++){
+//				//subchart.setTitle("Index " + i);
+//				//subchart.getTitle().setToolTipText("Index " + i);
+//				//subchart.addSubtitle(i, t);
+//			}			
+			
+			//System.out.println(chart.getSubtitles().get(0).toString());
+			//System.out.println(mpp.getDrawingSupplier());
+
+
+
+		} else {
+			//System.out.println("bc");
+			((CategoryPlot) plot).setDataset(0, dataset);
+		}
+		
 	}
 
 	/**
@@ -914,6 +1310,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		for(int i = 0; i < listAdd.size(); i++){
 			StatsData sd = listAdd.get(i);
+			//System.out.println(sd.getCount());
 			dcd.addValue(sd.getCount(), unique, formatDependencyKey(sd.getTagKey()));
 		}
 		return dcd;
@@ -924,6 +1321,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		textFilterField.setText(null);
 		lbm.setValue(1);
 		ubm.setValue(ubm.getMaximum());
+		onlyFilterNuclei.setSelected(false);
+		exactTextMatch.setSelected(false);
 		doResultFiltering();
 	}
 
@@ -937,6 +1336,9 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 */
 	private void resetStatisticFilter() {
 		statisticTextFilterField.setText(null);
+		statsSpinner.setValue(1);
+		exactTagMatch.setSelected(false);
+		refreshChart("",null); //$NON-NLS-1$
 		doStatisticFiltering();
 	}
 
@@ -953,38 +1355,76 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 
 	private void generateFilteredStatistic(){
-		if(!statisticTextFilterField.equals("")){ //$NON-NLS-1$
+		if(!statisticTextFilterField.getText().equals("")){ //$NON-NLS-1$
 			statsResultFiltered.clear();
 			String filter = statisticTextFilterField.getText();
 			filter = filter.replace("->", "_R"); //$NON-NLS-1$ //$NON-NLS-2$
 			filter = filter.replace("<-", "_L");  //$NON-NLS-1$//$NON-NLS-2$
 			for (String key : statsResult.keySet()) {
-//				System.out.println(key);
+				//System.out.println(key);
 //				String tmp = key.replace("[", "");
 //				tmp = tmp.replace("]", "");
 //				String[] sa = tmp.split(", ");
 //
 //				for(String s : sa){
-//					System.out.println(s.matches(filter) + " " + s +" >> " + filter);
-//					if(s.matches(filter)){
+//					System.out.println(s.matches(filter) + " Key: " + s +" Filter: " + filter);
+//					//System.out.println(s.contains(filter) + " Key: " + s +" Filter: " + filter);
+//					if(s.matches(filter)){				
 //						statsResultFiltered.put(key, statsResult.get(key));
 //					}
 //				}
-				if (key.contains(filter)) {
-					statsResultFiltered.put(key, statsResult.get(key));
-				}
+				
+				String tmp = key.replace("[", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp = tmp.replace("]", "");  //$NON-NLS-1$ //$NON-NLS-2$
+				
+				//allow multiple tag filtering
+					
+					int matches = 0;
+					String[] mfArray = filter.split(" "); //$NON-NLS-1$
+	
+					for(String s : tmp.split(", ")){ //$NON-NLS-1$
+
+						for(String multifilter : mfArray){ 
+							//System.out.println(multifilter);
+							//System.out.println(s.contains(multifilter) + " Filter: " + multifilter);
+							if (exactTagMatch(s, multifilter)) {
+								matches++;
+							}						
+						} 
+					}
+					
+					if(matches == mfArray.length){
+						statsResultFiltered.put(key, statsResult.get(key));
+					}
 			}
-		}else{
+		} else {
 			statsResultFiltered.clear();
 			statsResultFiltered.putAll(statsResult);
 		}
 
-
 		//clear list when no results
-		if(statsResultFiltered.size() == 0){
+		if(statsResultFiltered.size() == 0){			
 			if(statisticListModel != null){
 				statisticListModel.removeAll();
 			}
+		}
+	}
+	
+	
+	private boolean exactTagMatch(String tag, String filter){
+		if(exactTagMatch.isSelected()){			
+			return tag.matches(filter);
+		}else {
+			return tag.contains(filter);
+		}
+	}
+	
+	
+	private boolean exactTextMatch(String tag, String filter){
+		if(exactTextMatch.isSelected()){			
+			return tag.matches(filter);
+		}else {
+			return tag.contains(filter);
 		}
 	}
 
@@ -1000,12 +1440,37 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			String key = tmpKey.get(i);
 			int currentSize = key.split(" ").length; //$NON-NLS-1$
 
+			//System.out.println("USE"+onlyNuclei.isSelected());
 			//Check if we should also use textfilter
 			if(!textFilterField.getText().equals("")){ //$NON-NLS-1$
-				if(key.contains(textFilterField.getText())){
+				//if(key.contains(textFilterField.getText())){
+				if(exactTextMatch(key, textFilterField.getText())){
 					if(currentSize >= minimumGramsize
 							&& currentSize <= maximumGramsize){
-								nGramResultFiltered.put(key, nGramResult.get(key));
+						//System.out.println(key + isNuclei(key.split(" ")[1]));
+//						System.out.println(key.split(" ")[1] 
+//											+ " " 
+//											//+ nGramResult.keySet().contains(key.split(" ")[1]
+//											+ (key.split(" ")[1].contains(textFilterField.getText())));
+
+						//only filter for nuclei items
+						if(onlyFilterNuclei.isSelected()){
+							for(int k = 0; k < currentSize; k++){								
+								if(isNucleiItem(k, nGramResult.get(key))){
+									//regex
+									if(exactTextMatch(key.split(" ")[k], textFilterField.getText())){ //$NON-NLS-1$
+										nGramResultFiltered.put(key, nGramResult.get(key));
+									}										
+//									if(key.split(" ")[k].contains(textFilterField.getText())){ //$NON-NLS-1$
+//										nGramResultFiltered.put(key, nGramResult.get(key));
+//									}
+
+								}
+								//System.out.println(key.split(" ")[k] + " "+ isNuclei(s));
+							}
+						} else {
+							nGramResultFiltered.put(key, nGramResult.get(key));
+						}
 					}
 				}
 			} else {
@@ -1034,13 +1499,25 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				if(key.contains(textFilterField.getText())){
 					if(currentSize >= minimumGramsize
 							&& currentSize <= maximumGramsize){
+						
+						
+						// only filter for nuclei items
+						if (onlyFilterNuclei.isSelected()) {
+							if(isDependencyNucleus(key, textFilterField.getText())){
 								nGramResultFilteredDependency.put(key, nGramResultDependency.get(key));
+							}
+							
+						} else {
+							nGramResultFilteredDependency.put(key, nGramResultDependency.get(key));
+						}
+						
+						//		nGramResultFilteredDependency.put(key, nGramResultDependency.get(key));
 					}
 				}
 			} else {
 			//correct size?
 			if(currentSize >= minimumGramsize
-				&& currentSize <= maximumGramsize){
+				&& currentSize <= maximumGramsize){				
 					nGramResultFilteredDependency.put(key, nGramResultDependency.get(key));
 				}
 			}
@@ -1146,15 +1623,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	}
 
 	protected void displaySelectedStatsData(){
+		
 		int selectedRow = statisticTable.getSelectedRow();
 
 		//List<StatsData> tmp = (List<StatsData>) statisticTable.getValueAt(selectedRow, 1);
 		//System.out.println(tmp.get(0));
-
 		String key = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
-		refreshBarChart(key, statsResultFiltered.get(key));
+		refreshChart(key, statsResultFiltered.get(key));		
 		statisticTableModel.generateListEntryFromString(key);
-		statisticList.clearSelection();
+		statisticList.clearSelection();	
 	}
 
 //	protected void displaySelectedData() throws Exception {
@@ -1299,6 +1776,36 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 		// not found = color black
 		return false;
+	}
+	
+	
+	protected boolean isDependencyNucleus(String key, String filter){
+		List<DependencyItemInNuclei> diinList = nGramResultDependency.get(key);
+		int sentenceStart = diinList.get(0).getSentenceInfoAt(0).getSentenceBegin();
+		int sentenceNucleiIndex = diinList.get(0).getSentenceInfoAt(0).getNucleiIndex();
+
+		int colorOffset = diinList.get(0).getSentenceInfoAt(0).getSentenceBegin();
+
+		if(key.split(" ").length == 2){ //$NON-NLS-1$
+			if(sentenceNucleiIndex-sentenceStart > 1){
+				colorOffset = sentenceNucleiIndex;
+			}
+		}
+
+		for(int c = 0; c < key.split(" ").length; c++){ //$NON-NLS-1$
+			if(isDependencyNuclei(c, diinList.get(0).getSentenceInfoAt(0), colorOffset)){
+				if(key.split(" ")[c].contains(filter)){ //$NON-NLS-1$
+					return true;
+				}
+			}
+			else if(isDependencyHead(c, diinList.get(0).getSentenceInfoAt(0), key.split(" ").length, colorOffset)){ //$NON-NLS-1$
+				if(key.split(" ")[c].contains(filter)){ //$NON-NLS-1$
+					return true;
+				}
+			}			
+		}
+		return false;
+		
 	}
 
 
@@ -1567,7 +2074,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			//DependencyData dd = (DependencyData) dl.get(0);
 
 			//FIXME painting
-
 			int head = dsi.getSentenceHeadIndex();
 			//int offset = headIndex - dsi.getSentenceBegin();
 			//int nucleus = dsi.getNucleiIndexListAt(n)-1;
@@ -1667,6 +2173,15 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		actionManager.addHandler(
 				"plugins.errormining.nGramResultView.showDetailAction", //$NON-NLS-1$
 				callbackHandler, "showDetail"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.errormining.nGramResultView.toggleNumberCompareModeAction", //$NON-NLS-1$
+				callbackHandler, "toggleNumberCompareMode"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.errormining.nGramResultView.toggleNumberModeAction", //$NON-NLS-1$
+				callbackHandler, "toggleNumberMode"); //$NON-NLS-1$
+		actionManager.addHandler(
+				"plugins.errormining.nGramResultView.toggleChartDisplayModeAction", //$NON-NLS-1$
+				callbackHandler, "toggleChartDisplayMode"); //$NON-NLS-1$
 		actionManager.addHandler(
 				"plugins.errormining.nGramResultView.exportBarchart", //$NON-NLS-1$
 				callbackHandler, "exportBarchart"); //$NON-NLS-1$
@@ -2284,9 +2799,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 * @param s
 	 * @param value
 	 */
-
 	private List<String> getNucleus(String key, ItemInNuclei iin) {
-
 		List<String> list = new ArrayList<String>();
 		String[] splittedKey = key.split(" ");  //$NON-NLS-1$
 
@@ -2297,7 +2810,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				list.add(splittedKey[c]);
 			}
 		}
-
 		return list;
 	}
 
@@ -2810,6 +3322,95 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 				UIUtil.beep();
 			}
 		}
+		
+		public void toggleNumberCompareMode(boolean b) {
+			try {
+				barCompare = b;
+				chart.fireChartChanged();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle number mode", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+		
+		public void toggleNumberCompareMode(ActionEvent e) {
+			// ignore
+		}
+		
+		
+		public void toggleNumberMode(boolean b) {
+			try {
+				showPercentage = b;
+				chart.fireChartChanged();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle number mode", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+		
+		public void toggleNumberMode(ActionEvent e) {
+			// ignore
+		}
+		
+		
+		public void toggleChartDisplayMode(boolean b) {
+			try {				
+				//System.out.println(b);
+				if(b){
+
+//				chart = ChartFactory.createMultiplePieChart(
+//						ResourceManager.getInstance().get(
+//								"plugins.errormining.labels.barChart.head"), //$NON-NLS-1$,  // chart title
+//						plot.getDataset(), // data
+//						TableOrder.BY_ROW, // table order (row/column)
+//						true, // include legend
+//						true,
+//						false);
+//
+//				barchartPanel.setChart(chart);
+				barChartPanel.setChart(createPieChart(((CategoryPlot) plot).getDataset()));	
+				
+				} else {					
+					
+//					chart = ChartFactory.createBarChart(
+//							ResourceManager.getInstance().get(
+//									"plugins.errormining.labels.barChart.head"), //$NON-NLS-1$
+//							ResourceManager.getInstance().get(
+//									"plugins.errormining.labels.barChart.x-axis"), //$NON-NLS-1$
+//							ResourceManager.getInstance().get(
+//									"plugins.errormining.labels.barChart.y-axis"), //$NON-NLS-1$
+//							plot.getDataset(),
+//							PlotOrientation.VERTICAL, // orientation
+//							true, // include legend
+//							true, // tooltips?
+//							false); // URLs?
+					barChartPanel.setChart(createBarChart(((CategoryPlot) plot).getDataset()));				
+				}
+
+//				MultiplePiePlot plot = (MultiplePiePlot) chart.getPlot();
+//				JFreeChart subchart = plot.getPieChart();
+//				plot.setLimit(0.10);
+//				PiePlot p = (PiePlot) subchart.getPlot();
+//				// p.setLabelGenerator(new
+//				// StandardPieItemLabelGenerator("{0}"));
+//				// p.setLabelFont(new Font("SansSerif", Font.PLAIN, 8));
+//				p.setInteriorGap(0.30);      
+
+
+				//barchartPanel.setChart(chart);
+				
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE, 
+						"Failed to toggle number mode", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+		
+		public void toggleChartDisplayMode(ActionEvent e) {
+			// ignore
+		}
 
 
 		public void exportBarchart(ActionEvent e){
@@ -2851,17 +3452,20 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						"Failed to show details", ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
-
 		}
+		
+		
 
 	}
 
 
 	protected class HandlerErrorMining extends Handler implements
 			ActionListener, ListSelectionListener, EventListener,
-			ListDataListener, ComponentListener, ChartMouseListener, KeyListener {
+			ListDataListener, ComponentListener, ChartMouseListener, KeyListener, ItemListener {
 
 		protected boolean trackResizing = true;
+		
+		protected PieSectionEntity pse = null;
 
 		/**
 		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
@@ -2964,6 +3568,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					//ngramTableAdjuster.adjustColumns();
 
 				} else if (e.getSource() == statisticTable.getSelectionModel()){
+			
 					//no selection check
 					if(statisticTable.getSelectedRow() != -1){
 						displaySelectedStatsData();
@@ -2983,10 +3588,10 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							int selectedRow = statisticTable.getSelectedRow();
 							String keyTable = (String) statisticTable.getModel().getValueAt(selectedRow, 1);
 							String title = keyTable; // + "\n " + keys;
-							refreshBarChart(title, statsResultFiltered.get(keyTable));
+							refreshChart(title, statsResultFiltered.get(keyTable));
 
 							//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable)
-							DefaultCategoryDataset dcd = (DefaultCategoryDataset) plot.getDataset(0);
+							DefaultCategoryDataset dcd = (DefaultCategoryDataset) ((CategoryPlot) plot).getDataset(0);
 
 							for(Object o : keys){
 								List<StatsData> statsList = new ArrayList<StatsData>();
@@ -3017,7 +3622,8 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								//addBarChartItems(title, statsList, statsResultFiltered.get(keyTable), o.toString());
 								dcd = buildDefaultCategoryDataset(dcd, statsList, o.toString());
 							}
-							plot.setDataset(0, dcd);
+							setCategoryChartData(dcd);
+							//((CategoryPlot) plot).setDataset(0, dcd);
 						}
 
 				} else {
@@ -3121,77 +3727,346 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			}
 
 
-			/**
-			 * @see org.jfree.chart.ChartMouseListener#chartMouseClicked(org.jfree.chart.ChartMouseEvent)
+		/**
+		 * @see org.jfree.chart.ChartMouseListener#chartMouseClicked(org.jfree.chart.ChartMouseEvent)
+		 */
+		@Override
+		public void chartMouseClicked(ChartMouseEvent e) {
+			//System.out.println(e.getEntity());
+
+			String key;
+			String label;
+
+			if (e.getEntity() instanceof PieSectionEntity) {
+				PieSectionEntity pieSection = (PieSectionEntity) e.getEntity();
+
+				if (pieSection != null) {
+					// multiplot index to determine the corect (clicked) pieplot
+
+					int pieIndex = pieSection.getPieIndex();
+
+					// System.out.println(pieSectoin.getDataset().getKey(sectionIndex));
+					label = pieSection.getSectionKey().toString();
+
+					// pieplotlegend(0) = total#; followed by the selected
+					// pielabels
+					if (pieIndex == 0) {
+						if (statisticList.getSelectedValuesList().size() == 0) {
+							DialogFactory
+									.getGlobalFactory()
+									.showInfo(
+											null,
+											"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+											"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+							// for(int i = 0; i < statisticListModel.getSize();
+							// i++){
+							// key = (String)
+							// statisticListModel.getElementAt(i);
+							//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
+							// }
+						} else {
+							for (int i = 0; i < statisticList
+									.getSelectedValuesList().size(); i++) {
+								
+								key = (String) statisticList
+										.getSelectedValuesList().get(i);
+																
+								showDetails(createDetailList(key),key 
+										+ " " + chart.getTitle().getText()); //$NON-NLS-1$
+										//+ " [" + plot.getLegendItems().get(pieIndex).getLabel().toString() + "]"); //$NON-NLS-1$ //$NON-NLS-
+							}
+						}
+					} else {
+
+						key = plot.getLegendItems().get(pieIndex).getLabel();
+
+						// System.out.println(pieSection.getSectionKey());
+						// System.out.println(pieSection.getDataset().getKeys());
+						// System.out.println(plot.getLegendItems().get(pieIndex).getLabel());
+
+						//System.out.println("Key: " + key + "  Label: " + label);
+						showDetails(createDetailList(key, label), key
+								+ " [" + label + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+
+						// displayResultFromStats(key, label);
+					}
+				}
+			}
+
+			
+			
+			if (e.getEntity() instanceof TitleEntity) {
+
+				//TitleEntity titelItem = (TitleEntity) e.getEntity();
+				//System.out.println("source " + e.getSource());
+				
+				if(e.getChart().getPlot() instanceof MultiplePiePlot){
+					//System.out.println("x: " + e.getTrigger().getX() +  "y: " +e.getTrigger().getY());
+					int x = e.getTrigger().getX();
+					int y = e.getTrigger().getY()-20;
+					
+					ChartRenderingInfo chartrenderinginfo = barChartPanel.getChartRenderingInfo();
+					EntityCollection entities = chartrenderinginfo.getEntityCollection();
+					
+
+
+					if (entities.getEntity(x,y) instanceof PieSectionEntity) {
+						PieSectionEntity pieSection = (PieSectionEntity) entities.getEntity(x,y);
+						int pieIndex = pieSection.getPieIndex();
+						label = pieSection.getSectionKey().toString();
+						//System.out.println("Label "+label);
+
+						// pieplotlegend(0) = total#; followed by the selected pielabels
+						if (pieIndex == 0) {
+							if (statisticList.getSelectedValuesList().size() == 0) {
+								DialogFactory
+										.getGlobalFactory()
+										.showInfo(
+												null,
+												"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+												"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+								// for(int i = 0; i < statisticListModel.getSize();
+								// i++){
+								// key = (String)
+								// statisticListModel.getElementAt(i);
+								//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
+								// }
+							} else {
+								for (int i = 0; i < statisticList
+										.getSelectedValuesList().size(); i++) {
+									
+									key = (String) statisticList
+											.getSelectedValuesList().get(i);
+																	
+									showDetails(createDetailList(key),key 
+											+ " " + chart.getTitle().getText()); //$NON-NLS-1$
+											//+ " [" + plot.getLegendItems().get(pieIndex).getLabel().toString() + "]"); //$NON-NLS-1$ //$NON-NLS-
+								}
+							}
+						} else {
+							key = plot.getLegendItems().get(pieIndex).getLabel();
+
+							// System.out.println(pieSection.getSectionKey());
+							// System.out.println(pieSection.getDataset().getKeys());
+							// System.out.println(plot.getLegendItems().get(pieIndex).getLabel());
+
+							//System.out.println("Key: " + key + "  Label: " + label);
+							showDetails(createDetailList(key), key);
+						}
+					}				
+					
+					
+					//System.out.println("EntityAtXY" + entities.getEntity(x,y) + e.getChart().getPlot());
+					
+				}
+				
+//				MultiplePiePlot mpp = (MultiplePiePlot) e.getChart().getPlot();
+//				JFreeChart subchart = mpp.getPieChart();
+//				PiePlot pp = (PiePlot) subchart.getPlot();
+  
+//				System.out.println("ChartTitle:  " + chart.getTitle().getText());
+//				System.out.println("SChartTitle:  " + subchart.getTitle().getText());
+//				System.out.println("TitleEntiry: " + item.getTitle().toString());
+//				System.out.println("PieIndex: " +pp.getPieIndex());
+//				JFreeChart test = e.getChart();
+//				System.out.println("Test: " + test.getTitle().getText().toString());
+//				System.out.println(mpp.getDataset().getColumnKeys());
+//				System.out.println(mpp.getDataset().getRowKeys());
+
+				
+//				for(int i = 0; i < mpp.getLegendItems().getItemCount(); i++){
+//					System.out.println(mpp.getLegendItems().get(i));	
+//				}
+
+//				if (!isPoSErrorMiningResult()) {
+//					label = reFormatDependencyKey(label);
+//				}
+//
+//				displayResultFromStats("", label); //$NON-NLS-1$
+			}
+						
+
+			if (e.getEntity() instanceof CategoryItemEntity) {
+
+				ChartEntity entity = e.getEntity();
+				// System.out.println(entity);
+
+				// details with filtered clicked on bars
+				CategoryItemEntity item = (CategoryItemEntity) entity;
+				// System.out.println(item.getColumnKey().toString());
+
+				label = item.getColumnKey().toString();
+				key = item.getRowKey().toString();
+
+				if (!isPoSErrorMiningResult()) {
+					label = reFormatDependencyKey(label);
+				}
+
+				if (key.equals(labelmatrix)) {
+					displayResultFromStats(key, label);
+				} else {
+					showDetails(createDetailList(key, label), key
+							+ " [" + label + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
+			}
+
+			
+			// details with filtered (clicked on label x-axis)
+			if (e.getEntity() instanceof CategoryLabelEntity) {
+
+				CategoryLabelEntity item = (CategoryLabelEntity) e.getEntity();
+
+				label = item.getKey().toString();
+
+				if (!isPoSErrorMiningResult()) {
+					label = reFormatDependencyKey(label);
+				}
+
+				displayResultFromStats("", label); //$NON-NLS-1$
+			}
+			
+
+			// details complete label (clicked legend)
+			if (e.getEntity() instanceof LegendItemEntity) {
+				
+				LegendItemEntity item = (LegendItemEntity) e.getEntity();
+
+				if (e.getChart().getPlot() instanceof MultiplePiePlot) {
+
+					label = item.getSeriesKey().toString();
+					if (statisticList.getSelectedValuesList().size() == 0) {
+						DialogFactory
+								.getGlobalFactory()
+								.showInfo(
+										null,
+										"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+										"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+						// for(int i = 0; i < statisticListModel.getSize();
+						// i++){
+						// key = (String) statisticListModel.getElementAt(i);
+						//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
+						// }
+					} else {
+						for (int i = 0; i < statisticList
+								.getSelectedValuesList().size(); i++) {
+							key = (String) statisticList
+									.getSelectedValuesList().get(i);
+							// showDetails(createDetailList(key));
+
+							showDetails(createDetailList(key, label), key
+									+ " [" + label + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+
+						}
+					}
+				} else {
+
+					key = item.getSeriesKey().toString();
+
+					if (!key.equals(labelmatrix)) {
+						showDetails(createDetailList(key));
+					} else {
+						if (statisticList.getSelectedValuesList().size() == 0) {
+							DialogFactory
+									.getGlobalFactory()
+									.showInfo(
+											null,
+											"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+											"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+							// for(int i = 0; i < statisticListModel.getSize();
+							// i++){
+							// key = (String)
+							// statisticListModel.getElementAt(i);
+							//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
+							// }
+						} else {
+							for (int i = 0; i < statisticList
+									.getSelectedValuesList().size(); i++) {
+								key = (String) statisticList
+										.getSelectedValuesList().get(i);
+								showDetails(createDetailList(key));
+							}
+						}
+					}
+				}
+			}
+		}
+		
+
+		/**
+			 * @see org.jfree.chart.ChartMouseListener#chartMouseMoved(org.jfree.chart.ChartMouseEvent)
 			 */
 			@Override
-			public void chartMouseClicked(ChartMouseEvent e) {
-		           ChartEntity entity = e.getEntity();
-		            //System.out.println(entity);
-		            String key;
-		            String label;
+			public void chartMouseMoved(ChartMouseEvent e) {
+				ChartEntity entity = e.getEntity();
+				CustomBarHighlightRenderer cbhr = (CustomBarHighlightRenderer) ((CategoryPlot) plot).getRenderer();
+				//System.out.println(e.getEntity());
+				
+				
+	            if (!  (entity instanceof CategoryItemEntity 
+	            		|| entity instanceof PieSectionEntity
+	            		|| entity instanceof LegendItemEntity)) {	            		
+	            	
+	            	if(((JFreeChart) e.getSource()).getPlot() instanceof MultiplePiePlot){
+//	            	MultiplePiePlot mpp = (MultiplePiePlot) ((JFreeChart) e.getSource()).getPlot();
+//	            	//setPieSliceHighlight(mpp, null, false);
+	            		
+//	            		if(pse != null){
+//	    					MultiplePiePlot mpp = (MultiplePiePlot) ((JFreeChart) e.getSource()).getPlot();
+//	    					
+//	    					JFreeChart subchart = mpp.getPieChart();
+//	    					PiePlot pp = (PiePlot) subchart.getPlot();
+//	    					pp.setExplodePercent(pse.getSectionKey(), 0);
+//	    					subchart.fireChartChanged();
+//	    					chart.fireChartChanged();
+//	            		}
+	            		
+	            	}	            	
+	                cbhr.setHighlightedItem(-1, -1); 	                
+	                barChartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	                return;
+	            }
+	            
+	            
+	            
+	            if(entity instanceof PieSectionEntity){	 
+	            	//do nothing with colorstuff
+					MultiplePiePlot mpp = (MultiplePiePlot) ((JFreeChart) e.getSource()).getPlot();
+					JFreeChart subchart = mpp.getPieChart();
+//					PiePlot pp = (PiePlot) subchart.getPlot();
 
-		            // details with filtered clicked on bars
-		            if (entity != null && (entity instanceof CategoryItemEntity)) {
-		            	CategoryItemEntity item = (CategoryItemEntity) entity;
+//					if(pse == null){
+//						pse = (PieSectionEntity)e.getEntity();	
+//						pp.setExplodePercent(pse.getSectionKey(), 0.25);
+//
+//					} else if (pse != (PieSectionEntity)e.getEntity()) {
+//						pp.setExplodePercent(pse.getSectionKey(), 0);
+//						pse = (PieSectionEntity)e.getEntity();
+//						pp.setExplodePercent(pse.getSectionKey(), 0.25);	
+//					}
+					
+//					pse = (PieSectionEntity)e.getEntity();					
+////					setPieSliceHighlight(mpp, pse, true);
+//					
+//            	
+//	
+//					System.out.println(pse.getSectionKey());
+//					pp.setExplodePercent(pse.getSectionKey(), 0.3);
+					
+					subchart.fireChartChanged();
+					chart.fireChartChanged();
+	            } 
+	            
+	            if (entity instanceof CategoryItemEntity){
+	            	//barhighlight
+		            CategoryItemEntity cie = (CategoryItemEntity) entity;
+		            CategoryDataset dataset = cie.getDataset();
 
+		        	cbhr.setHighlightedItem(dataset.getRowIndex(cie.getRowKey()),
+		                    dataset.getColumnIndex(cie.getColumnKey()));	            	
+	            }
 
-		            	label = item.getColumnKey().toString();
-
-		            	if(!isPoSErrorMiningResult()){
-			            	label = reFormatDependencyKey(label);
-		            	}
-
-		            	key = item.getRowKey().toString();
-		            	displayResultFromStats(key, label);
-		            }
-
-
-		            // details with filtered (clicked on label x-axis)
-		            if (entity != null && (entity instanceof CategoryLabelEntity)) {
-		            	CategoryLabelEntity item = (CategoryLabelEntity) entity;
-
-		            	label = item.getKey().toString();
-
-		            	if(!isPoSErrorMiningResult()){
-		            		label = reFormatDependencyKey(label);
-		            	}
-
-
-
-		            	displayResultFromStats("", label);    //$NON-NLS-1$
-		            }
-
-
-		            // details complete label (clicked legend)
-		            if (entity != null && (entity instanceof LegendItemEntity)) {
-		            	LegendItemEntity item = (LegendItemEntity) entity;
-
-		            	key = item.getSeriesKey().toString();
-
-		            	if(!key.equals(labelmatrix)){
-		            		showDetails(createDetailList(key));
-		            	} else {
-			            	if(statisticList.getSelectedValuesList().size() == 0){
-			            		DialogFactory.getGlobalFactory().showInfo(null,
-			            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
-			            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
-		//	            		for(int i = 0; i < statisticListModel.getSize(); i++){
-		//		            		key = (String) statisticListModel.getElementAt(i);
-		//		            		showDetails(createDetailList(key,label), key + " " + label ); //$NON-NLS-1$
-		//	            		}
-			            	} else {
-								for (int i = 0; i < statisticList.getSelectedValuesList()
-										.size(); i++) {
-									key = (String) statisticList.getSelectedValuesList()
-											.get(i);
-									showDetails(createDetailList(key));
-
-								}
-			            	}
-		            	}
-		            }
-
+	        	barChartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 			}
 
@@ -3201,61 +4076,63 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			 * @param label
 			 */
 			private void displayResultFromStats(String key, String label) {
-	        	StringBuilder sbLabel = new StringBuilder();
-
-	        	sbLabel.append(" [").append(label).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
-
-
-	        	if(key.equals(labelmatrix) && statisticListModel.getSize() == 1){
-	        		key = (String) statisticListModel.getElementAt(0);
-	        		showDetails(createDetailList(key,label), key + sbLabel.toString() );
-	        	}
-
-	        	else{
-	            	if(statisticList.getSelectedValuesList().size() == 0){
-	            		DialogFactory.getGlobalFactory().showInfo(null,
-	            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
-	            				"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
-	//            		for(int i = 0; i < statisticListModel.getSize(); i++){
-	//	            		key = (String) statisticListModel.getElementAt(i);
-	//	            		showDetails(createDetailList(key,label), key + sbLabel.toString()); //$NON-NLS-1$
-	//            		}
-	            	} else {
+				StringBuilder sbLabel = new StringBuilder();
+			
+				sbLabel.append(" [").append(label).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+				if (key.equals(labelmatrix) && statisticListModel.getSize() == 1) {
+					key = (String) statisticListModel.getElementAt(0);
+					showDetails(createDetailList(key, label),
+							key + sbLabel.toString());
+				}
+			
+				else {
+					if (statisticList.getSelectedValuesList().size() == 0) {
+						DialogFactory
+								.getGlobalFactory()
+								.showInfo(
+										null,
+										"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.title", //$NON-NLS-1$
+										"plugins.errorMining.errorMiningSearchPresenter.dialogs.noStatSelection.message"); //$NON-NLS-1$
+						// for(int i = 0; i < statisticListModel.getSize(); i++){
+						// key = (String) statisticListModel.getElementAt(i);
+						//	            		showDetails(createDetailList(key,label), key + sbLabel.toString()); //$NON-NLS-1$
+						// }
+					} else {
 						for (int i = 0; i < statisticList.getSelectedValuesList()
 								.size(); i++) {
 							key = (String) statisticList.getSelectedValuesList()
 									.get(i);
-							showDetails(createDetailList(key, label), key + sbLabel.toString());
-
+							showDetails(createDetailList(key, label),
+									key + sbLabel.toString());
+			
 						}
-	            	}
-	        	}
-
+					}
+				}
+			
 			}
 
 
 			/**
-			 * @see org.jfree.chart.ChartMouseListener#chartMouseMoved(org.jfree.chart.ChartMouseEvent)
+			 * @param mpp
 			 */
-			@Override
-			public void chartMouseMoved(ChartMouseEvent e) {
-				ChartEntity entity = e.getEntity();
+			private void setPieSliceHighlight(MultiplePiePlot mpp, PieSectionEntity pse, boolean highlight) {
+				JFreeChart subchart = mpp.getPieChart();
+				PiePlot pp = (PiePlot) subchart.getPlot();				
+				
+				Color c = (Color) pp.getSectionPaint(pse.getSectionKey());
 
-				CustomBarHighlightRenderer cbhr = (CustomBarHighlightRenderer) plot.getRenderer();
-
-	            if (!(entity instanceof CategoryItemEntity)) {
-	                cbhr.setHighlightedItem(-1, -1);
-	                barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	                return;
-	            }
-
-	            CategoryItemEntity cie = (CategoryItemEntity) entity;
-	            CategoryDataset dataset = cie.getDataset();
-
-	        	cbhr.setHighlightedItem(dataset.getRowIndex(cie.getRowKey()),
-	                    dataset.getColumnIndex(cie.getColumnKey()));
-	        	barchartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
+				
+				if(highlight){
+					pp.setSectionPaint(pse.getSectionKey(), c.brighter());
+				} else {
+					pp.setBaseSectionPaint(Color.blue);
+				}
+				
+				chart.fireChartChanged();
+				
+				System.out.println(pp.getSectionPaint(pse.getSectionKey()));				
+				System.out.println("\n");				 //$NON-NLS-1$
 			}
 
 
@@ -3306,9 +4183,124 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			}
 
 
+		/**
+		 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+		 */
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+
+			// System.out.println(e.getSource());
+
+			if (e.getSource() instanceof JRadioButton) {
+				JRadioButton jrb = (JRadioButton) e.getSource();
+				switch (jrb.getName().toString()) {
+				case barChart:
+					barChartPanel.setChart(createBarChart(((CategoryPlot) plot)
+							.getDataset()));
+					break;
+				case pieChart:
+					barChartPanel.setChart(createPieChart(((CategoryPlot) plot)
+							.getDataset()));
+					break;
+				case percentA:
+					barCompare = false;
+					chart.fireChartChanged();
+					break;
+				case percentB:
+					barCompare = true;
+					chart.fireChartChanged();
+					break;
+
+				default:
+					break;
+				}
+			}
 		}
+	}
+	
+	
+	//test stuff...
+	public static class CustomMultiPie extends ChartFactory{
+		
+	    public static JFreeChart createMultiplePieChart3D(String title,
+	            CategoryDataset dataset, TableOrder order, boolean legend,
+	            boolean tooltips, boolean urls) {
+
+	        ParamChecks.nullNotPermitted(order, "order"); //$NON-NLS-1$
+	        MultiplePiePlot plot = new MultiplePiePlot(dataset);
+	        plot.setDataExtractOrder(order);
+	        plot.setBackgroundPaint(null);
+	        plot.setOutlineStroke(null);
 
 
+	        JFreeChart pieChart = new JFreeChart(new PiePlot3D(null));
+	        TextTitle seriesTitle = new TextTitle("Series Title", //$NON-NLS-1$
+	                new Font("SansSerif", Font.BOLD, 12)); //$NON-NLS-1$
+	        seriesTitle.setPosition(RectangleEdge.BOTTOM);
+
+	        System.out.println(seriesTitle);
+	        pieChart.setTitle(seriesTitle);
+	        pieChart.getTitle().setToolTipText(seriesTitle.getText());
+	        pieChart.removeLegend();
+	        pieChart.setBackgroundPaint(null);
+	        plot.setPieChart(pieChart);	        
+
+
+	        if (tooltips) {
+	            PieToolTipGenerator tooltipGenerator
+	                = new StandardPieToolTipGenerator();
+	            PiePlot pp = (PiePlot) plot.getPieChart().getPlot();
+	            pp.setToolTipGenerator(tooltipGenerator);
+	        }
+
+	        if (urls) {
+	            PieURLGenerator urlGenerator = new StandardPieURLGenerator();
+	            PiePlot pp = (PiePlot) plot.getPieChart().getPlot();
+	            pp.setURLGenerator(urlGenerator);
+	        }
+
+	        JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
+	                plot, legend);
+	        
+	        ChartFactory.getChartTheme().apply(chart);
+	        return chart;
+	    }		
+	}
+	
+	
+	//teststuff....
+	public class MultiplePiePlotWithTooltips extends MultiplePiePlot {		
+
+		
+		public void addToolTip(){
+			String tt = super.getPieChart().getTitle().toString();
+			super.getPieChart().getTitle().setToolTipText(tt);	
+		};
+		
+		
+		/**
+		 * @see org.jfree.chart.plot.MultiplePiePlot#draw(java.awt.Graphics2D, java.awt.geom.Rectangle2D, java.awt.geom.Point2D, org.jfree.chart.plot.PlotState, org.jfree.chart.plot.PlotRenderingInfo)
+		 */
+		@Override
+		public void draw(Graphics2D g2, Rectangle2D area, Point2D anchor,
+				PlotState parentState, PlotRenderingInfo info) {
+			// TODO Auto-generated method stub
+			
+			String tt = super.getPieChart().getTitle().toString();
+			super.getPieChart().getTitle().setToolTipText(tt);
+			super.draw(g2, area, anchor, parentState, info);
+		}
+	}
+	
+	
+	
+
+	/**
+	 * 
+	 * @author Gregor Thiele
+	 * @version $Id$
+	 *
+	 */
 	public class DifferenceBarRenderer extends BarRenderer {
 
 		private static final long serialVersionUID = 7871113296140703067L;
@@ -3333,6 +4325,13 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 	}
 
+	
+	/**
+	 * 
+	 * @author Gregor Thiele
+	 * @version $Id$
+	 *
+	 */
 
 	private class FilterWorker extends SwingWorker<Object, Object> implements Identity{
 
@@ -3446,6 +4445,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		}
 
 
+	/**
+	 * 
+	 * @author Gregor Thiele
+	 * @version $Id$
+	 *
+	 */
 	private class StatsFilterWorker extends SwingWorker<Object, Object> implements Identity{
 
 		/**
@@ -4310,13 +5315,12 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		    		ngramList.setSelectedIndex(0);
 		    	}
 
-		    	//TODO FIX NULLPOINTER
-		    	String s;
-		    	if(table.getModel().getValueAt(row, col) == null){
-		    		s =""; //$NON-NLS-1$
-		    	} else {
-		    	s = table.getModel().getValueAt(row, col).toString();
-		    	}
+				String s;
+				if (table.getModel().getValueAt(row, col) == null) {
+					s = ""; //$NON-NLS-1$
+				} else {
+					s = table.getModel().getValueAt(row, col).toString();
+				}
 
 			    String selectedKey = (String) ngramList.getSelectedValue();
 
@@ -4408,7 +5412,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		            SwingUtilities.invokeLater(new Runnable() {
 		                @Override
 		                public void run() {
-		                    statisticTable.changeSelection(0, 0, false, false);
+		                    statisticTable.changeSelection(0, 0, false, true);
 		                }
 		            });
 		        }
@@ -4584,8 +5588,107 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		//tabbedPane = null;
 	}
 
+	
+	
+	
+	
+	/**
+	 * 
+	 * @author Gregor Thiele
+	 * @version $Id$
+	 *
+	 */
+	protected class CustomPieLabelGenerator extends StandardPieSectionLabelGenerator {
+
+		private static final long serialVersionUID = -4726538399012030031L;
+		
+		NumberFormat defaultFormat = NumberFormat.getPercentInstance();		
+		boolean barCompare = false;
+		
+		public CustomPieLabelGenerator(){
+			defaultFormat.setMinimumFractionDigits(2);
+		}
+		
+		/**
+		 * @see org.jfree.chart.labels.PieSectionLabelGenerator#generateSectionLabel(org.jfree.data.general.PieDataset, java.lang.Comparable)
+		 */
+		@Override
+		public String generateSectionLabel(PieDataset dataset, Comparable key) {
+			
+			StringBuilder label = new StringBuilder();
+			label.append(key);
+			label.append(" ("); //$NON-NLS-1$
+			if(showPercentage){
+				label.append(defaultFormat.format(
+						dataset.getValue(key).doubleValue()/getTotalCount(dataset)));
+			} else {
+				label.append(dataset.getValue(key).intValue());
+			}
+			label.append(")"); //$NON-NLS-1$
+			
+			return label.toString();
+		}
+
+		/**
+		 * @see org.jfree.chart.labels.PieSectionLabelGenerator#generateAttributedSectionLabel(org.jfree.data.general.PieDataset, java.lang.Comparable)
+		 */
+		@Override
+		public AttributedString generateAttributedSectionLabel(
+				PieDataset dataset, Comparable key) {
+			// TO DO Auto-generated method stub	
+			return getAttributedLabel(dataset.getIndex(key));
+		}
+		
+		public double getTotalCount(PieDataset dataset){
+			double total = 0;
+			for(int col = 0; col < dataset.getKeys().size(); col++){
+				total = total + dataset.getValue(dataset.getKey(col)).doubleValue();
+			}
+			//System.out.println("TOTAL "+ total);
+			return total;
+		}		
+	
+	}
+	
+
+	
+	/**
+	 * 
+	 * @author Gregor Thiele
+	 * @version $Id$
+	 *
+	 */
+	
+	protected class CustomPieToolTipGenerator implements PieToolTipGenerator {
+
+		/**
+		 * @see org.jfree.chart.labels.PieToolTipGenerator#generateToolTip(org.jfree.data.general.PieDataset, java.lang.Comparable)
+		 */
+		@Override
+		public String generateToolTip(PieDataset dataset, Comparable key) {
+			return StringUtil.formatDecimal(dataset.getValue(key).intValue());
+		}		
+	}	
+	
+	protected class CustomPieDrawingSupplier extends DefaultDrawingSupplier{
+
+
+		private static final long serialVersionUID = -789075994286903520L;
+
+
+	
+	}
+	
+	
 
 	protected class CustomLabelGenerator implements CategoryItemLabelGenerator {
+		
+		NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+		
+		public CustomLabelGenerator(){
+			defaultFormat.setMinimumFractionDigits(2);
+		}
+		
 
 		/**
 		 * @see org.jfree.chart.labels.CategoryItemLabelGenerator#generateColumnLabel(org.jfree.data.category.CategoryDataset, int)
@@ -4601,14 +5704,35 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		@Override
 		public String generateLabel(CategoryDataset dataset, int row, int column) {
-			String label = StringUtil.formatDecimal(
-					(int) (dataset.getValue(row, column).doubleValue()));
-//			System.out.println("row"+dataset.getRowKey(row));
-//			if(dataset.getRowKey(row).equals("")){
-//				return label;
-//			}
-//			return label + " " + dataset.getRowKey(row);
+			
+			String label = null;
+			if(showPercentage){
+				label  = defaultFormat.format(
+						dataset.getValue(row, column).doubleValue()/
+											getTotalCount(dataset, row, column ));
+			} else {
+				label = StringUtil.formatDecimal(dataset.getValue(row, column).intValue());
+			}
+
+			//System.out.println("Label " + label);
+			//System.out.println(row + " |col " + column);
+			//System.out.println("Total " + getTotalCount(dataset, row, column));	
+
 			return label;
+		}
+		
+		
+		public double getTotalCount(CategoryDataset dataset, int row, int column){
+			double total = 0;
+			
+			if(barCompare){
+				total = dataset.getValue(0, column).doubleValue();
+			} else {			
+				for(int col = 0; col < dataset.getColumnCount(); col++){
+					total = total + dataset.getValue(row, col).doubleValue();
+				}	
+			}
+			return total;
 		}
 
 		/**
@@ -4628,6 +5752,50 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	    	String label = StringUtil.formatDecimal(dataset.getValue(row, column).intValue());
 	    	return label;
 	    }
+	}
+
+
+	protected class CustomBarHighlightRenderer extends BarRenderer {
+	
+		private static final long serialVersionUID = 1791567745153742371L;
+	
+		/** The row to highlight (-1 for none). */
+	    private int highlightRow = -1;
+	
+	    /** The column to highlight (-1 for none). */
+	    private int highlightColumn = -1;
+	
+	    /**
+	     * Sets the item to be highlighted (use (-1, -1) for no highlight).
+	     *
+	     * @param r  the row index.
+	     * @param c  the column index.
+	     */
+	    public void setHighlightedItem(int r, int c) {
+	        if (this.highlightRow == r && this.highlightColumn == c) {
+	            return;  // nothing to do
+	        }
+	        this.highlightRow = r;
+	        this.highlightColumn = c;
+	        notifyListeners(new RendererChangeEvent(this));
+	    }
+	
+	    /**
+	     * Return a special color for the highlighted item.
+	     *
+	     * @param row  the row index.
+	     * @param column  the column index.
+	     *
+	     * @return The outline paint.
+	     */
+	    @Override
+		public Paint getItemOutlinePaint(int row, int column) {
+	        if (row == this.highlightRow && column == this.highlightColumn) {
+	            return Color.green;
+	        }
+	        return super.getItemOutlinePaint(row, column);
+	
+	    }	
 	}
 
 
@@ -4839,51 +6007,6 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 			}
 		}
 	}
-
-
-	protected class CustomBarHighlightRenderer extends BarRenderer {
-
-		private static final long serialVersionUID = 1791567745153742371L;
-
-		/** The row to highlight (-1 for none). */
-        private int highlightRow = -1;
-
-        /** The column to highlight (-1 for none). */
-        private int highlightColumn = -1;
-
-        /**
-         * Sets the item to be highlighted (use (-1, -1) for no highlight).
-         *
-         * @param r  the row index.
-         * @param c  the column index.
-         */
-        public void setHighlightedItem(int r, int c) {
-            if (this.highlightRow == r && this.highlightColumn == c) {
-                return;  // nothing to do
-            }
-            this.highlightRow = r;
-            this.highlightColumn = c;
-            notifyListeners(new RendererChangeEvent(this));
-        }
-
-        /**
-         * Return a special color for the highlighted item.
-         *
-         * @param row  the row index.
-         * @param column  the column index.
-         *
-         * @return The outline paint.
-         */
-        @Override
-		public Paint getItemOutlinePaint(int row, int column) {
-            if (row == this.highlightRow && column == this.highlightColumn) {
-                return Color.green;
-            }
-            return super.getItemOutlinePaint(row, column);
-
-        }
-
-    }
 
 
 }

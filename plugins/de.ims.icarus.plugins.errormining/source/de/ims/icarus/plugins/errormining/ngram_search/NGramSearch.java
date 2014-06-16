@@ -328,10 +328,16 @@ public class NGramSearch extends AbstractParallelSearch implements
 		protected void init() {
 			// System.out.println(source.size());
 			
-			if (!DialogFactory.getGlobalFactory().showConfirm(null,
-					"plugins.errormining.dialogs.nilLabel.title", //$NON-NLS-1$
-					"plugins.errormining.dialogs.nilLabel.message")){ //$NON-NLS-1$
-				execute = false;
+			// dialog performs check since current nil implementation scaling
+			// recommendation to use "pos-mining" with dependency tags
+			if(useFringe){
+				if (!DialogFactory.getGlobalFactory().showConfirm(null,
+						"plugins.errormining.dialogs.nilLabel.title", //$NON-NLS-1$
+						"plugins.errormining.dialogs.nilLabel.message")){ //$NON-NLS-1$
+					execute = false;
+				} else {
+					execute = true;
+				}				
 			} else {
 				execute = true;
 			}

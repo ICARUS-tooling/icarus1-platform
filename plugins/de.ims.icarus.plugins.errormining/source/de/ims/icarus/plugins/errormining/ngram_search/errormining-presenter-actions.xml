@@ -35,6 +35,18 @@
 	<action id="plugins.errormining.nGramResultView.showDetailAction"
 		name="${id}.name" desc="${id}.description" icon="filter_errormining.png"/>
 	
+	<!-- Number Format barchart -->
+	<action id="plugins.errormining.nGramResultView.toggleNumberModeAction"
+		name="${id}.name" desc="${id}.description" icon="percent.png" type="toggle"/>
+	
+	<!-- Number Compare Mode -->
+	<action id="plugins.errormining.nGramResultView.toggleNumberCompareModeAction"
+		name="${id}.name" desc="${id}.description" icon="percentA.png" type="toggle"/>
+	
+	<!-- Bar-/Pie Chart  -->
+	<action id="plugins.errormining.nGramResultView.toggleChartDisplayModeAction"
+		name="${id}.name" desc="${id}.description" icon="chart-pie.png" type="toggle"/>
+
 	<!-- Export barchart -->
 	<action id="plugins.errormining.nGramResultView.exportBarchart"
 		name="${id}.name" desc="${id}.description" icon="export_wiz.gif"/>
@@ -48,6 +60,10 @@
 		<item type="label" value="plugins.errormining.nGramResultView.filteredResults.label" />
 		<item type="custom" value="resultCounter" />		
 		<separator />
+		<item type="label" value="plugins.errormining.nGramResultView.onlyNuclei.label" />
+		<item type="custom" value="onlyNuclei" />
+		<item type="label" value="plugins.errormining.nGramResultView.exactTextMatch.label" />
+		<item type="custom" value="exactTextMatch" />
 		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
 		<item type="custom" value="textfield" />
 		<item type="label" value="plugins.errormining.nGramResultView.lowerBound.label" />
@@ -70,6 +86,8 @@
 		<item type="label" value="plugins.errormining.nGramResultView.filteredResults.label" />
 		<item type="custom" value="statisticCounter" />		
 		<separator />	
+		<item type="label" value="plugins.errormining.nGramResultView.exactTagMatch.label" />
+		<item type="custom" value="exactTagMatch" />	
 		<item type="label" value="plugins.errormining.nGramResultView.textFilter.label" />		
 		<item type="custom" value="statisticTextFilterField" />
 		<item type="action" value="plugins.errormining.nGramResultView.applyFilterAction" />
@@ -81,6 +99,11 @@
 		<item type="custom" value="statsSpinner" />
 		<item type="action" value="plugins.errormining.nGramResultView.statsAction" />
 		<separator />
+		<item type="action" value="plugins.errormining.nGramResultView.toggleNumberModeAction" />
+		<item type="custom" value="percenModeSwitch" />
+		<separator />
+		<item type="custom" value="chartStyleSwitch" />
+		<separator />		
 		<item type="action" value="plugins.errormining.nGramResultView.exportBarchart" />
 		<separator />
 		<item type="glue"/>
