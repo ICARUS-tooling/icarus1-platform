@@ -129,6 +129,8 @@
 	
 	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
 		<parameter id="class" value="de.ims.icarus.plugins.coref.view.grid.ClusterLabelType" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.graph.CorefNodeData" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.view.graph.CorefEdgeData" />
 	</extension>
 	
 	<!-- PERSPECTIVES AND VIEWS -->

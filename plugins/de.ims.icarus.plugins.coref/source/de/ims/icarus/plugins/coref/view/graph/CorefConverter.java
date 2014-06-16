@@ -23,46 +23,39 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.plugins.coref.view.graph;
 
-import java.io.Closeable;
-import java.io.Flushable;
-import java.io.IOException;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+import de.ims.icarus.language.coref.CorefMember;
+import de.ims.icarus.language.coref.Edge;
+import de.ims.icarus.language.coref.Span;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface IndexSourceWriter extends Closeable, Flushable {
+public class CorefConverter extends XmlAdapter<String, CorefMember> {
 
 	/**
-	 * Attempts to open a data channel to the underlying chunk index and
-	 * returns true if not already open.
-	 *
-	 * @return
-	 * @throws IOException
+	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
-	boolean open() throws IOException;
+	@Override
+	public CorefMember unmarshal(String v) throws Exception {
+		if(v.indexOf('>')==-1) {
+			return Span.parse(v);
+		} else {
+			return Edge.parse(v);
+		}
+	}
 
 	/**
-	 * Erases all data in the underlying index source.
-	 * @return
-	 * @throws IOException
+	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
-	long clear() throws IOException;
+	@Override
+	public String marshal(CorefMember v) throws Exception {
+		return v.toString();
+	}
 
-	int setFileId(long index, int fileId);
-
-	/**
-	 * Returns whether or not this writer is able to handle the
-	 * given {@code index}, i.e. if its implementation is capable
-	 * of addressing or storing values in that magnitude. Note that
-	 * any value that passes this check by returning {@code true} must
-	 * not yield {@code IndexOutOfBoundsException}s when passed to any
-	 * of the modification methods!
-	 *
-	 * @return
-	 */
-	boolean isIndexSupported(long index);
 }

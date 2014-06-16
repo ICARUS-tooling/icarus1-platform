@@ -37,6 +37,8 @@ import de.ims.icarus.model.standard.driver.file.ManagedFileResource;
 import de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter;
 
 /**
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -46,7 +48,9 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 	private final FileSet fileSet;
 	private final ChunkArrays.ArrayAdapter arrayAdapter;
 
-	private final int entriesPerBlock;
+	private static final int BLOCK_POWER = 12;
+
+	private static final int ENTRIES_PER_BLOCK = 2<<BLOCK_POWER;
 
 	public DefaultChunkIndex(Path file, BlockCache cache, int cacheSize,
 			FileSet fileSet, boolean largeIndex) {
@@ -59,9 +63,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 
 		arrayAdapter = createAdapter(fileSet.getFileCount()>1, largeIndex);
 
-		entriesPerBlock = 10_000;
-
-		setBytesPerBlock(entriesPerBlock * arrayAdapter.chunkSize());
+		setBytesPerBlock(ENTRIES_PER_BLOCK * arrayAdapter.chunkSize());
 	}
 
 	protected ArrayAdapter createAdapter(boolean multiFile, boolean largeIndex) {
@@ -138,33 +140,41 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		return arrayAdapter.createBuffer(getBytesPerBlock());
 	}
 
+	private int id(long index) {
+		return (int) (index>>BLOCK_POWER);
+	}
+
+	private int localIndex(long index) {
+		return (int)(index & (BLOCK_POWER-1));
+	}
+
 	protected int getFileId(long index) {
-		int id = (int)(index/entriesPerBlock);
-		int localIndex = (int) (index%entriesPerBlock);
+		int id = id(index);
+		int localIndex = localIndex(index);
 
 		Block block = getBlock(id, false);
 		return block==null ? -1 : arrayAdapter.getFileId(block.getData(), localIndex);
 	}
 
 	protected long getBeginOffset(long index) {
-		int id = (int)(index/entriesPerBlock);
-		int localIndex = (int) (index%entriesPerBlock);
+		int id = id(index);
+		int localIndex = localIndex(index);
 
 		Block block = getBlock(id, false);
 		return block==null ? -1 : arrayAdapter.getBeginOffset(block.getData(), localIndex);
 	}
 
 	protected long getEndOffset(long index) {
-		int id = (int)(index/entriesPerBlock);
-		int localIndex = (int) (index%entriesPerBlock);
+		int id = id(index);
+		int localIndex = localIndex(index);
 
 		Block block = getBlock(id, false);
 		return block==null ? -1 : arrayAdapter.getEndOffset(block.getData(), localIndex);
 	}
 
 	protected int setFileId(long index, int fileId) {
-		int id = (int)(index/entriesPerBlock);
-		int localIndex = (int) (index%entriesPerBlock);
+		int id = id(index);
+		int localIndex = localIndex(index);
 
 		Block block = getBlock(id, true);
 		int result = arrayAdapter.setFileId(block.getData(), localIndex, fileId);
@@ -174,8 +184,8 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 	}
 
 	protected long setBeginOffset(long index, long offset) {
-		int id = (int)(index/entriesPerBlock);
-		int localIndex = (int) (index%entriesPerBlock);
+		int id = id(index);
+		int localIndex = localIndex(index);
 
 		Block block = getBlock(id, true);
 		long result = arrayAdapter.setBeginOffset(block.getData(), localIndex, offset);
@@ -185,8 +195,8 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 	}
 
 	protected long setEndOffset(long index, long offset) {
-		int id = (int)(index/entriesPerBlock);
-		int localIndex = (int) (index%entriesPerBlock);
+		int id = id(index);
+		int localIndex = localIndex(index);
 
 		Block block = getBlock(id, true);
 		long result = arrayAdapter.setEndOffset(block.getData(), localIndex, offset);

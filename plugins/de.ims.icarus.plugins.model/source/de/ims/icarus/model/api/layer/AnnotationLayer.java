@@ -32,7 +32,7 @@ import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
 import de.ims.icarus.model.api.manifest.ValueSet;
-import de.ims.icarus.util.Consumer;
+import de.ims.icarus.util.Collector;
 
 /**
  *
@@ -76,7 +76,7 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @throws NullPointerException if any one of the two arguments is {@code null}
 	 * @throws UnsupportedOperationException if this layer does not support additional keys
 	 */
-	boolean collectKeys(Markable markable, Consumer<String> buffer);
+	boolean collectKeys(Markable markable, Collector<String> buffer);
 
 	/**
 	 * Returns the annotation for a given markable and key or {@code null} if that markable

@@ -73,4 +73,20 @@ public class SingletonIndexSet implements IndexSet {
 		return new IndexSet[]{this};
 	}
 
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#firstIndex()
+	 */
+	@Override
+	public long firstIndex() {
+		return index;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#lastIndex()
+	 */
+	@Override
+	public long lastIndex() {
+		return index;
+	}
+
 }

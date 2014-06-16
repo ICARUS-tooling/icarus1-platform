@@ -101,7 +101,7 @@ public class CorefProperties extends CompactProperties {
 
 		CorefProperties properties = new CorefProperties();
 		int maxIndex = s.length()-1;
-		int startIndex = 0;
+		int startIndex = from;
 		while(startIndex<maxIndex) {
 			int offset0 = s.indexOf(ASSIGNMENT_CHAR, startIndex);
 			if(offset0==-1)
@@ -125,6 +125,38 @@ public class CorefProperties extends CompactProperties {
 		return properties;
 	}
 
+	public static CorefProperties parse(String s) {
+		return parse(s, 0);
+	}
+
+	public static CorefProperties parse(String s, int from) {
+		if(s==null || s.isEmpty()) {
+			return null;
+		}
+
+		CorefProperties properties = new CorefProperties();
+		int maxIndex = s.length()-1;
+		int startIndex = from;
+		while(startIndex<maxIndex) {
+			int offset0 = s.indexOf(ASSIGNMENT_CHAR, startIndex);
+			if(offset0==-1)
+				throw new NullPointerException("Invalid properties source string: "+s); //$NON-NLS-1$
+			int endIndex = s.indexOf(SEPARATOR_CHAR, offset0);
+			if(endIndex==-1) {
+				endIndex = s.length();
+			}
+
+			String sKey = s.substring(startIndex, offset0);
+			String sValue = s.substring(offset0+1, endIndex);
+
+			properties.put(sKey.toString(), toValue(sValue));
+
+			startIndex = endIndex+1;
+		}
+
+		return properties;
+	}
+
 	private static Object toValue(Splitable s) {
 		try {
 			return StringPrimitives.parseInt(s);
@@ -138,6 +170,21 @@ public class CorefProperties extends CompactProperties {
 		}
 
 		return s.toString();
+	}
+
+	private static Object toValue(String s) {
+		try {
+			return StringPrimitives.parseInt(s);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+		try {
+			return StringPrimitives.parseDouble(s);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+
+		return s;
 	}
 
 	@Override

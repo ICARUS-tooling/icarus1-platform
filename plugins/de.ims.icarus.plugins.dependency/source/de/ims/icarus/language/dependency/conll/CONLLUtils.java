@@ -46,8 +46,8 @@ public class CONLLUtils {
 	// 1	id
 	// 2	form
 	// 3	lemma
-	// 4	cpos-tag
-	// 5	pos-tog
+	// 4	course-grained pos-tag
+	// 5	fine-grained pos-tag
 	// 6	feats
 	// 7	head
 	// 8	deprel
@@ -55,7 +55,7 @@ public class CONLLUtils {
 	public static final int FORM06 = 1;
 	public static final int LEMMA06 = 2;
 	public static final int CPOS06 = 3;
-	public static final int POS06 = 4;
+	public static final int FPOS06 = 4;
 	public static final int FEAT06 = 5;
 	public static final int HEAD06 = 6;
 	public static final int DEPREL06 = 7;
@@ -196,7 +196,7 @@ public class CONLLUtils {
 		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
 	}
 
-	public static DependencyData read06(CharTableBuffer buffer, int corpusIndex) {
+	public static DependencyData readCourse06(CharTableBuffer buffer, int corpusIndex) {
 		if(buffer.isEmpty())
 			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 
@@ -226,7 +226,62 @@ public class CONLLUtils {
 			heads[i] = (short) get(row, HEAD06);
 			lemmas[i] = get(row, LEMMA06, EMPTY);
 			features[i] = get(row, FEAT06, EMPTY);
-			poss[i] = get(row, POS06, EMPTY);
+			poss[i] = get(row, CPOS06, EMPTY);
+			relations[i] = get(row, DEPREL06, EMPTY);
+			flags[i] = 0;
+
+			if(index==-1 && checkIdForIndex) {
+				Cursor cursor = row.getSplitCursor(ID06);
+				int offset = cursor.indexOf('_');
+				if(offset>-1 && offset<cursor.length()) {
+					index = StringPrimitives.parseInt(cursor, offset+1, -1);
+				} else {
+					checkIdForIndex = false;
+				}
+				cursor.recycle();
+			}
+		}
+
+		if(index==-1) {
+			index = corpusIndex;
+		}
+
+		DependencyUtils.fillProjectivityFlags(heads, flags);
+
+		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
+	}
+
+	public static DependencyData readFine06(CharTableBuffer buffer, int corpusIndex) {
+		if(buffer.isEmpty())
+			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
+
+		int size = buffer.getRowCount();
+
+		short[] heads = new short[size];
+		String[] poss = new String[size];
+		String[] forms = new String[size];
+		String[] lemmas = new String[size];
+		String[] features = new String[size];
+		String[] relations = new String[size];
+		long[] flags = new long[size];
+
+		int index = -1;
+
+		Row row;
+		boolean checkIdForIndex = true;
+
+		for(int i=0; i<size; i++) {
+
+			row = buffer.getRow(i);
+			if(row.split(DELIMITER, COL_LIMIT06)!=COL_LIMIT06)
+				throw new IllegalArgumentException("Incorrect column count in data file, " //$NON-NLS-1$
+						+ "are you sure this is the right format for CoNLL 06?"); //$NON-NLS-1$
+
+			forms[i] = get(row, FORM06, "<empty>"); //$NON-NLS-1$
+			heads[i] = (short) get(row, HEAD06);
+			lemmas[i] = get(row, LEMMA06, EMPTY);
+			features[i] = get(row, FEAT06, EMPTY);
+			poss[i] = get(row, FPOS06, EMPTY);
 			relations[i] = get(row, DEPREL06, EMPTY);
 			flags[i] = 0;
 

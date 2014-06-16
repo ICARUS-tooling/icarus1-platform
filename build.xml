@@ -46,6 +46,7 @@
 		<pathelement location="${lib.home}/commons-logging.jar" />
 		<pathelement location="${lib.home}/log4j.jar" />
 		<pathelement location="${lib.home}/jpf.jar" />
+		<pathelement location="${lib.home}/trove-3.0.3.jar" />
 	</path>
 
 	<!--================= CLASSPATHES =================-->

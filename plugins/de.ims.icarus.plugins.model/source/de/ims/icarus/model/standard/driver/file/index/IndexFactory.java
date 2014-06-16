@@ -23,14 +23,26 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.util;
+package de.ims.icarus.model.standard.driver.file.index;
+
+import java.util.List;
+
+import de.ims.icarus.model.api.driver.Driver;
+import de.ims.icarus.model.api.driver.indexing.Index;
+import de.ims.icarus.model.api.manifest.IndexManifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Consumer<E extends Object> {
+public class IndexFactory {
 
-	void consume(E item);
+	private final Driver driver;
+	private final
+
+
+	public List<Index> createIndices(List<IndexManifest> manifests) {
+
+	}
 }

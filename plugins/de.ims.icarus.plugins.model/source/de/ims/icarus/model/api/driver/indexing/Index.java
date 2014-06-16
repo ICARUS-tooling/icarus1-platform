@@ -36,13 +36,42 @@ import de.ims.icarus.model.api.manifest.IndexManifest;
  */
 public interface Index {
 
+	/**
+	 * Returns the driver that created and manages this index.
+	 *
+	 * @return
+	 */
 	Driver getDriver();
 
+	/**
+	 * Returns the {@code source} layer for the mapping this index represents.
+	 * Note that the index must accept each element in this source layer as a
+	 * legal input to methods of its {@link IndexReader} instances!
+	 *
+	 * @return
+	 */
 	MarkableLayer getSourceLayer();
 
+	/**
+	 * Returns the {@code target} layer for the mapping this index represents.
+	 *
+	 * @return
+	 */
 	MarkableLayer getTargetLayer();
 
+	/**
+	 * Returns the manifest this index is based upon.
+	 *
+	 * @return
+	 */
 	IndexManifest getManifest();
 
+	/**
+	 * Creates a new reader instance to access the data in this index.
+	 *
+	 * @return
+	 */
 	IndexReader newReader();
+
+	void close();
 }

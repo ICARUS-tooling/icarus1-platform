@@ -202,6 +202,19 @@ public final class CoreferenceRegistry {
 		return documentSetList.get(index);
 	}
 
+	public DocumentSetDescriptor getDocumentSetByName(String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name");
+
+		for(DocumentSetDescriptor descriptor : documentSetList) {
+			if(name.equals(descriptor.getName())) {
+				return descriptor;
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * @return the defaultAllocatinReaderExtension
 	 */

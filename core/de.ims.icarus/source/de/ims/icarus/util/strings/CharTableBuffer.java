@@ -398,7 +398,7 @@ public class CharTableBuffer {
 		 */
 		@Override
 		public Cursor subSequence(int start, int end) {
-			return getCursor0(row, index0+start, index0+end);
+			return getCursor0(row, index0+start, index0+end-1);
 		}
 
 		/**
@@ -513,7 +513,7 @@ public class CharTableBuffer {
 		 */
 		@Override
 		public Cursor subSequence(int start, int end) {
-			return getCursor0(rowIndex, start, end);
+			return getCursor0(rowIndex, start, end-1);
 		}
 
 		/**

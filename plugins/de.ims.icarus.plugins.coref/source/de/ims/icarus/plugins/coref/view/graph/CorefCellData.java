@@ -19,14 +19,22 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.graph;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.plugins.jgraph.cells.GraphCell;
 
 /**
@@ -34,16 +42,22 @@ import de.ims.icarus.plugins.jgraph.cells.GraphCell;
  * @version $Id$
  *
  */
-public abstract class CorefCellData<E extends Object> implements Serializable, GraphCell {
+@XmlAccessorType(XmlAccessType.FIELD)
+public abstract class CorefCellData<E extends CorefMember> implements Serializable, GraphCell {
 
 	private static final long serialVersionUID = 5316908730346053116L;
+	@XmlTransient
 	protected String label;
+	@XmlAttribute(required=false)
 	protected long highlight = 0L;
-	
+
+	@XmlAttribute(required=false)
 	protected boolean gold;
-	
+
+	@XmlElement
+	@XmlJavaTypeAdapter(value=CorefConverter.class)
 	protected E data;
-	
+
 	protected CorefCellData() {
 		// no-op
 	}
@@ -56,13 +70,13 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 		setData(data);
 		setGold(gold);
 	}
-	
+
 	protected CorefCellData(E data, boolean gold, long highlight) {
 		setData(data);
 		setGold(gold);
 		setHighlight(highlight);
 	}
-	
+
 	/**
 	 * @return the gold
 	 */
@@ -80,7 +94,7 @@ public abstract class CorefCellData<E extends Object> implements Serializable, G
 	protected void setData(E data) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
 		this.data = data;
 		label = null;
 	}

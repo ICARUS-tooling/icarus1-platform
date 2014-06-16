@@ -29,15 +29,6 @@
 			</doc>
 			<export prefix="*" />
 		</library>
-		<library id="Trove Collections" path="lib/trove-3.0.3.jar" type="code">
-			<doc>
-				<doc-text>
-					Trove Collections for primitive types version 3.0.3
-					(http://sourceforge.net/projects/trove4j/)
-				</doc-text>
-			</doc>
-			<export prefix="*" />
-		</library>
 	</runtime>
 	
 	<!-- Extension-Points -->
@@ -366,6 +357,60 @@
 			<doc>
 				<doc-text>
 					Classname of the Look-and-Feel implementation
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="Consumer" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Allows plug-ins to define abstract data consumers for the "send to" transfer operation.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					The 'consumer' itself as a java class.
+					Required to have no-args constructor and implement
+					de.ims.icarus.util.transfer.Consumer interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="perspective" type="extension-id"
+				multiplicity="none-or-one"
+				custom-data="de.ims.icarus.core@Perspective">
+			<doc>
+				<doc-text>
+					Collection of supported content types.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="view" type="extension-id"
+				multiplicity="none-or-one"
+				custom-data="de.ims.icarus.core@View">
+			<doc>
+				<doc-text>
+					Optional view that has to be loaded and active when the consumer
+					gets called.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id"
+				multiplicity="one-or-more"
+				custom-data="de.ims.icarus.core@ContentType">
+			<doc>
+				<doc-text>
+					Input content type.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="batch" multiplicity="none-or-one" type="boolean" default-value="false">
+			<doc>
+				<doc-text>
+					Marks a consumer to be able to handle multiple data objects at once. The default
+					is false.
 				</doc-text>
 			</doc>
 		</parameter-def>
@@ -944,5 +989,14 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="de.ims.icarus.ui.helper.TextItem" />
+	</extension>
+	
+	<extension id="StringContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Represents the java.lang.String content type.
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="java.lang.String" />
 	</extension>
 </plugin>

@@ -98,4 +98,20 @@ public class ArrayIndexSet implements IndexSet {
 
 		return result;
 	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#firstIndex()
+	 */
+	@Override
+	public long firstIndex() {
+		return indices[fromIndex];
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#lastIndex()
+	 */
+	@Override
+	public long lastIndex() {
+		return indices[toIndex];
+	}
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.treebank;
@@ -37,22 +37,22 @@ import de.ims.icarus.util.location.Location;
 
 
 /**
- * 
- * @author Markus Gärtner 
+ *
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface Treebank extends SentenceDataList, Identity, Loadable {
-	
+
 	boolean isEditable();
-	
+
 	void setName(String name);
 
 	/**
 	 * Replaces
 	 */
 	void set(SentenceData item, int index, DataType type);
-	
+
 	/**
 	 * Removes from this {@code Treebank} the data stored at the
 	 * specified {@code index} that is associated with the given
@@ -68,28 +68,34 @@ public interface Treebank extends SentenceDataList, Identity, Loadable {
 	 */
 	void remove(int index, DataType type);
 
+	void destroy();
+
+	boolean isDestroyed();
+
 	/**
-	 * 
+	 *
 	 * @return
 	 */
+	@Override
 	boolean isLoaded();
 
 	/**
 	 * Loads this {@code Treebank}. In a typical synchronous
-	 * implementation this method will cover the entire 
+	 * implementation this method will cover the entire
 	 * loading process and return once all data is loaded.
 	 * For asynchronous implementations this method returns
 	 * immediately and actual loading is done in a background
 	 * thread.
 	 * @throws Exception if the loading failed
 	 */
+	@Override
 	void load() throws Exception;
 
 	/**
-	 * Sets the new {@code Location} to be used for this 
+	 * Sets the new {@code Location} to be used for this
 	 * {@code Treebank}. Subsequent calls to {@link #isLoaded()}
 	 * will return {@code false} at least until the first call
-	 * to {@link #load()} is performed 
+	 * to {@link #load()} is performed
 	 * @param location the new {@code Location} to be used
 	 */
 	void setLocation(Location location);
@@ -100,25 +106,26 @@ public interface Treebank extends SentenceDataList, Identity, Loadable {
 	 * @return the {@code source} of this {@code Treebank}
 	 */
 	Location getLocation();
-	
+
 	/**
-	 * Releases all data within this {@code Treebank} so that 
+	 * Releases all data within this {@code Treebank} so that
 	 * later calls to {@link #isLoaded()} return {@code false}.
 	 */
+	@Override
 	void free();
-	
+
 	void saveState(TreebankDescriptor descriptor);
-	
+
 	void loadState(TreebankDescriptor descriptor);
-	
+
 	TreebankMetaData getMetaData();
 
 	Object getProperty(String key);
-	
+
 	void setProperty(String key, Object value);
-	
+
 	Map<String, Object> getProperties();
-	
+
 	/**
 	 * @see de.ims.icarus.ui.events.EventSource#addListener(java.lang.String, de.ims.icarus.ui.events.EventListener)
 	 */

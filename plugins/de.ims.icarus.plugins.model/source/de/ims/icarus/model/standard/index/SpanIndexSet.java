@@ -83,4 +83,20 @@ public class SpanIndexSet implements IndexSet {
 
 		return result;
 	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#firstIndex()
+	 */
+	@Override
+	public long firstIndex() {
+		return minValue;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#lastIndex()
+	 */
+	@Override
+	public long lastIndex() {
+		return maxValue;
+	}
 }

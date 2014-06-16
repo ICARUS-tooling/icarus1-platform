@@ -112,7 +112,7 @@ public class ChunkArrays {
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
-			return ((int[])buffer).length/2;
+			return ((int[])buffer).length>>1;
 		}
 
 		/**
@@ -121,7 +121,7 @@ public class ChunkArrays {
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset, int length) {
 			int[] array = (int[]) target;
-			int index = offset*2;
+			int index = offset<<1;
 			while(length-->0) {
 				array[index++] = buffer.getInt();
 				array[index++] = buffer.getInt();
@@ -134,7 +134,7 @@ public class ChunkArrays {
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset, int length) {
 			int[] array = (int[]) source;
-			int index = offset*2;
+			int index = offset<<1;
 			while(length-->0) {
 				buffer.putInt(array[index++]);
 				buffer.putInt(array[index++]);
@@ -313,7 +313,7 @@ public class ChunkArrays {
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
-			return ((long[])buffer).length/2;
+			return ((long[])buffer).length>>1;
 		}
 
 		/**
@@ -335,7 +335,7 @@ public class ChunkArrays {
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset, int length) {
 			long[] array = (long[]) source;
-			int index = offset*2;
+			int index = offset<<1;
 			while(length-->0) {
 				buffer.putLong(array[index++]);
 				buffer.putLong(array[index++]);

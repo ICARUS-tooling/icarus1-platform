@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui;
@@ -36,14 +36,14 @@ import javax.swing.ToolTipManager;
  *
  */
 public class TooltipFreezer extends MouseAdapter {
-	
+
 	private int dismissDelayReminder = -1;
 	private int initialDelayReminder = -1;
 
 	public TooltipFreezer() {
 		// no-op
 	}
-	
+
 	/**
 	 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
 	 */
@@ -51,11 +51,11 @@ public class TooltipFreezer extends MouseAdapter {
 	public void mouseEntered(MouseEvent e) {
 		initialDelayReminder = ToolTipManager.sharedInstance().getInitialDelay();
 		dismissDelayReminder = ToolTipManager.sharedInstance().getDismissDelay();
-		
+
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 	}
-	
+
 	/**
 	 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
 	 */

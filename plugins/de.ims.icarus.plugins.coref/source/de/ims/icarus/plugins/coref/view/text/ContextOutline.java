@@ -33,6 +33,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
+import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter.PresenterMenu;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
 import de.ims.icarus.util.Filter;
@@ -49,6 +50,14 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 	private JSlider scopeSelect;
 
 	private int scope = DEFAULT_SCOPE;
+
+	/**
+	 * @see de.ims.icarus.plugins.coref.view.text.CoreferenceDocumentPresenter#createPresenterMenu()
+	 */
+	@Override
+	protected PresenterMenu createPresenterMenu() {
+		return null;
+	}
 
 	/**
 	 * @see de.ims.icarus.plugins.coref.view.text.AbstractCoreferenceTextPresenter#createToolBar()

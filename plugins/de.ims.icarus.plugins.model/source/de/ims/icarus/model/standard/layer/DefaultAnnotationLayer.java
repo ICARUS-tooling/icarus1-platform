@@ -43,7 +43,7 @@ import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.model.util.CorpusUtils;
-import de.ims.icarus.util.Consumer;
+import de.ims.icarus.util.Collector;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
@@ -93,10 +93,10 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.Markable, de.ims.icarus.util.Consumer)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.Markable, de.ims.icarus.util.Collector)
 	 */
 	@Override
-	public boolean collectKeys(Markable markable, Consumer<String> buffer) {
+	public boolean collectKeys(Markable markable, Collector<String> buffer) {
 		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
 	}
 

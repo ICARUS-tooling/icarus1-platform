@@ -36,5 +36,9 @@ public interface IndexCollector {
 
 	void add(long index);
 
+	void add(long fromIndex, long toIndex);
+
 	void add(IndexSet indices);
+
+	void add(IndexSet[] indices);
 }

@@ -116,14 +116,14 @@ public abstract class Splitable extends AbstractString {
 	        	int off = 0;
 	        	while(m.find() && (limit==0 || splitCount<limit)) {
 	        		if(m.start()>off) {
-		        		addSplit(off, m.start()-1);
+		        		addSplit(off, m.start());
 	        		}
 
 	        		off = m.end();
 	        	}
 
 	        	if(off<length() && (limit==0 || splitCount<limit)) {
-	        		addSplit(off, length()-1);
+	        		addSplit(off, length());
 	        	}
 
 	        	recycleMatcher(m);
@@ -145,11 +145,11 @@ public abstract class Splitable extends AbstractString {
             boolean limited = limit > 0;
             while ((next = indexOf(ch, off)) != -1) {
                 if (!limited || splitCount < limit - 1) {
-                    addSplit(off, next-1);
+                    addSplit(off, next);
                     off = next + 1;
                 } else {    // last one
                     //assert (list.size() == limit - 1);
-                    addSplit(off, width-1);
+                    addSplit(off, width);
                     off = width;
                     break;
                 }
@@ -162,7 +162,7 @@ public abstract class Splitable extends AbstractString {
 
             // Add remaining segment
             if (!limited || splitCount < limit)
-            	addSplit(off, width-1);
+            	addSplit(off, width);
 
             return splitCount;
 		}

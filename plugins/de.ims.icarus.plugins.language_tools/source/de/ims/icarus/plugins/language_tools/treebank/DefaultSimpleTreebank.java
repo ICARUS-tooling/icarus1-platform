@@ -235,6 +235,9 @@ public class DefaultSimpleTreebank extends AbstractTreebank implements Treebank 
 	 */
 	@Override
 	public void load() throws Exception {
+		if(isDestroyed())
+			throw new IllegalStateException("Unable to load - treebank already destroyed: "+this); //$NON-NLS-1$
+
 		SentenceDataReader reader = getSentenceDataReader();
 
 		if(location==null)

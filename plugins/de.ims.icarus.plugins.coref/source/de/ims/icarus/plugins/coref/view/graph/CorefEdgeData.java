@@ -19,11 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.graph;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.plugins.jgraph.cells.GraphEdge;
@@ -33,18 +37,20 @@ import de.ims.icarus.plugins.jgraph.cells.GraphEdge;
  * @version $Id$
  *
  */
+@XmlRootElement(name="coref-edge")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
 
 	private static final long serialVersionUID = 440883995135005413L;
-	
+
 	protected CorefEdgeData() {
 		// no-op
 	}
-	
+
 	public CorefEdgeData(Edge edge) {
 		super(edge);
 	}
-	
+
 	public CorefEdgeData(Edge edge, boolean gold) {
 		super(edge, gold);
 	}

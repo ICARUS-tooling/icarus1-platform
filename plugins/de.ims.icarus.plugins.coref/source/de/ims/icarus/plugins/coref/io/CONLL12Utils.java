@@ -329,7 +329,7 @@ public final class CONLL12Utils {
 			} if(row.startsWith(BEGIN_DOCUMENT)) {
 				if(expectedId!=null)
 					throw new IllegalStateException("Unexpected begin of document: "+row); //$NON-NLS-1$
-				expectedId = row.subSequence(BEGIN_DOCUMENT.length(), row.length()-1).toString().trim();
+				expectedId = row.subSequence(BEGIN_DOCUMENT.length(), row.length()).toString().trim();
 				return RowAction.IGNORE;
 			} else if(row.startsWith(END_DOCUMENT)) {
 				if(expectedId==null)

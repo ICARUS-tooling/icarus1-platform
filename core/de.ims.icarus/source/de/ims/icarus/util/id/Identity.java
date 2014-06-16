@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.id;
@@ -30,22 +30,25 @@ import java.util.Comparator;
 import javax.swing.Icon;
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface Identity {
-	
+
 	String getId();
-	
+
 	String getName();
-	
+
 	String getDescription();
-	
+
 	Icon getIcon();
-	
+
 	Object getOwner();
-	
+
+	/**
+	 * Name based comparator
+	 */
 	public static final Comparator<Identity> COMPARATOR = new Comparator<Identity>() {
 
 		@Override
@@ -58,6 +61,6 @@ public interface Identity {
 				return i1.getId().compareTo(i2.getId());
 			}
 		}
-		
+
 	};
 }

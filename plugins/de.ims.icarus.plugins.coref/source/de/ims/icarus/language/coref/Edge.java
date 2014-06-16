@@ -117,6 +117,35 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		return edge;
 	}
 
+	public static Edge parse(String s) {
+		return parse(s, 0);
+	}
+
+	public static Edge parse(String s, int from) {
+		if(s==null || s.isEmpty())
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
+
+		int tabIndex = s.indexOf(TAB_CHAR, from);
+		if(tabIndex==-1) {
+			tabIndex = s.length();
+		}
+		String part = s.substring(0, tabIndex);
+		String[] spans = part.split(DIRECTION_STRING);
+		if(spans.length!=2)
+			throw new IllegalArgumentException("Invalid edge format"); //$NON-NLS-1$
+
+		Span source = Span.parse(spans[0]);
+		Span target = Span.parse(spans[1]);
+
+		Edge edge = new Edge(source, target);
+
+		if(tabIndex<s.length()-1) {
+			edge.setProperties(CorefProperties.parse(s, tabIndex+1));
+		}
+
+		return edge;
+	}
+
 	public static Edge parse(Splitable s, SpanSet spanSet) {
 		return parse(s, 0, spanSet);
 	}
@@ -131,7 +160,7 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		if(tabIndex==-1) {
 			tabIndex = s.length();
 		}
-		Splitable part = s.subSequence(from, tabIndex-1);
+		Splitable part = s.subSequence(from, tabIndex);
 		if(part.split(DIRECTION_STRING)!=2)
 			throw new IllegalArgumentException("Invalid edge format"); //$NON-NLS-1$
 

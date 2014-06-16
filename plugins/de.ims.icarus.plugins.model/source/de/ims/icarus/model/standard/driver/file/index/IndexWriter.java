@@ -23,41 +23,24 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.test.member;
+package de.ims.icarus.model.standard.driver.file.index;
 
-import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.MemberType;
+import de.ims.icarus.model.api.driver.IndexSet;
+import de.ims.icarus.model.api.driver.indexing.Index;
+import de.ims.icarus.model.io.SynchronizedAccessor;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class MemberDummy implements CorpusMember {
+public interface IndexWriter extends SynchronizedAccessor<Index> {
 
-	private final long id;
+	void add(long sourceIndex, long from, long to);
 
-	public MemberDummy(long id) {
-		this.id = id;
-	}
+	void add(long sourceIndex, long targetIndex);
 
-	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
-	 */
-	@Override
-	public Corpus getCorpus() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	void add(long sourceIndex, IndexSet indices);
 
-	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
-	 */
-	@Override
-	public MemberType getMemberType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	void add(long sourceIndex, IndexSet[] indices);
 }

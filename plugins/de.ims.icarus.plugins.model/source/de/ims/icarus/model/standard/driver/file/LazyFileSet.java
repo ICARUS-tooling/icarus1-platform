@@ -140,7 +140,7 @@ public class LazyFileSet extends JAXBGate<LazyFileSet.StorageBuffer> implements 
 		FileChecksum checksum = null;
 
 		try {
-			createChecksum(path);
+			checksum = createChecksum(path);
 		} finally {
 			if(checksum==null) {
 				checksums.remove(path);
@@ -218,6 +218,7 @@ public class LazyFileSet extends JAXBGate<LazyFileSet.StorageBuffer> implements 
 		for(int i=0; i<size; i++) {
 			Path path = paths.get(i);
 			FileChecksum checksum = checksums.get(path);
+
 			entries[i] = new StorageEntry(path, checksum);
 		}
 

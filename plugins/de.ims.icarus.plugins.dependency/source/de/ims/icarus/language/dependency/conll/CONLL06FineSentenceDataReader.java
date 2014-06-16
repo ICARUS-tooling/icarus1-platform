@@ -50,7 +50,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
  * @version $Id$
  *
  */
-public class CONLL06SentenceDataReader implements SentenceDataReader {
+public class CONLL06FineSentenceDataReader implements SentenceDataReader {
 
 	protected CharTableBuffer buffer;
 	protected int count;
@@ -98,7 +98,7 @@ public class CONLL06SentenceDataReader implements SentenceDataReader {
 		DependencyData resultdd = null;
 
 		if (buffer.next()) {
-			resultdd = CONLLUtils.read06(buffer, count++);
+			resultdd = CONLLUtils.readFine06(buffer, count++);
 		}
 
 		return resultdd;

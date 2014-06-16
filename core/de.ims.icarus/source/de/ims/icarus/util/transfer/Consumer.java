@@ -23,36 +23,31 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.util.transfer;
 
-import java.io.Closeable;
-import java.io.IOException;
+import de.ims.icarus.util.Options;
+import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface IndexSourceReader extends Closeable {
-
-	boolean open() throws IOException;
+public interface Consumer extends Identity {
 
 	/**
-	 * Returns the number of chunks in the underlying
-	 * {@code ChunkIndex}.
 	 *
-	 * @return
+	 * @param data The data to be displayed
+	 * @param source The origin of the data
+	 * @param options A (possibly) empty set of extra parameters
+	 * @throws Exception
 	 */
-	long getEntryCount();
+	void process(Object data, Object source, Options options) throws Exception;
 
-	/**
-	 * Returns the position at the file level a chunk specified
-	 * via the {@code index} parameter is located at. Note that for
-	 * chunk indices that only cover a single corpus file this method
-	 * will always return {@code 0}
-	 *
-	 * @param index
-	 * @return
-	 */
-	int getFileId(long index);
+	void processBatch(Object[] data, Object source, Options options) throws Exception;
+
+	boolean supports(ContentType contentType);
+
+	boolean supportsBatch();
 }

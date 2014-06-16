@@ -76,6 +76,7 @@ import de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder;
 import de.ims.icarus.plugins.jgraph.layout.GraphLayout;
 import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.layout.GraphStyle;
+import de.ims.icarus.plugins.jgraph.util.CellBuffer;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.resources.Localizable;
@@ -105,6 +106,10 @@ import de.ims.icarus.util.data.ContentType;
 public class CoreferenceGraphPresenter extends GraphPresenter implements Installable {
 
 	private static final long serialVersionUID = -6564065119073757454L;
+
+	public static final String NODE_DATA_TYPE = CorefNodeData.class.getName();
+
+	public static final String EDGE_DATA_TYPE = CorefEdgeData.class.getName();
 
 	protected CoreferenceDocumentDataPresenter parent;
 
@@ -885,6 +890,70 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		}
 
 		return spans.isEmpty() ? null : new SpanFilters.SpanFilter(spans);
+	}
+
+	@Override
+	public void cloneCells(Object[] cells) {
+		if(!canEdit()) {
+			return;
+		}
+
+		mxIGraphModel model = graph.getModel();
+		model.beginUpdate();
+		try {
+			double dx = graph.getGridSize();
+			double dy = graph.getGridSize()*2;
+
+			graph.moveCells(cells, dx, dy, true);
+		} finally {
+			model.endUpdate();
+		}
+	}
+
+	@Override
+	public void importCells(CellBuffer buffer) {
+		if(!canEdit()) {
+			return;
+		}
+
+		if(buffer==null)
+			throw new NullPointerException("Invalid cell buffer"); //$NON-NLS-1$
+
+		if(document==null)
+			throw new IllegalStateException("Cannot import cells without a reference document being present"); //$NON-NLS-1$
+
+		if(!NODE_DATA_TYPE.equals(buffer.graphType)) {
+			return;
+		}
+
+		Object[] cells = CellBuffer.buildCells(buffer);
+
+		// TODO Verify content?
+
+		if(cells==null || cells.length==0) {
+			return;
+		}
+
+		//FIXME currently can only import stuff that originated from the same document
+
+		mxIGraphModel model = graph.getModel();
+		// Assign sentence objects to each node
+		for(Object cell : cells) {
+			if(model.isVertex(cell)) {
+				CorefNodeData data = (CorefNodeData) model.getValue(cell);
+				Span span = data.getSpan();
+				data.setSentence(document.get(span.getSentenceIndex()));
+			}
+		}
+
+		graph.moveCells(cells, 0, 0, true);
+	}
+
+	@Override
+	public CellBuffer exportCells(Object[] cells) {
+		return cells!=null ?
+				CellBuffer.createBuffer(cells, graph.getModel(), NODE_DATA_TYPE)
+				: CellBuffer.createBuffer(graph.getModel(),	null, NODE_DATA_TYPE);
 	}
 
 

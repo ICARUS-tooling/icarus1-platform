@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core;
@@ -88,80 +88,81 @@ import de.ims.icarus.util.mpi.ResultMessage;
 import de.ims.icarus.util.mpi.ResultMessage.ResultType;
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public abstract class Perspective implements Identifiable {
-	
+
 	public static final String CLIENT_PROPERTY_ALIGNMENT = "view:alignment"; //$NON-NLS-1$
-	
+
 	ActionManager actionManager;
 	FrameDelegate frameDelegate;
-	
+
 	protected final Set<Extension> connectedViews = new HashSet<>();
-	
+
 	protected final Map<Extension, View> activatedViews = new HashMap<>();
-	
+
 	protected final Map<Extension, ViewContainer> containers = new HashMap<>();
-	
+
 	protected final Set<View> views = new HashSet<>();
-	
+
 	private View activeView = null;
-	
+
 	private Extension extension;
-	
+
 	private Identity identity;
-	
+
 	protected AreaLayout areaLayout;
-	
+
 	/**
 	 * For security reasons we do not extend {@code EventSource} but rather
 	 * store an internal instance and forward methods we want to expose.
-	 * Since {@code EventSource} does not offer access control to methods 
+	 * Since {@code EventSource} does not offer access control to methods
 	 * like {@link EventSource#setEventsEnabled(boolean)} this is necessary
 	 * to prevent external sources from disabling event handling for us.
-	 * Implementations might reconsider about that and expose more 
+	 * Implementations might reconsider about that and expose more
 	 * functionality of the {@code EventSource} via new forwarding methods.
 	 */
 	protected final EventSource eventSource = new EventSource(this);
-	
+
 	private final EventSource broadcastEventSource = new EventSource(this);
 
 	/**
-	 * 
+	 *
 	 */
 	protected Perspective() {
 		// no-op
 	}
-	
+
 	final void setExtension(Extension extension) {
 		if(this.extension!=null && this.extension!=extension)
 			throw new IllegalStateException("Extension already defined"); //$NON-NLS-1$
-		
+
 		this.extension = extension;
 		identity = null;
 	}
-	
+
+	@Override
 	public Identity getIdentity() {
 		if(identity==null) {
 			identity = new ExtensionIdentity(getExtension());
 		}
 		return identity;
 	}
-	
+
 	public final Extension getExtension() {
 		if(extension==null)
 			throw new IllegalStateException("Extension not available yet"); //$NON-NLS-1$
-		
+
 		return extension;
 	}
-	
+
 	@Override
 	public String toString() {
 		return getExtension().getId();
 	}
-	
+
 	public final ActionManager getActionManager() {
 		if(actionManager==null) {
 			actionManager = getFrameDelegate().getActionManager();
@@ -169,19 +170,19 @@ public abstract class Perspective implements Identifiable {
 				actionManager = actionManager.derive();
 			}
 		}
-		
+
 		return actionManager;
 	}
-	
+
 	/**
 	 * Hook for subclasses to disable private action-namespace.
 	 * If this method returns {@code false} then the {@code ActionManager}
 	 * provided by the present {@code FrameDelegate} will be used {@code as-is}
-	 * otherwise a new manager will be instantiated by calling 
+	 * otherwise a new manager will be instantiated by calling
 	 * {@link ActionManager#derive()} on the one from the delegate. This way
 	 * all actions loaded by this {@code Perspective} or any of its containing
 	 * {@code View}s using the perspective's {@code ActionManager} will be private.
-	 * The default implementation returns {@code true}. 
+	 * The default implementation returns {@code true}.
 	 */
 	protected boolean usePrivateActionNamespace() {
 		return true;
@@ -198,24 +199,24 @@ public abstract class Perspective implements Identifiable {
 	 * @param container the {@code root} component of this {@code Perspective}
 	 */
 	public abstract void init(JComponent container);
-	
+
 	public boolean isClosable() {
 		for(View view : views) {
 			if(!view.isClosable()) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
-    private static final String PERMANENT_FOCUS_OWNER_PROPERTY 
+    private static final String PERMANENT_FOCUS_OWNER_PROPERTY
     		= "permanentFocusOwner";  //$NON-NLS-1$
-    
+
 	public void close() {
 		KeyboardFocusManager.getCurrentKeyboardFocusManager()
 			.removePropertyChangeListener(PERMANENT_FOCUS_OWNER_PROPERTY, focusTracker);
-		
+
 		for(View view : getViews()) {
 			try {
 				view.close();
@@ -225,7 +226,7 @@ public abstract class Perspective implements Identifiable {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the {@code View} currently available within this
 	 * {@code Perspective} that uses the given {@code id} or {@code null}
@@ -238,14 +239,29 @@ public abstract class Perspective implements Identifiable {
 	 */
 	public final View getView(String id) {
 		Exceptions.testNullArgument(id, "id"); //$NON-NLS-1$
-		
+
+		int sep = id.indexOf('@');
+		if(sep!=-1) {
+			id = id.substring(sep+1);
+		}
+
 		for(View view : views)
 			if(id.equals(view.getIdentity().getId()))
 				return view;
-		
+
 		return null;
 	}
-	
+
+	public final View getView(Extension extension) {
+		Exceptions.testNullArgument(extension, "extension"); //$NON-NLS-1$
+
+		for(View view : views)
+			if(view.getExtension()==extension)
+				return view;
+
+		return null;
+	}
+
 	/**
 	 * Searches the list of registered {@code View}s within this
 	 * {@code Perspective} for instances of the given {@code Class}
@@ -263,10 +279,10 @@ public abstract class Perspective implements Identifiable {
 		for(View view : views)
 			if(clazz.isAssignableFrom(view.getClass()))
 				result.add(view);
-			
+
 		return result;
 	}
-	
+
 	/**
 	 * Returns all the active {@code View} instances within this
 	 * {@code Perspective} as an unmodifiable {@code Collection}
@@ -276,11 +292,11 @@ public abstract class Perspective implements Identifiable {
 	public final Collection<View> getViews() {
 		return Collections.unmodifiableCollection(views);
 	}
-	
+
 	public final Collection<View> getViews(Filter filter) {
 		return CollectionUtils.filter(views, filter);
 	}
-	
+
 	/**
 	 * Returns all the {@code Extension}s that represent {@code View}s
 	 * and are currently connected to this {@code Perspective}. The
@@ -293,7 +309,7 @@ public abstract class Perspective implements Identifiable {
 	public final Collection<Extension> getConnectedViewExtensions() {
 		return Collections.unmodifiableCollection(connectedViews);
 	}
-	
+
 	/**
 	 * Resets all the {@code View} objects currently associated
 	 * with this {@code Perspective}. All catched exceptions are forwarded
@@ -307,19 +323,19 @@ public abstract class Perspective implements Identifiable {
 	 */
 	public void reset() {
 		CorruptedStateException ex = null;
-		
+
 		for(View view : getViews()) {
 			try {
 				view.reset();
 			} catch(Exception e) {
 				if(e instanceof CorruptedStateException)
 					ex = (CorruptedStateException)e;
-				
-				LoggerFactory.log(this, Level.SEVERE, 
+
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to reset view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
 			}
 		}
-		
+
 		if(ex!=null)
 			throw ex;
 	}
@@ -357,15 +373,15 @@ public abstract class Perspective implements Identifiable {
 	public void removeListener(EventListener listener, String eventName) {
 		eventSource.removeEventListener(listener, eventName);
 	}
-	
+
 	public final void openPerspective(Extension extension) throws Exception {
 		getFrameDelegate().getFrame().openPerspective(extension, false);
 	}
-	
+
 	protected Frame getFrame() {
 		return getFrameDelegate().getFrame();
 	}
-	
+
 	/**
 	 * Collects all {@code Extension}s that should be used for this perspective.
 	 * The default implementation simply adds all extensions defined for the
@@ -375,23 +391,23 @@ public abstract class Perspective implements Identifiable {
 	 */
 	protected void collectViewExtensions() {
 		PluginRegistry registry = PluginUtil.getPluginRegistry();
-		
+
 		ExtensionPoint coreViewExtPoint = registry.getExtensionPoint("de.ims.icarus.core", "View"); //$NON-NLS-1$ //$NON-NLS-2$
 		connectedViews.addAll(coreViewExtPoint.getConnectedExtensions());
-		
+
 		PluginDescriptor declaringPluginDesc = getExtension().getDeclaringPluginDescriptor();
-		
+
 		// nothing to do here if plugin does not define its own 'View' extension point
 		if(declaringPluginDesc.getExtensionPoint("View")==null) //$NON-NLS-1$
 			return;
 		// fetch connected extensions
 		ExtensionPoint declaringViewExtPoint = registry.getExtensionPoint(declaringPluginDesc.getId(), "View"); //$NON-NLS-1$
 		connectedViews.addAll(declaringViewExtPoint.getConnectedExtensions());
-		
-		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEWS_ADDED, 
+
+		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEWS_ADDED,
 				"extensions", connectedViews.toArray())); //$NON-NLS-1$
 	}
-	
+
 	protected void defaultDoLayout(JComponent root) {
 		DefaultAreaLayout layout = null;
 		if(this.areaLayout instanceof DefaultAreaLayout) {
@@ -400,58 +416,58 @@ public abstract class Perspective implements Identifiable {
 		if(layout==null) {
 			layout = new DefaultAreaLayout();
 		}
-		
+
 		layout.init(root);
-		
+
 		for(Extension extension : connectedViews) {
 			Alignment alignment = getViewAlignment(extension);
 			ViewContainer container = new ViewContainer(extension, alignment);
 			containers.put(extension, container);
-			
+
 			Extension.Parameter param = extension.getParameter("activateEarly");  //$NON-NLS-1$
 			if(param!=null && param.valueAsBoolean()) {
 				activateView(container);
 			}
-			
+
 			layout.add(container, alignment);
 		}
-		
+
 		layout.setComponentSorter(COMPONENT_SORTER);
 		layout.setContainerWatcher(viewActivater);
 		layout.setTabLocalizer(tabLocalizer);
-		
+
 		layout.doLayout();
-		
+
 		this.areaLayout = layout;
 
 		KeyboardFocusManager.getCurrentKeyboardFocusManager()
 			.addPropertyChangeListener(PERMANENT_FOCUS_OWNER_PROPERTY, focusTracker);
 	}
-	
+
 	protected Alignment getViewAlignment(Extension extension) {
 		return Alignment.parse(extension.getParameter("alignment").valueAsString()); //$NON-NLS-1$
 	}
-	
+
 	public void toggleView(View view) {
 		Extension extension = view.getExtension();
 		ViewContainer container = containers.get(extension);
 		if(container==null)
 			throw new IllegalArgumentException("View not registered to this perspective: "+view); //$NON-NLS-1$
-		
+
 		if(areaLayout==null) {
 			return;
 		}
-		
+
 		areaLayout.toggle(container);
 	}
-	
+
 	protected void focusView(final Object view) {
 		SwingUtilities.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				View v = null;
-				
+
 				if(view instanceof View) {
 					v = (View)view;
 				} else if(view instanceof String) {
@@ -459,25 +475,25 @@ public abstract class Perspective implements Identifiable {
 				} else if(view instanceof Extension) {
 					v = activatedViews.get((Extension) view);
 				}
-				
+
 				if(v!=null && views.contains(v)) {
 					v.focusView();
 				}
 			}
 		});
 	}
-	
+
 	protected Localizer tabLocalizer = new Localizer() {
-		
+
 		@Override
 		public void localize(Object item) {
 			JTabbedPane tabbedPane = (JTabbedPane) item;
-			
+
 			for(int i=0; i<tabbedPane.getTabCount(); i++) {
 				ViewContainer container = (ViewContainer) tabbedPane.getComponentAt(i);
 				try {
 					Identity identity = container.getIdentity();
-					
+
 					tabbedPane.setTitleAt(i, identity.getName());
 					tabbedPane.setToolTipTextAt(i, identity.getDescription());
 				} catch(Throwable t) {
@@ -486,9 +502,9 @@ public abstract class Perspective implements Identifiable {
 			}
 		}
 	};
-	
+
 	protected ChangeListener viewActivater = new ChangeListener() {
-		
+
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			ViewContainer container = null;
@@ -501,79 +517,79 @@ public abstract class Perspective implements Identifiable {
 			if(container!=null) {
 				activateView(container);
 			}
-			
+
 			View view = container.getView();
 			if(view!=null) {
 				view.focusView();
 			}
 		}
 	};
-	
+
 	protected InfoPanel getInfoPanel() {
 		return getFrameDelegate().getFrame().getInfoPanel(this);
 	}
-	
+
 	protected View getFocusedView() {
 		Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getPermanentFocusOwner();
 		if(focusOwner==null) {
 			return null;
 		}
-		
+
 		ViewContainer container = getContainer(focusOwner);
 		if(container==null) {
 			return null;
 		}
-		
+
 		return container.getView();
 	}
-	
+
 	/**
 	 * Checks whether the given {@code View} is the currently active
-	 * view in this {@code Perspective}. 
+	 * view in this {@code Perspective}.
 	 */
 	public boolean isActiveView(View view) {
 		if(view==null)
 			throw new NullPointerException();
-		
+
 		View focusedView = getFocusedView();
 		return view==focusedView;
 	}
-	
+
 	protected void refreshInfoPanelForView(View view) {
 		InfoPanel infoPanel = getInfoPanel();
 		if(infoPanel==null) {
 			return;
 		}
-		
+
 		infoPanel.clear();
 
 		if(view==null) {
 			return;
 		}
-		
+
 		view.refreshInfoPanel(infoPanel);
 	}
-	
+
 	public InfoPanel getInfoPanel(View view) {
 		if(!isActiveView(view)) {
 			return null;
 		}
 		return getInfoPanel();
 	}
-	
+
 	public final View getActiveView() {
 		return activeView;
 	}
-	
+
 	protected final void setActiveView(View view) {
 		if(view!=null && view==activeView) {
 			return;
 		}
-		
+
 		activeView = view;
 		refreshInfoPanelForView(view);
 	}
-	
+
 	/**
 	 * Returns the ViewContainer for the given component. Returns null
 	 * if the component is part of a component hierarchy that resides
@@ -587,40 +603,40 @@ public abstract class Perspective implements Identifiable {
 			return (ViewContainer) comp;
 		}
 		ViewContainer ancestor = (ViewContainer)SwingUtilities.getAncestorOfClass(ViewContainer.class, comp);
-		
-		// Expensive call to containsValue, but should be ok since we never have 
+
+		// Expensive call to containsValue, but should be ok since we never have
 		// more than 10 to 20 views
 		if(ancestor!=null && !containers.containsValue(ancestor)) {
 			ancestor = null;
 		}
 		return ancestor;
 	}
-	
+
 	protected PropertyChangeListener focusTracker = new PropertyChangeListener() {
-		
+
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			ViewContainer oldFocusOwner = getContainer((Component) evt.getOldValue());
 			ViewContainer newFocusOwner = getContainer((Component) evt.getNewValue());
-			
+
 			if(oldFocusOwner==newFocusOwner) {
 				return;
 			}
-			
+
 			if(oldFocusOwner!=null) {
 				oldFocusOwner.setFocused(false);
 			}
-			
+
 			if(newFocusOwner!=null) {
 				newFocusOwner.setFocused(true);
 			}
-			
+
 			// Tell perspective to refresh info panel
-			View view = newFocusOwner==null ? null : newFocusOwner.getView();			
+			View view = newFocusOwner==null ? null : newFocusOwner.getView();
 			setActiveView(view);
 		}
 	};
-	
+
 	protected static final Comparator<JComponent> COMPONENT_SORTER = new Comparator<JComponent>() {
 
 		@Override
@@ -633,54 +649,54 @@ public abstract class Perspective implements Identifiable {
 			}
 			return result;
 		}
-		
+
 	};
-	
+
 	protected final void closeView(View view, boolean forceClose, boolean removeContainer) throws Exception {
 		Extension extension = view.getExtension();
 		JComponent container = containers.get(extension);
 		String viewId = view.getIdentity().getId();
-		
+
 		if(container==null)
 			throw new IllegalArgumentException("View already closed and not showing: "+view); //$NON-NLS-1$
-		
+
 		// If we are not forced to close the view
 		// let it decide for itself
 		if(!forceClose && !view.isClosable()) {
 			return;
 		}
-		
+
 		eventSource.fireEvent(new EventObject(PerspectiveEvents.CLOSE_VIEW, "id", viewId)); //$NON-NLS-1$
-		
+
 		// Save-point for exception thrown by the call
 		// to view.close() to allow for cleanup of
 		// the view's root container component.
 		// Only exceptions are handled this way, errors
 		// will just pass uncatched.
 		Exception thrown = null;
-		
+
 		// Close the view object
 		try {
 			view.close();
 		} catch(Exception e) {
 			thrown = e;
 		}
-		
+
 		if(removeContainer) {
 			// TODO remove the view's container and rearrange components if necessary
 		}
-		
+
 		eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEW_CLOSED, "id", viewId)); //$NON-NLS-1$
-		
+
 		// If closing the view yielded an error re-throw it
 		if(thrown!=null)
 			throw thrown;
 	}
-	
+
 	void reloadViewTab(View view) {
 		JComponent container = getViewContainer(view);
 		Component parent = container.getParent();
-		
+
 		if(parent instanceof JTabbedPane) {
 			JTabbedPane tabbedPane = (JTabbedPane) parent;
 			int index = tabbedPane.indexOfComponent(container);
@@ -699,93 +715,93 @@ public abstract class Perspective implements Identifiable {
 			tabbedPane.setIconAt(index, icon);
 			tabbedPane.setTitleAt(index, identity.getName());
 			tabbedPane.setToolTipTextAt(index, identity.getDescription());
-			
+
 			Component tabComponent = tabbedPane.getTabComponentAt(index);
 			if(tabComponent!=null) {
 				tabComponent.repaint();
 			}
 		}
 	}
-	
+
 	void selectViewTab(View view) {
 		JComponent container = getViewContainer(view);
 		Component parent = container.getParent();
-		
+
 		if(parent instanceof JTabbedPane) {
 			JTabbedPane tabbedPane = (JTabbedPane) parent;
 			tabbedPane.setSelectedComponent(container);
 		}
 	}
-	
+
 	JComponent getViewContainer(View view) {
 		Extension extension = view.getExtension();
 		return containers.get(extension);
 	}
-	
+
 	protected final JComponent getContainer() {
 		return getFrameDelegate().getFrame().getContainer(this);
 	}
-	
+
 	void addBroadcastListener(String eventName, EventListener listener) {
 		broadcastEventSource.addListener(eventName, listener);
 	}
-	
+
 	void removeBroadcastListener(EventListener listener) {
 		broadcastEventSource.removeEventListener(listener);
 	}
-	
+
 	void removeBroadcastListener(EventListener listener, String eventName) {
 		broadcastEventSource.removeEventListener(listener, eventName);
 	}
-	
+
 	void fireBroadcastEvent(View source, EventObject event) {
 		broadcastEventSource.fireEvent(event, source);
 	}
-	
+
 	void setFrameDelegate(FrameDelegate frameDelegate) {
 		if(this.frameDelegate!=null && this.frameDelegate!=frameDelegate)
 			throw new IllegalStateException("Already assigned to a frame!"); //$NON-NLS-1$
-		
+
 		this.frameDelegate = frameDelegate;
 	}
-	
+
 	protected final FrameDelegate getFrameDelegate() {
 		if(frameDelegate==null)
 			throw new IllegalArgumentException("No frame delegate available yet"); //$NON-NLS-1$
-		
+
 		return frameDelegate;
 	}
-	
+
 	protected void buildMenuBar(MenuDelegate delegate) {
 		// no-op
 	}
-	
+
 	protected void buildToolBar(ToolBarDelegate delegate) {
 		List<View> views = new ArrayList<>(activatedViews.values());
 		if(views.isEmpty()) {
 			return;
 		}
-		
+
 		Collections.sort(views, Identifiable.COMPARATOR);
-		
+
 		for(View view : views) {
 			try {
 				view.buildToolBar(delegate);
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to build tool-bar elements for view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
 			}
 		}
 	}
-	
+
 	protected final void activateView(ViewContainer container) {
-		Extension extension = container.getViewExtension(); 
-		View view = container.getView(); 
-		
+		Extension extension = container.getViewExtension();
+		View view = container.getView();
+
 		if(view==null && !container.isInvalid()) {
 			try {
 				eventSource.fireEvent(new EventObject(PerspectiveEvents.ACTIVATE_VIEW, "extension", extension)); //$NON-NLS-1$
-				
+
 				PluginManager pluginManager = PluginUtil.getPluginManager();
 	            // Activate plug-in that declares extension
 				pluginManager.activatePlugin(extension.getDeclaringPluginDescriptor().getId());
@@ -804,28 +820,28 @@ public abstract class Perspective implements Identifiable {
 	            initView(view, container);
 	            views.add(view);
 	            activatedViews.put(extension, view);
-	            
+
 	            reloadViewTab(view);
-	            
-	            LoggerFactory.log(this, Level.FINE, 
+
+	            LoggerFactory.log(this, Level.FINE,
 	        			"Activated view: "+extension.getId()); //$NON-NLS-1$
-	            
+
 	            eventSource.fireEvent(new EventObject(PerspectiveEvents.VIEW_ACTIVATED, "view", view)); //$NON-NLS-1$
 	        } catch (Throwable t) {
 	        	// Present the user some feedback both at logging level
 	        	// and on the container itself
-	        	LoggerFactory.log(this, Level.SEVERE, 
+	        	LoggerFactory.log(this, Level.SEVERE,
 	        			"Failed to activate view: "+extension.getId(), t); //$NON-NLS-1$
 	        	UIDummies.createDefaultErrorOutput(container, t);
 	        	container.setToolTipText("View: "+extension.getId()); //$NON-NLS-1$
 	        	container.setInvalid();
 	            return;
 	        }
-			
-	        container.setView(view); 
+
+	        container.setView(view);
 		}
 	}
-	
+
 	/**
 	 * Called after a {@code View} instance has been activated and before
 	 * notifying listeners to allow subclasses to perform implementation
@@ -839,14 +855,14 @@ public abstract class Perspective implements Identifiable {
 	protected void initView(View view, ViewContainer container) {
 		view.init(container);
 	}
-	
+
 	protected final ResultMessage sendRequest(Object sender, Object perspective, Object receiver, Message message) {
 		Perspective target = getFrameDelegate().getFrame().ensurePerspective(perspective);
-		
+
 		if(target==null) {
 			return message.unknownReceiver(this);
 		}
-		
+
 		try {
 			return target.handleRequest(sender, receiver, message);
 		} catch (Exception e) {
@@ -857,13 +873,13 @@ public abstract class Perspective implements Identifiable {
 	protected ResultMessage handleRequest(Object sender, Object receiver, Message message) throws Exception {
 		return sendRequest(sender, receiver, message);
 	}
-	
+
 	final ResultMessage sendRequest(Object sender, Object receiver, Message message) {
 		if(message==null)
 			throw new NullPointerException("Invalid message"); //$NON-NLS-1$
-		
+
 		ResultMessage result = null;
-		
+
 		if(SwingUtilities.isEventDispatchThread()) {
 			result = dispatchRequest(sender, receiver, message);
 		} else {
@@ -875,15 +891,15 @@ public abstract class Perspective implements Identifiable {
 				result = new ResultMessage(this, message, e);
 			}
 		}
-		
+
 		return result;
 	}
-	
-	private ResultMessage dispatchRequest(Object sender, Object receiver, Message message) {		
+
+	private ResultMessage dispatchRequest(Object sender, Object receiver, Message message) {
 		Collection<View> receivers = new LinkedList<>();
-		
+
 		ViewFilter filter = ViewFilter.emptyFilter;
-		
+
 		// Translate receiver argument into a ViewFilter
 		if(receiver instanceof ViewFilter) {
 			filter = (ViewFilter) receiver;
@@ -898,14 +914,14 @@ public abstract class Perspective implements Identifiable {
 		} else if(receiver != null) {
 			throw new NullPointerException("Invalid receiver: "+receiver); //$NON-NLS-1$
 		}
-		
+
 		for(Extension extension : connectedViews) {
 			View view = activatedViews.get(extension);
-			
+
 			if(view==sender) {
 				continue;
 			}
-			
+
 			if(filter.filter(extension, view)) {
 				// If view is to be included but not yet activated
 				// perform activation now
@@ -913,58 +929,58 @@ public abstract class Perspective implements Identifiable {
 					activateView(containers.get(extension));
 					view = activatedViews.get(extension);
 				}
-				
+
 				// Include only loaded and valid view instances
 				if(view!=null) {
 					receivers.add(view);
 				}
 			}
 		}
-		
+
 		// Tell the sender if we couldn't find suitable receivers
 		if(receivers.isEmpty()) {
 			return new ResultMessage(this, ResultType.UNKNOWN_RECEIVER, message, null, null);
 		}
-		
+
 		List<ResultMessage> results = new ArrayList<>();
 		for(View view : receivers) {
 			try {
 				results.add(view.handleRequest(message));
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to dispatch message to view: "+view.getIdentity().getId(), e); //$NON-NLS-1$
 				results.add(new ResultMessage(this, message, e));
 			}
 		}
-		
+
 		// Depending on the number of results either return the one
 		// existing result or wrap them all in a multi-result
 		if(results.size()==1) {
 			return results.get(0);
 		} else {
-			
+
 			// Find the 'best' result type among all results
 			ResultType dominatingType = ResultType.REQUEST_FAILED;
 			for(ResultMessage result : results) {
 				if(result.getType().compareTo(dominatingType)<0) {
 					dominatingType = result.getType();
 				}
-				
-				// Best possible result type encountered 
+
+				// Best possible result type encountered
 				// -> no need to search further
 				if(dominatingType==ResultType.REQUEST_SUCCESSFUL) {
 					break;
 				}
 			}
-			
+
 			return new MultiResultMessage(this, dominatingType, message, results);
 		}
 	}
-	
+
 	// Eclipse view highlight color: r=160, g=191, b=244
 	private static Color defaultHighlightColor = new Color(160, 191, 244);
 
-	
+
 	/**
 	 * Searches the component hierarchy of the given
 	 * {@code JComponent} for one that serves as container
@@ -972,7 +988,7 @@ public abstract class Perspective implements Identifiable {
 	 */
 	public static View findView(Component comp) {
 		Exceptions.testNullArgument(comp, "comp"); //$NON-NLS-1$
-		
+
 		while(!(comp instanceof ViewContainer)) {
 			Component parent = comp.getParent();
 			if(parent instanceof JComponent)
@@ -980,12 +996,12 @@ public abstract class Perspective implements Identifiable {
 			else
 				return null;
 		}
-		
+
 		return (comp instanceof ViewContainer) ? ((ViewContainer)comp).getView() : null;
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -993,7 +1009,7 @@ public abstract class Perspective implements Identifiable {
 	protected class ViewContainer extends JPanel implements Identifiable, Border {
 
 		private static final long serialVersionUID = -2139304858671288495L;
-		
+
 		private final Extension viewExtension;
 		private Alignment alignment;
 		private View view;
@@ -1004,27 +1020,27 @@ public abstract class Perspective implements Identifiable {
 		public ViewContainer(Extension viewExtension, Alignment alignment) {
 			if(viewExtension==null)
 				throw new NullPointerException("Invalid view extension"); //$NON-NLS-1$
-			
+
 			this.viewExtension = viewExtension;
 			this.alignment = alignment;
-			
+
 			setBorder(this);
-			
+
 			init();
 		}
-		
+
 		public ViewContainer(Extension viewExtension) {
 			this(viewExtension, null);
 		}
-		
+
 		protected void init() {
 			Extension.Parameter param = viewExtension.getParameter("requiresTab"); //$NON-NLS-1$
 			if(param!=null) {
-				putClientProperty(DefaultAreaLayout.REQUIRES_TAB_PROPERTY, 
+				putClientProperty(DefaultAreaLayout.REQUIRES_TAB_PROPERTY,
 						param.valueAsBoolean());
 			}
 		}
-		
+
 		public Priority getPriority() {
 			Extension.Parameter param = viewExtension.getParameter("priority");  //$NON-NLS-1$
 			return param==null ? Priority.STANDARD : Priority.parse(param.valueAsString());
@@ -1057,7 +1073,7 @@ public abstract class Perspective implements Identifiable {
 		public void setAlignment(Alignment alignment) {
 			if(this.alignment!=null && this.alignment!=alignment)
 				throw new IllegalArgumentException("Alignment already defined"); //$NON-NLS-1$
-			
+
 			this.alignment = alignment;
 		}
 
@@ -1067,7 +1083,7 @@ public abstract class Perspective implements Identifiable {
 		public void setView(View view) {
 			if(this.view!=null && this.view!=view)
 				throw new IllegalArgumentException("View already defined"); //$NON-NLS-1$
-			
+
 			this.view = view;
 		}
 
@@ -1113,7 +1129,7 @@ public abstract class Perspective implements Identifiable {
 				repaint();
 			}
 		}
-		
+
 		/**
 		 * @see java.awt.Component#getName()
 		 */
@@ -1121,24 +1137,24 @@ public abstract class Perspective implements Identifiable {
 		public String getName() {
 			return viewExtension==null ? super.getName() : viewExtension.getId();
 		}
-		
+
 		/**
 		 * @see javax.swing.border.Border#paintBorder(java.awt.Component, java.awt.Graphics, int, int, int, int)
 		 */
 		@Override
 		public void paintBorder(Component c, Graphics g, int x, int y,
 				int w, int h) {
-			
+
 			Color col = isFocused() ? UIManager.getColor("TabbedPane.focus") : getBackground(); //$NON-NLS-1$
 			if(Color.black.equals(col)) {
 				col = defaultHighlightColor;
 			}
-			
+
 			g.setColor(col);
-			
+
 			int b = y+h-1;
 			int r = x+w-1;
-			
+
 			// top
 			g.drawLine(x, y, r, y);
 			g.drawLine(x, y+1, r, y+1);
@@ -1151,7 +1167,7 @@ public abstract class Perspective implements Identifiable {
 			// bottom
 			g.drawLine(x, b, r, b);
 			g.drawLine(x, b-1, r, b-1);
-			
+
 			// Only separate from header area if we are inside of a tabbed pane
 			if(!isFocused() && getParent() instanceof JTabbedPane) {
 				g.setColor(Color.black);
@@ -1174,21 +1190,21 @@ public abstract class Perspective implements Identifiable {
 		public boolean isBorderOpaque() {
 			return true;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "ViewContainer: "+getName(); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	private class RequestDispatcher implements Runnable {
-		
+
 		private ResultMessage result;
 
 		private final Object receiver;
@@ -1212,14 +1228,14 @@ public abstract class Perspective implements Identifiable {
 				result = new ResultMessage(this, message, e);
 			}
 		}
-		
+
 		ResultMessage getResult() {
 			return result;
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *

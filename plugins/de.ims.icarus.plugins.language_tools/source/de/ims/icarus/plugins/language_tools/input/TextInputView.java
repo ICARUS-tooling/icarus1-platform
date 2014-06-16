@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.language_tools.input;
@@ -50,11 +50,11 @@ import de.ims.icarus.util.mpi.ResultMessage;
  *
  */
 public class TextInputView extends View {
-	
+
 	protected JTextArea inputArea;
-	
+
 	protected JToolBar toolBar;
-	
+
 	public TextInputView() {
 		// no-op
 	}
@@ -64,19 +64,19 @@ public class TextInputView extends View {
 	 */
 	@Override
 	public void init(JComponent container) {
-		
+
 		// Load actions
 		if(!defaultLoadActions(TextInputView.class, "text-input-view-actions.xml")) { //$NON-NLS-1$
 			return;
 		}
-		
+
 		inputArea = new JTextArea();
 		inputArea.setLineWrap(true);
 		inputArea.setWrapStyleWord(true);
 		inputArea.setBorder(UIUtil.defaultContentBorder);
 		UIUtil.createUndoSupport(inputArea, 20);
 		UIUtil.addPopupMenu(inputArea, UIUtil.createDefaultTextMenu(inputArea, true));
-		
+
 		ActionManager actionManager = getDefaultActionManager();
 		ActionMap actionMap = inputArea.getActionMap();
 		actionManager.addAction("plugins.languageTools.textInputView.undoAction", actionMap.get("undo")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,34 +86,34 @@ public class TextInputView extends View {
 		actionManager.addAction("plugins.languageTools.textInputView.cutAction", actionMap.get(DefaultEditorKit.cutAction)); //$NON-NLS-1$
 		actionManager.addAction("plugins.languageTools.textInputView.copyAction", actionMap.get(DefaultEditorKit.copyAction)); //$NON-NLS-1$
 		actionManager.addAction("plugins.languageTools.textInputView.pasteAction", actionMap.get(DefaultEditorKit.pasteAction)); //$NON-NLS-1$
-				
+
 		JScrollPane scrollPane = new JScrollPane(inputArea);
 		scrollPane.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
-		
+
 		toolBar = createToolBar().buildToolBar();
-		
+
 		container.setLayout(new BorderLayout());
 		container.add(toolBar, BorderLayout.NORTH);
 		container.add(scrollPane, BorderLayout.CENTER);
-		
+
 		registerActionCallbacks();
-		
+
 		refreshActions();
 	}
-	
+
 	protected void refreshActions() {
 		// no-op
 	}
-	
+
 	protected void registerActionCallbacks() {
 		// for subclasses
 	}
-	
+
 	protected ActionComponentBuilder createToolBar() {
 		ActionComponentBuilder builder = new ActionComponentBuilder(getDefaultActionManager());
 		builder.setActionListId("plugins.languageTools.textInputView.toolBarList"); //$NON-NLS-1$
-		
+
 		return builder;
 	}
 
@@ -152,5 +152,12 @@ public class TextInputView extends View {
 		} else {
 			return message.unknownRequestResult(this);
 		}
+	}
+
+	public void setText(String text) {
+		if (text == null)
+			throw new NullPointerException("Invalid text"); //$NON-NLS-1$
+
+		inputArea.setText(text);
 	}
 }

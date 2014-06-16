@@ -136,6 +136,10 @@
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.clearFilterAction" />
 		<separator />
 		<item type="action" value="plugins.coref.coreferenceDocumentPresenter.refreshAction" />
+		<separator />
+		<item type="custom" value="showInMenu" />
+		<separator />
+		<item type="custom" value="sendToMenu" />
 	</action-list>
 	
 </actions>

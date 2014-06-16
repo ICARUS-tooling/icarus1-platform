@@ -19,11 +19,17 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.graph;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceData;
@@ -35,30 +41,32 @@ import de.ims.icarus.plugins.jgraph.cells.GraphNode;
  * @version $Id$
  *
  */
+@XmlRootElement(name="coref-node")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 
 	private static final long serialVersionUID = 857912220195344541L;
-	
-	protected CoreferenceData sentence;
-	
-	protected String label;
 
+	@XmlTransient
+	protected CoreferenceData sentence;
+
+	@XmlAttribute(required=false)
 	private CorefErrorType type;
 
 	protected CorefNodeData() {
 		// no-op
 	}
-	
+
 	public CorefNodeData(Span span, CoreferenceData sentence) {
 		super(span);
 		setSentence(sentence);
 	}
-	
+
 	public CorefNodeData(Span span, CoreferenceData sentence, CorefErrorType type) {
 		super(span);
 		setSentence(sentence);
 	}
-	
+
 	public CorefNodeData(Span span, CoreferenceData sentence, CorefErrorType type, boolean gold) {
 		super(span, gold);
 		setSentence(sentence);
@@ -102,7 +110,7 @@ public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
 	public void setSentence(CoreferenceData sentence) {
 		if(sentence==null)
 			throw new NullPointerException("Invalid sentence"); //$NON-NLS-1$
-		
+
 		this.sentence = sentence;
 		label = null;
 	}

@@ -23,41 +23,14 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.test.member;
-
-import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.MemberType;
+package de.ims.icarus.util;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class MemberDummy implements CorpusMember {
+public interface Collector<E extends Object> {
 
-	private final long id;
-
-	public MemberDummy(long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
-	 */
-	@Override
-	public Corpus getCorpus() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
-	 */
-	@Override
-	public MemberType getMemberType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	void collect(E item);
 }

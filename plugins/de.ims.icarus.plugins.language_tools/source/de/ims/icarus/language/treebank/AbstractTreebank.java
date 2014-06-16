@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Icon;
 import javax.swing.event.ChangeEvent;
@@ -71,10 +72,26 @@ public abstract class AbstractTreebank {
 
 	protected List<ChangeListener> changeListeners;
 
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	/**
+	 * @see Treebank#destroy()
+	 */
+	public void destroy() {
+		if(!destroyed.compareAndSet(isDestroyed(), true))
+			throw new IllegalStateException("Treebank already destroyed: "+this); //$NON-NLS-1$
+		free();
+	}
+
+	public abstract void free();
+
+	public boolean isDestroyed() {
+		return destroyed.get();
 	}
 
 	public boolean isEditable() {

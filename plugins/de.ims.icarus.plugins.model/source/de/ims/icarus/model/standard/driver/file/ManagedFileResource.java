@@ -43,6 +43,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
+import de.ims.icarus.model.io.SynchronizedAccessor;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
@@ -344,6 +345,8 @@ public abstract class ManagedFileResource {
 
 	public interface BlockCache {
 
+		public static final int MIN_CAPACITY = 100;
+
 		/**
 		 * Lookup the block stored for the specified {@code id}. If the cache
 		 * does not contain such a block, return {@code null}.
@@ -359,6 +362,7 @@ public abstract class ManagedFileResource {
 		 *
 		 * @param block The block that was pushed out of the cache or {@code null}
 		 * @param id
+		 * @throws IllegalStateException if the supplied block is already present in the cache
 		 */
 		Block addBlock(Block block, int id);
 
@@ -372,5 +376,110 @@ public abstract class ManagedFileResource {
 		 * {@link #open()} gets called.
 		 */
 		void close();
+	}
+
+	/**
+	 * Provides a basic implementation for synchronized read access to the data in
+	 * the hosting {@link ManagedFileResource}. Creating an instance of this accessor
+	 * will automatically increment the resource's use counter and closing it will
+	 * then again decrement the counter.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 * @param <T> The source type of the accessor
+	 */
+	protected class ReadAccessor<T extends Object> implements SynchronizedAccessor<T> {
+
+		protected ReadAccessor() {
+			incrementUseCount();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#getSource()
+		 */
+		@SuppressWarnings("unchecked")
+		@Override
+		public T getSource() {
+			return (T) ManagedFileResource.this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#begin()
+		 */
+		@Override
+		public void begin() {
+			getReadLock().lock();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#end()
+		 */
+		@Override
+		public void end() {
+			getReadLock().unlock();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#close()
+		 */
+		@Override
+		public void close() throws ModelException {
+			decrementUseCount();
+		}
+
+	}
+
+
+	/**
+	 * Provides a basic implementation for synchronized write access to the data in
+	 * the hosting {@link ManagedFileResource}. Creating an instance of this accessor
+	 * will automatically increment the resource's use counter and closing it will
+	 * then again decrement the counter.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 * @param <T> The source type of the accessor
+	 */
+	protected class WriteAccessor<T extends Object> implements SynchronizedAccessor<T> {
+
+		protected WriteAccessor() {
+			incrementUseCount();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#getSource()
+		 */
+		@SuppressWarnings("unchecked")
+		@Override
+		public T getSource() {
+			return (T) ManagedFileResource.this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#begin()
+		 */
+		@Override
+		public void begin() {
+			getWriteLock().lock();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#end()
+		 */
+		@Override
+		public void end() {
+			getWriteLock().unlock();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.io.SynchronizedAccessor#close()
+		 */
+		@Override
+		public void close() throws ModelException {
+			decrementUseCount();
+		}
+
 	}
 }

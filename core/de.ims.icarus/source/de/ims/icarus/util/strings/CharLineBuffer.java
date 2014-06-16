@@ -225,7 +225,7 @@ public class CharLineBuffer extends Splitable {
 	 */
 	@Override
 	public Cursor subSequence(int begin, int end) {
-		return getCursor0(begin, end);
+		return getCursor0(begin, end-1);
 	}
 
 	public Cursor subSequence(int begin) {
@@ -313,7 +313,7 @@ public class CharLineBuffer extends Splitable {
 		 */
 		@Override
 		public Cursor subSequence(int start, int end) {
-			return getCursor0(index0+start, index0+end);
+			return getCursor0(index0+start, index0+end-1);
 		}
 
 		/**

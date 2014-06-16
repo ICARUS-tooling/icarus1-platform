@@ -56,14 +56,24 @@
 		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL09SentenceDataPredictedReader" />
 	</extension>
 	
-	<extension id="CONLL06SentenceDataReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+	<extension id="CONLL06FineSentenceDataReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
 		<doc>
 			<doc-text>
-				TODO
+				Reader for the CoNLL 2006 Shared Task Format, using the 'fine-grained' column for part-of-speech tags.
 			</doc-text>
 		</doc>
-		<parameter id="name" value="CoNLL 06 Reader" />
-		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL06SentenceDataReader" />
+		<parameter id="name" value="CoNLL 06 Reader (fine-grained PoS)" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL06FineSentenceDataReader" />
+	</extension>
+	
+	<extension id="CONLL06CourseSentenceDataReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+		<doc>
+			<doc-text>
+				Reader for the CoNLL 2006 Shared Task Format, using the 'course-grained' column for part-of-speech tags.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="CoNLL 06 Reader (course-grained PoS)" />
+		<parameter id="class" value="de.ims.icarus.language.dependency.conll.CONLL06CourseSentenceDataReader" />
 	</extension>
 	
 	<!-- HELPERS -->

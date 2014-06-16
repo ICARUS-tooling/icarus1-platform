@@ -99,6 +99,7 @@ import de.ims.icarus.util.annotation.HighlightType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.util.transfer.ConsumerMenu;
 
 
 /**
@@ -119,6 +120,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 	protected static final String configPath = "plugins.coref.appearance.text"; //$NON-NLS-1$
 
 	protected ActionManager actionManager;
+	protected ConsumerMenu consumerMenu;
 	protected JPopupMenu popupMenu;
 
 	protected Handler handler;
@@ -241,6 +243,10 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		}
 
 		return sharedActionManager;
+	}
+
+	protected ConsumerMenu createConsumerMenu() {
+		return new ConsumerMenu(this);
 	}
 
 	protected ActionManager getActionManager() {
@@ -508,6 +514,18 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		return new SpanFilters.ClusterIdFilter(span.getClusterId());
 	}
 
+	protected Options createPopupOptions() {
+		Options options = new Options();
+
+		if(consumerMenu==null) {
+			consumerMenu = createConsumerMenu();
+		}
+
+		options.put("sendToMenu", consumerMenu); //$NON-NLS-1$
+
+		return options;
+	}
+
 	protected void showPopup(MouseEvent trigger) {
 		if(contentPanel==null)
 			return;
@@ -515,7 +533,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		if(popupMenu==null) {
 			// Create new popup menu
 
-			Options options = new Options();
+			Options options = createPopupOptions();
 			popupMenu = getActionManager().createPopupMenu(
 					"plugins.coref.coreferenceDocumentPresenter.popupMenuList", options); //$NON-NLS-1$
 
@@ -531,7 +549,20 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 		if(popupMenu!=null) {
 			refreshActions();
 
+			preparePopupMenu();
+
 			popupMenu.show(textPane, trigger.getX(), trigger.getY());
+		}
+	}
+
+	protected void preparePopupMenu() {
+		String text = textPane.getSelectedText();
+		if(text==null || text.isEmpty()) {
+			consumerMenu.setEnabled(false);
+		} else {
+			ContentType contentType = ContentTypeRegistry.getInstance().getType("StringContentType"); //$NON-NLS-1$
+			consumerMenu.refresh(contentType, text);
+			consumerMenu.setEnabled(true);
 		}
 	}
 

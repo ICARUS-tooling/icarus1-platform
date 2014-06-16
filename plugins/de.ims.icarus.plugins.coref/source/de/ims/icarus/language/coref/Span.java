@@ -210,6 +210,39 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		}
 	}
 
+	public static Span parse(String s) {
+		return parse(s, 0);
+	}
+
+	public static Span parse(String s, int from) {
+		if(s==null || s.isEmpty())
+			throw new NullPointerException("Invalid string"); //$NON-NLS-1$
+
+		if(s.startsWith("ROOT")) { //$NON-NLS-1$
+			return getROOT();
+		} else {
+			int tabIndex = s.indexOf(TAB_CHAR, from);
+			if(tabIndex==-1) {
+				tabIndex = s.length();
+			}
+
+			Matcher m = getMatcher(s);
+			if(!m.find())
+				throw new IllegalArgumentException("Unrecognized format for span: "+s); //$NON-NLS-1$
+
+			Span span = new Span();
+			span.setSentenceIndex(StringPrimitives.parseInt(s, m.start(1), m.end(1)-1));
+			span.setBeginIndex(StringPrimitives.parseInt(s, m.start(2), m.end(2)-1)-1);
+			span.setEndIndex(StringPrimitives.parseInt(s, m.start(3), m.end(3)-1)-1);
+
+			if(tabIndex<s.length()-1) {
+				span.setProperties(CorefProperties.parse(s, tabIndex+1));
+			}
+
+			return span;
+		}
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Span) {

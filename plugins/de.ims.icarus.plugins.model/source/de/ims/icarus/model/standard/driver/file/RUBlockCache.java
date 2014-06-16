@@ -29,6 +29,15 @@ import de.ims.icarus.model.standard.driver.file.ManagedFileResource.Block;
 import de.ims.icarus.model.standard.driver.file.ManagedFileResource.BlockCache;
 
 /**
+ * Implements a cache with a removal strategy based on the recent usage of blocks.
+ * Each time a block is added or requested it gets pushed to the head of the internal
+ * linked list of entries. When the cache is full and needs to make space for new entries
+ * it will remove either the least or most recently used entry, depending on the chosen
+ * strategy. The entry storage is built as a hash table, making all cache operations
+ * perform in constant time (with the exception of occasional rehashing when the current
+ * buffer storage needs to be expanded until the specified cache capacity is reached, at
+ * which point removal of previously used entries will begin).
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -36,6 +45,13 @@ import de.ims.icarus.model.standard.driver.file.ManagedFileResource.BlockCache;
 public class RUBlockCache implements BlockCache {
 
 	private Entry[] table;
+	private int capacity;
+	private int count;
+	private int threshold;
+
+	private final boolean isLRU;
+
+	private final Entry root;
 
 	private static class Entry {
 
@@ -50,6 +66,28 @@ public class RUBlockCache implements BlockCache {
 
 		// Links for the linked list
 		Entry _next, _previous;
+
+		Entry(int key, Block block, Entry next) {
+			this.key = key;
+			this.block = block;
+			this.next = next;
+		}
+	}
+
+	private RUBlockCache(boolean lru) {
+		isLRU = lru;
+
+		root = new Entry(0, null, null);
+		root._next = root;
+		root._previous = root;
+	}
+
+	public static RUBlockCache newLeastRecentlyUsedCache() {
+		return new RUBlockCache(true);
+	}
+
+	public static RUBlockCache newMostRecentlyUsedCache() {
+		return new RUBlockCache(false);
 	}
 
 	/**
@@ -57,7 +95,24 @@ public class RUBlockCache implements BlockCache {
 	 */
 	@Override
 	public Block getBlock(int id) {
-		// TODO Auto-generated method stub
+		Entry tab[] = table;
+		int index = (id & 0x7FFFFFFF) % tab.length;
+		for (Entry e = tab[index]; e != null; e = e.next) {
+			if (e.key == id) {
+
+				// Remove entry from linked list
+				e._previous._next = e._next;
+				e._next._previous = e._previous;
+
+				// Add entry to head of the list
+				e._previous = root;
+				e._next = root._next;
+				root._next._previous = e;
+				root._next = e;
+
+				return e.block;
+			}
+		}
 		return null;
 	}
 
@@ -66,8 +121,88 @@ public class RUBlockCache implements BlockCache {
 	 */
 	@Override
 	public Block addBlock(Block block, int id) {
-		// TODO Auto-generated method stub
+		Entry tab[] = table;
+		int index = (id & 0x7FFFFFFF) % tab.length;
+		for (Entry e = tab[index]; e != null; e = e.next) {
+			if (e.key == id)
+				throw new IllegalStateException("Cannot add block to cache - id already in use: "+id); //$NON-NLS-1$
+		}
+
+		Block removed = null;
+
+		if (count >= threshold && count<capacity) {
+			// Rehash the table if the threshold is exceeded
+			rehash();
+
+			tab = table;
+			index = (id & 0x7FFFFFFF) % tab.length;
+		} else if(count==capacity) {
+			// Remove another entry from the table
+
+			Entry old = isLRU ? root._previous : root._next;
+
+			removed = removeBlock(old.key);
+		}
+
+		// Creates the new entry.
+		Entry e = new Entry(id, block, tab[index]);
+		tab[index] = e;
+		count++;
+
+		// Add entry to head of the list
+		e._previous = root;
+		e._next = root._next;
+		root._next._previous = e;
+		root._next = e;
+
+		return removed;
+	}
+
+	public Block removeBlock(int id) {
+		Entry tab[] = table;
+		int index = (id & 0x7FFFFFFF) % tab.length;
+		for (Entry e = tab[index], prev = null; e != null; prev = e, e = e.next) {
+			if (e.key == id) {
+				if (prev != null) {
+					prev.next = e.next;
+				} else {
+					tab[index] = e.next;
+				}
+
+				// Remove entry from linked list
+				e._previous._next = e._next;
+				e._next._previous = e._previous;
+
+				count--;
+				Block block = e.block;
+				e.block = null;
+
+				return block;
+			}
+		}
 		return null;
+	}
+
+	private void rehash() {
+		int oldCapacity = table.length;
+		Entry oldMap[] = table;
+
+		int newCapacity = Math.min(capacity, (oldCapacity * 2) + 1);
+		Entry newMap[] = new Entry[newCapacity];
+
+		threshold = (int) (newCapacity * 0.75f);
+		table = newMap;
+
+		for (int i = oldCapacity; i-- > 0;) {
+			for (Entry old = oldMap[i]; old != null;) {
+				Entry e = old;
+				old = old.next;
+
+				int index = (e.key & 0x7FFFFFFF) % newCapacity;
+				e.next = newMap[index];
+				newMap[index] = e;
+			}
+		}
 	}
 
 	/**
@@ -75,8 +210,15 @@ public class RUBlockCache implements BlockCache {
 	 */
 	@Override
 	public void open(int capacity) {
-		// TODO Auto-generated method stub
+		if(capacity<MIN_CAPACITY)
+			throw new IllegalArgumentException("Capacity below required minimum: "+capacity); //$NON-NLS-1$
 
+		this.capacity = capacity;
+
+		int size = Math.min(MIN_CAPACITY, capacity);
+
+		table = new Entry[size];
+		threshold = (int) (size*0.75f);
 	}
 
 	/**
@@ -84,7 +226,8 @@ public class RUBlockCache implements BlockCache {
 	 */
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-
+		table = null;
+		count = 0;
+		threshold = 0;
 	}
 }

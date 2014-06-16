@@ -27,10 +27,14 @@ package de.ims.icarus.model.api.driver.indexing;
 
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.driver.IndexSet;
+import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.io.SynchronizedAccessor;
 
 /**
- * Models the read access to an {@link Index} implementation.
+ * Models the read access to an {@link Index} implementation. Note that all
+ * methods in this interface that take arrays of {@link IndexSet} instances as
+ * arguments, expect those arrays to be sorted according to the order defined by
+ * {@link IndexUtils#INDEX_SET_SORTER}!
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -40,7 +44,7 @@ public interface IndexReader extends SynchronizedAccessor<Index> {
 
 	// Single index lookups
 
-	void lookup(long sourceIndex, IndexCollector collector) throws ModelException, InterruptedException;
+	boolean lookup(long sourceIndex, IndexCollector collector) throws ModelException, InterruptedException;
 
 	IndexSet[] lookup(long sourceIndex) throws ModelException, InterruptedException;
 
@@ -51,8 +55,30 @@ public interface IndexReader extends SynchronizedAccessor<Index> {
 
 	IndexSet[] lookup(IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 
-	void lookup(IndexSet[] sourceIndices, IndexCollector collector) throws ModelException, InterruptedException;
+	boolean lookup(IndexSet[] sourceIndices, IndexCollector collector) throws ModelException, InterruptedException;
 
 	long getBeginIndex(IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 	long getEndIndex(IndexSet[] sourceIndices) throws ModelException, InterruptedException;
+
+	// Utility method for efficient reverse lookups
+
+	/**
+	 * Find the source index that maps to the specified {@code targetIndex}, restricting the
+	 * search to the closed interval {@code fromSource} to {@code toSource}. This method is
+	 * intended for use of reverse indices that are able to efficiently pin down the possible
+	 * range of source indices for a given target index and then delegate the remaining work
+	 * of the lookup to an existing index inverse to their own mapping direction.
+	 *
+	 * @param fromSource
+	 * @param toSource
+	 * @param targetIndex
+	 * @return
+	 * @throws ModelException
+	 * @throws InterruptedException
+	 */
+	long find(long fromSource, long toSource, long targetIndex) throws ModelException, InterruptedException;
+
+	IndexSet[] find(long fromSource, long toSource, IndexSet[] targetIndices) throws ModelException, InterruptedException;
+
+	boolean find(long fromSource, long toSource, IndexSet[] targetIndices, IndexCollector collector) throws ModelException, InterruptedException;
 }

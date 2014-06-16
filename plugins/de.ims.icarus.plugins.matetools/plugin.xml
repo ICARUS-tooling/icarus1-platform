@@ -126,6 +126,22 @@
 		<parameter id="class" value="de.ims.icarus.plugins.matetools.conll.CONLL09SentenceDataPredictedWriter" />
 	</extension>
 	
+	<extension id="MatetoolsParserConsumer" plugin-id="de.ims.icarus.core" point-id="Consumer">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="contentType" value="de.ims.icarus.core@StringContentType" />
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="name" value="plugins.matetools.matetoolsParserConsumer.identity.name" />
+		<parameter id="description" value="plugins.matetools.matetoolsParserConsumer.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.matetools.resources.matetools" />
+		<parameter id="class" value="de.ims.icarus.plugins.matetools.parser.MatetoolsParserConsumer" />
+		<parameter id="perspective" value="de.ims.icarus.matetools@MatetoolsParserPerspective" />
+		<parameter id="view" value="de.ims.icarus.matetools@MatetoolsParserInputView" />
+	</extension>
+	
 	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
 		<parameter id="class" value="de.ims.icarus.plugins.matetools.parser.ModelStorage" />
 	</extension>

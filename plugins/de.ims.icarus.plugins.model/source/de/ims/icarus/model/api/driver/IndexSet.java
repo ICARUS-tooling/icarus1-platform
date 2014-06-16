@@ -47,6 +47,10 @@ public interface IndexSet {
 
 	long indexAt(int index);
 
+	long firstIndex();
+
+	long lastIndex();
+
 	/**
 	 * Splits the current set of indices so that each new subset contains at most
 	 * the given number of indices. This method is forced to be implemented by actual

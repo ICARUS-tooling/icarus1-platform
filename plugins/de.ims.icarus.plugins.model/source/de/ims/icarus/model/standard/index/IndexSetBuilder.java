@@ -37,6 +37,10 @@ public class IndexSetBuilder implements IndexCollector {
 
 	private final int setSizeLimit;
 
+	public IndexSetBuilder() {
+		this(10_000);
+	}
+
 	public IndexSetBuilder(int setSizeLimit) {
 		if(setSizeLimit<1)
 			throw new IllegalArgumentException("Size limit of index sets must be greater than 0: "+setSizeLimit); //$NON-NLS-1$
@@ -49,6 +53,7 @@ public class IndexSetBuilder implements IndexCollector {
 
 	}
 
+	@Override
 	public void add(long fromIndex, long toIndex) {
 
 	}
@@ -62,6 +67,7 @@ public class IndexSetBuilder implements IndexCollector {
 
 	}
 
+	@Override
 	public void add(IndexSet[] indices) {
 
 	}

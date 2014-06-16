@@ -767,7 +767,7 @@ public class PluginExplorerView extends View {
 			try {
 				targetFile = Paths.get(location.toURI());
 			} catch (URISyntaxException ex) {
-				LoggerFactory.error(this, "Unable to convert url to path: "+location, ex);
+				LoggerFactory.error(this, "Unable to convert url to path: "+location, ex); //$NON-NLS-1$
 			}
 			// Switch to parent directory if necessary
 			if(targetFile!=null && Files.isRegularFile(targetFile)) {

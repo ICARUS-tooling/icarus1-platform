@@ -34,15 +34,15 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.Test;
 
-import de.ims.icarus.language.model.standard.manifest.OptionsManifestImpl;
-import de.ims.icarus.language.model.standard.manifest.ValueSetImpl;
-import de.ims.icarus.language.model.standard.manifest.Values;
-import de.ims.icarus.language.model.util.ValueType;
-import de.ims.icarus.language.model.xml.XmlSerializer;
-import de.ims.icarus.language.model.xml.XmlWriter;
-import de.ims.icarus.language.model.xml.sax.ManifestParser;
-import de.ims.icarus.language.model.xml.stream.XmlStreamSerializer;
 import de.ims.icarus.logging.LogReport;
+import de.ims.icarus.model.standard.manifest.OptionsManifestImpl;
+import de.ims.icarus.model.standard.manifest.ValueSetImpl;
+import de.ims.icarus.model.standard.manifest.Values;
+import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.model.xml.XmlWriter;
+import de.ims.icarus.model.xml.sax.ManifestParser;
+import de.ims.icarus.model.xml.stream.XmlStreamSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**

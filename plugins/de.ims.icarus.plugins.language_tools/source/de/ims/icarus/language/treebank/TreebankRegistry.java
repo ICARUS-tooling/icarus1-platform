@@ -331,7 +331,7 @@ public class TreebankRegistry {
 
 			// Release treebank resources
 			try {
-				treebank.free();
+				treebank.destroy();
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to free treebank: "+treebank.getName(), e); //$NON-NLS-1$
@@ -494,6 +494,22 @@ public class TreebankRegistry {
 	public static final Treebank DUMMY_TREEBANK = new Treebank() {
 
 		private Map<String, Object> properties = Collections.emptyMap();
+
+		/**
+		 * @see de.ims.icarus.language.treebank.Treebank#destroy()
+		 */
+		@Override
+		public void destroy() {
+			// no-op
+		}
+
+		/**
+		 * @see de.ims.icarus.language.treebank.Treebank#isDestroyed()
+		 */
+		@Override
+		public boolean isDestroyed() {
+			return false;
+		}
 
 		@Override
 		public int size() {

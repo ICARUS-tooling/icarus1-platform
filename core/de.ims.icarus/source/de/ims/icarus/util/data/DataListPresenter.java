@@ -31,6 +31,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
@@ -85,6 +88,7 @@ import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.transfer.ConsumerMenu;
 
 /**
  * @author Markus Gärtner
@@ -115,6 +119,9 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	protected JToggleButton widthToggleButton;
 	protected Map<Extension, Filter> filterInstances;
 	protected NavigationControl navigationControl;
+
+	protected ConsumerMenu consumerMenu;
+	protected JPopupMenu popupMenu;
 
 	protected JTextArea textArea;
 
@@ -166,6 +173,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		list.setSelectionModel(getSelectionModel());
 		list.setBorder(UIUtil.defaultContentBorder);
 		list.setTrackViewportWidth(true);
+
+		UIUtil.enableRighClickListSelection(list);
+
+		list.addMouseListener(getHandler());
 
 		return list;
 	}
@@ -671,8 +682,83 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		return filter;
 	}
 
-	protected class Handler implements ActionListener, ListSelectionListener,
+	protected JPopupMenu createPopupMenu() {
+		JPopupMenu popupMenu = new JPopupMenu();
+
+		if(consumerMenu==null) {
+			consumerMenu = createConsumerMenu();
+		}
+
+		popupMenu.add(consumerMenu);
+
+		return popupMenu;
+	}
+
+	protected ConsumerMenu createConsumerMenu() {
+		return new ConsumerMenu(this);
+	}
+
+	protected void preparePopupMenu() {
+		ContentType contentType = getContentType();
+		if(contentType==null) {
+			consumerMenu.setEnabled(false);
+			return;
+		}
+
+		Object data = list.getSelectedValue();
+		consumerMenu.setEnabled(data!=null);
+		if(data==null) {
+			return;
+		}
+
+		consumerMenu.refresh(contentType, data);
+	}
+
+	protected void showPopup(MouseEvent trigger) {
+		if(popupMenu==null) {
+			// Create new popup menu
+			popupMenu = createPopupMenu();
+
+			if(popupMenu!=null) {
+				popupMenu.pack();
+			} else {
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
+			}
+		}
+
+		if(popupMenu!=null) {
+			// TODO refresh enabled state of actions
+
+			preparePopupMenu();
+
+			popupMenu.show(list, trigger.getX(), trigger.getY());
+		}
+	}
+
+	protected class Handler extends MouseAdapter implements ActionListener, ListSelectionListener,
 			PropertyChangeListener {
+
+		protected void maybeShowPopup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				showPopup(e);
+			}
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
 
 		/**
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)

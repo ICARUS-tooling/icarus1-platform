@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 
 /**
@@ -54,7 +55,19 @@ public interface IndexManifest {
 
 	Relation getRelation();
 
-	boolean includeReverse();
+	Coverage getCoverage();
+
+	/**
+	 * If defined, returns the manifest describing the inverse index, or {@code null} otherwise.
+	 * @return
+	 */
+	IndexManifest getInverse();
+
+	/**
+	 * If this manifest describes an inverse index, returns the original index, or {@code null} otherwise.
+	 * @return
+	 */
+	IndexManifest getOriginal();
 
 	/**
 	 * @author Markus Gärtner
@@ -64,10 +77,9 @@ public interface IndexManifest {
 	public enum Relation {
 
 		/**
-		 * Elements from the source and target layer are mapped by identical index values.
-		 * This means there is no real lookup structure required and the element at index <i>i</i>
-		 * in the source layer is mapped to the element at the same index <i>i</i> in the target
-		 * layer (and therefore the same holds true for the inverse index).
+		 * Elements from the source and target layer are mapped by one by one. If the
+		 * corresponding {@code Coverage} is {@link Coverage#TOTAL_MONOTONIC} this
+		 * equals the identity function.
 		 */
 		ONE_TO_ONE,
 
@@ -76,15 +88,16 @@ public interface IndexManifest {
 		 * the target layer. Typical examples are all kinds of aggregating markable layers that
 		 * feature containers as top level elements. Possible lookup structures include span lists
 		 * (begin- and end-index for each source element) for source layers that host span elements
-		 * and complete content lists (a list of exact target indices) for non-continuous source
+		 * and complete content lists (a list of exact target indices) for non-monotonic source
 		 * layer members. While span lists are fairly easy to map to memory chunks or arrays, content
 		 * lists pose some serious drawbacks, potentially requiring an additional layer of indices to
 		 * map source elements to their respective sublist in a data block.
+		 * The corresponding index function is injective.
 		 */
 		ONE_TO_MANY,
 
 		/**
-		 * An arbitrary number of (not necessarily continuous) elements in the source layer map to
+		 * An arbitrary number of (not necessarily monotonic) elements in the source layer map to
 		 * a common member of the target layer.
 		 *
 		 * If the target elements are spans, than an efficient
@@ -97,7 +110,7 @@ public interface IndexManifest {
 		 * between required memory space to store the index information and the speed incurred by the
 		 * binary search (which serves as a constant cost factor in the performance formula).
 		 *
-		 * In the case of non-continuous elements in the target layer (e.g. clusters of source markables)
+		 * In the case of non-monotonic elements in the target layer (e.g. clusters of source markables)
 		 * the above technique fails and it might be required to store a dedicated target index value for
 		 * each source element.
 		 */
@@ -120,7 +133,7 @@ public interface IndexManifest {
 		 * is possible due to the sorted nature of top-level layer elements and the sorting rules for spans
 		 * (span locality).
 		 *
-		 * For non-continuous target elements the rules for the {@link #ONE_TO_MANY} relation apply.
+		 * For non-monotonic target elements the rules for the {@link #ONE_TO_MANY} relation apply.
 		 */
 		MANY_TO_MANY;
 
@@ -142,6 +155,76 @@ public interface IndexManifest {
 			default:
 				return this;
 			}
+		}
+	}
+
+	/**
+	 * Describes the areal coverage of the target layer's index space. This information
+	 * is intended to be exploited by {@code Index} implementations to optimize access
+	 * and lookup times. Coverage is expressed as a combination of two boolean flags,
+	 * <i>totality</i> and <i>monotonicity</i>:
+	 * <p>
+	 * <i>Totality</i> means that the available target space is completely covered by the
+	 * elements in the source layer (i.e. for every index value in the target layer there
+	 * is guaranteed to be at least one matching index value in the source layer, meaning
+	 * the index implementation describes an surjective function).
+	 * <p>
+	 * <i>Monotonicity</i> of an index is given, when for any two distinct source indices the
+	 * respective collections of target indices are also distinct (i.e. the index describes
+	 * an injective function). In addition the index function preserves order relations on both
+	 * index value spaces. For any two source index values {@code j} and {@code k}
+	 * with <tt>j &lt; k</tt> the corresponding target {@code IndexSet}s {@code t(j)} and {@code t(k)}
+	 * are also ordered <tt>t(j) &lt; t(k)</tt> according to {@link IndexUtils#INDEX_SET_SORTER}.
+	 * Note that this means target index collections for continuous source indices are again
+	 * a continuous subset of the target value space.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public enum Coverage {
+
+		/**
+		 * The entire target index space is covered, but the mapped areas might overlap or be
+		 * in a somewhat "random" fashion.
+		 */
+		TOTAL(true, false),
+
+		/**
+		 * No exploitable patterns available in the way of index mapping.
+		 */
+		PARTIAL(false, false),
+
+		/**
+		 *
+		 */
+		MONOTONIC(false, true),
+
+		/**
+		 *
+		 */
+		TOTAL_MONOTONIC(true, true),
+		;
+
+		private final boolean total, monotonic;
+
+		private Coverage(boolean total, boolean monotonic) {
+			this.total = total;
+			this.monotonic = monotonic;
+		}
+
+		/**
+		 * @return the total
+		 */
+		public boolean isTotal() {
+			return total;
+		}
+
+		/**
+		 * @return the monotonic
+		 */
+		public boolean isMonotonic() {
+			return monotonic;
 		}
 	}
 }

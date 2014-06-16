@@ -25,11 +25,11 @@
  */
 package de.ims.icarus.language.model.test.dummy;
 
-import de.ims.icarus.language.model.api.manifest.AnnotationManifest;
-import de.ims.icarus.language.model.api.manifest.ValueRange;
-import de.ims.icarus.language.model.api.manifest.ValueSet;
-import de.ims.icarus.language.model.standard.manifest.AnnotationManifestImpl;
-import de.ims.icarus.language.model.util.ValueType;
+import de.ims.icarus.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.model.api.manifest.ValueRange;
+import de.ims.icarus.model.api.manifest.ValueSet;
+import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
+import de.ims.icarus.model.util.ValueType;
 
 /**
  * @author Markus Gärtner
