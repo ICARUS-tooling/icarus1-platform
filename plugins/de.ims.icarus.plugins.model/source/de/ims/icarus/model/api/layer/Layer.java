@@ -44,6 +44,20 @@ public interface Layer extends NamedCorpusMember {
 	public static final MemberSet<MarkableLayer> EMPTY_BASE_SET = MemberSets.emptySet();
 
 	/**
+	 * Returns a special integer id created by the framework that is
+	 * used for fast lookup or mapping operations involving layers. Note
+	 * that such an uid is only valid for the duration of the current session.
+	 * It is not guaranteed (in fact it is very unlikely) that a layer gets
+	 * assigned the same uid across multiple sessions, since the assignment
+	 * is performed on construction time of the layer, which happens when the
+	 * user starts to work with it. The returned value is always positive and not
+	 * {@code 0}!
+	 *
+	 * @return
+	 */
+	int getUID();
+
+	/**
 	 * Returns the name of the layer. This call is typically forwarded
 	 * to the manifest that describes this layer.
 	 *

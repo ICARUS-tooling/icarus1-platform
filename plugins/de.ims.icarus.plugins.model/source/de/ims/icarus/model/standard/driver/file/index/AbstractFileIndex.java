@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.model.standard.driver.file.index;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 import de.ims.icarus.model.api.driver.Driver;
@@ -47,6 +48,11 @@ public abstract class AbstractFileIndex extends ManagedFileResource implements I
 
 	protected AbstractFileIndex(Path file, BlockCache cache, int cacheSize) {
 		super(file, cache, cacheSize);
+	}
+
+	protected static void checkInterrupted() throws InterruptedException {
+		if(Thread.interrupted())
+			throw new InterruptedException();
 	}
 
 	/**
@@ -124,5 +130,17 @@ public abstract class AbstractFileIndex extends ManagedFileResource implements I
 	@Override
 	public void close() {
 		// no-op
+	}
+
+	/**
+	 * Allows subclasses to perform compression or other means of
+	 * storage optimization. This method should only called once
+	 * an index has been completely filled with mapping data!
+	 *
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void optimize() throws IOException, InterruptedException {
+		// for subclasses
 	}
 }

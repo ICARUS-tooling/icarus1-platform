@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import de.ims.icarus.model.standard.index.SingletonIndexSet;
+import de.ims.icarus.model.standard.index.SpanIndexSet;
 
 /**
  * @author Markus Gärtner
@@ -115,10 +116,87 @@ public class IndexUtils {
 	}
 
 	public static IndexSet[] intersect(IndexSet[]...indices) {
-
 	}
 
 	public static IndexSet[] intersect(long from1, long to1, long from2, long to2) {
+		long from = Math.max(from1, from2);
+		long to = Math.min(from1, to2);
 
+		if(from>to) {
+			return EMPTY;
+		}
+
+		long count = to-from+1;
+		int chunks = (int) Math.ceil(count/(double)Integer.MAX_VALUE);
+
+		IndexSet[] result = new IndexSet[chunks];
+
+		for(int i=0; i<count; i++) {
+			long begin = from;
+			long end = Math.min(begin+Integer.MAX_VALUE, to);
+
+			result[i] = new SpanIndexSet(begin, end);
+
+			from = end+1;
+		}
+
+		return result;
+	}
+
+	public static boolean forEachSpan(IndexSet[] indices, IndexProcedure procedure) throws InterruptedException {
+		if(isContinuous(indices)) {
+			return procedure.process(firstIndex(indices), lastIndex(indices));
+		} else {
+
+			boolean result = false;
+
+			for(IndexSet set : indices) {
+				boolean b= forEachSpan(set, procedure);
+				result |= b;
+
+				if(!b) {
+					break;
+				}
+			}
+
+			return result;
+		}
+	}
+
+	public static boolean forEachSpan(IndexSet indices, IndexProcedure procedure) throws InterruptedException {
+		if(isContinuous(indices)) {
+			return procedure.process(indices.firstIndex(), indices.lastIndex());
+		} else {
+			long from = indices.firstIndex();
+			long last = from;
+
+			boolean result = false;
+
+			for(int i=1; i<indices.size(); i++) {
+				long val = indices.indexAt(i);
+
+				if(val>last+1) {
+					boolean b = procedure.process(from, last);
+					result |= b;
+
+					if(!b) {
+						break;
+					}
+
+					from = val;
+				}
+
+				last = val;
+			}
+
+			result |= procedure.process(from, last);
+
+			return result;
+		}
+	}
+
+	public interface IndexProcedure {
+
+		boolean process(long from, long to) throws InterruptedException;
 	}
 }

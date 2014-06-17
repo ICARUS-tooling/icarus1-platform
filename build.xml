@@ -5,7 +5,7 @@
 	
 	<!--Application properties -->
 	<property name="app.name" value="ICARUS" />
-	<property name="app.version" value="1.1.2" />
+	<property name="app.version" value="1.1.3" />
 	
 	<property name="guide.file" value="${basedir}/quickstart-guide/Quickstart_Guide_for_ICARUS_1.0.5.pdf" />
 
@@ -475,6 +475,22 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		</delete>
 		<antcall target="-docs" />
 
+		<!-- Prepare distribution folder -->
+		<mkdir dir="${dist.home}" />
+		<delete includeemptydirs="true">
+			<fileset dir="${dist.home}">
+				<include name="**/*" />
+			</fileset>
+		</delete>
+
+		<!-- Zip documentation and move to dist folder -->
+		<zip destfile="${dist.home}/${app.name}-doc-${app.version}.zip"
+		     duplicate="fail"
+		     update="false">
+			<fileset dir="${docs.home}" />
+		</zip>
+		<delete dir="${docs.home}" />
+
 		<!-- Zip build folder and move to dist folder -->
 		<copy todir="${build.home}/${app.name}-${app.version}">
 			<fileset dir="${build.home}">
@@ -482,12 +498,6 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 				<include name="**/*"/>
 			</fileset>
 		</copy>
-		<mkdir dir="${dist.home}" />
-		<delete includeemptydirs="true">
-			<fileset dir="${dist.home}">
-				<include name="**/*" />
-			</fileset>
-		</delete>
 		<zip destfile="${dist.home}/${app.name}-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">

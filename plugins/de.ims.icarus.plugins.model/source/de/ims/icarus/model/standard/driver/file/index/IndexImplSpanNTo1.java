@@ -143,7 +143,7 @@ public class IndexImplSpanNTo1 extends AbstractFileIndex {
 
 			Block block = getBlock(id, false);
 			if(block==null) {
-				return -1L;
+				return INVALID;
 			}
 
 			long fromSource = spanAdapter.getFrom(block.getData(), localIndex);
@@ -161,7 +161,7 @@ public class IndexImplSpanNTo1 extends AbstractFileIndex {
 				throws ModelException, InterruptedException {
 			long result = lookup0(sourceIndex);
 
-			if(result!=-1L) {
+			if(result!=INVALID) {
 				collector.add(result);
 				return true;
 			} else {
@@ -280,14 +280,14 @@ public class IndexImplSpanNTo1 extends AbstractFileIndex {
 			long spanBegin = inverseReader.getBeginIndex(targetIndex);
 			long spanEnd = inverseReader.getEndIndex(targetIndex);
 
-			if(spanBegin==-1L || spanEnd==-1L) {
-				return -1L;
+			if(spanBegin==INVALID || spanEnd==INVALID) {
+				return INVALID;
 			}
 
 			spanBegin = Math.max(spanBegin, fromSource);
 			spanBegin = Math.min(spanEnd, toSource);
 
-			return spanBegin<=spanEnd ? spanBegin : -1L;
+			return spanBegin<=spanEnd ? spanBegin : INVALID;
 		}
 
 		/**

@@ -31,6 +31,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -451,6 +453,35 @@ public final class PluginUtil {
 		ClassLoader loader = getClassLoader(extension);
 		Class<?> clazz = loader.loadClass(param.valueAsString());
 		return clazz.newInstance();
+	}
+
+	public static Object instantiate(Extension extension, Class[] signature, Object[] params) throws InstantiationException,
+			IllegalAccessException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+		if(extension==null)
+			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
+		if (signature == null)
+			throw new NullPointerException("Invalid signature");
+		if (params == null)
+			throw new NullPointerException("Invalid params");
+
+		try {
+			activatePlugin(extension);
+		} catch (PluginLifecycleException e) {
+			LoggerFactory.log(PluginUtil.class, Level.SEVERE, "Failed to activate plug-in: "+extension.getDeclaringPluginDescriptor().getId(), e); //$NON-NLS-1$
+
+			throw new IllegalStateException("Plug-in not active for extension: "+extension.getUniqueId());  //$NON-NLS-1$
+		}
+
+		Extension.Parameter param = extension.getParameter("class"); //$NON-NLS-1$
+		if(param==null)
+			throw new IllegalArgumentException("Extension does not declare class parameter: "+extension.getUniqueId()); //$NON-NLS-1$
+
+		ClassLoader loader = getClassLoader(extension);
+		Class<?> clazz = loader.loadClass(param.valueAsString());
+
+		Constructor<?> constructor = clazz.getConstructor(signature);
+
+		return constructor.newInstance(params);
 	}
 
 	public static Class<?> loadClass(Extension extension) throws ClassNotFoundException {

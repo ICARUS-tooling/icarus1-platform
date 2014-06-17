@@ -33,8 +33,10 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
 import de.ims.icarus.model.ModelException;
+import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.driver.IndexSet;
 import de.ims.icarus.model.api.driver.IndexUtils;
+import de.ims.icarus.model.api.driver.IndexUtils.IndexProcedure;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.driver.indexing.IndexCollector;
 import de.ims.icarus.model.api.driver.indexing.IndexReader;
@@ -43,6 +45,25 @@ import de.ims.icarus.model.standard.index.IndexSetBuilder;
 import de.ims.icarus.model.standard.index.SpanIndexSet;
 
 /**
+ * Implements a one-to-many index for containers of type {@link ContainerType#SPAN}.
+ * It stores the begin and end offsets for each span as a pair of either integer or long
+ * values (resulting in 8 or 16 bytes per entry). The nature of spans allows for some
+ * very efficient optimizations for the corresponding {@link IndexReader} implementations
+ * this index provides:
+ * <p>
+ * If an index function is monotonic, then the begin index of the (partially) covered target
+ * indices of a set of sorted source spans is always the target begin index of the first span
+ * (the same holds for end index values, where the last index in the last span is sued).
+ * In addition a continuous collection of spans always maps to a continuous subset of the
+ * target index space, described by the projected target indices of the collections first and
+ * last spans.
+ * <p>
+ * For reverse lookups the two {@code find} methods of the {@code IndexReader} interface are
+ * implemented to use binary search in order to pin down source spans in a predefined range.
+ * <p>
+ * The file based storage is organized in blocks with {@value #ENTRIES_PER_BLOCK} (<tt>2^14</tt>)
+ * entries each.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -122,8 +143,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#lookup(long, de.ims.icarus.model.api.driver.indexing.IndexCollector)
 		 */
 		@Override
-		public boolean lookup(long sourceIndex, IndexCollector collector)
-				throws ModelException, InterruptedException {
+		public boolean lookup(long sourceIndex, IndexCollector collector) throws ModelException {
 			int id = id(sourceIndex);
 			int localIndex = localIndex(sourceIndex);
 
@@ -145,8 +165,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#lookup(long)
 		 */
 		@Override
-		public IndexSet[] lookup(long sourceIndex) throws ModelException,
-				InterruptedException {
+		public IndexSet[] lookup(long sourceIndex) throws ModelException {
 			int id = id(sourceIndex);
 			int localIndex = localIndex(sourceIndex);
 
@@ -166,8 +185,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#getBeginIndex(long)
 		 */
 		@Override
-		public long getBeginIndex(long sourceIndex) throws ModelException,
-				InterruptedException {
+		public long getBeginIndex(long sourceIndex) throws ModelException {
 			int id = id(sourceIndex);
 			int localIndex = localIndex(sourceIndex);
 
@@ -179,13 +197,12 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#getEndIndex(long)
 		 */
 		@Override
-		public long getEndIndex(long sourceIndex) throws ModelException,
-				InterruptedException {
+		public long getEndIndex(long sourceIndex) throws ModelException {
 			int id = id(sourceIndex);
 			int localIndex = localIndex(sourceIndex);
 
 			Block block = getBlock(id, false);
-			return block==null ? -1L : spanAdapter.getTo(block.getData(), localIndex);
+			return block==null ? INVALID : spanAdapter.getTo(block.getData(), localIndex);
 		}
 
 		/**
@@ -203,6 +220,8 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		}
 
 		/**
+		 * Runs a check for interrupted thread state before processing an index set.
+		 *
 		 * @return
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#lookup(de.ims.icarus.model.api.driver.IndexSet[], de.ims.icarus.model.api.driver.indexing.IndexCollector)
 		 */
@@ -221,6 +240,8 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 							// Spans get projected on other spans
 							collector.add(getBeginIndex(indices.firstIndex()), getEndIndex(indices.lastIndex()));
 						} else {
+							checkInterrupted();
+
 							// Expensive version: traverse values and add individual target spans
 							for(int i=0; i<indices.size(); i++) {
 								long sourceIndex = indices.indexAt(i);
@@ -235,6 +256,8 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 				// Remember however, that we still have an injective index function, so no
 				// duplicate checks required!
 				for(IndexSet indices : sourceIndices) {
+					checkInterrupted();
+
 					// Expensive version: traverse values and add individual target spans
 					for(int i=0; i<indices.size(); i++) {
 						long sourceIndex = indices.indexAt(i);
@@ -250,6 +273,8 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		 * Optimized behavior in case of {@link Coverage#isMonotonic() continuous coverage}:<br>
 		 * Since
 		 *
+		 * Runs a check for interrupted thread state before processing an index set.
+		 *
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#getBeginIndex(de.ims.icarus.model.api.driver.IndexSet[])
 		 */
 		@Override
@@ -264,6 +289,8 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 				long result = Long.MAX_VALUE;
 
 				for(IndexSet indices : sourceIndices) {
+					checkInterrupted();
+
 					for(int i=0; i<indices.size(); i++) {
 						long sourceIndex = indices.indexAt(i);
 						result = Math.min(result, getBeginIndex(sourceIndex));
@@ -275,6 +302,9 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		}
 
 		/**
+		 *
+		 * Runs a check for interrupted thread state before processing an index set.
+		 *
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#getEndIndex(de.ims.icarus.model.api.driver.IndexSet[])
 		 */
 		@Override
@@ -289,6 +319,8 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 				long result = Long.MIN_VALUE;
 
 				for(IndexSet indices : sourceIndices) {
+					checkInterrupted();
+
 					for(int i=0; i<indices.size(); i++) {
 						long sourceIndex = indices.indexAt(i);
 						result = Math.max(result, getBeginIndex(sourceIndex));
@@ -299,52 +331,21 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 			}
 		}
 
+		private long translate(int id, int localIndex) {
+			return localIndex==-1 ? INVALID : id*ENTRIES_PER_BLOCK + localIndex;
+		}
+
 		/**
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#find(long, long, long)
 		 */
 		@Override
-		public long find(long fromSource, long toSource, long targetIndex)
-				throws ModelException, InterruptedException {
+		public long find(long fromSource, long toSource, long targetIndex) throws ModelException {
 			int idFrom = id(fromSource);
 			int idTo = id(toSource);
 			int localFrom = localIndex(fromSource);
 			int localTo = localIndex(toSource);
 
-			// Check whether or not the candidate space spans across multiple blocks
-			if(idFrom==idTo) {
-				// Only requires one block to be loaded
-				return find(idFrom, localFrom, localTo, targetIndex);
-			} else {
-				// Check first block
-				long result = find(idFrom, localFrom, localTo, targetIndex);
-				if(result!=-1L) {
-					return result;
-				}
-
-				// Check last block
-				result = find(idTo, localFrom, localTo, targetIndex);
-				if(result!=-1L) {
-					return result;
-				}
-
-				// Iterate intermediate blocks
-				for(int id=idFrom+1; id<idTo; id++) {
-					// Now always include the entire block to search
-					result = find(id, 0, ENTRIES_PER_BLOCK-1, targetIndex);
-					if(result!=-1L) {
-						return result;
-					}
-				}
-			}
-
-			return -1L;
-		}
-
-		private long find(int id, int localFrom, int localTo, long targetIndex) {
-
-			Block block = getBlock(id, false);
-
-			return block==null ? -1L : spanAdapter.find(block.getData(), localFrom, localTo, targetIndex);
+			return find(idFrom, idTo, localFrom, localTo, targetIndex);
 		}
 
 		/**
@@ -362,20 +363,201 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 			return builder.build();
 		}
 
+		private long find(int idFrom, int idTo, int localFrom, int localTo, long targetIndex) {
+			// Special case of a single block search
+			if(idFrom==idTo) {
+				return find0(idFrom, localFrom, localTo, targetIndex);
+			}
+
+			// Check first block
+			long result = find0(idFrom, localFrom, ENTRIES_PER_BLOCK-1, targetIndex);
+			if(result!=INVALID) {
+				return result;
+			}
+
+			// Check last block
+			result = find0(idTo, 0, localTo, targetIndex);
+			if(result!=INVALID) {
+				return result;
+			}
+
+			// Iterate intermediate blocks
+			for(int id=idFrom+1; id<idTo; id++) {
+				// Now always include the entire block to search
+				result = find0(id, 0, ENTRIES_PER_BLOCK-1, targetIndex);
+				if(result!=INVALID) {
+					return result;
+				}
+			}
+
+			return INVALID;
+		}
+
+		private long find0(int id, int localFrom, int localTo, long targetIndex) {
+
+			Block block = getBlock(id, false);
+
+			return block==null ? INVALID : translate(id, spanAdapter.find(block.getData(), localFrom, localTo, targetIndex));
+		}
+
+		private long findContinuous(int idFrom, int idTo, int localFrom, int localTo,
+				long targetBegin, long targetEnd, IndexCollector collector) {
+
+			// Find first span covering the targetBegin
+			long sourceBegin = find(idFrom, idTo, localFrom, localTo, targetBegin);
+
+			if(sourceBegin==INVALID) {
+				return INVALID;
+			}
+
+			// Refresh left end of search interval
+			idFrom = id(sourceBegin);
+			localFrom = localIndex(sourceBegin);
+
+			// Find last span covering tragetEnd
+			long sourceEnd = find(idFrom, idTo, localFrom, localTo, targetEnd);
+
+			if(sourceEnd==INVALID) {
+				return INVALID;
+			}
+
+			collector.add(sourceBegin, sourceEnd);
+
+			return sourceEnd;
+		}
+
 		/**
 		 * @return
 		 * @see de.ims.icarus.model.api.driver.indexing.IndexReader#find(long, long, de.ims.icarus.model.api.driver.IndexSet[], de.ims.icarus.model.api.driver.indexing.IndexCollector)
 		 */
 		@Override
-		public boolean find(long fromSource, long toSource,
-				IndexSet[] targetIndices, IndexCollector collector)
+		public boolean find(final long fromSource, final long toSource,
+				final IndexSet[] targetIndices, final IndexCollector collector)
 				throws ModelException, InterruptedException {
-			int idFrom = id(fromSource);
-			int idTo = id(toSource);
-			int localFrom = localIndex(fromSource);
-			int localTo = localIndex(toSource);
 
-			// TODO Auto-generated method stub
+			if(coverage.isMonotonic()) {
+
+				/*
+				 * In case of monotonic index we can adjust our search interval for
+				 * the source index space whenever we successfully resolve some
+				 * source indices. In addition the first miss is bound to cause the
+				 * entire search to fail.
+				 * each
+				 */
+
+				IndexProcedure proc = new IndexProcedure() {
+
+					int idFrom = id(fromSource);
+					int idTo = id(toSource);
+					int localFrom = localIndex(fromSource);
+					int localTo = localIndex(toSource);
+
+					long targetEnd = lastIndex(targetIndices);
+
+					@Override
+					public boolean process(long from, long to) {
+						long sourceIndex;
+
+						if(from==to) {
+							sourceIndex = find(idFrom, idTo, localFrom, localTo, from);
+							if(sourceIndex==INVALID) {
+								return false;
+							}
+
+							// Manually add mapped source index
+							collector.add(sourceIndex);
+						} else {
+							// The mapped span will already be added inside the inner method
+							sourceIndex = findContinuous(idFrom, idTo,
+									localFrom, localTo, from, to, collector);
+
+							// Here sourceIndex is the index of the last span that was found
+							if(sourceIndex==INVALID) {
+								return false;
+							}
+						}
+
+						if(sourceIndex>=toSource || getEndIndex(sourceIndex)>=targetEnd) {
+							return false;
+						} else {
+							// There has to be space left to map the remaining target indices, so
+							// reset interval begin to the next span after the current
+
+							idFrom = id(sourceIndex+1);
+							localFrom = localIndex(sourceIndex+1);
+
+							return true;
+						}
+					}
+				};
+
+				return IndexUtils.forEachSpan(targetIndices, proc);
+			} else {
+
+				/*
+				 * Non-monotonic mapping means the only way of optimizing the search
+				 * is to shrink the source interval whenever we encounter spans that
+				 * overlap with the current end of the interval.
+				 */
+
+				IndexProcedure proc = new IndexProcedure() {
+
+					int idFrom = id(fromSource);
+					int idTo = id(toSource);
+					int localFrom = localIndex(fromSource);
+					int localTo = localIndex(toSource);
+
+					long _fromSource = fromSource;
+					long _toSource = toSource;
+
+					@Override
+					public boolean process(long from, long to) {
+
+						while(from<=to) {
+							long sourceIndex = find(idFrom, idTo, localFrom, localTo, from);
+
+							if(sourceIndex==INVALID) {
+								// Continue through the search space when no match was found
+								from++;
+							} else {
+
+								collector.add(sourceIndex);
+
+								// Fetch end of span to prune some target indices
+								long spanEnd = getEndIndex(sourceIndex);
+
+								// Step forward to either the next target index or after
+								// the end of the found span, whichever is greater
+								from = Math.max(spanEnd, from)+1;
+
+								// Shrink search interval if possible
+								if(sourceIndex==_fromSource) {
+									_fromSource++;
+									idFrom = id(_fromSource);
+									localFrom = localIndex(_fromSource);
+								}
+								if(sourceIndex==_toSource) {
+									_toSource--;
+									idTo  = id(_toSource);
+									localTo = localIndex(_toSource);
+								}
+							}
+
+							// Global state check of the search window
+							if(_toSource<_fromSource) {
+								// Search space exhausted, abort future processing
+								return false;
+							}
+						}
+
+						// Only way of finishing search is exhaustion of search space,
+						// so always allow to continue here
+						return true;
+					}
+				};
+
+				return IndexUtils.forEachSpan(targetIndices, proc);
+			}
 
 		}
 

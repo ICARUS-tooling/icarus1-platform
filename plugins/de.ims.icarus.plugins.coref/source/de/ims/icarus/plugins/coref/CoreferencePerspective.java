@@ -68,7 +68,7 @@ public class CoreferencePerspective extends Perspective {
 	@Override
 	public void init(JComponent container) {
 
-		ensureExampleDocumentSet();
+//		ensureExampleDocumentSet();
 
 		collectViewExtensions();
 		defaultDoLayout(container);

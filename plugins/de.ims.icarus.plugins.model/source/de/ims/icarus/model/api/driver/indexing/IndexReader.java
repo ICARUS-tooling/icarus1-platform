@@ -42,6 +42,8 @@ import de.ims.icarus.model.io.SynchronizedAccessor;
  */
 public interface IndexReader extends SynchronizedAccessor<Index> {
 
+	public static final long INVALID = -1L;
+
 	// Single index lookups
 
 	boolean lookup(long sourceIndex, IndexCollector collector) throws ModelException, InterruptedException;
@@ -78,6 +80,19 @@ public interface IndexReader extends SynchronizedAccessor<Index> {
 	 */
 	long find(long fromSource, long toSource, long targetIndex) throws ModelException, InterruptedException;
 
+	/**
+	 * Performs a reverse lookup for a collection of target indices. Note that the {@code targetIndices}
+	 * array is required to be sorted according to {@link IndexUtils#INDEX_SET_SORTER}!
+	 *
+	 * @see #find(long, long, long)
+	 *
+	 * @param fromSource
+	 * @param toSource
+	 * @param targetIndices
+	 * @return
+	 * @throws ModelException
+	 * @throws InterruptedException
+	 */
 	IndexSet[] find(long fromSource, long toSource, IndexSet[] targetIndices) throws ModelException, InterruptedException;
 
 	boolean find(long fromSource, long toSource, IndexSet[] targetIndices, IndexCollector collector) throws ModelException, InterruptedException;

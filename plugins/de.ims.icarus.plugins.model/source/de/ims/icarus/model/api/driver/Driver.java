@@ -25,12 +25,11 @@
  */
 package de.ims.icarus.model.api.driver;
 
-import java.util.Set;
-
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.driver.indexing.Index;
+import de.ims.icarus.model.api.driver.indexing.IndexStorage;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.DriverManifest;
@@ -57,7 +56,7 @@ public interface Driver {
 	 * Returns all the indices available for the context this driver manages.
 	 * @return
 	 */
-	Set<Index> getIndices();
+	IndexStorage getIndices();
 
 	/**
 	 *
@@ -68,7 +67,7 @@ public interface Driver {
 	Index getIndex(MarkableLayer sourceLayer, MarkableLayer targetLayer);
 
 	/**
-	 * Attempts to contact whatever indexing system the driver internally uses
+	 * Attempts to contact whatever <i>content</i> indexing system the driver internally uses
 	 * and asks it to narrow down the number of potential candidates for the given
 	 * query. The query is provided in raw form since there is no a priori limitation
 	 * on what parts of a query a driver can or cannot use for indexing/filtering.
@@ -79,7 +78,8 @@ public interface Driver {
 	 * @param query the query to use in order to narrow down potential candidates
 	 * @param layer the primary layer of the vertical filter that index values of the returned
 	 * 			{@code IndexSet} array refer to.
-	 * @return
+	 * @return A collection of candidates or {@code null} if the data in the query was insufficient
+	 * 			for any sensible filtering.
 	 * @throws ModelException if the driver encountered problems while contacting the index
 	 * 			(note that incompatibility between constraints in the query and the capabilities
 	 * 			of the driver should lead the latter to ignore said constraints instead of throwing

@@ -214,6 +214,11 @@ public interface IndexManifest {
 		}
 
 		/**
+		 * <i>Totality</i> means that the available target space is completely covered by the
+		 * elements in the source layer (i.e. for every index value in the target layer there
+		 * is guaranteed to be at least one matching index value in the source layer, meaning
+		 * the index implementation describes an surjective function).
+		 *
 		 * @return the total
 		 */
 		public boolean isTotal() {
@@ -221,6 +226,15 @@ public interface IndexManifest {
 		}
 
 		/**
+		 * <i>Monotonicity</i> of an index is given, when for any two distinct source indices the
+		 * respective collections of target indices are also distinct (i.e. the index describes
+		 * an injective function). In addition the index function preserves order relations on both
+		 * index value spaces. For any two source index values {@code j} and {@code k}
+		 * with <tt>j &lt; k</tt> the corresponding target {@code IndexSet}s {@code t(j)} and {@code t(k)}
+		 * are also ordered <tt>t(j) &lt; t(k)</tt> according to {@link IndexUtils#INDEX_SET_SORTER}.
+		 * Note that this means target index collections for continuous source indices are again
+		 * a continuous subset of the target value space.
+		 *
 		 * @return the monotonic
 		 */
 		public boolean isMonotonic() {

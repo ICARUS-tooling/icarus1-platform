@@ -19,29 +19,32 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.meta;
+package de.ims.icarus.model.api.layer.info;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.meta.MetaData;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Mapping extends MetaData {
+public interface MarkableLayerInfo extends MetaData {
 
-	Container getSource();
-	
-	Container getTarget();
-	
-	Markable toSource(Markable m);
-	
-	Markable toTarget(Markable m);
-	
-	boolean isBidirectional();
+	long getMemberCount();
+
+	long getMinimumSize();
+
+	long getMaximumSize();
+
+	long getMinimumSpan();
+
+	long getMaximumSpan();
+
+	double getAverageSpan();
+
+	double getAverageSize();
 }
