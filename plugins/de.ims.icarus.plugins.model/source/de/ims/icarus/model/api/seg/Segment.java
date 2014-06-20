@@ -114,10 +114,11 @@ public interface Segment {
 	 * corpus.
 	 *
 	 * @throws ModelException
+	 * @throws InterruptedException
 	 * @throws IllegalStateException in case there are still owners that could not be made to
 	 * 			release their partial ownership of this segment
 	 */
-	void close() throws ModelException;
+	void close() throws ModelException, InterruptedException;
 
 	// Page support
 

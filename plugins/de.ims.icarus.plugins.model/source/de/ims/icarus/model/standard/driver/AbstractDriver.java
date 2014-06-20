@@ -29,9 +29,13 @@ import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.driver.Candidates;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.IndexSet;
+import de.ims.icarus.model.api.driver.indexing.Index;
+import de.ims.icarus.model.api.driver.indexing.IndexReader;
+import de.ims.icarus.model.api.driver.indexing.IndexStorage;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContextManifest;
@@ -40,7 +44,6 @@ import de.ims.icarus.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
 import de.ims.icarus.model.api.seg.Scope;
 import de.ims.icarus.model.api.seg.Segment;
-import de.ims.icarus.model.iql.Query;
 import de.ims.icarus.model.standard.driver.cache.MemberCache;
 import de.ims.icarus.model.standard.layer.CachedLayer;
 
@@ -53,6 +56,7 @@ public abstract class AbstractDriver implements Driver {
 
 	private final Context context;
 	private final DriverManifest manifest;
+	private final IndexStorage indices;
 
 	protected AbstractDriver(ContextManifest manifest, Corpus corpus) throws ModelException {
 		if (manifest == null)
@@ -62,6 +66,7 @@ public abstract class AbstractDriver implements Driver {
 
 		this.manifest = manifest.getDriverManifest();
 
+		indices = new IndexStorage();
 		context = createContext(manifest, corpus);
 	}
 
@@ -85,16 +90,21 @@ public abstract class AbstractDriver implements Driver {
 		return new ContextFactory().createContext(corpus, manifest, this);
 	}
 
-	// END LAYER CREATION
 
 	/**
-	 * @see de.ims.icarus.model.api.driver.Driver#lookup(de.ims.icarus.model.iql.Query, de.ims.icarus.model.api.layer.MarkableLayer)
+	 * @see de.ims.icarus.model.api.driver.Driver#getIndices()
 	 */
 	@Override
-	public IndexSet[] lookup(Query query, MarkableLayer layer)
-			throws ModelException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+	public IndexStorage getIndices() {
+		return indices;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.Driver#getIndex(de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.layer.MarkableLayer)
+	 */
+	@Override
+	public Index getIndex(MarkableLayer sourceLayer, MarkableLayer targetLayer) {
+		return indices.getIndex(sourceLayer, targetLayer);
 	}
 
 	/**
@@ -104,17 +114,20 @@ public abstract class AbstractDriver implements Driver {
 	public long load(IndexSet[] indices, Scope scope, ChunkStorage storage)
 			throws ModelException, InterruptedException {
 		if (indices == null)
-			throw new NullPointerException("Invalid indices");
+			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
 		if (scope == null)
-			throw new NullPointerException("Invalid scope");
+			throw new NullPointerException("Invalid scope"); //$NON-NLS-1$
 		if (storage == null)
-			throw new NullPointerException("Invalid storage");
+			throw new NullPointerException("Invalid storage"); //$NON-NLS-1$
 
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	/**
+	 * This implementation casts the given layer to {@link CachedLayer} and retrieves
+	 * its cache to forward the lookup.
+	 *
 	 * @see de.ims.icarus.model.api.driver.Driver#load(long, de.ims.icarus.model.api.layer.MarkableLayer)
 	 */
 	@Override
@@ -129,11 +142,28 @@ public abstract class AbstractDriver implements Driver {
 	 * @see de.ims.icarus.model.api.driver.Driver#getHostIndices(de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.driver.IndexSet[])
 	 */
 	@Override
-	public IndexSet[] getHostIndices(MarkableLayer targetLayer,
+	public Candidates getHostIndices(MarkableLayer targetLayer,
 			MarkableLayer sourceLayer, IndexSet[] indices)
 			throws ModelException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		Index index = getIndex(sourceLayer, targetLayer);
+
+		if(index==null)
+			throw new IllegalStateException("No index available to map from layer " //$NON-NLS-1$
+					+sourceLayer.getName()+" to target layer "+targetLayer.getName()); //$NON-NLS-1$
+
+		IndexReader reader = index.newReader();
+
+		IndexSet[] result = null;
+
+		reader.begin();
+		try {
+			result = reader.lookup(indices);
+		} finally {
+			reader.end();
+			reader.close();
+		}
+
+		return Candidates.wrap(result);
 	}
 
 	/**

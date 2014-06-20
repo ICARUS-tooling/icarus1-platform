@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.model.standard.driver.file.indexing;
 
 import static de.ims.icarus.model.api.driver.IndexUtils.firstIndex;
 import static de.ims.icarus.model.api.driver.IndexUtils.lastIndex;
@@ -127,7 +127,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.AbstractFileIndex#newWriter()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.AbstractFileIndex#newWriter()
 	 */
 	@Override
 	public IndexWriter newWriter() {
@@ -566,7 +566,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 	public class Writer extends WriteAccessor<Index> implements IndexWriter {
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.IndexWriter#add(long, long, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.IndexWriter#add(long, long, long)
 		 */
 		@Override
 		public void add(long sourceIndex, long from, long to) {
@@ -579,7 +579,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.IndexWriter#add(long, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.IndexWriter#add(long, long)
 		 */
 		@Override
 		public void add(long sourceIndex, long targetIndex) {
@@ -587,7 +587,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.IndexWriter#add(long, de.ims.icarus.model.api.driver.IndexSet)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.IndexWriter#add(long, de.ims.icarus.model.api.driver.IndexSet)
 		 */
 		@Override
 		public void add(long sourceIndex, IndexSet indices) {
@@ -598,7 +598,7 @@ public class IndexImplSpan1ToN extends AbstractFileIndex {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.IndexWriter#add(long, de.ims.icarus.model.api.driver.IndexSet[])
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.IndexWriter#add(long, de.ims.icarus.model.api.driver.IndexSet[])
 		 */
 		@Override
 		public void add(long sourceIndex, IndexSet[] indices) {

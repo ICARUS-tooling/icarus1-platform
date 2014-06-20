@@ -71,7 +71,7 @@ public interface ModifiableManifest extends Derivable {
 	 * fulfill the contract described in the {@code OptionsManifest} of this
 	 * manifest.
 	 * @throws UnsupportedOperationException if the manifest does not declare
-	 * any properties the user can modify
+	 * any properties the user can modify.
 	 */
 	void setProperty(String name, Object value);
 

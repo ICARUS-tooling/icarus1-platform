@@ -23,32 +23,25 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index.chunks;
+package de.ims.icarus.model.standard.driver.file.indexing.chunks;
 
-import java.io.Flushable;
-
-import de.ims.icarus.model.io.SynchronizedAccessor;
+import java.io.IOException;
 
 /**
- * Defines the writer interface to get data into a {@link ChunkIndex}.
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ChunkIndexWriter extends SynchronizedAccessor<ChunkIndex>, Flushable {
+public class IndexFormatException extends IOException {
 
-	/**
-	 * Changes the file id for the given {@code index} to the new value
-	 * and returns the old value if one was set.
-	 *
-	 * @param index
-	 * @param fileId
-	 * @return the value previously stored as file id for the given {@code index}
-	 */
-	int setFileId(long index, int fileId);
+	private static final long serialVersionUID = 290232354113252546L;
 
-	long setBeginOffset(long index, long offset);
+	public IndexFormatException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-	long setEndOffset(long index, long offset);
+	public IndexFormatException(String message) {
+		super(message);
+	}
+
 }

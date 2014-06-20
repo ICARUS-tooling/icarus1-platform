@@ -144,6 +144,20 @@ public enum ModelError {
 	 * not support client originated write operations on the index!
 	 */
 	DRIVER_INDEX_WRITE_VIOLATION(402),
+
+	/**
+	 * A driver implementation failed to create a proper checksum for an index or content file.
+	 */
+	DRIVER_CHECKSUM_FAIL(403),
+
+	//**************************************************
+	//       5xx  SEGMENT ERRORS
+	//**************************************************
+
+	/**
+	 * Closing a segment failed due to some owner not being able to release its lock when asked.
+	 */
+	SEGMENT_OWNED(501),
 	;
 
 	private final int errorCode;

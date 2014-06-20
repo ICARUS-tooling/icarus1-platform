@@ -347,4 +347,10 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * and the layer is not part of this corpus
 	 */
 	Set<MetaData> getMetaData(ContentType type, Layer layer);
+
+	/**
+	 * Called by the framework when the corpus gets unloaded to signal that
+	 * it should free all internal resources and close drivers and other utility modules.
+	 */
+	void close();
 }

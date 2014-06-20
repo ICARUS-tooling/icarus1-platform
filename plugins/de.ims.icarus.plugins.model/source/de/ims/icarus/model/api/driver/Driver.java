@@ -87,18 +87,21 @@ public interface Driver {
 	 * @throws InterruptedException
 	 * @throws NullPointerException if either one of the {@code query} or {@code scope} arguments is {@code null}
 	 */
-	IndexSet[] lookup(Query query, MarkableLayer layer) throws ModelException, InterruptedException;
+	Candidates lookup(Query query, MarkableLayer layer) throws ModelException, InterruptedException;
 
 	/**
-	 * Synchronously attempts to load the given set of indices referencing chunks in the primary layer of the
-	 * supplied {@code Scope}. The driver is responsible for translating the scope related indices into indices
-	 * of the respective layer group and load chunks of that group. Note that this method does automatically
+	 * Synchronously attempts to load the given set of indices referencing chunks in the given layer.
+	 * The driver is responsible for translating the indices into indices
+	 * of the respective layer group and load chunks of that group. Note that this method must automatically
 	 * increment the reference counters of each of the affected primary layer members by exactly {@code 1}, no matter
 	 * how many lower members are referenced via the original indices. For every resolved markable covered by the
 	 * given indices the supplied {@code storage} implementation is used.
+	 * <p>
+	 * Note furthermore that in case a context contains data that relies on foreign data hosted in another context,
+	 * the driver is responsible for performing the required index lookups and initiating
 	 *
 	 * @param indices
-	 * @param scope
+	 * @param layer
 	 * @param storage
 	 * @return
 	 * @throws IllegalArgumentException if the
@@ -109,7 +112,7 @@ public interface Driver {
 	 * @see DriverListener
 	 * @see Scope
 	 */
-	long load(IndexSet[] indices, Scope scope, ChunkStorage storage) throws ModelException, InterruptedException;
+	long load(IndexSet[] indices, MarkableLayer layer, ChunkStorage storage) throws ModelException, InterruptedException;
 
 	/**
 	 * Attempts to fetch the number of elements stored in the top-level container for the given
@@ -151,7 +154,7 @@ public interface Driver {
 	 * @throws ModelException
 	 * @throws InterruptedException
 	 */
-	IndexSet[] getHostIndices(MarkableLayer targetLayer, MarkableLayer sourceLayer, IndexSet[] indices) throws ModelException, InterruptedException;
+	Candidates getHostIndices(MarkableLayer targetLayer, MarkableLayer sourceLayer, IndexSet[] indices) throws ModelException, InterruptedException;
 
 	/**
 	 * Called by a {@link Segment} when it gets closed or it otherwise decided to discard its current
@@ -162,7 +165,7 @@ public interface Driver {
 	 * @param container
 	 * @param segment
 	 */
-	void release(Segment segment);
+	void release(Segment segment) throws ModelException, InterruptedException;
 
 	/**
 	 * Called when a context is removed from a corpus or the entire model framework is shutting down.

@@ -23,25 +23,22 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index.chunks;
+package de.ims.icarus.model.standard.driver.file;
 
-import java.io.IOException;
+import java.nio.channels.SeekableByteChannel;
+
+import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.layer.LayerGroup;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class IndexFormatException extends IOException {
+public abstract class GroupLoader {
 
-	private static final long serialVersionUID = 290232354113252546L;
+	protected final LayerGroup group;
+	protected final FileConnector connector;
 
-	public IndexFormatException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public IndexFormatException(String message) {
-		super(message);
-	}
-
+	public abstract Markable load(long index, SeekableByteChannel channel);
 }

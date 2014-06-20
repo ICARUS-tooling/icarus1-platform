@@ -27,12 +27,14 @@ package de.ims.icarus.model.standard.corpus;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.ContainerType;
@@ -43,6 +45,7 @@ import de.ims.icarus.model.api.MemberType;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.IndexSet;
+import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
@@ -77,6 +80,12 @@ abstract class AbstractSegment implements Segment {
 	private boolean checkContainersOnAdd = true;
 
 	private boolean checkIndicesOnAdd = true;
+
+	/**
+	 * Maximum initial capacity used for proxy containers
+	 */
+	//TODO needs adjustments!
+	public static final int MAX_INITIAL_CAPACITY = 100_000;
 
 	protected AbstractSegment(DefaultCorpus corpus, Query query) {
 		if (corpus == null)
@@ -128,7 +137,12 @@ abstract class AbstractSegment implements Segment {
 			memberCount = 10000;
 		}
 
-		return memberCount>Integer.MAX_VALUE ? 10000 : (int)memberCount;
+		return (int)Math.min(memberCount, MAX_INITIAL_CAPACITY);
+	}
+
+	protected int estimateContainerCapacity(IndexSet[] indices) {
+		long count = IndexUtils.count(indices);
+		return (int)Math.min(count, MAX_INITIAL_CAPACITY);
 	}
 
 	/**
@@ -191,10 +205,11 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
+	 * @throws InterruptedException
 	 * @see de.ims.icarus.model.api.seg.Segment#close()
 	 */
 	@Override
-	public void close() throws ModelException {
+	public void close() throws ModelException, InterruptedException {
 		synchronized (owners) {
 			checkOpen();
 
@@ -204,7 +219,8 @@ abstract class AbstractSegment implements Segment {
 				if(owner.release()) {
 					it.remove();
 				} else
-					throw new IllegalStateException("Unable to close segment - could not release ownership of "+owner.getName()); //$NON-NLS-1$
+					throw new ModelException(ModelError.SEGMENT_OWNED,
+							"Unable to close segment - could not release ownership of "+owner.getName()); //$NON-NLS-1$
 			}
 
 			closing = true;
@@ -212,7 +228,11 @@ abstract class AbstractSegment implements Segment {
 
 		// At this point no owners may prevent the segment from closing.
 		// Therefore simply free the content of the current page
-		freePage();
+		try {
+			freePage();
+		} finally {
+			closed = true;
+		}
 	}
 
 	/**
@@ -220,23 +240,50 @@ abstract class AbstractSegment implements Segment {
 	 *
 	 * @throws ModelException
 	 */
-	protected void freePage() throws ModelException {
+	protected void freePage() throws ModelException, InterruptedException {
+
+		Set<Driver> drivers = new HashSet<>();
+
+		// Collect affected drivers
+		for(ProxyContainer container : containers.values()) {
+			drivers.add(container.getLayer().getContext().getDriver());
+		}
+
+		for(Driver driver : drivers) {
+			// Delegate data clean up to the appropriate driver
+			driver.release(this);
+
+		}
 
 		for(ProxyContainer container : containers.values()) {
-			Driver driver = container.getLayer().getContext().getDriver();
-			driver.releaseContainer(container, this);
-
+			// Finally empty all proxy containers
 			container.clear();
 		}
 	}
 
-	protected void loadPage(IndexSet[] indices) throws ModelException {
-		if (indices == null)
-			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
-		if(indices.length==0)
-			throw new IllegalArgumentException("Empty indices array"); //$NON-NLS-1$
+	protected void loadPage(IndexSet[] indices) throws ModelException, InterruptedException {
+		IndexUtils.check(indices);
 
+		MarkableLayer primaryLayer = getPrimaryLayer();
+		ProxyContainer container = getProxyContainer(primaryLayer);
+		Driver driver = primaryLayer.getContext().getDriver();
 
+		// Make some preparations
+		container.ensureCapacity(estimateContainerCapacity(indices));
+
+		// Delegate actual work to driver
+		driver.load(indices, primaryLayer, container);
+
+		// Finalize container
+		container.sort();
+	}
+
+	public MarkableLayer getPrimaryLayer() {
+		return getScope().getPrimaryLayer();
+	}
+
+	public Container getPrimaryContainer() {
+		return getProxyContainer(getPrimaryLayer());
 	}
 
 	/**
@@ -294,6 +341,21 @@ abstract class AbstractSegment implements Segment {
 		}
 	};
 
+	private class ChunkDelegate implements ChunkStorage {
+
+		/**
+		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.Markable, long)
+		 */
+		@Override
+		public void add(Markable member, long index) {
+			ProxyContainer container = getProxyContainer(member.getLayer());
+			if(container!=null) {
+				container.add(member, index);
+			}
+		}
+
+	}
+
 	private class ProxyContainer implements Container, ChunkStorage {
 
 		private long maxId = -1;
@@ -302,21 +364,14 @@ abstract class AbstractSegment implements Segment {
 		private final LookupList<Markable> items;
 		private final MarkableLayer layer;
 
-		private MemberSet<Container> bases;
-
 		private ProxyContainer(MarkableLayer layer, int capacity) {
 			if (layer == null)
 				throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
 
 			this.layer = layer;
 			items = new LookupList<>(capacity);
-		}
 
-		/**
-		 * @param bases the bases to set
-		 */
-		public void setBaseContainers(MemberSet<Container> bases) {
-			this.bases = bases;
+
 		}
 
 		/**
@@ -485,7 +540,7 @@ abstract class AbstractSegment implements Segment {
 		 */
 		@Override
 		public MemberSet<Container> getBaseContainers() {
-			return bases;
+			return Container.EMPTY_BASE_SET;
 		}
 
 		/**

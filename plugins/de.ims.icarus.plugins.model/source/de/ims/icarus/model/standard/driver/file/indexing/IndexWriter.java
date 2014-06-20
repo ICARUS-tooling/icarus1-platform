@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.model.standard.driver.file.indexing;
 
 import de.ims.icarus.model.api.driver.IndexSet;
 import de.ims.icarus.model.api.driver.indexing.Index;

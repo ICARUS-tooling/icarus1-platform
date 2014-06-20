@@ -91,6 +91,11 @@ public class RUBlockCache implements BlockCache {
 	}
 
 	/**
+	 * Looks up the entry associated with the specified {@code id}. If such an entry
+	 * could be found, it will be marked as most recently used and the {@code Block}
+	 * it holds will be returned. In case no entry for the given {@code id} exists this
+	 * method simply returns {@code null}.
+	 *
 	 * @see de.ims.icarus.model.standard.driver.file.ManagedFileResource.BlockCache#getBlock(int)
 	 */
 	@Override

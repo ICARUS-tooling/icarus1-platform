@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index.chunks;
+package de.ims.icarus.model.standard.driver.file.indexing.chunks;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -34,7 +34,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.standard.driver.file.FileSet;
 import de.ims.icarus.model.standard.driver.file.ManagedFileResource;
-import de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter;
+import de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter;
 
 /**
  *
@@ -77,7 +77,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#getFileSet()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#getFileSet()
 	 */
 	@Override
 	public FileSet getFileSet() {
@@ -85,7 +85,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#newReader()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#newReader()
 	 */
 	@Override
 	public ChunkIndexReader newReader() {
@@ -93,7 +93,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#newWriter()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#newWriter()
 	 */
 	@Override
 	public ChunkIndexWriter newWriter() {
@@ -244,7 +244,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexReader#getEntryCount()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexReader#getEntryCount()
 		 */
 		@Override
 		public long getEntryCount() {
@@ -252,7 +252,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexReader#getFileId(long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexReader#getFileId(long)
 		 */
 		@Override
 		public int getFileId(long index) {
@@ -260,7 +260,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexReader#getBeginOffset(long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexReader#getBeginOffset(long)
 		 */
 		@Override
 		public long getBeginOffset(long index) {
@@ -268,7 +268,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexReader#getEndOffset(long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexReader#getEndOffset(long)
 		 */
 		@Override
 		public long getEndOffset(long index) {
@@ -324,7 +324,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexWriter#setFileId(long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexWriter#setFileId(long, int)
 		 */
 		@Override
 		public int setFileId(long index, int fileId) {
@@ -332,7 +332,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexWriter#setBeginOffset(long, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexWriter#setBeginOffset(long, long)
 		 */
 		@Override
 		public long setBeginOffset(long index, long offset) {
@@ -340,7 +340,7 @@ public class DefaultChunkIndex extends ManagedFileResource implements ChunkIndex
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndexWriter#setEndOffset(long, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndexWriter#setEndOffset(long, long)
 		 */
 		@Override
 		public long setEndOffset(long index, long offset) {

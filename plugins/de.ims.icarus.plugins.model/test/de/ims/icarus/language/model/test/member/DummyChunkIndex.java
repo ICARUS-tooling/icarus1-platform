@@ -30,7 +30,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Path;
 
 import de.ims.icarus.model.standard.driver.file.FileChecksum;
-import de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex;
+import de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex;
 
 /**
  * @author Markus Gärtner
@@ -42,7 +42,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	private boolean largeIndex;
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#getLocation()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#getLocation()
 	 */
 	@Override
 	public Path getLocation() {
@@ -51,7 +51,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#getLayerUid()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#getLayerUid()
 	 */
 	@Override
 	public String getLayerUid() {
@@ -60,7 +60,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#getFileCount()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#getFileCount()
 	 */
 	@Override
 	public int getFileCount() {
@@ -69,7 +69,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#getFileAt(int)
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#getFileAt(int)
 	 */
 	@Override
 	public Path getFileAt(int fileIndex) {
@@ -78,7 +78,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#getChecksum(int)
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#getChecksum(int)
 	 */
 	@Override
 	public FileChecksum getChecksum(int fileIndex) {
@@ -87,7 +87,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#refreshChecksum(int)
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#refreshChecksum(int)
 	 */
 	@Override
 	public void refreshChecksum(int fileIndex) {
@@ -96,7 +96,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#isLargeIndex()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#isLargeIndex()
 	 */
 	@Override
 	public boolean isLargeIndex() {
@@ -105,7 +105,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#isMappingElements()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#isMappingElements()
 	 */
 	@Override
 	public boolean isMappingElements() {
@@ -114,7 +114,7 @@ public class DummyChunkIndex implements ChunkIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkIndex#openChannel()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkIndex#openChannel()
 	 */
 	@Override
 	public SeekableByteChannel openChannel() throws IOException {

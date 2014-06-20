@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index.chunks;
+package de.ims.icarus.model.standard.driver.file.indexing.chunks;
 
 import de.ims.icarus.model.standard.driver.file.FileSet;
 

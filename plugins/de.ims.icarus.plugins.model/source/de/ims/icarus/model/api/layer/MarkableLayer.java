@@ -34,7 +34,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * A {@code MarkableLayer} defines a collection of markables. If it is
- * the <i>base layer<i/> of a corpus it describes the basic collection
+ * the <i>base layer</i> of a corpus it describes the basic collection
  * of available markables for that corpus. In any other case it serves
  * as a sort of aggregated view, grouping markables of the underlying
  * layers in its container.

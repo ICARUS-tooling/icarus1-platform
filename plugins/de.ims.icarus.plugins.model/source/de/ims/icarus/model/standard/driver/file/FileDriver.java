@@ -27,7 +27,12 @@ package de.ims.icarus.model.standard.driver.file;
 
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Corpus;
+import de.ims.icarus.model.api.driver.Candidates;
+import de.ims.icarus.model.api.driver.ChunkStorage;
+import de.ims.icarus.model.api.driver.IndexSet;
+import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContextManifest;
+import de.ims.icarus.model.iql.Query;
 import de.ims.icarus.model.standard.driver.AbstractDriver;
 
 /**
@@ -36,6 +41,8 @@ import de.ims.icarus.model.standard.driver.AbstractDriver;
  *
  */
 public class FileDriver extends AbstractDriver {
+
+	//TODO when generating a new driver, make the framework assign its manifest a random UID string for the name suffix of the folder the driver uses for metadata and/or indices
 
 	/**
 	 * @param manifest
@@ -46,6 +53,44 @@ public class FileDriver extends AbstractDriver {
 			throws ModelException {
 		super(manifest, corpus);
 		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.Driver#lookup(de.ims.icarus.model.iql.Query, de.ims.icarus.model.api.layer.MarkableLayer)
+	 */
+	@Override
+	public Candidates lookup(Query query, MarkableLayer layer)
+			throws ModelException, InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.Driver#load(de.ims.icarus.model.api.driver.IndexSet[], de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.driver.ChunkStorage)
+	 */
+	@Override
+	public long load(IndexSet[] indices, MarkableLayer layer,
+			ChunkStorage storage) throws ModelException, InterruptedException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.Driver#getMemberCount(de.ims.icarus.model.api.layer.MarkableLayer)
+	 */
+	@Override
+	public long getMemberCount(MarkableLayer layer) throws ModelException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.Driver#close()
+	 */
+	@Override
+	public void close() throws ModelException {
+		// TODO Auto-generated method stub
+
 	}
 
 }

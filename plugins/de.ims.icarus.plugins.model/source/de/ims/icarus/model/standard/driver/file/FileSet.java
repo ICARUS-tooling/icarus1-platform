@@ -95,8 +95,7 @@ public interface FileSet {
 	 */
 	void refreshChecksum(int fileIndex) throws IOException, ModelException;
 
-	/**
-	 *
-	 */
 	void synchronize();
+
+	void close();
 }

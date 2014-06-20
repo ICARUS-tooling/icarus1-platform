@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.model.standard.driver.file.indexing;
 
 import static de.ims.icarus.model.api.driver.IndexUtils.firstIndex;
 import static de.ims.icarus.model.api.driver.IndexUtils.lastIndex;
@@ -121,7 +121,7 @@ public class IndexImplSpanNTo1 extends AbstractFileIndex {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.index.AbstractFileIndex#newWriter()
+	 * @see de.ims.icarus.model.standard.driver.file.indexing.AbstractFileIndex#newWriter()
 	 */
 	@Override
 	public IndexWriter newWriter() {
@@ -132,10 +132,16 @@ public class IndexImplSpanNTo1 extends AbstractFileIndex {
 	public class Reader extends ReadAccessor<Index> implements IndexReader {
 
 		// Used for the final step in lookup resolution
-		// Represents one-to-many mapping
+		// Represents one-to-many mapping (of spans)
 		private final IndexReader inverseReader = inverseIndex.newReader();
 		private final Coverage inverseCoverage = inverseReader.getSource().getManifest().getCoverage();
 
+		/**
+		 * Resolves the group a given source index belongs to and fetches the
+		 * reverse mapping for that group, which in turn describes the lower and
+		 * upper index limits in the target space of this index. Finally calls the
+		 * inverse reader to run a search for a mapping index in the given interval.
+		 */
 		private long lookup0(long sourceIndex) throws ModelException, InterruptedException {
 			long group = group(sourceIndex);
 			int id = id(group);
@@ -146,10 +152,11 @@ public class IndexImplSpanNTo1 extends AbstractFileIndex {
 				return INVALID;
 			}
 
-			long fromSource = spanAdapter.getFrom(block.getData(), localIndex);
-			long toSource = spanAdapter.getTo(block.getData(), localIndex);
+			long fromTarget = spanAdapter.getFrom(block.getData(), localIndex);
+			long toTarget = spanAdapter.getTo(block.getData(), localIndex);
 
-			return inverseReader.find(fromSource, toSource, sourceIndex);
+			// Delegate to inverse reader for interval search
+			return inverseReader.find(fromTarget, toTarget, sourceIndex);
 		}
 
 		/**

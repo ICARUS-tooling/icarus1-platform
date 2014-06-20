@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.model.standard.driver.file.indexing;
 
 import java.nio.ByteBuffer;
 
@@ -81,7 +81,7 @@ public class SpanArrays {
 		private static final int BYTES_PER_ENTRY = 4 + 4;
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#createBuffer(int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#createBuffer(int)
 		 */
 		@Override
 		public Object createBuffer(int byteCount) {
@@ -90,7 +90,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#bufferSize(java.lang.Object)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#bufferSize(java.lang.Object)
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
@@ -98,7 +98,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#getFrom(int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#getFrom(int)
 		 */
 		@Override
 		public long getFrom(Object buffer, int index) {
@@ -106,7 +106,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#getTo(int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#getTo(int)
 		 */
 		@Override
 		public long getTo(Object buffer, int index) {
@@ -114,7 +114,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#setFrom(int, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#setFrom(int, long)
 		 */
 		@Override
 		public long setFrom(Object buffer, int index, long value) {
@@ -128,7 +128,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#setTo(int, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#setTo(int, long)
 		 */
 		@Override
 		public long setTo(Object buffer, int index, long value) {
@@ -142,7 +142,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#chunkSize()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#chunkSize()
 		 */
 		@Override
 		public int chunkSize() {
@@ -150,7 +150,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#read(java.lang.Object, java.nio.ByteBuffer, int, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#read(java.lang.Object, java.nio.ByteBuffer, int, int)
 		 */
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset,
@@ -164,7 +164,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#write(java.lang.Object, java.nio.ByteBuffer, int, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#write(java.lang.Object, java.nio.ByteBuffer, int, int)
 		 */
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset,
@@ -178,7 +178,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#find(java.lang.Object, int, int, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#find(java.lang.Object, int, int, long)
 		 */
 		@Override
 		public int find(Object source, int from, int to, long value) {
@@ -213,7 +213,7 @@ public class SpanArrays {
 		private static final int BYTES_PER_ENTRY = 8 + 8;
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#createBuffer(int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#createBuffer(int)
 		 */
 		@Override
 		public Object createBuffer(int byteCount) {
@@ -222,7 +222,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#bufferSize(java.lang.Object)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#bufferSize(java.lang.Object)
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
@@ -230,7 +230,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#getFrom(int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#getFrom(int)
 		 */
 		@Override
 		public long getFrom(Object buffer, int index) {
@@ -238,7 +238,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#getTo(int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#getTo(int)
 		 */
 		@Override
 		public long getTo(Object buffer, int index) {
@@ -246,7 +246,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#setFrom(int, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#setFrom(int, long)
 		 */
 		@Override
 		public long setFrom(Object buffer, int index, long value) {
@@ -260,7 +260,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#setTo(int, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#setTo(int, long)
 		 */
 		@Override
 		public long setTo(Object buffer, int index, long value) {
@@ -274,7 +274,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#chunkSize()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#chunkSize()
 		 */
 		@Override
 		public int chunkSize() {
@@ -282,7 +282,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#read(java.lang.Object, java.nio.ByteBuffer, int, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#read(java.lang.Object, java.nio.ByteBuffer, int, int)
 		 */
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset,
@@ -296,7 +296,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#write(java.lang.Object, java.nio.ByteBuffer, int, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#write(java.lang.Object, java.nio.ByteBuffer, int, int)
 		 */
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset,
@@ -310,7 +310,7 @@ public class SpanArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.SpanArrays.SpanAdapter#find(java.lang.Object, int, int, long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#find(java.lang.Object, int, int, long)
 		 */
 		@Override
 		public int find(Object source, int from, int to, long value) {

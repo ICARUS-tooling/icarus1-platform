@@ -23,24 +23,37 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.model.standard.driver.file.indexing;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.IndexManifest;
+import de.ims.icarus.model.standard.driver.file.ManagedFileResource;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractIndex implements Index {
+public abstract class AbstractFileIndex extends ManagedFileResource implements Index {
 
 	private Driver driver;
 	private IndexManifest manifest;
 	private MarkableLayer sourceLayer;
 	private MarkableLayer targetLayer;
+
+	protected AbstractFileIndex(Path file, BlockCache cache, int cacheSize) {
+		super(file, cache, cacheSize);
+	}
+
+	protected static void checkInterrupted() throws InterruptedException {
+		if(Thread.interrupted())
+			throw new InterruptedException();
+	}
 
 	/**
 	 * @param driver the driver to set
@@ -103,6 +116,13 @@ public abstract class AbstractIndex implements Index {
 	}
 
 	/**
+	 * Returns an accessor for write operations on this index.
+	 *
+	 * @return
+	 */
+	public abstract IndexWriter newWriter();
+
+	/**
 	 * The default implementation does nothing.
 	 *
 	 * @see de.ims.icarus.model.api.driver.indexing.Index#close()
@@ -112,4 +132,15 @@ public abstract class AbstractIndex implements Index {
 		// no-op
 	}
 
+	/**
+	 * Allows subclasses to perform compression or other means of
+	 * storage optimization. This method should only called once
+	 * an index has been completely filled with mapping data!
+	 *
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void optimize() throws IOException, InterruptedException {
+		// for subclasses
+	}
 }

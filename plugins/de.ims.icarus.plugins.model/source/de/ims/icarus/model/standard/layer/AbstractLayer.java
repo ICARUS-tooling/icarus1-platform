@@ -49,6 +49,8 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	private MemberSet<MarkableLayer> baseLayers = EMPTY_BASE_SET;
 	private final LayerGroup group;
 
+	private final int uid = CorpusUtils.getNewUID();
+
 	private final Markable markableProxy;
 
 	public AbstractLayer(M manifest, LayerGroup group) {
@@ -152,6 +154,14 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	@Override
 	public LayerGroup getLayerGroup() {
 		return group;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.layer.Layer#getUID()
+	 */
+	@Override
+	public int getUID() {
+		return uid;
 	}
 
 	/**

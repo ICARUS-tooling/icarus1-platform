@@ -25,53 +25,42 @@
  */
 package de.ims.icarus.model.standard.driver.file;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.io.LocationType;
-import de.ims.icarus.model.io.PathResolver;
-import de.ims.icarus.model.io.ResourcePath;
-import de.ims.icarus.util.CorruptedStateException;
 
 /**
- * Implements a {@link FileSet} that is linked to a central storage file and
- * manages a collection of target files that are resolved with the help of a
- * {@link PathResolver}, provided at construction time. The implementation
- * resolves paths to target files lazily, as soon as they are requested. The
- * same policy holds true for the corresponding checksums.
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class LazyFileSet implements FileSet {
+public class SingletonFileSet implements FileSet {
 
-	private final TIntObjectMap<Path> paths = new TIntObjectHashMap<>();
-	private final PathResolver pathResolver;
+	private final Path file;
 	private final SharedChecksumStorage storage;
 
 	/**
 	 * Creates a new {@code SingletonFileSet} that points to the given {@code file}
 	 * and uses the provided {@link SharedChecksumStorage} to store the checksum.
 	 *
-	 * @param pathResolver
+	 * @param file
 	 * @param storage
 	 */
-	public LazyFileSet(PathResolver pathResolver, SharedChecksumStorage storage) {
-		if (pathResolver == null)
-			throw new NullPointerException("Invalid pathResolver"); //$NON-NLS-1$
+	public SingletonFileSet(Path file, SharedChecksumStorage storage) {
+		if (file == null)
+			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		if (storage == null)
 			throw new NullPointerException("Invalid storage"); //$NON-NLS-1$
 
-		this.storage = storage;
+		if(!Files.exists(file, LinkOption.NOFOLLOW_LINKS))
+			throw new IllegalArgumentException("File does not exis: "+file); //$NON-NLS-1$
 
-		this.pathResolver = pathResolver;
+		this.file = file;
+		this.storage = storage;
 	}
 
 	/**
@@ -79,18 +68,20 @@ public class LazyFileSet implements FileSet {
 	 * The checksum storage is obtained by calling {@link SharedChecksumStorage#getStorage(Path)}
 	 * with the {@code checksumFile} argument.
 	 *
-	 * @param pathResolver
-	 * @param checksumFile
+	 * @param file
+	 * @param storage
 	 */
-	public LazyFileSet(PathResolver pathResolver, Path checksumFile) {
-		if (pathResolver == null)
-			throw new NullPointerException("Invalid pathResolver"); //$NON-NLS-1$
+	public SingletonFileSet(Path file, Path checksumFile) {
+		if (file == null)
+			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 		if (checksumFile == null)
 			throw new NullPointerException("Invalid checksumFile"); //$NON-NLS-1$
 
-		this.storage = SharedChecksumStorage.getStorage(checksumFile);
+		if(!Files.exists(file, LinkOption.NOFOLLOW_LINKS))
+			throw new IllegalArgumentException("File does not exis: "+file); //$NON-NLS-1$
 
-		this.pathResolver = pathResolver;
+		this.file = file;
+		this.storage = SharedChecksumStorage.getStorage(checksumFile);
 	}
 
 	/**
@@ -98,32 +89,32 @@ public class LazyFileSet implements FileSet {
 	 */
 	@Override
 	public int getFileCount() {
-		return pathResolver.getPathCount();
+		return 1;
+	}
+
+	private void checkIndex(int fileIndex) {
+		if(fileIndex!=0)
+			throw new IllegalArgumentException("Invalid file index: "+fileIndex+" - only legal value is 0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
 	 * @see de.ims.icarus.model.standard.driver.file.FileSet#getFileAt(int)
 	 */
 	@Override
-	public synchronized Path getFileAt(int fileIndex) {
-		Path path = paths.get(fileIndex);
-		if(path==null) {
-			ResourcePath resourcePath = pathResolver.getPath(fileIndex);
-			if(resourcePath==null)
-				throw new IndexOutOfBoundsException("No file available for index: "+fileIndex); //$NON-NLS-1$
-			if(resourcePath.getType()!=LocationType.FILE)
-				throw new CorruptedStateException("Resolver returned unsupported path type: "+resourcePath);//TODO more info in exception //$NON-NLS-1$
+	public Path getFileAt(int fileIndex) {
+		checkIndex(fileIndex);
 
-			path = Paths.get(resourcePath.getPath());
+		return file;
+	}
 
-//			if(!path.isAbsolute()) {
-//				path = path.toAbsolutePath();
-//			}
+	/**
+	 * @see de.ims.icarus.model.standard.driver.file.FileSet#getChecksum(int)
+	 */
+	@Override
+	public FileChecksum getChecksum(int fileIndex) throws ModelException {
+		checkIndex(fileIndex);
 
-			paths.put(fileIndex, path);
-		}
-
-		return path;
+		return storage.getChecksum(file);
 	}
 
 	private FileChecksum createChecksum(Path path) throws IOException {
@@ -147,35 +138,31 @@ public class LazyFileSet implements FileSet {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.driver.file.FileSet#getChecksum(int)
-	 */
-	@Override
-	public synchronized FileChecksum getChecksum(int fileIndex) {
-		return storage.getChecksum(getFileAt(fileIndex));
-	}
-
-	/**
 	 * @see de.ims.icarus.model.standard.driver.file.FileSet#verifyChecksum(int)
 	 */
 	@Override
-	public synchronized boolean verifyChecksum(int fileIndex) throws IOException, ModelException {
-		Path path = getFileAt(fileIndex);
+	public boolean verifyChecksum(int fileIndex) throws IOException,
+			ModelException {
+		checkIndex(fileIndex);
 
-		FileChecksum newValue = createChecksum(path);
+		FileChecksum newValue = createChecksum(file);
 
 		if(newValue==null)
 			throw new ModelException(ModelError.DRIVER_CHECKSUM_FAIL,
-					"Unable to refresh checksum for file: "+path); //$NON-NLS-1$
+					"Unable to refresh checksum for file: "+file); //$NON-NLS-1$
 
-		return storage.compareAndSetChecksum(path, newValue);
+		return storage.compareAndSetChecksum(file, newValue);
 	}
 
 	/**
 	 * @see de.ims.icarus.model.standard.driver.file.FileSet#refreshChecksum(int)
 	 */
 	@Override
-	public synchronized void refreshChecksum(int fileIndex) throws IOException {
-		refreshChecksum(getFileAt(fileIndex));
+	public void refreshChecksum(int fileIndex) throws IOException,
+			ModelException {
+		checkIndex(fileIndex);
+
+		refreshChecksum(file);
 	}
 
 	/**

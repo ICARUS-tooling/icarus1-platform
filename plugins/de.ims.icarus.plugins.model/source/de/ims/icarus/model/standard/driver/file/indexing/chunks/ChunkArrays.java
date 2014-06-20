@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index.chunks;
+package de.ims.icarus.model.standard.driver.file.indexing.chunks;
 
 import java.nio.ByteBuffer;
 
@@ -99,7 +99,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#createBuffer(long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#createBuffer(long)
 		 */
 		@Override
 		public Object createBuffer(int byteCount) {
@@ -108,7 +108,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
@@ -116,7 +116,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#read(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#read(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset, int length) {
@@ -129,7 +129,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#write(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#write(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset, int length) {
@@ -142,7 +142,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
 		 */
 		@Override
 		public int getFileId(Object buffer, int index) {
@@ -150,7 +150,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getBeginOffset(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getBeginOffset(java.lang.Object, int)
 		 */
 		@Override
 		public long getBeginOffset(Object buffer, int index) {
@@ -158,7 +158,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getEndOffset(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getEndOffset(java.lang.Object, int)
 		 */
 		@Override
 		public long getEndOffset(Object buffer, int index) {
@@ -166,7 +166,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
 		 */
 		@Override
 		public int setFileId(Object buffer, int index, int fileId) {
@@ -174,7 +174,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setBeginOffset(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setBeginOffset(java.lang.Object, long, int)
 		 */
 		@Override
 		public long setBeginOffset(Object buffer, int index, long offset) {
@@ -186,7 +186,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setEndOffset(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setEndOffset(java.lang.Object, long, int)
 		 */
 		@Override
 		public long setEndOffset(Object buffer, int index, long offset) {
@@ -198,7 +198,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
 		 */
 		@Override
 		public int chunkSize() {
@@ -217,7 +217,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
@@ -225,7 +225,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#read(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#read(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset, int length) {
@@ -239,7 +239,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#write(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#write(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset, int length) {
@@ -253,7 +253,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
 		 */
 		@Override
 		public int getFileId(Object buffer, int index) {
@@ -261,7 +261,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
 		 */
 		@Override
 		public int setFileId(Object buffer, int index, int fileId) {
@@ -273,7 +273,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
 		 */
 		@Override
 		public int chunkSize() {
@@ -300,7 +300,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#createBuffer(long)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#createBuffer(long)
 		 */
 		@Override
 		public Object createBuffer(int byteCount) {
@@ -309,7 +309,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
@@ -317,7 +317,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.IntAdapter#read(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.IntAdapter#read(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset, int length) {
@@ -330,7 +330,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.IntAdapter#write(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.IntAdapter#write(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset, int length) {
@@ -343,7 +343,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
 		 */
 		@Override
 		public int getFileId(Object buffer, int index) {
@@ -351,7 +351,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getBeginOffset(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getBeginOffset(java.lang.Object, int)
 		 */
 		@Override
 		public long getBeginOffset(Object buffer, int index) {
@@ -359,7 +359,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getEndOffset(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getEndOffset(java.lang.Object, int)
 		 */
 		@Override
 		public long getEndOffset(Object buffer, int index) {
@@ -367,7 +367,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
 		 */
 		@Override
 		public int setFileId(Object buffer, int index, int fileId) {
@@ -375,7 +375,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setBeginOffset(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setBeginOffset(java.lang.Object, long, int)
 		 */
 		@Override
 		public long setBeginOffset(Object buffer, int index, long offset) {
@@ -387,7 +387,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setEndOffset(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setEndOffset(java.lang.Object, long, int)
 		 */
 		@Override
 		public long setEndOffset(Object buffer, int index, long offset) {
@@ -399,7 +399,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
 		 */
 		@Override
 		public int chunkSize() {
@@ -418,7 +418,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#bufferSize(java.lang.Object)
 		 */
 		@Override
 		public int bufferSize(Object buffer) {
@@ -426,7 +426,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.IntAdapter#read(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.IntAdapter#read(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void read(Object target, ByteBuffer buffer, int offset, int length) {
@@ -440,7 +440,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.IntAdapter#write(java.lang.Object, java.nio.ByteBuffer)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.IntAdapter#write(java.lang.Object, java.nio.ByteBuffer)
 		 */
 		@Override
 		public void write(Object source, ByteBuffer buffer, int offset, int length) {
@@ -454,7 +454,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#getFileId(java.lang.Object, int)
 		 */
 		@Override
 		public int getFileId(Object buffer, int index) {
@@ -462,7 +462,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.DefaultChunkIndex.ArrayAdapter#setFileId(java.lang.Object, long, int)
 		 */
 		@Override
 		public int setFileId(Object buffer, int index, int fileId) {
@@ -474,7 +474,7 @@ public class ChunkArrays {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.driver.file.index.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
+		 * @see de.ims.icarus.model.standard.driver.file.indexing.chunks.ChunkArrays.ArrayAdapter#maxChunkSize()
 		 */
 		@Override
 		public int chunkSize() {

@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Context;
@@ -56,6 +57,7 @@ import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest;
+import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
@@ -63,7 +65,6 @@ import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
-import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.raster.Position;
 import de.ims.icarus.model.api.raster.PositionOutOfBoundsException;
 import de.ims.icarus.model.api.raster.Rasterizer;
@@ -78,8 +79,14 @@ import de.ims.icarus.model.registry.CorpusRegistry;
  */
 public final class CorpusUtils {
 
+	private static final AtomicInteger uidGenerator = new AtomicInteger(1);
+
 	private CorpusUtils() {
 		throw new AssertionError();
+	}
+
+	public static int getNewUID() {
+		return uidGenerator.getAndIncrement();
 	}
 
 	public static ContextManifest getContextManifest(MemberManifest manifest) {

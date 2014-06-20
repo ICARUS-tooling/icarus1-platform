@@ -23,26 +23,29 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file.index;
+package de.ims.icarus.model.standard.driver.file;
 
-import java.util.List;
-
-import de.ims.icarus.model.api.driver.Driver;
-import de.ims.icarus.model.api.driver.indexing.Index;
-import de.ims.icarus.model.api.manifest.IndexManifest;
+import java.nio.file.Path;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class IndexFactory {
+public abstract class FileConnector {
 
-	private final Driver driver;
-	private final
+	protected final FileDriver driver;
 
+	protected final Path folder;
 
-	public List<Index> createIndices(List<IndexManifest> manifests) {
+	protected FileConnector(FileDriver driver) {
+		if (driver == null)
+			throw new NullPointerException("Invalid driver"); //$NON-NLS-1$
 
+		this.driver = driver;
+	}
+
+	public FileDriver getDriver() {
+		return driver;
 	}
 }

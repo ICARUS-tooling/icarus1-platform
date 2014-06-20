@@ -40,6 +40,25 @@ public class IndexUtils {
 
 	public static final IndexSet[] EMPTY = new IndexSet[0];
 
+	public static void check(IndexSet[] indices) {
+		if (indices == null)
+			throw new NullPointerException("Invalid indices"); //$NON-NLS-1$
+		if(indices.length==0)
+			throw new IllegalArgumentException("Empty indices array"); //$NON-NLS-1$
+		if(count(indices)==0)
+			throw new IllegalArgumentException("Index array contains no actual index values"); //$NON-NLS-1$
+	}
+
+	public static long count(IndexSet[] indices) {
+		long result = 0;
+
+		for(IndexSet indexSet : indices) {
+			result += indexSet.size();
+		}
+
+		return result;
+	}
+
 	public static boolean isContinuous(IndexSet indices) {
 		return indices.lastIndex()-indices.firstIndex()==indices.size()-1;
 	}
