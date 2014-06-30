@@ -280,8 +280,8 @@ public class CoreferenceDocument extends BatchDocument {
 
 		HighlightType highlightType = getHighlightType();
 		Filter filter = getFilter();
-		//boolean lastWasClosing = false;
-		//boolean lastWasImportant = false;
+		boolean forceSpace = false;
+//		boolean lastWasImportant = false;
 
 		int length = data.length();
 
@@ -300,11 +300,15 @@ public class CoreferenceDocument extends BatchDocument {
 			String token = data.getForm(index);
 
 			// Add space
-			//if(index>0 && (builder.length()>0
-			//		|| (lastWasImportant /*&& !important*/) // TODO
-			//		|| (lastWasClosing && spanBuffer.isStart(index)))) {
-			//	builder.append(" "); //$NON-NLS-1$
-			//}
+//			if(index>0 && (builder.length()>0
+//					|| (lastWasImportant /*&& !important*/) // TODO
+//					|| (lastWasClosing && spanBuffer.isStart(index)))) {
+//				builder.append(" "); //$NON-NLS-1$
+//			}
+			if(forceSpace && !StringUtil.endsWith(builder, ' ')) {
+				builder.append(' ');
+				forceSpace = false;
+			}
 			//lastWasClosing = false;
 
 			// Border between two spans or regular text an the beginning of a new span
@@ -377,7 +381,7 @@ public class CoreferenceDocument extends BatchDocument {
 					}
 
 					attributeStack.push(attributes);
-					//					System.out.printf("attr::push %s %s\n",attributeStack, span);
+//					System.out.printf("attr::push %s %s\n",attributeStack, span);
 					spanStack.push(span);
 					if(highlightColor!=null) {
 						highlightStack .push(highlightColor);
@@ -420,7 +424,6 @@ public class CoreferenceDocument extends BatchDocument {
 					if(filter!=null && !filter.accepts(span)) {
 						continue;
 					}
-					//lastWasClosing = true;
 
 					int clusterIndex = getCache().getIndex(span);
 					Color highlightColor = null;
@@ -470,6 +473,8 @@ public class CoreferenceDocument extends BatchDocument {
 					builder.append(' ');
 				}
 			}
+
+			forceSpace = spanBuffer.isEnd(index);
 
 			//lastWasImportant = important;
 		}
