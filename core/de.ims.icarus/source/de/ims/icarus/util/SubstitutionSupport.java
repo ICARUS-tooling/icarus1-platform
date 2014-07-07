@@ -19,42 +19,43 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * 
- * 
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class SubstitutionSupport {
 
-	protected Map<String, Integer> substitutions;
+	protected final TObjectIntMap<String> substitutions;
 
-	protected List<String> resubstitutions;
+	protected final List<String> resubstitutions;
 
 	public SubstitutionSupport() {
 		this(100);
 	}
 
 	public SubstitutionSupport(int size) {
-		substitutions = new HashMap<>(size);
+		substitutions = new TObjectIntHashMap<>(size, 0.5f, -1);
 		resubstitutions = new ArrayList<>(size);
 	}
 
 	public int substitute(String value) {
-		Integer id = substitutions.get(value);
-		if (id == null) {
+		int id = substitutions.get(value);
+		if (id == -1) {
 			id = resubstitutions.size();
 			resubstitutions.add(value);
 			substitutions.put(value, id);
@@ -64,8 +65,7 @@ public class SubstitutionSupport {
 	}
 
 	public int getSubstitution(String value) {
-		Integer id = substitutions.get(value);
-		return id == null ? -1 : id;
+		return substitutions.get(value);
 	}
 
 	public String resubstitute(int value) {
@@ -79,5 +79,15 @@ public class SubstitutionSupport {
 
 	public int size() {
 		return resubstitutions.size();
+	}
+
+	public void set(String[] items) {
+		substitutions.clear();
+		resubstitutions.clear();
+
+		for(int i=0; i<items.length; i++) {
+			resubstitutions.add(items[i]);
+			substitutions.put(items[i], i);
+		}
 	}
 }

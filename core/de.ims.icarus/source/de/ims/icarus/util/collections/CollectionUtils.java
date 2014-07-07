@@ -318,6 +318,35 @@ public final class CollectionUtils {
 		return map;
 	}
 
+	public static <T extends Comparable<? super T>> List<T> asSortedList(Collection<T> items) {
+		if (items == null)
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
+
+		List<T> result = Collections.emptyList();
+
+		if(!items.isEmpty()) {
+			result = new ArrayList<>(items);
+
+			Collections.sort(result);
+		}
+
+		return result;
+	}
+
+	public static <T extends Object> List<T> asSortedList(Collection<T> items, Comparator<? super T> comparator) {
+		if (items == null)
+			throw new NullPointerException("Invalid items"); //$NON-NLS-1$
+
+		List<T> result = Collections.emptyList();
+
+		if(!items.isEmpty()) {
+			result = new ArrayList<>(items);
+
+			Collections.sort(result, comparator);
+		}
+
+		return result;
+	}
 
 	public static int min(int...values) {
 		/*if(values.length<2)

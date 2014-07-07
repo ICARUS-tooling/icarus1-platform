@@ -23,47 +23,26 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.io;
+package de.ims.icarus.search_tools.io;
 
-import java.net.URL;
+import javax.xml.stream.XMLStreamException;
 
-import de.ims.icarus.model.api.manifest.LocationManifest;
-import de.ims.icarus.model.xml.XmlResource;
+import de.ims.icarus.search_tools.result.ResultEntry;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum LocationType implements XmlResource {
+public interface SearchResolver {
 
-	/**
-	 * Specifies that a certain location denotes a local file object
-	 * accessible via a simple path string.
-	 */
-	FILE,
+//	void initSearch();
 
-	/**
-	 * Marks a location as remotely accessible via a dedicated {@link URL}
-	 */
-	NETWORK,
+	void writeResultEntries(SearchWriter writer) throws XMLStreamException;
 
-	/**
-	 * Locations with this type denote a database of arbitrary implementation.
-	 * It is up to the {@link ResourcePath} or {@link LocationManifest} to provide
-	 * additional information to properly access the database.
-	 */
-	DATABASE;
+	void setGroupLabels(int dimension, String[] labels);
 
-	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return name().toLowerCase();
-	}
+	void addResultEntry(ResultEntry entry, int...indices);
 
-	public static LocationType parseLocationType(String s) {
-		return valueOf(s.toUpperCase());
-	}
+	void finalizeSearch();
 }

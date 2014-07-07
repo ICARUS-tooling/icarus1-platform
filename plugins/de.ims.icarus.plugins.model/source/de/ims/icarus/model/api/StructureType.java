@@ -26,6 +26,8 @@
 package de.ims.icarus.model.api;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.ims.icarus.model.api.edit.EditOperation;
 import de.ims.icarus.model.xml.XmlResource;
@@ -45,14 +47,14 @@ public enum StructureType implements XmlResource {
 	 * @deprecated no need to support empty structures
 	 */
 	@Deprecated
-	SET(false, 0, 0, 0),
+	SET("set", false, 0, 0, 0), //$NON-NLS-1$
 
 	/**
 	 * An ordered sequence of nodes, each with at most one
 	 * predecessor and successor. Edges in this structure are
 	 * expected to be {@code directed} only!
 	 */
-	CHAIN(true, 1, 1, 1),
+	CHAIN("chain", true, 1, 1, 1), //$NON-NLS-1$
 
 	/**
 	 * A hierarchically ordered collection of nodes where each node
@@ -60,30 +62,32 @@ public enum StructureType implements XmlResource {
 	 * number of children. All edges are {@code directed} from a parent
 	 * down to the child node itself.
 	 */
-	TREE(true, -1, 1, 1),
+	TREE("tree", true, -1, 1, 1), //$NON-NLS-1$
 
 	/**
 	 * A general graph with the only restriction that edges have to be
 	 * directed.
 	 */
-	DIRECTED_GRAPH(true, -1, -1, 0),
+	DIRECTED_GRAPH("directed-graph", true, -1, -1, 0), //$NON-NLS-1$
 
 	/**
 	 * Being the most unbounded and therefore most complex type a {@code GRAPH}
 	 * does not pose any restrictions on nodes or edges.
 	 */
-	GRAPH(false, -1, -1, 0);
+	GRAPH("graph", false, -1, -1, 0); //$NON-NLS-1$
 
 	private final int outgoingEdgeLimit;
 	private final int incomingEdgeLimit;
 	private final int minEdgeCount;
 	private final boolean directed;
 	private final EnumSet<EditOperation> operations;
+	private final String xmlForm;
 
-	private StructureType(boolean directed, int outgoingEdgeLimit,
+	private StructureType(String xmlForm, boolean directed, int outgoingEdgeLimit,
 			int incomingEdgeLimit, int minEdgeCount,
 			EditOperation...operations) {
 
+		this.xmlForm = xmlForm;
 		this.outgoingEdgeLimit = outgoingEdgeLimit;
 		this.incomingEdgeLimit = incomingEdgeLimit;
 		this.minEdgeCount = minEdgeCount;
@@ -188,10 +192,20 @@ public enum StructureType implements XmlResource {
 	 */
 	@Override
 	public String getValue() {
-		return name();
+		return xmlForm;
 	}
 
+	private static Map<String, StructureType> xmlLookup;
+
 	public static StructureType parseStructureType(String s) {
-		return valueOf(s.toUpperCase());
+		if(xmlLookup==null) {
+			Map<String, StructureType> map = new HashMap<>();
+			for(StructureType type : values()) {
+				map.put(type.xmlForm, type);
+			}
+			xmlLookup = map;
+		}
+
+		return xmlLookup.get(s);
 	}
 }

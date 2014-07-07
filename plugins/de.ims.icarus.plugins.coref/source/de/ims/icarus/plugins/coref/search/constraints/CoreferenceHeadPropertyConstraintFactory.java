@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search.constraints;
@@ -44,7 +44,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 	public static final String TOKEN = "headProperty"; //$NON-NLS-1$
 
 	public CoreferenceHeadPropertyConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, 
+		super(TOKEN, NODE_CONSTRAINT_TYPE,
 				"plugins.coref.constraints.headProperty.name",  //$NON-NLS-1$
 				"plugins.coref.constraints.headProperty.description"); //$NON-NLS-1$
 	}
@@ -60,7 +60,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE) || operator.isGrouping())
 			return new CoreferenceHeadPropertyConstraint(value, operator, specifier);
 		else
 			return new CoreferenceHeadPropertyIConstraint(value, operator, specifier);
@@ -73,7 +73,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 		public CoreferenceHeadPropertyConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
-		
+
 		public String getKey() {
 			return getSpecifier().toString();
 		}
@@ -96,7 +96,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 		public CoreferenceHeadPropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
-		
+
 		public String getKey() {
 			return getSpecifier().toString();
 		}

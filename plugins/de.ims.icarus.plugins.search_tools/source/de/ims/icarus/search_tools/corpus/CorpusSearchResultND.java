@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.corpus;
@@ -97,10 +97,9 @@ public class CorpusSearchResultND extends DefaultSearchResultND implements Sente
 
 	@Override
 	public DataList<? extends Object> getEntryList(int... groupIndices) {
-		String key = getKey(groupIndices);
-		List<ResultEntry> list = entries.get(key);
-		
-		return list==null ? null : new EntryList(key);
+		List<ResultEntry> list = getList(groupIndices, false);
+
+		return list==null ? null : new EntryList(groupIndices);
 	}
 
 	@Override
@@ -110,10 +109,10 @@ public class CorpusSearchResultND extends DefaultSearchResultND implements Sente
 
 	protected class EntryList extends AbstractList<SentenceData> implements SentenceDataList {
 
-		final String key;
+		final int[] indices;
 
-		protected EntryList(String key) {
-			this.key = key;
+		protected EntryList(int[] indices) {
+			this.indices = indices==null ? null : indices;
 		}
 
 		/**
@@ -162,14 +161,14 @@ public class CorpusSearchResultND extends DefaultSearchResultND implements Sente
 		@Override
 		public SentenceData get(int index, DataType type,
 				AvailabilityObserver observer) {
-			List<ResultEntry> list = key==null ? totalEntries : entries.get(key);
-			
+			List<ResultEntry> list = indices==null ? totalEntries : getList(indices, false);
+
 			if(list==null) {
 				return null;
 			}
-			
+
 			ResultEntry entry = list.get(index);
-			
+
 			return getTarget().get(entry.getIndex(), type, observer);
 		}
 
@@ -186,9 +185,9 @@ public class CorpusSearchResultND extends DefaultSearchResultND implements Sente
 		 */
 		@Override
 		public int size() {
-			List<ResultEntry> list = key==null ? totalEntries : entries.get(key);
+			List<ResultEntry> list = indices==null ? totalEntries : getList(indices, false);
 			return list==null ? 0 : list.size();
 		}
-		
+
 	}
 }

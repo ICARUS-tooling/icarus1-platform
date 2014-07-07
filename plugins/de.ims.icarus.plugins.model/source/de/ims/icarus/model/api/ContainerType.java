@@ -26,6 +26,8 @@
 package de.ims.icarus.model.api;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.ims.icarus.model.api.edit.EditOperation;
 import de.ims.icarus.model.xml.XmlResource;
@@ -41,7 +43,7 @@ public enum ContainerType implements XmlResource {
 	/**
 	 * The container holds a single {@code Markable}.
 	 */
-	SINGLETON(0, 1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE),
+	SINGLETON("singleton", 0, 1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE), //$NON-NLS-1$
 
 	/**
 	 * The container holds a non-continuous collection
@@ -53,26 +55,28 @@ public enum ContainerType implements XmlResource {
 	 * members
 	 */
 	@Deprecated
-	SET(0, -1),
+	SET("set", 0, -1), //$NON-NLS-1$
 
 	/**
 	 * The container holds a non-continuous but ordered
 	 * collection of {@code Markable}s.
 	 */
-	LIST(0, -1),
+	LIST("list", 0, -1), //$NON-NLS-1$
 
 	/**
 	 * The container holds an ordered and continuous list
 	 * of {@code Markable}s.
 	 */
-	SPAN(0, -1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE);
+	SPAN("span", 0, -1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE); //$NON-NLS-1$
 
 	private final EnumSet<EditOperation> operations;
 	private final int minSize, maxSize;
+	private final String xmlForm;
 
-	private ContainerType(int minSize, int maxSize, EditOperation...operations) {
+	private ContainerType(String xmlForm, int minSize, int maxSize, EditOperation...operations) {
 		this.minSize = minSize;
 		this.maxSize = maxSize;
+		this.xmlForm = xmlForm;
 
 		if(operations==null || operations.length==0) {
 			this.operations = EnumSet.allOf(EditOperation.class);
@@ -134,10 +138,20 @@ public enum ContainerType implements XmlResource {
 	 */
 	@Override
 	public String getValue() {
-		return name();
+		return xmlForm;
 	}
 
+	private static Map<String, ContainerType> xmlLookup;
+
 	public static ContainerType parseContainerType(String s) {
-		return valueOf(s.toUpperCase());
+		if(xmlLookup==null) {
+			Map<String, ContainerType> map = new HashMap<>();
+			for(ContainerType type : values()) {
+				map.put(type.xmlForm, type);
+			}
+			xmlLookup = map;
+		}
+
+		return xmlLookup.get(s);
 	}
 }

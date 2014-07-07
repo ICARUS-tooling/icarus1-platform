@@ -97,6 +97,14 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		public boolean apply(Object value, Object constraint) {
 			return true;
 		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.SearchOperator#isGrouping()
+		 */
+		@Override
+		public boolean isGrouping() {
+			return true;
+		}
 	};
 
 	public static final SearchOperator EQUALS = new DefaultSearchOperator("=", "equals") {  //$NON-NLS-1$//$NON-NLS-2$

@@ -2799,7 +2799,6 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 						ResourceManager.getInstance().get(
 								"plugins.jgraph.graphPresenter.fileTypes.allImages"))); //$NON-NLS-1$
 				fileChooser.setFileFilter(defaultFilter);
-				fileChooser.setFileFilter(defaultFilter);
 
 				fileChooser.setCurrentDirectory(Core.getCore().getDataFolder().toFile());
 				fileChooser.setApproveButtonText(ResourceManager.getInstance().get("save")); //$NON-NLS-1$

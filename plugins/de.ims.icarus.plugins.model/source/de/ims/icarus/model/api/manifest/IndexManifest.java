@@ -25,8 +25,12 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
+import de.ims.icarus.model.xml.XmlResource;
 
 /**
  * Models the description of an indexable mapping in the form of either a
@@ -74,14 +78,14 @@ public interface IndexManifest {
 	 * @version $Id$
 	 *
 	 */
-	public enum Relation {
+	public enum Relation implements XmlResource {
 
 		/**
 		 * Elements from the source and target layer are mapped by one by one. If the
 		 * corresponding {@code Coverage} is {@link Coverage#TOTAL_MONOTONIC} this
 		 * equals the identity function.
 		 */
-		ONE_TO_ONE,
+		ONE_TO_ONE("one-to-one"), //$NON-NLS-1$
 
 		/**
 		 * A single element in the source layer may hold an arbitrary number of elements from
@@ -94,7 +98,7 @@ public interface IndexManifest {
 		 * map source elements to their respective sublist in a data block.
 		 * The corresponding index function is injective.
 		 */
-		ONE_TO_MANY,
+		ONE_TO_MANY("one-to-many"), //$NON-NLS-1$
 
 		/**
 		 * An arbitrary number of (not necessarily monotonic) elements in the source layer map to
@@ -114,7 +118,7 @@ public interface IndexManifest {
 		 * the above technique fails and it might be required to store a dedicated target index value for
 		 * each source element.
 		 */
-		MANY_TO_ONE,
+		MANY_TO_ONE("many-to-one"), //$NON-NLS-1$
 
 		/**
 		 * As the most complex relation version, this one maps an arbitrary number of source elements to
@@ -135,7 +139,13 @@ public interface IndexManifest {
 		 *
 		 * For non-monotonic target elements the rules for the {@link #ONE_TO_MANY} relation apply.
 		 */
-		MANY_TO_MANY;
+		MANY_TO_MANY("many-to-many"); //$NON-NLS-1$
+
+		private final String xmlForm;
+
+		private Relation(String xmlForm) {
+			this.xmlForm = xmlForm;
+		}
 
 		/**
 		 * Returns the inverse version of the current relation. This method is used to obtain the required
@@ -155,6 +165,28 @@ public interface IndexManifest {
 			default:
 				return this;
 			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
+		 */
+		@Override
+		public String getValue() {
+			return xmlForm;
+		}
+
+		private static Map<String, Relation> xmlLookup;
+
+		public static Relation parseRelation(String s) {
+			if(xmlLookup==null) {
+				Map<String, Relation> map = new HashMap<>();
+				for(Relation type : values()) {
+					map.put(type.xmlForm, type);
+				}
+				xmlLookup = map;
+			}
+
+			return xmlLookup.get(s);
 		}
 	}
 
@@ -182,33 +214,35 @@ public interface IndexManifest {
 	 * @version $Id$
 	 *
 	 */
-	public enum Coverage {
+	public enum Coverage implements XmlResource {
 
 		/**
 		 * The entire target index space is covered, but the mapped areas might overlap or be
 		 * in a somewhat "random" fashion.
 		 */
-		TOTAL(true, false),
+		TOTAL("total", true, false), //$NON-NLS-1$
 
 		/**
 		 * No exploitable patterns available in the way of index mapping.
 		 */
-		PARTIAL(false, false),
+		PARTIAL("partial", false, false), //$NON-NLS-1$
 
 		/**
 		 *
 		 */
-		MONOTONIC(false, true),
+		MONOTONIC("monotonic", false, true), //$NON-NLS-1$
 
 		/**
 		 *
 		 */
-		TOTAL_MONOTONIC(true, true),
+		TOTAL_MONOTONIC("total-monotonic", true, true), //$NON-NLS-1$
 		;
 
 		private final boolean total, monotonic;
+		private String xmlForm;
 
-		private Coverage(boolean total, boolean monotonic) {
+		private Coverage(String xmlForm, boolean total, boolean monotonic) {
+			this.xmlForm = xmlForm;
 			this.total = total;
 			this.monotonic = monotonic;
 		}
@@ -239,6 +273,28 @@ public interface IndexManifest {
 		 */
 		public boolean isMonotonic() {
 			return monotonic;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
+		 */
+		@Override
+		public String getValue() {
+			return xmlForm;
+		}
+
+		private static Map<String, Coverage> xmlLookup;
+
+		public static Coverage parseCoverage(String s) {
+			if(xmlLookup==null) {
+				Map<String, Coverage> map = new HashMap<>();
+				for(Coverage type : values()) {
+					map.put(type.xmlForm, type);
+				}
+				xmlLookup = map;
+			}
+
+			return xmlLookup.get(s);
 		}
 	}
 }

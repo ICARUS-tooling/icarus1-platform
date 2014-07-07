@@ -42,9 +42,7 @@ public interface FragmentLayerManifest extends MarkableLayerManifest {
 	TargetLayerManifest getValueLayerManifest();
 
 	/**
-	 * If an annotation other than the default annotation of the linked
-	 * annotation layer should be used, this method returns the key associated
-	 * with the desired annotation. Otherwise it returns {@code null}.
+	 * Returns the key to be used when fetching values for fragmentation.
 	 * @return
 	 */
 	String getAnnotationKey();

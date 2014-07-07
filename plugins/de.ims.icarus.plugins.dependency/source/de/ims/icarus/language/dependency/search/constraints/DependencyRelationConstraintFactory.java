@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.search.constraints;
@@ -29,6 +29,7 @@ import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
+import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.util.Options;
 
@@ -77,7 +78,7 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 		}
 	}
 
-	private static class DependencyRelationCIConstraint extends DefaultConstraint {
+	private static class DependencyRelationCIConstraint extends DefaultCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = -3611860983057645172L;
 

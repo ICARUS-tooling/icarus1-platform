@@ -85,10 +85,6 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 		return (StructureLayerManifest) super.getLayerManifest();
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.StructureManifest#setStructureType(de.ims.icarus.model.api.StructureType)
-	 */
-	@Override
 	public void setStructureType(StructureType structureType) {
 		if (structureType == null)
 			throw new NullPointerException("Invalid structureType"); //$NON-NLS-1$
@@ -104,10 +100,6 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 		return multiRootAllowed;
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.StructureManifest#setMultiRootAllowed(boolean)
-	 */
-	@Override
 	public void setMultiRootAllowed(boolean value) {
 		this.multiRootAllowed = value;
 	}

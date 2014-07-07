@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
@@ -38,32 +38,38 @@ import de.ims.icarus.util.UnsupportedFormatException;
  */
 public interface SearchFactory {
 
+	Search createSearch(String query, String target, Options options) throws Exception;
+
+	String getSerializedForm();
+
+	String getSerializedTarget(Search search);
+
 	/**
 	 * Constructs a new {@code Search} object that can be scheduled
 	 * to run the <i>search-constraints</i> encoded within the
 	 * {@code query} argument. Implementations are required to support
 	 * all the parameters defined in {@code SearchParameters} when passed
 	 * as part of the {@code options} argument.
-	 * 
+	 *
 	 * @throws UnsupportedFormatException in case the {@code query} contains
 	 * illegal {@code SearchConstraint} instances or is of an unsupported
 	 * structure (e.g. a factory for tree-structures would reject a full
 	 * grown graph object)
 	 */
 	Search createSearch(SearchQuery query, Object target, Options options) throws UnsupportedFormatException;
-	
+
 	Search createExampleSearch() throws Exception;
-	
+
 	ConstraintContext getConstraintContext();
-	
+
 	/**
 	 * Creates an empty query usable for setting up
 	 * a search.
 	 */
 	SearchQuery createQuery();
-	
+
 	Editor<Options> createParameterEditor();
-	
+
 	/**
 	 * Returns the class of the {@link QueryEditor} to be used when editing
 	 * queries for this factory. If a  {@code null} value is returned the
@@ -71,7 +77,7 @@ public interface SearchFactory {
 	 * sufficient.
 	 */
 	Class<? extends QueryEditor> getDefaultEditorClass();
-	
+
 	/**
 	 * Generates a context specific label for the given {@code SearchQuery}.
 	 * A return value of {@code null} indicates that the framework should

@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.xml.XmlResource;
+
 
 
 /**
@@ -84,12 +86,14 @@ public interface ImplementationManifest extends ModifiableManifest {
 	 * It is the responsibility of the factory to run a final assignment check
 	 * before returning the instantiated implementation, or, better yet, to perform
 	 * such a check beforehand to prevent potentially unnecessary resource allocation.
+	 * <p>
+	 * Default is {@code false}.
 	 *
 	 * @return
 	 */
 	boolean isUseFactory();
 
-	public enum SourceType {
+	public enum SourceType implements XmlResource {
 
 		/**
 		 * Source is a globally unique extension uid in the form:<br>
@@ -127,6 +131,18 @@ public interface ImplementationManifest extends ModifiableManifest {
 		 * (the {@code source} is not needed any more!).
 		 */
 		DEFAULT;
+
+		/**
+		 * @see de.ims.icarus.model.xml.XmlResource#getValue()
+		 */
+		@Override
+		public String getValue() {
+			return name().toLowerCase();
+		}
+
+		public static SourceType parseSourceType(String s) {
+			return valueOf(s.toUpperCase());
+		}
 	}
 
 	public interface Factory {

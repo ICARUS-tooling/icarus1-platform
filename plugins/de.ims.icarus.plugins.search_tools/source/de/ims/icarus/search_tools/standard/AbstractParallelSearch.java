@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -34,6 +34,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigRegistry;
@@ -46,12 +48,16 @@ import de.ims.icarus.search_tools.SearchGraph;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchMode;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.SearchState;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
 import de.ims.icarus.search_tools.corpus.ConstraintUnifier;
+import de.ims.icarus.search_tools.io.SearchResolver;
+import de.ims.icarus.search_tools.io.SearchWriter;
 import de.ims.icarus.search_tools.result.AbstractSearchResult;
 import de.ims.icarus.search_tools.result.DefaultSearchResult0D;
 import de.ims.icarus.search_tools.result.DefaultSearchResultND;
+import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.dialog.DialogDispatcher;
@@ -70,23 +76,23 @@ import de.ims.icarus.util.data.DataList;
  *
  */
 public abstract class AbstractParallelSearch extends Search {
-	
+
 	public static final int ANNOTATION_BUFFER_SIZE = 300;
-	
+
 	protected SearchResult result;
-	
+
 	protected DataList<?> source;
 	protected int processed;
-	
+
 	protected int pendingWorkers;
 	protected List<Worker> workers = Collections.synchronizedList(new ArrayList<Worker>());
 	protected Set<Integer> pendingIndices = Collections.synchronizedSet(new HashSet<Integer>());
 	protected Queue<ItemBuffer> pendingItems = new LinkedList<>();
-	
+
 	protected final Object notifer = new Object();
-	
+
 	protected int nextItemIndex = 0;
-	
+
 	protected final int resultLimit;
 	protected final SearchMode searchMode;
 	protected final Orientation orientation;
@@ -99,7 +105,7 @@ public abstract class AbstractParallelSearch extends Search {
 		searchMode = getParameters().get(SEARCH_MODE, DEFAULT_SEARCH_MODE);
 		orientation = getParameters().get(SEARCH_ORIENTATION, DEFAULT_SEARCH_ORIENTATION);
 	}
-	
+
 	@Override
 	public boolean init() {
 		if(SearchUtils.isEmpty(getSearchGraph()))
@@ -108,51 +114,51 @@ public abstract class AbstractParallelSearch extends Search {
 			// Validation already shows a dialog
 			return false;
 		}
-		
+
 		initEngine();
-		
+
 		result = createResult();
 		if(result==null) {
 			return false;
 		}
-		
+
 		source = createSource(SearchManager.getTarget(this));
 		if(source==null)
 			throw new IllegalStateException("Invalid source created"); //$NON-NLS-1$
-		
+
 		return true;
 	}
 
 	@Override
 	protected void innerCancel() {
-		
+
 		for(Worker worker : workers) {
 			worker.cancel();
 		}
-		
+
 		// Allow all workers to properly finish their last cycle
 		synchronized (notifer) {
 			notifer.notifyAll();
 		}
-		
+
 		workers.clear();
 	}
-	
+
 	public SearchGraph getSearchGraph() {
 		return getQuery().getSearchGraph();
 	}
-	
+
 	protected ItemRequestResult nextItem(ItemBuffer buffer) {
 		if(isCancelled()) {
 			return ItemRequestResult.SEARCH_FINISHED;
 		}
-		
+
 		synchronized (result) {
 			if(resultLimit>0 && result.getTotalMatchCount()>=resultLimit) {
 				return ItemRequestResult.RESULT_FILLED;
 			}
 		}
-		
+
 		// Check cached items
 		synchronized (pendingItems) {
 			ItemBuffer cached = pendingItems.poll();
@@ -161,14 +167,14 @@ public abstract class AbstractParallelSearch extends Search {
 				return ItemRequestResult.ITEM_AVAILABLE;
 			}
 		}
-		
+
 		synchronized (this) {
 			int sourceSize = source.size();
 			int index = nextItemIndex++;
-			
+
 			if(index<sourceSize) {
 				Object data = getTargetItem(index);
-				
+
 				if(data!=null) {
 					buffer.set(index, data);
 					return ItemRequestResult.ITEM_AVAILABLE;
@@ -178,36 +184,36 @@ public abstract class AbstractParallelSearch extends Search {
 				}
 			}
 		}
-		
+
 		return ItemRequestResult.NO_MORE_ITEMS;
 	}
-	
+
 	protected boolean hasUnprocessedItems() {
 		if(isCancelled()) {
 			return false;
 		}
-		
+
 		synchronized (pendingItems) {
 			if(!pendingItems.isEmpty()) {
 				return true;
 			}
 		}
-		
+
 		synchronized (this) {
 			if(nextItemIndex<source.size()) {
 				return true;
 			}
 		}
-		
+
 		return !pendingIndices.isEmpty();
 	}
-	
+
 	protected void awaitItem() throws InterruptedException {
 		synchronized (notifer) {
 			notifer.wait();
 		}
 	}
-	
+
 	protected void itemProcessed(ItemBuffer buffer) {
 		synchronized (this) {
 			processed++;
@@ -215,7 +221,7 @@ public abstract class AbstractParallelSearch extends Search {
 			setProgress((int)(processed/total * 100d));
 		}
 	}
-	
+
 	/**
 	 * Tries to fetch an item from the target list. If the
 	 * item is currently not available (indicated by a return
@@ -224,91 +230,91 @@ public abstract class AbstractParallelSearch extends Search {
 	protected Object getTargetItem(int index) {
 		return source.get(index);
 	}
-	
+
 	protected void offerItem(int index, Object data) {
 		synchronized (pendingItems) {
 			pendingItems.add(new ItemBuffer(index, data));
 		}
-		
+
 		pendingIndices.remove(index);
-		
+
 		synchronized (notifer) {
 			// TODO should we notify more than one worker?
 			notifer.notify();
 		}
 	}
-	
+
 	protected synchronized void finalizeResult(boolean broken) {
 		if(result.isFinal()) {
 			return;
 		}
-		
+
 		if(broken) {
 			result.clear();
 		}
-		
+
 		result.finish();
 	}
-	
+
 	protected abstract boolean validateGraph();
-	
+
 	protected abstract void initEngine();
-	
+
 	protected abstract DataList<?> createSource(Object target);
 
 	protected SearchResult createResult() {
 		List<SearchConstraint> groupConstraints = null;
-		
+
 		try {
 			// Try to unify group constraints
 			groupConstraints = new ConstraintUnifier(getSearchGraph()).getGroupConstraints();
 		} catch(Exception e) {
-			LoggerFactory.log(this, Level.WARNING, 
+			LoggerFactory.log(this, Level.WARNING,
 					"Aggregation of group-constraints failed", e); //$NON-NLS-1$
 		}
-		
+
 		/* If unifying the group constraints failed allow user
 		 * to manually override and switch to raw collection of
 		 * all existing group constraints (ignoring duplicates)
-		 * 
-		 * 'ok' will cause collection of all group constraints 
+		 *
+		 * 'ok' will cause collection of all group constraints
 		 * without aggregation check
 		 */
 		if(groupConstraints==null) {
 			boolean doPlainUnify = ConfigRegistry.getGlobalRegistry().getBoolean(
 					"plugins.searchTools.alwaysUnifyNonAggregatedConstraints"); //$NON-NLS-1$
-			
+
 			if(!doPlainUnify) {
 				MutableBoolean check = new MutableBoolean(false);
 				doPlainUnify = DialogFactory.getGlobalFactory().showCheckedConfirm(
-						null, DialogFactory.CONTINUE_CANCEL_OPTION, check, 
+						null, DialogFactory.CONTINUE_CANCEL_OPTION, check,
 						"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
 						"config.alwaysUnifyNonAggregatedConstraints", //$NON-NLS-1$
 						"plugins.searchTools.graphValidation.ununifiedGroups"); //$NON-NLS-1$
-				
+
 				if(check.getValue()) {
 					ConfigRegistry.getGlobalRegistry().setValue(
 							"plugins.searchTools.alwaysUnifyNonAggregatedConstraints",  //$NON-NLS-1$
 							true);
 				}
 			}
-			
+
 			if(doPlainUnify) {
 				groupConstraints = ConstraintUnifier.collectUnunifiedGroupConstraints(getSearchGraph());
 			} else {
 				return null;
 			}
 		}
-		
+
 		if(groupConstraints==null) {
 			groupConstraints = Collections.emptyList();
 		}
-		
+
 		ContentType entryType = ContentTypeRegistry.getEntryType(getTarget());
-		
+
 		/* Allow user to run search with a dimension that is not
 		 * covered by a specialized result presenter.
-		 * 
+		 *
 		 * 'ok' will cause search to ignore group count limits
 		 */
 		boolean forceFallback = false;
@@ -316,7 +322,7 @@ public abstract class AbstractParallelSearch extends Search {
 		List<Extension> presenters = SearchManager.getResultPresenterExtensions(
 				entryType, dimension);
 		if(presenters==null || presenters.isEmpty()) {
-			if(!DialogFactory.getGlobalFactory().showConfirm(null, DialogFactory.CONTINUE_CANCEL_OPTION, 
+			if(!DialogFactory.getGlobalFactory().showConfirm(null, DialogFactory.CONTINUE_CANCEL_OPTION,
 					"plugins.searchTools.graphValidation.title",  //$NON-NLS-1$
 					"plugins.searchTools.graphValidation.groupLimitExceeded",  //$NON-NLS-1$
 					dimension)) {
@@ -324,54 +330,54 @@ public abstract class AbstractParallelSearch extends Search {
 			}
 			forceFallback = true;
 		}
-		
+
 		SearchResult result = createResult(groupConstraints);
-		
+
 		if(forceFallback) {
 			result.setProperty(SearchResult.FORCE_SIMPLE_OUTLINE_PROPERTY, forceFallback);
 		}
-		
+
 		ResultAnnotator annotator = createAnnotator();
 		if(annotator!=null && result instanceof AbstractSearchResult) {
 			AnnotationBuffer annotationBuffer = new AnnotationBuffer(
 					result, annotator, ANNOTATION_BUFFER_SIZE);
 			((AbstractSearchResult)result).setAnnotationBuffer(annotationBuffer);
 		}
-		
+
 		return result;
 	}
-	
+
 	protected SearchResult createResult(List<SearchConstraint> groupConstraints) {
-		
+
 		/* Only distinguish between 0D and ND where N>0 since 0D
 		 * can be implemented efficiently by using a simple list storage.
 		 */
 		if(groupConstraints.isEmpty()) {
 			return new DefaultSearchResult0D(this);
 		} else {
-			return new DefaultSearchResultND(this, 
+			return new DefaultSearchResultND(this,
 					groupConstraints.toArray(new SearchConstraint[0]));
 		}
-		
+
 	}
-	
+
 	protected abstract ResultAnnotator createAnnotator();
-	
+
 	protected abstract Worker createWorker(int id);
-	
+
 	protected synchronized void workerFinished(Worker worker) {
 		pendingWorkers--;
 		if(pendingWorkers>0) {
 			return;
 		}
-		
+
 		// Properly finish search
 		if(!isDone()) {
 			finish();
 		}
 		finalizeResult(false);
 	}
-	
+
 	protected int getMaxWorkerCount() {
 		int cores = ConfigRegistry.getGlobalRegistry().getInteger("plugins.searchTools.maxCores"); //$NON-NLS-1$
 		int availableCores = Math.max(1, Runtime.getRuntime().availableProcessors()-1);
@@ -379,7 +385,7 @@ public abstract class AbstractParallelSearch extends Search {
 			availableCores = Math.min(cores, availableCores);
 		}
 		cores = Math.max(availableCores, 1);
-		
+
 		return cores;
 	}
 
@@ -388,7 +394,7 @@ public abstract class AbstractParallelSearch extends Search {
 	 */
 	@Override
 	public boolean innerExecute() throws Exception {
-		
+
 		if(result==null) {
 			return false;
 		}
@@ -398,17 +404,17 @@ public abstract class AbstractParallelSearch extends Search {
 
 		// Obtain number of possible concurrent workers
 		int cores = getMaxWorkerCount();
-		
+
 		LoggerFactory.log(this, Level.INFO, "Executing search "+getClass().getSimpleName()+" on "+cores+" cores"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		
+
 		pendingWorkers = cores;
-		
+
 		for(int i=0; i<cores; i++) {
 			Worker worker = createWorker(i);
 			workers.add(worker);
 			TaskManager.getInstance().execute(worker);
 		}
-		
+
 		return true;
 	}
 
@@ -428,7 +434,65 @@ public abstract class AbstractParallelSearch extends Search {
 	public SearchResult getResult() {
 		return result;
 	}
-	
+
+	/**
+	 * @see de.ims.icarus.search_tools.Search#getSearchResolver()
+	 */
+	@Override
+	public SearchResolver getSearchResolver() {
+		return new DefaultSearchResolver();
+	}
+
+	public class DefaultSearchResolver implements SearchResolver {
+
+//		/**
+//		 * @see de.ims.icarus.search_tools.io.SearchResolver#initSearch()
+//		 */
+//		@Override
+//		public void initSearch() {
+//			init();
+//		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.io.SearchResolver#writeResultEntries(de.ims.icarus.search_tools.io.SearchWriter)
+		 */
+		@Override
+		public void writeResultEntries(SearchWriter writer)
+				throws XMLStreamException {
+			AbstractSearchResult result = (AbstractSearchResult) getResult();
+
+			result.writeEntries(writer);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.io.SearchResolver#addResultEntry(de.ims.icarus.search_tools.result.ResultEntry, int[])
+		 */
+		@Override
+		public void addResultEntry(ResultEntry entry, int... indices) {
+			AbstractSearchResult result = (AbstractSearchResult) getResult();
+			result.addEntry(entry, indices);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.io.SearchResolver#finalizeSearch()
+		 */
+		@Override
+		public void finalizeSearch() {
+			finalizeResult(false);
+			setState(SearchState.DONE);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.io.SearchResolver#setGroupLabels(int, java.lang.String[])
+		 */
+		@Override
+		public void setGroupLabels(int dimension, String[] labels) {
+			AbstractSearchResult result = (AbstractSearchResult) getResult();
+			result.setGroupInstances(dimension, labels);
+		}
+
+	}
+
 	protected static enum ItemRequestResult {
 		ITEM_AVAILABLE,
 		ITEM_PENDING,
@@ -436,53 +500,53 @@ public abstract class AbstractParallelSearch extends Search {
 		RESULT_FILLED,
 		SEARCH_FINISHED;
 	}
-	
+
 	protected abstract class Worker implements Runnable {
 
 		protected ItemBuffer buffer;
-		
+
 		protected boolean cancelled = false;
-		
+
 		private final int id;
-		
+
 		private Thread thread;
-		
+
 		protected Worker(int id) {
 			this.id = id;
-			
+
 			init();
-			
+
 			buffer = new ItemBuffer();
 		}
-		
+
 		protected abstract void init();
-		
+
 		public String getId() {
 			return "SearchWorker-"+id; //$NON-NLS-1$
 		}
-		
+
 		@Override
 		public String toString() {
 			return getId();
 		}
-		
+
 		public void cancel() {
 			cancelled = true;
 			// TODO maybe a bit redundant?
 			getThread().interrupt();
 		}
-		
+
 		public boolean isCancelled() {
 			return cancelled || AbstractParallelSearch.this.isCancelled() || Thread.currentThread().isInterrupted();
 		}
-		
+
 		public final Thread getThread() {
 			if(thread==null)
 				throw new IllegalStateException("Worker still pending for execution"); //$NON-NLS-1$
-			
+
 			return thread;
 		}
-				
+
 		/**
 		 * @see java.lang.Runnable#run()
 		 */
@@ -490,14 +554,14 @@ public abstract class AbstractParallelSearch extends Search {
 		public void run() {
 			// Save reference to current thread
 			thread = Thread.currentThread();
-			
+
 			try {
 				search_loop : while(!isCancelled() && hasUnprocessedItems()) {
 					switch (nextItem(buffer)) {
 					case ITEM_AVAILABLE: {
 							// Perform search operation on item
 							process();
-							
+
 							// Notify search of processed item
 							itemProcessed(buffer);
 						}
@@ -514,44 +578,44 @@ public abstract class AbstractParallelSearch extends Search {
 						break search_loop;
 					}
 				}
-				
+
 			} catch(Throwable t) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Unexpected error during search", t); //$NON-NLS-1$
 				AbstractParallelSearch.this.cancel();
-				
+
 				String message = "plugins.searchTools.tools.dialogs.generalError"; //$NON-NLS-1$
 				if(t instanceof OutOfMemoryError) {
 					message = "plugins.searchTools.tools.dialogs.outOfMemoryError"; //$NON-NLS-1$
 				}
-				DialogDispatcher dispatcher = new DialogDispatcher(null, 
+				DialogDispatcher dispatcher = new DialogDispatcher(null,
 						"plugins.searchTools.tools.dialogs.errorTitle",  //$NON-NLS-1$
 						message, t);
 				dispatcher.showAsError();
 			} finally {
 				cleanup();
 			}
-			
+
 			workerFinished(this);
 		}
-		
+
 		protected abstract void process();
-		
+
 		protected abstract void cleanup();
 	}
-	
+
 	protected static class ItemBuffer {
 		private int index;
 		private Object data;
-		
+
 		public ItemBuffer() {
 			// no-op
 		}
-		
+
 		public ItemBuffer(int index, Object data) {
 			set(index, data);
 		}
-		
+
 		public void set(int index, Object data) {
 			this.index = index;
 			this.data = data;
@@ -572,7 +636,7 @@ public abstract class AbstractParallelSearch extends Search {
 		public void setData(Object data) {
 			this.data = data;
 		}
-		
+
 		public void copy(ItemBuffer source) {
 			index = source.index;
 			data = source.data;

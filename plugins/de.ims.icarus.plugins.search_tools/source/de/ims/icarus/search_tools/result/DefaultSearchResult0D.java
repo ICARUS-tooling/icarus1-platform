@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.result;
@@ -30,8 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.event.ChangeListener;
+import javax.xml.stream.XMLStreamException;
 
 import de.ims.icarus.search_tools.Search;
+import de.ims.icarus.search_tools.io.SearchWriter;
 import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataList;
@@ -56,16 +58,16 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 
 	public DefaultSearchResult0D(Search search, int size) {
 		super(search, null);
-		
+
 		entries = new ArrayList<>(size);
 	}
 
 	public DefaultSearchResult0D(Search search, List<ResultEntry> entries) {
 		super(search, null);
-		
+
 		if(entries==null)
 			throw new NullPointerException("Invalid entry list"); //$NON-NLS-1$
-		
+
 		this.entries = new ArrayList<>(entries);
 	}
 
@@ -94,7 +96,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 		if(wrapper==null) {
 			wrapper = new EntryList();
 		}
-		
+
 		return wrapper;
 	}
 
@@ -155,7 +157,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 	public int getGroupMatchCount(int groupId, int index) {
 		return 0;
 	}
-	
+
 	protected synchronized void commit(ResultEntry entry) {
 		entries.add(entry);
 		hitCount += entry.getHitCount();
@@ -168,7 +170,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 	public void clear() {
 		if(finalized)
 			throw new IllegalStateException("Result is already final - clearing not possible"); //$NON-NLS-1$
-		
+
 		entries.clear();
 	}
 
@@ -176,7 +178,25 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 	public int getTotalHitCount() {
 		return hitCount;
 	}
-	
+
+	/**
+	 * @see de.ims.icarus.search_tools.result.AbstractSearchResult#writeEntries(de.ims.icarus.search_tools.io.SearchWriter)
+	 */
+	@Override
+	public void writeEntries(SearchWriter writer) throws XMLStreamException {
+		for(ResultEntry entry : entries) {
+			writer.writeEntry(entry);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.result.AbstractSearchResult#addEntry(de.ims.icarus.search_tools.result.ResultEntry, int[])
+	 */
+	@Override
+	public void addEntry(ResultEntry entry, int... groupIndices) {
+		entries.add(entry);
+	}
+
 	protected class Result0DCache implements GroupCache {
 
 		/**
@@ -210,7 +230,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 		public void commit(ResultEntry entry) {
 			DefaultSearchResult0D.this.commit(entry);
 		}
-		
+
 	}
 
 	protected class EntryList extends AbstractList<Object> implements DataList<Object> {

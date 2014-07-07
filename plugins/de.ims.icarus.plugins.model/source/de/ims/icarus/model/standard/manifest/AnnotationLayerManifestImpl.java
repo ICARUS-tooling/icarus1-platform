@@ -43,7 +43,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public class AnnotationLayerManifestImpl extends AbstractLayerManifest<AnnotationLayerManifest> implements AnnotationLayerManifest {
 
 	private Map<String, AnnotationManifest> annotationManifests;
-	private AnnotationManifest defaultAnnotationManifest;
+	private String defaultKey;
 	private boolean deepAnnotation = false;
 	private boolean allowUnknownKeys = false;
 	private boolean searchable = true;
@@ -112,22 +112,18 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.AnnotationLayerManifest#getDefaultAnnotationManifest()
+	 * @see de.ims.icarus.model.api.manifest.AnnotationLayerManifest#getDefaultKey()
 	 */
 	@Override
-	public AnnotationManifest getDefaultAnnotationManifest() {
-		return defaultAnnotationManifest;
+	public String getDefaultKey() {
+		return defaultKey;
 	}
 
 	/**
 	 * @param defaultAnnotationManifest the defaultAnnotationManifest to set
 	 */
-	public void setDefaultAnnotationManifest(
-			AnnotationManifest defaultAnnotationManifest) {
-		if (defaultAnnotationManifest == null)
-			throw new NullPointerException("Invalid defaultAnnotationManifest"); //$NON-NLS-1$
-
-		this.defaultAnnotationManifest = defaultAnnotationManifest;
+	public void setDefaultKey(String defaultKey) {
+		this.defaultKey = defaultKey;
 	}
 
 	/**

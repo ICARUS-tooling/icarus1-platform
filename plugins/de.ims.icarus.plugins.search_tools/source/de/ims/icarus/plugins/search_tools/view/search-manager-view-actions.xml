@@ -18,6 +18,16 @@
 	<action id="plugins.searchTools.searchManagerView.cancelSearchAction"
 		name="${id}.name" desc="${id}.description" icon="search_cancel.png" />
 		
+	<!-- Save Search -->
+	<action id="plugins.searchTools.searchManagerView.saveSearchAction"
+		template="actions.default.exportAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Open Search -->
+	<action id="plugins.searchTools.searchManagerView.openSearchAction"
+		template="actions.default.importAction"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- Load Search Target -->
 	<action id="plugins.searchTools.searchManagerView.loadSearchTargetAction"
 		name="${id}.name" desc="${id}.description" icon="search_load.png" />
@@ -75,9 +85,12 @@
 	<!-- ToolBar List for history area -->
 	<action-list id="plugins.searchTools.searchManagerView.historyToolBarList">
 		<item type="label" value="plugins.searchTools.searchManagerView.labels.history" />
-		<item type="separator" value="20" />
+		<item type="separator" />
 		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.saveSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.openSearchAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />
@@ -89,6 +102,9 @@
 	<action-list id="plugins.searchTools.searchManagerView.historyPopupMenuList">
 		<item type="action" value="plugins.searchTools.searchManagerView.clearHistoryAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.removeSearchAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.saveSearchAction" />
+		<item type="action" value="plugins.searchTools.searchManagerView.openSearchAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />

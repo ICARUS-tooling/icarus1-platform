@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search.constraints;
@@ -44,7 +44,7 @@ public class CoreferenceEdgePropertyConstraintFactory extends AbstractConstraint
 	public static final String TOKEN = "edgeProperty"; //$NON-NLS-1$
 
 	public CoreferenceEdgePropertyConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, 
+		super(TOKEN, EDGE_CONSTRAINT_TYPE,
 				"plugins.coref.constraints.edgeProperty.name",  //$NON-NLS-1$
 				"plugins.coref.constraints.edgeProperty.description"); //$NON-NLS-1$
 	}
@@ -60,7 +60,7 @@ public class CoreferenceEdgePropertyConstraintFactory extends AbstractConstraint
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE) || operator.isGrouping())
 			return new CoreferenceEdgePropertyConstraint(value, operator, specifier);
 		else
 			return new CoreferenceEdgePropertyIConstraint(value, operator, specifier);
@@ -73,7 +73,7 @@ public class CoreferenceEdgePropertyConstraintFactory extends AbstractConstraint
 		public CoreferenceEdgePropertyConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
-		
+
 		public String getKey() {
 			return getSpecifier().toString();
 		}
@@ -96,7 +96,7 @@ public class CoreferenceEdgePropertyConstraintFactory extends AbstractConstraint
 		public CoreferenceEdgePropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
-		
+
 		public String getKey() {
 			return getSpecifier().toString();
 		}

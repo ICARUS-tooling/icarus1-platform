@@ -40,13 +40,5 @@ public interface StructureManifest extends ContainerManifest {
 	 */
 	StructureType getStructureType();
 
-	/**
-	 * Changes the type of this structure
-	 * @param structureType
-	 */
-	void setStructureType(StructureType structureType);
-
 	boolean isMultiRootAllowed();
-
-	void setMultiRootAllowed(boolean value);
 }

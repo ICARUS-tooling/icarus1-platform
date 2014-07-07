@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
@@ -41,56 +41,60 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  *
  */
 public abstract class SearchOperator implements Serializable {
-	
+
 	private static final long serialVersionUID = 771727767289393418L;
 
 	private String symbol;
-	
+
 	@SuppressWarnings("unused")
 	private SearchOperator() {
 		// no-op
 	}
-	
+
 	protected SearchOperator(String symbol) {
 		if(symbol==null)
 			throw new NullPointerException("Invalid symbol"); //$NON-NLS-1$
-		
+
 		this.symbol = symbol;
 	}
-	
+
 	public String getSymbol() {
 		return symbol;
 	}
-	
+
 	public abstract boolean apply(Object value, Object constraint);
-	
+
 	public abstract String getName();
 
 	public abstract String getDescription();
-	
+
+	public boolean isGrouping() {
+		return false;
+	}
+
 	private static Map<String, SearchOperator> available = new LinkedHashMap<>();
-	
+
 	public static void register(SearchOperator operator) {
 		if(operator==null)
 			throw new NullPointerException("Invalid operator"); //$NON-NLS-1$
 		if(available.containsKey(operator.getSymbol()))
 			throw new DuplicateIdentifierException("Duplicate operator symbol: "+operator.getSymbol()); //$NON-NLS-1$
-		
+
 		available.put(operator.getSymbol(), operator);
 	}
-	
+
 	public static SearchOperator getOperator(String symbol) {
 		return available.get(symbol);
 	}
-	
+
 	public static Set<String> symbols() {
 		return CollectionUtils.getSetProxy(available.keySet());
 	}
-	
+
 	public static Collection<SearchOperator> operators() {
 		return CollectionUtils.getCollectionProxy(available.values());
 	}
-	
+
 	public static SearchOperator[] values() {
 		SearchOperator[] result = new SearchOperator[available.size()];
 		return available.values().toArray(result);

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search.constraints;
@@ -44,7 +44,7 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 	public static final String TOKEN = "sentenceProperty"; //$NON-NLS-1$
 
 	public CoreferenceSentencePropertyConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, 
+		super(TOKEN, NODE_CONSTRAINT_TYPE,
 				"plugins.coref.constraints.sentenceProperty.name",  //$NON-NLS-1$
 				"plugins.coref.constraints.sentenceProperty.description"); //$NON-NLS-1$
 	}
@@ -60,7 +60,7 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE) || operator.isGrouping())
 			return new CoreferenceSentencePropertyConstraint(value, operator, specifier);
 		else
 			return new CoreferenceSentencePropertyIConstraint(value, operator, specifier);
@@ -73,7 +73,7 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 		public CoreferenceSentencePropertyConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
-		
+
 		public String getKey() {
 			return getSpecifier().toString();
 		}
@@ -96,7 +96,7 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 		public CoreferenceSentencePropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
-		
+
 		public String getKey() {
 			return getSpecifier().toString();
 		}

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -40,7 +40,7 @@ import de.ims.icarus.search_tools.SearchOperator;
 public class DefaultCaseInsensitiveConstraint extends DefaultConstraint {
 
 	private static final long serialVersionUID = -7648734660494017554L;
-	
+
 	@XmlTransient
 	protected Object lowercaseValue;
 
@@ -53,7 +53,7 @@ public class DefaultCaseInsensitiveConstraint extends DefaultConstraint {
 			SearchOperator operator, Object specifier) {
 		super(token, value, operator, specifier);
 	}
-	
+
 	@Override
 	protected Object getConstraint() {
 		return lowercaseValue;
@@ -68,7 +68,7 @@ public class DefaultCaseInsensitiveConstraint extends DefaultConstraint {
 	@Override
 	public void setValue(Object value) {
 		super.setValue(value);
-		lowercaseValue = ((String)value).toLowerCase();
+		lowercaseValue = String.valueOf(value).toLowerCase();
 	}
 
 	public Object getLowercaseValue() {

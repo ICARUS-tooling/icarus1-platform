@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.result;
@@ -28,16 +28,17 @@ package de.ims.icarus.search_tools.result;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.event.ChangeListener;
+import javax.xml.stream.XMLStreamException;
 
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
+import de.ims.icarus.search_tools.io.SearchWriter;
 import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
@@ -50,18 +51,20 @@ import de.ims.icarus.util.data.DataList;
  */
 public class DefaultSearchResultND extends AbstractSearchResult {
 
-	protected Map<String, List<ResultEntry>> entries;
+	protected Map<Key, List<ResultEntry>> entries;
 	protected List<ResultEntry> totalEntries;
 	protected int hitCount = 0;
 	protected final int[] indexBuffer;
-	
+
 	protected int[][] groupMatchCounts;
-	
+
+	private final Key dummyKey;
+
 	public static final int DEFAULT_START_SIZE = 200;
-	
+
 	/**
 	 * Keeps track of the total permutation to be applied
-	 * on entries stored in {@link ResultNDCache} objects created 
+	 * on entries stored in {@link ResultNDCache} objects created
 	 * from this result.
 	 */
 	protected final int[] indexPermutator;
@@ -74,31 +77,49 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	public DefaultSearchResultND(Search search,
 			SearchConstraint[] groupConstraints, int size) {
 		super(search, groupConstraints);
-		
+
 		indexPermutator = new int[getDimension()];
 		CollectionUtils.fillAscending(indexPermutator);
-		
+
 		indexBuffer = new int[getDimension()];
 		groupMatchCounts = new int[getDimension()][];
-		
-		entries = new HashMap<>(size);
+
+		entries = new LinkedHashMap<>(size);
 		totalEntries = new ArrayList<>(size);
+
+		dummyKey = new Key(getDimension());
 	}
 
 	StringBuilder keyBuilder = new StringBuilder(10);
 
-	protected String getKey(int... indices) {
+//	protected String getKey(int... indices) {
+//		if(indices.length!=indexBuffer.length)
+//			throw new IllegalArgumentException("Illegal indices count: expected "+indexBuffer.length+" - got "+indices.length); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		keyBuilder.setLength(0);
+//		int last = indices.length - 1;
+//		for (int i = 0; i < last; i++) {
+//			keyBuilder.append(indices[i]).append('_');
+//		}
+//		keyBuilder.append(indices[last]);
+//
+//		return keyBuilder.toString();
+//	}
+
+	// UNSYNCHRONIZED ACCESS
+	protected List<ResultEntry> getList(int[] indices, boolean createIfMissing) {
 		if(indices.length!=indexBuffer.length)
 			throw new IllegalArgumentException("Illegal indices count: expected "+indexBuffer.length+" - got "+indices.length); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		keyBuilder.setLength(0);
-		int last = indices.length - 1;
-		for (int i = 0; i < last; i++) {
-			keyBuilder.append(indices[i]).append('_');
-		}
-		keyBuilder.append(indices[last]);
 
-		return keyBuilder.toString();
+		dummyKey.set(indices);
+
+		List<ResultEntry> list = entries.get(dummyKey);
+		if(list==null && createIfMissing) {
+			list = new ArrayList<>(30);
+			entries.put(dummyKey.clone(), list);
+		}
+
+		return list;
 	}
 
 	@Override
@@ -106,12 +127,12 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		int dif = getDimension()-groupInstances.length;
 		if(dif<0)
 			throw new IllegalArgumentException("Number of instances for sub-result exceeds current dimension: "+groupInstances.length); //$NON-NLS-1$
-		
+
 		if(dif==0) {
 			List<ResultEntry> list = getRawEntryList(groupInstances);
 			DefaultSearchResult0D subResult = new DefaultSearchResult0D(getSource(), list);
 			subResult.setAnnotationBuffer(getAnnotationBuffer());
-			
+
 			return subResult;
 		} else {
 			return new SubResult(this, groupInstances);
@@ -131,10 +152,9 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	 */
 	@Override
 	public int getMatchCount(int... groupIndices) {
-		String key = getKey(groupIndices);
-		List<ResultEntry> list = entries.get(key);
-		
-		return list==null ? 0 : list.size(); 
+		List<ResultEntry> list = getList(groupIndices, false);
+
+		return list==null ? 0 : list.size();
 	}
 
 	/**
@@ -159,10 +179,9 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	 */
 	@Override
 	public DataList<? extends Object> getEntryList(int... groupIndices) {
-		String key = getKey(groupIndices);
-		List<ResultEntry> list = entries.get(key);
-		
-		return list==null ? null : new EntryList(key);
+		List<ResultEntry> list = getList(groupIndices, false);
+
+		return list==null ? null : new EntryList(groupIndices);
 	}
 
 	/**
@@ -170,8 +189,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	 */
 	@Override
 	public List<ResultEntry> getRawEntryList(int... groupIndices) {
-		String key = getKey(groupIndices);
-		return entries.get(key);
+		return getList(groupIndices, false);
 	}
 
 	/**
@@ -179,8 +197,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	 */
 	@Override
 	public Object getEntryAt(int index, int... groupIndices) {
-		String key = getKey(groupIndices);
-		List<ResultEntry> list = entries.get(key);
+		List<ResultEntry> list = getList(groupIndices, false);
 		if(list==null) {
 			return null;
 		}
@@ -193,8 +210,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	 */
 	@Override
 	public ResultEntry getRawEntryAt(int index, int... groupIndices) {
-		String key = getKey(groupIndices);
-		List<ResultEntry> list = entries.get(key);
+		List<ResultEntry> list = getList(groupIndices, false);
 		return list==null ? null : list.get(index);
 	}
 
@@ -207,15 +223,15 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	}
 
 	protected synchronized void commit(ResultEntry entry, ResultNDCache cache) {
-		
+
 		for (int i = 0; i < indexBuffer.length; i++) {
 			String value = cache.instanceBuffer[indexPermutator[i]];
 			if(value==null || "".equals(value)) { //$NON-NLS-1$
 				value = DUMMY_INSTANCE;
 			}
 			int index = groupInstances[i].substitute(value);
-			indexBuffer[i] = index; 
-			
+			indexBuffer[i] = index;
+
 			int[] counts = groupMatchCounts[i];
 			if(counts==null) {
 				counts = new int[Math.max(index*2, 100)];
@@ -228,17 +244,12 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		}
 
 		// Generate key and ensure valid result list
-		String key = getKey(indexBuffer);
-		List<ResultEntry> list = entries.get(key);
-		if (list == null) {
-			list = new ArrayList<>(30);
-			entries.put(key, list);
-		}
+		List<ResultEntry> list = getList(indexBuffer, true);
 
 		// finally add the currently processed entry to the result list
 		list.add(entry);
 		totalEntries.add(entry);
-		
+
 		hitCount += entry.getHitCount();
 	}
 
@@ -249,7 +260,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	public void clear() {
 		if(finalized)
 			throw new IllegalStateException("Result is already final - clearing not possible"); //$NON-NLS-1$
-		
+
 		entries.clear();
 		totalEntries.clear();
 	}
@@ -277,69 +288,149 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	public synchronized boolean reorder(int[] permutation) {
 		if(permutation==null || permutation.length==0)
 			throw new NullPointerException("Invalid permutation"); //$NON-NLS-1$
-		
+
 		/*System.out.printf("reorder call: perm=%s dim=%d\n",  //$NON-NLS-1$
 				Arrays.toString(permutation), getDimension());*/
-		
+
 		int dimension = getDimension();
 		if(permutation.length!=dimension)
 			throw new IllegalArgumentException();
-		
-		// we only allow reordering from 3 dimensions on 
+
+		// we only allow reordering from 3 dimensions on
 		if(dimension<3) {
 			return false;
 		}
-		
+
 		// nothing to do when permutation array is sorted
 		if(CollectionUtils.isAscending(permutation))
 			return true;
-		
+
 		// generate an easy way to reshape key strings
-		int[] tmp = new int[dimension];
-		CollectionUtils.fillAscending(tmp);
-		CollectionUtils.permutate(tmp, permutation);
-		String pattern = "", replacement = ""; //$NON-NLS-1$ //$NON-NLS-2$
-		for(int i=0; i<dimension; i++) {
-			pattern += "(\\d+)"; //$NON-NLS-1$
-			replacement += "$"+(tmp[i]+1); //$NON-NLS-1$
-			if(i==dimension-1)
-				break;
-			pattern += "_"; //$NON-NLS-1$
-			replacement += "_"; //$NON-NLS-1$
-		}
-		
+//		int[] tmp = new int[dimension];
+//		CollectionUtils.fillAscending(tmp);
+//		CollectionUtils.permutate(tmp, permutation);
+//		String pattern = "", replacement = ""; //$NON-NLS-1$ //$NON-NLS-2$
+//		for(int i=0; i<dimension; i++) {
+//			pattern += "(\\d+)"; //$NON-NLS-1$
+//			replacement += "$"+(tmp[i]+1); //$NON-NLS-1$
+//			if(i==dimension-1)
+//				break;
+//			pattern += "_"; //$NON-NLS-1$
+//			replacement += "_"; //$NON-NLS-1$
+//		}
+
 		/*System.out.printf("reordering result: pattern='%s' replacement='%s'\n", //$NON-NLS-1$
 				pattern, replacement);*/
-		
+
 		// Entry buffer, preserves order
-		Map<String, List<ResultEntry>> buffer = 
-			new LinkedHashMap<String, List<ResultEntry>>(entries.size());
-		
+		Map<Key, List<ResultEntry>> buffer = new LinkedHashMap<>(entries.size());
+
 		// Relink all entry lists
-		String key;
-		for(Entry<String, List<ResultEntry>> entry : entries.entrySet()) {
-			key = entry.getKey().replaceAll(pattern, replacement);
-			buffer.put(key, entry.getValue());
+		int[] tmp = new int[getDimension()];
+		for(Entry<Key, List<ResultEntry>> entry : entries.entrySet()) {
+			entry.getKey().copyTo(tmp);;
+			CollectionUtils.permutate(tmp, permutation);
+
+			buffer.put(new Key(tmp), entry.getValue());
 		}
-		
+
 		// Copy them back
 		entries.clear();
 		entries.putAll(buffer);
-		
+
 		// Apply permutation to the internal arrays
 		CollectionUtils.permutate(indexPermutator, permutation);
 		CollectionUtils.permutate(groupConstraints, permutation);
 		CollectionUtils.permutate(groupMatchCounts, permutation);
 		CollectionUtils.permutate(groupInstances, permutation);
 		CollectionUtils.permutate(groupTokens, permutation);
-		
+
 		return true;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.result.AbstractSearchResult#writeEntries(de.ims.icarus.search_tools.io.SearchWriter)
+	 */
+	@Override
+	public void writeEntries(SearchWriter writer) throws XMLStreamException {
+		for(Entry<Key, List<ResultEntry>> entry : entries.entrySet()) {
+			int[] indices = entry.getKey().indices;
+			for(ResultEntry resultEntry : entry.getValue()) {
+				writer.writeEntry(resultEntry, indices);
+			}
+		}
+	}
+
+	@Override
+	public void addEntry(ResultEntry entry, int... groupIndices) {
+		getList(groupIndices, true).add(entry);
+		totalEntries.add(entry);
+	}
+
+	private static class Key {
+		final int[] indices;
+
+		public Key(int size) {
+			indices = new int[size];
+		}
+
+		public Key(int[] indices) {
+			this.indices = indices.clone();
+		}
+
+		public void set(int[] values) {
+			System.arraycopy(values, 0, indices, 0, indices.length);
+		}
+
+		public void set(Key key) {
+			System.arraycopy(key.indices, 0, indices, 0, indices.length);
+		}
+
+		public int[] indices() {
+			return indices.clone();
+		}
+
+		public void copyTo(int[] target) {
+			System.arraycopy(indices, 0, target, 0, indices.length);
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(indices);
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Key) {
+				return Arrays.equals(indices, ((Key)obj).indices);
+			}
+			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return Arrays.toString(indices);
+		}
+
+		@Override
+		public Key clone() {
+			return new Key(indices);
+		}
 	}
 
 	protected class ResultNDCache implements GroupCache {
 
 		protected final String[] instanceBuffer = new String[getDimension()];
-		
+
 		protected boolean locked = false;
 
 		/**
@@ -351,7 +442,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 				instanceBuffer[groupIndexMap[id]] = String.valueOf(value);
 			}
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Cache: "+Arrays.toString(instanceBuffer); //$NON-NLS-1$
@@ -381,15 +472,15 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		public void commit(ResultEntry entry) {
 			DefaultSearchResultND.this.commit(entry, this);
 		}
-		
+
 	}
 
 	protected class EntryList extends AbstractList<Object> implements DataList<Object> {
 
-		final String key;
+		final int[] indices;
 
-		protected EntryList(String key) {
-			this.key = key;
+		protected EntryList(int[] indices) {
+			this.indices = indices==null ? null : indices.clone();
 		}
 
 		/**
@@ -421,14 +512,14 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		 */
 		@Override
 		public Object get(int index) {
-			List<ResultEntry> list = key==null ? totalEntries : entries.get(key);
-			
+			List<ResultEntry> list = indices==null ? totalEntries : getList(indices, false);
+
 			if(list==null) {
 				return null;
 			}
-			
+
 			ResultEntry entry = list.get(index);
-			
+
 			return getTarget().get(entry.getIndex());
 		}
 
@@ -437,9 +528,9 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		 */
 		@Override
 		public int size() {
-			List<ResultEntry> list = key==null ? totalEntries : entries.get(key);
+			List<ResultEntry> list = indices==null ? totalEntries : getList(indices, false);
 			return list==null ? 0 : list.size();
 		}
-		
+
 	}
 }

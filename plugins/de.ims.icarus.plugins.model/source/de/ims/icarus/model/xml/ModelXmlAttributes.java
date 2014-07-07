@@ -77,6 +77,12 @@ public interface ModelXmlAttributes {
 	public static final String ATTR_MULTI_VALUE = "multi-value"; //$NON-NLS-1$
 	public static final String ATTR_GROUP = "group"; //$NON-NLS-1$
 
+	public static final String ATTR_SOURCE = "source"; //$NON-NLS-1$
+	public static final String ATTR_SOURCE_TYPE = "source-type"; //$NON-NLS-1$
+	public static final String ATTR_LOCATION_TYPE = "location-type"; //$NON-NLS-1$
+
 	public static final String ATTR_SERCH = "search"; //$NON-NLS-1$
 	public static final String ATTR_INDEX = "index"; //$NON-NLS-1$
+	public static final String ATTR_DEFAULT_KEY = "default-key"; //$NON-NLS-1$
+	public static final String ATTR_ANNOTATION_KEY = "annotation-key"; //$NON-NLS-1$
 }

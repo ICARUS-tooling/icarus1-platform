@@ -35,15 +35,23 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -53,10 +61,12 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
 import org.java.plugin.registry.Extension;
 
@@ -77,6 +87,9 @@ import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.SearchTargetSelector;
+import de.ims.icarus.search_tools.io.SearchReader;
+import de.ims.icarus.search_tools.io.SearchResolver;
+import de.ims.icarus.search_tools.io.SearchWriter;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.ComponentUpdater;
@@ -85,6 +98,7 @@ import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.dialog.SelectFormEntry;
+import de.ims.icarus.ui.helper.DefaultFileFilter;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
@@ -233,6 +247,7 @@ public class SearchManagerView extends View {
 		boolean isLoading = isLoadable && ((Loadable)target).isLoading();
 		boolean canLoad = isLoadable && !isLoading && !((Loadable)target).isLoaded();
 		boolean canFree = isLoadable && !isLoading && ((Loadable)target).isLoaded();
+		boolean canSave = hasResult && search.isDone() && search.isSerializable();
 
 		actionManager.setEnabled(hasResult,
 				"plugins.searchTools.searchManagerView.viewResultAction"); //$NON-NLS-1$
@@ -247,6 +262,8 @@ public class SearchManagerView extends View {
 				"plugins.searchTools.searchManagerView.loadSearchTargetAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canFree,
 				"plugins.searchTools.searchManagerView.freeSearchTargetAction"); //$NON-NLS-1$
+		actionManager.setEnabled(canSave,
+				"plugins.searchTools.searchManagerView.saveSearchAction"); //$NON-NLS-1$
 	}
 
 	protected void showPopup(MouseEvent trigger) {
@@ -306,6 +323,10 @@ public class SearchManagerView extends View {
 				callbackHandler, "loadSearchTarget"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchManagerView.freeSearchTargetAction",  //$NON-NLS-1$
 				callbackHandler, "freeSearchTarget"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchManagerView.saveSearchAction",  //$NON-NLS-1$
+				callbackHandler, "saveSearch"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchManagerView.openSearchAction",  //$NON-NLS-1$
+				callbackHandler, "openSearch"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -949,6 +970,315 @@ public class SearchManagerView extends View {
 				showError(ex);
 			}
 		}
+
+		private JFileChooser fileChooser;
+
+		private JFileChooser getFileChooser() {
+			if(fileChooser==null) {
+				fileChooser = new JFileChooser();
+
+				FileFilter defaultFilter = new DefaultFileFilter(".xml", "*.xml Files"); //$NON-NLS-1$ //$NON-NLS-2$
+
+				fileChooser.addChoosableFileFilter(defaultFilter);
+				fileChooser.setFileFilter(defaultFilter);
+
+				fileChooser.setCurrentDirectory(Core.getCore().getDataFolder().toFile());
+			}
+
+			return fileChooser;
+		}
+
+		public void saveSearch(ActionEvent e) {
+			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
+			if(descriptor==null) {
+				return;
+			}
+
+			try {
+				Search search = descriptor.getSearch();
+
+				if(!search.isDone() || search.getResult()==null && !search.isSerializable()) {
+					return;
+				}
+
+				SearchResolver resolver = search.getSearchResolver();
+
+				if(resolver==null) {
+					return;
+				}
+
+				JFileChooser fileChooser = getFileChooser();
+
+				fileChooser.setApproveButtonText(ResourceManager.getInstance().get("save")); //$NON-NLS-1$
+				fileChooser.setDialogTitle(ResourceManager.getInstance().get(
+						"plugins.searchTools.searchManagerView.dialogs.saveSearch.title")); //$NON-NLS-1$
+
+				String filename = null;
+
+				if (fileChooser.showDialog(null, null) != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+
+				filename = fileChooser.getSelectedFile().getAbsolutePath();
+
+				// Append file extension if missing in name
+				if (!filename.toLowerCase().endsWith(".xml")) { //$NON-NLS-1$
+					filename += ".xml"; //$NON-NLS-1$
+				}
+
+				Path path = Paths.get(filename);
+
+				// Overwrite if already existing?
+				if (Files.exists(path)
+						&& !DialogFactory.getGlobalFactory().showConfirm(null,
+								"plugins.searchTools.searchManagerView.dialogs.saveSearch.title",  //$NON-NLS-1$
+								"plugins.searchTools.searchManagerView.dialogs.saveSearch.overwriteExisting", //$NON-NLS-1$
+								StringUtil.fit(filename, 80))) {
+					return;
+				}
+
+				SearchWriter writer = new SearchWriter(search);
+
+				String title = ResourceManager.getInstance().get("plugins.searchTools.searchManagerView.saveSearchTask.title"); //$NON-NLS-1$
+
+				TaskManager.getInstance().schedule(
+						new SearchWriterTask(writer, path),
+						title, null, null, TaskPriority.DEFAULT, true);
+
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to save search", ex); //$NON-NLS-1$
+				UIUtil.beep();
+
+				showError(ex);
+			}
+		}
+
+		public void openSearch(ActionEvent e) {
+			try {
+
+				JFileChooser fileChooser = getFileChooser();
+
+				fileChooser.setApproveButtonText(ResourceManager.getInstance().get("load")); //$NON-NLS-1$
+				fileChooser.setDialogTitle(ResourceManager.getInstance().get(
+						"plugins.searchTools.searchManagerView.dialogs.openSearch.title")); //$NON-NLS-1$
+
+				if (fileChooser.showDialog(null, null) != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+
+				Path path = fileChooser.getSelectedFile().toPath();
+
+				SearchReader reader = new SearchReader(path);
+
+				String title = ResourceManager.getInstance().get("plugins.searchTools.searchManagerView.openSearchTask.title"); //$NON-NLS-1$
+
+				TaskManager.getInstance().schedule(
+						new SearchReaderTask(reader),
+						title, null, null, TaskPriority.DEFAULT, true);
+
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to open search", ex); //$NON-NLS-1$
+				UIUtil.beep();
+
+				showError(ex);
+			}
+		}
+	}
+
+	protected class SearchWriterTask extends SwingWorker<SearchWriter, Object> {
+
+		private final SearchWriter writer;
+		private final Path path;
+
+		public SearchWriterTask(SearchWriter writer, Path path) {
+			if (writer == null)
+				throw new NullPointerException("Invalid reader"); //$NON-NLS-1$
+			if (path == null)
+				throw new NullPointerException("Invalid path"); //$NON-NLS-1$
+
+			this.writer = writer;
+			this.path = path;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected SearchWriter doInBackground() throws Exception {
+
+			TaskManager.getInstance().setIndeterminate(this, true);
+
+			try (OutputStream out = Files.newOutputStream(path,
+					StandardOpenOption.CREATE,
+					StandardOpenOption.WRITE,
+					StandardOpenOption.TRUNCATE_EXISTING)) {
+				writer.write(out);
+
+				LoggerFactory.info(this, "Search saved to file: "+path); //$NON-NLS-1$
+			}
+
+			return writer;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#done()
+		 */
+		@Override
+		protected void done() {
+			try {
+				get();
+			} catch (InterruptedException e) {
+				try {
+					Files.deleteIfExists(path);
+				} catch (IOException ex) {
+					LoggerFactory.error(this,
+							"Failed to delete file '"+path+"' after cancelled save task", ex); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
+			} catch (ExecutionException e) {
+				Exception ex = (Exception) e.getCause();
+
+				LoggerFactory.error(this, "Saving search to file '"+path+"' failed", ex); //$NON-NLS-1$ //$NON-NLS-2$
+
+				DialogFactory.getGlobalFactory().showError(null,
+						"plugins.searchTools.searchManagerView.dialogs.saveSearch.title", //$NON-NLS-1$
+						"plugins.searchTools.searchManagerView.dialogs.saveSearch.failed", //$NON-NLS-1$
+						path);
+			}
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof SearchWriterTask) {
+				return writer.equals(((SearchWriterTask)obj).writer);
+			}
+
+			return false;
+		}
+
+	}
+
+	protected class SearchReaderTask extends SwingWorker<SearchDescriptor, Object> {
+
+		private final SearchReader reader;
+
+		public SearchReaderTask(SearchReader reader) {
+			if (reader == null)
+				throw new NullPointerException("Invalid reader"); //$NON-NLS-1$
+
+			this.reader = reader;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected SearchDescriptor doInBackground() throws Exception {
+
+			TaskManager.getInstance().setIndeterminate(this, true);
+
+			SearchDescriptor descriptor = reader.load();
+
+			LoggerFactory.info(this, "Loaded search from file: "+reader.getPath()); //$NON-NLS-1$
+
+			return descriptor;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#done()
+		 */
+		@Override
+		protected void done() {
+			try {
+				SearchDescriptor descriptor = get();
+
+				searchHistory.addSearch(descriptor);
+
+				refreshActions();
+
+				Object target = descriptor.getTarget();
+
+				if(!(target instanceof Loadable)) {
+					return;
+				}
+
+				final Loadable loadable = (Loadable) target;
+
+				if(!loadable.isLoaded() && DialogFactory.getGlobalFactory().showConfirm(getFrame(),
+						"plugins.searchTools.searchManagerView.dialogs.openSearch.title", //$NON-NLS-1$
+						"plugins.searchTools.searchManagerView.dialogs.openSearch.loadTarget")) { //$NON-NLS-1$
+
+					String title = ResourceManager.getInstance().get(
+							"plugins.searchTools.searchManager.loadTargetJob.name"); //$NON-NLS-1$
+					String info = ResourceManager.getInstance().get(
+							"plugins.searchTools.searchManager.loadTargetJob.description", //$NON-NLS-1$
+							StringUtil.getName(loadable));
+
+					Object task = new IOUtil.LoadJob(loadable) {
+
+						/**
+						 * @see javax.swing.SwingWorker#done()
+						 */
+						@Override
+						protected void done() {
+							Loadable loadable = null;
+							try {
+								loadable = get();
+
+							} catch(InterruptedException | CancellationException e) {
+								// ignore
+							} catch(Exception e) {
+								LoggerFactory.log(this, Level.SEVERE,
+										"Failed to load search target: "+String.valueOf(loadable), e); //$NON-NLS-1$
+								UIUtil.beep();
+
+								if(!Core.getCore().handleThrowable(e)) {
+									showError(e);
+								}
+
+							} finally {
+								searchHistoryList.repaint();
+								refreshActions();
+							}
+						}
+					};
+
+					TaskManager.getInstance().schedule(task, title, info, null, TaskPriority.HIGH, true);
+
+					searchHistoryList.repaint();
+				}
+
+			} catch (InterruptedException e) {
+				// no-op
+			} catch (ExecutionException e) {
+				Exception ex = (Exception) e.getCause();
+
+				LoggerFactory.error(this, "Loading search from file '"+reader.getPath()+"' failed", ex); //$NON-NLS-1$ //$NON-NLS-2$
+
+				DialogFactory.getGlobalFactory().showError(null,
+						"plugins.searchTools.searchManagerView.dialogs.openSearch.title", //$NON-NLS-1$
+						"plugins.searchTools.searchManagerView.dialogs.openSearch.failed", //$NON-NLS-1$
+						reader.getPath());
+			}
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof SearchReaderTask) {
+				return reader.equals(((SearchReaderTask)obj).reader);
+			}
+
+			return false;
+		}
+
 	}
 
 	protected static class SearchTargetDialog implements ActionListener {

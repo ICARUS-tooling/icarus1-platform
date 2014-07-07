@@ -29,7 +29,6 @@ import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
-import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.ClassUtils;
 
 /**
@@ -90,16 +89,6 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getBoundaryContainerManifest()
-	 */
-	@Override
-	public ContainerManifest getBoundaryContainerManifest() {
-//		return boundaryContainerManifest;
-		MarkableLayerManifest boundaryLayerManifest = getLayerManifest().getBoundaryLayerManifest();
-		return boundaryLayerManifest==null ? null : boundaryLayerManifest.getRootContainerManifest();
-	}
-
-	/**
 	 * @param elementManifest the elementManifest to set
 	 */
 	public void setElementManifest(ContainerManifest elementManifest) {
@@ -137,73 +126,11 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 		return containerType==null ? ContainerType.LIST : containerType;
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#setContainerType(de.ims.icarus.model.api.ContainerType)
-	 */
-	@Override
 	public void setContainerType(ContainerType containerType) {
 		if (containerType == null)
 			throw new NullPointerException("Invalid containerType"); //$NON-NLS-1$
 
 		this.containerType = containerType;
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeXmlAttribute(serializer, "container-type", containerType, getTemplate().getContainerType()); //$NON-NLS-1$
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("container-type", containerType.getValue()); //$NON-NLS-1$
-	}
-
-//	/**
-//	 * @throws Exception
-//	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-//	 */
-//	@Override
-//	protected void writeTemplateXmlElements(XmlSerializer serializer)
-//			throws Exception {
-//		super.writeTemplateXmlElements(serializer);
-//
-//		if(!ClassUtils.equals(elementManifest, getTemplate().getElementManifest())) {
-//			XmlWriter.writeContainerManifestElement(serializer, elementManifest);
-//		}
-//	}
-
-//	/**
-//	 * @throws Exception
-//	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-//	 */
-//	@Override
-//	protected void writeFullXmlElements(XmlSerializer serializer)
-//			throws Exception {
-//		super.writeFullXmlElements(serializer);
-//
-//		XmlWriter.writeContainerManifestElement(serializer, elementManifest);
-//	}
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return "container"; //$NON-NLS-1$
 	}
 
 	/**

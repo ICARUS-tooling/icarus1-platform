@@ -57,10 +57,9 @@ import de.ims.icarus.model.api.layer.MarkableLayer;
 public interface AnnotationLayerManifest extends LayerManifest {
 
 	/**
-	 * Returns the available keys that can be used for annotation. This method
-	 * must not return {@code null}! If the annotation only supports one value
-	 * and therefore does not require keys at all, it should return an empty
-	 * {@code Set}. In addition the returned {@code Set} should be considered
+	 * Returns the available keys that can be used for annotation. The returned
+	 * set is always non-null and never empty.
+	 * In addition the returned {@code Set} should be considered
 	 * as 'owned' by the manifest and be immutable.
 	 *
 	 * @return An immutable {@code Set} containing all the available keys used
@@ -78,20 +77,17 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 * @throws NullPointerException if the {@code key} argument is {@code null}
 	 * @throws IllegalArgumentException if the given {@code key} is unknown to
 	 * this manifest
-	 * @throws UnsupportedOperationException if the manifest does not declare any
-	 * keys available
 	 */
 	AnnotationManifest getAnnotationManifest(String key);
 
 	/**
-	 * Returns the manifest that describes annotations on this layer that do
-	 * not use an additional key. If this layer returns a non-empty {@code Set}
-	 * of available keys via its {@link #getAvailableKeys()} and only supports
-	 * annotation specified by those keys than this method may return {@code null}.
+	 * Returns the (optional) default key for this annotation layer. This is only
+	 * important for user interfaces as a hint for selecting the key which is to
+	 * be presented first to the user.
 	 *
 	 * @return
 	 */
-	AnnotationManifest getDefaultAnnotationManifest();
+	String getDefaultKey();
 
 	/**
 	 * Defines whether an {@code AnnotationLayer} derived from this manifest should

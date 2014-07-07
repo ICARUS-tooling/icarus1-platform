@@ -49,10 +49,12 @@ public interface ModelXmlTags {
 
 	public static final String TAG_BASE_LAYER = "base-layer"; //$NON-NLS-1$
 	public static final String TAG_BOUNDARY_LAYER = "boundary-layer"; //$NON-NLS-1$
+	public static final String TAG_VALUE_LAYER = "value-layer"; //$NON-NLS-1$
 
 	public static final String TAG_CONTAINER = "container"; //$NON-NLS-1$
 	public static final String TAG_STRUCTURE = "structure"; //$NON-NLS-1$
 	public static final String TAG_ANNOTATION = "annotation"; //$NON-NLS-1$
+	public static final String TAG_ALIAS = "alias"; //$NON-NLS-1$
 
 	public static final String TAG_VALUES = "values"; //$NON-NLS-1$
 	public static final String TAG_VALUE = "value"; //$NON-NLS-1$

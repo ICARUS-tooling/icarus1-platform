@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
@@ -28,6 +28,7 @@ package de.ims.icarus.search_tools;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.ims.icarus.search_tools.io.SearchResolver;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Options;
@@ -40,24 +41,24 @@ import de.ims.icarus.util.PropertyChangeSource;
  *
  */
 public abstract class Search extends PropertyChangeSource implements SearchParameters {
-	
+
 	private SearchState state = SearchState.BLANK;
-	
+
 	private Object lock = new Object();
-	
+
 	private final Object target;
 	private final SearchQuery query;
-	
+
 	private AtomicBoolean cancelled = new AtomicBoolean();
-	
+
 	private CompactProperties properties;
-	
+
 	private int progress = 0;
-	
+
 	private final SearchFactory factory;
-	
+
 	private final Options parameters;
-	
+
 	protected Search(SearchFactory factory, SearchQuery query, Options parameters, Object target) {
 		if(factory==null)
 			throw new NullPointerException("Invalid factory"); //$NON-NLS-1$
@@ -65,28 +66,34 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 			throw new NullPointerException("Invalid query"); //$NON-NLS-1$
 		if(target==null)
 			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
-		
+
 		if(parameters==null) {
 			parameters = Options.emptyOptions;
 		}
-		
+
 		this.factory = factory;
 		this.query = query;
 		this.target = target;
 		this.parameters = parameters.clone();
 	}
-	
+
+	public boolean isSerializable() {
+		return true;
+	}
+
+	public abstract SearchResolver getSearchResolver();
+
 	public boolean init() {
 		return true;
 	}
 
-	final void setState(SearchState state) {
+	protected final void setState(SearchState state) {
 		SearchState oldValue;
 		synchronized (lock) {
 			oldValue = this.state;
 			this.state = state;
 		}
-		
+
 		firePropertyChange("state", oldValue, state); //$NON-NLS-1$
 	}
 
@@ -98,69 +105,69 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 				throw new IllegalStateException();
 			this.state = state;
 		}
-		
+
 		firePropertyChange("state", oldValue, state); //$NON-NLS-1$
 	}
-	
+
 	public final SearchState getState() {
 		synchronized (lock) {
 			return state;
 		}
 	}
-	
+
 	public final SearchFactory getFactory() {
 		return factory;
 	}
-	
+
 	public final SearchQuery getQuery() {
 		return query;
 	}
-	
+
 	public final Object getTarget() {
 		return target;
 	}
-	
+
 	public final Object getProperty(String key) {
 		return properties==null ? null : properties.get(key);
 	}
-	
+
 	public final void setProperty(String key, Object value) {
 		if(properties==null) {
 			properties = new CompactProperties();
 		}
-		
+
 		properties.put(key, value);
 	}
-	
+
 	public final Object getParameter(String key) {
 		return parameters.get(key);
 	}
-	
+
 	public Options getParameters() {
 		return parameters;
 	}
-	
+
 	public final boolean isCancelled() {
 		return cancelled.get();
 	}
-	
+
 	public final boolean isDone() {
 		synchronized (lock) {
 			return state==SearchState.DONE || state==SearchState.CANCELLED;
 		}
 	}
-	
+
 	public final boolean isRunning() {
 		synchronized (lock) {
 			return state==SearchState.RUNNING;
 		}
 	}
-	
+
 	/**
 	 * Attempts to cancel this search by setting the internal {@code cancelled}
 	 * flag to {@code true}.
 	 * This method will throw an {@link IllegalArgumentException} if the
-	 * search is not yet running or has already been finished or cancelled. 
+	 * search is not yet running or has already been finished or cancelled.
 	 */
 	public final void cancel() {
 		synchronized (lock) {
@@ -171,13 +178,13 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 				throw new IllegalStateException("Search not running!"); //$NON-NLS-1$*/
 			if(!cancelled.compareAndSet(false, true))
 				throw new IllegalStateException("Search already cancelled!"); //$NON-NLS-1$
-			
+
 			setState(SearchState.CANCELLED);
-			
+
 			innerCancel();
 		}
 	}
-	
+
 	/**
 	 * Callback for subclasses to perform proper cleanup of their
 	 * resources
@@ -185,11 +192,11 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	protected void innerCancel() {
 		// no-op
 	}
-	
+
 	public final void finish() {
 		setState(SearchState.RUNNING, SearchState.DONE);
 	}
-	
+
 	/**
 	 * Runs the search and constructs the internal {@code SearchResult} object.
 	 * Note that an implementation should regularly check for user originated
@@ -198,9 +205,9 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	public final void execute() throws Exception {
 		if(isDone())
 			throw new IllegalStateException("Cannot reuse search instance"); //$NON-NLS-1$
-		
+
 		setState(SearchState.BLANK, SearchState.RUNNING);
-		
+
 		if(!innerExecute() && isRunning()) {
 			setState(SearchState.RUNNING, SearchState.DONE);
 		}
@@ -210,14 +217,14 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	 * Performs the implementation specific scheduling of
 	 * the search operation. If an implementation realizes that
 	 * the supplied data does not allow for a regular search
-	 * execution to take place it can immediately return a 
+	 * execution to take place it can immediately return a
 	 * value of {@code false} to signal an early exit. The search
 	 * will then set its state to {@value SearchState#DONE}.
 	 * @return {@code true} if and only if the search operation
 	 * was successfully scheduled.
 	 */
 	protected abstract boolean innerExecute() throws Exception;
-	
+
 	/**
 	 * Returns the (estimated) progress of the search in the range
 	 * 0 to 100.
@@ -225,20 +232,20 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	public int getProgress() {
 		return progress;
 	}
-	
+
 	protected void setProgress(int newProgress) {
 		if(newProgress==progress) {
 			return;
 		}
 		if(newProgress<progress)
 			throw new IllegalArgumentException("Cannot decrease progress field"); //$NON-NLS-1$
-		
+
 		int oldProgress = progress;
 		progress = newProgress;
-		
+
 		firePropertyChange("progress", oldProgress, newProgress); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Returns the result of this search operation.
 	 * Note that not all implementations are required to support live
@@ -246,19 +253,19 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	 * return {@code null} until the search has finished or an empty result.
 	 */
 	public abstract SearchResult getResult();
-	
+
 	public abstract SearchPerformanceInfo getPerformanceInfo();
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	public interface SearchPerformanceInfo {
-		
+
 		// TODO add more performance fields!
-		
+
 		/**
 		 * Performance field describing the total number of
 		 * nodes that have been processed during a search operation.
@@ -292,7 +299,7 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 		/**
 		 * Number of data items that were excluded by the pre-processing
 		 * stage. Note that the sum of this value and {@link #PROCESSED_ITEMS}
-		 * is exactly the number of items that was passed to the search 
+		 * is exactly the number of items that was passed to the search
 		 * in the first place.
 		 */
 		public static final int IGNORED_ITEMS = 5;
@@ -308,24 +315,24 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 		 * and survived the optional post-processing stage.
 		 */
 		public static final int RETURNED_ITEMS = 7;
-		
+
 		/**
 		 * Returns the exact time this search was executed
 		 */
 		Date getTime();
-		
+
 		/**
 		 * Returns the amount of time in milliseconds this search
 		 * required.
 		 */
 		long getDuration();
-		
+
 		/**
 		 * Returns the stored value for the specified performance
-		 * field. 
+		 * field.
 		 */
 		long getPerformanceValue(int field);
-		
+
 		/**
 		 * Returns the number of cores used by this search.
 		 */

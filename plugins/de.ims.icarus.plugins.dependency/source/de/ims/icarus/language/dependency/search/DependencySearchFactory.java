@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.search;
@@ -32,9 +32,9 @@ import de.ims.icarus.plugins.language_tools.treebank.TreebankManagerPerspective;
 import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
-import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.corpus.AbstractCorpusSearchFactory;
 import de.ims.icarus.search_tools.standard.DefaultParameterEditor;
 import de.ims.icarus.search_tools.standard.DefaultSearchQuery;
 import de.ims.icarus.ui.helper.Editor;
@@ -48,7 +48,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class DependencySearchFactory implements SearchFactory {
+public class DependencySearchFactory extends AbstractCorpusSearchFactory {
 
 	public DependencySearchFactory() {
 		// no-op
@@ -98,18 +98,18 @@ public class DependencySearchFactory implements SearchFactory {
 	public Search createExampleSearch() throws Exception {
 		// Ensure target treebank
 		TreebankManagerPerspective.ensureExampleTreebank();
-		
+
 		// Generate query
 		SearchQuery query = new DefaultSearchQuery(getContentType());
 		query.parseQueryString("[lemma<*>1[relation=SBJ,lemma<*>2]]"); //$NON-NLS-1$
-		
+
 		// Fetch target
 		String name = TreebankManagerPerspective.EXAMPLE_TREEBANK_NAME;
 		Treebank treebank = TreebankRegistry.getInstance().getTreebankByName(name);
 		if(treebank==null)
 			throw new IllegalStateException("Missing example treebank: "+name); //$NON-NLS-1$
 		Object target = TreebankRegistry.getInstance().getListDelegate(treebank);
-		
+
 		return createSearch(query, target, null);
 	}
 
@@ -131,4 +131,24 @@ public class DependencySearchFactory implements SearchFactory {
 		return null;
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#createSearch(java.lang.String, java.lang.String, de.ims.icarus.util.Options)
+	 */
+	@Override
+	public Search createSearch(String q, String t, Options options) throws Exception {
+		SearchQuery query = createQuery();
+		query.parseQueryString(q);
+
+		Object target = resolveTarget(t);
+
+		return createSearch(query, target, options);
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedForm()
+	 */
+	@Override
+	public String getSerializedForm() {
+		return "de.ims.icarus.dependency@DependencySearchFactory"; //$NON-NLS-1$
+	}
 }

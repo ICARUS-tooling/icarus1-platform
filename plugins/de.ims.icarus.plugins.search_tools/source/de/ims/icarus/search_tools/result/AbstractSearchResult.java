@@ -19,11 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.result;
+
+import javax.xml.stream.XMLStreamException;
 
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
@@ -31,6 +33,7 @@ import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
+import de.ims.icarus.search_tools.io.SearchWriter;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.SubstitutionSupport;
@@ -46,18 +49,18 @@ import de.ims.icarus.util.data.DataList;
 public abstract class AbstractSearchResult implements SearchResult {
 
 	protected transient final Search search;
-	
+
 	protected String[] groupTokens;
 	protected SubstitutionSupport[] groupInstances;
 	protected SearchConstraint[] groupConstraints;
 	protected int[] groupIndexMap;
-	
+
 	protected CompactProperties properties;
-	
+
 	protected AnnotationBuffer annotationBuffer;
-	
+
 	protected boolean finalized = false;
-	
+
 	protected final Object lock = new Object();
 
 	protected AbstractSearchResult(Search search, SearchConstraint[] groupConstraints) {
@@ -65,27 +68,27 @@ public abstract class AbstractSearchResult implements SearchResult {
 			throw new NullPointerException("Invalid search"); //$NON-NLS-1$*/
 		/*if(!(descriptor.getTarget() instanceof SentenceDataList))
 			throw new NullPointerException("Invalid target: "+descriptor.getTarget()); //$NON-NLS-1$*/
-		
+
 		this.search = search;
 		this.groupConstraints = SearchUtils.cloneSimple(groupConstraints);
-		
+
 		if(groupConstraints!=null && groupConstraints.length>0) {
 			int size = groupConstraints.length;
 			groupTokens = new String[size];
 			groupInstances = new SubstitutionSupport[size];
-			
+
 			int maxIndex = 0;
-			
+
 			// Init token and instance mapping and find max group index
 			for(int i=0; i<size; i++) {
 				groupTokens[i] = groupConstraints[i].getToken();
 				groupInstances[i] = new SubstitutionSupport();
 				maxIndex = Math.max(maxIndex, (int)groupConstraints[i].getValue());
 			}
-			
+
 			groupIndexMap = new int[maxIndex+1];
 
-			// Fill reverse mapping from group id to id 
+			// Fill reverse mapping from group id to id
 			// in current list of group constraints
 			for(int i=0; i<size; i++) {
 				int index = (int) groupConstraints[i].getValue();
@@ -169,7 +172,7 @@ public abstract class AbstractSearchResult implements SearchResult {
 	public ContentType getContentType() {
 		return getTarget().getContentType();
 	}
-	
+
 	public ConstraintContext getContext() {
 		return search==null ? null : search.getFactory().getConstraintContext();
 	}
@@ -216,14 +219,16 @@ public abstract class AbstractSearchResult implements SearchResult {
 	public boolean isFinal() {
 		return finalized;
 	}
-	
+
+	@Override
 	public void finish() {
 		if(finalized)
 			throw new IllegalStateException("Result is already final!"); //$NON-NLS-1$
-		
+
 		finalized = true;
 	}
-	
+
+	@Override
 	public Object getPlainEntry(ResultEntry entry) {
 		return getTarget().get(entry.getIndex());
 	}
@@ -239,5 +244,13 @@ public abstract class AbstractSearchResult implements SearchResult {
 	@Override
 	public ContentType getAnnotationType() {
 		return annotationBuffer==null ? null : annotationBuffer.getAnnotationType();
+	}
+
+	public abstract void writeEntries(SearchWriter writer) throws XMLStreamException;
+
+	public abstract void addEntry(ResultEntry entry, int... groupIndices);
+
+	public void setGroupInstances(int groupId, String[] instances) {
+		groupInstances[groupId].set(instances);
 	}
 }
