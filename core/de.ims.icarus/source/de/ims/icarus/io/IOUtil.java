@@ -186,6 +186,18 @@ public final class IOUtil {
 		return "file".equalsIgnoreCase(scheme) && !hasHost(url); //$NON-NLS-1$
 	}
 
+	public static String stripJarContext(String context) {
+		int begin = context.startsWith("jar:") ? 4 : 0; //$NON-NLS-1$
+		int end = context.indexOf("jar!/", begin); //$NON-NLS-1$
+		if(end!=-1) {
+			end += 3;
+		} else {
+			end = context.length();
+		}
+
+		return context.substring(begin, end);
+	}
+
 	public static boolean hasHost(URL url) {
 		String host = url.getHost();
 		return host != null && !"".equals(host); //$NON-NLS-1$

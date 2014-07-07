@@ -33,6 +33,8 @@ import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,12 +62,15 @@ import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.Extension.Parameter;
 import org.java.plugin.registry.ExtensionPoint;
+import org.java.plugin.registry.Library;
 import org.java.plugin.registry.PluginAttribute;
 import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.PluginElement;
+import org.java.plugin.registry.PluginFragment;
 import org.java.plugin.registry.PluginRegistry;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.DefaultResourceLoader;
 import de.ims.icarus.resources.ResourceLoader;
@@ -210,6 +215,33 @@ public final class PluginUtil {
 				list.add(targetExtension);
 			}
 		}
+	}
+
+	public static URL getLocation(Object obj) {
+		URL location = null;
+
+		if(obj instanceof PluginDescriptor) {
+			location = ((PluginDescriptor)obj).getLocation();
+		} else if(obj instanceof PluginFragment) {
+			location = ((PluginFragment)obj).getLocation();
+		} else if(obj instanceof Library) {
+			Library library = (Library)obj;
+			location = pluginManager.getPathResolver().resolvePath(library, library.getPath());
+		}
+
+		if(location!=null) {
+			String path = location.toExternalForm();
+			String newPath = IOUtil.stripJarContext(path);
+			if(!path.equals(newPath)) {
+				try {
+					location = new URL(newPath);
+				} catch (MalformedURLException e) {
+					LoggerFactory.error(PluginUtil.class, "Shrinking jar context failed: "+path, e); //$NON-NLS-1$
+				}
+			}
+		}
+
+		return location;
 	}
 
 	public static Collection<Extension> getLinkedExtensions(ExtensionPoint extensionPoint) {
@@ -460,9 +492,9 @@ public final class PluginUtil {
 		if(extension==null)
 			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$
 		if (signature == null)
-			throw new NullPointerException("Invalid signature");
+			throw new NullPointerException("Invalid signature"); //$NON-NLS-1$
 		if (params == null)
-			throw new NullPointerException("Invalid params");
+			throw new NullPointerException("Invalid params"); //$NON-NLS-1$
 
 		try {
 			activatePlugin(extension);

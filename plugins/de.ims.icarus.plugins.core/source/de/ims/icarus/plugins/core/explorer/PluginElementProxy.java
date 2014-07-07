@@ -246,7 +246,7 @@ public class PluginElementProxy implements Wrapper<Object> {
 			Library library = (Library) element;
 
 			// Resolve library location
-			URL libLocation = pluginManager.getPathResolver().resolvePath(library, library.getPath());
+			URL libLocation = PluginUtil.getLocation(library);
 			boolean libExists = IOUtil.isResourceExists(libLocation);
 			boolean local = IOUtil.isLocalFile(libLocation);
 			Path libFile = null;

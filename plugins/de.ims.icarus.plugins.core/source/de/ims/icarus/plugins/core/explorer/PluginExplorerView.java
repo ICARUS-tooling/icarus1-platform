@@ -747,16 +747,7 @@ public class PluginExplorerView extends View {
 			}
 
 			// Get location information
-			URL location = null;
-			if(selectedObject instanceof PluginDescriptor) {
-				location = ((PluginDescriptor)selectedObject).getLocation();
-			} else if(selectedObject instanceof PluginFragment) {
-				location = ((PluginFragment)selectedObject).getLocation();
-			} else if(selectedObject instanceof Library) {
-				PluginManager pluginManager = PluginUtil.getPluginManager();
-				Library library = (Library)selectedObject;
-				location = pluginManager.getPathResolver().resolvePath(library, library.getPath());
-			}
+			URL location = PluginUtil.getLocation(selectedObject);
 
 			if(location==null) {
 				LoggerFactory.log(this, Level.INFO, "Not a valid directory owner: "+selectedObject); //$NON-NLS-1$
