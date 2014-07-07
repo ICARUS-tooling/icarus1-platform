@@ -55,4 +55,15 @@ public interface LayerGroupManifest {
 	boolean isIndependent();
 
 	String getName();
+
+	/**
+	 * Tests whether this {@code LayerGroupManifest} equals the given {@code Object} {@code o}.
+	 * Two {@code LayerGroupManifest} instances are considered equal if they have the same name
+	 * attribute as returned by {@link #getName()}.
+	 *
+	 * @param obj
+	 * @return
+	 */
+	@Override
+	boolean equals(Object o);
 }

@@ -40,6 +40,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -766,7 +767,7 @@ public class PluginExplorerView extends View {
 			Path targetFile = null;
 			try {
 				targetFile = Paths.get(location.toURI());
-			} catch (URISyntaxException ex) {
+			} catch (URISyntaxException|FileSystemNotFoundException ex) {
 				LoggerFactory.error(this, "Unable to convert url to path: "+location, ex); //$NON-NLS-1$
 			}
 			// Switch to parent directory if necessary

@@ -27,6 +27,7 @@ package de.ims.icarus.model.api.manifest;
 
 /**
  *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -56,10 +57,10 @@ public interface Derivable {
 	 */
 	Derivable getTemplate();
 
-	/**
-	 * Changes the template used to derive content from.
-	 *
-	 * @param template
-	 */
-	void setTemplate(Derivable template);
+//	/**
+//	 * Changes the template used to derive content from.
+//	 *
+//	 * @param template
+//	 */
+//	void setTemplate(Derivable template);
 }

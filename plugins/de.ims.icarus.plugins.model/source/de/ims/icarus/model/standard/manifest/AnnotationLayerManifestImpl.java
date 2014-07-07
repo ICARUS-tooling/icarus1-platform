@@ -26,7 +26,6 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,9 +33,6 @@ import java.util.Set;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
-import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -48,41 +44,10 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 
 	private Map<String, AnnotationManifest> annotationManifests;
 	private AnnotationManifest defaultAnnotationManifest;
-	private boolean deepAnnotation, allowUnknownKeys;
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.model.api.manifest.LayerManifest)
-	 */
-	@Override
-	protected void readTemplate(AnnotationLayerManifest template) {
-		super.readTemplate(template);
-
-		AnnotationManifest defaultAnnotationManifest = template.getDefaultAnnotationManifest();
-		if(defaultAnnotationManifest!=null) {
-			if(this.defaultAnnotationManifest==null) {
-				this.defaultAnnotationManifest = new AnnotationManifestImpl();
-			}
-			this.defaultAnnotationManifest.setTemplate(defaultAnnotationManifest);
-		}
-
-		// Copy over all annotation manifests
-		for(String key : template.getAvailableKeys()) {
-			if(annotationManifests==null) {
-				annotationManifests = new LinkedHashMap<>();
-			}
-
-			AnnotationManifest annotationManifest = annotationManifests.get(key);
-			if(annotationManifest==null) {
-				annotationManifest = new AnnotationManifestImpl();
-				annotationManifests.put(key, annotationManifest);
-			}
-
-			annotationManifest.setTemplate(template.getAnnotationManifest(key));
-		}
-
-		deepAnnotation |= template.isDeepAnnotation();
-		allowUnknownKeys |= template.allowUnknownKeys();
-	}
+	private boolean deepAnnotation = false;
+	private boolean allowUnknownKeys = false;
+	private boolean searchable = true;
+	private boolean indexable = true;
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -196,78 +161,32 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.model.api.manifest.AnnotationLayerManifest#isIndexable()
 	 */
 	@Override
-	protected String getXmlTag() {
-		return "annotation-layer"; //$NON-NLS-1$
+	public boolean isIndexable() {
+		return indexable;
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.manifest.AnnotationLayerManifest#isSearchable()
 	 */
 	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeXmlAttribute(serializer, "deep-annotation", deepAnnotation, getTemplate().isDeepAnnotation()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "unknown-keys", allowUnknownKeys, getTemplate().allowUnknownKeys()); //$NON-NLS-1$
+	public boolean isSearchable() {
+		return searchable;
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @param searchable the searchable to set
 	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("deep-annotation", deepAnnotation); //$NON-NLS-1$
-		serializer.writeAttribute("unknown-keys", allowUnknownKeys); //$NON-NLS-1$
+	public void setSearchable(boolean searchable) {
+		this.searchable = searchable;
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @param indexable the indexable to set
 	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		if(!ClassUtils.equals(defaultAnnotationManifest, getTemplate().getDefaultAnnotationManifest())) {
-			XmlWriter.writeAnnotationManifestElement(serializer, defaultAnnotationManifest);
-		}
-
-		Set<String> derived = new HashSet<>(getTemplate().getAvailableKeys());
-		for(String key : getAvailableKeys()) {
-			if(derived.contains(key)
-					&& ClassUtils.equals(getAnnotationManifest(key),
-							getTemplate().getAnnotationManifest(key))) {
-				continue;
-			}
-
-			XmlWriter.writeAnnotationManifestElement(serializer, getAnnotationManifest(key));
-		}
+	public void setIndexable(boolean indexable) {
+		this.indexable = indexable;
 	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		XmlWriter.writeAnnotationManifestElement(serializer, defaultAnnotationManifest);
-
-		for(String key : getAvailableKeys()) {
-			XmlWriter.writeAnnotationManifestElement(serializer, getAnnotationManifest(key));
-		}
-	}
-
 }

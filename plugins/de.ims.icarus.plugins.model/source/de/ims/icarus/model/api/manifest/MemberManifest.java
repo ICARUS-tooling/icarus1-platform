@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import de.ims.icarus.model.api.NamedCorpusMember;
 import de.ims.icarus.util.id.Identity;
+
 
 /**
  * A manifest is a kind of descriptor for parts of a corpus.
@@ -55,49 +55,16 @@ public interface MemberManifest extends Identity, ModifiableManifest {
 	 */
 	ManifestType getManifestType();
 
-	/**
-	 * Returns the public id of this manifest that can be used to
-	 * uniquely identify it. Note that uniqueness of public ids is
-	 * enforced on the context level.
-	 *
-	 * @see de.ims.icarus.util.id.Identity#getId()
-	 * @see #getRawId()
-	 */
-	@Override
-	String getId();
-
-	/**
-	 * Returns the private id of this manifest that is shared between all manifests
-	 * derived from the same template. This id can be used to resolve dependencies
-	 * defined in templates to actual public ids of the instantiated members in a
-	 * corpus. Note that unlike {@link #getId()} the uniqueness of raw ids is enforced
-	 * on the context level, so that no two layers within the same context share s
-	 * common raw id. This is a crucial requirement for id resolution, since ambiguity
-	 * of raw ids cannot be resolved by the framework!
-	 *
-	 * @see #getId()
-	 */
-	String getRawId();
-
-	/**
-	 * Allows for localization of corpus related components.
-	 * The returned name is not required to be equal to the
-	 * result of a {@link NamedCorpusMember#getName()} call.
-	 *
-	 * @return The (optionally) localized name of the task
-	 * this manifest describes.
-	 */
-	@Override
-	String getName();
-
-	/**
-	 * Returns a more detailed description of the task performed
-	 * by instances of this manifest.
-	 * <p>
-	 * This is an optional method.
-	 *
-	 * @return Returns the optional description of this manifest
-	 */
-	@Override
-	String getDescription();
+//	/**
+//	 * Returns the private id of this manifest that is shared between all manifests
+//	 * derived from the same template. This id can be used to resolve dependencies
+//	 * defined in templates to actual public ids of the instantiated members in a
+//	 * corpus. Note that unlike {@link #getId()} the uniqueness of raw ids is enforced
+//	 * on the context level, so that no two layers within the same context share a
+//	 * common raw id. This is a crucial requirement for id resolution, since ambiguity
+//	 * of raw ids cannot be resolved by the framework!
+//	 *
+//	 * @see #getId()
+//	 */
+//	String getRawId();
 }

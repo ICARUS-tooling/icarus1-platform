@@ -35,4 +35,6 @@ public interface Expression extends NamespaceMember, Value {
 	Class<?> getResultType();
 
 	boolean isConstant();
+
+	Expression clone();
 }

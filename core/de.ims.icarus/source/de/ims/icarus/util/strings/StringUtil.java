@@ -653,4 +653,8 @@ public final class StringUtil {
 
 		return s1.compareToIgnoreCase(s2);
 	}
+
+	public static boolean endsWith(CharSequence s, char c) {
+		return s.length()>0 && s.charAt(s.length()-1)==c;
+	}
 }

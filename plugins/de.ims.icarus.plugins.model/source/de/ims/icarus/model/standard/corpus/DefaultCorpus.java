@@ -86,7 +86,7 @@ public class DefaultCorpus implements Corpus {
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 
 		this.manifest = manifest;
-		this.defaultContext = new DefaultContext(this, manifest.getDefaultContextManifest());
+		this.defaultContext = new DefaultContext(this, manifest.getRootContextManifest());
 
 		overlayLayer = new OverlayLayer();
 		overlayContainer = new OverlayContainer();

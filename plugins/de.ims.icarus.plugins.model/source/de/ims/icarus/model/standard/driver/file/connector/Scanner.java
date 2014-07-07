@@ -23,25 +23,13 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.manifest;
-
-import de.ims.icarus.model.util.ValueType;
+package de.ims.icarus.model.standard.driver.file.connector;
 
 /**
- * A discrete collection of values.
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ValueSet {
+public abstract class Scanner {
 
-	int valueCount();
-
-	Object getValueAt(int index);
-
-	/**
-	 * Returns the type of this set
-	 */
-	ValueType getValueType();
 }

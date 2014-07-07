@@ -30,7 +30,11 @@ package de.ims.icarus.model.api.manifest;
  * @version $Id$
  *
  */
-public interface RasterizerManifest extends MemberManifest, ImplementationManifest {
+public interface RasterizerManifest extends MemberManifest {
 
-	// no-op
+	/**
+	 * Returns the manifest that specifies the actual driver implementation.
+	 * @return
+	 */
+	ImplementationManifest getImplementationManifest();
 }

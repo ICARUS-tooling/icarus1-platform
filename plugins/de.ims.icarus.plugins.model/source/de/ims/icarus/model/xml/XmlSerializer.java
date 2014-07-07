@@ -41,6 +41,7 @@ public interface XmlSerializer {
 
 	void writeAttribute(String name, String value) throws Exception;
 	void writeAttribute(String name, int value) throws Exception;
+	void writeAttribute(String name, long value) throws Exception;
 	void writeAttribute(String name, double value) throws Exception;
 	void writeAttribute(String name, boolean value) throws Exception;
 

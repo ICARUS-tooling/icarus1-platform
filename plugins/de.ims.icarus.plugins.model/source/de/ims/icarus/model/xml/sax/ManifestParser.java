@@ -64,7 +64,7 @@ import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.AbstractDerivable;
 import de.ims.icarus.model.standard.manifest.AbstractLayerManifest;
-import de.ims.icarus.model.standard.manifest.AbstractManifest;
+import de.ims.icarus.model.standard.manifest.AbstractMemberManifest;
 import de.ims.icarus.model.standard.manifest.AnnotationLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
 import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
@@ -466,7 +466,7 @@ public class ManifestParser {
 			}
 		}
 
-		private void readManifestAttributes(Attributes attributes, AbstractManifest<?> manifest) {
+		private void readManifestAttributes(Attributes attributes, AbstractMemberManifest<?> manifest) {
 			readTemplateAttributes(attributes, manifest);
 
 			String id = normalize(attributes, "id"); //$NON-NLS-1$
@@ -574,12 +574,12 @@ public class ManifestParser {
 				if(implementation==null) {
 					error("Empty implementation declaration in manifest"); //$NON-NLS-1$
 				} else {
-					current(AbstractManifest.class).setImplementation(implementation);
+					current(AbstractMemberManifest.class).setImplementation(implementation);
 				}
 			} break;
 
 			case "property": { //$NON-NLS-1$
-				AbstractManifest<?> manifest = current(AbstractManifest.class);
+				AbstractMemberManifest<?> manifest = current(AbstractMemberManifest.class);
 
 				key = normalize(attributes, "key"); //$NON-NLS-1$
 				valueType = typeValue(normalize(attributes, "type")); //$NON-NLS-1$
@@ -608,7 +608,7 @@ public class ManifestParser {
 				if(isRoot()) {
 					addTemplate(manifest);
 				} else {
-					current(AbstractManifest.class).setOptionsManifest(manifest);
+					current(AbstractMemberManifest.class).setOptionsManifest(manifest);
 				}
 
 				push(manifest);
@@ -1048,7 +1048,7 @@ public class ManifestParser {
 
 				if(text!=null) {
 					Object value = value(text, valueType);
-					current(AbstractManifest.class).setProperty(key, value);
+					current(AbstractMemberManifest.class).setProperty(key, value);
 				}
 				key = null;
 				valueType = null;

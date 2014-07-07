@@ -38,6 +38,7 @@ import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -49,6 +50,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	private String id;
 
 	private Set<String> baseNames = new HashSet<>();
+	private Set<Identity> groupIdentifiers = new HashSet<>();
 	private Map<String, Option> options = new HashMap<>();
 
 	/**
@@ -104,6 +106,7 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	/**
 	 * @param id the id to set
 	 */
+	@Override
 	public void setId(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
@@ -179,6 +182,30 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		return getOption(name).published;
 	}
 
+	/**
+	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getOptionGroup(java.lang.String)
+	 */
+	@Override
+	public String getOptionGroup(String name) {
+		return getOption(name).group;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getGroupIdentifiers()
+	 */
+	@Override
+	public Set<Identity> getGroupIdentifiers() {
+		return CollectionUtils.getSetProxy(groupIdentifiers);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#isMultiValue(java.lang.String)
+	 */
+	@Override
+	public boolean isMultiValue(String name) {
+		return getOption(name).multivalue;
+	}
+
 	public void addOption(String name) {
 		if (name == null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
@@ -230,37 +257,27 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		getOption(name).published = published;
 	}
 
+	public void setOptionGroup(String key, String group) {
+		getOption(key).group = group;
+	}
+
+	public void setMultiValue(String name, boolean multivalue) {
+		getOption(name).multivalue = multivalue;
+	}
+
+	public void addGroupIdentifier(Identity identity) {
+		if (identity == null)
+			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
+
+		groupIdentifiers.add(identity);
+	}
+
 	/**
 	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getSupportedRange(java.lang.String)
 	 */
 	@Override
 	public ValueRange getSupportedRange(String name) {
 		return getOption(name).range;
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		serializer.writeAttribute("id", id); //$NON-NLS-1$
-		serializer.writeAttribute("template-id", getTemplate().getId()); //$NON-NLS-1$
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("id", id); //$NON-NLS-1$
 	}
 
 	/**
@@ -318,8 +335,10 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		public ValueType valueType;
 		public String name;
 		public String description;
+		public String group;
 		public ValueSet values;
 		public ValueRange range;
 		public boolean published = true;
+		public boolean multivalue = false;
 	}
 }

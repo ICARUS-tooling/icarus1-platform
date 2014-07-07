@@ -26,18 +26,14 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
-import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -45,12 +41,13 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> implements CorpusManifest {
+public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> implements CorpusManifest {
 
 	private ContextManifest defaultContextManifest;
 	private List<ContextManifest> contextManifests = new ArrayList<>(3);
 	private Map<String, ContextManifest> contextManifestLookup = new HashMap<>();
 	private boolean editable;
+	private List<Note> notes = new ArrayList<>();
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -61,10 +58,10 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.CorpusManifest#getDefaultContextManifest()
+	 * @see de.ims.icarus.model.api.manifest.CorpusManifest#getRootContextManifest()
 	 */
 	@Override
-	public ContextManifest getDefaultContextManifest() {
+	public ContextManifest getRootContextManifest() {
 		return defaultContextManifest;
 	}
 
@@ -144,74 +141,90 @@ public class CorpusManifestImpl extends AbstractManifest<CorpusManifest> impleme
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.manifest.CorpusManifest#getNotes()
 	 */
 	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeXmlAttribute(serializer, "editable", editable, getTemplate().isEditable()); //$NON-NLS-1$
+	public List<Note> getNotes() {
+		return CollectionUtils.getListProxy(notes);
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.manifest.CorpusManifest#addNote(de.ims.icarus.model.api.manifest.CorpusManifest.Note)
 	 */
 	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("editable", editable); //$NON-NLS-1$
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		XmlWriter.writeContextManifestElement(serializer, defaultContextManifest);
-
-		for(ContextManifest contextManifest : contextManifests) {
-			XmlWriter.writeContextManifestElement(serializer, contextManifest);
+	public void addNote(Note note) {
+		if(!notes.contains(note)) {
+			notes.add(note);
 		}
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.manifest.CorpusManifest#removeNote(de.ims.icarus.model.api.manifest.CorpusManifest.Note)
 	 */
 	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		if(!ClassUtils.equals(defaultContextManifest, getTemplate().getDefaultContextManifest())) {
-			XmlWriter.writeContextManifestElement(serializer, defaultContextManifest);
-		}
-
-		Set<ContextManifest> derived = new HashSet<>(getTemplate().getCustomContextManifests());
-
-		for(ContextManifest contextManifest : contextManifests) {
-			if(derived.contains(contextManifest)) {
-				continue;
-			}
-
-			XmlWriter.writeContextManifestElement(serializer, contextManifest);
-		}
+	public void removeNote(Note note) {
+		notes.remove(note);
 	}
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return "corpus"; //$NON-NLS-1$
+	public static class NoteImpl implements Note {
+
+		private Date modificationDate;
+		private String name;
+		private String content;
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.CorpusManifest.Note#getModificationDate()
+		 */
+		@Override
+		public Date getModificationDate() {
+			return modificationDate;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.CorpusManifest.Note#getName()
+		 */
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.CorpusManifest.Note#getContent()
+		 */
+		@Override
+		public String getContent() {
+			return content;
+		}
+
+		/**
+		 * @param modificationDate the modificationDate to set
+		 */
+		public void setModificationDate(Date modificationDate) {
+			if (modificationDate == null)
+				throw new NullPointerException("Invalid modificationDate"); //$NON-NLS-1$
+
+			this.modificationDate = modificationDate;
+		}
+
+		/**
+		 * @param name the name to set
+		 */
+		public void setName(String name) {
+			if (name == null)
+				throw new NullPointerException("Invalid name");  //$NON-NLS-1$
+
+			this.name = name;
+		}
+
+		/**
+		 * @param content the content to set
+		 */
+		public void setContent(String content) {
+			if (content == null)
+				throw new NullPointerException("Invalid content"); //$NON-NLS-1$
+
+			this.content = content;
+		}
+
 	}
 }

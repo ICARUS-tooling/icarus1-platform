@@ -23,25 +23,28 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.manifest;
-
+package de.ims.icarus.model.iql.expr.func;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ContextWriterManifest extends MemberManifest {
+public class FunctionUtils {
 
-	/**
-	 * If the writer is not defined via a specific class but rather
-	 * as an abstract format specification, this method returns the
-	 * id of the format that was used for registration with the
-	 * {@code CorpusRegistry}. Note that a {@code ContextReaderManifest}
-	 * must either define a dedicated {@link Implementation} section or
-	 * return a valid format id!
-	 *
-	 * @return
-	 */
-	String getFormatId();
+	private static boolean checkMonoParams(Function function, Class<?> type) {
+		for(int i=0; i<function.getGrade(); i++) {
+			if(!type.equals(function.getParamType(i))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean isLongParamFunction(Function function) {
+		return checkMonoParams(function, long.class);
+	}
+
+	//TODO
 }

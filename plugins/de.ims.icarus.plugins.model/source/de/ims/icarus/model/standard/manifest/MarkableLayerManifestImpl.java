@@ -29,11 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ims.icarus.model.api.manifest.ContainerManifest;
-import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
 
 /**
  * @author Markus Gärtner
@@ -44,38 +41,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 
 	private List<ContainerManifest> containerManifests;
 
-	private MarkableLayerManifest boundaryLayerManifest;
-
-	private String boundaryLayer;
-	private String boundaryContext;
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#readTemplate(de.ims.icarus.model.api.manifest.LayerManifest)
-	 */
-	@Override
-	protected void readTemplate(MarkableLayerManifest template) {
-		super.readTemplate(template);
-
-		ContainerManifestImpl lastAdded = null;
-
-		for(int i=0; i<template.getContainerDepth(); i++) {
-			ContainerManifest source = template.getContainerManifest(i);
-			ContainerManifestImpl containerManifest =
-					(ContainerManifestImpl) clone(source);
-
-			containerManifest.setTemplate(source);
-
-			if(lastAdded!=null) {
-				containerManifest.setParentManifest(lastAdded);
-				lastAdded.setElementManifest(containerManifest);
-			}
-			containerManifest.setLayerManifest(this);
-
-			addContainerManifest(containerManifest);
-
-			lastAdded = containerManifest;
-		}
-	}
+	private TargetLayerManifest boundaryLayerManifest;
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -127,136 +93,20 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.StructureLayerManifest#getBoundaryLayerManifest()
+	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#getBoundaryLayerManifest()
 	 */
 	@Override
-	public MarkableLayerManifest getBoundaryLayerManifest() {
+	public TargetLayerManifest getBoundaryLayerManifest() {
 		return boundaryLayerManifest;
 	}
 
 	/**
 	 * @param boundaryLayerManifest the boundaryLayerManifest to set
 	 */
-	public void setBoundaryLayerManifest(MarkableLayerManifest boundaryLayerManifest) {
+	public void setBoundaryLayerManifest(TargetLayerManifest boundaryLayerManifest) {
 		if (boundaryLayerManifest == null)
 			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
 
 		this.boundaryLayerManifest = boundaryLayerManifest;
-	}
-
-	/**
-	 * @return the boundaryLayer
-	 */
-	public String getBoundaryLayerManifest() {
-		return boundaryLayer;
-	}
-
-	/**
-	 * @return the boundaryContext
-	 */
-	public String getBoundaryContext() {
-		return boundaryContext;
-	}
-
-	/**
-	 * @param boundaryLayer the boundaryLayer to set
-	 */
-	public void setBoundaryLayer(String boundaryLayer) {
-		if (boundaryLayer == null)
-			throw new NullPointerException("Invalid boundaryLayer"); //$NON-NLS-1$
-		if(!isTemplate())
-			throw new UnsupportedOperationException("Cannot define lazy boundary layer link"); //$NON-NLS-1$
-		this.boundaryLayer = boundaryLayer;
-	}
-
-	/**
-	 * @param boundaryContext the boundaryContext to set
-	 */
-	public void setBoundaryContext(String boundaryContext) {
-		if (boundaryContext == null)
-			throw new NullPointerException("Invalid boundaryContext"); //$NON-NLS-1$
-		if(!isTemplate())
-			throw new UnsupportedOperationException("Cannot define lazy boundary context link"); //$NON-NLS-1$
-		this.boundaryContext = boundaryContext;
-	}
-
-	private void writeBoundaryXmlAttributes(XmlSerializer serializer) throws Exception {
-		if(isTemplate()) {
-			serializer.writeAttribute("boundary-layer", boundaryLayer); //$NON-NLS-1$
-			serializer.writeAttribute("boundary-context", boundaryContext); //$NON-NLS-1$
-		} else if(boundaryLayerManifest!=null) {
-			ContextManifest boundaryContext = boundaryLayerManifest.getContextManifest();
-
-			serializer.writeAttribute("boundary-layer", boundaryLayerManifest.getId()); //$NON-NLS-1$
-
-			if(boundaryContext!=getContextManifest()) {
-				serializer.writeAttribute("boundary-context", boundaryContext.getId()); //$NON-NLS-1$
-			}
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		for(int i=getTemplate().getContainerDepth(); i<getContainerDepth(); i++) {
-			XmlWriter.writeContainerManifestElement(serializer, getContainerManifest(i));
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		for(int i=0; i<getContainerDepth(); i++) {
-			XmlWriter.writeContainerManifestElement(serializer, getContainerManifest(i));
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeBoundaryXmlAttributes(serializer);
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractLayerManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		writeBoundaryXmlAttributes(serializer);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return "markable-layer"; //$NON-NLS-1$
-	}
-
-	protected ContainerManifest clone(ContainerManifest source) {
-		return source.getManifestType()==ManifestType.STRUCTURE_MANIFEST ?
-				new StructureManifestImpl() : new ContainerManifestImpl();
 	}
 }

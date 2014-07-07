@@ -193,7 +193,7 @@ public class CorpusVerifier {
 		}
 
 		// Check integrity
-		if(manifest.isDefaultContext() && manifest.getCorpusManifest().getDefaultContextManifest()!=manifest) {
+		if(manifest.isRootContext() && manifest.getCorpusManifest().getRootContextManifest()!=manifest) {
 			error("Inconsistent default-manifest declaration"); //$NON-NLS-1$
 		}
 

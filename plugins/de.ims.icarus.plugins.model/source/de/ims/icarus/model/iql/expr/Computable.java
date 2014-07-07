@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.model.iql.expr;
@@ -32,4 +32,13 @@ package de.ims.icarus.model.iql.expr;
  */
 public interface Computable {
 
+	boolean isComputed();
+
+	/**
+	 * Initiates the computation and prepares the output value.
+	 *
+	 * @throws IllegalStateException iff parameters are missing or
+	 * 			some other issue prevents successful computation.
+	 */
+	void compute();
 }

@@ -23,25 +23,31 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.manifest;
+package de.ims.icarus.model.standard.driver.file.connector;
 
+import java.nio.file.Path;
+
+import de.ims.icarus.model.standard.driver.file.FileDriver;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ContextReaderManifest extends MemberManifest {
+public abstract class FileConnector {
 
-	/**
-	 * If the reader is not defined via a specific class but rather
-	 * as an abstract format specification, this method returns the
-	 * id of the format that was used for registration with the
-	 * {@code CorpusRegistry}. Note that a {@code ContextReaderManifest}
-	 * must either define a dedicated {@link Implementation} section or
-	 * return a valid format id!
-	 *
-	 * @return
-	 */
-	String getFormatId();
+	protected final FileDriver driver;
+
+	protected final Path folder;
+
+	protected FileConnector(FileDriver driver) {
+		if (driver == null)
+			throw new NullPointerException("Invalid driver"); //$NON-NLS-1$
+
+		this.driver = driver;
+	}
+
+	public FileDriver getDriver() {
+		return driver;
+	}
 }

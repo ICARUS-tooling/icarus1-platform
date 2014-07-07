@@ -57,19 +57,10 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 	 */
 	@Override
 	public StructureManifest getStructureManifest() {
-		return (StructureManifest) getContainerManifest(2);
+		return (StructureManifest) getContainerManifest(1);
 	}
 
 	public void addStructureManifest(StructureManifest manifest) {
 		addContainerManifest(manifest);
 	}
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.MarkableLayerManifestImpl#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return "structure-layer"; //$NON-NLS-1$
-	}
-
 }

@@ -117,7 +117,7 @@ public interface ContextManifest extends MemberManifest {
 	 */
 	boolean isIndependentContext();
 
-	boolean isDefaultContext();
+	boolean isRootContext();
 
 	/**
 	 * Abstract description of a layer object this context depends on.
@@ -184,5 +184,17 @@ public interface ContextManifest extends MemberManifest {
 		 * @return
 		 */
 		String getAlias();
+
+		/**
+		 * If this prerequisite is in resolved state, it was created based on some unresolved
+		 * prerequisite in a context template. In that case this method returns the original
+		 * prerequisite manifest in unresolved form, or {@code null} otherwise.
+		 * <p>
+		 * Note that in case the prerequisite was declared using "hard binding" then this method
+		 * will return also {@code null}!
+		 *
+		 * @return
+		 */
+		PrerequisiteManifest getUnresolvedForm();
 	}
 }

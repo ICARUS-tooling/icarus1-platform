@@ -71,24 +71,4 @@ public interface ContainerManifest extends MemberManifest {
 	 * @see ContainerType
 	 */
 	ContainerType getContainerType();
-
-
-	/**
-	 * Changes the type of this container
-	 * @param containerType The new type of this container
-	 * @throws NullPointerException if the {@code containerType} argument is {@code null}
-	 */
-	void setContainerType(ContainerType containerType);
-
-	/**
-	 * Returns the manifest describing the <i>boundary containers</i> used for
-	 * {@code Container} instances of this manifest or {@code null} if those
-	 * containers are not restricted by boundaries.
-	 * <p>
-	 * Note that <i>boundary containers</i> are only valid when a container actually hosts
-	 * other containers!
-	 */
-	ContainerManifest getBoundaryContainerManifest();
-
-	ContainerManifest getBaseContainerManifest();
 }

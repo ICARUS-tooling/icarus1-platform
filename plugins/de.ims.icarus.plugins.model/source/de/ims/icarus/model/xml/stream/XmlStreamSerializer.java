@@ -143,6 +143,15 @@ public class XmlStreamSerializer implements XmlSerializer {
 	}
 
 	/**
+	 * @see de.ims.icarus.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, long)
+	 */
+	@Override
+	public void writeAttribute(String name, long value) throws XMLStreamException {
+//		pushAttribute(name, String.valueOf(value));
+		writer.writeAttribute(name, String.valueOf(value));
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, double)
 	 */
 	@Override

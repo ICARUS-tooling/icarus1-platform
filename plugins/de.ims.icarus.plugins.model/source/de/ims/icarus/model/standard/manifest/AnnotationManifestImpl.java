@@ -40,22 +40,24 @@ import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest> implements AnnotationManifest {
+public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationManifest> implements AnnotationManifest {
 
 	private String key;
 	private List<String> aliases;
 	private ValueType valueType = ValueType.UNKNOWN;
 	private ValueSet values;
 	private ValueRange valueRange;
+	private ContentType contentType;
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
 	 */
 	@Override
 	protected void readTemplate(AnnotationManifest template) {
@@ -149,7 +151,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * This implementation returns {@code true} when at least one of
-	 * {@link ValueRange} or {@link Values.ValueIteratorFactory} previously
+	 * {@link ValueRange} or {@link ValueSet} previously
 	 * assigned to this manifest is non-null.
 	 *
 	 * @see de.ims.icarus.model.api.manifest.AnnotationManifest#isBounded()
@@ -181,6 +183,21 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 	@Override
 	public ValueType getValueType() {
 		return valueType;
+	}
+
+	/**
+	 * @return the contentType
+	 */
+	@Override
+	public ContentType getContentType() {
+		return contentType;
+	}
+
+	/**
+	 * @param contentType the contentType to set
+	 */
+	public void setContentType(ContentType contentType) {
+		this.contentType = contentType;
 	}
 
 	/**
@@ -220,7 +237,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -229,11 +246,14 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 		writeXmlAttribute(serializer, "key", key, getTemplate().getKey()); //$NON-NLS-1$
 		writeXmlAttribute(serializer, "type", valueType, getTemplate().getValueType()); //$NON-NLS-1$
+		if(!ClassUtils.equals(contentType, getTemplate().getContentType())) {
+			XmlWriter.writeContentTypeAttribute(serializer, contentType);
+		}
 	}
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -242,11 +262,12 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 		serializer.writeAttribute("key", key); //$NON-NLS-1$
 		serializer.writeAttribute("type", valueType.getValue()); //$NON-NLS-1$
+		XmlWriter.writeContentTypeAttribute(serializer, contentType);
 	}
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlElements(XmlSerializer serializer)
@@ -272,7 +293,7 @@ public class AnnotationManifestImpl extends AbstractManifest<AnnotationManifest>
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlElements(XmlSerializer serializer)

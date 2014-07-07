@@ -26,9 +26,11 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.manifest.ValueRange;
+import de.ims.icarus.model.util.ValueType;
 
 public class ValueRangeImpl implements ValueRange {
 
+	private ValueType valueType = ValueType.STRING;
 	private Object lower, upper;
 	private final boolean lowerIncluded, upperIncluded;
 
@@ -44,6 +46,24 @@ public class ValueRangeImpl implements ValueRange {
 
 		this.lower = lower;
 		this.upper = upper;
+	}
+
+	/**
+	 * @return the valueType
+	 */
+	@Override
+	public ValueType getValueType() {
+		return valueType;
+	}
+
+	/**
+	 * @param valueType the valueType to set
+	 */
+	public void setValueType(ValueType valueType) {
+		if (valueType == null)
+			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
+
+		this.valueType = valueType;
 	}
 
 	/**

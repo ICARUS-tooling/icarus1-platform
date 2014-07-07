@@ -23,22 +23,41 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file;
+package de.ims.icarus.model.standard.elements;
 
-import java.nio.channels.SeekableByteChannel;
-
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.layer.LayerGroup;
+import de.ims.icarus.model.api.layer.MarkableLayer;
+import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.standard.elements.dummy.DummyContainer;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class GroupLoader {
+public class VirtualRootContainer extends DummyContainer {
 
-	protected final LayerGroup group;
-	protected final FileConnector connector;
+	private final MarkableLayer layer;
 
-	public abstract Markable load(long index, SeekableByteChannel channel);
+	public VirtualRootContainer(MarkableLayer layer) {
+		if (layer == null)
+			throw new NullPointerException("Invalid layer"); //$NON-NLS-1$
+
+		this.layer = layer;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.elements.dummy.DummyContainer#getManifest()
+	 */
+	@Override
+	public ContainerManifest getManifest() {
+		return layer.getManifest().getRootContainerManifest();
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.elements.dummy.DummyMarkable#getLayer()
+	 */
+	@Override
+	public MarkableLayer getLayer() {
+		return layer;
+	}
 }

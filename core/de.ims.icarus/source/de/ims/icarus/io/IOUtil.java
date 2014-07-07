@@ -38,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -260,7 +261,7 @@ public final class IOUtil {
 	            return isJarResourceExists(url);
 	        }
 	        return isUrlResourceExists(url);
-    	} catch(URISyntaxException e) {
+    	} catch(URISyntaxException|FileSystemNotFoundException e) {
     		return false;
     	}
     }

@@ -25,11 +25,7 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
-import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.api.manifest.Derivable;
-import de.ims.icarus.model.xml.XmlElement;
-import de.ims.icarus.model.xml.XmlResource;
-import de.ims.icarus.model.xml.XmlSerializer;
 
 
 
@@ -38,21 +34,41 @@ import de.ims.icarus.model.xml.XmlSerializer;
  * @version $Id$
  *
  */
-public abstract class AbstractDerivable<T extends Derivable> implements XmlElement, Derivable {
+public abstract class AbstractDerivable<T extends Derivable> implements Derivable {
 
 	private T template;
 
 	private boolean isTemplate = false;
 
-	public AbstractDerivable() {
+	private String id;
+
+	protected AbstractDerivable() {
 		template = null;
+	}
+
+	/**
+	 * @return the id
+	 */
+	@Override
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		this.id = id;
 	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.Derivable#setTemplate(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@SuppressWarnings("unchecked")
-	@Override
+//	@Override
 	public void setTemplate(Derivable template) {
 		if (template == null)
 			throw new NullPointerException("Invalid template"); //$NON-NLS-1$
@@ -61,6 +77,11 @@ public abstract class AbstractDerivable<T extends Derivable> implements XmlEleme
 		readTemplate((T) template);
 	}
 
+	/**
+	 * Applies the content of the given template to this derivable.
+	 * Note that a subclass should always invoke {@code super.readTemplate()} first!
+	 * @param template
+	 */
 	protected void readTemplate(T template) {
 		// for subclasses
 	}
@@ -74,96 +95,96 @@ public abstract class AbstractDerivable<T extends Derivable> implements XmlEleme
 		return template!=null;
 	}
 
-	/**
-	 * Writes out the given {@code localValue} if it non-null and
-	 * does not equal the optional {@code templateValue}
-	 * @throws Exception
-	 */
-	protected void writeXmlAttribute(XmlSerializer serializer, String name,
-			String localValue, String templateValue) throws Exception {
-		if(localValue==null || (localValue!=null && localValue.equals(templateValue))) {
-			return;
-		}
-
-		serializer.writeAttribute(name, localValue);
-	}
-
-	protected void writeXmlAttribute(XmlSerializer serializer, String name,
-			boolean localValue, boolean templateValue) throws Exception {
-		if(localValue==templateValue) {
-			return;
-		}
-
-		serializer.writeAttribute(name, localValue);
-	}
-
-	protected void writeXmlAttribute(XmlSerializer serializer, String name,
-			int localValue, int templateValue) throws Exception {
-		if(localValue==templateValue) {
-			return;
-		}
-
-		serializer.writeAttribute(name, localValue);
-	}
-
-	protected void writeXmlAttribute(XmlSerializer serializer, String name,
-			Object localValue, Object templateValue) throws Exception {
-		if(localValue==null || (localValue!=null && localValue.equals(templateValue))) {
-			return;
-		}
-
-		if(localValue instanceof XmlResource) {
-			serializer.writeAttribute(name, ((XmlResource) localValue).getValue());
-		} else
-			LoggerFactory.warning(this, "Unable to serialize object to xml: "+localValue.getClass()); //$NON-NLS-1$
-	}
-
-	protected void writeXmlAttribute(XmlSerializer serializer, String name,
-			Object value) throws Exception {
-		if(value==null) {
-			return;
-		}
-
-		if(value instanceof XmlResource) {
-			serializer.writeAttribute(name, ((XmlResource) value).getValue());
-		} else
-			LoggerFactory.warning(this, "Unable to serialize object to xml: "+value.getClass()); //$NON-NLS-1$
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.xml.XmlElement#writeXml(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	public void writeXml(XmlSerializer serializer) throws Exception {
-		serializer.startElement(getXmlTag());
-		if(hasTemplate()) {
-			writeTemplateXmlAttributes(serializer);
-			writeTemplateXmlElements(serializer);
-		} else {
-			writeFullXmlAttributes(serializer);
-			writeFullXmlElements(serializer);
-		}
-		serializer.endElement(getXmlTag());
-	}
-
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer) throws Exception {
-		// no-op
-	}
-
-	protected void writeFullXmlAttributes(XmlSerializer serializer) throws Exception {
-		// no-op
-	}
-
-	protected void writeTemplateXmlElements(XmlSerializer serializer) throws Exception {
-		// no-op
-	}
-
-	protected void writeFullXmlElements(XmlSerializer serializer) throws Exception {
-		// no-op
-	}
-
-	protected abstract String getXmlTag();
+//	/**
+//	 * Writes out the given {@code localValue} if it non-null and
+//	 * does not equal the optional {@code templateValue}
+//	 * @throws Exception
+//	 */
+//	protected void writeXmlAttribute(XmlSerializer serializer, String name,
+//			String localValue, String templateValue) throws Exception {
+//		if(localValue==null || (localValue!=null && localValue.equals(templateValue))) {
+//			return;
+//		}
+//
+//		serializer.writeAttribute(name, localValue);
+//	}
+//
+//	protected void writeXmlAttribute(XmlSerializer serializer, String name,
+//			boolean localValue, boolean templateValue) throws Exception {
+//		if(localValue==templateValue) {
+//			return;
+//		}
+//
+//		serializer.writeAttribute(name, localValue);
+//	}
+//
+//	protected void writeXmlAttribute(XmlSerializer serializer, String name,
+//			int localValue, int templateValue) throws Exception {
+//		if(localValue==templateValue) {
+//			return;
+//		}
+//
+//		serializer.writeAttribute(name, localValue);
+//	}
+//
+//	protected void writeXmlAttribute(XmlSerializer serializer, String name,
+//			Object localValue, Object templateValue) throws Exception {
+//		if(localValue==null || (localValue!=null && localValue.equals(templateValue))) {
+//			return;
+//		}
+//
+//		if(localValue instanceof XmlResource) {
+//			serializer.writeAttribute(name, ((XmlResource) localValue).getValue());
+//		} else
+//			LoggerFactory.warning(this, "Unable to serialize object to xml: "+localValue.getClass()); //$NON-NLS-1$
+//	}
+//
+//	protected void writeXmlAttribute(XmlSerializer serializer, String name,
+//			Object value) throws Exception {
+//		if(value==null) {
+//			return;
+//		}
+//
+//		if(value instanceof XmlResource) {
+//			serializer.writeAttribute(name, ((XmlResource) value).getValue());
+//		} else
+//			LoggerFactory.warning(this, "Unable to serialize object to xml: "+value.getClass()); //$NON-NLS-1$
+//	}
+//
+//	/**
+//	 * @throws Exception
+//	 * @see de.ims.icarus.model.api.xml.XmlElement#writeXml(de.ims.icarus.model.api.xml.XmlSerializer)
+//	 */
+//	@Override
+//	public void writeXml(XmlSerializer serializer) throws Exception {
+//		serializer.startElement(getXmlTag());
+//		if(hasTemplate()) {
+//			writeTemplateXmlAttributes(serializer);
+//			writeTemplateXmlElements(serializer);
+//		} else {
+//			writeFullXmlAttributes(serializer);
+//			writeFullXmlElements(serializer);
+//		}
+//		serializer.endElement(getXmlTag());
+//	}
+//
+//	protected void writeTemplateXmlAttributes(XmlSerializer serializer) throws Exception {
+//		// no-op
+//	}
+//
+//	protected void writeFullXmlAttributes(XmlSerializer serializer) throws Exception {
+//		// no-op
+//	}
+//
+//	protected void writeTemplateXmlElements(XmlSerializer serializer) throws Exception {
+//		// no-op
+//	}
+//
+//	protected void writeFullXmlElements(XmlSerializer serializer) throws Exception {
+//		// no-op
+//	}
+//
+//	protected abstract String getXmlTag();
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.Derivable#isTemplate()

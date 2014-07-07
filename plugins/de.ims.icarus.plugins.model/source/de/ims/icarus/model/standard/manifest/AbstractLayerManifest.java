@@ -26,17 +26,13 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.ContextManifest;
-import de.ims.icarus.model.api.manifest.LayerManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
-import de.ims.icarus.model.util.CorpusUtils;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
+import de.ims.icarus.model.api.manifest.LayerGroupManifest;
+import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -44,32 +40,12 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractManifest<L> implements LayerManifest {
+public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractMemberManifest<L> implements LayerManifest {
 
-	private List<PrerequisiteManifest> prerequisites = new ArrayList<>(3);
-	private boolean indexable = true, searchable = true;
 	private ContextManifest contextManifest;
-	private MarkableLayerManifest baseLayerManifest;
-
-	private String baseLayer;
-	private String baseContext;
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
-	 */
-	@Override
-	protected void readTemplate(L template) {
-		super.readTemplate(template);
-
-		for(PrerequisiteManifest prerequisite : template.getPrerequisites()) {
-			if(!prerequisites.contains(prerequisite)) {
-				prerequisites.add(prerequisite);
-			}
-		}
-
-		indexable |= template.isIndexable();
-		searchable |= template.isSearchable();
-	}
+	private LayerGroupManifest layerGroupManifest;
+	private List<TargetLayerManifest> baseLayerManifests = new ArrayList<>(3);
+	private LayerType layerType;
 
 	/**
 	 * @param contextManifest the contextManifest to set
@@ -90,190 +66,140 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getPrerequisites()
+	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getGroupManifest()
 	 */
 	@Override
-	public List<PrerequisiteManifest> getPrerequisites() {
-		return CollectionUtils.getListProxy(prerequisites);
-	}
-
-	public void addPrerequisite(PrerequisiteManifest prerequisite) {
-		if(prerequisite==null)
-			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
-
-		if(prerequisites.contains(prerequisite))
-			throw new IllegalArgumentException("Duplicate prerequisite: "+CorpusUtils.getName(prerequisite)); //$NON-NLS-1$
-
-		prerequisites.add(prerequisite);
-	}
-
-	public void removePrerequisite(PrerequisiteManifest prerequisite) {
-		if(prerequisite==null)
-			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
-
-		if(!prerequisites.remove(prerequisite))
-			throw new IllegalArgumentException("Unknown prerequisite: "+CorpusUtils.getName(prerequisite)); //$NON-NLS-1$
+	public LayerGroupManifest getGroupManifest() {
+		return layerGroupManifest;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerManifest#isIndexable()
+	 * @param layerGroupManifest the layerGroupManifest to set
+	 */
+	public void setLayerGroupManifest(LayerGroupManifest layerGroupManifest) {
+		if (layerGroupManifest == null)
+			throw new NullPointerException("Invalid layerGroupManifest"); //$NON-NLS-1$
+
+		this.layerGroupManifest = layerGroupManifest;
+	}
+
+	/**
+	 * @param layerType the layerType to set
+	 */
+	public void setLayerType(LayerType layerType) {
+		this.layerType = layerType;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getLayerType()
 	 */
 	@Override
-	public boolean isIndexable() {
-		return indexable;
+	public LayerType getLayerType() {
+		return layerType;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerManifest#isSearchable()
+	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getBaseLayerManifests()
 	 */
 	@Override
-	public boolean isSearchable() {
-		return searchable;
+	public List<TargetLayerManifest> getBaseLayerManifests() {
+		return CollectionUtils.getListProxy(baseLayerManifests);
 	}
 
-	/**
-	 * @param indexable the indexable to set
-	 */
-	public void setIndexable(boolean indexable) {
-		this.indexable = indexable;
+	public void addBaseLayerManifest(TargetLayerManifest manifest) {
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+
+		if(!baseLayerManifests.add(manifest))
+			throw new IllegalArgumentException("Base layer manifest already present: "+manifest); //$NON-NLS-1$
 	}
 
-	/**
-	 * @param searchable the searchable to set
-	 */
-	public void setSearchable(boolean searchable) {
-		this.searchable = searchable;
-	}
+	public static class TargetLayerManifestImpl implements TargetLayerManifest {
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getBaseLayerManifest()
-	 */
-	@Override
-	public MarkableLayerManifest getBaseLayerManifest() {
-		return baseLayerManifest;
-	}
+		private final LayerManifest layerManifest;
 
-	/**
-	 * @param baseLayerManifest the baseLayerManifest to set
-	 */
-	public void setBaseLayerManifest(MarkableLayerManifest baseLayerManifest) {
-		if (baseLayerManifest == null)
-			throw new NullPointerException("Invalid baseLayerManifest"); //$NON-NLS-1$
+		private PrerequisiteManifest prerequisiteManifest;
+		private LayerManifest resolvedLayerManifest;
 
-		this.baseLayerManifest = baseLayerManifest;
-	}
+		public TargetLayerManifestImpl(LayerManifest layerManifest) {
+			if (layerManifest == null)
+				throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
 
-	/**
-	 * @return the baseLayer
-	 */
-	public String getBaseLayer() {
-		return baseLayer;
-	}
+			this.layerManifest = layerManifest;
+		}
 
-	/**
-	 * @return the baseContext
-	 */
-	public String getBaseContext() {
-		return baseContext;
-	}
+		public TargetLayerManifestImpl(LayerManifest layerManifest, TargetLayerManifest template) {
+			this(layerManifest);
 
-	/**
-	 * @param baseLayer the baseLayer to set
-	 */
-	public void setBaseLayer(String baseLayer) {
-		if (baseLayer == null)
-			throw new NullPointerException("Invalid baseLayer");  //$NON-NLS-1$
-		if(!isTemplate())
-			throw new UnsupportedOperationException("Cannot define lazy base layer link"); //$NON-NLS-1$
+			if (template == null)
+				throw new NullPointerException("Invalid template"); //$NON-NLS-1$
 
-		this.baseLayer = baseLayer;
-	}
+			prerequisiteManifest = template.getPrerequisite();
+		}
 
-	/**
-	 * @param baseContext the baseContext to set
-	 */
-	public void setBaseContext(String baseContext) {
-		if (baseContext == null)
-			throw new NullPointerException("Invalid baseContext");  //$NON-NLS-1$
-		if(!isTemplate())
-			throw new UnsupportedOperationException("Cannot define lazy base context link"); //$NON-NLS-1$
+		/**
+		 * @see de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest#getLayerManifest()
+		 */
+		@Override
+		public LayerManifest getLayerManifest() {
+			return layerManifest;
+		}
 
-		this.baseContext = baseContext;
-	}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest#getPrerequisite()
+		 */
+		@Override
+		public PrerequisiteManifest getPrerequisite() {
+			return prerequisiteManifest;
+		}
 
-	private void writeBaseXmlAttributes(XmlSerializer serializer) throws Exception {
-		if(isTemplate()) {
-			serializer.writeAttribute("base-layer", baseLayer); //$NON-NLS-1$
-			serializer.writeAttribute("base-context", baseContext); //$NON-NLS-1$
-		} else if(baseLayerManifest!=null) {
-			ContextManifest baseContext = baseLayerManifest.getContextManifest();
+		/**
+		 * @see de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest#getResolvedLayerManifest()
+		 */
+		@Override
+		public LayerManifest getResolvedLayerManifest() {
+			return resolvedLayerManifest;
+		}
 
-			serializer.writeAttribute("base-layer", baseLayerManifest.getId()); //$NON-NLS-1$
+		/**
+		 * @param prerequisiteManifest the prerequisiteManifest to set
+		 */
+		public void setPrerequisiteManifest(PrerequisiteManifest prerequisiteManifest) {
+			this.prerequisiteManifest = prerequisiteManifest;
+		}
 
-			if(baseContext!=contextManifest) {
-				serializer.writeAttribute("base-context", baseContext.getId()); //$NON-NLS-1$
+		/**
+		 * @param resolvedLayerManifest the resolvedLayerManifest to set
+		 */
+		public void setResolvedLayerManifest(LayerManifest resolvedLayerManifest) {
+			if (resolvedLayerManifest == null)
+				throw new NullPointerException("Invalid resolvedLayerManifest"); //$NON-NLS-1$
+
+			this.resolvedLayerManifest = resolvedLayerManifest;
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			// TODO Auto-generated method stub
+			return super.hashCode();
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof TargetLayerManifest) {
+				TargetLayerManifest other = (TargetLayerManifest) obj;
+				return (resolvedLayerManifest==null || resolvedLayerManifest==other.getResolvedLayerManifest())
+						&& (prerequisiteManifest==null || prerequisiteManifest==other.getPrerequisite());
 			}
+
+			return false;
 		}
-	}
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeXmlAttribute(serializer, "index", indexable, getTemplate().isIndexable()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "search", searchable, getTemplate().isSearchable()); //$NON-NLS-1$
-
-		writeBaseXmlAttributes(serializer);
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("index", indexable); //$NON-NLS-1$
-		serializer.writeAttribute("search", searchable); //$NON-NLS-1$
-
-		writeBaseXmlAttributes(serializer);
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		Set<PrerequisiteManifest> tmp = new HashSet<>(prerequisites);
-		tmp.removeAll(getTemplate().getPrerequisites());
-
-		for(PrerequisiteManifest prerequisite : tmp) {
-			XmlWriter.writePrerequisiteElement(serializer, prerequisite);
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		for(PrerequisiteManifest prerequisite : prerequisites) {
-			XmlWriter.writePrerequisiteElement(serializer, prerequisite);
-		}
 	}
 }

@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -49,7 +48,8 @@ public interface ModifiableManifest extends Derivable {
 	/**
 	 * Returns the property assigned to this manifest for the given
 	 * name. If their is no property with the given name available
-	 * this method should return {@code null}.
+	 * this method should return {@code null}. Note that multi-value
+	 * properties will typically return a collection of values.
 	 *
 	 * @param name The name of the property in question
 	 * @return The value of the property with the given name or {@code null}
@@ -57,11 +57,10 @@ public interface ModifiableManifest extends Derivable {
 	 */
 	Object getProperty(String name);
 
-	Collection<Object> getProperties(String name);
-
 	/**
 	 * Changes the value of the property specified by {@code name} to
-	 * the new {@code value}.
+	 * the new {@code value}. Note that only for multi-value properties
+	 * it is allowed to pass collections of values!
 	 *
 	 * @param name The name of the property to be changed
 	 * @param value The new value for the property, allowed to be {@code null}
@@ -74,8 +73,6 @@ public interface ModifiableManifest extends Derivable {
 	 * any properties the user can modify.
 	 */
 	void setProperty(String name, Object value);
-
-	void setProperties(String name, Collection<Object> values);
 
 	/**
 	 * Returns a {@link Set} view of all the available property names

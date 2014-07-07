@@ -53,7 +53,7 @@ import de.ims.icarus.util.CorruptedStateException;
  */
 public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifest> implements AnnotationLayer {
 
-	private final Map<Markable, Object> annotations = new WeakHashMap<>();
+	protected final Map<Markable, Object> annotations = new WeakHashMap<>();
 
 	/**
 	 * @param id
@@ -225,7 +225,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		private Markable[] markables = null;
 		private Object[] values = null;
 
-		int expectedSize = annotations.size();
+		private int expectedSize = annotations.size();
 
 		/**
 		 * @see de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
@@ -276,6 +276,8 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		private final Markable[] markables;
 		private final Object[] values;
 
+		private int expectedSize = annotations.size();
+
 		private AnnotationChange(Markable[] markables, Object[] values) {
 			if(markables.length!=values.length)
 				throw new IllegalArgumentException("Size mismatch between markables and values array"); //$NON-NLS-1$
@@ -299,6 +301,11 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		 */
 		@Override
 		public void execute() {
+			int size = annotations.size();
+			if(expectedSize!=size)
+				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
+						"Clear failed", expectedSize, annotations.size())); //$NON-NLS-1$
+
 			for(int i=markables.length-1; i>-1; i--) {
 				Markable markable = markables[i];
 				Object value = values[i];
@@ -307,6 +314,8 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 				values[i] = current;
 			}
+
+			expectedSize = annotations.size();
 		}
 
 		/**

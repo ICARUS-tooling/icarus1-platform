@@ -44,6 +44,8 @@ public interface MarkableLayerManifest extends LayerManifest {
 
 	/**
 	 * Returns the manifest for the top-level container in this layer.
+	 * Note that usually this will always be a manifest describing a list
+	 * type container.
 	 *
 	 * @return
 	 */

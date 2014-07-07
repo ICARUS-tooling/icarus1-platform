@@ -23,29 +23,21 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.driver.file;
+package de.ims.icarus.model.api.manifest;
 
-import java.nio.file.Path;
+import de.ims.icarus.util.ClassUtils;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class FileConnector {
+public class ManifestUtils {
 
-	protected final FileDriver driver;
-
-	protected final Path folder;
-
-	protected FileConnector(FileDriver driver) {
-		if (driver == null)
-			throw new NullPointerException("Invalid driver"); //$NON-NLS-1$
-
-		this.driver = driver;
-	}
-
-	public FileDriver getDriver() {
-		return driver;
+	public static boolean equals(ImplementationManifest m1, ImplementationManifest m2) {
+		return ClassUtils.equals(m1.getSourceType(), m2.getSourceType())
+				&& ClassUtils.equals(m1.getSource(), m2.getSource())
+				&& ClassUtils.equals(m1.getClassname(), m2.getClassname())
+				&& m1.isUseFactory()==m2.isUseFactory();
 	}
 }

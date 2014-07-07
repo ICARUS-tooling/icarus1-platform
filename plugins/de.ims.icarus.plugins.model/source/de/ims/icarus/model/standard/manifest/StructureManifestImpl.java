@@ -30,7 +30,6 @@ import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
-import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -39,8 +38,8 @@ import de.ims.icarus.model.xml.XmlSerializer;
  */
 public class StructureManifestImpl extends ContainerManifestImpl implements StructureManifest {
 
-	private StructureType structureType;
-//	private ContainerManifest boundaryContainerManifest;
+	private StructureType structureType = StructureType.SET;
+	private boolean multiRootAllowed = false;
 
 	/**
 	 * @see de.ims.icarus.model.api.standard.manifest.ContainerManifestImpl#readTemplate(de.ims.icarus.model.api.manifest.ContainerManifest)
@@ -75,7 +74,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	 */
 	@Override
 	public StructureType getStructureType() {
-		return structureType==null ? StructureType.SET : structureType;
+		return structureType;
 	}
 
 	/**
@@ -97,54 +96,19 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 		this.structureType = structureType;
 	}
 
-//	/**
-//	 * @param boundaryContainerManifest the boundaryContainerManifest to set
-//	 */
-//	public void setBoundaryContainerManifest(
-//			ContainerManifest boundaryContainerManifest) {
-//		if (boundaryContainerManifest == null)
-//			throw new NullPointerException("Invalid boundaryContainerManifest"); //$NON-NLS-1$
-//
-//		this.boundaryContainerManifest = boundaryContainerManifest;
-//	}
-
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.ContainerManifestImpl#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.manifest.StructureManifest#isMultiRootAllowed()
 	 */
 	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeXmlAttribute(serializer, "structure-type", structureType, getTemplate().getStructureType()); //$NON-NLS-1$
-
-//		if(boundaryContainerManifest!=null) {
-//			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
-//		}
+	public boolean isMultiRootAllowed() {
+		return multiRootAllowed;
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.ContainerManifestImpl#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.manifest.StructureManifest#setMultiRootAllowed(boolean)
 	 */
 	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("structure-type", structureType.getValue()); //$NON-NLS-1$
-
-//		if(boundaryContainerManifest!=null) {
-//			serializer.writeAttribute("boundary", boundaryContainerManifest.getId()); //$NON-NLS-1$
-//		}
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.ContainerManifestImpl#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return "structure"; //$NON-NLS-1$
+	public void setMultiRootAllowed(boolean value) {
+		this.multiRootAllowed = value;
 	}
 }

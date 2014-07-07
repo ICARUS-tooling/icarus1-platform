@@ -35,7 +35,7 @@ import java.util.List;
  */
 public interface CorpusManifest extends MemberManifest {
 
-	ContextManifest getDefaultContextManifest();
+	ContextManifest getRootContextManifest();
 
 	List<ContextManifest> getCustomContextManifests();
 

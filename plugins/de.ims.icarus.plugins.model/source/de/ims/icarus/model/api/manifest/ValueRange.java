@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.util.ValueType;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -39,4 +41,6 @@ public interface ValueRange {
 	boolean isLowerBoundInclusive();
 
 	boolean isUpperBoundInclusive();
+
+	ValueType getValueType();
 }

@@ -19,17 +19,34 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.meta;
+package de.ims.icarus.model.iql.expr.func;
+
+import de.ims.icarus.model.iql.expr.Expression;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Index extends MetaData {
+public interface Function extends Expression {
 
+	Class<?> getParamType(int index);
+
+	int getGrade();
+
+	Function setParam(int index, int value);
+	Function setParam(int index, long value);
+	Function setParam(int index, short value);
+	Function setParam(int index, byte value);
+	Function setParam(int index, char value);
+	Function setParam(int index, float value);
+	Function setParam(int index, double value);
+	Function setParam(int index, boolean value);
+	Function setParam(int index, Expression value);
+	Function setParam(int index, Object value);
+	Function setParam(int index, String value);
 }

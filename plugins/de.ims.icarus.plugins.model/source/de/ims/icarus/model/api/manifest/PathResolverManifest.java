@@ -30,7 +30,11 @@ package de.ims.icarus.model.api.manifest;
  * @version $Id$
  *
  */
-public interface PathResolverManifest extends MemberManifest, ImplementationManifest {
+public interface PathResolverManifest extends MemberManifest {
 
-	// no-op
+	/**
+	 * Returns the manifest that specifies the actual path resolver implementation.
+	 * @return
+	 */
+	ImplementationManifest getImplementationManifest();
 }

@@ -33,7 +33,7 @@ import de.ims.icarus.model.api.manifest.PathResolverManifest;
  * @version $Id$
  *
  */
-public class PathResolverManifestImpl extends AbstractManifest<PathResolverManifest> implements PathResolverManifest {
+public class PathResolverManifestImpl extends AbstractForeignImplementationManifest<PathResolverManifest> implements PathResolverManifest {
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()

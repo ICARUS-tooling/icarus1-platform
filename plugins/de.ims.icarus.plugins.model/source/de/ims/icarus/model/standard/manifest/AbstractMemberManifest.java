@@ -25,22 +25,12 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import javax.swing.Icon;
 
-import de.ims.icarus.model.api.manifest.Implementation;
 import de.ims.icarus.model.api.manifest.MemberManifest;
-import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
 import de.ims.icarus.util.ClassUtils;
-import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  *
@@ -50,11 +40,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public abstract class AbstractManifest<M extends MemberManifest> extends AbstractDerivable<M> implements MemberManifest {
-
-	private Map<String, Object> properties;
-	private OptionsManifest optionsManifest;
-	private Implementation implementation;
+public abstract class AbstractMemberManifest<M extends MemberManifest> extends AbstractModifiableManifest<M> implements MemberManifest {
 
 	private String name;
 	private String description;
@@ -83,20 +69,6 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 		}
 		if(icon==null) {
 			icon = template.getIcon();
-		}
-
-		OptionsManifest optionsManifest = template.getOptionsManifest();
-		if(optionsManifest!=null) {
-			if(this.optionsManifest==null) {
-				this.optionsManifest = new OptionsManifestImpl();
-			}
-			this.optionsManifest.setTemplate(optionsManifest);
-		}
-
-		for(String key : template.getPropertyNames()) {
-			if(getProperty(key)==null) {
-				setProperty(key, template.getProperty(key));
-			}
 		}
 	}
 
@@ -231,94 +203,6 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 	}
 
 	/**
-	 * @return the implementation
-	 */
-	@Override
-	public Implementation getImplementation() {
-		return implementation;
-	}
-
-	/**
-	 * @param implementation the implementation to set
-	 */
-	public void setImplementation(Implementation implementation) {
-		if (implementation == null)
-			throw new NullPointerException("Invalid implementation"); //$NON-NLS-1$
-
-		this.implementation = implementation;
-	}
-
-	/**
-	 * @param optionsManifest the optionsManifest to set
-	 */
-	public void setOptionsManifest(OptionsManifest optionsManifest) {
-		if (optionsManifest == null)
-			throw new NullPointerException("Invalid optionsManifest"); //$NON-NLS-1$
-
-		this.optionsManifest = optionsManifest;
-	}
-
-	protected boolean isTemplateKey(String name) {
-		return hasTemplate() && getTemplate().getPropertyNames().contains(name);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getProperty(java.lang.String)
-	 */
-	@Override
-	public Object getProperty(String name) {
-		return properties==null ? null : properties.get(name);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getPropertyNames()
-	 */
-	@Override
-	public Set<String> getPropertyNames() {
-		Set<String> result = null;
-		if(properties!=null) {
-			result = CollectionUtils.getSetProxy(properties.keySet());
-		}
-
-		if(result==null) {
-			result = Collections.emptySet();
-		}
-
-		return result;
-	}
-
-	@Override
-	public void setProperty(String key, Object value) {
-		if(key==null)
-			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
-
-		if(properties==null) {
-			properties = new HashMap<>();
-		}
-
-		properties.put(key, value);
-	}
-
-	public void setProperties(Map<String, Object> values) {
-		if(values==null)
-			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
-
-		if(properties==null) {
-			properties = new HashMap<>();
-		}
-
-		properties.putAll(values);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getOptionsManifest()
-	 */
-	@Override
-	public OptionsManifest getOptionsManifest() {
-		return optionsManifest;
-	}
-
-	/**
 	 * @throws Exception
 	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
@@ -348,60 +232,5 @@ public abstract class AbstractManifest<M extends MemberManifest> extends Abstrac
 		serializer.writeAttribute("name", name); //$NON-NLS-1$
 		serializer.writeAttribute("description", description); //$NON-NLS-1$
 		writeXmlAttribute(serializer, "icon", icon); //$NON-NLS-1$
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		if(optionsManifest!=null) {
-			if(properties!=null) {
-
-				// Find properties that differ from the template and only
-				// serialize them
-				for(Entry<String, Object> entry : properties.entrySet()) {
-					String name = entry.getKey();
-					Object value = entry.getValue();
-
-					// Skip properties that are equal to those defined in the template
-					if(value.equals(getTemplate().getProperty(name))) {
-						continue;
-					}
-
-					XmlWriter.writePropertyElement(serializer, name,
-							value, optionsManifest.getValueType(name));
-				}
-			}
-
-			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
-		}
-
-		if(implementation!=null && !implementation.equals(getTemplate().getImplementation())) {
-			implementation.writeXml(serializer);
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		if(optionsManifest!=null) {
-			XmlWriter.writeProperties(serializer, properties, optionsManifest);
-			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
-		}
-
-		if(implementation!=null) {
-			implementation.writeXml(serializer);
-		};
 	}
 }

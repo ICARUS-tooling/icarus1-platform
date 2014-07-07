@@ -27,20 +27,15 @@ package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.ims.icarus.model.api.manifest.ContextManifest;
-import de.ims.icarus.model.api.manifest.ContextReaderManifest;
-import de.ims.icarus.model.api.manifest.ContextWriterManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
+import de.ims.icarus.model.api.manifest.DriverManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -48,18 +43,23 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class ContextManifestImpl extends AbstractManifest<ContextManifest> implements ContextManifest {
+public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest> implements ContextManifest {
 
 	private final List<LayerManifest> layerManifests = new ArrayList<>();
 	private final Map<String, LayerManifest> layerManifestLookup = new HashMap<>();
 
-	private ContextReaderManifest readerManifest;
-	private ContextWriterManifest writerManifest;
-
 	private LocationManifest locationManifest;
 
-	private boolean independent;
-	private CorpusManifest corpusManifest;
+	private boolean independent = false;
+	private final CorpusManifest corpusManifest;
+	private DriverManifest driverManifest;
+
+	public ContextManifestImpl(CorpusManifest corpusManifest) {
+		if (corpusManifest == null)
+			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
+
+		this.corpusManifest = corpusManifest;
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getLayerManifests()
@@ -142,52 +142,6 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getReaderManifest()
-	 */
-	@Override
-	public ContextReaderManifest getReaderManifest() {
-		return readerManifest;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getWriterManifest()
-	 */
-	@Override
-	public ContextWriterManifest getWriterManifest() {
-		return writerManifest;
-	}
-
-	/**
-	 * @param corpusManifest the corpusManifest to set
-	 */
-	public void setCorpusManifest(CorpusManifest corpusManifest) {
-		if (corpusManifest == null)
-			throw new NullPointerException("Invalid corpusManifest");  //$NON-NLS-1$
-
-		this.corpusManifest = corpusManifest;
-	}
-
-	/**
-	 * @param readerManifest the readerManifest to set
-	 */
-	public void setReaderManifest(ContextReaderManifest readerManifest) {
-		if (readerManifest == null)
-			throw new NullPointerException("Invalid readerManifest"); //$NON-NLS-1$
-
-		this.readerManifest = readerManifest;
-	}
-
-	/**
-	 * @param writerManifest the writerManifest to set
-	 */
-	public void setWriterManifest(ContextWriterManifest writerManifest) {
-		if (writerManifest == null)
-			throw new NullPointerException("Invalid writerManifest");  //$NON-NLS-1$
-
-		this.writerManifest = writerManifest;
-	}
-
-	/**
 	 * @param independent the independent to set
 	 */
 	public void setIndependent(boolean independent) {
@@ -195,11 +149,11 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.ContextManifest#isDefaultContext()
+	 * @see de.ims.icarus.model.api.manifest.ContextManifest#isRootContext()
 	 */
 	@Override
-	public boolean isDefaultContext() {
-		return corpusManifest!=null && corpusManifest.getDefaultContextManifest()==this;
+	public boolean isRootContext() {
+		return corpusManifest!=null && corpusManifest.getRootContextManifest()==this;
 	}
 
 	/**
@@ -210,87 +164,129 @@ public class ContextManifestImpl extends AbstractManifest<ContextManifest> imple
 		return ManifestType.CONTEXT_MANIFEST;
 	}
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
+	public static class PrerequisiteManifestImpl implements PrerequisiteManifest {
 
-		writeXmlAttribute(serializer, "independent", independent, getTemplate().isIndependentContext()); //$NON-NLS-1$
-	}
+		private final ContextManifest contextManifest;
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
+		private String layerId;
+		private String typeId;
+		private String contextId;
+		private final String alias;
 
-		serializer.writeAttribute("independent", independent); //$NON-NLS-1$
-	}
+		private PrerequisiteManifest unresolvedForm;
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
+		public PrerequisiteManifestImpl(ContextManifest contextManifest, String alias) {
+			if (contextManifest == null)
+				throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+			if (alias == null)
+				throw new NullPointerException("Invalid alias");  //$NON-NLS-1$
 
-		ContextManifest template = getTemplate();
-
-		if(locationManifest!=null && !locationManifest.equals(template.getLocationManifest())) {
-			XmlWriter.writeLocationManifestElement(serializer, locationManifest);
+			this.contextManifest = contextManifest;
+			this.alias = alias;
 		}
 
-		if(readerManifest!=null && !readerManifest.equals(template.getReaderManifest())) {
-			XmlWriter.writeContextReaderManifestElement(serializer, readerManifest);
+		/**
+		 * @see de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest#getContextManifest()
+		 */
+		@Override
+		public ContextManifest getContextManifest() {
+			return contextManifest;
 		}
 
-		if(writerManifest!=null && !writerManifest.equals(template.getWriterManifest())) {
-			XmlWriter.writeContextWriterManifestElement(serializer, writerManifest);
+		/**
+		 * @see de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest#getLayerId()
+		 */
+		@Override
+		public String getLayerId() {
+			return layerId;
 		}
 
-		Set<LayerManifest> derived = new HashSet<>(template.getLayerManifests());
+		/**
+		 * @see de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest#getContextId()
+		 */
+		@Override
+		public String getContextId() {
+			return contextId;
+		}
 
-		for(LayerManifest layerManifest : layerManifests) {
-			if(derived.contains(layerManifest)) {
-				continue;
+		/**
+		 * @see de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest#getTypeId()
+		 */
+		@Override
+		public String getTypeId() {
+			return typeId;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest#getAlias()
+		 */
+		@Override
+		public String getAlias() {
+			return alias;
+		}
+
+		/**
+		 * @return the unresolvedForm
+		 */
+		@Override
+		public PrerequisiteManifest getUnresolvedForm() {
+			return unresolvedForm;
+		}
+
+		/**
+		 * @param unresolvedForm the unresolvedForm to set
+		 */
+		public void setUnresolvedForm(PrerequisiteManifest unresolvedForm) {
+			this.unresolvedForm = unresolvedForm;
+		}
+
+		/**
+		 * @param layerId the layerId to set
+		 */
+		public void setLayerId(String layerId) {
+			this.layerId = layerId;
+		}
+
+		/**
+		 * @param typeId the typeId to set
+		 */
+		public void setTypeId(String typeId) {
+			this.typeId = typeId;
+		}
+
+		/**
+		 * @param contextId the contextId to set
+		 */
+		public void setContextId(String contextId) {
+			this.contextId = contextId;
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return alias.hashCode();
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof PrerequisiteManifest) {
+				return alias.equals(((PrerequisiteManifest)obj).getAlias());
 			}
-
-			XmlWriter.writeLayerManifestElement(serializer, layerManifest);
+			return false;
 		}
-	}
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		XmlWriter.writeLocationManifestElement(serializer, locationManifest);
-		XmlWriter.writeContextReaderManifestElement(serializer, readerManifest);
-		XmlWriter.writeContextWriterManifestElement(serializer, writerManifest);
-
-		for(LayerManifest layerManifest : layerManifests) {
-			XmlWriter.writeLayerManifestElement(serializer, layerManifest);
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "Prerequisite:"+alias; //$NON-NLS-1$
 		}
-	}
 
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return isDefaultContext() ? "default-context" : "context"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

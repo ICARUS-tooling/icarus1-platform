@@ -34,7 +34,13 @@ import de.ims.icarus.model.io.LocationType;
  * @version $Id$
  *
  */
-public interface DriverManifest extends MemberManifest, ImplementationManifest {
+public interface DriverManifest extends MemberManifest {
+
+	/**
+	 * Returns the manifest that specifies the actual driver implementation.
+	 * @return
+	 */
+	ImplementationManifest getImplementationManifest();
 
 	/**
 	 * Returns manifests describing all the indices that should be created for this

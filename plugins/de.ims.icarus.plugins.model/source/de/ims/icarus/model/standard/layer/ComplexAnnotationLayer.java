@@ -26,24 +26,30 @@
 package de.ims.icarus.model.standard.layer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.CorpusMember;
+import de.ims.icarus.model.api.Edge;
 import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.MemberType;
+import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
+import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.collections.LongHashMap;
 
 /**
  * @author Markus Gärtner
@@ -52,35 +58,94 @@ import de.ims.icarus.util.collections.LongHashMap;
  */
 public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 
+	// Lookup for annotations involving markables
 	private final Map<Markable, AnnotationBundle> keyAnnotations = new WeakHashMap<>();
 
-	/**
-	 * @param id
-	 * @param context
-	 * @param manifest
-	 */
+	// Factory for creating annotation bundles (constructor assigns default implementation)
+	private BundleFactory bundleFactory;
+
+	public static BundleFactory defaultCreateBundleFactory(AnnotationLayerManifest manifest) {
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+
+		final int keyCount = manifest.getAvailableKeys().size();
+
+		//TODO threshold regarding keyCount is subject to further evaluation!
+		if(manifest.allowUnknownKeys() || keyCount>=10) {
+			return new BundleFactory() {
+
+				@Override
+				public AnnotationBundle createBundle(Markable markable,
+						AnnotationLayer layer) {
+					return new LargeAnnotationBundle();
+				}
+			};
+		} else {
+			return new BundleFactory() {
+
+				@Override
+				public AnnotationBundle createBundle(Markable markable,
+						AnnotationLayer layer) {
+					return new CompactAnnotationBundle(keyCount);
+				}
+			};
+		}
+	}
+
 	public ComplexAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
 		super(manifest, group);
+
+		bundleFactory = defaultCreateBundleFactory(manifest);
+	}
+
+	/**
+	 * @return the bundleFactory
+	 */
+	public BundleFactory getBundleFactory() {
+		return bundleFactory;
+	}
+
+	/**
+	 * @param bundleFactory the bundleFactory to set
+	 */
+	public void setBundleFactory(BundleFactory bundleFactory) {
+		if (bundleFactory == null)
+			throw new NullPointerException("Invalid bundleFactory"); //$NON-NLS-1$
+
+		this.bundleFactory = bundleFactory;
 	}
 
 	private void checkKey(String key) {
 		if (key == null)
-			throw new NullPointerException("Invalid annotationKey"); //$NON-NLS-1$
+			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 		AnnotationLayerManifest manifest = getManifest();
-		if(!manifest.getAvailableKeys().contains(key)
-				&& ! manifest.allowUnknownKeys())
+		if(!manifest.allowUnknownKeys()
+				&& !manifest.getAvailableKeys().contains(key))
 			throw new IllegalArgumentException("Key not allowed in annotation layer: "+key); //$NON-NLS-1$
 	}
 
-	private AnnotationBundle createBundle() {
+	private void checkMarkable(Markable markable) {
+		if (markable == null)
+			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 
+		MarkableLayer layer = markable.getLayer();
+		if(!getBaseLayers().contains(layer))
+			throw new IllegalArgumentException("Host layer of markable "+markable+" is not a valid base layer of this annotation layer"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private AnnotationBundle createBundle(Markable markable) {
+		return bundleFactory.createBundle(markable, this);
 	}
 
 	private AnnotationBundle getAnnotations(Markable markable) {
 		AnnotationBundle annotations = keyAnnotations.get(markable);
 		if(annotations==null) {
-			annotations = createBundle();
-			keyAnnotations.put(markable, annotations);
+			synchronized (keyAnnotations) {
+				if((annotations = keyAnnotations.get(markable))==null) {
+					annotations = createBundle(markable);
+					keyAnnotations.put(markable, annotations);
+				}
+			}
 		}
 
 		return annotations;
@@ -103,8 +168,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+		checkMarkable(markable);
 		checkKey(key);
 
 		AnnotationBundle annotations = keyAnnotations.get(markable);
@@ -130,9 +194,7 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	public void removeAllValues(String key) {
 		checkKey(key);
 
-		LongHashMap<Object> annotations = keyAnnotations.get(key);
-
-		if(annotations==null) {
+		if(keyAnnotations.isEmpty()) {
 			return;
 		}
 
@@ -144,69 +206,108 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	 */
 	@Override
 	public void removeAllValues(Markable markable, boolean recursive) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+		checkMarkable(markable);
 
-		boolean deepAnnotation = getManifest().isDeepAnnotation();
+		Map<String, Object> tmp = new HashMap<>();
 
-		MarkableLayer markableLayer = markable.getLayer();
-		if(markableLayer!=getBaseLayer() && !deepAnnotation)
-			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
+		AnnotationBuffer buffer = collectAnnotations(markable, tmp);
 
-		List<Markable> buffer = new ArrayList<>();
-		List<String> annotationKeys = new ArrayList<>();
+		if(recursive && getManifest().isDeepAnnotation()) {
 
-		LongHashMap<?>[] annoMap = new LongHashMap<?>[keyAnnotations.size()];
-		String[] annoKeys = new String[keyAnnotations.size()];
+			Set<Markable> lut = new HashSet<>();
+			List<AnnotationBuffer> buffers = new ArrayList<>();
 
-		int annoIdx = 0;
-		for(Entry<String, LongHashMap<Object>> entry : keyAnnotations.entrySet()) {
-			annoKeys[annoIdx] = entry.getKey();
-			annoMap[annoIdx] = entry.getValue();
+			// Ensure the original changes get preserved as well
+			buffers.add(buffer);
+
+			collectAnnotatedMembers(markable, lut, buffers, tmp);
+
+			execute(new BatchAnnotationChange(buffers));
+		} else {
+			execute(new BatchAnnotationChange(buffer));
 		}
-
-		if(getDefaultAnnotations().get(markable.getId())!=null) {
-			buffer.add(markable);
-			annotationKeys.add(null);
-		}
-
-		if(recursive && annoMap.length>0 && (markable.getMemberType()==MemberType.STRUCTURE
-				|| markable.getMemberType()==MemberType.CONTAINER)) {
-			collectAnnotatedMarkables((Container) markable, buffer, annotationKeys, annoMap, annoKeys);
-		}
-
-		if(buffer.isEmpty()) {
-			return;
-		}
-
-		int size = buffer.size();
-		long[] keys = new long[size];
-
-		for(int i=0; i<size; i++) {
-			keys[i] = buffer.get(i).getId();
-		}
-
-		execute(new BatchAnnotationChange(annotationKeys.toArray(new String[size]), keys));
 	}
 
-	private void collectAnnotatedMarkables(Container container, List<Markable> markableBuffer,
-			List<String> keyBuffer, LongHashMap<?>[] maps, String[] keys) {
-		int size = container.getMarkableCount();
-		for(int i=0; i<size; i++) {
-			Markable markable = container.getMarkableAt(i);
+	private AnnotationBuffer collectAnnotations(Markable markable, Map<String, Object> tmp) {
+		AnnotationBundle bundle = keyAnnotations.get(markable);
+		Object value = annotations.get(markable);
 
-			for(int j=0; j<maps.length; j++) {
-				LongHashMap<?> annotations = maps[j];
-				if(annotations.get(markable.getId())!=null) {
-					markableBuffer.add(markable);
-					keyBuffer.add(keys[j]);
+		if(bundle==null && value==null) {
+			// Nothing to remove here
+			return null;
+		}
+
+		AnnotationBuffer buffer = new AnnotationBuffer(markable);
+
+//		if(bundle!=null) {
+//			bundle.collect(tmp);
+//
+//			if(!tmp.isEmpty()) {
+//
+//				Object[] values = new Object[tmp.size()*2];
+//				int index = 0;
+//				for(Entry<String, Object> entry : tmp.entrySet()) {
+//					values[index++] = entry.getKey();
+//					values[index++] = entry.getValue();
+//				}
+//
+//				tmp.clear();
+//			}
+//		}
+
+		return buffer;
+	}
+
+	private void collectAnnotatedMembers(Markable markable, Set<Markable> lut,
+			List<AnnotationBuffer> buffers, Map<String, Object> tmp) {
+
+		// Collect edge annotations
+		//
+		// Note: No need to bother with the terminals of edges, since they
+		// will be processed later in this method and each structure must always
+		// hold all terminals of all its edges!
+		if(markable.getMemberType()==MemberType.STRUCTURE) {
+			Structure structure = (Structure) markable;
+
+			for(int i=0; i<structure.getEdgeCount(); i++) {
+				Edge edge = structure.getEdgeAt(i);
+
+				if(!lut.add(edge)) {
+					continue;
+				}
+
+				AnnotationBuffer buffer = collectAnnotations(edge, tmp);
+				if(buffer!=null) {
+					buffers.add(buffer);
 				}
 			}
+		}
 
-			if(markable.getMemberType()==MemberType.STRUCTURE
-					|| markable.getMemberType()==MemberType.CONTAINER) {
-				collectAnnotatedMarkables((Container) markable,
-						markableBuffer, keyBuffer, maps, keys);
+		// Collect regular members of the container or structure
+		//
+		// Note: Containers or structures might hold edges as regular markables or
+		// nodes, but the terminals of those edges are only of interest in case they
+		// are available as regular members of the current markable tree!
+		if(markable.getMemberType()==MemberType.CONTAINER
+				|| markable.getMemberType()==MemberType.STRUCTURE) {
+
+			Container container = (Container) markable;
+
+			for(int i=0; i<container.getMarkableCount(); i++) {
+				Markable member = container.getMarkableAt(i);
+
+				if(!lut.add(member)) {
+					continue;
+				}
+
+
+				AnnotationBuffer buffer = collectAnnotations(member, tmp);
+				if(buffer!=null) {
+					buffers.add(buffer);
+				}
+
+				// Recursively process containers
+				collectAnnotatedMembers(member, lut, buffers, tmp);
 			}
 		}
 	}
@@ -216,86 +317,78 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	 */
 	@Override
 	public void setValue(Markable markable, String key, Object value) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
-
+		checkMarkable(markable);
 		checkKey(key);
 
-		execute(new KeyAnnotationChange(key, markable.getId(), value));
+		execute(new KeyAnnotationChange(key, markable, value));
 	}
 
 	protected void setValue0(Markable markable, String key, Object value) {
-		getAnnotations(key).put(markable.getId(), value);
+		getAnnotations(markable).setValue(key, value);
+	}
+
+	public interface BundleFactory {
+		AnnotationBundle createBundle(Markable markable, AnnotationLayer layer);
 	}
 
 	private class ClearChange implements AtomicChange {
 
-		private final List<long[]> keyList = new ArrayList<>();
-		private final List<String> annotationKeyList = new ArrayList<>();
-		private final List<Object[]> valueList = new ArrayList<>();
+		private Markable[] markables = null;
+		private Object[] values = null;
+
+		private int expectedSize = annotations.size();
+		private int expectedBundleCount = keyAnnotations.size();
+
+		private Map<Markable, AnnotationBundle> bundles = new HashMap<>();
 
 		/**
 		 * @see de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
 		 */
 		@Override
 		public void execute() {
-			if(keyList.isEmpty()) {
+			int size = annotations.size();
+			int bundleCount = keyAnnotations.size();
+			if(expectedSize!=size)
+				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
+						"Clear failed", expectedSize, size)); //$NON-NLS-1$
+			if(expectedBundleCount!=bundleCount)
+				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
+						"Clear failed (bundle count)", expectedBundleCount, bundleCount)); //$NON-NLS-1$
 
-				LongHashMap<Object> annotations = getDefaultAnnotations();
+			// Process key-less annotations
+			if(markables==null) {
+				markables = new Markable[size];
+				values = new Object[size];
 
-				if(!annotations.isEmpty()) {
-					int size = annotations.size();
-					long[] keys = new long[size];
-					Object[] values = new Object[size];
-
-					annotations.save(keys, values);
-					annotations.clear();
-
-					keyList.add(keys);
-					annotationKeyList.add(null);
-					valueList.add(values);
+				Iterator<Entry<Markable, Object>> it = annotations.entrySet().iterator();
+				for(int i=0; i<size; i++) {
+					Entry<Markable, Object> entry = it.next();
+					markables[i] = entry.getKey();
+					values[i] = entry.getValue();
 				}
 
-				for(Entry<String, LongHashMap<Object>> entry : keyAnnotations.entrySet()) {
-					String anootationKey = entry.getKey();
-					annotations = entry.getValue();
-
-					if(annotations.isEmpty()) {
-						continue;
-					}
-
-					int size = annotations.size();
-					long[] keys = new long[size];
-					Object[] values = new Object[size];
-
-					annotations.save(keys, values);
-					annotations.clear();
-
-					keyList.add(keys);
-					annotationKeyList.add(anootationKey);
-					valueList.add(values);
-				}
-
+				annotations.clear();
 			} else {
-
-				for(int i=keyList.size()-1; i>-1; i--) {
-					String annotationKey = annotationKeyList.get(i);
-					long[] keys = keyList.get(i);
-					Object[] values = valueList.get(i);
-
-					LongHashMap<Object> annotations = annotationKey==null ?
-							getDefaultAnnotations() : keyAnnotations.get(annotationKey);
-
-					if(annotations==null)
-						throw new CorruptedStateException("Missing annotation storage for key: "+annotationKey); //$NON-NLS-1$
-
-					annotations.load(keys, values);
+				for(int i=0; i<size; i++) {
+					annotations.put(markables[i], values[i]);
 				}
 
-				keyList.clear();
-				annotationKeyList.clear();
-				valueList.clear();
+				markables = null;
+				values = null;
 			}
+
+			expectedSize = annotations.size();
+
+			// Process keyed annotations
+			if(bundles.isEmpty()) {
+				bundles.putAll(keyAnnotations);
+				keyAnnotations.clear();
+			} else {
+				keyAnnotations.putAll(bundles);
+				bundles.clear();
+			}
+
+			expectedBundleCount = keyAnnotations.size();
 		}
 
 		/**
@@ -311,27 +404,27 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 	private class KeyAnnotationChange implements AtomicChange {
 
 		private final String annotationKey;
-		private final long[] keys;
+		private final Markable[] markables;
 		private final Object[] values;
 
 		/**
 		 * Models a set of changes to annotation entries
 		 */
-		private KeyAnnotationChange(String annotationKey, long[] keys, Object[] values) {
-			if(keys.length!=values.length)
-				throw new IllegalArgumentException("Size mismatch between keys ad values array"); //$NON-NLS-1$
+		private KeyAnnotationChange(String annotationKey, Markable[] markables, Object[] values) {
+			if(markables.length!=values.length)
+				throw new IllegalArgumentException("Size mismatch between markables ad values array"); //$NON-NLS-1$
 
 			this.annotationKey = annotationKey;
-			this.keys = keys;
+			this.markables = markables;
 			this.values = values;
 		}
 
 		/**
 		 * Models the change of a single annotation entry
 		 */
-		private KeyAnnotationChange(String annotationKey, long key, Object value) {
+		private KeyAnnotationChange(String annotationKey, Markable key, Object value) {
 			this.annotationKey = annotationKey;
-			keys = new long[]{key};
+			markables = new Markable[]{key};
 			values = new Object[]{value};
 		}
 
@@ -339,10 +432,10 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		 * Models removal of a subset of annotations for a single
 		 * annotation key
 		 */
-		private KeyAnnotationChange(String annotationKey, long[] keys) {
+		private KeyAnnotationChange(String annotationKey, Markable[] markables) {
 			this.annotationKey = annotationKey;
-			this.keys = keys;
-			this.values = new Object[keys.length];
+			this.markables = markables;
+			this.values = new Object[markables.length];
 		}
 
 		/**
@@ -351,16 +444,19 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		private KeyAnnotationChange(String annotationKey) {
 			this.annotationKey = annotationKey;
 
-			LongHashMap<Object> annotations = keyAnnotations.get(annotationKey);
-			if(annotations==null)
-				throw new IllegalArgumentException("No annotations for key: "+annotationKey); //$NON-NLS-1$
+			List<Markable> m = new ArrayList<>();
 
-			int size = annotations.size();
-			keys = new long[size];
+			for(Entry<Markable, AnnotationBundle> entry : keyAnnotations.entrySet()) {
+				if(entry.getValue().getValue(annotationKey)!=null) {
+					m.add(entry.getKey());
+				}
+			}
+
+			int size = m.size();
+			markables = new Markable[size];
 			values = new Object[size];
 
-			annotations.save(keys, values);
-			Arrays.fill(values, null);
+			m.toArray(markables);
 		}
 
 		/**
@@ -368,15 +464,15 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		 */
 		@Override
 		public void execute() {
-			LongHashMap<Object> annotations = getAnnotations(annotationKey);
 
-			for(int i=keys.length-1; i>-1; i--) {
-				long key = keys[i];
-				Object value = values[i];
-				Object current = annotations.get(key);
-				annotations.put(key, value);
+			for(int i=markables.length-1; i>-1; i--) {
+				Markable markable = markables[i];
 
-				values[i] = current;
+				AnnotationBundle bundle = getAnnotations(markable);
+				Object value = bundle.getValue(annotationKey);
+				bundle.setValue(annotationKey, values[i]);
+
+				values[i] = value;
 			}
 		}
 
@@ -392,33 +488,27 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 
 	private class BatchAnnotationChange implements AtomicChange {
 
-		private final String[] annotationKeys;
-		private final long[] keys;
-		private final Object[] values;
+		private final List<AnnotationBuffer> buffers;
 
 		/**
 		 * Models a set of changes to annotation entries
 		 */
-		private BatchAnnotationChange(String[] annotationKeys, long[] keys, Object[] values) {
-			if(keys.length!=values.length || annotationKeys.length!=keys.length)
-				throw new IllegalArgumentException("Size mismatch in input arrays"); //$NON-NLS-1$
+		private BatchAnnotationChange(List<AnnotationBuffer> buffers) {
+			if (buffers == null)
+				throw new NullPointerException("Invalid buffers"); //$NON-NLS-1$
 
-			this.annotationKeys = annotationKeys;
-			this.keys = keys;
-			this.values = values;
+			this.buffers = buffers;
 		}
 
 		/**
 		 * Models removal of a subset of annotations for a single
 		 * annotation key
 		 */
-		private BatchAnnotationChange(String[] annotationKeys, long[] keys) {
-			if(annotationKeys.length!=keys.length)
-				throw new IllegalArgumentException("Size mismatch in input arrays"); //$NON-NLS-1$
+		private BatchAnnotationChange(AnnotationBuffer buffer) {
+			if (buffer == null)
+				throw new NullPointerException("Invalid buffer"); //$NON-NLS-1$
 
-			this.annotationKeys = annotationKeys;
-			this.keys = keys;
-			this.values = new Object[keys.length];
+			this.buffers = Collections.singletonList(buffer);
 		}
 
 		/**
@@ -426,21 +516,27 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 		 */
 		@Override
 		public void execute() {
-			for(int i=keys.length-1; i>-1; i--) {
-				String annotationKey = annotationKeys[i];
 
-				LongHashMap<Object> annotations = annotationKey==null ?
-						getDefaultAnnotations() : keyAnnotations.get(annotationKeys[i]);
+			for(AnnotationBuffer buffer : buffers) {
+				Markable markable = buffer.markable;
 
-				if(annotations==null)
-					throw new CorruptedStateException("Missing annotation storage for key: "+annotationKeys[i]); //$NON-NLS-1$
+				// Handle key-less annotation
+				Object value = buffer.value;
+				buffer.value = annotations.get(markable);
+				annotations.put(markable, value);
 
-				long key = keys[i];
-				Object value = values[i];
-				Object current = annotations.get(key);
-				annotations.put(key, value);
+				// Now handle mapped annotations
+				AnnotationBundle bundle = keyAnnotations.get(markable);
+				Object[] map = buffer.map;
+				if(map!=null) {
+					for(int i=0; i<map.length-1; i+=2) {
+						String key = (String) map[i];
+						value = map[i+1];
 
-				values[i] = current;
+						map[i+1] = bundle.getValue(key);
+						bundle.setValue(key, value);
+					}
+				}
 			}
 		}
 
@@ -454,13 +550,74 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 
 	}
 
-	private interface AnnotationBundle {
-		Object getValue(String key);
-		boolean setValue(String key, Object value);
-		void collectKeys(Collection<String> buffer);
+	private static class AnnotationBuffer {
+
+		private final Markable markable;
+
+		private Object value;
+		private Object[] map;
+
+		private AnnotationBuffer(Markable markable) {
+			this.markable = markable;
+		}
+
+		private AnnotationBuffer(Markable markable, Object value) {
+			this.markable = markable;
+			this.value = value;
+		}
 	}
 
-	private static class LargeAnnotationBundle extends HashMap<String, Object> implements AnnotationBundle {
+	/**
+	 * Models a set of key-value pairs describing annotations for a
+	 * single markable.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	public interface AnnotationBundle {
+		/**
+		 * Fetches the mapped annotation value for the specified {@code key} or
+		 * {@code null} if no value is stored for theat {@code key}.
+		 *
+		 * @param key
+		 * @return
+		 */
+		Object getValue(String key);
+
+		/**
+		 * Maps the given {@code value} (allowed to be {@code null}) to
+		 * the specified {@code key}.
+		 *
+		 * @param key
+		 * @param value
+		 * @return {@code true} iff the content of this bundle was changed by
+		 * this method (i.e. there either was no mapping for {@code key} prior
+		 * to calling this method or the previously mapped value did not equal the
+		 * new {@code value} parameter).
+		 */
+		boolean setValue(String key, Object value);
+
+		/**
+		 * Collects and sends all the currently used keys in this
+		 * bundle to the external {@code buffer} collection.
+		 *
+		 * @param buffer
+		 */
+		void collectKeys(Collection<String> buffer);
+
+		/**
+		 * Collects the keys and values in this bundle and sends them
+		 * to the external {@code buffer} map.
+		 *
+		 * @param buffer
+		 */
+		void collect(Map<String, Object> buffer);
+	}
+
+	public static class LargeAnnotationBundle extends HashMap<String, Object> implements AnnotationBundle {
+
+		private static final long serialVersionUID = -3058615796981616593L;
 
 		/**
 		 * @see de.ims.icarus.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#getValue(java.lang.String)
@@ -487,14 +644,32 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 			buffer.addAll(keySet());
 		}
 
+		/**
+		 * @see de.ims.icarus.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#collect(java.util.Map)
+		 */
+		@Override
+		public void collect(Map<String, Object> buffer) {
+			buffer.putAll(this);
+		}
+
 	}
 
-	private static class CompactAnnotationBundle implements AnnotationBundle {
+	public static class CompactAnnotationBundle implements AnnotationBundle {
+
+		public static final int DEFAULT_CAPACITY = 6;
 
 		private final Object[] data;
 
-		private CompactAnnotationBundle(int size) {
-			data = new Object[size];
+		public CompactAnnotationBundle() {
+			this(DEFAULT_CAPACITY);
+		}
+
+		/**
+		 * Creates a new compact bundle with initial storage for a number
+		 * of entries equal to the {@code capacity} parameter.
+		 */
+		public CompactAnnotationBundle(int capacity) {
+			data = new Object[capacity*2];
 		}
 
 		/**
@@ -535,6 +710,18 @@ public class ComplexAnnotationLayer extends DefaultAnnotationLayer {
 			for(int i=0; i<data.length-1; i+=2) {
 				if(data[i]!=null) {
 					buffer.add((String) data[i]);
+				}
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.layer.ComplexAnnotationLayer.AnnotationBundle#collect(java.util.Map)
+		 */
+		@Override
+		public void collect(Map<String, Object> buffer) {
+			for(int i=0; i<data.length-1; i+=2) {
+				if(data[i]!=null) {
+					buffer.put((String) data[i], data[i+1]);
 				}
 			}
 		}

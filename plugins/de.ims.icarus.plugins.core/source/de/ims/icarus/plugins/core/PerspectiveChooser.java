@@ -276,10 +276,14 @@ public class PerspectiveChooser {
 		title.setVerticalAlignment(SwingConstants.CENTER);
 		title.setBackground(bg);
 
+		JPanel footer = new JPanel();
+		footer.add(button);
+
 		JPanel contentPanel = new JPanel(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 		contentPanel.add(splitPane, BorderLayout.CENTER);
 		contentPanel.add(title, BorderLayout.NORTH);
+		contentPanel.add(footer, BorderLayout.SOUTH);
 		contentPanel.setBackground(bg);
 
 		container.setLayout(new BorderLayout());

@@ -37,7 +37,7 @@ import de.ims.icarus.util.ClassUtils;
  * @version $Id$
  *
  */
-public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> implements ContainerManifest {
+public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManifest> implements ContainerManifest {
 
 	private ContainerManifest parentManifest;
 	private MarkableLayerManifest layerManifest;
@@ -46,7 +46,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	private ContainerType containerType;
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
 	 */
 	@Override
 	protected void readTemplate(ContainerManifest template) {
@@ -150,7 +150,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
@@ -162,7 +162,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 
 	/**
 	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeFullXmlAttributes(XmlSerializer serializer)
@@ -207,7 +207,7 @@ public class ContainerManifestImpl extends AbstractManifest<ContainerManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#equals(java.lang.Object)
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {
