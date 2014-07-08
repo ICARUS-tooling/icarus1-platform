@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -50,7 +50,7 @@ public class ConstraintAdapter extends XmlAdapter<DefaultConstraint, SearchConst
 	 */
 	@Override
 	public DefaultConstraint marshal(SearchConstraint v) throws Exception {
-		return v instanceof DefaultConstraint ? (DefaultConstraint)v :  new DefaultConstraint(v.getToken(), v.getValue(), v.getOperator(), v.getSpecifier());
+		return v instanceof DefaultConstraint ? (DefaultConstraint)v :  new DefaultConstraint(v);
 	}
 
 }

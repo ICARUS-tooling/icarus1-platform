@@ -27,6 +27,7 @@ package de.ims.icarus.search_tools.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -522,6 +523,43 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 
 	public static boolean isEmpty(SearchGraph graph) {
 		return graph==null || graph.getRootNodes()==null || graph.getRootNodes().length==0;
+	}
+
+	private static void collectInactive0(List<SearchConstraint> buffer, SearchConstraint[] constraints) {
+		if(constraints==null) {
+			return;
+		}
+
+		for(SearchConstraint constraint : constraints) {
+			if(!constraint.isActive() && !constraint.isUndefined()) {
+				buffer.add(constraint);
+			}
+		}
+	}
+
+	public static List<SearchConstraint> collectInactive(SearchGraph graph) {
+		if(isEmpty(graph)) {
+			return Collections.emptyList();
+		}
+
+		final List<SearchConstraint> result = new ArrayList<>();
+
+		Visitor visitor = new Visitor() {
+
+			@Override
+			public void visit(SearchEdge edge) {
+				collectInactive0(result, edge.getConstraints());
+			}
+
+			@Override
+			public void visit(SearchNode node) {
+				collectInactive0(result, node.getConstraints());
+			}
+		};
+
+		traverse(graph, visitor);
+
+		return result;
 	}
 
 	public static boolean isUndefined(SearchConstraint[] constraints) {

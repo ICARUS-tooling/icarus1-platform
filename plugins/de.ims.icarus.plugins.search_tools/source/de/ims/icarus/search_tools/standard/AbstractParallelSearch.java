@@ -491,6 +491,14 @@ public abstract class AbstractParallelSearch extends Search {
 			result.setGroupInstances(dimension, labels);
 		}
 
+		/**
+		 * @see de.ims.icarus.search_tools.io.SearchResolver#prepareWrite(de.ims.icarus.util.Options)
+		 */
+		@Override
+		public Options prepareWrite(Options options) {
+			return options;
+		}
+
 	}
 
 	protected static enum ItemRequestResult {

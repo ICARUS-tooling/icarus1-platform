@@ -60,7 +60,7 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE) || operator.isGrouping())
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new CoreferenceSentencePropertyConstraint(value, operator, specifier);
 		else
 			return new CoreferenceSentencePropertyIConstraint(value, operator, specifier);

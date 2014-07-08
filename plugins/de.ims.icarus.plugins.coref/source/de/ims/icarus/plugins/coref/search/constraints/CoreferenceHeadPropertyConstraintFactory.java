@@ -60,7 +60,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE) || operator.isGrouping())
+		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
 			return new CoreferenceHeadPropertyConstraint(value, operator, specifier);
 		else
 			return new CoreferenceHeadPropertyIConstraint(value, operator, specifier);

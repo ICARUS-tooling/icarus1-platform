@@ -129,7 +129,7 @@ public class SearchWriter implements SearchXmlConstants {
 		writeElement(TAG_QUERY, search.getQuery().getQueryString());
 		// Write parameters
 		Options options = search.getParameters();
-		if(!options.isEmpty()) {
+		if(!options.isEmpty() && !(options = resolver.prepareWrite(options)).isEmpty()) {
 			for(Entry<String, Object> entry : options.entrySet()) {
 				writeParameter(entry.getKey(), entry.getValue());
 			}
@@ -137,6 +137,7 @@ public class SearchWriter implements SearchXmlConstants {
 
 		// Write result
 		startElement(TAG_RESULT);
+		writeAttribute(ATTR_DIMENSION, String.valueOf(result.getDimension()));
 
 		// Write groups
 		for(int i=0; i<result.getDimension(); i++) {

@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import de.ims.icarus.language.LanguageConstants;
@@ -70,6 +69,14 @@ public class DefaultConstraint implements SearchConstraint {
 		this(token, value, operator);
 
 		setSpecifier(specifier);
+	}
+
+	public DefaultConstraint(SearchConstraint source) {
+		setToken(source.getToken());
+		setValue(source.getValue());
+		setOperator(source.getOperator());
+		setSpecifier(source.getSpecifier());
+		setActive(source.isActive());
 	}
 
 	@SuppressWarnings("unused")
@@ -194,7 +201,7 @@ public class DefaultConstraint implements SearchConstraint {
 	/**
 	 * @see de.ims.icarus.search_tools.SearchConstraint#setActive(boolean)
 	 */
-	@XmlTransient
+	@XmlAttribute(name="active",required=false)
 	@Override
 	public void setActive(boolean active) {
 		this.active = active;

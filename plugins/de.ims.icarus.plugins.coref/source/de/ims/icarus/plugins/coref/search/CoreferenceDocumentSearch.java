@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search;
@@ -32,6 +32,7 @@ import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
+import de.ims.icarus.search_tools.io.SearchResolver;
 import de.ims.icarus.search_tools.tree.AbstractTreeSearch;
 import de.ims.icarus.search_tools.tree.TargetTree;
 import de.ims.icarus.util.Options;
@@ -47,14 +48,14 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 	public CoreferenceDocumentSearch(SearchFactory factory,
 			SearchQuery query, Options parameters, Object target) {
 		super(factory, query, parameters, target);
-		
+
 		CoreferenceAllocation allocation = null;
-		
+
 		AllocationDescriptor alloc = getSearchTarget().getAllocation();
 		if(alloc!=null) {
 			allocation = alloc.get();
 		}
-		
+
 		getParameters().put("goldAllocation", allocation); //$NON-NLS-1$
 		getParameters().put("allocation", allocation); //$NON-NLS-1$
 	}
@@ -67,10 +68,10 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 	protected DataList<CoreferenceDocumentData> createSource(Object target) {
 		if(target==null)
 			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
-		
+
 		if(!(target instanceof CoreferenceDocumentSearchTarget))
 			throw new IllegalArgumentException("Unsupported target type: "+target.getClass()); //$NON-NLS-1$
-		
+
 		return (DataList<CoreferenceDocumentData>) target;
 	}
 
@@ -89,7 +90,7 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 	protected TargetTree createTargetTree() {
 		return new DocumentTargetTree();
 	}
-	
+
 	public CoreferenceDocumentSearchTarget getSearchTarget() {
 		return (CoreferenceDocumentSearchTarget) super.getTarget();
 	}
@@ -97,13 +98,37 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 	@Override
 	protected Options createTreeOptions() {
 		Options options = new Options();
-		
+
 		// Save the selected allocation (not its descriptor!)
 		AllocationDescriptor alloc = getSearchTarget().getAllocation();
 		if(alloc!=null) {
 			options.put("allocation", alloc.get()); //$NON-NLS-1$
 		}
-		
+
 		return options;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#getSearchResolver()
+	 */
+	@Override
+	public SearchResolver getSearchResolver() {
+		return new CoreferenceSearchResolver();
+	}
+
+	public class CoreferenceSearchResolver extends DefaultSearchResolver {
+
+		/**
+		 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch.DefaultSearchResolver#prepareWrite(de.ims.icarus.util.Options)
+		 */
+		@Override
+		public Options prepareWrite(Options options) {
+			Options result = options.clone();
+			result.remove("allocation");
+			result.remove("goldAllocation");
+
+			return result;
+		}
+
 	}
 }

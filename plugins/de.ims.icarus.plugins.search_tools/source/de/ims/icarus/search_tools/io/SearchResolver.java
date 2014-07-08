@@ -28,6 +28,7 @@ package de.ims.icarus.search_tools.io;
 import javax.xml.stream.XMLStreamException;
 
 import de.ims.icarus.search_tools.result.ResultEntry;
+import de.ims.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
@@ -45,4 +46,6 @@ public interface SearchResolver {
 	void addResultEntry(ResultEntry entry, int...indices);
 
 	void finalizeSearch();
+
+	Options prepareWrite(Options options);
 }

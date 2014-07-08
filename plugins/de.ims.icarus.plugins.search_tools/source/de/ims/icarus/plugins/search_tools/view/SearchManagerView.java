@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -82,6 +83,7 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.search_tools.SearchToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Search;
+import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchDescriptor;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
@@ -1004,6 +1006,17 @@ public class SearchManagerView extends View {
 				SearchResolver resolver = search.getSearchResolver();
 
 				if(resolver==null) {
+					return;
+				}
+
+				SearchQuery query = search.getQuery();
+				List<SearchConstraint> inactive = SearchUtils.collectInactive(query.getSearchGraph());
+				if(!inactive.isEmpty()) {
+					UIUtil.beep();
+					DialogFactory.getGlobalFactory().showWarning(getFrame(),
+							"plugins.searchTools.searchManagerView.dialogs.saveSearch.title", //$NON-NLS-1$
+							"plugins.searchTools.searchManagerView.dialogs.saveSearch.inactiveConstraints", //$NON-NLS-1$
+							inactive.size());
 					return;
 				}
 

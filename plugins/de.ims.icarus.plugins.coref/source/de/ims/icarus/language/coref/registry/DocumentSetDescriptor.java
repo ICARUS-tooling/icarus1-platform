@@ -375,6 +375,16 @@ public class DocumentSetDescriptor implements Loadable,
 		return index;
 	}
 
+	public AllocationDescriptor getById(String id) {
+		for(AllocationDescriptor allocation : allocations) {
+			if(allocation.getId().equals(id)) {
+				return allocation;
+			}
+		}
+
+		return null;
+	}
+
 	public int indexOfAllocation(AllocationDescriptor allocation) {
 		return allocations.isEmpty() ? -1 : allocations.indexOf(allocation);
 	}

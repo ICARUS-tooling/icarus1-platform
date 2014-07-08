@@ -19,13 +19,16 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search;
 
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.registry.AllocationDescriptor;
+import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
+import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
@@ -112,6 +115,70 @@ public class CoreferenceDocumentSearchFactory implements SearchFactory {
 	public String getQueryLabel(SearchQuery query) {
 		// Allow framework to generate a default label
 		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#createSearch(java.lang.String, java.lang.String, de.ims.icarus.util.Options)
+	 */
+	@Override
+	public Search createSearch(String q, String t, Options options)
+			throws Exception {
+		SearchQuery query = createQuery();
+		query.parseQueryString(q);
+
+		Object target = resolveTarget(t);
+
+		return createSearch(query, target, options);
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedForm()
+	 */
+	@Override
+	public String getSerializedForm() {
+		return "de.ims.icarus.coref@CoreferenceSearchFactory"; //$NON-NLS-1$
+	}
+
+	public Object resolveTarget(String target) {
+		String[] parts = target.split("@"); //$NON-NLS-1$
+
+		DocumentSetDescriptor documentSet = CoreferenceRegistry.getInstance().getDocumentSet(parts[0]);
+		AllocationDescriptor allocation = null;
+
+		if(!DEFAULT_ALLOC.equals(parts[1])) {
+			allocation = documentSet.getById(parts[1]);
+
+			if(allocation==null) {
+				throw new IllegalArgumentException("No allocation registered for document set matching id: "+parts[1]); //$NON-NLS-1$
+			}
+		}
+
+		return new CoreferenceDocumentSearchTarget(documentSet, allocation);
+	}
+
+	private static final String DEFAULT_ALLOC = "DEFAULT"; //$NON-NLS-1$
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedTarget(de.ims.icarus.search_tools.Search)
+	 */
+	@Override
+	public String getSerializedTarget(Search search) {
+		CoreferenceDocumentSearchTarget bundle = (CoreferenceDocumentSearchTarget) search.getTarget();
+
+		StringBuilder sb = new StringBuilder();
+
+		DocumentSetDescriptor documentSet = bundle.getDocumentSet();
+		AllocationDescriptor allocation = bundle.getAllocation();
+
+		sb.append(documentSet.getId()).append("@"); //$NON-NLS-1$
+
+		if(allocation==null) {
+			sb.append(DEFAULT_ALLOC);
+		} else {
+			sb.append(allocation.getId());
+		}
+
+		return sb.toString();
 	}
 
 }

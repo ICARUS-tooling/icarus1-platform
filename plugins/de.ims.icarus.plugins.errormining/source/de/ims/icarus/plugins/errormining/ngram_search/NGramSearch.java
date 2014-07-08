@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
@@ -51,6 +51,7 @@ import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.AnnotationBuffer;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
+import de.ims.icarus.search_tools.io.SearchResolver;
 import de.ims.icarus.search_tools.result.AbstractSearchResult;
 import de.ims.icarus.search_tools.result.DefaultSearchResult0D;
 import de.ims.icarus.search_tools.result.EntryBuilder;
@@ -66,7 +67,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
 /**
  * @author Gregor Thiele
  * @version $Id$
- * 
+ *
  */
 public class NGramSearch extends AbstractParallelSearch implements
 		NGramParameters {
@@ -125,6 +126,22 @@ public class NGramSearch extends AbstractParallelSearch implements
 				DEFAULT_GRAMS_GREATERX);
 		createXML = getParameters().getBoolean(CREATE_XML_OUTPUT,
 				DEFAULT_CREATE_XML_OUTPUT);
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch#getSearchResolver()
+	 */
+	@Override
+	public SearchResolver getSearchResolver() {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.Search#isSerializable()
+	 */
+	@Override
+	public boolean isSerializable() {
+		return false;
 	}
 
 	/**
@@ -225,7 +242,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 	protected Worker createWorker(int id) {
 
 		if (getFactory() instanceof NGramSearchFactory) {
-			// System.out.println("PoS Search");			
+			// System.out.println("PoS Search");
 			return new NGramWorker(id);
 		}
 
@@ -260,7 +277,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 
 		Options options = new Options();
 		options.put("UseFringe", useFringe); //$NON-NLS-1$
-		options.put("FringeSIZE", fringeSize); //$NON-NLS-1$		
+		options.put("FringeSIZE", fringeSize); //$NON-NLS-1$
 		options.put("NGramLIMIT", ngramResultLimit); //$NON-NLS-1$
 		options.put("UseNumberWildcard", useNumberWildcard); //$NON-NLS-1$
 		return options;
@@ -301,7 +318,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 
 	// stuff for dependency
 	protected class NGramWorkerDependency extends Worker {
-		
+
 		protected boolean execute;
 
 		protected GroupCache cache;
@@ -327,7 +344,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 		@Override
 		protected void init() {
 			// System.out.println(source.size());
-			
+
 			// dialog performs check since current nil implementation scaling
 			// recommendation to use "pos-mining" with dependency tags
 			if(useFringe){
@@ -337,11 +354,11 @@ public class NGramSearch extends AbstractParallelSearch implements
 					execute = false;
 				} else {
 					execute = true;
-				}				
+				}
 			} else {
 				execute = true;
 			}
-			
+
 			if(execute){
 
 			cache = createCache();
@@ -358,7 +375,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 			posFilterOptions.put("UseFringe", true); //$NON-NLS-1$
 			posFilterOptions.put("UseNumberWildcard", false); //$NON-NLS-1$
 			NGrams posFilter = new NGrams(posFilterOptions, createQueryList(), NGramSearch.this);
-			
+
 			ngrams = new NGramsDependency(ngramOptions, createQueryList(), NGramSearch.this);
 
 			int maxSentences = sentenceLimit;
@@ -383,14 +400,14 @@ public class NGramSearch extends AbstractParallelSearch implements
 				ngrams.initializeUniGrams((DependencyData) sd, i);
 				progress = (double) i / maxSentences * 50d;
 				setProgress((int) progress);
-				
+
 				if (NGramSearch.this.isCancelled()){
 					return;
 				}
 
 				posFilter.initializeUniGrams((DependencyData) sd, i);
 			}
-			
+
 			//Test Stuff
 			posFilter.nGramResults();
 			posFilter.nGramPoSFilter(posFilter.getResult(), 4);
@@ -535,11 +552,11 @@ public class NGramSearch extends AbstractParallelSearch implements
 		protected NGramWorker(int id) {
 			super(id);
 		}
-		
-		
+
+
 
 		/**
-		 * @throws InterruptedException 
+		 * @throws InterruptedException
 		 * @see de.ims.icarus.search_tools.standard.AbstractParallelSearch.Worker#init()
 		 */
 		@Override
@@ -583,12 +600,12 @@ public class NGramSearch extends AbstractParallelSearch implements
 				}
 			}
 
-			
+
 			// start generation process
 			ngrams.nGramResults();
 			// grab result map
 			ngramsResultMap = ngrams.getResult();
-			
+
 			// remove unwanted nucleus
 			// ngrams.cleanUpNucleus();
 
@@ -731,7 +748,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 	 * Otherwise we have a new key which is not covered by the ngram we have
 	 * added so far and we add the new key to the helferList which contains all
 	 * keys (larges ngrams) from an given variation nuclei
-	 * 
+	 *
 	 * @param mapping
 	 * @param ngramsResultMap
 	 * @param helferList

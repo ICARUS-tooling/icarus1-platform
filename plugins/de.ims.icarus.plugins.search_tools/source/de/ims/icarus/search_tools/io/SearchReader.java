@@ -197,7 +197,7 @@ public class SearchReader implements SearchXmlConstants {
 				search = descriptor.getSearch();
 				resolver = search.getSearchResolver();
 				result = search.getResult();
-				dimension = result.getDimension();
+				dimension = Integer.parseInt(attributes.getValue(ATTR_DIMENSION));
 
 				groupIndices = new int[dimension];
 			} break;

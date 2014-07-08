@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus G�rtner and Gregor Thiele
  *
@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
@@ -52,11 +52,11 @@ import de.ims.icarus.util.data.ContentType;
  *
  */
 public class NGramSearchFactory implements SearchFactory {
-	
+
 	public NGramSearchFactory() {
 		// no-op
 	}
-	
+
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchFactory#createSearch(de.ims.icarus.search_tools.SearchQuery, java.lang.Object, de.ims.icarus.util.Options)
@@ -65,10 +65,10 @@ public class NGramSearchFactory implements SearchFactory {
 	public Search createSearch(SearchQuery query, Object target, Options options)
 			throws UnsupportedFormatException {
 		//System.out.println("Target " + target.toString()); //$NON-NLS-1$
-		
+
 		return new NGramSearch(this, query, options, target);
 	}
-	
+
 	public ContentType getContentType() {
 		//return ContentTypeRegistry.getInstance().getTypeForClass(NGramData.class);
 		return DependencyUtils.getDependencyContentType();
@@ -123,23 +123,23 @@ public class NGramSearchFactory implements SearchFactory {
 	 */
 	@Override
 	public String getQueryLabel(SearchQuery query) {
-		
+
 		String queryLabel = ResourceManager.getInstance()
 				.get("plugins.errorMining.nGramQueryEditor.labelNoQuery"); //$NON-NLS-1$
-		
+
 		//Extract NGramQuerylist  from Search Graph
 		if (query != null){
 
 			DefaultSearchGraph graph = (DefaultSearchGraph) query.getSearchGraph();
-			
+
 			if (graph.getNodes() != null) {
 				SearchNode[] sn = new SearchNode[1];
 				sn = graph.getNodes();
-				SearchConstraint[] constraints = new SearchConstraint[1];			
-				
+				SearchConstraint[] constraints = new SearchConstraint[1];
+
 				//holding object list<ngrammattributes>
 				constraints = sn[0].getConstraints();
-				
+
 				@SuppressWarnings("unchecked")
 				List<NGramQAttributes> nqList = (List<NGramQAttributes>)
 														constraints[0].getValue();
@@ -149,13 +149,41 @@ public class NGramSearchFactory implements SearchFactory {
 				} else {
 					queryLabel = nqList.size() + " "+ ResourceManager.getInstance() //$NON-NLS-1$
 							.get("plugins.errorMining.nGramQueryEditor.labelMultiQuery"); //$NON-NLS-1$
-				
+
 				}
 				//System.out.println("Using #Querys: " + nqList.size()); //$NON-NLS-1$
 			}
 		}
-		
+
 		return queryLabel;
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#createSearch(java.lang.String, java.lang.String, de.ims.icarus.util.Options)
+	 */
+	@Override
+	public Search createSearch(String query, String target, Options options)
+			throws Exception {
+		throw new UnsupportedOperationException();
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedForm()
+	 */
+	@Override
+	public String getSerializedForm() {
+		throw new UnsupportedOperationException();
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedTarget(de.ims.icarus.search_tools.Search)
+	 */
+	@Override
+	public String getSerializedTarget(Search search) {
+		throw new UnsupportedOperationException();
 	}
 
 }
