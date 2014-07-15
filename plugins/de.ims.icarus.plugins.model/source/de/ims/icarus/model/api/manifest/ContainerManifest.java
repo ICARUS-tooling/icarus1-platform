@@ -27,6 +27,10 @@ package de.ims.icarus.model.api.manifest;
 
 import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.Structure;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * A manifest that describes a container and its content.
@@ -35,6 +39,7 @@ import de.ims.icarus.model.api.Structure;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface ContainerManifest extends MemberManifest {
 
 	/**
@@ -42,23 +47,24 @@ public interface ContainerManifest extends MemberManifest {
 	 * is hosted in.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	MarkableLayerManifest getLayerManifest();
 
-	/**
-	 * If this is a nested container this will return the manifest of
-	 * the parent container. On a top-level manifest the returned
-	 * value will be {@code null}.
-	 * @return
-	 */
-	ContainerManifest getParentManifest();
-
-	/**
-	 * If the elements of this container are themselves containers and this
-	 * container is their actual parent than this method returns the manifest
-	 * for those nested containers. Otherwise {@code null} will be returned.
-	 * @return
-	 */
-	ContainerManifest getElementManifest();
+//	/**
+//	 * If this is a nested container this will return the manifest of
+//	 * the parent container. On a top-level manifest the returned
+//	 * value will be {@code null}.
+//	 * @return
+//	 */
+//	ContainerManifest getParentManifest();
+//
+//	/**
+//	 * If the elements of this container are themselves containers and this
+//	 * container is their actual parent than this method returns the manifest
+//	 * for those nested containers. Otherwise {@code null} will be returned.
+//	 * @return
+//	 */
+//	ContainerManifest getElementManifest();
 
 	/**
 	 * Returns the type of this container. This provides
@@ -70,5 +76,10 @@ public interface ContainerManifest extends MemberManifest {
 	 * @return The {@code ContainerType} of this {@code Container}
 	 * @see ContainerType
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ContainerType getContainerType();
+
+	// Modification methods
+
+	void setContainerType(ContainerType containerType);
 }

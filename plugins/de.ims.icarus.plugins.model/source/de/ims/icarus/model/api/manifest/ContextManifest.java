@@ -26,20 +26,24 @@
 package de.ims.icarus.model.api.manifest;
 
 import java.util.List;
-import java.util.Map;
 
-import de.ims.icarus.model.ModelError;
-import de.ims.icarus.model.ModelException;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface ContextManifest extends MemberManifest {
 
+	@AccessRestriction(AccessMode.READ)
 	CorpusManifest getCorpusManifest();
 
+	@AccessRestriction(AccessMode.READ)
 	DriverManifest getDriverManifest();
 
 	/**
@@ -49,49 +53,57 @@ public interface ContextManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	List<PrerequisiteManifest> getPrerequisites();
 
-	/**
-	 * Generates a cloned version of this manifest that is identical to the current state
-	 * except that all its prerequisites are resolved according to the {@code resolutionMap}
-	 * argument.
-	 *
-	 * @param corpusManifest the new hosting corpus manifest
-	 * @param resolutionMap
-	 * @return
-	 * @throws ModelException if the {@code resolutionMap} contains prerequisites that are either
-	 * 			unresolved or invalid according to the prerequisite errors defined in {@link ModelError}.
-	 * @throws NullPointerException if the {@code corpusManifest} argument is {@code null}
-	 * @throws IllegalArgumentException if not every unresolved prerequisite in this manifest is
-	 * 			covered as a key in the {@code resolutionMap} parameter.
-	 * @throws UnsupportedOperationException if this manifest is not a template and therefore cannot
-	 * 			be instantiated to a resolved form.
-	 */
-	ContextManifest getResolvedForm(CorpusManifest corpusManifest, Map<PrerequisiteManifest, PrerequisiteManifest> resolutionMap) throws ModelException;
-
-	/**
-	 * Allows for changes of the context's name at runtime. This is one of the
-	 * few situations where a direct modification of a manifest by the user is
-	 * possible.
-	 * <p>
-	 *
-	 * @param newName The desired new name of the layer
-	 * @throws UnsupportedOperationException if the manifest does not support renaming
-	 * @throws NullPointerException if the {@code newName} parameter is {@code null}
-	 */
-	void setName(String newName);
+//	/**
+//	 * Generates a cloned version of this manifest that is identical to the current state
+//	 * except that all its prerequisites are resolved according to the {@code resolutionMap}
+//	 * argument.
+//	 *
+//	 * @param corpusManifest the new hosting corpus manifest
+//	 * @param resolutionMap
+//	 * @return
+//	 * @throws ModelException if the {@code resolutionMap} contains prerequisites that are either
+//	 * 			unresolved or invalid according to the prerequisite errors defined in {@link ModelError}.
+//	 * @throws NullPointerException if the {@code corpusManifest} argument is {@code null}
+//	 * @throws IllegalArgumentException if not every unresolved prerequisite in this manifest is
+//	 * 			covered as a key in the {@code resolutionMap} parameter.
+//	 * @throws UnsupportedOperationException if this manifest is not a template and therefore cannot
+//	 * 			be instantiated to a resolved form.
+//	 */
+//	ContextManifest getResolvedForm(CorpusManifest corpusManifest, Map<PrerequisiteManifest, PrerequisiteManifest> resolutionMap) throws ModelException;
 
 	/**
 	 * Returns the list of manifests that describe the layers in this context
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	List<LayerManifest> getLayerManifests();
 
+	@AccessRestriction(AccessMode.READ)
 	List<LayerGroupManifest> getGroupManifests();
 
+	/**
+	 * Returns the layer on the top of this context's layer hierarchy
+	 */
+	@AccessRestriction(AccessMode.READ)
 	MarkableLayerManifest getPrimaryLayerManifest();
 
+	/**
+	 * Returns the layer manifest that describes this context's atomic units
+	 * or {@code null} if that layer resides outside of this context.
+	 */
+	@AccessRestriction(AccessMode.READ)
+	MarkableLayerManifest getBaseLayerManifest();
+
+	/**
+	 * Looks up the layer manifest accessible via the given {@code id}. Note that
+	 * this method provides access to layers from both this context and all linked
+	 * prerequisites.
+	 */
+	@AccessRestriction(AccessMode.READ)
 	LayerManifest getLayerManifest(String id);
 
 	/**
@@ -100,14 +112,8 @@ public interface ContextManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	LocationManifest getLocationManifest();
-
-	/**
-	 * Changes the location from which this context's data is loaded.
-	 *
-	 * @param manifest
-	 */
-	void setLocationManifest(LocationManifest manifest);
 
 	/**
 	 * Tells whether or not a context depends on other resources besides the
@@ -115,9 +121,36 @@ public interface ContextManifest extends MemberManifest {
 	 * external data can be assigned as default context of a corpus!
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isIndependentContext();
 
+	@AccessRestriction(AccessMode.READ)
 	boolean isRootContext();
+
+	// Modification methods
+
+	void setDriverManifest(DriverManifest driverManifest);
+
+	void setPrimaryLayerManifest(MarkableLayerManifest manifest);
+
+	void setBaseLayerManifest(MarkableLayerManifest manifest);
+
+	void setIndependentContext(boolean isIndependent);
+
+	void addPrerequisite(PrerequisiteManifest prerequisiteManifest);
+
+	void removePrerequisite(PrerequisiteManifest prerequisiteManifest);
+
+	void addLayerGroup(LayerGroupManifest groupManifest);
+
+	void removeLayerGroup(LayerGroupManifest groupManifest);
+
+	/**
+	 * Changes the location from which this context's data is loaded.
+	 *
+	 * @param manifest
+	 */
+	void setLocationManifest(LocationManifest manifest);
 
 	/**
 	 * Abstract description of a layer object this context depends on.
@@ -145,8 +178,19 @@ public interface ContextManifest extends MemberManifest {
 	 * @version $Id$
 	 *
 	 */
+	@AccessControl(AccessPolicy.DENY)
 	public interface PrerequisiteManifest {
 
+		/**
+		 * Returns the {@code ContextManifest} this prerequisite was declared in.
+		 * Note that it is perfectly legal for intermediate templates to host
+		 * prerequisites originating from one of their ancestors. Only for live
+		 * instances of a template it is mandatory to only host their own
+		 * prerequisites, which by then must have been resolved to legal targets!
+		 *
+		 * @return
+		 */
+		@AccessRestriction(AccessMode.READ)
 		ContextManifest getContextManifest();
 
 		/**
@@ -155,6 +199,7 @@ public interface ContextManifest extends MemberManifest {
 		 *
 		 * @return
 		 */
+		@AccessRestriction(AccessMode.READ)
 		String getLayerId();
 
 		/**
@@ -163,6 +208,7 @@ public interface ContextManifest extends MemberManifest {
 		 * exact match is required or the prerequisite has not yet been fully resolved.
 		 * @return
 		 */
+		@AccessRestriction(AccessMode.READ)
 		String getContextId();
 
 		/**
@@ -173,6 +219,7 @@ public interface ContextManifest extends MemberManifest {
 		 *
 		 * @return
 		 */
+		@AccessRestriction(AccessMode.READ)
 		String getTypeId();
 
 		/**
@@ -183,6 +230,7 @@ public interface ContextManifest extends MemberManifest {
 		 *
 		 * @return
 		 */
+		@AccessRestriction(AccessMode.READ)
 		String getAlias();
 
 		/**
@@ -195,6 +243,18 @@ public interface ContextManifest extends MemberManifest {
 		 *
 		 * @return
 		 */
+		@AccessRestriction(AccessMode.READ)
 		PrerequisiteManifest getUnresolvedForm();
+
+		/**
+		 * Returns a brief description of this prerequisite, usable as a hint for user interfaces
+		 * when asking the user to resolve ambiguous references.
+		 * <p>
+		 * This is an optional method.
+		 *
+		 * @return
+		 */
+		@AccessRestriction(AccessMode.READ)
+		String getDescription();
 	}
 }

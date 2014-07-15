@@ -52,6 +52,8 @@ public interface ModelXmlAttributes {
 	public static final String ATTR_NAMESPACE = "namespace"; //$NON-NLS-1$
 	public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 	public static final String ATTR_CLASSNAME = "classname"; //$NON-NLS-1$
+	public static final String ATTR_PLUGIN_ID = "plugin-id"; //$NON-NLS-1$
+	public static final String ATTR_PATH = "path"; //$NON-NLS-1$
 
 	public static final String ATTR_SOURCE_LAYER = "source-layer"; //$NON-NLS-1$
 	public static final String ATTR_TARGET_LAYER = "target-layer"; //$NON-NLS-1$
@@ -60,6 +62,7 @@ public interface ModelXmlAttributes {
 	public static final String ATTR_INCLUDE_REVERSE = "include-reverse"; //$NON-NLS-1$
 
 	public static final String ATTR_LAYER_ID = "layer-id"; //$NON-NLS-1$
+	public static final String ATTR_CONTEXT_ID = "context-id"; //$NON-NLS-1$
 	public static final String ATTR_CONTAINER_TYPE = "container-type"; //$NON-NLS-1$
 	public static final String ATTR_STRUCTURE_TYPE = "structure-type"; //$NON-NLS-1$
 	public static final String ATTR_MULTI_ROOT = "multi-root"; //$NON-NLS-1$

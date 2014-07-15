@@ -28,6 +28,10 @@ package de.ims.icarus.model.api.manifest;
 import java.util.Set;
 
 import de.ims.icarus.model.api.layer.MarkableLayer;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * Describes a layer that adds <i>content</i> in the form of annotations to
@@ -54,6 +58,7 @@ import de.ims.icarus.model.api.layer.MarkableLayer;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface AnnotationLayerManifest extends LayerManifest {
 
 	/**
@@ -67,6 +72,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 *
 	 * @see #getDefaultAnnotationManifest()
 	 */
+	@AccessRestriction(AccessMode.READ)
 	Set<String> getAvailableKeys();
 
 	/**
@@ -78,6 +84,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 * @throws IllegalArgumentException if the given {@code key} is unknown to
 	 * this manifest
 	 */
+	@AccessRestriction(AccessMode.READ)
 	AnnotationManifest getAnnotationManifest(String key);
 
 	/**
@@ -87,6 +94,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getDefaultKey();
 
 	/**
@@ -100,6 +108,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean allowUnknownKeys();
 
 	/**
@@ -111,6 +120,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 * @return {@code true} if and only if this layer includes annotations
 	 * for nested containers or structures/edges on the target {@code MarkableLayer}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isDeepAnnotation();
 
 	/**
@@ -126,6 +136,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isIndexable();
 
 	/**
@@ -138,5 +149,22 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isSearchable();
+
+	// Modification methods
+
+	void setDefaultKey(String key);
+
+	void setAllowUnknownKeys(boolean allowUnknownKeys);
+
+	void setDeepAnnotation(boolean deepAnnotation);
+
+	void setIndexable(boolean indexable);
+
+	void setSearchable(boolean searchable);
+
+	void addAnnotationManifest(AnnotationManifest annotationManifest);
+
+	void removeAnnotationManifest(AnnotationManifest annotationManifest);
 }

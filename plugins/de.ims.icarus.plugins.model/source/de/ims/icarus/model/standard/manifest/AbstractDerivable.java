@@ -26,6 +26,7 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.manifest.Derivable;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 
 
 
@@ -42,8 +43,28 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 
 	private String id;
 
+	private ManifestSource manifestSource;
+
 	protected AbstractDerivable() {
 		template = null;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestSource()
+	 */
+	@Override
+	public ManifestSource getManifestSource() {
+		return manifestSource;
+	}
+
+	/**
+	 * @param manifestSource the manifestSource to set
+	 */
+	public void setManifestSource(ManifestSource manifestSource) {
+		if (manifestSource == null)
+			throw new NullPointerException("Invalid manifestSource");
+
+		this.manifestSource = manifestSource;
 	}
 
 	/**
@@ -57,6 +78,7 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	/**
 	 * @param id the id to set
 	 */
+	@Override
 	public void setId(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
@@ -67,6 +89,7 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	/**
 	 * @see de.ims.icarus.model.api.manifest.Derivable#setTemplate(de.ims.icarus.model.api.manifest.Derivable)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 //	@Override
 	public void setTemplate(Derivable template) {
@@ -74,17 +97,19 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 			throw new NullPointerException("Invalid template"); //$NON-NLS-1$
 
 		this.template = (T) template;
-		readTemplate((T) template);
+		copyFrom((T) template);
 	}
 
-	/**
-	 * Applies the content of the given template to this derivable.
-	 * Note that a subclass should always invoke {@code super.readTemplate()} first!
-	 * @param template
-	 */
-	protected void readTemplate(T template) {
-		// for subclasses
-	}
+	protected abstract void copyFrom(T template);
+
+//	/**
+//	 * Applies the content of the given template to this derivable.
+//	 * Note that a subclass should always invoke {@code super.readTemplate()} first!
+//	 * @param template
+//	 */
+//	protected void readTemplate(T template) {
+//		// for subclasses
+//	}
 
 	@Override
 	public T getTemplate() {
@@ -197,7 +222,8 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	/**
 	 * @param isTemplate the isTemplate to set
 	 */
-	public void setTemplate(boolean isTemplate) {
+	@Override
+	public void setIsTemplate(boolean isTemplate) {
 		this.isTemplate = isTemplate;
 	}
 

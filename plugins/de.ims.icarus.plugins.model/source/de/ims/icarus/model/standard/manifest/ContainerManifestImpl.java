@@ -29,7 +29,6 @@ import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
-import de.ims.icarus.util.ClassUtils;
 
 /**
  * @author Markus Gärtner
@@ -38,23 +37,11 @@ import de.ims.icarus.util.ClassUtils;
  */
 public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManifest> implements ContainerManifest {
 
-	private ContainerManifest parentManifest;
+//	private ContainerManifest parentManifest;
 	private MarkableLayerManifest layerManifest;
 
-	private ContainerManifest elementManifest;
-	private ContainerType containerType;
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
-	 */
-	@Override
-	protected void readTemplate(ContainerManifest template) {
-		super.readTemplate(template);
-
-		if(containerType==null) {
-			containerType = template.getContainerType();
-		}
-	}
+//	private ContainerManifest elementManifest;
+	private ContainerType containerType = ContainerType.LIST;
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -69,44 +56,44 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	 */
 	@Override
 	public MarkableLayerManifest getLayerManifest() {
-		return layerManifest==null ? parentManifest.getLayerManifest() : layerManifest;
+		return layerManifest;
 	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getParentManifest()
-	 */
-	@Override
-	public ContainerManifest getParentManifest() {
-		return parentManifest;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getElementManifest()
-	 */
-	@Override
-	public ContainerManifest getElementManifest() {
-		return elementManifest;
-	}
-
-	/**
-	 * @param elementManifest the elementManifest to set
-	 */
-	public void setElementManifest(ContainerManifest elementManifest) {
-		if (elementManifest == null)
-			throw new NullPointerException("Invalid elementManifest"); //$NON-NLS-1$
-
-		this.elementManifest = elementManifest;
-	}
-
-	/**
-	 * @param parentManifest the parentManifest to set
-	 */
-	public void setParentManifest(ContainerManifest parentManifest) {
-		if (parentManifest == null)
-			throw new NullPointerException("Invalid parentManifest"); //$NON-NLS-1$
-
-		this.parentManifest = parentManifest;
-	}
+//
+//	/**
+//	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getParentManifest()
+//	 */
+//	@Override
+//	public ContainerManifest getParentManifest() {
+//		return parentManifest;
+//	}
+//
+//	/**
+//	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getElementManifest()
+//	 */
+//	@Override
+//	public ContainerManifest getElementManifest() {
+//		return elementManifest;
+//	}
+//
+//	/**
+//	 * @param elementManifest the elementManifest to set
+//	 */
+//	public void setElementManifest(ContainerManifest elementManifest) {
+//		if (elementManifest == null)
+//			throw new NullPointerException("Invalid elementManifest"); //$NON-NLS-1$
+//
+//		this.elementManifest = elementManifest;
+//	}
+//
+//	/**
+//	 * @param parentManifest the parentManifest to set
+//	 */
+//	public void setParentManifest(ContainerManifest parentManifest) {
+//		if (parentManifest == null)
+//			throw new NullPointerException("Invalid parentManifest"); //$NON-NLS-1$
+//
+//		this.parentManifest = parentManifest;
+//	}
 
 	/**
 	 * @param layerManifest the layerManifest to set
@@ -134,20 +121,30 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#equals(java.lang.Object)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if(!super.equals(obj)) {
-			return false;
-		}
+	protected void copyFrom(ContainerManifest template) {
+		super.copyFrom(template);
 
-		if(obj instanceof ContainerManifest) {
-			ContainerManifest other = (ContainerManifest) obj;
-			return containerType==other.getContainerType()
-					&& (ClassUtils.equals(elementManifest, other.getElementManifest()));
-		}
-		return false;
+		containerType = template.getContainerType();
 	}
+
+//	/**
+//	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#equals(java.lang.Object)
+//	 */
+//	@Override
+//	public boolean equals(Object obj) {
+//		if(!super.equals(obj)) {
+//			return false;
+//		}
+//
+//		if(obj instanceof ContainerManifest) {
+//			ContainerManifest other = (ContainerManifest) obj;
+//			return containerType==other.getContainerType()
+//					&& (ClassUtils.equals(elementManifest, other.getElementManifest()));
+//		}
+//		return false;
+//	}
 
 }

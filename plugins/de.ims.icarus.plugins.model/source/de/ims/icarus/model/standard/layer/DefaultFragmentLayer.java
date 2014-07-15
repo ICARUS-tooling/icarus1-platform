@@ -92,7 +92,7 @@ public class DefaultFragmentLayer extends DefaultMarkableLayer implements Fragme
 	@Override
 	public long getRasterSize(Markable markable, int axis) {
 		String key = getManifest().getAnnotationKey();
-		Object value = key==null ? valueLayer.getValue(markable) : valueLayer.getValue(markable, key);
+		Object value = valueLayer.getValue(markable, key);
 		return rasterizer.getRasterSize(markable, this, value, axis);
 	}
 

@@ -166,6 +166,14 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 		notes.remove(note);
 	}
 
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
+	 */
+	@Override
+	protected void copyFrom(CorpusManifest template) {
+		throw new UnsupportedOperationException();
+	}
+
 	public static class NoteImpl implements Note {
 
 		private Date modificationDate;

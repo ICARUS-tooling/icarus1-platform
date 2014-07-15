@@ -25,7 +25,11 @@
  */
 package de.ims.icarus.eval;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.ims.icarus.util.UnsupportedFormatException;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner
@@ -36,6 +40,8 @@ public class Expression {
 
 	private Class<?> returnType;
 	private Environment environment;
+	private String code;
+	private List<Variable> variables = new ArrayList<>();
 
 	public static Expression compile(String s) throws UnsupportedFormatException {
 		return compile(s, 0);
@@ -50,5 +56,30 @@ public class Expression {
 		if (text == null)
 			throw new NullPointerException("Invalid text");
 
+	}
+
+	public List<Variable> getVariables() {
+		return CollectionUtils.getListProxy(variables);
+	}
+
+	/**
+	 * @return the returnType
+	 */
+	public Class<?> getReturnType() {
+		return returnType;
+	}
+
+	/**
+	 * @return the environment
+	 */
+	public Environment getEnvironment() {
+		return environment;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
 	}
 }

@@ -25,12 +25,20 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import java.util.List;
+
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface LocationManifest {
 
 //	LocationType getType();
@@ -43,6 +51,7 @@ public interface LocationManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getPath();
 
 	/**
@@ -52,7 +61,50 @@ public interface LocationManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	PathResolverManifest getPathResolverManifest();
 
-	void setPathResolverManifest(PathResolverManifest manifest);
+	@AccessRestriction(AccessMode.READ)
+	List<PathEntry> getPathEntries();
+
+	// Modification methods
+
+	void setPath(String path);
+
+	void setPathResolverManifest(PathResolverManifest pathResolverManifest);
+
+	void addPathEntry(PathEntry entry);
+
+	void removePathEntry(PathEntry entry);
+
+	public enum PathType {
+		FILE,
+		FOLDER,
+		PATTERN,
+		IDENTIFIER,
+		CUSTOM;
+
+		/**
+		 * @see java.lang.Enum#toString()
+		 */
+		@Override
+		public String toString() {
+			return name().toLowerCase();
+		}
+
+
+		public static PathType parsePathType(String s) {
+			return valueOf(s.toUpperCase());
+		}
+	}
+
+	@AccessControl(AccessPolicy.DENY)
+	public interface PathEntry {
+
+		@AccessRestriction(AccessMode.READ)
+		PathType getType();
+
+		@AccessRestriction(AccessMode.READ)
+		String getValue();
+	}
 }

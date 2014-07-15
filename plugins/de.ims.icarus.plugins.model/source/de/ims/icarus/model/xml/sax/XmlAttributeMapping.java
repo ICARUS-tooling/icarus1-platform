@@ -23,47 +23,27 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util;
+package de.ims.icarus.model.xml.sax;
 
-import org.java.plugin.registry.Extension;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import de.ims.icarus.model.xml.XmlResource;
+import de.ims.icarus.model.util.types.ValueType;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ValueType implements XmlResource {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Documented
+public @interface XmlAttributeMapping {
 
-	UNKNOWN(Object.class),
-	CUSTOM(Object.class),
-	STRING(String.class),
-	BOOLEAN(Boolean.class),
-	INTEGER(Integer.class),
-	LONG(Long.class),
-	DOUBLE(Double.class),
-	EXTENSION(Extension.class);
+	String name();
 
-	private final Class<?> baseClass;
-
-	private ValueType(Class<?> baseClass) {
-		this.baseClass = baseClass;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return name().toLowerCase();
-	}
-
-	public static ValueType parseValueType(String s) {
-		return valueOf(s.toUpperCase());
-	}
-
-	public boolean isValidValue(Object value) {
-		return value!=null && baseClass.isAssignableFrom(value.getClass());
-	}
+	ValueType type() default ValueType.STRING;
 }

@@ -28,18 +28,24 @@ package de.ims.icarus.model.api.manifest;
 import java.util.List;
 
 import de.ims.icarus.model.io.LocationType;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface DriverManifest extends MemberManifest {
 
 	/**
 	 * Returns the manifest that specifies the actual driver implementation.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ImplementationManifest getImplementationManifest();
 
 	/**
@@ -47,6 +53,7 @@ public interface DriverManifest extends MemberManifest {
 	 * context.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	List<IndexManifest> getIndexManifests();
 
 	/**
@@ -55,5 +62,16 @@ public interface DriverManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	LocationType getLocationType();
+
+	// Modification methods
+
+	void setImplementationManifest(ImplementationManifest implementationManifest);
+
+	void addIndexManifest(IndexManifest indexManifest);
+
+	void removeIndexManifest(IndexManifest indexManifest);
+
+	void setLocationType(LocationType locationType);
 }

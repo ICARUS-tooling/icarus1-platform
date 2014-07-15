@@ -28,22 +28,35 @@ package de.ims.icarus.model.api.manifest;
 import java.util.Date;
 import java.util.List;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface CorpusManifest extends MemberManifest {
 
+	@AccessRestriction(AccessMode.READ)
 	ContextManifest getRootContextManifest();
 
+	@AccessRestriction(AccessMode.READ)
 	List<ContextManifest> getCustomContextManifests();
 
+	@AccessRestriction(AccessMode.READ)
 	ContextManifest getContextManifest(String id);
 
-	void addCustomContextManifest(ContextManifest manifest);
-
-	void removeCustomContextManifest(ContextManifest manifest);
+	/**
+	 * Returns {@code true} if the corpus described by this manifest can
+	 * be edited by the user.
+	 *
+	 * @return
+	 */
+	boolean isEditable();
 
 	/**
 	 * Returns the notes added to this corpus. The order is not specified and
@@ -53,18 +66,17 @@ public interface CorpusManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	List<Note> getNotes();
+
+	// Modification methods
+
+	void addCustomContextManifest(ContextManifest manifest);
+
+	void removeCustomContextManifest(ContextManifest manifest);
 
 	void addNote(Note note);
 	void removeNote(Note note);
-
-	/**
-	 * Returns {@code true} if the corpus described by this manifest can
-	 * be edited by the user.
-	 *
-	 * @return
-	 */
-	boolean isEditable();
 
 	/**
 	 *

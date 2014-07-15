@@ -29,9 +29,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,12 +56,11 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.StructureType;
 import de.ims.icarus.model.api.manifest.ContextManifest;
+import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.Derivable;
-import de.ims.icarus.model.api.manifest.Implementation;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
-import de.ims.icarus.model.api.manifest.Prerequisite;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.AbstractDerivable;
@@ -69,20 +70,16 @@ import de.ims.icarus.model.standard.manifest.AnnotationLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
 import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
 import de.ims.icarus.model.standard.manifest.ContextManifestImpl;
-import de.ims.icarus.model.standard.manifest.ContextReaderManifestImpl;
-import de.ims.icarus.model.standard.manifest.ContextWriterManifestImpl;
 import de.ims.icarus.model.standard.manifest.CorpusManifestImpl;
-import de.ims.icarus.model.standard.manifest.Implementations;
 import de.ims.icarus.model.standard.manifest.LocationManifestImpl;
 import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl;
 import de.ims.icarus.model.standard.manifest.PathResolverManifestImpl;
-import de.ims.icarus.model.standard.manifest.PrerequisiteImpl;
 import de.ims.icarus.model.standard.manifest.StructureLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.StructureManifestImpl;
 import de.ims.icarus.model.standard.manifest.ValueRangeImpl;
 import de.ims.icarus.model.standard.manifest.ValueSetImpl;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.Identity;
@@ -94,47 +91,43 @@ import de.ims.icarus.util.id.Identity;
  */
 public class ManifestParser {
 
-	private volatile static ManifestParser instance;
+	private final Set<ParseSource> sources = new HashSet<>();
 
-	public static ManifestParser getInstance() {
-		ManifestParser result = instance;
+	public void addSource(URL url, ParseMode mode) {
+		if (url == null)
+			throw new NullPointerException("Invalid url");
+		if (mode == null)
+			throw new NullPointerException("Invalid mode");
 
-		if (result == null) {
-			synchronized (ManifestParser.class) {
-				result = instance;
-
-				if (result == null) {
-					instance = new ManifestParser();
-					result = instance;
-				}
-			}
-		}
-
-		return result;
+		if(!sources.add(new ParseSource(mode, url)))
+			throw new IllegalArgumentException("Source already registered: "+url);
 	}
 
-	private SAXParserFactory parserFactory;
+	public void parseAll() throws SAXException {
+		XMLReader reader = newReader();
 
-	private synchronized SAXParserFactory getParserFactory() {
-		if(parserFactory==null) {
-			parserFactory = SAXParserFactory.newInstance();
-			parserFactory.setNamespaceAware(true);
-			parserFactory.setValidating(true);
 
-			try {
-				parserFactory.setFeature("http://xml.org/sax/features/use-entity-resolver2", true); //$NON-NLS-1$
-			} catch (SAXNotRecognizedException | SAXNotSupportedException
-					| ParserConfigurationException e) {
-				LoggerFactory.error(this, "Failed to activate advanced entity-resolver feature", e); //$NON-NLS-1$
-			}
-		}
-		return parserFactory;
 	}
 
-	private synchronized XMLReader newReader() throws ParserConfigurationException, SAXException {
-		SAXParserFactory parserFactory = getParserFactory();
+	private XMLReader newReader() throws ParserConfigurationException, SAXException {
+		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+		parserFactory.setNamespaceAware(true);
+		parserFactory.setValidating(true);
+
+		try {
+			parserFactory.setFeature("http://xml.org/sax/features/use-entity-resolver2", true); //$NON-NLS-1$
+		} catch (SAXNotRecognizedException | SAXNotSupportedException
+				| ParserConfigurationException e) {
+			LoggerFactory.error(this, "Failed to activate advanced entity-resolver feature", e); //$NON-NLS-1$
+		}
+
+
 		SAXParser parser = parserFactory.newSAXParser();
 		return parser.getXMLReader();
+	}
+
+	private interface Linker<O extends Object> {
+		void link();
 	}
 
 	public LogReport loadCorpora(URL url) {
@@ -206,6 +199,44 @@ public class ManifestParser {
 		CORPORA;
 	}
 
+	private class ParseSource {
+
+		private final ParseMode mode;
+		private final URL url;
+
+		ParseSource(ParseMode mode, URL url) {
+			this.mode = mode;
+			this.url = url;
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return url.hashCode();
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof ParseSource) {
+				return url.equals(((ParseSource)obj).url);
+			}
+			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "{"+mode.name()+": "+url.toExternalForm()+"}";
+		}
+	}
+
 	public static class ModelHandler extends DefaultHandler implements EntityResolver2 {
 
 		private final LogReport report;
@@ -224,10 +255,7 @@ public class ManifestParser {
 		private ValueType valueType;
 		private Expression expression;
 
-		public ModelHandler(ParseMode parseMode) {
-			if (parseMode == null)
-				throw new NullPointerException("Invalid parseMode"); //$NON-NLS-1$
-
+		public ModelHandler() {
 			report = new LogReport(this);
 			this.parseMode = parseMode;
 		}
@@ -510,7 +538,7 @@ public class ManifestParser {
 		}
 
 		private void readTemplateAttributes(Attributes attributes, AbstractDerivable<?> derivable) {
-			derivable.setTemplate(isTemplateMode());
+			derivable.setIsTemplate(isTemplateMode());
 
 			String templateId = normalize(attributes, "template-id"); //$NON-NLS-1$
 			if(templateId==null) {
@@ -654,12 +682,12 @@ public class ManifestParser {
 				Object owner = peek();
 				if(owner instanceof OptionsManifestImpl) {
 					OptionsManifestImpl manifest = (OptionsManifestImpl) owner;
-					manifest.setRange(key, range);
+					manifest.setSupportedRange(key, range);
 
 					valueType = manifest.getValueType(key);
 				} else {
 					AnnotationManifestImpl manifest = (AnnotationManifestImpl) owner;
-					manifest.setValueRange(range);
+					manifest.setSupportedRange(range);
 
 					valueType = manifest.getValueType();
 				}
@@ -704,7 +732,7 @@ public class ManifestParser {
 					valueType = manifest.getValueType(key);
 				} else if(owner instanceof AnnotationManifestImpl) {
 					AnnotationManifestImpl manifest = (AnnotationManifestImpl) owner;
-					manifest.setValues(valueSet);
+					manifest.setSupportedValues(valueSet);
 
 					valueType = manifest.getValueType();
 				} else {

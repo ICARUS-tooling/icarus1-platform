@@ -25,6 +25,11 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 
 
 
@@ -33,6 +38,7 @@ package de.ims.icarus.model.api.manifest;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface StructureLayerManifest extends MarkableLayerManifest {
 
 	/**
@@ -48,5 +54,6 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 	 * @see #getRootContainerManifest()
 	 * @see #getContextManifest()
 	 */
+	@AccessRestriction(AccessMode.READ)
 	StructureManifest getStructureManifest();
 }

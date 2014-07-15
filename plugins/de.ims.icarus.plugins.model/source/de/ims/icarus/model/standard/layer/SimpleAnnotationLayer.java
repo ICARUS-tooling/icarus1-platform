@@ -51,21 +51,43 @@ import de.ims.icarus.util.CorruptedStateException;
  * @version $Id$
  *
  */
-public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifest> implements AnnotationLayer {
+public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest> implements AnnotationLayer {
 
-	protected final Map<Markable, Object> annotations = new WeakHashMap<>();
+	private final Map<Markable, Object> annotations = new WeakHashMap<>();
+	private final String key;
+	private final AnnotationManifest annotationManifest;
 
 	/**
 	 * @param id
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
+	public SimpleAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
 		super(manifest, group);
+
+		if(manifest.getAvailableKeys().size()>1 || manifest.allowUnknownKeys())
+			throw new IllegalArgumentException("This annotation layer implementation does not support more than one annotation key"); //$NON-NLS-1$
+
+		key = manifest.getDefaultKey();
+
+		if(key==null)
+			throw new IllegalArgumentException("Missing sole annotation key"); //$NON-NLS-1$
+
+		annotationManifest = manifest.getAnnotationManifest(key);
+
+		if(annotationManifest==null)
+			throw new IllegalArgumentException("Missing annotation manifest for sole key: "+key); //$NON-NLS-1$
 	}
 
 	protected Map<Markable, Object> getDefaultAnnotations() {
 		return annotations;
+	}
+
+	private void checkKey(String key) {
+		if (key == null)
+			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
+		if(!this.key.equals(key))
+			throw new IllegalArgumentException("Unsupported key: "+key); //$NON-NLS-1$
 	}
 
 	/**
@@ -76,20 +98,22 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		return !annotations.isEmpty();
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.Markable)
-	 */
-	@Override
-	public Object getValue(Markable markable) {
-		return annotations.get(markable);
-	}
+//	/**
+//	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.Markable)
+//	 */
+//	@Override
+//	public Object getValue(Markable markable) {
+//		return annotations.get(markable);
+//	}
 
 	/**
 	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.Markable, java.lang.String)
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
-		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
+		checkKey(key);
+
+		return annotations.get(markable);
 	}
 
 	/**
@@ -97,7 +121,8 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 */
 	@Override
 	public boolean collectKeys(Markable markable, Collector<String> buffer) {
-		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
+		buffer.collect(key);
+		return true;
 	}
 
 	/**
@@ -113,7 +138,9 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 */
 	@Override
 	public void removeAllValues(String key) {
-		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
+		checkKey(key);
+
+		execute(new ClearChange());
 	}
 
 	/**
@@ -164,26 +191,22 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		}
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.Markable, java.lang.Object)
-	 */
-	@Override
-	public void setValue(Markable markable, Object value) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
-
-		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
-			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		AnnotationManifest annotationManifest = getManifest().getDefaultAnnotationManifest();
-		if(annotationManifest==null)
-			throw new UnsupportedOperationException("No keyless annotation defined"); //$NON-NLS-1$
-
-		if(value!=null && !annotationManifest.getValueType().isValidValue(value))
-			throw new IllegalArgumentException("Invalid annotation value: "+value); //$NON-NLS-1$
-
-		execute(new AnnotationChange(markable, value));
-	}
+//	/**
+//	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.Markable, java.lang.Object)
+//	 */
+//	@Override
+//	public void setValue(Markable markable, Object value) {
+//		if (markable == null)
+//			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+//
+//		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
+//			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		if(value!=null && !annotationManifest.getValueType().isValidValue(value))
+//			throw new IllegalArgumentException("Invalid annotation value: "+value); //$NON-NLS-1$
+//
+//		execute(new AnnotationChange(markable, value));
+//	}
 
 	/**
 	 * Directly saves a given annotation value, bypassing most of the default
@@ -206,7 +229,17 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	 */
 	@Override
 	public void setValue(Markable markable, String key, Object value) {
-		throw new UnsupportedOperationException("Additional keys not supported"); //$NON-NLS-1$
+		if (markable == null)
+			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+		checkKey(key);
+
+		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
+			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		if(!CorpusUtils.isValidValue(value, annotationManifest))
+			throw new IllegalArgumentException("Invalid annotation value: "+value); //$NON-NLS-1$
+
+		execute(new AnnotationChange(markable, value));
 	}
 
 	/**
@@ -266,7 +299,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
-			return DefaultAnnotationLayer.this;
+			return SimpleAnnotationLayer.this;
 		}
 
 	}
@@ -323,7 +356,7 @@ public class DefaultAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
-			return DefaultAnnotationLayer.this;
+			return SimpleAnnotationLayer.this;
 		}
 
 	}

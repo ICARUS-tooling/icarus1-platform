@@ -41,12 +41,12 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class LayerGroupManifestImpl implements LayerGroupManifest {
 
-	private final ContextManifest contextManifest;
+	private ContextManifest contextManifest;
 
 	private final List<LayerManifest> layerManifests = new ArrayList<>();
 	private MarkableLayerManifest primaryLayerManifest;
 	private boolean independent = false;
-	private final String name;
+	private String name;
 
 	public LayerGroupManifestImpl(ContextManifest contextManifest, String name) {
 		if (contextManifest == null)
@@ -101,10 +101,12 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 	/**
 	 * @param independent the independent to set
 	 */
+	@Override
 	public void setIndependent(boolean independent) {
 		this.independent = independent;
 	}
 
+	@Override
 	public void addLayerManifest(LayerManifest layerManifest) {
 		if (layerManifest == null)
 			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
@@ -113,9 +115,19 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 			throw new IllegalArgumentException("Layer manifest already present in group: "+layerManifest.getId()); //$NON-NLS-1$
 	}
 
+	@Override
+	public void removeLayerManifest(LayerManifest layerManifest) {
+		if (layerManifest == null)
+			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
+
+		if(!layerManifests.remove(layerManifest))
+			throw new IllegalArgumentException("Layer manifest not present in group: "+layerManifest.getId()); //$NON-NLS-1$
+	}
+
 	/**
 	 * @param primaryLayerManifest the primaryLayerManifest to set
 	 */
+	@Override
 	public void setPrimaryLayerManifest(MarkableLayerManifest primaryLayerManifest) {
 		if (primaryLayerManifest == null)
 			throw new NullPointerException("Invalid primaryLayerManifest"); //$NON-NLS-1$
@@ -125,24 +137,46 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 		this.primaryLayerManifest = primaryLayerManifest;
 	}
 
+//	/**
+//	 * @see java.lang.Object#hashCode()
+//	 */
+//	@Override
+//	public int hashCode() {
+//		return name.hashCode();
+//	}
+//
+//	/**
+//	 * @see java.lang.Object#equals(java.lang.Object)
+//	 */
+//	@Override
+//	public boolean equals(Object obj) {
+//		if(obj instanceof LayerGroupManifest) {
+//			return name.equals(((LayerGroupManifest)obj).getName());
+//		}
+//
+//		return false;
+//	}
+
 	/**
-	 * @see java.lang.Object#hashCode()
+	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#setContextManifest(de.ims.icarus.model.api.manifest.ContextManifest)
 	 */
 	@Override
-	public int hashCode() {
-		return name.hashCode();
+	public void setContextManifest(ContextManifest contextManifest) {
+		if (contextManifest == null)
+			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+
+		this.contextManifest = contextManifest;
 	}
 
 	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#setName(java.lang.String)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof LayerGroupManifest) {
-			return name.equals(((LayerGroupManifest)obj).getName());
-		}
+	public void setName(String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
-		return false;
+		this.name = name;
 	}
 
 	/**

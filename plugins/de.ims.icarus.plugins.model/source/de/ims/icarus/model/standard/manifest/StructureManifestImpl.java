@@ -42,18 +42,6 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	private boolean multiRootAllowed = false;
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.ContainerManifestImpl#readTemplate(de.ims.icarus.model.api.manifest.ContainerManifest)
-	 */
-	@Override
-	protected void readTemplate(ContainerManifest template) {
-		super.readTemplate(template);
-
-		if(structureType==null) {
-			structureType = ((StructureManifest)template).getStructureType();
-		}
-	}
-
-	/**
 	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getTemplate()
 	 */
 	@Override
@@ -85,6 +73,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 		return (StructureLayerManifest) super.getLayerManifest();
 	}
 
+	@Override
 	public void setStructureType(StructureType structureType) {
 		if (structureType == null)
 			throw new NullPointerException("Invalid structureType"); //$NON-NLS-1$
@@ -100,7 +89,21 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 		return multiRootAllowed;
 	}
 
+	@Override
 	public void setMultiRootAllowed(boolean value) {
 		this.multiRootAllowed = value;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.ContainerManifestImpl#copyFrom(de.ims.icarus.model.api.manifest.ContainerManifest)
+	 */
+	@Override
+	protected void copyFrom(ContainerManifest tpl) {
+		super.copyFrom(tpl);
+
+		StructureManifest template = (StructureManifest)tpl;
+
+		structureType = template.getStructureType();
+		multiRootAllowed = template.isMultiRootAllowed();
 	}
 }

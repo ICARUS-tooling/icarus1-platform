@@ -25,16 +25,27 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface RasterizerManifest extends MemberManifest {
 
 	/**
 	 * Returns the manifest that specifies the actual driver implementation.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ImplementationManifest getImplementationManifest();
+
+	// Modification methods
+
+	void setImplementationManifest(ImplementationManifest implementationManifest);
 }

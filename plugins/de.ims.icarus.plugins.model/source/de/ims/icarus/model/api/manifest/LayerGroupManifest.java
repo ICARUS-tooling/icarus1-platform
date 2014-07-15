@@ -27,6 +27,11 @@ package de.ims.icarus.model.api.manifest;
 
 import java.util.List;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 
 /**
  * Layer groups describe logical
@@ -35,12 +40,16 @@ import java.util.List;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface LayerGroupManifest {
 
+	@AccessRestriction(AccessMode.READ)
 	ContextManifest getContextManifest();
 
+	@AccessRestriction(AccessMode.READ)
 	List<LayerManifest> getLayerManifests();
 
+	@AccessRestriction(AccessMode.READ)
 	MarkableLayerManifest getPrimaryLayerManifest();
 
 	/**
@@ -49,11 +58,15 @@ public interface LayerGroupManifest {
 	 * independent of content that resides in another context! Full independence is given when
 	 * both this method and {@link ContextManifest#isIndependentContext()} of the describing
 	 * manifest of the surrounding context return {@code true}.
+	 * <p>
+	 * Default is {@code false}.
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isIndependent();
 
+	@AccessRestriction(AccessMode.READ)
 	String getName();
 
 	/**
@@ -66,4 +79,18 @@ public interface LayerGroupManifest {
 	 */
 	@Override
 	boolean equals(Object o);
+
+	// Modification methods
+
+	void setContextManifest(ContextManifest contextManifest);
+
+	void addLayerManifest(LayerManifest layerManifest);
+
+	void removeLayerManifest(LayerManifest layerManifest);
+
+	void setPrimaryLayerManifest(MarkableLayerManifest layerManifest);
+
+	void setIndependent(boolean isIndependent);
+
+	void setName(String name);
 }

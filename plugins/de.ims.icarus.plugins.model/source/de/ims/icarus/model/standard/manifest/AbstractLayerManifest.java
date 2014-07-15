@@ -42,27 +42,16 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractMemberManifest<L> implements LayerManifest {
 
-	private ContextManifest contextManifest;
 	private LayerGroupManifest layerGroupManifest;
 	private List<TargetLayerManifest> baseLayerManifests = new ArrayList<>(3);
 	private LayerType layerType;
-
-	/**
-	 * @param contextManifest the contextManifest to set
-	 */
-	public void setContextManifest(ContextManifest contextManifest) {
-		if (contextManifest == null)
-			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
-
-		this.contextManifest = contextManifest;
-	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getContextManifest()
 	 */
 	@Override
 	public ContextManifest getContextManifest() {
-		return contextManifest;
+		return layerGroupManifest.getContextManifest();
 	}
 
 	/**
@@ -74,9 +63,10 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	}
 
 	/**
-	 * @param layerGroupManifest the layerGroupManifest to set
+	 * @see de.ims.icarus.model.api.manifest.LayerManifest#setGroupManifest(de.ims.icarus.model.api.manifest.LayerGroupManifest)
 	 */
-	public void setLayerGroupManifest(LayerGroupManifest layerGroupManifest) {
+	@Override
+	public void setGroupManifest(LayerGroupManifest layerGroupManifest) {
 		if (layerGroupManifest == null)
 			throw new NullPointerException("Invalid layerGroupManifest"); //$NON-NLS-1$
 
@@ -86,6 +76,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	/**
 	 * @param layerType the layerType to set
 	 */
+	@Override
 	public void setLayerType(LayerType layerType) {
 		this.layerType = layerType;
 	}
@@ -106,12 +97,35 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		return CollectionUtils.getListProxy(baseLayerManifests);
 	}
 
+	@Override
 	public void addBaseLayerManifest(TargetLayerManifest manifest) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
 
-		if(!baseLayerManifests.add(manifest))
-			throw new IllegalArgumentException("Base layer manifest already present: "+manifest); //$NON-NLS-1$
+		baseLayerManifests.remove(manifest);
+		baseLayerManifests.add(manifest);
+	}
+
+	@Override
+	public void removeBaseLayerManifest(TargetLayerManifest manifest) {
+		if (manifest == null)
+			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+
+		baseLayerManifests.remove(manifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
+	 */
+	@Override
+	protected void copyFrom(L template) {
+		super.copyFrom(template);
+
+		layerType = template.getLayerType();
+
+		for(TargetLayerManifest baseLayerManifest : template.getBaseLayerManifests()) {
+			addBaseLayerManifest(baseLayerManifest);
+		}
 	}
 
 	public static class TargetLayerManifestImpl implements TargetLayerManifest {

@@ -47,5 +47,5 @@ public interface Rasterizer extends Comparator<Position> {
 
 	Position createPosition(long...values);
 
-	FragmentLayer getFragmentLayer();
+//	FragmentLayer getFragmentLayer();
 }

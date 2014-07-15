@@ -63,10 +63,15 @@ public interface ModelXmlTags {
 	public static final String TAG_DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
 	public static final String TAG_IMPLEMENTATION = "implementation"; //$NON-NLS-1$
 	public static final String TAG_DOCUMENTATION = "documentation"; //$NON-NLS-1$
+	public static final String TAG_CONTENT = "content"; //$NON-NLS-1$
+	public static final String TAG_RESOURCE = "resource"; //$NON-NLS-1$
 
 	public static final String TAG_DRIVER = "driver"; //$NON-NLS-1$
 	public static final String TAG_CONNECTOR = "connector"; //$NON-NLS-1$
 	public static final String TAG_INDEX = "index"; //$NON-NLS-1$
+
+	public static final String TAG_LOCATION = "location"; //$NON-NLS-1$
+	public static final String TAG_PATH_RESOLVER = "path-resolver"; //$NON-NLS-1$
 
 	public static final String TAG_RANGE = "range"; //$NON-NLS-1$
 	public static final String TAG_MIN = "min"; //$NON-NLS-1$

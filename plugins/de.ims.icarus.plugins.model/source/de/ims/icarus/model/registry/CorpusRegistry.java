@@ -501,6 +501,15 @@ public final class CorpusRegistry {
 		return instance;
 	}
 
+	public boolean hasTemplate(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		synchronized (templates) {
+			return templates.containsKey(id);
+		}
+	}
+
 	public Derivable getTemplate(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$

@@ -25,12 +25,8 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
-import javax.sql.rowset.spi.XmlWriter;
-
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
-import de.ims.icarus.model.api.manifest.ManifestUtils;
 import de.ims.icarus.model.api.manifest.MemberManifest;
-import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -61,31 +57,5 @@ public abstract class AbstractForeignImplementationManifest<M extends MemberMani
 			throw new NullPointerException("Invalid implementationManifest"); //$NON-NLS-1$
 
 		this.implementationManifest = implementationManifest;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeTemplateXmlElements(de.ims.icarus.model.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		AbstractForeignImplementationManifest<?> template = (AbstractForeignImplementationManifest<?>) getTemplate();
-
-		if(!ManifestUtils.equals(implementationManifest, template.getImplementationManifest())) {
-			XmlWriter.writeImplementationElement(serializer, implementationManifest);
-		}
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeFullXmlElements(de.ims.icarus.model.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		XmlWriter.writeImplementationElement(serializer, implementationManifest);
 	}
 }

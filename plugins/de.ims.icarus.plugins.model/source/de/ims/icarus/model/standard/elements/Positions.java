@@ -34,7 +34,7 @@ import de.ims.icarus.model.api.raster.Position;
  */
 public class Positions {
 
-	public static class Position1D implements Position {
+	public static class Position1D implements Position, Comparable<Position1D> {
 
 		private final long x;
 
@@ -95,6 +95,15 @@ public class Positions {
 		@Override
 		public String toString() {
 			return "["+x+"]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		/**
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		@Override
+		public int compareTo(Position1D o) {
+			// FIXME consider int overflow!
+			return (int)(x-o.x);
 		}
 
 	}

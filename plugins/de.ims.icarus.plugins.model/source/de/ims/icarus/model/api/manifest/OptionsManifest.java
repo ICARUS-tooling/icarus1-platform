@@ -27,7 +27,11 @@ package de.ims.icarus.model.api.manifest;
 
 import java.util.Set;
 
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.util.id.Identity;
 
 /**
@@ -38,6 +42,7 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface OptionsManifest extends Derivable {
 
 	/**
@@ -47,6 +52,7 @@ public interface OptionsManifest extends Derivable {
 	 *
 	 * @return The names of all available options as a {@code Set}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	Set<String> getOptionNames();
 
 	/**
@@ -60,6 +66,7 @@ public interface OptionsManifest extends Derivable {
 	 * @throws NullPointerException if the {@code name} argument
 	 * is {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	Object getDefaultValue(String name);
 
 	/**
@@ -72,6 +79,7 @@ public interface OptionsManifest extends Derivable {
 	 * @throws NullPointerException if the {@code name} argument
 	 * is {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ValueType getValueType(String name);
 
 	/**
@@ -84,6 +92,7 @@ public interface OptionsManifest extends Derivable {
 	 * @throws NullPointerException if the {@code name} argument
 	 * is {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getName(String name);
 
 	/**
@@ -99,6 +108,7 @@ public interface OptionsManifest extends Derivable {
 	 * @throws NullPointerException if the {@code name} argument
 	 * is {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getDescription(String name);
 
 	/**
@@ -106,6 +116,7 @@ public interface OptionsManifest extends Derivable {
 	 * @param name
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ValueSet getSupportedValues(String name);
 
 	/**
@@ -113,6 +124,7 @@ public interface OptionsManifest extends Derivable {
 	 * @param name
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ValueRange getSupportedRange(String name);
 
 	/**
@@ -131,6 +143,7 @@ public interface OptionsManifest extends Derivable {
 	 * @return
 	 * @see #getOptionNames()
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getOptionGroup(String name);
 
 	/**
@@ -142,6 +155,7 @@ public interface OptionsManifest extends Derivable {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	Set<Identity> getGroupIdentifiers();
 
 	/**
@@ -155,6 +169,7 @@ public interface OptionsManifest extends Derivable {
 	 * @throws NullPointerException if the {@code name} argument
 	 * is {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isPublished(String name);
 
 	/**
@@ -167,5 +182,34 @@ public interface OptionsManifest extends Derivable {
 	 * @throws NullPointerException if the {@code name} argument
 	 * is {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isMultiValue(String name);
+
+	// Modification methods
+
+	void removeOption(String name);
+
+	void addOption(String name);
+
+	void setDefaultValue(String name, Object value);
+
+	void setValueType(String name, ValueType type);
+
+	void setName(String name, String value);
+
+	void setDescription(String name, String value);
+
+	void setOptionGroup(String name, String value);
+
+	void setSupportedValues(String name, ValueSet values);
+
+	void setSupportedRange(String name, ValueRange range);
+
+	void setPublished(String name, boolean published);
+
+	void setMultiValue(String name, boolean multiValue);
+
+	void addGroupIdentifier(Identity identifier);
+
+	void removeGroupIdentifier(Identity identifier);
 }

@@ -57,6 +57,7 @@ import javax.swing.SwingUtilities;
 
 import org.java.plugin.ObjectFactory;
 import org.java.plugin.PathResolver;
+import org.java.plugin.PluginClassLoader;
 import org.java.plugin.PluginLifecycleException;
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
@@ -569,6 +570,20 @@ public final class PluginUtil {
 		} catch(Exception e) {
 			return false;
 		}
+	}
+
+	public static boolean isPluginClassLoader(ClassLoader classLoader) {
+		return classLoader instanceof PluginClassLoader;
+	}
+
+	public static PluginDescriptor getDescriptor(ClassLoader classLoader) {
+		if(!(classLoader instanceof PluginClassLoader)) {
+			return null;
+		}
+
+		PluginClassLoader pluginClassLoader = (PluginClassLoader) classLoader;
+
+		return pluginClassLoader.getPluginDescriptor();
 	}
 
 	public static boolean isExtensionOf(Extension extension, ExtensionPoint extensionPoint) {

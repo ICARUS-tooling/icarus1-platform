@@ -27,7 +27,11 @@ package de.ims.icarus.model.api.manifest;
 
 import java.util.List;
 
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -35,6 +39,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface AnnotationManifest extends MemberManifest {
 
 	/**
@@ -42,6 +47,7 @@ public interface AnnotationManifest extends MemberManifest {
 	 * describes.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getKey();
 
 	/**
@@ -50,6 +56,7 @@ public interface AnnotationManifest extends MemberManifest {
 	 * should return an empty list.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	List<String> getAliases();
 
 	/**
@@ -81,6 +88,7 @@ public interface AnnotationManifest extends MemberManifest {
 	 * @see #getSupportedRange()
 	 * @see #getSupportedValues()
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isBounded();
 
 	/**
@@ -96,6 +104,7 @@ public interface AnnotationManifest extends MemberManifest {
 	 * @return
 	 * @see Comparable
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ValueRange getSupportedRange();
 
 	/**
@@ -108,11 +117,13 @@ public interface AnnotationManifest extends MemberManifest {
 	 * the values one by one.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ValueSet getSupportedValues();
 
 	/**
 	 * Returns the type of this annotation
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ValueType getValueType();
 
 	/**
@@ -122,5 +133,22 @@ public interface AnnotationManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ContentType getContentType();
+
+	// Modification methods
+
+	void setKey(String key);
+
+	void addAlias(String alias);
+
+	void removeAlias(String alias);
+
+	void setSupportedRange(ValueRange range);
+
+	void setSupportedValues(ValueSet values);
+
+	void setValueType(ValueType valueType);
+
+	void setContentType(ContentType contentType);
 }

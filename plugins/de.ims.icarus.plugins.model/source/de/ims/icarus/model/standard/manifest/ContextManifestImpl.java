@@ -33,9 +33,11 @@ import java.util.Map;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.DriverManifest;
+import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
+import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -47,13 +49,22 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 
 	private final List<LayerManifest> layerManifests = new ArrayList<>();
 	private final Map<String, LayerManifest> layerManifestLookup = new HashMap<>();
+	private final List<PrerequisiteManifest> prerequisiteManifests = new ArrayList<>();
+	private final List<LayerGroupManifest> groupManifests = new ArrayList<>();
 
+	private MarkableLayerManifest primaryLayerManifest;
+	private MarkableLayerManifest baseLayerManifest;
 	private LocationManifest locationManifest;
 
 	private boolean independent = false;
 	private final CorpusManifest corpusManifest;
 	private DriverManifest driverManifest;
 
+	/**
+	 * Live manifest constructor
+	 *
+	 * @param corpusManifest
+	 */
 	public ContextManifestImpl(CorpusManifest corpusManifest) {
 		if (corpusManifest == null)
 			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
@@ -62,25 +73,35 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	}
 
 	/**
+	 * Template constructor
+	 */
+	public ContextManifestImpl() {
+		corpusManifest = null;
+	}
+
+	private void resetLookup() {
+		layerManifests.clear();
+		layerManifestLookup.clear();
+	}
+
+	private void ensureLookup() {
+		if(layerManifests.isEmpty() && !groupManifests.isEmpty()) {
+			for(LayerGroupManifest groupManifest : groupManifests) {
+				for(LayerManifest layerManifest : groupManifest.getLayerManifests()) {
+					layerManifests.add(layerManifest);
+					layerManifestLookup.put(layerManifest.getId(), layerManifest);
+				}
+			}
+		}
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getLayerManifests()
 	 */
 	@Override
 	public List<LayerManifest> getLayerManifests() {
+		ensureLookup();
 		return CollectionUtils.getListProxy(layerManifests);
-	}
-
-	public void addLayerManifest(LayerManifest layerManifest) {
-		if(layerManifest==null)
-			throw new NullPointerException("Invalid layer manifest"); //$NON-NLS-1$
-		if(layerManifests.contains(layerManifest))
-			throw new IllegalArgumentException("Layer manifest already registered: "+layerManifest.getId()); //$NON-NLS-1$
-
-		LayerManifest current = layerManifestLookup.get(layerManifest.getId());
-		if(current!=null && !current.equals(layerManifest))
-			throw new IllegalArgumentException("Duplicate layer manifests for rawId: "+layerManifest.getId()); //$NON-NLS-1$
-
-		layerManifests.add(layerManifest);
-		layerManifestLookup.put(layerManifest.getId(), layerManifest);
 	}
 
 	/**
@@ -91,6 +112,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		if (id == null)
 			throw new NullPointerException("Invalid rawId"); //$NON-NLS-1$
 
+		ensureLookup();
 		LayerManifest layerManifest = layerManifestLookup.get(id);
 		if(layerManifest==null)
 			throw new IllegalArgumentException("No such layer: "+id); //$NON-NLS-1$
@@ -144,7 +166,8 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	/**
 	 * @param independent the independent to set
 	 */
-	public void setIndependent(boolean independent) {
+	@Override
+	public void setIndependentContext(boolean independent) {
 		this.independent = independent;
 	}
 
@@ -164,6 +187,146 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		return ManifestType.CONTEXT_MANIFEST;
 	}
 
+	/**
+	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getDriverManifest()
+	 */
+	@Override
+	public DriverManifest getDriverManifest() {
+		return driverManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getPrerequisites()
+	 */
+	@Override
+	public List<PrerequisiteManifest> getPrerequisites() {
+		return CollectionUtils.getListProxy(prerequisiteManifests);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getGroupManifests()
+	 */
+	@Override
+	public List<LayerGroupManifest> getGroupManifests() {
+		return CollectionUtils.getListProxy(groupManifests);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getPrimaryLayerManifest()
+	 */
+	@Override
+	public MarkableLayerManifest getPrimaryLayerManifest() {
+		return primaryLayerManifest;
+	}
+
+	/**
+	 * @param primaryLayerManifest the primaryLayerManifest to set
+	 */
+	@Override
+	public void setPrimaryLayerManifest(MarkableLayerManifest primaryLayerManifest) {
+		if (primaryLayerManifest == null)
+			throw new NullPointerException("Invalid primaryLayerManifest"); //$NON-NLS-1$
+
+		this.primaryLayerManifest = primaryLayerManifest;
+	}
+
+	/**
+	 * @return the baseLayerManifest
+	 */
+	@Override
+	public MarkableLayerManifest getBaseLayerManifest() {
+		return baseLayerManifest;
+	}
+
+	/**
+	 * @param baseLayerManifest the baseLayerManifest to set
+	 */
+	@Override
+	public void setBaseLayerManifest(MarkableLayerManifest baseyLayerManifest) {
+		this.baseLayerManifest = baseyLayerManifest;
+	}
+
+	/**
+	 * @param driverManifest the driverManifest to set
+	 */
+	@Override
+	public void setDriverManifest(DriverManifest driverManifest) {
+		if (driverManifest == null)
+			throw new NullPointerException("Invalid driverManifest"); //$NON-NLS-1$
+
+		this.driverManifest = driverManifest;
+	}
+
+	@Override
+	public void addPrerequisite(PrerequisiteManifest prerequisiteManifest) {
+		if (prerequisiteManifest == null)
+			throw new NullPointerException("Invalid prerequisiteManifest");  //$NON-NLS-1$
+
+		if(prerequisiteManifests.contains(prerequisiteManifest))
+			throw new IllegalArgumentException("Prerequisite already present: "+prerequisiteManifest); //$NON-NLS-1$
+
+		prerequisiteManifests.add(prerequisiteManifest);
+	}
+
+	@Override
+	public void removePrerequisite(PrerequisiteManifest prerequisiteManifest) {
+		if (prerequisiteManifest == null)
+			throw new NullPointerException("Invalid prerequisiteManifest");  //$NON-NLS-1$
+
+		if(!prerequisiteManifests.remove(prerequisiteManifest))
+			throw new IllegalArgumentException("Prerequisite not present: "+prerequisiteManifest); //$NON-NLS-1$
+	}
+
+	@Override
+	public void addLayerGroup(LayerGroupManifest groupManifest) {
+		if (groupManifest == null)
+			throw new NullPointerException("Invalid groupManifest"); //$NON-NLS-1$
+
+		if(groupManifests.contains(groupManifest))
+			throw new IllegalArgumentException("Layer group already present: "+groupManifest); //$NON-NLS-1$
+
+		groupManifests.add(groupManifest);
+
+		resetLookup();
+	}
+
+	@Override
+	public void removeLayerGroup(LayerGroupManifest groupManifest) {
+		if (groupManifest == null)
+			throw new NullPointerException("Invalid groupManifest"); //$NON-NLS-1$
+
+		if(!groupManifests.remove(groupManifest))
+			throw new IllegalArgumentException("Layer group not present: "+groupManifest); //$NON-NLS-1$
+
+		resetLookup();
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
+	 */
+	@Override
+	protected void copyFrom(ContextManifest template) {
+		super.copyFrom(template);
+
+		for(PrerequisiteManifest prerequisiteManifest : template.getPrerequisites()) {
+			addPrerequisite(prerequisiteManifest);
+		}
+
+		for(LayerGroupManifest groupManifest : template.getGroupManifests()) {
+			addLayerGroup(groupManifest);
+		}
+
+		primaryLayerManifest = template.getPrimaryLayerManifest();
+
+		baseLayerManifest = template.getBaseLayerManifest();
+
+		locationManifest = template.getLocationManifest();
+
+		independent = template.isIndependentContext();
+
+		driverManifest = template.getDriverManifest();
+	}
+
 	public static class PrerequisiteManifestImpl implements PrerequisiteManifest {
 
 		private final ContextManifest contextManifest;
@@ -172,6 +335,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		private String typeId;
 		private String contextId;
 		private final String alias;
+		private String description;
 
 		private PrerequisiteManifest unresolvedForm;
 
@@ -183,6 +347,21 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 
 			this.contextManifest = contextManifest;
 			this.alias = alias;
+		}
+
+		/**
+		 * @return the description
+		 */
+		@Override
+		public String getDescription() {
+			return description;
+		}
+
+		/**
+		 * @param description the description to set
+		 */
+		public void setDescription(String description) {
+			this.description = description;
 		}
 
 		/**

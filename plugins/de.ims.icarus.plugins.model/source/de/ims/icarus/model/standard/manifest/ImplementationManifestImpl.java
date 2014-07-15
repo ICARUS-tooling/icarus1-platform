@@ -26,8 +26,6 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.util.ClassUtils;
 
 /**
  * @author Markus Gärtner
@@ -41,18 +39,6 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	private String classname;
 	private boolean useFactory = false;
 
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#readTemplate(de.ims.icarus.model.api.manifest.ModifiableManifest)
-	 */
-	@Override
-	protected void readTemplate(M template) {
-		super.readTemplate(template);
-
-		sourceType = template.getSourceType();
-		source = template.getSource();
-		classname = template.getClassname();
-		useFactory = template.isUseFactory();
-	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.ImplementationManifest#getSourceType()
@@ -118,54 +104,15 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeTemplateXmlElements(de.ims.icarus.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
+	protected void copyFrom(M template) {
+		super.copyFrom(template);
 
-		ImplementationManifest template = getTemplate();
-
-		if(!ClassUtils.equals(sourceType, template.getSourceType())) {
-			serializer.writeAttribute("source-type", sourceType.name().toLowerCase()); //$NON-NLS-1$
-		}
-
-		if(!ClassUtils.equals(source, template.getSource())) {
-			serializer.writeAttribute("source", source); //$NON-NLS-1$
-		}
-
-		if(!ClassUtils.equals(classname, template.getClassname())) {
-			serializer.writeAttribute("classname", classname); //$NON-NLS-1$
-		}
-
-		if(useFactory && useFactory!=template.isUseFactory()) {
-			serializer.writeAttribute("use-factory", useFactory); //$NON-NLS-1$
-		}
+		sourceType = template.getSourceType();
+		source = template.getSource();
+		classname = template.getClassname();
+		useFactory = template.isUseFactory();
 	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeFullXmlElements(de.ims.icarus.model.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		serializer.writeAttribute("source-type", sourceType.name().toLowerCase()); //$NON-NLS-1$
-		serializer.writeAttribute("source", source); //$NON-NLS-1$
-		serializer.writeAttribute("classname", classname); //$NON-NLS-1$
-		if(useFactory) {
-			serializer.writeAttribute("use-factory", true); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#getXmlTag()
-	 */
-	@Override
-	protected String getXmlTag() {
-		return "implementation"; //$NON-NLS-1$
-	}
-
 }

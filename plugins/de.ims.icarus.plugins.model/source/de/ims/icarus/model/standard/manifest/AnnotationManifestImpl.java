@@ -27,18 +27,13 @@ package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
-import de.ims.icarus.model.util.ValueType;
-import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.model.xml.XmlWriter;
-import de.ims.icarus.util.ClassUtils;
+import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 
@@ -57,43 +52,6 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	private ContentType contentType;
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#readTemplate(de.ims.icarus.model.api.manifest.MemberManifest)
-	 */
-	@Override
-	protected void readTemplate(AnnotationManifest template) {
-		super.readTemplate(template);
-
-		for(String alias : template.getAliases()) {
-			if(aliases==null) {
-				aliases = new ArrayList<>();
-			}
-
-			if(!aliases.contains(alias)) {
-				aliases.add(alias);
-			}
-		}
-
-		if(key==null) {
-			key = template.getKey();
-		}
-		if(valueType==null) {
-			valueType = template.getValueType();
-		}
-		if(valueRange==null) {
-			valueRange = template.getSupportedRange();
-		}
-
-		ValueSet values = template.getSupportedValues();
-		if(values!=null) {
-			if(this.values==null) {
-				this.values = new ValueSetImpl();
-			}
-
-			this.values.setTemplate(values);
-		}
-	}
-
-	/**
 	 * @return the key
 	 */
 	@Override
@@ -104,6 +62,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	/**
 	 * @param key the key to set
 	 */
+	@Override
 	public void setKey(String key) {
 		if (key == null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
@@ -135,6 +94,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		return result;
 	}
 
+	@Override
 	public void addAlias(String alias) {
 		if (alias == null)
 			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
@@ -147,6 +107,15 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 			throw new IllegalArgumentException("Alias already registered: "+alias); //$NON-NLS-1$
 
 		aliases.add(alias);
+	}
+
+	@Override
+	public void removeAlias(String alias) {
+		if (alias == null)
+			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
+
+		if(aliases==null || !aliases.remove(alias))
+			throw new IllegalArgumentException("Unknown alias: "+alias); //$NON-NLS-1$
 	}
 
 	/**
@@ -196,6 +165,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	/**
 	 * @param contentType the contentType to set
 	 */
+	@Override
 	public void setContentType(ContentType contentType) {
 		this.contentType = contentType;
 	}
@@ -203,6 +173,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	/**
 	 * @param valueType the valueType to set
 	 */
+	@Override
 	public void setValueType(ValueType valueType) {
 		if (valueType == null)
 			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
@@ -210,7 +181,8 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		this.valueType = valueType;
 	}
 
-	public void setValues(ValueSet values) {
+	@Override
+	public void setSupportedValues(ValueSet values) {
 		if (values == null)
 			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
 
@@ -220,7 +192,8 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	/**
 	 * @param valueRange the valueRange to set
 	 */
-	public void setValueRange(ValueRange valueRange) {
+	@Override
+	public void setSupportedRange(ValueRange valueRange) {
 		if (valueRange == null)
 			throw new NullPointerException("Invalid valueRange"); //$NON-NLS-1$
 
@@ -228,84 +201,19 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@Override
-	protected String getXmlTag() {
-		return "annotation"; //$NON-NLS-1$
-	}
+	protected void copyFrom(AnnotationManifest template) {
+		super.copyFrom(template);
 
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
-
-		writeXmlAttribute(serializer, "key", key, getTemplate().getKey()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "type", valueType, getTemplate().getValueType()); //$NON-NLS-1$
-		if(!ClassUtils.equals(contentType, getTemplate().getContentType())) {
-			XmlWriter.writeContentTypeAttribute(serializer, contentType);
+		key = template.getKey();
+		for(String alias : template.getAliases()) {
+			addAlias(alias);
 		}
+		valueType = template.getValueType();
+		values = template.getSupportedValues();
+		valueRange = template.getSupportedRange();
+		contentType = template.getContentType();
 	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("key", key); //$NON-NLS-1$
-		serializer.writeAttribute("type", valueType.getValue()); //$NON-NLS-1$
-		XmlWriter.writeContentTypeAttribute(serializer, contentType);
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
-
-		Set<String> derived = new HashSet<>(getTemplate().getAliases());
-
-		for(String alias : getAliases()) {
-			if(derived.contains(alias)) {
-				continue;
-			}
-
-			XmlWriter.writeAliasElement(serializer, alias);
-		}
-
-		XmlWriter.writeValuesElement(serializer, values, valueType);
-
-		if(!ClassUtils.equals(valueRange, getTemplate().getSupportedRange())) {
-			XmlWriter.writeValueRangeElement(serializer, valueRange, valueType);
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractMemberManifest#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		for(String alias : getAliases()) {
-			XmlWriter.writeAliasElement(serializer, alias);
-		}
-
-		XmlWriter.writeValuesElement(serializer, values, valueType);
-		XmlWriter.writeValueRangeElement(serializer, valueRange, valueType);
-	}
-
 }

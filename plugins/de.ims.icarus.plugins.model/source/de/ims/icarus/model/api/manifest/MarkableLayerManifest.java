@@ -25,6 +25,11 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 
 
 
@@ -33,6 +38,7 @@ package de.ims.icarus.model.api.manifest;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface MarkableLayerManifest extends LayerManifest {
 
 	/**
@@ -40,6 +46,7 @@ public interface MarkableLayerManifest extends LayerManifest {
 	 * layer.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	int getContainerDepth();
 
 	/**
@@ -49,6 +56,7 @@ public interface MarkableLayerManifest extends LayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ContainerManifest getRootContainerManifest();
 
 	/**
@@ -61,7 +69,11 @@ public interface MarkableLayerManifest extends LayerManifest {
      * @throws IndexOutOfBoundsException if the level is out of range
      *         (<tt>level &lt; 0 || level &gt;= getContainerDepth()</tt>)
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ContainerManifest getContainerManifest(int level);
+
+	@AccessRestriction(AccessMode.READ)
+	int indexOfContainerManifest(ContainerManifest containerManifest);
 
 	/**
 	 * Returns the {@code MarkableLayerManifest} that describes the layer hosting
@@ -76,5 +88,14 @@ public interface MarkableLayerManifest extends LayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	TargetLayerManifest getBoundaryLayerManifest();
+
+	// Modification methods
+
+	void setBoundaryLayerManifest(TargetLayerManifest layerManifest);
+
+	void removeContainerManifest(ContainerManifest containerManifest);
+
+	void setContainerManifest(ContainerManifest containerManifest, int level);
 }

@@ -25,6 +25,11 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 /**
  *
  *
@@ -32,7 +37,8 @@ package de.ims.icarus.model.api.manifest;
  * @version $Id$
  *
  */
-public interface Derivable {
+@AccessControl(AccessPolicy.DENY)
+public interface Derivable extends Manifest {
 
 	/**
 	 * Returns whether or not this {@code Derivable} is meant to be a template,
@@ -41,12 +47,14 @@ public interface Derivable {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isTemplate();
 
 	/**
 	 * Returns the namespace wide unique id of this template/derivable.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getId();
 
 	/**
@@ -55,12 +63,19 @@ public interface Derivable {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	Derivable getTemplate();
 
-//	/**
-//	 * Changes the template used to derive content from.
-//	 *
-//	 * @param template
-//	 */
-//	void setTemplate(Derivable template);
+	// Modification methods
+
+	void setId(String id);
+
+	void setIsTemplate(boolean isTemplate);
+
+	/**
+	 * Changes the template used to derive content from.
+	 *
+	 * @param template
+	 */
+	void setTemplate(Derivable template);
 }

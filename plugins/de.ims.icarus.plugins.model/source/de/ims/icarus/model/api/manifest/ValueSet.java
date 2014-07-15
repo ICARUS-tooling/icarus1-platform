@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 
 /**
  * A discrete collection of values.

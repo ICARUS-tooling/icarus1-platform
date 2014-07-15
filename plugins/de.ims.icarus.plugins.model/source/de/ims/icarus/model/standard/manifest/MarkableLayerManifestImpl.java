@@ -39,7 +39,7 @@ import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
  */
 public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLayerManifest> implements MarkableLayerManifest {
 
-	private List<ContainerManifest> containerManifests;
+	private final List<ContainerManifest> containerManifests = new ArrayList<>();
 
 	private TargetLayerManifest boundaryLayerManifest;
 
@@ -81,15 +81,45 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 		return containerManifests.get(level);
 	}
 
-	public void addContainerManifest(ContainerManifest manifest) {
-		if (manifest == null)
-			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+	/**
+	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#indexOfContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest)
+	 */
+	@Override
+	public int indexOfContainerManifest(ContainerManifest containerManifest) {
+		if (containerManifest == null)
+			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
 
-		if(containerManifests==null) {
-			containerManifests = new ArrayList<>(3);
-		}
+		return containerManifests.indexOf(containerManifest);
+	}
 
-		containerManifests.add(manifest);
+	/**
+	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#removeContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest)
+	 */
+	@Override
+	public void removeContainerManifest(ContainerManifest containerManifest) {
+		if (containerManifest == null)
+			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
+
+		containerManifests.remove(containerManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#setContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest, int)
+	 */
+	@Override
+	public void setContainerManifest(ContainerManifest containerManifest,
+			int level) {
+		if (containerManifest == null)
+			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
+
+		containerManifests.set(level, containerManifest);
+	}
+
+	public void addContainerManifest(ContainerManifest containerManifest) {
+		if (containerManifest == null)
+			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
+
+		containerManifests.add(containerManifest);
 	}
 
 	/**
@@ -103,10 +133,28 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	/**
 	 * @param boundaryLayerManifest the boundaryLayerManifest to set
 	 */
+	@Override
 	public void setBoundaryLayerManifest(TargetLayerManifest boundaryLayerManifest) {
 		if (boundaryLayerManifest == null)
 			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
 
 		this.boundaryLayerManifest = boundaryLayerManifest;
+	}
+
+	/**
+	 * Attention:
+	 * This implementation does <b>not</b> inherit the container manifests of the given template!
+	 *
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
+	 */
+	@Override
+	protected void copyFrom(MarkableLayerManifest template) {
+		super.copyFrom(template);
+
+		boundaryLayerManifest = template.getBoundaryLayerManifest();
+
+//		for(int i=0; i<template.getContainerDepth(); i++) {
+//			addContainerManifest(template.getContainerManifest(i));
+//		}
 	}
 }

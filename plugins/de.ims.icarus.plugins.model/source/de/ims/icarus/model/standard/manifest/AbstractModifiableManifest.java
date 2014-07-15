@@ -28,14 +28,11 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.sql.rowset.spi.XmlWriter;
-
+import de.ims.icarus.model.api.manifest.Documentation;
 import de.ims.icarus.model.api.manifest.ModifiableManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
-import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -47,27 +44,22 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 
 	private Map<String, Object> properties;
 	private OptionsManifest optionsManifest;
+	private Documentation documentation;
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#readTemplate(de.ims.icarus.model.api.manifest.Derivable)
+	 * @return the documentation
 	 */
 	@Override
-	protected void readTemplate(T template) {
-		super.readTemplate(template);
+	public Documentation getDocumentation() {
+		return documentation;
+	}
 
-		OptionsManifest optionsManifest = template.getOptionsManifest();
-		if(optionsManifest!=null) {
-			if(this.optionsManifest==null) {
-				this.optionsManifest = new OptionsManifestImpl();
-			}
-			this.optionsManifest.setTemplate(optionsManifest);
-		}
-
-		for(String key : template.getPropertyNames()) {
-			if(getProperty(key)==null) {
-				setProperty(key, template.getProperty(key));
-			}
-		}
+	/**
+	 * @param documentation the documentation to set
+	 */
+	@Override
+	public void setDocumentation(Documentation documentation) {
+		this.documentation = documentation;
 	}
 
 	/**
@@ -81,15 +73,12 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 	/**
 	 * @param optionsManifest the optionsManifest to set
 	 */
+	@Override
 	public void setOptionsManifest(OptionsManifest optionsManifest) {
 		if (optionsManifest == null)
 			throw new NullPointerException("Invalid optionsManifest"); //$NON-NLS-1$
 
 		this.optionsManifest = optionsManifest;
-	}
-
-	protected boolean isTemplateKey(String name) {
-		return hasTemplate() && getTemplate().getPropertyNames().contains(name);
 	}
 
 	/**
@@ -141,50 +130,15 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@Override
-	protected void writeTemplateXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlElements(serializer);
+	protected void copyFrom(T template) {
+		optionsManifest = template.getOptionsManifest();
+		documentation = template.getDocumentation();
 
-		if(optionsManifest!=null) {
-			if(properties!=null) {
-
-				// Find properties that differ from the template and only
-				// serialize them (this can be done since template properties
-				// never change!)
-				for(Entry<String, Object> entry : properties.entrySet()) {
-					String name = entry.getKey();
-					Object value = entry.getValue();
-
-					// Skip properties that are equal to those defined in the template
-					if(value.equals(getTemplate().getProperty(name))) {
-						continue;
-					}
-
-					XmlWriter.writePropertyElement(serializer, name,
-							value, optionsManifest.getValueType(name));
-				}
-			}
-
-			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
-		}
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeFullXmlElements(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlElements(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlElements(serializer);
-
-		if(optionsManifest!=null) {
-			XmlWriter.writeProperties(serializer, properties, optionsManifest);
-			XmlWriter.writeOptionsManifestElement(serializer, optionsManifest);
+		for(String key : template.getPropertyNames()) {
+			setProperty(key, template.getProperty(key));
 		}
 	}
 }

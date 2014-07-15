@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * Marks a class as access controlled. All methods in the annotated class
  * will have one or more {@link AccessMode} values associated with them
  * (either directly declared or inferred by the {@link AccessPolicy} of this
- * annotation.
+ * annotation).
  *
  * @author Markus Gärtner
  * @version $Id$

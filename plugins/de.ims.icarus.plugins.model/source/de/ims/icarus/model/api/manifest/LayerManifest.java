@@ -29,6 +29,10 @@ import java.util.List;
 
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.layer.LayerType;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * A {@code LayerManifest} describes a single {@link Layer} in a corpus and
@@ -39,8 +43,10 @@ import de.ims.icarus.model.api.layer.LayerType;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface LayerManifest extends MemberManifest {
 
+	@AccessRestriction(AccessMode.READ)
 	ContextManifest getContextManifest();
 
 	/**
@@ -48,6 +54,7 @@ public interface LayerManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	LayerGroupManifest getGroupManifest();
 
 	/**
@@ -58,13 +65,25 @@ public interface LayerManifest extends MemberManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	LayerType getLayerType();
 
 	/**
 	 * Returns the list of resolved base layers for this layer manifest.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	List<TargetLayerManifest> getBaseLayerManifests();
+
+	// Modification methods
+
+	void setGroupManifest(LayerGroupManifest groupManifest);
+
+	void setLayerType(LayerType layerType);
+
+	void addBaseLayerManifest(TargetLayerManifest layerManifest);
+
+	void removeBaseLayerManifest(TargetLayerManifest layerManifest);
 
 	/**
 	 * Models a resolved dependency on the layer level. A target layer may either be

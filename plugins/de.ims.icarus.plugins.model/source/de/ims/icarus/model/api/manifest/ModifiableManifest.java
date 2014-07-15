@@ -27,12 +27,18 @@ package de.ims.icarus.model.api.manifest;
 
 import java.util.Set;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ModifiableManifest extends Derivable {
+@AccessControl(AccessPolicy.DENY)
+public interface ModifiableManifest extends Derivable, Documentable {
 
 	/**
 	 * Returns the manifest that describes possible options the
@@ -43,6 +49,7 @@ public interface ModifiableManifest extends Derivable {
 	 * @return the manifest describing options for this manifest
 	 * or {@code null}
 	 */
+	@AccessRestriction(AccessMode.READ)
 	OptionsManifest getOptionsManifest();
 
 	/**
@@ -55,7 +62,24 @@ public interface ModifiableManifest extends Derivable {
 	 * @return The value of the property with the given name or {@code null}
 	 * if no such property exists.
 	 */
+	@AccessRestriction(AccessMode.READ)
 	Object getProperty(String name);
+
+	/**
+	 * Returns a {@link Set} view of all the available property names
+	 * in this manifest. If there are no properties in the manifest
+	 * available then this method should return an empty {@code Set}!
+	 * <p>
+	 * The returned {@code Set} should be immutable.
+	 *
+	 * @return A {@code Set} view on all the available property names
+	 * for this manifest or the empty {@code Set} if this manifest does
+	 * not contain any properties.
+	 */
+	@AccessRestriction(AccessMode.READ)
+	Set<String> getPropertyNames();
+
+	// Modification methods
 
 	/**
 	 * Changes the value of the property specified by {@code name} to
@@ -74,16 +98,5 @@ public interface ModifiableManifest extends Derivable {
 	 */
 	void setProperty(String name, Object value);
 
-	/**
-	 * Returns a {@link Set} view of all the available property names
-	 * in this manifest. If there are no properties in the manifest
-	 * available then this method should return an empty {@code Set}!
-	 * <p>
-	 * The returned {@code Set} should be immutable.
-	 *
-	 * @return A {@code Set} view on all the available property names
-	 * for this manifest or the empty {@code Set} if this manifest does
-	 * not contain any properties.
-	 */
-	Set<String> getPropertyNames();
+	void setOptionsManifest(OptionsManifest optionsManifest);
 }

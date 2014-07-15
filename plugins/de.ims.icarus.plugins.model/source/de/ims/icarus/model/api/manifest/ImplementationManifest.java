@@ -25,6 +25,10 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 import de.ims.icarus.model.xml.XmlResource;
 
 
@@ -45,6 +49,7 @@ import de.ims.icarus.model.xml.XmlResource;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface ImplementationManifest extends ModifiableManifest {
 
 	/**
@@ -54,6 +59,7 @@ public interface ImplementationManifest extends ModifiableManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	SourceType getSourceType();
 
 	/**
@@ -64,6 +70,7 @@ public interface ImplementationManifest extends ModifiableManifest {
 	 * @return
 	 * @see SourceType
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getSource();
 
 	/**
@@ -74,6 +81,7 @@ public interface ImplementationManifest extends ModifiableManifest {
 	 * @return
 	 * @see SourceType
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getClassname();
 
 	/**
@@ -91,7 +99,18 @@ public interface ImplementationManifest extends ModifiableManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	boolean isUseFactory();
+
+	// Modification methods
+
+	void setSourceType(SourceType sourceType);
+
+	void setSource(String source);
+
+	void setClassname(String classname);
+
+	void setUseFactory(boolean useFactory);
 
 	public enum SourceType implements XmlResource {
 

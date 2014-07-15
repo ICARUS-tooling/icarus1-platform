@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 import de.ims.icarus.model.api.manifest.ValueSet;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 
 /**
  * @author Markus Gärtner

@@ -25,7 +25,10 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 
 /**
@@ -43,7 +46,8 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public interface MemberManifest extends Identity, ModifiableManifest {
+@AccessControl(AccessPolicy.DENY)
+public interface MemberManifest extends ModifiableIdentity, ModifiableManifest {
 
 	/**
 	 * Returns the {@code type} of this manifest, i.e. that is
@@ -53,6 +57,7 @@ public interface MemberManifest extends Identity, ModifiableManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	ManifestType getManifestType();
 
 //	/**
@@ -67,4 +72,6 @@ public interface MemberManifest extends Identity, ModifiableManifest {
 //	 * @see #getId()
 //	 */
 //	String getRawId();
+
+	// Modification methods
 }

@@ -55,6 +55,7 @@ import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
+import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
@@ -71,6 +72,9 @@ import de.ims.icarus.model.api.raster.Rasterizer;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.io.ResourcePath;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
  * @author Markus Gärtner
@@ -87,6 +91,25 @@ public final class CorpusUtils {
 
 	public static int getNewUID() {
 		return uidGenerator.getAndIncrement();
+	}
+
+	public static boolean isValidValue(Object value, AnnotationManifest manifest) {
+		if(value==null) {
+			return true;
+		}
+
+		ValueType type = manifest.getValueType();
+		switch (type) {
+		case CUSTOM:
+			ContentType contentType = manifest.getContentType();
+			return ContentTypeRegistry.isCompatible(contentType, type);
+
+		case UNKNOWN:
+			throw new IllegalArgumentException("Manifest declares annotation value type as unknown: "+manifest); //$NON-NLS-1$
+
+		default:
+			return type.isValidValue(value);
+		}
 	}
 
 	public static ContextManifest getContextManifest(MemberManifest manifest) {

@@ -158,6 +158,21 @@ public enum ModelError {
 	 * Closing a segment failed due to some owner not being able to release its lock when asked.
 	 */
 	SEGMENT_OWNED(501),
+
+	//**************************************************
+	//       6xx  MANIFEST ERRORS
+	//**************************************************
+
+	/**
+	 * Two or more elements in a manifest definition used the same id within a single namespace
+	 */
+	MANIFEST_DUPLICATE_ID(601),
+	MANIFEST_UNKNOWN_ID(602),
+	MANIFEST_ILLEGAL_TEMPLATE(603),
+	MANIFEST_CYCLIC_TEMPLATE(604),
+	MANIFEST_INCOMPATTIBLE_TEMPLATE(605),
+	//FIXME add errors for missing content etc...
+
 	;
 
 	private final int errorCode;

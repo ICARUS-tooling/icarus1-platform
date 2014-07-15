@@ -26,19 +26,32 @@
 package de.ims.icarus.model.api.manifest;
 
 import de.ims.icarus.model.api.StructureType;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface StructureManifest extends ContainerManifest {
 
 	/**
 	 * Returns the type of this structure
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	StructureType getStructureType();
 
+	@AccessRestriction(AccessMode.READ)
 	boolean isMultiRootAllowed();
+
+	// Modification methods
+
+	void setStructureType(StructureType structureType);
+
+	void setMultiRootAllowed(boolean multiRootAllowed);
 }

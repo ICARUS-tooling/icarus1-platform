@@ -30,6 +30,10 @@ import java.util.Map;
 
 import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
 import de.ims.icarus.model.xml.XmlResource;
 
 /**
@@ -49,29 +53,49 @@ import de.ims.icarus.model.xml.XmlResource;
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface IndexManifest {
 
-	ContextManifest getContextManifest();
+	@AccessRestriction(AccessMode.READ)
+	DriverManifest getDriverManifest();
 
+	@AccessRestriction(AccessMode.READ)
 	TargetLayerManifest getSourceLayerManifest();
 
+	@AccessRestriction(AccessMode.READ)
 	TargetLayerManifest getTargetLayerManifest();
 
+	@AccessRestriction(AccessMode.READ)
 	Relation getRelation();
 
+	@AccessRestriction(AccessMode.READ)
 	Coverage getCoverage();
 
 	/**
 	 * If defined, returns the manifest describing the inverse index, or {@code null} otherwise.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	IndexManifest getInverse();
 
 	/**
 	 * If this manifest describes an inverse index, returns the original index, or {@code null} otherwise.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	IndexManifest getOriginal();
+
+	// Modification methods
+
+	void setDriverManifest(DriverManifest driverManifest);
+
+	void setSourceLayerManifest(TargetLayerManifest layerManifest);
+
+	void setTargetLayerManifest(TargetLayerManifest layerManifest);
+
+	void setRelation(Relation relation);
+
+	void setCoverage(Coverage coverage);
 
 	/**
 	 * @author Markus Gärtner

@@ -29,7 +29,6 @@ import javax.swing.Icon;
 
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
-import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.ClassUtils;
 
 /**
@@ -45,32 +44,7 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	private String name;
 	private String description;
 	private String id;
-	private String rawId;
 	private Icon icon;
-
-	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#readTemplate()
-	 */
-	@Override
-	protected void readTemplate(M template) {
-		super.readTemplate(template);
-
-		if(id==null) {
-			id = template.getId();
-		}
-		if(rawId==null) {
-			rawId = template.getRawId();
-		}
-		if(name==null) {
-			name = template.getName();
-		}
-		if(description==null) {
-			description = template.getDescription();
-		}
-		if(icon==null) {
-			icon = template.getIcon();
-		}
-	}
 
 	/**
 	 * @see java.lang.Object#hashCode()
@@ -132,14 +106,6 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getRawId()
-	 */
-	@Override
-	public String getRawId() {
-		return rawId;
-	}
-
-	/**
 	 * @return the icon
 	 */
 	@Override
@@ -170,6 +136,7 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	/**
 	 * @param id the id to set
 	 */
+	@Override
 	public void setId(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
@@ -177,11 +144,6 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 			throw new IllegalArgumentException("Id format not supported: "+id); //$NON-NLS-1$
 
 		this.id = id;
-
-		// Copy over raw id if not already defined
-		if(rawId==null) {
-			rawId = id;
-		}
 	}
 
 	/**
@@ -203,34 +165,15 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	}
 
 	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeTemplateXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@Override
-	protected void writeTemplateXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeTemplateXmlAttributes(serializer);
+	protected void copyFrom(M template) {
+		super.copyFrom(template);
 
-		writeXmlAttribute(serializer, "id", id, getTemplate().getId()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "name", name, getTemplate().getName()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "description", description, getTemplate().getDescription()); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "icon", icon, getTemplate().getIcon()); //$NON-NLS-1$
-
-		serializer.writeAttribute("template-id", getTemplate().getId()); //$NON-NLS-1$
-	}
-
-	/**
-	 * @throws Exception
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#writeFullXmlAttributes(de.ims.icarus.model.api.xml.XmlSerializer)
-	 */
-	@Override
-	protected void writeFullXmlAttributes(XmlSerializer serializer)
-			throws Exception {
-		super.writeFullXmlAttributes(serializer);
-
-		serializer.writeAttribute("id", id); //$NON-NLS-1$
-		serializer.writeAttribute("name", name); //$NON-NLS-1$
-		serializer.writeAttribute("description", description); //$NON-NLS-1$
-		writeXmlAttribute(serializer, "icon", icon); //$NON-NLS-1$
+		id = template.getId();
+		name = template.getName();
+		description = template.getDescription();
+		icon = template.getIcon();
 	}
 }

@@ -34,26 +34,36 @@ import java.util.Set;
 import javax.sql.rowset.spi.XmlWriter;
 import javax.swing.Icon;
 
+import org.java.plugin.registry.PluginDescriptor;
+
+import de.ims.icarus.eval.Expression;
+import de.ims.icarus.eval.Variable;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest;
+import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.Derivable;
+import de.ims.icarus.model.api.manifest.Documentation;
+import de.ims.icarus.model.api.manifest.Documentation.Resource;
 import de.ims.icarus.model.api.manifest.DriverManifest;
 import de.ims.icarus.model.api.manifest.FragmentLayerManifest;
+import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.ImplementationManifest.SourceType;
 import de.ims.icarus.model.api.manifest.IndexManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
+import de.ims.icarus.model.api.manifest.LocationManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.ModifiableManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
+import de.ims.icarus.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.model.api.manifest.RasterizerManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
@@ -61,8 +71,10 @@ import de.ims.icarus.model.api.manifest.ValueManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.io.LocationType;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.util.ClassUtils;
+import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.Identity;
 
@@ -124,17 +136,17 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.close();
 	}
 
-	private boolean tryWrite(Object object) throws Exception {
-		if(object==null) {
-			return true;
-		}
-		if(object instanceof XmlElement) {
-			((XmlElement)object).writeXml(serializer);
-			return true;
-		}
-
-		return false;
-	}
+//	private boolean tryWrite(Object object) throws Exception {
+//		if(object==null) {
+//			return true;
+//		}
+//		if(object instanceof XmlElement) {
+//			((XmlElement)object).writeXml(serializer);
+//			return true;
+//		}
+//
+//		return false;
+//	}
 
 	/**
 	 * Returns the value to be serialized if a template value is given.
@@ -182,16 +194,16 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		}
 	}
 
-	/**
-	 * Write template id if the given derivable is depending on a template
-	 */
-	private void writeTemplateAttribute(Derivable derivable) throws Exception {
-		Derivable template = derivable.getTemplate();
-
-		if(template!=null) {
-			serializer.writeAttribute(ATTR_TEMPLATE_ID, template.getId());
-		}
-	}
+//	/**
+//	 * Write template id if the given derivable is depending on a template
+//	 */
+//	private void writeTemplateAttribute(Derivable derivable) throws Exception {
+//		Derivable template = derivable.getTemplate();
+//
+//		if(template!=null) {
+//			serializer.writeAttribute(ATTR_TEMPLATE_ID, template.getId());
+//		}
+//	}
 
 	/**
 	 * Write options manifest and properties, after making diff check against template.
@@ -200,6 +212,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		ModifiableManifest template = (ModifiableManifest) manifest.getTemplate();
 
 		OptionsManifest optionsManifest = manifest.getOptionsManifest();
+		Documentation documentation = manifest.getDocumentation();
 
 		Set<String> properties = manifest.getPropertyNames();
 
@@ -207,6 +220,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 			serializer.writeAttribute(ATTR_TEMPLATE_ID, template.getId());
 
 			optionsManifest = diff(optionsManifest, template.getOptionsManifest());
+			documentation = diff(documentation, template.getDocumentation());
 
 			properties = new HashSet<>(properties);
 
@@ -218,6 +232,12 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 					it.remove();
 				}
 			}
+		}
+
+		// Elements
+
+		if(documentation!=null) {
+			writeDocumentationElement(documentation);
 		}
 
 		if(optionsManifest!=null) {
@@ -255,7 +275,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.startElement(name);
 
 		// ATTRIBUTES
-		serializer.writeAttribute("layer-id", getSerializedForm(manifest)); //$NON-NLS-1$
+		serializer.writeAttribute(ATTR_LAYER_ID, getSerializedForm(manifest));
 
 		serializer.endElement(name);
 	}
@@ -420,12 +440,106 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 	//**************************************************
 
 	private void writeLayerGroupElement(LayerGroupManifest manifest) throws Exception {
-		//TODO
+
+		serializer.startElement(TAG_LAYER_GROUP);
+
+		// ATTRIBUTES
+		serializer.writeAttribute(ATTR_NAME, manifest.getName());
+		if(manifest.isIndependent()) {
+			serializer.writeAttribute(ATTR_INDEPENDENT, true);
+		}
+		serializer.writeAttribute(ATTR_PRIMARY_LAYER, manifest.getPrimaryLayerManifest().getId());
+
+		// ELEMENTS
+
+		// Write layers
+		for(LayerManifest layerManifest : manifest.getLayerManifests()) {
+			switch (layerManifest.getManifestType()) {
+			case MARKABLE_LAYER_MANIFEST:
+				writeMarkableLayerManifest((MarkableLayerManifest) layerManifest);
+				break;
+			case STRUCTURE_LAYER_MANIFEST:
+				writeStructureLayerManifest((StructureLayerManifest) layerManifest);
+				break;
+			case ANNOTATION_LAYER_MANIFEST:
+				writeAnnotationLayerManifest((AnnotationLayerManifest) layerManifest);
+				break;
+			case FRAGMENT_LAYER_MANIFEST:
+				writeFragmentLayerManifest((FragmentLayerManifest) layerManifest);
+				break;
+			case HIGHLIGHT_LAYER_MANIFEST:
+				writeHighlightLayerManifest((HighlightLayerManifest) layerManifest);
+				break;
+
+			default:
+				throw new CorruptedStateException("Illegal manifest type for layer ' " //$NON-NLS-1$
+							+layerManifest.getId()+"': "+layerManifest.getManifestType()); //$NON-NLS-1$
+			}
+		}
+
+		serializer.endElement(TAG_LAYER_GROUP);
+	}
+
+	private void writeDocumentationElement(Documentation documentation) throws Exception {
+
+		serializer.startElement(TAG_DOCUMENTATION);
+
+		writeIdentityAttributes(documentation);
+
+		serializer.startElement(TAG_CONTENT);
+		serializer.writeText(documentation.getContent());
+		serializer.endElement(TAG_CONTENT);
+
+		for(Resource resource : documentation.getResources()) {
+			serializer.startElement(TAG_RESOURCE);
+			writeIdentityAttributes(resource);
+			serializer.writeText(resource.getURL().toExternalForm());
+			serializer.endElement(TAG_RESOURCE);
+		}
+
+		serializer.endElement(TAG_DOCUMENTATION);
+	}
+
+	private void writeLocationElement(LocationManifest manifest) throws Exception {
+
+		serializer.startElement(TAG_LOCATION);
+
+		// ATTRIBUTES
+
+		serializer.writeAttribute(ATTR_PATH, manifest.getPath());
+
+		// ELEMENTS
+
+		PathResolverManifest pathResolverManifest = manifest.getPathResolverManifest();
+		if(pathResolverManifest!=null) {
+			writePathResolverManifest(pathResolverManifest);
+		}
+
+		serializer.endElement(TAG_LOCATION);
+	}
+
+	private void writePrerequisiteElement(PrerequisiteManifest manifest) throws Exception {
+
+		serializer.startElement(TAG_PREREQUISITE);
+
+		// ATTRIBUTES
+
+		serializer.writeAttribute(ATTR_CONTEXT_ID, manifest.getContextId());
+		serializer.writeAttribute(ATTR_LAYER_ID, manifest.getLayerId());
+
+		// Only write the layer type attribute for unresolved prerequisites!
+		if(manifest.getUnresolvedForm()==null) {
+			serializer.writeAttribute(ATTR_LAYER_TYPE, manifest.getTypeId());
+		}
+
+		serializer.writeAttribute(ATTR_ALIAS, manifest.getAlias());
+
+		serializer.endElement(TAG_PREREQUISITE);
 	}
 
 	private void writeIndexElement(IndexManifest manifest) throws Exception {
 
-		// Never serialize inverted manifests, they are created by the parser!
+		// Never serialize inverted manifests, they are created by the parser dynamically!
 		if(manifest.getOriginal()!=null) {
 			return;
 		}
@@ -449,6 +563,8 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		serializer.startElement(TAG_OPTION);
 
+		// Attributes
+
 		serializer.writeAttribute(ATTR_ID, option);
 		serializer.writeAttribute(ATTR_TYPE, getSerializedForm(type));
 		serializer.writeAttribute(ATTR_NAME, manifest.getName(option));
@@ -461,8 +577,10 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		}
 		serializer.writeAttribute(ATTR_GROUP, manifest.getOptionGroup(option));
 
+		// Elements
+
 		writeValueElement(TAG_DEFAULT_VALUE, manifest.getDefaultValue(option), type);
-		writeValuesElement(manifest.getSupportedValues(option), type);
+		writeValueSetElement(manifest.getSupportedValues(option), type);
 		writeValueRangeElement(manifest.getSupportedRange(option), type);
 
 		serializer.endElement(TAG_OPTION);
@@ -475,6 +593,8 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		serializer.startElement(name);
 
+		// CONTENT
+
 		switch (type) {
 		case UNKNOWN:
 			throw new IllegalArgumentException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
@@ -482,14 +602,39 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
 
 		default:
-			if(value instanceof XmlElement) {
-				((XmlElement)value).writeXml(serializer);
+			if(value instanceof Expression) {
+				writeEvalElement((Expression)value);
 			} else {
-				serializer.writeText(String.valueOf(value));
+				serializer.writeText(type.toString(value));
 			}
 			break;
 		}
+
 		serializer.endElement(name);
+	}
+
+	private void writeEvalElement(Expression expression) throws Exception {
+		serializer.startElement(TAG_EVAL);
+
+		for(Variable variable : expression.getVariables()) {
+			serializer.startElement(TAG_VARIABLE);
+			serializer.writeAttribute(ATTR_NAME, variable.getName());
+			serializer.writeAttribute(ATTR_NAMESPACE, variable.getNamespaceClass().getName());
+
+			ClassLoader loader = variable.getNamespaceClass().getClassLoader();
+			if(PluginUtil.isPluginClassLoader(loader)) {
+				PluginDescriptor descriptor = PluginUtil.getDescriptor(loader);
+				serializer.writeAttribute(ATTR_PLUGIN_ID, descriptor.getId());
+			}
+
+			serializer.endElement(TAG_VARIABLE);
+		}
+
+		serializer.startElement(TAG_CODE);
+		serializer.writeText(expression.getCode());
+		serializer.endElement(TAG_CODE);
+
+		serializer.endElement(TAG_EVAL);
 	}
 
 	private String getSerializedForm(ValueType type) {
@@ -512,7 +657,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		default:
 			serializer.writeAttribute(ATTR_NAME, name);
 			serializer.writeAttribute(ATTR_TYPE, getSerializedForm(type));
-			serializer.writeText(String.valueOf(value));
+			serializer.writeText(type.toString(value));
 			break;
 		}
 		serializer.endElement(TAG_PROPERTY);
@@ -531,7 +676,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.endElement(TAG_RANGE);
 	}
 
-	private void writeValuesElement(ValueSet values, ValueType type) throws Exception {
+	private void writeValueSetElement(ValueSet values, ValueType type) throws Exception {
 		if(values==null) {
 			return;
 		}
@@ -552,8 +697,12 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 	private void writeValueManifestElement(ValueManifest manifest, ValueType type) throws Exception {
 
 		serializer.startElement(TAG_VALUE);
+
+		//ATTRIBUTES
 		serializer.writeAttribute(ATTR_NAME, manifest.getName());
 		serializer.writeAttribute(ATTR_DESCRIPTION, manifest.getDescription());
+
+		// CONTENT
 
 		Object value = manifest.getValue();
 
@@ -564,7 +713,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
 
 		default:
-			serializer.writeText(String.valueOf(value));
+			serializer.writeText(type.toString(value));
 			break;
 		}
 
@@ -605,6 +754,16 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		ContextManifest template = (ContextManifest) manifest.getTemplate();
 
+		MarkableLayerManifest primaryLayer = manifest.getPrimaryLayerManifest();
+		MarkableLayerManifest baseLayer = manifest.getBaseLayerManifest();
+
+		if(template!=null) {
+			primaryLayer = diff(primaryLayer, template.getPrimaryLayerManifest());
+			baseLayer = diff(baseLayer, template.getBaseLayerManifest());
+		}
+
+		// ATTRIBUTES
+
 		// Write default stuff
 		writeIdentityAttributes(manifest);
 
@@ -614,9 +773,51 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 			serializer.writeAttribute(ATTR_INDEPENDENT, true);
 		}
 
+		// ELEMENTS
+
 		writeModifiableManifest(manifest);
 
-		//TODO write layer groups, driver, prerequisites and stuff
+		// Write location
+		LocationManifest locationManifest = manifest.getLocationManifest();
+		if(locationManifest!=null) {
+			writeLocationElement(locationManifest);
+		}
+
+		// Write prerequisites
+		if(!manifest.getPrerequisites().isEmpty()) {
+			serializer.startElement(TAG_PREREQUISITES);
+
+			for(PrerequisiteManifest prerequisiteManifest : manifest.getPrerequisites()) {
+				if(prerequisiteManifest.getContextManifest()==manifest) {
+					writePrerequisiteElement(prerequisiteManifest);
+				}
+			}
+
+			serializer.endElement(TAG_PREREQUISITES);
+		}
+
+		// Write groups
+		List<LayerGroupManifest> groupManifests = manifest.getGroupManifests();
+
+		if(template!=null) {
+			groupManifests = new ArrayList<>(groupManifests);
+
+			groupManifests.removeAll(template.getGroupManifests());
+		}
+
+		for(LayerGroupManifest groupManifest : groupManifests) {
+			writeLayerGroupElement(groupManifest);
+		}
+
+		// Write driver manifest
+		DriverManifest driverManifest = manifest.getDriverManifest();
+		if(template!=null) {
+			driverManifest = diff(driverManifest, template.getDriverManifest());
+		}
+
+		if(driverManifest!=null) {
+			writeDriverManifest(driverManifest);
+		}
 
 		endManifest(TAG_CONTEXT);
 	}
@@ -717,7 +918,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 			writeAliasElement(alias);
 		}
 
-		writeValuesElement(manifest.getSupportedValues(), manifest.getValueType());
+		writeValueSetElement(manifest.getSupportedValues(), manifest.getValueType());
 		writeValueRangeElement(manifest.getSupportedRange(), manifest.getValueType());
 
 		serializer.endElement(TAG_ANNOTATION);
@@ -843,7 +1044,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		endManifest(TAG_FRAGMENT_LAYER);
 	}
 
-	public void writeHighlightLayerManifest(StructureLayerManifest manifest) throws Exception {
+	public void writeHighlightLayerManifest(HighlightLayerManifest manifest) throws Exception {
 		//TODO
 	}
 
@@ -889,7 +1090,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		writeModifiableManifest(manifest);
 
-		// Write implementaton manifest
+		// Write implementation manifest
 		ImplementationManifest implementationManifest = manifest.getImplementationManifest();
 		if(template!=null) {
 			implementationManifest = diff(implementationManifest, template.getImplementationManifest());
@@ -920,7 +1121,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		writeModifiableManifest(manifest);
 
-		// Write implementaton manifest
+		// Write implementation manifest
 		ImplementationManifest implementationManifest = manifest.getImplementationManifest();
 		if(template!=null) {
 			implementationManifest = diff(implementationManifest, template.getImplementationManifest());
@@ -943,5 +1144,34 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		}
 
 		endManifest(TAG_DRIVER);
+	}
+
+	public void writePathResolverManifest(PathResolverManifest manifest) throws Exception {
+		checkTemplate(manifest);
+
+		startManifest(TAG_PATH_RESOLVER);
+
+		PathResolverManifest template = (PathResolverManifest) manifest.getTemplate();
+
+		// ATTRIBUTES
+
+		// Write default stuff
+		writeIdentityAttributes(manifest);
+
+		// ELEMENTS
+
+		writeModifiableManifest(manifest);
+
+		// Write implementation manifest
+		ImplementationManifest implementationManifest = manifest.getImplementationManifest();
+		if(template!=null) {
+			implementationManifest = diff(implementationManifest, template.getImplementationManifest());
+		}
+
+		if(implementationManifest!=null) {
+			writeImplementationManifest(implementationManifest);
+		}
+
+		endManifest(TAG_PATH_RESOLVER);
 	}
 }

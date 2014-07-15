@@ -51,17 +51,17 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	@Override
 	AnnotationLayerManifest getManifest();
 
-	/**
-	 * Returns the annotation for a given markable or {@code null} if that markable
-	 * has not been assigned an annotation value in this layer. Note that the returned
-	 * object can be either an actual value or an {@link Annotation} instance that wraps
-	 * a value and provides further information.
-	 *
-	 * @param markable
-	 * @return
-	 * @throws NullPointerException if the {@code markable} is {@code null}
-	 */
-	Object getValue(Markable markable);
+//	/**
+//	 * Returns the annotation for a given markable or {@code null} if that markable
+//	 * has not been assigned an annotation value in this layer. Note that the returned
+//	 * object can be either an actual value or an {@link Annotation} instance that wraps
+//	 * a value and provides further information.
+//	 *
+//	 * @param markable
+//	 * @return
+//	 * @throws NullPointerException if the {@code markable} is {@code null}
+//	 */
+//	Object getValue(Markable markable);
 
 	/**
 	 * Collects all the keys in this layer which are mapped to valid annotation values for
@@ -134,23 +134,23 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 */
 	void removeAllValues(Markable markable, boolean recursive);
 
-	/**
-	 * Assigns the given {@code value} as new annotation for the specified
-	 * {@code Markable}, replacing any previously defined value. If the
-	 * {@code value} argument is {@code null} any stored annotation for the
-	 * {@code markable} will be deleted.
-	 *
-	 * @param markable The {@code Markable} to change the annotation value for
-	 * @param value the new annotation value or {@code null} if the annotation
-	 * for the given {@code markable} should be deleted
-	 * @throws NullPointerException if the {@code markable} argument is {@code null}
-	 * @throws IllegalArgumentException if the supplied {@code value} is not
-	 * contained in the {@link ValueSet} of this layer's manifest. This is only
-	 * checked if the manifest actually defines such restrictions.
-	 * @throws UnsupportedOperationException if the corpus
-	 * is not editable
-	 */
-	void setValue(Markable markable, Object value);
+//	/**
+//	 * Assigns the given {@code value} as new annotation for the specified
+//	 * {@code Markable}, replacing any previously defined value. If the
+//	 * {@code value} argument is {@code null} any stored annotation for the
+//	 * {@code markable} will be deleted.
+//	 *
+//	 * @param markable The {@code Markable} to change the annotation value for
+//	 * @param value the new annotation value or {@code null} if the annotation
+//	 * for the given {@code markable} should be deleted
+//	 * @throws NullPointerException if the {@code markable} argument is {@code null}
+//	 * @throws IllegalArgumentException if the supplied {@code value} is not
+//	 * contained in the {@link ValueSet} of this layer's manifest. This is only
+//	 * checked if the manifest actually defines such restrictions.
+//	 * @throws UnsupportedOperationException if the corpus
+//	 * is not editable
+//	 */
+//	void setValue(Markable markable, Object value);
 
 
 	/**

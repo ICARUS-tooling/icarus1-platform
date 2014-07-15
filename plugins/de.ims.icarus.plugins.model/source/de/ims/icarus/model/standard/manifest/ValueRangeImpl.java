@@ -26,7 +26,7 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.manifest.ValueRange;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 
 public class ValueRangeImpl implements ValueRange {
 

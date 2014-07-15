@@ -107,19 +107,19 @@ public class XmlStreamSerializer implements XmlSerializer {
 //		pushElement(name, false);
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.xml.XmlSerializer#startEmptyElement(java.lang.String)
-	 */
-	@Override
-	public void startEmptyElement(String name) throws XMLStreamException {
-		writeLineBreak();
-		writeIndent();
-
-		writer.writeEmptyElement(name);
-		indent++;
-		nested = false;
-//		pushElement(name, true);
-	}
+//	/**
+//	 * @see de.ims.icarus.model.api.xml.XmlSerializer#startEmptyElement(java.lang.String)
+//	 */
+//	@Override
+//	public void startEmptyElement(String name) throws XMLStreamException {
+//		writeLineBreak();
+//		writeIndent();
+//
+//		writer.writeEmptyElement(name);
+//		indent++;
+//		nested = false;
+////		pushElement(name, true);
+//	}
 
 	/**
 	 * @see de.ims.icarus.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, java.lang.String)

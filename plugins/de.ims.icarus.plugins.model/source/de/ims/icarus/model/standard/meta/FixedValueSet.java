@@ -29,7 +29,7 @@ import java.util.Set;
 
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
 import de.ims.icarus.model.standard.ProxyIdentity;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 
 /**
  * @author Markus Gärtner

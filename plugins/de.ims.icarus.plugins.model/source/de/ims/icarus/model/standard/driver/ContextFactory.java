@@ -54,7 +54,7 @@ import de.ims.icarus.model.standard.corpus.DefaultContext;
 import de.ims.icarus.model.standard.elements.MemberSets;
 import de.ims.icarus.model.standard.layer.AbstractLayer;
 import de.ims.icarus.model.standard.layer.ComplexAnnotationLayer;
-import de.ims.icarus.model.standard.layer.DefaultAnnotationLayer;
+import de.ims.icarus.model.standard.layer.SimpleAnnotationLayer;
 import de.ims.icarus.model.standard.layer.DefaultFragmentLayer;
 import de.ims.icarus.model.standard.layer.DefaultLayerGroup;
 import de.ims.icarus.model.standard.layer.DefaultMarkableLayer;
@@ -161,7 +161,7 @@ public class ContextFactory {
 		if(isComplex) {
 			return new LayerLinker(new ComplexAnnotationLayer(manifest, group));
 		} else {
-			return new LayerLinker(new DefaultAnnotationLayer(manifest, group));
+			return new LayerLinker(new SimpleAnnotationLayer(manifest, group));
 		}
 	}
 

@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.iql;
 
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 
 /**
  * @author Markus Gärtner

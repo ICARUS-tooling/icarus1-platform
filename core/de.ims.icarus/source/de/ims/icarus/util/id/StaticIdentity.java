@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.id;
@@ -36,16 +36,24 @@ import javax.swing.ImageIcon;
  *
  */
 public class StaticIdentity implements Identity {
-	
+
 	protected final String id;
 	protected final Object owner;
 	protected String name;
 	protected String description;
 	protected URL iconLocation;
 	protected Icon icon;
-	
+
+	public StaticIdentity(String id) {
+		if(id==null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		this.id = id;
+		this.owner = null;
+	}
+
 	/**
-	 * 
+	 *
 	 */
 	public StaticIdentity(String id, Object owner) {
 		if(id==null)
@@ -87,11 +95,11 @@ public class StaticIdentity implements Identity {
 	@Override
 	public Icon getIcon() {
 		Icon icon = this.icon;
-		
+
 		if(icon==null && iconLocation!=null) {
 			icon = new ImageIcon(iconLocation);
 		}
-		
+
 		return icon;
 	}
 
@@ -100,9 +108,9 @@ public class StaticIdentity implements Identity {
 	 */
 	@Override
 	public Object getOwner() {
-		return owner;
+		return owner==null ? this : owner;
 	}
-	
+
 	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */

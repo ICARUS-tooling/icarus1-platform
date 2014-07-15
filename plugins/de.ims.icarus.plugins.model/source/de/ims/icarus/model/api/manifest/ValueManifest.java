@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.model.api.manifest;
@@ -29,7 +29,7 @@ package de.ims.icarus.model.api.manifest;
  * A helper class that wraps a value and provides additional textual information
  * like a description and an optional name. The purpose of those strings is so
  * that user interfaces can provide the user with information about the available
- * values for an option.
+ * values for an option or annotation.
  *
  * @author Markus Gärtner
  * @version $Id$

@@ -44,11 +44,13 @@ public class PathResolverManifestImpl extends AbstractForeignImplementationManif
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getXmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
 	 */
 	@Override
-	protected String getXmlTag() {
-		return "path-resolver"; //$NON-NLS-1$
+	protected void copyFrom(PathResolverManifest template) {
+		super.copyFrom(template);
+
+		setImplementationManifest(template.getImplementationManifest());
 	}
 
 }

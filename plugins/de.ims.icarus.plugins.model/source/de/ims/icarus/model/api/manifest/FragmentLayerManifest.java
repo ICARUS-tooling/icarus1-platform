@@ -25,12 +25,18 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface FragmentLayerManifest extends MarkableLayerManifest {
 
 	/**
@@ -39,13 +45,24 @@ public interface FragmentLayerManifest extends MarkableLayerManifest {
 	 *
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	TargetLayerManifest getValueLayerManifest();
 
 	/**
 	 * Returns the key to be used when fetching values for fragmentation.
 	 * @return
 	 */
+	@AccessRestriction(AccessMode.READ)
 	String getAnnotationKey();
 
+	@AccessRestriction(AccessMode.READ)
 	RasterizerManifest getRasterizerManifest();
+
+	// Modification methods
+
+	void setValueLayerManifest(TargetLayerManifest layerManifest);
+
+	void setAnnotationKey(String key);
+
+	void setRasterizerManifest(RasterizerManifest rasterizerManifest);
 }

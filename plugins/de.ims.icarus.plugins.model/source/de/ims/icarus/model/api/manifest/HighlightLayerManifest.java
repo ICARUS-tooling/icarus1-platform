@@ -28,12 +28,18 @@ package de.ims.icarus.model.api.manifest;
 import java.awt.Color;
 import java.util.List;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface HighlightLayerManifest extends LayerManifest {
+
+	//FIXME finish specification
 
 	List<LayerManifest> getHighlightedLayerManifests();
 

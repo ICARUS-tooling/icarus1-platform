@@ -38,7 +38,7 @@ import de.ims.icarus.logging.LogReport;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl;
 import de.ims.icarus.model.standard.manifest.ValueSetImpl;
 import de.ims.icarus.model.standard.manifest.Values;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.model.xml.XmlWriter;
 import de.ims.icarus.model.xml.sax.ManifestParser;
@@ -74,7 +74,7 @@ public class ModelXmlTest {
 		template.addOption("cores");
 		template.setValueType("cores", ValueType.INTEGER);
 		template.setDefaultValue("cores", 1);
-		template.setRange("cores", Values.newValueRange(1, 10));
+		template.setSupportedRange("cores", Values.newValueRange(1, 10));
 		template.setName("cores", "#Cores");
 		template.setDescription("cores", "Number of cores to use for calculation");
 

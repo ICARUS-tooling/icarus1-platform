@@ -29,7 +29,7 @@ import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
-import de.ims.icarus.model.util.ValueType;
+import de.ims.icarus.model.util.types.ValueType;
 
 /**
  * @author Markus Gärtner
@@ -45,8 +45,8 @@ public class ModelDummies {
 		manifest.setName(name);
 		manifest.setDescription(description);
 		manifest.setValueType(valueType);
-		manifest.setValueRange(range);
-		manifest.setValues(values);
+		manifest.setSupportedRange(range);
+		manifest.setSupportedValues(values);
 
 		return manifest;
 	}
