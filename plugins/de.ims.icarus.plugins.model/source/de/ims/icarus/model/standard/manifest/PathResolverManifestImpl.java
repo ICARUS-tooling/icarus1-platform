@@ -25,8 +25,11 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import de.ims.icarus.model.api.manifest.ImplementationManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
 
 /**
  * @author Markus Gärtner
@@ -36,21 +39,40 @@ import de.ims.icarus.model.api.manifest.PathResolverManifest;
 public class PathResolverManifestImpl extends AbstractForeignImplementationManifest<PathResolverManifest> implements PathResolverManifest {
 
 	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	public PathResolverManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_PATH_RESOLVER;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractForeignImplementationManifest#getImplementationManifest()
+	 */
+	@Override
+	public ImplementationManifest getImplementationManifest() {
+		ImplementationManifest result = super.getImplementationManifest();
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getImplementationManifest();
+		}
+
+		return result;
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
 		return ManifestType.PATH_RESOLVER_MANIFEST;
 	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(PathResolverManifest template) {
-		super.copyFrom(template);
-
-		setImplementationManifest(template.getImplementationManifest());
-	}
-
 }

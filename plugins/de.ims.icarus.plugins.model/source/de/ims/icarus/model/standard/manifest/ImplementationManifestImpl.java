@@ -26,6 +26,9 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -34,10 +37,51 @@ import de.ims.icarus.model.api.manifest.ImplementationManifest;
  */
 public class ImplementationManifestImpl<M extends ImplementationManifest> extends AbstractModifiableManifest<M> implements ImplementationManifest {
 
-	private SourceType sourceType = SourceType.DEFAULT;
+	private SourceType sourceType;
 	private String source;
 	private String classname;
-	private boolean useFactory = false;
+	private Boolean useFactory;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	protected ImplementationManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
+
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write source
+		serializer.writeAttribute(ATTR_SOURCE, source);
+
+		// Write classname
+		serializer.writeAttribute(ATTR_CLASSNAME, classname);
+
+		// Write source type
+		if(sourceType!=null && sourceType!=SourceType.DEFAULT) {
+			serializer.writeAttribute(ATTR_SOURCE_TYPE, sourceType.getXmlValue());
+		}
+
+		// Write flags
+		writeFlag(serializer, ATTR_FACTORY, useFactory, DEFAULT_USE_FACTORY_VALUE);
+	}
+
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_IMPLEMENTATION;
+	}
 
 
 	/**
@@ -45,7 +89,14 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	 */
 	@Override
 	public SourceType getSourceType() {
-		return sourceType;
+		SourceType result = sourceType;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getSourceType();
+		}
+		if(result==null) {
+			result = DEFAULT_SOURCE_TYPE;
+		}
+		return result;
 	}
 
 	/**
@@ -53,7 +104,11 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	 */
 	@Override
 	public String getSource() {
-		return source;
+		String result = source;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getSource();
+		}
+		return result;
 	}
 
 	/**
@@ -61,7 +116,11 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	 */
 	@Override
 	public String getClassname() {
-		return classname;
+		String result = classname;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getClassname();
+		}
+		return result;
 	}
 
 	/**
@@ -69,12 +128,17 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	 */
 	@Override
 	public boolean isUseFactory() {
-		return useFactory;
+		if(useFactory==null) {
+			return hasTemplate() ? getTemplate().isUseFactory() : DEFAULT_USE_FACTORY_VALUE;
+		} else {
+			return useFactory.booleanValue();
+		}
 	}
 
 	/**
 	 * @param sourceType the sourceType to set
 	 */
+//	@Override
 	public void setSourceType(SourceType sourceType) {
 		if (sourceType == null)
 			throw new NullPointerException("Invalid sourceType"); //$NON-NLS-1$
@@ -85,6 +149,7 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	/**
 	 * @param source the source to set
 	 */
+//	@Override
 	public void setSource(String source) {
 		this.source = source;
 	}
@@ -92,6 +157,7 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	/**
 	 * @param classname the classname to set
 	 */
+//	@Override
 	public void setClassname(String classname) {
 		this.classname = classname;
 	}
@@ -99,20 +165,8 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	/**
 	 * @param useFactory the useFactory to set
 	 */
+//	@Override
 	public void setUseFactory(boolean useFactory) {
 		this.useFactory = useFactory;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(M template) {
-		super.copyFrom(template);
-
-		sourceType = template.getSourceType();
-		source = template.getSource();
-		classname = template.getClassname();
-		useFactory = template.isUseFactory();
 	}
 }

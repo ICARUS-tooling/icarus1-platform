@@ -25,11 +25,10 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
-import de.ims.icarus.model.api.manifest.LayerGroupManifest;
+import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.api.manifest.StructureLayerManifest;
-import de.ims.icarus.model.api.manifest.StructureManifest;
+import de.ims.icarus.model.api.manifest.RasterizerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 
 /**
@@ -37,16 +36,15 @@ import de.ims.icarus.model.registry.CorpusRegistry;
  * @version $Id$
  *
  */
-public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implements StructureLayerManifest {
+public class RasterizerManifestImpl extends AbstractForeignImplementationManifest<RasterizerManifest> implements RasterizerManifest {
 
 	/**
 	 * @param manifestSource
 	 * @param registry
-	 * @param layerGroupManifest
 	 */
-	protected StructureLayerManifestImpl(ManifestSource manifestSource,
-			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
-		super(manifestSource, registry, layerGroupManifest);
+	public RasterizerManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
 	}
 
 	/**
@@ -54,34 +52,27 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 	 */
 	@Override
 	protected String xmlTag() {
-		return TAG_STRUCTURE_LAYER;
+		return TAG_RASTERIZER;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getTemplate()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractForeignImplementationManifest#getImplementationManifest()
 	 */
 	@Override
-	public synchronized StructureLayerManifest getTemplate() {
-		return (StructureLayerManifest) super.getTemplate();
+	public ImplementationManifest getImplementationManifest() {
+		ImplementationManifest result = super.getImplementationManifest();
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getImplementationManifest();
+		}
+
+		return result;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.MarkableLayerManifestImpl#getManifestType()
+	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {
-		return ManifestType.STRUCTURE_LAYER_MANIFEST;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.StructureLayerManifest#getStructureManifest()
-	 */
-	@Override
-	public StructureManifest getStructureManifest() {
-		return (StructureManifest) getContainerManifest(1);
-	}
-
-	public void addStructureManifest(StructureManifest manifest) {
-		addContainerManifest(manifest);
+		return ManifestType.RASTERIZER_MANIFEST;
 	}
 }

@@ -56,10 +56,10 @@ public enum LocationType implements XmlResource {
 	DATABASE;
 
 	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
+	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
 	 */
 	@Override
-	public String getValue() {
+	public String getXmlValue() {
 		return name().toLowerCase();
 	}
 

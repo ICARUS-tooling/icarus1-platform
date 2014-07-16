@@ -31,7 +31,7 @@ package de.ims.icarus.model.xml;
  * @version $Id$
  *
  */
-public interface XmlElement {
+public interface ModelXmlElement extends ModelXmlAttributes, ModelXmlTags {
 
 	void writeXml(XmlSerializer serializer) throws Exception;
 }

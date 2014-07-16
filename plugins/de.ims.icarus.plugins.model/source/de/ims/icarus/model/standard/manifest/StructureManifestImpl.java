@@ -26,10 +26,12 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.StructureType;
-import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -38,8 +40,42 @@ import de.ims.icarus.model.api.manifest.StructureManifest;
  */
 public class StructureManifestImpl extends ContainerManifestImpl implements StructureManifest {
 
-	private StructureType structureType = StructureType.SET;
-	private boolean multiRootAllowed = false;
+	private StructureType structureType;
+	private Boolean multiRootAllowed;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 * @param layerManifest
+	 */
+	public StructureManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry, StructureLayerManifest layerManifest) {
+		super(manifestSource, registry, layerManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write structure type
+		if(structureType!=null) {
+			serializer.writeAttribute(ATTR_STRUCTURE_TYPE, structureType.getXmlValue());
+		}
+
+		// Write flags
+		writeFlag(serializer, ATTR_MULTI_ROOT, multiRootAllowed, DEFAULT_MULTI_ROOT_VALUE);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.ContainerManifestImpl#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_STRUCTURE;
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getTemplate()
@@ -62,7 +98,16 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	 */
 	@Override
 	public StructureType getStructureType() {
-		return structureType;
+		StructureType result = structureType;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getStructureType();
+		}
+
+		if(result==null) {
+			result = StructureType.SET;
+		}
+
+		return result;
 	}
 
 	/**
@@ -73,7 +118,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 		return (StructureLayerManifest) super.getLayerManifest();
 	}
 
-	@Override
+//	@Override
 	public void setStructureType(StructureType structureType) {
 		if (structureType == null)
 			throw new NullPointerException("Invalid structureType"); //$NON-NLS-1$
@@ -86,24 +131,15 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	 */
 	@Override
 	public boolean isMultiRootAllowed() {
-		return multiRootAllowed;
+		if(multiRootAllowed==null) {
+			return hasTemplate() ? getTemplate().isMultiRootAllowed() : DEFAULT_MULTI_ROOT_VALUE;
+		} else {
+			return multiRootAllowed.booleanValue();
+		}
 	}
 
-	@Override
+//	@Override
 	public void setMultiRootAllowed(boolean value) {
 		this.multiRootAllowed = value;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.ContainerManifestImpl#copyFrom(de.ims.icarus.model.api.manifest.ContainerManifest)
-	 */
-	@Override
-	protected void copyFrom(ContainerManifest tpl) {
-		super.copyFrom(tpl);
-
-		StructureManifest template = (StructureManifest)tpl;
-
-		structureType = template.getStructureType();
-		multiRootAllowed = template.isMultiRootAllowed();
 	}
 }

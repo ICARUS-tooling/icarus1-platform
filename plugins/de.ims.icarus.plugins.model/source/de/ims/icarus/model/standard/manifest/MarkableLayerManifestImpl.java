@@ -29,8 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.api.manifest.LayerGroupManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -42,6 +47,40 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	private final List<ContainerManifest> containerManifests = new ArrayList<>();
 
 	private TargetLayerManifest boundaryLayerManifest;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 * @param layerGroupManifest
+	 */
+	public MarkableLayerManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
+		super(manifestSource, registry, layerGroupManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		if(boundaryLayerManifest!=null) {
+			ModelXmlUtils.writeTargetLayerManifestElement(serializer, TAG_BOUNDARY_LAYER, boundaryLayerManifest);
+		}
+
+		for(ContainerManifest containerManifest : containerManifests) {
+			containerManifest.writeXml(serializer);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_MARKABLE_LAYER;
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -56,10 +95,11 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	 */
 	@Override
 	public int getContainerDepth() {
-//		if(containerManifests==null)
-//			throw new IllegalStateException("Missing root container manifest"); //$NON-NLS-1$
-
-		return containerManifests==null ? 0 : containerManifests.size();
+		int depth = containerManifests.size();
+		if(depth==0 && hasTemplate()) {
+			depth = getTemplate().getContainerDepth();
+		}
+		return depth;
 	}
 
 	/**
@@ -75,10 +115,17 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	 */
 	@Override
 	public ContainerManifest getContainerManifest(int level) {
-		if(containerManifests==null)
-			throw new IllegalStateException("Missing root container manifest"); //$NON-NLS-1$
+		ContainerManifest result = null;
+		if(!containerManifests.isEmpty()) {
+			result = containerManifests.get(level);
+		} else if(hasTemplate()) {
+			result = getTemplate().getContainerManifest(level);
+		}
 
-		return containerManifests.get(level);
+		if(result==null)
+			throw new IndexOutOfBoundsException("No container manifest available for level: "+level); //$NON-NLS-1$
+
+		return result;
 	}
 
 	/**
@@ -89,30 +136,13 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 		if (containerManifest == null)
 			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
 
-		return containerManifests.indexOf(containerManifest);
-	}
+		int index = containerManifests.indexOf(containerManifest);
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#removeContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest)
-	 */
-	@Override
-	public void removeContainerManifest(ContainerManifest containerManifest) {
-		if (containerManifest == null)
-			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
+		if(index==-1 && containerManifests.isEmpty() && hasTemplate()) {
+			index = getTemplate().indexOfContainerManifest(containerManifest);
+		}
 
-		containerManifests.remove(containerManifest);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#setContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest, int)
-	 */
-	@Override
-	public void setContainerManifest(ContainerManifest containerManifest,
-			int level) {
-		if (containerManifest == null)
-			throw new NullPointerException("Invalid containerManifest"); //$NON-NLS-1$
-
-		containerManifests.set(level, containerManifest);
+		return index;
 	}
 
 	public void addContainerManifest(ContainerManifest containerManifest) {
@@ -133,28 +163,11 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	/**
 	 * @param boundaryLayerManifest the boundaryLayerManifest to set
 	 */
-	@Override
-	public void setBoundaryLayerManifest(TargetLayerManifest boundaryLayerManifest) {
-		if (boundaryLayerManifest == null)
-			throw new NullPointerException("Invalid boundaryLayerManifest"); //$NON-NLS-1$
-
-		this.boundaryLayerManifest = boundaryLayerManifest;
-	}
-
-	/**
-	 * Attention:
-	 * This implementation does <b>not</b> inherit the container manifests of the given template!
-	 *
-	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
-	 */
-	@Override
-	protected void copyFrom(MarkableLayerManifest template) {
-		super.copyFrom(template);
-
-		boundaryLayerManifest = template.getBoundaryLayerManifest();
-
-//		for(int i=0; i<template.getContainerDepth(); i++) {
-//			addContainerManifest(template.getContainerManifest(i));
-//		}
+//	@Override
+	public TargetLayerManifest setBoundaryLayerId(String boundaryLayerId) {
+		checkAllowsTargetLayer();
+		TargetLayerManifest manifest = new TargetLayerManifestImpl(boundaryLayerId);
+		boundaryLayerManifest = manifest;
+		return manifest;
 	}
 }

@@ -31,6 +31,7 @@ import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.xml.ModelXmlElement;
 
 
 /**
@@ -41,7 +42,9 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface LayerGroupManifest {
+public interface LayerGroupManifest extends ModelXmlElement {
+
+	public static final boolean DEFAULT_INDEPENDENT_VALUE = false;
 
 	@AccessRestriction(AccessMode.READ)
 	ContextManifest getContextManifest();
@@ -69,6 +72,9 @@ public interface LayerGroupManifest {
 	@AccessRestriction(AccessMode.READ)
 	String getName();
 
+	@AccessRestriction(AccessMode.READ)
+	LayerManifest getLayerManifest(String id);
+
 	/**
 	 * Tests whether this {@code LayerGroupManifest} equals the given {@code Object} {@code o}.
 	 * Two {@code LayerGroupManifest} instances are considered equal if they have the same name
@@ -82,15 +88,15 @@ public interface LayerGroupManifest {
 
 	// Modification methods
 
-	void setContextManifest(ContextManifest contextManifest);
+//	void setContextManifest(ContextManifest contextManifest);
 
-	void addLayerManifest(LayerManifest layerManifest);
+//	void addLayerManifest(LayerManifest layerManifest);
 
-	void removeLayerManifest(LayerManifest layerManifest);
+//	void removeLayerManifest(LayerManifest layerManifest);
 
-	void setPrimaryLayerManifest(MarkableLayerManifest layerManifest);
+//	void setPrimaryLayerManifest(MarkableLayerManifest layerManifest);
 
-	void setIndependent(boolean isIndependent);
+//	void setIndependent(boolean isIndependent);
 
-	void setName(String name);
+//	void setName(String name);
 }

@@ -29,6 +29,7 @@ import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.XmlResource;
 
 
@@ -50,7 +51,10 @@ import de.ims.icarus.model.xml.XmlResource;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface ImplementationManifest extends ModifiableManifest {
+public interface ImplementationManifest extends ModifiableManifest, ModelXmlElement {
+
+	public static final boolean DEFAULT_USE_FACTORY_VALUE = false;
+	public static final SourceType DEFAULT_SOURCE_TYPE = SourceType.DEFAULT;
 
 	/**
 	 * Returns the type of this implementation's source, defining
@@ -104,13 +108,13 @@ public interface ImplementationManifest extends ModifiableManifest {
 
 	// Modification methods
 
-	void setSourceType(SourceType sourceType);
-
-	void setSource(String source);
-
-	void setClassname(String classname);
-
-	void setUseFactory(boolean useFactory);
+//	void setSourceType(SourceType sourceType);
+//
+//	void setSource(String source);
+//
+//	void setClassname(String classname);
+//
+//	void setUseFactory(boolean useFactory);
 
 	public enum SourceType implements XmlResource {
 
@@ -152,10 +156,10 @@ public interface ImplementationManifest extends ModifiableManifest {
 		DEFAULT;
 
 		/**
-		 * @see de.ims.icarus.model.xml.XmlResource#getValue()
+		 * @see de.ims.icarus.model.xml.XmlResource#getXmlValue()
 		 */
 		@Override
-		public String getValue() {
+		public String getXmlValue() {
 			return name().toLowerCase();
 		}
 

@@ -78,13 +78,13 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 			return false;
 		}
 
-		ContainerManifest manifest = getManifest();
+//		ContainerManifest manifest = getManifest();
 
 		//FIXME maybe add boundary and base container manifests again?
 
-		if(manifest.getParentManifest()!=null && getContainer()==null) {
-			return false;
-		}
+//		if(manifest.getParentManifest()!=null && getContainer()==null) {
+//			return false;
+//		}
 
 		return true;
 	}

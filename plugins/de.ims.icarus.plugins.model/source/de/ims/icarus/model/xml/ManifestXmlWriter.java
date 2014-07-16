@@ -63,6 +63,7 @@ import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.ModifiableManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
+import de.ims.icarus.model.api.manifest.OptionsManifest.Option;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.model.api.manifest.RasterizerManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
@@ -140,8 +141,8 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 //		if(object==null) {
 //			return true;
 //		}
-//		if(object instanceof XmlElement) {
-//			((XmlElement)object).writeXml(serializer);
+//		if(object instanceof ModelXmlElement) {
+//			((ModelXmlElement)object).writeXml(serializer);
 //			return true;
 //		}
 //
@@ -188,7 +189,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.writeAttribute(ATTR_DESCRIPTION, description);
 
 		if(icon instanceof XmlResource) {
-			serializer.writeAttribute(ATTR_ICON, ((XmlResource)icon).getValue());
+			serializer.writeAttribute(ATTR_ICON, ((XmlResource)icon).getXmlValue());
 		} else if(icon != null) {
 			LoggerFactory.warning(XmlWriter.class, "Skipping serialization of icon for identity: "+identity); //$NON-NLS-1$
 		}
@@ -249,7 +250,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 			for(String name : names) {
 				ValueType type = optionsManifest==null ?
-						ValueType.STRING : optionsManifest.getValueType(name);
+						ValueType.STRING : optionsManifest.getOption(name).getValueType();
 
 				writePropertyElement(name, manifest.getProperty(name), type);
 			}
@@ -312,7 +313,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		// ATTRIBUTES
 		if(locationType!=null) {
-			serializer.writeAttribute(ATTR_LOCATION_TYPE, locationType.getValue());
+			serializer.writeAttribute(ATTR_LOCATION_TYPE, locationType.getXmlValue());
 		}
 	}
 
@@ -340,7 +341,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		// ATTRIBUTES
 		writeIdentityAttributes(manifest);
-		serializer.writeAttribute(ATTR_CONTAINER_TYPE, manifest.getContainerType().getValue());
+		serializer.writeAttribute(ATTR_CONTAINER_TYPE, manifest.getContainerType().getXmlValue());
 
 		// ELEMENTS
 		writeModifiableManifest(manifest);
@@ -357,8 +358,8 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		// ATTRIBUTES
 		writeIdentityAttributes(manifest);
-		serializer.writeAttribute(ATTR_CONTAINER_TYPE, manifest.getContainerType().getValue());
-		serializer.writeAttribute(ATTR_STRUCTURE_TYPE, manifest.getStructureType().getValue());
+		serializer.writeAttribute(ATTR_CONTAINER_TYPE, manifest.getContainerType().getXmlValue());
+		serializer.writeAttribute(ATTR_STRUCTURE_TYPE, manifest.getStructureType().getXmlValue());
 
 		StructureManifest template = (StructureManifest) manifest.getTemplate();
 		boolean multiRoot = manifest.isMultiRootAllowed();
@@ -548,8 +549,8 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 
 		serializer.writeAttribute(ATTR_SOURCE_LAYER, getSerializedForm(manifest.getSourceLayerManifest()));
 		serializer.writeAttribute(ATTR_TARGET_LAYER, getSerializedForm(manifest.getTargetLayerManifest()));
-		serializer.writeAttribute(ATTR_RELATION, manifest.getRelation().getValue());
-		serializer.writeAttribute(ATTR_COVERAGE, manifest.getCoverage().getValue());
+		serializer.writeAttribute(ATTR_RELATION, manifest.getRelation().getXmlValue());
+		serializer.writeAttribute(ATTR_COVERAGE, manifest.getCoverage().getXmlValue());
 		if(manifest.getInverse()!=null) {
 			serializer.writeAttribute(ATTR_INCLUDE_REVERSE, true);
 		}
@@ -557,31 +558,31 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.endElement(TAG_INDEX);
 	}
 
-	private void writeOptionElement(String option, OptionsManifest manifest) throws Exception {
+	private void writeOptionElement(Option option) throws Exception {
 
-		ValueType type = manifest.getValueType(option);
+		ValueType type = option.getValueType();
 
 		serializer.startElement(TAG_OPTION);
 
 		// Attributes
 
-		serializer.writeAttribute(ATTR_ID, option);
+		serializer.writeAttribute(ATTR_ID, option.getId());
 		serializer.writeAttribute(ATTR_TYPE, getSerializedForm(type));
-		serializer.writeAttribute(ATTR_NAME, manifest.getName(option));
-		serializer.writeAttribute(ATTR_DESCRIPTION, manifest.getDescription(option));
-		if(!manifest.isPublished(option)) {
-			serializer.writeAttribute(ATTR_PUBLISHED, false);
+		serializer.writeAttribute(ATTR_NAME, option.getName());
+		serializer.writeAttribute(ATTR_DESCRIPTION, option.getDescription());
+		if(option.isPublished()!=Option.DEFAULT_PUBLISHED_VALUE) {
+			serializer.writeAttribute(ATTR_PUBLISHED, option.isPublished());
 		}
-		if(manifest.isMultiValue(option)) {
-			serializer.writeAttribute(ATTR_MULTI_VALUE, true);
+		if(option.isMultiValue()!=Option.DEFAULT_MULTIVALUE_VALUE) {
+			serializer.writeAttribute(ATTR_MULTI_VALUE, option.isMultiValue());
 		}
-		serializer.writeAttribute(ATTR_GROUP, manifest.getOptionGroup(option));
+		serializer.writeAttribute(ATTR_GROUP, option.getOptionGroup());
 
 		// Elements
 
-		writeValueElement(TAG_DEFAULT_VALUE, manifest.getDefaultValue(option), type);
-		writeValueSetElement(manifest.getSupportedValues(option), type);
-		writeValueRangeElement(manifest.getSupportedRange(option), type);
+		writeValueElement(TAG_DEFAULT_VALUE, option.getDefaultValue(), type);
+		writeValueSetElement(option.getSupportedValues(), type);
+		writeValueRangeElement(option.getSupportedRange(), type);
 
 		serializer.endElement(TAG_OPTION);
 	}
@@ -637,11 +638,11 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.endElement(TAG_EVAL);
 	}
 
-	private String getSerializedForm(ValueType type) {
-		return type==ValueType.STRING ? null : type.getValue();
+	private static String getSerializedForm(ValueType type) {
+		return type==ValueType.STRING ? null : type.getXmlValue();
 	}
 
-	private void writePropertyElement(String name, Object value, ValueType type) throws Exception {
+	public static void writePropertyElement(XmlSerializer serializer, String name, Object value, ValueType type) throws Exception {
 		if(value==null) {
 			return;
 		}
@@ -739,8 +740,8 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.writeAttribute(ATTR_EDITABLE, manifest.isEditable());
 
 		// Now write all context manifests
-		writeContextManifest(manifest.getRootContextManifest());
-		for(ContextManifest contextManifest : manifest.getCustomContextManifests()) {
+//		writeContextManifest(manifest.getRootContextManifest());
+		for(ContextManifest contextManifest : manifest.getContextManifests()) {
 			writeContextManifest(contextManifest);
 		}
 
@@ -866,7 +867,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 			List<String> names = CollectionUtils.asSortedList(options);
 
 			for(String option : names) {
-				writeOptionElement(option, manifest);
+				writeOptionElement(manifest.getOption(option));
 			}
 		}
 
@@ -1068,7 +1069,7 @@ public class ManifestXmlWriter implements ModelXmlTags, ModelXmlAttributes {
 		serializer.writeAttribute(ATTR_SOURCE, source);
 		serializer.writeAttribute(ATTR_CLASSNAME, classname);
 		if(sourceType!=null && sourceType!=SourceType.DEFAULT) {
-			serializer.writeAttribute(ATTR_SOURCE_TYPE, sourceType.getValue());
+			serializer.writeAttribute(ATTR_SOURCE_TYPE, sourceType.getXmlValue());
 		}
 
 		endManifest(TAG_IMPLEMENTATION);

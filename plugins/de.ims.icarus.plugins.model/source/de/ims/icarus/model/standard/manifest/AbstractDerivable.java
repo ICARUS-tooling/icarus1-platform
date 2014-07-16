@@ -25,8 +25,12 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.Derivable;
 import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlElement;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 
 
@@ -35,18 +39,61 @@ import de.ims.icarus.model.api.manifest.ManifestSource;
  * @version $Id$
  *
  */
-public abstract class AbstractDerivable<T extends Derivable> implements Derivable {
+public abstract class AbstractDerivable<T extends Derivable> extends LazyResolver implements Derivable, ModelXmlElement {
 
-	private T template;
-
-	private boolean isTemplate = false;
+	private TemplateLink<T> template;
 
 	private String id;
+	private boolean isTemplate = false;
 
-	private ManifestSource manifestSource;
+	private final ManifestSource manifestSource;
+	private final CorpusRegistry registry;
 
-	protected AbstractDerivable() {
-		template = null;
+	protected AbstractDerivable(ManifestSource manifestSource, CorpusRegistry registry) {
+		if (manifestSource == null)
+			throw new NullPointerException("Invalid manifestSource");  //$NON-NLS-1$
+		if (registry == null)
+			throw new NullPointerException("Invalid registry");  //$NON-NLS-1$
+
+		this.manifestSource = manifestSource;
+		this.registry = registry;
+	}
+
+	protected void writeEmbedded(ModelXmlElement element, XmlSerializer serializer) throws Exception {
+		if(element!=null) {
+			element.writeXml(serializer);
+		}
+	}
+
+	protected void writeFlag(XmlSerializer serializer, String name, Boolean flag, boolean defaultValue) throws Exception {
+		if(flag!=null && flag.booleanValue()!=defaultValue) {
+			serializer.writeAttribute(name, flag.booleanValue());
+		}
+	}
+
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		serializer.writeAttribute(ATTR_ID, id);
+
+		if(template!=null) {
+			serializer.writeAttribute(ATTR_TEMPLATE_ID, template.getId());
+		}
+	}
+
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		// for subclasses
+	}
+
+	protected abstract String xmlTag();
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	public void writeXml(XmlSerializer serializer) throws Exception {
+		serializer.startElement(xmlTag());
+		writeAttributes(serializer);
+		writeElements(serializer);
+		serializer.endElement(xmlTag());
 	}
 
 	/**
@@ -58,13 +105,10 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	}
 
 	/**
-	 * @param manifestSource the manifestSource to set
+	 * @return the registry
 	 */
-	public void setManifestSource(ManifestSource manifestSource) {
-		if (manifestSource == null)
-			throw new NullPointerException("Invalid manifestSource");
-
-		this.manifestSource = manifestSource;
+	public CorpusRegistry getRegistry() {
+		return registry;
 	}
 
 	/**
@@ -72,7 +116,11 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	 */
 	@Override
 	public String getId() {
-		return id;
+		String result = id;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getId();
+		}
+		return result;
 	}
 
 	/**
@@ -82,25 +130,11 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	public void setId(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		if(!CorpusRegistry.isValidId(id))
+			throw new IllegalArgumentException("Id format not supported: "+id); //$NON-NLS-1$
 
 		this.id = id;
 	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.Derivable#setTemplate(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-//	@Override
-	public void setTemplate(Derivable template) {
-		if (template == null)
-			throw new NullPointerException("Invalid template"); //$NON-NLS-1$
-
-		this.template = (T) template;
-		copyFrom((T) template);
-	}
-
-	protected abstract void copyFrom(T template);
 
 //	/**
 //	 * Applies the content of the given template to this derivable.
@@ -111,9 +145,17 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 //		// for subclasses
 //	}
 
+	/**
+	 * @see de.ims.icarus.model.api.manifest.Derivable#setTemplateId(java.lang.String)
+	 */
+	@Override
+	public void setTemplateId(String templateId) {
+		template = new TemplateLink<>(templateId);
+	}
+
 	@Override
 	public T getTemplate() {
-		return template;
+		return template.get();
 	}
 
 	public boolean hasTemplate() {
@@ -234,5 +276,45 @@ public abstract class AbstractDerivable<T extends Derivable> implements Derivabl
 	public String toString() {
 		String id = getId();
 		return id==null ? super.toString() : getClass().getName()+"@"+id; //$NON-NLS-1$
+	}
+
+	protected class TemplateLink<D extends Derivable> extends Link<D> {
+
+		/**
+		 * @param abstractDerivable
+		 * @param id
+		 */
+		public TemplateLink(String id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable.Link#resolve()
+		 */
+		@SuppressWarnings("unchecked")
+		@Override
+		protected D resolve() {
+			return (D) registry.getTemplate(getId());
+		}
+
+	}
+
+	protected class LayerTypeLink extends Link<LayerType> {
+
+		/**
+		 * @param id
+		 */
+		public LayerTypeLink(String id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 */
+		@Override
+		protected LayerType resolve() {
+			return registry.getLayerType(getId());
+		}
+
 	}
 }

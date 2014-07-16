@@ -81,5 +81,5 @@ public interface ContainerManifest extends MemberManifest {
 
 	// Modification methods
 
-	void setContainerType(ContainerType containerType);
+//	void setContainerType(ContainerType containerType);
 }

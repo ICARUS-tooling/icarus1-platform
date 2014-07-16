@@ -83,4 +83,6 @@ public interface ModelXmlTags {
 
 	public static final String TAG_PROPERTY = "property"; //$NON-NLS-1$
 	public static final String TAG_GROUP = "group"; //$NON-NLS-1$
+
+	public static final String TAG_NOTE = "note"; //$NON-NLS-1$
 }

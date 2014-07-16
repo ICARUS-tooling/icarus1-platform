@@ -34,6 +34,8 @@ import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
 
 /**
+ * Note: A corpus manifest can only appear in non-template parsing context!
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -41,11 +43,13 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
 @AccessControl(AccessPolicy.DENY)
 public interface CorpusManifest extends MemberManifest {
 
+	public static final boolean DEFAULT_EDITABLE_VALUE = false;
+
 	@AccessRestriction(AccessMode.READ)
 	ContextManifest getRootContextManifest();
 
 	@AccessRestriction(AccessMode.READ)
-	List<ContextManifest> getCustomContextManifests();
+	List<ContextManifest> getContextManifests();
 
 	@AccessRestriction(AccessMode.READ)
 	ContextManifest getContextManifest(String id);
@@ -95,7 +99,7 @@ public interface CorpusManifest extends MemberManifest {
 	 * @version $Id$
 	 *
 	 */
-	interface Note {
+	public interface Note {
 
 		public static final int MAX_CHARACTER_LIMIT = 10_000;
 

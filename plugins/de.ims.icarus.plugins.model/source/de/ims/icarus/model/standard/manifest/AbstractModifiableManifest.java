@@ -25,14 +25,20 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.model.api.manifest.Documentation;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ModifiableManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -46,11 +52,43 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 	private OptionsManifest optionsManifest;
 	private Documentation documentation;
 
+	protected AbstractModifiableManifest(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
+
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		// Write documentation
+		writeEmbedded(documentation, serializer);
+
+		// Write options manifest
+		writeEmbedded(optionsManifest, serializer);
+
+		if(properties!=null && !properties.isEmpty()) {
+			List<String> names = CollectionUtils.asSortedList(properties.keySet());
+
+			for(String name : names) {
+				Object value = properties.get(name);
+				ValueType type = optionsManifest==null ?
+						ValueType.STRING : optionsManifest.getOption(name).getValueType();
+
+				ModelXmlUtils.writePropertyElement(serializer, name, value, type);
+			}
+		}
+	}
+
 	/**
 	 * @return the documentation
 	 */
 	@Override
 	public Documentation getDocumentation() {
+		Documentation documentation = this.documentation;
+		if(documentation==null && hasTemplate()) {
+			documentation = getTemplate().getDocumentation();
+		}
 		return documentation;
 	}
 
@@ -67,6 +105,10 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 	 */
 	@Override
 	public OptionsManifest getOptionsManifest() {
+		OptionsManifest optionsManifest = this.optionsManifest;
+		if(optionsManifest==null && hasTemplate()) {
+			optionsManifest = getTemplate().getOptionsManifest();
+		}
 		return optionsManifest;
 	}
 
@@ -86,7 +128,17 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 	 */
 	@Override
 	public Object getProperty(String name) {
-		return properties==null ? null : properties.get(name);
+		Object value = null;
+
+		if(properties!=null) {
+			value = properties.get(name);
+		}
+
+		if(value==null && hasTemplate()) {
+			value = getTemplate().getProperty(name);
+		}
+
+		return value;
 	}
 
 	/**
@@ -94,13 +146,13 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 	 */
 	@Override
 	public Set<String> getPropertyNames() {
-		Set<String> result = null;
+		Set<String> result = new HashSet<>();
 		if(properties!=null) {
-			result = CollectionUtils.getSetProxy(properties.keySet());
+			result.addAll(properties.keySet());
 		}
 
-		if(result==null) {
-			result = Collections.emptySet();
+		if(hasTemplate()) {
+			result.addAll(getTemplate().getPropertyNames());
 		}
 
 		return result;
@@ -127,18 +179,5 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 		}
 
 		properties.putAll(values);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(T template) {
-		optionsManifest = template.getOptionsManifest();
-		documentation = template.getDocumentation();
-
-		for(String key : template.getPropertyNames()) {
-			setProperty(key, template.getProperty(key));
-		}
 	}
 }

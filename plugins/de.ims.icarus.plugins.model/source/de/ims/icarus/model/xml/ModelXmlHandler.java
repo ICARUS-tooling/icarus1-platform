@@ -23,21 +23,24 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.manifest;
+package de.ims.icarus.model.xml;
 
-import de.ims.icarus.util.ClassUtils;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
+import de.ims.icarus.model.api.manifest.ManifestSource;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class ManifestUtils {
+public interface ModelXmlHandler {
 
-	public static boolean equals(ImplementationManifest m1, ImplementationManifest m2) {
-		return ClassUtils.equals(m1.getSourceType(), m2.getSourceType())
-				&& ClassUtils.equals(m1.getSource(), m2.getSource())
-				&& ClassUtils.equals(m1.getClassname(), m2.getClassname())
-				&& m1.isUseFactory()==m2.isUseFactory();
-	}
+	ModelXmlHandler startElement(ManifestSource manifestSource, String uri, String localName, String qName,
+			Attributes attributes) throws SAXException;
+
+	ModelXmlHandler endElement(ManifestSource manifestSource, String uri, String localName, String qName, String text)
+			throws SAXException;
+
 }

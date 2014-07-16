@@ -32,6 +32,7 @@ import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -39,13 +40,13 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class LayerGroupManifestImpl implements LayerGroupManifest {
+public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupManifest {
 
 	private ContextManifest contextManifest;
 
 	private final List<LayerManifest> layerManifests = new ArrayList<>();
-	private MarkableLayerManifest primaryLayerManifest;
-	private boolean independent = false;
+	private LayerLink primaryLayer;
+	private boolean independent = DEFAULT_INDEPENDENT_VALUE;
 	private String name;
 
 	public LayerGroupManifestImpl(ContextManifest contextManifest, String name) {
@@ -56,6 +57,26 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 
 		this.contextManifest = contextManifest;
 		this.name = name;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	public void writeXml(XmlSerializer serializer) throws Exception {
+		serializer.startElement(TAG_LAYER_GROUP);
+
+		serializer.writeAttribute(ATTR_NAME, name);
+		if(independent!=DEFAULT_INDEPENDENT_VALUE) {
+			serializer.writeAttribute(ATTR_INDEPENDENT, independent);
+		}
+		serializer.writeAttribute(ATTR_PRIMARY_LAYER, primaryLayer.getId());
+
+		for(LayerManifest layerManifest : layerManifests) {
+			layerManifest.writeXml(serializer);
+		}
+
+		serializer.endElement(TAG_LAYER_GROUP);
 	}
 
 	/**
@@ -79,7 +100,7 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 	 */
 	@Override
 	public MarkableLayerManifest getPrimaryLayerManifest() {
-		return primaryLayerManifest;
+		return primaryLayer.get();
 	}
 
 	/**
@@ -101,12 +122,12 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 	/**
 	 * @param independent the independent to set
 	 */
-	@Override
+//	@Override
 	public void setIndependent(boolean independent) {
 		this.independent = independent;
 	}
 
-	@Override
+//	@Override
 	public void addLayerManifest(LayerManifest layerManifest) {
 		if (layerManifest == null)
 			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
@@ -115,7 +136,7 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 			throw new IllegalArgumentException("Layer manifest already present in group: "+layerManifest.getId()); //$NON-NLS-1$
 	}
 
-	@Override
+//	@Override
 	public void removeLayerManifest(LayerManifest layerManifest) {
 		if (layerManifest == null)
 			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
@@ -127,14 +148,16 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 	/**
 	 * @param primaryLayerManifest the primaryLayerManifest to set
 	 */
-	@Override
-	public void setPrimaryLayerManifest(MarkableLayerManifest primaryLayerManifest) {
-		if (primaryLayerManifest == null)
-			throw new NullPointerException("Invalid primaryLayerManifest"); //$NON-NLS-1$
-		if(!layerManifests.contains(primaryLayerManifest))
-			throw new IllegalArgumentException("Primary layer manifest not added as contained layer: "+primaryLayerManifest.getId()); //$NON-NLS-1$
+//	@Override
+	public void setPrimaryLayerId(String primaryLayerId) {
+//		if (primaryLayerManifest == null)
+//			throw new NullPointerException("Invalid primaryLayerManifest"); //$NON-NLS-1$
+//		if(!layerManifests.contains(primaryLayerManifest))
+//			throw new IllegalArgumentException("Primary layer manifest not added as contained layer: "+primaryLayerManifest.getId()); //$NON-NLS-1$
+//
+//		this.primaryLayerManifest = primaryLayerManifest;
 
-		this.primaryLayerManifest = primaryLayerManifest;
+		primaryLayer = new LayerLink(primaryLayerId);
 	}
 
 //	/**
@@ -157,27 +180,27 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 //		return false;
 //	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#setContextManifest(de.ims.icarus.model.api.manifest.ContextManifest)
-	 */
-	@Override
-	public void setContextManifest(ContextManifest contextManifest) {
-		if (contextManifest == null)
-			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+//	/**
+//	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#setContextManifest(de.ims.icarus.model.api.manifest.ContextManifest)
+//	 */
+//	@Override
+//	public void setContextManifest(ContextManifest contextManifest) {
+//		if (contextManifest == null)
+//			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+//
+//		this.contextManifest = contextManifest;
+//	}
 
-		this.contextManifest = contextManifest;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#setName(java.lang.String)
-	 */
-	@Override
-	public void setName(String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
-
-		this.name = name;
-	}
+//	/**
+//	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#setName(java.lang.String)
+//	 */
+//	@Override
+//	public void setName(String name) {
+//		if (name == null)
+//			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+//
+//		this.name = name;
+//	}
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -185,5 +208,50 @@ public class LayerGroupManifestImpl implements LayerGroupManifest {
 	@Override
 	public String toString() {
 		return "LayerGroup:"+name; //$NON-NLS-1$
+	}
+
+	private LayerManifest lookupLayer(String id, boolean localOnly) {
+		LayerManifest result = null;
+
+		for(LayerManifest layerManifest : layerManifests) {
+			if(id.equals(layerManifest.getId())) {
+				result = layerManifest;
+				break;
+			}
+		}
+
+		if(result==null && !localOnly && contextManifest!=null) {
+			result = contextManifest.getLayerManifest(id);
+		}
+
+		return result;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#getLayerManifest(java.lang.String)
+	 */
+	@Override
+	public LayerManifest getLayerManifest(String id) {
+		return lookupLayer(id, true);
+	}
+
+	protected class LayerLink extends Link<MarkableLayerManifest> {
+
+		/**
+		 * @param lazyResolver
+		 * @param id
+		 */
+		public LayerLink(String id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 */
+		@Override
+		protected MarkableLayerManifest resolve() {
+			return (MarkableLayerManifest) lookupLayer(getId(), true);
+		}
+
 	}
 }

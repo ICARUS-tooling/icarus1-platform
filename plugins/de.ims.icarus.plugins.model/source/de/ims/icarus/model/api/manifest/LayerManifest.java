@@ -27,6 +27,8 @@ package de.ims.icarus.model.api.manifest;
 
 import java.util.List;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.iql.access.AccessControl;
@@ -38,6 +40,14 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  * A {@code LayerManifest} describes a single {@link Layer} in a corpus and
  * defines an optional set of prerequisites that have to be met for the layer
  * to work properly.
+ * <p>
+ * Note:<br>
+ * A layer declaring any kind of inter-layer relationship (like a base or
+ * boundary layer) must be hosted within a valid layer group and context
+ * environment! Otherwise it will not be possible to resolve the targets of
+ * those relations. Not complying to this specification will result in
+ * a {@link ModelException} of type {@value ModelError#MANIFEST_MISSING_CONTEXT}
+ * being thrown during parsing.
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -77,13 +87,13 @@ public interface LayerManifest extends MemberManifest {
 
 	// Modification methods
 
-	void setGroupManifest(LayerGroupManifest groupManifest);
+//	void setGroupManifest(LayerGroupManifest groupManifest);
 
-	void setLayerType(LayerType layerType);
+//	void setLayerType(LayerType layerType);
 
-	void addBaseLayerManifest(TargetLayerManifest layerManifest);
+//	void addBaseLayerManifest(TargetLayerManifest layerManifest);
 
-	void removeBaseLayerManifest(TargetLayerManifest layerManifest);
+//	void removeBaseLayerManifest(TargetLayerManifest layerManifest);
 
 	/**
 	 * Models a resolved dependency on the layer level. A target layer may either be

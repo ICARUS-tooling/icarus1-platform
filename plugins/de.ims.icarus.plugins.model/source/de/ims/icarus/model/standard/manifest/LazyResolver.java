@@ -23,29 +23,57 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.manifest;
+package de.ims.icarus.model.standard.manifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ManifestType {
-	CONTAINER_MANIFEST,
-	STRUCTURE_MANIFEST,
-	ANNOTATION_MANIFEST,
-	ANNOTATION_LAYER_MANIFEST,
-	MARKABLE_LAYER_MANIFEST,
-	STRUCTURE_LAYER_MANIFEST,
-	FRAGMENT_LAYER_MANIFEST,
-	HIGHLIGHT_LAYER_MANIFEST,
-	LOCATION_MANIFEST,
-	OPTIONS_MANIFEST,
-	CONTEXT_MANIFEST,
-	CORPUS_MANIFEST,
-	PATH_RESOLVER_MANIFEST,
-	RASTERIZER_MANIFEST,
-	DRIVER_MANIFEST,
-	;
+public abstract class LazyResolver {
 
+	protected abstract class Link<O extends Object> {
+		private final String id;
+		O target;
+
+		public Link(String id) {
+			if (id == null)
+				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+			this.id = id;
+		}
+
+		protected abstract O resolve();
+
+		public String getId() {
+			return id;
+		}
+
+		public O get() {
+			if(target==null) {
+				target = resolve();
+			}
+
+			return target;
+		}
+	}
+
+	protected abstract class MemoryLink<O extends Object> extends Link<O> {
+
+		private volatile boolean resolved = false;
+
+		public MemoryLink(String id) {
+			super(id);
+		}
+
+		@Override
+		public O get() {
+			if(!resolved && target==null) {
+				target = resolve();
+				resolved = true;
+			}
+
+			return target;
+		}
+	}
 }

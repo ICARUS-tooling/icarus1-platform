@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.data;
@@ -32,23 +32,24 @@ import de.ims.icarus.util.id.Identity;
 
 
 /**
- * 
- * 
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface ContentType extends Identity, Filter {
-	
+
 	/**
 	 * Returns the root class or interface that objects associated
 	 * with this {@code ContentType} must extend or implement.
-	 * This method must not return {@code null}.
+	 * This method must not return {@code null} but is technically
+	 * allowed to return the {@link Object} class.
 	 */
 	Class<?> getContentClass();
-	
+
 	String getContentClassName();
-	
+
 	/**
 	 * Returns a read-only collection of properties in the form of
 	 * a key-value mapping. If this {@code ContentType} does not
@@ -56,7 +57,7 @@ public interface ContentType extends Identity, Filter {
 	 * {@code null}.
 	 */
 	Map<String, Object> getProperties();
-	
+
 	/**
 	 * Checks the given argument (typically a {@code Class} instance)
 	 * for compatibility with this content-type.
@@ -66,11 +67,12 @@ public interface ContentType extends Identity, Filter {
 	 * not explicitly required to do so! Custom implementations that
 	 * are designed to be used outside the framework might want to handle
 	 * arbitrary argument objects.
-	 * 
+	 *
 	 * @see de.ims.icarus.util.Filter#accepts(java.lang.Object)
 	 */
+	@Override
 	boolean accepts(Object obj);
-	
+
 	/**
 	 * Signals whether content is only allowed to be of the class
 	 * returned by {@link #getContentClass()} and not of some subclass

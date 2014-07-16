@@ -60,9 +60,9 @@ public interface FragmentLayerManifest extends MarkableLayerManifest {
 
 	// Modification methods
 
-	void setValueLayerManifest(TargetLayerManifest layerManifest);
-
-	void setAnnotationKey(String key);
-
-	void setRasterizerManifest(RasterizerManifest rasterizerManifest);
+//	void setValueLayerManifest(TargetLayerManifest layerManifest);
+//
+//	void setAnnotationKey(String key);
+//
+//	void setRasterizerManifest(RasterizerManifest rasterizerManifest);
 }

@@ -32,5 +32,5 @@ package de.ims.icarus.model.xml;
  */
 public interface XmlResource {
 
-	String getValue();
+	String getXmlValue();
 }

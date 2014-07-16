@@ -27,13 +27,20 @@ package de.ims.icarus.model.standard.manifest;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.Icon;
+
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
+import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.Identity;
 
@@ -44,49 +51,56 @@ import de.ims.icarus.util.id.Identity;
  */
 public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> implements OptionsManifest {
 
-	private String id;
+	private final Set<String> baseNames = new HashSet<>();
+	private final Set<Identity> groupIdentifiers = new HashSet<>();
+	private final Map<String, Option> options = new HashMap<>();
 
-	private Set<String> baseNames = new HashSet<>();
-	private Set<Identity> groupIdentifiers = new HashSet<>();
-	private Map<String, Option> options = new HashMap<>();
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	public OptionsManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
 
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
 	@Override
-	protected void copyFrom(OptionsManifest template) {
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
 
-		for(String key : template.getOptionNames()) {
-			Option option = new Option();
-			option.name = template.getName(key);
-			option.description = template.getDescription(key);
-			option.valueType = template.getValueType(key);
-			option.defaultValue = template.getDefaultValue(key);
-			option.range = template.getSupportedRange(key);
-			option.values = template.getSupportedValues(key);
-			option.group = template.getOptionGroup(key);
-			option.published = template.isPublished(key);
-			option.multivalue = template.isMultiValue(key);
+		// Write options in alphabetic order
+		if(!options.isEmpty()) {
+			List<String> names = CollectionUtils.asSortedList(options.keySet());
 
-			options.put(key, option);
-			baseNames.add(key);
+			for(String option : names) {
+				ModelXmlUtils.writeOptionElement(serializer, options.get(option));
+			}
+		}
+
+		// Write groups in alphabetic order
+		if(!groupIdentifiers.isEmpty()) {
+			List<Identity> idents = CollectionUtils.asSortedList(groupIdentifiers, Identity.COMPARATOR);
+
+			for(Identity group : idents) {
+				//FIXME empty element
+				serializer.startElement(TAG_GROUP);
+
+				// ATTRIBUTES
+				ModelXmlUtils.writeIdentityAttributes(serializer, group);
+				serializer.endElement(TAG_GROUP);
+			}
 		}
 	}
 
 	/**
-	 * @return the id
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
 	 */
 	@Override
-	public String getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	@Override
-	public void setId(String id) {
-		if (id == null)
-			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
-
-		this.id = id;
+	protected String xmlTag() {
+		return TAG_OPTIONS;
 	}
 
 	/**
@@ -94,75 +108,46 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	 */
 	@Override
 	public Set<String> getOptionNames() {
-		return CollectionUtils.getSetProxy(baseNames);
+		Set<String> result = new HashSet<>();
+		result.addAll(baseNames);
+
+		if(hasTemplate()) {
+			result.addAll(getTemplate().getOptionNames());
+		}
+
+		return result;
 	}
 
-	private Option getOption(String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+	@Override
+	public Option getOption(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
-		Option option = options.get(name);
+		Option option = options.get(id);
+
+		if(option==null && hasTemplate()) {
+			option = getTemplate().getOption(id);
+		}
+
 		if(option==null)
-			throw new IllegalArgumentException("No such option: "+name); //$NON-NLS-1$
+			throw new IllegalArgumentException("No such option: "+id); //$NON-NLS-1$
 
 		return option;
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getDefaultValue(java.lang.String)
-	 */
-	@Override
-	public Object getDefaultValue(String name) {
-		return getOption(name).defaultValue;
-	}
+	public void addOption(Option option) {
+		if (option == null)
+			throw new NullPointerException("Invalid option"); //$NON-NLS-1$
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getValueType(java.lang.String)
-	 */
-	@Override
-	public ValueType getValueType(String name) {
-		return getOption(name).valueType;
-	}
+		String id = option.getId();
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getName(java.lang.String)
-	 */
-	@Override
-	public String getName(String name) {
-		Option option = getOption(name);
-		return getOption(name).name==null ? name : option.name;
-	}
+		if(id==null)
+			throw new IllegalArgumentException("Option does not declare a valid id"); //$NON-NLS-1$
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getDescription(java.lang.String)
-	 */
-	@Override
-	public String getDescription(String name) {
-		return getOption(name).description;
-	}
+		if(options.containsKey(id))
+			throw new IllegalArgumentException("Duplicate option id: "+id); //$NON-NLS-1$
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getSupportedValues(java.lang.String)
-	 */
-	@Override
-	public ValueSet getSupportedValues(String name) {
-		return getOption(name).values;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#isPublished(java.lang.String)
-	 */
-	@Override
-	public boolean isPublished(String name) {
-		return getOption(name).published;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getOptionGroup(java.lang.String)
-	 */
-	@Override
-	public String getOptionGroup(String name) {
-		return getOption(name).group;
+		options.put(id, option);
 	}
 
 	/**
@@ -170,129 +155,178 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 	 */
 	@Override
 	public Set<Identity> getGroupIdentifiers() {
-		return CollectionUtils.getSetProxy(groupIdentifiers);
+		Set<Identity> result = new HashSet<>(groupIdentifiers);
+		if(hasTemplate()) {
+			result.addAll(getTemplate().getGroupIdentifiers());
+		}
+
+		return result;
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#isMultiValue(java.lang.String)
-	 */
-	@Override
-	public boolean isMultiValue(String name) {
-		return getOption(name).multivalue;
-	}
+	public static class OptionImpl implements Option {
+		private Object defaultValue;
+		private ValueType valueType;
+		private final String id;
+		private String name;
+		private String description;
+		private String group;
+		private ValueSet values;
+		private ValueRange range;
+		private boolean published = DEFAULT_PUBLISHED_VALUE;
+		private boolean multivalue = DEFAULT_MULTIVALUE_VALUE;
 
-	@Override
-	public void addOption(String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+		public OptionImpl(String id) {
+			if (id == null)
+				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+			this.id = id;
+		}
 
-		Option option = options.get(name);
-		if(option!=null)
-			throw new IllegalArgumentException("Duplicate option name: "+name); //$NON-NLS-1$
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getIcon()
+		 */
+		@Override
+		public Icon getIcon() {
+			return null;
+		}
+		/**
+		 * @see de.ims.icarus.util.id.Identity#getOwner()
+		 */
+		@Override
+		public Object getOwner() {
+			return this;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getId()
+		 */
+		@Override
+		public String getId() {
+			return id;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getDefaultValue()
+		 */
+		@Override
+		public Object getDefaultValue() {
+			return defaultValue;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getValueType()
+		 */
+		@Override
+		public ValueType getValueType() {
+			return valueType;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getName()
+		 */
+		@Override
+		public String getName() {
+			return name;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			return description;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getSupportedValues()
+		 */
+		@Override
+		public ValueSet getSupportedValues() {
+			return values;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getSupportedRange()
+		 */
+		@Override
+		public ValueRange getSupportedRange() {
+			return range;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getOptionGroup()
+		 */
+		@Override
+		public String getOptionGroup() {
+			return group;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#isPublished()
+		 */
+		@Override
+		public boolean isPublished() {
+			return published;
+		}
+		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#isMultiValue()
+		 */
+		@Override
+		public boolean isMultiValue() {
+			return multivalue;
+		}
 
-		option = new Option();
+		/**
+		 * @param defaultValue the defaultValue to set
+		 */
+		public void setDefaultValue(Object defaultValue) {
+			this.defaultValue = defaultValue;
+		}
 
-		options.put(name, option);
-		baseNames.add(name);
-	}
+		/**
+		 * @param valueType the valueType to set
+		 */
+		public void setValueType(ValueType valueType) {
+			this.valueType = valueType;
+		}
 
-	@Override
-	public void removeOption(String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+		/**
+		 * @param name the name to set
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}
 
-		if(options.remove(name)==null)
-			throw new IllegalArgumentException("Unknown option name: "+name); //$NON-NLS-1$
+		/**
+		 * @param description the description to set
+		 */
+		public void setDescription(String description) {
+			this.description = description;
+		}
 
-		baseNames.remove(name);
-	}
+		/**
+		 * @param group the group to set
+		 */
+		public void setGroup(String group) {
+			this.group = group;
+		}
 
-	@Override
-	public void setName(String key, String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+		/**
+		 * @param values the values to set
+		 */
+		public void setValues(ValueSet values) {
+			this.values = values;
+		}
 
-		getOption(key).name = name;
-	}
+		/**
+		 * @param range the range to set
+		 */
+		public void setRange(ValueRange range) {
+			this.range = range;
+		}
 
-	@Override
-	public void setDescription(String key, String description) {
-		if (description == null)
-			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
+		/**
+		 * @param published the published to set
+		 */
+		public void setPublished(boolean published) {
+			this.published = published;
+		}
 
-		getOption(key).description = description;
-	}
-
-	@Override
-	public void setDefaultValue(String key, Object defaultValue) {
-		getOption(key).defaultValue = defaultValue;
-	}
-
-	@Override
-	public void setValueType(String key, ValueType valueType) {
-		if (valueType == null)
-			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
-
-		getOption(key).valueType = valueType;
-	}
-
-	@Override
-	public void setSupportedValues(String key, ValueSet values) {
-		getOption(key).values = values;
-	}
-
-	public void setSupportedRange(String key, ValueRange range) {
-		getOption(key).range = range;
-	}
-
-	@Override
-	public void setPublished(String name, boolean published) {
-		getOption(name).published = published;
-	}
-
-	@Override
-	public void setOptionGroup(String key, String group) {
-		getOption(key).group = group;
-	}
-
-	@Override
-	public void setMultiValue(String name, boolean multivalue) {
-		getOption(name).multivalue = multivalue;
-	}
-
-	@Override
-	public void addGroupIdentifier(Identity identity) {
-		if (identity == null)
-			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
-
-		groupIdentifiers.add(identity);
-	}
-
-	@Override
-	public void removeGroupIdentifier(Identity identity) {
-		if (identity == null)
-			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
-
-		groupIdentifiers.remove(identity);
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.manifest.OptionsManifest#getSupportedRange(java.lang.String)
-	 */
-	@Override
-	public ValueRange getSupportedRange(String name) {
-		return getOption(name).range;
-	}
-
-	private static class Option {
-		public Object defaultValue;
-		public ValueType valueType;
-		public String name;
-		public String description;
-		public String group;
-		public ValueSet values;
-		public ValueRange range;
-		public boolean published = true;
-		public boolean multivalue = false;
+		/**
+		 * @param multivalue the multivalue to set
+		 */
+		public void setMultivalue(boolean multivalue) {
+			this.multivalue = multivalue;
+		}
 	}
 }

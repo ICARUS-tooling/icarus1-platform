@@ -26,7 +26,10 @@
 package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.MemberManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -37,14 +40,31 @@ public abstract class AbstractForeignImplementationManifest<M extends MemberMani
 
 	private ImplementationManifest implementationManifest;
 
-	protected AbstractForeignImplementationManifest() {
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	protected AbstractForeignImplementationManifest(
+			ManifestSource manifestSource, CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
 
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		if(implementationManifest!=null) {
+			implementationManifest.writeXml(serializer);
+		}
 	}
 
 	/**
 	 * @return the implementationManifest
 	 */
-	public ImplementationManifest getImplementationManifest() {
+	protected ImplementationManifest getImplementationManifest() {
 		return implementationManifest;
 	}
 

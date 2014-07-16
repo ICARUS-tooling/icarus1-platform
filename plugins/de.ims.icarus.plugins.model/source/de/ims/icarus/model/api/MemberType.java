@@ -46,10 +46,10 @@ public enum MemberType implements XmlResource {
 	LAYER; // No distinction between different layer types. they are defined by the manifest type
 
 	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
+	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
 	 */
 	@Override
-	public String getValue() {
+	public String getXmlValue() {
 		return name();
 	}
 }

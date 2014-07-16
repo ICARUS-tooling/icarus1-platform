@@ -61,6 +61,11 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
 @AccessControl(AccessPolicy.DENY)
 public interface AnnotationLayerManifest extends LayerManifest {
 
+	public static final boolean DEFAULT_SEARCHABLE_VALUE = true;
+	public static final boolean DEFAULT_INDEXABLE_VALUE = true;
+	public static final boolean DEFAULT_DEEP_ANNOTATION_VALUE = false;
+	public static final boolean DEFAULT_ALLOW_UNKNOWN_KEYS_VALUE = false;
+
 	/**
 	 * Returns the available keys that can be used for annotation. The returned
 	 * set is always non-null and never empty.
@@ -154,17 +159,17 @@ public interface AnnotationLayerManifest extends LayerManifest {
 
 	// Modification methods
 
-	void setDefaultKey(String key);
+//	void setDefaultKey(String key);
 
-	void setAllowUnknownKeys(boolean allowUnknownKeys);
+//	void setAllowUnknownKeys(boolean allowUnknownKeys);
 
-	void setDeepAnnotation(boolean deepAnnotation);
+//	void setDeepAnnotation(boolean deepAnnotation);
 
-	void setIndexable(boolean indexable);
+//	void setIndexable(boolean indexable);
 
-	void setSearchable(boolean searchable);
+//	void setSearchable(boolean searchable);
 
-	void addAnnotationManifest(AnnotationManifest annotationManifest);
+//	void addAnnotationManifest(AnnotationManifest annotationManifest);
 
-	void removeAnnotationManifest(AnnotationManifest annotationManifest);
+//	void removeAnnotationManifest(AnnotationManifest annotationManifest);
 }

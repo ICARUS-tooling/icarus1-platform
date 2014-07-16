@@ -32,6 +32,7 @@ import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.xml.ModelXmlElement;
 
 /**
  * @author Markus Gärtner
@@ -39,7 +40,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface Documentation extends ModifiableIdentity {
+public interface Documentation extends ModifiableIdentity, ModelXmlElement {
 
 	@AccessRestriction(AccessMode.READ)
 	Documentable getTarget();
@@ -52,13 +53,13 @@ public interface Documentation extends ModifiableIdentity {
 
 	// Modification methods
 
-	void setTarget(Documentable documentable);
-
-	void setContent(String content);
-
-	void addResource(Resource resource);
-
-	void removeResource(Resource resource);
+//	void setTarget(Documentable documentable);
+//
+//	void setContent(String content);
+//
+//	void addResource(Resource resource);
+//
+//	void removeResource(Resource resource);
 
 	@AccessControl(AccessPolicy.DENY)
 	public interface Resource extends ModifiableIdentity {

@@ -67,11 +67,11 @@ public interface DriverManifest extends MemberManifest {
 
 	// Modification methods
 
-	void setImplementationManifest(ImplementationManifest implementationManifest);
-
-	void addIndexManifest(IndexManifest indexManifest);
-
-	void removeIndexManifest(IndexManifest indexManifest);
-
-	void setLocationType(LocationType locationType);
+//	void setImplementationManifest(ImplementationManifest implementationManifest);
+//
+//	void addIndexManifest(IndexManifest indexManifest);
+//
+//	void removeIndexManifest(IndexManifest indexManifest);
+//
+//	void setLocationType(LocationType locationType);
 }

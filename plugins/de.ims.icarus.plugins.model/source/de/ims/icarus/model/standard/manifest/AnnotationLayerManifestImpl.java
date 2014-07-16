@@ -25,14 +25,19 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.model.api.manifest.LayerGroupManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -42,12 +47,64 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class AnnotationLayerManifestImpl extends AbstractLayerManifest<AnnotationLayerManifest> implements AnnotationLayerManifest {
 
-	private Map<String, AnnotationManifest> annotationManifests;
+	private Map<String, AnnotationManifest> annotationManifests = new LinkedHashMap<>();
 	private String defaultKey;
-	private boolean deepAnnotation = false;
-	private boolean allowUnknownKeys = false;
-	private boolean searchable = true;
-	private boolean indexable = true;
+	private Boolean deepAnnotation;
+	private Boolean allowUnknownKeys;
+	private Boolean searchable;
+	private Boolean indexable;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 * @param layerGroupManifest
+	 */
+	public AnnotationLayerManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
+		super(manifestSource, registry, layerGroupManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write default key
+		serializer.writeAttribute(ATTR_DEFAULT_KEY, defaultKey);
+
+		// Write flags
+		writeFlag(serializer, ATTR_DEEP_ANNOTATION, deepAnnotation, DEFAULT_DEEP_ANNOTATION_VALUE);
+		writeFlag(serializer, ATTR_UNKNOWN_KEYS, allowUnknownKeys, DEFAULT_ALLOW_UNKNOWN_KEYS_VALUE);
+		writeFlag(serializer, ATTR_SERCH, searchable, DEFAULT_SEARCHABLE_VALUE);
+		writeFlag(serializer, ATTR_INDEX, indexable, DEFAULT_INDEXABLE_VALUE);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		// Write annotation manifests
+		if(annotationManifests!=null && !annotationManifests.isEmpty()) {
+			List<String> keys = CollectionUtils.asSortedList(annotationManifests.keySet());
+
+			for(String key : keys) {
+				annotationManifests.get(key).writeXml(serializer);
+			}
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_ANNOTATION_LAYER;
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -62,16 +119,14 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public Set<String> getAvailableKeys() {
-		Set<String> keys = null;
+		Set<String> keys = new HashSet<>();
 
 		if(annotationManifests!=null) {
-			keys = annotationManifests.keySet();
+			keys.addAll(annotationManifests.keySet());
 		}
 
-		if(keys==null) {
-			keys = Collections.emptySet();
-		} else {
-			keys = CollectionUtils.getSetProxy(keys);
+		if(hasTemplate()) {
+			keys.addAll(getTemplate().getAvailableKeys());
 		}
 
 		return keys;
@@ -85,24 +140,23 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 		if (key == null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 
-		if(annotationManifests==null)
-			throw new UnsupportedOperationException();
 
 		AnnotationManifest manifest = annotationManifests.get(key);
+
+		if(manifest==null && hasTemplate()) {
+			manifest = getTemplate().getAnnotationManifest(key);
+		}
+
 		if(manifest==null)
 			throw new IllegalArgumentException("Unknown annotation key: "+key); //$NON-NLS-1$
 
 		return manifest;
 	}
 
-	@Override
+//	@Override
 	public void addAnnotationManifest(AnnotationManifest manifest) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
-
-		if(annotationManifests==null) {
-			annotationManifests = new LinkedHashMap<>();
-		}
 
 		String key = manifest.getKey();
 
@@ -112,7 +166,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 		annotationManifests.put(key, manifest);
 	}
 
-	@Override
+//	@Override
 	public void removeAnnotationManifest(AnnotationManifest manifest) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
@@ -128,13 +182,17 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public String getDefaultKey() {
-		return defaultKey;
+		String result = defaultKey;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getDefaultKey();
+		}
+		return result;
 	}
 
 	/**
 	 * @param defaultAnnotationManifest the defaultAnnotationManifest to set
 	 */
-	@Override
+//	@Override
 	public void setDefaultKey(String defaultKey) {
 		this.defaultKey = defaultKey;
 	}
@@ -144,7 +202,11 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public boolean isDeepAnnotation() {
-		return deepAnnotation;
+		if(deepAnnotation==null) {
+			return hasTemplate() ? getTemplate().isDeepAnnotation() : DEFAULT_DEEP_ANNOTATION_VALUE;
+		} else {
+			return deepAnnotation.booleanValue();
+		}
 	}
 
 	/**
@@ -152,13 +214,17 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public boolean allowUnknownKeys() {
-		return allowUnknownKeys;
+		if(allowUnknownKeys==null) {
+			return hasTemplate() ? getTemplate().allowUnknownKeys() : DEFAULT_ALLOW_UNKNOWN_KEYS_VALUE;
+		} else {
+			return allowUnknownKeys.booleanValue();
+		}
 	}
 
 	/**
 	 * @param deepAnnotation the deepAnnotation to set
 	 */
-	@Override
+//	@Override
 	public void setDeepAnnotation(boolean deepAnnotation) {
 		this.deepAnnotation = deepAnnotation;
 	}
@@ -166,7 +232,7 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	/**
 	 * @param allowUnknownKeys the allowUnknownKeys to set
 	 */
-	@Override
+//	@Override
 	public void setAllowUnknownKeys(boolean allowUnknownKeys) {
 		this.allowUnknownKeys = allowUnknownKeys;
 	}
@@ -176,7 +242,11 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public boolean isIndexable() {
-		return indexable;
+		if(indexable==null) {
+			return hasTemplate() ? getTemplate().isIndexable() : DEFAULT_INDEXABLE_VALUE;
+		} else {
+			return indexable.booleanValue();
+		}
 	}
 
 	/**
@@ -184,13 +254,17 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	 */
 	@Override
 	public boolean isSearchable() {
-		return searchable;
+		if(searchable==null) {
+			return hasTemplate() ? getTemplate().isSearchable() : DEFAULT_SEARCHABLE_VALUE;
+		} else {
+			return searchable.booleanValue();
+		}
 	}
 
 	/**
 	 * @param searchable the searchable to set
 	 */
-	@Override
+//	@Override
 	public void setSearchable(boolean searchable) {
 		this.searchable = searchable;
 	}
@@ -198,26 +272,8 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	/**
 	 * @param indexable the indexable to set
 	 */
-	@Override
+//	@Override
 	public void setIndexable(boolean indexable) {
 		this.indexable = indexable;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(AnnotationLayerManifest template) {
-		super.copyFrom(template);
-
-		defaultKey = template.getDefaultKey();
-		deepAnnotation = template.isDeepAnnotation();
-		allowUnknownKeys = template.allowUnknownKeys();
-		searchable = template.isSearchable();
-		indexable = template.isIndexable();
-
-		for(String key : template.getAvailableKeys()) {
-			addAnnotationManifest(template.getAnnotationManifest(key));
-		}
 	}
 }

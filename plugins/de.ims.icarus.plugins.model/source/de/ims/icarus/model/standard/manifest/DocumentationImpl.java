@@ -31,6 +31,8 @@ import java.util.List;
 
 import de.ims.icarus.model.api.manifest.Documentable;
 import de.ims.icarus.model.api.manifest.Documentation;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -40,11 +42,41 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class DocumentationImpl extends DefaultModifiableIdentity implements Documentation {
 
-	private Documentable target;
+	private final Documentable target;
 
 	private String content;
 
 	private final List<Resource> resources = new ArrayList<>();
+
+	public DocumentationImpl(Documentable target) {
+		if (target == null)
+			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
+
+		this.target = target;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	public void writeXml(XmlSerializer serializer) throws Exception {
+		serializer.startElement(TAG_DOCUMENTATION);
+
+		ModelXmlUtils.writeIdentityAttributes(serializer, this);
+
+		serializer.startElement(TAG_CONTENT);
+		serializer.writeText(content);
+		serializer.endElement(TAG_CONTENT);
+
+		for(Resource resource : resources) {
+			serializer.startElement(TAG_RESOURCE);
+			ModelXmlUtils.writeIdentityAttributes(serializer, resource);
+			serializer.writeText(resource.getURL().toExternalForm());
+			serializer.endElement(TAG_RESOURCE);
+		}
+
+		serializer.endElement(TAG_DOCUMENTATION);
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.Documentation#getTarget()
@@ -54,13 +86,13 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		return target;
 	}
 
-	/**
-	 * @param target the target to set
-	 */
-	@Override
-	public void setTarget(Documentable target) {
-		this.target = target;
-	}
+//	/**
+//	 * @param target the target to set
+//	 */
+//	@Override
+//	public void setTarget(Documentable target) {
+//		this.target = target;
+//	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.Documentation#getContent()
@@ -81,12 +113,12 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 	/**
 	 * @param content the content to set
 	 */
-	@Override
+//	@Override
 	public void setContent(String content) {
 		this.content = content;
 	}
 
-	@Override
+//	@Override
 	public void addResource(Resource resource) {
 		if (resource == null)
 			throw new NullPointerException("Invalid resource"); //$NON-NLS-1$
@@ -94,7 +126,7 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		resources.add(resource);
 	}
 
-	@Override
+//	@Override
 	public void removeResource(Resource resource) {
 		if (resource == null)
 			throw new NullPointerException("Invalid resource"); //$NON-NLS-1$

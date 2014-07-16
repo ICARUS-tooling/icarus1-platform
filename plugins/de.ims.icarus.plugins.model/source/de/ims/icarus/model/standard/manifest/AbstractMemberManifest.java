@@ -27,9 +27,11 @@ package de.ims.icarus.model.standard.manifest;
 
 import javax.swing.Icon;
 
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
-import de.ims.icarus.util.ClassUtils;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  *
@@ -43,28 +45,25 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 
 	private String name;
 	private String description;
-	private String id;
 	private Icon icon;
 
 	/**
-	 * @see java.lang.Object#hashCode()
+	 * @param manifestSource
+	 * @param registry
 	 */
-	@Override
-	public int hashCode() {
-		return id==null ? 0 : id.hashCode();
+	protected AbstractMemberManifest(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
 	}
 
 	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof MemberManifest) {
-			MemberManifest other = (MemberManifest) obj;
-			return getManifestType()==other.getManifestType()
-					&& ClassUtils.equals(id, other.getId());
-		}
-		return false;
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		ModelXmlUtils.writeIdentityAttributes(serializer, null, name, description, icon);
 	}
 
 	/**
@@ -74,8 +73,8 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	public String toString() {
 		String s = getManifestType().toString();
 
-		if(id!=null) {
-			s += "@"+id; //$NON-NLS-1$
+		if(getId()!=null) {
+			s += "@"+getId(); //$NON-NLS-1$
 		}
 
 		return s;
@@ -86,7 +85,11 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	 */
 	@Override
 	public String getName() {
-		return name;
+		String result = name;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getName();
+		}
+		return result;
 	}
 
 	/**
@@ -94,15 +97,11 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	 */
 	@Override
 	public String getDescription() {
-		return description;
-	}
-
-	/**
-	 * @return the id
-	 */
-	@Override
-	public String getId() {
-		return id;
+		String result = description;
+		if(result==null && hasTemplate()) {
+			description = getTemplate().getDescription();
+		}
+		return result;
 	}
 
 	/**
@@ -110,12 +109,17 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	 */
 	@Override
 	public Icon getIcon() {
-		return icon;
+		Icon result = icon;
+		if(result==null && hasTemplate()) {
+			icon = getTemplate().getIcon();
+		}
+		return result;
 	}
 
 	/**
 	 * @param name the name to set
 	 */
+	@Override
 	public void setName(String name) {
 		if (name == null)
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
@@ -126,6 +130,7 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	/**
 	 * @param description the description to set
 	 */
+	@Override
 	public void setDescription(String description) {
 		if (description == null)
 			throw new NullPointerException("Invalid description"); //$NON-NLS-1$
@@ -134,21 +139,9 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	}
 
 	/**
-	 * @param id the id to set
-	 */
-	@Override
-	public void setId(String id) {
-		if (id == null)
-			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
-		if(!CorpusRegistry.isValidId(id))
-			throw new IllegalArgumentException("Id format not supported: "+id); //$NON-NLS-1$
-
-		this.id = id;
-	}
-
-	/**
 	 * @param icon the icon to set
 	 */
+	@Override
 	public void setIcon(Icon icon) {
 		if (icon == null)
 			throw new NullPointerException("Invalid icon"); //$NON-NLS-1$
@@ -162,18 +155,5 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	@Override
 	public Object getOwner() {
 		return this;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(M template) {
-		super.copyFrom(template);
-
-		id = template.getId();
-		name = template.getName();
-		description = template.getDescription();
-		icon = template.getIcon();
 	}
 }

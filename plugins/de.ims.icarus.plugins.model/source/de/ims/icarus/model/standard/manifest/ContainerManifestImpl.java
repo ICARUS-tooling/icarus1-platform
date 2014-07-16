@@ -27,8 +27,11 @@ package de.ims.icarus.model.standard.manifest;
 
 import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
  * @author Markus Gärtner
@@ -38,10 +41,42 @@ import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManifest> implements ContainerManifest {
 
 //	private ContainerManifest parentManifest;
-	private MarkableLayerManifest layerManifest;
+	private final MarkableLayerManifest layerManifest;
 
 //	private ContainerManifest elementManifest;
-	private ContainerType containerType = ContainerType.LIST;
+	private ContainerType containerType;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	public ContainerManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry, MarkableLayerManifest layerManifest) {
+		super(manifestSource, registry);
+
+		this.layerManifest = layerManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write container type
+		if(containerType!=null) {
+			serializer.writeAttribute(ATTR_CONTAINER_TYPE, containerType.getXmlValue());
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_CONTAINER;
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -95,22 +130,31 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 //		this.parentManifest = parentManifest;
 //	}
 
-	/**
-	 * @param layerManifest the layerManifest to set
-	 */
-	public void setLayerManifest(MarkableLayerManifest layerManifest) {
-		if (layerManifest == null)
-			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
-
-		this.layerManifest = layerManifest;
-	}
+//	/**
+//	 * @param layerManifest the layerManifest to set
+//	 */
+//	public void setLayerManifest(MarkableLayerManifest layerManifest) {
+//		if (layerManifest == null)
+//			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
+//
+//		this.layerManifest = layerManifest;
+//	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
-		return containerType==null ? ContainerType.LIST : containerType;
+		ContainerType result = containerType;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getContainerType();
+		}
+
+		if(result==null) {
+			result = ContainerType.LIST;
+		}
+
+		return result;
 	}
 
 	public void setContainerType(ContainerType containerType) {
@@ -118,16 +162,6 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 			throw new NullPointerException("Invalid containerType"); //$NON-NLS-1$
 
 		this.containerType = containerType;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(ContainerManifest template) {
-		super.copyFrom(template);
-
-		containerType = template.getContainerType();
 	}
 
 //	/**

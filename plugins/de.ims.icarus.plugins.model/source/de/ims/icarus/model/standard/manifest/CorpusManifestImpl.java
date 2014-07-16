@@ -31,9 +31,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -43,11 +49,74 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> implements CorpusManifest {
 
-	private ContextManifest defaultContextManifest;
-	private List<ContextManifest> contextManifests = new ArrayList<>(3);
-	private Map<String, ContextManifest> contextManifestLookup = new HashMap<>();
+	private ContextLink rootContext;
+	private final List<ContextManifest> contextManifests = new ArrayList<>(3);
+	private final Map<String, ContextManifest> contextManifestLookup = new HashMap<>();
 	private boolean editable;
-	private List<Note> notes = new ArrayList<>();
+	private final List<Note> notes = new ArrayList<>();
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	public CorpusManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write editable flag
+		if(editable!=DEFAULT_EDITABLE_VALUE) {
+			serializer.writeAttribute(ATTR_EDITABLE, editable);
+		}
+
+		// Write root context
+		serializer.writeAttribute(ATTR_ROOT_CONTEXT, rootContext.getId());
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		// Write notes
+		for(Note note : notes) {
+			ModelXmlUtils.writeNoteElement(serializer, note);
+		}
+
+		// Write contained context manifests
+		for(ContextManifest contextManifest : contextManifests) {
+			contextManifest.writeXml(serializer);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_CORPUS;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#setIsTemplate(boolean)
+	 */
+	@Override
+	public void setIsTemplate(boolean isTemplate) {
+		if(isTemplate)
+			throw new ModelException(ModelError.MANIFEST_ILLEGAL_TEMPLATE,
+					"Cannot declare corpus manifest as template"); //$NON-NLS-1$
+
+		super.setIsTemplate(isTemplate);
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.MemberManifest#getManifestType()
@@ -62,24 +131,22 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 	 */
 	@Override
 	public ContextManifest getRootContextManifest() {
-		return defaultContextManifest;
+		return rootContext.get();
 	}
 
 	/**
-	 * @param defaultContextManifest the defaultContextManifest to set
+	 * @param rootContextManifest the rootContextManifest to set
 	 */
-	public void setDefaultContextManifest(ContextManifest defaultContextManifest) {
-		if (defaultContextManifest == null)
-			throw new NullPointerException("Invalid defaultContextManifest"); //$NON-NLS-1$
+	public void setRootContextId(String rootContextId) {
 
-		this.defaultContextManifest = defaultContextManifest;
+		rootContext = new ContextLink(rootContextId);
 	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.CorpusManifest#getCustomContextManifests()
 	 */
 	@Override
-	public List<ContextManifest> getCustomContextManifests() {
+	public List<ContextManifest> getContextManifests() {
 		return CollectionUtils.getListProxy(contextManifests);
 	}
 
@@ -103,6 +170,9 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 	public void removeCustomContextManifest(ContextManifest manifest) {
 		if (manifest == null)
 			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+
+		if(manifest==getRootContextManifest())
+			throw new IllegalArgumentException("Cannot remove root context!"); //$NON-NLS-1$
 
 		if(!contextManifests.remove(manifest))
 			throw new IllegalArgumentException("Unknown context manifest: "+manifest); //$NON-NLS-1$
@@ -166,12 +236,23 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 		notes.remove(note);
 	}
 
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
-	 */
-	@Override
-	protected void copyFrom(CorpusManifest template) {
-		throw new UnsupportedOperationException();
+	protected class ContextLink extends Link<ContextManifest> {
+
+		/**
+		 * @param id
+		 */
+		public ContextLink(String id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 */
+		@Override
+		protected ContextManifest resolve() {
+			return getContextManifest(getId());
+		}
+
 	}
 
 	public static class NoteImpl implements Note {

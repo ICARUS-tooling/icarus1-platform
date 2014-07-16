@@ -72,10 +72,12 @@ public interface Derivable extends Manifest {
 
 	void setIsTemplate(boolean isTemplate);
 
-	/**
-	 * Changes the template used to derive content from.
-	 *
-	 * @param template
-	 */
-	void setTemplate(Derivable template);
+//	/**
+//	 * Changes the template used to derive content from.
+//	 *
+//	 * @param template
+//	 */
+//	void setTemplate(Derivable template);
+
+	void setTemplateId(String templateId);
 }

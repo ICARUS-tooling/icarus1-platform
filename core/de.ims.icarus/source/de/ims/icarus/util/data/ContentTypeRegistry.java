@@ -313,7 +313,7 @@ public final class ContentTypeRegistry {
 
 	/**
 	 * Checks whether {@code ContentType} {@code target} is compatible
-	 * towards the {@code type} argument. This check is delegates to {@code type}'s
+	 * towards the {@code type} argument. This check is delegated to {@code type}'s
 	 * {@link ContentType#accepts(Object)} method with the result of {@code target}'s
 	 * {@link ContentType#getContentClass()}.
 	 * <p>
@@ -728,7 +728,7 @@ public final class ContentTypeRegistry {
 	 * @version $Id$
 	 *
 	 */
-	private class ContentTypePair {
+	private static class ContentTypePair {
 		private ContentType inputType;
 		private ContentType outputType;
 
@@ -765,7 +765,7 @@ public final class ContentTypeRegistry {
 		}
 	}
 
-	private class DefaultContentType implements ContentType {
+	private static class DefaultContentType implements ContentType {
 
 		private final Class<?> contentClass;
 
@@ -810,7 +810,7 @@ public final class ContentTypeRegistry {
 		 */
 		@Override
 		public Object getOwner() {
-			return ContentTypeRegistry.this;
+			return this;
 		}
 
 		/**

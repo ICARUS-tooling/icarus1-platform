@@ -93,9 +93,9 @@ public interface MarkableLayerManifest extends LayerManifest {
 
 	// Modification methods
 
-	void setBoundaryLayerManifest(TargetLayerManifest layerManifest);
-
-	void removeContainerManifest(ContainerManifest containerManifest);
-
-	void setContainerManifest(ContainerManifest containerManifest, int level);
+//	void setBoundaryLayerManifest(TargetLayerManifest layerManifest);
+//
+//	void removeContainerManifest(ContainerManifest containerManifest);
+//
+//	void setContainerManifest(ContainerManifest containerManifest, int level);
 }

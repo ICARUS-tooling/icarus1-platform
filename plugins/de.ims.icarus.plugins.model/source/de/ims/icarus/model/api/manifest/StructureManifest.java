@@ -39,6 +39,8 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
 @AccessControl(AccessPolicy.DENY)
 public interface StructureManifest extends ContainerManifest {
 
+	public static final boolean DEFAULT_MULTI_ROOT_VALUE = false;
+
 	/**
 	 * Returns the type of this structure
 	 * @return
@@ -51,7 +53,7 @@ public interface StructureManifest extends ContainerManifest {
 
 	// Modification methods
 
-	void setStructureType(StructureType structureType);
+//	void setStructureType(StructureType structureType);
 
-	void setMultiRootAllowed(boolean multiRootAllowed);
+//	void setMultiRootAllowed(boolean multiRootAllowed);
 }

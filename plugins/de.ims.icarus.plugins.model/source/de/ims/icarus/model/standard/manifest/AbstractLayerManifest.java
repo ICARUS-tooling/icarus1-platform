@@ -28,11 +28,17 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -42,16 +48,53 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractMemberManifest<L> implements LayerManifest {
 
-	private LayerGroupManifest layerGroupManifest;
+	private final LayerGroupManifest layerGroupManifest;
 	private List<TargetLayerManifest> baseLayerManifests = new ArrayList<>(3);
-	private LayerType layerType;
+	private LayerTypeLink layerType;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	protected AbstractLayerManifest(ManifestSource manifestSource,
+			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
+		super(manifestSource, registry);
+
+		this.layerGroupManifest = layerGroupManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write layer type
+		if(layerType!=null) {
+			serializer.writeAttribute(ATTR_LAYER_TYPE, layerType.getId());
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		// Write base layers
+		for(TargetLayerManifest layerManifest : baseLayerManifests) {
+			ModelXmlUtils.writeTargetLayerManifestElement(serializer, TAG_BASE_LAYER, layerManifest);
+		}
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.LayerManifest#getContextManifest()
 	 */
 	@Override
 	public ContextManifest getContextManifest() {
-		return layerGroupManifest.getContextManifest();
+		return layerGroupManifest==null ? null : layerGroupManifest.getContextManifest();
 	}
 
 	/**
@@ -62,23 +105,23 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		return layerGroupManifest;
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerManifest#setGroupManifest(de.ims.icarus.model.api.manifest.LayerGroupManifest)
-	 */
-	@Override
-	public void setGroupManifest(LayerGroupManifest layerGroupManifest) {
-		if (layerGroupManifest == null)
-			throw new NullPointerException("Invalid layerGroupManifest"); //$NON-NLS-1$
-
-		this.layerGroupManifest = layerGroupManifest;
-	}
+//	/**
+//	 * @see de.ims.icarus.model.api.manifest.LayerManifest#setGroupManifest(de.ims.icarus.model.api.manifest.LayerGroupManifest)
+//	 */
+//	@Override
+//	public void setGroupManifest(LayerGroupManifest layerGroupManifest) {
+//		if (layerGroupManifest == null)
+//			throw new NullPointerException("Invalid layerGroupManifest"); //$NON-NLS-1$
+//
+//		this.layerGroupManifest = layerGroupManifest;
+//	}
 
 	/**
 	 * @param layerType the layerType to set
 	 */
-	@Override
-	public void setLayerType(LayerType layerType) {
-		this.layerType = layerType;
+//	@Override
+	public void setLayerTypeId(String layerTypeId) {
+		layerType = new LayerTypeLink(layerTypeId);
 	}
 
 	/**
@@ -86,7 +129,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	 */
 	@Override
 	public LayerType getLayerType() {
-		return layerType;
+		return layerType.get();
 	}
 
 	/**
@@ -97,58 +140,106 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		return CollectionUtils.getListProxy(baseLayerManifests);
 	}
 
-	@Override
-	public void addBaseLayerManifest(TargetLayerManifest manifest) {
-		if (manifest == null)
-			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+//	@Override
+//	public void addBaseLayerManifest(TargetLayerManifest manifest) {
+//		if (manifest == null)
+//			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+//
+//		baseLayerManifests.remove(manifest);
+//		baseLayerManifests.add(manifest);
+//	}
 
-		baseLayerManifests.remove(manifest);
-		baseLayerManifests.add(manifest);
+//	@Override
+//	public void removeBaseLayerManifest(TargetLayerManifest manifest) {
+//		if (manifest == null)
+//			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
+//
+//		baseLayerManifests.remove(manifest);
+//	}
+
+//	protected TargetLayerManifest createTargetLayer(String targetId, boolean localOnly) {
+//		TargetLayerManifestImpl targetLayerManifest = new TargetLayerManifestImpl(targetId);
+//
+////		ContextManifest contextManifest = getContextManifest();
+////
+////		if(!localOnly && contextManifest!=null) {
+////			targetLayerManifest.setPrerequisiteManifest(contextManifest.getPrerequisite(targetId));
+////		}
+//
+//		return targetLayerManifest;
+//	}
+
+//	protected boolean isLocalGroup() {
+//		LayerGroupManifest groupManifest = this.layerGroupManifest;
+//		if(groupManifest==null || !groupManifest.isIndependent()) {
+//			return false;
+//		}
+//
+//		ContextManifest contextManifest = groupManifest.getContextManifest();
+//
+//		return contextManifest!=null && contextManifest.isIndependentContext();
+//	}
+
+	protected void checkAllowsTargetLayer() throws ModelException {
+		if(layerGroupManifest==null || layerGroupManifest.getContextManifest()==null)
+			throw new ModelException(ModelError.MANIFEST_MISSING_CONTEXT,
+					"Cannot make links to other layers without enclosing context: "+getId()); //$NON-NLS-1$
 	}
 
-	@Override
-	public void removeBaseLayerManifest(TargetLayerManifest manifest) {
-		if (manifest == null)
-			throw new NullPointerException("Invalid manifest"); //$NON-NLS-1$
-
-		baseLayerManifests.remove(manifest);
+	public TargetLayerManifest addBaseLayer(String baseLayerId) {
+		checkAllowsTargetLayer();
+		TargetLayerManifest targetLayerManifest = new TargetLayerManifestImpl(baseLayerId);
+		baseLayerManifests.add(targetLayerManifest);
+		return targetLayerManifest;
 	}
 
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#copyFrom(de.ims.icarus.model.api.manifest.MemberManifest)
-	 */
-	@Override
-	protected void copyFrom(L template) {
-		super.copyFrom(template);
+	protected class LayerLink extends Link<LayerManifest> {
 
-		layerType = template.getLayerType();
-
-		for(TargetLayerManifest baseLayerManifest : template.getBaseLayerManifests()) {
-			addBaseLayerManifest(baseLayerManifest);
+		/**
+		 * @param id
+		 */
+		public LayerLink(String id) {
+			super(id);
 		}
-	}
 
-	public static class TargetLayerManifestImpl implements TargetLayerManifest {
-
-		private final LayerManifest layerManifest;
-
-		private PrerequisiteManifest prerequisiteManifest;
-		private LayerManifest resolvedLayerManifest;
-
-		public TargetLayerManifestImpl(LayerManifest layerManifest) {
-			if (layerManifest == null)
-				throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
-
-			this.layerManifest = layerManifest;
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 */
+		@Override
+		protected LayerManifest resolve() {
+			return getContextManifest().getLayerManifest(getId());
 		}
 
-		public TargetLayerManifestImpl(LayerManifest layerManifest, TargetLayerManifest template) {
-			this(layerManifest);
+	}
 
-			if (template == null)
-				throw new NullPointerException("Invalid template"); //$NON-NLS-1$
+	protected class PrerequisiteLink extends MemoryLink<PrerequisiteManifest> {
 
-			prerequisiteManifest = template.getPrerequisite();
+		/**
+		 * @param id
+		 */
+		public PrerequisiteLink(String id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 */
+		@Override
+		protected PrerequisiteManifest resolve() {
+			return getContextManifest().getPrerequisite(getId());
+		}
+
+	}
+
+	public class TargetLayerManifestImpl implements TargetLayerManifest {
+
+//		private PrerequisiteManifest prerequisiteManifest;
+		private LayerLink resolvedLayer;
+		private PrerequisiteLink prerequisite;
+
+		public TargetLayerManifestImpl(String targetId) {
+			resolvedLayer = new LayerLink(targetId);
+			prerequisite = new PrerequisiteLink(targetId);
 		}
 
 		/**
@@ -156,7 +247,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		 */
 		@Override
 		public LayerManifest getLayerManifest() {
-			return layerManifest;
+			return AbstractLayerManifest.this;
 		}
 
 		/**
@@ -164,7 +255,8 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		 */
 		@Override
 		public PrerequisiteManifest getPrerequisite() {
-			return prerequisiteManifest;
+//			return getContextManifest().getPrerequisite(resolvedLayer.getId());
+			return prerequisite.get();
 		}
 
 		/**
@@ -172,48 +264,14 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		 */
 		@Override
 		public LayerManifest getResolvedLayerManifest() {
-			return resolvedLayerManifest;
+			return resolvedLayer.get();
 		}
 
-		/**
-		 * @param prerequisiteManifest the prerequisiteManifest to set
-		 */
-		public void setPrerequisiteManifest(PrerequisiteManifest prerequisiteManifest) {
-			this.prerequisiteManifest = prerequisiteManifest;
-		}
-
-		/**
-		 * @param resolvedLayerManifest the resolvedLayerManifest to set
-		 */
-		public void setResolvedLayerManifest(LayerManifest resolvedLayerManifest) {
-			if (resolvedLayerManifest == null)
-				throw new NullPointerException("Invalid resolvedLayerManifest"); //$NON-NLS-1$
-
-			this.resolvedLayerManifest = resolvedLayerManifest;
-		}
-
-		/**
-		 * @see java.lang.Object#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-			// TODO Auto-generated method stub
-			return super.hashCode();
-		}
-
-		/**
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof TargetLayerManifest) {
-				TargetLayerManifest other = (TargetLayerManifest) obj;
-				return (resolvedLayerManifest==null || resolvedLayerManifest==other.getResolvedLayerManifest())
-						&& (prerequisiteManifest==null || prerequisiteManifest==other.getPrerequisite());
-			}
-
-			return false;
-		}
-
+//		/**
+//		 * @param prerequisiteManifest the prerequisiteManifest to set
+//		 */
+//		public void setPrerequisiteManifest(PrerequisiteManifest prerequisiteManifest) {
+//			this.prerequisiteManifest = prerequisiteManifest;
+//		}
 	}
 }

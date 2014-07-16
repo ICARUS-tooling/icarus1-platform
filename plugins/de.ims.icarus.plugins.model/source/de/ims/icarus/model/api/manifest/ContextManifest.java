@@ -40,6 +40,8 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
 @AccessControl(AccessPolicy.DENY)
 public interface ContextManifest extends MemberManifest {
 
+	public static final boolean DEFAULT_INDEPENDENT_VALUE = false;
+
 	@AccessRestriction(AccessMode.READ)
 	CorpusManifest getCorpusManifest();
 
@@ -55,6 +57,9 @@ public interface ContextManifest extends MemberManifest {
 	 */
 	@AccessRestriction(AccessMode.READ)
 	List<PrerequisiteManifest> getPrerequisites();
+
+	@AccessRestriction(AccessMode.READ)
+	PrerequisiteManifest getPrerequisite(String alias);
 
 //	/**
 //	 * Generates a cloned version of this manifest that is identical to the current state
@@ -129,28 +134,28 @@ public interface ContextManifest extends MemberManifest {
 
 	// Modification methods
 
-	void setDriverManifest(DriverManifest driverManifest);
-
-	void setPrimaryLayerManifest(MarkableLayerManifest manifest);
-
-	void setBaseLayerManifest(MarkableLayerManifest manifest);
-
-	void setIndependentContext(boolean isIndependent);
-
-	void addPrerequisite(PrerequisiteManifest prerequisiteManifest);
-
-	void removePrerequisite(PrerequisiteManifest prerequisiteManifest);
-
-	void addLayerGroup(LayerGroupManifest groupManifest);
-
-	void removeLayerGroup(LayerGroupManifest groupManifest);
-
-	/**
-	 * Changes the location from which this context's data is loaded.
-	 *
-	 * @param manifest
-	 */
-	void setLocationManifest(LocationManifest manifest);
+//	void setDriverManifest(DriverManifest driverManifest);
+//
+//	void setPrimaryLayerManifest(MarkableLayerManifest manifest);
+//
+//	void setBaseLayerManifest(MarkableLayerManifest manifest);
+//
+//	void setIndependentContext(boolean isIndependent);
+//
+//	void addPrerequisite(PrerequisiteManifest prerequisiteManifest);
+//
+//	void removePrerequisite(PrerequisiteManifest prerequisiteManifest);
+//
+//	void addLayerGroup(LayerGroupManifest groupManifest);
+//
+//	void removeLayerGroup(LayerGroupManifest groupManifest);
+//
+//	/**
+//	 * Changes the location from which this context's data is loaded.
+//	 *
+//	 * @param manifest
+//	 */
+//	void setLocationManifest(LocationManifest manifest);
 
 	/**
 	 * Abstract description of a layer object this context depends on.

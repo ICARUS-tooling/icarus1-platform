@@ -29,6 +29,7 @@ import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.xml.ModelXmlElement;
 
 
 /**
@@ -47,7 +48,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface MemberManifest extends ModifiableIdentity, ModifiableManifest {
+public interface MemberManifest extends ModifiableIdentity, ModifiableManifest, ModelXmlElement {
 
 	/**
 	 * Returns the {@code type} of this manifest, i.e. that is

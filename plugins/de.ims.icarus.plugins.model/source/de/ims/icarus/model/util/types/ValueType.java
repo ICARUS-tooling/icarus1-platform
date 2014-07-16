@@ -192,7 +192,7 @@ public enum ValueType implements XmlResource {
 		@Override
 		public String toString(Object value) {
 			if(value instanceof IconWrapper) {
-				return ((IconWrapper)value).getValue();
+				return ((IconWrapper)value).getXmlValue();
 			} else
 				throw new IllegalArgumentException("Cannot serialize icon: "+value); //$NON-NLS-1$
 		}
@@ -227,10 +227,10 @@ public enum ValueType implements XmlResource {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getValue()
+	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
 	 */
 	@Override
-	public String getValue() {
+	public String getXmlValue() {
 		return xmlForm;
 	}
 

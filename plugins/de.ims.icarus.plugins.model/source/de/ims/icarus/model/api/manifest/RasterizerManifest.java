@@ -47,5 +47,5 @@ public interface RasterizerManifest extends MemberManifest {
 
 	// Modification methods
 
-	void setImplementationManifest(ImplementationManifest implementationManifest);
+//	void setImplementationManifest(ImplementationManifest implementationManifest);
 }

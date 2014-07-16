@@ -138,17 +138,17 @@ public interface AnnotationManifest extends MemberManifest {
 
 	// Modification methods
 
-	void setKey(String key);
-
-	void addAlias(String alias);
-
-	void removeAlias(String alias);
-
-	void setSupportedRange(ValueRange range);
-
-	void setSupportedValues(ValueSet values);
-
-	void setValueType(ValueType valueType);
-
-	void setContentType(ContentType contentType);
+//	void setKey(String key);
+//
+//	void addAlias(String alias);
+//
+//	void removeAlias(String alias);
+//
+//	void setSupportedRange(ValueRange range);
+//
+//	void setSupportedValues(ValueSet values);
+//
+//	void setValueType(ValueType valueType);
+//
+//	void setContentType(ContentType contentType);
 }

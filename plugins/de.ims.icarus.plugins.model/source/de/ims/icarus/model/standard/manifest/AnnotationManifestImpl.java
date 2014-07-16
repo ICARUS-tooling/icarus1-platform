@@ -26,15 +26,19 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.model.api.manifest.ManifestSource;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
+import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.util.types.ValueType;
-import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -46,23 +50,88 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 
 	private String key;
 	private List<String> aliases;
-	private ValueType valueType = ValueType.UNKNOWN;
+	private ValueType valueType;
 	private ValueSet values;
 	private ValueRange valueRange;
 	private ContentType contentType;
+
+	/**
+	 * @param manifestSource
+	 * @param registry
+	 */
+	public AnnotationManifestImpl(ManifestSource manifestSource,
+			CorpusRegistry registry) {
+		super(manifestSource, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeAttributes(XmlSerializer serializer) throws Exception {
+		super.writeAttributes(serializer);
+
+		// Write key
+		serializer.writeAttribute(ATTR_KEY, key);
+
+		// Write value type
+		if(valueType!=null) {
+			serializer.writeAttribute(ATTR_TYPE, ModelXmlUtils.getSerializedForm(valueType));
+		}
+
+		if(contentType!=null) {
+			serializer.writeAttribute(ATTR_CONTENT_TYPE, contentType.getId());
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	protected void writeElements(XmlSerializer serializer) throws Exception {
+		super.writeElements(serializer);
+
+		// Write aliases
+		if(aliases!=null) {
+			for(String alias : aliases) {
+				ModelXmlUtils.writeAliasElement(serializer, alias);
+			}
+		}
+
+		// Get (possibly) inherited type
+		ValueType valueType = getValueType();
+
+		// Write values
+		ModelXmlUtils.writeValueSetElement(serializer, values, valueType);
+
+		// Write range
+		ModelXmlUtils.writeValueRangeElement(serializer, valueRange, valueType);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 */
+	@Override
+	protected String xmlTag() {
+		return TAG_ANNOTATION;
+	}
 
 	/**
 	 * @return the key
 	 */
 	@Override
 	public String getKey() {
-		return key;
+		String result = key;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getKey();
+		}
+		return result;
 	}
 
 	/**
 	 * @param key the key to set
 	 */
-	@Override
+//	@Override
 	public void setKey(String key) {
 		if (key == null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
@@ -83,18 +152,20 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	 */
 	@Override
 	public List<String> getAliases() {
-		List<String> result = aliases;
+		List<String> result = new ArrayList<>();
 
-		if(result==null) {
-			result = Collections.emptyList();
-		} else {
-			result = CollectionUtils.getListProxy(result);
+		if(aliases!=null) {
+			result.addAll(aliases);
+		}
+
+		if(hasTemplate()) {
+			result.addAll(getTemplate().getAliases());
 		}
 
 		return result;
 	}
 
-	@Override
+//	@Override
 	public void addAlias(String alias) {
 		if (alias == null)
 			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
@@ -109,7 +180,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		aliases.add(alias);
 	}
 
-	@Override
+//	@Override
 	public void removeAlias(String alias) {
 		if (alias == null)
 			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
@@ -127,7 +198,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	 */
 	@Override
 	public boolean isBounded() {
-		return valueRange!=null || values!=null;
+		return valueRange!=null || values!=null || (hasTemplate() && getTemplate().isBounded());
 	}
 
 	/**
@@ -135,7 +206,11 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	 */
 	@Override
 	public ValueRange getSupportedRange() {
-		return valueRange;
+		ValueRange result = valueRange;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getSupportedRange();
+		}
+		return result;
 	}
 
 	/**
@@ -143,7 +218,11 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	 */
 	@Override
 	public ValueSet getSupportedValues() {
-		return values;
+		ValueSet result = values;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getSupportedValues();
+		}
+		return result;
 	}
 
 	/**
@@ -151,7 +230,16 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	 */
 	@Override
 	public ValueType getValueType() {
-		return valueType;
+		ValueType result = valueType;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getValueType();
+		}
+
+		if(result==null)
+			throw new ModelException(ModelError.MANIFEST_MISSING_TYPE,
+					"No value type available for annotation manifest: "+getId()); //$NON-NLS-1$
+
+		return result;
 	}
 
 	/**
@@ -159,13 +247,17 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	 */
 	@Override
 	public ContentType getContentType() {
-		return contentType;
+		ContentType result = contentType;
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getContentType();
+		}
+		return result;
 	}
 
 	/**
 	 * @param contentType the contentType to set
 	 */
-	@Override
+//	@Override
 	public void setContentType(ContentType contentType) {
 		this.contentType = contentType;
 	}
@@ -173,7 +265,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	/**
 	 * @param valueType the valueType to set
 	 */
-	@Override
+//	@Override
 	public void setValueType(ValueType valueType) {
 		if (valueType == null)
 			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
@@ -181,7 +273,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		this.valueType = valueType;
 	}
 
-	@Override
+//	@Override
 	public void setSupportedValues(ValueSet values) {
 		if (values == null)
 			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
@@ -192,28 +284,11 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	/**
 	 * @param valueRange the valueRange to set
 	 */
-	@Override
+//	@Override
 	public void setSupportedRange(ValueRange valueRange) {
 		if (valueRange == null)
 			throw new NullPointerException("Invalid valueRange"); //$NON-NLS-1$
 
 		this.valueRange = valueRange;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#copyFrom(de.ims.icarus.model.api.manifest.Derivable)
-	 */
-	@Override
-	protected void copyFrom(AnnotationManifest template) {
-		super.copyFrom(template);
-
-		key = template.getKey();
-		for(String alias : template.getAliases()) {
-			addAlias(alias);
-		}
-		valueType = template.getValueType();
-		values = template.getSupportedValues();
-		valueRange = template.getSupportedRange();
-		contentType = template.getContentType();
 	}
 }

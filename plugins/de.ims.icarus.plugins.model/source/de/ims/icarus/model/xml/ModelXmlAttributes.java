@@ -54,6 +54,7 @@ public interface ModelXmlAttributes {
 	public static final String ATTR_CLASSNAME = "classname"; //$NON-NLS-1$
 	public static final String ATTR_PLUGIN_ID = "plugin-id"; //$NON-NLS-1$
 	public static final String ATTR_PATH = "path"; //$NON-NLS-1$
+	public static final String ATTR_FACTORY = "factory"; //$NON-NLS-1$
 
 	public static final String ATTR_SOURCE_LAYER = "source-layer"; //$NON-NLS-1$
 	public static final String ATTR_TARGET_LAYER = "target-layer"; //$NON-NLS-1$
@@ -70,12 +71,15 @@ public interface ModelXmlAttributes {
 	public static final String ATTR_DEEP_ANNOTATION = "deep-annotation"; //$NON-NLS-1$
 	public static final String ATTR_INDEPENDENT = "independent"; //$NON-NLS-1$
 	public static final String ATTR_PRIMARY_LAYER = "primary-layer"; //$NON-NLS-1$
+	public static final String ATTR_BASE_LAYER = "base-layer"; //$NON-NLS-1$
 	public static final String ATTR_TYPE_ID = "type-id"; //$NON-NLS-1$
 	public static final String ATTR_ALIAS = "alias"; //$NON-NLS-1$
 	public static final String ATTR_DEFAULT = "default"; //$NON-NLS-1$
 	public static final String ATTR_PUBLISHED = "published"; //$NON-NLS-1$
 	public static final String ATTR_INCLUDE_MIN = "include-min"; //$NON-NLS-1$
 	public static final String ATTR_INCLUDE_MAX = "include-max"; //$NON-NLS-1$
+
+	public static final String ATTR_DATE = "date"; //$NON-NLS-1$
 
 	public static final String ATTR_MULTI_VALUE = "multi-value"; //$NON-NLS-1$
 	public static final String ATTR_GROUP = "group"; //$NON-NLS-1$
