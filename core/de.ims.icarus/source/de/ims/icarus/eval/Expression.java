@@ -28,7 +28,6 @@ package de.ims.icarus.eval;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -41,20 +40,22 @@ public class Expression {
 	private Class<?> returnType;
 	private Environment environment;
 	private String code;
-	private List<Variable> variables = new ArrayList<>();
+	private final List<Variable> variables = new ArrayList<>();
 
-	public static Expression compile(String s) throws UnsupportedFormatException {
-		return compile(s, 0);
-	}
-
-	public static Expression compile(String s, int flags) throws UnsupportedFormatException {
-		//FIXME
-		return new Expression(s, 0);
-	}
-
-	private Expression(String text, int flags) {
+	Expression(String text, int flags) {
 		if (text == null)
 			throw new NullPointerException("Invalid text");
+
+		code = text;
+		//TODO apply flags
+	}
+
+	void addVariable(String name, Class<?> namespaceClass) {
+		variables.add(new Variable(name, this, namespaceClass));
+	}
+
+	//FIXME specify exception type
+	void compile() throws Exception {
 
 	}
 

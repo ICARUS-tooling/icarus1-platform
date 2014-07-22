@@ -36,7 +36,7 @@ import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
-import de.ims.icarus.util.ClassProxy;
+import de.ims.icarus.util.classes.ClassProxy;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 

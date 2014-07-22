@@ -27,8 +27,12 @@ package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
@@ -38,10 +42,11 @@ import de.ims.icarus.model.api.manifest.DriverManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -70,22 +75,30 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	private DriverManifest driverManifest;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	public ContextManifestImpl(ManifestSource manifestSource,
+	public ContextManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 		corpusManifest = null;
 	}
 
-	public ContextManifestImpl(ManifestSource manifestSource,
+	public ContextManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, CorpusManifest corpusManifest) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 		if (corpusManifest == null)
 			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
 
 		this.corpusManifest = corpusManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && prerequisiteManifests.isEmpty() && groupManifests.isEmpty() && driverManifest==null;
 	}
 
 	/**
@@ -96,7 +109,9 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		super.writeAttributes(serializer);
 
 		// Write primary layer
-		serializer.writeAttribute(ATTR_PRIMARY_LAYER, primaryLayer.getId());
+		if(primaryLayer!=null) {
+			serializer.writeAttribute(ATTR_PRIMARY_LAYER, primaryLayer.getId());
+		}
 
 		// Write base layer
 		if(baseLayer!=null) {
@@ -117,16 +132,27 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		// Write location manifest
 		if(locationManifest!=null) {
 			ModelXmlUtils.writeLocationElement(serializer, locationManifest);
+			serializer.writeLineBreak();
 		}
 
 		// Write prerequisites
-		for(PrerequisiteManifest prerequisiteManifest : prerequisiteManifests) {
-			ModelXmlUtils.writePrerequisiteElement(serializer, prerequisiteManifest);
+		if(!prerequisiteManifests.isEmpty()) {
+			serializer.startElement(TAG_PREREQUISITES);
+
+			for(PrerequisiteManifest prerequisiteManifest : prerequisiteManifests) {
+				ModelXmlUtils.writePrerequisiteElement(serializer, prerequisiteManifest);
+			}
+
+			serializer.endElement(TAG_PREREQUISITES);
+			serializer.writeLineBreak();
 		}
 
 		// Write groups
-		for(LayerGroupManifest groupManifest : groupManifests) {
-			groupManifest.writeXml(serializer);
+		for(Iterator<LayerGroupManifest> it = groupManifests.iterator(); it.hasNext();) {
+			it.next().writeXml(serializer);
+			if(it.hasNext()) {
+				serializer.writeLineBreak();
+			}
 		}
 
 		// Write driver
@@ -134,7 +160,122 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		// Read primary layer id
+		String primaryLayerId = ModelXmlUtils.normalize(attributes, ATTR_PRIMARY_LAYER);
+		if(primaryLayerId!=null) {
+			setPrimaryLayerId(primaryLayerId);
+		}
+
+		// Read base layer id
+		String baseLayerId = ModelXmlUtils.normalize(attributes, ATTR_BASE_LAYER);
+		if(baseLayerId!=null) {
+			setBaseLayerId(baseLayerId);
+		}
+
+		independent = readFlag(attributes, ATTR_INDEPENDENT);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_CONTEXT: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_LOCATION: {
+			return new LocationManifestImpl();
+		}
+
+		case TAG_PREREQUISITES: {
+			// no-op
+		} break;
+
+		case TAG_PREREQUISITE: {
+			String alias = ModelXmlUtils.normalize(attributes, ATTR_ALIAS);
+			PrerequisiteManifestImpl prerequisite = addPrerequisite(alias, null);
+			prerequisite.readAttributes(attributes);
+		} break;
+
+		case TAG_LAYER_GROUP: {
+			return new LayerGroupManifestImpl(this);
+		}
+
+		case TAG_DRIVER: {
+			return new DriverManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_CONTEXT: {
+			return null;
+		}
+
+		case TAG_PREREQUISITES: {
+			// no-op
+		} break;
+
+		case TAG_PREREQUISITE: {
+			// no-op
+		} break;
+
+		case TAG_DRIVER: {
+			// no-op
+		} break;
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_LOCATION: {
+			setLocationManifest((LocationManifest) handler);
+		} break;
+
+		case TAG_LAYER_GROUP : {
+			addLayerGroup((LayerGroupManifest) handler);
+		} break;
+
+		case TAG_DRIVER: {
+			setDriverManifest((DriverManifest) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
@@ -370,11 +511,11 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 * @param baseLayerManifest the baseLayerManifest to set
 	 */
 //	@Override
-	public void setBaseLayerId(String baseyLayerId) {
-		if (baseyLayerId == null)
-			throw new NullPointerException("Invalid baseyLayerId"); //$NON-NLS-1$
+	public void setBaseLayerId(String baseLayerId) {
+		if (baseLayerId == null)
+			throw new NullPointerException("Invalid baseLayerId"); //$NON-NLS-1$
 
-		baseLayer = new LayerLink(baseyLayerId);
+		baseLayer = new LayerLink(baseLayerId);
 	}
 
 	/**
@@ -456,6 +597,13 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 
 			this.alias = alias;
 			this.unresolvedForm = null;
+		}
+
+		protected void readAttributes(Attributes attributes) {
+			layerId = ModelXmlUtils.normalize(attributes, ATTR_LAYER_ID);
+			typeId = ModelXmlUtils.normalize(attributes, ATTR_TYPE_ID);
+			contextId = ModelXmlUtils.normalize(attributes, ATTR_CONTEXT_ID);
+			description = ModelXmlUtils.normalize(attributes, ATTR_DESCRIPTION);
 		}
 
 		/**

@@ -27,6 +27,7 @@ package de.ims.icarus.eval;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author Markus Gärtner
@@ -48,12 +49,19 @@ public class ExpressionFactory {
 		if (namespace == null)
 			throw new NullPointerException("Invalid namespace");
 
-		//TODO
+		if(variables.containsKey(id))
+			throw new IllegalArgumentException("Duplicate variable id: "+id);
+
+		variables.put(id, namespace);
 	}
 
 	public Expression build() {
 		if(expression==null) {
-			//TODO
+			expression = new Expression(code, 0);
+
+			for(Entry<String, Class<?>> entry : variables.entrySet()) {
+				expression.addVariable(entry.getKey(), entry.getValue());
+			}
 		}
 
 		return expression;

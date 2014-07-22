@@ -71,6 +71,7 @@ public interface ModelXmlTags {
 	public static final String TAG_INDEX = "index"; //$NON-NLS-1$
 
 	public static final String TAG_LOCATION = "location"; //$NON-NLS-1$
+	public static final String TAG_PATH_ENTRY = "path-entry"; //$NON-NLS-1$
 	public static final String TAG_PATH_RESOLVER = "path-resolver"; //$NON-NLS-1$
 
 	public static final String TAG_RANGE = "range"; //$NON-NLS-1$
@@ -81,6 +82,7 @@ public interface ModelXmlTags {
 	public static final String TAG_CODE = "code"; //$NON-NLS-1$
 	public static final String TAG_VARIABLE = "variable"; //$NON-NLS-1$
 
+	public static final String TAG_PROPERTIES = "properties"; //$NON-NLS-1$
 	public static final String TAG_PROPERTY = "property"; //$NON-NLS-1$
 	public static final String TAG_GROUP = "group"; //$NON-NLS-1$
 

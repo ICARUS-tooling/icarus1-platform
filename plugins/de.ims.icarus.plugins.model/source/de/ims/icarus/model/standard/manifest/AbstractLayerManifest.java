@@ -28,6 +28,9 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.layer.LayerType;
@@ -35,8 +38,9 @@ import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -49,18 +53,26 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public abstract class AbstractLayerManifest<L extends LayerManifest> extends AbstractMemberManifest<L> implements LayerManifest {
 
 	private final LayerGroupManifest layerGroupManifest;
-	private List<TargetLayerManifest> baseLayerManifests = new ArrayList<>(3);
+	private final List<TargetLayerManifest> baseLayerManifests = new ArrayList<>(3);
 	private LayerTypeLink layerType;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	protected AbstractLayerManifest(ManifestSource manifestSource,
+	protected AbstractLayerManifest(ManifestLocation manifestLocation,
 			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 
 		this.layerGroupManifest = layerGroupManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && baseLayerManifests.isEmpty();
 	}
 
 	/**
@@ -87,6 +99,58 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		for(TargetLayerManifest layerManifest : baseLayerManifests) {
 			ModelXmlUtils.writeTargetLayerManifestElement(serializer, TAG_BASE_LAYER, layerManifest);
 		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		String layerTypeId = ModelXmlUtils.normalize(attributes, ATTR_LAYER_TYPE);
+		if(layerTypeId!=null) {
+			setLayerTypeId(layerTypeId);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+		switch (qName) {
+		case TAG_BASE_LAYER: {
+			String baseLayerId = ModelXmlUtils.normalize(attributes, ATTR_LAYER_ID);
+			addBaseLayer(baseLayerId);
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+			throws SAXException {
+		switch (qName) {
+		case TAG_BASE_LAYER: {
+			// no-op
+		} break;
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+
+		return this;
 	}
 
 	/**

@@ -25,10 +25,14 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
@@ -41,12 +45,20 @@ public abstract class AbstractForeignImplementationManifest<M extends MemberMani
 	private ImplementationManifest implementationManifest;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
 	protected AbstractForeignImplementationManifest(
-			ManifestSource manifestSource, CorpusRegistry registry) {
-		super(manifestSource, registry);
+			ManifestLocation manifestLocation, CorpusRegistry registry) {
+		super(manifestLocation, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return implementationManifest==null;
 	}
 
 	/**
@@ -58,6 +70,40 @@ public abstract class AbstractForeignImplementationManifest<M extends MemberMani
 
 		if(implementationManifest!=null) {
 			implementationManifest.writeXml(serializer);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+		switch (qName) {
+		case TAG_IMPLEMENTATION: {
+			return new ImplementationManifestImpl<>(manifestLocation, getRegistry());
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+		case TAG_IMPLEMENTATION: {
+			setImplementationManifest((ImplementationManifest) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
 		}
 	}
 

@@ -65,6 +65,14 @@ public interface DriverManifest extends MemberManifest {
 	@AccessRestriction(AccessMode.READ)
 	LocationType getLocationType();
 
+	/**
+	 *  For live driver manifests this method returns the manifest describing the
+	 *  surrounding {@code Context}. For templates the return value is {@code null}.
+	 * @return
+	 */
+	@AccessRestriction(AccessMode.READ)
+	ContextManifest getContextManifest();
+
 	// Modification methods
 
 //	void setImplementationManifest(ImplementationManifest implementationManifest);

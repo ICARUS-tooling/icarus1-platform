@@ -25,12 +25,15 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.xml.XmlResource;
 
 
 /**
@@ -77,12 +80,18 @@ public interface LocationManifest {
 
 	void removePathEntry(PathEntry entry);
 
-	public enum PathType {
-		FILE,
-		FOLDER,
-		PATTERN,
-		IDENTIFIER,
-		CUSTOM;
+	public enum PathType implements XmlResource {
+		FILE("file"), //$NON-NLS-1$
+		FOLDER("folder"), //$NON-NLS-1$
+		PATTERN("pattern"), //$NON-NLS-1$
+		IDENTIFIER("identifier"), //$NON-NLS-1$
+		CUSTOM("custom"); //$NON-NLS-1$
+
+		private final String xmlForm;
+
+		private PathType(String xmlForm) {
+			this.xmlForm = xmlForm;
+		}
 
 		/**
 		 * @see java.lang.Enum#toString()
@@ -92,9 +101,26 @@ public interface LocationManifest {
 			return name().toLowerCase();
 		}
 
+		/**
+		 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
+		 */
+		@Override
+		public String getXmlValue() {
+			return xmlForm;
+		}
+
+		private static Map<String, PathType> xmlLookup;
 
 		public static PathType parsePathType(String s) {
-			return valueOf(s.toUpperCase());
+			if(xmlLookup==null) {
+				Map<String, PathType> map = new HashMap<>();
+				for(PathType type : values()) {
+					map.put(type.xmlForm, type);
+				}
+				xmlLookup = map;
+			}
+
+			return xmlLookup.get(s);
 		}
 	}
 

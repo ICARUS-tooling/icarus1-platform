@@ -37,7 +37,7 @@ import java.util.logging.Level;
 
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.search_tools.util.SearchUtils;
-import de.ims.icarus.util.ClassProxy;
+import de.ims.icarus.util.classes.ClassProxy;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 

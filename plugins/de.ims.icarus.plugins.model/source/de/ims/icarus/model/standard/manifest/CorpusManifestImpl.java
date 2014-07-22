@@ -25,22 +25,29 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.date.DateUtils;
 
 /**
  * @author Markus Gärtner
@@ -56,12 +63,20 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 	private final List<Note> notes = new ArrayList<>();
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	public CorpusManifestImpl(ManifestSource manifestSource,
+	public CorpusManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && contextManifests.isEmpty() && notes.isEmpty();
 	}
 
 	/**
@@ -88,18 +103,103 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 		super.writeElements(serializer);
 
 		// Write notes
-		for(Note note : notes) {
-			ModelXmlUtils.writeNoteElement(serializer, note);
+		for(Iterator<Note> it = notes.iterator(); it.hasNext();) {
+			ModelXmlUtils.writeNoteElement(serializer, it.next());
+			if(it.hasNext()) {
+				serializer.writeLineBreak();
+			}
 		}
 
 		// Write contained context manifests
-		for(ContextManifest contextManifest : contextManifests) {
-			contextManifest.writeXml(serializer);
+		for(Iterator<ContextManifest> it = contextManifests.iterator(); it.hasNext();) {
+			it.next().writeXml(serializer);
+			if(it.hasNext()) {
+				serializer.writeLineBreak();
+			}
 		}
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		String editable = ModelXmlUtils.normalize(attributes, ATTR_EDITABLE);
+		if(editable!=null) {
+			this.editable = Boolean.parseBoolean(editable);
+		} else {
+			this.editable = DEFAULT_EDITABLE_VALUE;
+		}
+
+		String rootContextId = ModelXmlUtils.normalize(attributes, ATTR_ROOT_CONTEXT);
+		setRootContextId(rootContextId);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_CORPUS: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_CONTEXT: {
+			return new ContextManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		case TAG_NOTE: {
+			return new NoteImpl();
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_CORPUS: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_CONTEXT: {
+			addCustomContextManifest((ContextManifest) handler);
+		} break;
+
+		case TAG_NOTE: {
+			addNote((Note) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
@@ -107,7 +207,7 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#setIsTemplate(boolean)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#setIsTemplate(boolean)
 	 */
 	@Override
 	public void setIsTemplate(boolean isTemplate) {
@@ -255,11 +355,63 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 
 	}
 
-	public static class NoteImpl implements Note {
+	public static class NoteImpl implements Note, ModelXmlHandler {
 
 		private Date modificationDate;
 		private String name;
 		private String content;
+
+		protected void readAttributes(Attributes attributes) throws SAXException {
+			setName(ModelXmlUtils.normalize(attributes, ATTR_NAME));
+			String date = ModelXmlUtils.normalize(attributes, ATTR_DATE);
+			try {
+				setModificationDate(DateUtils.parseDate(date));
+			} catch (ParseException e) {
+				throw new SAXException("Invalid modification date string", e); //$NON-NLS-1$
+			}
+		}
+
+		@Override
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, Attributes attributes)
+						throws SAXException {
+			switch (qName) {
+			case TAG_NOTE: {
+				// no-op
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_NOTE+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
+			return this;
+		}
+
+		@Override
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
+						throws SAXException {
+			switch (qName) {
+			case TAG_NOTE: {
+				setContent(text);
+
+				return null;
+			}
+
+			default:
+				throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_NOTE+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+		 */
+		@Override
+		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+				String localName, String qName, ModelXmlHandler handler)
+				throws SAXException {
+			throw new SAXException("No nesting allowed within "+TAG_NOTE+" environment"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 
 		/**
 		 * @see de.ims.icarus.model.api.manifest.CorpusManifest.Note#getModificationDate()

@@ -34,6 +34,8 @@ import org.java.plugin.Plugin;
  */
 public class ModelPlugin extends Plugin {
 
+	public static final String PLUGIN_ID = "de.ims.icarus.model";
+
 	/**
 	 * @see org.java.plugin.Plugin#doStart()
 	 */

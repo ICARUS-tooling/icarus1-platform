@@ -50,6 +50,7 @@ public class ModelException extends RuntimeException {
 	private final boolean corpusSet;
 
 	public ModelException(ModelError error, String message, Throwable cause) {
+		super(message, cause);
 
 		if(error==null) {
 			error = ModelError.UNKNOWN_ERROR;
@@ -98,7 +99,7 @@ public class ModelException extends RuntimeException {
 		return corpusSet ? source.get() : null;
 	}
 
-	public boolean wasCorpusSet() {
+	public boolean isCorpusSet() {
 		return corpusSet;
 	}
 

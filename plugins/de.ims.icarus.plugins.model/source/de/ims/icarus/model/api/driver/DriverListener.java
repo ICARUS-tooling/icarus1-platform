@@ -30,12 +30,7 @@ import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.layer.LayerGroup;
 
 /**
- * Provides the uplink from a {@code Driver} implementation to
- * the {@code Corpus} that hosts the actual model objects. Each
- * {@code DriverListener} is coupled with a single {@code Corpus} and
- * has full access to all the loaded data within this corpus instance.
- * Its task is providing an interface to {@code Driver} objects to
- * fetch and register chunks of data.
+ * Allows intercepting loaded or skipped chunks during load operations of a driver implementation.
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -48,6 +43,9 @@ public interface DriverListener {
 	/**
 	 * Callback to signal the successful loading of a new data chunk
 	 * (typically a {@link Container} implementation) by a driver.
+	 * Note that this method will only be called for top-level members!
+	 *
+	 *
 	 * @param id
 	 * @param markable
 	 */
@@ -67,6 +65,8 @@ public interface DriverListener {
 	 * The latter case is signaled with the {@code corrupted} argument being {@code true}.
 	 * Note that the {@code Markable} associated with the given index will still be available
 	 * through the layer's cache as long as the {@code corrupted} argument is {@code false}.
+	 * <p>
+	 * Note that this method will only be called for top-level members!
 	 *
 	 * @param index
 	 * @param corrupted

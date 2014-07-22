@@ -44,7 +44,7 @@ import de.ims.icarus.util.id.Identity;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface OptionsManifest extends Derivable, ModelXmlElement {
+public interface OptionsManifest extends Manifest, ModelXmlElement {
 
 	/**
 	 * Returns the names of all available options for the target

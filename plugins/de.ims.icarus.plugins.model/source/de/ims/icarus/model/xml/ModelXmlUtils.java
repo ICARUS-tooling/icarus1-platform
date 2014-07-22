@@ -25,9 +25,12 @@
  */
 package de.ims.icarus.model.xml;
 
+import java.util.List;
+
 import javax.swing.Icon;
 
 import org.java.plugin.registry.PluginDescriptor;
+import org.xml.sax.Attributes;
 
 import de.ims.icarus.eval.Expression;
 import de.ims.icarus.eval.Variable;
@@ -37,12 +40,15 @@ import de.ims.icarus.model.api.manifest.CorpusManifest.Note;
 import de.ims.icarus.model.api.manifest.IndexManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
+import de.ims.icarus.model.api.manifest.LocationManifest.PathEntry;
+import de.ims.icarus.model.api.manifest.ModifiableIdentity;
 import de.ims.icarus.model.api.manifest.OptionsManifest.Option;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.model.api.manifest.ValueManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.sax.IconWrapper;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.util.date.DateUtils;
 import de.ims.icarus.util.id.Identity;
@@ -54,8 +60,13 @@ import de.ims.icarus.util.id.Identity;
  */
 public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
+	//*******************************************
+	//               WRITE METHODS
+	//*******************************************
+
 	public static String getSerializedForm(ValueType type) {
-		return type==ValueType.STRING ? null : type.getXmlValue();
+//		return type==ValueType.STRING ? null : type.getXmlValue();
+		return type.getXmlValue();
 	}
 
 	public static void writePropertyElement(XmlSerializer serializer, String name, Object value, ValueType type) throws Exception {
@@ -63,20 +74,15 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 			return;
 		}
 
-		serializer.startElement(TAG_PROPERTY);
-
-		switch (type) {
-		case UNKNOWN:
+		if(type==ValueType.UNKNOWN)
 			throw new IllegalArgumentException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
-		case CUSTOM:
+		if(type==ValueType.CUSTOM)
 			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
 
-		default:
-			serializer.writeAttribute(ATTR_NAME, name);
-			serializer.writeAttribute(ATTR_TYPE, getSerializedForm(type));
-			serializer.writeText(type.toString(value));
-			break;
-		}
+		serializer.startElement(TAG_PROPERTY);
+		serializer.writeAttribute(ATTR_NAME, name);
+		serializer.writeAttribute(ATTR_VALUE_TYPE, getSerializedForm(type));
+		serializer.writeText(type.toString(value));
 		serializer.endElement(TAG_PROPERTY);
 	}
 
@@ -89,10 +95,6 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 	}
 
 	public static void writeIdentityAttributes(XmlSerializer serializer, String id, String name, String description, Icon icon) throws Exception {
-		if(icon==null) {
-			return;
-		}
-
 		serializer.writeAttribute(ATTR_ID, id);
 		serializer.writeAttribute(ATTR_NAME, name);
 		serializer.writeAttribute(ATTR_DESCRIPTION, description);
@@ -119,8 +121,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 			return;
 		}
 
-		//FIXME empty element
-		serializer.startElement(name);
+		serializer.startEmptyElement(name);
 
 		// ATTRIBUTES
 		serializer.writeAttribute(ATTR_LAYER_ID, getSerializedForm(manifest));
@@ -129,8 +130,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 	}
 
 	public static void writeAliasElement(XmlSerializer serializer, String alias) throws Exception {
-		//FIXME empty element
-		serializer.startElement(TAG_ALIAS);
+		serializer.startEmptyElement(TAG_ALIAS);
 		serializer.writeAttribute(ATTR_NAME, alias);
 		serializer.endElement(TAG_ALIAS);
 	}
@@ -141,8 +141,18 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		}
 
 		serializer.startElement(TAG_RANGE);
-		serializer.writeAttribute(ATTR_INCLUDE_MIN, range.isLowerBoundInclusive());
-		serializer.writeAttribute(ATTR_INCLUDE_MAX, range.isUpperBoundInclusive());
+
+		// ATTRIBUTES
+		serializer.writeAttribute(ATTR_VALUE_TYPE, getSerializedForm(type));
+		if(range.isLowerBoundInclusive()!=ValueRange.DEFAULT_LOWER_INCLUSIVE_VALUE) {
+			serializer.writeAttribute(ATTR_INCLUDE_MIN, range.isLowerBoundInclusive());
+		}
+		if(range.isUpperBoundInclusive()!=ValueRange.DEFAULT_UPPER_INCLUSIVE_VALUE) {
+			serializer.writeAttribute(ATTR_INCLUDE_MAX, range.isUpperBoundInclusive());
+		}
+
+		// ELEMENTS
+
 		writeValueElement(serializer, TAG_MIN, range.getLowerBound(), type);
 		writeValueElement(serializer, TAG_MAX, range.getUpperBound(), type);
 		serializer.endElement(TAG_RANGE);
@@ -185,7 +195,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
 
 		default:
-			serializer.writeText(type.toString(value));
+			writeValue(serializer, value, type);
 			break;
 		}
 
@@ -208,22 +218,26 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
 
 		default:
-			if(value instanceof Expression) {
-				writeEvalElement(serializer, (Expression)value);
-			} else {
-				serializer.writeText(type.toString(value));
-			}
+			writeValue(serializer, value, type);
 			break;
 		}
 
 		serializer.endElement(name);
 	}
 
+	private static void writeValue(XmlSerializer serializer, Object value, ValueType type) throws Exception {
+		if(value instanceof Expression) {
+			writeEvalElement(serializer, (Expression)value);
+		} else {
+			serializer.writeText(type.toString(value));
+		}
+	}
+
 	public static void writeEvalElement(XmlSerializer serializer, Expression expression) throws Exception {
 		serializer.startElement(TAG_EVAL);
 
 		for(Variable variable : expression.getVariables()) {
-			serializer.startElement(TAG_VARIABLE);
+			serializer.startEmptyElement(TAG_VARIABLE);
 			serializer.writeAttribute(ATTR_NAME, variable.getName());
 			serializer.writeAttribute(ATTR_NAMESPACE, variable.getNamespaceClass().getName());
 
@@ -237,7 +251,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		}
 
 		serializer.startElement(TAG_CODE);
-		serializer.writeText(expression.getCode());
+		serializer.writeCData(expression.getCode());
 		serializer.endElement(TAG_CODE);
 
 		serializer.endElement(TAG_EVAL);
@@ -247,12 +261,20 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		ValueType type = option.getValueType();
 
-		serializer.startElement(TAG_OPTION);
+		Object defaultValue = option.getDefaultValue();
+		ValueSet valueSet = option.getSupportedValues();
+		ValueRange valueRange = option.getSupportedRange();
+
+		if(defaultValue==null && valueSet==null && valueRange==null) {
+			serializer.startEmptyElement(TAG_OPTION);
+		} else {
+			serializer.startElement(TAG_OPTION);
+		}
 
 		// Attributes
 
 		serializer.writeAttribute(ATTR_ID, option.getId());
-		serializer.writeAttribute(ATTR_TYPE, getSerializedForm(type));
+		serializer.writeAttribute(ATTR_VALUE_TYPE, getSerializedForm(type));
 		serializer.writeAttribute(ATTR_NAME, option.getName());
 		serializer.writeAttribute(ATTR_DESCRIPTION, option.getDescription());
 		if(option.isPublished()!=Option.DEFAULT_PUBLISHED_VALUE) {
@@ -265,16 +287,24 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		// Elements
 
-		writeValueElement(serializer, TAG_DEFAULT_VALUE, option.getDefaultValue(), type);
-		writeValueSetElement(serializer, option.getSupportedValues(), type);
-		writeValueRangeElement(serializer, option.getSupportedRange(), type);
+		writeValueElement(serializer, TAG_DEFAULT_VALUE, defaultValue, type);
+		writeValueSetElement(serializer, valueSet, type);
+		writeValueRangeElement(serializer, valueRange, type);
 
 		serializer.endElement(TAG_OPTION);
 	}
 
 	public static void writeLocationElement(XmlSerializer serializer, LocationManifest manifest) throws Exception {
 
-		serializer.startElement(TAG_LOCATION);
+		List<PathEntry> entries = manifest.getPathEntries();
+		PathResolverManifest pathResolverManifest = manifest.getPathResolverManifest();
+
+		if(entries.isEmpty() && pathResolverManifest==null) {
+			serializer.startEmptyElement(TAG_LOCATION);
+		} else {
+			serializer.startElement(TAG_LOCATION);
+		}
+
 
 		// ATTRIBUTES
 
@@ -282,7 +312,15 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		// ELEMENTS
 
-		PathResolverManifest pathResolverManifest = manifest.getPathResolverManifest();
+		// Write path entries
+		for(PathEntry pathEntry : entries) {
+			serializer.startElement(TAG_PATH_ENTRY);
+			serializer.writeAttribute(ATTR_TYPE, pathEntry.getType().getXmlValue());
+			serializer.writeText(pathEntry.getValue());
+			serializer.endElement(TAG_PATH_ENTRY);
+		}
+
+		// Write path resolver
 		if(pathResolverManifest!=null) {
 			pathResolverManifest.writeXml(serializer);
 		}
@@ -292,7 +330,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 	public static void writePrerequisiteElement(XmlSerializer serializer, PrerequisiteManifest manifest) throws Exception {
 
-		serializer.startElement(TAG_PREREQUISITE);
+		serializer.startEmptyElement(TAG_PREREQUISITE);
 
 		// ATTRIBUTES
 
@@ -301,7 +339,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		// Only write the layer type attribute for unresolved prerequisites!
 		if(manifest.getUnresolvedForm()==null) {
-			serializer.writeAttribute(ATTR_LAYER_TYPE, manifest.getTypeId());
+			serializer.writeAttribute(ATTR_TYPE_ID, manifest.getTypeId());
 		}
 
 		serializer.writeAttribute(ATTR_ALIAS, manifest.getAlias());
@@ -330,21 +368,120 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 	public static void writeIndexElement(XmlSerializer serializer, IndexManifest manifest) throws Exception {
 
-		// Never serialize inverted manifests, they are created by the parser dynamically!
-		if(manifest.getOriginal()!=null) {
-			return;
-		}
+		serializer.startEmptyElement(TAG_INDEX);
 
-		serializer.startElement(TAG_INDEX);
-
-		serializer.writeAttribute(ATTR_SOURCE_LAYER, getSerializedForm(manifest.getSourceLayerManifest()));
-		serializer.writeAttribute(ATTR_TARGET_LAYER, getSerializedForm(manifest.getTargetLayerManifest()));
+		serializer.writeAttribute(ATTR_SOURCE_LAYER, manifest.getSourceLayerId());
+		serializer.writeAttribute(ATTR_TARGET_LAYER, manifest.getTargetLayerId());
 		serializer.writeAttribute(ATTR_RELATION, manifest.getRelation().getXmlValue());
 		serializer.writeAttribute(ATTR_COVERAGE, manifest.getCoverage().getXmlValue());
-		if(manifest.getInverse()!=null) {
-			serializer.writeAttribute(ATTR_INCLUDE_REVERSE, true);
+		if(manifest.isIncludeReverse()!=IndexManifest.DEFAULT_INCLUDE_REVERSE_VALUE) {
+			serializer.writeAttribute(ATTR_INCLUDE_REVERSE, manifest.isIncludeReverse());
 		}
 
 		serializer.endElement(TAG_INDEX);
+	}
+
+	//*******************************************
+	//               READ METHOD
+	//*******************************************
+
+	public static void readIdentity(Attributes attr, ModifiableIdentity identity) {
+		String id = normalize(attr, ATTR_ID);
+		if(id!=null) {
+			identity.setId(id);
+		}
+
+		String name = normalize(attr, ATTR_NAME);
+		if(name!=null) {
+			identity.setName(name);
+		}
+
+		String description = normalize(attr, ATTR_DESCRIPTION);
+		if(description!=null) {
+			identity.setDescription(description);
+		}
+
+		String icon = normalize(attr, ATTR_ICON);
+		if(icon!=null) {
+			identity.setIcon(iconValue(icon));
+		}
+	}
+
+	public static Icon iconValue(String iconName) {
+		return new IconWrapper(iconName);
+	}
+
+	public static Icon iconValue(Attributes attr, String key) {
+		String icon = normalize(attr, key);
+		return icon==null ? null : iconValue(icon);
+	}
+
+	public static String stringValue(Attributes attr, String key) {
+		return normalize(attr, key);
+	}
+
+	public static long longValue(String s) {
+		return Long.parseLong(s);
+	}
+
+	public static long longValue(Attributes attr, String key) {
+		return longValue(normalize(attr, key));
+	}
+
+	public static double doubleValue(String s) {
+		return Double.parseDouble(s);
+	}
+
+	public static double doubleValue(Attributes attr, String key) {
+		return doubleValue(normalize(attr, key));
+	}
+
+	public static float floatValue(String s) {
+		return Float.parseFloat(s);
+	}
+
+	public static float floatValue(Attributes attr, String key) {
+		return floatValue(normalize(attr, key));
+	}
+
+	public static int intValue(String s) {
+		return Integer.parseInt(s);
+	}
+
+	public static int intValue(Attributes attr, String key) {
+		return intValue(normalize(attr, key));
+	}
+
+	public static boolean booleanValue(String s) {
+		return s!=null && ("true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s)); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public static boolean booleanValue(Attributes attr, String key) {
+		return booleanValue(normalize(attr, key));
+	}
+
+	public static boolean booleanValue(Attributes attr, String key, boolean defaultValue) {
+		String s = normalize(attr, key);
+		return s==null ? defaultValue : booleanValue(s);
+	}
+
+	public static ValueType typeValue(Attributes attr) {
+		String s = normalize(attr, ATTR_VALUE_TYPE);
+		return typeValue(s);
+	}
+
+	public static ValueType typeValue(String s) {
+		return s==null ? ValueType.STRING : ValueType.parseValueType(s);
+	}
+
+	public static Boolean boolValue(Attributes attr, String key) {
+		String s = normalize(attr, key);
+		return s==null ? null : booleanValue(s);
+	}
+
+	public static String normalize(Attributes attr, String name) {
+		String value = attr.getValue(name);
+
+		return (value==null || value.isEmpty()) ? null : value;
 	}
 }

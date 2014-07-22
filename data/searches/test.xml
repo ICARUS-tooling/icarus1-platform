@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+
+<search factory="de.ims.icarus.dependency@DependencySearchFactory">
+	<target>9f6dcde3-65da-4e48-9b3f-fb3085fe66a7</target>
+	<query>[lemma&lt;*&gt;1 [relation=SBJ, lemma&lt;*&gt;2]]</query>
+	<result dimension="2">
+		<group dimension="0">
+			<label>be</label>
+			<label>come</label>
+			<label>know</label>
+			<label>build</label>
+			<label>found</label>
+			<label>ignore</label>
+			<label>get</label>
+			<label>look</label>
+		</group>
+		<group dimension="1">
+			<label>icarus</label>
+			<label>daedalus</label>
+			<label>daedelus</label>
+			<label>he</label>
+			<label>they</label>
+		</group>
+		<entry index="0" indices="0 0">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="1" indices="0 1">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="2" indices="1 2">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="3" indices="2 3">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="4" indices="3 3">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="5" indices="4 4">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="6" indices="5 0">
+			<hit>2 0</hit>
+		</entry>
+		<entry index="7" indices="6 0">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="8" indices="7 1">
+			<hit>1 0</hit>
+		</entry>
+		<entry index="9" indices="4 1">
+			<hit>2 1</hit>
+		</entry>
+	</result>
+</search>

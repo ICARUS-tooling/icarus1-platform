@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.util;
+package de.ims.icarus.util.classes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +33,7 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.util.Exceptions;
 
 
 /**

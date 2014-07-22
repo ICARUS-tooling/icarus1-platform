@@ -25,11 +25,17 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.layer.LayerType;
-import de.ims.icarus.model.api.manifest.Derivable;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.Manifest;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.xml.ModelXmlElement;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 
 
@@ -39,29 +45,31 @@ import de.ims.icarus.model.xml.XmlSerializer;
  * @version $Id$
  *
  */
-public abstract class AbstractDerivable<T extends Derivable> extends LazyResolver implements Derivable, ModelXmlElement {
+public abstract class AbstractManifest<T extends Manifest> extends LazyResolver implements Manifest, ModelXmlElement, ModelXmlHandler {
 
 	private TemplateLink<T> template;
 
 	private String id;
-	private boolean isTemplate = false;
+	private boolean isTemplate;
 
-	private final ManifestSource manifestSource;
-	private final CorpusRegistry registry;
+	private transient final ManifestLocation manifestLocation;
+	private transient final CorpusRegistry registry;
 
-	protected AbstractDerivable(ManifestSource manifestSource, CorpusRegistry registry) {
-		if (manifestSource == null)
-			throw new NullPointerException("Invalid manifestSource");  //$NON-NLS-1$
+	protected AbstractManifest(ManifestLocation manifestLocation, CorpusRegistry registry) {
+		if (manifestLocation == null)
+			throw new NullPointerException("Invalid manifestLocation");  //$NON-NLS-1$
 		if (registry == null)
 			throw new NullPointerException("Invalid registry");  //$NON-NLS-1$
 
-		this.manifestSource = manifestSource;
+		this.manifestLocation = manifestLocation;
 		this.registry = registry;
+		isTemplate = this.manifestLocation.isTemplate();
 	}
 
 	protected void writeEmbedded(ModelXmlElement element, XmlSerializer serializer) throws Exception {
 		if(element!=null) {
 			element.writeXml(serializer);
+			serializer.writeLineBreak();
 		}
 	}
 
@@ -69,6 +77,11 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 		if(flag!=null && flag.booleanValue()!=defaultValue) {
 			serializer.writeAttribute(name, flag.booleanValue());
 		}
+	}
+
+	protected Boolean readFlag(Attributes attributes, String name) {
+		String value = ModelXmlUtils.normalize(attributes, name);
+		return value==null ? null : Boolean.valueOf(value);
 	}
 
 	protected void writeAttributes(XmlSerializer serializer) throws Exception {
@@ -79,18 +92,68 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 		}
 	}
 
+	protected void readAttributes(Attributes attributes) {
+		String id = ModelXmlUtils.normalize(attributes, ATTR_ID);
+		if(id!=null) {
+			setId(id);
+		}
+
+		String templateId = ModelXmlUtils.normalize(attributes, ATTR_TEMPLATE_ID);
+		if(templateId!=null) {
+			setTemplateId(templateId);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+
+		throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+			throws SAXException {
+
+		throw new SAXException("Unrecognized end tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		// for subclasses
+	}
+
 	protected void writeElements(XmlSerializer serializer) throws Exception {
 		// for subclasses
 	}
 
 	protected abstract String xmlTag();
 
+	protected abstract boolean isEmpty();
+
 	/**
 	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
 	public void writeXml(XmlSerializer serializer) throws Exception {
-		serializer.startElement(xmlTag());
+		if(isEmpty()) {
+			serializer.startEmptyElement(xmlTag());
+		} else {
+			serializer.startElement(xmlTag());
+		}
 		writeAttributes(serializer);
 		writeElements(serializer);
 		serializer.endElement(xmlTag());
@@ -100,13 +163,14 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 	 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestSource()
 	 */
 	@Override
-	public ManifestSource getManifestSource() {
-		return manifestSource;
+	public ManifestLocation getManifestSource() {
+		return manifestLocation;
 	}
 
 	/**
 	 * @return the registry
 	 */
+	@Override
 	public CorpusRegistry getRegistry() {
 		return registry;
 	}
@@ -126,11 +190,11 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 	/**
 	 * @param id the id to set
 	 */
-	@Override
+//	@Override
 	public void setId(String id) {
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
-		if(!CorpusRegistry.isValidId(id))
+		if(!CorpusUtils.isValidId(id))
 			throw new IllegalArgumentException("Id format not supported: "+id); //$NON-NLS-1$
 
 		this.id = id;
@@ -146,9 +210,9 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 //	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.Derivable#setTemplateId(java.lang.String)
+	 * @see de.ims.icarus.model.api.manifest.Manifest#setTemplateId(java.lang.String)
 	 */
-	@Override
+//	@Override
 	public void setTemplateId(String templateId) {
 		template = new TemplateLink<>(templateId);
 	}
@@ -254,7 +318,7 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 //	protected abstract String getXmlTag();
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.Derivable#isTemplate()
+	 * @see de.ims.icarus.model.api.manifest.Manifest#isTemplate()
 	 */
 	@Override
 	public boolean isTemplate() {
@@ -264,7 +328,7 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 	/**
 	 * @param isTemplate the isTemplate to set
 	 */
-	@Override
+//	@Override
 	public void setIsTemplate(boolean isTemplate) {
 		this.isTemplate = isTemplate;
 	}
@@ -278,7 +342,7 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 		return id==null ? super.toString() : getClass().getName()+"@"+id; //$NON-NLS-1$
 	}
 
-	protected class TemplateLink<D extends Derivable> extends Link<D> {
+	protected class TemplateLink<D extends Manifest> extends Link<D> {
 
 		/**
 		 * @param abstractDerivable
@@ -289,7 +353,7 @@ public abstract class AbstractDerivable<T extends Derivable> extends LazyResolve
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.AbstractManifest.Link#resolve()
 		 */
 		@SuppressWarnings("unchecked")
 		@Override

@@ -37,8 +37,7 @@ public interface XmlSerializer {
 
 	void startElement(String name) throws Exception;
 
-	//FIXME make sure that implementations can handle the difference themselves!
-//	void startEmptyElement(String name) throws Exception;
+	void startEmptyElement(String name) throws Exception;
 
 	void writeAttribute(String name, String value) throws Exception;
 	void writeAttribute(String name, int value) throws Exception;
@@ -49,6 +48,8 @@ public interface XmlSerializer {
 	void endElement(String name) throws Exception;
 
 	void writeText(String text) throws Exception;
+	void writeCData(String text) throws Exception;
+	void writeLineBreak() throws Exception;
 
 	void endDocument() throws Exception;
 

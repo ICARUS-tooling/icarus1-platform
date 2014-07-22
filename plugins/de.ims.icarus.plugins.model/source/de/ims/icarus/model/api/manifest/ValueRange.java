@@ -34,6 +34,9 @@ import de.ims.icarus.model.util.types.ValueType;
  */
 public interface ValueRange {
 
+	public static final boolean DEFAULT_LOWER_INCLUSIVE_VALUE = true;
+	public static final boolean DEFAULT_UPPER_INCLUSIVE_VALUE = true;
+
 	Object getLowerBound();
 
 	Object getUpperBound();

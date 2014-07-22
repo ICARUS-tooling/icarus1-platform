@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.util.ClassProxy;
+import de.ims.icarus.util.classes.ClassProxy;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 import de.ims.icarus.util.location.Location;

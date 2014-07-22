@@ -42,8 +42,8 @@ import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
-import de.ims.icarus.util.ClassUtils;
 import de.ims.icarus.util.Counter;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.strings.StringUtil;
 

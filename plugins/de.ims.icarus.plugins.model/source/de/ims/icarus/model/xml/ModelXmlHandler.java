@@ -28,19 +28,22 @@ package de.ims.icarus.model.xml;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ModelXmlHandler {
+public interface ModelXmlHandler extends ModelXmlTags, ModelXmlAttributes {
 
-	ModelXmlHandler startElement(ManifestSource manifestSource, String uri, String localName, String qName,
+	ModelXmlHandler startElement(ManifestLocation manifestLocation, String uri, String localName, String qName,
 			Attributes attributes) throws SAXException;
 
-	ModelXmlHandler endElement(ManifestSource manifestSource, String uri, String localName, String qName, String text)
+	ModelXmlHandler endElement(ManifestLocation manifestLocation, String uri, String localName, String qName, String text)
 			throws SAXException;
+
+	void endNestedHandler(ManifestLocation manifestLocation, String uri, String localName, String qName,
+			ModelXmlHandler handler) throws SAXException;
 
 }

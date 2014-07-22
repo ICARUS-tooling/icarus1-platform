@@ -25,12 +25,18 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.Documentable;
 import de.ims.icarus.model.api.manifest.Documentation;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -65,7 +71,7 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		ModelXmlUtils.writeIdentityAttributes(serializer, this);
 
 		serializer.startElement(TAG_CONTENT);
-		serializer.writeText(content);
+		serializer.writeCData(content);
 		serializer.endElement(TAG_CONTENT);
 
 		for(Resource resource : resources) {
@@ -76,6 +82,74 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		}
 
 		serializer.endElement(TAG_DOCUMENTATION);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+		switch (qName) {
+		case TAG_DOCUMENTATION: {
+			ModelXmlUtils.readIdentity(attributes, this);
+		} break;
+
+		case TAG_RESOURCE: {
+			return new ResourceImpl();
+		}
+
+		case TAG_CONTENT: {
+			// no-op
+		} break;
+
+		default:
+			throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_DOCUMENTATION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+			throws SAXException {
+		switch (qName) {
+		case TAG_DOCUMENTATION: {
+			return null;
+		}
+
+		case TAG_CONTENT: {
+			setContent(text);
+		} break;
+
+		default:
+			throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_DOCUMENTATION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+
+		switch (qName) {
+		case TAG_RESOURCE: {
+			addResource((Resource) handler);
+		} break;
+
+		default:
+			throw new SAXException("Unrecognized nested tag  '"+qName+"' in "+TAG_DOCUMENTATION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 	}
 
 	/**
@@ -134,9 +208,64 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		resources.remove(resource);
 	}
 
-	public static class ResourceImpl extends DefaultModifiableIdentity implements Resource {
+	public static class ResourceImpl extends DefaultModifiableIdentity implements Resource, ModelXmlHandler {
 
 		private URL url;
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+		 */
+		@Override
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName,
+				Attributes attributes) throws SAXException {
+			switch (qName) {
+			case TAG_RESOURCE: {
+				ModelXmlUtils.readIdentity(attributes, this);
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_RESOURCE+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 */
+		@Override
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
+				throws SAXException {
+			switch (qName) {
+			case TAG_RESOURCE: {
+
+				if(text!=null) {
+					try {
+						setURL(new URL(text));
+					} catch (MalformedURLException e) {
+						throw new SAXException("Invalid resoucre url", e); //$NON-NLS-1$
+					}
+				}
+
+				return null;
+			}
+
+			default:
+				throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_RESOURCE+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+		 */
+		@Override
+		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+				String localName, String qName, ModelXmlHandler handler)
+				throws SAXException {
+			throw new UnsupportedOperationException();
+		}
 
 		/**
 		 * @see de.ims.icarus.model.api.manifest.Documentation.Resource#getURL()

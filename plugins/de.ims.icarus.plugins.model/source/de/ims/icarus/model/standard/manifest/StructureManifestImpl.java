@@ -25,12 +25,17 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.StructureType;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
@@ -44,13 +49,13 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	private Boolean multiRootAllowed;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 * @param layerManifest
 	 */
-	public StructureManifestImpl(ManifestSource manifestSource,
+	public StructureManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, StructureLayerManifest layerManifest) {
-		super(manifestSource, registry, layerManifest);
+		super(manifestLocation, registry, layerManifest);
 	}
 
 	/**
@@ -70,6 +75,51 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		String structureType = ModelXmlUtils.normalize(attributes, ATTR_STRUCTURE_TYPE);
+		if(structureType!=null) {
+			setStructureType(StructureType.parseStructureType(structureType));
+		}
+
+		multiRootAllowed = readFlag(attributes, ATTR_MULTI_ROOT);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_STRUCTURE: {
+			readAttributes(attributes);
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_STRUCTURE: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+	}
+
+	/**
 	 * @see de.ims.icarus.model.standard.manifest.ContainerManifestImpl#xmlTag()
 	 */
 	@Override
@@ -78,7 +128,7 @@ public class StructureManifestImpl extends ContainerManifestImpl implements Stru
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getTemplate()
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#getTemplate()
 	 */
 	@Override
 	public synchronized StructureManifest getTemplate() {

@@ -25,12 +25,17 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
@@ -47,12 +52,12 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	private ContainerType containerType;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	public ContainerManifestImpl(ManifestSource manifestSource,
+	public ContainerManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, MarkableLayerManifest layerManifest) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 
 		this.layerManifest = layerManifest;
 	}
@@ -71,7 +76,50 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		String containerType = ModelXmlUtils.normalize(attributes, ATTR_CONTAINER_TYPE);
+		if(containerType!=null) {
+			setContainerType(ContainerType.parseContainerType(containerType));
+		}
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_CONTAINER: {
+			readAttributes(attributes);
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_CONTAINER: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {

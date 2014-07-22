@@ -25,9 +25,14 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 
 /**
@@ -43,17 +48,17 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 	private Boolean useFactory;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	protected ImplementationManifestImpl(ManifestSource manifestSource,
+	public ImplementationManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 	}
 
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeAttributes(XmlSerializer serializer) throws Exception {
@@ -74,9 +79,59 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 		writeFlag(serializer, ATTR_FACTORY, useFactory, DEFAULT_USE_FACTORY_VALUE);
 	}
 
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		setSource(ModelXmlUtils.normalize(attributes, ATTR_SOURCE));
+		setClassname(ModelXmlUtils.normalize(attributes, ATTR_CLASSNAME));
+
+		String type = ModelXmlUtils.normalize(attributes, ATTR_SOURCE_TYPE);
+		if(type!=null) {
+			this.sourceType = SourceType.parseSourceType(type);
+		} else {
+			this.sourceType = SourceType.DEFAULT;
+		}
+
+		useFactory = readFlag(attributes, ATTR_FACTORY);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_IMPLEMENTATION: {
+			readAttributes(attributes);
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_IMPLEMENTATION: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+	}
+
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {

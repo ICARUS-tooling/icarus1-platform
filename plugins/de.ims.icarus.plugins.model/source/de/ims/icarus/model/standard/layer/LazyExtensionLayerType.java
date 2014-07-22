@@ -33,7 +33,7 @@ import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.plugins.PluginUtil;
-import de.ims.icarus.util.ClassUtils;
+import de.ims.icarus.util.classes.ClassUtils;
 
 /**
  * @author Markus Gärtner

@@ -27,7 +27,9 @@ package de.ims.icarus.model.standard.manifest;
 
 import javax.swing.Icon;
 
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import org.xml.sax.Attributes;
+
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.xml.ModelXmlUtils;
@@ -48,22 +50,32 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	private Icon icon;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	protected AbstractMemberManifest(ManifestSource manifestSource,
+	protected AbstractMemberManifest(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeAttributes(XmlSerializer serializer) throws Exception {
 		super.writeAttributes(serializer);
 
 		ModelXmlUtils.writeIdentityAttributes(serializer, null, name, description, icon);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		ModelXmlUtils.readIdentity(attributes, this);
 	}
 
 	/**
@@ -99,7 +111,7 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	public String getDescription() {
 		String result = description;
 		if(result==null && hasTemplate()) {
-			description = getTemplate().getDescription();
+			result = getTemplate().getDescription();
 		}
 		return result;
 	}
@@ -111,7 +123,7 @@ public abstract class AbstractMemberManifest<M extends MemberManifest> extends A
 	public Icon getIcon() {
 		Icon result = icon;
 		if(result==null && hasTemplate()) {
-			icon = getTemplate().getIcon();
+			result = getTemplate().getIcon();
 		}
 		return result;
 	}

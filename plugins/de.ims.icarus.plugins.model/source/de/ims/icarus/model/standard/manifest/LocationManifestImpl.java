@@ -28,8 +28,14 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.LocationManifest;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -37,11 +43,70 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class LocationManifestImpl implements LocationManifest {
+public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 	private String path;
 	private PathResolverManifest pathResolverManifest;
 
 	private final List<PathEntry> pathEntries = new ArrayList<>();
+
+	/**
+	 * @param attributes
+	 */
+	protected void readAttributes(Attributes attributes) {
+		path = ModelXmlUtils.normalize(attributes, ATTR_PATH);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_LOCATION: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_PATH_ENTRY : {
+			return new PathEntryImpl();
+		}
+
+		default:
+			throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_LOCATION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_LOCATION: {
+			return null;
+		}
+
+		default:
+			throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_LOCATION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_PATH_ENTRY : {
+			addPathEntry((PathEntry) handler);
+		} break;
+
+		default:
+			throw new UnsupportedOperationException();
+		}
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.LocationManifest#getPath()
@@ -104,10 +169,14 @@ public class LocationManifestImpl implements LocationManifest {
 		pathEntries.remove(entry);
 	}
 
-	public static class PathEntryImpl implements PathEntry {
+	public static class PathEntryImpl implements PathEntry, ModelXmlHandler {
 
-		private final PathType type;
-		private final String value;
+		private PathType type;
+		private String value;
+
+		protected PathEntryImpl() {
+			// no-op
+		}
 
 		public PathEntryImpl(PathType type, String value) {
 			if (type == null)
@@ -117,6 +186,54 @@ public class LocationManifestImpl implements LocationManifest {
 
 			this.type = type;
 			this.value = value;
+		}
+
+		/**
+		 * @param attributes
+		 */
+		protected void readAttributes(Attributes attributes) {
+			String typeId = ModelXmlUtils.normalize(attributes, ATTR_TYPE);
+			type = PathType.parsePathType(typeId);
+		}
+
+		@Override
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, Attributes attributes)
+						throws SAXException {
+			switch (qName) {
+			case TAG_PATH_ENTRY: {
+				readAttributes(attributes);
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
+			return this;
+		}
+
+		@Override
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
+						throws SAXException {
+			switch (qName) {
+			case TAG_PATH_ENTRY: {
+				return null;
+			}
+
+			default:
+				throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+		 */
+		@Override
+		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+				String localName, String qName, ModelXmlHandler handler)
+				throws SAXException {
+			throw new UnsupportedOperationException();
 		}
 
 		/**

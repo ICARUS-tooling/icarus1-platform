@@ -26,12 +26,24 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
+import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest;
+import de.ims.icarus.model.api.manifest.FragmentLayerManifest;
+import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.StructureLayerManifest;
+import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -40,7 +52,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupManifest {
+public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupManifest, ModelXmlHandler {
 
 	private ContextManifest contextManifest;
 
@@ -48,6 +60,13 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	private LayerLink primaryLayer;
 	private boolean independent = DEFAULT_INDEPENDENT_VALUE;
 	private String name;
+
+	public LayerGroupManifestImpl(ContextManifest contextManifest) {
+		if (contextManifest == null)
+			throw new NullPointerException("Invalid contextManifest"); //$NON-NLS-1$
+
+		this.contextManifest = contextManifest;
+	}
 
 	public LayerGroupManifestImpl(ContextManifest contextManifest, String name) {
 		if (contextManifest == null)
@@ -66,17 +85,125 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	public void writeXml(XmlSerializer serializer) throws Exception {
 		serializer.startElement(TAG_LAYER_GROUP);
 
-		serializer.writeAttribute(ATTR_NAME, name);
+		serializer.writeAttribute(ATTR_ID, name);
 		if(independent!=DEFAULT_INDEPENDENT_VALUE) {
 			serializer.writeAttribute(ATTR_INDEPENDENT, independent);
 		}
 		serializer.writeAttribute(ATTR_PRIMARY_LAYER, primaryLayer.getId());
 
-		for(LayerManifest layerManifest : layerManifests) {
-			layerManifest.writeXml(serializer);
+		for(Iterator<LayerManifest> it = layerManifests.iterator(); it.hasNext();) {
+			it.next().writeXml(serializer);
+			if(it.hasNext()) {
+				serializer.writeLineBreak();
+			}
 		}
 
 		serializer.endElement(TAG_LAYER_GROUP);
+	}
+
+	private CorpusRegistry getRegistry() {
+		if(contextManifest==null)
+			throw new IllegalStateException("Context manifest required for registry lookup"); //$NON-NLS-1$
+
+		return contextManifest.getRegistry();
+	}
+
+	protected void readAttributes(Attributes attributes) {
+		setName(ModelXmlUtils.normalize(attributes, ATTR_ID));
+
+		String independent = ModelXmlUtils.normalize(attributes, ATTR_INDEPENDENT);
+		if(independent!=null) {
+			this.independent = Boolean.parseBoolean(independent);
+		} else {
+			this.independent = DEFAULT_INDEPENDENT_VALUE;
+		}
+
+		String primaryLayerId = ModelXmlUtils.normalize(attributes, ATTR_PRIMARY_LAYER);
+		setPrimaryLayerId(primaryLayerId);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_LAYER_GROUP: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_MARKABLE_LAYER : {
+			return new MarkableLayerManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		case TAG_STRUCTURE_LAYER : {
+			return new StructureLayerManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		case TAG_ANNOTATION_LAYER : {
+			return new AnnotationLayerManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		case TAG_FRAGMENT_LAYER : {
+			return new FragmentLayerManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		case TAG_HIGHLIGHT_LAYER : {
+			return new HighlightLayerManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		default:
+			throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_LAYER_GROUP+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_LAYER_GROUP: {
+			return null;
+		}
+
+		default:
+			throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_LAYER_GROUP+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_MARKABLE_LAYER : {
+			addLayerManifest((MarkableLayerManifest) handler);
+		} break;
+
+		case TAG_STRUCTURE_LAYER : {
+			addLayerManifest((StructureLayerManifest) handler);
+		} break;
+
+		case TAG_ANNOTATION_LAYER : {
+			addLayerManifest((AnnotationLayerManifest) handler);
+		} break;
+
+		case TAG_FRAGMENT_LAYER : {
+			addLayerManifest((FragmentLayerManifest) handler);
+		} break;
+
+		case TAG_HIGHLIGHT_LAYER : {
+			addLayerManifest((HighlightLayerManifest) handler);
+		} break;
+
+		default:
+			break;
+		}
 	}
 
 	/**
@@ -117,6 +244,16 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		if (name == null)
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
+
+		this.name = name;
 	}
 
 	/**

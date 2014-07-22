@@ -44,7 +44,7 @@ public class Variable {
 		if (expression == null)
 			throw new NullPointerException("Invalid expression"); //$NON-NLS-1$
 
-		//TODO further snaity checks?
+		//TODO further sanity checks?
 
 		this.expression = expression;
 		this.name = name;
@@ -87,6 +87,9 @@ public class Variable {
 	 * @param value the value to set
 	 */
 	void setValue(Object value) {
+		if (value == null)
+			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
+
 		this.value = value;
 	}
 }

@@ -28,15 +28,20 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
+import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.DriverManifest;
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.IndexManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 
@@ -49,10 +54,21 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 
 	private LocationType locationType;
 	private final List<IndexManifest> indexManifests = new ArrayList<>();
+	private final ContextManifest contextManifest;
 
-	public DriverManifestImpl(ManifestSource manifestSource,
-			CorpusRegistry registry) {
-		super(manifestSource, registry);
+	public DriverManifestImpl(ManifestLocation manifestLocation,
+			CorpusRegistry registry, ContextManifest contextManifest) {
+		super(manifestLocation, registry);
+
+		this.contextManifest = contextManifest;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && indexManifests.isEmpty();
 	}
 
 	/**
@@ -81,11 +97,95 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		String locationType = ModelXmlUtils.normalize(attributes, ATTR_LOCATION_TYPE);
+		if(locationType!=null) {
+			setLocationType(LocationType.parseLocationType(locationType));
+		}
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_DRIVER: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_INDEX: {
+			return new IndexManifestImpl(this);
+		}
+
+		case TAG_CONNECTOR: {
+			// no-op
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_DRIVER: {
+			return null;
+		}
+
+		case TAG_CONNECTOR: {
+			// no-op
+		} break;
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_INDEX: {
+			addIndexManifest((IndexManifest) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
 		return TAG_DRIVER;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#getContextManifest()
+	 */
+	@Override
+	public ContextManifest getContextManifest() {
+		return contextManifest;
 	}
 
 	/**

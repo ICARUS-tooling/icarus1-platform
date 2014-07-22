@@ -628,6 +628,21 @@ public final class StringUtil {
 		return sb.toString();
 	}
 
+	public static String join(String[] tokens, String separator) {
+		if(tokens==null || tokens.length==0)
+			return ""; //$NON-NLS-1$
+		StringBuilder sb = new StringBuilder();
+
+		for(int i=0; i<tokens.length; i++) {
+			if(i>0) {
+				sb.append(separator);
+			}
+			sb.append(tokens[i]);
+		}
+
+		return sb.toString();
+	}
+
 	public static int compareNumberAwareIgnoreCase(String s1, String s2) {
 		try {
 			int i1 = Integer.parseInt(s1);

@@ -25,11 +25,15 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.RasterizerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 
 /**
  * @author Markus Gärtner
@@ -39,16 +43,46 @@ import de.ims.icarus.model.registry.CorpusRegistry;
 public class RasterizerManifestImpl extends AbstractForeignImplementationManifest<RasterizerManifest> implements RasterizerManifest {
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	public RasterizerManifestImpl(ManifestSource manifestSource,
+	public RasterizerManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_RASTERIZER: {
+			readAttributes(attributes);
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_RASTERIZER: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {

@@ -383,6 +383,10 @@ public final class PluginUtil {
 		return getPluginManager().getPluginClassLoader(element.getDeclaringPluginDescriptor());
 	}
 
+	public static ClassLoader getClassLoader(String pluginId) {
+		return getPluginManager().getPluginClassLoader(getPluginRegistry().getPluginDescriptor(pluginId));
+	}
+
 	public static Map<String, Object> getProperties(Extension extension) {
 		if(extension==null)
 			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$

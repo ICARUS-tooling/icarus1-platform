@@ -38,7 +38,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface ModifiableManifest extends Derivable, Documentable {
+public interface ModifiableManifest extends Manifest, Documentable {
 
 	/**
 	 * Returns the manifest that describes possible options the

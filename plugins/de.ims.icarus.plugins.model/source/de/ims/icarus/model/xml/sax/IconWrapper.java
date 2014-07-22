@@ -34,7 +34,7 @@ import de.ims.icarus.model.xml.XmlResource;
 import de.ims.icarus.ui.IconRegistry;
 
 public class IconWrapper implements Icon, XmlResource {
-	private Icon source;
+	private transient Icon source;
 	private final String name;
 
 	public IconWrapper(String name) {
@@ -42,6 +42,33 @@ public class IconWrapper implements Icon, XmlResource {
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
 		this.name = name;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof IconWrapper) {
+			return name.equals(((IconWrapper)obj).name);
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "IconWrapper@"+name; //$NON-NLS-1$
 	}
 
 	/**

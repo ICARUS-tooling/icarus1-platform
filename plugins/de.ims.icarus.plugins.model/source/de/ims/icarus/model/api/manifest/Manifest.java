@@ -25,12 +25,64 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.iql.access.AccessControl;
+import de.ims.icarus.model.iql.access.AccessMode;
+import de.ims.icarus.model.iql.access.AccessPolicy;
+import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.registry.CorpusRegistry;
+
 /**
+ *
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@AccessControl(AccessPolicy.DENY)
 public interface Manifest {
 
-	ManifestSource getManifestSource();
+	/**
+	 * Returns whether or not this {@code Manifest} is meant to be a template,
+	 * i.e. an abstract base description that cannot be used to directly instantiate
+	 * objects from.
+	 *
+	 * @return
+	 */
+	@AccessRestriction(AccessMode.READ)
+	boolean isTemplate();
+
+	/**
+	 * Returns the namespace wide unique id of this template/derivable.
+	 * @return
+	 */
+	@AccessRestriction(AccessMode.READ)
+	String getId();
+
+	/**
+	 * If derived from another template, this method returns the object used for
+	 * templating or {@code null} otherwise.
+	 *
+	 * @return
+	 */
+	@AccessRestriction(AccessMode.READ)
+	Manifest getTemplate();
+
+	// Modification methods
+
+//	void setId(String id);
+//
+//	void setIsTemplate(boolean isTemplate);
+
+//	/**
+//	 * Changes the template used to derive content from.
+//	 *
+//	 * @param template
+//	 */
+//	void setTemplate(Manifest template);
+
+//	void setTemplateId(String templateId);
+
+	CorpusRegistry getRegistry();
+
+	ManifestLocation getManifestSource();
 }

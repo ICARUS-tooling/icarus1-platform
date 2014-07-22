@@ -31,12 +31,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
+import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
 
@@ -55,13 +60,13 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	private Boolean indexable;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 * @param layerGroupManifest
 	 */
-	public AnnotationLayerManifestImpl(ManifestSource manifestSource,
+	public AnnotationLayerManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
-		super(manifestSource, registry, layerGroupManifest);
+		super(manifestLocation, registry, layerGroupManifest);
 	}
 
 	/**
@@ -82,6 +87,23 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		// Read default key
+		defaultKey = ModelXmlUtils.normalize(attributes, ATTR_DEFAULT_KEY);
+
+		// Read flags
+		deepAnnotation = readFlag(attributes, ATTR_DEEP_ANNOTATION);
+		allowUnknownKeys = readFlag(attributes, ATTR_UNKNOWN_KEYS);
+		searchable = readFlag(attributes, ATTR_SERCH);
+		indexable = readFlag(attributes, ATTR_INDEX);
+	}
+
+	/**
 	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
@@ -99,7 +121,65 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+		switch (qName) {
+		case TAG_ANNOTATION_LAYER: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_ANNOTATION: {
+			return new AnnotationManifestImpl(manifestLocation, getRegistry());
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+			throws SAXException {
+		switch (qName) {
+		case TAG_ANNOTATION_LAYER: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+		case TAG_ANNOTATION: {
+			addAnnotationManifest((AnnotationManifest) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {

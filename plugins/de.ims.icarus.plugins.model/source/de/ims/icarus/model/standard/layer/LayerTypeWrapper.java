@@ -32,8 +32,8 @@ import org.java.plugin.registry.Extension;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.LayerManifest;
-import de.ims.icarus.util.ClassProxy;
-import de.ims.icarus.util.ClassUtils;
+import de.ims.icarus.util.classes.ClassProxy;
+import de.ims.icarus.util.classes.ClassUtils;
 
 /**
  * @author Markus Gärtner

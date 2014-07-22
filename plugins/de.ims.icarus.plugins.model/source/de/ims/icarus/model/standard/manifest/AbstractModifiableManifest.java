@@ -25,18 +25,25 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.Documentation;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ModifiableManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -46,15 +53,23 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public abstract class AbstractModifiableManifest<T extends ModifiableManifest> extends AbstractDerivable<T> implements ModifiableManifest {
+public abstract class AbstractModifiableManifest<T extends ModifiableManifest> extends AbstractManifest<T> implements ModifiableManifest {
 
-	private Map<String, Object> properties;
+	private final Map<String, Object> properties = new HashMap<>();
 	private OptionsManifest optionsManifest;
 	private Documentation documentation;
 
-	protected AbstractModifiableManifest(ManifestSource manifestSource,
+	protected AbstractModifiableManifest(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return properties.isEmpty() && optionsManifest==null && documentation==null;
 	}
 
 	@Override
@@ -67,17 +82,87 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 		// Write options manifest
 		writeEmbedded(optionsManifest, serializer);
 
-		if(properties!=null && !properties.isEmpty()) {
+		if(!properties.isEmpty()) {
+			serializer.startElement(TAG_PROPERTIES);
+
 			List<String> names = CollectionUtils.asSortedList(properties.keySet());
+
+			// Use inherited options manifest to decide about value types if required!
+			OptionsManifest optionsManifest = getOptionsManifest();
 
 			for(String name : names) {
 				Object value = properties.get(name);
 				ValueType type = optionsManifest==null ?
 						ValueType.STRING : optionsManifest.getOption(name).getValueType();
 
-				ModelXmlUtils.writePropertyElement(serializer, name, value, type);
+				boolean multiValue = optionsManifest==null ?
+						false : optionsManifest.getOption(name).isMultiValue();
+
+				// Multi-value conscious serialization
+				if(multiValue && value instanceof Collection) {
+					for(Object item : (Collection<?>) value) {
+						ModelXmlUtils.writePropertyElement(serializer, name, item, type);
+					}
+				} else {
+					ModelXmlUtils.writePropertyElement(serializer, name, value, type);
+				}
 			}
+
+			serializer.endElement(TAG_PROPERTIES);
 		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+			throws SAXException {
+		switch (qName) {
+		case TAG_OPTIONS: {
+			return new OptionsManifestImpl(getManifestSource(), getRegistry());
+		}
+
+		case TAG_DOCUMENTATION: {
+			return new DocumentationImpl(this);
+		}
+
+		case TAG_PROPERTIES: {
+			return new PropertiesXmlHandler();
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+
+		switch (qName) {
+		case TAG_OPTIONS: {
+			setOptionsManifest((OptionsManifest) handler);
+		} break;
+
+		case TAG_DOCUMENTATION: {
+			setDocumentation((Documentation) handler);
+		} break;
+
+		case TAG_PROPERTIES: {
+			setProperties(((PropertiesXmlHandler)handler).getProperties());
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+
 	}
 
 	/**
@@ -163,9 +248,7 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 		if(key==null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 
-		if(properties==null) {
-			properties = new HashMap<>();
-		}
+		//FIXME sanity check for value type!
 
 		properties.put(key, value);
 	}
@@ -174,10 +257,97 @@ public abstract class AbstractModifiableManifest<T extends ModifiableManifest> e
 		if(values==null)
 			throw new NullPointerException("Invalid values"); //$NON-NLS-1$
 
-		if(properties==null) {
-			properties = new HashMap<>();
+		properties.putAll(values);
+	}
+
+	public static class PropertiesXmlHandler implements ModelXmlHandler {
+
+		private final Map<String, Object> properties = new LinkedHashMap<>();
+
+		private String name;
+		private ValueType valueType;
+
+		@SuppressWarnings("unchecked")
+		private void addProperty(String key, Object value) {
+			Object current = properties.get(key);
+
+			if(current instanceof Collection) {
+				Collection.class.cast(current).add(value);
+			} else if(current!=null) {
+				List<Object> list = new ArrayList<>(4);
+				CollectionUtils.feedItems(list, current, value);
+				properties.put(key, list);
+			} else {
+				properties.put(key, value);
+			}
 		}
 
-		properties.putAll(values);
+		public Map<String, Object> getProperties() {
+			return properties;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+		 */
+		@Override
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName,
+				Attributes attributes) throws SAXException {
+			switch (qName) {
+			case TAG_PROPERTIES: {
+				// no-op
+			} break;
+
+			case TAG_PROPERTY: {
+				name = ModelXmlUtils.normalize(attributes, ATTR_NAME);
+				valueType = ModelXmlUtils.typeValue(attributes);
+			} break;
+
+			default:
+				throw new SAXException("Unexpected opening tag in properties environment: "+qName); //$NON-NLS-1$
+			}
+
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 */
+		@Override
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
+				throws SAXException {
+			switch (qName) {
+			case TAG_PROPERTIES: {
+				return null;
+			}
+
+			case TAG_PROPERTY: {
+
+				Object value = valueType.parse(text, manifestLocation.getClassLoader());
+
+				addProperty(name, value);
+
+				name = null;
+				valueType = null;
+			} break;
+
+			default:
+				throw new SAXException("Unexpected end tag in properties environment: "+qName); //$NON-NLS-1$
+			}
+
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+		 */
+		@Override
+		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+				String localName, String qName, ModelXmlHandler handler)
+				throws SAXException {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 }

@@ -109,7 +109,6 @@ public interface Driver {
 	 * @throws InterruptedException
 	 * @throws NullPointerException if any of the arguments is {@code null}
 	 *
-	 * @see DriverListener
 	 * @see Scope
 	 */
 	long load(IndexSet[] indices, MarkableLayer layer, ChunkStorage storage) throws ModelException, InterruptedException;
@@ -140,12 +139,12 @@ public interface Driver {
 	Markable load(long index, MarkableLayer layer) throws ModelException;
 
 	/**
-	 * Performs a reverse lookup to return indices of markables in the designated target layer
-	 * that contain the specified elements in the given {@code source} layer.
+	 * Performs an index lookup to return indices of markables in the designated target layer
+	 * using the specified elements in the given {@code source} layer.
 	 *
-	 * @param targetLayer
 	 * @param sourceLayer
-	 * @param indices
+	 * @param targetLayer
+	 * @param sourceIndices
 	 * @return
 	 * @throws NullPointerException if any of the arguments is {@code null}
 	 * @throws IllegalArgumentException if {@code targetLayer} is neither directly nor indirectly
@@ -154,7 +153,7 @@ public interface Driver {
 	 * @throws ModelException
 	 * @throws InterruptedException
 	 */
-	Candidates getHostIndices(MarkableLayer targetLayer, MarkableLayer sourceLayer, IndexSet[] indices) throws ModelException, InterruptedException;
+	Candidates mapIndices(MarkableLayer sourceLayer, MarkableLayer targetLayer, IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 
 	/**
 	 * Called by a {@link Segment} when it gets closed or it otherwise decided to discard its current
@@ -219,4 +218,8 @@ public interface Driver {
 	 * @throws InterruptedException
 	 */
 	AnnotationValueDistribution lookupDistribution(AnnotationLayer layer, String key) throws ModelException, InterruptedException;
+
+	void addDriverListener(DriverListener listener);
+
+	void removeDriverListener(DriverListener listener);
 }

@@ -28,20 +28,27 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
+ * FIXME missing value type when parsing might break the implementation (maybe use lazy value parsing?)
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -49,19 +56,27 @@ import de.ims.icarus.util.data.ContentType;
 public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationManifest> implements AnnotationManifest {
 
 	private String key;
-	private List<String> aliases;
+	private final List<String> aliases = new ArrayList<>(3);
 	private ValueType valueType;
 	private ValueSet values;
 	private ValueRange valueRange;
 	private ContentType contentType;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	public AnnotationManifestImpl(ManifestSource manifestSource,
+	public AnnotationManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && aliases.isEmpty() && values==null && valueRange==null;
 	}
 
 	/**
@@ -75,12 +90,30 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		serializer.writeAttribute(ATTR_KEY, key);
 
 		// Write value type
-		if(valueType!=null) {
-			serializer.writeAttribute(ATTR_TYPE, ModelXmlUtils.getSerializedForm(valueType));
-		}
+		//TODO for now we ALWAYS serialize the (possibly) inherited type
+//		if(valueType!=null) {
+			serializer.writeAttribute(ATTR_VALUE_TYPE, ModelXmlUtils.getSerializedForm(getValueType()));
+//		}
 
 		if(contentType!=null) {
 			serializer.writeAttribute(ATTR_CONTENT_TYPE, contentType.getId());
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+	 */
+	@Override
+	protected void readAttributes(Attributes attributes) {
+		super.readAttributes(attributes);
+
+		key = ModelXmlUtils.normalize(attributes, ATTR_KEY);
+
+		valueType = ModelXmlUtils.typeValue(attributes);
+
+		String contentTypeId = ModelXmlUtils.normalize(attributes, ATTR_CONTENT_TYPE);
+		if(contentTypeId!=null) {
+			setContentType(ContentTypeRegistry.getInstance().getType(contentTypeId));
 		}
 	}
 
@@ -108,8 +141,79 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		ModelXmlUtils.writeValueRangeElement(serializer, valueRange, valueType);
 	}
 
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_ANNOTATION: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_ALIAS: {
+			addAlias(ModelXmlUtils.normalize(attributes, ATTR_NAME));
+		} break;
+
+		case TAG_VALUES: {
+			return new ValueSetImpl(valueType);
+		}
+
+		case TAG_RANGE: {
+			return new ValueRangeImpl();
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_ANNOTATION: {
+			return null;
+		}
+
+		case TAG_ALIAS: {
+			// no-op
+		} break;
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+
+		return this;
+	}
+
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.AbstractModifiableManifest#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+
+		switch (qName) {
+		case TAG_VALUES: {
+			setSupportedValues((ValueSet) handler);
+		} break;
+
+		case TAG_RANGE: {
+			setSupportedRange((ValueRange) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
@@ -169,10 +273,6 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	public void addAlias(String alias) {
 		if (alias == null)
 			throw new NullPointerException("Invalid alias"); //$NON-NLS-1$
-
-		if(aliases==null) {
-			aliases = new ArrayList<>(3);
-		}
 
 		if(aliases.contains(alias))
 			throw new IllegalArgumentException("Alias already registered: "+alias); //$NON-NLS-1$
@@ -281,6 +381,12 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		this.values = values;
 	}
 
+	public ValueSet clearSupportedValues() {
+		ValueSet current = values;
+		values = null;
+		return current;
+	}
+
 	/**
 	 * @param valueRange the valueRange to set
 	 */
@@ -290,5 +396,11 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 			throw new NullPointerException("Invalid valueRange"); //$NON-NLS-1$
 
 		this.valueRange = valueRange;
+	}
+
+	public ValueRange clearSupportedRange() {
+		ValueRange current = valueRange;
+		valueRange = null;
+		return current;
 	}
 }

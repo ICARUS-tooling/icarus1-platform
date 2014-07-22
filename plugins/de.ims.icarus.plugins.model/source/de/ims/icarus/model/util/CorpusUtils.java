@@ -38,6 +38,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Context;
@@ -52,7 +54,6 @@ import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.FragmentLayer;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.layer.LayerGroup;
-import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
@@ -71,7 +72,6 @@ import de.ims.icarus.model.api.raster.PositionOutOfBoundsException;
 import de.ims.icarus.model.api.raster.Rasterizer;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.io.ResourcePath;
-import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
@@ -91,6 +91,38 @@ public final class CorpusUtils {
 
 	public static int getNewUID() {
 		return uidGenerator.getAndIncrement();
+	}
+
+	private static final Pattern idPattern = Pattern.compile(
+			"^\\p{Alpha}[:_\\-\\w]{2,}$"); //$NON-NLS-1$
+
+	private static Matcher idMatcher;
+
+	/**
+	 * Verifies the validity of the given {@code id} string.
+	 * <p>
+	 * Valid ids are defined as follows:
+	 * <ul>
+	 * <li>they have a minimum length of 3 characters</li>
+	 * <li>they start with an alphabetic character (lower and upper case are allowed)</li>
+	 * <li>subsequent characters may be alphabetic or digits</li>
+	 * <li>no whitespaces, control characters or code points with 2 or more bytes are allowed</li>
+	 * <li>no special characters are allowed besides the following 2: _- (underscore, hyphen)</li>
+	 * </ul>
+	 *
+	 * Attempting to use any other string as an identifier for arbitrary members of a corpus will
+	 * result in them being rejected by the registry.
+	 */
+	public static boolean isValidId(String id) {
+		synchronized (idPattern) {
+			if(idMatcher==null) {
+				idMatcher = idPattern.matcher(id);
+			} else {
+				idMatcher.reset(id);
+			}
+
+			return idMatcher.matches();
+		}
 	}
 
 	public static boolean isValidValue(Object value, AnnotationManifest manifest) {
@@ -248,32 +280,6 @@ public final class CorpusUtils {
 		return context.getLayer(manifest.getId());
 	}
 
-	public static boolean matches(PrerequisiteManifest prerequisite, Corpus corpus) {
-		if(prerequisite==null)
-			throw new NullPointerException("Invalid prerequisite"); //$NON-NLS-1$
-		if(corpus==null)
-			throw new NullPointerException("Invalid corpus"); //$NON-NLS-1$
-
-		String id = prerequisite.getLayerId();
-		if(id!=null) {
-			try {
-				Object member = corpus.getLayer(id);
-
-				return member instanceof Layer;
-			} catch(IllegalArgumentException e) {
-				return false;
-			}
-		}
-
-		String typeId = prerequisite.getTypeId();
-		if(typeId!=null && !typeId.isEmpty()) {
-			LayerType type = CorpusRegistry.getInstance().getLayerType(typeId);
-			return !corpus.getLayers(type).isEmpty();
-		}
-
-		return true;
-	}
-
 	public static String getName(PrerequisiteManifest prerequisite) {
 		String id = prerequisite.getLayerId();
 		if(id!=null)
@@ -284,10 +290,6 @@ public final class CorpusUtils {
 			return "Required type-id: "+typeName; //$NON-NLS-1$
 
 		return prerequisite.toString();
-	}
-
-	public static String getName(Layer layer) {
-		return layer.getName()+" ("+layer.getLayerType().getName()+")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static String getName(LayerGroup layerGroup) {

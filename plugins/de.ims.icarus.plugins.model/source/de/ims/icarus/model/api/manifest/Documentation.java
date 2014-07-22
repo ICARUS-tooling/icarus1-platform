@@ -33,6 +33,7 @@ import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
 import de.ims.icarus.model.xml.ModelXmlElement;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 
 /**
  * @author Markus Gärtner
@@ -40,7 +41,7 @@ import de.ims.icarus.model.xml.ModelXmlElement;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface Documentation extends ModifiableIdentity, ModelXmlElement {
+public interface Documentation extends ModifiableIdentity, ModelXmlElement, ModelXmlHandler {
 
 	@AccessRestriction(AccessMode.READ)
 	Documentable getTarget();

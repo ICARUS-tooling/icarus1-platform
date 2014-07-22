@@ -32,6 +32,7 @@ import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
+import de.ims.icarus.util.CorruptedStateException;
 
 /**
  * @author Markus Gärtner
@@ -45,7 +46,9 @@ public enum ModelError {
 	//**************************************************
 
 	/**
-	 * Represents an error whose cause could not be identified.
+	 * Represents an error whose cause could not be identified or when a
+	 * {@code ModelException} only contains an error message without the
+	 * exact type of error being specified.
 	 */
 	UNKNOWN_ERROR(100),
 
@@ -201,6 +204,9 @@ public enum ModelError {
 				if (codeLookup.isEmpty()) {
 					for(ModelError error : values()) {
 						//TODO Maybe add extra sanity check against duplicate error codes?
+						if(codeLookup.containsKey(error.errorCode))
+							throw new CorruptedStateException("Duplicate error code: "+error); //$NON-NLS-1$
+
 						codeLookup.put(error.errorCode, error);
 					}
 				}

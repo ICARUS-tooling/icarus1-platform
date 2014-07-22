@@ -25,20 +25,24 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.Icon;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -49,23 +53,31 @@ import de.ims.icarus.util.id.Identity;
  * @version $Id$
  *
  */
-public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> implements OptionsManifest {
+public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> implements OptionsManifest {
 
 	private final Set<String> baseNames = new HashSet<>();
 	private final Set<Identity> groupIdentifiers = new HashSet<>();
 	private final Map<String, Option> options = new HashMap<>();
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 */
-	public OptionsManifestImpl(ManifestSource manifestSource,
+	public OptionsManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestSource, registry);
+		super(manifestLocation, registry);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return options.isEmpty();
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#writeElements(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeElements(XmlSerializer serializer) throws Exception {
@@ -95,8 +107,74 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		}
 	}
 
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_OPTIONS: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_OPTION: {
+			return new OptionImpl();
+		}
+
+		case TAG_GROUP: {
+			DefaultModifiableIdentity identity = new DefaultModifiableIdentity();
+			ModelXmlUtils.readIdentity(attributes, identity);
+
+			addGroupIdentifier(identity);
+		} break;
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_OPTIONS: {
+			return null;
+		}
+
+		case TAG_GROUP: {
+			// no-op
+		} break;
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+
+		return this;
+	}
+
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_OPTION: {
+			addOption((Option) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
@@ -163,45 +241,145 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		return result;
 	}
 
-	public static class OptionImpl implements Option {
+	public void addGroupIdentifier(Identity identity) {
+		if (identity == null)
+			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
+
+		if(groupIdentifiers.contains(identity))
+			throw new IllegalArgumentException("Duplicate group identifier: "+identity); //$NON-NLS-1$
+
+		groupIdentifiers.add(identity);
+	}
+
+	public static class OptionImpl extends DefaultModifiableIdentity implements Option, ModelXmlHandler {
 		private Object defaultValue;
 		private ValueType valueType;
-		private final String id;
-		private String name;
-		private String description;
 		private String group;
 		private ValueSet values;
 		private ValueRange range;
 		private boolean published = DEFAULT_PUBLISHED_VALUE;
 		private boolean multivalue = DEFAULT_MULTIVALUE_VALUE;
 
+		protected OptionImpl() {
+			// for parsing
+		}
+
 		public OptionImpl(String id) {
 			if (id == null)
 				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
-			this.id = id;
+			setId(id);
 		}
 
 		/**
-		 * @see de.ims.icarus.util.id.Identity#getIcon()
+		 * @param attributes
 		 */
-		@Override
-		public Icon getIcon() {
-			return null;
+		protected void readAttributes(Attributes attributes) {
+			setValueType(ModelXmlUtils.typeValue(attributes));
+			ModelXmlUtils.readIdentity(attributes, this);
+
+			String published = ModelXmlUtils.normalize(attributes, ATTR_PUBLISHED);
+			if(published!=null) {
+				this.published = Boolean.parseBoolean(published);
+			} else {
+				this.published = DEFAULT_PUBLISHED_VALUE;
+			}
+
+			String multivalue = ModelXmlUtils.normalize(attributes, ATTR_MULTI_VALUE);
+			if(multivalue!=null) {
+				this.multivalue = Boolean.parseBoolean(multivalue);
+			} else {
+				this.multivalue = DEFAULT_MULTIVALUE_VALUE;
+			}
+
+			setGroup(ModelXmlUtils.normalize(attributes, ATTR_GROUP));
 		}
-		/**
-		 * @see de.ims.icarus.util.id.Identity#getOwner()
-		 */
+
 		@Override
-		public Object getOwner() {
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, Attributes attributes)
+						throws SAXException {
+			switch (qName) {
+			case TAG_OPTION: {
+				readAttributes(attributes);
+			} break;
+
+			case TAG_RANGE : {
+				return new ValueRangeImpl();
+			}
+
+			case TAG_VALUES : {
+				return new ValueSetImpl(valueType);
+			}
+
+			case TAG_DEFAULT_VALUE : {
+				// no-op
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_OPTION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
 			return this;
 		}
+
+		@Override
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
+						throws SAXException {
+			switch (qName) {
+			case TAG_OPTION: {
+				return null;
+			}
+
+			case TAG_DEFAULT_VALUE : {
+				addDefaultValue(valueType.parse(text, manifestLocation.getClassLoader()));
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_OPTION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
+			return this;
+		}
+
 		/**
-		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getId()
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
 		 */
 		@Override
-		public String getId() {
-			return id;
+		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+				String localName, String qName, ModelXmlHandler handler)
+				throws SAXException {
+			switch (qName) {
+
+			case TAG_RANGE : {
+				setRange((ValueRange) handler);
+			} break;
+
+			case TAG_VALUES : {
+				setValues((ValueSet) handler);
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized nested tag  '"+qName+"' in "+TAG_OPTION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
 		}
+
+		@SuppressWarnings("unchecked")
+		protected void addDefaultValue(Object value) {
+			if(defaultValue instanceof Collection) {
+				Collection.class.cast(defaultValue).add(value);
+			} else if(defaultValue!=null) {
+				if(!multivalue)
+					throw new IllegalStateException("Cannot add more than one default value to optin that is not declared as multivalue"); //$NON-NLS-1$
+
+				List<Object> list = new ArrayList<>(4);
+				CollectionUtils.feedItems(list, defaultValue, value);
+				defaultValue = list;
+			}  else {
+				defaultValue = value;
+			}
+		}
+
 		/**
 		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getDefaultValue()
 		 */
@@ -215,20 +393,6 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		@Override
 		public ValueType getValueType() {
 			return valueType;
-		}
-		/**
-		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getName()
-		 */
-		@Override
-		public String getName() {
-			return name;
-		}
-		/**
-		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getDescription()
-		 */
-		@Override
-		public String getDescription() {
-			return description;
 		}
 		/**
 		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getSupportedValues()
@@ -278,20 +442,6 @@ public class OptionsManifestImpl extends AbstractDerivable<OptionsManifest> impl
 		 */
 		public void setValueType(ValueType valueType) {
 			this.valueType = valueType;
-		}
-
-		/**
-		 * @param name the name to set
-		 */
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		/**
-		 * @param description the description to set
-		 */
-		public void setDescription(String description) {
-			this.description = description;
 		}
 
 		/**

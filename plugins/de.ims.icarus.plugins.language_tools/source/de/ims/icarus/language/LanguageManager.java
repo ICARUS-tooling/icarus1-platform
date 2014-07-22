@@ -37,8 +37,8 @@ import org.java.plugin.registry.ExtensionPoint;
 
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.language_tools.LanguageToolsConstants;
-import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.Exceptions;
+import de.ims.icarus.util.classes.ClassProxy;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.DuplicateIdentifierException;

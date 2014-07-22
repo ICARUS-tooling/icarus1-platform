@@ -28,12 +28,16 @@ package de.ims.icarus.model.standard.manifest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
 
@@ -49,13 +53,21 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	private TargetLayerManifest boundaryLayerManifest;
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 * @param layerGroupManifest
 	 */
-	public MarkableLayerManifestImpl(ManifestSource manifestSource,
+	public MarkableLayerManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
-		super(manifestSource, registry, layerGroupManifest);
+		super(manifestLocation, registry, layerGroupManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && boundaryLayerManifest==null && containerManifests.isEmpty();
 	}
 
 	/**
@@ -74,8 +86,72 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 		}
 	}
 
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_MARKABLE_LAYER: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_BOUNDARY_LAYER: {
+			String boundaryLayerId = ModelXmlUtils.normalize(attributes, ATTR_LAYER_ID);
+			setBoundaryLayerId(boundaryLayerId);
+		} break;
+
+		case TAG_CONTAINER: {
+			return new ContainerManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_MARKABLE_LAYER: {
+			return null;
+		}
+
+		case TAG_BOUNDARY_LAYER: {
+			// no-op
+		} break;
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
+
+		return this;
+	}
+
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_CONTAINER: {
+			addContainerManifest((ContainerManifest) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {

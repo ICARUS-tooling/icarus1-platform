@@ -34,5 +34,18 @@ import de.ims.icarus.model.api.Markable;
  */
 public interface ChunkStorage {
 
+	/**
+	 * Adds the given {@code member} to the storage, using the specified
+	 * {@code index}. The storage should treat the markable as not being
+	 * fully linked (i.e. it might for example return an actual index value
+	 * different from the {@code index} argument). It is perfectly legal for
+	 * a driver implementation to delay final initialization and integrity checks
+	 * till the end of a batch load operation. The {@code index} argument is provided
+	 * so that the storage is already able to perform a proper mapping and store the
+	 * markable at the correct location.
+	 *
+	 * @param member
+	 * @param index
+	 */
 	void add(Markable member, long index);
 }

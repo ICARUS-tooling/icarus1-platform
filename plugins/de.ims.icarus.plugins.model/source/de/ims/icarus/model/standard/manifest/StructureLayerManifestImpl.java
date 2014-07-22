@@ -25,12 +25,16 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 
 /**
  * @author Markus Gärtner
@@ -40,17 +44,70 @@ import de.ims.icarus.model.registry.CorpusRegistry;
 public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implements StructureLayerManifest {
 
 	/**
-	 * @param manifestSource
+	 * @param manifestLocation
 	 * @param registry
 	 * @param layerGroupManifest
 	 */
-	protected StructureLayerManifestImpl(ManifestSource manifestSource,
+	public StructureLayerManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
-		super(manifestSource, registry, layerGroupManifest);
+		super(manifestLocation, registry, layerGroupManifest);
+	}
+
+	@Override
+	public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, Attributes attributes)
+					throws SAXException {
+		switch (qName) {
+		case TAG_STRUCTURE_LAYER: {
+			readAttributes(attributes);
+		} break;
+
+		case TAG_STRUCTURE: {
+			return new StructureManifestImpl(manifestLocation, getRegistry(), this);
+		}
+
+		default:
+			return super.startElement(manifestLocation, uri, localName, qName, attributes);
+		}
+
+		return this;
+	}
+
+	@Override
+	public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+			String uri, String localName, String qName, String text)
+					throws SAXException {
+		switch (qName) {
+		case TAG_STRUCTURE_LAYER: {
+			return null;
+		}
+
+		default:
+			return super.endElement(manifestLocation, uri, localName, qName, text);
+		}
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.AbstractDerivable#xmlTag()
+	 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+	 */
+	@Override
+	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+			String localName, String qName, ModelXmlHandler handler)
+			throws SAXException {
+		switch (qName) {
+
+		case TAG_STRUCTURE: {
+			addStructureManifest((StructureManifest) handler);
+		} break;
+
+		default:
+			super.endNestedHandler(manifestLocation, uri, localName, qName, handler);
+			break;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
@@ -58,7 +115,7 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.AbstractDerivable#getTemplate()
+	 * @see de.ims.icarus.model.api.standard.manifest.AbstractManifest#getTemplate()
 	 */
 	@Override
 	public synchronized StructureLayerManifest getTemplate() {

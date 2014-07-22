@@ -139,10 +139,10 @@ public abstract class AbstractDriver implements Driver {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.driver.Driver#getHostIndices(de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.driver.IndexSet[])
+	 * @see de.ims.icarus.model.api.driver.Driver#mapIndices(de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.layer.MarkableLayer, de.ims.icarus.model.api.driver.IndexSet[])
 	 */
 	@Override
-	public Candidates getHostIndices(MarkableLayer targetLayer,
+	public Candidates mapIndices(MarkableLayer targetLayer,
 			MarkableLayer sourceLayer, IndexSet[] indices)
 			throws ModelException, InterruptedException {
 		Index index = getIndex(sourceLayer, targetLayer);

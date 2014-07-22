@@ -56,7 +56,7 @@ public class LogReport {
 		return owner;
 	}
 
-	private void publish(int minLevel, int maxLevel) {
+	public void publish(int minLevel, int maxLevel) {
 		if(published)
 			throw new IllegalStateException("Records already published"); //$NON-NLS-1$
 

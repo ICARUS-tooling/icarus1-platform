@@ -23,19 +23,43 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.test.chunk;
+package de.ims.icarus.language.model.test;
 
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class ChunkIndexTest {
+public class TestUtils {
 
-	@Test
-	public void testIntIndexAdapter() throws Exception {
+    private static boolean equalsRegardingNull(Object expected, Object actual) {
+        if (expected == null) {
+            return actual == null;
+        }
 
+        return isEquals(expected, actual);
+    }
+
+    private static boolean isEquals(Object expected, Object actual) {
+        return expected.equals(actual);
+    }
+
+    private static boolean isHashEquals(Object expected, Object actual) {
+        return expected.hashCode()==actual.hashCode();
+    }
+
+	public static void assertHashEquals(Object expected, Object actual) {
+		assertHashEquals(null, expected, actual);
+	}
+
+	public static void assertHashEquals(String message, Object expected, Object actual) {
+		assertNotNull("Expected", expected);
+		assertNotNull("Actual", actual);
+
+		if(isEquals(expected, actual) && !isHashEquals(expected, actual)) {
+
+		}
 	}
 }

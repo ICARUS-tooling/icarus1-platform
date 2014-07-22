@@ -40,7 +40,7 @@ import java.util.WeakHashMap;
 import javax.swing.SwingUtilities;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.util.ClassUtils;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.BiDiMap;
 import de.ims.icarus.util.collections.CollectionUtils;
 

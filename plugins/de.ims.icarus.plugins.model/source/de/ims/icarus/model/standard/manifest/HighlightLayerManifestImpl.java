@@ -23,22 +23,29 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.test.footprint;
+package de.ims.icarus.model.standard.manifest;
 
-import org.junit.Test;
+import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
+import de.ims.icarus.model.api.manifest.LayerGroupManifest;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.registry.CorpusRegistry;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class CorpusFootprint {
+public class HighlightLayerManifestImpl extends AbstractLayerManifest<HighlightLayerManifest> implements HighlightLayerManifest {
 
-	private static final int avg_letters_ger = 12;
-	private static final int avg_words_ger = 14;
-
-	@Test
-	public void footprintGer() throws Exception {
-
+	/**
+	 * @param manifestLocation
+	 * @param registry
+	 * @param layerGroupManifest
+	 */
+	public HighlightLayerManifestImpl(ManifestLocation manifestLocation,
+			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
+		super(manifestLocation, registry, layerGroupManifest);
+		// TODO Auto-generated constructor stub
 	}
+
 }

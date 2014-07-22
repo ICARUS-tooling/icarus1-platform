@@ -36,8 +36,8 @@ import java.util.logging.Level;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.util.ClassProxy;
 import de.ims.icarus.util.Exceptions;
+import de.ims.icarus.util.classes.ClassProxy;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeCollection;
 import de.ims.icarus.util.data.ContentTypeRegistry;

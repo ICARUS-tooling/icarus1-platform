@@ -26,6 +26,7 @@
 package de.ims.icarus.model.xml.stream;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -47,6 +48,9 @@ public class XmlStreamSerializer implements XmlSerializer {
 
 	private int indent = 0;
 	private boolean nested = false;
+	private boolean noNesting = false;
+
+	private Stack<String> trace = new Stack<>();
 
 	public XmlStreamSerializer(XMLStreamWriter writer) {
 		if (writer == null)
@@ -72,11 +76,6 @@ public class XmlStreamSerializer implements XmlSerializer {
 		writer.writeCharacters(indentBuffer, 0, indent);
 	}
 
-	private void writeLineBreak() throws XMLStreamException {
-		//TODO maybe reduce linebreak to a single newline character?
-		writer.writeCharacters("\r\n"); //$NON-NLS-1$
-	}
-
 	private boolean flushCharacters() throws XMLStreamException {
 		if(characters.length()==0) {
 			return false;
@@ -98,28 +97,36 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void startElement(String name) throws XMLStreamException {
+		startElement(name, false);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.xml.XmlSerializer#startEmptyElement(java.lang.String)
+	 */
+	@Override
+	public void startEmptyElement(String name) throws XMLStreamException {
+		startElement(name, true);
+	}
+
+	private void startElement(String name, boolean empty) throws XMLStreamException {
+		if(noNesting)
+			throw new IllegalStateException("Cannot nest elements until current one is closed"); //$NON-NLS-1$
+
 		writeLineBreak();
 		writeIndent();
 
-		writer.writeStartElement(name);
+		if(empty) {
+			writer.writeEmptyElement(name);
+			noNesting = true;
+		} else {
+			writer.writeStartElement(name);
+		}
 		indent++;
 		nested = false;
-//		pushElement(name, false);
-	}
+//		pushElement(name, true);
 
-//	/**
-//	 * @see de.ims.icarus.model.api.xml.XmlSerializer#startEmptyElement(java.lang.String)
-//	 */
-//	@Override
-//	public void startEmptyElement(String name) throws XMLStreamException {
-//		writeLineBreak();
-//		writeIndent();
-//
-//		writer.writeEmptyElement(name);
-//		indent++;
-//		nested = false;
-////		pushElement(name, true);
-//	}
+		trace.add(name);
+	}
 
 	/**
 	 * @see de.ims.icarus.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, java.lang.String)
@@ -174,6 +181,9 @@ public class XmlStreamSerializer implements XmlSerializer {
 	 */
 	@Override
 	public void endElement(String name) throws XMLStreamException {
+		if(!trace.pop().equals(name))
+			throw new XMLStreamException("Unexpected closing tag: "+name); //$NON-NLS-1$
+
 		indent--;
 //		popElement(name);
 		if(nested) {
@@ -187,6 +197,7 @@ public class XmlStreamSerializer implements XmlSerializer {
 		}
 
 		nested = true;
+		noNesting = false;
 	}
 
 	/**
@@ -201,13 +212,30 @@ public class XmlStreamSerializer implements XmlSerializer {
 	}
 
 	/**
+	 * @see de.ims.icarus.model.xml.XmlSerializer#writeCData(java.lang.String)
+	 */
+	@Override
+	public void writeCData(String text) throws Exception {
+		writer.writeCData(text);
+		nested = true;
+	}
+
+	@Override
+	public void writeLineBreak() throws XMLStreamException {
+		//TODO maybe reduce linebreak to a single newline character?
+		writer.writeCharacters("\r\n"); //$NON-NLS-1$
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.xml.XmlSerializer#startDocument()
 	 */
 	@Override
 	public void startDocument() throws XMLStreamException {
 		writer.writeStartDocument();
-		writeLineBreak();
-		writer.writeDTD("<!DOCTYPE model SYSTEM \"corpus.dtd\">"); //$NON-NLS-1$
+
+		//FIXME enable DOCTYPE section once schema file is reworked!
+//		writeLineBreak();
+//		writer.writeDTD("<!DOCTYPE model SYSTEM \"corpus.dtd\">"); //$NON-NLS-1$
 	}
 
 	/**

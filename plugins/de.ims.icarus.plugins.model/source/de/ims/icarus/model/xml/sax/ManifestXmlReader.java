@@ -27,25 +27,21 @@ package de.ims.icarus.model.xml.sax;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.Icon;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.java.plugin.registry.PluginDescriptor;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -55,49 +51,40 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.ims.icarus.eval.Expression;
-import de.ims.icarus.eval.ExpressionFactory;
 import de.ims.icarus.logging.LogReport;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
-import de.ims.icarus.model.api.manifest.Derivable;
-import de.ims.icarus.model.api.manifest.Documentation;
-import de.ims.icarus.model.api.manifest.LayerGroupManifest;
-import de.ims.icarus.model.api.manifest.LayerManifest;
-import de.ims.icarus.model.api.manifest.ManifestSource;
-import de.ims.icarus.model.api.manifest.MemberManifest;
-import de.ims.icarus.model.api.manifest.ModifiableIdentity;
-import de.ims.icarus.model.api.manifest.ModifiableManifest;
-import de.ims.icarus.model.api.manifest.OptionsManifest;
-import de.ims.icarus.model.api.manifest.ValueRange;
-import de.ims.icarus.model.api.manifest.ValueSet;
+import de.ims.icarus.model.api.manifest.Manifest;
+import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.registry.CorpusRegistry;
-import de.ims.icarus.model.standard.manifest.DocumentationImpl;
-import de.ims.icarus.model.standard.manifest.DocumentationImpl.ResourceImpl;
+import de.ims.icarus.model.standard.manifest.AnnotationLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
+import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
+import de.ims.icarus.model.standard.manifest.ContextManifestImpl;
+import de.ims.icarus.model.standard.manifest.CorpusManifestImpl;
+import de.ims.icarus.model.standard.manifest.DriverManifestImpl;
+import de.ims.icarus.model.standard.manifest.ExpressionXmlHandler;
+import de.ims.icarus.model.standard.manifest.FragmentLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.HighlightLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl;
-import de.ims.icarus.model.standard.manifest.ValueManifestImpl;
-import de.ims.icarus.model.standard.manifest.ValueRangeImpl;
-import de.ims.icarus.model.standard.manifest.ValueSetImpl;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.standard.manifest.PathResolverManifestImpl;
+import de.ims.icarus.model.standard.manifest.RasterizerManifestImpl;
+import de.ims.icarus.model.standard.manifest.StructureLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.StructureManifestImpl;
 import de.ims.icarus.model.xml.ModelXmlAttributes;
+import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlTags;
-import de.ims.icarus.model.xml.sax.ManifestXmlReader.Buffers.OptionBuffer;
-import de.ims.icarus.model.xml.sax.ManifestXmlReader.Buffers.PrerequisiteBuffer;
-import de.ims.icarus.model.xml.sax.ManifestXmlReader.Buffers.PropertyBuffer;
-import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.util.id.Identity;
-import de.ims.icarus.util.id.StaticIdentity;
 
 /**
  * Important constraints:
  * <ul>
  * <li>Templates will inherit all data unchanged from their ancestor template if they declare one</li>
  * <li>Templates will overwrite all data they explicitly declare</li>
- * <li>Only top-level manifests in a &lt;templates&gt; context are considered templates</li>
- * <li>A live corpus will clone <b>all</b> data from its inherited templates and re-link them
+ * <li>Only top-level manifests in a &lt;manifests&gt; context are considered manifests</li>
+ * <li>A live corpus will clone <b>all</b> data from its inherited manifests and re-link them
  * to the new instances</li>
  * <li>A template must be completely loaded and fully resolved before it can be used for further inheritance</li>
  * </ul>
@@ -106,7 +93,7 @@ import de.ims.icarus.util.id.StaticIdentity;
  * <ol>
  * <li>Parsing all template sources into intermediate builder states</li>
  * <li>Creating from every top-level builder a new template object (this is done recursively to ensure that
- * referenced templates get fully resolved before being further processed)</li>
+ * referenced manifests get fully resolved before being further processed)</li>
  * <li>Parsing all live corpora into intermediate builder states</li>
  * <li>Creating fully cloned manifest instances for each corpus, preserving template informations</li>
  * </ol>
@@ -117,15 +104,13 @@ import de.ims.icarus.util.id.StaticIdentity;
  */
 public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 
-	private final Set<ManifestSource> templateSources = new HashSet<>();
-	private final Set<ManifestSource> corpusSources = new HashSet<>();
+	private final Set<ManifestLocation> templateSources = new HashSet<>();
+	private final Set<ManifestLocation> corpusSources = new HashSet<>();
 	private final AtomicBoolean reading = new AtomicBoolean(false);
 
+	private final ParseState state = new ParseState();
+
 	private final CorpusRegistry registry;
-
-	private final Map<String, TemplateState> templateStates = new HashMap<>();
-
-	private ParseState state;
 
 	public ManifestXmlReader(CorpusRegistry registry) {
 		if (registry == null)
@@ -134,29 +119,31 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 		this.registry = registry;
 	}
 
-	public void addSource(ManifestSource source) {
+	public void addSource(ManifestLocation source) {
 		if (source == null)
 			throw new NullPointerException("Invalid source");  //$NON-NLS-1$
 
 		if(reading.get())
 			throw new IllegalStateException("Reading in progress, cannot add new sources"); //$NON-NLS-1$
 
-		Set<ManifestSource> sources = source.isTemplate() ? templateSources : corpusSources;
+		Set<ManifestLocation> sources = source.isTemplate() ? templateSources : corpusSources;
 
 		if(!sources.add(source))
 			throw new IllegalArgumentException("Source already registered: "+source.getUrl()); //$NON-NLS-1$
 	}
 
-	public void readAll() throws ModelException, IOException, SAXException {
+	public LogReport readAll() throws ModelException, IOException, SAXException {
 
 		if(!reading.compareAndSet(false, true))
 			throw new IllegalStateException("Reading already in progress"); //$NON-NLS-1$
 
 		XMLReader reader = newReader();
 
-		// Read in templates
-		for(ManifestSource source : templateSources) {
-			try (InputStream in = source.getUrl().openStream()) {
+		List<Manifest> templates = new ArrayList<>();
+
+		// Read in manifests
+		for(ManifestLocation source : templateSources) {
+			try (InputStream in = source.getInputStream()) {
 				RootHandler handler = new RootHandler(source);
 
 				reader.setContentHandler(handler);
@@ -165,28 +152,20 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 				reader.setDTDHandler(handler);
 
 				reader.parse(new InputSource(in));
+
+				templates.addAll(handler.getTopLevelManifests());
 			}
 		}
 
-		// Resolve all templates
-		for(String templateId : templateStates.keySet()) {
-			readTemplate(templateId);
-		}
-
-		// Register all templates once resolution process is done
-		for(TemplateState state : templateStates.values()) {
-
-			// Make sure our templates are marked as such!
-			state.template.setIsTemplate(true);
-
-			// Register fully resolved template to the registry
-			registry.registerTemplate(state.template);
+		// Register all manifests
+		for(Manifest template : templates) {
+			registry.registerTemplate(template);
 		}
 
 		// Read in live corpora
-		List<Builder<?>> topLevelBuilders = new ArrayList<>();
-		for(ManifestSource source : templateSources) {
-			try (InputStream in = source.getUrl().openStream()) {
+		List<Manifest> corpora = new ArrayList<>();
+		for(ManifestLocation source : corpusSources) {
+			try (InputStream in = source.getInputStream()) {
 				RootHandler handler = new RootHandler(source);
 
 				reader.setContentHandler(handler);
@@ -196,23 +175,28 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 
 				reader.parse(new InputSource(in));
 
-				topLevelBuilders.addAll(handler.getTopLevelBuilders());
+				corpora.addAll(handler.getTopLevelManifests());
 			}
 		}
 
 		// Now build and register all live corpora
-		for(Builder<?> builder : topLevelBuilders) {
-			CorpusManifest corpusManifest = (CorpusManifest) builder.build();
+		for(Manifest manifest : corpora) {
+			CorpusManifest corpusManifest = (CorpusManifest) manifest;
+
+			//TODO instantiate a fresh new corpus manifest with proper linking!
 
 			registry.addCorpus(corpusManifest);
 		}
+
+		return state.report;
 	}
 
-	private XMLReader newReader() throws SAXException {
+	protected XMLReader newReader() throws SAXException {
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 
 		parserFactory.setNamespaceAware(true);
-		parserFactory.setValidating(true);
+//		parserFactory.setValidating(true);
+		//FIXME
 
 		try {
 			parserFactory.setFeature("http://xml.org/sax/features/use-entity-resolver2", true); //$NON-NLS-1$
@@ -231,73 +215,8 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 		return parser.getXMLReader();
 	}
 
-	/**
-	 * Attempts to read an element containing a top level template
-	 */
-	private Derivable readTemplate(String id) {
-		if(id==null) {
-			return null;
-		}
-
-		TemplateState state = templateStates.get(id);
-
-		if(state==null)
-			throw new ModelException(ModelError.MANIFEST_UNKNOWN_ID, "No template definition found for id: "+id); //$NON-NLS-1$
-
-		if(state.building)
-			throw new ModelException(ModelError.MANIFEST_CYCLIC_TEMPLATE, "Template id is part of a cyclic dependency: "+id); //$NON-NLS-1$
-
-		// Create new template if required
-		if(state.template!=null) {
-			state.building = true;
-
-			state.template = (Derivable) state.builder.build();
-
-			state.building = false;
-		}
-
-		return state.template;
-	}
-
-	/**
-	 * Performs a prioritized template lookup in that it first checks the
-	 * {@code CorpusRegistry} for a template of the given {@code id} and only if
-	 * that fails will the method attempt to load a template from the current
-	 * parser cache.
-	 */
-	private Derivable lookupTemplate(String id) {
-		if(registry.hasTemplate(id)) {
-			return registry.getTemplate(id);
-		} else {
-			return readTemplate(id);
-		}
-	}
-
-	private void addTemplateState(String id, Builder<?> builder, ManifestSource manifestSource) {
-		if(templateStates.containsKey(id) || registry.hasTemplate(id))
-			throw new ModelException(ModelError.MANIFEST_DUPLICATE_ID, "Template id already in use: "+id); //$NON-NLS-1$
-
-		templateStates.put(id, new TemplateState(builder, manifestSource));
-	}
-
-	static class TemplateState {
-		// Builder responsible for the template
-		final Builder<?> builder;
-		// The physical source of the template
-		final ManifestSource manifestSource;
-		// FLag for cyclic dependency checks
-		boolean building;
-		// Constructed template
-		Derivable template;
-
-		public TemplateState(Builder<?> builder, ManifestSource manifestSource) {
-			this.builder = builder;
-			this.manifestSource = manifestSource;
-		}
-	}
-
 	@SuppressWarnings("unused")
-	private class ParseState {
+	protected class ParseState {
 
 		private final Stack<Object> stack = new Stack<>();
 
@@ -322,8 +241,8 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 				String id = null;
 				Object item = stack.get(i);
 
-				if(item instanceof Derivable) {
-					id = ((Derivable)item).getId();
+				if(item instanceof Manifest) {
+					id = ((Manifest)item).getId();
 				} else if(item instanceof Identity) {
 					id = ((Identity)item).getId();
 				}
@@ -368,26 +287,26 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 		}
 	}
 
-	private class RootHandler extends DefaultHandler {
+	protected class RootHandler extends DefaultHandler {
 
 		private final StringBuilder buffer = new StringBuilder();
 
-		private final Stack<Builder<?>> builders = new Stack<>();
+		private final Stack<ModelXmlHandler> handlers = new Stack<>();
 
-		// List of all top-level builders. Used to preserve order of appearance
-		private final List<Builder<?>> topLevelBuilders = new ArrayList<>();
+		// List of all top-level handlers. Used to preserve order of appearance
+		private final List<Manifest> topLevelManifests = new ArrayList<>();
 
-		private final ManifestSource manifestSource;
+		private final ManifestLocation manifestLocation;
 
-		RootHandler(ManifestSource manifestSource) {
-			this.manifestSource = manifestSource;
+		RootHandler(ManifestLocation manifestLocation) {
+			this.manifestLocation = manifestLocation;
 		}
 
 		/**
-		 * @return the topLevelBuilders
+		 * @return the topLevelManifests
 		 */
-		public List<Builder<?>> getTopLevelBuilders() {
-			return topLevelBuilders;
+		public List<Manifest> getTopLevelManifests() {
+			return topLevelManifests;
 		}
 
 		/**
@@ -399,32 +318,35 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 			buffer.append(ch, start, length);
 		}
 
+		private void push(ModelXmlHandler handler) {
+			handlers.push(handler);
+			state.push(handler);
+		}
+
+		private ModelXmlHandler pop() {
+			ModelXmlHandler handler = handlers.pop();
+			state.pop();
+			return handler;
+		}
+
 		/**
 		 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
 		 */
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			if(builders.isEmpty()) {
-				Builder<?> root;
-				if(manifestSource.isTemplate()) {
-					root = new TemplatesBuilder();
-				} else {
-					root = new CorporaBuilder();
-				}
-
-				builders.add(root);
+			if(handlers.isEmpty()) {
+				push(new ManifestCollector());
 			}
 
-			Builder<?> current = builders.peek();
+			ModelXmlHandler current = handlers.peek();
 
-			Builder<?> future = current.startElement(manifestSource, uri, localName, qName, attributes);
+			ModelXmlHandler future = current.startElement(manifestLocation, uri, localName, qName, attributes);
 
 			// Delegate initial element handling to next builder
 			if(future!=null && future!=current) {
-				builders.push(future);
-				state.push(future);
+				push(future);
 
-				future.startElement(manifestSource, uri, localName, qName, attributes);
+				future.startElement(manifestLocation, uri, localName, qName, attributes);
 			}
 		}
 
@@ -435,17 +357,21 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			String text = getText();
 
-			Builder<?> current = builders.peek();
-			Builder<?> future = current.endElement(manifestSource, uri, localName, qName, text);
+			ModelXmlHandler current = handlers.peek();
+			ModelXmlHandler future = current.endElement(manifestLocation, uri, localName, qName, text);
 
 			// Discard current builder and switch to ancestor
 			if(future==null) {
-				builders.pop();
-				state.pop();
+				pop();
 
-				// If we are at the <templates> level again the builder was considered top-level
-				if(builders.size()==1) {
-					topLevelBuilders.add(current);
+				// Root level means we just add the manifests from the collector
+				if(handlers.isEmpty()) {
+					topLevelManifests.addAll(((ManifestCollector)current).getManifests());
+				} else {
+					// Allow ancestor to collect nested entries
+					ModelXmlHandler ancestor = handlers.peek();
+
+					ancestor.endNestedHandler(manifestLocation, uri, localName, qName, current);
 				}
 			}
 		}
@@ -485,1228 +411,135 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 			String text = buffer.length()==0 ? null : buffer.toString().trim();
 			buffer.setLength(0);
 
-			return text;
+			return text.length()==0 ? null : text;
 		}
 	}
 
-	static class ParseUtils {
+	private final static Map<String, Object> templateHandlers = new HashMap<>();
 
-		public static void readIdentity(Attributes attr, ModifiableIdentity identity) {
-			identity.setId(normalize(attr, ATTR_ID));
-			identity.setName(normalize(attr, ATTR_NAME));
-			identity.setDescription(normalize(attr, ATTR_DESCRIPTION));
-			identity.setIcon(iconValue(attr, ATTR_ICON));
-		}
+	private final static Map<String, Object> liveHandlers = new HashMap<>();
 
-		public static Icon iconValue(Attributes attr, String key) {
-			String icon = normalize(attr, key);
-			return icon==null ? null : new IconWrapper(icon);
-		}
+	static {
+		// Live manifests
+		liveHandlers.put(TAG_CORPUS, CorpusManifestImpl.class);
 
-		public static String stringValue(Attributes attr, String key) {
-			return normalize(attr, key);
-		}
-
-		public static long longValue(String s) {
-			return Long.parseLong(s);
-		}
-
-		public static long longValue(Attributes attr, String key) {
-			return longValue(normalize(attr, key));
-		}
-
-		public static double doubleValue(String s) {
-			return Double.parseDouble(s);
-		}
-
-		public static double doubleValue(Attributes attr, String key) {
-			return doubleValue(normalize(attr, key));
-		}
-
-		public static float floatValue(String s) {
-			return Float.parseFloat(s);
-		}
-
-		public static float floatValue(Attributes attr, String key) {
-			return floatValue(normalize(attr, key));
-		}
-
-		public static int intValue(String s) {
-			return Integer.parseInt(s);
-		}
-
-		public static int intValue(Attributes attr, String key) {
-			return intValue(normalize(attr, key));
-		}
-
-		public static boolean booleanValue(String s) {
-			return s!=null && ("true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s)); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-
-		public static boolean booleanValue(Attributes attr, String key) {
-			return booleanValue(normalize(attr, key));
-		}
-
-		public static boolean booleanValue(Attributes attr, String key, boolean defaultValue) {
-			String s = normalize(attr, key);
-			return s==null ? defaultValue : booleanValue(s);
-		}
-
-		public static ValueType typeValue(Attributes attr) {
-			String s = normalize(attr, ATTR_TYPE);
-			return typeValue(s);
-		}
-
-		public static ValueType typeValue(String s) {
-			return s==null ? null : ValueType.parseValueType(s);
-		}
-
-		public static Boolean boolValue(Attributes attr, String key) {
-			String s = normalize(attr, key);
-			return s==null ? null : booleanValue(s);
-		}
-
-		public static String normalize(Attributes attr, String name) {
-			String value = attr.getValue(name);
-			if(value.isEmpty()) {
-				value = null;
-			}
-			return value;
-		}
+		// Templates
+		templateHandlers.put(TAG_ANNOTATION_LAYER, AnnotationLayerManifestImpl.class);
+		templateHandlers.put(TAG_ANNOTATION, AnnotationManifestImpl.class);
+		templateHandlers.put(TAG_CONTAINER, ContainerManifestImpl.class);
+		templateHandlers.put(TAG_CONTEXT, ContextManifestImpl.class);
+		templateHandlers.put(TAG_DRIVER, DriverManifestImpl.class);
+		templateHandlers.put(TAG_EVAL, ExpressionXmlHandler.class);
+		templateHandlers.put(TAG_FRAGMENT_LAYER, FragmentLayerManifestImpl.class);
+		templateHandlers.put(TAG_HIGHLIGHT_LAYER, HighlightLayerManifestImpl.class);
+		templateHandlers.put(TAG_MARKABLE_LAYER, MarkableLayerManifestImpl.class);
+		templateHandlers.put(TAG_OPTIONS, OptionsManifestImpl.class);
+		templateHandlers.put(TAG_PATH_RESOLVER, PathResolverManifestImpl.class);
+		templateHandlers.put(TAG_RASTERIZER, RasterizerManifestImpl.class);
+		templateHandlers.put(TAG_STRUCTURE_LAYER, StructureLayerManifestImpl.class);
+		templateHandlers.put(TAG_STRUCTURE, StructureManifestImpl.class);
 	}
 
-	static class Buffers {
-		static class OptionBuffer {
-			String name, id, description, group;
-			ValueType type;
-			ValueSet valueSet;
-			ValueRange valueRange;
-			Object defaultValue;
-			boolean published = true, multiValue = false;
-		}
+	@SuppressWarnings("rawtypes")
+	private final static Class[] CONSTRUCTOR_TYPES = {
+		ManifestLocation.class,
+		CorpusRegistry.class,
+	};
 
-		static class PropertyBuffer {
-			String name;
-			ValueType type = ValueType.STRING;
-		}
+	private static final Object[] constructorParams = new Object[2];
 
-		static class PrerequisiteBuffer {
-			String layerId, contextId, layerType, alias;
-		}
-	}
+	protected ModelXmlHandler newInstance(String tag, ManifestLocation manifestLocation) throws SAXException {
+		synchronized (CONSTRUCTOR_TYPES) {
+			Map<String, Object> handlerLut = manifestLocation.isTemplate() ? templateHandlers : liveHandlers;
+			Object current = handlerLut.get(tag);
 
-	abstract class Builder<O extends Object> {
+			if(current==null)
+				throw new SAXException("No handler for tag: "+tag); //$NON-NLS-1$
 
-		abstract O build();
+			Constructor<?> constructor;
 
-		abstract Builder<?> startElement(ManifestSource manifestSource, String uri, String localName, String qName,
-				Attributes attributes) throws SAXException;
-
-		abstract Builder<?> endElement(ManifestSource manifestSource, String uri, String localName, String qName, String text)
-				throws SAXException;
-
-		<B extends Builder<?>> B add(Collection<B> buffer, B builder) {
-			buffer.add(builder);
-
-			return builder;
-		}
-	}
-
-	class TemplatesBuilder extends Builder<Object> {
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		Object build() {
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
-
-			Builder<?> builder = null;
-			// TODO Auto-generated method stub
-
-
-			addTemplateState(attributes.getValue(ATTR_ID), builder, manifestSource);
-
-			return builder;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri, String localName, String qName,
-				String text) throws SAXException {
-			return null;
-		}
-
-	}
-
-	class CorporaBuilder extends Builder<Object> {
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		Object build() {
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
-			switch (qName) {
-			case TAG_CORPUS:
-				return new CorpusBuilder();
-
-			default:
-				throw new SAXException("Only 'corpus' elements allowed on top level in live corpus file: "+qName); //$NON-NLS-1$
-			}
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri, String localName, String qName,
-				String text) throws SAXException {
-			switch (qName) {
-			case TAG_CORPUS:
-				return null;
-
-			default:
-				throw new SAXException("Only 'corpus' elements allowed on top level in live corpus file: "+qName); //$NON-NLS-1$
-			}
-		}
-
-	}
-
-	abstract class DerivableBuilder<D extends Derivable> extends Builder<D> {
-		private String templateId;
-		private String id;
-
-		void readAttributes(Attributes attributes) {
-			setId(ParseUtils.normalize(attributes, ATTR_ID));
-			setTemplateId(ParseUtils.normalize(attributes, ATTR_TEMPLATE_ID));
-		}
-
-		String getTemplateId() {
-			return templateId;
-		}
-
-		/**
-		 * @return the id
-		 */
-		public String getId() {
-			return id;
-		}
-
-		/**
-		 * @param templateId the templateId to set
-		 */
-		public void setTemplateId(String templateId) {
-			this.templateId = templateId;
-		}
-
-		/**
-		 * @param id the id to set
-		 */
-		public void setId(String id) {
-			this.id = id;
-		}
-
-		boolean hasTemplate() {
-			return templateId!=null;
-		}
-
-		void init(D instance) {
-			instance.setId(id);
-
-			if(templateId!=null) {
-				Derivable template = lookupTemplate(templateId);
-
-				instance.setTemplate(template);
-			}
-		}
-	}
-
-	class EvalBuilder extends Builder<Expression> {
-		private final ExpressionFactory factory = new ExpressionFactory();
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		Expression build() {
-			return factory.build();
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@SuppressWarnings("resource")
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_EVAL: {
-				// no-op
-			} break;
-
-			case TAG_VARIABLE: {
-				String name = ParseUtils.normalize(attributes, ATTR_NAME);
-				String namespace = ParseUtils.normalize(attributes, ATTR_NAMESPACE);
-				String pluginId = ParseUtils.normalize(attributes, ATTR_PLUGIN_ID);
-
-				Class<?> clazz;
-
-				ClassLoader classLoader = getClass().getClassLoader();
-				if(pluginId!=null) {
-					PluginDescriptor descriptor = PluginUtil.getPluginRegistry().getPluginDescriptor(pluginId);
-					classLoader = PluginUtil.getPluginManager().getPluginClassLoader(descriptor);
-				}
-
-				try {
-					clazz = classLoader.loadClass(namespace);
-				} catch (ClassNotFoundException e) {
-					throw new SAXException("Unable to laod namespace class for variable: "+name, e); //$NON-NLS-1$
-				}
-
-				factory.addVariable(name, clazz);
-			} break;
-
-			case TAG_CODE: {
-				// no-op
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in eval scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-			case TAG_EVAL: {
-				return null;
-			}
-
-			case TAG_VARIABLE: {
-				// no-op
-			} break;
-
-			case TAG_CODE: {
-				factory.setCode(text);
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in eval scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-	}
-
-	class ValueSetBuilder extends Builder<ValueSet> {
-
-		private final ValueSetImpl valueSet;
-
-		private String name, description;
-
-		ValueSetBuilder(ValueType type) {
-			valueSet = new ValueSetImpl();
-			valueSet.setValueType(type);
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		ValueSet build() {
-			return valueSet;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_VALUES: {
-				// no-op
-			} break;
-
-			case TAG_VALUE: {
-				name = ParseUtils.normalize(attributes, ATTR_NAME);
-				description = ParseUtils.normalize(attributes, ATTR_DESCRIPTION);
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in value-set scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-			case TAG_VALUES: {
-				return null;
-			}
-
-			case TAG_VALUE: {
-				Object value = valueSet.getValueType().parse(text, manifestSource.getClassLoader());
-				if(name!=null) {
-					ValueManifestImpl manifst = new ValueManifestImpl();
-					manifst.setDescription(description);
-					manifst.setName(name);
-					manifst.setValue(value);
-
-					value = manifst;
-				}
-
-				valueSet.addValue(value);
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in value-set scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-	}
-
-	class ValueRangeBuilder extends Builder<ValueRange> {
-
-		private final ValueType type;
-		private boolean includeLower = true, includeUpper = true;
-		private Object lower, upper;
-
-		private EvalBuilder evalBuilder;
-
-		ValueRangeBuilder(ValueType type) {
-			this.type = type;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		ValueRange build() {
-			return new ValueRangeImpl(lower, upper, includeLower, includeUpper);
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_RANGE: {
-				// no-op
-			} break;
-
-			case TAG_MIN: {
-				// no-op
-			} break;
-
-			case TAG_MAX: {
-				// no-op
-			} break;
-
-			case TAG_EVAL: {
-				return (evalBuilder = new EvalBuilder());
-			}
-
-			default:
-				throw new SAXException("Unexpected tag in value-range scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-		private Object getValue(String text, ManifestSource manifestSource) {
-			Object value;
-			if(evalBuilder!=null) {
-				value = evalBuilder.build();
-				evalBuilder = null;
+			if(current instanceof Constructor) {
+				constructor = (Constructor<?>) current;
 			} else {
-				value = type.parse(text, manifestSource.getClassLoader());
-			}
-
-			return value;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-			case TAG_RANGE: {
-				return null;
-			}
-
-			case TAG_MIN: {
-				lower = getValue(text, manifestSource);
-			} break;
-
-			case TAG_MAX: {
-				upper = getValue(text, manifestSource);
-			} break;
-
-			case TAG_EVAL: {
-				// no-op
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in value-range scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-	}
-
-	class OptionsBuilder extends DerivableBuilder<OptionsManifest> {
-
-		private List<OptionBuffer> options = new ArrayList<>();
-		private List<Identity> groups = new ArrayList<>();
-
-		private ValueRangeBuilder rangeBuilder;
-		private ValueSetBuilder setBuilder;
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		OptionsManifest build() {
-			OptionsManifestImpl optionsManifest = new OptionsManifestImpl();
-
-			init(optionsManifest);
-
-			for(Identity group : groups) {
-				optionsManifest.addGroupIdentifier(group);
-			}
-
-			Set<String> names = optionsManifest.getOptionNames();
-
-			for(OptionBuffer option : options) {
-				String key = option.id;
-
-				if(names.contains(key)) {
-					optionsManifest.removeOption(key);
-				}
-
-				optionsManifest.addOption(key);
-				optionsManifest.setValueType(key, option.type);
-				optionsManifest.setName(key, option.name);
-				optionsManifest.setDescription(key, option.description);
-				optionsManifest.setOptionGroup(key, option.group);
-				optionsManifest.setSupportedValues(key, option.valueSet);
-				optionsManifest.setSupportedRange(key, option.valueRange);
-				optionsManifest.setMultiValue(key, option.multiValue);
-				optionsManifest.setPublished(key, option.published);
-				optionsManifest.setDefaultValue(key, option.defaultValue);
-			}
-
-			return optionsManifest;
-		}
-
-		private OptionBuffer current() {
-			return options.get(options.size()-1);
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_OPTIONS: {
-				readAttributes(attributes);
-			} break;
-
-			case TAG_OPTION: {
-				OptionBuffer option = new OptionBuffer();
-				option.id = ParseUtils.normalize(attributes, ATTR_ID);
-				option.name = ParseUtils.normalize(attributes, ATTR_NAME);
-				option.description = ParseUtils.normalize(attributes, ATTR_DESCRIPTION);
-				option.group = ParseUtils.normalize(attributes, ATTR_GROUP);
-				String type = ParseUtils.normalize(attributes, ATTR_TYPE);
-				if(type!=null) {
-					option.type = ValueType.parseValueType(type);
-				}
-				option.published = ParseUtils.booleanValue(attributes, ATTR_PUBLISHED, true);
-				option.multiValue = ParseUtils.booleanValue(attributes, ATTR_MULTI_VALUE, false);
-
-				options.add(option);
-			} break;
-
-			case TAG_GROUP: {
-				String id = ParseUtils.normalize(attributes, ATTR_ID);
-				String name = ParseUtils.normalize(attributes, ATTR_NAME);
-				String description = ParseUtils.normalize(attributes, ATTR_DESCRIPTION);
-				Icon icon = ParseUtils.iconValue(attributes, ATTR_ICON);
-
-				StaticIdentity identity = new StaticIdentity(id);
-				identity.setName(name);
-				identity.setDescription(description);
-				identity.setIcon(icon);
-
-				groups.add(identity);
-			} break;
-
-			case TAG_RANGE: {
-				return (rangeBuilder = new ValueRangeBuilder(current().type));
-			}
-
-			case TAG_VALUES: {
-				return (setBuilder = new ValueSetBuilder(current().type));
-			}
-
-			case TAG_DEFAULT_VALUE: {
-				// no-op
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in options scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-			case TAG_OPTIONS:
-				return null;
-
-			case TAG_OPTION: {
-				// no-op
-			} break;
-
-			case TAG_GROUP: {
-				// no-op
-			} break;
-
-			case TAG_VALUES: {
-				current().valueSet = setBuilder.build();
-				setBuilder = null;
-			} break;
-
-			case TAG_RANGE: {
-				current().valueRange = rangeBuilder.build();
-				rangeBuilder = null;
-			} break;
-
-			case TAG_DEFAULT_VALUE: {
-				OptionBuffer option = current();
-
-				option.defaultValue = option.type.parse(text, manifestSource.getClassLoader());
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in options scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-	}
-
-	class DocumentationBuilder extends Builder<Documentation> {
-
-		private final DocumentationImpl documentation = new DocumentationImpl();
-
-		private ResourceImpl resource;
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		Documentation build() {
-			return documentation;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_DOCUMENTATION: {
-				ParseUtils.readIdentity(attributes, documentation);
-			} break;
-
-			case TAG_CONTENT: {
-				// no-op
-			} break;
-
-			case TAG_RESOURCE: {
-				resource = new ResourceImpl();
-
-				ParseUtils.readIdentity(attributes, resource);
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in documentation scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-			case TAG_DOCUMENTATION:
-				return null;
-
-			case TAG_CONTENT: {
-				documentation.setContent(text);
-			} break;
-
-			case TAG_RESOURCE: {
+				Class<?> clazz = (Class<?>) current;
 				try {
-					resource.setURL(new URL(text));
-				} catch (MalformedURLException e) {
-					throw new SAXException("Invalid url for resource", e); //$NON-NLS-1$
-				}
-
-				documentation.addResource(resource);
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in documentation scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-	}
-
-	abstract class ModifiableBuilder<M extends ModifiableManifest> extends DerivableBuilder<M> {
-
-		private Map<String, Object> properties;
-		private OptionsBuilder optionsBuilder;
-		private DocumentationBuilder documentationBuilder;
-		private PropertyBuffer property;
-
-		abstract String tag();
-
-		@Override
-		void init(M instance) {
-			super.init(instance);
-
-			if(optionsBuilder!=null) {
-				instance.setOptionsManifest(optionsBuilder.build());
-			}
-
-			if(documentationBuilder!=null) {
-				instance.setDocumentation(documentationBuilder.build());
-			}
-
-			if(properties!=null) {
-				for(Entry<String, Object> entry : properties.entrySet()) {
-					instance.setProperty(entry.getKey(), entry.getValue());
+					constructor = clazz.getConstructor(CONSTRUCTOR_TYPES);
+				} catch (NoSuchMethodException | SecurityException e) {
+					throw new SAXException("Failed to access handler constructur", e); //$NON-NLS-1$
 				}
 			}
-		}
 
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_OPTIONS: {
-				return (optionsBuilder = new OptionsBuilder());
+			constructorParams[0] = manifestLocation;
+			constructorParams[1] = registry;
+
+			try {
+				return (ModelXmlHandler) constructor.newInstance(constructorParams);
+			} catch (InstantiationException | IllegalAccessException
+					| IllegalArgumentException | InvocationTargetException e) {
+				throw new SAXException("Failed to invoke handler constructur", e); //$NON-NLS-1$
 			}
-
-			case TAG_DOCUMENTATION: {
-				return (documentationBuilder = new DocumentationBuilder());
-			}
-
-			case TAG_PROPERTY: {
-				property = new PropertyBuffer();
-				property.name = ParseUtils.normalize(attributes, ATTR_NAME);
-
-				if(properties.containsKey(property.name))
-					throw new SAXException("Duplicate property definition: "+property.name); //$NON-NLS-1$
-
-				String type = ParseUtils.normalize(attributes, ATTR_TYPE);
-				if(type!=null) {
-					property.type = ValueType.parseValueType(type);
-				}
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in "+tag()+" scope: "+qName); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-
-			case TAG_OPTIONS: {
-				// no-op
-			} break;
-
-			case TAG_DOCUMENTATION: {
-				// no-op
-			} break;
-
-			case TAG_PROPERTY: {
-				Object value = property.type.parse(text, manifestSource.getClassLoader());
-
-				properties.put(property.name, value);
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in "+tag()+" scope: "+qName); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
-			return this;
 		}
 	}
 
-	abstract class MemberBuilder<M extends MemberManifest> extends ModifiableBuilder<M> {
-		String name, description;
-		Icon icon;
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#init(de.ims.icarus.model.api.manifest.ModifiableManifest)
-		 */
-		@Override
-		void init(M instance) {
-			super.init(instance);
+	protected class ManifestCollector implements ModelXmlHandler {
 
-			if(name!=null) {
-				instance.setName(name);
-			}
-			if(description!=null) {
-				instance.setDescription(description);
-			}
-			if(icon!=null) {
-				instance.setIcon(icon);
-			}
-		}
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.DerivableBuilder#readAttributes(org.xml.sax.Attributes)
-		 */
-		@Override
-		void readAttributes(Attributes attributes) {
-			super.readAttributes(attributes);
-
-			name = ParseUtils.normalize(attributes, ATTR_NAME);
-			description = ParseUtils.normalize(attributes, ATTR_DESCRIPTION);
-			icon = ParseUtils.iconValue(attributes, ATTR_ICON);
-		}
-	}
-
-	abstract class LayerBuilder<L extends LayerManifest> extends MemberBuilder<L> {
-
-		private final List<String> baseLayerIds = new ArrayList<>();
-		private String layerTypeId;
-
-		void link(ContextManifest contextManifest) {
-
-		}
+		// List of all top-level handlers. Used to preserve order of appearance
+		private final List<Manifest> manifests = new ArrayList<>();
 
 		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.MemberBuilder#init(de.ims.icarus.model.api.manifest.MemberManifest)
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
 		 */
 		@Override
-		void init(L instance) {
-			super.init(instance);
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName,
+				Attributes attributes) throws SAXException {
 
-			if(layerTypeId!=null) {
-				instance.setLayerType(registry.getLayerType(layerTypeId));
-			}
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.MemberBuilder#readAttributes(org.xml.sax.Attributes)
-		 */
-		@Override
-		void readAttributes(Attributes attributes) {
-			super.readAttributes(attributes);
-
-			layerTypeId = ParseUtils.normalize(attributes, ATTR_LAYER_TYPE);
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
 			switch (qName) {
-
-			case TAG_BASE_LAYER: {
-				baseLayerIds.add(ParseUtils.normalize(attributes, ATTR_LAYER_ID));
-			} break;
-
-			default:
-				return super.startElement(manifestSource, uri, localName, qName, attributes);
+			case TAG_CORPORA: {
+				if(manifestLocation.isTemplate())
+					throw new SAXException("Illegal "+TAG_CORPORA+" tag in template manifest source"); //$NON-NLS-1$ //$NON-NLS-2$
+				return this;
 			}
 
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-
-			case TAG_BASE_LAYER: {
-
-			} break;
-
-			default:
-				return super.endElement(manifestSource, uri, localName, qName, text);
-			}
-
-			return this;
-		}
-	}
-
-	class LayerGroupBuilder extends Builder<LayerGroupManifest> {
-
-		private String name;
-		private Boolean independent;
-		private String primaryLayerId;
-		private final List<LayerBuilder<?>> layerBuilders = new ArrayList<>();
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		LayerGroupManifest build() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		void link(ContextManifest contextManifest) {
-			for(LayerBuilder<?> layerBuilder : layerBuilders) {
-				layerBuilder.link(contextManifest);
-			}
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case TAG_LAYER_GROUP: {
-				name = ParseUtils.normalize(attributes, ATTR_ID);
-				primaryLayerId = ParseUtils.normalize(attributes, ATTR_PRIMARY_LAYER);
-				independent = ParseUtils.boolValue(attributes, ATTR_INDEPENDENT);
-			} break;
-
-			case TAG_MARKABLE_LAYER: {
-				return add(layerBuilders, new MarkableLayerBuilder());
-			}
-
-			case TAG_STRUCTURE_LAYER: {
-				return add(layerBuilders, new StructureLayerBuilder());
-			}
-
-			case TAG_FRAGMENT_LAYER: {
-				return add(layerBuilders, new FragmentLayerBuilder());
-			}
-
-			case TAG_ANNOTATION_LAYER: {
-				return add(layerBuilders, new AnnotationLayerBuilder());
-			}
-
-			case TAG_HIGHLIGHT_LAYER: {
-				return add(layerBuilders, new HighlightLayerBuilder());
+			case TAG_TEMPLATES: {
+				if(!manifestLocation.isTemplate())
+					throw new SAXException("Illegal "+TAG_TEMPLATES+" tag in live corpus manifest source"); //$NON-NLS-1$ //$NON-NLS-2$
+				return this;
 			}
 
 			default:
-				throw new SAXException("Unexpected tag in layer-group scope: "+qName); //$NON-NLS-1$
+				// no-op
+				break;
 			}
 
-			return this;
+			return newInstance(qName, manifestLocation);
 		}
 
 		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 		 */
 		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
 				throws SAXException {
-			switch (qName) {
-
-			case TAG_LAYER_GROUP: {
-				return null;
-			}
-
-			case TAG_MARKABLE_LAYER: {
-				// no-op
-			} break;
-
-			case TAG_STRUCTURE_LAYER: {
-				// no-op
-			} break;
-
-			case TAG_FRAGMENT_LAYER: {
-				// no-op
-			} break;
-
-			case TAG_ANNOTATION_LAYER: {
-				// no-op
-			} break;
-
-			case TAG_HIGHLIGHT_LAYER: {
-				// no-op
-			} break;
-
-			default:
-				throw new SAXException("Unexpected tag in layer-group scope: "+qName); //$NON-NLS-1$
-			}
-
-			return this;
-		}
-
-	}
-
-	class ContextBuiler extends MemberBuilder<ContextManifest> {
-
-		private final List<PrerequisiteBuffer> prerequisites =  new ArrayList<>();
-		private final List<LayerGroupBuilder> groupBuilders = new ArrayList<>();
-
-		private Boolean independent;
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#tag()
-		 */
-		@Override
-		String tag() {
-			return TAG_CONTEXT;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		ContextManifest build() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.MemberBuilder#init(de.ims.icarus.model.api.manifest.MemberManifest)
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
 		 */
 		@Override
-		void init(ContextManifest instance) {
-			// TODO Auto-generated method stub
-			super.init(instance);
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.MemberBuilder#readAttributes(org.xml.sax.Attributes)
-		 */
-		@Override
-		void readAttributes(Attributes attributes) {
-			super.readAttributes(attributes);
-
-			independent = ParseUtils.boolValue(attributes, ATTR_INDEPENDENT);
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
+		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
+				String localName, String qName, ModelXmlHandler handler)
 				throws SAXException {
-			switch (qName) {
-
-			case TAG_CONTEXT: {
-				readAttributes(attributes);
-			} break;
-
-			case TAG_PREREQUISITES: {
-				// no-op
-			} break;
-
-			case TAG_PREREQUISITE: {
-				PrerequisiteBuffer prerequisite = new PrerequisiteBuffer();
-				prerequisite.layerId = ParseUtils.normalize(attributes, ATTR_LAYER_ID);
-				prerequisite.contextId = ParseUtils.normalize(attributes, ATTR_CONTEXT_ID);
-				prerequisite.layerType = ParseUtils.normalize(attributes, ATTR_LAYER_TYPE);
-				prerequisite.alias = ParseUtils.normalize(attributes, ATTR_ALIAS);
-
-				prerequisites.add(prerequisite);
-			} break;
-
-			case TAG_LAYER_GROUP: {
-				return add(groupBuilders, new LayerGroupBuilder());
-			}
-
-			default:
-				return super.startElement(manifestSource, uri, localName, qName, attributes);
-			}
-
-			return this;
+			manifests.add((Manifest) handler);
 		}
 
 		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 * @return the manifests
 		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-
-			case TAG_CONTEXT: {
-				return null;
-			}
-
-			case TAG_PREREQUISITES: {
-				// no-op
-			} break;
-
-			case TAG_PREREQUISITE: {
-				// no-op
-			} break;
-
-			case TAG_LAYER_GROUP: {
-				// no-op
-			} break;
-
-			default:
-				return super.endElement(manifestSource, uri, localName, qName, text);
-			}
-
-			return this;
+		public List<Manifest> getManifests() {
+			return manifests;
 		}
-
-	}
-
-	class CorpusBuilder extends MemberBuilder<CorpusManifest> {
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.Builder#build()
-		 */
-		@Override
-		CorpusManifest build() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#tag()
-		 */
-		@Override
-		String tag() {
-			return TAG_CORPUS;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#startElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-		 */
-		@Override
-		Builder<?> startElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-
-			case TAG_BASE_LAYER: {
-
-			} break;
-
-			default:
-				return super.startElement(manifestSource, uri, localName, qName, attributes);
-			}
-
-			return this;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.xml.sax.ManifestXmlReader.ModifiableBuilder#endElement(de.ims.icarus.model.api.manifest.ManifestSource, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
-		@Override
-		Builder<?> endElement(ManifestSource manifestSource, String uri,
-				String localName, String qName, String text)
-				throws SAXException {
-			switch (qName) {
-
-			case TAG_BASE_LAYER: {
-
-			} break;
-
-			default:
-				return super.endElement(manifestSource, uri, localName, qName, text);
-			}
-
-			return this;
-		}
-
 	}
 }
