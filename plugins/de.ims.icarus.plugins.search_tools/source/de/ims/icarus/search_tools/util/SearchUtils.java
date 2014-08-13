@@ -396,7 +396,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 
 	public static int getMinInstanceCount(ConstraintFactory factory) {
 		int value = factory.getMinInstanceCount();
-		return value==-1 ? 1 : value;
+		return value==-1 ? 0 : value;
 	}
 
 	public static int getMaxInstanceCount(ConstraintFactory factory) {
