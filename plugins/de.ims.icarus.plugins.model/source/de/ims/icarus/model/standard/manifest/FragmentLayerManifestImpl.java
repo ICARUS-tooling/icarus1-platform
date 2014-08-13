@@ -64,7 +64,7 @@ public class FragmentLayerManifestImpl extends MarkableLayerManifestImpl impleme
 	 */
 	@Override
 	protected boolean isEmpty() {
-		return super.isEmpty() && rasterizerManifest==null;
+		return super.isEmpty() && rasterizerManifest==null && valueManifest==null;
 	}
 
 	/**

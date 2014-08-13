@@ -55,5 +55,5 @@ public interface StructureLayerManifest extends MarkableLayerManifest {
 	 * @see #getContextManifest()
 	 */
 	@AccessRestriction(AccessMode.READ)
-	StructureManifest getStructureManifest();
+	StructureManifest getRootStructureManifest();
 }

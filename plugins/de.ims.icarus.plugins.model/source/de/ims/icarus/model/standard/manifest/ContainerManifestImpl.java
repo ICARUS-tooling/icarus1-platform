@@ -59,6 +59,8 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 			CorpusRegistry registry, MarkableLayerManifest layerManifest) {
 		super(manifestLocation, registry);
 
+		verifyEnvironment(manifestLocation, layerManifest, MarkableLayerManifest.class);
+
 		this.layerManifest = layerManifest;
 	}
 

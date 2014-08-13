@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import de.ims.icarus.model.util.types.ValueType;
+
 /**
  * A helper class that wraps a value and provides additional textual information
  * like a description and an optional name. The purpose of those strings is so
@@ -60,4 +62,6 @@ public interface ValueManifest {
 	 * @return A textual description of this value
 	 */
 	String getDescription();
+
+	ValueType getValueType();
 }

@@ -156,7 +156,7 @@ public class ContextFactory {
 	}
 
 	protected LayerLinker createAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
-		boolean isComplex = manifest.allowUnknownKeys() || !manifest.getAvailableKeys().isEmpty();
+		boolean isComplex = manifest.isAllowUnknownKeys() || !manifest.getAvailableKeys().isEmpty();
 
 		if(isComplex) {
 			return new LayerLinker(new ComplexAnnotationLayer(manifest, group));

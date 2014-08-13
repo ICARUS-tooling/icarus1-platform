@@ -32,6 +32,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Marks a field or method as accessible for a set of {@code AccessMode}s.
+ * If a field or method is missing an {@code AccessRestriction} annotation, the
+ * hosting class' {@code AccessControl} annotation will be queried for the general
+ * {@code AccessPolicy} value which then decides whether to deny access to the field
+ * or method.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *

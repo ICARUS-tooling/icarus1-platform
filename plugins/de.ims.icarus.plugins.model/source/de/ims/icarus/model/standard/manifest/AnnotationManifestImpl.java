@@ -43,6 +43,7 @@ import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -77,6 +78,45 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 	@Override
 	protected boolean isEmpty() {
 		return super.isEmpty() && aliases.isEmpty() && values==null && valueRange==null;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#toString()
+	 */
+	@Override
+	public String toString() {
+		return "AnnotationManifest@"+(key==null ? "<no-key>" : key); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 1;
+		if(getId()!=null) {
+			hash *= getId().hashCode();
+		}
+		if(key!=null) {
+			hash *= key.hashCode();
+		}
+
+		return hash;
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof AnnotationManifest) {
+			AnnotationManifest other = (AnnotationManifest) obj;
+
+			return ClassUtils.equals(getId(), other.getId())
+					&& ClassUtils.equals(key, other.getKey());
+		}
+
+		return false;
 	}
 
 	/**
@@ -159,7 +199,7 @@ public class AnnotationManifestImpl extends AbstractMemberManifest<AnnotationMan
 		}
 
 		case TAG_RANGE: {
-			return new ValueRangeImpl();
+			return new ValueRangeImpl(valueType);
 		}
 
 		default:

@@ -52,9 +52,6 @@ public class StaticIdentity implements Identity {
 		this.owner = null;
 	}
 
-	/**
-	 *
-	 */
 	public StaticIdentity(String id, Object owner) {
 		if(id==null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
@@ -63,6 +60,16 @@ public class StaticIdentity implements Identity {
 
 		this.id = id;
 		this.owner = owner;
+	}
+
+	public StaticIdentity(String id, String description, Icon icon) {
+		if(id==null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+		this.id = id;
+		this.owner = this;
+		this.description = description;
+		this.icon = icon;
 	}
 
 	/**

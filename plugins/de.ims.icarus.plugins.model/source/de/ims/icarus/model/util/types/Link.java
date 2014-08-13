@@ -25,7 +25,6 @@
  */
 package de.ims.icarus.model.util.types;
 
-import java.net.URL;
 
 /**
  * @author Markus Gärtner
@@ -34,7 +33,7 @@ import java.net.URL;
  */
 public interface Link {
 
-	URL getUrl();
+	Url getUrl();
 
 	String getTitle();
 

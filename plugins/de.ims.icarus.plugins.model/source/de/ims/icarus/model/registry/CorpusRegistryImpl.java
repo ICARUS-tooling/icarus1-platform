@@ -624,7 +624,7 @@ public final class CorpusRegistryImpl implements CorpusRegistry {
 		List<Manifest> result = new ArrayList<>();
 
 		for(Manifest manifest : templates.values()) {
-			if(manifestLocation.equals(manifest.getManifestSource())) {
+			if(manifestLocation.equals(manifest.getManifestLocation())) {
 				result.add(manifest);
 			}
 		}

@@ -132,6 +132,13 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 			throw new IllegalArgumentException("Source already registered: "+source.getUrl()); //$NON-NLS-1$
 	}
 
+	private InputSource inputSource(InputStream in) {
+		InputSource inputSource = new InputSource(in);
+		inputSource.setEncoding("UTF-8"); //$NON-NLS-1$
+
+		return inputSource;
+	}
+
 	public LogReport readAll() throws ModelException, IOException, SAXException {
 
 		if(!reading.compareAndSet(false, true))
@@ -151,7 +158,7 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 				reader.setEntityResolver(handler);
 				reader.setDTDHandler(handler);
 
-				reader.parse(new InputSource(in));
+				reader.parse(inputSource(in));
 
 				templates.addAll(handler.getTopLevelManifests());
 			}
@@ -173,7 +180,7 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 				reader.setEntityResolver(handler);
 				reader.setDTDHandler(handler);
 
-				reader.parse(new InputSource(in));
+				reader.parse(inputSource(in));
 
 				corpora.addAll(handler.getTopLevelManifests());
 			}

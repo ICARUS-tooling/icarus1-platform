@@ -29,7 +29,6 @@ import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
-import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.XmlResource;
 
 
@@ -51,7 +50,7 @@ import de.ims.icarus.model.xml.XmlResource;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface ImplementationManifest extends ModifiableManifest, ModelXmlElement {
+public interface ImplementationManifest extends MemberManifest {
 
 	public static final boolean DEFAULT_USE_FACTORY_VALUE = false;
 	public static final SourceType DEFAULT_SOURCE_TYPE = SourceType.DEFAULT;
@@ -62,6 +61,8 @@ public interface ImplementationManifest extends ModifiableManifest, ModelXmlElem
 	 * parameters.
 	 *
 	 * @return
+	 *
+	 * @see #DEFAULT_SOURCE_TYPE
 	 */
 	@AccessRestriction(AccessMode.READ)
 	SourceType getSourceType();
@@ -94,7 +95,7 @@ public interface ImplementationManifest extends ModifiableManifest, ModelXmlElem
 	 * constructor. A return value of {@code true} indicates that the
 	 * class must implement {@link Factory} and is able to handle customization
 	 * in the form of properties assigned to a {@link ModifiableManifest}.
-	 * Note that the factory gets told the type its result is expected to be of.
+	 * Note that the factory gets told the type its result is expected to compatible with.
 	 * It is the responsibility of the factory to run a final assignment check
 	 * before returning the instantiated implementation, or, better yet, to perform
 	 * such a check beforehand to prevent potentially unnecessary resource allocation.
@@ -102,6 +103,8 @@ public interface ImplementationManifest extends ModifiableManifest, ModelXmlElem
 	 * Default is {@code false}.
 	 *
 	 * @return
+	 *
+	 * @see #DEFAULT_USE_FACTORY_VALUE
 	 */
 	@AccessRestriction(AccessMode.READ)
 	boolean isUseFactory();
@@ -169,7 +172,7 @@ public interface ImplementationManifest extends ModifiableManifest, ModelXmlElem
 	}
 
 	public interface Factory {
-		<T extends Object> T create(Class<T> resultClass, ModifiableManifest manifest) throws
+		<T extends Object> T create(Class<T> resultClass, MemberManifest manifest) throws
 				ClassNotFoundException, IllegalAccessException, InstantiationException, ClassCastException;
 
 	}

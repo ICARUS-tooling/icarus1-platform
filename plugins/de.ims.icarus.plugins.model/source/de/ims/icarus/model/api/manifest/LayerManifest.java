@@ -46,7 +46,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  * boundary layer) must be hosted within a valid layer group and context
  * environment! Otherwise it will not be possible to resolve the targets of
  * those relations. Not complying to this specification will result in
- * a {@link ModelException} of type {@value ModelError#MANIFEST_MISSING_CONTEXT}
+ * a {@link ModelException} of type {@value ModelError#MANIFEST_MISSING_ENVIRONMENT}
  * being thrown during parsing.
  *
  * @author Markus Gärtner
@@ -105,6 +105,8 @@ public interface LayerManifest extends MemberManifest {
 	 *
 	 */
 	public interface TargetLayerManifest {
+
+		String getLayerId();
 
 		/**
 		 * Returns the source layer manifest for the dependency this manifest describes

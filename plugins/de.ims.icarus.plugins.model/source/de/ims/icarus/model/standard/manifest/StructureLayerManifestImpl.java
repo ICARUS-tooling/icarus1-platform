@@ -131,14 +131,16 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.StructureLayerManifest#getStructureManifest()
+	 * @see de.ims.icarus.model.api.manifest.StructureLayerManifest#getRootStructureManifest()
 	 */
 	@Override
-	public StructureManifest getStructureManifest() {
+	public StructureManifest getRootStructureManifest() {
 		return (StructureManifest) getContainerManifest(1);
 	}
 
 	public void addStructureManifest(StructureManifest manifest) {
+		if(getContainerDepth()==0)
+			throw new IllegalStateException("Cannot add structure manifest as root container manifest"); //$NON-NLS-1$
 		addContainerManifest(manifest);
 	}
 }

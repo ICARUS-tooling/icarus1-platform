@@ -65,7 +65,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 	public SimpleAnnotationLayer(AnnotationLayerManifest manifest, LayerGroup group) {
 		super(manifest, group);
 
-		if(manifest.getAvailableKeys().size()>1 || manifest.allowUnknownKeys())
+		if(manifest.getAvailableKeys().size()>1 || manifest.isAllowUnknownKeys())
 			throw new IllegalArgumentException("This annotation layer implementation does not support more than one annotation key"); //$NON-NLS-1$
 
 		key = manifest.getDefaultKey();

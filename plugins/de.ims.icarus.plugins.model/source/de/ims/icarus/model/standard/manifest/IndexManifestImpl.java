@@ -33,13 +33,15 @@ import de.ims.icarus.model.api.manifest.IndexManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class IndexManifestImpl extends LazyResolver implements IndexManifest, ModelXmlHandler {
+public class IndexManifestImpl implements IndexManifest, ModelXmlHandler {
 
 	private Coverage coverage;
 	private Relation relation;
@@ -58,6 +60,73 @@ public class IndexManifestImpl extends LazyResolver implements IndexManifest, Mo
 		this.driverManifest = driverManifest;
 	}
 
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 1;
+
+		if(coverage!=null) {
+			hash *= coverage.hashCode();
+		}
+
+		if(relation!=null) {
+			hash *= relation.hashCode();
+		}
+
+		if(sourceLayerId!=null) {
+			hash *= sourceLayerId.hashCode();
+		}
+
+		if(targetLayerId!=null) {
+			hash *= targetLayerId.hashCode();
+		}
+
+		return hash;
+	}
+
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof IndexManifest) {
+			IndexManifest other = (IndexManifest) obj;
+			return ClassUtils.equals(coverage, other.getCoverage())
+					&& ClassUtils.equals(relation, other.getRelation())
+					&& ClassUtils.equals(sourceLayerId, other.getSourceLayerId())
+					&& ClassUtils.equals(targetLayerId, other.getTargetLayerId());
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("IndexManifest@[") //$NON-NLS-1$
+		.append(coverage).append(',')
+		.append(relation).append(',')
+		.append(sourceLayerId).append(',')
+		.append(targetLayerId).append(']');
+
+		return sb.toString();
+	}
+
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	public void writeXml(XmlSerializer serializer) throws Exception {
+		ModelXmlUtils.writeIndexElement(serializer, this);
+	}
 
 	/**
 	 * @param attributes
@@ -115,7 +184,7 @@ public class IndexManifestImpl extends LazyResolver implements IndexManifest, Mo
 	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
 			String localName, String qName, ModelXmlHandler handler)
 			throws SAXException {
-		throw new UnsupportedOperationException();
+		throw new SAXException("Unexpected nested element "+qName+" in "+TAG_INDEX+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**

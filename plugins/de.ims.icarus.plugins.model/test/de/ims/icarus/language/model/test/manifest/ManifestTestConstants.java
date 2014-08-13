@@ -54,11 +54,12 @@ public interface ManifestTestConstants {
 	public static final String INVALID_ID_CONTENT = "id_with_illegal_characters&%)(/&%"; //$NON-NLS-1$
 	public static final String INVALID_ID_BEGIN = "-id_with_illegal_begin_character"; //$NON-NLS-1$
 
-	public static final String TEST_TEMPLATE_ID = "testTemplateId";
-	public static final String TEST_ID = "testId";
+	public static final String TEST_TEMPLATE_ID = "testTemplateId"; //$NON-NLS-1$
+	public static final String TEST_ID = "testId"; //$NON-NLS-1$
 
-	public static final String TEST_NAME = "Some Fancy Name";
-	public static final String TEST_DESCRIPTION = "This is a description usable for a manifest";
-	public static final String TEST_ICON_NAME = "testIconName";
+	public static final String TEST_NAME = "Some Fancy Name"; //$NON-NLS-1$
+	public static final String TEST_DESCRIPTION = "This is a description usable for a manifest"; //$NON-NLS-1$
+	public static final String TEST_ICON_NAME = "testIconName"; //$NON-NLS-1$
 	public static final Icon TEST_ICON = new IconWrapper(TEST_ICON_NAME);
+	public static final String TEST_PATH = "path/to/some/fancy/location/"; //$NON-NLS-1$
 }

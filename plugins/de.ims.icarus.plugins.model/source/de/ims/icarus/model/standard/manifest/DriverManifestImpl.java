@@ -41,9 +41,12 @@ import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.standard.manifest.Links.Link;
+import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 
 /**
  * @author Markus Gärtner
@@ -54,11 +57,15 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 
 	private LocationType locationType;
 	private final List<IndexManifest> indexManifests = new ArrayList<>();
+	private final List<ModuleSpec> moduleSpecs = new ArrayList<>();
+	private final List<ModuleManifest> moduleManifests = new ArrayList<>();
 	private final ContextManifest contextManifest;
 
 	public DriverManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, ContextManifest contextManifest) {
 		super(manifestLocation, registry);
+
+		verifyEnvironment(manifestLocation, contextManifest, ContextManifest.class);
 
 		this.contextManifest = contextManifest;
 	}
@@ -68,7 +75,7 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 	 */
 	@Override
 	protected boolean isEmpty() {
-		return super.isEmpty() && indexManifests.isEmpty();
+		return super.isEmpty() && indexManifests.isEmpty() && moduleSpecs.isEmpty() && moduleManifests.isEmpty();
 	}
 
 	/**
@@ -89,6 +96,16 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 	@Override
 	protected void writeElements(XmlSerializer serializer) throws Exception {
 		super.writeElements(serializer);
+
+		// Write module specs
+		for(ModuleSpec moduleSpec : moduleSpecs) {
+			ModelXmlUtils.writeModuleSpecElement(serializer, moduleSpec);
+		}
+
+		// Write module manifests
+		for(ModuleManifest moduleManifest : moduleManifests) {
+			moduleManifest.writeXml(serializer);
+		}
 
 		// Write index manifests
 		for(IndexManifest indexManifest : indexManifests) {
@@ -122,9 +139,13 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 			return new IndexManifestImpl(this);
 		}
 
-		case TAG_CONNECTOR: {
-			// no-op
-		} break;
+		case TAG_MODULE_SPEC: {
+			return new ModuleSpecImpl(this);
+		}
+
+		case TAG_MODULE: {
+			return new ModuleManifestImpl(manifestLocation, getRegistry(), this);
+		}
 
 		default:
 			return super.startElement(manifestLocation, uri, localName, qName, attributes);
@@ -142,7 +163,11 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 			return null;
 		}
 
-		case TAG_CONNECTOR: {
+		case TAG_MODULE_SPEC: {
+			// no-op
+		} break;
+
+		case TAG_MODULE: {
 			// no-op
 		} break;
 
@@ -164,6 +189,14 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 
 		case TAG_INDEX: {
 			addIndexManifest((IndexManifest) handler);
+		} break;
+
+		case TAG_MODULE_SPEC: {
+			addModuleSpec((ModuleSpec) handler);
+		} break;
+
+		case TAG_MODULE: {
+			addModuleManifest((ModuleManifest) handler);
 		} break;
 
 		default:
@@ -229,13 +262,89 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 	@Override
 	public LocationType getLocationType() {
 		LocationType result = locationType;
-		if(locationType==null && hasTemplate()) {
+		if(result==null && hasTemplate()) {
 			result = getTemplate().getLocationType();
 		}
 
-		if(locationType==null)
+		if(result==null)
 			throw new ModelException(ModelError.MANIFEST_MISSING_LOCATION,
 					"No location type available for driver manifest: "+getId()); //$NON-NLS-1$
+
+		return result;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#getModuleManifests()
+	 */
+	@Override
+	public List<ModuleManifest> getModuleManifests() {
+		List<ModuleManifest> result = new ArrayList<>(moduleManifests);
+
+		if(hasTemplate()) {
+			result.addAll(getTemplate().getModuleManifests());
+		}
+
+		return result;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#getModuleSpecs()
+	 */
+	@Override
+	public List<ModuleSpec> getModuleSpecs() {
+		List<ModuleSpec> result = new ArrayList<>(moduleSpecs);
+
+		if(hasTemplate()) {
+			result.addAll(getTemplate().getModuleSpecs());
+		}
+
+		return result;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#getModuleSpec(java.lang.String)
+	 */
+	@Override
+	public ModuleSpec getModuleSpec(final String specId) {
+		if (specId == null)
+			throw new NullPointerException("Invalid specId"); //$NON-NLS-1$
+
+		ModuleSpec result = null;
+
+		for(ModuleSpec spec : moduleSpecs) {
+			if(specId.equals(spec.getId())) {
+				result = spec;
+				break;
+			}
+		}
+
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getModuleSpec(specId);
+		}
+
+		return result;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#getModuleManifest(java.lang.String)
+	 */
+	@Override
+	public ModuleManifest getModuleManifest(String moduleId) {
+		if (moduleId == null)
+			throw new NullPointerException("Invalid specId"); //$NON-NLS-1$
+
+		ModuleManifest result = null;
+
+		for(ModuleManifest moduleManifest : moduleManifests) {
+			if(moduleId.equals(moduleManifest.getId())) {
+				result = moduleManifest;
+				break;
+			}
+		}
+
+		if(result==null && hasTemplate()) {
+			result = getTemplate().getModuleManifest(moduleId);
+		}
 
 		return result;
 	}
@@ -267,6 +376,58 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 	}
 
 	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#addModuleManifest(de.ims.icarus.model.api.manifest.ModuleManifest)
+	 */
+//	@Override
+	public void addModuleManifest(ModuleManifest moduleManifest) {
+		if (moduleManifest == null)
+			throw new NullPointerException("Invalid moduleManifest");  //$NON-NLS-1$
+
+		if(moduleManifests.contains(moduleManifest))
+			throw new IllegalArgumentException("Duplicate module manifest: "+moduleManifest); //$NON-NLS-1$
+
+		moduleManifests.add(moduleManifest);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#removeModuleManifest(de.ims.icarus.model.api.manifest.ModuleManifest)
+	 */
+//	@Override
+	public void removeModuleManifest(ModuleManifest moduleManifest) {
+		if (moduleManifest == null)
+			throw new NullPointerException("Invalid moduleManifest");  //$NON-NLS-1$
+
+		if(!moduleManifests.remove(moduleManifest))
+			throw new IllegalArgumentException("Unknown module manifest: "+moduleManifest); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#addModuleManifest(de.ims.icarus.model.api.manifest.addModuleSpec)
+	 */
+//	@Override
+	public void addModuleSpec(ModuleSpec moduleSpec) {
+		if (moduleSpec == null)
+			throw new NullPointerException("Invalid moduleSpec");  //$NON-NLS-1$
+
+		if(moduleSpecs.contains(moduleSpec))
+			throw new IllegalArgumentException("Duplicate module spec: "+moduleSpec); //$NON-NLS-1$
+
+		moduleSpecs.add(moduleSpec);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.DriverManifest#removeModuleManifest(de.ims.icarus.model.api.manifest.removeModuleSpec)
+	 */
+//	@Override
+	public void removeModuleSpec(ModuleSpec moduleSpec) {
+		if (moduleSpec == null)
+			throw new NullPointerException("Invalid moduleSpec");  //$NON-NLS-1$
+
+		if(!moduleSpecs.remove(moduleSpec))
+			throw new IllegalArgumentException("Unknown module spec: "+moduleSpec); //$NON-NLS-1$
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.manifest.DriverManifest#setLocationType(de.ims.icarus.model.io.LocationType)
 	 */
 //	@Override
@@ -277,4 +438,301 @@ public class DriverManifestImpl extends AbstractForeignImplementationManifest<Dr
 		this.locationType = locationType;
 	}
 
+	public static class ModuleSpecImpl extends DefaultModifiableIdentity implements ModuleSpec, ModelXmlElement, ModelXmlHandler {
+
+		private final DriverManifest driverManifest;
+		private boolean optional = DEFAULT_IS_OPTIONAL;
+		private boolean customizable = DEFAULT_IS_CUSTOMIZABLE;
+		private String extensionPointUid;
+
+		public ModuleSpecImpl(DriverManifest driverManifest) {
+			if (driverManifest == null)
+				throw new NullPointerException("Invalid driverManifest");  //$NON-NLS-1$
+
+			this.driverManifest = driverManifest;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.DefaultModifiableIdentity#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			int hash = driverManifest.hashCode()+1;
+			if(getId()!=null) {
+				hash *= getId().hashCode();
+			}
+			return hash;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.DefaultModifiableIdentity#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof ModuleSpec) {
+				ModuleSpec other = (ModuleSpec) obj;
+				return ClassUtils.equals(getId(), other.getId());
+			}
+			return false;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.DefaultModifiableIdentity#toString()
+		 */
+		@Override
+		public String toString() {
+			return "ModuleSpec@"+ (getId()==null ? "<unnamed>" : getId()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		/**
+		 * @param attributes
+		 */
+		protected void readAttributes(Attributes attributes) {
+			ModelXmlUtils.readIdentity(attributes, this);
+
+			String optional = ModelXmlUtils.normalize(attributes, ATTR_OPTIONAL);
+			if(optional!=null) {
+				setOptional(Boolean.parseBoolean(optional));
+			}
+
+			String customizable = ModelXmlUtils.normalize(attributes, ATTR_CUSTOMIZABLE);
+			if(customizable!=null) {
+				setCustomizable(Boolean.parseBoolean(customizable));
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+		 */
+		@Override
+		public ModelXmlHandler startElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName,
+				Attributes attributes) throws SAXException {
+			switch (qName) {
+			case TAG_MODULE_SPEC: {
+				readAttributes(attributes);
+			} break;
+
+			case TAG_EXTENSION_POINT: {
+				// no-op
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_MODULE_SPEC+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 */
+		@Override
+		public ModelXmlHandler endElement(ManifestLocation manifestLocation,
+				String uri, String localName, String qName, String text)
+				throws SAXException {
+			switch (qName) {
+			case TAG_MODULE_SPEC: {
+				return null;
+			}
+
+			case TAG_EXTENSION_POINT: {
+				setExtensionPointUid(text);
+			} break;
+
+			default:
+				throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_MODULE_SPEC+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+
+			return this;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlHandler#endNestedHandler(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, de.ims.icarus.model.xml.ModelXmlHandler)
+		 */
+		@Override
+		public void endNestedHandler(ManifestLocation manifestLocation,
+				String uri, String localName, String qName,
+				ModelXmlHandler handler) throws SAXException {
+			throw new SAXException("Unexpected nested element "+qName+" in "+TAG_MODULE_SPEC+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+		 */
+		@Override
+		public void writeXml(XmlSerializer serializer) throws Exception {
+			ModelXmlUtils.writeModuleSpecElement(serializer, this);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.DriverManifest.ModuleSpec#getDriverManifest()
+		 */
+		@Override
+		public DriverManifest getDriverManifest() {
+			return driverManifest;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.DriverManifest.ModuleSpec#isOptional()
+		 */
+		@Override
+		public boolean isOptional() {
+			return optional;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.DriverManifest.ModuleSpec#isCustomizable()
+		 */
+		@Override
+		public boolean isCustomizable() {
+			return customizable;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.DriverManifest.ModuleSpec#getExtensionPointUid()
+		 */
+		@Override
+		public String getExtensionPointUid() {
+			return extensionPointUid;
+		}
+
+		/**
+		 * @param optional the optional to set
+		 */
+		public void setOptional(boolean optional) {
+			this.optional = optional;
+		}
+
+		/**
+		 * @param customizable the customizable to set
+		 */
+		public void setCustomizable(boolean customizable) {
+			this.customizable = customizable;
+		}
+
+		/**
+		 * @param extensionPointUid the extensionPointUid to set
+		 */
+		public void setExtensionPointUid(String extensionPointUid) {
+			this.extensionPointUid = extensionPointUid;
+		}
+
+	}
+
+	public static class ModuleManifestImpl extends AbstractForeignImplementationManifest<ModuleManifestImpl> implements ModuleManifest {
+
+		private final DriverManifest driverManifest;
+		private ModuleSpecLink moduleSpec;
+
+		/**
+		 * @param manifestLocation
+		 * @param registry
+		 */
+		public ModuleManifestImpl(ManifestLocation manifestLocation,
+				CorpusRegistry registry, DriverManifest driverManifest) {
+			super(manifestLocation, registry);
+
+			verifyEnvironment(manifestLocation, driverManifest, DriverManifest.class);
+
+			this.driverManifest = driverManifest;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#readAttributes(org.xml.sax.Attributes)
+		 */
+		@Override
+		protected void readAttributes(Attributes attributes) {
+			super.readAttributes(attributes);
+
+			String moduleSpecId = ModelXmlUtils.normalize(attributes, ATTR_MODULE_SPEC_ID);
+			if(moduleSpecId!=null) {
+				setModuleSpecId(moduleSpecId);
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.AbstractMemberManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
+		 */
+		@Override
+		protected void writeAttributes(XmlSerializer serializer)
+				throws Exception {
+			super.writeAttributes(serializer);
+
+			if(moduleSpec!=null) {
+				serializer.writeAttribute(ATTR_MODULE_SPEC_ID, moduleSpec.getId());
+			}
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestType()
+		 */
+		@Override
+		public ManifestType getManifestType() {
+			return ManifestType.MODULE_MANIFEST;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#xmlTag()
+		 */
+		@Override
+		protected String xmlTag() {
+			return TAG_MODULE;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.AbstractForeignImplementationManifest#getImplementationManifest()
+		 */
+		@Override
+		public ImplementationManifest getImplementationManifest() {
+			ImplementationManifest result = super.getImplementationManifest();
+			if(result==null && hasTemplate()) {
+				result = getTemplate().getImplementationManifest();
+			}
+
+			return result;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.DriverManifest.ModuleManifest#getDriverManifest()
+		 */
+		@Override
+		public DriverManifest getDriverManifest() {
+			return driverManifest;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.DriverManifest.ModuleManifest#getModuleSpecId()
+		 */
+		@Override
+		public ModuleSpec getModuleSpec() {
+			return moduleSpec==null ? null : moduleSpec.get();
+		}
+
+		/**
+		 * @param moduleSpecId the moduleSpecId to set
+		 */
+		public void setModuleSpecId(String moduleSpecId) {
+			moduleSpec = new ModuleSpecLink(moduleSpecId);
+		}
+
+		protected class ModuleSpecLink extends Link<ModuleSpec> {
+
+			/**
+			 * @param id
+			 */
+			public ModuleSpecLink(String id) {
+				super(id);
+			}
+
+			/**
+			 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
+			 */
+			@Override
+			protected ModuleSpec resolve() {
+				return getDriverManifest().getModuleSpec(getId());
+			}
+
+		}
+	}
 }

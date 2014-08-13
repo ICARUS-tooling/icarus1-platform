@@ -247,7 +247,7 @@ public class CorpusVerifier {
 		Set<String> keys = manifest.getAvailableKeys();
 		AnnotationManifest defaultAnnotationManifest = manifest.getDefaultAnnotationManifest();
 
-		if(keys.isEmpty() && defaultAnnotationManifest==null && !manifest.allowUnknownKeys()) {
+		if(keys.isEmpty() && defaultAnnotationManifest==null && !manifest.isAllowUnknownKeys()) {
 			error("No annotation manifests defined for bounded annotation layer. "
 					+ "Need at least a default annotation when no foreign keys are allowed");
 		}

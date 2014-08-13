@@ -23,41 +23,63 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.model.test.member;
+package de.ims.icarus.model.util.types;
 
-import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.MemberType;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class MemberDummy implements CorpusMember {
+public class Url {
 
-	private final long id;
+	private final URL url;
 
-	public MemberDummy(long id) {
-		this.id = id;
+	public Url(URL url) {
+		if (url == null)
+			throw new NullPointerException("Invalid url"); //$NON-NLS-1$
+
+		this.url = url;
+	}
+
+	public Url(String spec) throws MalformedURLException {
+		this.url = new URL(spec);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+	 * @return the url
 	 */
-	@Override
-	public Corpus getCorpus() {
-		// TODO Auto-generated method stub
-		return null;
+	public URL getURL() {
+		return url;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public MemberType getMemberType() {
-		// TODO Auto-generated method stub
-		return null;
+	public int hashCode() {
+		return url.toExternalForm().hashCode();
 	}
 
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Url) {
+			Url other = (Url) obj;
+			return toString().equals(other.toString());
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return url.toExternalForm();
+	}
 }

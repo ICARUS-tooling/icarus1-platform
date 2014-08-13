@@ -29,8 +29,12 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.indexing.Index;
+import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
+import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
+import de.ims.icarus.model.api.manifest.LayerGroupManifest;
+import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 import de.ims.icarus.util.CorruptedStateException;
 
@@ -170,13 +174,52 @@ public enum ModelError {
 	 * Two or more elements in a manifest definition used the same id within a single namespace
 	 */
 	MANIFEST_DUPLICATE_ID(601),
+
+	/**
+	 * The reference via id to another resource is invalid due to the id being unknown.
+	 */
 	MANIFEST_UNKNOWN_ID(602),
+
+	/**
+	 * An attempt was made to declare a resource as template although in the given situation
+	 * that particular resource was not allowed to be declared as template.
+	 */
 	MANIFEST_ILLEGAL_TEMPLATE(603),
+
+	/**
+	 * A set of templates form a cyclic relation.
+	 */
 	MANIFEST_CYCLIC_TEMPLATE(604),
+
+	/**
+	 * A manifest is referencing a template of a foreign manifest type.
+	 */
 	MANIFEST_INCOMPATTIBLE_TEMPLATE(605),
-	MANIFEST_MISSING_CONTEXT(606),
+
+	/**
+	 * Signals that a given operation is not possible since the manifest in question requires another
+	 * manifest instance surrounding it. For example certain manifests (like {@link ContextManifest},
+	 * {@link LayerManifest}, etc..) cannot be used without their respective environments ({@link CorpusManifest},
+	 * {@link LayerGroupManifest}, respectively) in a live state.
+	 */
+	MANIFEST_MISSING_ENVIRONMENT(606),
+
+	/**
+	 * A manifest that requires value type information for its content (like annotations) is missing
+	 * that declaration.
+	 */
 	MANIFEST_MISSING_TYPE(607),
+
+	/**
+	 * A manifest that relies on external resources is missing the location declaration for those resources.
+	 */
 	MANIFEST_MISSING_LOCATION(608),
+
+	/**
+	 * Some value (annotation, property, option, ...) declared in a manifest is incompatible
+	 * with the respective value type specified in the context of that value.
+	 */
+	MANIFEST_TYPE_CAST(620),
 	//FIXME add errors for missing content etc...
 
 	;

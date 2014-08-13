@@ -79,6 +79,14 @@ public interface CorpusManifest extends MemberManifest {
 
 	void removeCustomContextManifest(ContextManifest manifest);
 
+	/**
+	 *
+	 * @param note
+	 *
+	 * @throws NullPointerException if the {@code note} argument is {@code null}
+	 * @throws IllegalArgumentException if the content of the given {@code note}
+	 * 			exceeds the {@link Note#MAX_CHARACTER_LIMIT} limit
+	 */
 	void addNote(Note note);
 	void removeNote(Note note);
 
@@ -101,6 +109,9 @@ public interface CorpusManifest extends MemberManifest {
 	 */
 	public interface Note {
 
+		/**
+		 * The maximum allowed number of characters a single note object can hold
+		 */
 		public static final int MAX_CHARACTER_LIMIT = 10_000;
 
 		/**

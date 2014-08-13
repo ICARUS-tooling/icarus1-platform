@@ -44,7 +44,7 @@ public class Expression {
 
 	Expression(String text, int flags) {
 		if (text == null)
-			throw new NullPointerException("Invalid text");
+			throw new NullPointerException("Invalid text"); //$NON-NLS-1$
 
 		code = text;
 		//TODO apply flags
@@ -82,5 +82,32 @@ public class Expression {
 	 */
 	public String getCode() {
 		return code;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return code.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Expression) {
+			return code.equals(((Expression)obj).code);
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Expression@"+returnType.getName()+" ["+code.length()+" code characters]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

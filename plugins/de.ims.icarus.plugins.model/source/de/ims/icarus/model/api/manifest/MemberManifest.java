@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.model.api.manifest;
 
+import java.util.Set;
+
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
@@ -48,18 +50,70 @@ import de.ims.icarus.model.xml.ModelXmlElement;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface MemberManifest extends ModifiableIdentity, ModifiableManifest, ModelXmlElement {
+public interface MemberManifest extends ModifiableIdentity, Manifest, ModelXmlElement {
+
+	@AccessRestriction(AccessMode.READ)
+	Documentation getDocumentation();
 
 	/**
-	 * Returns the {@code type} of this manifest, i.e. that is
-	 * what kind of member in a corpus it describes. If type-specific
-	 * behavior is modeled, one should always use this method rather than
-	 * doing multiple {@code instanceof} checks.
+	 * Returns the manifest that describes possible options the
+	 * user can assign to this manifest. If the manifest does not
+	 * support additional properties assignable by the user, this
+	 * method returns {@code null}.
 	 *
-	 * @return
+	 * @return the manifest describing options for this manifest
+	 * or {@code null}
 	 */
 	@AccessRestriction(AccessMode.READ)
-	ManifestType getManifestType();
+	OptionsManifest getOptionsManifest();
+
+	/**
+	 * Returns the property assigned to this manifest for the given
+	 * name. If their is no property with the given name available
+	 * this method should return {@code null}. Note that multi-value
+	 * properties will typically return a collection of values.
+	 *
+	 * @param name The name of the property in question
+	 * @return The value of the property with the given name or {@code null}
+	 * if no such property exists.
+	 */
+	@AccessRestriction(AccessMode.READ)
+	Object getProperty(String name);
+
+	/**
+	 * Returns a {@link Set} view of all the available property names
+	 * in this manifest. If there are no properties in the manifest
+	 * available then this method should return an empty {@code Set}!
+	 * <p>
+	 * The returned {@code Set} should be immutable.
+	 *
+	 * @return A {@code Set} view on all the available property names
+	 * for this manifest or the empty {@code Set} if this manifest does
+	 * not contain any properties.
+	 */
+	@AccessRestriction(AccessMode.READ)
+	Set<String> getPropertyNames();
+
+	// Modification methods
+
+	/**
+	 * Changes the value of the property specified by {@code name} to
+	 * the new {@code value}. Note that only for multi-value properties
+	 * it is allowed to pass collections of values!
+	 *
+	 * @param name The name of the property to be changed
+	 * @param value The new value for the property, allowed to be {@code null}
+	 * if stated so in the {@code OptionsManifest} for this manifest
+	 * @throws NullPointerException if the {@code name} argument is {@code null}
+	 * @throws IllegalArgumentException if the {@code value} argument does not
+	 * fulfill the contract described in the {@code OptionsManifest} of this
+	 * manifest.
+	 * @throws UnsupportedOperationException if the manifest does not declare
+	 * any properties the user can modify.
+	 */
+	void setProperty(String name, Object value);
+
+	void setOptionsManifest(OptionsManifest optionsManifest);
 
 //	/**
 //	 * Returns the private id of this manifest that is shared between all manifests

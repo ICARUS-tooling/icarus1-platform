@@ -27,6 +27,8 @@ package de.ims.icarus.model.api.manifest;
 
 import java.util.Set;
 
+import org.java.plugin.registry.ExtensionPoint;
+
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
@@ -105,7 +107,7 @@ public interface OptionsManifest extends Manifest, ModelXmlElement {
 	 * @version $Id$
 	 *
 	 */
-	public interface Option extends Identity {
+	public interface Option extends Identity, ModelXmlElement {
 
 		public static final boolean DEFAULT_PUBLISHED_VALUE = true;
 		public static final boolean DEFAULT_MULTIVALUE_VALUE = false;
@@ -187,6 +189,18 @@ public interface OptionsManifest extends Manifest, ModelXmlElement {
 		 */
 		@AccessRestriction(AccessMode.READ)
 		ValueRange getSupportedRange();
+
+		/**
+		 * If the type of this option is {@link ValueType#EXTENSION} then this method
+		 * returns the {@link ExtensionPoint} which defines the collection of valid
+		 * extensions to be used as values. Note that this method only returns the
+		 * globally unique id of the extension-point in question. It is up to the client
+		 * code to actually delegate the lookup to the current plugin registry!
+		 *
+		 * @return
+		 */
+		@AccessRestriction(AccessMode.READ)
+		String getExtensionPointUid();
 
 		/**
 		 * To support graphical visualizations in their job of presenting configuration

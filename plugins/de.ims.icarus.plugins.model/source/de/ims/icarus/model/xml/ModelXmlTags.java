@@ -60,6 +60,7 @@ public interface ModelXmlTags {
 	public static final String TAG_VALUE = "value"; //$NON-NLS-1$
 	public static final String TAG_OPTIONS = "options"; //$NON-NLS-1$
 	public static final String TAG_OPTION = "option"; //$NON-NLS-1$
+	public static final String TAG_EXTENSION_POINT = "extension-point"; //$NON-NLS-1$
 	public static final String TAG_DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
 	public static final String TAG_IMPLEMENTATION = "implementation"; //$NON-NLS-1$
 	public static final String TAG_DOCUMENTATION = "documentation"; //$NON-NLS-1$
@@ -67,16 +68,19 @@ public interface ModelXmlTags {
 	public static final String TAG_RESOURCE = "resource"; //$NON-NLS-1$
 
 	public static final String TAG_DRIVER = "driver"; //$NON-NLS-1$
-	public static final String TAG_CONNECTOR = "connector"; //$NON-NLS-1$
 	public static final String TAG_INDEX = "index"; //$NON-NLS-1$
+	public static final String TAG_MODULE = "module"; //$NON-NLS-1$
+	public static final String TAG_MODULE_SPEC = "module-spec"; //$NON-NLS-1$
 
 	public static final String TAG_LOCATION = "location"; //$NON-NLS-1$
+	public static final String TAG_PATH = "path"; //$NON-NLS-1$
 	public static final String TAG_PATH_ENTRY = "path-entry"; //$NON-NLS-1$
 	public static final String TAG_PATH_RESOLVER = "path-resolver"; //$NON-NLS-1$
 
 	public static final String TAG_RANGE = "range"; //$NON-NLS-1$
 	public static final String TAG_MIN = "min"; //$NON-NLS-1$
 	public static final String TAG_MAX = "max"; //$NON-NLS-1$
+	public static final String TAG_STEP_SIZE = "step-size"; //$NON-NLS-1$
 
 	public static final String TAG_EVAL = "eval"; //$NON-NLS-1$
 	public static final String TAG_CODE = "code"; //$NON-NLS-1$

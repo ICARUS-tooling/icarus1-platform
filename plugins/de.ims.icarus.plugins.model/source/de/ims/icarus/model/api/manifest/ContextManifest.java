@@ -91,7 +91,9 @@ public interface ContextManifest extends MemberManifest {
 	List<LayerGroupManifest> getGroupManifests();
 
 	/**
-	 * Returns the layer on the top of this context's layer hierarchy
+	 * Returns the layer on the top of this context's layer hierarchy.
+	 *
+	 * @throws IllegalStateException iff this context is missing a primary layer declaration
 	 */
 	@AccessRestriction(AccessMode.READ)
 	MarkableLayerManifest getPrimaryLayerManifest();
@@ -106,7 +108,10 @@ public interface ContextManifest extends MemberManifest {
 	/**
 	 * Looks up the layer manifest accessible via the given {@code id}. Note that
 	 * this method provides access to layers from both this context and all linked
-	 * prerequisites.
+	 * prerequisites. Note further, that layers targeted by prerequisite declarations
+	 * will only be resolved when this context manifest is actually hosted within
+	 * a corpus manifest, since otherwise it is impossible for the context to access
+	 * foreign resources.
 	 */
 	@AccessRestriction(AccessMode.READ)
 	LayerManifest getLayerManifest(String id);

@@ -71,7 +71,7 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		final int keyCount = manifest.getAvailableKeys().size();
 
 		//TODO threshold regarding keyCount is subject to further evaluation!
-		if(manifest.allowUnknownKeys() || keyCount>=10) {
+		if(manifest.isAllowUnknownKeys() || keyCount>=10) {
 			return new BundleFactory() {
 
 				@Override
@@ -119,7 +119,7 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		if (key == null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 		AnnotationLayerManifest manifest = getManifest();
-		if(!manifest.allowUnknownKeys()
+		if(!manifest.isAllowUnknownKeys()
 				&& !manifest.getAvailableKeys().contains(key))
 			throw new IllegalArgumentException("Key not allowed in annotation layer: "+key); //$NON-NLS-1$
 	}

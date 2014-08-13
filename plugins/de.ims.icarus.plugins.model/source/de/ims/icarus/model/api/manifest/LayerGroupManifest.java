@@ -35,19 +35,23 @@ import de.ims.icarus.model.xml.ModelXmlElement;
 
 
 /**
- * Layer groups describe logical
+ * Layer groups describe logical compounds of layers within a single context.
+ *
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface LayerGroupManifest extends ModelXmlElement {
+public interface LayerGroupManifest extends ModifiableIdentity, ModelXmlElement {
 
 	public static final boolean DEFAULT_INDEPENDENT_VALUE = false;
 
 	@AccessRestriction(AccessMode.READ)
 	ContextManifest getContextManifest();
+
+	@AccessRestriction(AccessMode.READ)
+	int layerCount();
 
 	@AccessRestriction(AccessMode.READ)
 	List<LayerManifest> getLayerManifests();
@@ -69,9 +73,13 @@ public interface LayerGroupManifest extends ModelXmlElement {
 	@AccessRestriction(AccessMode.READ)
 	boolean isIndependent();
 
-	@AccessRestriction(AccessMode.READ)
-	String getName();
-
+	/**
+	 * Performs a group local lookup for the given layer id. This method does <b>not</b>
+	 * resolve layer ids on the context level!
+	 *
+	 * @param id
+	 * @return
+	 */
 	@AccessRestriction(AccessMode.READ)
 	LayerManifest getLayerManifest(String id);
 

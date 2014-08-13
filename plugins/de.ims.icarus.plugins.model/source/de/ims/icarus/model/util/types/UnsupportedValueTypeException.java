@@ -23,23 +23,43 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.manifest;
-
-import de.ims.icarus.model.iql.access.AccessControl;
-import de.ims.icarus.model.iql.access.AccessMode;
-import de.ims.icarus.model.iql.access.AccessPolicy;
-import de.ims.icarus.model.iql.access.AccessRestriction;
+package de.ims.icarus.model.util.types;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-@AccessControl(AccessPolicy.DENY)
-public interface Documentable {
+public class UnsupportedValueTypeException extends RuntimeException {
 
-	@AccessRestriction(AccessMode.READ)
-	Documentation getDocumentation();
+	private static final long serialVersionUID = 3427046321201797935L;
 
-	void setDocumentation(Documentation documentation);
+	private final ValueType valueType;
+
+	private static final String DEFAULT_MESSAGE = "Value type not supported: "; //$NON-NLS-1$
+
+	public UnsupportedValueTypeException(ValueType valueType) {
+		this(DEFAULT_MESSAGE+valueType, valueType, null);
+	}
+
+	public UnsupportedValueTypeException(String message, ValueType valueType, Throwable cause) {
+		super(message, cause);
+
+		this.valueType = valueType;
+	}
+
+	public UnsupportedValueTypeException(String message, ValueType valueType) {
+		this(message, valueType, null);
+	}
+
+	public UnsupportedValueTypeException(ValueType valueType, Throwable cause) {
+		this(DEFAULT_MESSAGE+valueType, valueType, cause);
+	}
+
+	/**
+	 * @return the valueType
+	 */
+	public ValueType getValueType() {
+		return valueType;
+	}
 }

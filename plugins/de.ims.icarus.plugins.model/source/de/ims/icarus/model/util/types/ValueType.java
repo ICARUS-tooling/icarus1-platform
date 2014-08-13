@@ -26,58 +26,97 @@
 package de.ims.icarus.model.util.types;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.Icon;
 
-import org.java.plugin.registry.Extension;
-
+import de.ims.icarus.eval.Expression;
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.xml.XmlResource;
 import de.ims.icarus.model.xml.sax.IconWrapper;
-import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ValueType implements XmlResource {
+public abstract class ValueType implements XmlResource {
 
-	UNKNOWN("unknown", Object.class) { //$NON-NLS-1$
+	private final Class<?> baseClass;
+	private final String xmlForm;
+
+	private static Map<String, ValueType> xmlLookup = new HashMap<>();
+
+	public static ValueType parseValueType(String s) {
+		return xmlLookup.get(s);
+	}
+
+	private ValueType(String xmlForm, Class<?> baseClass) {
+		this.baseClass = baseClass;
+		this.xmlForm = xmlForm;
+
+		xmlLookup.put(xmlForm, this);
+	}
+
+	//FIXME add support for vector types (dimension + component type)
+
+	public String toString(Object value) {
+		return String.valueOf(value);
+	}
+
+	public abstract Object parse(String s, ClassLoader classLoader);
+
+	/**
+	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
+	 */
+	@Override
+	public String getXmlValue() {
+		return xmlForm;
+	}
+
+	public static final ValueType UNKNOWN = new ValueType("unknown", Object.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			throw new IllegalStateException("Cannot parse data of type 'unknown'"); //$NON-NLS-1$
 		}
-	},
+	};
 
 	// External
-	CUSTOM("custom", Object.class) { //$NON-NLS-1$
+	public static final ValueType CUSTOM = new ValueType("custom", Object.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			throw new IllegalStateException("Cannot parse data of type 'custom'"); //$NON-NLS-1$
 		}
-	},
-	EXTENSION("extension", Extension.class) { //$NON-NLS-1$
+	};
+
+	/**
+	 * To reduce dependency we only store the extension's unique id, not the extension itself!
+	 */
+	public static final ValueType EXTENSION = new ValueType("extension", String.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
-			return PluginUtil.getExtension(s);
+			return s;
 		}
 
-		/**
-		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
-		 */
-		@Override
-		public String toString(Object value) {
-			Extension extension = (Extension) value;
-			return extension.getUniqueId();
-		}
-	},
+//		/**
+//		 *
+//		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+//		 */
+//		@Override
+//		public String toString(Object value) {
+//			Extension extension = (Extension) value;
+//			return extension.getUniqueId();
+//		}
+	};
 
-	ENUM("enum", Enum.class) { //$NON-NLS-1$
+	public static final ValueType ENUM = new ValueType("enum", Enum.class) { //$NON-NLS-1$
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
@@ -85,7 +124,7 @@ public enum ValueType implements XmlResource {
 			try {
 				Class<?> clazz = classLoader.loadClass(parts[0]);
 
-				return Enum.valueOf((Class<Enum>)clazz, parts[1]);
+				return Enum.valueOf((Class<Enum>) clazz, parts[1]);
 			} catch (ClassNotFoundException e) {
 				throw new CorruptedStateException("Unable to parse enum parameter: "+s, e); //$NON-NLS-1$
 			}
@@ -101,52 +140,57 @@ public enum ValueType implements XmlResource {
 
 			return enumType.getDeclaringClass().getName()+"@"+enumType.name(); //$NON-NLS-1$
 		}
-	},
+	};
 
 	// "Primitive"
-	STRING("string", String.class) { //$NON-NLS-1$
+	public static final ValueType STRING = new ValueType("string", String.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return s;
 		}
-	},
-	BOOLEAN("boolean", Boolean.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType BOOLEAN = new ValueType("boolean", Boolean.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return Boolean.parseBoolean(s);
 		}
-	},
-	INTEGER("integer", Integer.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType INTEGER = new ValueType("integer", Integer.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return Integer.parseInt(s);
 		}
-	},
-	LONG("long", Long.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType LONG = new ValueType("long", Long.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return Long.parseLong(s);
 		}
-	},
-	DOUBLE("double", Double.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType DOUBLE = new ValueType("double", Double.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return Double.parseDouble(s);
 		}
-	},
-	FLOAT("float", Float.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType FLOAT = new ValueType("float", Float.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return Float.parseFloat(s);
 		}
-	},
+	};
 
 	// Resource links
-	URL("url", URL.class) { //$NON-NLS-1$
+	public static final ValueType URL = new ValueType("url", Url.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			try {
-				return new URL(s);
+				return new Url(s);
 			} catch (MalformedURLException e) {
 				throw new CorruptedStateException("Serialized form of url is invalid: "+s); //$NON-NLS-1$
 			}
@@ -158,14 +202,15 @@ public enum ValueType implements XmlResource {
 		 */
 		@Override
 		public String toString(Object value) {
-			URL url = (URL) value;
-			return url.toExternalForm();
+			Url url = (Url) value;
+			return url.getURL().toExternalForm();
 		}
-	},
-	URL_RESOURCE("url-resource", Link.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType URL_RESOURCE = new ValueType("url-resource", Link.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
-			throw new IllegalStateException("Cannot parse data of type 'url-resource'"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Cannot parse data of type 'url-resource'"); //$NON-NLS-1$
 		}
 
 		/**
@@ -174,12 +219,12 @@ public enum ValueType implements XmlResource {
 		 */
 		@Override
 		public String toString(Object value) {
-			throw new IllegalStateException("Cannot serialize data of type 'url-resource'"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Cannot serialize data of type 'url-resource'"); //$NON-NLS-1$
 		}
-	},
+	};
 
 	// Predefined images
-	IMAGE("image", Icon.class) { //$NON-NLS-1$
+	public static final ValueType IMAGE = new ValueType("image", Icon.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
 			return new IconWrapper(s);
@@ -196,11 +241,12 @@ public enum ValueType implements XmlResource {
 			} else
 				throw new IllegalArgumentException("Cannot serialize icon: "+value); //$NON-NLS-1$
 		}
-	},
-	IMAGE_RESOURCE("image-resource", IconLink.class) { //$NON-NLS-1$
+	};
+
+	public static final ValueType IMAGE_RESOURCE = new ValueType("image-resource", IconLink.class) { //$NON-NLS-1$
 		@Override
 		public Object parse(String s, ClassLoader classLoader) {
-			throw new IllegalStateException("Cannot parse data of type 'image-resource'"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Cannot parse data of type 'image-resource'"); //$NON-NLS-1$
 		}
 
 		/**
@@ -209,46 +255,98 @@ public enum ValueType implements XmlResource {
 		 */
 		@Override
 		public String toString(Object value) {
-			throw new IllegalStateException("Cannot serialize data of type 'image-resource'"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Cannot serialize data of type 'image-resource'"); //$NON-NLS-1$
 		}
 	};
 
-	private final Class<?> baseClass;
-	private final String xmlForm;
-
-	private ValueType(String xmlForm, Class<?> baseClass) {
-		this.baseClass = baseClass;
-		this.xmlForm = xmlForm;
+	public boolean isValidValue(Object value) {
+		return value!=null && baseClass.isAssignableFrom(value.getClass());
 	}
 
-	public abstract Object parse(String s, ClassLoader classLoader);
-	public String toString(Object value) {
-		return String.valueOf(value);
+	public boolean isValidType(Class<?> type) {
+		return baseClass.isAssignableFrom(type);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
+	 * Returns a collection view on all the available value types
 	 */
-	@Override
-	public String getXmlValue() {
-		return xmlForm;
+	public static Collection<ValueType> values() {
+		return CollectionUtils.getCollectionProxy(xmlLookup.values());
 	}
 
-	private static Map<String, ValueType> xmlLookup;
+	/**
+	 * Creates a set view that contains all available value types except the
+	 * ones specified in the {@code exclusions} varargs parameter.
+	 * @param exclusions
+	 * @return
+	 */
+	public static Set<ValueType> filterWithout(ValueType...exclusions) {
+		Set<ValueType> filter = new HashSet<>(xmlLookup.values());
 
-	public static ValueType parseValueType(String s) {
-		if(xmlLookup==null) {
-			Map<String, ValueType> map = new HashMap<>();
-			for(ValueType type : values()) {
-				map.put(type.xmlForm, type);
+		if(exclusions!=null) {
+			for(ValueType type : exclusions) {
+				filter.remove(type);
 			}
-			xmlLookup = map;
 		}
 
-		return xmlLookup.get(s);
+		return filter;
 	}
 
-	public boolean isValidValue(Object value) {
-		return value!=null && baseClass.isAssignableFrom(value.getClass());
+	/**
+	 * Creates a set view that contains only value types specified
+	 * in the {@code exclusions} varargs parameter.
+	 * @param inclusive
+	 * @return
+	 */
+	public static Set<ValueType> filterIncluding(ValueType...inclusive) {
+		Set<ValueType> filter = new HashSet<>();
+
+		if(inclusive!=null) {
+			for(ValueType type : inclusive) {
+				filter.add(type);
+			}
+		}
+
+		return filter;
+	}
+
+	public Class<?> checkValue(Object value) {
+		Class<?> type = value.getClass();
+		if(Expression.class.isAssignableFrom(type)) {
+			type = ((Expression)value).getReturnType();
+		}
+
+		if(!baseClass.isAssignableFrom(type))
+			throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
+					"Incompatible value type "+type.getName()+" for value-type "+xmlForm+" - expected "+baseClass.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		return type;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return xmlForm.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof ValueType) {
+			return xmlForm.equals(((ValueType)obj).xmlForm);
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ValueType@"+xmlForm; //$NON-NLS-1$
 	}
 }

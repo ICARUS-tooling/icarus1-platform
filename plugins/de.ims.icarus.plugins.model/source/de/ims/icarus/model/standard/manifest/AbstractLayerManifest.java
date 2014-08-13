@@ -40,6 +40,8 @@ import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.standard.manifest.Links.Link;
+import de.ims.icarus.model.standard.manifest.Links.MemoryLink;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
@@ -63,6 +65,8 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	protected AbstractLayerManifest(ManifestLocation manifestLocation,
 			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
 		super(manifestLocation, registry);
+
+		verifyEnvironment(manifestLocation, layerGroupManifest, LayerGroupManifest.class);
 
 		this.layerGroupManifest = layerGroupManifest;
 	}
@@ -124,7 +128,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		switch (qName) {
 		case TAG_BASE_LAYER: {
 			String baseLayerId = ModelXmlUtils.normalize(attributes, ATTR_LAYER_ID);
-			addBaseLayer(baseLayerId);
+			addBaseLayerId(baseLayerId);
 		} break;
 
 		default:
@@ -193,7 +197,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 	 */
 	@Override
 	public LayerType getLayerType() {
-		return layerType.get();
+		return layerType==null ? null : layerType.get();
 	}
 
 	/**
@@ -246,11 +250,11 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 
 	protected void checkAllowsTargetLayer() throws ModelException {
 		if(layerGroupManifest==null || layerGroupManifest.getContextManifest()==null)
-			throw new ModelException(ModelError.MANIFEST_MISSING_CONTEXT,
+			throw new ModelException(ModelError.MANIFEST_MISSING_ENVIRONMENT,
 					"Cannot make links to other layers without enclosing context: "+getId()); //$NON-NLS-1$
 	}
 
-	public TargetLayerManifest addBaseLayer(String baseLayerId) {
+	public TargetLayerManifest addBaseLayerId(String baseLayerId) {
 		checkAllowsTargetLayer();
 		TargetLayerManifest targetLayerManifest = new TargetLayerManifestImpl(baseLayerId);
 		baseLayerManifests.add(targetLayerManifest);
@@ -267,10 +271,11 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
 		protected LayerManifest resolve() {
+			// This takes care of layer id resolution in terms of prerequisite aliases
 			return getContextManifest().getLayerManifest(getId());
 		}
 
@@ -286,7 +291,7 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
 		protected PrerequisiteManifest resolve() {
@@ -304,6 +309,42 @@ public abstract class AbstractLayerManifest<L extends LayerManifest> extends Abs
 		public TargetLayerManifestImpl(String targetId) {
 			resolvedLayer = new LayerLink(targetId);
 			prerequisite = new PrerequisiteLink(targetId);
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return getLayerId().hashCode();
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof TargetLayerManifest) {
+				TargetLayerManifest other = (TargetLayerManifest) obj;
+				return getLayerId().equals(other.getLayerId());
+			}
+			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "TargetLayerManifest@"+getLayerId(); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest#getLayerId()
+		 */
+		@Override
+		public String getLayerId() {
+			return resolvedLayer.getId();
 		}
 
 		/**

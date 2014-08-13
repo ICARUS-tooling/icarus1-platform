@@ -25,46 +25,152 @@
  */
 package de.ims.icarus.model.standard.manifest;
 
+import java.util.Set;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ValueRange;
+import de.ims.icarus.model.util.types.UnsupportedValueTypeException;
 import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 
-public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
+public class ValueRangeImpl implements ValueRange, ModelXmlHandler, ModelXmlElement {
 
-	private ValueType valueType = ValueType.STRING;
-	private Object lower, upper;
+	private final ValueType valueType;
+	private Object lower, upper, stepSize;
 	private boolean lowerIncluded = DEFAULT_LOWER_INCLUSIVE_VALUE,
 			upperIncluded = DEFAULT_UPPER_INCLUSIVE_VALUE;
 
+	// Stuff used for parsing
 	private transient short currentField = 0;
 	private static final short MIN_FIELD = 1;
 	private static final short MAX_FIELD = 2;
+	private static final short STEP_SIZE_FIELD = 3;
 
-	public ValueRangeImpl() {
-		// no-op
-	}
+	private static final Set<ValueType> supportedValueTypes = ValueType.filterIncluding(
+			ValueType.STRING,
+			ValueType.INTEGER,
+			ValueType.LONG,
+			ValueType.FLOAT,
+			ValueType.DOUBLE,
+			ValueType.ENUM);
 
 	public ValueRangeImpl(ValueType valueType) {
-		setValueType(valueType);
+		if (valueType == null)
+			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
+
+		if(!supportedValueTypes.contains(valueType))
+			throw new UnsupportedValueTypeException(valueType);
+
+		this.valueType = valueType;
 	}
 
-	public ValueRangeImpl(boolean lowerIncluded,
+	public ValueRangeImpl(ValueType valueType, boolean lowerIncluded,
 			boolean upperIncluded) {
+		this(valueType);
+
 		this.lowerIncluded = lowerIncluded;
 		this.upperIncluded = upperIncluded;
 	}
 
-	public ValueRangeImpl(Object lower, Object upper, boolean lowerIncluded,
+	public ValueRangeImpl(ValueType valueType, Object lower, Object upper, boolean lowerIncluded,
 			boolean upperIncluded) {
-		this(lowerIncluded, upperIncluded);
+		this(valueType, lowerIncluded, upperIncluded);
 
-		this.lower = lower;
-		this.upper = upper;
+		setLowerBound(lower);
+		setUpperBound(upper);
+	}
+
+	public ValueRangeImpl(ValueType valueType, Object lower, Object upper) {
+		this(valueType, lower, upper, true, true);
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = valueType.hashCode();
+
+		if(lowerIncluded!=DEFAULT_LOWER_INCLUSIVE_VALUE) {
+			hash *= -1;
+		}
+
+		if(upperIncluded!=DEFAULT_UPPER_INCLUSIVE_VALUE) {
+			hash *= -2;
+		}
+
+		if(lower!=null) {
+			hash *= lower.hashCode();
+		}
+
+		if(upper!=null) {
+			hash *= upper.hashCode();
+		}
+
+		return hash;
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof ValueRange) {
+			ValueRange other = (ValueRange)obj;
+
+			return valueType.equals(other.getValueType())
+					&& lowerIncluded==other.isLowerBoundInclusive()
+					&& upperIncluded==other.isUpperBoundInclusive()
+					&& ClassUtils.equals(lower, other.getLowerBound())
+					&& ClassUtils.equals(upper, other.getUpperBound());
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("ValueRange@").append(valueType.getXmlValue()); //$NON-NLS-1$
+
+		if(lowerIncluded) {
+			sb.append('[');
+		} else {
+			sb.append('(');
+		}
+
+		if(lower==null && upper==null) {
+			sb.append('-');
+		} else {
+			sb.append(lower).append(',').append(upper);
+		}
+
+		if(upperIncluded) {
+			sb.append('[');
+		} else {
+			sb.append(')');
+		}
+
+
+		return sb.toString();
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	public void writeXml(XmlSerializer serializer) throws Exception {
+		ModelXmlUtils.writeValueRangeElement(serializer, this, valueType);
 	}
 
 	/**
@@ -79,8 +185,6 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
 		if(upperIncluded!=null) {
 			setUpperBoundIncluded(Boolean.parseBoolean(upperIncluded));
 		}
-
-		valueType = ModelXmlUtils.typeValue(attributes);
 	}
 
 	@Override
@@ -98,6 +202,10 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
 
 		case TAG_MAX : {
 			currentField = MAX_FIELD;
+		} break;
+
+		case TAG_STEP_SIZE : {
+			currentField = STEP_SIZE_FIELD;
 		} break;
 
 		case TAG_EVAL : {
@@ -129,6 +237,12 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
 		case TAG_MAX : {
 			if(text!=null && upper==null) {
 				setUpperBound(valueType.parse(text, manifestLocation.getClassLoader()));
+			}
+		} break;
+
+		case TAG_STEP_SIZE : {
+			if(text!=null && stepSize==null) {
+				setStepSize(valueType.parse(text, manifestLocation.getClassLoader()));
 			}
 		} break;
 
@@ -179,16 +293,6 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
 	}
 
 	/**
-	 * @param valueType the valueType to set
-	 */
-	public void setValueType(ValueType valueType) {
-		if (valueType == null)
-			throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
-
-		this.valueType = valueType;
-	}
-
-	/**
 	 * @see de.ims.icarus.model.api.manifest.ValueRange#getLowerBound()
 	 */
 	@Override
@@ -202,6 +306,14 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
 	@Override
 	public Object getUpperBound() {
 		return upper;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.manifest.ValueRange#getStepSize()
+	 */
+	@Override
+	public Object getStepSize() {
+		return stepSize;
 	}
 
 	/**
@@ -220,18 +332,48 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler {
 		return upperIncluded;
 	}
 
+	protected void checkValue(Object value) {
+		Class<?> type = valueType.checkValue(value);
+
+		if(!Comparable.class.isAssignableFrom(type))
+			throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
+					"Provided value for value range does not implement java.lang.Comparable: "+type.getName()); //$NON-NLS-1$
+	}
+
 	/**
 	 * @param lower the lower to set
 	 */
-	public void setLowerBound(Object lower) {
+	public void setLowerBound(Object lower) throws ModelException {
+		if (lower == null)
+			throw new NullPointerException("Invalid lower bound"); //$NON-NLS-1$
+
+		checkValue(lower);
+
 		this.lower = lower;
 	}
 
 	/**
 	 * @param upper the upper to set
 	 */
-	public void setUpperBound(Object upper) {
+	public void setUpperBound(Object upper) throws ModelException {
+		if (upper == null)
+			throw new NullPointerException("Invalid upper bound"); //$NON-NLS-1$
+
+		checkValue(upper);
+
 		this.upper = upper;
+	}
+
+	/**
+	 * @param upper the upper to set
+	 */
+	public void setStepSize(Object stepSize) throws ModelException {
+		if (stepSize == null)
+			throw new NullPointerException("Invalid stepSize"); //$NON-NLS-1$
+
+		checkValue(stepSize);
+
+		this.stepSize = stepSize;
 	}
 
 	/**

@@ -67,6 +67,17 @@ public interface Manifest {
 	@AccessRestriction(AccessMode.READ)
 	Manifest getTemplate();
 
+	/**
+	 * Returns the {@code type} of this manifest, i.e. that is
+	 * what kind of member in a corpus it describes. If type-specific
+	 * behavior is modeled, one should always use this method rather than
+	 * doing multiple {@code instanceof} checks.
+	 *
+	 * @return
+	 */
+	@AccessRestriction(AccessMode.READ)
+	ManifestType getManifestType();
+
 	// Modification methods
 
 //	void setId(String id);
@@ -84,5 +95,5 @@ public interface Manifest {
 
 	CorpusRegistry getRegistry();
 
-	ManifestLocation getManifestSource();
+	ManifestLocation getManifestLocation();
 }

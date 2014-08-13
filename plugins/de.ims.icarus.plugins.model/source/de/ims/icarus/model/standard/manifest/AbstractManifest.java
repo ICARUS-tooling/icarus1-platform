@@ -28,15 +28,19 @@ package de.ims.icarus.model.standard.manifest;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.Manifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.standard.manifest.Links.Link;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 
 
 
@@ -45,7 +49,7 @@ import de.ims.icarus.model.xml.XmlSerializer;
  * @version $Id$
  *
  */
-public abstract class AbstractManifest<T extends Manifest> extends LazyResolver implements Manifest, ModelXmlElement, ModelXmlHandler {
+public abstract class AbstractManifest<T extends Manifest> implements Manifest, ModelXmlElement, ModelXmlHandler {
 
 	private TemplateLink<T> template;
 
@@ -54,6 +58,12 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 
 	private transient final ManifestLocation manifestLocation;
 	private transient final CorpusRegistry registry;
+
+	public static void verifyEnvironment(ManifestLocation manifestLocation, Object environment, Class<?> expected) {
+		if(!manifestLocation.isTemplate() && environment==null)
+			throw new ModelException(ModelError.MANIFEST_MISSING_ENVIRONMENT,
+					"Missing environment of type "+expected.getName()); //$NON-NLS-1$
+	}
 
 	protected AbstractManifest(ManifestLocation manifestLocation, CorpusRegistry registry) {
 		if (manifestLocation == null)
@@ -66,6 +76,80 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 		isTemplate = this.manifestLocation.isTemplate();
 	}
 
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = getManifestType().hashCode()*manifestLocation.hashCode()*registry.hashCode();
+
+		if(getId()!=null) {
+			hash *= getId().hashCode();
+		}
+
+		return hash;
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Manifest) {
+			Manifest other = (Manifest) obj;
+
+			//FIXME currently manifest location is excluded from equality check
+			return getManifestType().equals(other.getManifestType())
+//					&& manifestLocation.equals(other.getManifestLocation())
+					&& registry.equals(other.getRegistry())
+					&& ClassUtils.equals(getId(), other.getId());
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String s = getManifestType().toString();
+
+		if(getId()!=null) {
+			s += "@"+getId(); //$NON-NLS-1$
+		}
+
+		return s;
+	}
+
+//	/**
+//	 * @see java.lang.Object#hashCode()
+//	 */
+//	@Override
+//	public int hashCode() {
+//		int hash = getManifestType().hashCode()*manifestLocation.hashCode()*registry.hashCode();
+//
+//		if(id!=null) {
+//			hash *= id.hashCode();
+//		}
+//
+//		return hash;
+//	}
+//
+//	/**
+//	 * @see java.lang.Object#equals(java.lang.Object)
+//	 */
+//	@Override
+//	public boolean equals(Object obj) {
+//		if(obj instanceof Manifest) {
+//			Manifest other = (Manifest) obj;
+//			return getManifestType()==other.getManifestType()
+//					&& registry==other.getRegistry()
+//					&& manifestLocation.equals(other.getManifestLocation())
+//					&& ClassUtils.equals(id, other.getId());
+//		}
+//		return false;
+//	}
+
 	protected void writeEmbedded(ModelXmlElement element, XmlSerializer serializer) throws Exception {
 		if(element!=null) {
 			element.writeXml(serializer);
@@ -73,6 +157,10 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 		}
 	}
 
+	/**
+	 * Check whether a flag is set and differs from a given default value. Only if both conditions are met
+	 * will the flag be written to the provided serializer, using the specified name as identifier.
+	 */
 	protected void writeFlag(XmlSerializer serializer, String name, Boolean flag, boolean defaultValue) throws Exception {
 		if(flag!=null && flag.booleanValue()!=defaultValue) {
 			serializer.writeAttribute(name, flag.booleanValue());
@@ -112,7 +200,11 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 			String uri, String localName, String qName, Attributes attributes)
 			throws SAXException {
 
-		throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if(qName.equals(xmlTag())) {
+			readAttributes(attributes);
+			return this;
+		} else
+			throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -123,7 +215,10 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 			String uri, String localName, String qName, String text)
 			throws SAXException {
 
-		throw new SAXException("Unrecognized end tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if(qName.equals(xmlTag())) {
+			return null;
+		} else
+			throw new SAXException("Unrecognized end tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -133,7 +228,7 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
 			String localName, String qName, ModelXmlHandler handler)
 			throws SAXException {
-		// for subclasses
+		throw new SAXException("Unexpected nested element "+qName+" in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	protected void writeElements(XmlSerializer serializer) throws Exception {
@@ -160,10 +255,10 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestSource()
+	 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestLocation()
 	 */
 	@Override
-	public ManifestLocation getManifestSource() {
+	public ManifestLocation getManifestLocation() {
 		return manifestLocation;
 	}
 
@@ -180,6 +275,7 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 	 */
 	@Override
 	public String getId() {
+		//FIXME do we really want to inherit id?
 		String result = id;
 		if(result==null && hasTemplate()) {
 			result = getTemplate().getId();
@@ -333,15 +429,6 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 		this.isTemplate = isTemplate;
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		String id = getId();
-		return id==null ? super.toString() : getClass().getName()+"@"+id; //$NON-NLS-1$
-	}
-
 	protected class TemplateLink<D extends Manifest> extends Link<D> {
 
 		/**
@@ -373,7 +460,7 @@ public abstract class AbstractManifest<T extends Manifest> extends LazyResolver 
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
 		protected LayerType resolve() {

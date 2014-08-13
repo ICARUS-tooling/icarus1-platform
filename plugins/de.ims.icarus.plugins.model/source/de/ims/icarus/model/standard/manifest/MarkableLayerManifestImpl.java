@@ -192,6 +192,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	@Override
 	public ContainerManifest getContainerManifest(int level) {
 		ContainerManifest result = null;
+
 		if(!containerManifests.isEmpty()) {
 			result = containerManifests.get(level);
 		} else if(hasTemplate()) {

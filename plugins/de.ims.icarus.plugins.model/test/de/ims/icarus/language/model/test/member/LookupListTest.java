@@ -26,14 +26,14 @@
 package de.ims.icarus.language.model.test.member;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 
-import junit.framework.Assert;
-
+import org.junit.Before;
 import org.junit.Test;
 
-import de.ims.icarus.model.api.CorpusMember;
 import de.ims.icarus.util.collections.LookupList;
 
 /**
@@ -43,52 +43,59 @@ import de.ims.icarus.util.collections.LookupList;
  */
 public class LookupListTest {
 
-	private static final CorpusMember dummy1 = new MemberDummy(1);
-	private static final CorpusMember dummy2 = new MemberDummy(2);
-	private static final CorpusMember dummy3 = new MemberDummy(3);
+	private static Object dummy(int id) {
+		return "Dummy"+id; //$NON-NLS-1$
+	}
+
+	private static final Object dummy1 = dummy(1);
+	private static final Object dummy2 = dummy(2);
+	private static final Object dummy3 = dummy(3);
+
+	private LookupList<Object> list;
+
+	@Before
+	public void prepare() {
+		list = new LookupList<>();
+	}
 
 	@Test
 	public void testInit() throws Exception {
-		LookupList<CorpusMember> list = new LookupList<>();
-
-		assertEquals(list.size(), 0L);
+		assertEquals(list.size(), 0);
 
 		list = new LookupList<>(100);
 
-		assertEquals(list.size(), 0L);
+		assertEquals(list.size(), 0);
 	}
 
 	@Test
 	public void testBasic() throws Exception {
-		LookupList<CorpusMember> list = new LookupList<>();
-
 		// Test size
 
 		list.add(dummy1);
-		Assert.assertEquals("Size after adding 1 item must be 1", list.size(), 1);
+		assertEquals("Size after adding 1 item must be 1", list.size(), 1); //$NON-NLS-1$
 
 		list.add(dummy2);
-		Assert.assertEquals("Size after adding 2 items must be s", list.size(), 2);
+		assertEquals("Size after adding 2 items must be s", list.size(), 2); //$NON-NLS-1$
 
 		// Test indexOf()
 
-		Assert.assertEquals("Index of dummy1 must be 0", list.indexOf(dummy1), 0);
-		Assert.assertEquals("Index of dummy2 must be 1", list.indexOf(dummy2), 1);
-		Assert.assertEquals("Index of dummy3 must be -1", list.indexOf(dummy3), -1);
+		assertEquals("Index of dummy1 must be 0", list.indexOf(dummy1), 0); //$NON-NLS-1$
+		assertEquals("Index of dummy2 must be 1", list.indexOf(dummy2), 1); //$NON-NLS-1$
+		assertEquals("Index of dummy3 must be -1", list.indexOf(dummy3), -1); //$NON-NLS-1$
 
 		// Test contains()
 
-		Assert.assertTrue("List must contain dummy1", list.contains(dummy1));
-		Assert.assertTrue("List must contain dummy2", list.contains(dummy2));
-		Assert.assertTrue("List must not contain dummy3", !list.contains(dummy3));
+		assertTrue("List must contain dummy1", list.contains(dummy1)); //$NON-NLS-1$
+		assertTrue("List must contain dummy2", list.contains(dummy2)); //$NON-NLS-1$
+		assertTrue("List must not contain dummy3", !list.contains(dummy3)); //$NON-NLS-1$
 
 		// Test insert
 
 		list.add(1, dummy3);
 
-		Assert.assertEquals("Index of dummy3 must be 1", list.indexOf(dummy3), 1);
-		Assert.assertEquals("Index of dummy2 must be 2", list.indexOf(dummy2), 2);
-		Assert.assertTrue("List must contain dummy3", list.contains(dummy3));
+		assertEquals("Index of dummy3 must be 1", list.indexOf(dummy3), 1); //$NON-NLS-1$
+		assertEquals("Index of dummy2 must be 2", list.indexOf(dummy2), 2); //$NON-NLS-1$
+		assertTrue("List must contain dummy3", list.contains(dummy3)); //$NON-NLS-1$
 
 		// Test clear
 		list = new LookupList<>();
@@ -96,9 +103,9 @@ public class LookupListTest {
 		list.add(dummy2);
 		list.add(dummy3);
 
-		Assert.assertEquals(list.size(), 3);
+		assertEquals(list.size(), 3);
 		list.clear();
-		Assert.assertTrue("List must be empty after clearing", list.isEmpty());
+		assertTrue("List must be empty after clearing", list.isEmpty()); //$NON-NLS-1$
 
 		// Test remove
 
@@ -106,49 +113,45 @@ public class LookupListTest {
 		list.add(dummy1);
 
 		list.remove(dummy1);
-		Assert.assertTrue("List must not contain dummy1 after removal", !list.contains(dummy1));
+		assertTrue("List must not contain dummy1 after removal", !list.contains(dummy1)); //$NON-NLS-1$
 
 		list.add(dummy2);
 		list.remove(0);
-		Assert.assertTrue("List must not contain dummy2 after removal", !list.contains(dummy2));
+		assertTrue("List must not contain dummy2 after removal", !list.contains(dummy2)); //$NON-NLS-1$
 	}
 
 	@Test
 	public void testIterator() throws Exception {
-		LookupList<CorpusMember> list = new LookupList<>();
-
 		list.add(dummy1);
 		list.add(dummy2);
-		Assert.assertEquals(list.size(), 2);
+		assertEquals(list.size(), 2);
 
-		Iterator<CorpusMember> it = list.iterator();
-		Assert.assertNotNull(it);
-		Assert.assertTrue(it.hasNext());
+		Iterator<Object> it = list.iterator();
+		assertNotNull(it);
+		assertTrue(it.hasNext());
 
-		CorpusMember item = it.next();
-		Assert.assertEquals(item, dummy1);
-		Assert.assertTrue(it.hasNext());
+		Object item = it.next();
+		assertEquals(item, dummy1);
+		assertTrue(it.hasNext());
 
 		item = it.next();
-		Assert.assertEquals(item, dummy2);
-		Assert.assertTrue(!it.hasNext());
+		assertEquals(item, dummy2);
+		assertTrue(!it.hasNext());
 	}
 
 	@Test
 	public void testLookup() throws Exception {
-		LookupList<CorpusMember> list = new LookupList<>();
-
-		CorpusMember[] items = new CorpusMember[20];
+		Object[] items = new Object[20];
 		for(int i=0; i<items.length; i++) {
-			items[i] = new MemberDummy(i+1);
+			items[i] = dummy(i+1);
 			list.add(items[i]);
 		}
 
-		Assert.assertEquals(list.size(), items.length);
+		assertEquals(list.size(), items.length);
 
 		for(int i=0; i<items.length; i++) {
-			Assert.assertTrue(list.contains(items[i]));
-			Assert.assertEquals(i, list.indexOf(items[i]));
+			assertTrue(list.contains(items[i]));
+			assertEquals(i, list.indexOf(items[i]));
 		}
 	}
 }

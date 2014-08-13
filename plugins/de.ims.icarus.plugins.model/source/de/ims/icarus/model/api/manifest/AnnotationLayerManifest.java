@@ -114,7 +114,7 @@ public interface AnnotationLayerManifest extends LayerManifest {
 	 * @return
 	 */
 	@AccessRestriction(AccessMode.READ)
-	boolean allowUnknownKeys();
+	boolean isAllowUnknownKeys();
 
 	/**
 	 * Returns whether this layer only provides annotations for the members

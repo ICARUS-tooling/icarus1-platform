@@ -26,19 +26,20 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import de.ims.icarus.model.api.manifest.Documentable;
 import de.ims.icarus.model.api.manifest.Documentation;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.util.types.Url;
+import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -48,17 +49,50 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class DocumentationImpl extends DefaultModifiableIdentity implements Documentation {
 
-	private final Documentable target;
-
 	private String content;
 
 	private final List<Resource> resources = new ArrayList<>();
 
-	public DocumentationImpl(Documentable target) {
-		if (target == null)
-			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
+	public DocumentationImpl() {
+		// no-op
+	}
 
-		this.target = target;
+	public DocumentationImpl(String content) {
+		setContent(content);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.DefaultModifiableIdentity#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 1;
+
+		if(getId()!=null) {
+			hash *= getId().hashCode();
+		}
+
+		return hash;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.DefaultModifiableIdentity#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Documentation) {
+			Documentation other = (Documentation) obj;
+			return ClassUtils.equals(getId(), other.getId());
+		}
+		return false;
+	}
+
+	/**
+	 * @see de.ims.icarus.model.standard.manifest.DefaultModifiableIdentity#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Documentation@"+String.valueOf(getId()); //$NON-NLS-1$
 	}
 
 	/**
@@ -66,19 +100,22 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 	 */
 	@Override
 	public void writeXml(XmlSerializer serializer) throws Exception {
-		serializer.startElement(TAG_DOCUMENTATION);
+		if(content==null && resources.isEmpty()) {
+			serializer.startEmptyElement(TAG_DOCUMENTATION);
+		} else {
+			serializer.startElement(TAG_DOCUMENTATION);
+		}
 
 		ModelXmlUtils.writeIdentityAttributes(serializer, this);
 
-		serializer.startElement(TAG_CONTENT);
-		serializer.writeCData(content);
-		serializer.endElement(TAG_CONTENT);
+		if(content!=null) {
+			serializer.startElement(TAG_CONTENT);
+			serializer.writeCData(content);
+			serializer.endElement(TAG_CONTENT);
+		}
 
 		for(Resource resource : resources) {
-			serializer.startElement(TAG_RESOURCE);
-			ModelXmlUtils.writeIdentityAttributes(serializer, resource);
-			serializer.writeText(resource.getURL().toExternalForm());
-			serializer.endElement(TAG_RESOURCE);
+			ModelXmlUtils.writeResourceElement(serializer, resource);
 		}
 
 		serializer.endElement(TAG_DOCUMENTATION);
@@ -152,14 +189,6 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		}
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.manifest.Documentation#getTarget()
-	 */
-	@Override
-	public Documentable getTarget() {
-		return target;
-	}
-
 //	/**
 //	 * @param target the target to set
 //	 */
@@ -208,9 +237,26 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		resources.remove(resource);
 	}
 
-	public static class ResourceImpl extends DefaultModifiableIdentity implements Resource, ModelXmlHandler {
+	public static class ResourceImpl extends DefaultModifiableIdentity implements Resource, ModelXmlElement, ModelXmlHandler {
 
-		private URL url;
+		private Url url;
+
+		public ResourceImpl() {
+			// Default constructor
+		}
+
+		public ResourceImpl(String id, Url url) {
+			setId(id);
+			setUrl(url);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+		 */
+		@Override
+		public void writeXml(XmlSerializer serializer) throws Exception {
+			ModelXmlUtils.writeResourceElement(serializer, this);
+		}
 
 		/**
 		 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
@@ -243,7 +289,7 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 
 				if(text!=null) {
 					try {
-						setURL(new URL(text));
+						setUrl(new Url(text));
 					} catch (MalformedURLException e) {
 						throw new SAXException("Invalid resoucre url", e); //$NON-NLS-1$
 					}
@@ -268,17 +314,17 @@ public class DocumentationImpl extends DefaultModifiableIdentity implements Docu
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.manifest.Documentation.Resource#getURL()
+		 * @see de.ims.icarus.model.api.manifest.Documentation.Resource#getUrl()
 		 */
 		@Override
-		public URL getURL() {
+		public Url getUrl() {
 			return url;
 		}
 
 		/**
 		 * @param url the url to set
 		 */
-		public void setURL(URL url) {
+		public void setUrl(Url url) {
 			if (url == null)
 				throw new NullPointerException("Invalid url"); //$NON-NLS-1$
 

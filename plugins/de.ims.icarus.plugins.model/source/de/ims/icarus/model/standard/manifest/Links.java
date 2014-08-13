@@ -23,27 +23,60 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.xml.sax;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import de.ims.icarus.model.util.types.ValueType;
+package de.ims.icarus.model.standard.manifest;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@Documented
-public @interface XmlAttributeMapping {
+public class Links {
 
-	String name();
+	//FIXME consider weak links to allow targets to be gced ?
 
-	ValueType type() default ValueType.STRING;
+	public static abstract class Link<O extends Object> {
+		private final String id;
+
+		transient O target;
+
+		public Link(String id) {
+			if (id == null)
+				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+
+			this.id = id;
+		}
+
+		protected abstract O resolve();
+
+		public String getId() {
+			return id;
+		}
+
+		public O get() {
+			if(target==null) {
+				target = resolve();
+			}
+
+			return target;
+		}
+	}
+
+	public static abstract class MemoryLink<O extends Object> extends Link<O> {
+
+		private volatile transient boolean resolved = false;
+
+		public MemoryLink(String id) {
+			super(id);
+		}
+
+		@Override
+		public O get() {
+			if(!resolved && target==null) {
+				target = resolve();
+				resolved = true;
+			}
+
+			return target;
+		}
+	}
 }

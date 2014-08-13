@@ -42,9 +42,11 @@ import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.standard.manifest.Links.Link;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -52,14 +54,13 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupManifest, ModelXmlHandler {
+public class LayerGroupManifestImpl extends DefaultModifiableIdentity implements LayerGroupManifest, ModelXmlHandler {
 
-	private ContextManifest contextManifest;
+	private final ContextManifest contextManifest;
 
 	private final List<LayerManifest> layerManifests = new ArrayList<>();
 	private LayerLink primaryLayer;
 	private boolean independent = DEFAULT_INDEPENDENT_VALUE;
-	private String name;
 
 	public LayerGroupManifestImpl(ContextManifest contextManifest) {
 		if (contextManifest == null)
@@ -75,7 +76,7 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
 		this.contextManifest = contextManifest;
-		this.name = name;
+		setName(name);
 	}
 
 	/**
@@ -85,11 +86,15 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	public void writeXml(XmlSerializer serializer) throws Exception {
 		serializer.startElement(TAG_LAYER_GROUP);
 
-		serializer.writeAttribute(ATTR_ID, name);
+		ModelXmlUtils.writeIdentityAttributes(serializer, this);
+
 		if(independent!=DEFAULT_INDEPENDENT_VALUE) {
 			serializer.writeAttribute(ATTR_INDEPENDENT, independent);
 		}
-		serializer.writeAttribute(ATTR_PRIMARY_LAYER, primaryLayer.getId());
+
+		if(primaryLayer!=null) {
+			serializer.writeAttribute(ATTR_PRIMARY_LAYER, primaryLayer.getId());
+		}
 
 		for(Iterator<LayerManifest> it = layerManifests.iterator(); it.hasNext();) {
 			it.next().writeXml(serializer);
@@ -109,7 +114,7 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	}
 
 	protected void readAttributes(Attributes attributes) {
-		setName(ModelXmlUtils.normalize(attributes, ATTR_ID));
+		ModelXmlUtils.readIdentity(attributes, this);
 
 		String independent = ModelXmlUtils.normalize(attributes, ATTR_INDEPENDENT);
 		if(independent!=null) {
@@ -119,6 +124,8 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 		}
 
 		String primaryLayerId = ModelXmlUtils.normalize(attributes, ATTR_PRIMARY_LAYER);
+		if(primaryLayerId==null)
+			throw new IllegalArgumentException("Missing primary layer id"); //$NON-NLS-1$
 		setPrimaryLayerId(primaryLayerId);
 	}
 
@@ -215,6 +222,14 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	}
 
 	/**
+	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#layerCount()
+	 */
+	@Override
+	public int layerCount() {
+		return layerManifests.size();
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#getLayerManifests()
 	 */
 	@Override
@@ -239,24 +254,6 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#getName()
-	 */
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		if (name == null)
-			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
-
-		this.name = name;
-	}
-
-	/**
 	 * @param independent the independent to set
 	 */
 //	@Override
@@ -269,8 +266,10 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 		if (layerManifest == null)
 			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
 
-		if(!layerManifests.add(layerManifest))
+		if(layerManifests.contains(layerManifest))
 			throw new IllegalArgumentException("Layer manifest already present in group: "+layerManifest.getId()); //$NON-NLS-1$
+
+		layerManifests.add(layerManifest);
 	}
 
 //	@Override
@@ -344,24 +343,43 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	 */
 	@Override
 	public String toString() {
-		return "LayerGroup:"+name; //$NON-NLS-1$
+		return "LayerGroup:"+getId(); //$NON-NLS-1$
 	}
 
-	private LayerManifest lookupLayer(String id, boolean localOnly) {
-		LayerManifest result = null;
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hash = contextManifest.hashCode() * (1+layerManifests.size());
+		if(getId()!=null) {
+			hash *= (1+getId().hashCode());
+		}
+		return hash;
+	}
 
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof LayerGroupManifest) {
+			LayerGroupManifest other = (LayerGroupManifest) obj;
+			return contextManifest.equals(other.getContextManifest())
+					&& layerManifests.size()==other.layerCount()
+					&& ClassUtils.equals(getId(), other.getId());
+		}
+		return false;
+	}
+
+	private LayerManifest lookupLayer(final String id) {
 		for(LayerManifest layerManifest : layerManifests) {
 			if(id.equals(layerManifest.getId())) {
-				result = layerManifest;
-				break;
+				return layerManifest;
 			}
 		}
 
-		if(result==null && !localOnly && contextManifest!=null) {
-			result = contextManifest.getLayerManifest(id);
-		}
-
-		return result;
+		return null;
 	}
 
 	/**
@@ -369,7 +387,7 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 	 */
 	@Override
 	public LayerManifest getLayerManifest(String id) {
-		return lookupLayer(id, true);
+		return lookupLayer(id);
 	}
 
 	protected class LayerLink extends Link<MarkableLayerManifest> {
@@ -383,11 +401,11 @@ public class LayerGroupManifestImpl extends LazyResolver implements LayerGroupMa
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
 		protected MarkableLayerManifest resolve() {
-			return (MarkableLayerManifest) lookupLayer(getId(), true);
+			return (MarkableLayerManifest) lookupLayer(getId());
 		}
 
 	}

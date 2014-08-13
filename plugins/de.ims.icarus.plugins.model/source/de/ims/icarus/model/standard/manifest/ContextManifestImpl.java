@@ -26,10 +26,8 @@
 package de.ims.icarus.model.standard.manifest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -46,6 +44,8 @@ import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.standard.manifest.Links.Link;
+import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
@@ -59,8 +59,8 @@ import de.ims.icarus.util.collections.CollectionUtils;
 public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest> implements ContextManifest {
 
 	// Lookup structures
-	private final List<LayerManifest> layerManifests = new ArrayList<>();
-	private final Map<String, LayerManifest> layerManifestLookup = new HashMap<>();
+//	private final List<LayerManifest> layerManifests = new ArrayList<>();
+//	private final Map<String, LayerManifest> layerManifestLookup = new HashMap<>();
 
 	// Main storage
 	private final List<PrerequisiteManifest> prerequisiteManifests = new ArrayList<>();
@@ -80,15 +80,14 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 */
 	public ContextManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry) {
-		super(manifestLocation, registry);
-		corpusManifest = null;
+		this(manifestLocation, registry, null);
 	}
 
 	public ContextManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, CorpusManifest corpusManifest) {
 		super(manifestLocation, registry);
-		if (corpusManifest == null)
-			throw new NullPointerException("Invalid corpusManifest"); //$NON-NLS-1$
+
+		verifyEnvironment(manifestLocation, corpusManifest, CorpusManifest.class);
 
 		this.corpusManifest = corpusManifest;
 	}
@@ -98,7 +97,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 */
 	@Override
 	protected boolean isEmpty() {
-		return super.isEmpty() && prerequisiteManifests.isEmpty() && groupManifests.isEmpty() && driverManifest==null;
+		return super.isEmpty() && prerequisiteManifests.isEmpty() && groupManifests.isEmpty() && driverManifest==null && locationManifest==null;
 	}
 
 	/**
@@ -282,29 +281,42 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		return TAG_CONTEXT;
 	}
 
-	private void resetLookup() {
-		layerManifests.clear();
-		layerManifestLookup.clear();
-	}
-
-	private void ensureLookup() {
-		if(layerManifests.isEmpty() && (!groupManifests.isEmpty() || !prerequisiteManifests.isEmpty())) {
-			for(LayerGroupManifest groupManifest : groupManifests) {
-				for(LayerManifest layerManifest : groupManifest.getLayerManifests()) {
-					layerManifests.add(layerManifest);
-					layerManifestLookup.put(layerManifest.getId(), layerManifest);
-				}
-			}
-		}
-	}
+//	private void resetLookup() {
+//		layerManifests.clear();
+//		layerManifestLookup.clear();
+//	}
+//
+//	private void ensureLookup() {
+//		if(layerManifests.isEmpty() && (!groupManifests.isEmpty() || !prerequisiteManifests.isEmpty())) {
+//			for(LayerGroupManifest groupManifest : groupManifests) {
+//				for(LayerManifest layerManifest : groupManifest.getLayerManifests()) {
+//					layerManifests.add(layerManifest);
+//					layerManifestLookup.put(layerManifest.getId(), layerManifest);
+//				}
+//			}
+//
+//
+//		}
+//	}
 
 	/**
 	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getLayerManifests()
 	 */
 	@Override
 	public List<LayerManifest> getLayerManifests() {
-		ensureLookup();
-		return CollectionUtils.getListProxy(layerManifests);
+//		ensureLookup();
+//		return CollectionUtils.getListProxy(layerManifests);
+
+		List<LayerGroupManifest> groupManifests = getGroupManifests();
+
+		// FIXME get a better default multiplier than 5 per group
+		List<LayerManifest> result = new ArrayList<>(groupManifests.size()*5);
+
+		for(LayerGroupManifest groupManifest : groupManifests) {
+			result.addAll(groupManifest.getLayerManifests());
+		}
+
+		return result;
 	}
 
 //	private LayerManifest lookupLayer(String id, boolean localOnly) {
@@ -328,6 +340,37 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 //		return result;
 //	}
 
+	private LayerManifest lookupLayerManifest(String id) {
+
+		LayerManifest result = null;
+
+		List<LayerGroupManifest> groupManifests = getGroupManifests();
+
+		for(int i=0; i<groupManifests.size(); i++) {
+			result = groupManifests.get(i).getLayerManifest(id);
+			if(result!=null) {
+				break;
+			}
+		}
+
+		/// TODO maybe throw exception when no corpus manifest is set here?
+		if(result==null && corpusManifest!=null) {
+			List<PrerequisiteManifest> prerequisiteManifests = getPrerequisites();
+
+			for(int i=0; i<prerequisiteManifests.size(); i++) {
+				PrerequisiteManifest prerequisiteManifest = prerequisiteManifests.get(i);
+				if(id.equals(prerequisiteManifest.getAlias())) {
+					CorpusManifest corpusManifest = getCorpusManifest();
+					ContextManifest targetContext = corpusManifest.getContextManifest(prerequisiteManifest.getContextId());
+					result = targetContext.getLayerManifest(prerequisiteManifest.getLayerId());
+					break;
+				}
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getLayerManifest(java.lang.String)
 	 */
@@ -336,13 +379,11 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		if (id == null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
-		ensureLookup();
+//		ensureLookup();
 
-		LayerManifest result = layerManifestLookup.get(id);
+//		LayerManifest result = layerManifestLookup.get(id);
 
-		if(result==null && hasTemplate()) {
-			result = getTemplate().getLayerManifest(id);
-		}
+		LayerManifest result = lookupLayerManifest(id);
 
 		if(result==null)
 			throw new ModelException(ModelError.MANIFEST_UNKNOWN_ID, "No layer available for id "+id+" in context "+getId()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -397,7 +438,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 //	@Override
 	public void setLocationManifest(LocationManifest manifest) {
 		if(isTemplate())
-			throw new UnsupportedOperationException("Cannot assign location manifest to template"); //$NON-NLS-1$
+			throw new IllegalStateException("Cannot assign location manifest to template"); //$NON-NLS-1$
 
 		this.locationManifest = manifest;
 	}
@@ -485,7 +526,15 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 */
 	@Override
 	public MarkableLayerManifest getPrimaryLayerManifest() {
-		return primaryLayer.get();
+		if(primaryLayer!=null) {
+			return primaryLayer.get();
+		}
+
+		if(hasTemplate()) {
+			return getTemplate().getPrimaryLayerManifest();
+		}
+
+		throw new IllegalStateException("No primary layer defined for context: "+this); //$NON-NLS-1$
 	}
 
 	/**
@@ -504,7 +553,15 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 */
 	@Override
 	public MarkableLayerManifest getBaseLayerManifest() {
-		return baseLayer.get();
+		if(baseLayer!=null) {
+			return baseLayer.get();
+		}
+
+		if(hasTemplate()) {
+			return getTemplate().getBaseLayerManifest();
+		}
+
+		return null;
 	}
 
 	/**
@@ -531,6 +588,13 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 
 //	@Override
 	public PrerequisiteManifestImpl addPrerequisite(String alias, PrerequisiteManifest unresolvedForm) {
+		if (alias == null)
+			throw new NullPointerException("Invalid alias");  //$NON-NLS-1$
+
+		for(int i=0; i<prerequisiteManifests.size(); i++) {
+			if(alias.equals(prerequisiteManifests.get(i).getAlias()))
+				throw new IllegalArgumentException("Duplicate prerequisite alias: "+alias); //$NON-NLS-1$
+		}
 
 		PrerequisiteManifestImpl result = new PrerequisiteManifestImpl(alias, unresolvedForm);
 		prerequisiteManifests.add(result);
@@ -543,12 +607,15 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		if (groupManifest == null)
 			throw new NullPointerException("Invalid groupManifest"); //$NON-NLS-1$
 
+		if(groupManifest.getContextManifest()!=this)
+			throw new IllegalArgumentException("Layer group already hosted in foreign context: "+groupManifest); //$NON-NLS-1$
+
 		if(groupManifests.contains(groupManifest))
 			throw new IllegalArgumentException("Layer group already present: "+groupManifest); //$NON-NLS-1$
 
 		groupManifests.add(groupManifest);
 
-		resetLookup();
+//		resetLookup();
 	}
 
 //	@Override
@@ -559,7 +626,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		if(!groupManifests.remove(groupManifest))
 			throw new IllegalArgumentException("Layer group not present: "+groupManifest); //$NON-NLS-1$
 
-		resetLookup();
+//		resetLookup();
 	}
 
 	protected class LayerLink extends Link<MarkableLayerManifest> {
@@ -572,7 +639,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
 		protected MarkableLayerManifest resolve() {
@@ -594,6 +661,9 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		PrerequisiteManifestImpl(String alias, PrerequisiteManifest unresolvedForm) {
 			if (alias == null)
 				throw new NullPointerException("Invalid alias");  //$NON-NLS-1$
+
+			if(!CorpusUtils.isValidId(alias))
+				throw new IllegalArgumentException("Alias format not supported: "+alias); //$NON-NLS-1$
 
 			this.alias = alias;
 			this.unresolvedForm = null;

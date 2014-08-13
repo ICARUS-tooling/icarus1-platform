@@ -37,6 +37,8 @@ import de.ims.icarus.eval.Variable;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest.Note;
+import de.ims.icarus.model.api.manifest.Documentation.Resource;
+import de.ims.icarus.model.api.manifest.DriverManifest.ModuleSpec;
 import de.ims.icarus.model.api.manifest.IndexManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
@@ -75,9 +77,9 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		}
 
 		if(type==ValueType.UNKNOWN)
-			throw new IllegalArgumentException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
 		if(type==ValueType.CUSTOM)
-			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Cannot serialize custom value: "+value); //$NON-NLS-1$
 
 		serializer.startElement(TAG_PROPERTY);
 		serializer.writeAttribute(ATTR_NAME, name);
@@ -143,7 +145,6 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		serializer.startElement(TAG_RANGE);
 
 		// ATTRIBUTES
-		serializer.writeAttribute(ATTR_VALUE_TYPE, getSerializedForm(type));
 		if(range.isLowerBoundInclusive()!=ValueRange.DEFAULT_LOWER_INCLUSIVE_VALUE) {
 			serializer.writeAttribute(ATTR_INCLUDE_MIN, range.isLowerBoundInclusive());
 		}
@@ -155,6 +156,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		writeValueElement(serializer, TAG_MIN, range.getLowerBound(), type);
 		writeValueElement(serializer, TAG_MAX, range.getUpperBound(), type);
+		writeValueElement(serializer, TAG_STEP_SIZE, range.getStepSize(), type);
 		serializer.endElement(TAG_RANGE);
 	}
 
@@ -178,6 +180,13 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 	public static void writeValueManifestElement(XmlSerializer serializer, ValueManifest manifest, ValueType type) throws Exception {
 
+		Object value = manifest.getValue();
+
+		if(type==ValueType.UNKNOWN)
+			throw new UnsupportedOperationException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
+		if(type==ValueType.CUSTOM)
+			throw new UnsupportedOperationException("Cannot serialize custom value: "+value); //$NON-NLS-1$
+
 		serializer.startElement(TAG_VALUE);
 
 		//ATTRIBUTES
@@ -186,18 +195,7 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		// CONTENT
 
-		Object value = manifest.getValue();
-
-		switch (type) {
-		case UNKNOWN:
-			throw new IllegalArgumentException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
-		case CUSTOM:
-			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
-
-		default:
-			writeValue(serializer, value, type);
-			break;
-		}
+		writeValue(serializer, value, type);
 
 		serializer.endElement(TAG_VALUE);
 	}
@@ -207,20 +205,16 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 			return;
 		}
 
+		if(type==ValueType.UNKNOWN)
+			throw new UnsupportedOperationException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
+		if(type==ValueType.CUSTOM)
+			throw new UnsupportedOperationException("Cannot serialize custom value: "+value); //$NON-NLS-1$
+
 		serializer.startElement(name);
 
 		// CONTENT
 
-		switch (type) {
-		case UNKNOWN:
-			throw new IllegalArgumentException("Cannot serialize unknown value: "+value); //$NON-NLS-1$
-		case CUSTOM:
-			throw new IllegalArgumentException("Cannot serialize custom value: "+value); //$NON-NLS-1$
-
-		default:
-			writeValue(serializer, value, type);
-			break;
-		}
+		writeValue(serializer, value, type);
 
 		serializer.endElement(name);
 	}
@@ -264,8 +258,9 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		Object defaultValue = option.getDefaultValue();
 		ValueSet valueSet = option.getSupportedValues();
 		ValueRange valueRange = option.getSupportedRange();
+		String extensionPointUid = option.getExtensionPointUid();
 
-		if(defaultValue==null && valueSet==null && valueRange==null) {
+		if(defaultValue==null && valueSet==null && valueRange==null && extensionPointUid==null) {
 			serializer.startEmptyElement(TAG_OPTION);
 		} else {
 			serializer.startElement(TAG_OPTION);
@@ -273,10 +268,8 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		// Attributes
 
-		serializer.writeAttribute(ATTR_ID, option.getId());
+		writeIdentityAttributes(serializer, option);
 		serializer.writeAttribute(ATTR_VALUE_TYPE, getSerializedForm(type));
-		serializer.writeAttribute(ATTR_NAME, option.getName());
-		serializer.writeAttribute(ATTR_DESCRIPTION, option.getDescription());
 		if(option.isPublished()!=Option.DEFAULT_PUBLISHED_VALUE) {
 			serializer.writeAttribute(ATTR_PUBLISHED, option.isPublished());
 		}
@@ -287,37 +280,48 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 		// Elements
 
-		writeValueElement(serializer, TAG_DEFAULT_VALUE, defaultValue, type);
-		writeValueSetElement(serializer, valueSet, type);
-		writeValueRangeElement(serializer, valueRange, type);
+		if(extensionPointUid!=null) {
+			serializer.startElement(TAG_EXTENSION_POINT);
+			serializer.writeText(extensionPointUid);
+			serializer.endElement(TAG_EXTENSION_POINT);
+		}
+
+		if(defaultValue!=null) {
+			writeValueElement(serializer, TAG_DEFAULT_VALUE, defaultValue, type);
+		}
+
+		if(valueSet!=null) {
+			writeValueSetElement(serializer, valueSet, type);
+		}
+
+		if(valueRange!=null) {
+			writeValueRangeElement(serializer, valueRange, type);
+		}
 
 		serializer.endElement(TAG_OPTION);
 	}
 
 	public static void writeLocationElement(XmlSerializer serializer, LocationManifest manifest) throws Exception {
 
+		if(manifest.getPath()==null)
+			throw new IllegalStateException("Location manifest is missing path"); //$NON-NLS-1$
+
 		List<PathEntry> entries = manifest.getPathEntries();
 		PathResolverManifest pathResolverManifest = manifest.getPathResolverManifest();
 
-		if(entries.isEmpty() && pathResolverManifest==null) {
-			serializer.startEmptyElement(TAG_LOCATION);
-		} else {
-			serializer.startElement(TAG_LOCATION);
-		}
-
+		serializer.startElement(TAG_LOCATION);
 
 		// ATTRIBUTES
 
-		serializer.writeAttribute(ATTR_PATH, manifest.getPath());
+		serializer.startElement(TAG_PATH);
+		serializer.writeCData(manifest.getPath());
+		serializer.endElement(TAG_PATH);
 
 		// ELEMENTS
 
 		// Write path entries
 		for(PathEntry pathEntry : entries) {
-			serializer.startElement(TAG_PATH_ENTRY);
-			serializer.writeAttribute(ATTR_TYPE, pathEntry.getType().getXmlValue());
-			serializer.writeText(pathEntry.getValue());
-			serializer.endElement(TAG_PATH_ENTRY);
+			writePathEntryElement(serializer, pathEntry);
 		}
 
 		// Write path resolver
@@ -326,6 +330,28 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		}
 
 		serializer.endElement(TAG_LOCATION);
+	}
+
+	public static void writePathEntryElement(XmlSerializer serializer, PathEntry pathEntry) throws Exception {
+		if(pathEntry.getType()==null)
+			throw new IllegalStateException("Path entry is missing type"); //$NON-NLS-1$
+		if(pathEntry.getValue()==null)
+			throw new IllegalStateException("Path entry is missing value"); //$NON-NLS-1$
+
+		serializer.startElement(TAG_PATH_ENTRY);
+		serializer.writeAttribute(ATTR_TYPE, pathEntry.getType().getXmlValue());
+		serializer.writeCData(pathEntry.getValue());
+		serializer.endElement(TAG_PATH_ENTRY);
+	}
+
+	public static void writeResourceElement(XmlSerializer serializer, Resource resource) throws Exception {
+		if(resource.getUrl()==null)
+			throw new IllegalStateException("Resource is missing url"); //$NON-NLS-1$
+
+		serializer.startElement(TAG_RESOURCE);
+		ModelXmlUtils.writeIdentityAttributes(serializer, resource);
+		serializer.writeText(resource.getUrl().getURL().toExternalForm());
+		serializer.endElement(TAG_RESOURCE);
 	}
 
 	public static void writePrerequisiteElement(XmlSerializer serializer, PrerequisiteManifest manifest) throws Exception {
@@ -368,6 +394,15 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 
 	public static void writeIndexElement(XmlSerializer serializer, IndexManifest manifest) throws Exception {
 
+		if(manifest.getSourceLayerId()==null)
+			throw new IllegalStateException("Index manifest is missing source layer id"); //$NON-NLS-1$
+		if(manifest.getTargetLayerId()==null)
+			throw new IllegalStateException("Index manifest is missing target layer id"); //$NON-NLS-1$
+		if(manifest.getRelation()==null)
+			throw new IllegalStateException("Index manifest is missing relation"); //$NON-NLS-1$
+		if(manifest.getCoverage()==null)
+			throw new IllegalStateException("Index manifest is missing coverage"); //$NON-NLS-1$
+
 		serializer.startEmptyElement(TAG_INDEX);
 
 		serializer.writeAttribute(ATTR_SOURCE_LAYER, manifest.getSourceLayerId());
@@ -379,6 +414,39 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		}
 
 		serializer.endElement(TAG_INDEX);
+	}
+
+	public static void writeModuleSpecElement(XmlSerializer serializer, ModuleSpec spec) throws Exception {
+
+		String extensionPointUid = spec.getExtensionPointUid();
+
+		if(extensionPointUid==null) {
+			serializer.startEmptyElement(TAG_MODULE_SPEC);
+		} else {
+			serializer.startElement(TAG_MODULE_SPEC);
+		}
+
+		// ATTRIBUTES
+
+		writeIdentityAttributes(serializer, spec);
+
+		if(spec.isCustomizable()!=ModuleSpec.DEFAULT_IS_CUSTOMIZABLE) {
+			serializer.writeAttribute(ATTR_CUSTOMIZABLE, spec.isCustomizable());
+		}
+
+		if(spec.isOptional()!=ModuleSpec.DEFAULT_IS_OPTIONAL) {
+			serializer.writeAttribute(ATTR_OPTIONAL, spec.isOptional());
+		}
+
+		// ELEMENTS
+
+		if(extensionPointUid!=null) {
+			serializer.startElement(TAG_EXTENSION_POINT);
+			serializer.writeText(extensionPointUid);
+			serializer.endElement(TAG_EXTENSION_POINT);
+		}
+
+		serializer.endElement(TAG_MODULE_SPEC);
 	}
 
 	//*******************************************

@@ -28,6 +28,8 @@ package de.ims.icarus.model.standard.manifest;
 import javax.swing.Icon;
 
 import de.ims.icarus.model.api.manifest.ModifiableIdentity;
+import de.ims.icarus.model.util.CorpusUtils;
+import de.ims.icarus.util.id.Identity;
 
 /**
  * @author Markus Gärtner
@@ -40,6 +42,25 @@ public class DefaultModifiableIdentity implements ModifiableIdentity {
 	private String name;
 	private String description;
 	private Icon icon;
+
+	public DefaultModifiableIdentity() {
+		// default constructor
+	}
+
+	public DefaultModifiableIdentity(String id, String name, String description, Icon icon) {
+		setId(id);
+		setName(name);
+		setDescription(description);
+		setIcon(icon);
+	}
+
+	public DefaultModifiableIdentity(String id, String description, Icon icon) {
+		this(id, null, description, icon);
+	}
+
+	public DefaultModifiableIdentity(String id, String description) {
+		this(id, null, description, null);
+	}
 
 	/**
 	 * @return the id
@@ -78,6 +99,11 @@ public class DefaultModifiableIdentity implements ModifiableIdentity {
 	 */
 	@Override
 	public void setId(String id) {
+		if (id == null)
+			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		if(!CorpusUtils.isValidId(id))
+			throw new IllegalArgumentException("Id format not supported: "+id); //$NON-NLS-1$
+
 		this.id = id;
 	}
 
@@ -111,5 +137,34 @@ public class DefaultModifiableIdentity implements ModifiableIdentity {
 	@Override
 	public Object getOwner() {
 		return this;
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return id==null ? 0 : id.hashCode();
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Identity) {
+			Identity other = (Identity) obj;
+			return id==null ? other.getId()==null :
+				id.equals(other.getId());
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ModifiableIdentity@"+(id==null ? "<unnamed>" : id); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

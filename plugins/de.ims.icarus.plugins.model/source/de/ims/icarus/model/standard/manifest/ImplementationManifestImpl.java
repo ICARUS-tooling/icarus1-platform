@@ -30,6 +30,7 @@ import org.xml.sax.SAXException;
 
 import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
@@ -40,7 +41,7 @@ import de.ims.icarus.model.xml.XmlSerializer;
  * @version $Id$
  *
  */
-public class ImplementationManifestImpl<M extends ImplementationManifest> extends AbstractModifiableManifest<M> implements ImplementationManifest {
+public class ImplementationManifestImpl extends AbstractMemberManifest<ImplementationManifest> implements ImplementationManifest {
 
 	private SourceType sourceType;
 	private String source;
@@ -56,6 +57,13 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 		super(manifestLocation, registry);
 	}
 
+	/**
+	 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestType()
+	 */
+	@Override
+	public ManifestType getManifestType() {
+		return ManifestType.IMPLEMENTATION_MANIFEST;
+	}
 
 	/**
 	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
@@ -92,8 +100,6 @@ public class ImplementationManifestImpl<M extends ImplementationManifest> extend
 		String type = ModelXmlUtils.normalize(attributes, ATTR_SOURCE_TYPE);
 		if(type!=null) {
 			this.sourceType = SourceType.parseSourceType(type);
-		} else {
-			this.sourceType = SourceType.DEFAULT;
 		}
 
 		useFactory = readFlag(attributes, ATTR_FACTORY);

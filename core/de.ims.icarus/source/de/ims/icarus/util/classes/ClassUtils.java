@@ -378,6 +378,8 @@ public final class ClassUtils {
 					fieldHandlers.add(new ObjectFieldHandler(field));
 				} else if(Map.class.isAssignableFrom(type)) {
 					fieldHandlers.add(new MapFieldHandler(field));
+				} else if(List.class.isAssignableFrom(type)) {
+					fieldHandlers.add(new ListFieldHandler(field));
 				} else if(Collection.class.isAssignableFrom(type)) {
 					fieldHandlers.add(new CollectionFieldHandler(field));
 				} else if(type.getName().startsWith(DEEP_HANDLING_PREFIX)) {
@@ -522,7 +524,9 @@ public final class ClassUtils {
 			final Object value1 = field.get(obj1);
 			final Object value2 = field.get(obj2);
 
-			if(value1==null && value2==null) {
+			if(value1==value2) {
+				return true;
+			} else if(value1==null && value2==null) {
 				return true;
 			} else if(value1==null) {
 				localNull(trace, value2);
@@ -700,26 +704,35 @@ public final class ClassUtils {
 					Object item1 = a1[i];
 					Object item2 = a2[i];
 
-					if(item1==null && item2==null) {
-						return true;
+					boolean mismatch = false;
+
+					if(item1==item2) {
+						continue;
+					} else if(item1==null && item2==null) {
+						continue;
 					} else if(item1==null) {
 						localNull(trace, item2, i);
-						return false;
+						mismatch = true;
 					} else if(item2==null) {
 						otherNull(trace, item1, i);
-						return false;
+						mismatch = true;
 					} else if(!item1.getClass().isAssignableFrom(item2.getClass())) {
 						differentClass(trace, item1, item2, i);
-						return false;
+						mismatch = true;
 					} else if(trace.visit(item1)) {
 						try {
 							if(!getChecker(item1.getClass()).equals(trace, item1, item2)) {
 								dif(trace, item1, item2, i);
-								return false;
+								mismatch = true;
 							}
 						} finally {
 							trace.leave(item1);
 						}
+					}
+
+					// Break loop if we are only interested in checking the fact of difference
+					if(mismatch && !trace.doDiff) {
+						return false;
 					}
 				}
 
@@ -788,6 +801,67 @@ public final class ClassUtils {
 		}
 	}
 
+	private static boolean equalsCollection(Collection<?> c1, Collection<?> c2) {
+		if(c1.size()!=c2.size()) {
+			return false;
+		}
+
+		for(Object item : c1) {
+			if(!c2.contains(item)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean equalsList(List<?> l1, List<?> l2) {
+		if(l1.size()!=l2.size()) {
+			return false;
+		}
+
+		for(int i=0; i<l1.size(); i++) {
+			if(!l1.get(i).equals(l2.get(i))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean equalsMap(Map<?, ?> m1, Map<?, ?> m2) {
+		if(m1.size()!=m2.size()) {
+			return false;
+		}
+
+		for(Object key : m1.keySet()) {
+			Object value1 = m1.get(key);
+			Object value2 = m2.get(key);
+
+			if(value1==value2) {
+				continue;
+			} else if(value1==null || value2==null) {
+				return false;
+			}
+
+			boolean equals;
+
+			if((value1 instanceof Collection) && (value2 instanceof Collection)) {
+				equals = equalsCollection((Collection<?>) value1, (Collection<?>) value2);
+			} else  if((value1 instanceof Map) && (value2 instanceof Map)) {
+				equals = equalsMap((Map<?, ?>) value1 , (Map<?, ?>) value2);
+			} else {
+				equals = value1.equals(value2);
+			}
+
+			if(!equals) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private static class MapFieldHandler extends ObjectFieldHandler {
 
 		MapFieldHandler(Field field) {
@@ -803,7 +877,7 @@ public final class ClassUtils {
 			Map<?, ?> m1 = (Map<?, ?>) value1;
 			Map<?, ?> m2 = (Map<?, ?>) value2;
 
-			return CollectionUtils.equals(m1, m2);
+			return equalsMap(m1, m2);
 		}
 	}
 
@@ -822,7 +896,26 @@ public final class ClassUtils {
 			Collection<?> c1 = (Collection<?>) value1;
 			Collection<?> c2 = (Collection<?>) value2;
 
-			return CollectionUtils.equals(c1, c2);
+			return equalsCollection(c1, c2);
+		}
+	}
+
+	private static class ListFieldHandler extends ObjectFieldHandler {
+
+		ListFieldHandler(Field field) {
+			super(field);
+		}
+
+		/**
+		 * @see de.ims.icarus.util.classes.ClassUtils.ObjectFieldHandler#equals(de.ims.icarus.util.classes.ClassUtils.Trace, java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		protected boolean equals(Trace trace, Object value1, Object value2)
+				throws IllegalArgumentException, IllegalAccessException {
+			List<?> l1 = (List<?>) value1;
+			List<?> l2 = (List<?>) value2;
+
+			return equalsList(l1, l2);
 		}
 	}
 }

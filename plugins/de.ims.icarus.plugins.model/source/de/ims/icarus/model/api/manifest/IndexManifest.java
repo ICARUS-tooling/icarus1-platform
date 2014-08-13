@@ -33,6 +33,7 @@ import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.XmlResource;
 
 /**
@@ -53,7 +54,7 @@ import de.ims.icarus.model.xml.XmlResource;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface IndexManifest {
+public interface IndexManifest extends ModelXmlElement {
 
 	public static final boolean DEFAULT_INCLUDE_REVERSE_VALUE = false;
 

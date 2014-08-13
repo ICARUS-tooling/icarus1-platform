@@ -44,7 +44,23 @@ import de.ims.icarus.plugins.PluginUtil;
  */
 public class ExpressionXmlHandler implements ModelXmlHandler, ModelXmlAttributes, ModelXmlTags {
 
-	private final ExpressionFactory factory = new ExpressionFactory();
+	private final ExpressionFactory factory;
+
+	public ExpressionXmlHandler(ExpressionFactory factory) {
+		if (factory == null)
+			throw new NullPointerException("Invalid factory"); //$NON-NLS-1$
+
+		this.factory = factory;
+	}
+
+	/**
+	 * Default constructor. Uses the basic {@link ExpressionFactory} implemenattion
+	 * as factory to build the expression object.
+	 */
+	public ExpressionXmlHandler() {
+
+		this.factory = new ExpressionFactory();
+	}
 
 	/**
 	 * @see de.ims.icarus.model.xml.ModelXmlHandler#startElement(de.ims.icarus.model.api.manifest.ManifestLocation, java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)

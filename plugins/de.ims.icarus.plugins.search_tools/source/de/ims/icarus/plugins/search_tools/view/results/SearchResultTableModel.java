@@ -294,17 +294,22 @@ public class SearchResultTableModel extends AbstractTableModel
 		/*System.out.printf("sorting content: sortRows=%b rowsAsc=%b sortCols=%b colsAsc=%b\n",
 				sortRows, rowsAscending, sortColumns, columnsAscending);*/
 
-		int rowCount = getRowCount();
-		int columnCount = getColumnCount();
+		final int rowCount = getRowCount();
+		final int columnCount = getColumnCount();
+
+		final SearchResult resultData = this.resultData;
 
 		if(sortRows) {
+			Integer[] rowTransform = this.rowTransform;
+			this.rowTransform = null;
+
 			if(rowTransform==null || rowTransform.length!=rowCount) {
 				rowTransform = new Integer[rowCount];
 			}
 			CollectionUtils.fillAscending(rowTransform);
 			try {
 				Arrays.sort(rowTransform, new Comparator<Integer>(){
-					int result = rowsAscending ? -1 : 1;
+					int resultSignum = rowsAscending ? -1 : 1;
 					int dimension = rowDimension;
 
 					@Override
@@ -312,22 +317,27 @@ public class SearchResultTableModel extends AbstractTableModel
 						if(Thread.currentThread().isInterrupted())
 							throw new IllegalStateException();
 
-						return result * ( resultData.getGroupMatchCount(dimension, o1)
+						return resultSignum * ( resultData.getGroupMatchCount(dimension, o1)
 								- resultData.getGroupMatchCount(dimension, o2));
 					}});
 			} catch(IllegalStateException e) {
 				throw new InterruptedException();
 			}
+
+			this.rowTransform = rowTransform;
 		}
 
 		if(sortColumns) {
+			Integer[] columnTransform = this.columnTransform;
+			this.columnTransform = null;
+
 			if(columnTransform==null || columnTransform.length!=columnCount) {
 				columnTransform = new Integer[columnCount];
 			}
 			CollectionUtils.fillAscending(columnTransform);
 			try {
 				Arrays.sort(columnTransform, new Comparator<Integer>(){
-					int result = columnsAscending ? 1 : -1;
+					int resultSignum = columnsAscending ? 1 : -1;
 					int dimension = columnDimension;
 
 					@Override
@@ -335,12 +345,14 @@ public class SearchResultTableModel extends AbstractTableModel
 						if(Thread.currentThread().isInterrupted())
 							throw new IllegalStateException();
 
-						return result * ( resultData.getGroupMatchCount(dimension, o1)
+						return resultSignum * ( resultData.getGroupMatchCount(dimension, o1)
 								- resultData.getGroupMatchCount(dimension, o2));
 					}});
 			} catch(IllegalStateException e) {
 				throw new InterruptedException();
 			}
+
+			this.columnTransform = columnTransform;
 		}
 
 		updateEDT();
@@ -351,16 +363,17 @@ public class SearchResultTableModel extends AbstractTableModel
 		if(!sortRows && !sortColumns)
 			return;
 
-		int rowCount = getRowCount();
-		int columnCount = getColumnCount();
+		final int rowCount = getRowCount();
+		final int columnCount = getColumnCount();
 
 		if(sortRows) {
+			Integer[] rowTransform = this.rowTransform;
+			this.rowTransform = null;
+
 			if(rowTransform==null || rowTransform.length!=rowCount) {
 				rowTransform = new Integer[rowCount];
 			}
 
-			Integer[] rowTransform = this.rowTransform;
-			this.rowTransform = null;
 			CollectionUtils.fillAscending(rowTransform);
 
 			try {
@@ -383,12 +396,13 @@ public class SearchResultTableModel extends AbstractTableModel
 		}
 
 		if(sortColumns) {
+			Integer[] columnTransform = this.columnTransform;
+			this.columnTransform = null;
+
 			if(columnTransform==null || columnTransform.length!=columnCount) {
 				columnTransform = new Integer[columnCount];
 			}
 
-			Integer[] columnTransform = this.columnTransform;
-			this.columnTransform = null;
 			CollectionUtils.fillAscending(columnTransform);
 
 			try {

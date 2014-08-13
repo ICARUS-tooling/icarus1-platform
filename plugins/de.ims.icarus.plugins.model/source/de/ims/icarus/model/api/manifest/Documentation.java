@@ -25,13 +25,13 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import java.net.URL;
 import java.util.List;
 
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
 import de.ims.icarus.model.iql.access.AccessRestriction;
+import de.ims.icarus.model.util.types.Url;
 import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 
@@ -42,9 +42,6 @@ import de.ims.icarus.model.xml.ModelXmlHandler;
  */
 @AccessControl(AccessPolicy.DENY)
 public interface Documentation extends ModifiableIdentity, ModelXmlElement, ModelXmlHandler {
-
-	@AccessRestriction(AccessMode.READ)
-	Documentable getTarget();
 
 	@AccessRestriction(AccessMode.READ)
 	String getContent();
@@ -66,6 +63,6 @@ public interface Documentation extends ModifiableIdentity, ModelXmlElement, Mode
 	public interface Resource extends ModifiableIdentity {
 
 		@AccessRestriction(AccessMode.READ)
-		URL getURL();
+		Url getUrl();
 	}
 }

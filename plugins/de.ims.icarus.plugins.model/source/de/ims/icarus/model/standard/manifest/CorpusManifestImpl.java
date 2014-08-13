@@ -43,6 +43,7 @@ import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.standard.manifest.Links.Link;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
@@ -346,7 +347,7 @@ public class CorpusManifestImpl extends AbstractMemberManifest<CorpusManifest> i
 		}
 
 		/**
-		 * @see de.ims.icarus.model.standard.manifest.LazyResolver.Link#resolve()
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
 		protected ContextManifest resolve() {

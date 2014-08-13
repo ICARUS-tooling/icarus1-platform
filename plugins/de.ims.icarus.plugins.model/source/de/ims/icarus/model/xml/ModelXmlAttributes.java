@@ -47,6 +47,10 @@ public interface ModelXmlAttributes {
 
 	public static final String ATTR_VERSION = "version"; //$NON-NLS-1$
 
+	public static final String ATTR_OPTIONAL = "optional"; //$NON-NLS-1$
+	public static final String ATTR_CUSTOMIZABLE = "customizable"; //$NON-NLS-1$
+	public static final String ATTR_MODULE_SPEC_ID = "module-spec-id"; //$NON-NLS-1$
+
 	public static final String ATTR_ROOT_CONTEXT = "root-context"; //$NON-NLS-1$
 	public static final String ATTR_EDITABLE = "editable"; //$NON-NLS-1$
 

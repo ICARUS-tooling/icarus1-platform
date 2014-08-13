@@ -82,7 +82,7 @@ public abstract class AbstractForeignImplementationManifest<M extends MemberMani
 			throws SAXException {
 		switch (qName) {
 		case TAG_IMPLEMENTATION: {
-			return new ImplementationManifestImpl<>(manifestLocation, getRegistry());
+			return new ImplementationManifestImpl(manifestLocation, getRegistry());
 		}
 
 		default:
@@ -123,5 +123,9 @@ public abstract class AbstractForeignImplementationManifest<M extends MemberMani
 			throw new NullPointerException("Invalid implementationManifest"); //$NON-NLS-1$
 
 		this.implementationManifest = implementationManifest;
+	}
+
+	public void clearImplementationManifest() {
+		implementationManifest = null;
 	}
 }

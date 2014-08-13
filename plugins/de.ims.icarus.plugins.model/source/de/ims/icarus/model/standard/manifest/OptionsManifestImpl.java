@@ -37,10 +37,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.registry.CorpusRegistry;
+import de.ims.icarus.model.util.CorpusUtils;
+import de.ims.icarus.model.util.types.UnsupportedValueTypeException;
 import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
@@ -69,11 +72,19 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 	}
 
 	/**
+	 * @see de.ims.icarus.model.api.manifest.Manifest#getManifestType()
+	 */
+	@Override
+	public ManifestType getManifestType() {
+		return ManifestType.OPTIONS_MANIFEST;
+	}
+
+	/**
 	 * @see de.ims.icarus.model.standard.manifest.AbstractManifest#isEmpty()
 	 */
 	@Override
 	protected boolean isEmpty() {
-		return options.isEmpty();
+		return options.isEmpty() && groupIdentifiers.isEmpty();
 	}
 
 	/**
@@ -88,17 +99,16 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 			List<String> names = CollectionUtils.asSortedList(options.keySet());
 
 			for(String option : names) {
-				ModelXmlUtils.writeOptionElement(serializer, options.get(option));
+				options.get(option).writeXml(serializer);
 			}
 		}
 
 		// Write groups in alphabetic order
 		if(!groupIdentifiers.isEmpty()) {
-			List<Identity> idents = CollectionUtils.asSortedList(groupIdentifiers, Identity.COMPARATOR);
+			List<Identity> identities = CollectionUtils.asSortedList(groupIdentifiers, Identity.COMPARATOR);
 
-			for(Identity group : idents) {
-				//FIXME empty element
-				serializer.startElement(TAG_GROUP);
+			for(Identity group : identities) {
+				serializer.startEmptyElement(TAG_GROUP);
 
 				// ATTRIBUTES
 				ModelXmlUtils.writeIdentityAttributes(serializer, group);
@@ -245,6 +255,12 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 		if (identity == null)
 			throw new NullPointerException("Invalid identity"); //$NON-NLS-1$
 
+		if(identity.getId()==null)
+			throw new IllegalArgumentException("Supplied identity declares null id"); //$NON-NLS-1$
+
+		if(!CorpusUtils.isValidId(identity.getId()))
+			throw new IllegalArgumentException("Supplied identity declares invalid id: "+identity.getId()); //$NON-NLS-1$
+
 		if(groupIdentifiers.contains(identity))
 			throw new IllegalArgumentException("Duplicate group identifier: "+identity); //$NON-NLS-1$
 
@@ -257,17 +273,58 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 		private String group;
 		private ValueSet values;
 		private ValueRange range;
+		private String extensionPointUid;
 		private boolean published = DEFAULT_PUBLISHED_VALUE;
 		private boolean multivalue = DEFAULT_MULTIVALUE_VALUE;
+
+		private static final Set<ValueType> supportedValueTypes = ValueType.filterWithout(
+				ValueType.UNKNOWN,
+				ValueType.CUSTOM,
+				ValueType.IMAGE_RESOURCE,
+				ValueType.URL_RESOURCE);
 
 		protected OptionImpl() {
 			// for parsing
 		}
 
-		public OptionImpl(String id) {
-			if (id == null)
-				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
+		public OptionImpl(String id, ValueType valueType) {
 			setId(id);
+			setValueType(valueType);
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return getId().hashCode();
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Option) {
+				return getId().equals(((Option)obj).getId());
+			}
+			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "Option@"+getId(); //$NON-NLS-1$
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+		 */
+		@Override
+		public void writeXml(XmlSerializer serializer) throws Exception {
+			ModelXmlUtils.writeOptionElement(serializer, this);
 		}
 
 		/**
@@ -291,7 +348,7 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 				this.multivalue = DEFAULT_MULTIVALUE_VALUE;
 			}
 
-			setGroup(ModelXmlUtils.normalize(attributes, ATTR_GROUP));
+			setOptionGroup(ModelXmlUtils.normalize(attributes, ATTR_GROUP));
 		}
 
 		@Override
@@ -304,7 +361,7 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 			} break;
 
 			case TAG_RANGE : {
-				return new ValueRangeImpl();
+				return new ValueRangeImpl(valueType);
 			}
 
 			case TAG_VALUES : {
@@ -312,6 +369,10 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 			}
 
 			case TAG_DEFAULT_VALUE : {
+				// no-op
+			} break;
+
+			case TAG_EXTENSION_POINT : {
 				// no-op
 			} break;
 
@@ -333,6 +394,10 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 
 			case TAG_DEFAULT_VALUE : {
 				addDefaultValue(valueType.parse(text, manifestLocation.getClassLoader()));
+			} break;
+
+			case TAG_EXTENSION_POINT : {
+				setExtensionPointUid(text);
 			} break;
 
 			default:
@@ -409,6 +474,14 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 			return range;
 		}
 		/**
+		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getExtensionPointUid()
+		 */
+		@Override
+		public String getExtensionPointUid() {
+			return extensionPointUid;
+		}
+
+		/**
 		 * @see de.ims.icarus.model.api.manifest.OptionsManifest.Option#getOptionGroup()
 		 */
 		@Override
@@ -433,50 +506,97 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 		/**
 		 * @param defaultValue the defaultValue to set
 		 */
-		public void setDefaultValue(Object defaultValue) {
+		public OptionImpl setDefaultValue(Object defaultValue) {
+
+			if(defaultValue!=null) {
+				valueType.checkValue(defaultValue);
+			}
+
 			this.defaultValue = defaultValue;
+
+			return this;
 		}
 
 		/**
 		 * @param valueType the valueType to set
 		 */
-		public void setValueType(ValueType valueType) {
+		public OptionImpl setValueType(ValueType valueType) {
+			if (valueType == null)
+				throw new NullPointerException("Invalid valueType"); //$NON-NLS-1$
+
+			if(!supportedValueTypes.contains(valueType))
+				throw new UnsupportedValueTypeException(valueType);
+
 			this.valueType = valueType;
+
+			return this;
 		}
 
 		/**
 		 * @param group the group to set
 		 */
-		public void setGroup(String group) {
+		public OptionImpl setOptionGroup(String group) {
+			if(group!=null && !CorpusUtils.isValidId(group))
+				throw new IllegalArgumentException("Supplied group id is not valid: "+group); //$NON-NLS-1$
+
 			this.group = group;
+
+			return this;
 		}
 
 		/**
 		 * @param values the values to set
 		 */
-		public void setValues(ValueSet values) {
+		public OptionImpl setValues(ValueSet values) {
+
+			if(values!=null && !valueType.equals(values.getValueType()))
+				throw new IllegalArgumentException("Incompatible value type defined for value set: expected "+valueType+" - got "+values.getValueType()); //$NON-NLS-1$ //$NON-NLS-2$
+
 			this.values = values;
+
+			return this;
 		}
 
 		/**
 		 * @param range the range to set
 		 */
-		public void setRange(ValueRange range) {
+		public OptionImpl setRange(ValueRange range) {
+
+			if(range!=null && !valueType.equals(range.getValueType()))
+				throw new IllegalArgumentException("Incompatible value type defined for range: expected "+valueType+" - got "+range.getValueType()); //$NON-NLS-1$ //$NON-NLS-2$
+
 			this.range = range;
+
+			return this;
+		}
+
+		/**
+		 * @param extensionPoint the extensionPointUid to set
+		 */
+		public void setExtensionPointUid(String extensionPointUid) {
+			if(extensionPointUid!=null && !valueType.equals(ValueType.EXTENSION))
+				throw new IllegalArgumentException("Cannot define extension point for value type other than " //$NON-NLS-1$
+						+ValueType.EXTENSION.getXmlValue()+": "+valueType.getXmlValue()); //$NON-NLS-1$
+
+			this.extensionPointUid = extensionPointUid;
 		}
 
 		/**
 		 * @param published the published to set
 		 */
-		public void setPublished(boolean published) {
+		public OptionImpl setPublished(boolean published) {
 			this.published = published;
+
+			return this;
 		}
 
 		/**
 		 * @param multivalue the multivalue to set
 		 */
-		public void setMultivalue(boolean multivalue) {
+		public OptionImpl setMultiValue(boolean multivalue) {
 			this.multivalue = multivalue;
+
+			return this;
 		}
 	}
 }

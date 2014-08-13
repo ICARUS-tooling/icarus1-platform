@@ -70,6 +70,14 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
+	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#isEmpty()
+	 */
+	@Override
+	protected boolean isEmpty() {
+		return super.isEmpty() && annotationManifests.isEmpty();
+	}
+
+	/**
 	 * @see de.ims.icarus.model.standard.manifest.AbstractLayerManifest#writeAttributes(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
@@ -290,12 +298,12 @@ public class AnnotationLayerManifestImpl extends AbstractLayerManifest<Annotatio
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.AnnotationLayerManifest#allowUnknownKeys()
+	 * @see de.ims.icarus.model.api.manifest.AnnotationLayerManifest#isAllowUnknownKeys()
 	 */
 	@Override
-	public boolean allowUnknownKeys() {
+	public boolean isAllowUnknownKeys() {
 		if(allowUnknownKeys==null) {
-			return hasTemplate() ? getTemplate().allowUnknownKeys() : DEFAULT_ALLOW_UNKNOWN_KEYS_VALUE;
+			return hasTemplate() ? getTemplate().isAllowUnknownKeys() : DEFAULT_ALLOW_UNKNOWN_KEYS_VALUE;
 		} else {
 			return allowUnknownKeys.booleanValue();
 		}

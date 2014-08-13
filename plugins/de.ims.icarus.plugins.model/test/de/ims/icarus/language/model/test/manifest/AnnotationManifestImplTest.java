@@ -25,19 +25,18 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
+import static de.ims.icarus.language.model.test.TestUtils.assertTemplateGetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdSetterSpec;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdentitySetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.manifest.ManifestLocation;
-import de.ims.icarus.model.api.manifest.ManifestLocation.VirtualManifestInputLocation;
-import de.ims.icarus.model.registry.CorpusRegistry;
-import de.ims.icarus.model.registry.CorpusRegistryImpl;
+import de.ims.icarus.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
 import de.ims.icarus.model.standard.manifest.ValueRangeImpl;
 import de.ims.icarus.model.standard.manifest.ValueSetImpl;
@@ -48,24 +47,20 @@ import de.ims.icarus.model.util.types.ValueType;
  * @version $Id$
  *
  */
-public class AnnotationManifestImplTest implements ManifestTestConstants {
+public class AnnotationManifestImplTest extends ManifestTestCase<AnnotationManifestImpl> {
 
 	private static final ValueType DEFAULT_TYPE = ValueType.STRING;
 	private static final String DEFAULT_KEY = "defaultKey"; //$NON-NLS-1$
 
-	private AnnotationManifestImpl manifest;
-	private ManifestLocation location;
-	private CorpusRegistry registry;
-
-	@Before
-	public void prepare() {
-		location = new VirtualManifestInputLocation(null, true);
-		registry = new CorpusRegistryImpl();
-
-		manifest = new AnnotationManifestImpl(location, registry);
-	}
-
 	// FILL
+
+	/**
+	 * @see de.ims.icarus.language.model.test.manifest.ManifestTestCase#newInstance()
+	 */
+	@Override
+	protected AnnotationManifestImpl newInstance() {
+		return new AnnotationManifestImpl(location, registry);
+	}
 
 	private void fillAll(AnnotationManifestImpl manifest) {
 		fill(manifest);
@@ -119,27 +114,49 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 	// GENERAL TESTS
 
 	@Test
+	public void testConstructorConsistency() throws Exception {
+		testConsistency();
+	}
+
+	@Test
+	public void testEquals() throws Exception {
+
+		AnnotationManifestImpl other = newInstance();
+
+		assertHashEquals(manifest, other);
+
+		assertHashEquals(manifest, manifest);
+	}
+
+	@Test
 	public void testIdentitySetters() throws Exception {
 		assertIdSetterSpec(manifest);
 
 		assertIdentitySetters(manifest);
 	}
 
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void testValuesSetter() throws Exception {
+		thrown.expect(NullPointerException.class);
 		manifest.setSupportedValues(null);
 	}
 
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void testRangeSetter() throws Exception {
+		thrown.expect(NullPointerException.class);
 		manifest.setSupportedRange(null);
+	}
+
+	@Test
+	public void testManifestType() throws Exception {
+		assertEquals(ManifestType.ANNOTATION_MANIFEST, manifest.getManifestType());
 	}
 
 	@Test
 	public void testTemplate() throws Exception {
 
 		// Prepare template
-		AnnotationManifestImpl template = new AnnotationManifestImpl(location, registry);
+		AnnotationManifestImpl template = newInstance();
 		fillAll(template);
 		template.setId(TEST_TEMPLATE_ID);
 
@@ -151,30 +168,17 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 
 		// Manifest is empty except for id and templateId
 
-		assertEquals("Template link ignored", template, manifest.getTemplate()); //$NON-NLS-1$
-
-		assertEquals("Local id overwritten", TEST_ID, manifest.getId()); //$NON-NLS-1$
-
-		assertEquals("Template name ignored", template.getName(), manifest.getName()); //$NON-NLS-1$
-
-		assertEquals("Template description ignored", template.getDescription(), manifest.getDescription()); //$NON-NLS-1$
-
-		assertEquals("Template icon ignored", template.getIcon(), manifest.getIcon()); //$NON-NLS-1$
-
-		assertEquals("Template value-type ignored", template.getValueType(), manifest.getValueType()); //$NON-NLS-1$
-
-		assertEquals("Template value-set ignored", template.getSupportedValues(), manifest.getSupportedValues()); //$NON-NLS-1$
-
-		assertEquals("Template value-range ignored", template.getSupportedRange(), manifest.getSupportedRange()); //$NON-NLS-1$
+		assertTemplateGetters(AnnotationManifest.class, manifest, template);
 	}
 
 	// XML TEST
 
 	// Should fail due to missing id and value type declaration
-	@Test(expected=ModelException.class)
+	@Test
 	public void testXmlEmpty() throws Exception {
 
-		assertSerializationEquals(manifest);
+		thrown.expect(ModelException.class);
+		assertSerializationEquals(manifest, newInstance());
 	}
 
 	@Test
@@ -182,7 +186,7 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 
 		fill(manifest);
 
-		assertSerializationEquals(manifest);
+		assertSerializationEquals(manifest, newInstance());
 	}
 
 	@Test
@@ -191,7 +195,7 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 		fill(manifest);
 		fillProperties(manifest);
 
-		assertSerializationEquals(manifest);
+		assertSerializationEquals(manifest, newInstance());
 	}
 
 	@Test
@@ -200,7 +204,7 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 		fill(manifest);
 		fillAliases(manifest);
 
-		assertSerializationEquals(manifest);
+		assertSerializationEquals(manifest, newInstance());
 	}
 
 	@Test
@@ -209,7 +213,7 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 		fill(manifest);
 		fillValues(manifest);
 
-		assertSerializationEquals(manifest);
+		assertSerializationEquals(manifest, newInstance());
 	}
 
 	@Test
@@ -218,7 +222,7 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 		fill(manifest);
 		fillRange(manifest);
 
-		assertSerializationEquals(manifest);
+		assertSerializationEquals(manifest, newInstance());
 	}
 
 	@Test
@@ -226,6 +230,6 @@ public class AnnotationManifestImplTest implements ManifestTestConstants {
 
 		fillAll(manifest);
 
-		assertSerializationEquals(manifest);
+		assertSerializationEquals(manifest, newInstance());
 	}
 }

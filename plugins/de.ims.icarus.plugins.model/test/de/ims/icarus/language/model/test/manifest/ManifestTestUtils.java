@@ -25,7 +25,9 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import de.ims.icarus.model.api.manifest.ModifiableIdentity;
 import de.ims.icarus.model.standard.manifest.AbstractManifest;
 
@@ -84,12 +86,24 @@ public class ManifestTestUtils implements ManifestTestConstants {
 			// no-op
 		}
 	}
+
 	public static void assertIdentitySetters(ModifiableIdentity identity) {
 
-		assertSetInvalidId(identity);
-		assertSetInvalidName(identity);
-		assertSetInvalidDescription(identity);
-		assertSetInvalidIcon(identity);
+		identity.setId(LEGAL_ID);
+
+		assertSetInvalidIdNull(identity);
+		assertSetInvalidIdBegin(identity);
+		assertSetInvalidIdLength(identity);
+		assertSetInvalidIdContent(identity);
+
+		identity.setName(TEST_NAME);
+		assertSame(TEST_NAME, identity.getName());
+
+		identity.setDescription(TEST_DESCRIPTION);
+		assertSame(TEST_DESCRIPTION, identity.getDescription());
+
+		identity.setIcon(TEST_ICON);
+		assertSame(TEST_ICON, identity.getIcon());
 	}
 
 	public static void assertSetInvalidId(ModifiableIdentity identity) {
@@ -97,6 +111,42 @@ public class ManifestTestUtils implements ManifestTestConstants {
 			identity.setId(null);
 			fail("Expected NullPointerException for null id"); //$NON-NLS-1$
 		} catch(NullPointerException e) {
+			// no-op
+		}
+	}
+
+	public static void assertSetInvalidIdNull(ModifiableIdentity identity) {
+		try {
+			identity.setId(null);
+			fail("Expected NullPointerException for null id"); //$NON-NLS-1$
+		} catch(NullPointerException e) {
+			// no-op
+		}
+	}
+
+	public static void assertSetInvalidIdLength(ModifiableIdentity identity) {
+		try {
+			identity.setId(INVALID_ID_LENGTH);
+			fail("Expected IllegalArgumentException for id with invalid length: "+INVALID_ID_LENGTH); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			// no-op
+		}
+	}
+
+	public static void assertSetInvalidIdContent(ModifiableIdentity identity) {
+		try {
+			identity.setId(INVALID_ID_CONTENT);
+			fail("Expected IllegalArgumentException for id with invalid content: "+INVALID_ID_CONTENT); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
+			// no-op
+		}
+	}
+
+	public static void assertSetInvalidIdBegin(ModifiableIdentity identity) {
+		try {
+			identity.setId(INVALID_ID_BEGIN);
+			fail("Expected IllegalArgumentException for id with invalid begin: "+INVALID_ID_BEGIN); //$NON-NLS-1$
+		} catch(IllegalArgumentException e) {
 			// no-op
 		}
 	}
@@ -126,5 +176,13 @@ public class ManifestTestUtils implements ManifestTestConstants {
 		} catch(NullPointerException e) {
 			// no-op
 		}
+	}
+
+	public static <M extends AbstractManifest<?>> M mockManifest(Class<M> manifestClass) {
+		M manifest = mock(manifestClass);
+
+		manifest.setId(manifestClass.getName());
+
+		return manifest;
 	}
 }

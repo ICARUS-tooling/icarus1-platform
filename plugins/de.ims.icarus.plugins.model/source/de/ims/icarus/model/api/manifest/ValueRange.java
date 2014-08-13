@@ -41,6 +41,8 @@ public interface ValueRange {
 
 	Object getUpperBound();
 
+	Object getStepSize();
+
 	boolean isLowerBoundInclusive();
 
 	boolean isUpperBoundInclusive();

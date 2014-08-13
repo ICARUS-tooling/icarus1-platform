@@ -34,8 +34,11 @@ import org.xml.sax.SAXException;
 import de.ims.icarus.model.api.manifest.LocationManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
+import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
+import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -43,11 +46,27 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @version $Id$
  *
  */
-public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
+public class LocationManifestImpl implements LocationManifest, ModelXmlElement, ModelXmlHandler {
 	private String path;
 	private PathResolverManifest pathResolverManifest;
 
 	private final List<PathEntry> pathEntries = new ArrayList<>();
+
+	public LocationManifestImpl() {
+		// no-op
+	}
+
+	public LocationManifestImpl(String path) {
+		setPath(path);
+	}
+
+	/**
+	 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+	 */
+	@Override
+	public void writeXml(XmlSerializer serializer) throws Exception {
+		ModelXmlUtils.writeLocationElement(serializer, this);
+	}
 
 	/**
 	 * @param attributes
@@ -63,6 +82,10 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 		switch (qName) {
 		case TAG_LOCATION: {
 			readAttributes(attributes);
+		} break;
+
+		case TAG_PATH: {
+			// no-op
 		} break;
 
 		case TAG_PATH_ENTRY : {
@@ -85,9 +108,15 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 			return null;
 		}
 
+		case TAG_PATH: {
+			setPath(text);
+		} break;
+
 		default:
 			throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_LOCATION+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
+
+		return this;
 	}
 
 	/**
@@ -139,8 +168,10 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 
 	@Override
 	public void setPathResolverManifest(PathResolverManifest pathResolverManifest) {
-		if (pathResolverManifest == null)
-			throw new NullPointerException("Invalid pathResolverManifest"); //$NON-NLS-1$
+		// NOTE setting the path resolver manifest to null is legal
+		// since the framework will use a default file based resolver in that case!
+//		if (pathResolverManifest == null)
+//			throw new NullPointerException("Invalid pathResolverManifest"); //$NON-NLS-1$
 
 		this.pathResolverManifest = pathResolverManifest;
 	}
@@ -169,12 +200,12 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 		pathEntries.remove(entry);
 	}
 
-	public static class PathEntryImpl implements PathEntry, ModelXmlHandler {
+	public static class PathEntryImpl implements PathEntry, ModelXmlElement, ModelXmlHandler {
 
 		private PathType type;
 		private String value;
 
-		protected PathEntryImpl() {
+		public PathEntryImpl() {
 			// no-op
 		}
 
@@ -189,11 +220,56 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 		}
 
 		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			int hash = 1;
+			if(type!=null) {
+				hash *= type.hashCode();
+			}
+			if(value!=null) {
+				hash *= value.hashCode();
+			}
+
+			return hash;
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof PathEntry) {
+				PathEntry other = (PathEntry) obj;
+				return ClassUtils.equals(type, other.getType())
+						&& ClassUtils.equals(value, other.getValue());
+			}
+			return false;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "PathEntry["+(type==null ? "<no_type>" : type.getXmlValue())+"]@"+(value==null ? "<no_value>" : value); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+
+		/**
+		 * @see de.ims.icarus.model.xml.ModelXmlElement#writeXml(de.ims.icarus.model.xml.XmlSerializer)
+		 */
+		@Override
+		public void writeXml(XmlSerializer serializer) throws Exception {
+			ModelXmlUtils.writePathEntryElement(serializer, this);
+		}
+
+		/**
 		 * @param attributes
 		 */
 		protected void readAttributes(Attributes attributes) {
 			String typeId = ModelXmlUtils.normalize(attributes, ATTR_TYPE);
-			type = PathType.parsePathType(typeId);
+			setType(PathType.parsePathType(typeId));
 		}
 
 		@Override
@@ -206,7 +282,7 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 			} break;
 
 			default:
-				throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				throw new SAXException("Unrecognized opening tag '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			return this;
@@ -218,11 +294,12 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 						throws SAXException {
 			switch (qName) {
 			case TAG_PATH_ENTRY: {
+				setValue(text);
 				return null;
 			}
 
 			default:
-				throw new SAXException("Unrecognized end tag  '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				throw new SAXException("Unrecognized end tag '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 
@@ -233,7 +310,7 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 		public void endNestedHandler(ManifestLocation manifestLocation, String uri,
 				String localName, String qName, ModelXmlHandler handler)
 				throws SAXException {
-			throw new UnsupportedOperationException();
+			throw new SAXException("Unrecognized nested element '"+qName+"' in "+TAG_PATH_ENTRY+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		/**
@@ -250,6 +327,26 @@ public class LocationManifestImpl implements LocationManifest, ModelXmlHandler {
 		@Override
 		public String getValue() {
 			return value;
+		}
+
+		/**
+		 * @param type the type to set
+		 */
+		public void setType(PathType type) {
+			if (type == null)
+				throw new NullPointerException("Invalid type");  //$NON-NLS-1$
+
+			this.type = type;
+		}
+
+		/**
+		 * @param value the value to set
+		 */
+		public void setValue(String value) {
+			if (value == null)
+				throw new NullPointerException("Invalid value");  //$NON-NLS-1$
+
+			this.value = value;
 		}
 
 	}
