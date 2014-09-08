@@ -98,7 +98,13 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 		DependencyData resultdd = null;
 
 		if (buffer.next()) {
-			resultdd = CONLLUtils.readGold09(buffer, count++);
+			try {
+				resultdd = CONLLUtils.readGold09(buffer, count++);
+			} catch(Exception e) {
+				// Cannot be IOException or UnsupportedFormatException
+
+				throw new IOException(buffer.getErrorMessage("Failed to gold fine CoNLL09 data"), e); //$NON-NLS-1$
+			}
 		}
 
 		return resultdd;

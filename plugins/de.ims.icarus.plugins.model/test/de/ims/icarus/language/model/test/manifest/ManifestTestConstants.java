@@ -54,6 +54,8 @@ public interface ManifestTestConstants {
 	public static final String INVALID_ID_CONTENT = "id_with_illegal_characters&%)(/&%"; //$NON-NLS-1$
 	public static final String INVALID_ID_BEGIN = "-id_with_illegal_begin_character"; //$NON-NLS-1$
 
+	public static final String UNKNOWN_ID = "not-registered-before"; //$NON-NLS-1$
+
 	public static final String TEST_TEMPLATE_ID = "testTemplateId"; //$NON-NLS-1$
 	public static final String TEST_ID = "testId"; //$NON-NLS-1$
 

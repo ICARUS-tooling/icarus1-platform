@@ -74,7 +74,7 @@ public class OptionsManifestImplTest extends ManifestTestCase<OptionsManifestImp
 	private void fillOptions(OptionsManifestImpl manifest) {
 		// String option
 		OptionImpl option1 = new OptionImpl("option1", ValueType.STRING); //$NON-NLS-1$
-		option1.setDefaultValue("defualt test string"); //$NON-NLS-1$
+		option1.setDefaultValue("default test string"); //$NON-NLS-1$
 		option1.setPublished(false);
 
 		manifest.addOption(option1);
@@ -82,21 +82,21 @@ public class OptionsManifestImplTest extends ManifestTestCase<OptionsManifestImp
 		// Integer option
 		OptionImpl option2 = new OptionImpl("option2", ValueType.INTEGER); //$NON-NLS-1$
 		option2.setDefaultValue(234);
-		option2.setRange(new ValueRangeImpl(ValueType.INTEGER, 1, 9999999, true, false));
+		option2.setSupportedRange(new ValueRangeImpl(ValueType.INTEGER, 1, 9999999, true, false));
 		option2.setMultiValue(true);
 
 		manifest.addOption(option2);
 
 		// Double option
 		OptionImpl option3 = new OptionImpl("option3", ValueType.DOUBLE); //$NON-NLS-1$
-		option3.setValues(new ValueSetImpl(ValueType.DOUBLE, getTestValues(ValueType.DOUBLE)));
+		option3.setSupportedValues(new ValueSetImpl(ValueType.DOUBLE, getTestValues(ValueType.DOUBLE)));
 
 		manifest.addOption(option3);
 
 		// Enum option
 		OptionImpl option4 = new OptionImpl("option4", ValueType.ENUM); //$NON-NLS-1$
 		option4.setDefaultValue(TestEnum.TEST2);
-		option4.setValues(new ValueSetImpl(ValueType.ENUM, TestEnum.class));
+		option4.setSupportedValues(new ValueSetImpl(ValueType.ENUM, TestEnum.class));
 
 		manifest.addOption(option4);
 	}
@@ -125,6 +125,39 @@ public class OptionsManifestImplTest extends ManifestTestCase<OptionsManifestImp
 	}
 
 	@Test
+	public void testGetOptionInherited() throws Exception {
+
+		String optionId = "test-option"; //$NON-NLS-1$
+
+		Option option = mock(Option.class);
+
+		OptionsManifest template = mock(OptionsManifest.class);
+		when(template.isTemplate()).thenReturn(true);
+		when(template.getOption(optionId)).thenReturn(option);
+		when(template.getId()).thenReturn(TEST_TEMPLATE_ID);
+
+		registry.registerTemplate(template);
+
+		manifest.setTemplateId(TEST_TEMPLATE_ID);
+
+		assertSame(option, manifest.getOption(optionId));
+	}
+
+	@Test
+	public void testGetOptionNull() throws Exception {
+		thrown.expect(NullPointerException.class);
+		manifest.getOption(null);
+	}
+
+	@Test
+	public void testGetOptionUnknown() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		manifest.getOption(UNKNOWN_ID);
+	}
+
+	// MODIFICATION TESTS
+
+	@Test
 	public void testId() throws Exception {
 		assertIdSetterSpec(manifest);
 	}
@@ -137,6 +170,21 @@ public class OptionsManifestImplTest extends ManifestTestCase<OptionsManifestImp
 		manifest.addOption(option);
 
 		assertSame(option, manifest.getOption(TEST_ID));
+	}
+
+	@Test
+	public void testAddInvalidOptionIdNull() throws Exception {
+		Option option = mock(Option.class);
+		when(option.getId()).thenReturn(null);
+
+		thrown.expect(IllegalArgumentException.class);
+		manifest.addOption(option);
+	}
+
+	@Test
+	public void testAddInvalidOptionNull() throws Exception {
+		thrown.expect(NullPointerException.class);
+		manifest.addOption(null);
 	}
 
 	@Test

@@ -33,6 +33,7 @@ import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.manifest.Manifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.api.manifest.VersionManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.Links.Link;
 import de.ims.icarus.model.util.CorpusUtils;
@@ -55,6 +56,7 @@ public abstract class AbstractManifest<T extends Manifest> implements Manifest, 
 
 	private String id;
 	private boolean isTemplate;
+	private VersionManifest versionManifest;
 
 	private transient final ManifestLocation manifestLocation;
 	private transient final CorpusRegistry registry;
@@ -203,6 +205,8 @@ public abstract class AbstractManifest<T extends Manifest> implements Manifest, 
 		if(qName.equals(xmlTag())) {
 			readAttributes(attributes);
 			return this;
+		} else if(qName.equals(TAG_VERSION)) {
+			return new VersionManifestImpl();
 		} else
 			throw new SAXException("Unrecognized opening tag  '"+qName+"' in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -228,11 +232,14 @@ public abstract class AbstractManifest<T extends Manifest> implements Manifest, 
 	public void endNestedHandler(ManifestLocation manifestLocation, String uri,
 			String localName, String qName, ModelXmlHandler handler)
 			throws SAXException {
-		throw new SAXException("Unexpected nested element "+qName+" in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if(qName.equals(TAG_VERSION)) {
+			setVersionManifest((VersionManifest) handler);
+		} else
+			throw new SAXException("Unexpected nested element "+qName+" in "+xmlTag()+" environment"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	protected void writeElements(XmlSerializer serializer) throws Exception {
-		// for subclasses
+		writeEmbedded(versionManifest, serializer);
 	}
 
 	protected abstract String xmlTag();
@@ -284,6 +291,21 @@ public abstract class AbstractManifest<T extends Manifest> implements Manifest, 
 	}
 
 	/**
+	 * @return the versionManifest
+	 */
+	@Override
+	public VersionManifest getVersionManifest() {
+		return versionManifest;
+	}
+
+	/**
+	 * @param versionManifest the versionManifest to set
+	 */
+	public void setVersionManifest(VersionManifest versionManifest) {
+		this.versionManifest = versionManifest;
+	}
+
+	/**
 	 * @param id the id to set
 	 */
 //	@Override
@@ -315,7 +337,7 @@ public abstract class AbstractManifest<T extends Manifest> implements Manifest, 
 
 	@Override
 	public T getTemplate() {
-		return template.get();
+		return template==null ? null : template.get();
 	}
 
 	public boolean hasTemplate() {

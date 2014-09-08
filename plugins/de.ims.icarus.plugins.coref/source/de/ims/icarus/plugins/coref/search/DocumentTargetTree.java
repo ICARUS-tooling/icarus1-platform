@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search;
@@ -28,7 +28,7 @@ package de.ims.icarus.plugins.coref.search;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -48,13 +48,13 @@ import de.ims.icarus.util.Options;
  *
  */
 public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentData> {
-	
-	protected SpanSet spanSet;	
+
+	protected SpanSet spanSet;
 	protected EdgeSet edgeSet;
 	//protected Edge[] headMap;
 	protected Map<Span, Integer> indexMap;
 	protected Map<Integer, Edge> headMap;
-	
+
 	protected CompactTree tree;
 
 	public DocumentTargetTree() {
@@ -69,7 +69,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	@Override
 	public void close() {
 		super.close();
-		
+
 		spanSet = null;
 		edgeSet = null;
 		headMap = null;
@@ -82,7 +82,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 		CoreferenceAllocation allocation = (CoreferenceAllocation) options.get("allocation"); //$NON-NLS-1$
 		spanSet = CoreferenceUtils.getSpanSet(data, allocation);
 		edgeSet = CoreferenceUtils.getEdgeSet(data, allocation);
-		
+
 		// Generate reverse lookup for span indices
 		if(indexMap==null) {
 			indexMap = new HashMap<>();
@@ -91,11 +91,11 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 		}
 
 		int size = fetchSize();
-				
+
 		for(int i=0; i<size; i++) {
 			indexMap.put(spanSet.get(i), i);
 		}
-		
+
 		// Generate head lookup
 //		if(headMap==null || headMap.length<size) {
 //			headMap = new Edge[spanSet.size()];
@@ -107,11 +107,11 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 		} else {
 			headMap.clear();
 		}
-		
+
 		if(edgeSet==null) {
 			return;
 		}
-		
+
 //		for(int i=0; i<edgeSet.size(); i++) {
 //			Edge edge = edgeSet.get(i);
 //			// TODO right now we ignore the virtual edge from the generic doc root!
@@ -119,16 +119,16 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 //				headMap[indexMap.get(edge.getTarget())] = edge;
 //			}
 //		}
-		
+
 		for(int i=0; i<edgeSet.size(); i++) {
 			Edge edge = edgeSet.get(i);
 			// TODO right now we ignore the virtual edge from the generic doc root!
 			if(edge.getSource().isROOT()) {
 				continue;
 			}
-			
+
 			int index = indexMap.get(edge.getTarget());
-			
+
 			headMap.put(index, edge);
 		}
 	}
@@ -148,54 +148,54 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	protected int fetchHead(int index) {
 		Integer head = null;
 		Edge edge = headMap.get(index);
-		
+
 		if(edge!=null) {
 			Span parent = edge.getSource();
 			if(!parent.isROOT()) {
 				head = indexMap.get(parent);
 			}
 		}
-		
-		return head==null ? LanguageUtils.DATA_HEAD_ROOT : head;
+
+		return head==null ? LanguageConstants.DATA_HEAD_ROOT : head;
 	}
 
 	// Coreference data access methods
-	
+
 	// SPAN METHODS
-	
+
 	public Span getSpan() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		return spanSet.get(nodePointer);
 	}
-	
-	public int getSentenceIndex() {		
+
+	public int getSentenceIndex() {
 		return getSpan().getSentenceIndex();
 	}
-	
+
 	public int getBeginIndex() {
 		return getSpan().getBeginIndex();
 	}
-	
+
 	public int getEndIndex() {
 		return getSpan().getEndIndex();
 	}
-	
+
 	public int getRange() {
 		return getSpan().getRange();
 	}
-	
+
 	public int getClusterId() {
 		return getSpan().getClusterId();
 	}
-	
+
 	public Object getSpanProperty(String key) {
 		return getSpan().getProperty(key);
 	}
-	
+
 	// EDGE METHODS
-	
+
 	public Edge getEdge() {
 		/*if(edgePointer==-1)
 		throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
@@ -203,17 +203,17 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
 		Edge edge = headMap.get(nodePointer);
-		
+
 		if(edge==null)
 			throw new CorruptedStateException("Current node has no head edge"); //$NON-NLS-1$
-		
+
 		return edge;
 	}
-	
+
 	public Object getEdgeProperty(String key) {
 		return getEdge().getProperty(key);
 	}
-	
+
 	public int getDirection() {
 		/*if(edgePointer==-1)
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
@@ -221,53 +221,53 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
 
 		Edge edge = getEdge();
-		
-		return edge.getTarget().compareTo(edge.getSource())>0 ? 
-				LanguageUtils.DATA_LEFT_VALUE : LanguageUtils.DATA_RIGHT_VALUE;
+
+		return edge.getTarget().compareTo(edge.getSource())>0 ?
+				LanguageConstants.DATA_LEFT_VALUE : LanguageConstants.DATA_RIGHT_VALUE;
 	}
-	
+
 	// DOCUMENT METHODS
-	
+
 	public CoreferenceDocumentData getDocument() {
 		return data;
 	}
-	
+
 	// SENTENCE METHODS
-	
+
 	public CoreferenceData getSentence() {
 		int sentenceIndex = getSpan().getSentenceIndex();
 		if(sentenceIndex==-1)
 			throw new IllegalStateException("No valid sentence index available on current scope"); //$NON-NLS-1$
-		
+
 		return getDocument().get(sentenceIndex);
 	}
-	
+
 	private StringBuilder buffer = new StringBuilder(100);
-	
+
 	public String getForms() {
 		buffer.setLength(0);
-		
+
 		CoreferenceData sentence = getSentence();
-		
+
 		CoreferenceUtils.appendForms(buffer, sentence, getSpan());
-		
+
 		return buffer.toString();
 	}
-	
+
 	public String getSentenceProperties(String key) {
 		buffer.setLength(0);
-		
+
 		CoreferenceData sentence = getSentence();
-		
+
 		CoreferenceUtils.appendProperties(buffer, key, sentence, getSpan());
-		
+
 		return buffer.toString();
 	}
-	
+
 	public Object getHeadProperty(String key) {
 		CoreferenceData sentence = getSentence();
 		Span span = getSpan();
 		int head = span.getHead();
-		return sentence.getProperty(key+'_'+head);
+		return sentence.getProperty(head, key);
 	}
 }

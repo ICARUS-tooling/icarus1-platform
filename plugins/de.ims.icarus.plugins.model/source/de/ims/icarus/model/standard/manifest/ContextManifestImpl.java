@@ -45,11 +45,11 @@ import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.Links.Link;
+import de.ims.icarus.model.standard.manifest.Links.MemoryLink;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
-import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner
@@ -199,7 +199,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 
 		case TAG_PREREQUISITE: {
 			String alias = ModelXmlUtils.normalize(attributes, ATTR_ALIAS);
-			PrerequisiteManifestImpl prerequisite = addPrerequisite(alias, null);
+			PrerequisiteManifestImpl prerequisite = addPrerequisite(alias);
 			prerequisite.readAttributes(attributes);
 		} break;
 
@@ -496,15 +496,13 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 */
 	@Override
 	public List<PrerequisiteManifest> getPrerequisites() {
-		if(isTemplate()) {
-			List<PrerequisiteManifest> result = new ArrayList<>(prerequisiteManifests);
-			if(hasTemplate()) {
-				result.addAll(getTemplate().getPrerequisites());
-			}
-			return result;
-		} else {
-			return CollectionUtils.getListProxy(prerequisiteManifests);
+		List<PrerequisiteManifest> result = new ArrayList<>(prerequisiteManifests);
+
+		if(isTemplate() && hasTemplate()) {
+			result.addAll(getTemplate().getPrerequisites());
 		}
+
+		return result;
 	}
 
 	/**
@@ -587,7 +585,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	}
 
 //	@Override
-	public PrerequisiteManifestImpl addPrerequisite(String alias, PrerequisiteManifest unresolvedForm) {
+	public PrerequisiteManifestImpl addPrerequisite(String alias) {
 		if (alias == null)
 			throw new NullPointerException("Invalid alias");  //$NON-NLS-1$
 
@@ -596,7 +594,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 				throw new IllegalArgumentException("Duplicate prerequisite alias: "+alias); //$NON-NLS-1$
 		}
 
-		PrerequisiteManifestImpl result = new PrerequisiteManifestImpl(alias, unresolvedForm);
+		PrerequisiteManifestImpl result = new PrerequisiteManifestImpl(alias);
 		prerequisiteManifests.add(result);
 
 		return result;
@@ -648,17 +646,37 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 
 	}
 
+	protected class PrerequisiteLink extends MemoryLink<PrerequisiteManifest> {
+
+		/**
+		 * @param id
+		 */
+		public PrerequisiteLink(String id) {
+			super(id);
+		}
+
+		/**
+		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
+		 */
+		@Override
+		protected PrerequisiteManifest resolve() {
+			ContextManifest contextManifest = ContextManifestImpl.this.getTemplate();
+			return contextManifest==null ? null : contextManifest.getPrerequisite(getId());
+		}
+
+	}
+
 	public class PrerequisiteManifestImpl implements PrerequisiteManifest {
 
 		private final String alias;
-		private final PrerequisiteManifest unresolvedForm;
+		private final PrerequisiteLink unresolvedForm;
 
 		private String layerId;
 		private String typeId;
 		private String contextId;
 		private String description;
 
-		PrerequisiteManifestImpl(String alias, PrerequisiteManifest unresolvedForm) {
+		PrerequisiteManifestImpl(String alias) {
 			if (alias == null)
 				throw new NullPointerException("Invalid alias");  //$NON-NLS-1$
 
@@ -666,7 +684,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 				throw new IllegalArgumentException("Alias format not supported: "+alias); //$NON-NLS-1$
 
 			this.alias = alias;
-			this.unresolvedForm = null;
+			this.unresolvedForm = new PrerequisiteLink(alias);
 		}
 
 		protected void readAttributes(Attributes attributes) {
@@ -736,7 +754,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		 */
 		@Override
 		public PrerequisiteManifest getUnresolvedForm() {
-			return unresolvedForm;
+			return unresolvedForm.get();
 		}
 
 		/**

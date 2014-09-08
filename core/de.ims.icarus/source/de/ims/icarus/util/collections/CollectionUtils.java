@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.util.collections;
 
+import gnu.trove.TLongCollection;
+
 import java.io.Serializable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -268,6 +270,12 @@ public final class CollectionUtils {
 			collection.add((T)item);
 		}
 	}
+
+    public static void feedItems(TLongCollection collection, long...items) {
+    	for(long item : items) {
+    		collection.add(item);
+    	}
+    }
 
     @SafeVarargs
 	public static <T extends Object> Set<T> asSet(T...items) {

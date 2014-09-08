@@ -210,6 +210,12 @@ public class AbstractLayerManifestTest extends ManifestTestCase<AbstractLayerMan
 	}
 
 	@Test
+	public void testXmlLayerType() throws Exception {
+		manifest.setLayerTypeId(TEST_TEMPLATE_ID);
+		assertSerializationEquals(manifest, newInstance());
+	}
+
+	@Test
 	public void testXmlBaseLayerWithContext() throws Exception {
 
 		LayerManifest target = mock(LayerManifest.class);

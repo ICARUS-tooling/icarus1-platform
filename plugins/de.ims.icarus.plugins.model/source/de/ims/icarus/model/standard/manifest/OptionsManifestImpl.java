@@ -283,6 +283,10 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 				ValueType.IMAGE_RESOURCE,
 				ValueType.URL_RESOURCE);
 
+		public static boolean isSupportedValueType(ValueType valueType) {
+			return supportedValueTypes.contains(valueType);
+		}
+
 		protected OptionImpl() {
 			// for parsing
 		}
@@ -417,11 +421,11 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 			switch (qName) {
 
 			case TAG_RANGE : {
-				setRange((ValueRange) handler);
+				setSupportedRange((ValueRange) handler);
 			} break;
 
 			case TAG_VALUES : {
-				setValues((ValueSet) handler);
+				setSupportedValues((ValueSet) handler);
 			} break;
 
 			default:
@@ -547,7 +551,7 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 		/**
 		 * @param values the values to set
 		 */
-		public OptionImpl setValues(ValueSet values) {
+		public OptionImpl setSupportedValues(ValueSet values) {
 
 			if(values!=null && !valueType.equals(values.getValueType()))
 				throw new IllegalArgumentException("Incompatible value type defined for value set: expected "+valueType+" - got "+values.getValueType()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -560,7 +564,7 @@ public class OptionsManifestImpl extends AbstractManifest<OptionsManifest> imple
 		/**
 		 * @param range the range to set
 		 */
-		public OptionImpl setRange(ValueRange range) {
+		public OptionImpl setSupportedRange(ValueRange range) {
 
 			if(range!=null && !valueType.equals(range.getValueType()))
 				throw new IllegalArgumentException("Incompatible value type defined for range: expected "+valueType+" - got "+range.getValueType()); //$NON-NLS-1$ //$NON-NLS-2$

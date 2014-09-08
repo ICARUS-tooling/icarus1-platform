@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -72,6 +73,11 @@ public class LocationManifestImplTest implements ManifestTestConstants {
 	@Before
 	public void prepare() {
 		manifest = new LocationManifestImpl();
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(manifest);
 	}
 
 	@Test

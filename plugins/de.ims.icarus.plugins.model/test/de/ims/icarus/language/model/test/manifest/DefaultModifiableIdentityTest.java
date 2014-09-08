@@ -26,7 +26,8 @@
 package de.ims.icarus.language.model.test.manifest;
 
 import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
-import static org.junit.Assert.assertNotEquals;
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
 import org.junit.Before;
@@ -51,6 +52,16 @@ public class DefaultModifiableIdentityTest implements ManifestTestConstants {
 	@Before
 	public void prepare() {
 		identity = new DefaultModifiableIdentity();
+	}
+
+	@Test
+	public void testGeneral() throws Exception {
+		assertObjectContract(identity);
+	}
+
+	@Test
+	public void testOwner() throws Exception {
+		assertNotNull(identity.getOwner());
 	}
 
 	@Test
@@ -106,16 +117,6 @@ public class DefaultModifiableIdentityTest implements ManifestTestConstants {
 		identity.setIcon(TEST_ICON);
 
 		assertSame(TEST_ICON, identity.getIcon());
-	}
-
-	@Test
-	public void testEqualsNull() throws Exception {
-		assertNotEquals(identity, null);
-	}
-
-	@Test
-	public void testEqualsForeign() throws Exception {
-		assertNotEquals(identity, new Object());
 	}
 
 	@Test

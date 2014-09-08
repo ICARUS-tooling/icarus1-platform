@@ -99,6 +99,8 @@ public class FragmentLayerManifestImplTest extends ManifestTestCase<FragmentLaye
 		testConsistency();
 
 		assertNull(manifest.getGroupManifest());
+		assertNull(manifest.getRasterizerManifest());
+		assertNull(manifest.getAnnotationKey());
 	}
 
 	@Test

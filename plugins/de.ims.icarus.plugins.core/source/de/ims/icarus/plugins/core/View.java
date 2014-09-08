@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core;
@@ -34,12 +34,10 @@ import javax.swing.JComponent;
 
 import org.java.plugin.registry.Extension;
 
-import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.actions.ActionManager;
-import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
@@ -52,38 +50,38 @@ import de.ims.icarus.util.mpi.Message;
 import de.ims.icarus.util.mpi.ResultMessage;
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public abstract class View implements Identifiable {
-	
+
 	private Perspective perspective;
-	
+
 	private Extension extension;
-	
+
 	/**
 	 * For security reasons we do not extend {@code EventSource} but rather
 	 * store an internal instance and forward methods we want to expose.
-	 * Since {@code EventSource} does not offer access control to methods 
+	 * Since {@code EventSource} does not offer access control to methods
 	 * like {@link EventSource#setEventsEnabled(boolean)} this is necessary
 	 * to prevent external sources from disabling event handling for us.
-	 * Implementations might reconsider about that and expose more 
+	 * Implementations might reconsider about that and expose more
 	 * functionality of the {@code EventSource} via new forwarding methods.
 	 */
 	protected final EventSource eventSource = new EventSource(this);
 
 	/**
-	 * 
+	 *
 	 */
 	protected View() {
 		// no-op
 	}
-	
+
 	public final Extension getExtension() {
 		return extension;
 	}
-	
+
 	final void setExtension(Extension extension) {
 		this.extension = extension;
 	}
@@ -135,14 +133,14 @@ public abstract class View implements Identifiable {
 	 * of this call until {@code #close()} is called this {@code View} is allowed
 	 * to take complete ownership if the provided {@code container}. Due to the
 	 * nature of Swing's component hierarchy it is possible for a {@code View} object
-	 * to access components outside its {@code root} container but this is not 
+	 * to access components outside its {@code root} container but this is not
 	 * recommended! The basic job to be done within this method is to add components
 	 * to the {@code container} and to resize it if needed.<p>
 	 * This method will always be called on the {@code EventDispatchThread}!
 	 * @param container
 	 */
 	public abstract void init(JComponent container);
-	
+
 	/**
 	 * Tells this {@code View} to release all its resources and
 	 * return ownership of the {@code JComponent} it was provided with
@@ -168,9 +166,9 @@ public abstract class View implements Identifiable {
 			container.removeAll();
 		}
 	}
-	
+
 	/**
-	 * Checks whether this {@code View} can be closed. This method exists 
+	 * Checks whether this {@code View} can be closed. This method exists
 	 * so that implementations that have ongoing background operations
 	 * still running can ask the user to cancel those. Note that in some
 	 * situations the return value from this method being {@code true} does
@@ -183,16 +181,16 @@ public abstract class View implements Identifiable {
 	public boolean isClosable() {
 		return true;
 	}
-	
+
 	public void reset() {
 		// no-op
 	}
-	
+
 	@Override
 	public String toString() {
 		return getExtension().getId();
 	}
-	
+
 	/**
 	 * Returns the enclosing {@code Perspective} that manages this {@code View}
 	 * instance. Note that it is not recommended to call this method before
@@ -204,17 +202,17 @@ public abstract class View implements Identifiable {
 	public final Perspective getPerspective() {
 		if(perspective==null)
 			throw new IllegalStateException("No enclosing view available"); //$NON-NLS-1$
-		
+
 		return perspective;
 	}
-	
+
 	/**
 	 * Returns the enclosing {@link Frame}.
 	 */
 	protected final Frame getFrame() {
 		return getPerspective().getFrame();
 	}
-	
+
 	/**
 	 * Returns the {@code InfoPanel} available for this {@code View}.
 	 * This request is forwarded to the enclosing {@code Perspective}
@@ -225,7 +223,7 @@ public abstract class View implements Identifiable {
 	protected InfoPanel getInfoPanel() {
 		return getPerspective().getInfoPanel(this);
 	}
-	
+
 	/**
 	 * Called when the {@code View} gets the input focus.
 	 * Hook for subclasses to initialize displayed fields on the info panel.
@@ -235,7 +233,7 @@ public abstract class View implements Identifiable {
 	protected void refreshInfoPanel(InfoPanel infoPanel) {
 		infoPanel.clear();
 	}
-	
+
 	/**
 	 * Entry point for subclasses to add tool-bar elements to the
 	 * frame-wide tool-bar. The default implementation does nothing.
@@ -257,19 +255,19 @@ public abstract class View implements Identifiable {
 	final void addNotify(Perspective perspective) {
 		if(this.perspective!=null && perspective!=null)
 			throw new IllegalArgumentException("View already owned by "+this.perspective); //$NON-NLS-1$
-		
+
 		this.perspective = perspective;
 	}
 
 	protected ResultMessage handleRequest(Message message) throws Exception {
 		return message.unknownRequestResult(this);
 	}
-	
+
 	/**
 	 * Forwards the given {@code data} to this {@code View}'s {@code Perspective}
 	 * to be dispatched. The {@code receiver} argument serves as a filter for the
 	 * {@code Perspective} to find suitable targets. It may either be a {@code String}
-	 * defining the exact {@code unique-id} of the desired {@code View}, a {@code Class} 
+	 * defining the exact {@code unique-id} of the desired {@code View}, a {@code Class}
 	 * object describing a super-type for targets, a {@link Capability} describing
 	 * required capabilities or {@code null} if the {@code data} should be dispatched as a broadcast.
 	 * <p>
@@ -281,11 +279,11 @@ public abstract class View implements Identifiable {
 	protected final ResultMessage sendRequest(Object receiver, Message message) {
 		return getPerspective().sendRequest(this, receiver, message);
 	}
-	
+
 	protected final ResultMessage sendRequest(Object perspective, Object receiver, Message message) {
 		return getPerspective().sendRequest(this, perspective, receiver, message);
 	}
-	
+
 	/**
 	 * Tells the enclosing {@code Perspective} to set the {@code tab}
 	 * that holds this {@code View}'s {@code container} object as the
@@ -294,7 +292,7 @@ public abstract class View implements Identifiable {
 	protected final void selectViewTab() {
 		getPerspective().selectViewTab(this);
 	}
-	
+
 	/**
 	 * Forces the enclosing {@code Perspective} to update the following
 	 * properties of the {@code JTabbedPane}'s {@code tab} that holds this
@@ -305,13 +303,13 @@ public abstract class View implements Identifiable {
 	 * <li>tooltipText - replaced by {@link Identity#getDescription()}</li>
 	 * <li>title - replaced by {@link Identity#getName()}</li>
 	 * </ul>
-	 * This enables the {@code View} to change its {@code tab}'s appearance 
+	 * This enables the {@code View} to change its {@code tab}'s appearance
 	 * at any time.
 	 */
 	protected final void reloadViewTab() {
 		getPerspective().reloadViewTab(this);
 	}
-	
+
 	/**
 	 * Toggles the <i>state</i> of this {@code View}'s container which can
 	 * be either {@code maximized} or the default state. Usually this method
@@ -321,7 +319,7 @@ public abstract class View implements Identifiable {
 	protected final void toggleContainer() {
 		getPerspective().toggleView(this);
 	}
-	
+
 	/**
 	 * Returns the {@code JComponent} that was provided by the
 	 * enclosing {@code Perspective} for this {@code View} to lay out
@@ -330,23 +328,23 @@ public abstract class View implements Identifiable {
 	protected final JComponent getContainer() {
 		return getPerspective().getViewContainer(this);
 	}
-	
+
 	protected final void addBroadcastListener(String eventName, EventListener listener) {
 		getPerspective().addBroadcastListener(eventName, listener);
 	}
-	
+
 	protected final void removeBroadcastListener(EventListener listener) {
 		getPerspective().removeBroadcastListener(listener);
 	}
-	
+
 	protected final void removeBroadcastListener(EventListener listener, String eventName) {
 		getPerspective().removeBroadcastListener(listener, eventName);
 	}
-	
+
 	protected final void fireBroadcastEvent(EventObject event) {
 		getPerspective().fireBroadcastEvent(this, event);
 	}
-	
+
 	/**
 	 * Returns the default {@code ActionManager} that is available to this
 	 * {@code View}. Per convention all views within the same {@code Perspective}
@@ -355,7 +353,7 @@ public abstract class View implements Identifiable {
 	protected final ActionManager getDefaultActionManager() {
 		return getPerspective().getActionManager();
 	}
-	
+
 	protected boolean defaultLoadActions(Class<?> clazz, String path) {
 		if(clazz==null) {
 			clazz = getClass();
@@ -364,7 +362,7 @@ public abstract class View implements Identifiable {
 		URL actionLocation = clazz.getResource(path);
 		if(actionLocation==null)
 			throw new CorruptedStateException("Missing resources: "+path); //$NON-NLS-1$
-		
+
 		try {
 			getDefaultActionManager().loadActions(actionLocation);
 			return true;
@@ -374,7 +372,7 @@ public abstract class View implements Identifiable {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Requests this {@code View} to get the focus. The default
 	 * implementation delegates this call to {@link JComponent#requestFocusInWindow()}
@@ -385,18 +383,11 @@ public abstract class View implements Identifiable {
 	public void focusView() {
 		getContainer().requestFocusInWindow();
 	}
-	
+
 	protected void showError(Throwable t) {
-		if(Core.getCore().handleThrowable(t)) {
-			return;
-		}
-		
-		DialogFactory.getGlobalFactory().showError(getFrame(), 
-				"plugins.core.icarusCorePlugin.errorDialog.title",  //$NON-NLS-1$
-				"plugins.core.icarusCorePlugin.errorDialog.message",  //$NON-NLS-1$
-				t.getMessage());
+		IcarusFrame.defaultShowError(t);
 	}
-	
+
 	public interface ViewEvents {
 
 		public static final String CLOSING = "closing"; //$NON-NLS-1$

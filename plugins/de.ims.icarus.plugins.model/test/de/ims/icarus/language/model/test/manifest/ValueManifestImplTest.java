@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.TestUtils.getTestValue;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertEquals;
@@ -74,6 +75,11 @@ public class ValueManifestImplTest implements ManifestTestConstants {
 		manifest.setValue(getTestValue(valueType));
 
 		assertSerializationEquals(manifest, new ValueManifestImpl(valueType));
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(manifest);
 	}
 
 	@Test

@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		PROSODY OUTLINE PRESENTER
+	-->
+		
+	<!-- Open Preferences -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.openPreferencesAction"
+		template="actions.default.openPreferencesAction" />
+		
+	<!-- Refresh -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.refreshAction"
+		template="actions.default.refreshAction" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.prosody.prosodyOutlinePresenter.toolBarList">
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.openPreferencesAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.refreshAction" />
+		<separator />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup-Menu list -->
+	<action-list id="plugins.prosody.prosodyOutlinePresenter.popupMenuList">
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.refreshAction" />
+		<separator />
+		<item type="custom" value="showInMenu" />
+		<separator />
+		<item type="custom" value="sendToMenu" />
+	</action-list>
+	
+</actions>

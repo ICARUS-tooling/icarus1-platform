@@ -47,6 +47,8 @@ public interface ModelXmlTags {
 	public static final String TAG_PREREQUISITE = "prerequisite"; //$NON-NLS-1$
 	public static final String TAG_RASTERIZER = "rasterizer"; //$NON-NLS-1$
 
+	public static final String TAG_VERSION = "version"; //$NON-NLS-1$
+
 	public static final String TAG_BASE_LAYER = "base-layer"; //$NON-NLS-1$
 	public static final String TAG_BOUNDARY_LAYER = "boundary-layer"; //$NON-NLS-1$
 	public static final String TAG_VALUE_LAYER = "value-layer"; //$NON-NLS-1$

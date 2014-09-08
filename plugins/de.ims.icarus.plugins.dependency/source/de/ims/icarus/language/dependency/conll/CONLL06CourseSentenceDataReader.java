@@ -98,7 +98,13 @@ public class CONLL06CourseSentenceDataReader implements SentenceDataReader {
 		DependencyData resultdd = null;
 
 		if (buffer.next()) {
-			resultdd = CONLLUtils.readCourse06(buffer, count++);
+			try {
+				resultdd = CONLLUtils.readCourse06(buffer, count++);
+			} catch(Exception e) {
+				// Cannot be IOException or UnsupportedFormatException
+
+				throw new IOException(buffer.getErrorMessage("Failed to read course CoNLL06 data"), e); //$NON-NLS-1$
+			}
 		}
 
 		return resultdd;

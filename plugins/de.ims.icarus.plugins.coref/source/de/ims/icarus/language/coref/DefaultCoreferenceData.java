@@ -61,6 +61,14 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 	}
 
 	/**
+	 * @see de.ims.icarus.language.coref.CoreferenceData#getProperty(int, java.lang.String)
+	 */
+	@Override
+	public Object getProperty(int index, String key) {
+		return getProperty(key+'_'+index);
+	}
+
+	/**
 	 * @see de.ims.icarus.language.SentenceData#getForm(int)
 	 */
 	@Override

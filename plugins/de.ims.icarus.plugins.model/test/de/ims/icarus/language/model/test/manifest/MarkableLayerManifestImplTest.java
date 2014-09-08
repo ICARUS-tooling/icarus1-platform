@@ -115,6 +115,24 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		assertIdentitySetters(manifest);
 	}
 
+	@Test
+	public void testIndexOfContainerManifest() throws Exception {
+		ContainerManifest containerManifest = mock(ContainerManifest.class);
+		int index = 2;
+
+		MarkableLayerManifest template = mock(MarkableLayerManifest.class);
+		when(template.indexOfContainerManifest(containerManifest)).thenReturn(index);
+		when(template.isTemplate()).thenReturn(true);
+		when(template.getId()).thenReturn(TEST_TEMPLATE_ID);
+
+		registry.registerTemplate(template);
+
+		// Link template
+		manifest.setTemplateId(TEST_TEMPLATE_ID);
+
+		assertEquals(index, manifest.indexOfContainerManifest(containerManifest));
+	}
+
 	// MODIFICATION TESTS
 
 	@Test
@@ -180,6 +198,10 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		assertSame(containerManifest3, manifest.getContainerManifest(2));
 
 		assertSame(containerManifest1, manifest.getRootContainerManifest());
+
+		assertEquals(0, manifest.indexOfContainerManifest(containerManifest1));
+		assertEquals(1, manifest.indexOfContainerManifest(containerManifest2));
+		assertEquals(2, manifest.indexOfContainerManifest(containerManifest3));
 	}
 
 	@Test

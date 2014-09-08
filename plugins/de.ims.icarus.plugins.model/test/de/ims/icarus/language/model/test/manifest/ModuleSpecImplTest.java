@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdentitySetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertEquals;
@@ -87,6 +88,11 @@ public class ModuleSpecImplTest implements ManifestTestConstants {
 		fillCustomizable(spec);
 		fillOptional(spec);
 		fillExtensionPointUid(spec);
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(spec);
 	}
 
 	// GENERAL TESTS

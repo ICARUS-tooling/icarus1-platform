@@ -45,7 +45,7 @@ public interface ModelXmlAttributes {
 	public static final String ATTR_VALUE_TYPE = "value-type"; //$NON-NLS-1$
 	public static final String ATTR_LAYER_TYPE = "layer-type"; //$NON-NLS-1$
 
-	public static final String ATTR_VERSION = "version"; //$NON-NLS-1$
+	public static final String ATTR_VERSION_FORMAT = "version-format"; //$NON-NLS-1$
 
 	public static final String ATTR_OPTIONAL = "optional"; //$NON-NLS-1$
 	public static final String ATTR_CUSTOMIZABLE = "customizable"; //$NON-NLS-1$

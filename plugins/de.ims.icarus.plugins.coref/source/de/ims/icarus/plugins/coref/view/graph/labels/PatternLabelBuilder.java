@@ -450,7 +450,7 @@ public class PatternLabelBuilder implements CellLabelBuilder {
 			int beginIndex = span.getBeginIndex();
 			int endIndex = span.getEndIndex();
 			for(int i=beginIndex; i<=endIndex; i++) {
-				buffer.append(sentence.getProperty(key+'_'+i));
+				buffer.append(sentence.getProperty(i, key));
 				if(i<endIndex) {
 					buffer.append(' ');
 				}
@@ -489,7 +489,7 @@ public class PatternLabelBuilder implements CellLabelBuilder {
 
 			int head = span.getHead();
 
-			buffer.append(sentence.getProperty(key+'_'+head));
+			buffer.append(sentence.getProperty(head, key));
 
 			if(buffer.length()==length) {
 				buffer.append('-');

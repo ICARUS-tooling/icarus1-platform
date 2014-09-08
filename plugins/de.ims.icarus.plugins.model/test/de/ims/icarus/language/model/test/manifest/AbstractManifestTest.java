@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.test.manifest;
 
 import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdSetterSpec;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertFalse;
@@ -100,6 +101,20 @@ public class AbstractManifestTest extends ManifestTestCase<AbstractManifestTest.
 		testConsistency();
 	}
 
+	// GENERAL TESTS
+
+	@Test
+	public void testConstructorNullLocation() throws Exception {
+		thrown.expect(NullPointerException.class);
+		new DummyManifest(null, registry);
+	}
+
+	@Test
+	public void testConstructorNullRegistry() throws Exception {
+		thrown.expect(NullPointerException.class);
+		new DummyManifest(location, null);
+	}
+
 	@Test
 	public void testEquals() throws Exception {
 		DummyManifest other = newInstance();
@@ -107,6 +122,11 @@ public class AbstractManifestTest extends ManifestTestCase<AbstractManifestTest.
 		assertHashEquals(manifest, other);
 
 		assertHashEquals(manifest, manifest);
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(manifest);
 	}
 
 	@Test

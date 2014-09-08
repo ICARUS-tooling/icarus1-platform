@@ -26,6 +26,8 @@
 package de.ims.icarus.model.util.types;
 
 import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -204,6 +206,24 @@ public abstract class ValueType implements XmlResource {
 		public String toString(Object value) {
 			Url url = (Url) value;
 			return url.getURL().toExternalForm();
+		}
+	};
+
+	// Resource links
+	public static final ValueType FILE = new ValueType("file", Path.class) { //$NON-NLS-1$
+		@Override
+		public Object parse(String s, ClassLoader classLoader) {
+			return Paths.get(s);
+		}
+
+		/**
+		 *
+		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 */
+		@Override
+		public String toString(Object value) {
+			Path path = (Path) value;
+			return path.toString();
 		}
 	};
 

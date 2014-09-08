@@ -28,6 +28,7 @@ package de.ims.icarus.language.model.test.manifest;
 import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdSetterSpec;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdentitySetters;
+import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
@@ -40,6 +41,7 @@ import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.AbstractForeignImplementationManifest;
+import de.ims.icarus.model.standard.manifest.ImplementationManifestImpl;
 
 /**
  * @author Markus Gärtner
@@ -143,5 +145,17 @@ public class AbstractForeignImplementationManifestTest extends ManifestTestCase<
 		manifest.clearImplementationManifest();
 
 		assertNull(manifest.getImplementationManifest());
+	}
+
+	@Test
+	public void testXmlEmpty() throws Exception {
+		assertSerializationEquals(manifest, newInstance());
+	}
+
+	@Test
+	public void testXmlImplementation() throws Exception {
+		manifest.setImplementationManifest(new ImplementationManifestImpl(location, registry));
+
+		assertSerializationEquals(manifest, newInstance());
 	}
 }

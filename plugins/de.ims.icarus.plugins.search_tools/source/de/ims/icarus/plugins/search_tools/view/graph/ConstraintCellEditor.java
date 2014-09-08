@@ -460,6 +460,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		return isVertex ? context.getNodeFactories() : context.getEdgeFactories();
 	}
 
+	private ConstraintContext getContext() {
+		return getPresenter().getConstraintContext();
+	}
+
 	public static String createConstraintId() {
 		return "constraint_"+idGen.incrementAndGet(); //$NON-NLS-1$
 	}
@@ -642,22 +646,26 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 				list.add(constraint);
 			}
 
+			ConstraintContext context = getContext();
+
 			List<ConstraintFactory> factories = getFactories(isVertex);
 			for(ConstraintFactory factory : factories) {
 				int min = SearchUtils.getMinInstanceCount(factory);
 				int max = SearchUtils.getMaxInstanceCount(factory);
 				List<SearchConstraint> items = cmap.get(factory.getToken());
 				// Ignore unused constraint types
-				if(items==null || items.isEmpty()) {
+				if((items==null || items.isEmpty()) && !context.isRequired(factory.getToken())) {
 					continue;
 //					items = Collections.emptyList();
 				}
 
-				max = Math.min(max, items.size());
+				int size = items==null ? 0 : items.size();
+
+				max = Math.min(max, size);
 				min = Math.max(min, max);
 				for(int i=0; i<min; i++) {
 					ConstraintFormEntry entry = newEntry(factory);
-					if(i<items.size()) {
+					if(i<size) {
 						entry.setValue(items.get(i));
 					}
 					formBuilder.addEntry(createConstraintId(), entry);

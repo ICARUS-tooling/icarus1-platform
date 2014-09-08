@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -59,6 +60,11 @@ public class IndexManifestImplTest implements ManifestTestConstants {
 		driverManifest = mock(DriverManifest.class);
 
 		manifest = new IndexManifestImpl(driverManifest);
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(manifest);
 	}
 
 	@Test

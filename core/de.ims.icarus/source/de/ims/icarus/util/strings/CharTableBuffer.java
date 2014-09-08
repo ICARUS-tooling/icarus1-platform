@@ -85,6 +85,8 @@ public class CharTableBuffer {
 
 	private RowFilter rowFilter;
 
+	private int blockBegin, blockEnd = 0;
+
 	// Cursor cursorCache
 	private Stack<Cursor> cursorCache = new Stack<>();
 	private Map<String, Matcher> regexCache;
@@ -98,6 +100,12 @@ public class CharTableBuffer {
 		this.columns = columns;
 
 		this.rows = new Row[rows];
+	}
+
+	public String getErrorMessage(String prefix) {
+		return String.format(
+				"%s - error in block:\n==== starting at line %d\n%s\n==== ending at line %d", //$NON-NLS-1$
+				prefix, getBlockBegin(), toString(), getBlockEnd());
 	}
 
 	public void startReading(Reader reader) throws IOException {
@@ -119,6 +127,7 @@ public class CharTableBuffer {
 		if(reader==null)
 			throw new IllegalStateException("No reader initialized"); //$NON-NLS-1$
 
+		int lines = 0;
 		height = 0;
 
 		//TODO read empty lines till first content or end of stream?
@@ -131,12 +140,14 @@ public class CharTableBuffer {
 				truncate();
 				break line_loop;
 			} else if(rowFilter==null) {
+				lines++;
 				// If no custom row handling is defined use the first empty row as delimiter
 				if(row.length()==0) {
 					truncate();
 					break line_loop;
 				}
 			} else {
+				lines++;
 				// Allow custom filter to decide
 				switch (rowFilter.getRowAction(row)) {
 				case END_OF_TABLE:
@@ -151,6 +162,11 @@ public class CharTableBuffer {
 					break;
 				}
 			}
+		}
+
+		if(lines>0) {
+			blockBegin = blockEnd+1;
+			blockEnd = blockBegin+lines-1;
 		}
 
 		return height>0;
@@ -349,6 +365,41 @@ public class CharTableBuffer {
 
 		matcher.reset();
 		regexCache.put(matcher.pattern().pattern(), matcher);
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		if(isEmpty()) {
+			sb.append("<empty buffer>"); //$NON-NLS-1$
+		} else {
+			for(int i=0; i<getRowCount(); i++) {
+				if(i>0) {
+					sb.append('\n');
+				}
+				sb.append(getRow(i).toString());
+			}
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * @return the blockBegin
+	 */
+	public int getBlockBegin() {
+		return blockBegin;
+	}
+
+	/**
+	 * @return the blockEnd
+	 */
+	public int getBlockEnd() {
+		return blockEnd;
 	}
 
 	public class Cursor extends Splitable {

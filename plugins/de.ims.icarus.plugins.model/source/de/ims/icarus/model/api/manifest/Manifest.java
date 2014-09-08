@@ -96,4 +96,6 @@ public interface Manifest {
 	CorpusRegistry getRegistry();
 
 	ManifestLocation getManifestLocation();
+
+	VersionManifest getVersionManifest();
 }

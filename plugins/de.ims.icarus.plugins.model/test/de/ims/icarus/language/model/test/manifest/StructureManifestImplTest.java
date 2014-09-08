@@ -30,8 +30,11 @@ import static de.ims.icarus.language.model.test.TestUtils.assertTemplateGetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdSetterSpec;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdentitySetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,6 +70,7 @@ public class StructureManifestImplTest extends ManifestTestCase<StructureManifes
 		testConsistency();
 
 		assertNull(manifest.getLayerManifest());
+		assertEquals(StructureManifest.DEFAULT_MULTI_ROOT_VALUE, manifest.isMultiRootAllowed());
 	}
 
 	@Test
@@ -124,6 +128,15 @@ public class StructureManifestImplTest extends ManifestTestCase<StructureManifes
 	public void testSetStructureTypeNull() throws Exception {
 		thrown.expect(NullPointerException.class);
 		manifest.setStructureType(null);
+	}
+
+	@Test
+	public void testSetMultiRootAllowed() throws Exception {
+		manifest.setMultiRootAllowed(true);
+		assertTrue(manifest.isMultiRootAllowed());
+
+		manifest.setMultiRootAllowed(false);
+		assertFalse(manifest.isMultiRootAllowed());
 	}
 
 	// TEMPLATE TESTS

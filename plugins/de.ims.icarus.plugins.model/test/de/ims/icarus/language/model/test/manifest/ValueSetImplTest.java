@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.test.manifest;
 
 import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.TestUtils.getTestValues;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertNotNull;
@@ -90,6 +91,11 @@ public class ValueSetImplTest {
 
 		assertHashEquals(valueSet1, valueSet2);
 		assertHashEquals(valueSet1, valueSet1);
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(new ValueSetImpl(ValueType.STRING));
 	}
 
 	@Test

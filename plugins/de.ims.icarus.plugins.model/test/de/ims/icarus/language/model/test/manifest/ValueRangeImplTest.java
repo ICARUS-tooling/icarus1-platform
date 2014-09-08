@@ -26,13 +26,13 @@
 package de.ims.icarus.language.model.test.manifest;
 
 import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.TestUtils.getTestValues;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -61,7 +61,7 @@ public class ValueRangeImplTest {
 
 		assertNotNull("Test value array", values); //$NON-NLS-1$
 
-		assumeFalse("Test values array too small", values.length<2); //$NON-NLS-1$
+		assertFalse("Test values array too small", values.length<2); //$NON-NLS-1$
 
 		Object lower = values[0];
 		Object upper = values[1];
@@ -106,6 +106,11 @@ public class ValueRangeImplTest {
 
 		assertHashEquals(valueRange1, valueRange2);
 		assertHashEquals(valueRange1, valueRange1);
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(new ValueRangeImpl(ValueType.STRING));
 	}
 
 	@Test

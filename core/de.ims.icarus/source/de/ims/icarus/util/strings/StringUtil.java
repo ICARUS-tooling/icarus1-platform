@@ -130,7 +130,7 @@ public final class StringUtil {
 				return false;
 			}
 
-			for(int i=cs.length()-1; i>0; i--) {
+			for(int i=cs.length()-1; i>=0; i--) {
 				if(cs.charAt(i)!=other.charAt(i)) {
 					return false;
 				}
@@ -398,6 +398,16 @@ public final class StringUtil {
 
 	private static DecimalFormat fractionDecimalFormat = new DecimalFormat("#,##0.00"); //$NON-NLS-1$
 
+	public static String formatDecimal(double value) {
+		synchronized (fractionDecimalFormat) {
+			return fractionDecimalFormat.format(value);
+		}
+	}
+	public static String formatDecimal(float value) {
+		synchronized (fractionDecimalFormat) {
+			return fractionDecimalFormat.format(value);
+		}
+	}
 	public static String formatShortenedDecimal(double value) {
 		synchronized (fractionDecimalFormat) {
 			if(value>=1_000_000_000)

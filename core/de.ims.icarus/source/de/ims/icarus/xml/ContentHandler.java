@@ -33,7 +33,7 @@ public abstract class ContentHandler extends DefaultHandler {
 	}
 
 	protected String getText() {
-		String text = textBuffer.toString();
+		String text = textBuffer.toString().trim();
 		clearText();
 		return text;
 	}

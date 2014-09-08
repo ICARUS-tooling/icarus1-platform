@@ -49,6 +49,7 @@ import de.ims.icarus.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.model.api.manifest.ValueManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
+import de.ims.icarus.model.api.manifest.VersionManifest;
 import de.ims.icarus.model.util.types.ValueType;
 import de.ims.icarus.model.xml.sax.IconWrapper;
 import de.ims.icarus.plugins.PluginUtil;
@@ -249,6 +250,21 @@ public class ModelXmlUtils implements ModelXmlAttributes, ModelXmlTags {
 		serializer.endElement(TAG_CODE);
 
 		serializer.endElement(TAG_EVAL);
+	}
+
+	public static void writeVersionElement(XmlSerializer serializer, VersionManifest version) throws Exception {
+		if(version.getVersionString()==null)
+			throw new IllegalArgumentException("Invalid version string in manifest"); //$NON-NLS-1$
+
+		serializer.startElement(TAG_VERSION);
+
+		// ATTRIBUTES
+		serializer.writeAttribute(ATTR_VERSION_FORMAT, version.getFormatId());
+
+		// CONTENT
+		serializer.writeCData(version.getVersionString());
+
+		serializer.endElement(TAG_VERSION);
 	}
 
 	public static void writeOptionElement(XmlSerializer serializer, Option option) throws Exception {

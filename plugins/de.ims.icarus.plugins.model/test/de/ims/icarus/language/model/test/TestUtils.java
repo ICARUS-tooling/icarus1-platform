@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
@@ -71,6 +72,12 @@ public class TestUtils {
 
 	public static void assertHashEquals(Object expected, Object actual) {
 		assertHashEquals(null, expected, actual);
+	}
+
+	public static void assertObjectContract(Object obj) {
+		assertFalse(obj.equals(null));
+		assertFalse(obj.equals(new Dummy()));
+		assertNotNull(obj.toString());
 	}
 
 	public static void assertHashEquals(String message, Object expected, Object actual) {

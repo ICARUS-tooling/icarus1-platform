@@ -378,7 +378,9 @@
 		<parameter id="token" value="range" />
 		<parameter id="token" value="id" />
 		<parameter id="token" value="direction" />
-		<parameter id="token" value="spanProperty" />
+		<parameter id="token" value="spanProperty">
+			<parameter id="required" value="true" />
+		</parameter>
 		<parameter id="token" value="edgeProperty" />
 		<parameter id="token" value="sentenceProperty" />
 		<parameter id="token" value="headProperty" />

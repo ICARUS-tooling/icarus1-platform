@@ -185,6 +185,7 @@ public class StructureLayerManifestImplTest extends ManifestTestCase<StructureLa
 		assertSame(containerManifest3, manifest.getContainerManifest(2));
 
 		assertSame(containerManifest1, manifest.getRootContainerManifest());
+		assertSame(containerManifest2, manifest.getRootStructureManifest());
 	}
 
 	@Test

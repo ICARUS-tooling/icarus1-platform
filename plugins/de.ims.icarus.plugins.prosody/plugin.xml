@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="de.ims.icarus.prosody" version="0.0.1"
+	class="de.ims.icarus.plugins.prosody.ProsodyPlugin">
+	
+	<doc>
+		<doc-text>
+			TODO
+		</doc-text>
+	</doc>
+	
+	<attributes>
+		<attribute id="de.ims.icarus.resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<attribute id="de.ims.icarus.icons" value="de/ims/icarus/plugins/prosody/icons/" />
+		<attribute id="de.ims.icarus.preferences" value="de.ims.icarus.plugins.prosody.ProsodyPreferences" />
+	</attributes>
+	
+	<requires>
+		<import plugin-id="de.ims.icarus.core" />
+		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.searchTools" />
+		<import plugin-id="de.ims.icarus.jgraph" />
+		<import plugin-id="de.ims.icarus.coref" />
+	</requires>
+	
+	<runtime>
+		<library id="source" path="." type="code">
+			<export prefix="*" />
+		</library>
+	</runtime>
+	
+	<!-- Extension-Points -->
+	
+	<!-- Standard Extensions -->
+	
+	<!-- PERSPECTIVES AND VIEWS -->
+	
+	<!-- HELPERS -->
+	
+	<extension id="ProsodyDocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
+		<parameter id="name" value="plugins.prosody.prosodyDocumentReader.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodyDocumentReader.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.ProsodyDocumentReader" />
+	</extension>
+	
+	<extension id="ProsodyOutlinePresenter" plugin-id="de.ims.icarus.coref" point-id="CoreferencePresenter">
+		<parameter id="name" value="plugins.prosody.prosodyOutlinePresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodyOutlinePresenter.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.outline.ProsodyOutlinePresenter" />
+	</extension>
+	
+	<!-- CONTENT TYPES -->
+	
+	<extension id="ProsodicDocumentDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.prosody.ProsodicDocumentData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.ProsodicDocumentData" />
+	</extension>
+	
+	<extension id="ProsodicSentenceDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.prosody.ProsodicSentenceData
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.ProsodicSentenceData" />
+	</extension>
+	
+	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
+	
+</plugin>

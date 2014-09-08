@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools;
@@ -59,9 +59,9 @@ public class SearchToolsPlugin extends Plugin {
 		registerSearchOperators();
 		registerConstraintFactories();
 	}
-	
+
 	private void registerSearchOperators() {
-		
+
 		SearchOperator.register(DefaultSearchOperator.EQUALS);
 		SearchOperator.register(DefaultSearchOperator.EQUALS_NOT);
 		SearchOperator.register(DefaultSearchOperator.MATCHES);
@@ -79,12 +79,12 @@ public class SearchToolsPlugin extends Plugin {
 				SearchOperator operator = (SearchOperator)PluginUtil.instantiate(extension);
 				SearchOperator.register(operator);
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to register search-operator: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
 		}
 	}
-	
+
 	/**
 	 * Load and register all content types that are defined at plug-in manifest level
 	 */
@@ -94,32 +94,37 @@ public class SearchToolsPlugin extends Plugin {
 
 				Extension.Parameter contentTypeParam = extension.getParameter("contentType"); //$NON-NLS-1$
 				ContentType contentType = ContentTypeRegistry.getInstance().getType(contentTypeParam.valueAsExtension());
-				
+
 				ConstraintContext context = SearchManager.getInstance().getConstraintContext(contentType);
-							
+
 				for(Extension.Parameter tokenParam : extension.getParameters("token")) { //$NON-NLS-1$
 					String token = tokenParam.valueAsString();
 					try {
 						context.addToken(token);
 					}catch(Exception e) {
-						LoggerFactory.log(this, Level.SEVERE, 
+						LoggerFactory.log(this, Level.SEVERE,
 								"Failed to add token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					
+
+					Extension.Parameter requiredParam = tokenParam.getSubParameter("required"); //$NON-NLS-1$
+					if(requiredParam!=null && requiredParam.valueAsBoolean()) {
+						context.addRequiredToken(token);
+					}
+
 					for(Extension.Parameter aliasParam : tokenParam.getSubParameters("alias")) { //$NON-NLS-1$
 						String alias = aliasParam.valueAsString();
 						try {
 							context.addAlias(alias, token);
 						}catch(Exception e) {
-							LoggerFactory.log(this, Level.SEVERE, 
+							LoggerFactory.log(this, Level.SEVERE,
 									"Failed to add alias '"+alias+"' for token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					}
 				}
-				
+
 				PluginUtil.activatePlugin(extension);
 				ClassLoader loader = PluginUtil.getClassLoader(extension);
-				
+
 				for(Extension.Parameter factoryParam : extension.getParameter("factories").getSubParameters()) {  //$NON-NLS-1$
 					String token = factoryParam.getId();
 					String factoryClassName = factoryParam.rawValue();
@@ -127,13 +132,13 @@ public class SearchToolsPlugin extends Plugin {
 						ClassProxy proxy = new ClassProxy(factoryClassName, loader);
 						context.registerFactory(token, proxy);
 					} catch(Exception e) {
-						LoggerFactory.log(this, Level.SEVERE, 
+						LoggerFactory.log(this, Level.SEVERE,
 								"Failed to register factory '"+factoryClassName+"' for token '"+token+" in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
-			
+
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to register constraint context: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
 		}

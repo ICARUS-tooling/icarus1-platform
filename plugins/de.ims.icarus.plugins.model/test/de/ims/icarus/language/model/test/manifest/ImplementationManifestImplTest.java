@@ -30,7 +30,9 @@ import static de.ims.icarus.language.model.test.TestUtils.assertTemplateGetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdSetterSpec;
 import static de.ims.icarus.language.model.test.manifest.ManifestTestUtils.assertIdentitySetters;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -85,6 +87,11 @@ public class ImplementationManifestImplTest extends ManifestTestCase<Implementat
 	@Test
 	public void testConstructorConsistency() throws Exception {
 		testConsistency();
+
+		assertNull(manifest.getSource());
+		assertNull(manifest.getClassname());
+		assertEquals(ImplementationManifest.DEFAULT_USE_FACTORY_VALUE, manifest.isUseFactory());
+		assertSame(SourceType.DEFAULT, manifest.getSourceType());
 	}
 
 	@Test

@@ -26,9 +26,12 @@
 package de.ims.icarus.language.model.test.manifest;
 
 import static de.ims.icarus.language.model.test.TestUtils.assertHashEquals;
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.TestUtils.getTestValue;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,8 +43,10 @@ import org.junit.rules.ExpectedException;
 
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.OptionsManifest.Option;
+import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl.OptionImpl;
+import de.ims.icarus.model.standard.manifest.ValueRangeImpl;
 import de.ims.icarus.model.standard.manifest.ValueSetImpl;
 import de.ims.icarus.model.util.types.UnsupportedValueTypeException;
 import de.ims.icarus.model.util.types.ValueType;
@@ -61,6 +66,11 @@ public class OptionImplTest implements ManifestTestConstants {
 	@Before
 	public void prepare() {
 		option = new OptionImpl(TEST_ID, ValueType.STRING);
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(option);
 	}
 
 	@Test
@@ -89,14 +99,14 @@ public class OptionImplTest implements ManifestTestConstants {
 		ValueSet legalValues = mock(ValueSet.class);
 		when(legalValues.getValueType()).thenReturn(valueType);
 
-		option.setValues(legalValues);
+		option.setSupportedValues(legalValues);
 
 		ValueSet illegalValues = mock(ValueSet.class);
 		when(illegalValues.getValueType()).thenReturn(ValueType.UNKNOWN);
 
 
 		try {
-			option.setValues(illegalValues);
+			option.setSupportedValues(illegalValues);
 			fail("Accepted object set as "+valueType+" value set"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch(IllegalArgumentException e) {
 			// no-op
@@ -108,7 +118,7 @@ public class OptionImplTest implements ManifestTestConstants {
 
 		option.setDefaultValue(getTestValue(valueType));
 
-		option.setValues(new ValueSetImpl(valueType));
+		option.setSupportedValues(new ValueSetImpl(valueType));
 
 		assertSerializationEquals(option, new OptionImpl(TEST_ID, valueType));
 	}
@@ -233,6 +243,42 @@ public class OptionImplTest implements ManifestTestConstants {
 	public void testInvalidGroupBegin() throws Exception {
 		thrown.expect(IllegalArgumentException.class);
 		option.setOptionGroup(INVALID_ID_BEGIN);
+	}
+
+	@Test
+	public void testSetValues() throws Exception {
+		option.setSupportedValues(null);
+		assertNull(option.getSupportedValues());
+
+		ValueSet valueSet = mock(ValueSet.class);
+		when(valueSet.getValueType()).thenReturn(ValueType.STRING);
+
+		option.setSupportedValues(valueSet);
+		assertSame(valueSet, option.getSupportedValues());
+	}
+
+	@Test
+	public void testSetValuesIncompatible() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		option.setSupportedValues(new ValueSetImpl(ValueType.INTEGER));
+	}
+
+	@Test
+	public void testSetRange() throws Exception {
+		option.setSupportedRange(null);
+		assertNull(option.getSupportedRange());
+
+		ValueRange valueRange = mock(ValueRange.class);
+		when(valueRange.getValueType()).thenReturn(ValueType.STRING);
+
+		option.setSupportedRange(valueRange);
+		assertSame(valueRange, option.getSupportedRange());
+	}
+
+	@Test
+	public void testSetRangeIncompatible() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		option.setSupportedRange(new ValueRangeImpl(ValueType.INTEGER));
 	}
 
 	@Test

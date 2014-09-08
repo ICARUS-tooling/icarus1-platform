@@ -137,11 +137,11 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 	}
 
 	private void fillPrerequisites(ContextManifestImpl manifest) {
-		PrerequisiteManifestImpl prerequisiteManifest1 = manifest.addPrerequisite(PREREQUISITE_ALIAS_1, null);
+		PrerequisiteManifestImpl prerequisiteManifest1 = manifest.addPrerequisite(PREREQUISITE_ALIAS_1);
 		prerequisiteManifest1.setContextId(FOREIGN_CONTEX_ID);
 		prerequisiteManifest1.setLayerId(FOREIGN_LAYER_ID_1);
 
-		PrerequisiteManifestImpl prerequisiteManifest2 = manifest.addPrerequisite(PREREQUISITE_ALIAS_2, null);
+		PrerequisiteManifestImpl prerequisiteManifest2 = manifest.addPrerequisite(PREREQUISITE_ALIAS_2);
 		prerequisiteManifest2.setContextId(FOREIGN_CONTEX_ID);
 		prerequisiteManifest2.setLayerId(FOREIGN_LAYER_ID_2);
 	}
@@ -176,6 +176,10 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 		testConsistency();
 
 		assertNull(manifest.getCorpusManifest());
+		assertNull(manifest.getBaseLayerManifest());
+
+		thrown.expect(IllegalStateException.class);
+		assertNull(manifest.getPrimaryLayerManifest());
 	}
 
 	@Test
@@ -207,6 +211,29 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 
 		thrown.expect(ModelException.class);
 		new ContextManifestImpl(manifestLocation, registry, null);
+	}
+
+	@Test
+	public void testGetLayerManifestNull() throws Exception {
+		thrown.expect(NullPointerException.class);
+		manifest.getLayerManifest(null);
+	}
+
+	@Test
+	public void testGetLayerManifestUnknown() throws Exception {
+		thrown.expect(ModelException.class);
+		manifest.getLayerManifest(UNKNOWN_ID);
+	}
+
+	@Test
+	public void testGetPrerequisiteNull() throws Exception {
+		thrown.expect(NullPointerException.class);
+		manifest.getPrerequisite(null);
+	}
+
+	@Test
+	public void testGetPrerequisiteUnknown() throws Exception {
+		assertNull(manifest.getPrerequisite(UNKNOWN_ID));
 	}
 
 	// MODIFICATION TESTS
@@ -310,12 +337,24 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 	}
 
 	@Test
+	public void testSetPrimaryLayerNull() throws Exception {
+		thrown.expect(NullPointerException.class);
+		manifest.setPrimaryLayerId(null);
+	}
+
+	@Test
 	public void testSetBaseLayer() throws Exception {
 
 		fillGroups(manifest);
 		fillBaseLayer(manifest);
 
 		assertEquals(LAYER_ID_1, manifest.getBaseLayerManifest().getId());
+	}
+
+	@Test
+	public void testSetBaseLayerNull() throws Exception {
+		thrown.expect(NullPointerException.class);
+		manifest.setBaseLayerId(null);
 	}
 
 	@Test
@@ -330,15 +369,15 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 	@Test
 	public void testAddPrerequisiteNull() throws Exception {
 		thrown.expect(NullPointerException.class);
-		manifest.addPrerequisite(null, null);
+		manifest.addPrerequisite(null);
 	}
 
 	@Test
 	public void testAddPrerequisiteDuplicate() throws Exception {
-		manifest.addPrerequisite(PREREQUISITE_ALIAS_1, null);
+		manifest.addPrerequisite(PREREQUISITE_ALIAS_1);
 
 		thrown.expect(IllegalArgumentException.class);
-		manifest.addPrerequisite(PREREQUISITE_ALIAS_1, null);
+		manifest.addPrerequisite(PREREQUISITE_ALIAS_1);
 	}
 
 	@Test
@@ -349,17 +388,27 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 		LayerManifest foreignLayer2 = mock(LayerManifest.class);
 		when(foreignLayer2.getId()).thenReturn(FOREIGN_LAYER_ID_2);
 
-		ContextManifest foreignContest = mock(ContextManifest.class);
-		when(foreignContest.getId()).thenReturn(FOREIGN_CONTEX_ID);
-		when(foreignContest.getLayerManifest(FOREIGN_LAYER_ID_1)).thenReturn(foreignLayer1);
-		when(foreignContest.getLayerManifest(FOREIGN_LAYER_ID_2)).thenReturn(foreignLayer2);
+		ContextManifest foreignContext = mock(ContextManifest.class);
+		when(foreignContext.getId()).thenReturn(FOREIGN_CONTEX_ID);
+		when(foreignContext.getLayerManifest(FOREIGN_LAYER_ID_1)).thenReturn(foreignLayer1);
+		when(foreignContext.getLayerManifest(FOREIGN_LAYER_ID_2)).thenReturn(foreignLayer2);
 
 		CorpusManifest corpusManifest = mock(CorpusManifest.class);
-		when(corpusManifest.getContextManifest(FOREIGN_CONTEX_ID)).thenReturn(foreignContest);
+		when(corpusManifest.getContextManifest(FOREIGN_CONTEX_ID)).thenReturn(foreignContext);
 
 		manifest = new ContextManifestImpl(location, registry, corpusManifest);
 		fillIdentity(manifest);
-		fillPrerequisites(manifest);
+
+		PrerequisiteManifestImpl prerequisiteManifest1 = manifest.addPrerequisite(PREREQUISITE_ALIAS_1);
+		prerequisiteManifest1.setContextId(FOREIGN_CONTEX_ID);
+		prerequisiteManifest1.setLayerId(FOREIGN_LAYER_ID_1);
+
+		PrerequisiteManifestImpl prerequisiteManifest2 = manifest.addPrerequisite(PREREQUISITE_ALIAS_2);
+		prerequisiteManifest2.setContextId(FOREIGN_CONTEX_ID);
+		prerequisiteManifest2.setLayerId(FOREIGN_LAYER_ID_2);
+
+		assertSame("prerequisite 1", prerequisiteManifest1, manifest.getPrerequisite(PREREQUISITE_ALIAS_1));
+		assertSame("prerequisite 2", prerequisiteManifest2, manifest.getPrerequisite(PREREQUISITE_ALIAS_2));
 
 		assertSame("foreign layer 1", foreignLayer1, manifest.getLayerManifest(PREREQUISITE_ALIAS_1)); //$NON-NLS-1$
 		assertSame("foreign layer 2", foreignLayer2, manifest.getLayerManifest(PREREQUISITE_ALIAS_2)); //$NON-NLS-1$

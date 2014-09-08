@@ -133,10 +133,16 @@ public final class CONLL12Utils {
 		TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
 
 		while(buffer.next()) {
-			if(result==null) {
-				result = documentSet.newDocument(blockHandler.getExpectedId());
+			try {
+				if(result==null) {
+					result = documentSet.newDocument(blockHandler.getExpectedId());
+				}
+				createData(result, buffer, clusterMap);
+			} catch(Exception e) {
+				// Cannot be IOException or UnsupportedFormatException
+
+				throw new IOException(buffer.getErrorMessage("Failed to read CoNLL12 data"), e); //$NON-NLS-1$
 			}
-			createData(result, buffer, clusterMap);
 		}
 
 		if(result!=null) {

@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.model.test.manifest;
 
+import static de.ims.icarus.language.model.test.TestUtils.assertObjectContract;
 import static de.ims.icarus.language.model.test.manifest.ManifestXmlTestUtils.assertSerializationEquals;
 import static org.junit.Assert.assertSame;
 
@@ -58,6 +59,11 @@ public class PathEntryImplTest implements ManifestTestConstants {
 		pathEntry.setValue(TEST_PATH);
 
 		assertSerializationEquals(pathEntry, new PathEntryImpl());
+	}
+
+	@Test
+	public void testObjectContract() throws Exception {
+		assertObjectContract(pathEntry);
 	}
 
 	@Test

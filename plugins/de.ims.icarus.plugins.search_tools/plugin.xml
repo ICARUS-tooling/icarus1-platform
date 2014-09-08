@@ -65,6 +65,14 @@
 					</doc-text>
 				</doc>
 			</parameter-def>
+			<parameter-def id="required" multiplicity="none-or-one" type="boolean" default-value="false">
+				<doc>
+					<doc-text>
+						Indicates whether a constraint is required to be displayed 
+						in the user interface.
+					</doc-text>
+				</doc>
+			</parameter-def>
 		</parameter-def>
 		<parameter-def id="factories" multiplicity="one" type="any">
 			<doc>

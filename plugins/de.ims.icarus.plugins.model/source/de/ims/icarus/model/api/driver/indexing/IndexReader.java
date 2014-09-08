@@ -42,6 +42,10 @@ import de.ims.icarus.model.io.SynchronizedAccessor;
  */
 public interface IndexReader extends SynchronizedAccessor<Index> {
 
+	/**
+	 * Constant for indicating that an index value does not represent an actually
+	 * valid value.
+	 */
 	public static final long INVALID = -1L;
 
 	// Single index lookups
