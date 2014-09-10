@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody.ui.view.outline;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -43,11 +44,13 @@ import java.text.DecimalFormat;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -55,11 +58,20 @@ import javax.swing.event.ChangeListener;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 
+import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
+import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.sound.SoundException;
+import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
+import de.ims.icarus.plugins.prosody.sound.SoundPlayer;
+import de.ims.icarus.plugins.prosody.sound.SoundPlayer.SoundFile;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
+import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
+import de.ims.icarus.plugins.prosody.ui.geom.PaIntEHitBox;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEParams;
-import de.ims.icarus.plugins.prosody.ui.geom.PaIntEPoint;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
@@ -79,6 +91,7 @@ public class SentencePanel extends JPanel{
 
 //	private JToggleButton toggleExpandButton;
 	private JToggleButton toggleDetailsButton;
+	private JButton playSentenceButton;
 
 	private WordCursorModel wordCursorModel;
 	private JSlider wordCursor;
@@ -87,6 +100,7 @@ public class SentencePanel extends JPanel{
 	private Handler handler;
 
 	private JLabel sentenceLabel;
+	private JLabel headerLabel;
 	private JLabel curveLabel;
 	private Icon curveIcon = new Icon() {
 
@@ -108,26 +122,11 @@ public class SentencePanel extends JPanel{
 		}
 	};
 
-	public static Color DEFAULT_CURVE_COLOR = Color.black;
-	public static AntiAliasingType DEFAULT_ANTIALIASING_TYPE = AntiAliasingType.DEFAULT;
-	public static final int DEFAULT_GRAPH_HEIGHT = 90;
-	public static final int DEFAULT_GRAPH_WIDTH = 120;
-	public static final int DEFAULT_WORD_SCOPE = 1;
-	public static final boolean  DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED = true;
-	public static final int DEFAULT_WORD_SPACING = 3;
-	public static final int DEFAULT_GRAPH_SPACING = 2;
-
-	private Color curveColor = DEFAULT_CURVE_COLOR;
-	private AntiAliasingType antiAliasingType = DEFAULT_ANTIALIASING_TYPE;
-	private int wordScope = DEFAULT_WORD_SCOPE;
 	private int currentWord = -1;
 	private PaIntEGraph graph = new PaIntEGraph();
 	private PaIntEParams params = new PaIntEParams();
-	private int graphHeight = DEFAULT_GRAPH_HEIGHT;
-	private int graphWidth = DEFAULT_GRAPH_WIDTH;
-	private int wordSpacing = DEFAULT_WORD_SPACING;
-	private int graphSpacing = DEFAULT_GRAPH_SPACING;
-	private boolean mouseWheelScrollSupported = DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED;
+
+	private final PanelConfig config;
 
 	private double translationAccuracy = 0.05;
 
@@ -136,7 +135,12 @@ public class SentencePanel extends JPanel{
 			BorderFactory.createLineBorder(Color.lightGray),
 			BorderFactory.createEmptyBorder(0, 1, 0, 1));
 
-	public SentencePanel() {
+	public SentencePanel(PanelConfig config) {
+		if (config == null)
+			throw new NullPointerException("Invalid config"); //$NON-NLS-1$
+
+		this.config = config;
+
 		handler = new Handler();
 
 		IconRegistry iconRegistry = IconRegistry.getGlobalRegistry();
@@ -173,9 +177,14 @@ public class SentencePanel extends JPanel{
 
 		// Sentence label
 		sentenceLabel = new JLabel();
-//		sentenceLabel.setVisible(toggleExpandButton.isSelected());
 		sentenceLabel.setOpaque(false);
 		add(sentenceLabel, CC.rc(4, 3));
+
+		// Header label (to the left)
+		headerLabel = new JLabel();
+		headerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		headerLabel.setOpaque(false);
+		add(headerLabel, CC.rc(4, 1));
 
 		// Cursor
 		wordCursorModel = new WordCursorModel();
@@ -186,6 +195,16 @@ public class SentencePanel extends JPanel{
 		wordCursor.addMouseListener(handler);
 		wordCursor.setOpaque(false);
 		add(wordCursor, CC.rc(2, 3));
+
+		// Button for playing entire sentence
+		playSentenceButton = new JButton();
+		playSentenceButton.setIcon(iconRegistry.getIcon("speaker.png")); //$NON-NLS-1$
+		playSentenceButton.setFocusable(false);
+		playSentenceButton.setFocusPainted(false);
+		playSentenceButton.setBorderPainted(false);
+		playSentenceButton.addActionListener(handler);
+		UIUtil.resizeComponent(playSentenceButton, 16, 16);
+		add(playSentenceButton, CC.rc(2, 1));
 
 		// Curve label
 		curveLabel = new JLabel();
@@ -199,6 +218,7 @@ public class SentencePanel extends JPanel{
 		detailPanel.setFocusable(false);
 		detailPanel.setOpaque(false);
 		detailPanel.addMouseListener(new TooltipFreezer());
+		detailPanel.addMouseListener(handler);
 		detailPanel.addMouseMotionListener(handler);
 		add(detailPanel, CC.rcw(1, 3, 2));
 
@@ -216,7 +236,7 @@ public class SentencePanel extends JPanel{
 		if (data == null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 
-		curveInfo = new CurveInfo(data, curveLabel.getFontMetrics(curveLabel.getFont()), antiAliasingType, curveColor);
+		curveInfo = new CurveInfo(data, curveLabel.getFontMetrics(curveLabel.getFont()), config.antiAliasingType, config.curveColor);
 
 		refresh();
 	}
@@ -225,6 +245,7 @@ public class SentencePanel extends JPanel{
 
 		if(curveInfo==null) {
 			sentenceLabel.setText(null);
+			headerLabel.setText(null);
 
 //			toggleExpandButton.setSelected(false);
 			toggleDetailsButton.setSelected(false);
@@ -233,6 +254,18 @@ public class SentencePanel extends JPanel{
 
 			// Refresh text + image
 			sentenceLabel.setText(curveInfo.getText());
+			headerLabel.setText((String) curveInfo.getSentence().getProperty(ProsodyConstants.SENTENCE_NUMBER_KEY));
+
+			// Refresh graph internals
+			Axis.Integer yAxis = (Axis.Integer)graph.getYAxis();
+			double stepSize = yAxis.getMarkerStepSize();
+			float maxD = curveInfo.getMaxD();
+			float minD = curveInfo.getMinD();
+			int yMax = (int) (Math.ceil(maxD/stepSize) * stepSize);
+			int yMin = (int) (Math.floor(minD/stepSize) * stepSize);
+			//TODO maybe we should iterate over all sentences to get the "real" outer boundaries?
+			yAxis.setMinValue(yMin);
+			yAxis.setMaxValue(yMax);
 
 			// Synchronize cursor
 //			wordCursor.setMaximum(curveInfo.getImage().getWidth());
@@ -255,6 +288,7 @@ public class SentencePanel extends JPanel{
 
 		wordCursor.setVisible(showDetails);
 		detailPanel.setVisible(showDetails);
+		playSentenceButton.setVisible(showDetails);
 
 		setBorder(showDetails ? expandedBorder : collapsedBorder);
 
@@ -281,7 +315,63 @@ public class SentencePanel extends JPanel{
 		detailPanel.repaint();
 	}
 
+	private void play(float beginOffset, float endOffset) {
+
+		if(beginOffset==LanguageConstants.DATA_UNDEFINED_VALUE
+				|| endOffset==LanguageConstants.DATA_UNDEFINED_VALUE) {
+			LoggerFactory.warning(this, String.format(
+					"Cannot play part of sentence - at least one offset is undefined: [%.02f , %.02f]", beginOffset, endOffset));
+			return;
+		}
+
+		try {
+			ProsodicSentenceData sentence = curveInfo.getSentence();
+
+			SoundPlayer player = SoundPlayer.getInstance();
+			SoundFile soundFile = player.getSoundFile(sentence);
+
+			if(!soundFile.isOpen()) {
+				player.open(soundFile);
+			}
+
+			soundFile.setStartOffset(beginOffset);
+			soundFile.setEndOffset(endOffset);
+			soundFile.setRepeating(config.loopSound);
+
+			player.start(soundFile);
+
+		} catch (SoundException e) {
+			LoggerFactory.error(this, "Failed to play sound for part of sentence '"+curveInfo.getText()+"'", e); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
+	private void playSentence() {
+		ProsodicSentenceData sentence = curveInfo.getSentence();
+		float beginOffset = SoundOffsets.getBeginOffset(sentence);
+		float endOffset = SoundOffsets.getEndOffset(sentence);
+
+		play(beginOffset, endOffset);
+	}
+
+	private void playWord(int wordIndex) {
+		ProsodicSentenceData sentence = curveInfo.getSentence();
+		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex);
+		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex);
+
+		play(beginOffset, endOffset);
+	}
+
+	private void playSyllable(int wordIndex, int sylIndex) {
+		ProsodicSentenceData sentence = curveInfo.getSentence();
+		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex, sylIndex);
+		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex, sylIndex);
+
+		play(beginOffset, endOffset);
+	}
+
 	private class Handler extends MouseAdapter implements ActionListener, ChangeListener {
+
+		private Cursor cursor;
 
 
 		/**
@@ -303,6 +393,8 @@ public class SentencePanel extends JPanel{
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource()==toggleDetailsButton) {
 				toggleDetails();
+			} else if(e.getSource()==playSentenceButton) {
+				playSentence();
 			}
 //			else if(e.getSource()==toggleExpandButton) {
 //				toggleExpand();
@@ -314,12 +406,13 @@ public class SentencePanel extends JPanel{
 		 */
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e) {
-			if(!mouseWheelScrollSupported) {
+			if(!config.mouseWheelScrollSupported) {
 				return;
 			}
 
 			if(e.getWheelRotation()<0) {
 				// Away from user => scroll left
+				//TODO ask whether this is the preferred direction
 				wordCursorModel.previousWord();
 			} else {
 				wordCursorModel.nextWord();
@@ -341,14 +434,36 @@ public class SentencePanel extends JPanel{
 		 */
 		@Override
 		public void mouseClicked(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				//TODO implement popup menu
+				return;
+			}
+
 			if(e.getSource()==wordCursor) {
 //				wordCursorModel.setIgnoreChanges(false);
 				int value = e.getPoint().x;
 				wordCursorModel.setValue(value);
+			} else if(e.getSource()==detailPanel) {
+				PaIntEHitBox hitBox = detailPanel.translate(e.getPoint());
+				if(hitBox==null) {
+					return;
+				}
+
+				switch (hitBox.getType()) {
+				case SYL_LABEL:
+					playSyllable(hitBox.getWordIndex(), hitBox.getSylIndex());
+					break;
+				case WORD_LABEL:
+					playWord(hitBox.getWordIndex());
+					break;
+
+				default:
+					break;
+				}
 			}
 		}
 
-		private final DecimalFormat decimalFormat = new DecimalFormat("#,###,###,##0.00");
+		private final DecimalFormat decimalFormat = new DecimalFormat("#,###,###,##0.00"); //$NON-NLS-1$
 
 		/**
 		 * @see java.awt.event.MouseAdapter#mouseMoved(java.awt.event.MouseEvent)
@@ -356,21 +471,88 @@ public class SentencePanel extends JPanel{
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			if(e.getSource()==detailPanel) {
-				PaIntEPoint point = detailPanel.translate(e.getPoint());
-
-				String tooltip = null;
-
-				if(point!=null) {
-					if(point.getAxis()!=null) {
-						tooltip = decimalFormat.format(point.getAxisValue());
-					} else {
-						tooltip = decimalFormat.format(point.getX())+'/'+decimalFormat.format(point.getY());
-					}
-				}
-
-				detailPanel.setToolTipText(tooltip);
+				refreshDetailPanel(e.getPoint());
 			}
 		}
+
+		private void refreshDetailPanel(Point p) {
+			PaIntEHitBox hitBox = detailPanel.translate(p);
+
+			String tooltip = null;
+			Cursor cursor = this.cursor;
+
+			if(hitBox!=null) {
+				switch (hitBox.getType()) {
+				case AXIS:
+					tooltip = decimalFormat.format(hitBox.getAxisValue());
+					break;
+
+				case CURVE:
+					tooltip = decimalFormat.format(hitBox.getX())+'/'+decimalFormat.format(hitBox.getY());
+					break;
+
+				case WORD_LABEL:
+				case SYL_LABEL:
+//					cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+					cursor = ProsodyUtils.getSpeakerCursor();
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			detailPanel.setCursor(cursor);
+			detailPanel.setToolTipText(tooltip);
+//			detailPanel.repaint();
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			if(e.getSource()==detailPanel) {
+				cursor = detailPanel.getCursor();
+				refreshDetailPanel(e.getPoint());
+			}
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseExited(MouseEvent e) {
+			if(e.getSource()==detailPanel) {
+				detailPanel.setCursor(cursor);
+				cursor = null;
+			}
+		}
+	}
+
+	public static class PanelConfig {
+
+		public static Color DEFAULT_CURVE_COLOR = Color.black;
+		public static AntiAliasingType DEFAULT_ANTIALIASING_TYPE = AntiAliasingType.DEFAULT;
+		public static final int DEFAULT_GRAPH_HEIGHT = 90;
+		public static final int DEFAULT_GRAPH_WIDTH = 120;
+		public static final int DEFAULT_WORD_SCOPE = 1;
+		public static final boolean  DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED = true;
+		public static final int DEFAULT_WORD_SPACING = 3;
+		public static final int DEFAULT_GRAPH_SPACING = 2;
+		public static final boolean  DEFAULT_CLEAR_LABEL_BACKGROUND = true;
+		public static final boolean  DEFAULT_LOOP_SOUND = false;
+
+		private Color curveColor = DEFAULT_CURVE_COLOR;
+		private AntiAliasingType antiAliasingType = DEFAULT_ANTIALIASING_TYPE;
+		private int wordScope = DEFAULT_WORD_SCOPE;
+		private int graphHeight = DEFAULT_GRAPH_HEIGHT;
+		private int graphWidth = DEFAULT_GRAPH_WIDTH;
+		private int wordSpacing = DEFAULT_WORD_SPACING;
+		private int graphSpacing = DEFAULT_GRAPH_SPACING;
+		private boolean mouseWheelScrollSupported = DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED;
+		private boolean clearLabelBackground = DEFAULT_CLEAR_LABEL_BACKGROUND;
+		private boolean loopSound = DEFAULT_LOOP_SOUND;
 	}
 
 	static final char SPACE = ' ';
@@ -407,10 +589,10 @@ public class SentencePanel extends JPanel{
 			int wordCount = lastWord-firstWord+1;
 
 			int width = wordCount*graph.getYAxis().getRequiredWidth(g)
-					+ (wordCount-1) * wordSpacing
-					+ sylCount * graphWidth
-					+ (sylCount - 2*wordCount) * graphSpacing;
-			int height = graphHeight+graph.getXAxis().getRequiredHeight(g)+g.getFontMetrics().getHeight();
+					+ (wordCount-1) * config.wordSpacing
+					+ sylCount * config.graphWidth
+					+ (sylCount - 2*wordCount) * config.graphSpacing;
+			int height = config.graphHeight+graph.getXAxis().getRequiredHeight(g)+g.getFontMetrics().getHeight();
 
 			g.dispose();
 
@@ -427,11 +609,11 @@ public class SentencePanel extends JPanel{
 
 			int leftSyl = curveInfo.firstSyl(currentWord);
 
-			if(wordScope>0) {
+			if(config.wordScope>0) {
 				int addedWords = 0;
 				int wordIndex = currentWord;
 				// Expand to the left
-				while(wordIndex>0 && addedWords<wordScope) {
+				while(wordIndex>0 && addedWords<config.wordScope) {
 					wordIndex--;
 					if(curveInfo.hasSyllables(wordIndex)) {
 						addedWords++;
@@ -450,11 +632,11 @@ public class SentencePanel extends JPanel{
 
 			int rightSyl = curveInfo.lastSyl(currentWord);
 
-			if(wordScope>0) {
+			if(config.wordScope>0) {
 				int addedWords = 0;
 				int wordIndex = currentWord;
 				// Expand to the left
-				while(wordIndex<curveInfo.getSentence().length()-1 && addedWords<wordScope) {
+				while(wordIndex<curveInfo.getSentence().length()-1 && addedWords<config.wordScope) {
 					wordIndex++;
 					if(curveInfo.hasSyllables(wordIndex)) {
 						addedWords++;
@@ -473,11 +655,11 @@ public class SentencePanel extends JPanel{
 
 			int result = currentWord;
 
-			if(wordScope>0) {
+			if(config.wordScope>0) {
 				int addedWords = 0;
 				int wordIndex = currentWord;
 				// Expand to the left
-				while(wordIndex>0 && addedWords<wordScope) {
+				while(wordIndex>0 && addedWords<config.wordScope) {
 					wordIndex--;
 					if(curveInfo.hasSyllables(wordIndex)) {
 						addedWords++;
@@ -496,11 +678,11 @@ public class SentencePanel extends JPanel{
 
 			int result = currentWord;
 
-			if(wordScope>0) {
+			if(config.wordScope>0) {
 				int addedWords = 0;
 				int wordIndex = currentWord;
 				// Expand to the left
-				while(wordIndex<curveInfo.getSentence().length()-1 && addedWords<wordScope) {
+				while(wordIndex<curveInfo.getSentence().length()-1 && addedWords<config.wordScope) {
 					wordIndex++;
 					if(curveInfo.hasSyllables(wordIndex)) {
 						addedWords++;
@@ -512,7 +694,7 @@ public class SentencePanel extends JPanel{
 			return result;
 		}
 
-		public PaIntEPoint translate(Point p) {
+		public PaIntEHitBox translate(Point p) {
 
 			if(curveInfo==null || curveInfo.sylCount()==0) {
 				return null;
@@ -524,19 +706,16 @@ public class SentencePanel extends JPanel{
 
 			Rectangle lastPaintArea = this.lastPaintArea;
 
-			if(lastPaintArea==null || !lastPaintArea.contains(p)) {
+			if(lastPaintArea==null || (p.y>=lastPaintArea.y && !lastPaintArea.contains(p))) {
 				return null;
 			}
 
-			p.translate(-lastPaintArea.x, -lastPaintArea.y);
+			int x = p.x-lastPaintArea.x;
+			int y = p.y;
 
 			Graphics2D g = (Graphics2D) getGraphics();
+			FontMetrics fm = g.getFontMetrics();
 			int yAxisWidth = graph.getYAxis().getRequiredWidth(g);
-
-			if(p.x<=yAxisWidth) {
-				Rectangle area = new Rectangle(0, 0, lastPaintArea.width, lastPaintArea.height);
-				return graph.translate(p, g, area, null, translationAccuracy);
-			}
 
 			int leftWord = getFirstWordToPaint();
 			int rightWord = getLastWordToPaint();
@@ -544,37 +723,74 @@ public class SentencePanel extends JPanel{
 			int wordCount = rightWord - leftWord + 1;
 
 			Rectangle area = new Rectangle();
+			area.y = fm.getHeight();
 
-			// Iterate over graph areas
+//			System.out.printf("x=%d y=%d fh=%d\n", x, y, fm.getHeight());
+
+			// Iterate over words
 			for(int i=0; i<wordCount; i++) {
 				if(i>0) {
-					area.x += wordSpacing;
+					area.x += config.wordSpacing;
 				}
 
+				int begin = area.x;
 				int wordIndex = leftWord+i;
 				int sylCount = curveInfo.sylCount(wordIndex);
 
+				// Iterate over syllables of word
 				for(int j=0; j<sylCount; j++) {
-					area.width = graphWidth;
+					area.width = config.graphWidth;
 					area.height = lastPaintArea.height;
 
 					if(j>0) {
-						area.x += graphSpacing;
+						area.x += config.graphSpacing;
 						graph.setPaintYAxis(false);
 					} else {
 						area.width += yAxisWidth;
 						graph.setPaintYAxis(true);
 					}
 
-					if(p.x<=area.x+area.width) {
+					if(area.contains(x, y)) {
+
+						String sylLabel = curveInfo.getSentence().getSyllableLabel(wordIndex, j);
+
+						// Label
+						if(sylLabel!=null) {
+							int sw = fm.stringWidth(sylLabel);
+							int sx = area.x + area.width/2 - sw/2;
+							int sy = area.y + fm.getHeight();
+
+							if(y<sy && x>=sx && x<=sx+sw) {
+								return new PaIntEHitBox(wordIndex, j);
+							}
+						}
+
 						params.setParams(curveInfo.getSentence(), wordIndex, j);
 
-						p.translate(-area.x, 0);
+						y -= area.y;
+						x -= area.x;
 
-						return graph.translate(p, g, area, params, translationAccuracy);
+						return graph.translate(x, y, g, area, params, translationAccuracy);
 					}
 
 					area.x += area.width;
+				}
+
+				int end = area.x;
+
+				String wordLabel = curveInfo.getSentence().getForm(wordIndex);
+
+				if(wordLabel!=null) {
+					int sw = fm.stringWidth(wordLabel);
+					int sx = (begin + end)/2 - sw/2;
+					int sy = fm.getHeight();
+
+//					System.out.printf("x=%d y=%d sw=%d sx=%d sy=%d area=%s\n",
+//							x, y, sw, sx, sy, area);
+
+					if(y<=sy && x>=sx && x<=sx+sw) {
+						return new PaIntEHitBox(wordIndex);
+					}
 				}
 			}
 
@@ -613,10 +829,10 @@ public class SentencePanel extends JPanel{
 			int xAxisHeight = graph.getXAxis().getRequiredHeight(g);
 
 			int width = wordCount*graph.getYAxis().getRequiredWidth(g)
-					+ (wordCount-1) * wordSpacing
-					+ graphCount * graphWidth
-					+ (graphCount - 2*wordCount) * graphSpacing;
-			int height = graphHeight+xAxisHeight;
+					+ (wordCount-1) * config.wordSpacing
+					+ graphCount * config.graphWidth
+					+ (graphCount - 2*wordCount) * config.graphSpacing;
+			int height = config.graphHeight+xAxisHeight;
 			int w = getWidth();
 
 			Rectangle area = new Rectangle();
@@ -635,10 +851,12 @@ public class SentencePanel extends JPanel{
 
 			lastPaintArea = new Rectangle(area.x, area.y, width, height);
 
+			Color bg = SentencePanel.this.getBackground();
+
 			// Paint graphs in blocks per word
 			for(int i=0; i<wordCount; i++) {
 				if(i>0) {
-					area.x += wordSpacing;
+					area.x += config.wordSpacing;
 				}
 
 				int begin = area.x;
@@ -646,11 +864,11 @@ public class SentencePanel extends JPanel{
 				int sylCount = curveInfo.sylCount(wordIndex);
 
 				for(int j=0; j<sylCount; j++) {
-					area.width = graphWidth;
+					area.width = config.graphWidth;
 					area.height = height;
 
 					if(j>0) {
-						area.x += graphSpacing;
+						area.x += config.graphSpacing;
 						graph.setPaintYAxis(false);
 					} else {
 						area.width += yAxisWidth;
@@ -665,8 +883,18 @@ public class SentencePanel extends JPanel{
 
 					// Label
 					if(sylLabel!=null) {
-						int x = area.x + area.width/2 - fm.stringWidth(sylLabel)/2;
+						int sw = fm.stringWidth(sylLabel);
+						int x = area.x + area.width/2 - sw/2;
 						int y = area.y + fm.getHeight();
+
+						if(config.clearLabelBackground) {
+							Color c = g.getColor();
+
+							g.setColor(bg);
+							g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
+
+							g.setColor(c);
+						}
 
 						g.drawString(sylLabel, x, y);
 					}
@@ -679,8 +907,18 @@ public class SentencePanel extends JPanel{
 				String wordLabel = curveInfo.getSentence().getForm(wordIndex);
 
 				if(wordLabel!=null) {
-					int x = (begin + end)/2 - fm.stringWidth(wordLabel)/2;
+					int sw = fm.stringWidth(wordLabel);
+					int x = (begin + end)/2 - sw/2;
 					int y = fm.getHeight();
+
+					if(config.clearLabelBackground) {
+						Color c = g.getColor();
+
+						g.setColor(bg);
+						g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
+
+						g.setColor(c);
+					}
 
 					g.drawString(wordLabel, x, y);
 				}
@@ -711,6 +949,10 @@ public class SentencePanel extends JPanel{
 			return wordIndex;
 		}
 
+		/**
+		 * Moves to the next valid word index (this is a word with
+		 * at least one designated syllable in it).
+		 */
 		public void nextWord() {
 			if(curveInfo==null) {
 				return;
@@ -733,6 +975,10 @@ public class SentencePanel extends JPanel{
 			setRangePropertiesUnchecked(getWordCenter(newWordIndex), getExtent(), getMinimum(), getMaximum(), getValueIsAdjusting());
 		}
 
+		/**
+		 * Moves to the previous valid word index (this is a word with
+		 * at least one designated syllable in it).
+		 */
 		public void previousWord() {
 			if(curveInfo==null) {
 				return;

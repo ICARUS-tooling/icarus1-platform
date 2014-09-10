@@ -28,7 +28,6 @@ package de.ims.icarus.plugins.prosody.ui.geom;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 
@@ -115,17 +114,17 @@ public class PaIntECurve {
 		g.setStroke(s);
 	}
 
-	public PaIntEPoint translate(Point p, Rectangle area, PaIntEParams params, double accuracy, Axis xAxis, Axis yAxis) {
-		final double x = xAxis.getMinValue() + (double)p.x/area.width * xAxis.getRange();
-		final double y = params.calc(x);
+	public PaIntEHitBox translate(int x, int y, Rectangle area, PaIntEParams params, double accuracy, Axis xAxis, Axis yAxis) {
+		final double vx = xAxis.getMinValue() + (double)x/area.width * xAxis.getRange();
+		final double vy = params.calc(vx);
 
-		final double dif = (yAxis.getMaxValue() - (double)p.y/area.height * yAxis.getRange()) - y;
+		final double dif = (yAxis.getMaxValue() - (double)y/area.height * yAxis.getRange()) - vy;
 
-		System.out.printf("p.x=%d p.y=%d x=%.02f y=%.02f dif=%.02f w=%d h=%d r.x=%.02f r.y=%.02f\n",
-				p.x, p.y, x, y, dif, area.width, area.height, xAxis.getRange(), yAxis.getRange());
+//		System.out.printf("p.x=%d p.y=%d x=%.02f y=%.02f dif=%.02f w=%d h=%d r.x=%.02f r.y=%.02f\n",
+//				x, y, vx, vy, dif, area.width, area.height, xAxis.getRange(), yAxis.getRange());
 
 		if(Math.abs(dif/yAxis.getRange())<=accuracy) {
-			return new PaIntEPoint(x, y);
+			return new PaIntEHitBox(vx, vy);
 		}
 
 		return null;

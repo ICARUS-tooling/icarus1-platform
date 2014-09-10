@@ -58,6 +58,7 @@ import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
@@ -101,6 +102,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 	protected JPanel contentPanel;
 	protected JScrollPane contentPane;
+	protected PanelConfig panelConfig = new PanelConfig();
 
 	protected static final String configPath = "plugins.prosody.appearance.outline"; //$NON-NLS-1$
 
@@ -271,7 +273,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		for(int i=0; i<data.size(); i++) {
 			ProsodicSentenceData sentence = data.get(i);
 
-			SentencePanel sentencePanel = new SentencePanel();
+			SentencePanel sentencePanel = new SentencePanel(panelConfig);
 			sentencePanel.refresh(sentence);
 			builder.append(sentencePanel);
 		}

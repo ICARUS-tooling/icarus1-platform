@@ -94,7 +94,7 @@ import de.ims.icarus.util.strings.StringPrimitives;
  * 10 		Coreference 			string			Coreference chain information encoded in a parenthesis structure.
  * 11		Begin-Timestamp			float			Timestamp of word begin in audio file
  * 12		End-Timestamp			float			Timestamp of word end in audio file
- * 13		Syllable-Offsets		int[]			Character based offsets for syllables in the word
+ * 13		Syllable-SoundOffsets		int[]			Character based offsets for syllables in the word
  * 14		Syllable-Labels			string[]		Syllable labels. This array is the main reference when determining the number of syllables in a word
  * 15		Syllable-Timestamps		float[]			Timestamps of each syllable's begin in audio file
  * 16		Syllable-Vowel			string[]		Phonetic vowel description
@@ -273,7 +273,8 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		String[] forms = new String[size-headerOffset];
 		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(document, forms);
 
-		// TODO evaluate need to expand storage to cover more than just form and spans
+		boolean mapsSyllables = false;
+
 		for(int i=0; i<size-headerOffset; i++) {
 			Row row = buffer.getRow(i+headerOffset);
 
@@ -354,7 +355,12 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
 			result.setProperty(i, BEGIN_TS_KEY, getFloat(row, BEGIN_TS_COL, DATA_UNDEFINED_VALUE));
 			result.setProperty(i, END_TS_KEY, getFloat(row, END_TS_COL, DATA_UNDEFINED_VALUE));
-			result.setProperty(i, SYLLABLE_OFFSET_KEY, getInts(row, SYL_OFFSET_COL));
+
+			int[] offsets = getInts(row, SYL_OFFSET_COL);
+			if(offsets!=EMPTY_INTS) {
+				mapsSyllables = true;
+			}
+			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
 			result.setProperty(i, SYLLABLE_LABEL_KEY, getStrings(row, SYL_LABEL_COL));
 			result.setProperty(i, SYLLABLE_TIMESTAMP_KEY, getFloats(row, SYL_TIMESTAMP_COL));
 			result.setProperty(i, SYLLABLE_VOWEL_KEY, getStrings(row, SYL_VOWEL_COL));
@@ -387,6 +393,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 
 		result.setProperties(properties);
+		result.setMapsSyllables(mapsSyllables);
 		result.setSentenceIndex(document.size());
 		document.add(result);
 

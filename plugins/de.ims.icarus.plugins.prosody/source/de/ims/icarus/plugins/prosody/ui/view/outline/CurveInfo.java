@@ -46,6 +46,8 @@ public class CurveInfo {
 		// Combined form tokens of sentence
 		private final String text;
 
+		private final float minD, maxD;
+
 		public CurveInfo(ProsodicSentenceData sentence, FontMetrics fm, AntiAliasingType antiAliasingType, Color curveColor) {
 			this.sentence = sentence;
 
@@ -77,12 +79,13 @@ public class CurveInfo {
 				}
 
 				String token = sentence.getForm(i);
+				int tokenWidth = fm.stringWidth(token);
 
 				sb.append(token);
 
 				int numSyls = sentence.getSyllableCount(i);
 				if(numSyls==0) {
-					width += fm.stringWidth(token);
+					width += tokenWidth;
 					formToSylMap[i<<1] = -1;
 					formToSylMap[(i<<1)+1] = -1;
 					continue;
@@ -91,12 +94,34 @@ public class CurveInfo {
 				formToSylMap[i<<1] = sylPos;
 				formToSylMap[(i<<1)+1] = sylPos+numSyls-1;
 
+				int begin = width;
+
 				for(int k=0; k<numSyls; k++) {
 
-					int offset0 = sentence.getSyllableOffset(i, k);
-					int offset1 = k<numSyls-1 ? sentence.getSyllableOffset(i, k+1) : token.length();
-					String sylToken = token.substring(offset0, offset1);
+					String sylToken;
+					if(sentence.isMapsSyllables()) {
+						int offset0 = sentence.getSyllableOffset(i, k);
+						int offset1 = k<numSyls-1 ? sentence.getSyllableOffset(i, k+1) : token.length();
+						sylToken = token.substring(offset0, offset1);
+					} else {
+						float beginTs = sentence.getBeginTimestamp(i);
+						float duration = sentence.getEndTimestamp(i)-beginTs;
+						float sylBegin = sentence.getSyllableTimestamp(i, k)-beginTs;
+						float sylDuration = sentence.getSyllableDuration(i, k);
+						int tokenLength = token.length();
+						int offset0 = (int) Math.floor(sylBegin/duration * tokenLength);
+						int offset1 = (int) Math.floor((sylBegin+sylDuration) / duration * tokenLength);
+
+						sylToken = token.substring(offset0, Math.min(offset1, tokenLength));
+
+//						System.out.printf("token=%s sylToken=%s offset0=%d offset1=%d beginTs=%.02f duration=%.02f sylBegin=%.02f sylDuration=%.02f tokenLength=%d\n",
+//								token, sylToken, offset0, offset1, beginTs, duration, sylBegin, sylDuration, tokenLength);
+					}
+
 					int sylWidth = fm.stringWidth(sylToken);
+
+//					System.out.printf("syl=%s w=%d\n",
+//							sylToken, sylWidth);
 
 					sylOffsets[sylPos<<1] = width;
 					sylOffsets[(sylPos<<1)+1] = width+sylWidth;
@@ -117,15 +142,29 @@ public class CurveInfo {
 					width += sylWidth;
 					sylPos++;
 				}
+
+				int end = width;
+
+				int dif = tokenWidth - (end-begin);
+				if(dif > 0) {
+					width += dif;
+				}
 			}
 
 			text = sb.toString();
+
+			this.minD = minD;
+			this.maxD = maxD;
 
 			// Now draw image
 
 			int height = fm.getAscent();
 			float scaleY = height/(maxD-minD);
-			image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			image = new BufferedImage(width, height+1, BufferedImage.TYPE_INT_ARGB);
+
+//			System.out.printf("image: w=%d h=%d\n",
+//					image.getWidth(), image.getHeight());
+
 			Graphics2D g = image.createGraphics();
 
 			g.setColor(new Color(0, 0, 0, 0));
@@ -156,8 +195,15 @@ public class CurveInfo {
 				int y1 = height - (int)((d-minD) * scaleY);
 				int y2 = height - (int)((d-c2-minD) * scaleY);
 
-				g.drawLine(x0, y0, x1, y1);
-				g.drawLine(x1, y1, x2, y2);
+//				System.out.printf("syl=%s y0=%d y1=%d y2=%d x0=%d x1=%d x2=%d\n",
+//						sylTokens[i], y0, y1, y2, x0, x1, x2);
+
+				if(y0==y1 && y1==y2) {
+					g.drawLine(x0, y0, x2, y2);
+				} else {
+					g.drawLine(x0, y0, x1, y1);
+					g.drawLine(x1, y1, x2, y2);
+				}
 			}
 		}
 
@@ -175,6 +221,20 @@ public class CurveInfo {
 
 		public BufferedImage getImage() {
 			return image;
+		}
+
+		/**
+		 * @return the minD
+		 */
+		public float getMinD() {
+			return minD;
+		}
+
+		/**
+		 * @return the maxD
+		 */
+		public float getMaxD() {
+			return maxD;
 		}
 
 		public boolean hasSyllables(int wordIndex) {

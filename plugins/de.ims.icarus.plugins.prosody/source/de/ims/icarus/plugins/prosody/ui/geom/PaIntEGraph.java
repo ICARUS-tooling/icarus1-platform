@@ -28,7 +28,6 @@ package de.ims.icarus.plugins.prosody.ui.geom;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 
 /**
@@ -271,7 +270,7 @@ public class PaIntEGraph {
 	 * to this graph's painting rectangle, specified by the {@code area}
 	 * argument.
 	 */
-	public PaIntEPoint translate(Point p, Graphics graphics, Rectangle area, PaIntEParams params, double accuracy) {
+	public PaIntEHitBox translate(int x, int y, Graphics graphics, Rectangle area, PaIntEParams params, double accuracy) {
 
 		final int w = area.width;
 		final int h = area.height;
@@ -281,33 +280,29 @@ public class PaIntEGraph {
 		int yAxisWidth = paintYAxis ? yAxis.getRequiredWidth(g) : 0;
 		int xAxisHeight = paintXAxis ? xAxis.getRequiredHeight(g) : 0;
 
-		if(paintYAxis && p.x<=yAxisWidth) {
-			if(p.y>h-xAxisHeight) {
+		if(paintYAxis && x<=yAxisWidth) {
+			if(y>h-xAxisHeight) {
 				// Outside axis area
 				return null;
 			}
-			double axisValue = yAxis.translate(h-xAxisHeight-p.y, h-xAxisHeight);
-			return new PaIntEPoint(0, axisValue, yAxis);
+			double axisValue = yAxis.translate(h-xAxisHeight-y, h-xAxisHeight);
+			return new PaIntEHitBox(0, axisValue, yAxis);
 		}
 
-		if(paintXAxis && p.y>=h-xAxisHeight) {
-			if(p.x<yAxisWidth) {
+		if(paintXAxis && y>=h-xAxisHeight) {
+			if(x<yAxisWidth) {
 				// Outside axis area
 				return null;
 			}
-			double axisValue = xAxis.translate(p.x-yAxisWidth, w-yAxisWidth);
-			return new PaIntEPoint(axisValue, 0, xAxis);
+			double axisValue = xAxis.translate(x-yAxisWidth, w-yAxisWidth);
+			return new PaIntEHitBox(axisValue, 0, xAxis);
 		}
 
 		if(xAxisHeight>0 || yAxisWidth>0) {
 			area = new Rectangle(yAxisWidth, 0, w-yAxisWidth, h-xAxisHeight);
+			x -= yAxisWidth;
 		}
 
-		if(paintXAxis || paintYAxis) {
-			area = new Rectangle(0, 0, area.width-yAxisWidth, area.height-xAxisHeight);
-			p.translate(-yAxisWidth, 0);
-		}
-
-		return curve.translate(p, area, params, accuracy, xAxis, yAxis);
+		return curve.translate(x, y, area, params, accuracy, xAxis, yAxis);
 	}
 }

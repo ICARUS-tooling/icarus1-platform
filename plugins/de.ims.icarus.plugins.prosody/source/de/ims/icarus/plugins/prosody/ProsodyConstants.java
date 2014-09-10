@@ -34,6 +34,14 @@ import de.ims.icarus.language.LanguageConstants;
  */
 public interface ProsodyConstants extends LanguageConstants {
 
+	// Document properties
+	public static final String AUDIO_FILE_KEY = "audio-file"; //$NON-NLS-1$
+	public static final String AUDIO_OFFSET_KEY = "audio-offset"; //$NON-NLS-1$
+
+	// Sentence properties
+	public static final String SENTENCE_NUMBER_KEY = "sent-num"; //$NON-NLS-1$
+
+	// WOrd/Syllable properties
 	public static final String FORM_KEY = "form"; //$NON-NLS-1$
 	public static final String POS_KEY = "pos"; //$NON-NLS-1$
 	public static final String LEMMA_KEY = "lemma"; //$NON-NLS-1$

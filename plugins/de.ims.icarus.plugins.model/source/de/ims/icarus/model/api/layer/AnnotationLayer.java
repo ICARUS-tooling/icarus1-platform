@@ -93,6 +93,12 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 */
 	Object getValue(Markable markable, String key);
 
+	int getIntValue(Markable markable, String key);
+	float getFloatValue(Markable markable, String key);
+	double getDoubleValue(Markable markable, String key);
+	long getLongValue(Markable markable, String key);
+	boolean getBooleanValue(Markable markable, String key);
+
 	/**
 	 * Deletes all annotations in this layer
 	 * <p>

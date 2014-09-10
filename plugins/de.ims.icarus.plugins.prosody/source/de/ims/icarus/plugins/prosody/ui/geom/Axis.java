@@ -364,9 +364,9 @@ public abstract class Axis {
 			g.setColor(axisColor);
 			g.drawLine(w, y, w, y+h);
 
-			int cursor = h;
+			int cursor;
 			int marker = 0;
-			while(cursor>=0) {
+			while((cursor=(int) (h-marker*markerStepSize*scale))>=0) {
 
 				// Draw marker
 				g.setColor(markerColor);
@@ -395,8 +395,6 @@ public abstract class Axis {
 						}
 					}
 				}
-
-				cursor -= (int) (markerStepSize*scale);
 				marker++;
 			}
 		} else {
@@ -472,7 +470,7 @@ public abstract class Axis {
 	}
 
 	public double translate(int value, int range) {
-		return getMinValue() + ((double)value/range * getRange());
+		return getMinValue() + getRange() * (double)value/range;
 	}
 
 	public abstract String getLabel(int marker);

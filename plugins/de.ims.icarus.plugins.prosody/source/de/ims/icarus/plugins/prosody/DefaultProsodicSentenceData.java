@@ -42,6 +42,8 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 
 	private TMap<Key, Object> indexedProperties = new THashMap<>();
 
+	private boolean mapsSyllables = false;
+
 	/**
 	 * @param document
 	 * @param forms
@@ -49,6 +51,14 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	public DefaultProsodicSentenceData(CoreferenceDocumentData document,
 			String[] forms) {
 		super(document, forms);
+	}
+
+	/**
+	 * @see de.ims.icarus.language.coref.DefaultCoreferenceData#getDocument()
+	 */
+	@Override
+	public ProsodicDocumentData getDocument() {
+		return (ProsodicDocumentData) super.getDocument();
 	}
 
 	/**
@@ -158,8 +168,13 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public int getSyllableCount(int index) {
-		int[] value = (int[])getIndexedProperty(index, SYLLABLE_OFFSET_KEY);
-		return value==null ? 0 : value.length;
+		if(mapsSyllables) {
+			int[] value = (int[])getIndexedProperty(index, SYLLABLE_OFFSET_KEY);
+			return value==null ? 0 : value.length;
+		} else {
+			String[] value = (String[])getIndexedProperty(index, SYLLABLE_LABEL_KEY);
+			return value==null ? 0 : value.length;
+		}
 	}
 
 	private int getSyllableIntProperty(int index, String key, int syllable) {
@@ -270,6 +285,21 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	@Override
 	public String getCodaType(int index, int syllable) {
 		return getSyllableStringProperty(index, CODA_TYPE_KEY, syllable);
+	}
+
+	/**
+	 * @return the mapsSyllables
+	 */
+	@Override
+	public boolean isMapsSyllables() {
+		return mapsSyllables;
+	}
+
+	/**
+	 * @param mapsSyllables the mapsSyllables to set
+	 */
+	public void setMapsSyllables(boolean mapsSyllables) {
+		this.mapsSyllables = mapsSyllables;
 	}
 
 	/**

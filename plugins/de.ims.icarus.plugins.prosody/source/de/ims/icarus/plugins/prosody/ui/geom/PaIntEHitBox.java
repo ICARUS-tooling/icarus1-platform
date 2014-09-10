@@ -30,36 +30,56 @@ package de.ims.icarus.plugins.prosody.ui.geom;
  * @version $Id$
  *
  */
-public class PaIntEPoint {
+public class PaIntEHitBox {
 
 	private double x, y;
 
+	private int wordIndex = -1, sylIndex = -1;
+
 	private Axis axis;
 
-	public PaIntEPoint(double x, double y) {
+	private Type type;
+
+	public PaIntEHitBox(double x, double y) {
 		this.x = x;
 		this.y = y;
+		type = Type.CURVE;
 	}
 
-	public PaIntEPoint(double x, double y, Axis axis) {
+	public PaIntEHitBox(double x, double y, Axis axis) {
 		this(x, y);
 
 		this.axis = axis;
+		type = Type.AXIS;
 	}
 
-	public PaIntEPoint(PaIntEPoint source) {
+	public PaIntEHitBox(PaIntEHitBox source) {
 		x = source.x;
 		y = source.y;
 		axis = source.axis;
+		wordIndex = source.wordIndex;
+		sylIndex = source.sylIndex;
+		type = source.type;
 	}
 
-	public PaIntEPoint() {
+	public PaIntEHitBox(int wordIndex) {
+		this.wordIndex = wordIndex;
+		type = Type.WORD_LABEL;
+	}
+
+	public PaIntEHitBox(int wordIndex, int sylIndex) {
+		this.wordIndex = wordIndex;
+		this.sylIndex = sylIndex;
+		type = Type.SYL_LABEL;
+	}
+
+	public PaIntEHitBox() {
 		// no-op
 	}
 
 	@Override
-	public PaIntEPoint clone() {
-		return new PaIntEPoint(this);
+	public PaIntEHitBox clone() {
+		return new PaIntEHitBox(this);
 	}
 
 	/**
@@ -106,5 +126,54 @@ public class PaIntEPoint {
 	 */
 	public void setAxis(Axis axis) {
 		this.axis = axis;
+	}
+
+	/**
+	 * @return the wordIndex
+	 */
+	public int getWordIndex() {
+		return wordIndex;
+	}
+
+	/**
+	 * @return the sylIndex
+	 */
+	public int getSylIndex() {
+		return sylIndex;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public Type getType() {
+		return type;
+	}
+
+	/**
+	 * @param wordIndex the wordIndex to set
+	 */
+	public void setWordIndex(int wordIndex) {
+		this.wordIndex = wordIndex;
+	}
+
+	/**
+	 * @param sylIndex the sylIndex to set
+	 */
+	public void setSylIndex(int sylIndex) {
+		this.sylIndex = sylIndex;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	public enum Type {
+		CURVE,
+		AXIS,
+		WORD_LABEL,
+		SYL_LABEL,
 	}
 }

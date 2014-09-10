@@ -35,10 +35,15 @@ import de.ims.icarus.language.dependency.DependencyData;
  */
 public interface ProsodicSentenceData extends DependencyData, CoreferenceData, ProsodyConstants {
 
+	@Override
+	ProsodicDocumentData getDocument();
+
 	float getBeginTimestamp(int index);
 	float getEndTimestamp(int index);
 
 	int getSyllableCount(int index);
+
+	boolean isMapsSyllables();
 
 	int getSyllableOffset(int index, int syllable);
 	String getSyllableLabel(int index, int syllable);
