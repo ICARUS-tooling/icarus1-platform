@@ -27,6 +27,9 @@ package de.ims.icarus.plugins.prosody;
 
 import gnu.trove.map.TMap;
 import gnu.trove.map.hash.THashMap;
+
+import java.lang.reflect.Array;
+
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
@@ -143,6 +146,15 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	@Override
 	public Object getProperty(int index, String key) {
 		return getIndexedProperty(index, key);
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.prosody.ProsodicSentenceData#getSyllableProperty(int, java.lang.String, int)
+	 */
+	@Override
+	public Object getSyllableProperty(int index, String key, int sylIndex) {
+		Object array = getIndexedProperty(sylIndex, key);
+		return (array==null || Array.getLength(array)==0) ? null : Array.get(array, sylIndex);
 	}
 
 	/**

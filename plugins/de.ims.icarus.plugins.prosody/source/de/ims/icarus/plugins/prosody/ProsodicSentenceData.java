@@ -38,6 +38,8 @@ public interface ProsodicSentenceData extends DependencyData, CoreferenceData, P
 	@Override
 	ProsodicDocumentData getDocument();
 
+	Object getSyllableProperty(int index, String key, int sylIndex);
+
 	float getBeginTimestamp(int index);
 	float getEndTimestamp(int index);
 

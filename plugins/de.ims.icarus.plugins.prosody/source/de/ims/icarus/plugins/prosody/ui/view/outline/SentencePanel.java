@@ -320,7 +320,7 @@ public class SentencePanel extends JPanel{
 		if(beginOffset==LanguageConstants.DATA_UNDEFINED_VALUE
 				|| endOffset==LanguageConstants.DATA_UNDEFINED_VALUE) {
 			LoggerFactory.warning(this, String.format(
-					"Cannot play part of sentence - at least one offset is undefined: [%.02f , %.02f]", beginOffset, endOffset));
+					"Cannot play part of sentence - at least one offset is undefined: [%.02f , %.02f]", beginOffset, endOffset)); //$NON-NLS-1$
 			return;
 		}
 
@@ -553,6 +553,10 @@ public class SentencePanel extends JPanel{
 		private boolean mouseWheelScrollSupported = DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED;
 		private boolean clearLabelBackground = DEFAULT_CLEAR_LABEL_BACKGROUND;
 		private boolean loopSound = DEFAULT_LOOP_SOUND;
+	}
+
+	private class TextPanel extends JComponent {
+
 	}
 
 	static final char SPACE = ' ';

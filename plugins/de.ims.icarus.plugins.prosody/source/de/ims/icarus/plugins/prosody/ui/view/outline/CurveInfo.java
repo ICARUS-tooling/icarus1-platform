@@ -158,7 +158,7 @@ public class CurveInfo {
 
 			// Now draw image
 
-			int height = fm.getAscent();
+			int height = fm.getAscent()*2;
 			float scaleY = height/(maxD-minD);
 			image = new BufferedImage(width, height+1, BufferedImage.TYPE_INT_ARGB);
 
@@ -183,9 +183,9 @@ public class CurveInfo {
 
 				// Ignore peaks outside the current syllable
 				//FIXME ask whether filtering them out would be better!
-//				if(b<-1F || b>1F) {
-//					continue;
-//				}
+				if(b<0F || b>1F) {
+					continue;
+				}
 
 				int x0 = sylOffsets[i<<1];
 				int x2 = sylOffsets[(i<<1)+1];

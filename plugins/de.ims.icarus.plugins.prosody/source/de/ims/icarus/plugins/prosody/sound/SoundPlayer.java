@@ -550,9 +550,11 @@ public class SoundPlayer {
 
 			long framesToRead = endFrame-startFrame+1;
 
-			System.out.printf("framesToRead=%d duration=%.02f\n",
+			System.out.printf("framesToRead=%d duration=%.02f\n", //$NON-NLS-1$
 					framesToRead, framesToRead/frameRate);
 
+			// Make a small 0.1 seconds buffer
+			//TODO maybe increase?
 			int framesToBuffer = (int)Math.ceil(frameRate / 10);
 
 			int bufferSize = frameSize * framesToBuffer;
@@ -596,6 +598,10 @@ public class SoundPlayer {
 				} catch(Exception e) {
 					// ignore
 				}
+			}
+
+			if(dispatchThread!=null) {
+				dispatchThread.close();
 			}
 		}
 
