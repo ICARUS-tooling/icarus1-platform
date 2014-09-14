@@ -30,7 +30,7 @@ import java.util.Arrays;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
-public class CurveInfo {
+public class SentenceInfo {
 		private final ProsodicSentenceData sentence;
 		private final float minD, maxD;
 		private final WordInfo[] words;
@@ -39,7 +39,7 @@ public class CurveInfo {
 
 		private int width;
 
-		public CurveInfo(ProsodicSentenceData sentence) {
+		public SentenceInfo(ProsodicSentenceData sentence) {
 			this.sentence = sentence;
 			text = LanguageUtils.combine(sentence);
 
