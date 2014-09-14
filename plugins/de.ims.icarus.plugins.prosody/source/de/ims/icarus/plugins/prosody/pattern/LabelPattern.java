@@ -51,6 +51,14 @@ public class LabelPattern implements ProsodyConstants {
 		}
 	};
 
+	public LabelPattern() {
+		// no-op
+	}
+
+	public LabelPattern(String pattern) {
+		compile(pattern);
+	}
+
 	public void compile(String pattern) {
 		if (pattern == null)
 			throw new NullPointerException("Invalid pattern"); //$NON-NLS-1$
@@ -137,6 +145,10 @@ public class LabelPattern implements ProsodyConstants {
 
 				case 'p':
 					element = new PropertyElement(POS_KEY);
+					break;
+
+				case 'n':
+					element = new PropertyElement(SENTENCE_NUMBER_KEY);
 					break;
 
 				default:

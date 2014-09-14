@@ -78,8 +78,14 @@ public class TextArea implements SwingConstants {
 	}
 
 	public Dimension getSize(JComponent c, String[] lines, Dimension d) {
+		if(d==null) {
+			d = new Dimension();
+		}
+
+		// Make sure to reset size
+		d.height = d.width = 0;
+
 		if(lines==null || lines.length==0) {
-			d.height = d.width = 0;
 			return d;
 		}
 
@@ -192,6 +198,22 @@ public class TextArea implements SwingConstants {
 	 */
 	public Insets getInsets() {
 		return insets;
+	}
+
+	public int getTopInsets() {
+		return insets==null ? 0 : insets.top;
+	}
+
+	public int getLeftInsets() {
+		return insets==null ? 0 : insets.left;
+	}
+
+	public int getRightInsets() {
+		return insets==null ? 0 : insets.right;
+	}
+
+	public int getBottomInsets() {
+		return insets==null ? 0 : insets.bottom;
 	}
 
 	/**

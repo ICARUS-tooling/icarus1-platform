@@ -92,12 +92,18 @@ public class TextComponent extends JComponent {
 			throw new NullPointerException("Invalid textArea"); //$NON-NLS-1$
 
 		this.textArea = textArea;
+
+		revalidate();
+		repaint();
 	}
 	/**
 	 * @param lines the lines to set
 	 */
 	public void setLines(String[] lines) {
 		this.lines = lines;
+
+		revalidate();
+		repaint();
 	}
 
 
