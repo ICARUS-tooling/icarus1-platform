@@ -35,6 +35,28 @@
 	
 	<!-- PERSPECTIVES AND VIEWS -->
 	
+	<extension id="PaIntEEditorView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">
+		<doc>
+			<doc-text>
+				Presentation view that allows for selection of different visualization
+				types for a single document and its allocations.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.prosody.painteEditorView.identity.name" />
+		<parameter id="description" value="plugins.prosody.painteEditorView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.editor.PaIntEEditorView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/prosody/ui/view/painte-editor-view.gif" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="low" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
+			<parameter id="present" value="PainteParamsContentType" />
+		</parameter>
+	</extension>
+	
 	<!-- HELPERS -->
 	
 	<extension id="ProsodyDocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
@@ -49,6 +71,24 @@
 		<parameter id="description" value="plugins.prosody.prosodyOutlinePresenter.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.outline.ProsodyOutlinePresenter" />
+	</extension>
+	
+	<extension id="ProsodyListCellRenderer" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				TODO
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.list.ProsodyListCellRenderer" />
+		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
+		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.geom.GridStyle" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.PreviewSize" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.params.PaIntEParams" />
 	</extension>
 	
 	<!-- CONTENT TYPES -->
@@ -71,6 +111,69 @@
 		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.ProsodicSentenceData" />
 	</extension>
 	
+	<extension id="PainteParamsContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.prosody.params.PaIntEParams
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.params.PaIntEParams" />
+	</extension>
+	
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
+	
+	<extension id="ProsodyConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
+		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
+		<!-- tokens "inherited" by dependency data -->
+		<parameter id="token" value="form" />
+		<parameter id="token" value="lemma" />
+		<parameter id="token" value="pos" />
+		<parameter id="token" value="features" />
+		<parameter id="token" value="relation" />
+		<parameter id="token" value="distance" />
+		<parameter id="token" value="direction" />
+		<parameter id="token" value="projectivity" />
+		<!-- new tokens -->
+		<parameter id="token" value="syllableProperty" />
+		<parameter id="token" value="wordProperty" />
+		<parameter id="token" value="sylCount" />
+		<parameter id="token" value="entity" />
+		<parameter id="token" value="speaker" />
+		<parameter id="token" value="speakerFeatures" />
+		<parameter id="factories">
+			<!-- factories "inherited" by dependency data -->
+			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
+			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.constraints.DependencyLemmaConstraintFactory" />
+			<parameter id="pos" value="de.ims.icarus.language.dependency.search.constraints.DependencyPosConstraintFactory" />
+			<parameter id="features" value="de.ims.icarus.language.dependency.search.constraints.DependencyFeaturesConstraintFactory" />
+			<parameter id="relation" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelationConstraintFactory" />
+			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
+			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
+			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
+			<!-- new factories -->
+			<parameter id="syllableProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllablePropertyConstraintFactory" />
+			<parameter id="wordProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPropertyConstraintFactory" />
+			<parameter id="sylCount" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllableCountConstraintFactory" />
+			<parameter id="entity" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyEntityConstraintFactory" />
+			<parameter id="speaker" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerConstraintFactory" />
+			<parameter id="speakerFeatures" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerFeaturesConstraintFactory" />
+		</parameter>
+	</extension>
+	
+	<extension id="ProsodySearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.search.ProsodySearchFactory" />
+		<parameter id="name" value="plugins.prosody.prosodySearchFactory.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySearchFactory.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="icon" value="de/ims/icarus/plugins/prosody/search/prosody-search-factory.gif" />
+	</extension>
+	
+	<extension id="ProsodyTargetSelector" plugin-id="de.ims.icarus.searchTools" point-id="SearchTargetSelector">
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.search.ProsodyTargetSelector" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="name" value="plugins.prosody.prosodyTargetSelector.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodyTargetSelector.identity.name" />
+	</extension>
 	
 </plugin>

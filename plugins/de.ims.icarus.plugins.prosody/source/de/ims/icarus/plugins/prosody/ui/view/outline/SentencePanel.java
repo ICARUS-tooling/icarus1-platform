@@ -28,6 +28,7 @@ package de.ims.icarus.plugins.prosody.ui.view.outline;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -39,6 +40,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultBoundedRangeModel;
@@ -55,10 +57,10 @@ import javax.swing.event.ChangeListener;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.params.PaIntEParams;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
@@ -68,9 +70,13 @@ import de.ims.icarus.plugins.prosody.ui.TextArea;
 import de.ims.icarus.plugins.prosody.ui.TextComponent;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
+import de.ims.icarus.plugins.prosody.ui.geom.GridStyle;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEHitBox;
-import de.ims.icarus.plugins.prosody.ui.geom.PaIntEParams;
+import de.ims.icarus.plugins.prosody.ui.view.PreviewSize;
+import de.ims.icarus.plugins.prosody.ui.view.SentenceInfo;
+import de.ims.icarus.plugins.prosody.ui.view.SyllableInfo;
+import de.ims.icarus.plugins.prosody.ui.view.WordInfo;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
@@ -99,6 +105,7 @@ public class SentencePanel extends JPanel{
 
 	private DetailPanel detailPanel;
 	private TextPanel textPanel;
+	private CurvePanel previewPanel;
 	private TextComponent headerLabel;
 	private TextComponent detailHeaderLabel;
 
@@ -126,7 +133,7 @@ public class SentencePanel extends JPanel{
 		IconRegistry iconRegistry = IconRegistry.getGlobalRegistry();
 		FormLayout layout = new FormLayout(
 				"left:pref, left:pref, 2dlu, pref, 2dlu, fill:pref, fill:pref:grow", //$NON-NLS-1$
-				"top:pref, top:pref, top:pref"); //$NON-NLS-1$
+				"top:pref, top:pref, top:pref, top:pref"); //$NON-NLS-1$
 
 		setLayout(layout);
 
@@ -155,16 +162,21 @@ public class SentencePanel extends JPanel{
 //		UIUtil.resizeComponent(toggleExpandButton, 16, 16);
 //		add(toggleExpandButton, CC.rc(4, 1));
 
-		// Sentence label
+		// Sentence panel
 		textPanel = new TextPanel();
 		textPanel.setOpaque(false);
-		add(textPanel, CC.rc(3, 6));
+		add(textPanel, CC.rc(4, 6));
+
+		// Preview panel
+		previewPanel = new CurvePanel();
+		previewPanel.setOpaque(false);
+		add(previewPanel, CC.rc(3, 6));
 
 		// Header label (to the left)
 		headerLabel = new TextComponent();
 		headerLabel.getTextArea().setHorizontalAlignment(SwingConstants.RIGHT);
 		headerLabel.setOpaque(false);
-		add(headerLabel, CC.rc(3, 4));
+		add(headerLabel, CC.rchw(4, 1, 1, 4));
 
 		// Detail Header label (to the left)
 		detailHeaderLabel = new TextComponent();
@@ -220,7 +232,7 @@ public class SentencePanel extends JPanel{
 		refresh();
 	}
 
-	public SentenceInfo getCurveInfo() {
+	public SentenceInfo getSentenceInfo() {
 		return sentenceInfo;
 	}
 
@@ -235,11 +247,12 @@ public class SentencePanel extends JPanel{
 			toggleDetailsButton.setSelected(false);
 
 		} else {
-
-			textPanel.rebuild();
 			ProsodicSentenceData sentence = sentenceInfo.getSentence();
 
-			// Header sections
+			// Text area
+			textPanel.rebuild();
+
+			// Header section
 			headerLabel.setLines(config.headerPattern.getText(sentence));
 
 			// Refresh graph internals
@@ -276,6 +289,7 @@ public class SentencePanel extends JPanel{
 
 		wordCursor.setVisible(showDetails);
 		detailPanel.setVisible(showDetails);
+		detailHeaderLabel.setVisible(showDetails);
 
 		setBorder(showDetails ? expandedBorder : collapsedBorder);
 
@@ -296,21 +310,22 @@ public class SentencePanel extends JPanel{
 
 		ProsodicSentenceData sentence = sentenceInfo.getSentence();
 
+		detailPanel.rebuild();
+
 		currentWord = wordCursorModel.getWordIndex();
 		detailHeaderLabel.setLines(config.detailPattern.getText(sentence, currentWord));
 
 //		System.out.printf("offset=%d syl=%d\n", offset, currentSyl); //$NON-NLS-1$
 
-		detailPanel.revalidate();
-		detailPanel.repaint();
+		revalidate();
+		repaint();
 	}
 
 	private void play(float beginOffset, float endOffset) {
 
-		if(beginOffset==LanguageConstants.DATA_UNDEFINED_VALUE
-				|| endOffset==LanguageConstants.DATA_UNDEFINED_VALUE) {
+		if(beginOffset<0 || endOffset<0) {
 			LoggerFactory.warning(this, String.format(
-					"Cannot play part of sentence - at least one offset is undefined: [%.02f , %.02f]", beginOffset, endOffset)); //$NON-NLS-1$
+					"Cannot play part of sentence - at least one offset is undefined or invalid: [%.02f , %.02f]", beginOffset, endOffset)); //$NON-NLS-1$
 			return;
 		}
 
@@ -453,8 +468,6 @@ public class SentencePanel extends JPanel{
 			}
 		}
 
-		private final DecimalFormat decimalFormat = new DecimalFormat("#,###,###,##0.00"); //$NON-NLS-1$
-
 		/**
 		 * @see java.awt.event.MouseAdapter#mouseMoved(java.awt.event.MouseEvent)
 		 */
@@ -464,6 +477,16 @@ public class SentencePanel extends JPanel{
 				refreshDetailPanel(e.getPoint());
 			}
 		}
+
+		private final DecimalFormat decimalFormat = new DecimalFormat("#,###,###,##0.00"); //$NON-NLS-1$
+		private final String defaultTooltipFormat =
+				"<html>" //$NON-NLS-1$
+				+ "A<sub>1</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "A<sub>2</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "B<sub>&nbsp;</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "C<sub>1</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "C<sub>2</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "D<sub>&nbsp;</sub>:&nbsp;%.02f"; //$NON-NLS-1$
 
 		private void refreshDetailPanel(Point p) {
 			PaIntEHitBox hitBox = detailPanel.translate(p);
@@ -485,6 +508,13 @@ public class SentencePanel extends JPanel{
 				case SYL_LABEL:
 //					cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 					cursor = ProsodyUtils.getSpeakerCursor();
+					break;
+
+				case GRAPH:
+					PaIntEParams params = hitBox.getParams();
+					tooltip = String.format(Locale.ENGLISH, defaultTooltipFormat,
+							params.getA1(), params.getA2(), params.getB(),
+							params.getC1(), params.getC2(), params.getD());
 					break;
 
 				default:
@@ -523,10 +553,15 @@ public class SentencePanel extends JPanel{
 	public static class PanelConfig {
 
 		public static Color DEFAULT_CURVE_COLOR = Color.black;
+		public static Color DEFAULT_SYLLABLE_ALIGNMENT_COLOR = Color.orange;
+		public static final boolean  DEFAULT_TEXT_SHOW_ALIGNMENT = false;
+		public static final boolean  DEFAULT_PREVIEW_SHOW_ALIGNMENT = false;
+		public static Color DEFAULT_WORD_ALIGNMENT_COLOR = Color.lightGray;
 		public static AntiAliasingType DEFAULT_ANTIALIASING_TYPE = AntiAliasingType.DEFAULT;
 		public static final int DEFAULT_GRAPH_HEIGHT = 90;
 		public static final int DEFAULT_GRAPH_WIDTH = 120;
-		public static final int DEFAULT_WORD_SCOPE = 1;
+		public static final int DEFAULT_WORD_SCOPE = 0;
+		public static final int DEFAULT_SYLLABLE_SCOPE = 1;
 		public static final boolean  DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED = true;
 		public static final int DEFAULT_WORD_SPACING = 3;
 		public static final int DEFAULT_GRAPH_SPACING = 2;
@@ -536,26 +571,180 @@ public class SentencePanel extends JPanel{
 		public static final float DEFAULT_LEFT_SYLLABLE_BOUND = 0F;
 		public static final float DEFAULT_RIGHT_SYLLABLE_BOUND = 1F;
 
-		public static final LabelPattern DEFAULT_HEADER_PATTERN = new LabelPattern("n");
-		public static final LabelPattern DEFAULT_WORD_PATTERN = new LabelPattern("f\np");
-		public static final LabelPattern DEFAULT_DETAIL_PATTERN = new LabelPattern("");
+		public static final LabelPattern DEFAULT_HEADER_PATTERN = new LabelPattern("n"); //$NON-NLS-1$
+		public static final LabelPattern DEFAULT_SENTENCE_PATTERN = new LabelPattern("$form$\n$pos$"); //$NON-NLS-1$
+		public static final LabelPattern DEFAULT_DETAIL_PATTERN = new LabelPattern(""); //$NON-NLS-1$
 
-		private Color curveColor = DEFAULT_CURVE_COLOR;
-		private AntiAliasingType antiAliasingType = DEFAULT_ANTIALIASING_TYPE;
-		private int wordScope = DEFAULT_WORD_SCOPE;
-		private int graphHeight = DEFAULT_GRAPH_HEIGHT;
-		private int graphWidth = DEFAULT_GRAPH_WIDTH;
-		private int wordSpacing = DEFAULT_WORD_SPACING;
-		private int graphSpacing = DEFAULT_GRAPH_SPACING;
-		private boolean mouseWheelScrollSupported = DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED;
-		private boolean clearLabelBackground = DEFAULT_CLEAR_LABEL_BACKGROUND;
-		private boolean loopSound = DEFAULT_LOOP_SOUND;
-		private LabelPattern headerPattern = DEFAULT_HEADER_PATTERN;
-		private LabelPattern wordPattern= DEFAULT_WORD_PATTERN;
-		private LabelPattern detailPattern= DEFAULT_DETAIL_PATTERN;
-		private PreviewSize previewSize = DEFAULT_PREVIEW_SIZE;
-		private float leftSyllableBound = DEFAULT_LEFT_SYLLABLE_BOUND;
-		private float rightSyllableBound = DEFAULT_RIGHT_SYLLABLE_BOUND;
+		// General
+		public AntiAliasingType antiAliasingType = DEFAULT_ANTIALIASING_TYPE;
+		public boolean mouseWheelScrollSupported = DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED;
+		public boolean loopSound = DEFAULT_LOOP_SOUND;
+		public Color syllableAlignmentColor = DEFAULT_SYLLABLE_ALIGNMENT_COLOR;
+		public Color wordAlignmentColor = DEFAULT_WORD_ALIGNMENT_COLOR;
+
+		// Detail
+		public int wordScope = DEFAULT_WORD_SCOPE;
+		public int syllableScope = DEFAULT_SYLLABLE_SCOPE;
+		public int graphHeight = DEFAULT_GRAPH_HEIGHT;
+		public int graphWidth = DEFAULT_GRAPH_WIDTH;
+		public int wordSpacing = DEFAULT_WORD_SPACING;
+		public int graphSpacing = DEFAULT_GRAPH_SPACING;
+		public boolean clearLabelBackground = DEFAULT_CLEAR_LABEL_BACKGROUND;
+		public LabelPattern detailPattern = DEFAULT_DETAIL_PATTERN;
+		public Font detailFont = TextArea.DEFAULT_FONT;
+		public Color detailTextColor = TextArea.DEFAULT_TEXT_COLOR;
+		public Font detailAxisLabelFont = Axis.DEFAULT_FONT;
+		public Color detailAxisColor = Axis.DEFAULT_AXIS_COLOR;
+		public Color detailAxisLabelColor = Axis.DEFAULT_LABEL_COLOR;
+		public Color detailAxisMarkerColor = Axis.DEFAULT_MARKER_COLOR;
+		public int detailAxisMarkerHeight = Axis.DEFAULT_MARKER_HEIGHT;
+		public boolean detailPaintGrid = PaIntEGraph.DEFAULT_PAINT_GRID;
+		public boolean detailPaintBorder = PaIntEGraph.DEFAULT_PAINT_BORDER;
+		public Color detailGridColor = PaIntEGraph.DEFAULT_GRID_COLOR;
+		public Color detailBorderColor = PaIntEGraph.DEFAULT_BORDER_COLOR;
+		public GridStyle detailGridStyle = PaIntEGraph.DEFAULT_GRID_STYLE;
+
+		// Text
+		public LabelPattern sentencePattern = DEFAULT_SENTENCE_PATTERN;
+		public LabelPattern headerPattern = DEFAULT_HEADER_PATTERN;
+		public Font sentenceFont = TextArea.DEFAULT_FONT;
+		public Color sentenceTextColor = TextArea.DEFAULT_TEXT_COLOR;
+		public boolean textShowAlignment = DEFAULT_TEXT_SHOW_ALIGNMENT;
+
+		// Preview
+		public PreviewSize previewSize = DEFAULT_PREVIEW_SIZE;
+		public float leftSyllableBound = DEFAULT_LEFT_SYLLABLE_BOUND;
+		public float rightSyllableBound = DEFAULT_RIGHT_SYLLABLE_BOUND;
+		public Color curveColor = DEFAULT_CURVE_COLOR;
+		public boolean previewShowAlignment = DEFAULT_PREVIEW_SHOW_ALIGNMENT;
+	}
+
+	private class CurvePanel extends JComponent {
+		private static final long serialVersionUID = 2570632250556713583L;
+
+		/**
+		 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+		 */
+		@Override
+		protected void paintComponent(Graphics graphics) {
+			super.paintComponent(graphics);
+
+			SentenceInfo sentenceInfo = getSentenceInfo();
+
+			if(sentenceInfo==null) {
+				return;
+			}
+
+			Graphics2D g = (Graphics2D) graphics;
+			config.antiAliasingType.apply(g);
+			TextArea textArea = textPanel.textArea;
+
+			Color c = g.getColor();
+			g.setColor(config.curveColor);
+
+			int h = getHeight();
+
+			float minD = sentenceInfo.getMinD();
+			float maxD = sentenceInfo.getMaxD();
+			float scaleY = h/(maxD-minD);
+
+			for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
+				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
+
+				final int wx = wordInfo.getX();
+				final int ww = wordInfo.getWidth();
+
+				// Paint curve preview
+
+				// Align curve with text
+				int x = textArea.getLeftInsets();
+				if(textArea.getHorizontalAlignment()==SwingConstants.RIGHT) {
+					x = ww-textArea.getRightInsets()-wordInfo.getCurveWidth();
+				} else if(textArea.getHorizontalAlignment()==SwingConstants.CENTER) {
+					x += (ww-textArea.getLeftInsets()-textArea.getRightInsets())/2 - wordInfo.getCurveWidth()/2;
+				}
+
+				if(config.previewShowAlignment) {
+					g.setColor(config.wordAlignmentColor);
+					g.drawLine(wx+x, 0, wx+x, h);
+					g.setColor(config.curveColor);
+				}
+
+				int w = 0;
+
+				for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
+					SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
+
+					int sylWidth = sylInfo.getWidth();
+
+					if(sylIndex>0 && config.previewShowAlignment) {
+						g.setColor(config.syllableAlignmentColor);
+						g.drawLine(wx+x+w, 0, wx+x+w, h);
+						g.setColor(config.curveColor);
+					}
+
+					w += sylWidth;
+
+					// Ignore syllables with alignment outside bounds
+					if(config.leftSyllableBound!=config.rightSyllableBound
+							&& (sylInfo.getB()<config.leftSyllableBound || sylInfo.getB()>config.rightSyllableBound)) {
+						continue;
+					}
+
+					int x0 = wx + x + sylInfo.getX();
+					int x2 = x0 + sylInfo.getWidth();
+					int x1 = (x0+x2) >> 1;
+
+					float d = sylInfo.getD();
+					float c1 = sylInfo.getC1();
+					float c2 = sylInfo.getC2();
+
+					int y0 = h - (int)((d-c1-minD) * scaleY);
+					int y1 = h - (int)((d-minD) * scaleY);
+					int y2 = h - (int)((d-c2-minD) * scaleY);
+
+					// Prevent artifacts from antialiasing
+					if(y0==y1 && y1==y2) {
+						g.drawLine(x0, y0, x2, y2);
+					} else {
+						g.drawLine(x0, y0, x1, y1);
+						g.drawLine(x1, y1, x2, y2);
+					}
+				}
+
+				if(config.previewShowAlignment) {
+					g.setColor(config.wordAlignmentColor);
+					g.drawLine(wx+x+w, 0, wx+x+w, h);
+					g.setColor(config.curveColor);
+				}
+			}
+
+			g.setColor(c);
+		}
+
+		/**
+		 * @see javax.swing.JComponent#getPreferredSize()
+		 */
+		@Override
+		public Dimension getPreferredSize() {
+			Dimension d = new Dimension();
+
+			if(sentenceInfo!=null) {
+				d.height = textPanel.curveHeight;
+				d.width = sentenceInfo.getWidth();
+			}
+
+			return d;
+		}
+
+		/**
+		 * @see javax.swing.JComponent#getMinimumSize()
+		 */
+		@Override
+		public Dimension getMinimumSize() {
+			return getPreferredSize();
+		}
+
 	}
 
 	private class TextPanel extends JComponent {
@@ -568,8 +757,9 @@ public class SentencePanel extends JPanel{
 		private int curveHeight;
 
 		public void rebuild() {
-			LabelPattern pattern = config.wordPattern;
-			SentenceInfo sentenceInfo = getCurveInfo();
+			LabelPattern pattern = config.sentencePattern;
+			textArea.setFont(config.sentenceFont);
+			SentenceInfo sentenceInfo = getSentenceInfo();
 
 			Dimension size = new Dimension();
 
@@ -623,7 +813,6 @@ public class SentencePanel extends JPanel{
 				}
 
 				size.width = width;
-				size.height += curveHeight;
 			} else {
 				curveHeight = 0;
 			}
@@ -644,26 +833,22 @@ public class SentencePanel extends JPanel{
 		protected void paintComponent(Graphics graphics) {
 			super.paintComponent(graphics);
 
-			SentenceInfo sentenceInfo = getCurveInfo();
+			SentenceInfo sentenceInfo = getSentenceInfo();
 
 			if(sentenceInfo==null) {
 				return;
 			}
 
 			Graphics2D g = (Graphics2D) graphics;
-			config.antiAliasingType.apply(g);
+
+			textArea.setFont(config.sentenceFont);
+			textArea.setTextColor(config.sentenceTextColor);
 
 			int h = getHeight();
-			int textOffset = this.curveHeight;
 
 			Rectangle area = new Rectangle();
 
-			area.height = h-textOffset;
-			area.y = textOffset;
-
-			float minD = sentenceInfo.getMinD();
-			float maxD = sentenceInfo.getMaxD();
-			float scaleY = textOffset/(maxD-minD);
+			area.height = h;
 
 			for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
 				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
@@ -672,51 +857,42 @@ public class SentencePanel extends JPanel{
 				area.x = wordInfo.getX();
 				area.width = wordInfo.getWidth();
 
+				if(config.textShowAlignment) {
+					// Align curve with text
+					int x = textArea.getLeftInsets();
+					if(textArea.getHorizontalAlignment()==SwingConstants.RIGHT) {
+						x = area.width-textArea.getRightInsets()-wordInfo.getCurveWidth();
+					} else if(textArea.getHorizontalAlignment()==SwingConstants.CENTER) {
+						x += (area.width-textArea.getLeftInsets()-textArea.getRightInsets())/2 - wordInfo.getCurveWidth()/2;
+					}
+
+					// First line
+					g.setColor(config.wordAlignmentColor);
+					g.drawLine(area.x+x, 0, area.x+x, h);
+
+					int w = 0;
+
+					for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
+						SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
+
+						int sylWidth = sylInfo.getWidth();
+
+						if(sylIndex>0) {
+							g.setColor(config.syllableAlignmentColor);
+							g.drawLine(area.x+x+w, 0, area.x+x+w, h);
+						}
+
+						w += sylWidth;
+					}
+
+					// Second line
+					g.setColor(config.wordAlignmentColor);
+					g.drawLine(area.x+x+w, 0, area.x+x+w, h);
+					g.setColor(config.curveColor);
+				}
+
 				// Paint text
 				textArea.paint(g, lines, area);
-
-				if(!wordInfo.hasSyllables()) {
-					continue;
-				}
-
-				// Paint curve preview
-
-				// Allign curve with text
-				int x = textArea.getLeftInsets();
-				if(textArea.getHorizontalAlignment()==SwingConstants.RIGHT) {
-					x = area.width-textArea.getRightInsets()-wordInfo.getCurveWidth();
-				} else if(textArea.getHorizontalAlignment()==SwingConstants.CENTER) {
-					x += (area.width-textArea.getLeftInsets()-textArea.getRightInsets())/2 - wordInfo.getCurveWidth()/2;
-				}
-
-				for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
-					SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
-
-					// Ignore syllables with alignment outside bounds
-					if(sylInfo.getB()<config.leftSyllableBound || sylInfo.getB()>config.rightSyllableBound) {
-						continue;
-					}
-
-					int x0 = area.x + x + sylInfo.getX();
-					int x2 = x0 + sylInfo.getWidth();
-					int x1 = (x0+x2) >> 1;
-
-					float d = sylInfo.getD();
-					float c1 = sylInfo.getC1();
-					float c2 = sylInfo.getC2();
-
-					int y0 = textOffset - (int)((d-c1-minD) * scaleY);
-					int y1 = textOffset - (int)((d-minD) * scaleY);
-					int y2 = textOffset - (int)((d-c2-minD) * scaleY);
-
-					// Prevent artifacts from antialiasing
-					if(y0==y1 && y1==y2) {
-						g.drawLine(x0, y0, x2, y2);
-					} else {
-						g.drawLine(x0, y0, x1, y1);
-						g.drawLine(x1, y1, x2, y2);
-					}
-				}
 			}
 		}
 
@@ -749,6 +925,37 @@ public class SentencePanel extends JPanel{
 
 		public DetailPanel() {
 			setBackground(new Color(0, true));
+		}
+
+		public void rebuild() {
+			setFont(config.detailFont);
+			setForeground(config.detailTextColor);
+
+
+			Axis.Integer xAxis = (Axis.Integer) graph.getXAxis();
+			Axis.Integer yAxis = (Axis.Integer) graph.getYAxis();
+
+			// Apply config
+
+			graph.setBorderColor(config.detailBorderColor);
+			graph.setGridColor(config.detailGridColor);
+			graph.setGridStyle(config.detailGridStyle);
+			graph.setPaintBorder(config.detailPaintBorder);
+			graph.setPaintGrid(config.detailPaintGrid);
+
+			xAxis.setAxisColor(config.detailAxisColor);
+			xAxis.setLabelColor(config.detailAxisLabelColor);
+			xAxis.setLabelFont(config.detailAxisLabelFont);
+			xAxis.setMarkerColor(config.detailAxisMarkerColor);
+			xAxis.setMarkerHeight(config.detailAxisMarkerHeight);
+			xAxis.setMinValue(-config.syllableScope);
+			xAxis.setMaxValue(config.syllableScope);
+
+			yAxis.setAxisColor(config.detailAxisColor);
+			yAxis.setLabelColor(config.detailAxisLabelColor);
+			yAxis.setLabelFont(config.detailAxisLabelFont);
+			yAxis.setMarkerColor(config.detailAxisMarkerColor);
+			yAxis.setMarkerHeight(config.detailAxisMarkerHeight);
 		}
 
 		/**
@@ -786,52 +993,6 @@ public class SentencePanel extends JPanel{
 
 			return d;
 		}
-
-//		private int getFirstSylToPaint() {
-//			if(sentenceInfo==null) {
-//				return 0;
-//			}
-//
-//			int leftSyl = sentenceInfo.firstSyl(currentWord);
-//
-//			if(config.wordScope>0) {
-//				int addedWords = 0;
-//				int wordIndex = currentWord;
-//				// Expand to the left
-//				while(wordIndex>0 && addedWords<config.wordScope) {
-//					wordIndex--;
-//					if(sentenceInfo.hasSyllables(wordIndex)) {
-//						addedWords++;
-//						leftSyl = sentenceInfo.firstSyl(wordIndex);
-//					}
-//				}
-//			}
-//
-//			return leftSyl;
-//		}
-
-//		private int getLastSylToPaint() {
-//			if(sentenceInfo==null) {
-//				return 0;
-//			}
-//
-//			int rightSyl = sentenceInfo.lastSyl(currentWord);
-//
-//			if(config.wordScope>0) {
-//				int addedWords = 0;
-//				int wordIndex = currentWord;
-//				// Expand to the left
-//				while(wordIndex<sentenceInfo.getSentence().length()-1 && addedWords<config.wordScope) {
-//					wordIndex++;
-//					if(sentenceInfo.hasSyllables(wordIndex)) {
-//						addedWords++;
-//						rightSyl = sentenceInfo.lastSyl(wordIndex);
-//					}
-//				}
-//			}
-//
-//			return rightSyl;
-//		}
 
 		private int getFirstWordToPaint() {
 			if(sentenceInfo==null) {
@@ -1001,6 +1162,9 @@ public class SentencePanel extends JPanel{
 
 			Graphics2D g = (Graphics2D) graphics;
 
+			g.setColor(config.detailTextColor);
+			g.setFont(config.detailFont);
+
 			int leftWord = getFirstWordToPaint();
 			int rightWord = getLastWordToPaint();
 
@@ -1069,16 +1233,19 @@ public class SentencePanel extends JPanel{
 						int x = area.x + area.width/2 - sw/2;
 						int y = area.y + fm.getHeight();
 
+						Color c = g.getColor();
+
 						if(config.clearLabelBackground) {
-							Color c = g.getColor();
 
 							g.setColor(bg);
 							g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
-
-							g.setColor(c);
 						}
 
+						g.setFont(config.detailFont);
+						g.setColor(config.detailTextColor);
 						g.drawString(sylLabel, x, y);
+
+						g.setColor(c);
 					}
 
 					area.x += area.width;
@@ -1093,16 +1260,18 @@ public class SentencePanel extends JPanel{
 					int x = (begin + end)/2 - sw/2;
 					int y = fm.getHeight();
 
-					if(config.clearLabelBackground) {
-						Color c = g.getColor();
+					Color c = g.getColor();
 
+					if(config.clearLabelBackground) {
 						g.setColor(bg);
 						g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
-
-						g.setColor(c);
 					}
 
+					g.setFont(config.detailFont);
+					g.setColor(config.detailTextColor);
 					g.drawString(wordLabel, x, y);
+
+					g.setColor(c);
 				}
 			}
 		}

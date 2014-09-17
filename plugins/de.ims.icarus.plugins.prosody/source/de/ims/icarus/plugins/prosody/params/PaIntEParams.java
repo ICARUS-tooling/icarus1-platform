@@ -23,9 +23,15 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.ui.geom;
+package de.ims.icarus.plugins.prosody.params;
 
 import java.io.Serializable;
+import java.util.Locale;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
@@ -34,18 +40,30 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
  * @version $Id$
  *
  */
+@XmlRootElement(name="painte")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PaIntEParams implements Serializable {
 
 	public static final double DEFAULT_ALIGNMENT = 3.6;
 
 	private static final long serialVersionUID = 2000754079504418219L;
 
+	@XmlAttribute
 	private double a1, a2, b, c1, c2, d, alignment = DEFAULT_ALIGNMENT;
-//	private double minX, minY, maxX, maxY;
 
 	public void clear() {
 		a1 = a2 = b = c1 = c2 = d = 0.0;
 		alignment = DEFAULT_ALIGNMENT;
+	}
+
+	public void setParams(PaIntEParams params) {
+		a1 = params.a1;
+		a2 = params.a2;
+		b = params.b;
+		c1 = params.c1;
+		c2 = params.c2;
+		d = params.d;
+		alignment = params.alignment;
 	}
 
 	public void setParams(double[] params) {
@@ -55,6 +73,10 @@ public class PaIntEParams implements Serializable {
 		setC1(params[3]);
 		setC2(params[4]);
 		setD(params[5]);
+
+		if(params.length>6) {
+			setAlignment(params[6]);
+		}
 	}
 
 	public void setParams(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
@@ -64,6 +86,28 @@ public class PaIntEParams implements Serializable {
 		setC1(sentence.getPainteC1(wordIndex, sylIndex));
 		setC2(sentence.getPainteC2(wordIndex, sylIndex));
 		setD(sentence.getPainteD(wordIndex, sylIndex));
+	}
+
+	/**
+	 * Returns the params as an array, not including the alignment value!
+	 */
+	public double[] getParams() {
+		return getParams(new double[6]);
+	}
+
+	public double[] getParams(double[] params) {
+		params[0] = a1;
+		params[1] = a2;
+		params[2] = b;
+		params[3] = c1;
+		params[4] = c2;
+		params[5] = d;
+
+		if(params.length>6) {
+			params[6] = alignment;
+		}
+
+		return params;
 	}
 
 	public double calc(double x) {
@@ -178,6 +222,12 @@ public class PaIntEParams implements Serializable {
 	public void setAlignment(double alignment) {
 		this.alignment = alignment;
 	}
+	@Override
+	public PaIntEParams clone() {
+		PaIntEParams params = new PaIntEParams();
+		params.setParams(this);
+		return params;
+	}
 //	/**
 //	 * @param minX the minX to set
 //	 */
@@ -202,4 +252,41 @@ public class PaIntEParams implements Serializable {
 //	public void setMaxY(double maxY) {
 //		this.maxY = maxY;
 //	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return (int)(a1*a2*b*c1*c2*d*alignment);
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof PaIntEParams) {
+			PaIntEParams other = (PaIntEParams) obj;
+
+			return a1==other.a1
+					&& a2==other.a2
+					&& b==other.b
+					&& c1==other.c1
+					&& c2==other.c2
+					&& d==other.d
+					&& alignment==other.alignment;
+		}
+		return false;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format(Locale.ENGLISH,
+				"a1=%.02f a2=%.02f b=%.02f c1=%.02f c2=%.02f d=%.02f alignment=%.02f", //$NON-NLS-1$
+				a1, a2, b, c1, c2, d, alignment);
+	}
 }

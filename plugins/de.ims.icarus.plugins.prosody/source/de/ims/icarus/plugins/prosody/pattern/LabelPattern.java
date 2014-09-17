@@ -26,10 +26,14 @@
 package de.ims.icarus.plugins.prosody.pattern;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
  * @author Markus Gärtner
@@ -50,6 +54,23 @@ public class LabelPattern implements ProsodyConstants {
 			return NO_VALUE;
 		}
 	};
+
+	public static final Map<Object, Object> magicCharacters =
+			Collections.unmodifiableMap(CollectionUtils.asLinkedMap(
+					"\\", "plugins.prosody.labelPattern.escape", //$NON-NLS-1$ //$NON-NLS-2$
+					"c", "plugins.prosody.labelPattern.syllableCount", //$NON-NLS-1$ //$NON-NLS-2$
+					"n", "plugins.prosody.labelPattern.sentenceNumber", //$NON-NLS-1$ //$NON-NLS-2$
+					"$...$", "plugins.prosody.labelPattern.wordProperty", //$NON-NLS-1$ //$NON-NLS-2$
+					"#...#", "plugins.prosody.labelPattern.syllableProperty" //$NON-NLS-1$ //$NON-NLS-2$
+	));
+
+	public static String escapePattern(String s) {
+		return s==null ? null : s.replaceAll("\n", "\\\\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public static String unescapePattern(String s) {
+		return s==null ? null : s.replaceAll("\\\\n", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 
 	public LabelPattern() {
 		// no-op
@@ -127,25 +148,25 @@ public class LabelPattern implements ProsodyConstants {
 					key = !key;
 					break;
 
-				case 'b':
-					element = new PropertyElement(BEGIN_TS_KEY);
-					break;
-
-				case 'e':
-					element = new PropertyElement(END_TS_KEY);
-					break;
+//				case 'b':
+//					element = new PropertyElement(BEGIN_TS_KEY);
+//					break;
+//
+//				case 'e':
+//					element = new PropertyElement(END_TS_KEY);
+//					break;
 
 				case 'c':
 					element = new SyllableCountElement();
 					break;
 
-				case 'f':
-					element = new PropertyElement(FORM_KEY);
-					break;
-
-				case 'p':
-					element = new PropertyElement(POS_KEY);
-					break;
+//				case 'f':
+//					element = new PropertyElement(FORM_KEY);
+//					break;
+//
+//				case 'p':
+//					element = new PropertyElement(POS_KEY);
+//					break;
 
 				case 'n':
 					element = new PropertyElement(SENTENCE_NUMBER_KEY);
@@ -209,6 +230,18 @@ public class LabelPattern implements ProsodyConstants {
 	 */
 	public String getPattern() {
 		return pattern;
+	}
+
+	private static String val2String(Object value) {
+		if(value==null) {
+			return NO_VALUE;
+		}
+
+		if(value instanceof Double || value instanceof Float) {
+			return String.format(Locale.ENGLISH, "%.02f", value);
+		}
+
+		return String.valueOf(value);
 	}
 
 	private interface Element {
@@ -286,7 +319,7 @@ public class LabelPattern implements ProsodyConstants {
 		public String getText(ProsodicSentenceData sentence, int wordIndex) {
 			Object value = wordIndex==-1 ? sentence.getProperty(property) : sentence.getProperty(wordIndex, property);
 
-			return value==null ? NO_VALUE : String.valueOf(value);
+			return val2String(value);
 		}
 
 	}
@@ -298,7 +331,14 @@ public class LabelPattern implements ProsodyConstants {
 		 */
 		@Override
 		public String getText(ProsodicSentenceData sentence, int wordIndex) {
-			int count = sentence.getSyllableCount(wordIndex);
+			int count = 0;
+			if(wordIndex==-1) {
+				for(int i=0; i<sentence.length(); i++) {
+					count += sentence.getSyllableCount(i);
+				}
+			} else {
+				count = sentence.getSyllableCount(wordIndex);
+			}
 			return count<=0 ? NO_VALUE : String.valueOf(count);
 		}
 
@@ -334,11 +374,7 @@ public class LabelPattern implements ProsodyConstants {
 
 				Object value = sentence.getSyllableProperty(wordIndex, property, i);
 
-				if(value==null) {
-					buffer.append(NO_VALUE);
-				} else {
-					buffer.append(value);
-				}
+				buffer.append(val2String(value));
 			}
 
 			String result = buffer.toString();

@@ -31,11 +31,13 @@ import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
+import de.ims.icarus.plugins.prosody.ProsodicDocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.BlockHandler;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.data.DataCreater;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.strings.CharTableBuffer;
@@ -46,7 +48,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
  * @version $Id: ProsodyDocumentReader.java 244 2014-04-10 12:09:12Z mcgaerty $
  *
  */
-public class ProsodyDocumentReader implements Reader<ProsodicDocumentData> {
+public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, DataCreater {
 
 	private CharTableBuffer buffer;
 	private BlockHandler blockHandler;
@@ -100,6 +102,14 @@ public class ProsodyDocumentReader implements Reader<ProsodicDocumentData> {
 	@Override
 	public ContentType getContentType() {
 		return ProsodyUtils.getProsodyDocumentContentType();
+	}
+
+	/**
+	 * @see de.ims.icarus.util.data.DataCreater#create()
+	 */
+	@Override
+	public Object create() {
+		return new ProsodicDocumentSet();
 	}
 
 }

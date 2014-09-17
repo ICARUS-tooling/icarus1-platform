@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,36 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.ui;
+package de.ims.icarus.util.data;
 
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
+/**
+ * @author Markus Gärtner
+ * @version $Id$
+ *
+ */
+public interface DataCreater {
 
-public class NumberDocument extends PlainDocument {
+	ContentType getContentType();
 
-	private static final long serialVersionUID = -7247806020719831949L;
-
-	private static final String integerPattern = "^[+-]?\\d*$"; //$NON-NLS-1$
-	private static final String decimalPattern = "^[+-]?\\d*\\.?\\d*$"; //$NON-NLS-1$
-
-	private final String pattern;
-
-	public NumberDocument() {
-		this(false);
-	}
-
-	public NumberDocument(boolean allowFloatingPoint) {
-		pattern = allowFloatingPoint ? decimalPattern : integerPattern;
-	}
-
-	@Override
-	public void insertString(int offset, String str, AttributeSet a)
-			throws BadLocationException {
-		super.insertString(offset, str, a);
-		String newText = getText(0, getLength());
-		if (!newText.matches(pattern)) {
-			remove(offset, str.length());
-		}
-	}
+	Object create();
 }

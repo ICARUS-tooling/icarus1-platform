@@ -117,7 +117,8 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public long getFlags(int index) {
-		return (long) getProperty(index, FLAGS_KEY);
+		Object value = getProperty(index, FLAGS_KEY);
+		return value==null ? 0L : (long)value;
 	}
 
 	private final Key sharedKey = new Key();
@@ -153,7 +154,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public Object getSyllableProperty(int index, String key, int sylIndex) {
-		Object array = getIndexedProperty(sylIndex, key);
+		Object array = getIndexedProperty(index, key);
 		return (array==null || Array.getLength(array)==0) ? null : Array.get(array, sylIndex);
 	}
 

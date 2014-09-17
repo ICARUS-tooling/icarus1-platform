@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody.ui;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 
 import javax.swing.JComponent;
 
@@ -56,7 +57,8 @@ public class TextComponent extends JComponent {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		textArea.paint(g, lines, getBounds());
+		Rectangle area = new Rectangle(getSize());
+		textArea.paint(g, lines, area);
 	}
 	/**
 	 * @see javax.swing.JComponent#getPreferredSize()

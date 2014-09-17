@@ -29,6 +29,7 @@ import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.DefaultCoreferenceDocumentData;
+import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
@@ -68,6 +69,14 @@ public class DefaultProsodicDocumentData extends DefaultCoreferenceDocumentData 
 	public ProsodicSentenceData get(int index, DataType type,
 			AvailabilityObserver observer) {
 		return (ProsodicSentenceData) super.get(index, type, observer);
+	}
+
+	/**
+	 * @see de.ims.icarus.util.data.DataList#getContentType()
+	 */
+	@Override
+	public ContentType getContentType() {
+		return ProsodyUtils.getProsodySentenceContentType();
 	}
 
 }

@@ -14,11 +14,16 @@
 	<action id="plugins.prosody.prosodyOutlinePresenter.refreshAction"
 		template="actions.default.refreshAction" />
 		
+	<!-- EditLabelPatterns -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.editLabelPatternsAction"
+		name="${id}.name" desc="${id}.description" icon="url.gif" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.prosodyOutlinePresenter.toolBarList">
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.openPreferencesAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.refreshAction" />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.editLabelPatternsAction" />
 		<separator />
 		<item type="glue" />
 	</action-list>

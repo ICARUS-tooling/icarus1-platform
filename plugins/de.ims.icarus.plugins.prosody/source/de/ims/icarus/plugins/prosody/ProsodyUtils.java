@@ -45,7 +45,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class ProsodyUtils {
+public class ProsodyUtils implements ProsodyConstants {
 
 	private static Cursor speakerCursor;
 
@@ -76,5 +76,71 @@ public class ProsodyUtils {
 
 	public static ContentType getProsodySentenceContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(ProsodicSentenceData.class);
+	}
+
+	private static final String[] defaultWordPropertyKeys = {
+		FORM_KEY,
+		POS_KEY,
+		LEMMA_KEY,
+		BEGIN_TS_KEY,
+		DEPREL_KEY,
+		END_TS_KEY,
+		ENTITY_KEY,
+		FEATURES_KEY,
+		HEAD_KEY,
+		PHONEME_COUNT_KEY,
+		SPEAKER_KEY,
+		SPEAKER_FEATURES_KEY,
+	};
+
+	public static String[] getDefaultWordPropertyKeys() {
+		return defaultWordPropertyKeys.clone();
+	}
+
+	private static final String[] defaultSyllablePropertyKeys = {
+		SYLLABLE_DURATION_KEY,
+		SYLLABLE_ENDPITCH_KEY,
+		SYLLABLE_LABEL_KEY,
+		SYLLABLE_MIDPITCH_KEY,
+		SYLLABLE_OFFSET_KEY,
+		SYLLABLE_STARTPITCH_KEY,
+		SYLLABLE_STRESS_KEY,
+		SYLLABLE_TIMESTAMP_KEY,
+		SYLLABLE_VOWEL_KEY,
+		VOWEL_DURATION_KEY,
+		CODA_SIZE_KEY,
+		CODA_TYPE_KEY,
+		ONSET_SIZE_KEY,
+		ONSET_TYPE_KEY,
+		PAINTE_A1_KEY,
+		PAINTE_A2_KEY,
+		PAINTE_B_KEY,
+		PAINTE_C1_KEY,
+		PAINTE_C2_KEY,
+		PAINTE_D_KEY,
+	};
+
+	public static String[] getDefaultSyllablePropertyKeys() {
+		return defaultSyllablePropertyKeys.clone();
+	}
+
+	private static final String[] defaultSentencePropertyKeys = {
+		SENTENCE_NUMBER_KEY,
+	};
+
+	public static String[] getDefaultSentencePropertyKeys() {
+		return defaultSentencePropertyKeys.clone();
+	}
+
+	private static final char defaultDelimiter = ' ';
+
+	public static void appendProperties(StringBuilder buffer, String key, ProsodicSentenceData sentence, int wordIndex) {
+
+		for(int i=0; i<=sentence.getSyllableCount(wordIndex); i++) {
+			if(i>0) {
+				buffer.append(defaultDelimiter);
+			}
+			buffer.append(sentence.getSyllableProperty(wordIndex, key, i));
+		}
 	}
 }

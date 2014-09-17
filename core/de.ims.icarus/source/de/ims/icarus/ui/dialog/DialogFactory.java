@@ -43,6 +43,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.UIDummies;
@@ -500,6 +501,10 @@ public final class DialogFactory {
 
 	public Path showDestinationFileDialog(Component parent, String title,
 			Path directory, FileFilter filter) throws IOException {
+		if(directory==null) {
+			directory = Core.getCore().getDataFolder();
+		}
+
 		JFileChooser fileChooser = getFileChooser();
 		fileChooser.setCurrentDirectory(directory.toFile());
 		fileChooser.setSelectedFile(null);
@@ -538,6 +543,9 @@ public final class DialogFactory {
 
 	public Path showSourceFileDialog(Component parent, String title,
 			Path directory, FileFilter filter) {
+		if(directory==null) {
+			directory = Core.getCore().getDataFolder();
+		}
 		JFileChooser fileChooser = getFileChooser();
 		fileChooser.setCurrentDirectory(directory.toFile());
 		fileChooser.setSelectedFile(null);

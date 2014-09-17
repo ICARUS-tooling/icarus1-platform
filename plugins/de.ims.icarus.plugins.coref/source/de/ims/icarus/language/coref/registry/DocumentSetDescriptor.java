@@ -58,6 +58,7 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.util.data.DataCreater;
 import de.ims.icarus.util.data.DataList;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.xml.jaxb.ExtensionAdapter;
@@ -165,6 +166,8 @@ public class DocumentSetDescriptor implements Loadable,
 
 			loading.set(false);
 		}
+
+		fireChangeEvent();
 	}
 
 	@Override
@@ -190,7 +193,13 @@ public class DocumentSetDescriptor implements Loadable,
 
 	public CoreferenceDocumentSet getDocumentSet() {
 		if(documentSet==null) {
-			documentSet = new CoreferenceDocumentSet();
+			@SuppressWarnings("resource")
+			Reader<CoreferenceDocumentData> reader = createReader();
+			if(reader instanceof DataCreater) {
+				documentSet = (CoreferenceDocumentSet) ((DataCreater)reader).create();
+			} else {
+				documentSet = new CoreferenceDocumentSet();
+			}
 		}
 		return documentSet;
 	}
@@ -395,6 +404,7 @@ public class DocumentSetDescriptor implements Loadable,
 			synchronized (DocumentSetDescriptor.class) {
 				if(allocationDescriptorContentType==null) {
 					ContentTypeRegistry.getInstance().addType(AllocationDescriptor.class);
+					allocationDescriptorContentType = ContentTypeRegistry.getInstance().getTypeForClass(AllocationDescriptor.class);
 				}
 			}
 		}

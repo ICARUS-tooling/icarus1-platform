@@ -46,6 +46,7 @@ import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.location.Location;
@@ -100,68 +101,73 @@ public class DefaultAllocationReader implements AllocationReader {
 
 	@Override
 	public void readAllocation(CoreferenceAllocation allocation) throws Exception {
-		Set<String> ids = new HashSet<>();
-		boolean checkIds = false;
-		if(documentSet!=null) {
-			ids.addAll(documentSet.getDocumentIds());
-			checkIds = true;
-		}
-
-		main : while(true) {
-
-			if(Thread.currentThread().isInterrupted())
-				throw new InterruptedException();
-
-			if(!skipEmptyLines()) {
-				break main;
+		try {
+			Set<String> ids = new HashSet<>();
+			boolean checkIds = false;
+			if(documentSet!=null) {
+				ids.addAll(documentSet.getDocumentIds());
+				checkIds = true;
 			}
 
-			if(!buffer.startsWith(BEGIN_DOCUMENT))
-				throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+buffer); //$NON-NLS-1$ //$NON-NLS-2$
+			main : while(true) {
 
-			int startLine = lineCount;
-			documentId = buffer.substring(BEGIN_DOCUMENT.length()).trim();
+				if(Thread.currentThread().isInterrupted())
+					throw new InterruptedException();
 
-			if(checkIds && !ids.remove(documentId))
-				throw new IllegalArgumentException(String.format(
-						"Unknown document id '%s' at line %s ", documentId, lineCount)); //$NON-NLS-1$
+				if(!skipEmptyLines()) {
+					break main;
+				}
 
-			CoreferenceDocumentData document = documentSet==null ?
-					null : documentSet.getDocument(documentId);
+				if(!buffer.startsWith(BEGIN_DOCUMENT))
+					throw new NullPointerException("Invalid '"+BEGIN_DOCUMENT+"' declaration: "+buffer); //$NON-NLS-1$ //$NON-NLS-2$
 
-			// Read in properties
-			while(buffer.next()) {
-				if(buffer.equals(BEGIN_NODES)) {
-					break;
-				} else if(buffer.startsWith(COMMENT_PREFIX)) {
-					readProperty(allocation);
-				} else
+				int startLine = lineCount;
+				documentId = buffer.substring(BEGIN_DOCUMENT.length()).trim();
+
+				if(checkIds && !ids.remove(documentId))
+					throw new IllegalArgumentException(String.format(
+							"Unknown document id '%s' at line %s ", documentId, lineCount)); //$NON-NLS-1$
+
+				CoreferenceDocumentData document = documentSet==null ?
+						null : documentSet.getDocument(documentId);
+
+				// Read in properties
+				while(readLine()) {
+					if(buffer.equals(BEGIN_NODES)) {
+						break;
+					} else if(buffer.startsWith(COMMENT_PREFIX)) {
+						readProperty(allocation);
+					} else
+						throw new IllegalArgumentException(errMsg(String.format(
+								"Invalid property statement '%s' at line %d", buffer, lineCount))); //$NON-NLS-1$
+				}
+
+				// Read nodes
+				SpanSet spanSet = readNodes(document);
+
+				// Read edges
+				EdgeSet edgeSet = readEdges(spanSet);
+
+				allocation.setSpanSet(documentId, spanSet);
+				allocation.setEdgeSet(documentId, edgeSet);
+
+				// Check for closing declaration
+				if(!skipEmptyLines() || !buffer.equals(END_DOCUMENT))
 					throw new IllegalArgumentException(errMsg(String.format(
-							"Invalid property statement '%s' at line %d", buffer, lineCount))); //$NON-NLS-1$
+							"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
+							END_DOCUMENT, BEGIN_DOCUMENT, startLine)));
 			}
 
-			// Read nodes
-			SpanSet spanSet = readNodes(document);
+			if(checkIds && !ids.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("Missing allocations for documents:\n"); //$NON-NLS-1$
+				sb.append(CollectionUtils.toString(ids));
 
-			// Read edges
-			EdgeSet edgeSet = readEdges(spanSet);
-
-			allocation.setSpanSet(documentId, spanSet);
-			allocation.setEdgeSet(documentId, edgeSet);
-
-			// Check for closing declaration
-			if(!skipEmptyLines() || !buffer.equals(END_DOCUMENT))
-				throw new IllegalArgumentException(errMsg(String.format(
-						"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
-						END_DOCUMENT, BEGIN_DOCUMENT, startLine)));
-		}
-
-		if(checkIds && !ids.isEmpty()) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Missing allocations for documents:\n"); //$NON-NLS-1$
-			sb.append(CollectionUtils.toString(ids));
-
-			throw new IllegalArgumentException(sb.toString());
+				throw new IllegalArgumentException(sb.toString());
+			}
+		} catch(Throwable t) {
+			LoggerFactory.error(this, "Unexpected error in line "+lineCount+": "+String.valueOf(buffer), t); //$NON-NLS-1$ //$NON-NLS-2$
+			throw t;
 		}
 	}
 

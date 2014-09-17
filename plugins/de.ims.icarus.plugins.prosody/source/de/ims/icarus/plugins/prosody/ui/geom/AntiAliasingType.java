@@ -28,11 +28,14 @@ package de.ims.icarus.plugins.prosody.ui.geom;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
+import javax.xml.bind.annotation.XmlEnum;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@XmlEnum
 public enum AntiAliasingType {
 
 	NONE {

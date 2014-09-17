@@ -23,15 +23,18 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.ui.view.outline;
+package de.ims.icarus.plugins.prosody.ui.view;
 
 import java.awt.FontMetrics;
+
+import javax.xml.bind.annotation.XmlEnum;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
+@XmlEnum
 public enum PreviewSize {
 
 	SMALL {

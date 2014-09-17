@@ -309,6 +309,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	}
 
 	protected void displayData(DataList<T> data, Options options) {
+		//FIXME should this be an || instead of && ?
 		if(dataList==null && dataList==data) {
 			return;
 		}
@@ -393,6 +394,8 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		refreshFilterOptions();
 		refreshTextOutline();
 		refreshUtilities();
+
+		computeListCellPrototype();
 	}
 
 	protected void refreshUtilities() {

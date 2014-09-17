@@ -30,6 +30,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -303,6 +305,11 @@ public class PaIntEGraph {
 			x -= yAxisWidth;
 		}
 
-		return curve.translate(x, y, area, params, accuracy, xAxis, yAxis);
+		PaIntEHitBox hitBox = curve.translate(x, y, area, params, accuracy, xAxis, yAxis);
+		if(hitBox==null) {
+			hitBox = new PaIntEHitBox(params);
+		}
+
+		return hitBox;
 	}
 }

@@ -25,13 +25,15 @@
  */
 package de.ims.icarus.search_tools.standard;
 
+import gnu.trove.TIntCollection;
+import gnu.trove.impl.sync.TSynchronizedIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import java.util.logging.Level;
 
 import javax.xml.stream.XMLStreamException;
@@ -86,7 +88,7 @@ public abstract class AbstractParallelSearch extends Search {
 
 	protected int pendingWorkers;
 	protected List<Worker> workers = Collections.synchronizedList(new ArrayList<Worker>());
-	protected Set<Integer> pendingIndices = Collections.synchronizedSet(new HashSet<Integer>());
+	protected TIntCollection pendingIndices = new TSynchronizedIntSet(new TIntHashSet());
 	protected Queue<ItemBuffer> pendingItems = new LinkedList<>();
 
 	protected final Object notifer = new Object();
@@ -239,7 +241,7 @@ public abstract class AbstractParallelSearch extends Search {
 		pendingIndices.remove(index);
 
 		synchronized (notifer) {
-			// TODO should we notify more than one worker?
+			// TODO should we notify more than one worker? -> no!
 			notifer.notify();
 		}
 	}

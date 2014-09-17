@@ -47,7 +47,7 @@ public class TextArea implements SwingConstants {
 	public static final Font DEFAULT_FONT = new Font("Dialog", Font.PLAIN, 12); //$NON-NLS-1$
 	public static final Color DEFAULT_TEXT_COLOR = Color.black;
 	public static final int DEFAULT_HORIZONTAL_ALIGNMENT = CENTER;
-	public static final int DEFAULT_VERTICAL_ALIGNMENT = CENTER;
+	public static final int DEFAULT_VERTICAL_ALIGNMENT = TOP;
 	public static final boolean DEFAULT_VERTICAL = false;
 
 	private int horizontalAlignment = DEFAULT_HORIZONTAL_ALIGNMENT;
@@ -117,12 +117,15 @@ public class TextArea implements SwingConstants {
 			return;
 		}
 
+//		System.out.println(area);
+//		g.drawRect(area.x, area.y, area.width-1, area.height-1);
+
 		Color c = g.getColor();
 		Font f = g.getFont();
 
 		g.translate(area.x, area.y);
 		g.setColor(textColor);
-		g.setFont(font);
+		g.setFont(vertical ? getRotatedFont() : font);
 
 		FontMetrics fm = g.getFontMetrics();
 		Insets insets = this.insets;

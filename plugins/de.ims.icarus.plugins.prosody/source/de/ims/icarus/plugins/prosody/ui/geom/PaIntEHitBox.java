@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.plugins.prosody.ui.geom;
 
+import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -37,6 +39,8 @@ public class PaIntEHitBox {
 	private int wordIndex = -1, sylIndex = -1;
 
 	private Axis axis;
+
+	private PaIntEParams params;
 
 	private Type type;
 
@@ -51,6 +55,11 @@ public class PaIntEHitBox {
 
 		this.axis = axis;
 		type = Type.AXIS;
+	}
+
+	public PaIntEHitBox(PaIntEParams params) {
+		this.params = params;
+		type = Type.GRAPH;
 	}
 
 	public PaIntEHitBox(PaIntEHitBox source) {
@@ -170,10 +179,25 @@ public class PaIntEHitBox {
 		this.type = type;
 	}
 
+	/**
+	 * @return the params
+	 */
+	public PaIntEParams getParams() {
+		return params;
+	}
+
+	/**
+	 * @param params the params to set
+	 */
+	public void setParams(PaIntEParams params) {
+		this.params = params;
+	}
+
 	public enum Type {
 		CURVE,
 		AXIS,
 		WORD_LABEL,
 		SYL_LABEL,
+		GRAPH,
 	}
 }

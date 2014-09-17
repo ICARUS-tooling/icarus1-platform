@@ -19,15 +19,17 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.helper;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
@@ -43,25 +45,25 @@ import de.ims.icarus.util.Filter;
  *
  */
 public class FilteredListModel<E extends Object> extends AbstractListModel<E> {
-	
+
 	private static final long serialVersionUID = 8371348205390135107L;
 
 	protected ListModel<E> baseModel;
-	
+
 	protected Filter filter;
-	
-	protected List<Integer> mask;
-	
+
+	protected TIntList mask;
+
 	protected OwnedListDataListener ownedListDataListener;
-	
+
 	public FilteredListModel() {
 		// no-op
 	}
-	
+
 	public FilteredListModel(ListModel<E> baseModel) {
 		setBaseModel(baseModel);
 	}
-	
+
 	public FilteredListModel(ListModel<E> baseModel, Filter filter) {
 		setBaseModel(baseModel);
 		setFilter(filter);
@@ -79,20 +81,20 @@ public class FilteredListModel<E extends Object> extends AbstractListModel<E> {
 		if(this.baseModel==baseModel) {
 			return;
 		}
-		
+
 		if(this.baseModel!=null && ownedListDataListener!=null) {
 			this.baseModel.removeListDataListener(ownedListDataListener);
 		}
-		
+
 		this.baseModel = baseModel;
-		
+
 		if(this.baseModel!=null) {
 			if(ownedListDataListener==null) {
 				ownedListDataListener = new OwnedListDataListener(this);
 			}
 			this.baseModel.addListDataListener(ownedListDataListener);
 		}
-		
+
 		recomputeMask();
 	}
 
@@ -120,69 +122,76 @@ public class FilteredListModel<E extends Object> extends AbstractListModel<E> {
 		if(baseModel==null) {
 			return null;
 		}
-		
+
 		if(mask!=null) {
 			index = mask.get(index);
 		}
-		
+
 		return baseModel.getElementAt(index);
 	}
-	
+
 	protected void fireContentsChanged() {
 		int index1 = Math.max(0, getSize()-1);
 		fireContentsChanged(this, 0, index1);
 	}
-	
+
 	protected void recomputeMask() {
-		List<Integer> mask = null;
-				
+		TIntList mask = null;
+
 		if(filter!=null) {
-			// TODO filter indices
+			mask = new TIntArrayList();
+
+			for(int i=0; i<baseModel.getSize(); i++) {
+				E item = baseModel.getElementAt(i);
+				if(filter.accepts(item)) {
+					mask.add(i);
+				}
+			}
 		}
-		
+
 		this.mask = mask;
-		
+
 		fireContentsChanged();
 	}
-	
+
 	protected void intervalAdded(int index0, int index1) {
 		// TODO validate range of change by finding masking indices
-		
+
 		// For now we use costly recomputation of entire mask -> needs to be changed
 		recomputeMask();
 	}
-	
+
 	protected void intervalRemoved(int index0, int index1) {
 		// TODO validate range of change by finding masking indices
-		
+
 		// For now we use costly recomputation of entire mask -> needs to be changed
 		recomputeMask();
 	}
-	
+
 	protected void intervalChanged(int index0, int index1) {
 		// TODO validate range of change by finding masking indices
-		
+
 		// For now we use costly recomputation of entire mask -> needs to be changed
 		recomputeMask();
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
 	 */
 	@SuppressWarnings("rawtypes")
 	private static class OwnedListDataListener implements ListDataListener {
-		
+
 		private final Reference<FilteredListModel> owner;
 		private final int hash;
-		
+
 		public OwnedListDataListener(FilteredListModel model) {
 			owner = new WeakReference<>(model);
 			hash = model.hashCode();
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			if(obj instanceof OwnedListDataListener) {
@@ -238,7 +247,7 @@ public class FilteredListModel<E extends Object> extends AbstractListModel<E> {
 		 * @see java.lang.Object#hashCode()
 		 */
 		@Override
-		public int hashCode() { 
+		public int hashCode() {
 			return hash;
 		}
 	}

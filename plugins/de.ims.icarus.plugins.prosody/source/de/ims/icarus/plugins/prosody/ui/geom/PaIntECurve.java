@@ -31,6 +31,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 
+import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
@@ -38,12 +40,12 @@ import java.awt.Stroke;
  */
 public class PaIntECurve {
 
-	public static final int DEFAULT_MIN_SAMPLE_COUNT = 50;
+	public static final int DEFAULT_MAX_SAMPLE_COUNT = 50;
 	public static final int DEFAULT_SAMPLE_DISTANCE = 2;
 	public static final Color DEFAULT_COLOR = Color.black;
 	public static final AntiAliasingType DEFAULT_ANTIALIASING_TYPE = AntiAliasingType.DEFAULT;
 
-	private int minSampleCount = DEFAULT_MIN_SAMPLE_COUNT;
+	private int maxSampleCount = DEFAULT_MAX_SAMPLE_COUNT;
 	private int sampleDistanc = DEFAULT_SAMPLE_DISTANCE;
 
 	private AntiAliasingType antiAliasingType = DEFAULT_ANTIALIASING_TYPE;
@@ -76,7 +78,7 @@ public class PaIntECurve {
 		final double scaleY = area.height/rangeY;
 
 		// Number of samples
-		final int stepCount = Math.min(area.width/sampleDistanc, minSampleCount);
+		final int stepCount = Math.min(area.width/sampleDistanc, maxSampleCount);
 		// Distance between two sample points in the figure space
 		final double stepSize = rangeX/stepCount;
 		// Translation from figure space to drawing coordinates
@@ -148,10 +150,10 @@ public class PaIntECurve {
 	}
 
 	/**
-	 * @return the minSampleCount
+	 * @return the maxSampleCount
 	 */
-	public int getMinSampleCount() {
-		return minSampleCount;
+	public int getMaxSampleCount() {
+		return maxSampleCount;
 	}
 
 	/**
@@ -176,10 +178,10 @@ public class PaIntECurve {
 	}
 
 	/**
-	 * @param minSampleCount the minSampleCount to set
+	 * @param maxSampleCount the maxSampleCount to set
 	 */
-	public void setMinSampleCount(int minSampleCount) {
-		this.minSampleCount = minSampleCount;
+	public void setMaxSampleCount(int maxSampleCount) {
+		this.maxSampleCount = maxSampleCount;
 	}
 
 	/**

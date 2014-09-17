@@ -88,6 +88,12 @@
 		name="close" 
 		desc="close" />
 	
+	<!-- Rename -->
+	<action id="actions.default.renameAction" virtual="true"
+		name="rename" 
+		desc="rename" 
+		icon="wordassist_co.gif" />
+	
 	<!-- Inspect -->
 	<action id="actions.default.inspectAction" virtual="true"
 		name="inspect" 

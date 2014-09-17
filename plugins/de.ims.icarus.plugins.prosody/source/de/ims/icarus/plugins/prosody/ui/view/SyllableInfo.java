@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.ui.view.outline;
+package de.ims.icarus.plugins.prosody.ui.view;
 
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 

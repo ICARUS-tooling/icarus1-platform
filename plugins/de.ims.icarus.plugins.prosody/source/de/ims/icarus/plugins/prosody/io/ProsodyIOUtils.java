@@ -348,7 +348,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, POS_KEY, get(row, POS_COL, EMPTY));
 			result.setProperty(i, LEMMA_KEY, get(row, LEMMA_COL, EMPTY));
 			result.setProperty(i, FEATURES_KEY, get(row, FEATURES_COL, EMPTY));
-			result.setProperty(i, HEAD_KEY, getInt(row, HEAD_COL, DATA_UNDEFINED_VALUE));
+			result.setProperty(i, HEAD_KEY, Math.max(getInt(row, HEAD_COL, DATA_UNDEFINED_VALUE)-1, DATA_UNDEFINED_VALUE));
 			result.setProperty(i, DEPREL_KEY, get(row, DEPREL_COL, EMPTY));
 			result.setProperty(i, SPEAKER_KEY, get(row, SPEAKER_COL, EMPTY));
 			result.setProperty(i, SPEAKER_FEATURES_KEY, get(row, SPEAKER_FEATURES_COL, EMPTY));
