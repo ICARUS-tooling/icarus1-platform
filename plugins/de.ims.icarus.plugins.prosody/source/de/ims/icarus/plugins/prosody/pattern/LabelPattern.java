@@ -26,14 +26,18 @@
 package de.ims.icarus.plugins.prosody.pattern;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -41,6 +45,11 @@ import de.ims.icarus.util.collections.CollectionUtils;
  *
  */
 public class LabelPattern implements ProsodyConstants {
+
+	public static void main(String[] args) {
+		String test = "%documentId::15:% (n) $speaker:::?:$\\:  ";
+		LabelPattern pattern = new LabelPattern(test);
+	}
 
 	private Element[] elements;
 	private String pattern;
@@ -51,7 +60,7 @@ public class LabelPattern implements ProsodyConstants {
 
 		@Override
 		public String getText(ProsodicSentenceData sentence, int wordIndex) {
-			return NO_VALUE;
+			return null;
 		}
 	};
 
@@ -60,6 +69,8 @@ public class LabelPattern implements ProsodyConstants {
 					"\\", "plugins.prosody.labelPattern.escape", //$NON-NLS-1$ //$NON-NLS-2$
 					"c", "plugins.prosody.labelPattern.syllableCount", //$NON-NLS-1$ //$NON-NLS-2$
 					"n", "plugins.prosody.labelPattern.sentenceNumber", //$NON-NLS-1$ //$NON-NLS-2$
+					"d", "plugins.prosody.labelPattern.documentIndex", //$NON-NLS-1$ //$NON-NLS-2$
+					"%...%", "plugins.prosody.labelPattern.documentProperty", //$NON-NLS-1$ //$NON-NLS-2$
 					"$...$", "plugins.prosody.labelPattern.wordProperty", //$NON-NLS-1$ //$NON-NLS-2$
 					"#...#", "plugins.prosody.labelPattern.syllableProperty" //$NON-NLS-1$ //$NON-NLS-2$
 	));
@@ -78,6 +89,22 @@ public class LabelPattern implements ProsodyConstants {
 
 	public LabelPattern(String pattern) {
 		compile(pattern);
+	}
+
+	private void consumeText(StringBuilder sb, Collection<? super Element> buffer) {
+		if(sb.length()>0) {
+			buffer.add(new TextElement(getString(sb)));
+		}
+	}
+
+	private static String getString(StringBuilder sb) {
+		if(sb.length()>0) {
+			String s = sb.toString();
+			sb.setLength(0);
+			return s;
+		} else {
+			return null;
+		}
 	}
 
 	public void compile(String pattern) {
@@ -99,6 +126,8 @@ public class LabelPattern implements ProsodyConstants {
 		List<Element> buffer = new ArrayList<>();
 
 		Element[] newElements = new Element[lines.length];
+		// [min_length, max_length, default]
+		Opts options = new Opts();
 		for(int i=0; i<newElements.length; i++) {
 
 			String line = lines[i];
@@ -110,40 +139,73 @@ public class LabelPattern implements ProsodyConstants {
 			StringBuilder sb = new StringBuilder();
 			boolean escaped = false;
 			boolean key = false;
+			boolean allowOptions = false;
 			int size = line.length();
+			Element element = null;
+			options.reset();
 
 			for(int j=0; j<size; j++) {
 				char c = line.charAt(j);
-				Element element = null;
-				boolean collectChars = false;
 
-				if(escaped || (key && c!='$' && c!='#')) {
+				if(escaped || (key && c!='$' && c!='%' && c!='#' && c!=':')) {
 					sb.append(c);
 					escaped = false;
 					continue;
 				}
+
+				allowOptions = element!=null;
 
 				switch (c) {
 				case '\\':
 					escaped = true;
 					break;
 
+				case ':':
+					if(element==null || !allowOptions)
+						throw new IllegalStateException("Attempting to define options outside of element context"); //$NON-NLS-1$
+
+					if(options.isEmpty() && sb.length()>0) {
+						element.setModifier(getString(sb));
+					}
+
+					options.addOption(sb);
+					break;
+
 				case '$':
-					if(key) {
-						element = new PropertyElement(sb.toString());
-						sb.setLength(0);
+					if(element==null) {
+						consumeText(sb, buffer);
+						element = new PropertyElement();
+						buffer.add(element);
 					} else {
-						collectChars = true;
+						if(!options.applyOptions(element)) {
+							element.setModifier(getString(sb));
+						}
 					}
 					key = !key;
 					break;
 
 				case '#':
-					if(key) {
-						element = new SyllablePropertyElement(sb.toString());
-						sb.setLength(0);
+					if(element==null) {
+						consumeText(sb, buffer);
+						element = new SyllablePropertyElement();
+						buffer.add(element);
 					} else {
-						collectChars = true;
+						if(!options.applyOptions(element)) {
+							element.setModifier(getString(sb));
+						}
+					}
+					key = !key;
+					break;
+
+				case '%':
+					if(element==null) {
+						consumeText(sb, buffer);
+						element = new DocumentPropertyElement();
+						buffer.add(element);
+					} else {
+						if(!options.applyOptions(element)) {
+							element.setModifier(getString(sb));
+						}
 					}
 					key = !key;
 					break;
@@ -160,33 +222,29 @@ public class LabelPattern implements ProsodyConstants {
 					element = new SyllableCountElement();
 					break;
 
-//				case 'f':
-//					element = new PropertyElement(FORM_KEY);
-//					break;
-//
-//				case 'p':
-//					element = new PropertyElement(POS_KEY);
-//					break;
-
 				case 'n':
-					element = new PropertyElement(SENTENCE_NUMBER_KEY);
+					consumeText(sb, buffer);
+					element = new PropertyElement();
+					element.setModifier(SENTENCE_NUMBER_KEY);
+					buffer.add(element);
+					break;
+
+				case 'd':
+					element = new DocumentIndexElement();
+					buffer.add(element);
 					break;
 
 				default:
 					sb.append(c);
+					element = null;
 					break;
-				}
-
-				if(sb.length()>0 && (collectChars || element!=null || j==size-1)) {
-					buffer.add(new TextElement(sb.toString()));
-					sb.setLength(0);
-				}
-				if(element!=null) {
-					buffer.add(element);
 				}
 			}
 
-			Element element = EMPTY_LINE;
+			options.applyOptions(element);
+			consumeText(sb, buffer);
+
+			element = EMPTY_LINE;
 
 			if(buffer.size()>1) {
 				CompoundElement cElem = new CompoundElement();
@@ -219,10 +277,35 @@ public class LabelPattern implements ProsodyConstants {
 		String[] lines = new String[elements.length];
 
 		for(int i=0; i<elements.length; i++) {
-			lines[i] = elements[i].getText(sentence, wordIndex);
+			lines[i] = getText0(elements[i], sentence, wordIndex);
 		}
 
 		return lines;
+	}
+
+	public int getElementCount() {
+		return elements==null ? 0 : elements.length;
+	}
+
+	public Element getPatternElement(int index) {
+		return elements[index];
+	}
+
+	private static String getText0(Element element, ProsodicSentenceData sentence, int wordIndex) {
+
+		String text = element.getText(sentence, wordIndex);
+
+		if(text==null) {
+			text = element.getNoValueLabel();
+		} else {
+			if(element.getMinLength()!=-1 && text.length()<element.getMinLength()) {
+				text = StringUtil.padRight(text, element.getMinLength());
+			} else if(element.getMaxLength()!=-1 && text.length()>element.getMaxLength()) {
+				text = text.substring(0, element.getMaxLength()-5)+"[...]"; //$NON-NLS-1$
+			}
+		}
+
+		return text;
 	}
 
 	/**
@@ -238,17 +321,106 @@ public class LabelPattern implements ProsodyConstants {
 		}
 
 		if(value instanceof Double || value instanceof Float) {
-			return String.format(Locale.ENGLISH, "%.02f", value);
+			return String.format(Locale.ENGLISH, "%.02f", value); //$NON-NLS-1$
 		}
 
 		return String.valueOf(value);
 	}
 
-	private interface Element {
-		String getText(ProsodicSentenceData sentence, int wordIndex);
+	private static class Opts {
+		private String[] options = new String[3];
+		private int optIndex = -1;
+
+		public void addOption(StringBuilder sb) {
+			if(optIndex>=options.length)
+				throw new IllegalArgumentException("Too many options"); //$NON-NLS-1$
+
+			if(sb.length()>0) {
+				options[optIndex] = getString(sb);
+			}
+			optIndex++;
+		}
+
+		public boolean isEmpty() {
+			return optIndex<0;
+		}
+
+		public void reset() {
+			Arrays.fill(options, null);
+			optIndex = -1;
+		}
+
+		public boolean applyOptions(Element element) {
+			if(element==null) {
+				return false;
+			}
+
+			boolean empty = true;
+			if(options[0]!=null && !options[0].isEmpty()) {
+				element.setMinLength(Integer.parseInt(options[0]));
+				empty = false;
+			}
+			if(options[1]!=null && !options[1].isEmpty()) {
+				element.setMaxLength(Integer.parseInt(options[1]));
+				empty = false;
+			}
+			if(options[2]!=null && !options[2].isEmpty()) {
+				element.setNoValueLabel(options[2]);
+				empty = false;
+			}
+
+			reset();
+
+			return !empty;
+		}
 	}
 
-	private static class CompoundElement implements Element {
+	public static abstract class Element {
+		private int minLength = -1;
+		private int maxLength = -1;
+		private String noValueLabel = NO_VALUE;
+
+		public abstract String getText(ProsodicSentenceData sentence, int wordIndex);
+
+		protected void setModifier(String modifier) {
+			// for subclasses
+		}
+
+		public int getMinLength() {
+			return minLength;
+		}
+
+		public int getMaxLength() {
+			return maxLength;
+		}
+
+		public String getNoValueLabel() {
+			return noValueLabel;
+		}
+
+		public void setMinLength(int minLength) {
+			if(minLength<-1)
+				throw new IllegalArgumentException("Minimum length  must not be less than -1: "+minLength); //$NON-NLS-1$
+
+			this.minLength = minLength;
+		}
+
+		public void setMaxLength(int maxLength) {
+			if(maxLength<6 && maxLength!=-1)
+				throw new IllegalArgumentException("Maximum length must be either -1 or greater than 5: "+maxLength); //$NON-NLS-1$
+
+			this.maxLength = maxLength;
+		}
+
+		public void setNoValueLabel(String noValueLabel) {
+			if (noValueLabel == null)
+				throw new NullPointerException("Invalid noValueLabel"); //$NON-NLS-1$
+
+			this.noValueLabel = noValueLabel;
+		}
+	}
+
+	private static class CompoundElement extends Element {
 		private List<Element> elements = new ArrayList<>();
 		private final StringBuilder buffer = new StringBuilder(50);
 
@@ -265,11 +437,11 @@ public class LabelPattern implements ProsodyConstants {
 		@Override
 		public String getText(ProsodicSentenceData sentence, int wordIndex) {
 			if(elements.isEmpty()) {
-				return NO_VALUE;
+				return null;
 			}
 
 			for(Element element : elements) {
-				buffer.append(element.getText(sentence, wordIndex));
+				buffer.append(getText0(element, sentence, wordIndex));
 			}
 
 			String result = buffer.toString();
@@ -280,7 +452,7 @@ public class LabelPattern implements ProsodyConstants {
 
 	}
 
-	private static class TextElement implements Element {
+	private static class TextElement extends Element {
 
 		private final String text;
 
@@ -301,15 +473,16 @@ public class LabelPattern implements ProsodyConstants {
 
 	}
 
-	private static class PropertyElement implements Element {
+	private static class PropertyElement extends Element {
 
-		private final String property;
+		private String property;
 
-		PropertyElement(String property) {
-			if (property == null)
-				throw new NullPointerException("Invalid property"); //$NON-NLS-1$
+		@Override
+		public void setModifier(String modifier) {
+			if (modifier == null)
+				throw new NullPointerException("Invalid modifier"); //$NON-NLS-1$
 
-			this.property = property;
+			property = modifier;
 		}
 
 		/**
@@ -324,7 +497,45 @@ public class LabelPattern implements ProsodyConstants {
 
 	}
 
-	private static class SyllableCountElement implements Element {
+	private static class DocumentIndexElement extends Element {
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex) {
+			ProsodicDocumentData document = sentence.getDocument();
+			return String.valueOf(document.getDocumentIndex());
+		}
+
+	}
+
+	private static class DocumentPropertyElement extends Element {
+
+		private String property;
+
+		@Override
+		public void setModifier(String modifier) {
+			if (modifier == null)
+				throw new NullPointerException("Invalid modifier"); //$NON-NLS-1$
+
+			property = modifier;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex) {
+			ProsodicDocumentData document = sentence.getDocument();
+			Object value = document.getProperty(property);
+
+			return val2String(value);
+		}
+
+	}
+
+	private static class SyllableCountElement extends Element {
 
 		/**
 		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int)
@@ -339,21 +550,22 @@ public class LabelPattern implements ProsodyConstants {
 			} else {
 				count = sentence.getSyllableCount(wordIndex);
 			}
-			return count<=0 ? NO_VALUE : String.valueOf(count);
+			return count<=0 ? null : String.valueOf(count);
 		}
 
 	}
 
-	private static class SyllablePropertyElement implements Element {
+	private static class SyllablePropertyElement extends Element {
 
-		private final String property;
+		private String property;
 		private final StringBuilder buffer = new StringBuilder(50);
 
-		SyllablePropertyElement(String property) {
-			if (property == null)
-				throw new NullPointerException("Invalid property"); //$NON-NLS-1$
+		@Override
+		public void setModifier(String modifier) {
+			if (modifier == null)
+				throw new NullPointerException("Invalid modifier"); //$NON-NLS-1$
 
-			this.property = property;
+			property = modifier;
 		}
 
 		/**
@@ -364,7 +576,7 @@ public class LabelPattern implements ProsodyConstants {
 			int sylCount = sentence.getSyllableCount(wordIndex);
 
 			if(sylCount==0) {
-				return NO_VALUE;
+				return null;
 			}
 
 			for(int i=0; i<sylCount; i++) {

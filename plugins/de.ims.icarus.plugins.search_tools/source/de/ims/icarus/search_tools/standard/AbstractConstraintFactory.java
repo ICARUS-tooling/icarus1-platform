@@ -19,12 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.ConstraintFactory;
@@ -39,11 +40,11 @@ import de.ims.icarus.search_tools.SearchParameters;
 public abstract class AbstractConstraintFactory implements ConstraintFactory, SearchParameters {
 
 	private String nameKey, descriptionKey;
-	
+
 	private String token;
-	
+
 	private int type;
-	
+
 	protected static final Object[] DEFAULT_UNDEFINED_VALUESET = {
 		LanguageUtils.DATA_UNDEFINED_LABEL
 	};
@@ -54,13 +55,13 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 		this.descriptionKey = descriptionKey;
 		this.type = type;
 	}
-	
+
 	protected boolean isFlagSet(int flags, int mask) {
 		return (flags & mask) == mask;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#getConstraintType()
 	 */
 	@Override
@@ -104,7 +105,7 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#getValueClass()
 	 */
 	@Override
-	public Class<?> getValueClass() {
+	public Class<?> getValueClass(Object specifier) {
 		return String.class;
 	}
 
@@ -112,25 +113,25 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#getDefaultValue()
 	 */
 	@Override
-	public Object getDefaultValue() {
-		return LanguageUtils.DATA_UNDEFINED_LABEL;
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_LABEL;
 	}
 
 	/**
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#getValueSet()
 	 */
 	@Override
-	public Object[] getLabelSet() {
+	public Object[] getLabelSet(Object specifier) {
 		return DEFAULT_UNDEFINED_VALUESET;
 	}
 
 	@Override
-	public Object labelToValue(Object label) {
+	public Object labelToValue(Object label, Object specifier) {
 		return label;
 	}
 
 	@Override
-	public Object valueToLabel(Object value) {
+	public Object valueToLabel(Object value, Object specifier) {
 		return value;
 	}
 

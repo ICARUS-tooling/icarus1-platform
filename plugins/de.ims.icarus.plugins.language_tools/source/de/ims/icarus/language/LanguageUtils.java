@@ -133,6 +133,22 @@ public final class LanguageUtils implements LanguageConstants {
 		}
 	}
 
+	public static String getLabel(float value) {
+		if(value==DATA_UNDEFINED_FLOAT_VALUE) {
+			return DATA_UNDEFINED_LABEL;
+		} else {
+			return String.valueOf(value);
+		}
+	}
+
+	public static String getLabel(double value) {
+		if(value==DATA_UNDEFINED_DOUBLE_VALUE) {
+			return DATA_UNDEFINED_LABEL;
+		} else {
+			return String.valueOf(value);
+		}
+	}
+
 	public static String getDirectionLabel(int value) {
 		switch (value) {
 		case DATA_UNDEFINED_VALUE:
@@ -160,7 +176,7 @@ public final class LanguageUtils implements LanguageConstants {
 			return Integer.parseInt(head) - 1;
 	}
 
-	public static int parseLabel(String value) {
+	public static int parseIntegerLabel(String value) {
 		value = value.trim();
 		if (value.isEmpty() || DATA_UNDEFINED_LABEL.equals(value))
 			return DATA_UNDEFINED_VALUE;
@@ -168,6 +184,26 @@ public final class LanguageUtils implements LanguageConstants {
 			return DATA_GROUP_VALUE;
 		else
 			return Integer.parseInt(value);
+	}
+
+	public static float parseFloatLabel(String value) {
+		value = value.trim();
+		if (value.isEmpty() || DATA_UNDEFINED_LABEL.equals(value))
+			return DATA_UNDEFINED_FLOAT_VALUE;
+		else if (DATA_GROUP_LABEL.equals(value))
+			return DATA_GROUP_VALUE;
+		else
+			return Float.parseFloat(value);
+	}
+
+	public static double parseDoubleLabel(String value) {
+		value = value.trim();
+		if (value.isEmpty() || DATA_UNDEFINED_LABEL.equals(value))
+			return DATA_UNDEFINED_DOUBLE_VALUE;
+		else if (DATA_GROUP_LABEL.equals(value))
+			return DATA_GROUP_VALUE;
+		else
+			return Double.parseDouble(value);
 	}
 
 	public static int parseDirectionLabel(String direction) {

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
@@ -57,32 +57,32 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 
 	@XmlAttribute(required=false)
 	boolean negated = false;
-	
+
 	@XmlElement(required=false)
 	@XmlJavaTypeAdapter(value=ConstraintAdapter.class)
 	List<SearchConstraint> constraints;
-	
+
 	@XmlTransient
 	String id = "<undefined>"; //$NON-NLS-1$
-	
+
 	protected ConstraintCellData() {
 		// no-op
 	}
-	
+
 	protected ConstraintCellData(List<ConstraintFactory> factories) {
 		if(factories==null)
 			throw new NullPointerException("Invalid factories"); //$NON-NLS-1$
-		
+
 		constraints = new ArrayList<>();
-		
+
 		for(ConstraintFactory factory : factories) {
 			int min = SearchUtils.getMinInstanceCount(factory);
 
 			SearchOperator operator = factory.getSupportedOperators()[0];
-			Object value = factory.getDefaultValue();
+			Object value = factory.getDefaultValue(null);
 			String token = factory.getToken();
 			Object specifier = SearchUtils.getDefaultSpecifier(factory);
-			
+
 			for(int i=0; i<min; i++) {
 				constraints.add(new DefaultConstraint(
 						token, value, operator, specifier));
@@ -92,7 +92,7 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 
 	@Override
 	public abstract E clone();
-	
+
 	public abstract void copyFrom(E source);
 
 	public boolean isNegated() {
@@ -102,7 +102,7 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 	public void setNegated(boolean negated) {
 		this.negated = negated;
 	}
-	
+
 	public void setConstraint(int index, SearchConstraint constraint) {
 		if(constraints==null) {
 			constraints = new ArrayList<>();
@@ -117,11 +117,11 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 		SearchConstraint[] result = new SearchConstraint[constraints.size()];
 		return constraints.toArray(result);
 	}
-	
+
 	public int getConstraintCount() {
 		return constraints==null ? 0 : constraints.size();
 	}
-	
+
 	public SearchConstraint getConstraintAt(int index) {
 		return constraints==null ? null : constraints.get(index);
 	}
@@ -132,11 +132,11 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 		} else {
 			this.constraints.clear();
 		}
-		
+
 		if(constraints==null) {
 			return;
 		}
-		
+
 		for(SearchConstraint constraint : constraints) {
 			this.constraints.add(constraint);
 		}
@@ -148,41 +148,41 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 		} else {
 			this.constraints.clear();
 		}
-		
+
 		if(constraints==null) {
 			return;
 		}
-		
+
 		this.constraints.addAll(constraints);
 	}
-	
+
 	/*public void setConstraints(SearchConstraint[] constraints, Map<String, Integer> constraintMap) {
 		if(this.constraints==null)
 			throw new IllegalStateException("Cannot assign constraints - not initialized"); //$NON-NLS-1$
-		
+
 		if(constraints==null || constraints.length==0) {
 			return;
 		}
-		
+
 		for(SearchConstraint constraint : constraints) {
 			int index = constraintMap.get(constraint.getToken());
 			this.constraints[index] = constraint;
 		}
 	}*/
-	
+
 	public void addConstraint(SearchConstraint constraint) {
 		if(constraints==null) {
 			constraints = new ArrayList<>();
 		}
-		
+
 		constraints.add(constraint);
 	}
-	
+
 	public void insertConstraint(int index, SearchConstraint constraint) {
 		if(constraints==null) {
 			constraints = new ArrayList<>();
 		}
-		
+
 		constraints.add(index, constraint);
 	}
 

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.dependency.graph;
@@ -40,6 +40,7 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 
 import de.ims.icarus.config.ConfigDelegate;
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.dependency.DependencyNodeData;
 import de.ims.icarus.language.dependency.DependencyUtils;
@@ -51,6 +52,7 @@ import de.ims.icarus.plugins.jgraph.util.GraphUtils;
 import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.Grouping;
+import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.ui.view.TextRenderer;
 import de.ims.icarus.util.HtmlUtils.HtmlTableBuilder;
 import de.ims.icarus.util.annotation.AnnotationDisplayMode;
@@ -61,13 +63,13 @@ import de.ims.icarus.util.annotation.AnnotationDisplayMode;
  *
  */
 public class DependencyGraphRenderer extends GraphRenderer implements mxITextShape {
-	
+
 	protected TextRenderer renderer = new TextRenderer();
-	
+
 	protected GraphPresenter presenter;
-	
+
 	protected HtmlTableBuilder tableBuilder = new HtmlTableBuilder(500);
-	
+
 	protected StringBuilder sb;
 
 	public DependencyGraphRenderer() {
@@ -91,44 +93,48 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	public void uninstall(Object target) {
 		presenter = null;
 	}
-	
+
 	protected boolean isTrue(String key) {
 		ConfigDelegate configDelegate = presenter==null ? null : presenter.getConfigDelegate();
 		return configDelegate==null ? false : configDelegate.getBoolean(key);
 	}
-	
+
 	protected String normalize(String s) {
 		return s==null || s.isEmpty() ? "-" : s; //$NON-NLS-1$
 	}
-	
+
+	protected BitmaskHighlighting getHighlighting() {
+		return DependencyHighlighting.getInstance();
+	}
+
 	protected static final char DISTANCE_SYMBOL = 0x0394; // greek capital delta
 
 	@Override
 	public String convertValueToString(GraphOwner owner, Object cell) {
 		mxIGraphModel model = owner.getGraph().getModel();
-		
+
 		if(GraphUtils.isOrderEdge(model, cell)) {
 			return ""; //$NON-NLS-1$
 		}
-		
+
 		Object value = null;
 		if(model.isVertex(cell)) {
 			value = model.getValue(cell);
 		} else if(model.isEdge(cell)) {
 			value = model.getValue(model.getTerminal(cell, false));
 		}
-		
+
 		if(!(value instanceof DependencyNodeData)) {
 			return super.convertValueToString(owner, cell);
 		}
-		
+
 		DependencyNodeData nodeData = (DependencyNodeData)value;
-		
+
 		if(sb==null) {
 			sb = new StringBuilder(200);
 		}
 		sb.setLength(0);
-		
+
 		if(model.isVertex(cell)) {
 			boolean showIndex = isTrue("showIndex"); //$NON-NLS-1$
 			boolean showForm = isTrue("showForm"); //$NON-NLS-1$
@@ -136,12 +142,12 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			boolean showLemma = isTrue("showLemma"); //$NON-NLS-1$
 			boolean showFeatures = isTrue("showFeatures"); //$NON-NLS-1$
 			boolean markRoot = isTrue("markRoot"); //$NON-NLS-1$
-			
+
 			// Ensure something to be displayed
 			if(!showForm && !showLemma && !showFeatures && !showPos) {
 				showForm = true;
 			}
-						
+
 			if (showIndex) {
 				sb.append(String.valueOf(nodeData.getIndex()+1)).append(":\n"); //$NON-NLS-1$
 			}
@@ -159,7 +165,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 				sb.append(normalize(DependencyUtils.getFeatures(nodeData))).append("\n"); //$NON-NLS-1$
 			}
 			if(markRoot && nodeData.isRoot()) {
-				sb.append(LanguageUtils.DATA_ROOT_LABEL);
+				sb.append(LanguageConstants.DATA_ROOT_LABEL);
 			}
 		} else if(nodeData.hasHead()) {
 			boolean showRelation = isTrue("showRelation"); //$NON-NLS-1$
@@ -180,12 +186,12 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 				sb.append("(non-projective)"); //$NON-NLS-1$
 			}
 		}
-		
+
 		// Delete last line break if present
 		if(sb.length()>0 && sb.charAt(sb.length()-1)=='\n') {
 			sb.deleteCharAt(sb.length()-1);
 		}
-		
+
 		return sb.toString();
 	}
 
@@ -198,7 +204,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 		} else if(model.isEdge(cell)) {
 			value = model.getValue(model.getTerminal(cell, false));
 		}
-		
+
 		if(!(value instanceof DependencyNodeData)) {
 			return null;
 		}
@@ -207,39 +213,39 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 
 		if (model.isVertex(cell)) {
 			DependencyNodeData[] children = data.getChildrenArray();
-			
+
 			tableBuilder.start(children==null ? 2 : 3, true);
-						
+
 			tableBuilder.addRow(
 					ResourceManager.getInstance().get("plugins.dependency.labels.index"),  //$NON-NLS-1$
 					String.valueOf(data.getIndex() + 1),
 					DependencyUtils.getIndices(children));
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.form"), //$NON-NLS-1$
 					normalize(data.getForm()),
 					DependencyUtils.getForms(children));
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.lemma"), //$NON-NLS-1$
 					normalize(data.getLemma()),
 					DependencyUtils.getLemmas(children));
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.features"), //$NON-NLS-1$
 					normalize(data.getFeatures()),
 					DependencyUtils.getFeatures(children));
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.pos"), //$NON-NLS-1$
 					normalize(data.getPos()),
 					DependencyUtils.getPoss(children));
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.head"), //$NON-NLS-1$
 					normalize(LanguageUtils.getHeadLabel(data.getHead())),
 					DependencyUtils.getHeads(children));
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.relation"), //$NON-NLS-1$
 					normalize(data.getRelation()),
@@ -247,18 +253,18 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 		} else {
 
 			tableBuilder.start(2, true);
-			
+
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.relation"), //$NON-NLS-1$
 					normalize(data.getRelation()));
 
 			tableBuilder.addRowEscaped(
 					ResourceManager.getInstance().get("plugins.dependency.labels.projective"), //$NON-NLS-1$
-					String.valueOf(data.isFlagSet(LanguageUtils.FLAG_PROJECTIVE)));
+					String.valueOf(data.isFlagSet(LanguageConstants.FLAG_PROJECTIVE)));
 		}
-		
+
 		tableBuilder.finish();
-		
+
 		return tableBuilder.getResult();
 	}
 
@@ -266,7 +272,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	public mxITextShape getTextShape(Map<String, Object> style, boolean html) {
 		return html ? textShapes.get(TEXT_SHAPE_HTML) : this;
 	}
-	
+
 	protected void refreshCellStyle(mxCellState state) {
 		if(presenter==null) {
 			return;
@@ -275,50 +281,50 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			return;
 		}
 		DependencyAnnotationManager annotationManager = (DependencyAnnotationManager) presenter.getAnnotationManager();
-		
+
 		if(annotationManager.getDisplayMode()==AnnotationDisplayMode.NONE) {
 			return;
 		}
-		
+
 		mxIGraphModel model = state.getView().getGraph().getModel();
 		Object cell = state.getCell();
 		boolean isNode = model.isVertex(cell);
 		if(!isNode) {
-			
+
 			if(presenter.isHighlightedIncomingEdge(cell)
 					|| presenter.isHighlightedOutgoingEdge(cell)) {
 				return;
 			}
-			
+
 			cell = model.getTerminal(cell, false);
 		}
 		Object value = model.getValue(cell);
-		
+
 		if(!(value instanceof DependencyNodeData)) {
 			return;
 		}
 		DependencyNodeData data = (DependencyNodeData)value;
-		
+
 		if(!annotationManager.hasAnnotation()) {
 			return;
 		}
-		
+
 		long highlight = annotationManager.getHighlight(data.getIndex());
-		
+
 		//System.out.println(data.getIndex()+":"+DependencyHighlighting.dumpHighlight(highlight));
-		
+
 		Color color = null;
 		int groupId = isNode ?
-				DependencyHighlighting.getInstance().getNodeGroupId(highlight) 
-				: DependencyHighlighting.getInstance().getEdgeGroupId(highlight);
+				getHighlighting().getNodeGroupId(highlight)
+				: getHighlighting().getEdgeGroupId(highlight);
 		if(groupId!=-1) {
 			color = Grouping.getGrouping(groupId).getColor();
 		} else {
 			color = isNode ?
-					DependencyHighlighting.getInstance().getNodeHighlightColor(highlight)
-					: DependencyHighlighting.getInstance().getEdgeHighlightColor(highlight);
+					getHighlighting().getNodeHighlightColor(highlight)
+					: getHighlighting().getEdgeHighlightColor(highlight);
 		}
-		
+
 		if(color!=null) {
 			Map<String, Object> style = state.getStyle();
 			style.put(mxConstants.STYLE_STROKECOLOR, mxUtils.hexString(color));
@@ -328,11 +334,11 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	@Override
 	public Object drawCell(mxCellState state) {
 		refreshCellStyle(state);
-		
+
 		/*System.out.println(((mxCell)state.getCell()).getValue());
 		System.out.print(CollectionUtils.toString(state.getStyle()));
 		System.out.println();*/
-		
+
 		return super.drawCell(state);
 	}
 
@@ -347,7 +353,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 		Graphics2D g = canvas.getGraphics();
 
 		if (g.getClipBounds() == null || g.getClipBounds().intersects(rect)) {
-			
+
 			// BEGIN ORIGINAL
 			boolean horizontal = mxUtils.isTrue(style,
 					mxConstants.STYLE_HORIZONTAL, true);
@@ -406,19 +412,19 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			} else if (align.equals(mxConstants.ALIGN_RIGHT)) {
 				x -= mxConstants.LABEL_INSET * scale;
 			}
-			
+
 			// END ORIGINAL
 
 			// Try to paint the text in annotated form
 			if(paintAnnotatedText(text, state, g, fm, x, y, w, h, align, horizontal)) {
 				return;
 			}
-			
+
 			// If annotating the text failed paint it in plain form
 			paintText(text, state, g, fm, x, y, w, h, align, horizontal);
 		}
 	}
-	
+
 	private String[] nodeTokens = {
 		null,
 		"form", //$NON-NLS-1$
@@ -428,7 +434,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 		null,
 	};
 	private boolean[] nodeVisibility = new boolean[nodeTokens.length];
-	
+
 	private String[] edgeTokens = {
 		"relation", //$NON-NLS-1$
 		"direction", //$NON-NLS-1$
@@ -437,7 +443,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 	};
 	private boolean[] edgeVisibility = new boolean[edgeTokens.length];
 
-	protected boolean paintAnnotatedText(String text, mxCellState state, Graphics2D g, FontMetrics fm, 
+	protected boolean paintAnnotatedText(String text, mxCellState state, Graphics2D g, FontMetrics fm,
 			int x, int y, int w, int h, Object align, boolean horizontal) {
 
 		if(presenter==null) {
@@ -447,11 +453,11 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			return false;
 		}
 		DependencyAnnotationManager annotationManager = (DependencyAnnotationManager) presenter.getAnnotationManager();
-		
+
 		if(annotationManager.getDisplayMode()==AnnotationDisplayMode.NONE) {
 			return false;
 		}
-		
+
 		mxIGraphModel model = state.getView().getGraph().getModel();
 		Object cell = state.getCell();
 		boolean isNode = model.isVertex(cell);
@@ -459,28 +465,28 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			cell = model.getTerminal(cell, false);
 		}
 		Object value = model.getValue(cell);
-		
+
 		if(!(value instanceof DependencyNodeData)) {
 			return false;
 		}
 		DependencyNodeData data = (DependencyNodeData)value;
-		
-		
+
+
 		if(!annotationManager.hasAnnotation()) {
 			return false;
 		}
-		
+
 		long highlight = annotationManager.getHighlight(data.getIndex());
 		if(highlight==0L) {
 			return false;
 		}
-		
+
 		String[] lines = text.split("\n"); //$NON-NLS-1$
-		
+
 		Color[] colors = new Color[lines.length];
 		boolean[] vis;
 		String[] tokens;
-		
+
 		if(isNode) {
 			vis = nodeVisibility;
 			vis[0] = isTrue("showIndex"); //$NON-NLS-1$
@@ -489,7 +495,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			vis[3] = isTrue("showPos"); //$NON-NLS-1$
 			vis[4] = isTrue("showFeatures"); //$NON-NLS-1$
 			vis[5] = isTrue("markRoot"); //$NON-NLS-1$
-			
+
 			// Ensure something to be displayed
 			if(!vis[1] && !vis[2] && !vis[3] && !vis[4]) {
 				vis[1] = true;
@@ -501,16 +507,16 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			vis[1] = isTrue("showDirection"); //$NON-NLS-1$
 			vis[2] = isTrue("showDistance"); //$NON-NLS-1$
 			vis[3] = isTrue("markNonProjective"); //$NON-NLS-1$
-			
+
 			tokens = edgeTokens;
 		}
-		
+
 		int index = 0;
 		for(int i=0; i<tokens.length; i++) {
 			if(vis[i]) {
 				String token = tokens[i];
 				if(token!=null) {
-					colors[index] = DependencyHighlighting.getInstance().getHighlightColor(highlight, token);
+					colors[index] = getHighlighting().getHighlightColor(highlight, token);
 				}
 				index++;
 			}
@@ -532,7 +538,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 				int sw = fm.stringWidth(lines[i]);
 				dx = ((horizontal) ? w : h) - sw;
 			}
-			
+
 			Color col = colors[i];
 			if(col==null) {
 				col = c;
@@ -543,11 +549,11 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			y += fm.getHeight() + mxConstants.LINESPACING;
 		}
 		g.setColor(c);
-		
+
 		return true;
 	}
-	
-	protected void paintText(String text, mxCellState state, Graphics2D g, FontMetrics fm, 
+
+	protected void paintText(String text, mxCellState state, Graphics2D g, FontMetrics fm,
 			int x, int y, int w, int h, Object align, boolean horizontal) {
 		// Draws the text line by line
 		String[] lines = text.split("\n"); //$NON-NLS-1$

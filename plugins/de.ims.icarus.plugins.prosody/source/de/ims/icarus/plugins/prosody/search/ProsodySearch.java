@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody.search;
 
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.annotation.ProsodyResultAnnotator;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.annotation.ResultAnnotator;
@@ -77,8 +78,6 @@ public class ProsodySearch extends AbstractCorpusSearch {
 	 */
 	@Override
 	protected ResultAnnotator createAnnotator() {
-		//FIXME change to a proper prosody annotator implementation later!
-//		return new DependencyResultAnnotator(baseRootMatcher);
-		return null;
+		return new ProsodyResultAnnotator(baseRootMatcher);
 	}
 }

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
@@ -30,6 +30,7 @@ import java.awt.Dimension;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.jgraph.layout.GraphOwner;
 import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.util.GraphUtils;
@@ -40,7 +41,6 @@ import de.ims.icarus.search_tools.NodeType;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchOperator;
-import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.HtmlUtils.HtmlTableBuilder;
 
@@ -50,18 +50,18 @@ import de.ims.icarus.util.HtmlUtils.HtmlTableBuilder;
  *
  */
 public class ConstraintGraphRenderer extends GraphRenderer {
-	
+
 	protected HtmlTableBuilder tableBuilder = new HtmlTableBuilder(500);
-	
+
 	protected StringBuilder sb;
-	
+
 	public static final Dimension disjunctionNodeSize = new Dimension(25, 25);
-	
+
 	protected char disjunctionSymbol = (char) 0x2228;
 	protected String disjunctionString = String.valueOf(disjunctionSymbol);
 	protected char negationSymbol = (char) 0x00AC;
 	protected String negationString = String.valueOf(negationSymbol);
-	
+
 	protected ConstraintGraphPresenter presenter;
 
 	public ConstraintGraphRenderer() {
@@ -85,7 +85,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 	public void uninstall(Object target) {
 		presenter = null;
 	}
-	
+
 	protected String normalize(String s) {
 		return s==null || s.isEmpty() ? "-" : s; //$NON-NLS-1$
 	}
@@ -95,64 +95,64 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 		if(presenter==null) {
 			return ""; //$NON-NLS-1$
 		}
-		
+
 		mxIGraphModel model = owner.getGraph().getModel();
-		
+
 		if(GraphUtils.isOrderEdge(owner, model, cell)
 				|| ConstraintGraphPresenter.isLinkEdge(owner, cell)) {
 			return ""; //$NON-NLS-1$
 		}
-		
+
 		Object value = model.getValue(cell);
-		
+
 		if(sb==null) {
 			sb = new StringBuilder(200);
 		}
-		
+
 		sb.setLength(0);
 		boolean leaveEmpty = false;
-		
+
 		SearchConstraint[] constraints = null;
-		
+
 		if(value instanceof ConstraintNodeData) {
 			ConstraintNodeData data = (ConstraintNodeData)value;
-			
+
 			if(data.getNodeType()==NodeType.DISJUNCTION) {
 				return data.isNegated() ? negationString+disjunctionString : disjunctionString;
 			}
-			
+
 			// Negated state
 			if(data.isNegated()) {
 				sb.append(ResourceManager.getInstance().get(
 						"plugins.searchTools.labels.negated")).append(": ").append(data.isNegated()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			
+
 			// Node Type
 			if(data.getNodeType()!=NodeType.GENERAL) {
 				sb.append("\n").append(data.getNodeType().getName()); //$NON-NLS-1$
 			}
-			
+
 			// Constraints
 			constraints = data.getConstraints();
 		} else if(value instanceof ConstraintEdgeData) {
 			ConstraintEdgeData data = (ConstraintEdgeData)value;
 			leaveEmpty = data.getEdgeType()==EdgeType.DOMINANCE;
-			
+
 			if(data.getEdgeType()==EdgeType.LINK) {
 				return ""; //$NON-NLS-1$
 			}
-			
+
 			// Negated state
 			if(data.isNegated()) {
 				sb.append(ResourceManager.getInstance().get(
 						"plugins.searchTools.labels.negated")).append(": ").append(data.isNegated()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			
+
 			// Edge Type
 			if(data.getEdgeType()!=EdgeType.DOMINANCE) {
 				sb.append("\n").append(data.getEdgeType().getName()); //$NON-NLS-1$
 			}
-			
+
 			// Constraints
 			constraints = data.getConstraints();
 		}
@@ -166,7 +166,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 				SearchOperator operator = constraint.getOperator();
 				ConstraintFactory factory = presenter.getConstraintContext().getFactory(constraint.getToken());
 				Object label = SearchManager.isGroupingOperator(operator) ? ""  //$NON-NLS-1$
-						: factory.valueToLabel(constraint.getValue());
+						: factory.valueToLabel(constraint.getValue(), constraint.getSpecifier());
 				sb.append("\n").append(factory.getName()); //$NON-NLS-1$
 				Object specifier = constraint.getSpecifier();
 				if(specifier!=null) {
@@ -175,13 +175,13 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 				sb.append(" ").append(operator.getSymbol()).append(" ").append(label); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-		
+
 		String result = sb.toString().trim();
-		
+
 		if(result.isEmpty() && !leaveEmpty) {
-			result = SearchUtils.DATA_UNDEFINED_LABEL;
+			result = LanguageConstants.DATA_UNDEFINED_LABEL;
 		}
-		
+
 		return result;
 	}
 
@@ -198,10 +198,10 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			// TODO use table builder to create full view of constraints!!
 			tooltip = convertValueToString(owner, cell);
 		}
-		
+
 		return UIUtil.toSwingTooltip(tooltip);
 	}
-	
+
 	@Override
 	public mxRectangle getPreferredSizeForCell(GraphOwner owner, Object cell) {
 		if(ConstraintGraphPresenter.isDisjunctionNode(owner, cell)) {
@@ -211,7 +211,7 @@ public class ConstraintGraphRenderer extends GraphRenderer {
 			if(size!=null && size.getWidth()>0 && size.getWidth()<50) {
 				size.setWidth(50);
 			}
-			
+
 			return size;
 		}
 	}

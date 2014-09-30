@@ -273,7 +273,11 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		String[] forms = new String[size-headerOffset];
 		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(document, forms);
 
+		result.setProperties(properties);
+
 		boolean mapsSyllables = false;
+
+		String speaker = (String) result.getProperty(SPEAKER_KEY);
 
 		for(int i=0; i<size-headerOffset; i++) {
 			Row row = buffer.getRow(i+headerOffset);
@@ -351,6 +355,9 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, HEAD_KEY, Math.max(getInt(row, HEAD_COL, DATA_UNDEFINED_VALUE)-1, DATA_UNDEFINED_VALUE));
 			result.setProperty(i, DEPREL_KEY, get(row, DEPREL_COL, EMPTY));
 			result.setProperty(i, SPEAKER_KEY, get(row, SPEAKER_COL, EMPTY));
+			if(speaker==null) {
+				speaker = (String) result.getProperty(i, SPEAKER_KEY);
+			}
 			result.setProperty(i, SPEAKER_FEATURES_KEY, get(row, SPEAKER_FEATURES_COL, EMPTY));
 			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
 			result.setProperty(i, BEGIN_TS_KEY, getFloat(row, BEGIN_TS_COL, DATA_UNDEFINED_VALUE));
@@ -392,7 +399,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		if(!spanStack.isEmpty())
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 
-		result.setProperties(properties);
+		if(speaker!=null) {
+			result.setProperty(SPEAKER_KEY, speaker);
+		}
+
 		result.setMapsSyllables(mapsSyllables);
 		result.setSentenceIndex(document.size());
 		document.add(result);

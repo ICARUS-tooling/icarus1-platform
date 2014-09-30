@@ -77,6 +77,8 @@ import de.ims.icarus.plugins.prosody.ui.view.PreviewSize;
 import de.ims.icarus.plugins.prosody.ui.view.SentenceInfo;
 import de.ims.icarus.plugins.prosody.ui.view.SyllableInfo;
 import de.ims.icarus.plugins.prosody.ui.view.WordInfo;
+import de.ims.icarus.resources.ResourceDomain;
+import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
@@ -97,6 +99,7 @@ public class SentencePanel extends JPanel{
 //	private JToggleButton toggleExpandButton;
 	private JToggleButton toggleDetailsButton;
 	private JButton playSentenceButton;
+	private JButton playScopeButton;
 
 	private WordCursorModel wordCursorModel;
 	private JSlider wordCursor;
@@ -139,6 +142,8 @@ public class SentencePanel extends JPanel{
 
 		setBackground(Color.white);
 
+		ResourceDomain rd = ResourceManager.getInstance().getGlobalDomain();
+
 		// Toggle button for details panel
 		toggleDetailsButton = new JToggleButton();
 		toggleDetailsButton.setIcon(iconRegistry.getIcon("zoomin.gif")); //$NON-NLS-1$
@@ -147,6 +152,10 @@ public class SentencePanel extends JPanel{
 		toggleDetailsButton.setFocusPainted(false);
 		toggleDetailsButton.setBorderPainted(false);
 		toggleDetailsButton.addActionListener(handler);
+		rd.prepareComponent(toggleDetailsButton,
+				null,
+				"plugins.prosody.prosodyOutlinePresenter.toggleDetailPanelAction.description"); //$NON-NLS-1$
+		rd.addComponent(toggleDetailsButton);
 		UIUtil.resizeComponent(toggleDetailsButton, 16, 16);
 		add(toggleDetailsButton, CC.rc(3, 1));
 
@@ -201,8 +210,26 @@ public class SentencePanel extends JPanel{
 		playSentenceButton.setFocusPainted(false);
 		playSentenceButton.setBorderPainted(false);
 		playSentenceButton.addActionListener(handler);
+		rd.prepareComponent(playSentenceButton,
+				null,
+				"plugins.prosody.prosodyOutlinePresenter.playSentenceAction.description"); //$NON-NLS-1$
+		rd.addComponent(playSentenceButton);
 		UIUtil.resizeComponent(playSentenceButton, 16, 16);
 		add(playSentenceButton, CC.rc(3, 2));
+
+		// Button for playing current scope
+		playScopeButton = new JButton();
+		playScopeButton.setIcon(iconRegistry.getIcon("speaker.png")); //$NON-NLS-1$
+		playScopeButton.setFocusable(false);
+		playScopeButton.setFocusPainted(false);
+		playScopeButton.setBorderPainted(false);
+		playScopeButton.addActionListener(handler);
+		rd.prepareComponent(playScopeButton,
+				null,
+				"plugins.prosody.prosodyOutlinePresenter.playScopeAction.description"); //$NON-NLS-1$
+		rd.addComponent(playScopeButton);
+		UIUtil.resizeComponent(playScopeButton, 16, 16);
+		add(playScopeButton, CC.rc(1, 2));
 
 		// Upper details area
 		detailPanel = new DetailPanel();
@@ -290,6 +317,7 @@ public class SentencePanel extends JPanel{
 		wordCursor.setVisible(showDetails);
 		detailPanel.setVisible(showDetails);
 		detailHeaderLabel.setVisible(showDetails);
+		playScopeButton.setVisible(showDetails);
 
 		setBorder(showDetails ? expandedBorder : collapsedBorder);
 
@@ -346,7 +374,7 @@ public class SentencePanel extends JPanel{
 			player.start(soundFile);
 
 		} catch (SoundException e) {
-			LoggerFactory.error(this, "Failed to play sound for part of sentence '"+sentenceInfo.getText()+"'", e); //$NON-NLS-1$ //$NON-NLS-2$
+			LoggerFactory.error(this, "Failed to play sound for part of sentence '"+sentenceInfo.getLabel()+"'", e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -358,10 +386,24 @@ public class SentencePanel extends JPanel{
 		play(beginOffset, endOffset);
 	}
 
+	private void playScope() {
+		ProsodicSentenceData sentence = sentenceInfo.getSentence();
+
+		int firstWord = detailPanel.getFirstWordToPaint();
+		int lastWord = detailPanel.getLastWordToPaint();
+
+		float beginOffset = SoundOffsets.getBeginOffset(sentence, firstWord);
+		float endOffset = SoundOffsets.getEndOffset(sentence, lastWord);
+
+		play(beginOffset, endOffset);
+	}
+
 	private void playWord(int wordIndex) {
 		ProsodicSentenceData sentence = sentenceInfo.getSentence();
 		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex);
 		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex);
+
+		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
 
 		play(beginOffset, endOffset);
 	}
@@ -370,6 +412,8 @@ public class SentencePanel extends JPanel{
 		ProsodicSentenceData sentence = sentenceInfo.getSentence();
 		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex, sylIndex);
 		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex, sylIndex);
+
+		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
 
 		play(beginOffset, endOffset);
 	}
@@ -400,6 +444,8 @@ public class SentencePanel extends JPanel{
 				toggleDetails();
 			} else if(e.getSource()==playSentenceButton) {
 				playSentence();
+			} else if(e.getSource()==playScopeButton) {
+				playScope();
 			}
 //			else if(e.getSource()==toggleExpandButton) {
 //				toggleExpand();
@@ -569,7 +615,7 @@ public class SentencePanel extends JPanel{
 		public static final boolean  DEFAULT_LOOP_SOUND = false;
 		public static final PreviewSize DEFAULT_PREVIEW_SIZE = PreviewSize.MEDIUM;
 		public static final float DEFAULT_LEFT_SYLLABLE_BOUND = 0F;
-		public static final float DEFAULT_RIGHT_SYLLABLE_BOUND = 1F;
+		public static final float DEFAULT_RIGHT_SYLLABLE_BOUND = 1.1F;
 
 		public static final LabelPattern DEFAULT_HEADER_PATTERN = new LabelPattern("n"); //$NON-NLS-1$
 		public static final LabelPattern DEFAULT_SENTENCE_PATTERN = new LabelPattern("$form$\n$pos$"); //$NON-NLS-1$
@@ -994,7 +1040,7 @@ public class SentencePanel extends JPanel{
 			return d;
 		}
 
-		private int getFirstWordToPaint() {
+		public int getFirstWordToPaint() {
 			if(sentenceInfo==null) {
 				return 0;
 			}
@@ -1017,7 +1063,7 @@ public class SentencePanel extends JPanel{
 			return result;
 		}
 
-		private int getLastWordToPaint() {
+		public int getLastWordToPaint() {
 			if(sentenceInfo==null) {
 				return 0;
 			}
@@ -1082,6 +1128,10 @@ public class SentencePanel extends JPanel{
 				int begin = area.x;
 				int wordIndex = leftWord+i;
 				int sylCount = sentenceInfo.sylCount(wordIndex);
+
+				if(sylCount==0) {
+					continue;
+				}
 
 				// Iterate over syllables of word
 				for(int j=0; j<sylCount; j++) {
@@ -1208,6 +1258,10 @@ public class SentencePanel extends JPanel{
 				int begin = area.x;
 				int wordIndex = leftWord+i;
 				int sylCount = sentenceInfo.sylCount(wordIndex);
+
+				if(sylCount==0) {
+					continue;
+				}
 
 				for(int j=0; j<sylCount; j++) {
 					area.width = config.graphWidth;

@@ -141,7 +141,6 @@ import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.helper.Configurable;
 import de.ims.icarus.ui.helper.DefaultFileFilter;
 import de.ims.icarus.ui.view.AWTPresenter;
-import de.ims.icarus.ui.view.Presenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
@@ -183,7 +182,7 @@ import de.ims.icarus.xml.jaxb.JAXBUtils;
  *
  */
 public abstract class GraphPresenter extends mxGraphComponent implements AWTPresenter,
-		GraphOwner, Configurable, Presenter.GraphBasedPresenter {
+		GraphOwner, Configurable, AWTPresenter.GraphBasedPresenter {
 
 	private static final long serialVersionUID = -3776528318060931576L;
 

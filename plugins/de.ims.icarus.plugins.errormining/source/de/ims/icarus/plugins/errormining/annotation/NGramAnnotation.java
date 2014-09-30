@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.annotation;
@@ -29,17 +29,18 @@ import java.nio.channels.IllegalSelectorException;
 
 import de.ims.icarus.language.dependency.annotation.DependencyAnnotation;
 import de.ims.icarus.plugins.errormining.ngram_search.DefaultNGramHighlight;
+import de.ims.icarus.search_tools.annotation.ResultAnnotator;
 
 public class NGramAnnotation implements DependencyAnnotation {
-	
-	protected DefaultNGramHighlight highlight;		
-	private int pointer = BEFORE_FIRST;			
-	
+
+	protected DefaultNGramHighlight highlight;
+	private int pointer = BEFORE_FIRST;
+
 	public NGramAnnotation (DefaultNGramHighlight highlight){
 		this.highlight = highlight;
 	}
-	
-	
+
+
 	public NGramHighlighting getHighlighting() {
 		return NGramHighlighting.getInstance();
 	}
@@ -115,7 +116,7 @@ public class NGramAnnotation implements DependencyAnnotation {
 	 */
 	@Override
 	public void reset() {
-		pointer = BEFORE_FIRST;			
+		pointer = BEFORE_FIRST;
 	}
 
 	/**
@@ -141,7 +142,7 @@ public class NGramAnnotation implements DependencyAnnotation {
 	public boolean nextAnnotation() {
 		if(isAfterLast())
 			throw new IllegalSelectorException();
-		
+
 		pointer++;
 		return !isAfterLast();
 	}
@@ -162,8 +163,8 @@ public class NGramAnnotation implements DependencyAnnotation {
 		if(index!=BEFORE_FIRST && index!=AFTER_LAST
 				&& (index<0 || index>=getAnnotationCount()))
 			throw new IndexOutOfBoundsException("Invalid annotation index: "+index); //$NON-NLS-1$
-		
-		pointer = index;			
+
+		pointer = index;
 	}
 
 	/**
@@ -172,7 +173,16 @@ public class NGramAnnotation implements DependencyAnnotation {
 	@Override
 	public long getHighlight(int index) {
 		if(isBeforeFirst() || isAfterLast())
-			throw new IllegalStateException();			
+			throw new IllegalStateException();
 		return highlight.getHighlight(index);
+	}
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.annotation.SearchAnnotation#getAnnotator()
+	 */
+	@Override
+	public ResultAnnotator getAnnotator() {
+		return null;
 	}
 }

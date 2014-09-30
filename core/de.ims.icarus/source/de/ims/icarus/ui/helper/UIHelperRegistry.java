@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.helper;
@@ -43,12 +43,12 @@ import de.ims.icarus.util.data.ContentTypeCollection;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class UIHelperRegistry {
-	
+
 	private static UIHelperRegistry instance;
 
 	public static UIHelperRegistry globalRegistry() {
@@ -58,19 +58,19 @@ public final class UIHelperRegistry {
 					instance= new UIHelperRegistry();
 			}
 		}
-		
+
 		return instance;
 	}
-	
+
 	private Map<String, Map<String, Object>> helpers = new HashMap<>();
 	private Map<String, Object> fallbackHelpers = new HashMap<>();
-	
+
 	public UIHelperRegistry newRegistry() {
 		return new UIHelperRegistry();
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private UIHelperRegistry() {
 		init();
@@ -78,68 +78,72 @@ public final class UIHelperRegistry {
 
 	private void init() {
 		// FALLBACKS
-		
+
 		// Register renderers
 		setFallbackHelper("javax.swing.ListCellRenderer", "javax.swing.DefaultListCellRenderer"); //$NON-NLS-1$ //$NON-NLS-2$
 		setFallbackHelper("java.lang.String", "javax.swing.tree.DefaultTreeCellRenderer"); //$NON-NLS-1$ //$NON-NLS-2$
 		setFallbackHelper("java.lang.String", "javax.swing.table.DefaultTableCellRenderer"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		// Register editors
 		setFallbackHelper("javax.swing.CellEditor", "javax.swing.DefaultCellEditor"); //$NON-NLS-1$ //$NON-NLS-2$
 		setFallbackHelper("javax.swing.table.TableCellEditor", "javax.swing.DefaultCellEditor"); //$NON-NLS-1$ //$NON-NLS-2$
 		setFallbackHelper("javax.swing.tree.TreeCellEditor", "javax.swing.DefaultCellEditor"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		// ACTUAL HELPERS
 		registerHelper("de.ims.icarus.ui.view.AWTPresenter",  //$NON-NLS-1$
 				"StringContentType",  //$NON-NLS-1$
 				"de.ims.icarus.ui.view.TextPresenter"); //$NON-NLS-1$
-		
+
 		// TODO do we have some helpers that are not part of a plug-in?
 	}
-	
+
 	// Prevent multiple de-serialization
 	private Object readResolve() throws ObjectStreamException {
 		throw new NotSerializableException(UIHelperRegistry.class.getName());
 	}
-	
+
 	// prevent cloning
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
-	
+
 	public void setFallbackHelper(String helperClass, Object helper) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(helper, "helper"); //$NON-NLS-1$
-		
+
 		fallbackHelpers.put(helperClass, helper);
 	}
-	
+
+	private <T extends Object> String getLookupKey(Class<T> clazz) {
+		return clazz.getName().replace('$', '.');
+	}
+
 	/**
-	 * 
+	 *
 	 * @param helperClass
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Object> T getFallbackHelper(Class<T> helperClass) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
-		
+
 		Object helper = getFallbackHelper0(helperClass);
 
 		if(helper!=null)
 			helper = processHelper(helper, helperClass);
-			
+
 		// Guarantee type compatibility by discarding
 		// helper objects that are not assignment compatible
 		// with the desired helper class
 		if(helper!=null && !helperClass.isAssignableFrom(helper.getClass()))
 			helper = null;
-		
+
 		return (T) helper;
 	}
-	
+
 	private Object getFallbackHelper0(Class<?> helperClass) {
-		return fallbackHelpers.get(helperClass.getName());
+		return fallbackHelpers.get(getLookupKey(helperClass));
 	}
 
 	public boolean registerHelper(String helperClass, String contentTypeId, Object helper) {
@@ -154,20 +158,20 @@ public final class UIHelperRegistry {
 	public boolean registerHelper(String helperClass, ContentType contentType, Object helper) {
 		return registerHelper(helperClass, contentType, helper, false);
 	}
-	
+
 	public boolean registerHelper(String helperClass, ContentType contentType, Object helper, boolean replace) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(contentType, "contentType"); //$NON-NLS-1$
 		Exceptions.testNullArgument(helper, "helper"); //$NON-NLS-1$
-		
+
 		Map<String, Object> map = helpers.get(helperClass);
 		if(map==null) {
 			map = new LinkedHashMap<>();
 			helpers.put(helperClass, map);
 		}
-		
+
 		String contentTypeId = contentType.getId();
-		
+
 		Object currentHelper = map.get(contentTypeId);
 		if(currentHelper!=null && !replace) {
 			return false;
@@ -177,25 +181,25 @@ public final class UIHelperRegistry {
 		if(helper instanceof Extension) {
 			helper = new ClassProxy((Extension)helper);
 		}
-	
+
 		map.put(contentTypeId, helper);
-		
+
 		return true;
 	}
-	
-	private Object findHelper0(Class<?> helperClass, ContentType contentType, 
-			boolean includeCompatible, boolean useFallbackHelper) {	
-		Map<String, Object> map = helpers.get(helperClass.getName());
-		
+
+	private Object findHelper0(Class<?> helperClass, ContentType contentType,
+			boolean includeCompatible, boolean useFallbackHelper) {
+		Map<String, Object> map = helpers.get(getLookupKey(helperClass));
+
 		// Cannot search empty map, so sadly we have to return null
 		if(map==null) {
 			return null;
 		}
-		
+
 		String contentTypeId = contentType.getId();
-		
+
 		Object helper = map.get(contentTypeId);
-		
+
 		if(helper==null && includeCompatible) {
 			for(Entry<String, Object> entry : map.entrySet()) {
 				if(entry.getKey().equals(contentTypeId)) {
@@ -208,22 +212,22 @@ public final class UIHelperRegistry {
 				}
 			}
 		}
-		
+
 		// Only if allowed use fallback helper in case we
 		// could not find a 'real' helper object
 		if(helper==null && useFallbackHelper) {
 			helper = getFallbackHelper0(helperClass);
 		}
-		
+
 		return helper;
 	}
-	
+
 	public <T extends Object> T findHelper(Class<T> helperClass, Object data) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(data, "data"); //$NON-NLS-1$
-		
+
 		T helper = null;
-		
+
 		// Try direct type
 		try {
 			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(data);
@@ -231,11 +235,11 @@ public final class UIHelperRegistry {
 		} catch(IllegalArgumentException e) {
 			// ignore
 		}
-		
+
 		if(helper!=null) {
 			return helper;
 		}
-		
+
 		// Try enclosing type
 		try {
 			ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(data);
@@ -243,11 +247,11 @@ public final class UIHelperRegistry {
 		} catch(IllegalArgumentException e) {
 			// ignore
 		}
-		
+
 		if(helper!=null) {
 			return helper;
 		}
-		
+
 		// Try all compatible content types
 		ContentTypeCollection collection = ContentTypeRegistry.getInstance().getEnclosingTypes(data);
 		for(ContentType contentType : collection.getContentTypes()) {
@@ -256,7 +260,7 @@ public final class UIHelperRegistry {
 				break;
 			}
 		}
-		
+
 		return helper;
 	}
 
@@ -267,62 +271,62 @@ public final class UIHelperRegistry {
 	public <T extends Object> T findHelper(Class<T> helperClass, ContentType contentType) {
 		return findHelper(helperClass, contentType, false, false);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public <T extends Object> T findHelper(Class<T> helperClass, ContentType contentType, 
+	public <T extends Object> T findHelper(Class<T> helperClass, ContentType contentType,
 			boolean includeCompatible, boolean useFallbackHelper) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(contentType, "contentType"); //$NON-NLS-1$
-		
-		Object helper = findHelper0(helperClass, contentType, 
+
+		Object helper = findHelper0(helperClass, contentType,
 				includeCompatible, useFallbackHelper);
 
-		/* 
+		/*
 		 * Postprocessing of found helper objects:
-		 * 
+		 *
 		 * 1. ClassProxy objects instantiate their wrapped helper
 		 * 2. String values are interpreted as a fully qualified class name
 		 *    accessible by the current class loader. The loaded class will then
 		 *    be assigned as new value for 'helper'
 		 * 3. Class objects are instantiated by Class.newInstance() and used
 		 *    as new value for 'helper'
-		 *    
+		 *
 		 * Finally the result is checked for assignment compatibility with the
 		 * helper class and discarded if this check fails.
 		 */
 		if(helper!=null) {
 			helper = processHelper(helper, helperClass);
 		}
-			
+
 		// Guarantee type compatibility by discarding
 		// helper objects that are not assignment compatible
 		// with the desired helper class
 		if(helper!=null && !helperClass.isAssignableFrom(helper.getClass())) {
 			helper = null;
 		}
-		
+
 		return (T) helper;
 	}
-	
+
 	public <T extends Object> boolean hasHelper(Class<T> helperClass, ContentType contentType) {
 		return hasHelper(helperClass, contentType, false, false);
 	}
-	
-	public <T extends Object> boolean hasHelper(Class<T> helperClass, ContentType contentType, 
+
+	public <T extends Object> boolean hasHelper(Class<T> helperClass, ContentType contentType,
 			boolean includeCompatible, boolean useFallbackHelper) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(contentType, "contentType"); //$NON-NLS-1$
-		
-		return findHelper0(helperClass, contentType, 
+
+		return findHelper0(helperClass, contentType,
 				includeCompatible, useFallbackHelper)!=null;
 	}
-	
+
 	public boolean hasHelper(Class<?> helperClass, Object data) {
 		Exceptions.testNullArgument(helperClass, "helperClass"); //$NON-NLS-1$
 		Exceptions.testNullArgument(data, "data"); //$NON-NLS-1$
-		
+
 		Object helper = null;
-		
+
 		// Try direct type
 		try {
 			ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(data);
@@ -330,11 +334,11 @@ public final class UIHelperRegistry {
 		} catch(IllegalArgumentException e) {
 			// ignore
 		}
-		
+
 		if(helper!=null) {
 			return true;
 		}
-		
+
 		// Try enclosing type
 		try {
 			ContentType contentType = ContentTypeRegistry.getInstance().getEnclosingType(data);
@@ -342,11 +346,11 @@ public final class UIHelperRegistry {
 		} catch(IllegalArgumentException e) {
 			// ignore
 		}
-		
+
 		if(helper!=null) {
 			return true;
 		}
-		
+
 		// Try all compatible content types
 		ContentTypeCollection collection = ContentTypeRegistry.getInstance().getEnclosingTypes(data);
 		for(ContentType contentType : collection.getContentTypes()) {
@@ -355,17 +359,17 @@ public final class UIHelperRegistry {
 				break;
 			}
 		}
-		
+
 		return helper!=null;
 	}
-	
+
 	private Object processHelper(Object helper, Class<?> helperClass) {
-		
+
 		if(helper instanceof ClassProxy) {
 			// Let proxy create new object instance
 			helper = ((ClassProxy)helper).loadObject();
-		} 
-		
+		}
+
 		if(helper instanceof String) {
 			try {
 				// Use current class loader to search for desired class
@@ -376,8 +380,8 @@ public final class UIHelperRegistry {
 				LoggerFactory.log(this, Level.WARNING, msg, e);
 				helper = null;
 			}
-		} 
-		
+		}
+
 		if(helper instanceof Class) {
 			try {
 				helper = ((Class<?>)helper).newInstance();
@@ -393,7 +397,7 @@ public final class UIHelperRegistry {
 				helper = null;
 			}
 		}
-		
+
 		return helper;
 	}
 }

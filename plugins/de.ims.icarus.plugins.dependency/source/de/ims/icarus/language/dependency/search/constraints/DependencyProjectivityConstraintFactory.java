@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.search.constraints;
@@ -59,7 +59,7 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 	}
 
 	@Override
-	public Class<?> getValueClass() {
+	public Class<?> getValueClass(Object specifier) {
 		return null;
 	}
 
@@ -72,26 +72,26 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 	}
 
 	@Override
-	public Object getDefaultValue() {
-		return LanguageUtils.DATA_UNDEFINED_VALUE;
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
 	}
 
 	@Override
-	public Object labelToValue(Object label) {
+	public Object labelToValue(Object label, Object specifier) {
 		return LanguageUtils.parseBooleanLabel((String)label);
 	}
 
 	@Override
-	public Object valueToLabel(Object value) {
+	public Object valueToLabel(Object value, Object specifier) {
 		return LanguageUtils.getBooleanLabel((int)value);
 	}
 
 	@Override
-	public Object[] getLabelSet() {
+	public Object[] getLabelSet(Object specifier) {
 		return new Object[]{
-				LanguageUtils.DATA_UNDEFINED_LABEL,
-				LanguageUtils.getBooleanLabel(LanguageUtils.DATA_YES_VALUE),
-				LanguageUtils.getBooleanLabel(LanguageUtils.DATA_NO_VALUE),
+				LanguageConstants.DATA_UNDEFINED_LABEL,
+				LanguageUtils.getBooleanLabel(LanguageConstants.DATA_YES_VALUE),
+				LanguageUtils.getBooleanLabel(LanguageConstants.DATA_NO_VALUE),
 		};
 	}
 
@@ -105,7 +105,7 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).isFlagSet(LanguageUtils.FLAG_PROJECTIVE);
+			return ((DependencyTargetTree)value).isFlagSet(LanguageConstants.FLAG_PROJECTIVE);
 		}
 
 		@Override

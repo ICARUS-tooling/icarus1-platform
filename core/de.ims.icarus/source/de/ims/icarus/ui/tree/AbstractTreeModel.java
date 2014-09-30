@@ -61,6 +61,10 @@ public abstract class AbstractTreeModel implements TreeModel {
 		return root;
 	}
 
+	public boolean isRoot(Object node) {
+		return root==node;
+	}
+
 	/**
 	 * @see javax.swing.tree.TreeModel#isLeaf(java.lang.Object)
 	 */

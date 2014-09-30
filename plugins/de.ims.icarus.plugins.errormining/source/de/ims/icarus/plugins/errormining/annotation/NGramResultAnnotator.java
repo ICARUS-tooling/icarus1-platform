@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.annotation;
@@ -47,8 +47,8 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class NGramResultAnnotator extends AbstractLazyResultAnnotator {	
-	
+public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
+
 	private static long nucleiHighlight = DependencyHighlighting.getInstance()
 												.getHighlight("form"); //$NON-NLS-1$
 	private static long ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
@@ -58,7 +58,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 		super(highlighting);
 		this.nqList = nqList;
 	}
-	
+
 
 //	/**
 //	 * @param matcher
@@ -81,7 +81,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 	 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator#getHighlightCount()
 	 */
 	@Override
-	protected int getHighlightCount() {
+	public int getHighlightCount() {
 		// nuclei or ngram
 		return 2;
 	}
@@ -111,25 +111,25 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 	protected AnnotatedData createAnnotatedData(Object data, ResultEntry entry) {
 		return new LazyAnnotatedNGramData((DependencyData) data, entry);
 	}
-	
+
 	@Override
 	protected Annotation createAnnotation(Object data, ResultEntry entry) {
 		return new LazyNGramAnnotation(data, entry);
-	}	
-	
-	
+	}
+
+
 	protected String getTagQuery(String qtag){
 		String tag = qtag;
 		for(int i = 0; i < nqList.size(); i++){
 			NGramQAttributes att = nqList.get(i);
 			//System.out.println(tag + " vs " + att.getKey());
-			
+
 			//is there a key in querylist?
 			if (att.getKey().equals(tag)){
 				//System.out.print("Hit " + tag + " vs " + att.getKey());
-				
+
 				//shall we use key?
-				if(att.isInclude()){					
+				if(att.isInclude()){
 					if(att.getValue().equals("")){ //$NON-NLS-1$
 						//reuse old tag
 						//System.out.println(" Included Oldtag " + tag);
@@ -138,51 +138,51 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 						//use newspecified tag
 						//System.out.println(" Included Newtag " + att.getValue());
 						return att.getValue();
-					}					
+					}
 				} else {
 					//ignore tag for search
 					//System.out.println(" excluded ");
 					return null;
 				}
 			}
-		}		
-		return tag;		
+		}
+		return tag;
 	}
-	
-	
+
+
 
 	/**
 	 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator#createHighlight(java.lang.Object, de.ims.icarus.search_tools.result.Hit)
 	 */
 	@Override
 	protected Highlight createHighlight(Object data, Hit hit) {
-		
+
 		// Flexible buffer structures to allow for addition of
 		// needed highlight data during construction process
 		List<Integer> indexMap = new ArrayList<>(hit.getIndexCount());
 		List<Long> highlights = new ArrayList<>(hit.getIndexCount());
-	
+
 		int[] hitArray = hit.getIndices();
-		
-		
+
+
 		//Debug print hitarray, inside the array all informations need for highlight
 //		System.out.println("HitArray " + hitArray[0] + " " //$NON-NLS-1$ //$NON-NLS-2$
 //							+ hitArray[1] + " " //$NON-NLS-1$
 //							+ hitArray[2]);
 
-		
+
 		int start = hitArray[0];
 		int end = hitArray[1];
 		int nuclei = hitArray[2];
-		
-		
+
+
 		// used when highlight dependency result
 		int sourceNode = 0;
 		//dependency hit consists of target(nucleus) and sourceNode information
 		if (hit.getIndexCount() == 4){
 			sourceNode = hitArray[3];
 		}
-		
+
 		//only nuclei
 		if(end == start){
 			indexMap.add(nuclei-1);
@@ -196,12 +196,12 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 				} else {
 					highlight = ngramHighlight;
 				}
-				
+
 				indexMap.add(i);
 				highlights.add(highlight);
-			}			
+			}
 		}
-		
+
 		// Create final buffer structures
 		int size = indexMap.size();
 		int[]_indexMap = new int[size];
@@ -210,14 +210,14 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 			_indexMap[i] = indexMap.get(i);
 			_highlights[i] = highlights.get(i);
 		}
-		
+
 		return new DefaultHighlight(_indexMap, _highlights);
 	}
 
-	
-//	
+
+//
 //	/**
-//	 * 
+//	 *
 //	 * @param data
 //	 * @param hit
 //	 * @return
@@ -225,7 +225,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 //	protected Highlight createHighlights(Object data, Hit[] hit) {
 //
 //		int[] hitArray = hit[0].getIndices();
-//		
+//
 //		System.out.println(hitArray[0] + " " //$NON-NLS-1$
 //				+ hitArray[1] + " " //$NON-NLS-1$
 //				+ hitArray[2]);
@@ -233,21 +233,21 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 //		int start = hitArray[0];
 //		int end = hitArray[1];
 //		int nuclei = hitArray[2];
-//		
+//
 //		int[] iMap = new int[end-start+1];
 //		long[] longHighligth = new long[end-start+1];
-//		
+//
 //		for(int j = 0; j < hit.length; j++){
 //			hitArray = hit[j].getIndices();
-//			
+//
 //			System.out.println(hitArray[0] + " " //$NON-NLS-1$
 //					+ hitArray[1] + " " //$NON-NLS-1$
 //					+ hitArray[2]);
-//			
+//
 //			start = hitArray[0];
 //			end = hitArray[1];
 //			nuclei = hitArray[2];
-//			
+//
 //			for(int i = 0; i < end-start+1; i++){
 //				if (iMap[i] == 0){
 //					if (i == nuclei-1){
@@ -256,7 +256,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 //						longHighligth[i] = 2L;
 //					}
 //				}
-//			}			
+//			}
 //		}
 //
 //		Highlight highlight = new Highlight(iMap, longHighligth);
@@ -264,7 +264,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 //			System.out.print(iMap[index] + " "); //$NON-NLS-1$
 //		}
 //		System.out.println();
-//		return highlight;		
+//		return highlight;
 //	}
 
 
@@ -274,8 +274,8 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 	//	public NGramResultAnnotator(NGramResultMatcher matcher) {
 	//		this(NGramHighlighting.getInstance(), matcher);
 	//	}
-	
-	
+
+
 	protected class LazyAnnotatedNGramData extends AnnotatedDependencyData {
 
 		private static final long serialVersionUID = 2141988696554570730L;
@@ -291,7 +291,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 			Annotation annotation = super.getAnnotation();
 
 			if (annotation == null) {
-				annotation = createAnnotation(this, entry);				
+				annotation = createAnnotation(this, entry);
 				setAnnotation(annotation);
 			}
 
@@ -304,12 +304,12 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 
 		public LazyNGramAnnotation(Object data, ResultEntry entry) {
 			super(data, entry);
-			
+
 			//System.out.println("AnnoCount: " +LazyNGramAnnotation.this.getAnnotationCount());
 
 		}
 
-	
+
 	}
 
 

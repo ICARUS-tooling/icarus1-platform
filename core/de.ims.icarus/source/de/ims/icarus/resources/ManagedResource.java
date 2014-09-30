@@ -19,48 +19,49 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.resources;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class ManagedResource {
-	
+
 	private final String baseName;
-	
+
 	private final ResourceLoader loader;
-	
+
 	private ResourceBundle bundle;
 
 	/**
-	 * 
+	 *
 	 */
 	ManagedResource(String baseName, ResourceLoader loader) {
 		this.baseName = baseName;
 		this.loader = loader;
 	}
 
-	public synchronized void reload() {
-		bundle = loader.loadResource(baseName, ResourceManager.getInstance().getLocale());
+	public synchronized void reload(Locale locale) {
+		bundle = loader.loadResource(baseName, locale);
 	}
-	
+
 	synchronized void clear() {
 		bundle = null;
 	}
-	
+
 	public String getResource(String key) {
 		if(bundle==null) {
-			reload();
+			reload(ResourceManager.getInstance().getLocale());
 		}
-		
+
 		return bundle==null ? key : bundle.getString(key);
 	}
 
@@ -102,7 +103,7 @@ public final class ManagedResource {
 			ManagedResource other = (ManagedResource) obj;
 			return baseName.equals(other.baseName) && loader.equals(other.loader);
 		}
-		
+
 		return false;
 	}
 

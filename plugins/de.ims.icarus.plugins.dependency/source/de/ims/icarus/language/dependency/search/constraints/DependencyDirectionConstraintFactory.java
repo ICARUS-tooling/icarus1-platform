@@ -19,12 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.search.constraints;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -58,7 +59,7 @@ public class DependencyDirectionConstraintFactory extends AbstractConstraintFact
 	}
 
 	@Override
-	public Class<?> getValueClass() {
+	public Class<?> getValueClass(Object specifier) {
 		return null;
 	}
 
@@ -71,26 +72,26 @@ public class DependencyDirectionConstraintFactory extends AbstractConstraintFact
 	}
 
 	@Override
-	public Object getDefaultValue() {
-		return LanguageUtils.DATA_UNDEFINED_VALUE;
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
 	}
 
 	@Override
-	public Object labelToValue(Object label) {
+	public Object labelToValue(Object label, Object specifier) {
 		return LanguageUtils.parseDirectionLabel((String)label);
 	}
 
 	@Override
-	public Object valueToLabel(Object value) {
+	public Object valueToLabel(Object value, Object specifier) {
 		return LanguageUtils.getDirectionLabel((int)value);
 	}
 
 	@Override
-	public Object[] getLabelSet() {
+	public Object[] getLabelSet(Object specifier) {
 		return new Object[]{
-				LanguageUtils.DATA_UNDEFINED_LABEL,
-				LanguageUtils.DATA_LEFT_LABEL,
-				LanguageUtils.DATA_RIGHT_LABEL,
+				LanguageConstants.DATA_UNDEFINED_LABEL,
+				LanguageConstants.DATA_LEFT_LABEL,
+				LanguageConstants.DATA_RIGHT_LABEL,
 		};
 	}
 

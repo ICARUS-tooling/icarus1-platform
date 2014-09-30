@@ -57,11 +57,11 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 		return highlighting;
 	}
 
-	protected abstract int getHighlightCount();
+	public abstract int getHighlightCount();
 
 	protected abstract long createBaseHighlight(int index);
 
-	protected long[] getBaseHighlights() {
+	public long[] getBaseHighlights() {
 		if(baseHighlights==null) {
 			baseHighlights = new long[getHighlightCount()];
 			for(int i=0; i<baseHighlights.length; i++) {
@@ -172,7 +172,7 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 			}
 
 			if(highlights[getIndex()]==null) {
-				highlights[getIndex()] = createHighlight(data, getHit());
+				highlights[getIndex()] = getAnnotator().createHighlight(data, getHit());
 			}
 
 			return highlights[getIndex()];
@@ -248,6 +248,14 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 		@Override
 		public ResultEntry getResultEntry() {
 			return entry;
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.annotation.SearchAnnotation#getAnnotator()
+		 */
+		@Override
+		public AbstractLazyResultAnnotator getAnnotator() {
+			return AbstractLazyResultAnnotator.this;
 		}
 	}
 }

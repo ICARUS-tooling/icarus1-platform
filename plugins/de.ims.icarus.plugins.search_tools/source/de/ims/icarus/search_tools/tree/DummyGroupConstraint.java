@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
@@ -30,15 +30,15 @@ import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.GroupCache;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class DummyGroupConstraint implements SearchConstraint {
-	
+
 	private static final long serialVersionUID = -1351042489767331758L;
-	
+
 	private final SearchConstraint source;
 	private final GroupCache cache;
 
@@ -51,20 +51,24 @@ public class DummyGroupConstraint implements SearchConstraint {
 	 * Instead of doing a match check this implementation
 	 * directly delegates to the underlying {@code GroupCache}'s
 	 * {@link GroupCache#cacheGroupInstance(int, Object)} method.
-	 * 
+	 *
 	 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#matches(java.lang.Object)
 	 * @see GroupCache#cacheGroupInstance(int, Object)
 	 */
 	@Override
 	public boolean matches(Object value) {
-		cache.cacheGroupInstance(getGroupId(), getLabel(getInstance(value)));
-		
+		if(source.isMultiplexing()) {
+			source.group(cache,  getGroupId(), value);
+		} else {
+			cache.cacheGroupInstance(getGroupId(), getLabel(getInstance(value)));
+		}
+
 		return true;
 	}
-	
+
 	@Override
 	public DummyGroupConstraint clone() {
-		return new DummyGroupConstraint(source, cache); 
+		return new DummyGroupConstraint(source, cache);
 	}
 
 	public int getGroupId() {
@@ -149,5 +153,18 @@ public class DummyGroupConstraint implements SearchConstraint {
 	@Override
 	public Object getLabel(Object value) {
 		return source.getLabel(value);
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#isMultiplexing()
+	 */
+	@Override
+	public boolean isMultiplexing() {
+		return false;
+	}
+
+	@Override
+	public void group(GroupCache cache, int groupId, Object value) {
+		throw new UnsupportedOperationException();
 	}
 }

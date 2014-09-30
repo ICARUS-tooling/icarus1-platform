@@ -19,13 +19,17 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
 
-import java.util.ArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
+
 import java.util.List;
 
 import de.ims.icarus.language.LanguageUtils;
@@ -44,25 +48,29 @@ import de.ims.icarus.util.CorruptedStateException;
  *
  */
 public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnnotator {
-	
+
 	protected Matcher[] matchers;
 
 	protected AbstractTreeResultAnnotator(BitmaskHighlighting highlighting, Matcher rootMatcher) {
 		super(highlighting);
-		
+
 		List<Matcher> buffer = TreeUtils.collectMatchers(rootMatcher);
 		TreeUtils.clearDuplicates(buffer);
-		
+
 		matchers = buffer.toArray(new Matcher[0]);
-		
+
 		for(int i=0; i<matchers.length; i++) {
 			if(matchers[i].getId()!=i)
 				throw new CorruptedStateException();
 		}
 	}
 
+	public Matcher[] getMatchers() {
+		return matchers;
+	}
+
 	@Override
-	protected int getHighlightCount() {
+	public int getHighlightCount() {
 		return matchers.length;
 	}
 
@@ -72,46 +80,46 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 		boolean highlightEdge = !SearchUtils.isUndefined(matcher.getEdge());
 		return getHighlighting().getHighlight(matcher.getConstraints(), true, highlightEdge);
 	}
-	
+
 	protected abstract int getHead(Object data, int index);
 
 	@Override
 	protected Highlight createHighlight(Object data, Hit hit) {
 		// Flexible buffer structures to allow for addition of
 		// needed highlight data during construction process
-		List<Integer> indexMap = new ArrayList<>(hit.getIndexCount());
-		List<Long> highlights = new ArrayList<>(hit.getIndexCount());
-		
+		TIntList indexMap = new TIntArrayList(hit.getIndexCount());
+		TLongList highlights = new TLongArrayList(hit.getIndexCount());
+
 		boolean trans = false;
 		long[] baseHighlights = getBaseHighlights();
-		
+
 		// First pass -> plain copying of highlight info
 		for(int i=0; i<hit.getIndexCount(); i++) {
 			indexMap.add(hit.getIndex(i));
 			highlights.add(baseHighlights[i]);
-			
+
 			SearchEdge edge = matchers[i].getEdge();
 			if(!trans && edge!=null && edge.getEdgeType()==EdgeType.TRANSITIVE) {
 				trans = true;
 			}
 		}
-		
+
 		// Second pass if required
 		if(trans) {
 			for(int i=0; i<hit.getIndexCount(); i++) {
 				Matcher matcher = matchers[i];
-				if(matcher.getEdge()==null 
+				if(matcher.getEdge()==null
 						|| matcher.getEdge().getEdgeType()!=EdgeType.TRANSITIVE) {
 					continue;
 				}
-				
+
 				// Add transitive flag to existing highlight
 				long highlight = highlights.get(i);
 				highlight |= BitmaskHighlighting.TRANSITIVE_HIGHLIGHT;
 				highlights.set(i, highlight);
-				
+
 				int parentIndex = hit.getIndex(matcher.getParent().getId());
-				
+
 				int index = hit.getIndex(i);
 				// Traverse up all the way to the parent index
 				while(index!=parentIndex) {
@@ -119,20 +127,20 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 					if(LanguageUtils.isRoot(head) || LanguageUtils.isUndefined(head)) {
 						break;
 					}
-					
+
 					// Mark intermediate edge as transitive
 					highlight = BitmaskHighlighting.GENERAL_HIGHLIGHT;
 					highlight |= BitmaskHighlighting.TRANSITIVE_HIGHLIGHT;
-					
+
 					// Add 'new' highlight entry
 					highlights.add(highlight);
 					indexMap.add(index);
-					
+
 					index = head;
 				}
 			}
 		}
-		
+
 		// Create final buffer structures
 		int size = indexMap.size();
 		int[]_indexMap = new int[size];
@@ -141,7 +149,7 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 			_indexMap[i] = indexMap.get(i);
 			_highlights[i] = highlights.get(i);
 		}
-		
+
 		return new DefaultHighlight(_indexMap, _highlights);
 	}
 }

@@ -843,15 +843,17 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			UIUtil.fitToContent(specifierSelect, 60, 100, 20);
 			specifierSelect.setVisible(specifiers!=null);
 
+			Object specifier = specifierSelect.getSelectedItem();
+
 			addButton = createHelperButton(true, listener);
 			removeButton = createHelperButton(false, listener);
 
 			toggleInclude = new JCheckBox();
 			toggleInclude.setSelected(true);
 
-			Object[] labelSet = factory.getLabelSet();
-			Class<?> valueClass = factory.getValueClass();
-			Object defaultValue = factory.valueToLabel(factory.getDefaultValue());
+			Object[] labelSet = factory.getLabelSet(specifier);
+			Class<?> valueClass = factory.getValueClass(specifier);
+			Object defaultValue = factory.valueToLabel(factory.getDefaultValue(specifier), specifier);
 
 			valueSelect = labelSet==null ? new JComboBox<>() : new JComboBox<>(labelSet);
 
@@ -901,7 +903,6 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			if(!constraint.getToken().equals(factory.getToken()))
 				throw new IllegalArgumentException("Factory not designed to handle constraints for token: "+constraint.getToken()); //$NON-NLS-1$
 
-			Object currentValue = factory.valueToLabel(constraint.getValue());
 
 			operatorSelect.setSelectedItem(constraint.getOperator());
 			label.setText(factory.getName());
@@ -912,6 +913,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			if(displayingGroups) {
 				displayGroups((int)constraint.getValue());
 			} else {
+				Object currentValue = factory.valueToLabel(constraint.getValue(), constraint.getSpecifier());
 				displayValue(currentValue);
 			}
 			specifierSelect.setSelectedItem(constraint.getSpecifier());
@@ -927,17 +929,17 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			SearchOperator operator = (SearchOperator) operatorSelect.getSelectedItem();
 			Object value = null;
 
+			Object specifier = specifierSelect.isVisible() ? specifierSelect.getSelectedItem() : null;
+
 			if(!displayingGroups) {
 				value = valueSelect.getSelectedItem();
-				value = factory.labelToValue(value);
-				if(value instanceof String && Integer.class.equals(factory.getValueClass())) {
+				value = factory.labelToValue(value, specifier);
+				if(value instanceof String && Integer.class.equals(factory.getValueClass(specifier))) {
 					value = Integer.parseInt((String)value);
 				}
 			} else {
 				value = valueSelect.getSelectedIndex();
 			}
-
-			Object specifier = specifierSelect.isVisible() ? specifierSelect.getSelectedItem() : null;
 
 			SearchConstraint constraint = new DefaultConstraint(
 					factory.getToken(), value, operator, specifier);
@@ -995,7 +997,9 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) valueSelect.getModel();
 			model.removeAllElements();
 
-			Object[] labelSet = factory.getLabelSet();
+			Object specifier = specifierSelect.getSelectedItem();
+
+			Object[] labelSet = factory.getLabelSet(specifier);
 			if(labelSet!=null) {
 				for(Object label : labelSet) {
 					model.addElement(label);
@@ -1003,10 +1007,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			}
 
 			if(value==null) {
-				value = factory.valueToLabel(factory.getDefaultValue());
+				value = factory.valueToLabel(factory.getDefaultValue(specifier), specifier);
 			}
 
-			valueSelect.setEditable(factory.getValueClass()!=null);
+			valueSelect.setEditable(factory.getValueClass(specifier)!=null);
 			valueSelect.setSelectedItem(value);
 
 			displayingGroups = false;

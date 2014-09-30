@@ -79,4 +79,11 @@ public class DefaultProsodicDocumentData extends DefaultCoreferenceDocumentData 
 		return ProsodyUtils.getProsodySentenceContentType();
 	}
 
+	@Override
+	public void setId(String id) {
+		super.setId(id);
+
+		setProperty(DOCUMENT_ID_PROPERTY, id);
+	}
+
 }

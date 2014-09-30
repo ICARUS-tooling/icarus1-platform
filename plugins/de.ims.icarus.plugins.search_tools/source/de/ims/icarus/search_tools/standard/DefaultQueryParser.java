@@ -658,7 +658,7 @@ public class DefaultQueryParser {
 			value = Integer.parseInt((String)value)-1;
 		} else if(context!=null) {
 			ConstraintFactory factory = context.getFactory(token);
-			value = factory.labelToValue(value);
+			value = factory.labelToValue(value, specifier);
 		}
 
 		nodeStack.pushConstraint(new DefaultConstraint(token, value, operator, specifier));
@@ -1010,7 +1010,7 @@ public class DefaultQueryParser {
 				label = String.valueOf((int) value + 1);
 			} else if(context!=null) {
 				ConstraintFactory factory = context.getFactory(constraint.getToken());
-				label = String.valueOf(factory.valueToLabel(value));
+				label = String.valueOf(factory.valueToLabel(value, specifier));
 			} else {
 				label = String.valueOf(value);
 			}

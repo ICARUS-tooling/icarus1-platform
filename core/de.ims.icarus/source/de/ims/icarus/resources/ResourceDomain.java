@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.resources;
@@ -60,7 +60,7 @@ import de.ims.icarus.resources.Localizers.TextComponentLocalizer;
  * instance. All locations ({@code baseNames}) added to this domain
  * are wrapped into {@link ManagedResource} objects that are notified
  * by the {@code ResourceManager} when the current {@code Locale}
- * changes. All methods used to access localized data on the 
+ * changes. All methods used to access localized data on the
  * {@code ResourceManager} are mirrored in this class with the back-end
  * being a list of aforementioned {@code ManagedResource}s that will be
  * traversed until an entry for a given {@code key} is found.
@@ -69,19 +69,19 @@ import de.ims.icarus.resources.Localizers.TextComponentLocalizer;
  * localization 'manager' for some entity like a plug-in. Note that
  * registering of {@code Localizable} objects is still handled by the global
  * {@code ResourceManager}.
- * 
- * @author Markus Gärtner 
+ *
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class ResourceDomain {
-	
+
 	protected List<ManagedResource> resources = new LinkedList<>();
-	
+
 	protected Map<String, Localizer> localizers = new HashMap<>();
-	
+
 	protected final ResourceDomain parent;
-	
+
 	protected final boolean returnKeyIfAbsent;
 
 	public ResourceDomain() {
@@ -89,15 +89,15 @@ public class ResourceDomain {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public ResourceDomain(ResourceDomain parent, boolean returnKeyIfAbsent) {
 		this.parent = parent;
 		this.returnKeyIfAbsent = returnKeyIfAbsent;
-		
+
 		init();
 	}
-	
+
 	protected  void init() {
 		localizers.put("label", new LabelLocalizer(this)); //$NON-NLS-1$
 		localizers.put("button", new ButtonLocalizer(this)); //$NON-NLS-1$
@@ -108,25 +108,25 @@ public class ResourceDomain {
 		localizers.put("dialog", new DialogLocalizer(this)); //$NON-NLS-1$
 		localizers.put("generic", new GenericLocalizer(this)); //$NON-NLS-1$
 	}
-	
+
 	protected Localizer getLocalizer(String key) {
 		Localizer localizer = localizers.get(key);
 		return localizer==null ? Localizers.emptyLocalizer : localizer;
-	
+
 	}
-	
+
 	protected RegisteringLocalizer getRegisteringLocalizer(String key) {
 		Localizer localizer = localizers.get(key);
-		return (RegisteringLocalizer) (localizer==null || !(localizer instanceof RegisteringLocalizer) ? 
+		return (RegisteringLocalizer) (localizer==null || !(localizer instanceof RegisteringLocalizer) ?
 				Localizers.emptyRegisteringLocalizer : localizer);
 	}
-	
+
 	public void clear() {
 		for(ManagedResource resource : resources) {
 			resource.clear();
 		}
 	}
-	
+
 	public ManagedResource addResource(String baseName, ResourceLoader loader) {
 		ManagedResource resource = ResourceManager.getInstance().addManagedResource(baseName, loader);
 
@@ -135,14 +135,14 @@ public class ResourceDomain {
 				resources.add(resource);
 			}
 		}
-		
+
 		return resource;
 	}
 
 	public ManagedResource addResource(String baseName) {
 		return addResource(baseName, null);
 	}
-	
+
 	public void removeResource(String baseName) {
 		ResourceManager.getInstance().removeManagedResource(baseName);
 		synchronized (resources) {
@@ -174,6 +174,7 @@ public class ResourceDomain {
 		// Applies default value if required
 		if (value == null) {
 			if(ResourceManager.isNotifyMissingResource()) {
+				//TODO provide stack trace!
 				LoggerFactory.log(this, Level.INFO, "No resource entry for key: "+key/*, new Throwable()*/); //$NON-NLS-1$
 			}
 			value = defaultValue;
@@ -183,7 +184,7 @@ public class ResourceDomain {
 		if (value != null && params != null) {
 			value = ResourceManager.format(value, params);
 		}
-		
+
 		if(value==null && returnKeyIfAbsent) {
 			value = key;
 		}
@@ -231,7 +232,7 @@ public class ResourceDomain {
 	public void addItem(Localizable item) {
 		addItem(item, Localizers.emptyLocalizer, DEFAULT_INIT);
 	}
-	
+
 	public void removeItem(Object item) {
 		ResourceManager.getInstance().removeLocalizableItem(item);
 	}

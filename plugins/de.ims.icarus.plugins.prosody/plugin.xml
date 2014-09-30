@@ -20,6 +20,7 @@
 		<import plugin-id="de.ims.icarus.languageTools" />
 		<import plugin-id="de.ims.icarus.searchTools" />
 		<import plugin-id="de.ims.icarus.jgraph" />
+		<import plugin-id="de.ims.icarus.dependency" />
 		<import plugin-id="de.ims.icarus.coref" />
 	</requires>
 	
@@ -30,6 +31,28 @@
 	</runtime>
 	
 	<!-- Extension-Points -->
+			
+	<extension-point id="ProsodySentencePresenter" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Member of the prosody visualization framework. Extensions
+				of this point are responsible for providing a highly specialized
+				view for a single prosodic sentence. Usually a view relying
+				on such presenters will provide the user with options to select
+				the presenter he considers most useful for the task at hand.
+				It is recommended that extensions make use of all the optional
+				parameter fields of parent point 'Localizable'! 
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Class of presenter object, has to implement the de.ims.icarus.ui.view.AWTPresenter interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
 	
 	<!-- Standard Extensions -->
 	
@@ -59,6 +82,32 @@
 	
 	<!-- HELPERS -->
 	
+	<extension id="ProsodySearchResultPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				GraphPresenter implementation for use with arbitrary sentence data that implements
+				the de.ims.icarus.plugins.prosody.ProsodicSentenceData interface.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.result.ProsodySearchResultPresenter" />
+		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
+		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter.GraphBasedPresenter" />
+	</extension>
+	
+	<extension id="ProsodySentenceGraphPresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
+		<parameter id="name" value="plugins.prosody.prosodySentenceGraphPresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySentenceGraphPresenter.identity.name" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.graph.ProsodySentenceGraphPresenter" />
+	</extension>
+	
+	<extension id="ProsodySentenceTablePresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
+		<parameter id="name" value="plugins.prosody.prosodySentenceTablePresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySentenceTablePresenter.identity.name" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.table.ProsodySentenceTablePresenter" />
+	</extension>
+	
 	<extension id="ProsodyDocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
 		<parameter id="name" value="plugins.prosody.prosodyDocumentReader.identity.name" />
 		<parameter id="description" value="plugins.prosody.prosodyDocumentReader.identity.description" />
@@ -82,6 +131,18 @@
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.list.ProsodyListCellRenderer" />
 		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
+	</extension>
+	
+	<extension id="ProsodicAnnotationManager" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Annotation manager implementation to be used with DependencyAnnotation
+				objects.
+			</doc-text>
+		</doc>
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager" />
+		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicAnnotationContentType" />
+		<parameter id="interface" value="de.ims.icarus.util.annotation.AnnotationManager" />
 	</extension>
 	
 	<extension id="SerializableElements" plugin-id="de.ims.icarus.core" point-id="Serializable">
@@ -120,6 +181,15 @@
 		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.params.PaIntEParams" />
 	</extension>
 	
+	<extension id="ProsodicAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation" />
+	</extension>
+	
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
 	
 	<extension id="ProsodyConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
@@ -140,6 +210,7 @@
 		<parameter id="token" value="entity" />
 		<parameter id="token" value="speaker" />
 		<parameter id="token" value="speakerFeatures" />
+		<parameter id="token" value="accentShape" />
 		<parameter id="factories">
 			<!-- factories "inherited" by dependency data -->
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
@@ -154,9 +225,10 @@
 			<parameter id="syllableProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllablePropertyConstraintFactory" />
 			<parameter id="wordProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPropertyConstraintFactory" />
 			<parameter id="sylCount" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllableCountConstraintFactory" />
-			<parameter id="entity" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyEntityConstraintFactory" />
-			<parameter id="speaker" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerConstraintFactory" />
-			<parameter id="speakerFeatures" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerFeaturesConstraintFactory" />
+			<!--<parameter id="entity" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyEntityConstraintFactory" />-->
+			<!--<parameter id="speaker" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerConstraintFactory" />-->
+			<!--<parameter id="speakerFeatures" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerFeaturesConstraintFactory" />-->
+			<parameter id="accentShape" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyAccentShapeConstraintFactory" />
 		</parameter>
 	</extension>
 	

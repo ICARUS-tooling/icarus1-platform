@@ -90,6 +90,10 @@ public class ProsodyTargetTree extends DependencyTargetTree implements ProsodyCo
 		return (String) getSource().getProperty(nodePointer, ENTITY_KEY);
 	}
 
+	public boolean hasSyllables() {
+		return getSource().getSyllableCount(nodePointer)>0;
+	}
+
 	// SYLLABLE METHODS
 
 	public Object getProperty(String key, int sylIndex) {

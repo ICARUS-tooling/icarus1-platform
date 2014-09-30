@@ -211,6 +211,27 @@
 		desc="navigationActions.last.description"
 		icon="navi_right_stop.png"
 		command="lastElement" />
+
+	<!-- Start Media -->
+	<action id="actions.default.startAction" virtual="true"
+		name="mediaActions.start.name" 
+		desc="mediaActions.start.description"
+		icon="media_playback_start.png"
+		command="start" />
+
+	<!-- Stop Media -->
+	<action id="actions.default.stopAction" virtual="true"
+		name="mediaActions.stop.name" 
+		desc="mediaActions.stop.description"
+		icon="media_playback_stop.png"
+		command="stop" />
+
+	<!-- Pause Media -->
+	<action id="actions.default.pauseAction" virtual="true"
+		name="mediaActions.pause.name" 
+		desc="mediaActions.pause.description"
+		icon="media_playback_pause.png"
+		command="pause" />
 	
 
 </actions>

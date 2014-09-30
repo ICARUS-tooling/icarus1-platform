@@ -26,6 +26,7 @@
 package de.ims.icarus.plugins.prosody;
 
 import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.language.coref.CoreferenceDocumentData;
 
 /**
  * @author Markus Gärtner
@@ -34,14 +35,19 @@ import de.ims.icarus.language.LanguageConstants;
  */
 public interface ProsodyConstants extends LanguageConstants {
 
+	// PLugin ID
+	public static final String PROSODY_PLUGIN_ID =
+			"de.ims.icarus.prosody"; //$NON-NLS-1$
+
 	// Document properties
+	public static final String DOCUMENT_ID = CoreferenceDocumentData.DOCUMENT_ID_PROPERTY;
 	public static final String AUDIO_FILE_KEY = "audio-file"; //$NON-NLS-1$
 	public static final String AUDIO_OFFSET_KEY = "audio-offset"; //$NON-NLS-1$
 
 	// Sentence properties
 	public static final String SENTENCE_NUMBER_KEY = "sent-num"; //$NON-NLS-1$
 
-	// Word/Syllable properties
+	// Word properties
 	public static final String FORM_KEY = "form"; //$NON-NLS-1$
 	public static final String POS_KEY = "pos"; //$NON-NLS-1$
 	public static final String LEMMA_KEY = "lemma"; //$NON-NLS-1$
@@ -56,6 +62,7 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String BEGIN_TS_KEY = "begin_timestamp"; //$NON-NLS-1$
 	public static final String END_TS_KEY = "end_timestamp"; //$NON-NLS-1$
 
+	// Syllable properties
 	public static final String SYLLABLE_OFFSET_KEY = "syllable_offset"; //$NON-NLS-1$
 	public static final String SYLLABLE_LABEL_KEY = "syllable_label"; //$NON-NLS-1$
 	public static final String SYLLABLE_TIMESTAMP_KEY = "syllable_timestamp"; //$NON-NLS-1$
@@ -77,4 +84,14 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String PAINTE_C1_KEY = "painte_c1"; //$NON-NLS-1$
 	public static final String PAINTE_C2_KEY = "painte_c2"; //$NON-NLS-1$
 	public static final String PAINTE_D_KEY = "painte_d"; //$NON-NLS-1$
+
+	// Accent shape constants
+	public static final int ACCENT_SHAPE_RISE_VALUE = 1;
+	public static final int ACCENT_SHAPE_FALL_VALUE = 2;
+	public static final int ACCENT_SHAPE_RISE_FALL_VALUE = 3;
+
+	public static final String ACCENT_SHAPE_RISE_LABEL = "Rise"; //$NON-NLS-1$
+	public static final String ACCENT_SHAPE_FALL_LABEL = "Fall"; //$NON-NLS-1$
+	public static final String ACCENT_SHAPE_RISE_FALL_LABEL = "Rise-Fall"; //$NON-NLS-1$
+	public static final String ACCENT_SHAPE_UNDEFINED_LABEL = "Unaccented"; //$NON-NLS-1$
 }

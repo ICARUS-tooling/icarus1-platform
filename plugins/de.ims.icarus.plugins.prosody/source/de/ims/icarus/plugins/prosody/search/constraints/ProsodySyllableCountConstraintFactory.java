@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
@@ -47,6 +48,16 @@ public class ProsodySyllableCountConstraintFactory extends AbstractConstraintFac
 				"plugins.prosody.constraints.sylCount.description"); //$NON-NLS-1$
 	}
 
+	@Override
+	public Class<?> getValueClass(Object specifier) {
+		return Integer.class;
+	}
+
+	@Override
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
+	}
+
 	/**
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
 	 */
@@ -57,6 +68,8 @@ public class ProsodySyllableCountConstraintFactory extends AbstractConstraintFac
 	}
 
 	private static class ProsodySyllableCountConstraint extends DefaultConstraint {
+
+		private static final long serialVersionUID = -2819824788436110048L;
 
 		public ProsodySyllableCountConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);

@@ -85,7 +85,6 @@ import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.ui.tasks.TaskManager;
 import de.ims.icarus.ui.tasks.TaskPriority;
 import de.ims.icarus.ui.view.AWTPresenter;
-import de.ims.icarus.ui.view.Presenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
@@ -108,7 +107,7 @@ import de.ims.icarus.util.transfer.ConsumerMenu;
  *
  */
 public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
-		AnnotationController, Installable, Presenter.TextBasedPresenter {
+		AnnotationController, Installable, AWTPresenter.TextBasedPresenter {
 
 	protected JComponent contentPanel;
 	protected JTextPane textPane;

@@ -25,7 +25,13 @@
  */
 package de.ims.icarus.plugins.prosody;
 
+import java.util.Collection;
+
 import org.java.plugin.Plugin;
+import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
+
+import de.ims.icarus.plugins.PluginUtil;
 
 /**
  * @author Markus Gärtner
@@ -52,4 +58,10 @@ public class ProsodyPlugin extends Plugin {
 
 	}
 
+
+	public static Collection<Extension> getProsodySentencePresenterExtensions() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				ProsodyConstants.PROSODY_PLUGIN_ID, "ProsodySentencePresenter"); //$NON-NLS-1$
+		return extensionPoint.getConnectedExtensions();
+	}
 }

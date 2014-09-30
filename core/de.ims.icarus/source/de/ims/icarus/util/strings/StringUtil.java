@@ -270,8 +270,6 @@ public final class StringUtil {
         }
     }
 
-	private static Pattern indexPattern;
-
 	public static String getName(Object obj) {
 		if(obj==null)
 			return null;
@@ -296,6 +294,8 @@ public final class StringUtil {
 
 		return obj.toString();
 	}
+
+	private static Pattern indexPattern;
 
 	public static String getBaseName(String name) {
 		if(indexPattern==null) {
@@ -681,5 +681,13 @@ public final class StringUtil {
 
 	public static boolean endsWith(CharSequence s, char c) {
 		return s.length()>0 && s.charAt(s.length()-1)==c;
+	}
+
+	public static String padRight(String s, int n) {
+	     return String.format("%1$-" + n + "s", s); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public static String padLeft(String s, int n) {
+	    return String.format("%1$" + n + "s", s); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

@@ -14,9 +14,22 @@
 	<action id="plugins.prosody.prosodyOutlinePresenter.refreshAction"
 		template="actions.default.refreshAction" />
 		
-	<!-- EditLabelPatterns -->
+	<!-- Edit Label Patterns -->
 	<action id="plugins.prosody.prosodyOutlinePresenter.editLabelPatternsAction"
 		name="${id}.name" desc="${id}.description" icon="url.gif" />
+		
+	<!-- Play Document -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.playDocumentAction"
+		template="actions.default.startAction"
+	 	name="${id}.name" desc="${id}.description" />
+		
+	<!-- Stop Playback -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.stopPlaybackAction"
+		template="actions.default.stopAction" />
+		
+	<!-- Pause Playback -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction"
+		template="actions.default.pauseAction" type="toggle" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.prosodyOutlinePresenter.toolBarList">
@@ -24,6 +37,10 @@
 		<separator />
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.refreshAction" />
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.editLabelPatternsAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.playDocumentAction" />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.stopPlaybackAction" />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction" />
 		<separator />
 		<item type="glue" />
 	</action-list>

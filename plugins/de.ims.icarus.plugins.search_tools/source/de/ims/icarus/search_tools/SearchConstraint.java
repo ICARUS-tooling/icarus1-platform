@@ -19,13 +19,15 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
 
 import java.io.Serializable;
+
+import de.ims.icarus.search_tools.standard.GroupCache;
 
 
 /**
@@ -34,19 +36,19 @@ import java.io.Serializable;
  *
  */
 public interface SearchConstraint extends Serializable {
-	
+
 	/**
 	 * Returns the token used to identify this constraint's
 	 * factory within a certain {@link ConstraintContext}.
 	 */
 	String getToken();
-	
+
 	/**
 	 * Returns the value this constraint is meant to match
 	 * against.
 	 */
 	Object getValue();
-	
+
 	/**
 	 * Returns the optional specifier used to further restrict
 	 * the matching process.
@@ -54,18 +56,22 @@ public interface SearchConstraint extends Serializable {
 	Object getSpecifier();
 
 	SearchOperator getOperator();
-	
+
 	SearchConstraint clone();
-	
+
 	boolean matches(Object value);
-	
+
 	Object getInstance(Object value);
-	
+
 	Object getLabel(Object value);
-	
+
 	boolean isUndefined();
-	
+
 	void setActive(boolean active);
-	
+
 	boolean isActive();
+
+	boolean isMultiplexing();
+
+	void group(GroupCache cache, int groupId, Object value);
 }

@@ -91,7 +91,7 @@ public final class ClassProxy {
 
 	@Override
 	public String toString() {
-		return "ListenerProxy: "+className; //$NON-NLS-1$
+		return "ClassProxy: "+className; //$NON-NLS-1$
 	}
 
 	/**

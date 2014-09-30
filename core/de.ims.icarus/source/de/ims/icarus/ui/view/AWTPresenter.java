@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.view;
@@ -33,7 +33,7 @@ import java.awt.Component;
  * limitations of the AWT toolkit and may use Swing as well since there
  * is no special {@code Presenter} interface that explicitly enforces
  * the use of Swing components.
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -47,4 +47,24 @@ public interface AWTPresenter extends Presenter {
 	 * to be displayed by the visual {@code content} of the returned component.
 	 */
 	Component getPresentingComponent();
+
+	public interface TableBasedPresenter extends AWTPresenter {
+		// marker interface
+	}
+
+	public interface ListBasedPresenter extends AWTPresenter {
+		// marker interface
+	}
+
+	public interface GraphBasedPresenter extends AWTPresenter {
+		// marker interface
+	}
+
+	public interface TextBasedPresenter extends AWTPresenter {
+		// marker interface
+	}
+
+	public interface ChartBasedPresenter extends AWTPresenter {
+		// marker interface
+	}
 }

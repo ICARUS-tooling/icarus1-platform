@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.annotation;
@@ -33,18 +33,20 @@ import de.ims.icarus.util.annotation.Annotation;
  *
  */
 public interface SearchAnnotation extends Annotation {
-	
+
 	boolean isHighlighted(int index);
 
 	int getGroupId(int index);
-	
+
 	int getGroupId(int index, String token);
-	
+
 	boolean isNodeHighlighted(int index);
 	boolean isEdgeHighlighted(int index);
 	boolean isTransitiveHighlighted(int index);
-	
+
 	long getHighlight(int index);
-	
+
 	boolean isTokenHighlighted(int index, String token);
+
+	ResultAnnotator getAnnotator();
 }

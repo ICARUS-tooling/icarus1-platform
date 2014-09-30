@@ -124,6 +124,9 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	private final Key sharedKey = new Key();
 
 	private Object getIndexedProperty(int index, String key) {
+		if (key == null)
+			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
+
 		sharedKey.index = index;
 		sharedKey.key = key;
 

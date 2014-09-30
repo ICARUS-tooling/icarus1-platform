@@ -19,12 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search.constraints;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.coref.search.DocumentTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -44,7 +45,7 @@ public class CoreferenceBeginIndexConstraintFactory extends AbstractConstraintFa
 	public static final String TOKEN = "begin"; //$NON-NLS-1$
 
 	public CoreferenceBeginIndexConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, 
+		super(TOKEN, NODE_CONSTRAINT_TYPE,
 				"plugins.coref.constraints.beginIndex.name",  //$NON-NLS-1$
 				"plugins.coref.constraints.beginIndex.description"); //$NON-NLS-1$
 	}
@@ -64,22 +65,22 @@ public class CoreferenceBeginIndexConstraintFactory extends AbstractConstraintFa
 	}
 
 	@Override
-	public Class<?> getValueClass() {
+	public Class<?> getValueClass(Object specifier) {
 		return Integer.class;
 	}
 
 	@Override
-	public Object getDefaultValue() {
-		return LanguageUtils.DATA_UNDEFINED_VALUE;
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
 	}
 
 	@Override
-	public Object labelToValue(Object label) {
-		return LanguageUtils.parseLabel((String) label);
+	public Object labelToValue(Object label, Object specifier) {
+		return LanguageUtils.parseIntegerLabel((String) label);
 	}
 
 	@Override
-	public Object valueToLabel(Object value) {
+	public Object valueToLabel(Object value, Object specifier) {
 		return LanguageUtils.getLabel((int)value);
 	}
 

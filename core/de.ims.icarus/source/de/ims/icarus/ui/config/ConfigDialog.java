@@ -1374,6 +1374,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 
 		if (config.getValue(handle) != null){
+			//FIXME better use a customized icon for this instead of a fullgrown panel!
 			JPanel colorPanel = new JPanel();
 			if (getLatestItem(handle) != null){
 				colorPanel.setBackground(new Color((Integer) getLatestItem(handle)));

@@ -19,12 +19,13 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search.constraints;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.coref.search.DocumentTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -44,7 +45,7 @@ public class CoreferenceDirectionConstraintFactory extends AbstractConstraintFac
 	public static final String TOKEN = "direction"; //$NON-NLS-1$
 
 	public CoreferenceDirectionConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, 
+		super(TOKEN, EDGE_CONSTRAINT_TYPE,
 				"plugins.coref.constraints.direction.name",  //$NON-NLS-1$
 				"plugins.coref.constraints.direction.description"); //$NON-NLS-1$
 	}
@@ -59,7 +60,7 @@ public class CoreferenceDirectionConstraintFactory extends AbstractConstraintFac
 	}
 
 	@Override
-	public Class<?> getValueClass() {
+	public Class<?> getValueClass(Object specifier) {
 		return null;
 	}
 
@@ -72,26 +73,26 @@ public class CoreferenceDirectionConstraintFactory extends AbstractConstraintFac
 	}
 
 	@Override
-	public Object getDefaultValue() {
-		return LanguageUtils.DATA_UNDEFINED_VALUE;
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
 	}
 
 	@Override
-	public Object labelToValue(Object label) {
+	public Object labelToValue(Object label, Object specifier) {
 		return LanguageUtils.parseDirectionLabel((String)label);
 	}
 
 	@Override
-	public Object valueToLabel(Object value) {
+	public Object valueToLabel(Object value, Object specifier) {
 		return LanguageUtils.getDirectionLabel((int)value);
 	}
 
 	@Override
-	public Object[] getLabelSet() {
+	public Object[] getLabelSet(Object specifier) {
 		return new Object[]{
-				LanguageUtils.DATA_UNDEFINED_LABEL,
-				LanguageUtils.DATA_LEFT_LABEL,
-				LanguageUtils.DATA_RIGHT_LABEL,
+				LanguageConstants.DATA_UNDEFINED_LABEL,
+				LanguageConstants.DATA_LEFT_LABEL,
+				LanguageConstants.DATA_RIGHT_LABEL,
 		};
 	}
 

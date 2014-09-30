@@ -417,7 +417,7 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 
 			for(int i=0; i<min; i++) {
 				constraints.add(new DefaultConstraint(
-						factory.getToken(), factory.getDefaultValue(), operator));
+						factory.getToken(), factory.getDefaultValue(null), operator));
 			}
 		}
 

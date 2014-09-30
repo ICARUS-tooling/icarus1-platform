@@ -50,6 +50,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.ui.events.ChangeSource;
 
 /**
  * @author Markus Gärtner
@@ -158,19 +159,6 @@ public class SoundPlayer {
 		soundFile.state = FileState.OPEN;
 	}
 
-	public synchronized void stop(SoundFile soundFile) throws SoundException {
-		if (soundFile == null)
-			throw new NullPointerException("Invalid soundFile"); //$NON-NLS-1$
-
-		FileState state = soundFile.getState();
-		if(state==FileState.INACTIVE) {
-			return;
-		}
-
-		if(state!=FileState.ACTIVE)
-			throw new IllegalStateException("Cannot stop sound file while in state: "+state); //$NON-NLS-1$
-	}
-
 	public synchronized void close(SoundFile soundFile) throws SoundException {
 		if (soundFile == null)
 			throw new NullPointerException("Invalid soundFile"); //$NON-NLS-1$
@@ -201,15 +189,62 @@ public class SoundPlayer {
 		dispatchThread().scheduleFile(soundFile);
 	}
 
+	public synchronized void stop(SoundFile soundFile) throws SoundException {
+		if (soundFile == null)
+			throw new NullPointerException("Invalid soundFile"); //$NON-NLS-1$
+
+		FileState state = soundFile.getState();
+		if(state==FileState.INACTIVE) {
+			return;
+		}
+
+		if(state!=FileState.ACTIVE && state!=FileState.PAUSED)
+			throw new IllegalStateException("Cannot stop sound file while in state: "+state); //$NON-NLS-1$
+
+		dispatchThread().stopFile();
+	}
+
+	public synchronized void pause(SoundFile soundFile) throws SoundException {
+		if (soundFile == null)
+			throw new NullPointerException("Invalid soundFile"); //$NON-NLS-1$
+
+		FileState state = soundFile.getState();
+		if(state==FileState.INACTIVE) {
+			return;
+		}
+
+		if(state!=FileState.ACTIVE)
+			throw new IllegalStateException("Cannot pause sound file while in state: "+state); //$NON-NLS-1$
+
+		dispatchThread().pauseFile();
+	}
+
+
+	public synchronized void resume(SoundFile soundFile) throws SoundException {
+		if (soundFile == null)
+			throw new NullPointerException("Invalid soundFile"); //$NON-NLS-1$
+
+		FileState state = soundFile.getState();
+		if(state==FileState.INACTIVE) {
+			return;
+		}
+
+		if(state!=FileState.PAUSED)
+			throw new IllegalStateException("Cannot resume sound file while in state: "+state); //$NON-NLS-1$
+
+		dispatchThread().resumeFile();
+	}
+
 	private enum FileState {
 		BLANK,
 		OPEN,
 		ACTIVE,
 		INACTIVE,
+		PAUSED,
 		CLOSED,
 	}
 
-	public final static class SoundFile {
+	public final static class SoundFile extends ChangeSource {
 
 		private final Path path;
 
@@ -232,6 +267,8 @@ public class SoundPlayer {
 
 		synchronized void setState(FileState newState) {
 			state = newState;
+
+			fireStateChanged();
 		}
 
 		synchronized FileState getState() {
@@ -348,9 +385,8 @@ public class SoundPlayer {
 
 		public boolean isOpen() {
 			FileState state = getState();
-			return state==FileState.OPEN
-					|| state==FileState.ACTIVE
-					|| state==FileState.INACTIVE;
+			return state!=FileState.BLANK
+					&& state!=FileState.CLOSED;
 		}
 
 		public boolean isActive() {
@@ -359,6 +395,10 @@ public class SoundPlayer {
 
 		public boolean isClosed() {
 			return getState()==FileState.CLOSED;
+		}
+
+		public boolean isPaused() {
+			return getState()==FileState.PAUSED;
 		}
 	}
 
@@ -394,6 +434,7 @@ public class SoundPlayer {
 		private volatile boolean active = true;
 
 		private volatile boolean doStop = false;
+		private volatile boolean doPause = false;
 
 		private SourceDataLine sharedSoundLine;
 
@@ -405,18 +446,29 @@ public class SoundPlayer {
 		void close() {
 			active = false;
 			doStop = true;
+			doPause = false;
 
 			interrupt();
 		}
 
 		void stopFile() {
 			doStop = true;
+			doPause = false;
+		}
+
+		void pauseFile() {
+			doPause = true;
+		}
+
+		void resumeFile() {
+			doPause = false;
 		}
 
 		void scheduleFile(SoundFile soundFile) {
 			queue.clear();
 			queue.offer(soundFile);
 			doStop = true;
+			doPause = false;
 		}
 
 		private void ensureSoundLine(SoundFile soundFile) {
@@ -475,6 +527,7 @@ public class SoundPlayer {
 					}
 
 					doStop = false;
+					doPause = false;
 
 					if(!activeFile.isOpen()) {
 						LoggerFactory.error(this, "Cannot play sound file in state: "+activeFile.getState()); //$NON-NLS-1$
@@ -502,15 +555,12 @@ public class SoundPlayer {
 					// Activate sound file
 					activeFile.setState(FileState.ACTIVE);
 
-					// Fetch format info to create buffer
-					AudioFormat audioFormat = activeFile.getAudioFormat();
-
 					RandomAccessFile source = activeFile.randomAccessFile;
 
 					while(!doStop && activeFile.isActive()) {
 
 						try {
-							streamAudio(source, startFrame, endFrame, audioFormat);
+							streamAudio(source, startFrame, endFrame, activeFile);
 						} catch (IOException e) {
 							LoggerFactory.error(this, "I/O error during play back of file: "+activeFile.getPath(), e); //$NON-NLS-1$
 							break;
@@ -531,9 +581,11 @@ public class SoundPlayer {
 			}
 		}
 
-		private void streamAudio(RandomAccessFile source, long startFrame, long endFrame, AudioFormat audioFormat) throws IOException {
+		private void streamAudio(RandomAccessFile source, long startFrame, long endFrame, SoundFile soundFile) throws IOException {
 
 			sharedSoundLine.flush();
+
+			AudioFormat audioFormat = soundFile.getAudioFormat();
 
 			float frameRate = audioFormat.getFrameRate();
 			if(frameRate==AudioSystem.NOT_SPECIFIED) {
@@ -550,8 +602,8 @@ public class SoundPlayer {
 
 			long framesToRead = endFrame-startFrame+1;
 
-			System.out.printf("framesToRead=%d duration=%.02f\n", //$NON-NLS-1$
-					framesToRead, framesToRead/frameRate);
+			System.out.printf("firstFrame=%d lastFrame=%d framesToRead=%d duration=%.02f frameRate=%.02f frameSize=%d\n", //$NON-NLS-1$
+					startFrame, startFrame+framesToRead, framesToRead, framesToRead/frameRate, frameRate, frameSize);
 
 			// Make a small 0.1 seconds buffer
 			//TODO maybe increase?
@@ -563,13 +615,27 @@ public class SoundPlayer {
 			int bytesToRead = frameSize * (int) Math.min(framesToRead, framesToBuffer);
 			int bytesRead;
 			while(!doStop && framesToRead>0 && (bytesRead = source.read(buffer, 0, bytesToRead)) > 0 ) {
-				int bytesWritten = sharedSoundLine.write(buffer, 0, bytesRead);
-				//TODO use differenc ein written and read bytes for an artificial slow down of the data feed
+
+				if(doPause) {
+					soundFile.setState(FileState.PAUSED);
+					while(doPause && !doStop) {
+						// Busy waiting
+					}
+					soundFile.setState(FileState.ACTIVE);
+
+					if(doStop) {
+						break;
+					}
+				}
+
+
+				int bytesToWrite = Math.min((int)framesToRead*frameSize, bytesRead);
+				int bytesWritten = sharedSoundLine.write(buffer, 0, bytesToWrite);
 
 //				System.out.printf("bytesToRead=%d bytesRead=%d bytesWritten=%d\n",
 //						bytesToRead, bytesRead, bytesWritten);
 
-				framesToRead -= bytesRead/frameSize;
+				framesToRead -= bytesWritten/frameSize;
 			}
 
 //			sharedSoundLine.drain();

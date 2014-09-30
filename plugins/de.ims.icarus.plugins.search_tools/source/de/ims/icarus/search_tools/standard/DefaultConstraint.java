@@ -236,4 +236,17 @@ public class DefaultConstraint implements SearchConstraint {
 		return value;
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#isMultiplexing()
+	 */
+	@Override
+	public boolean isMultiplexing() {
+		return false;
+	}
+
+	@Override
+	public void group(GroupCache cache, int groupId, Object value) {
+		throw new UnsupportedOperationException();
+	}
+
 }

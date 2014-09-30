@@ -25,8 +25,16 @@
  */
 package de.ims.icarus.plugins.prosody;
 
+import java.util.ArrayList;
+
+import org.java.plugin.registry.Extension;
+
 import de.ims.icarus.config.ConfigBuilder;
+import de.ims.icarus.config.ConfigConstants;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.plugins.ExtensionListCellRenderer;
+import de.ims.icarus.plugins.jgraph.JGraphPreferences;
+import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.params.PaIntEParams;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
@@ -34,8 +42,11 @@ import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.GridStyle;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
+import de.ims.icarus.plugins.prosody.ui.list.ProsodyListCellRenderer;
 import de.ims.icarus.plugins.prosody.ui.view.PreviewSize;
 import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
+import de.ims.icarus.ui.list.TooltipListCellRenderer;
+import de.ims.icarus.util.annotation.HighlightType;
 
 /**
  * @author Markus Gärtner
@@ -49,8 +60,34 @@ public class ProsodyPreferences {
 		return s==null ? "" : LabelPattern.escapePattern(s); //$NON-NLS-1$
 	}
 
+	private static String escapePattern(String pattern) {
+		return pattern==null ? "" : LabelPattern.escapePattern(pattern); //$NON-NLS-1$
+	}
+
 	public ProsodyPreferences() {
 		ConfigBuilder builder = new ConfigBuilder();
+
+		// PLUGINS GROUP
+		builder.addGroup("plugins", true); //$NON-NLS-1$
+		// JGRAPH GROUP
+		builder.addGroup("jgraph", true); //$NON-NLS-1$
+		// APPEARANCE GROUP
+		builder.addGroup("appearance", true); //$NON-NLS-1$
+		// DEFAULT GROUP
+		builder.addGroup("prosody", true); //$NON-NLS-1$
+		// DEPENDENCY GRAPH GROUP
+		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showLemma", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showFeatures", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showForm", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showPos", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showRelation", true); //$NON-NLS-1$
+		builder.addBooleanEntry("showDirection", false); //$NON-NLS-1$
+		builder.addBooleanEntry("showDistance", false); //$NON-NLS-1$
+		builder.addBooleanEntry("markRoot", true); //$NON-NLS-1$
+		builder.addBooleanEntry("markNonProjective", false); //$NON-NLS-1$
+		JGraphPreferences.buildDefaultGraphConfig(builder, null);
+		builder.reset();
 
 		// PLUGINS GROUP
 		builder.addGroup("plugins", true); //$NON-NLS-1$
@@ -170,6 +207,79 @@ public class ProsodyPreferences {
 
 		// END PAINTE EDITOR GROUP
 		builder.back();
+
+		// SEARCH GROUP
+		builder.addGroup("search", true); //$NON-NLS-1$
+
+		// LIST GROUP
+		builder.addGroup("list", true); //$NON-NLS-1$
+
+		builder.addStringEntry("headerPattern", escapePattern(ProsodyListCellRenderer.DEFAULT_HEADER_PATTERN)); //$NON-NLS-1$
+		builder.addBooleanEntry("showCurvePreview", true); //$NON-NLS-1$
+
+		// END LIST GROUP
+		builder.back();
+
+		// RESULT GROUP
+		builder.addGroup("result", true); //$NON-NLS-1$
+		builder.setProperties(
+				builder.addOptionsEntry("defaultSentencePresenter", 0,  //$NON-NLS-1$
+						collectPresenterExtensions()),
+				ConfigConstants.RENDERER, new ExtensionListCellRenderer());
+
+		// END RESULT GROUP
+		builder.back();
+
+		// END SEARCH GROUP
+		builder.back();
+
+		// END APPEARANCE GROUP
+		builder.back();
+
+		// SEARCH GROUP
+		builder.addGroup("search", true); //$NON-NLS-1$
+
+		// Minimum difference between c values
+		builder.addIntegerEntry("accentShapeDelta", 10, 0, 50); //$NON-NLS-1$
+		// => Minimum values for c1 and c2
+		builder.addIntegerEntry("accentShapeExcursion", 30, 10, 150); //$NON-NLS-1$
+		builder.addDoubleEntry("accentShapeMinB", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("accentShapeMaxB", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
+
+		// END SEARCH GROUP
+		builder.back();
+
+		// HIGHLIGHTING GROUP
+		builder.addGroup("highlighting", true); //$NON-NLS-1$
+//		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
+//		builder.addBooleanEntry("showCorpusIndex", false); //$NON-NLS-1$
+		builder.setProperties(builder.addOptionsEntry("highlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, new TooltipListCellRenderer());
+		builder.setProperties(builder.addOptionsEntry("groupHighlightType", 0,  //$NON-NLS-1$
+				(Object[])HighlightType.values()),
+				ConfigConstants.RENDERER, new TooltipListCellRenderer());
+		builder.addBooleanEntry("markMultipleAnnotations", true); //$NON-NLS-1$
+		builder.addColorEntry("nodeHighlight", ProsodyHighlighting.getInstance().getNodeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("edgeHighlight", ProsodyHighlighting.getInstance().getEdgeHighlightColor().getRGB()); //$NON-NLS-1$
+		builder.addColorEntry("transitiveHighlight", ProsodyHighlighting.getInstance().getTransitiveHighlightColor().getRGB()); //$NON-NLS-1$
+		for(String token : ProsodyHighlighting.getInstance().getTokens()) {
+			builder.addColorEntry(token+"Highlight", ProsodyHighlighting.getInstance().getHighlightColor(token).getRGB()); //$NON-NLS-1$
+		}
+		builder.back();
+		// END HIGHLIGHTING GROUP
+
+		ProsodyHighlighting.getInstance().loadConfig();
+	}
+
+	private Object[] collectPresenterExtensions() {
+		java.util.List<Object> items = new ArrayList<>();
+
+		for(Extension extension : ProsodyPlugin.getProsodySentencePresenterExtensions()) {
+			items.add(extension.getUniqueId());
+		}
+
+		return items.toArray();
 	}
 
 }

@@ -593,6 +593,12 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 	@Override
 	public void close() {
 		clear();
+
+		@SuppressWarnings("rawtypes")
+		ListCellRenderer oldRenderer = list.getCellRenderer();
+		if(oldRenderer instanceof Installable) {
+			((Installable)oldRenderer).uninstall(this);
+		}
 	}
 
 	/**
@@ -837,7 +843,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 				}
 
 				T item = model.getElementAt(i);
-				int width = getEstimatedWidth(fm, item);
+				int width = item==null ? 0 : getEstimatedWidth(fm, item);
 
 				if(width>maxWidth) {
 					maxWidth = width;

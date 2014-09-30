@@ -25,13 +25,15 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
-import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
-import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.util.Options;
 
 /**
@@ -39,9 +41,39 @@ import de.ims.icarus.util.Options;
  * @version $Id: CoreferenceSentencePropertyConstraintFactory.java 270 2014-07-08 11:44:07Z mcgaerty $
  *
  */
-public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraintFactory {
+public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
 
 	public static final String TOKEN = "syllableProperty"; //$NON-NLS-1$
+
+	private static final Map<Object, ValueHandler> propertyClassMap = new HashMap<>();
+	static {
+		propertyClassMap.put(SYLLABLE_DURATION_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(SYLLABLE_ENDPITCH_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(SYLLABLE_LABEL_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(SYLLABLE_MIDPITCH_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(SYLLABLE_OFFSET_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(SYLLABLE_STARTPITCH_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(SYLLABLE_STRESS_KEY, ValueHandler.booleanHandler);
+		propertyClassMap.put(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(SYLLABLE_VOWEL_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(CODA_SIZE_KEY, ValueHandler.integerHandler);
+		propertyClassMap.put(CODA_TYPE_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(VOWEL_DURATION_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(ONSET_SIZE_KEY, ValueHandler.integerHandler);
+		propertyClassMap.put(ONSET_TYPE_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(PHONEME_COUNT_KEY, ValueHandler.integerHandler);
+		propertyClassMap.put(PAINTE_A1_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(PAINTE_A2_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(PAINTE_B_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(PAINTE_C1_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(PAINTE_C2_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(PAINTE_D_KEY, ValueHandler.floatHandler);
+	}
+
+	private static ValueHandler getHandler(Object key) {
+		ValueHandler handler = propertyClassMap.get(key);
+		return handler==null ? ValueHandler.stringHandler : handler;
+	}
 
 	public ProsodySyllablePropertyConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
@@ -52,6 +84,26 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 	@Override
 	public Object[] getSupportedSpecifiers() {
 		return ProsodyUtils.getDefaultSyllablePropertyKeys();
+	}
+
+	@Override
+	public Class<?> getValueClass(Object specifier) {
+		return getHandler(specifier).getValueClass();
+	}
+
+	@Override
+	public Object getDefaultValue(Object specifier) {
+		return getHandler(specifier).getDefaultValue();
+	}
+
+	@Override
+	public Object labelToValue(Object label, Object specifier) {
+		return getHandler(specifier).labelToValue(label);
+	}
+
+	@Override
+	public Object valueToLabel(Object value, Object specifier) {
+		return getHandler(specifier).valueToLabel(value);
 	}
 
 	/**
@@ -66,7 +118,7 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 			return new ProsodySyllablePropertyCIConstraint(value, operator, specifier);
 	}
 
-	private static class ProsodySyllablePropertyConstraint extends DefaultConstraint {
+	private static class ProsodySyllablePropertyConstraint extends AbstractProsodySyllableConstraint {
 
 		private static final long serialVersionUID = -2250947975211835769L;
 
@@ -79,8 +131,8 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getSyllableProperties(getKey()).toLowerCase();
+		protected Object getInstance(ProsodyTargetTree tree, int syllable) {
+			return tree.getProperty(getKey(), syllable);
 		}
 
 		@Override
@@ -89,7 +141,7 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 		}
 	}
 
-	private static class ProsodySyllablePropertyCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class ProsodySyllablePropertyCIConstraint extends AbstractProsodySyllableCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = 2216387895482510250L;
 
@@ -102,8 +154,8 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getSyllableProperties(getKey()).toLowerCase();
+		protected Object getInstance(ProsodyTargetTree tree, int syllable) {
+			return tree.getProperty(getKey(), syllable);
 		}
 
 		@Override

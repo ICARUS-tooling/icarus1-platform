@@ -79,7 +79,6 @@ import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.view.AWTPresenter;
-import de.ims.icarus.ui.view.Presenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Installable;
@@ -191,6 +190,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 			}
 		}
 
+		contextOutline.close();
 		detailOutline.close();
 	}
 
@@ -357,7 +357,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	}
 
 	private boolean isTextPresenter() {
-		return presenter instanceof Presenter.TextBasedPresenter;
+		return presenter instanceof AWTPresenter.TextBasedPresenter;
 	}
 
 	private void refreshActions() {

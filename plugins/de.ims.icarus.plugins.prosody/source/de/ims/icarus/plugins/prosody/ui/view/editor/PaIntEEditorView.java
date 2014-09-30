@@ -80,9 +80,9 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.prosody.params.PaIntEParams;
 import de.ims.icarus.plugins.prosody.params.PaIntEParamsWrapper;
-import de.ims.icarus.plugins.prosody.ui.PaIntEParamsListCellRenderer;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
+import de.ims.icarus.plugins.prosody.ui.list.PaIntEParamsListCellRenderer;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.NumberDocument;
@@ -187,7 +187,8 @@ public class PaIntEEditorView extends View {
 
 		JSplitPane upperSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, graphComponent, paramsPanel);
 		upperSplitPane.setBorder(null);
-		upperSplitPane.setResizeWeight(1);
+		upperSplitPane.setResizeWeight(0);
+		upperSplitPane.setDividerLocation(300);
 
 		JScrollPane upperScrollPane = new JScrollPane(upperSplitPane);
 		upperScrollPane.setBorder(null);
@@ -805,7 +806,7 @@ public class PaIntEEditorView extends View {
 		 */
 		@Override
 		public Dimension getMinimumSize() {
-			return getPreferredSize();
+			return new Dimension(300, 300);
 		}
 
 	}

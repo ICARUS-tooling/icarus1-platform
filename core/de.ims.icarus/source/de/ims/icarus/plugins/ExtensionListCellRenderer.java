@@ -69,7 +69,7 @@ public class ExtensionListCellRenderer extends DefaultListCellRenderer {
 		Identity identity = null;
 		if(value instanceof Extension) {
 			extension = (Extension) value;
-		} else if(value instanceof String) {
+		} else if(value instanceof String && !"NONE".equals(value)) { //$NON-NLS-1$
 			try {
 				extension = PluginUtil.getExtension((String)value);
 			} catch(Exception e) {

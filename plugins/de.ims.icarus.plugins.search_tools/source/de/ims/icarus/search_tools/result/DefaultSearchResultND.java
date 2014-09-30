@@ -28,10 +28,12 @@ package de.ims.icarus.search_tools.result;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.event.ChangeListener;
 import javax.xml.stream.XMLStreamException;
@@ -222,35 +224,76 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		return new ResultNDCache();
 	}
 
-	protected synchronized void commit(ResultEntry entry, ResultNDCache cache) {
+	private void commitRecursive(ResultEntry entry, ResultNDCache cache, final int rawIndex) {
+//		System.out.println(cache.instanceBuffer[indexPermutator[rawIndex]]);
 
-		for (int i = 0; i < indexBuffer.length; i++) {
-			String value = cache.instanceBuffer[indexPermutator[i]];
+		for(String value : cache.instanceBuffer[indexPermutator[rawIndex]]) {
 			if(value==null || "".equals(value)) { //$NON-NLS-1$
 				value = DUMMY_INSTANCE;
 			}
-			int index = groupInstances[i].substitute(value);
-			indexBuffer[i] = index;
+			int index = groupInstances[rawIndex].substitute(value);
+			indexBuffer[rawIndex] = index;
 
-			int[] counts = groupMatchCounts[i];
+			int[] counts = groupMatchCounts[rawIndex];
 			if(counts==null) {
 				counts = new int[Math.max(index*2, 100)];
-				groupMatchCounts[i] = counts;
+				groupMatchCounts[rawIndex] = counts;
 			} else if(counts.length<=index) {
 				counts = Arrays.copyOf(counts, index*2);
-				groupMatchCounts[i] = counts;
+				groupMatchCounts[rawIndex] = counts;
 			}
 			counts[index]++;
+
+			if(rawIndex<indexBuffer.length-1) {
+				commitRecursive(entry, cache, rawIndex+1);
+			} else {
+
+				// Generate key and ensure valid result list
+				List<ResultEntry> list = getList(indexBuffer, true);
+
+				// finally add the currently processed entry to the result list
+				list.add(entry);
+			}
 		}
 
-		// Generate key and ensure valid result list
-		List<ResultEntry> list = getList(indexBuffer, true);
+	}
 
-		// finally add the currently processed entry to the result list
-		list.add(entry);
+	protected synchronized void commit(ResultEntry entry, ResultNDCache cache) {
+		if(cache.multiValueSets) {
+			commitRecursive(entry, cache, 0);
+		} else {
+			for (int i = 0; i < indexBuffer.length; i++) {
+				Set<String> values = cache.instanceBuffer[indexPermutator[i]];
+				String value = values.isEmpty() ? null : values.iterator().next();
+				if(value==null || "".equals(value)) { //$NON-NLS-1$
+					value = DUMMY_INSTANCE;
+				}
+				int index = groupInstances[i].substitute(value);
+				indexBuffer[i] = index;
+
+				int[] counts = groupMatchCounts[i];
+				if(counts==null) {
+					counts = new int[Math.max(index*2, 100)];
+					groupMatchCounts[i] = counts;
+				} else if(counts.length<=index) {
+					counts = Arrays.copyOf(counts, index*2);
+					groupMatchCounts[i] = counts;
+				}
+				counts[index]++;
+			}
+
+			// Generate key and ensure valid result list
+			List<ResultEntry> list = getList(indexBuffer, true);
+
+			// finally add the currently processed entry to the result list
+			list.add(entry);
+		}
+
 		totalEntries.add(entry);
 
 		hitCount += entry.getHitCount();
+
+		cache.reset();
 	}
 
 	/**
@@ -429,9 +472,18 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 
 	protected class ResultNDCache implements GroupCache {
 
-		protected final String[] instanceBuffer = new String[getDimension()];
+		@SuppressWarnings("unchecked")
+		protected final Set<String>[] instanceBuffer = new Set[getDimension()];
 
 		protected boolean locked = false;
+
+		protected boolean multiValueSets = false;
+
+		public ResultNDCache() {
+			for(int i=0; i<instanceBuffer.length; i++) {
+				instanceBuffer[i] = new HashSet<>();
+			}
+		}
 
 		/**
 		 * @see de.ims.icarus.search_tools.standard.GroupCache#cacheGroupInstance(int, java.lang.Object)
@@ -439,7 +491,9 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		@Override
 		public void cacheGroupInstance(int id, Object value) {
 			if(!locked) {
-				instanceBuffer[groupIndexMap[id]] = String.valueOf(value);
+				Set<String> list = instanceBuffer[groupIndexMap[id]];
+				list.add(String.valueOf(value));
+				multiValueSets |= list.size()>1;
 			}
 		}
 
@@ -462,7 +516,10 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		@Override
 		public void reset() {
 			locked = false;
-			Arrays.fill(instanceBuffer, null);
+			multiValueSets = false;
+			for(int i=0; i<instanceBuffer.length; i++) {
+				instanceBuffer[i].clear();
+			}
 		}
 
 		/**

@@ -27,15 +27,18 @@ package de.ims.icarus.plugins.prosody.ui.view;
 
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
-public class SyllableInfo implements Comparable<SyllableInfo> {
-	private int width, x;
-	private final float b, c1, c2, d;
-	private final int wordIndex, sylIndex;
-	private final String label;
 
-	public SyllableInfo(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
-		this.wordIndex = wordIndex;
+public class SyllableInfo extends PartInfo {
+	private final float b, c1, c2, d;
+	private final int sylIndex;
+	private final WordInfo wordInfo;
+
+	public SyllableInfo(WordInfo wordInfo, int sylIndex) {
 		this.sylIndex = sylIndex;
+		this.wordInfo = wordInfo;
+
+		ProsodicSentenceData sentence = wordInfo.getSentenceInfo().getSentence();
+		int wordIndex = wordInfo.getWordIndex();
 
 		b = sentence.getPainteB(wordIndex, sylIndex);
 		c1 = sentence.getPainteC1(wordIndex, sylIndex);
@@ -47,7 +50,7 @@ public class SyllableInfo implements Comparable<SyllableInfo> {
 		if(sentence.isMapsSyllables()) {
 			int offset0 = sentence.getSyllableOffset(wordIndex, sylIndex);
 			int offset1 = sylIndex<sylCount-1 ? sentence.getSyllableOffset(wordIndex, sylIndex+1) : token.length();
-			label = token.substring(offset0, offset1);
+			setLabel(token.substring(offset0, offset1));
 		} else {
 			float beginTs = sentence.getBeginTimestamp(wordIndex);
 			float duration = sentence.getEndTimestamp(wordIndex)-beginTs;
@@ -57,26 +60,28 @@ public class SyllableInfo implements Comparable<SyllableInfo> {
 			int offset0 = (int) Math.floor(sylBegin/duration * tokenLength);
 			int offset1 = (int) Math.floor((sylBegin+sylDuration) / duration * tokenLength);
 
-			label = token.substring(offset0, Math.min(offset1, tokenLength));
+			offset1 = Math.min(offset1, tokenLength);
+
+			if(sylIndex==sentence.getSyllableCount(wordIndex)-1) {
+				offset1 = tokenLength;
+			}
+
+			setLabel(token.substring(offset0, offset1));
 		}
 	}
 
 	SyllableInfo() {
 		b = c1 = c2 = d = 0;
-		wordIndex = sylIndex = -1;
-		label = null;
+		sylIndex = -1;
+		wordInfo = null;
 	}
 
-	public String getLabel() {
-		return label;
+	public Object getBaseProperty(String key) {
+		return wordInfo.getSentenceInfo().getSentence().getSyllableProperty(wordInfo.getWordIndex(), key, sylIndex);
 	}
 
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getWidth() {
-		return width;
+	public WordInfo getWordInfo() {
+		return wordInfo;
 	}
 
 	public float getB() {
@@ -96,34 +101,10 @@ public class SyllableInfo implements Comparable<SyllableInfo> {
 	}
 
 	public int getWordIndex() {
-		return wordIndex;
+		return wordInfo.getWordIndex();
 	}
 
 	public int getSylIndex() {
 		return sylIndex;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(SyllableInfo o) {
-		if(o.x>=x && o.x+o.width<=x+width) {
-			return 0;
-		}
-		// Keep in mind that syllables cannot overlap!
-		return x-o.x;
-	}
-
-	public boolean contains(int offset) {
-		return offset>=x && offset<=x+width;
 	}
 }

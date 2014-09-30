@@ -25,18 +25,10 @@
  */
 package de.ims.icarus.plugins.prosody;
 
-import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.net.URL;
 
-import javax.swing.ImageIcon;
-
+import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -47,27 +39,29 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  */
 public class ProsodyUtils implements ProsodyConstants {
 
-	private static Cursor speakerCursor;
+//	private static Cursor speakerCursor;
 
 	public static Cursor getSpeakerCursor() {
-		if(speakerCursor==null) {
-			URL url = ProsodyUtils.class.getResource("speaker.png"); //$NON-NLS-1$
-			ImageIcon source = new ImageIcon(url);
+//		if(speakerCursor==null) {
+//			URL url = ProsodyUtils.class.getResource("speaker.png"); //$NON-NLS-1$
+//			ImageIcon source = new ImageIcon(url);
+//
+//			Dimension size = Toolkit.getDefaultToolkit().getBestCursorSize(0, 0);
+//
+//			BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
+//			Graphics2D graphics = image.createGraphics();
+//			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+//			graphics.setColor(new Color(0, true));
+//			graphics.fillRect(0, 0, size.width, size.height);
+//			graphics.drawImage(source.getImage(), 0, 0, null);
+//
+//			speakerCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+//					image, new Point(0, 0), "speaker"); //$NON-NLS-1$
+//		}
+//		return speakerCursor;
 
-			Dimension size = Toolkit.getDefaultToolkit().getBestCursorSize(0, 0);
-
-			BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
-			Graphics2D graphics = image.createGraphics();
-			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-			graphics.setColor(new Color(0, true));
-			graphics.fillRect(0, 0, size.width, size.height);
-			graphics.drawImage(source.getImage(), 0, 0, null);
-
-			speakerCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-					image, new Point(0, 0), "speaker"); //$NON-NLS-1$
-		}
-		return speakerCursor;
+		return Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 	}
 
 	public static ContentType getProsodyDocumentContentType() {
@@ -76,6 +70,10 @@ public class ProsodyUtils implements ProsodyConstants {
 
 	public static ContentType getProsodySentenceContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(ProsodicSentenceData.class);
+	}
+
+	public static ContentType getProsodyAnnotationType() {
+		return ContentTypeRegistry.getInstance().getTypeForClass(ProsodicAnnotation.class);
 	}
 
 	private static final String[] defaultWordPropertyKeys = {
@@ -141,6 +139,32 @@ public class ProsodyUtils implements ProsodyConstants {
 				buffer.append(defaultDelimiter);
 			}
 			buffer.append(sentence.getSyllableProperty(wordIndex, key, i));
+		}
+	}
+
+	public static String getAccentShapeLabel(int value) {
+		switch (value) {
+		case ACCENT_SHAPE_RISE_VALUE:
+			return ACCENT_SHAPE_RISE_LABEL;
+		case ACCENT_SHAPE_FALL_VALUE:
+			return ACCENT_SHAPE_FALL_LABEL;
+		case ACCENT_SHAPE_RISE_FALL_VALUE:
+			return ACCENT_SHAPE_RISE_FALL_LABEL;
+
+		default:
+			return LanguageConstants.DATA_UNDEFINED_LABEL;
+		}
+	}
+
+	public static int parseAccentShapeLabel(String label) {
+		if(ACCENT_SHAPE_RISE_LABEL.equals(label)) {
+			return ACCENT_SHAPE_RISE_VALUE;
+		} else if(ACCENT_SHAPE_FALL_LABEL.equals(label)) {
+			return ACCENT_SHAPE_FALL_VALUE;
+		} else if(ACCENT_SHAPE_RISE_FALL_LABEL.equals(label)) {
+			return ACCENT_SHAPE_RISE_FALL_VALUE;
+		} else {
+			return LanguageConstants.DATA_UNDEFINED_VALUE;
 		}
 	}
 }

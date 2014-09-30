@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		PROSODY SEARCH RESULT PRESENTER
+	-->
+		
+	<!-- Refresh View -->
+	<action id="plugins.prosody.prosodySearchResultPresenter.refreshViewAction"
+		template="actions.default.refreshAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Clear View -->
+	<action id="plugins.prosody.prosodySearchResultPresenter.clearViewAction"
+		template="actions.default.clearAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Toggle Property Outline -->
+	<action id="plugins.prosody.prosodySearchResultPresenter.toggleShowPropertyOutlineAction"
+		name="${id}.name" desc="${id}.description" icon="properties.gif" type="toggle" />
+		
+	<!-- Toggle Context Outline -->
+	<action id="plugins.prosody.prosodySearchResultPresenter.toggleShowContextOutlineAction"
+		name="${id}.name" desc="${id}.description" icon="icallout_obj.gif" type="toggle" />
+		
+	<!-- Open Preferences -->
+	<action id="plugins.prosody.prosodySearchResultPresenter.openPreferencesAction"
+		template="actions.default.openPreferencesAction"
+		name="${id}.name" desc="${id}.description" />
+	
+	<!-- Show Property Dialog -->
+	<action id="plugins.prosody.prosodySearchResultPresenter.showPropertyDialogAction"
+		name="${id}.name" desc="${id}.description" icon="container_obj.gif" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.prosody.prosodySearchResultPresenter.toolBarList">
+		<!--
+		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.openPreferencesAction" />
+		<separator />
+		-->
+		<item type="label" value="plugins.prosody.prosodySearchResultPresenter.presenter" />
+		<item type="custom" value="selectPresenter" />
+		<separator />
+		<item type="custom" value="headerLabel" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.toggleShowPropertyOutlineAction" />
+		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.toggleShowContextOutlineAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.showPropertyDialogAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.refreshViewAction" />
+		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.clearViewAction" />
+	</action-list>	
+</actions>

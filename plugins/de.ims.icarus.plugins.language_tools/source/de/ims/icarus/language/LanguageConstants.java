@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language;
@@ -56,6 +56,10 @@ public interface LanguageConstants {
 	public static final int DATA_GROUP_VALUE = -3;
 
 	public static final int DATA_UNDEFINED_VALUE = -2;
+
+	public static final float DATA_UNDEFINED_FLOAT_VALUE = Float.NEGATIVE_INFINITY;
+
+	public static final double DATA_UNDEFINED_DOUBLE_VALUE = Double.NEGATIVE_INFINITY;
 
 	public static final int DATA_YES_VALUE = 0;
 

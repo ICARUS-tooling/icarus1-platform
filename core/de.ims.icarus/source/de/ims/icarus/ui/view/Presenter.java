@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.view;
@@ -35,8 +35,8 @@ import de.ims.icarus.util.data.ContentType;
  * the absolute basic methods required. It is up to extending interfaces
  * or implementing classes to provide functionality to actually access
  * the rendering components like {@code Component} or {@code Graphics}
- * instances. 
- * 
+ * instances.
+ *
  * @author Markus Gärtner
  * @version $Id$
  * @see AWTPresenter
@@ -49,7 +49,7 @@ public interface Presenter {
 	 * a certain {@code ContentType} instance.
 	 */
 	boolean supports(ContentType type);
-	
+
 	/**
 	 * {@code Presents} the given {@code data} object using the
 	 * {@code options} parameter. As a general rule {@code data}
@@ -63,25 +63,25 @@ public interface Presenter {
 	 * @throws UnsupportedPresentationDataException
 	 */
 	void present(Object data, Options options) throws UnsupportedPresentationDataException;
-	
+
 	/**
 	 * Erases all previously set presentation data so that later calls
 	 * to {@link #isPresenting()} return {@code false} until new data
 	 * is being set.
 	 */
 	void clear();
-	
+
 	/**
 	 * Releases all underlying resources.
 	 */
 	void close();
-	
+
 	/**
 	 * Returns {@code true} if valid data has been set for presentation
 	 * and no call to {@link #clear()} has been performed since then.
 	 */
 	boolean isPresenting();
-	
+
 	/**
 	 * Returns the currently presented data or {@code null} if no
 	 * data is being presented right now. In the later case a
@@ -89,24 +89,4 @@ public interface Presenter {
 	 * {@code false}.
 	 */
 	Object getPresentedData();
-	
-	public interface TableBasedPresenter extends Presenter {
-		// marker interface
-	}
-	
-	public interface ListBasedPresenter extends Presenter {
-		// marker interface
-	}
-	
-	public interface GraphBasedPresenter extends Presenter {
-		// marker interface
-	}
-	
-	public interface TextBasedPresenter extends Presenter {
-		// marker interface
-	}
-	
-	public interface ChartBasedPresenter extends Presenter {
-		// marker interface
-	}
 }

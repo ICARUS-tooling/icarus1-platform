@@ -29,8 +29,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -44,6 +42,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.MutableComboBoxModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.java.plugin.registry.Extension;
 
@@ -55,8 +55,6 @@ import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
-import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
-import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
@@ -65,6 +63,10 @@ import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.sound.SoundException;
+import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
+import de.ims.icarus.plugins.prosody.sound.SoundPlayer;
+import de.ims.icarus.plugins.prosody.sound.SoundPlayer.SoundFile;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
 import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
 import de.ims.icarus.resources.Localizable;
@@ -79,16 +81,12 @@ import de.ims.icarus.ui.dialog.DummyFormEntry;
 import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.ui.view.AWTPresenter;
-import de.ims.icarus.ui.view.Presenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.annotation.AnnotatedData;
-import de.ims.icarus.util.annotation.AnnotationControl;
-import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.transfer.ConsumerMenu;
@@ -99,7 +97,7 @@ import de.ims.icarus.util.transfer.ConsumerMenu;
  *
  */
 public class ProsodyOutlinePresenter implements AWTPresenter,
-	AnnotationController, Installable, Presenter.TextBasedPresenter{
+	Installable, AWTPresenter.TextBasedPresenter{
 
 	protected ProsodicDocumentData data;
 
@@ -115,7 +113,6 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected CoreferenceDocumentDataPresenter parent;
 	private static ActionManager sharedActionManager;
 	protected ActionManager actionManager;
-	protected CoreferenceDocumentAnnotationManager annotationManager;
 
 	protected JPanel contentPanel;
 	protected JScrollPane contentPane;
@@ -184,22 +181,6 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		return actionManager;
 	}
 
-	@Override
-	public CoreferenceDocumentAnnotationManager getAnnotationManager() {
-		if(annotationManager==null) {
-			annotationManager = new CoreferenceDocumentAnnotationManager();
-			annotationManager.addPropertyChangeListener("position", getHandler()); //$NON-NLS-1$
-			annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
-		}
-		return annotationManager;
-	}
-
-	protected AnnotationControl createAnnotationControl() {
-		AnnotationControl annotationControl = new AnnotationControl(true);
-		annotationControl.setAnnotationManager(getAnnotationManager());
-		return annotationControl;
-	}
-
 	protected void registerActionCallbacks() {
 		ActionManager actionManager = getActionManager();
 
@@ -207,19 +188,52 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 			callbackHandler = createCallbackHandler();
 		}
 
-		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.openPreferencesAction",
-				callbackHandler, "openPreferences");
-		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.refreshAction",
-				callbackHandler, "refresh");
-		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.editLabelPatternsAction",
-				callbackHandler, "editLabelPatterns");
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.openPreferencesAction", //$NON-NLS-1$
+				callbackHandler, "openPreferences"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.refreshAction", //$NON-NLS-1$
+				callbackHandler, "refresh"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.editLabelPatternsAction", //$NON-NLS-1$
+				callbackHandler, "editLabelPatterns"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.playDocumentAction", //$NON-NLS-1$
+				callbackHandler, "playDocument"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.stopPlaybackAction", //$NON-NLS-1$
+				callbackHandler, "stopPlayback"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction", //$NON-NLS-1$
+				callbackHandler, "pausePlayback"); //$NON-NLS-1$
 		//TODO
+	}
+
+	private SoundFile getSoundFile() {
+		SoundFile soundFile = null;
+
+		if(data!=null) {
+			try {
+				soundFile = SoundPlayer.getInstance().getSoundFile(data);
+			} catch (SoundException e) {
+				LoggerFactory.warning(this, "Unable to fetch sound file for document: "+data.getId(), e); //$NON-NLS-1$
+			}
+		}
+
+		return soundFile;
 	}
 
 	protected void refreshActions() {
 		ActionManager actionManager = getActionManager();
 
-		//TODO
+		boolean hasData = data!=null;
+		SoundFile soundFile = getSoundFile();
+		boolean isPlaying = soundFile!=null && soundFile.isActive();
+		boolean isPaused = soundFile!=null && soundFile.isPaused();
+
+		actionManager.setEnabled(hasData,
+				"plugins.prosody.prosodyOutlinePresenter.playDocumentAction"); //$NON-NLS-1$
+		actionManager.setEnabled(isPlaying || isPaused,
+				"plugins.prosody.prosodyOutlinePresenter.stopPlaybackAction"); //$NON-NLS-1$
+		actionManager.setEnabled(isPlaying || isPaused,
+				"plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction"); //$NON-NLS-1$
+
+		actionManager.setSelected(isPaused,
+				"plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction"); //$NON-NLS-1$
 	}
 
 	protected Handler createHandler() {
@@ -280,10 +294,16 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	}
 
 	protected void setData(Object data) {
+		SoundFile oldSoundFile = getSoundFile();
+		if(oldSoundFile!=null) {
+			oldSoundFile.removeChangeListener(getHandler());
+		}
+
 		this.data = (ProsodicDocumentData) data;
 
-		if(data instanceof AnnotatedCoreferenceDocumentData) {
-			getAnnotationManager().setAnnotation(((AnnotatedData)data).getAnnotation());
+		SoundFile newSoundFile = getSoundFile();
+		if(newSoundFile!=null) {
+			newSoundFile.addChangeListener(getHandler());
 		}
 	}
 
@@ -348,7 +368,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	 */
 	@Override
 	public void close() {
-		// no-op
+		ConfigRegistry.getGlobalRegistry().removeGroupListener(configPath, getHandler());
 	}
 
 	/**
@@ -385,11 +405,6 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected ActionComponentBuilder createToolBar() {
 		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
 		builder.setActionListId("plugins.prosody.prosodyOutlinePresenter.toolBarList"); //$NON-NLS-1$
-
-		AnnotationControl annotationControl = createAnnotationControl();
-		if(annotationControl!=null) {
-			builder.addOption("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
-		}
 
 		return builder;
 	}
@@ -480,16 +495,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		refresh();
 	}
 
-	protected class Handler implements ConfigListener, PropertyChangeListener {
+	protected class Handler implements ConfigListener, ChangeListener {
 
-		/**
-		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-		 */
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			// TODO Auto-generated method stub
-
-		}
 
 		/**
 		 * @see de.ims.icarus.config.ConfigListener#invoke(de.ims.icarus.config.ConfigRegistry, de.ims.icarus.config.ConfigEvent)
@@ -497,6 +504,14 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		@Override
 		public void invoke(ConfigRegistry sender, ConfigEvent event) {
 			reloadConfig(event.getHandle());
+		}
+
+		/**
+		 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+		 */
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			refreshActions();
 		}
 
 	}
@@ -727,6 +742,88 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 				ProsodyOutlinePresenter.this.refresh();
 			}
+		}
+
+		public void playDocument(ActionEvent e) {
+			if(data==null) {
+				return;
+			}
+
+			try {
+
+				SoundPlayer player = SoundPlayer.getInstance();
+				SoundFile soundFile = player.getSoundFile(data);
+
+				if(!soundFile.isOpen()) {
+					player.open(soundFile);
+				}
+
+				float beginOffset = SoundOffsets.getBeginOffset(data);
+				float endOffset = SoundOffsets.getEndOffset(data);
+
+				soundFile.setStartOffset(beginOffset);
+				soundFile.setEndOffset(endOffset);
+				soundFile.setRepeating(false);
+
+				player.start(soundFile);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to play current document", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+			refreshActions();
+		}
+
+		public void stopPlayback(ActionEvent e) {
+			if(data==null) {
+				return;
+			}
+
+			try {
+
+				SoundPlayer player = SoundPlayer.getInstance();
+				SoundFile soundFile = player.getSoundFile(data);
+
+				player.stop(soundFile);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to stop audio playback", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+			refreshActions();
+		}
+
+		public void pausePlayback(ActionEvent e) {
+			if(data==null) {
+				return;
+			}
+
+			try {
+
+				SoundPlayer player = SoundPlayer.getInstance();
+				SoundFile soundFile = player.getSoundFile(data);
+
+				if(soundFile.isActive()) {
+					player.pause(soundFile);
+				} else if(soundFile.isPaused()) {
+					player.resume(soundFile);
+				}
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to pause audio playback", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+			refreshActions();
+		}
+
+		public void pausePlayback(boolean b) {
+			// no-op
 		}
 	}
 }

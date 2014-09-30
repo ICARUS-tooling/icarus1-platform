@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.ui;
+package de.ims.icarus.plugins.prosody.ui.list;
 
 import java.awt.Component;
 import java.awt.Dimension;

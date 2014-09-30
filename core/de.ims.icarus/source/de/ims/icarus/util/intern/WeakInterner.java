@@ -189,6 +189,11 @@ public class WeakInterner<E extends Object> implements Interner<E> {
 		return table;
 	}
 
+	/**
+	 * Hook for subclasses to prepare a new element prior to insertion.
+	 * Note that the returned value is only required to be <i>equal</i> to
+	 * the initial argument, not the same!
+	 */
 	protected E delegate(E item) {
 		return item;
 	}

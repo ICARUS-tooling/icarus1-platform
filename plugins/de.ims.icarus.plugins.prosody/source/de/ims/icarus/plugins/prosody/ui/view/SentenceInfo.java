@@ -30,18 +30,15 @@ import java.util.Arrays;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
-public class SentenceInfo {
+public class SentenceInfo extends PartInfo {
 		private final ProsodicSentenceData sentence;
 		private final float minD, maxD;
 		private final WordInfo[] words;
-		private final String text;
 		private final int sylCount;
-
-		private int width;
 
 		public SentenceInfo(ProsodicSentenceData sentence) {
 			this.sentence = sentence;
-			text = LanguageUtils.combine(sentence);
+			setLabel(LanguageUtils.combine(sentence));
 
 			float minD = Float.MAX_VALUE;
 			float maxD = Float.MIN_VALUE;
@@ -50,7 +47,7 @@ public class SentenceInfo {
 			words = new WordInfo[sentence.length()];
 
 			for(int i=0; i<words.length; i++) {
-				WordInfo wordInfo = new WordInfo(sentence, i);
+				WordInfo wordInfo = new WordInfo(this, i);
 
 				if(wordInfo.hasSyllables()) {
 					minD = Math.min(minD, wordInfo.getMinD());
@@ -64,6 +61,10 @@ public class SentenceInfo {
 			this.minD = minD;
 			this.maxD = maxD;
 			this.sylCount = sylCount;
+		}
+
+		public Object getBaseProperty(String key) {
+			return sentence.getProperty(key);
 		}
 
 		public ProsodicSentenceData getSentence() {
@@ -90,26 +91,8 @@ public class SentenceInfo {
 			return words==null ? 0 : words.length;
 		}
 
-		public String getText() {
-			return text;
-		}
-
 		public int sylCount() {
 			return sylCount;
-		}
-
-		/**
-		 * @return the width
-		 */
-		public int getWidth() {
-			return width;
-		}
-
-		/**
-		 * @param width the width to set
-		 */
-		public void setWidth(int width) {
-			this.width = width;
 		}
 
 		public WordInfo wordInfo(int wordIndex) {

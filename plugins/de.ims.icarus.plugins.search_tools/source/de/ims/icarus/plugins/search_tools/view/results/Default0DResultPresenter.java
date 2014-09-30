@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.results;
@@ -42,7 +42,6 @@ import javax.swing.event.ListSelectionListener;
 
 import de.ims.icarus.language.SentenceDataList;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.jgraph.view.GraphPresenter;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.ui.UIUtil;
@@ -62,14 +61,14 @@ import de.ims.icarus.util.data.DataList;
  *
  */
 public class Default0DResultPresenter extends SearchResultPresenter {
-	
+
 	public static final int SUPPORTED_DIMENSIONS = 0;
-	
+
 	protected ListPresenter listPresenter;
 	protected AWTPresenter detailsPresenter;
-	
+
 	protected DataList<? extends Object> listWrapper;
-	
+
 	protected JTextArea infoLabel;
 	protected JSplitPane splitPane;
 
@@ -91,12 +90,12 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 	@Override
 	protected void buildContentPanel() {
 		contentPanel = new JPanel(new BorderLayout());
-		
+
 		handler = createHandler();
 
 		infoLabel = UIUtil.defaultCreateInfoLabel(contentPanel);
 		contentPanel.add(infoLabel, BorderLayout.NORTH);
-		
+
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		splitPane.setContinuousLayout(false);
 		splitPane.setDividerSize(5);
@@ -107,7 +106,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 
 		showInfo(null);
 	}
-	
+
 	@Override
 	protected Handler createHandler() {
 		return new Handler0D();
@@ -124,75 +123,75 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 					"plugins.searchTools.default0DResultPresenter.notAvailable"); //$NON-NLS-1$
 		}
 		infoLabel.setText(text);
-		
+
 		infoLabel.setVisible(true);
 		splitPane.setVisible(false);
 		splitPane.setLeftComponent(null);
 		splitPane.setRightComponent(null);
-		
+
 		// Close any active presenter and discard its reference
 		if(detailsPresenter!=null) {
 			detailsPresenter.close();
 			detailsPresenter = null;
-		}		
+		}
 		if(listPresenter!=null) {
 			listPresenter.close();
 			listPresenter = null;
 		}
 	}
-	
+
 	protected void showDetailInfo(String text) {
 		if(text==null) {
 			text = ResourceManager.getInstance().get(
 					"plugins.searchTools.default0DResultPresenter.notAvailable"); //$NON-NLS-1$
 		}
-		
+
 		JLabel label = new JLabel(text);
 		label.setBorder(new EmptyBorder(10, 10, 10, 10));
 		label.setHorizontalAlignment(SwingConstants.CENTER);
-		
+
 		splitPane.setLeftComponent(label);
-		
+
 		// Close any active presenter and discard its reference
 		if(detailsPresenter!=null) {
 			detailsPresenter.close();
 			detailsPresenter = null;
 		}
 	}
-	
+
 	protected void setDetailPresenter(AWTPresenter detailsPresenter) {
 		if(this.detailsPresenter==detailsPresenter) {
 			return;
 		}
-		
+
 		if(this.detailsPresenter!=null) {
 			this.detailsPresenter.close();
 		}
-		
+
 		this.detailsPresenter = detailsPresenter;
-		
+
 		if(this.detailsPresenter!=null) {
 			splitPane.setLeftComponent(detailsPresenter.getPresentingComponent());
 		} else {
 			showDetailInfo(null);
 		}
 	}
-	
+
 	protected void setListPresenter(ListPresenter listPresenter) {
 		if(this.listPresenter==listPresenter) {
 			return;
 		}
-		
+
 		if(this.listPresenter!=null) {
 			this.listPresenter.getSelectionModel().removeListSelectionListener(getHandler());
 			this.listPresenter.close();
 		}
-		
+
 		this.listPresenter = listPresenter;
-		
+
 		if(this.listPresenter!=null) {
 			this.listPresenter.getSelectionModel().addListSelectionListener(getHandler());
-			
+
 			splitPane.setRightComponent(listPresenter.getPresentingComponent());
 		} else {
 			showInfo(null);
@@ -207,13 +206,13 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 		if(listWrapper==null) {
 			return;
 		}
-		
+
 		if(listPresenter!=null) {
 			//listPresenter.getPresentingComponent().repaint();
 			listPresenter.update();
 		}
 	}
-	
+
 	protected DataList<? extends Object> createListWrapper(SearchResult searchResult) {
 		if(searchResult instanceof SentenceDataList) {
 			return new SearchResultSentenceDataListWrapper(searchResult);
@@ -231,26 +230,26 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			showInfo(null);
 			return;
 		}
-		
+
 		listWrapper = createListWrapper(searchResult);
 		ContentType entryType = listWrapper.getContentType();
-		
+
 		// Ensure list presenter
 		ListPresenter listPresenter = this.listPresenter;
 		if(listPresenter==null || !PresenterUtils.presenterSupports(listPresenter, listWrapper)) {
 			listPresenter = UIHelperRegistry.globalRegistry().findHelper(ListPresenter.class, listWrapper);
 		}
-		
+
 		// Ensure details presenter
 		AWTPresenter detailsPresenter = this.detailsPresenter;
 		if(detailsPresenter==null || !PresenterUtils.presenterSupports(detailsPresenter, entryType)) {
 			// Try graph presenter first
-			detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphPresenter.class, entryType, true, false);
+			detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphBasedPresenter.class, entryType, true, false);
 			if(detailsPresenter==null) {
 				detailsPresenter = UIHelperRegistry.globalRegistry().findHelper(AWTPresenter.class, entryType, true, true);
 			}
 		}
-		
+
 		// Signal missing list presenter
 		if(detailsPresenter==null) {
 			String text = ResourceManager.getInstance().get(
@@ -258,12 +257,12 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			showInfo(text);
 			return;
 		}
-		
+
 		// Now present data
 		try {
 			listPresenter.present(listWrapper, options);
 		} catch (UnsupportedPresentationDataException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to present data list: "+listWrapper, e); //$NON-NLS-1$
 
 			String text = ResourceManager.getInstance().get(
@@ -271,14 +270,14 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			showInfo(text);
 			return;
 		}
-		
+
 		setListPresenter(listPresenter);
 		setDetailPresenter(detailsPresenter);
-		
+
 		/*try {
 			displaySelectedData();
 		} catch (Exception e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to present selected item", e); //$NON-NLS-1$
 
 			String text = ResourceManager.getInstance().get(
@@ -286,53 +285,53 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			showDetailInfo(text);
 			return;
 		}*/
-		
+
 		if(listWrapper.size()>0) {
 			listPresenter.getSelectionModel().setSelectionInterval(0, 0);
 		} else {
 			listPresenter.getSelectionModel().clearSelection();
 		}
-		
+
 		infoLabel.setVisible(false);
 		splitPane.setVisible(true);
 	}
-	
+
 	protected void displaySelectedData() throws Exception {
 		if(listPresenter==null || detailsPresenter==null) {
 			return;
 		}
-		
+
 		ListSelectionModel selectionModel = listPresenter.getSelectionModel();
-		
+
 		if(selectionModel.getValueIsAdjusting()) {
 			return;
 		}
-		
+
 		int selectedIndex = selectionModel.getMinSelectionIndex();
 		Object selectedObject = null;
-		
+
 		if(selectedIndex!=-1) {
 			selectedObject = listPresenter.getListModel().getElementAt(selectedIndex);
 		}
-		
+
 		if(selectedObject==null) {
 			detailsPresenter.clear();
 			return;
-		} 
-		
+		}
+
 		// Display selected object in details presenter
 		Options options = new Options();
 		options.put(Options.INDEX, selectedIndex);
 		options.put(Options.CONTENT_TYPE, listPresenter.getContentType());
 		options.putAll(getOptions());
-		
+
 		detailsPresenter.present(selectedObject, options);
 	}
-	
+
 	protected class Handler0D extends Handler implements ListSelectionListener, ComponentListener {
 
 		protected boolean trackResizing = true;
-		
+
 		/**
 		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
 		 */
@@ -341,7 +340,7 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			try {
 				displaySelectedData();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to handle change in selection: "+e, ex); //$NON-NLS-1$
 			}
 		}
@@ -354,14 +353,14 @@ public class Default0DResultPresenter extends SearchResultPresenter {
 			if(!trackResizing) {
 				return;
 			}
-			
+
 			int height = splitPane.getHeight();
 			if(height==0) {
 				return;
 			}
-			
+
 			splitPane.setDividerLocation(Math.max(height/2, height-100));
-			
+
 			trackResizing = false;
 		}
 

@@ -28,19 +28,23 @@ package de.ims.icarus.plugins.prosody.ui.view;
 import java.util.Arrays;
 
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
-import de.ims.icarus.util.CompactProperties;
 
-public class WordInfo implements Comparable<WordInfo> {
+public class WordInfo extends PartInfo {
 	private final int wordIndex;
 	private String[] lines;
-	private int width, x, curveWidth;
+	private int curveWidth;
 	private final SyllableInfo[] syllables;
 	private final float minD, maxD;
 
-	private final CompactProperties properties = new CompactProperties();
+	private final SentenceInfo sentenceInfo;
 
-	public WordInfo(ProsodicSentenceData sentence, int wordIndex) {
+	public WordInfo(SentenceInfo sentenceInfo, int wordIndex) {
 		this.wordIndex = wordIndex;
+		this.sentenceInfo = sentenceInfo;
+
+		ProsodicSentenceData sentence = sentenceInfo.getSentence();
+
+		setLabel(sentence.getForm(wordIndex));
 
 		int sylCount = sentence.getSyllableCount(wordIndex);
 
@@ -52,7 +56,7 @@ public class WordInfo implements Comparable<WordInfo> {
 			syllables = new SyllableInfo[sylCount];
 
 			for(int i=0; i<sylCount; i++) {
-				SyllableInfo syllableInfo = new SyllableInfo(sentence, wordIndex, i);
+				SyllableInfo syllableInfo = new SyllableInfo(this, i);
 				maxD = Math.max(maxD, syllableInfo.getD());
 				minD = Math.min(minD, syllableInfo.getD()-Math.max(syllableInfo.getC1(), syllableInfo.getC2()));
 
@@ -71,7 +75,16 @@ public class WordInfo implements Comparable<WordInfo> {
 	WordInfo() {
 		wordIndex = -1;
 		syllables = null;
+		sentenceInfo = null;
 		minD = maxD = 0;
+	}
+
+	public Object getBaseProperty(String key) {
+		return sentenceInfo.getSentence().getProperty(wordIndex, key);
+	}
+
+	public SentenceInfo getSentenceInfo() {
+		return sentenceInfo;
 	}
 
 	public int sylCount() {
@@ -80,10 +93,6 @@ public class WordInfo implements Comparable<WordInfo> {
 
 	public String[] getLines() {
 		return lines;
-	}
-
-	public int getWidth() {
-		return width;
 	}
 
 	public boolean hasSyllables() {
@@ -114,18 +123,6 @@ public class WordInfo implements Comparable<WordInfo> {
 		this.lines = lines;
 	}
 
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
 	/**
 	 * @return the curveWidth
 	 */
@@ -154,7 +151,7 @@ public class WordInfo implements Comparable<WordInfo> {
 		if(!hasSyllables()) {
 			return null;
 		}
-		if(offset<x || offset>x+width) {
+		if(offset<getX() || offset>getX()+getWidth()) {
 			return null;
 		}
 
@@ -170,7 +167,7 @@ public class WordInfo implements Comparable<WordInfo> {
 		if(!hasSyllables()) {
 			return null;
 		}
-		if(offset<x || offset>x+width) {
+		if(offset<getX() || offset>getX()+getWidth()) {
 			return null;
 		}
 
@@ -186,33 +183,5 @@ public class WordInfo implements Comparable<WordInfo> {
 		index = Math.max(0, Math.min(index, syllables.length-1));
 
 		return syllables[index];
-	}
-
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(WordInfo o) {
-		if(o.x>=x && o.x+o.width<=x+width) {
-			return 0;
-		}
-		// Keep in mind that words cannot overlap!
-		return x-o.x;
-	}
-
-	public boolean contains(int offset) {
-		return offset>=x && offset<=x+width;
-	}
-
-	public CompactProperties getProperties() {
-		return properties;
-	}
-
-	public void setProperty(String key, Object value) {
-		properties.put(key, value);
-	}
-
-	public Object getProperty(String key) {
-		return properties.get(key);
 	}
 }
