@@ -25,11 +25,11 @@
  */
 package de.ims.icarus.model.standard.elements.dummy;
 
-import de.ims.icarus.model.api.Edge;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.Structure;
-import de.ims.icarus.model.api.StructureType;
 import de.ims.icarus.model.api.manifest.StructureManifest;
+import de.ims.icarus.model.api.members.Edge;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Structure;
+import de.ims.icarus.model.api.members.StructureType;
 
 /**
  * @author Markus Gärtner
@@ -47,7 +47,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getStructureType()
+	 * @see de.ims.icarus.model.api.members.Structure#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -55,7 +55,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeCount()
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount()
 	 */
 	@Override
 	public int getEdgeCount() {
@@ -63,7 +63,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeAt(int)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(int)
 	 */
 	@Override
 	public Edge getEdgeAt(int index) {
@@ -72,7 +72,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#indexOfEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.api.members.Structure#indexOfEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public int indexOfEdge(Edge edge) {
@@ -81,7 +81,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#containsEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.api.members.Structure#containsEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public boolean containsEdge(Edge edge) {
@@ -90,7 +90,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeCount(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public int getEdgeCount(Markable node) {
@@ -99,7 +99,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeCount(de.ims.icarus.model.api.Markable, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Markable, boolean)
 	 */
 	@Override
 	public int getEdgeCount(Markable node, boolean isSource) {
@@ -108,7 +108,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeAt(de.ims.icarus.model.api.Markable, int, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(de.ims.icarus.model.api.members.Markable, int, boolean)
 	 */
 	@Override
 	public Edge getEdgeAt(Markable node, int index, boolean isSource) {
@@ -117,7 +117,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getParent(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#getParent(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public Markable getParent(Markable node) {
@@ -126,7 +126,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getRoot()
+	 * @see de.ims.icarus.model.api.members.Structure#getRoot()
 	 */
 	@Override
 	public Markable getRoot() {
@@ -134,7 +134,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#isRoot(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#isRoot(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public boolean isRoot(Markable node) {
@@ -142,7 +142,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#removeAllEdges()
+	 * @see de.ims.icarus.model.api.members.Structure#removeAllEdges()
 	 */
 	@Override
 	public void removeAllEdges() {
@@ -150,7 +150,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#addEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public Edge addEdge(Edge edge) {
@@ -158,7 +158,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#addEdge(de.ims.icarus.model.api.Edge, int)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Edge, int)
 	 */
 	@Override
 	public Edge addEdge(Edge edge, int index) {
@@ -166,7 +166,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#addEdge(de.ims.icarus.model.api.Markable, de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public Edge addEdge(Markable source, Markable target) {
@@ -174,7 +174,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#addEdge(de.ims.icarus.model.api.Markable, de.ims.icarus.model.api.Markable, int)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.members.Markable, int)
 	 */
 	@Override
 	public Edge addEdge(Markable source, Markable target, int index) {
@@ -182,7 +182,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#removeEdge(int)
+	 * @see de.ims.icarus.model.api.members.Structure#removeEdge(int)
 	 */
 	@Override
 	public Edge removeEdge(int index) {
@@ -190,7 +190,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#removeEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.api.members.Structure#removeEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public Edge removeEdge(Edge edge) {
@@ -198,7 +198,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#moveEdge(int, int)
+	 * @see de.ims.icarus.model.api.members.Structure#moveEdge(int, int)
 	 */
 	@Override
 	public void moveEdge(int index0, int index1) {
@@ -206,7 +206,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#moveEdge(de.ims.icarus.model.api.Edge, int)
+	 * @see de.ims.icarus.model.api.members.Structure#moveEdge(de.ims.icarus.model.api.members.Edge, int)
 	 */
 	@Override
 	public void moveEdge(Edge edge, int index) {
@@ -214,7 +214,7 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#setTerminal(de.ims.icarus.model.api.Edge, de.ims.icarus.model.api.Markable, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#setTerminal(de.ims.icarus.model.api.members.Edge, de.ims.icarus.model.api.members.Markable, boolean)
 	 */
 	@Override
 	public void setTerminal(Edge edge, Markable markable, boolean isSource) {

@@ -27,11 +27,11 @@ package de.ims.icarus.model.api.layer;
 
 import java.util.List;
 
-import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.highlight.Highlight;
 import de.ims.icarus.model.api.highlight.HighlightCursor;
 import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
  * @author Markus Gärtner

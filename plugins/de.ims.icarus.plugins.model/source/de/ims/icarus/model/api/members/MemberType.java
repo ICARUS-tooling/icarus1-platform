@@ -23,17 +23,33 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.members;
+
+import de.ims.icarus.model.xml.XmlResource;
 
 /**
+ * Defines the possibles types a {@link CorpusMember} can declare to represent by
+ * its {@link CorpusMember#getMemberType()} method. Not although that a class can implement
+ * multiple interfaces of the corpus framework, it can only ever be assigned to exactly one
+ * <i>member role</i> specified by its {@code MemberType}.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Model {
+public enum MemberType implements XmlResource {
+	FRAGMENT,
+	MARKABLE,
+	EDGE,
+	CONTAINER,
+	STRUCTURE,
+	LAYER; // No distinction between different layer types. they are defined by the manifest type
 
-	//TODO all actual modification, lookup and access calls go into this interface!
-
-	// Examples:
-	Markable getMarkableAt(Container container, int index);
+	/**
+	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
+	 */
+	@Override
+	public String getXmlValue() {
+		return name();
+	}
 }

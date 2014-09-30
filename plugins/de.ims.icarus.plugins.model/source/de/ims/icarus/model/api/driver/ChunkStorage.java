@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.driver;
 
-import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
  * @author Markus Gärtner

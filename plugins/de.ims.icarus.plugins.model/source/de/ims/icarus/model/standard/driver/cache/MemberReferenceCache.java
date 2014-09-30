@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.standard.driver.cache;
 
-import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;

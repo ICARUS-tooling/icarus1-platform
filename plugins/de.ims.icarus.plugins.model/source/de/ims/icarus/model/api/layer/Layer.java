@@ -27,10 +27,10 @@ package de.ims.icarus.model.api.layer;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberSet;
-import de.ims.icarus.model.api.NamedCorpusMember;
 import de.ims.icarus.model.api.manifest.LayerManifest;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberSet;
+import de.ims.icarus.model.api.members.NamedCorpusMember;
 import de.ims.icarus.model.standard.elements.MemberSets;
 
 /**
@@ -61,7 +61,7 @@ public interface Layer extends NamedCorpusMember {
 	 * Returns the name of the layer. This call is typically forwarded
 	 * to the manifest that describes this layer.
 	 *
-	 * @see de.ims.icarus.model.api.NamedCorpusMember#getName()
+	 * @see de.ims.icarus.model.api.members.NamedCorpusMember#getName()
 	 */
 	@Override
 	String getName();

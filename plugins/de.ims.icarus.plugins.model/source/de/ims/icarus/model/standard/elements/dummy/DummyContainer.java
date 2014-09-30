@@ -29,11 +29,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.ContainerType;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberSet;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.ContainerType;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberSet;
 
 /**
  * @author Markus Gärtner
@@ -52,7 +52,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getContainerType()
+	 * @see de.ims.icarus.model.api.members.Container#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -60,7 +60,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getManifest()
+	 * @see de.ims.icarus.model.api.members.Container#getManifest()
 	 */
 	@Override
 	public ContainerManifest getManifest() {
@@ -68,7 +68,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getBaseContainers()
+	 * @see de.ims.icarus.model.api.members.Container#getBaseContainers()
 	 */
 	@Override
 	public MemberSet<Container> getBaseContainers() {
@@ -76,7 +76,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getBoundaryContainer()
+	 * @see de.ims.icarus.model.api.members.Container#getBoundaryContainer()
 	 */
 	@Override
 	public Container getBoundaryContainer() {
@@ -84,7 +84,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getMarkableCount()
+	 * @see de.ims.icarus.model.api.members.Container#getMarkableCount()
 	 */
 	@Override
 	public int getMarkableCount() {
@@ -92,7 +92,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
@@ -100,7 +100,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#indexOfMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
@@ -108,7 +108,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#containsMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public boolean containsMarkable(Markable markable) {
@@ -116,7 +116,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeAllMarkables()
+	 * @see de.ims.icarus.model.api.members.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
@@ -124,7 +124,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#addMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public void addMarkable(Markable markable) {
@@ -132,7 +132,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#addMarkable(int, de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -140,7 +140,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -148,7 +148,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public Markable removeMarkable(Markable markable) {
@@ -156,7 +156,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {
@@ -164,7 +164,7 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#moveMarkable(de.ims.icarus.model.api.Markable, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
 	 */
 	@Override
 	public void moveMarkable(Markable markable, int index) {

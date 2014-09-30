@@ -27,9 +27,9 @@ package de.ims.icarus.model.standard.elements;
 
 import java.util.Arrays;
 
-import de.ims.icarus.model.api.Edge;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.Structure;
+import de.ims.icarus.model.api.members.Edge;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.mem.HeapMember;

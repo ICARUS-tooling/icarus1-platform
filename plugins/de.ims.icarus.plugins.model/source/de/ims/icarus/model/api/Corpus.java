@@ -42,6 +42,7 @@ import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
+import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.meta.MetaData;
 import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.iql.Query;

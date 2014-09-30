@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.members;
 
 /**
  * Wrapper interface for complex annotation types.

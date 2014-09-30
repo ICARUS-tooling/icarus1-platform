@@ -25,12 +25,12 @@
  */
 package de.ims.icarus.model.standard.elements;
 
-import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.layer.MarkableLayer;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.CorpusMember;
+import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.util.Recyclable;
 import de.ims.icarus.util.CorruptedStateException;
@@ -81,7 +81,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -89,7 +89,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -97,7 +97,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -149,7 +149,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -170,7 +170,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {

@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.members;
 
 import java.util.EnumSet;
 import java.util.HashMap;

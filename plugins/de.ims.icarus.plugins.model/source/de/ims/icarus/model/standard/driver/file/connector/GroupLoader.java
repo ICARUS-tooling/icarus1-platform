@@ -29,9 +29,9 @@ import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.layer.LayerGroup;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
  * @author Markus Gärtner

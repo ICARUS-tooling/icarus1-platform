@@ -38,9 +38,9 @@ import static org.mockito.Mockito.when;
 import org.junit.Test;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
+import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
 

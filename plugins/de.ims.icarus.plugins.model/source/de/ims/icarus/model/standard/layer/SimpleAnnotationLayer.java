@@ -32,15 +32,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberType;
 import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.CorpusMember;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.util.Collector;
@@ -107,7 +107,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 //	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.Markable, java.lang.String)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.members.Markable, java.lang.String)
 	 */
 	@Override
 	public Object getValue(Markable markable, String key) {
@@ -117,7 +117,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.Markable, de.ims.icarus.util.Collector)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.members.Markable, de.ims.icarus.util.Collector)
 	 */
 	@Override
 	public boolean collectKeys(Markable markable, Collector<String> buffer) {
@@ -144,7 +144,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#removeAllValues(de.ims.icarus.model.api.Markable, boolean)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#removeAllValues(de.ims.icarus.model.api.members.Markable, boolean)
 	 */
 	@Override
 	public void removeAllValues(Markable markable, boolean recursive) {
@@ -225,7 +225,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.Markable, java.lang.String, java.lang.Object)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.members.Markable, java.lang.String, java.lang.Object)
 	 */
 	@Override
 	public void setValue(Markable markable, String key, Object value) {

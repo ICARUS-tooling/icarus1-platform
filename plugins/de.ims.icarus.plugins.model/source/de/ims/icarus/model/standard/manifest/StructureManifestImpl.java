@@ -28,11 +28,11 @@ package de.ims.icarus.model.standard.manifest;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import de.ims.icarus.model.api.StructureType;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
+import de.ims.icarus.model.api.members.StructureType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;

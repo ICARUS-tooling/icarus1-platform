@@ -41,10 +41,10 @@ import static org.mockito.Mockito.when;
 import org.junit.Test;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.ContainerType;
-import de.ims.icarus.model.api.StructureType;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.StructureManifest;
+import de.ims.icarus.model.api.members.ContainerType;
+import de.ims.icarus.model.api.members.StructureType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.StructureManifestImpl;
 

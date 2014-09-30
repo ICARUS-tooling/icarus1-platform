@@ -28,9 +28,9 @@ package de.ims.icarus.model.api.seg;
 import java.util.Set;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.layer.MarkableLayer;
+import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.iql.Query;
 
 /**

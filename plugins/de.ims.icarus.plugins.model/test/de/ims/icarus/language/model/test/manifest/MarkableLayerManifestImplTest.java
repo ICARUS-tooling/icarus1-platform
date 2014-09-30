@@ -39,13 +39,13 @@ import static org.mockito.Mockito.when;
 import org.junit.Test;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
 import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
 

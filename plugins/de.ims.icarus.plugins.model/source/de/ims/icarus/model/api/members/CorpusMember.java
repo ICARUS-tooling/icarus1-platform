@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
-
+ *
  * $Revision$
  * $Date$
  * $URL$
@@ -23,33 +23,39 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.members;
 
-import de.ims.icarus.model.xml.XmlResource;
+import de.ims.icarus.model.api.Corpus;
+
+
 
 /**
- * Defines the possibles types a {@link CorpusMember} can declare to represent by
- * its {@link CorpusMember#getMemberType()} method. Not although that a class can implement
- * multiple interfaces of the corpus framework, it can only ever be assigned to exactly one
- * <i>member role</i> specified by its {@code MemberType}.
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum MemberType implements XmlResource {
-	FRAGMENT,
-	MARKABLE,
-	EDGE,
-	CONTAINER,
-	STRUCTURE,
-	LAYER; // No distinction between different layer types. they are defined by the manifest type
+public interface CorpusMember {
+
+//	/**
+//	 * @return The globally unique id
+//	 */
+//	long getId();
 
 	/**
-	 * @see de.ims.icarus.model.api.xml.XmlResource#getXmlValue()
+	 * Returns the corpus this member is a part of.
+	 * This call is usually forwarded to the host {@code Segment}
+	 * @return The corpus this member is a part of
 	 */
-	@Override
-	public String getXmlValue() {
-		return name();
-	}
+	Corpus getCorpus();
+
+	/**
+	 * Returns the type of this member. Note that the correct
+	 * way of performing type specific operations on a {@code CorpusMember}
+	 * is to query its type through this method and <b>not</b> by using the
+	 * {@code instanceof} operator!
+	 *
+	 * @return The type of this member
+	 */
+	MemberType getMemberType();
 }

@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.elements;
 import java.util.Arrays;
 import java.util.List;
 
-import de.ims.icarus.model.api.MemberSet;
+import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.util.Recyclable;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -81,7 +81,7 @@ public class MemberSets {
 	public static class EmptySet<E extends Object> extends AbstractMemberSet<E> {
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#size()
+		 * @see de.ims.icarus.model.api.members.MemberSet#size()
 		 */
 		@Override
 		public int size() {
@@ -89,7 +89,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#elementAt(int)
+		 * @see de.ims.icarus.model.api.members.MemberSet#elementAt(int)
 		 */
 		@Override
 		public E elementAt(int index) {
@@ -97,7 +97,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#contains(java.lang.Object)
+		 * @see de.ims.icarus.model.api.members.MemberSet#contains(java.lang.Object)
 		 */
 		@Override
 		public boolean contains(E member) {
@@ -145,7 +145,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#size()
+		 * @see de.ims.icarus.model.api.members.MemberSet#size()
 		 */
 		@Override
 		public int size() {
@@ -156,7 +156,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#containerAt(int)
+		 * @see de.ims.icarus.model.api.members.MemberSet#containerAt(int)
 		 */
 		@Override
 		public E elementAt(int index) {
@@ -186,7 +186,7 @@ public class MemberSets {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.api.MemberSet#contains(java.lang.Object)
+		 * @see de.ims.icarus.model.api.members.MemberSet#contains(java.lang.Object)
 		 */
 		@Override
 		public boolean contains(E member) {
@@ -236,7 +236,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#size()
+		 * @see de.ims.icarus.model.api.members.MemberSet#size()
 		 */
 		@Override
 		public int size() {
@@ -246,7 +246,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#elementAt(int)
+		 * @see de.ims.icarus.model.api.members.MemberSet#elementAt(int)
 		 */
 		@Override
 		public E elementAt(int index) {
@@ -310,7 +310,7 @@ public class MemberSets {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.api.MemberSet#contains(java.lang.Object)
+		 * @see de.ims.icarus.model.api.members.MemberSet#contains(java.lang.Object)
 		 */
 		@Override
 		public boolean contains(E member) {
@@ -362,7 +362,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#size()
+		 * @see de.ims.icarus.model.api.members.MemberSet#size()
 		 */
 		@Override
 		public int size() {
@@ -370,7 +370,7 @@ public class MemberSets {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.MemberSet#elementAt(int)
+		 * @see de.ims.icarus.model.api.members.MemberSet#elementAt(int)
 		 */
 		@Override
 		public E elementAt(int index) {
@@ -413,7 +413,7 @@ public class MemberSets {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.api.MemberSet#contains(java.lang.Object)
+		 * @see de.ims.icarus.model.api.members.MemberSet#contains(java.lang.Object)
 		 */
 		@Override
 		public boolean contains(E member) {

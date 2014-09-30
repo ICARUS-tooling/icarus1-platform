@@ -26,12 +26,12 @@
 package de.ims.icarus.model.standard.elements;
 
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.Fragment;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberType;
 import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.layer.FragmentLayer;
+import de.ims.icarus.model.api.members.CorpusMember;
+import de.ims.icarus.model.api.members.Fragment;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.raster.Position;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.util.mem.HeapMember;
@@ -101,7 +101,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -109,7 +109,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -117,7 +117,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -125,7 +125,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Fragment#getMarkable()
+	 * @see de.ims.icarus.model.api.members.Fragment#getMarkable()
 	 */
 	@Override
 	public Markable getMarkable() {
@@ -133,7 +133,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultMarkable.markable.AbstractMarkable#compareTo(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.standard.elements.DefaultMarkable.markable.AbstractMarkable#compareTo(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public int compareTo(Markable o) {
@@ -142,7 +142,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -170,7 +170,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Fragment#getLayer()
+	 * @see de.ims.icarus.model.api.members.Fragment#getLayer()
 	 */
 	@Override
 	public FragmentLayer getLayer() {
@@ -178,7 +178,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Fragment#getFragmentBegin()
+	 * @see de.ims.icarus.model.api.members.Fragment#getFragmentBegin()
 	 */
 	@Override
 	public Position getFragmentBegin() {
@@ -186,7 +186,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Fragment#getFragmentEnd()
+	 * @see de.ims.icarus.model.api.members.Fragment#getFragmentEnd()
 	 */
 	@Override
 	public Position getFragmentEnd() {
@@ -194,7 +194,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Fragment#setFragmentBegin(de.ims.icarus.model.api.raster.Position)
+	 * @see de.ims.icarus.model.api.members.Fragment#setFragmentBegin(de.ims.icarus.model.api.raster.Position)
 	 */
 	@Override
 	public void setFragmentBegin(Position fragmentBegin) {
@@ -204,7 +204,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Fragment#setFragmentEnd(de.ims.icarus.model.api.raster.Position)
+	 * @see de.ims.icarus.model.api.members.Fragment#setFragmentEnd(de.ims.icarus.model.api.raster.Position)
 	 */
 	@Override
 	public void setFragmentEnd(Position fragmentEnd) {

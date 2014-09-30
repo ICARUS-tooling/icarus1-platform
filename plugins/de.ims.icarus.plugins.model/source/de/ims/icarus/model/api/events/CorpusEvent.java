@@ -28,12 +28,12 @@ package de.ims.icarus.model.api.events;
 import java.util.Hashtable;
 import java.util.Map;
 
-import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.layer.Layer;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.CorpusMember;
+import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.model.api.meta.MetaData;
 import de.ims.icarus.util.collections.CollectionUtils;
 

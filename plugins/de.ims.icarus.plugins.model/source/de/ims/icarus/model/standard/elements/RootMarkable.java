@@ -26,10 +26,10 @@
 package de.ims.icarus.model.standard.elements;
 
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberType;
-import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.layer.MarkableLayer;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberType;
+import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Reference;
 import de.ims.icarus.util.mem.ReferenceType;
@@ -53,7 +53,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -61,7 +61,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -77,7 +77,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
 	 */
 	@Override
 	public Structure getContainer() {
@@ -85,7 +85,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -93,7 +93,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -101,7 +101,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -109,7 +109,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -117,7 +117,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {

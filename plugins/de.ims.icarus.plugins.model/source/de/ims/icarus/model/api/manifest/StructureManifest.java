@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import de.ims.icarus.model.api.StructureType;
+import de.ims.icarus.model.api.members.StructureType;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;

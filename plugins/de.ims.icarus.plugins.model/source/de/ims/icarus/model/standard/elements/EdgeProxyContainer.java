@@ -29,13 +29,13 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.ContainerType;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Structure;
 
 /**
  * Implements a bridge between containers and structures that allows edges
@@ -59,7 +59,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getContainerType()
+	 * @see de.ims.icarus.model.api.members.Container#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -67,7 +67,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getManifest()
+	 * @see de.ims.icarus.model.api.members.Container#getManifest()
 	 */
 	@Override
 	public ContainerManifest getManifest() {
@@ -75,7 +75,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getMarkableCount()
+	 * @see de.ims.icarus.model.api.members.Container#getMarkableCount()
 	 */
 	@Override
 	public int getMarkableCount() {
@@ -83,7 +83,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
@@ -91,7 +91,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeAllMarkables()
+	 * @see de.ims.icarus.model.api.members.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
@@ -99,7 +99,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#addMarkable(int, de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -107,7 +107,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -115,7 +115,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {
@@ -123,7 +123,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -131,7 +131,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -139,7 +139,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {

@@ -25,13 +25,13 @@
  */
 package de.ims.icarus.model.standard.elements;
 
-import de.ims.icarus.model.api.Container;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Edge;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberType;
-import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.layer.MarkableLayer;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.Edge;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberType;
+import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.util.Recyclable;
 import de.ims.icarus.util.mem.HeapMember;
@@ -116,7 +116,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -124,7 +124,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -132,7 +132,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -140,7 +140,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Edge#getStructure()
+	 * @see de.ims.icarus.model.api.members.Edge#getStructure()
 	 */
 	@Override
 	public Structure getStructure() {
@@ -148,7 +148,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Edge#getSource()
+	 * @see de.ims.icarus.model.api.members.Edge#getSource()
 	 */
 	@Override
 	public Markable getSource() {
@@ -156,7 +156,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Edge#getTarget()
+	 * @see de.ims.icarus.model.api.members.Edge#getTarget()
 	 */
 	@Override
 	public Markable getTarget() {
@@ -164,7 +164,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Edge#isDirected()
+	 * @see de.ims.icarus.model.api.members.Edge#isDirected()
 	 */
 	@Override
 	public boolean isDirected() {
@@ -177,7 +177,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * added to foreign containers as regular markables, but note, that this does {@code not}
 	 * change ownership!
 	 *
-	 * @see de.ims.icarus.model.api.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -186,7 +186,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -194,7 +194,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -234,7 +234,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -242,7 +242,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {

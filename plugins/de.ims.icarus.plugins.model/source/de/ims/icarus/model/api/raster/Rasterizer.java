@@ -27,8 +27,8 @@ package de.ims.icarus.model.api.raster;
 
 import java.util.Comparator;
 
-import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.layer.FragmentLayer;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
  * @author Markus Gärtner

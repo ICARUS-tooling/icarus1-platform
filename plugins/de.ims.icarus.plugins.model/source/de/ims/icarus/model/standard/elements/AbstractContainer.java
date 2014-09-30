@@ -25,14 +25,14 @@
  */
 package de.ims.icarus.model.standard.elements;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.ContainerType;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberSet;
-import de.ims.icarus.model.api.MemberType;
 import de.ims.icarus.model.api.edit.EditOperation;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.ContainerType;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberSet;
+import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
@@ -112,7 +112,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -120,7 +120,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getContainerType()
+	 * @see de.ims.icarus.model.api.members.Container#getContainerType()
 	 */
 	@Override
 	public ContainerType getContainerType() {
@@ -128,7 +128,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -139,7 +139,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -150,7 +150,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#containsMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public boolean containsMarkable(Markable markable) {
@@ -167,7 +167,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getBaseContainer()
+	 * @see de.ims.icarus.model.api.members.Container#getBaseContainer()
 	 */
 	@Override
 	public MemberSet<Container> getBaseContainers() {
@@ -184,7 +184,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getBoundaryContainer()
+	 * @see de.ims.icarus.model.api.members.Structure#getBoundaryContainer()
 	 */
 	@Override
 	public Container getBoundaryContainer() {
@@ -198,7 +198,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	 * {@link MarkableLayerManifest} that describes this
 	 * container's root.
 	 *
-	 * @see de.ims.icarus.model.api.Container#getManifest()
+	 * @see de.ims.icarus.model.api.members.Container#getManifest()
 	 */
 	@Override
 	public ContainerManifest getManifest() {
@@ -206,7 +206,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#indexOfMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
@@ -227,7 +227,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	// Shorthand edit methods
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#addMarkable()
+	 * @see de.ims.icarus.model.api.members.Container#addMarkable()
 	 */
 	@Override
 	public void addMarkable(Markable markable) {
@@ -235,7 +235,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public Markable removeMarkable(Markable markable) {
@@ -243,7 +243,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#moveMarkable(de.ims.icarus.model.api.Markable, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
 	 */
 	@Override
 	public void moveMarkable(Markable markable, int index) {
@@ -251,7 +251,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeAllMarkables()
+	 * @see de.ims.icarus.model.api.members.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
@@ -259,7 +259,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#addMarkable(int, de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -267,7 +267,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -276,7 +276,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {

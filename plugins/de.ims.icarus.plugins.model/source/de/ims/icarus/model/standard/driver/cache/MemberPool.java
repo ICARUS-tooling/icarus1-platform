@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.driver.cache;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.util.mem.Primitive;
 import de.ims.icarus.util.mem.Reference;
 

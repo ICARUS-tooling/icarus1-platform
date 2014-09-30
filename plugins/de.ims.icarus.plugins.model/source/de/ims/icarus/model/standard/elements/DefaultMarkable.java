@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.model.standard.elements;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.MemberType;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.Recyclable;
 import de.ims.icarus.util.mem.HeapMember;
 
@@ -73,7 +73,7 @@ public class DefaultMarkable extends AbstractMarkable implements Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+	 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 	 */
 	@Override
 	public MemberType getMemberType() {
@@ -81,7 +81,7 @@ public class DefaultMarkable extends AbstractMarkable implements Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -89,7 +89,7 @@ public class DefaultMarkable extends AbstractMarkable implements Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {

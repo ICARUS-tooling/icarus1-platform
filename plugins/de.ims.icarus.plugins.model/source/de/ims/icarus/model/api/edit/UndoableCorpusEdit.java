@@ -39,9 +39,9 @@ import javax.swing.undo.CannotUndoException;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.layer.Layer;
+import de.ims.icarus.model.api.members.CorpusMember;
+import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.util.CorruptedStateException;

@@ -33,13 +33,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberSet;
-import de.ims.icarus.model.api.MemberType;
 import de.ims.icarus.model.api.edit.CorpusEditModel;
 import de.ims.icarus.model.api.edit.CorpusUndoManager;
 import de.ims.icarus.model.api.events.CorpusListener;
@@ -51,6 +46,11 @@ import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.ContainerType;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberSet;
+import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.meta.MetaData;
 import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.iql.Query;
@@ -342,7 +342,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 		 */
 		@Override
 		public Corpus getCorpus() {
@@ -350,7 +350,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+		 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 		 */
 		@Override
 		public MemberType getMemberType() {
@@ -393,7 +393,7 @@ public class DefaultCorpus implements Corpus {
 	private class OverlayContainer implements Container {
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getContainer()
+		 * @see de.ims.icarus.model.api.members.Markable#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -401,7 +401,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getLayer()
+		 * @see de.ims.icarus.model.api.members.Markable#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -409,7 +409,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+		 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 		 */
 		@Override
 		public long getBeginOffset() {
@@ -417,7 +417,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+		 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 		 */
 		@Override
 		public long getEndOffset() {
@@ -425,7 +425,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 		 */
 		@Override
 		public Corpus getCorpus() {
@@ -441,7 +441,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getContainerType()
+		 * @see de.ims.icarus.model.api.members.Container#getContainerType()
 		 */
 		@Override
 		public ContainerType getContainerType() {
@@ -449,7 +449,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getManifest()
+		 * @see de.ims.icarus.model.api.members.Container#getManifest()
 		 */
 		@Override
 		public ContainerManifest getManifest() {
@@ -457,7 +457,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getMarkableCount()
+		 * @see de.ims.icarus.model.api.members.Container#getMarkableCount()
 		 */
 		@Override
 		public int getMarkableCount() {
@@ -465,7 +465,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getMarkableAt(int)
+		 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
 		 */
 		@Override
 		public Markable getMarkableAt(int index) {
@@ -473,7 +473,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#removeAllMarkables()
+		 * @see de.ims.icarus.model.api.members.Container#removeAllMarkables()
 		 */
 		@Override
 		public void removeAllMarkables() {
@@ -481,7 +481,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#addMarkable(int, de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public void addMarkable(int index, Markable markable) {
@@ -489,7 +489,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#removeMarkable(int)
+		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
 		 */
 		@Override
 		public Markable removeMarkable(int index) {
@@ -497,7 +497,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#moveMarkable(int, int)
+		 * @see de.ims.icarus.model.api.members.Container#moveMarkable(int, int)
 		 */
 		@Override
 		public void moveMarkable(int index0, int index1) {
@@ -505,7 +505,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getIndex()
+		 * @see de.ims.icarus.model.api.members.Markable#getIndex()
 		 */
 		@Override
 		public long getIndex() {
@@ -513,7 +513,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#setIndex(long)
+		 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
 		 */
 		@Override
 		public void setIndex(long newIndex) {
@@ -521,7 +521,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+		 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 		 */
 		@Override
 		public MemberType getMemberType() {
@@ -537,7 +537,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getBaseContainers()
+		 * @see de.ims.icarus.model.api.members.Container#getBaseContainers()
 		 */
 		@Override
 		public MemberSet<Container> getBaseContainers() {
@@ -545,7 +545,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getBoundaryContainer()
+		 * @see de.ims.icarus.model.api.members.Container#getBoundaryContainer()
 		 */
 		@Override
 		public Container getBoundaryContainer() {
@@ -553,7 +553,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#indexOfMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public int indexOfMarkable(Markable markable) {
@@ -567,7 +567,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#containsMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public boolean containsMarkable(Markable markable) {
@@ -575,7 +575,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#addMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public void addMarkable(Markable markable) {
@@ -583,7 +583,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#removeMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public Markable removeMarkable(Markable markable) {
@@ -591,7 +591,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#moveMarkable(de.ims.icarus.model.api.Markable, int)
+		 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
 		 */
 		@Override
 		public void moveMarkable(Markable markable, int index) {

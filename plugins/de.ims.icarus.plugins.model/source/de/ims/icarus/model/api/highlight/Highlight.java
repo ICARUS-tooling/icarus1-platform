@@ -27,8 +27,8 @@ package de.ims.icarus.model.api.highlight;
 
 import java.awt.Color;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.Markable;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
  * Models a set of highlight informations for a given {@link Container}

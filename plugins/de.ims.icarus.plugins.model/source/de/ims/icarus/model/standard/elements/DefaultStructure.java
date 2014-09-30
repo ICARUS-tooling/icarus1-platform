@@ -30,15 +30,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.CorpusMember;
-import de.ims.icarus.model.api.Edge;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.Structure;
-import de.ims.icarus.model.api.StructureType;
 import de.ims.icarus.model.api.edit.EditOperation;
 import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.manifest.StructureManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.CorpusMember;
+import de.ims.icarus.model.api.members.Edge;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Structure;
+import de.ims.icarus.model.api.members.StructureType;
 import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.util.CorruptedStateException;
@@ -188,7 +188,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getStructureType()
+	 * @see de.ims.icarus.model.api.members.Structure#getStructureType()
 	 */
 	@Override
 	public StructureType getStructureType() {
@@ -204,7 +204,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getMarkableCount()
+	 * @see de.ims.icarus.model.api.members.Container#getMarkableCount()
 	 */
 	@Override
 	public int getMarkableCount() {
@@ -219,7 +219,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
 	 */
 	@Override
 	public Markable getMarkableAt(int index) {
@@ -239,7 +239,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.standard.container.AbstractContainer#indexOfMarkable(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.standard.elements.standard.container.AbstractContainer#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public int indexOfMarkable(Markable markable) {
@@ -311,7 +311,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#isRoot(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#isRoot(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public boolean isRoot(Markable node) {
@@ -331,7 +331,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeAt(de.ims.icarus.model.api.Markable, int, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(de.ims.icarus.model.api.members.Markable, int, boolean)
 	 */
 	@Override
 	public Edge getEdgeAt(Markable node, int index, boolean isSource) {
@@ -348,7 +348,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#indexOfEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#indexOfEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public int indexOfEdge(Edge edge) {
@@ -356,7 +356,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#containsEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#containsEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public boolean containsEdge(Edge edge) {
@@ -369,7 +369,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#getEdgeCount(de.ims.icarus.model.api.Markable, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Markable, boolean)
 	 */
 	@Override
 	public int getEdgeCount(Markable node, boolean isSource) {
@@ -455,7 +455,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#addEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public Edge addEdge(Edge edge) {
@@ -463,7 +463,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Structure#addEdge(de.ims.icarus.model.api.Edge, int)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Edge, int)
 	 */
 	@Override
 	public Edge addEdge(Edge edge, int index) {
@@ -543,7 +543,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#removeEdge(de.ims.icarus.model.api.Edge)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#removeEdge(de.ims.icarus.model.api.members.Edge)
 	 */
 	@Override
 	public Edge removeEdge(Edge edge) {
@@ -571,7 +571,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#moveEdge(de.ims.icarus.model.api.Edge, int)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#moveEdge(de.ims.icarus.model.api.members.Edge, int)
 	 */
 	@Override
 	public void moveEdge(Edge edge, int index) {
@@ -582,7 +582,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#setTerminal(de.ims.icarus.model.api.Edge, de.ims.icarus.model.api.Markable, boolean)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#setTerminal(de.ims.icarus.model.api.members.Edge, de.ims.icarus.model.api.members.Markable, boolean)
 	 */
 	@Override
 	public void setTerminal(Edge edge, Markable markable, boolean isSource) {
@@ -610,7 +610,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeAllMarkables()
+	 * @see de.ims.icarus.model.api.members.Container#removeAllMarkables()
 	 */
 	@Override
 	public void removeAllMarkables() {
@@ -628,7 +628,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#addMarkable(int, de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public void addMarkable(int index, Markable markable) {
@@ -643,7 +643,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
 	 */
 	@Override
 	public Markable removeMarkable(int index) {
@@ -663,7 +663,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Container#moveMarkable(int, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(int, int)
 	 */
 	@Override
 	public void moveMarkable(int index0, int index1) {
@@ -698,7 +698,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#edgeAdded(de.ims.icarus.model.api.Edge, int)
+	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#edgeAdded(de.ims.icarus.model.api.members.Edge, int)
 	 */
 	protected void edgeAdded(Edge edge, int index) {
 		graph().add(edge.getSource(), edge, false);
@@ -712,7 +712,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#edgeRemoved(de.ims.icarus.model.api.Edge, int)
+	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#edgeRemoved(de.ims.icarus.model.api.members.Edge, int)
 	 */
 	protected void edgeRemoved(Edge edge, int index) {
 		graph().remove(edge.getSource(), edge, false);
@@ -730,7 +730,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#terminalChanged(de.ims.icarus.model.api.Edge, boolean, de.ims.icarus.model.api.Markable, de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#terminalChanged(de.ims.icarus.model.api.members.Edge, boolean, de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.members.Markable)
 	 */
 	protected void terminalChanged(Edge edge, boolean isSource,
 			Markable oldTerminal, Markable newTerminal) {
@@ -751,7 +751,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#getParent(de.ims.icarus.model.api.Markable)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#getParent(de.ims.icarus.model.api.members.Markable)
 	 */
 	@Override
 	public Markable getParent(Markable node) {

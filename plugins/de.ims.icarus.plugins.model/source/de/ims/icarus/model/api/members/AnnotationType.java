@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,37 +23,17 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.members;
 
-
+import de.ims.icarus.model.api.manifest.AnnotationManifest;
+import de.ims.icarus.util.id.Identity;
 
 /**
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface CorpusMember {
+public interface AnnotationType extends Identity {
 
-//	/**
-//	 * @return The globally unique id
-//	 */
-//	long getId();
-
-	/**
-	 * Returns the corpus this member is a part of.
-	 * This call is usually forwarded to the host {@code Segment}
-	 * @return The corpus this member is a part of
-	 */
-	Corpus getCorpus();
-
-	/**
-	 * Returns the type of this member. Note that the correct
-	 * way of performing type specific operations on a {@code CorpusMember}
-	 * is to query its type through this method and <b>not</b> by using the
-	 * {@code instanceof} operator!
-	 *
-	 * @return The type of this member
-	 */
-	MemberType getMemberType();
+	AnnotationManifest getSharedManifest();
 }

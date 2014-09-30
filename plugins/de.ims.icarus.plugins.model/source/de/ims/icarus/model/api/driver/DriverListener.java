@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.model.api.driver;
 
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.Markable;
 import de.ims.icarus.model.api.layer.LayerGroup;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
  * Allows intercepting loaded or skipped chunks during load operations of a driver implementation.

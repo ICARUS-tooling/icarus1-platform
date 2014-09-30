@@ -36,12 +36,7 @@ import java.util.Set;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.MemberSet;
-import de.ims.icarus.model.api.MemberType;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.IndexSet;
@@ -49,6 +44,11 @@ import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.ContainerType;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.MemberSet;
+import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.seg.Scope;
 import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.api.seg.SegmentOwner;
@@ -344,7 +344,7 @@ abstract class AbstractSegment implements Segment {
 	private class ChunkDelegate implements ChunkStorage {
 
 		/**
-		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.Markable, long)
+		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.members.Markable, long)
 		 */
 		@Override
 		public void add(Markable member, long index) {
@@ -375,7 +375,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.Markable,long)
+		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.members.Markable,long)
 		 */
 		@Override
 		public void add(Markable member, long index) {
@@ -440,7 +440,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getContainer()
+		 * @see de.ims.icarus.model.api.members.Markable#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -448,7 +448,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getLayer()
+		 * @see de.ims.icarus.model.api.members.Markable#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -456,7 +456,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getIndex()
+		 * @see de.ims.icarus.model.api.members.Markable#getIndex()
 		 */
 		@Override
 		public long getIndex() {
@@ -464,7 +464,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#setIndex(long)
+		 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
 		 */
 		@Override
 		public void setIndex(long newIndex) {
@@ -472,7 +472,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getBeginOffset()
+		 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
 		 */
 		@Override
 		public long getBeginOffset() {
@@ -480,7 +480,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#getEndOffset()
+		 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
 		 */
 		@Override
 		public long getEndOffset() {
@@ -488,7 +488,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Markable#compareTo(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Markable#compareTo(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public int compareTo(Markable o) {
@@ -496,7 +496,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.CorpusMember#getCorpus()
+		 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
 		 */
 		@Override
 		public Corpus getCorpus() {
@@ -504,7 +504,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.CorpusMember#getMemberType()
+		 * @see de.ims.icarus.model.api.members.CorpusMember#getMemberType()
 		 */
 		@Override
 		public MemberType getMemberType() {
@@ -520,7 +520,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getContainerType()
+		 * @see de.ims.icarus.model.api.members.Container#getContainerType()
 		 */
 		@Override
 		public ContainerType getContainerType() {
@@ -528,7 +528,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getManifest()
+		 * @see de.ims.icarus.model.api.members.Container#getManifest()
 		 */
 		@Override
 		public ContainerManifest getManifest() {
@@ -536,7 +536,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getBaseContainers()
+		 * @see de.ims.icarus.model.api.members.Container#getBaseContainers()
 		 */
 		@Override
 		public MemberSet<Container> getBaseContainers() {
@@ -544,7 +544,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getBoundaryContainer()
+		 * @see de.ims.icarus.model.api.members.Container#getBoundaryContainer()
 		 */
 		@Override
 		public Container getBoundaryContainer() {
@@ -552,7 +552,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getMarkableCount()
+		 * @see de.ims.icarus.model.api.members.Container#getMarkableCount()
 		 */
 		@Override
 		public int getMarkableCount() {
@@ -560,7 +560,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#getMarkableAt(int)
+		 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
 		 */
 		@Override
 		public Markable getMarkableAt(int index) {
@@ -568,7 +568,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#indexOfMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public int indexOfMarkable(Markable markable) {
@@ -576,7 +576,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#containsMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public boolean containsMarkable(Markable markable) {
@@ -584,7 +584,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#removeAllMarkables()
+		 * @see de.ims.icarus.model.api.members.Container#removeAllMarkables()
 		 */
 		@Override
 		public void removeAllMarkables() {
@@ -592,7 +592,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#addMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public void addMarkable(Markable markable) {
@@ -600,7 +600,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#addMarkable(int, de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public void addMarkable(int index, Markable markable) {
@@ -608,7 +608,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#removeMarkable(int)
+		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
 		 */
 		@Override
 		public Markable removeMarkable(int index) {
@@ -616,7 +616,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#removeMarkable(de.ims.icarus.model.api.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
 		 */
 		@Override
 		public Markable removeMarkable(Markable markable) {
@@ -624,7 +624,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#moveMarkable(int, int)
+		 * @see de.ims.icarus.model.api.members.Container#moveMarkable(int, int)
 		 */
 		@Override
 		public void moveMarkable(int index0, int index1) {
@@ -632,7 +632,7 @@ abstract class AbstractSegment implements Segment {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.Container#moveMarkable(de.ims.icarus.model.api.Markable, int)
+		 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
 		 */
 		@Override
 		public void moveMarkable(Markable markable, int index) {

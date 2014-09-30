@@ -25,13 +25,13 @@
  */
 package de.ims.icarus.model.api.layer;
 
-import de.ims.icarus.model.api.Annotation;
-import de.ims.icarus.model.api.Container;
-import de.ims.icarus.model.api.Markable;
-import de.ims.icarus.model.api.Structure;
 import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
 import de.ims.icarus.model.api.manifest.ValueSet;
+import de.ims.icarus.model.api.members.Annotation;
+import de.ims.icarus.model.api.members.Container;
+import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.util.Collector;
 
 /**

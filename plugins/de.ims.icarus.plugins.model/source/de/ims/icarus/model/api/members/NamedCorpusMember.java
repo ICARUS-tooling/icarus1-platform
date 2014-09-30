@@ -23,7 +23,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.members;
 
 import de.ims.icarus.util.NamedObject;
 

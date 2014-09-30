@@ -33,7 +33,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
 import de.ims.icarus.model.ModelException;
-import de.ims.icarus.model.api.ContainerType;
 import de.ims.icarus.model.api.driver.IndexSet;
 import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.driver.IndexUtils.IndexProcedure;
@@ -41,6 +40,7 @@ import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.driver.indexing.IndexCollector;
 import de.ims.icarus.model.api.driver.indexing.IndexReader;
 import de.ims.icarus.model.api.manifest.IndexManifest.Coverage;
+import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.standard.index.IndexSetBuilder;
 import de.ims.icarus.model.standard.index.SpanIndexSet;
 
