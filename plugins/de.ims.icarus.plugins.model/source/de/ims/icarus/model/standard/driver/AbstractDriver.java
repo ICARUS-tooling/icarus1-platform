@@ -28,6 +28,8 @@ package de.ims.icarus.model.standard.driver;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
+import de.ims.icarus.model.api.Scope;
+import de.ims.icarus.model.api.Segment;
 import de.ims.icarus.model.api.driver.Candidates;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
@@ -42,8 +44,6 @@ import de.ims.icarus.model.api.manifest.DriverManifest;
 import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
-import de.ims.icarus.model.api.seg.Scope;
-import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.standard.driver.cache.MemberCache;
 import de.ims.icarus.model.standard.layer.CachedLayer;
 
@@ -108,7 +108,7 @@ public abstract class AbstractDriver implements Driver {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.driver.Driver#load(de.ims.icarus.model.api.driver.IndexSet[], de.ims.icarus.model.api.seg.Scope, de.ims.icarus.model.api.driver.DriverListener)
+	 * @see de.ims.icarus.model.api.driver.Driver#load(de.ims.icarus.model.api.driver.IndexSet[], de.ims.icarus.model.api.Scope, de.ims.icarus.model.api.driver.DriverListener)
 	 */
 	@Override
 	public long load(IndexSet[] indices, Scope scope, ChunkStorage storage)
@@ -167,7 +167,7 @@ public abstract class AbstractDriver implements Driver {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.driver.Driver#releaseContainer(de.ims.icarus.model.api.Container, de.ims.icarus.model.api.seg.Segment)
+	 * @see de.ims.icarus.model.api.driver.Driver#releaseContainer(de.ims.icarus.model.api.Container, de.ims.icarus.model.api.Segment)
 	 */
 	@Override
 	public void release(Segment segment) {

@@ -44,7 +44,6 @@ import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.meta.MetaData;
-import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.iql.Query;
 import de.ims.icarus.ui.events.EventListener;
 import de.ims.icarus.util.data.ContentType;
@@ -131,7 +130,7 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	/**
 	 * Creates a new segment object that provides a filtered view on the sub-corpus
 	 * defined by the given query. A corpus implementation should try to narrow down
-	 * possible candidates using the {@link Driver#lookup(Query, de.ims.icarus.model.api.seg.Scope)}
+	 * possible candidates using the {@link Driver#lookup(Query, de.ims.icarus.model.api.part.Scope)}
 	 * method of all involved {@link Driver} objects and calculate the intersection of those
 	 * candidate lists if possible. If computing candidates failed or if the intersection is very large,
 	 * it is up to the corpus implementation to decide on a paging policy of the segment or ask the user

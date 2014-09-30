@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.seg;
+package de.ims.icarus.model.api;
 
 /**
  * @author Markus Gärtner

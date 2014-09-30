@@ -26,8 +26,8 @@
 package de.ims.icarus.model.iql;
 
 import de.ims.icarus.model.api.Context;
+import de.ims.icarus.model.api.Scope;
 import de.ims.icarus.model.api.driver.IndexSet;
-import de.ims.icarus.model.api.seg.Scope;
 
 /**
  * @author Markus Gärtner

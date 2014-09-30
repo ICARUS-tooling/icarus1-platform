@@ -27,6 +27,8 @@ package de.ims.icarus.model.api.driver;
 
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
+import de.ims.icarus.model.api.Scope;
+import de.ims.icarus.model.api.Segment;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.driver.indexing.IndexStorage;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
@@ -35,8 +37,6 @@ import de.ims.icarus.model.api.manifest.DriverManifest;
 import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
-import de.ims.icarus.model.api.seg.Scope;
-import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.iql.Query;
 
 /**

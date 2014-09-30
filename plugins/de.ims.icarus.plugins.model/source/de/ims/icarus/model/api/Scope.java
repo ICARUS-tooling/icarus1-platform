@@ -23,15 +23,13 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.seg;
+package de.ims.icarus.model.api;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.ims.icarus.model.api.Context;
-import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.layer.MarkableLayer;

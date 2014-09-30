@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.iql;
 
-import de.ims.icarus.model.api.seg.Segment;
+import de.ims.icarus.model.api.Segment;
 
 /**
  * @author Markus Gärtner

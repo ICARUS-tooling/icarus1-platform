@@ -26,8 +26,8 @@
 package de.ims.icarus.model.api.members;
 
 import de.ims.icarus.model.api.Corpus;
+import de.ims.icarus.model.api.Segment;
 import de.ims.icarus.model.api.layer.MarkableLayer;
-import de.ims.icarus.model.api.seg.Segment;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;

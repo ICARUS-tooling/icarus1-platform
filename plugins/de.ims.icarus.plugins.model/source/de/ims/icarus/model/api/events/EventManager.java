@@ -30,10 +30,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
+import de.ims.icarus.model.api.Segment;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.meta.MetaData;
-import de.ims.icarus.model.api.seg.Segment;
 
 /**
  * @author Markus Gärtner

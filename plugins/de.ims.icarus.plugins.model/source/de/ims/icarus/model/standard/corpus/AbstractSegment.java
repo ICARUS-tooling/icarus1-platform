@@ -37,6 +37,9 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Corpus;
+import de.ims.icarus.model.api.Scope;
+import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SegmentOwner;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.IndexSet;
@@ -49,9 +52,6 @@ import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.api.members.Markable;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.MemberType;
-import de.ims.icarus.model.api.seg.Scope;
-import de.ims.icarus.model.api.seg.Segment;
-import de.ims.icarus.model.api.seg.SegmentOwner;
 import de.ims.icarus.model.iql.Query;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -146,7 +146,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#getCorpus()
+	 * @see de.ims.icarus.model.api.Segment#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -154,7 +154,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#getScope()
+	 * @see de.ims.icarus.model.api.Segment#getScope()
 	 */
 	@Override
 	public Scope getScope() {
@@ -162,7 +162,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#getQuery()
+	 * @see de.ims.icarus.model.api.Segment#getQuery()
 	 */
 	@Override
 	public Query getQuery() {
@@ -174,7 +174,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#getContainer(de.ims.icarus.model.api.layer.MarkableLayer)
+	 * @see de.ims.icarus.model.api.Segment#getContainer(de.ims.icarus.model.api.layer.MarkableLayer)
 	 */
 	@Override
 	public Container getContainer(MarkableLayer layer) {
@@ -193,7 +193,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#closable()
+	 * @see de.ims.icarus.model.api.Segment#closable()
 	 */
 	@Override
 	public boolean closable() {
@@ -206,7 +206,7 @@ abstract class AbstractSegment implements Segment {
 
 	/**
 	 * @throws InterruptedException
-	 * @see de.ims.icarus.model.api.seg.Segment#close()
+	 * @see de.ims.icarus.model.api.Segment#close()
 	 */
 	@Override
 	public void close() throws ModelException, InterruptedException {
@@ -287,7 +287,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#getOwners()
+	 * @see de.ims.icarus.model.api.Segment#getOwners()
 	 */
 	@Override
 	public Set<SegmentOwner> getOwners() {
@@ -297,7 +297,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#acquire(de.ims.icarus.model.api.seg.SegmentOwner)
+	 * @see de.ims.icarus.model.api.Segment#acquire(de.ims.icarus.model.api.SegmentOwner)
 	 */
 	@Override
 	public void acquire(SegmentOwner owner) throws ModelException {
@@ -316,7 +316,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.seg.Segment#release(de.ims.icarus.model.api.seg.SegmentOwner)
+	 * @see de.ims.icarus.model.api.Segment#release(de.ims.icarus.model.api.SegmentOwner)
 	 */
 	@Override
 	public void release(SegmentOwner owner) throws ModelException {
