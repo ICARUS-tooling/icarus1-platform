@@ -158,13 +158,27 @@ public enum ModelError {
 	DRIVER_CHECKSUM_FAIL(403),
 
 	//**************************************************
-	//       5xx  SEGMENT ERRORS
+	//       5xx  SUBCORPUS ERRORS
 	//**************************************************
 
 	/**
-	 * Closing a segment failed due to some owner not being able to release its lock when asked.
+	 * Closing a sub corpus failed due to some owner not being able to release its lock when asked.
 	 */
-	SEGMENT_OWNED(501),
+	SUBCORPUS_UNCLOASABLE(501),
+
+	/**
+	 * Creating a new sub corpus in an access mode that would grant write access failed due to some other
+	 * sub corpus instance already working on the corpus in question.
+	 * Note that there can only be one sub corpus instance for a particular corpus with write access, but
+	 * an unlimited number of reading sub corpora!
+	 */
+	SUBCORPUS_ALREADY_OPENED(502),
+
+	/**
+	 * An attempt to fetch the model for a sub corpus failed because the data for the current
+	 * page has not yet been loaded.
+	 */
+	SUBCORPUS_EMPTY(503),
 
 	//**************************************************
 	//       6xx  MANIFEST ERRORS

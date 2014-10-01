@@ -67,7 +67,11 @@ public enum ContainerType implements XmlResource {
 	 * The container holds an ordered and continuous list
 	 * of {@code Markable}s.
 	 */
-	SPAN("span", 0, -1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE); //$NON-NLS-1$
+	SPAN("span", 0, -1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE), //$NON-NLS-1$
+	;
+
+
+	public static final int INDEFINITE_VALUE = -1;
 
 	private final EnumSet<EditOperation> operations;
 	private final int minSize, maxSize;
@@ -92,7 +96,7 @@ public enum ContainerType implements XmlResource {
 	}
 
 	/**
-	 * @return the operations
+	 * @return the operations supported by this container type in no particular order
 	 */
 	public EditOperation[] getOperations() {
 		return operations.toArray(new EditOperation[operations.size()]);

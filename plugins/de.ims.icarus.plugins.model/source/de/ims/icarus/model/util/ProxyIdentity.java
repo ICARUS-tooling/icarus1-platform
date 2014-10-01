@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard;
+package de.ims.icarus.model.util;
 
 import javax.swing.Icon;
 

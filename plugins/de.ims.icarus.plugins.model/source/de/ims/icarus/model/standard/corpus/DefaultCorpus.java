@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SubCorpus;
 import de.ims.icarus.model.api.edit.CorpusEditModel;
 import de.ims.icarus.model.api.edit.CorpusUndoManager;
 import de.ims.icarus.model.api.events.CorpusListener;
@@ -276,7 +276,7 @@ public class DefaultCorpus implements Corpus {
 	 * @see de.ims.icarus.model.api.Corpus#getSegment(de.ims.icarus.model.iql.Query)
 	 */
 	@Override
-	public Segment createSegment(Query query) throws ModelException {
+	public SubCorpus createSubCorpus(Query query) throws ModelException {
 		// TODO Auto-generated method stub
 		return null;
 	}

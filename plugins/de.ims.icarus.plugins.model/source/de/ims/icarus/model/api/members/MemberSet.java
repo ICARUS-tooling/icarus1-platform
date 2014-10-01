@@ -26,11 +26,9 @@
 package de.ims.icarus.model.api.members;
 
 /**
- * A array like storage for containers that allows unified access to
+ * An array like storage for containers that allows unified access to
  * collections of base containers while still preventing foreign
  * objects from making modifications.
- * <p>
- * Note that a {@code MemberSet} is never empty!
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -38,10 +36,6 @@ package de.ims.icarus.model.api.members;
  */
 public interface MemberSet<E extends Object> {
 
-	/**
-	 * @return The size of this set, which is never empty, therefore the returned
-	 * value is at least {@code 1}!
-	 */
 	int size();
 
 	E elementAt(int index);

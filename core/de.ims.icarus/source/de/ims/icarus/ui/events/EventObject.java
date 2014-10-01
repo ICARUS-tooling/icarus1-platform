@@ -40,7 +40,7 @@ public class EventObject {
 	/**
 	 * Constructs a new event for the given name and properties. The optional
 	 * properties are specified using a sequence of keys and values, eg.
-	 * {@code new mxEventObject("eventName", key1, val1, .., keyN, valN))}
+	 * {@code new EventObject("eventName", key1, val1, .., keyN, valN))}
 	 */
 	public EventObject(String name, Object... args) {
 		this.name = name;
@@ -63,14 +63,14 @@ public class EventObject {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Map<String, Object> getProperties() {
 		return CollectionUtils.getMapProxy(properties);
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Object getProperty(String key) {
 		return properties.get(key);

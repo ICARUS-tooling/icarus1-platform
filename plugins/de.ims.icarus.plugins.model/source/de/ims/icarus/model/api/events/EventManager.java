@@ -30,9 +30,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SubCorpus;
 import de.ims.icarus.model.api.layer.Layer;
-import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.meta.MetaData;
 
 /**
@@ -104,7 +103,7 @@ public class EventManager {
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				"context", context); //$NON-NLS-1$
+				CorpusEvent.CONTEXT_PROPERTY, context);
 
 		for(CorpusListener listener : listeners) {
 			listener.contextAdded(event);
@@ -120,60 +119,60 @@ public class EventManager {
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				"context", context); //$NON-NLS-1$
+				CorpusEvent.CONTEXT_PROPERTY, context);
 
 		for(CorpusListener listener : listeners) {
 			listener.contextRemoved(event);
 		}
 	}
 
-	public void fireMemberAdded(CorpusMember member) {
-		if (member == null)
-			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
-
-		if(listeners.isEmpty()) {
-			return;
-		}
-
-		CorpusEvent event = new CorpusEvent(corpus,
-				"member", member); //$NON-NLS-1$
-
-		for(CorpusListener listener : listeners) {
-			listener.memberAdded(event);
-		}
-	}
-
-	public void fireMemberRemoved(CorpusMember member) {
-		if (member == null)
-			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
-
-		if(listeners.isEmpty()) {
-			return;
-		}
-
-		CorpusEvent event = new CorpusEvent(corpus,
-				"member", member); //$NON-NLS-1$
-
-		for(CorpusListener listener : listeners) {
-			listener.memberRemoved(event);
-		}
-	}
-
-	public void fireMemberChanged(CorpusMember member) {
-		if (member == null)
-			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
-
-		if(listeners.isEmpty()) {
-			return;
-		}
-
-		CorpusEvent event = new CorpusEvent(corpus,
-				"member", member); //$NON-NLS-1$
-
-		for(CorpusListener listener : listeners) {
-			listener.memberChanged(event);
-		}
-	}
+//	public void fireMemberAdded(CorpusMember member) {
+//		if (member == null)
+//			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+//
+//		if(listeners.isEmpty()) {
+//			return;
+//		}
+//
+//		CorpusEvent event = new CorpusEvent(corpus,
+//				"member", member); //$NON-NLS-1$
+//
+//		for(CorpusListener listener : listeners) {
+//			listener.memberAdded(event);
+//		}
+//	}
+//
+//	public void fireMemberRemoved(CorpusMember member) {
+//		if (member == null)
+//			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+//
+//		if(listeners.isEmpty()) {
+//			return;
+//		}
+//
+//		CorpusEvent event = new CorpusEvent(corpus,
+//				"member", member); //$NON-NLS-1$
+//
+//		for(CorpusListener listener : listeners) {
+//			listener.memberRemoved(event);
+//		}
+//	}
+//
+//	public void fireMemberChanged(CorpusMember member) {
+//		if (member == null)
+//			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
+//
+//		if(listeners.isEmpty()) {
+//			return;
+//		}
+//
+//		CorpusEvent event = new CorpusEvent(corpus,
+//				"member", member); //$NON-NLS-1$
+//
+//		for(CorpusListener listener : listeners) {
+//			listener.memberChanged(event);
+//		}
+//	}
 
 	public void fireMetaDataAdded(MetaData metaData, Layer layer) {
 		if (metaData == null)
@@ -186,7 +185,8 @@ public class EventManager {
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				"metadata", metaData, "layer", layer); //$NON-NLS-1$ //$NON-NLS-2$
+				CorpusEvent.METADATA_PROPERTY, metaData,
+				CorpusEvent.LAYER_PROPERTY, layer);
 
 		for(CorpusListener listener : listeners) {
 			listener.metaDataAdded(event);
@@ -204,42 +204,43 @@ public class EventManager {
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				"metadata", metaData, "layer", layer); //$NON-NLS-1$ //$NON-NLS-2$
+				CorpusEvent.METADATA_PROPERTY, metaData,
+				CorpusEvent.LAYER_PROPERTY, layer);
 
 		for(CorpusListener listener : listeners) {
 			listener.metaDataRemoved(event);
 		}
 	}
 
-	public void fireSegmentAdded(Segment segment) {
-		if (segment == null)
-			throw new NullPointerException("Invalid segment"); //$NON-NLS-1$
+	public void fireSubCorpuCreated(SubCorpus subCorpus) {
+		if (subCorpus == null)
+			throw new NullPointerException("Invalid subCorpus"); //$NON-NLS-1$
 
 		if(listeners.isEmpty()) {
 			return;
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				"segment", segment); //$NON-NLS-1$
+				CorpusEvent.SUBCORPUS_PROPERTY, subCorpus);
 
 		for(CorpusListener listener : listeners) {
-			listener.segmentAdded(event);
+			listener.subCorpuCreated(event);
 		}
 	}
 
-	public void fireSegmentRemoved(Segment segment) {
-		if (segment == null)
-			throw new NullPointerException("Invalid segment"); //$NON-NLS-1$
+	public void fireSubCorpusDestroyed(SubCorpus subCorpus) {
+		if (subCorpus == null)
+			throw new NullPointerException("Invalid subCorpus"); //$NON-NLS-1$
 
 		if(listeners.isEmpty()) {
 			return;
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				"segment", segment); //$NON-NLS-1$
+				CorpusEvent.SUBCORPUS_PROPERTY, subCorpus);
 
 		for(CorpusListener listener : listeners) {
-			listener.segmentRemoved(event);
+			listener.subCorpusDestroyed(event);
 		}
 	}
 }

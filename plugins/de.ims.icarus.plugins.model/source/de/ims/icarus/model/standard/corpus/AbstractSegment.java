@@ -38,8 +38,8 @@ import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.Scope;
-import de.ims.icarus.model.api.Segment;
-import de.ims.icarus.model.api.SegmentOwner;
+import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusOwner;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
 import de.ims.icarus.model.api.driver.IndexSet;
@@ -63,14 +63,14 @@ import de.ims.icarus.util.collections.LookupList;
  * @version $Id$
  *
  */
-abstract class AbstractSegment implements Segment {
+abstract class AbstractSegment implements SubCorpus {
 
 	private final DefaultCorpus corpus;
 	private final Query query;
 
 	private final Map<MarkableLayer, ProxyContainer> containers;
 
-	private final Set<SegmentOwner> owners = new IdentityHashSet<>();
+	private final Set<CorpusOwner> owners = new IdentityHashSet<>();
 	private volatile boolean closed = false;
 	private volatile boolean closing = false;
 
@@ -146,7 +146,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#getCorpus()
+	 * @see de.ims.icarus.model.api.SubCorpus#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -154,7 +154,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#getScope()
+	 * @see de.ims.icarus.model.api.SubCorpus#getScope()
 	 */
 	@Override
 	public Scope getScope() {
@@ -162,7 +162,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#getQuery()
+	 * @see de.ims.icarus.model.api.SubCorpus#getQuery()
 	 */
 	@Override
 	public Query getQuery() {
@@ -174,7 +174,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#getContainer(de.ims.icarus.model.api.layer.MarkableLayer)
+	 * @see de.ims.icarus.model.api.SubCorpus#getContainer(de.ims.icarus.model.api.layer.MarkableLayer)
 	 */
 	@Override
 	public Container getContainer(MarkableLayer layer) {
@@ -193,7 +193,7 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#closable()
+	 * @see de.ims.icarus.model.api.SubCorpus#closable()
 	 */
 	@Override
 	public boolean closable() {
@@ -206,20 +206,20 @@ abstract class AbstractSegment implements Segment {
 
 	/**
 	 * @throws InterruptedException
-	 * @see de.ims.icarus.model.api.Segment#close()
+	 * @see de.ims.icarus.model.api.SubCorpus#close()
 	 */
 	@Override
 	public void close() throws ModelException, InterruptedException {
 		synchronized (owners) {
 			checkOpen();
 
-			for(Iterator<SegmentOwner> it = owners.iterator(); it.hasNext();) {
-				SegmentOwner owner = it.next();
+			for(Iterator<CorpusOwner> it = owners.iterator(); it.hasNext();) {
+				CorpusOwner owner = it.next();
 
 				if(owner.release()) {
 					it.remove();
 				} else
-					throw new ModelException(ModelError.SEGMENT_OWNED,
+					throw new ModelException(ModelError.SUBCORPUS_UNCLOASABLE,
 							"Unable to close segment - could not release ownership of "+owner.getName()); //$NON-NLS-1$
 			}
 
@@ -287,20 +287,20 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#getOwners()
+	 * @see de.ims.icarus.model.api.SubCorpus#getOwners()
 	 */
 	@Override
-	public Set<SegmentOwner> getOwners() {
+	public Set<CorpusOwner> getOwners() {
 		synchronized (owners) {
 			return CollectionUtils.getSetProxy(owners);
 		}
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#acquire(de.ims.icarus.model.api.SegmentOwner)
+	 * @see de.ims.icarus.model.api.SubCorpus#acquire(de.ims.icarus.model.api.CorpusOwner)
 	 */
 	@Override
-	public void acquire(SegmentOwner owner) throws ModelException {
+	public void acquire(CorpusOwner owner) throws ModelException {
 		if (owner == null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 
@@ -316,10 +316,10 @@ abstract class AbstractSegment implements Segment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.Segment#release(de.ims.icarus.model.api.SegmentOwner)
+	 * @see de.ims.icarus.model.api.SubCorpus#release(de.ims.icarus.model.api.CorpusOwner)
 	 */
 	@Override
-	public void release(SegmentOwner owner) throws ModelException {
+	public void release(CorpusOwner owner) throws ModelException {
 		if (owner == null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 

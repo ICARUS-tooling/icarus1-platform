@@ -40,7 +40,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * used for a specific purpose. Each {@code scope} is defined by its
  * <i>primary layer</i> as returned by {@link #getPrimaryLayer()}. This
  * layer is used as the measure of granularity (Note that this layer
- * is bound to be a {@code MarkableLayer} or {@code StructureLayer}).
+ * is bound to be a {@code MarkableLayer} or a compatible class).
  * For every element in this layer that was declared loaded by the host
  * corpus, it is guaranteed that all required data of underlying layers that are
  * within this scope (as can be checked by {@link #containsLayer(Layer)}

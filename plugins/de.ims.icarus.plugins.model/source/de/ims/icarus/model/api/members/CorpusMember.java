@@ -44,7 +44,7 @@ public interface CorpusMember {
 
 	/**
 	 * Returns the corpus this member is a part of.
-	 * This call is usually forwarded to the host {@code Segment}
+	 * This call is usually forwarded to the host {@code SubCorpus}
 	 * @return The corpus this member is a part of
 	 */
 	Corpus getCorpus();

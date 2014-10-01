@@ -28,7 +28,7 @@ package de.ims.icarus.model.api.driver;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Scope;
-import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SubCorpus;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.driver.indexing.IndexStorage;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
@@ -156,15 +156,15 @@ public interface Driver {
 	Candidates mapIndices(MarkableLayer sourceLayer, MarkableLayer targetLayer, IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 
 	/**
-	 * Called by a {@link Segment} when it gets closed or it otherwise decided to discard its current
+	 * Called by a {@link SubCorpus} when it gets closed or it otherwise decided to discard its current
 	 * content. The driver is responsible for collecting the layer groups affected by the segment which
 	 * it is able handle and then release their content from its internal cache, potentially moving
 	 * members it no longer requires to a markable pool.
 	 *
 	 * @param container
-	 * @param segment
+	 * @param subCorpus
 	 */
-	void release(Segment segment) throws ModelException, InterruptedException;
+	void release(SubCorpus subCorpus) throws ModelException, InterruptedException;
 
 	/**
 	 * Called when a context is removed from a corpus or the entire model framework is shutting down.

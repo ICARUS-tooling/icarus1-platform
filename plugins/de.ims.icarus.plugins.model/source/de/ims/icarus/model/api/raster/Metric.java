@@ -23,29 +23,21 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api;
+package de.ims.icarus.model.api.raster;
 
-import de.ims.icarus.util.id.Identity;
+import de.ims.icarus.model.api.CorpusModel;
+import de.ims.icarus.model.api.members.Markable;
 
 /**
- * Represents a single owner that can acquire partial ownership of a {@link Segment}.
- * A segment will be prevented from being closed as long as at least one registered
- * owner still holds partial ownership of it. Note that each {@code SegmentOwner} can
- * only hold partial ownership to at most one segment object at any given time!
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface SegmentOwner extends Identity {
+public interface Metric {
 
-	/**
-	 * Attempts to release the owners's hold on the one single segment it currently owns.
-	 * If the owner could successfully stop its current processing of the segment and was
-	 * able to disconnect from the segment, this method returns {@code true}. A return
-	 * value of {@code false} indicates, that the owner was unable to release connected
-	 * resources and that the segment will continue to be prevented from getting closed.
-	 * @return
-	 */
-	boolean release();
+	long distance(CorpusModel model, Markable m1, Markable m2);
+
+	boolean overlaps(CorpusModel model, Markable m1, Markable m2);
+
+	boolean contains(CorpusModel model, Markable m1, Markable m2);
 }

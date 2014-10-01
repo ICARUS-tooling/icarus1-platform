@@ -89,13 +89,22 @@ public class CorpusEditModel extends WeakEventSource {
 
 			try {
 				if (endingUpdate && !currentEdit.isEmpty()) {
+					// Notify listeners about imminent undoable edit
 					fireEvent(new EventObject(CorpusEditEvents.BEFORE_UNDO, "edit", //$NON-NLS-1$
 							currentEdit));
+
+					// Copy and then reset current edit
 					UndoableCorpusEdit tmp = currentEdit;
 					currentEdit = createUndoableEdit(null);
+
+					// Allow edit to manage notification (per default this will fire a "change" event)
 					tmp.dispatch();
+
+					// Notify listeners about executed undoable edit
 					fireEvent(new EventObject(CorpusEditEvents.UNDO, "edit", tmp)); //$NON-NLS-1$
 
+					// Finally dispatch the edit so undo managers and other specialized
+					// listeners can handle or accumulate it
 					fireUndoableCorpusEdit(tmp);
 				}
 			} finally {
@@ -107,7 +116,7 @@ public class CorpusEditModel extends WeakEventSource {
 	/**
 	 * @return
 	 */
-	protected UndoableCorpusEdit createUndoableEdit(String nameKey) {
+	protected UndoableCorpusEdit createUndoableEdit(final String nameKey) {
 		return new UndoableCorpusEdit(getCorpus(), nameKey)
 		{
 
@@ -165,7 +174,7 @@ public class CorpusEditModel extends WeakEventSource {
 	 * Note that a change will only trigger a {@value CorpusEditEvents#EXECUTE}
 	 * event the first time it is executed by the model. Subsequent executions
 	 * (when undoing or redoing a change) will {@code not} result in events being
-	 * fired for every atomic change!
+	 * fired for every atomic change, only for top level changes as a whole!
 	 *
 	 * @param change
 	 * @throws UnsupportedOperationException if the corpus is not editable

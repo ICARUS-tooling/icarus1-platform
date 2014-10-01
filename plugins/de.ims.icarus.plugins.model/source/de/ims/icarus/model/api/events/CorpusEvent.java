@@ -30,6 +30,7 @@ import java.util.Map;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
+import de.ims.icarus.model.api.SubCorpus;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
@@ -135,29 +136,43 @@ public class CorpusEvent {
 		return corpus;
 	}
 
+	// PROPERTY CONSTANTS
+
+	public static final String CONTEXT_PROPERTY = "context"; //$NON-NLS-1$
+	public static final String MEMBER_PROPERTY = "member"; //$NON-NLS-1$
+	public static final String LAYER_PROPERTY = "layer"; //$NON-NLS-1$
+	public static final String CONTAINER_PROPERTY = "container"; //$NON-NLS-1$
+	public static final String STRUCTURE_PROPERTY = "structure"; //$NON-NLS-1$
+	public static final String METADATA_PROPERTY = "metadata"; //$NON-NLS-1$
+	public static final String SUBCORPUS_PROPERTY = "subCorpus"; //$NON-NLS-1$
+
 	// HELPER METHODS
 
 	public Context getContext() {
-		return (Context) getProperty("context"); //$NON-NLS-1$
+		return (Context) getProperty(CONTEXT_PROPERTY);
 	}
 
 	public CorpusMember getMember() {
-		return (CorpusMember) getProperty("member"); //$NON-NLS-1$
+		return (CorpusMember) getProperty(MEMBER_PROPERTY);
 	}
 
 	public Layer getLayer() {
-		return (Layer) getProperty("layer"); //$NON-NLS-1$
+		return (Layer) getProperty(LAYER_PROPERTY);
 	}
 
 	public Container getContainer() {
-		return (Container) getProperty("container"); //$NON-NLS-1$
+		return (Container) getProperty(CONTAINER_PROPERTY);
 	}
 
 	public Structure getStructure() {
-		return (Structure) getProperty("structure"); //$NON-NLS-1$
+		return (Structure) getProperty(STRUCTURE_PROPERTY);
 	}
 
 	public MetaData getMetaData() {
-		return (MetaData) getProperty("metadata"); //$NON-NLS-1$
+		return (MetaData) getProperty(METADATA_PROPERTY);
+	}
+
+	public SubCorpus getSubCorpus() {
+		return (SubCorpus) getProperty(SUBCORPUS_PROPERTY);
 	}
 }

@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.meta;
 import java.util.Set;
 
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
-import de.ims.icarus.model.standard.ProxyIdentity;
+import de.ims.icarus.model.util.ProxyIdentity;
 import de.ims.icarus.model.util.types.ValueType;
 
 /**

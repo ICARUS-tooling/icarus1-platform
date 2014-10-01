@@ -58,7 +58,7 @@ public class CharacterRasterizer1D implements Rasterizer {
 
 	private void checkAxis(int axis) {
 		if(axis!=0)
-			throw new IllegalArgumentException("Invalid sharedAxis: "+axis); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid axis id: "+axis); //$NON-NLS-1$
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class CharacterRasterizer1D implements Rasterizer {
 		 */
 		@Override
 		public String getId() {
-			return getClass().getName();
+			return "CharacterAxis"; //$NON-NLS-1$
 		}
 
 		/**

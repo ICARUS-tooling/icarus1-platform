@@ -26,7 +26,6 @@
 package de.ims.icarus.model.api.events;
 
 import de.ims.icarus.model.api.Context;
-import de.ims.icarus.model.api.Corpus;
 
 /**
  *
@@ -77,48 +76,48 @@ public interface CorpusListener {
 	 */
 	void contextRemoved(CorpusEvent e);
 
-	/**
-	 * A new member was added to the corpus.
-	 * <p>
-	 * This can be anything from a bare atomic markable, over
-	 * a container, structure, edge or layer.
-	 * <p>
-	 * The {@code "member"} property holds the {@code CorpusMember}
-	 * that was added.
-	 *
-	 * @param e
-	 */
-	void memberAdded(CorpusEvent e);
-
-	/**
-	 * A new member was removed from the corpus.
-	 * <p>
-	 * This can be anything from a bare atomic markable, over
-	 * a container, structure, edge or layer. Note that as a general rule
-	 * this event should hold the top-most member involved in
-	 * an remove operation. So if an entire container was removed a single
-	 * event should be fired for that container alone and not for every
-	 * markable object it hosted.
-	 * <p>
-	 * The {@code "member"} property holds the {@code CorpusMember}
-	 * that was removed.
-	 *
-	 * @param e
-	 */
-	void memberRemoved(CorpusEvent e);
-
-	/**
-	 * A new member was changed.
-	 * <p>
-	 * This event only fires on descriptor-based changes as defined in the
-	 * {@link Corpus} documentation.
-	 * <p>
-	 * The {@code "member"} property holds the {@code CorpusMember}
-	 * that was changed.
-	 *
-	 * @param e
-	 */
-	void memberChanged(CorpusEvent e);
+//	/**
+//	 * A new member was added to the corpus.
+//	 * <p>
+//	 * This can be anything from a bare atomic markable, over
+//	 * a container, structure, edge or layer.
+//	 * <p>
+//	 * The {@code "member"} property holds the {@code CorpusMember}
+//	 * that was added.
+//	 *
+//	 * @param e
+//	 */
+//	void memberAdded(CorpusEvent e);
+//
+//	/**
+//	 * A member was removed from the corpus.
+//	 * <p>
+//	 * This can be anything from a bare atomic markable, over
+//	 * a container, structure, edge or layer. Note that as a general rule
+//	 * this event should hold the top-most member involved in
+//	 * an remove operation. So if an entire container was removed a single
+//	 * event should be fired for that container alone and not for every
+//	 * markable object it hosted.
+//	 * <p>
+//	 * The {@code "member"} property holds the {@code CorpusMember}
+//	 * that was removed.
+//	 *
+//	 * @param e
+//	 */
+//	void memberRemoved(CorpusEvent e);
+//
+//	/**
+//	 * A member was changed.
+//	 * <p>
+//	 * This event only fires on descriptor-based changes as defined in the
+//	 * {@link Corpus} documentation.
+//	 * <p>
+//	 * The {@code "member"} property holds the {@code CorpusMember}
+//	 * that was changed.
+//	 *
+//	 * @param e
+//	 */
+//	void memberChanged(CorpusEvent e);
 
 	/**
 	 * A new {@code MetaData} object was added to the corpus
@@ -146,7 +145,7 @@ public interface CorpusListener {
 	 */
 	void metaDataRemoved(CorpusEvent e);
 
-	void segmentAdded(CorpusEvent e);
+	void subCorpuCreated(CorpusEvent e);
 
-	void segmentRemoved(CorpusEvent e);
+	void subCorpusDestroyed(CorpusEvent e);
 }

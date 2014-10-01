@@ -26,7 +26,7 @@
 package de.ims.icarus.model.api.members;
 
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SubCorpus;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
@@ -41,23 +41,6 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  */
 @AccessControl(AccessPolicy.DENY)
 public interface Markable extends CorpusMember, Comparable<Markable> {
-
-//	/**
-//	 * Returns the text fragment of the underlying corpus this
-//	 * {@code Markable} covers. Note that this does not necessarily
-//	 * have to be continuous text. For example an {@link Edge} would
-//	 * concatenate the text portions covered by its source and target
-//	 * {@code Markable}s respectively (typically separated by some sort
-//	 * of delimiter).
-//	 * <p>
-//	 * Note that when dealing with {@code Container}s it is advised
-//	 * to cache results of the {@link #getText()} calls since they might
-//	 * be expensive to create depending on the 'size' of the container.
-//	 *
-//	 * @return The portion of text this markable covers in the underlying corpus.
-//	 */
-	// TODO evaluate if we need it here or better leave it to the form layer
-//	String getText();
 
 	/**
 	 * If this markable is hosted within a container, returns that enclosing
@@ -99,7 +82,7 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * {@link Container#indexOfMarkable(Markable)}! The latter is limited to integer values
 	 * and returns the <i>current</i> position of a markable within that container's internal storage.
 	 * This index can change over time and is most likely different when using containers from
-	 * multiple {@link Segment}s.
+	 * multiple {@link SubCorpus}s.
 	 * The result of the {@code #getIndex()} method on the other features a much larger value space
 	 * and is constant, no matter where the markable in question is stored. The only way to modify
 	 * a markable's index is to remove or insert other markables into the underlying data.

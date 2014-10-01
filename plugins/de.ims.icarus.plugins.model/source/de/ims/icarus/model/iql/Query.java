@@ -72,4 +72,6 @@ public interface Query {
 
 	@Override
 	String toString();
+
+	//TODO add access to deeper parts of the query like constraints etc
 }

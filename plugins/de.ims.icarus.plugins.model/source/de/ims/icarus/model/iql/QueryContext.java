@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.iql;
 
-import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SubCorpus;
 
 /**
  * @author Markus Gärtner
@@ -36,7 +36,7 @@ public interface QueryContext {
 
 	Query getQuery();
 
-	Segment getTarget();
+	SubCorpus getTarget();
 
 
 }

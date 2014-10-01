@@ -57,21 +57,21 @@ public class CorpusAdapter implements CorpusListener {
 		// no-op
 	}
 
-	/**
-	 * @see de.ims.icarus.model.api.events.CorpusListener#memberAdded(de.ims.icarus.model.api.events.CorpusEvent)
-	 */
-	@Override
-	public void memberAdded(CorpusEvent e) {
-		// no-op
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.events.CorpusListener#memberRemoved(de.ims.icarus.model.api.events.CorpusEvent)
-	 */
-	@Override
-	public void memberRemoved(CorpusEvent e) {
-		// no-op
-	}
+//	/**
+//	 * @see de.ims.icarus.model.api.events.CorpusListener#memberAdded(de.ims.icarus.model.api.events.CorpusEvent)
+//	 */
+//	@Override
+//	public void memberAdded(CorpusEvent e) {
+//		// no-op
+//	}
+//
+//	/**
+//	 * @see de.ims.icarus.model.api.events.CorpusListener#memberRemoved(de.ims.icarus.model.api.events.CorpusEvent)
+//	 */
+//	@Override
+//	public void memberRemoved(CorpusEvent e) {
+//		// no-op
+//	}
 
 	/**
 	 * @see de.ims.icarus.model.api.events.CorpusListener#metaDataAdded(de.ims.icarus.model.api.events.CorpusEvent)
@@ -97,27 +97,27 @@ public class CorpusAdapter implements CorpusListener {
 		// no-op
 	}
 
+//	/**
+//	 * @see de.ims.icarus.model.api.events.CorpusListener#memberChanged(de.ims.icarus.model.api.events.CorpusEvent)
+//	 */
+//	@Override
+//	public void memberChanged(CorpusEvent e) {
+//		// no-op
+//	}
+
 	/**
-	 * @see de.ims.icarus.model.api.events.CorpusListener#memberChanged(de.ims.icarus.model.api.events.CorpusEvent)
+	 * @see de.ims.icarus.model.api.events.CorpusListener#subCorpuCreated(de.ims.icarus.model.api.events.CorpusEvent)
 	 */
 	@Override
-	public void memberChanged(CorpusEvent e) {
+	public void subCorpuCreated(CorpusEvent e) {
 		// no-op
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.events.CorpusListener#segmentAdded(de.ims.icarus.model.api.events.CorpusEvent)
+	 * @see de.ims.icarus.model.api.events.CorpusListener#subCorpusDestroyed(de.ims.icarus.model.api.events.CorpusEvent)
 	 */
 	@Override
-	public void segmentAdded(CorpusEvent e) {
-		// no-op
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.events.CorpusListener#segmentRemoved(de.ims.icarus.model.api.events.CorpusEvent)
-	 */
-	@Override
-	public void segmentRemoved(CorpusEvent e) {
+	public void subCorpusDestroyed(CorpusEvent e) {
 		// no-op
 	}
 

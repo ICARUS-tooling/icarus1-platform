@@ -30,10 +30,25 @@ package de.ims.icarus.model.api;
  * @version $Id$
  *
  */
-public enum AccessMode {
+public enum CorpusAccessMode {
 
-	READ,
-	WRITE,
-	READ_WRITE,
+	READ(true, false),
+	WRITE(false, true),
+	READ_WRITE(true, true),
 	;
+
+	private final boolean read, write;
+
+	private CorpusAccessMode(boolean read, boolean write) {
+		this.read = read;
+		this.write = write;
+	}
+
+	public boolean isRead() {
+		return read;
+	}
+
+	public boolean isWrite() {
+		return write;
+	}
 }

@@ -29,7 +29,7 @@ import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.Scope;
-import de.ims.icarus.model.api.Segment;
+import de.ims.icarus.model.api.SubCorpus;
 import de.ims.icarus.model.api.driver.Candidates;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
@@ -167,10 +167,10 @@ public abstract class AbstractDriver implements Driver {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.driver.Driver#releaseContainer(de.ims.icarus.model.api.Container, de.ims.icarus.model.api.Segment)
+	 * @see de.ims.icarus.model.api.driver.Driver#releaseContainer(de.ims.icarus.model.api.Container, de.ims.icarus.model.api.SubCorpus)
 	 */
 	@Override
-	public void release(Segment segment) {
+	public void release(SubCorpus subCorpus) {
 		// TODO Auto-generated method stub
 
 	}
