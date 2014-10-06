@@ -25,12 +25,10 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
-import de.ims.icarus.plugins.prosody.painte.PaIntEOperator;
-import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
-import de.ims.icarus.search_tools.standard.GroupCache;
 
 /**
  * @author Markus Gärtner
@@ -42,106 +40,24 @@ public abstract class AbstractParameterizedPaIntEConstraint extends AbstractPros
 	private static final long serialVersionUID = -8403821633243469371L;
 
 	protected final PaIntEConstraintParams valueParams = new PaIntEConstraintParams();
-
-	protected PaIntEOperator painteOperator;
+	protected PaIntEConstraintParams specifierParams;
 
 	public AbstractParameterizedPaIntEConstraint(String token, Object value,
 			SearchOperator operator, Object specifier) {
 		super(token, value, operator, specifier);
 	}
 
-	public PaIntEOperator getPainteOperator() {
-		return painteOperator;
-	}
-
-	public void setPainteOperator(PaIntEOperator painteOperator) {
-		if (painteOperator == null)
-			throw new NullPointerException("Invalid painteOperator"); //$NON-NLS-1$
-
-		this.painteOperator = painteOperator;
-
-		Object value = getValue();
-		if(value!=null) {
-			String params = (String) value;
-			painteOperator.setParams(params);
-		}
-	}
-
-	@Override
-	public void setValue(Object value) {
-		super.setValue(value);
-
-		if(painteOperator!=null) {
-			String params = (String) value;
-			painteOperator.setParams(params);
-		}
-	}
-
-	@Override
-	public void setOperator(SearchOperator operator) {
-		super.setOperator(operator);
-
-		setPainteOperator(createPaIntEOperator(operator));
-	}
-
-	protected abstract PaIntEOperator createPaIntEOperator(SearchOperator operator);
-
 	@Override
 	public void setSpecifier(Object specifier) {
-		throw new UnsupportedOperationException();
-	}
+		super.setSpecifier(specifier);
 
-	/**
-	 * @see de.ims.icarus.search_tools.SearchConstraint#matches(java.lang.Object)
-	 */
-	@Override
-	public boolean matches(Object value) {
-		ProsodyTargetTree tree = (ProsodyTargetTree) value;
-
-		if(tree.hasSyllables()) {
-
-			PaIntEOperator operator = getPainteOperator();
-
-			for(int i=0; i<tree.getSyllableCount(); i++) {
-				if(operator.apply(getInstance(tree, i))) {
-					return true;
-				}
+		String s = (String)specifier;
+		if(s!=null && !LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
+			if(specifierParams==null) {
+				specifierParams = new PaIntEConstraintParams();
 			}
+
+			specifierParams.setParams(s);
 		}
-
-		return false;
 	}
-
-	@Override
-	public boolean matches(Object value, int syllable) {
-		ProsodyTargetTree tree = (ProsodyTargetTree) value;
-
-		if(tree.hasSyllables()) {
-
-			PaIntEOperator operator = getPainteOperator();
-
-			return operator.apply(getInstance(tree, syllable));
-		}
-
-		return false;
-	}
-
-	@Override
-	public void group(GroupCache cache, int groupId, Object value) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Object getLabel(Object value) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected PaIntEConstraintParams getInstance(ProsodyTargetTree tree, int syllable) {
-
-		valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
-
-		return valueParams;
-	}
-
 }

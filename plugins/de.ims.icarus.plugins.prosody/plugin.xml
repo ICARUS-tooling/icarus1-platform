@@ -213,6 +213,7 @@
 		<parameter id="token" value="section" />
 		<parameter id="token" value="painteIntegral" />
 		<parameter id="token" value="painteCurve" />
+		<parameter id="token" value="painteAngle" />
 		<parameter id="factories">
 			<!-- factories "inherited" by dependency data -->
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
@@ -226,6 +227,7 @@
 			<parameter id="section" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyRelativeWordPositionConstraintFactory" />
 			<parameter id="painteIntegral" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEIntegralConstraintFactory" />
 			<parameter id="painteCurve" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntECurveConstraintFactory" />
+			<parameter id="painteAngle" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEAngleConstraintFactory" />
 		</parameter>
 	</extension>
 	

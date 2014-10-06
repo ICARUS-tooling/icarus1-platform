@@ -109,7 +109,7 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Serializable 
 
 	@Override
 	public String toString() {
-		return (label==null ? "" : label)+":"+params.toString();
+		return (label==null ? "" : label)+":"+params.toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }
