@@ -46,7 +46,7 @@ public class ProsodyAccentShapeConstraintFactory extends AbstractConstraintFacto
 
 	public static final String TOKEN = "accentShape"; //$NON-NLS-1$
 
-	private static final String CONFIG_PATH = "plugins.prosody.search"; //$NON-NLS-1$
+	private static final String CONFIG_PATH = "plugins.prosody.search.accentShape"; //$NON-NLS-1$
 
 	public ProsodyAccentShapeConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
@@ -114,10 +114,10 @@ public class ProsodyAccentShapeConstraintFactory extends AbstractConstraintFacto
 			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
 			Handle handle = registry.getHandle(CONFIG_PATH);
 
-			excursion = registry.getInteger(registry.getChildHandle(handle, "accentShapeExcursion")); //$NON-NLS-1$
-			delta = registry.getInteger(registry.getChildHandle(handle, "accentShapeDelta")); //$NON-NLS-1$
-			minB = registry.getDouble(registry.getChildHandle(handle, "accentShapeMinB")); //$NON-NLS-1$
-			maxB = registry.getDouble(registry.getChildHandle(handle, "accentShapeMaxB")); //$NON-NLS-1$
+			excursion = registry.getInteger(registry.getChildHandle(handle, "excursion")); //$NON-NLS-1$
+			delta = registry.getInteger(registry.getChildHandle(handle, "delta")); //$NON-NLS-1$
+			minB = registry.getDouble(registry.getChildHandle(handle, "minB")); //$NON-NLS-1$
+			maxB = registry.getDouble(registry.getChildHandle(handle, "maxB")); //$NON-NLS-1$
 		}
 
 		@Override

@@ -35,7 +35,7 @@ import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
-import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
@@ -101,6 +101,7 @@ public class ProsodyPreferences {
 		builder.addOptionsEntry("antiAliasingType", PanelConfig.DEFAULT_ANTIALIASING_TYPE.ordinal(), //$NON-NLS-1$
 				(Object[])AntiAliasingType.values());
 		builder.addBooleanEntry("mouseWheelScrollSupported", PanelConfig.DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED); //$NON-NLS-1$
+		builder.addColorEntry("backgroundColor", PanelConfig.DEFAULT_BACKGROUND_COLOR); //$NON-NLS-1$N-NLS-1$
 		builder.addBooleanEntry("loopSound", PanelConfig.DEFAULT_LOOP_SOUND); //$NON-NLS-1$
 		builder.addColorEntry("wordAlignmentColor", PanelConfig.DEFAULT_WORD_ALIGNMENT_COLOR); //$NON-NLS-1$N-NLS-1$
 		builder.addColorEntry("syllableAlignmentColor", PanelConfig.DEFAULT_SYLLABLE_ALIGNMENT_COLOR); //$NON-NLS-1$
@@ -186,24 +187,24 @@ public class ProsodyPreferences {
 		builder.addDoubleEntry("a1LowerBound", -20.0, -1000.0, 0.0, 0.01); //$NON-NLS-1$
 		builder.addDoubleEntry("a1UpperBound", 20.0, 0.0, 1000.0, 0.01); //$NON-NLS-1$
 		builder.addDoubleEntry("a1Default", 4.4, -1000.0, 1000.0, 0.01); //$NON-NLS-1$
-		builder.addDoubleEntry("a2LowerBound", -20.0); //$NON-NLS-1$
-		builder.addDoubleEntry("a2UpperBound", 20.0); //$NON-NLS-1$
-		builder.addDoubleEntry("a2Default", 6.72); //$NON-NLS-1$
-		builder.addDoubleEntry("bLowerBound", -3.0); //$NON-NLS-1$
-		builder.addDoubleEntry("bUpperBound", 3.0); //$NON-NLS-1$
-		builder.addDoubleEntry("bDefault", 0.57); //$NON-NLS-1$
-		builder.addDoubleEntry("c1LowerBound", 0.0); //$NON-NLS-1$
-		builder.addDoubleEntry("c1UpperBound", 150.0); //$NON-NLS-1$
-		builder.addDoubleEntry("c1Default", 133.35); //$NON-NLS-1$
-		builder.addDoubleEntry("c2LowerBound", 0.0); //$NON-NLS-1$
-		builder.addDoubleEntry("c2UpperBound", 150.0); //$NON-NLS-1$
-		builder.addDoubleEntry("c2Default", 66.30); //$NON-NLS-1$
-		builder.addDoubleEntry("dLowerBound", 50.0); //$NON-NLS-1$
-		builder.addDoubleEntry("dUpperBound", 200.0); //$NON-NLS-1$
-		builder.addDoubleEntry("dDefault", 189.0); //$NON-NLS-1$
-		builder.addDoubleEntry("alignmentLowerBound", 0.0); //$NON-NLS-1$
-		builder.addDoubleEntry("alignmentUpperBound", 10.0); //$NON-NLS-1$
-		builder.addDoubleEntry("alignmentDefault", PaIntEParams.DEFAULT_ALIGNMENT); //$NON-NLS-1$
+		builder.addDoubleEntry("a2LowerBound", -20.0, -1000.0, 0.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("a2UpperBound", 20.0, 0.0, 1000.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("a2Default", 6.72, -1000.0, 1000.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("bLowerBound", -3.0, -5.0, 0.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("bUpperBound", 3.0, 0.0, 5.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("bDefault", 0.57, -5.0, 5.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("c1LowerBound", 0.0, 0.0, 100.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("c1UpperBound", 150.0, 100.0, 300.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("c1Default", 133.35, 0.0, 300.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("c2LowerBound", 0.0, 0.0, 100.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("c2UpperBound", 150.0, 100.0, 300.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("c2Default", 66.30, 0.0, 300.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("dLowerBound", 50.0, 0.0, 100.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("dUpperBound", 200.0, 100.0, 300.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("dDefault", 189.0, 100.0, 300.0, 1.0); //$NON-NLS-1$
+		builder.addDoubleEntry("alignmentLowerBound", 0.0, 0.0, 5.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("alignmentUpperBound", 10.0, 5.0, 20.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("alignmentDefault", PaIntEParams.DEFAULT_ALIGNMENT, 0.0, 20.0, 0.01); //$NON-NLS-1$
 
 		// END PAINTE EDITOR GROUP
 		builder.back();
@@ -239,12 +240,40 @@ public class ProsodyPreferences {
 		// SEARCH GROUP
 		builder.addGroup("search", true); //$NON-NLS-1$
 
+		// ACCENT SHAPE SUBGROUP
+		builder.addGroup("accentShape", true); //$NON-NLS-1$
+		builder.virtual();
+
 		// Minimum difference between c values
-		builder.addIntegerEntry("accentShapeDelta", 10, 0, 50); //$NON-NLS-1$
+		builder.addIntegerEntry("delta", 10, 0, 50); //$NON-NLS-1$
 		// => Minimum values for c1 and c2
-		builder.addIntegerEntry("accentShapeExcursion", 30, 10, 150); //$NON-NLS-1$
-		builder.addDoubleEntry("accentShapeMinB", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
-		builder.addDoubleEntry("accentShapeMaxB", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addIntegerEntry("excursion", 30, 10, 150); //$NON-NLS-1$
+		builder.addDoubleEntry("minB", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("maxB", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
+
+		// END ACCENT SHAPE SUBGROUP
+		builder.back();
+
+		// PAINTE INTEGRAL SUBGROUP
+		builder.addGroup("painteIntegral", true); //$NON-NLS-1$
+		builder.virtual();
+
+		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("rightBorder", 1.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+
+		// END PAINTE INTEGRAL SUBGROUP
+		builder.back();
+
+		// PAINTE CURVE SUBGROUP
+		builder.addGroup("painteCurve", true); //$NON-NLS-1$
+		builder.virtual();
+
+		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("rightBorder", 1.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addIntegerEntry("resolution", 100, 20, 300, 1); //$NON-NLS-1$
+
+		// END PAINTE CURVE SUBGROUP
+		builder.back();
 
 		// END SEARCH GROUP
 		builder.back();

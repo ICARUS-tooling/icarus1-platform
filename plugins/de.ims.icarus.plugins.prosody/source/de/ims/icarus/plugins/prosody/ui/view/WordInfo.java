@@ -31,7 +31,6 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
 public class WordInfo extends PartInfo {
 	private final int wordIndex;
-	private String[] lines;
 	private int curveWidth;
 	private final SyllableInfo[] syllables;
 	private final float minD, maxD;
@@ -91,10 +90,6 @@ public class WordInfo extends PartInfo {
 		return syllables==null ? 0 : syllables.length;
 	}
 
-	public String[] getLines() {
-		return lines;
-	}
-
 	public boolean hasSyllables() {
 		return syllables!=null && syllables.length>0;
 	}
@@ -117,10 +112,6 @@ public class WordInfo extends PartInfo {
 
 	public SyllableInfo syllableInfo(int sylIndex) {
 		return syllables[sylIndex];
-	}
-
-	public void setLines(String[] lines) {
-		this.lines = lines;
 	}
 
 	/**

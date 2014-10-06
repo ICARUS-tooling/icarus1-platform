@@ -130,9 +130,9 @@ public class ProsodyHighlighting extends BitmaskHighlighting {
 				continue;
 			}
 
-			if(!(constraint instanceof SyllableConstraint)) {
-				continue;
-			}
+//			if(!(constraint instanceof SyllableConstraint)) {
+//				continue;
+//			}
 
 			int offset = getOffset(constraint.getToken());
 
@@ -147,7 +147,8 @@ public class ProsodyHighlighting extends BitmaskHighlighting {
 				}
 
 				highlight |= (group << (offset+1));
-			} else if(!((SyllableConstraint)constraint).matches(targetTree, sylIndex)) {
+			} else if(!(constraint instanceof SyllableConstraint)
+					|| !((SyllableConstraint)constraint).matches(targetTree, sylIndex)) {
 				continue;
 			}
 

@@ -23,15 +23,15 @@
  * $LastChangedRevision: 269 $
  * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.plugins.prosody.search.constraints;
+package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
-import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
-import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
@@ -40,39 +40,31 @@ import de.ims.icarus.util.Options;
  * @version $Id: DependencyRelationConstraintFactory.java 269 2014-07-07 22:09:53Z mcgaerty $
  *
  */
-public class ProsodySyllableCountConstraintFactory extends AbstractConstraintFactory {
+public class PaIntESetConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
 
-	public static final String TOKEN = "sylCount"; //$NON-NLS-1$
+	public static final String TOKEN = "painteSet"; //$NON-NLS-1$
 
-	public ProsodySyllableCountConstraintFactory() {
+	public PaIntESetConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.prosody.constraints.sylCount.name",  //$NON-NLS-1$
-				"plugins.prosody.constraints.sylCount.description"); //$NON-NLS-1$
+				"plugins.prosody.constraints.painteSet.name",  //$NON-NLS-1$
+				"plugins.prosody.constraints.painteSet.description"); //$NON-NLS-1$
 	}
 
 	@Override
 	public SearchOperator[] getSupportedOperators() {
-		return DefaultSearchOperator.numerical();
+		return new SearchOperator[]{
+				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.EQUALS_NOT,
+				DefaultSearchOperator.LESS_THAN,
+				DefaultSearchOperator.LESS_OR_EQUAL,
+				DefaultSearchOperator.GREATER_THAN,
+				DefaultSearchOperator.GREATER_OR_EQUAL,
+		};
 	}
 
 	@Override
 	public Class<?> getValueClass(Object specifier) {
-		return Integer.class;
-	}
-
-	@Override
-	public Object getDefaultValue(Object specifier) {
-		return LanguageConstants.DATA_UNDEFINED_VALUE;
-	}
-
-	@Override
-	public Object labelToValue(Object label, Object specifier) {
-		return LanguageUtils.parseIntegerLabel((String) label);
-	}
-
-	@Override
-	public Object valueToLabel(Object value, Object specifier) {
-		return LanguageUtils.getLabel((int)value);
+		return String.class;
 	}
 
 	/**
@@ -81,25 +73,37 @@ public class ProsodySyllableCountConstraintFactory extends AbstractConstraintFac
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new ProsodySyllableCountConstraint(value, operator);
+		return new ProsodyPaIntESetConstraint(value, operator);
 	}
 
-	private static class ProsodySyllableCountConstraint extends DefaultConstraint {
+	private static class ProsodyPaIntESetConstraint extends AbstractProsodySyllableConstraint {
 
-		private static final long serialVersionUID = -2819824788436110048L;
+		private static final long serialVersionUID = 7309790344228778387L;
 
-		public ProsodySyllableCountConstraint(Object value, SearchOperator operator) {
-			super(TOKEN, value, operator);
+		private final transient PaIntEConstraintParams painteConstraints;
+
+		public ProsodyPaIntESetConstraint(Object value, SearchOperator operator) {
+			super(TOKEN, value, operator, null);
+
+			if(!DATA_UNDEFINED_LABEL.equals(value)
+					&& !DATA_GROUP_LABEL.equals(value)) {
+				painteConstraints = new PaIntEConstraintParams((String) value);
+			} else {
+				painteConstraints = null;
+			}
+		}
+
+		private transient PaIntEConstraintParams instance = new PaIntEConstraintParams();
+
+		@Override
+		public Object getInstance(ProsodyTargetTree tree, int sylIndex) {
+			instance.setParams(tree.getSource(), tree.getNodeIndex(), sylIndex);
+			return instance;
 		}
 
 		@Override
-		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getSyllableCount();
-		}
-
-		@Override
-		public SearchConstraint clone() {
-			return new ProsodySyllableCountConstraint(getValue(), getOperator());
+		public Object getLabel(Object value) {
+			return (value instanceof PaIntEConstraintParams) ? value.toString() : value;
 		}
 	}
 }

@@ -94,6 +94,13 @@
 		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter.GraphBasedPresenter" />
 	</extension>
 	
+	<extension id="ProsodySentenceDetailPresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
+		<parameter id="name" value="plugins.prosody.prosodySentenceDetailPresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySentenceDetailPresenter.identity.name" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.details.ProsodySentenceDetailPresenter" />
+	</extension>
+	
 	<extension id="ProsodySentenceGraphPresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
 		<parameter id="name" value="plugins.prosody.prosodySentenceGraphPresenter.identity.name" />
 		<parameter id="description" value="plugins.prosody.prosodySentenceGraphPresenter.identity.name" />
@@ -149,7 +156,7 @@
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.geom.GridStyle" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.PreviewSize" />
-		<parameter id="class" value="de.ims.icarus.plugins.prosody.params.PaIntEParams" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.painte.PaIntEParams" />
 	</extension>
 	
 	<!-- CONTENT TYPES -->
@@ -175,10 +182,10 @@
 	<extension id="PainteParamsContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on de.ims.icarus.plugins.prosody.params.PaIntEParams
+				Content type based on de.ims.icarus.plugins.prosody.painte.PaIntEParams
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.params.PaIntEParams" />
+		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.painte.PaIntEParams" />
 	</extension>
 	
 	<extension id="ProsodicAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
@@ -196,39 +203,29 @@
 		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
 		<!-- tokens "inherited" by dependency data -->
 		<parameter id="token" value="form" />
-		<parameter id="token" value="lemma" />
 		<parameter id="token" value="pos" />
-		<parameter id="token" value="features" />
-		<parameter id="token" value="relation" />
-		<parameter id="token" value="distance" />
-		<parameter id="token" value="direction" />
-		<parameter id="token" value="projectivity" />
 		<!-- new tokens -->
 		<parameter id="token" value="syllableProperty" />
 		<parameter id="token" value="wordProperty" />
 		<parameter id="token" value="sylCount" />
-		<parameter id="token" value="entity" />
-		<parameter id="token" value="speaker" />
-		<parameter id="token" value="speakerFeatures" />
 		<parameter id="token" value="accentShape" />
+		<parameter id="token" value="wordPos" />
+		<parameter id="token" value="section" />
+		<parameter id="token" value="painteIntegral" />
+		<parameter id="token" value="painteCurve" />
 		<parameter id="factories">
 			<!-- factories "inherited" by dependency data -->
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
-			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.constraints.DependencyLemmaConstraintFactory" />
 			<parameter id="pos" value="de.ims.icarus.language.dependency.search.constraints.DependencyPosConstraintFactory" />
-			<parameter id="features" value="de.ims.icarus.language.dependency.search.constraints.DependencyFeaturesConstraintFactory" />
-			<parameter id="relation" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelationConstraintFactory" />
-			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
-			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
-			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
 			<!-- new factories -->
 			<parameter id="syllableProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllablePropertyConstraintFactory" />
 			<parameter id="wordProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPropertyConstraintFactory" />
 			<parameter id="sylCount" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllableCountConstraintFactory" />
-			<!--<parameter id="entity" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyEntityConstraintFactory" />-->
-			<!--<parameter id="speaker" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerConstraintFactory" />-->
-			<!--<parameter id="speakerFeatures" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySpeakerFeaturesConstraintFactory" />-->
 			<parameter id="accentShape" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyAccentShapeConstraintFactory" />
+			<parameter id="wordPos" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPositionConstraintFactory" />
+			<parameter id="section" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyRelativeWordPositionConstraintFactory" />
+			<parameter id="painteIntegral" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEIntegralConstraintFactory" />
+			<parameter id="painteCurve" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntECurveConstraintFactory" />
 		</parameter>
 	</extension>
 	

@@ -251,6 +251,19 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		GROUPING,
 	};
 
+	private static final SearchOperator[] operatorsNoGrouping = {
+		EQUALS,
+		EQUALS_NOT,
+		MATCHES,
+		MATCHES_NOT,
+		CONTAINS,
+		CONTAINS_NOT,
+		LESS_THAN,
+		LESS_OR_EQUAL,
+		GREATER_THAN,
+		GREATER_OR_EQUAL,
+	};
+
 	private static final SearchOperator[] numericalOperators = {
 		EQUALS,
 		EQUALS_NOT,
@@ -261,11 +274,39 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		GROUPING,
 	};
 
+	private static final SearchOperator[] comparingOperators = {
+		LESS_THAN,
+		LESS_OR_EQUAL,
+		GREATER_THAN,
+		GREATER_OR_EQUAL,
+	};
+
+	private static final SearchOperator[] numericalOperatorsNoGrouping = {
+		EQUALS,
+		EQUALS_NOT,
+		LESS_THAN,
+		LESS_OR_EQUAL,
+		GREATER_THAN,
+		GREATER_OR_EQUAL,
+	};
+
 	public static SearchOperator[] values() {
 		return operators.clone();
 	}
 
+	public static SearchOperator[] valuesNoGrouping() {
+		return operatorsNoGrouping.clone();
+	}
+
 	public static SearchOperator[] numerical() {
 		return numericalOperators.clone();
+	}
+
+	public static SearchOperator[] comparing() {
+		return comparingOperators.clone();
+	}
+
+	public static SearchOperator[] numericalNoGrouping() {
+		return numericalOperatorsNoGrouping.clone();
 	}
 }

@@ -31,7 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 
-import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 
 /**
  * @author Markus Gärtner

@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.prosody.ui.list;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -35,8 +36,9 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JList;
 
-import de.ims.icarus.plugins.prosody.params.PaIntEParams;
-import de.ims.icarus.plugins.prosody.params.PaIntEParamsWrapper;
+import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParamsWrapper;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
 
@@ -55,6 +57,8 @@ public class PaIntEParamsListCellRenderer extends DefaultListCellRenderer {
 
 	private final transient PaIntEParams paramsBuffer = new PaIntEParams();
 
+	private final boolean adjustAxis;
+
 	private final Icon graphIcon = new Icon() {
 
 		private final Rectangle bounds = new Rectangle();
@@ -62,16 +66,22 @@ public class PaIntEParamsListCellRenderer extends DefaultListCellRenderer {
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y) {
 
-			bounds.setBounds(x, y, getIconWidth(), getIconHeight());
+			bounds.setBounds(x+1, y+1, getIconWidth()-2, getIconHeight()-2);
 
-			double dMax = paramsBuffer.getD();
-			double dMin = paramsBuffer.getD()-Math.max(paramsBuffer.getC1(), paramsBuffer.getC2());
+			if(adjustAxis) {
+				double dMax = paramsBuffer.getD();
+				double dMin = paramsBuffer.getD()-Math.max(paramsBuffer.getC1(), paramsBuffer.getC2());
 
-			Axis.Integer yAxis = (Axis.Integer) graph.getYAxis();
-			yAxis.setMinValue((int) Math.floor(dMin));
-			yAxis.setMaxValue((int) Math.ceil(dMax));
+				Axis.Integer yAxis = (Axis.Integer) graph.getYAxis();
+				yAxis.setMinValue((int) Math.floor(dMin));
+				yAxis.setMaxValue((int) Math.ceil(dMax));
+			}
 
-			graph.paint(g, paramsBuffer, bounds);
+			g.setColor(Color.black);
+			g.drawRect(x, y, getIconWidth()-1, getIconHeight()-1);
+
+			graph.getCurve().paint(g, paramsBuffer, bounds,
+					graph.getXAxis(), graph.getYAxis());
 		}
 
 		@Override
@@ -87,6 +97,12 @@ public class PaIntEParamsListCellRenderer extends DefaultListCellRenderer {
 
 	public PaIntEParamsListCellRenderer() {
 		graph = createGraph();
+		adjustAxis = true;
+	}
+
+	public PaIntEParamsListCellRenderer(PaIntEGraph graph) {
+		this.graph = graph;
+		adjustAxis = false;
 	}
 
 	protected PaIntEGraph createGraph() {
@@ -119,20 +135,28 @@ public class PaIntEParamsListCellRenderer extends DefaultListCellRenderer {
 				params.getC2(), params.getD(), params.getAlignment());
 	}
 
+	protected static final PaIntEConstraintParams constraints = new PaIntEConstraintParams();
+
+	protected String getConstraintLabel(PaIntEParams params) {
+		constraints.setParams(params);
+		return constraints.toString();
+	}
+
 	protected static String toString(double value) {
-		return String.format(Locale.ENGLISH, "%.02f", value);
+		return String.format(Locale.ENGLISH, "%.02f", value); //$NON-NLS-1$
 	}
 
 	protected String substitute(String label, PaIntEParams params) {
 		// Extremely stupid and wasteful approach, but should still be performant enough...
-		label = label.replaceAll("\\$a1", toString(params.getA1()));
-		label = label.replaceAll("\\$a2", toString(params.getA2()));
-		label = label.replaceAll("\\$b", toString(params.getB()));
-		label = label.replaceAll("\\$c1", toString(params.getC1()));
-		label = label.replaceAll("\\$c2", toString(params.getC2()));
-		label = label.replaceAll("\\$d", toString(params.getD()));
-		label = label.replaceAll("\\$alignment", toString(params.getAlignment()));
+		label = label.replaceAll("\\$a1", toString(params.getA1())); //$NON-NLS-1$
+		label = label.replaceAll("\\$a2", toString(params.getA2())); //$NON-NLS-1$
+		label = label.replaceAll("\\$b", toString(params.getB())); //$NON-NLS-1$
+		label = label.replaceAll("\\$c1", toString(params.getC1())); //$NON-NLS-1$
+		label = label.replaceAll("\\$c2", toString(params.getC2())); //$NON-NLS-1$
+		label = label.replaceAll("\\$d", toString(params.getD())); //$NON-NLS-1$
+		label = label.replaceAll("\\$alignment", toString(params.getAlignment())); //$NON-NLS-1$
 		label = label.replace("$params", getLabel(params)); //$NON-NLS-1$
+		label = label.replace("$constraints", getConstraintLabel(params)); //$NON-NLS-1$
 
 		return label;
 	}

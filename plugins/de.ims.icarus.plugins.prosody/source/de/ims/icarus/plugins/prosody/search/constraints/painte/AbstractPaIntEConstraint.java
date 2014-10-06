@@ -23,29 +23,51 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.search.constraints;
+package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
-import java.util.Locale;
-
+import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
-import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.GroupCache;
 
 /**
+ * Constraint using a set of painte parameters as constraint instance. Internally translates
+ * string constraints and search operators to implementations suitable for painte sets.
+ * Does <b>not</b> support grouping, specifiers or transformation of value instances to string labels!
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractProsodySyllableConstraint extends DefaultConstraint implements SyllableConstraint {
+public abstract class AbstractPaIntEConstraint extends AbstractProsodySyllableConstraint {
 
-	private static final long serialVersionUID = 8333873086091026549L;
+	private static final long serialVersionUID = -361927812276915216L;
 
-	public AbstractProsodySyllableConstraint(String token, Object value,
+	protected final PaIntEConstraintParams valueParams = new PaIntEConstraintParams();
+	protected PaIntEConstraintParams constraintParams;
+
+	public AbstractPaIntEConstraint(String token, Object value,
 			SearchOperator operator, Object specifier) {
 		super(token, value, operator, specifier);
 	}
 
+	@Override
+	public void setValue(Object value) {
+		super.setValue(value);
+
+		String s = (String)value;
+		if(s!=null && !LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
+			if(constraintParams==null) {
+				constraintParams = new PaIntEConstraintParams();
+			}
+
+			constraintParams.setParams(s);
+		}
+	}
+
+	protected abstract boolean applyOperator(PaIntEConstraintParams target);
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchConstraint#matches(java.lang.Object)
@@ -56,11 +78,8 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 
 		if(tree.hasSyllables()) {
 
-			SearchOperator operator = getOperator();
-			Object constraint = getConstraint();
-
 			for(int i=0; i<tree.getSyllableCount(); i++) {
-				if(operator.apply(getInstance(tree, i), constraint)) {
+				if(applyOperator(getInstance(tree, i))) {
 					return true;
 				}
 			}
@@ -75,53 +94,28 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 
 		if(tree.hasSyllables()) {
 
-			SearchOperator operator = getOperator();
-			Object constraint = getConstraint();
-
-			return operator.apply(getInstance(tree, syllable), constraint);
+			return applyOperator(getInstance(tree, syllable));
 		}
 
 		return false;
 	}
 
-
-	@Override
-	public boolean isMultiplexing() {
-		return true;
-	}
-
 	@Override
 	public void group(GroupCache cache, int groupId, Object value) {
-		ProsodyTargetTree tree = (ProsodyTargetTree) value;
-
-		// Remember to handle the "empty" cache in the result set implementations!
-		if(tree.hasSyllables()) {
-			for(int i=0; i<tree.getSyllableCount(); i++) {
-				Object instance = getInstance(tree, i);
-
-				if(instance instanceof Float) {
-					instance = (float)Math.floor((float)instance*100F)*0.01F;
-				} else if(instance instanceof Double) {
-					instance = Math.floor((double)instance*100D)*0.01D;
-				}
-
-				cache.cacheGroupInstance(groupId, getLabel(instance));
-			}
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Object getLabel(Object value) {
-		return (value instanceof Float || value instanceof Double) ?
-				String.format(Locale.ENGLISH, "%.02f", value) : super.getLabel(value); //$NON-NLS-1$
+		throw new UnsupportedOperationException();
 	}
-
 
 	@Override
-	public Object getInstance(Object value) {
-		throw new UnsupportedOperationException("Syllable constraints do not operate on word level"); //$NON-NLS-1$
+	protected PaIntEConstraintParams getInstance(ProsodyTargetTree tree, int syllable) {
+
+		valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
+
+		return valueParams;
 	}
 
-
-	protected abstract Object getInstance(ProsodyTargetTree tree, int syllable);
 }

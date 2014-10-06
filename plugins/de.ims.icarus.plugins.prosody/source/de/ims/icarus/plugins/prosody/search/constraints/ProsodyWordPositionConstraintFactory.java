@@ -25,12 +25,14 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints;
 
+import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
-import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
 /**
@@ -38,14 +40,39 @@ import de.ims.icarus.util.Options;
  * @version $Id: DependencyRelationConstraintFactory.java 269 2014-07-07 22:09:53Z mcgaerty $
  *
  */
-public class ProsodySpeakerConstraintFactory extends AbstractConstraintFactory {
+public class ProsodyWordPositionConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "speaker"; //$NON-NLS-1$
+	public static final String TOKEN = "wordPos"; //$NON-NLS-1$
 
-	public ProsodySpeakerConstraintFactory() {
+	public ProsodyWordPositionConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.prosody.constraints.speaker.name",  //$NON-NLS-1$
-				"plugins.prosody.constraints.speaker.description"); //$NON-NLS-1$
+				"plugins.prosody.constraints.wordPos.name",  //$NON-NLS-1$
+				"plugins.prosody.constraints.wordPos.description"); //$NON-NLS-1$
+	}
+
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return DefaultSearchOperator.numerical();
+	}
+
+	@Override
+	public Class<?> getValueClass(Object specifier) {
+		return Integer.class;
+	}
+
+	@Override
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
+	}
+
+	@Override
+	public Object labelToValue(Object label, Object specifier) {
+		return LanguageUtils.parseIntegerLabel((String) label);
+	}
+
+	@Override
+	public Object valueToLabel(Object value, Object specifier) {
+		return LanguageUtils.getLabel((int)value);
 	}
 
 	/**
@@ -54,43 +81,25 @@ public class ProsodySpeakerConstraintFactory extends AbstractConstraintFactory {
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new ProsodySpeakerConstraint(value, operator);
-		else
-			return new ProsodySpeakerCIConstraint(value, operator);
+		return new ProsodyWordPositionConstraint(value, operator);
 	}
 
-	private static class ProsodySpeakerConstraint extends DefaultConstraint {
+	private static class ProsodyWordPositionConstraint extends DefaultConstraint {
 
-		public ProsodySpeakerConstraint(Object value, SearchOperator operator) {
+		private static final long serialVersionUID = 1620252858048035885L;
+
+		public ProsodyWordPositionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getSpeaker();
+			return ((ProsodyTargetTree)value).getNodeIndex()+1;
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new ProsodySpeakerConstraint(getValue(), getOperator());
-		}
-	}
-
-	private static class ProsodySpeakerCIConstraint extends DefaultCaseInsensitiveConstraint {
-
-		public ProsodySpeakerCIConstraint(Object value, SearchOperator operator) {
-			super(TOKEN, value, operator);
-		}
-
-		@Override
-		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getSpeaker().toLowerCase();
-		}
-
-		@Override
-		public ProsodySpeakerCIConstraint clone() {
-			return new ProsodySpeakerCIConstraint(getValue(), getOperator());
+			return new ProsodyWordPositionConstraint(getValue(), getOperator());
 		}
 	}
 }

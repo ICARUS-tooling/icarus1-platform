@@ -119,7 +119,7 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 
 	@Override
 	public String toString() {
-		return LanguageUtils.combine(this);
+		return getText();
 	}
 
 	/**

@@ -111,7 +111,6 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected Options options;
 
 	protected CoreferenceDocumentDataPresenter parent;
-	private static ActionManager sharedActionManager;
 	protected ActionManager actionManager;
 
 	protected JPanel contentPanel;
@@ -122,6 +121,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected JLabel patternSelectInfo;
 
 	protected static final String configPath = "plugins.prosody.appearance.outline"; //$NON-NLS-1$
+
+	private static ActionManager sharedActionManager;
 
 	protected static synchronized final ActionManager getSharedActionManager() {
 		if(sharedActionManager==null) {
@@ -445,6 +446,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		panelConfig.loopSound = registry.getBoolean(registry.getChildHandle(handle, "loopSound")); //$NON-NLS-1$
 		panelConfig.wordAlignmentColor = registry.getColor(registry.getChildHandle(handle, "wordAlignmentColor")); //$NON-NLS-1$
 		panelConfig.syllableAlignmentColor = registry.getColor(registry.getChildHandle(handle, "syllableAlignmentColor")); //$NON-NLS-1$
+		panelConfig.backgroundColor = registry.getColor(registry.getChildHandle(handle, "backgroundColor")); //$NON-NLS-1$
 
 		// Text
 		Handle textHandle = registry.getChildHandle(handle, "text"); //$NON-NLS-1$

@@ -39,6 +39,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -138,6 +139,11 @@ public final class UIUtil {
 		// no-op
 	}
 
+	// Allows transfer of array objects across applications
+	public static final DataFlavor localObjectFlavor = new DataFlavor(Object[].class, "Array of items"); //$NON-NLS-1$
+//	public static final DataFlavor localObjectFlavor = new ActivationDataFlavor(Object[].class,
+//			DataFlavor.javaJVMLocalObjectMimeType, "Array of items");
+
 	private static JLabel textDummy;
 
 	private static JLabel getTextDummy() {
@@ -224,6 +230,8 @@ public final class UIUtil {
 
 	public static final Border topLineBorder = new SeparatingBorder(true, false, false, false);
 	public static final Border bottomLineBorder = new SeparatingBorder(false, false, true, false);
+	public static final Border rightLineBorder = new SeparatingBorder(false, true, false, false);
+	public static final Border leftLineBorder = new SeparatingBorder(false, false, false, true);
 	public static final Border emptyBorder = new EmptyBorder(0, 0, 0, 0);
 
 	public static final Border defaultContentBorder = new EmptyBorder(1, 3, 1, 3);

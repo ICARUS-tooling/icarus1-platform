@@ -10,17 +10,13 @@
 	<action id="plugins.prosody.painteEditorView.openPreferencesAction"
 		template="actions.default.openPreferencesAction" />
 		
-	<!-- Add PaIntE Params -->
-	<action id="plugins.prosody.painteEditorView.addPainteParamsAction"
-		name="${id}.name" desc="${id}.description" icon="chart_curve_add.png" />
-		
 	<!-- Remove PaIntE Params -->
 	<action id="plugins.prosody.painteEditorView.removePainteParamsAction"
-		name="${id}.name" desc="${id}.description" icon="chart_curve_delete.png" />
+		name="${id}.name" desc="${id}.description" icon="chart_curve_delete.png" accel="delete" />
 		
 	<!-- Edit PaIntE Params -->
 	<action id="plugins.prosody.painteEditorView.usePainteParamsAction"
-		name="${id}.name" desc="${id}.description" icon="chart_curve_edit.png" />
+		name="${id}.name" desc="${id}.description" icon="chart_curve_edit.png" accel="enter" />
 		
 	<!-- Rename PaIntE Params -->
 	<action id="plugins.prosody.painteEditorView.renamePainteParamsAction"
@@ -42,12 +38,32 @@
 		template="actions.default.clearAction"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Add Panel -->
+	<action id="plugins.prosody.painteEditorView.addParamsPanelAction"
+		template="actions.default.addAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Collapse All Panels -->
+	<action id="plugins.prosody.painteEditorView.collapseAllPanelsAction"
+		template="actions.default.collapseAllAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Expand All Panels -->
+	<action id="plugins.prosody.painteEditorView.expandAllPanelsAction"
+		template="actions.default.expandAllAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy Params -->
+	<action id="plugins.prosody.painteEditorView.copyPainteParamsAction"
+		template="actions.default.copyAction"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.painteEditorView.toolBarList">
 		<item type="action" value="plugins.prosody.painteEditorView.openPreferencesAction" />
 		<separator />
-		<item type="action" value="plugins.prosody.painteEditorView.addPainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.removePainteParamsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
 		<separator />
@@ -55,14 +71,17 @@
 		<item type="action" value="plugins.prosody.painteEditorView.importParamsHistoryAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsHistoryAction" />
 		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.collapseAllPanelsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.expandAllPanelsAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.addParamsPanelAction" />
 		<item type="glue" />
 	</action-list>
 		
 	<!-- Popup-Menu list -->
 	<action-list id="plugins.prosody.painteEditorView.popupMenuList">
-		<item type="action" value="plugins.prosody.painteEditorView.refreshAction" />
-		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.removePainteParamsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
 		<separator />

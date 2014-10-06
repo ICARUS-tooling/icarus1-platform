@@ -283,6 +283,20 @@ public class LabelPattern implements ProsodyConstants {
 		return lines;
 	}
 
+	public String[] getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+		if(elements==null || elements.length==0) {
+			return null;
+		}
+
+		String[] lines = new String[elements.length];
+
+		for(int i=0; i<elements.length; i++) {
+			lines[i] = getText0(elements[i], sentence, wordIndex, sylIndex);
+		}
+
+		return lines;
+	}
+
 	public int getElementCount() {
 		return elements==null ? 0 : elements.length;
 	}
@@ -294,6 +308,23 @@ public class LabelPattern implements ProsodyConstants {
 	private static String getText0(Element element, ProsodicSentenceData sentence, int wordIndex) {
 
 		String text = element.getText(sentence, wordIndex);
+
+		if(text==null) {
+			text = element.getNoValueLabel();
+		} else {
+			if(element.getMinLength()!=-1 && text.length()<element.getMinLength()) {
+				text = StringUtil.padRight(text, element.getMinLength());
+			} else if(element.getMaxLength()!=-1 && text.length()>element.getMaxLength()) {
+				text = text.substring(0, element.getMaxLength()-5)+"[...]"; //$NON-NLS-1$
+			}
+		}
+
+		return text;
+	}
+
+	private static String getText0(Element element, ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+
+		String text = element.getText(sentence, wordIndex, sylIndex);
 
 		if(text==null) {
 			text = element.getNoValueLabel();
@@ -382,6 +413,10 @@ public class LabelPattern implements ProsodyConstants {
 
 		public abstract String getText(ProsodicSentenceData sentence, int wordIndex);
 
+		public String getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+			return null;
+		}
+
 		protected void setModifier(String modifier) {
 			// for subclasses
 		}
@@ -450,6 +485,25 @@ public class LabelPattern implements ProsodyConstants {
 			return result;
 		}
 
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+			if(elements.isEmpty()) {
+				return null;
+			}
+
+			for(Element element : elements) {
+				buffer.append(getText0(element, sentence, wordIndex, sylIndex));
+			}
+
+			String result = buffer.toString();
+			buffer.setLength(0);
+
+			return result;
+		}
+
 	}
 
 	private static class TextElement extends Element {
@@ -468,6 +522,14 @@ public class LabelPattern implements ProsodyConstants {
 		 */
 		@Override
 		public String getText(ProsodicSentenceData sentence, int wordIndex) {
+			return text;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
 			return text;
 		}
 
@@ -491,6 +553,16 @@ public class LabelPattern implements ProsodyConstants {
 		@Override
 		public String getText(ProsodicSentenceData sentence, int wordIndex) {
 			Object value = wordIndex==-1 ? sentence.getProperty(property) : sentence.getProperty(wordIndex, property);
+
+			return val2String(value);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+			Object value = sentence.getSyllableProperty(wordIndex, property, sylIndex);
 
 			return val2String(value);
 		}
@@ -593,6 +665,16 @@ public class LabelPattern implements ProsodyConstants {
 			buffer.setLength(0);
 
 			return result;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+
+			Object value = sentence.getSyllableProperty(wordIndex, property, sylIndex);
+			return val2String(value);
 		}
 	}
 }

@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		PROSODY SENTENCE DETAIL PRESENTER
+	-->
+		
+	<!-- Open Preferences -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.openPreferencesAction"
+		template="actions.default.openPreferencesAction" />
+		
+	<!-- Refresh -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.refreshAction"
+		template="actions.default.refreshAction" />
+
+	<!-- Collapse All -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.collapseAllAction"
+		template="actions.default.collapseAllAction" />
+
+	<!-- Expand All -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.expandAllAction"
+		template="actions.default.expandAllAction" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.toolBarList">
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.openPreferencesAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.refreshAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.collapseAllAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.expandAllAction" />
+		<separator />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup-Menu list -->
+	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.popupMenuList">
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.refreshAction" />
+		<separator />
+		<item type="custom" value="showInMenu" />
+		<separator />
+		<item type="custom" value="sendToMenu" />
+	</action-list>
+	
+</actions>

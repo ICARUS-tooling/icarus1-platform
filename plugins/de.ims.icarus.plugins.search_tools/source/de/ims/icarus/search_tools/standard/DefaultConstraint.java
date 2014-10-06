@@ -180,6 +180,8 @@ public class DefaultConstraint implements SearchConstraint {
 		return !SearchManager.isGroupingOperator(operator)
 				&& (value==null || value.equals(LanguageConstants.DATA_UNDEFINED_LABEL)
 				|| value.equals(LanguageConstants.DATA_UNDEFINED_VALUE)
+				|| value.equals(LanguageConstants.DATA_UNDEFINED_FLOAT_VALUE)
+				|| value.equals(LanguageConstants.DATA_UNDEFINED_DOUBLE_VALUE)
 				|| "".equals(value)); //$NON-NLS-1$
 	}
 

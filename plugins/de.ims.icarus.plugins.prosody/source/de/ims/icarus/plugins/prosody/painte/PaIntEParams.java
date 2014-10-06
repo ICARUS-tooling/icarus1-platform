@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.params;
+package de.ims.icarus.plugins.prosody.painte;
 
 import java.io.Serializable;
 import java.util.Locale;
@@ -49,7 +49,18 @@ public class PaIntEParams implements Serializable {
 	private static final long serialVersionUID = 2000754079504418219L;
 
 	@XmlAttribute
-	private double a1, a2, b, c1, c2, d, alignment = DEFAULT_ALIGNMENT;
+	double a1, a2, b, c1, c2, d, alignment = DEFAULT_ALIGNMENT;
+
+	public static PaIntEParams parsePaIntEParams(String s) {
+		if(s==null) {
+			return null;
+		}
+
+		PaIntEParams params = new PaIntEParams();
+		params.setParams(s);
+
+		return params;
+	}
 
 	public void clear() {
 		a1 = a2 = b = c1 = c2 = d = 0.0;
@@ -64,6 +75,16 @@ public class PaIntEParams implements Serializable {
 		c2 = params.c2;
 		d = params.d;
 		alignment = params.alignment;
+	}
+
+	public void setParams(PaIntEConstraintParams constraints) {
+		a1 = constraints.a1;
+		a2 = constraints.a2;
+		b = constraints.b;
+		c1 = constraints.c1;
+		c2 = constraints.c2;
+		d = constraints.d;
+		alignment = constraints.alignment;
 	}
 
 	public void setParams(double[] params) {
@@ -86,6 +107,33 @@ public class PaIntEParams implements Serializable {
 		setC1(sentence.getPainteC1(wordIndex, sylIndex));
 		setC2(sentence.getPainteC2(wordIndex, sylIndex));
 		setD(sentence.getPainteD(wordIndex, sylIndex));
+	}
+
+	public void setParams(String encodedParams) {
+		if (encodedParams == null)
+			throw new NullPointerException("Invalid encodedParams");  //$NON-NLS-1$
+
+		String[] items = encodedParams.split("\\|"); //$NON-NLS-1$
+
+		if(items.length<6 || items.length>7)
+			throw new IllegalArgumentException("Invalid params string - wrong number of pipe separated items: "+encodedParams); //$NON-NLS-1$
+
+		a1 = parse(items[0]);
+		a2 = parse(items[1]);
+		b = parse(items[2]);
+		c1 = parse(items[3]);
+		c2 = parse(items[4]);
+		d = parse(items[5]);
+
+		if(items.length==7) {
+			alignment = parse(items[6]);
+		} else {
+			alignment = PaIntEParams.DEFAULT_ALIGNMENT;
+		}
+	}
+
+	private double parse(String s) {
+		return (s==null || s.isEmpty()) ? 0D : Double.parseDouble(s);
 	}
 
 	/**
@@ -111,7 +159,7 @@ public class PaIntEParams implements Serializable {
 	}
 
 	public double calc(double x) {
-		return d - (c1/(1+Math.exp(-a1*(b-x)+alignment))) - (c2/(1+Math.exp(-a2*(x-b)+alignment)));
+		return PaIntEUtils.calcY(x, this);
 	}
 
 	/**
@@ -280,13 +328,50 @@ public class PaIntEParams implements Serializable {
 		return false;
 	}
 
+	private static final char PIPE = '|';
+
 	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		// A1
+		sb.append(a1);
+		sb.append(PIPE);
+
+		// A2
+		sb.append(a2);
+		sb.append(PIPE);
+
+		// B
+		sb.append(b);
+		sb.append(PIPE);
+
+		// C1
+		sb.append(c1);
+		sb.append(PIPE);
+
+		// C2
+		sb.append(c2);
+		sb.append(PIPE);
+
+		// D
+		sb.append(d);
+
+		// Alignment
+		if(alignment!=DEFAULT_ALIGNMENT) {
+			sb.append(PIPE);
+			sb.append(alignment);
+		}
+
+		return sb.toString();
+	}
+
+	public String format() {
 		return String.format(Locale.ENGLISH,
-				"a1=%.02f a2=%.02f b=%.02f c1=%.02f c2=%.02f d=%.02f alignment=%.02f", //$NON-NLS-1$
+				"%f|%.02f b=%.02f c1=%.02f c2=%.02f d=%.02f alignment=%.02f", //$NON-NLS-1$
 				a1, a2, b, c1, c2, d, alignment);
 	}
 }

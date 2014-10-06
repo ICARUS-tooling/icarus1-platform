@@ -43,7 +43,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis.Integer;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;

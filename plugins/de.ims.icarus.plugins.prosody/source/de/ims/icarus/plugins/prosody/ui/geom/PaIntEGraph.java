@@ -30,7 +30,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 
 /**
  * @author Markus Gärtner
@@ -131,7 +131,10 @@ public class PaIntEGraph {
 		}
 
 		buffer.setBounds(yAxisWidth, 0, w-yAxisWidth, h-xAxisHeight);
-		curve.paint(g, params, buffer, xAxis, yAxis);
+
+		if(params!=null) {
+			curve.paint(g, params, buffer, xAxis, yAxis);
+		}
 
 		g.setColor(c);
 		g.translate(-x, -y);

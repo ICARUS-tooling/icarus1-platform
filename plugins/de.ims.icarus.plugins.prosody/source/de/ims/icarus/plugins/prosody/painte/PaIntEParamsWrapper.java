@@ -23,7 +23,9 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.params;
+package de.ims.icarus.plugins.prosody.painte;
+
+import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -31,10 +33,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.util.Wrapper;
+import de.ims.icarus.util.classes.ClassUtils;
 
 @XmlRootElement(name="painte-wrapper")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaIntEParamsWrapper implements Wrapper<PaIntEParams> {
+public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Serializable {
+
+	private static final long serialVersionUID = -2036008698457220647L;
 
 	@XmlElement(name="params")
 	private final PaIntEParams params;
@@ -50,6 +55,12 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams> {
 			throw new NullPointerException("Invalid params"); //$NON-NLS-1$
 
 		this.params = params;
+	}
+
+	public PaIntEParamsWrapper(PaIntEParams params, String label) {
+		this(params);
+
+		setLabel(label);
 	}
 
 	/**
@@ -79,6 +90,26 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams> {
 	 */
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	@Override
+	public int hashCode() {
+		return params.hashCode() * (label==null ? 1 : label.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof PaIntEParamsWrapper) {
+			PaIntEParamsWrapper other = (PaIntEParamsWrapper)obj;
+			return ClassUtils.equals(label, other.label)
+					&& params.equals(other.params);
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return (label==null ? "" : label)+":"+params.toString();
 	}
 
 }

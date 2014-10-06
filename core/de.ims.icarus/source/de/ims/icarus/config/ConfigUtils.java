@@ -28,6 +28,7 @@ package de.ims.icarus.config;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -538,7 +539,7 @@ public class ConfigUtils implements ConfigConstants {
 			super.buildComponent();
 			ResourceDomain resourceDomain = ResourceManager.getInstance().getGlobalDomain();
 
-			panel = new JPanel(GridBagUtil.getLayout());
+			panel = new JPanel(new GridBagLayout());
 
 			JLabel label = new JLabel();
 			resourceDomain.prepareComponent(label, "key", null); //$NON-NLS-1$

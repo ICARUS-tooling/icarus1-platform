@@ -60,7 +60,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
-import de.ims.icarus.plugins.prosody.params.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
@@ -264,6 +264,14 @@ public class SentencePanel extends JPanel{
 	}
 
 	private void refresh() {
+
+		Color bg = config.backgroundColor;
+
+		setBackground(bg);
+		textPanel.setBackground(bg);
+		detailPanel.setBackground(bg);
+		detailHeaderLabel.setBackground(bg);
+		previewPanel.setBackground(bg);
 
 		if(sentenceInfo==null) {
 			detailHeaderLabel.setLines(null);
@@ -598,6 +606,7 @@ public class SentencePanel extends JPanel{
 
 	public static class PanelConfig {
 
+		public static Color DEFAULT_BACKGROUND_COLOR = Color.white;
 		public static Color DEFAULT_CURVE_COLOR = Color.black;
 		public static Color DEFAULT_SYLLABLE_ALIGNMENT_COLOR = Color.orange;
 		public static final boolean  DEFAULT_TEXT_SHOW_ALIGNMENT = false;
@@ -627,6 +636,7 @@ public class SentencePanel extends JPanel{
 		public boolean loopSound = DEFAULT_LOOP_SOUND;
 		public Color syllableAlignmentColor = DEFAULT_SYLLABLE_ALIGNMENT_COLOR;
 		public Color wordAlignmentColor = DEFAULT_WORD_ALIGNMENT_COLOR;
+		public Color backgroundColor = DEFAULT_BACKGROUND_COLOR;
 
 		// Detail
 		public int wordScope = DEFAULT_WORD_SCOPE;
@@ -819,7 +829,7 @@ public class SentencePanel extends JPanel{
 				int width = 0;
 
 				for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
-					// Honor ward spacing
+					// Honor word spacing
 					if(wordIndex>0) {
 						width += fm.charWidth(' ');
 					}
@@ -828,7 +838,7 @@ public class SentencePanel extends JPanel{
 
 					// Compute text lines and save them
 					String[] lines = pattern.getText(sentence, wordIndex);
-					wordInfo.setLines(lines);
+					wordInfo.setProperty("lines", lines); //$NON-NLS-1$
 
 					// Compute required space for text lines
 					textArea.getSize(this, lines, areaSize);
@@ -898,7 +908,7 @@ public class SentencePanel extends JPanel{
 
 			for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
 				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
-				String[] lines = wordInfo.getLines();
+				String[] lines = (String[]) wordInfo.getProperty("lines"); //$NON-NLS-1$
 
 				area.x = wordInfo.getX();
 				area.width = wordInfo.getWidth();
@@ -1247,7 +1257,7 @@ public class SentencePanel extends JPanel{
 
 			lastPaintArea = new Rectangle(area.x, area.y, width, height);
 
-			Color bg = SentencePanel.this.getBackground();
+			Color bg = config.backgroundColor;
 
 			// Paint graphs in blocks per word
 			for(int i=0; i<wordCount; i++) {

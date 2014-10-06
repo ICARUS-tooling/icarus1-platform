@@ -111,7 +111,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 	public ProsodyListCellRenderer() {
 
 		setLayout(new FormLayout(
-				"pref, 3dlu, pref:grow", //$NON-NLS-1$
+				"pref, 3dlu, fill:pref:grow", //$NON-NLS-1$
 				"fill:pref")); //$NON-NLS-1$
 
 		headerLabel = new TextComponent();
@@ -209,8 +209,8 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 		private int curveHeight;
 		private int textHeight;
 
-		private static final String COL_KEY = "color";
-		private static final String GROUP_KEY = "group";
+		private static final String COL_KEY = "color"; //$NON-NLS-1$
+		private static final String GROUP_KEY = "group"; //$NON-NLS-1$
 
 		public void rebuild() {
 
@@ -421,7 +421,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 
 							Color sylCol = (Color) sylInfo.getProperty(COL_KEY);
 							if(sylCol==null) {
-								sylCol = textColor;
+								sylCol = wordCol;
 							}
 
 							g.setColor(sylCol);
