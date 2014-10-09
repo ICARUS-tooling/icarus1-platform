@@ -75,6 +75,11 @@ public class EventObject {
 	public Object getProperty(String key) {
 		return properties.get(key);
 	}
+	@SuppressWarnings("unchecked")
+	public <O extends Object> O getProperty(String key, O defaultValue) {
+		Object value = properties.get(key);
+		return value==null ? defaultValue : (O) value;
+	}
 
 	/**
 	 * Returns true if the event has been consumed.

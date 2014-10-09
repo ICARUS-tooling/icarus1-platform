@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.ui.list;
+package de.ims.icarus.plugins.prosody.ui.helper;
 
 import java.awt.Color;
 import java.awt.Component;

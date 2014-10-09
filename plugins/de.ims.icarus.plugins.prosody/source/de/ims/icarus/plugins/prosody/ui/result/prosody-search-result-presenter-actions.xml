@@ -51,5 +51,7 @@
 		<separator />
 		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.refreshViewAction" />
 		<item type="action" value="plugins.prosody.prosodySearchResultPresenter.clearViewAction" />
+		<separator />
+		<item type="custom" value="annotationControl" />
 	</action-list>	
 </actions>

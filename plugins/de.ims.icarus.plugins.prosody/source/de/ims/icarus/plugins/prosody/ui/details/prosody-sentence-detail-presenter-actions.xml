@@ -13,23 +13,44 @@
 	<!-- Refresh -->
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.refreshAction"
 		template="actions.default.refreshAction" />
-
-	<!-- Collapse All -->
-	<action id="plugins.prosody.prosodySentenceDetailPresenter.collapseAllAction"
-		template="actions.default.collapseAllAction" />
-
-	<!-- Expand All -->
-	<action id="plugins.prosody.prosodySentenceDetailPresenter.expandAllAction"
-		template="actions.default.expandAllAction" />
+		
+	<!-- Edit Label Patterns -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.editLabelPatternsAction"
+		name="${id}.name" desc="${id}.description" icon="url.gif" />
+		
+	<!-- Play Document -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"
+		template="actions.default.startAction"
+	 	name="${id}.name" desc="${id}.description" />
+		
+	<!-- Stop Playback -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.stopPlaybackAction"
+		template="actions.default.stopAction" />
+		
+	<!-- Pause Playback -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction"
+		template="actions.default.pauseAction" type="toggle" />
+		
+	<!-- Copy Painte Word -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.copyPainteWordAction"
+		template="actions.default.copyAction"
+	 	name="${id}.name" desc="${id}.description" />
+		
+	<!-- Copy Painte Syllable -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction"
+		template="actions.default.copyAction"
+	 	name="${id}.name" desc="${id}.description" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.toolBarList">
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.openPreferencesAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.refreshAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.editLabelPatternsAction" />
 		<separator />
-		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.collapseAllAction" />
-		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.expandAllAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.stopPlaybackAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction" />
 		<separator />
 		<item type="glue" />
 	</action-list>
@@ -38,9 +59,8 @@
 	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.popupMenuList">
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.refreshAction" />
 		<separator />
-		<item type="custom" value="showInMenu" />
-		<separator />
-		<item type="custom" value="sendToMenu" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteWordAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction" />
 	</action-list>
 	
 </actions>

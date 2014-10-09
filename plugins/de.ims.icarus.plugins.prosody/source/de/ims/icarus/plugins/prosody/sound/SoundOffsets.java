@@ -47,8 +47,14 @@ public class SoundOffsets {
 			return NO_VALUE;
 		}
 
-		document = (ProsodicDocumentData) documentSet.get(index+1);
-		String audioOffset = (String) document.getProperty(ProsodyConstants.AUDIO_OFFSET_KEY);
+		ProsodicDocumentData nextDocument = (ProsodicDocumentData) documentSet.get(index+1);
+
+		if(!document.getProperty(ProsodyConstants.AUDIO_FILE_KEY).equals(
+				nextDocument.getProperty(ProsodyConstants.AUDIO_FILE_KEY))) {
+			return NO_VALUE;
+		}
+
+		String audioOffset = (String) nextDocument.getProperty(ProsodyConstants.AUDIO_OFFSET_KEY);
 		return audioOffset==null ? NO_VALUE : Float.parseFloat(audioOffset);
 	}
 

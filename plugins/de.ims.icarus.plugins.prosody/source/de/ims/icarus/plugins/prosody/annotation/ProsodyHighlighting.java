@@ -69,15 +69,22 @@ public class ProsodyHighlighting extends BitmaskHighlighting {
 //		registerToken("lemma", true, new Color(2807039)); //$NON-NLS-1$
 //		registerToken("pos", true, new Color(2807039)); //$NON-NLS-1$
 //		registerToken("features", true, new Color(2807039)); //$NON-NLS-1$
-		registerToken("projectivity", false, new Color(1677593)); //$NON-NLS-1$
-		registerToken("relation", false, new Color(1677593)); //$NON-NLS-1$
-		registerToken("distance", false, new Color(14748812)); //$NON-NLS-1$
-		registerToken("direction", false, new Color(10789924)); //$NON-NLS-1$
+//		registerToken("projectivity", false, new Color(1677593)); //$NON-NLS-1$
+//		registerToken("relation", false, new Color(1677593)); //$NON-NLS-1$
+//		registerToken("distance", false, new Color(14748812)); //$NON-NLS-1$
+//		registerToken("direction", false, new Color(10789924)); //$NON-NLS-1$
 
 		registerToken("wordProperty", true, new Color(0xD49625)); //$NON-NLS-1$
 		registerToken("syllableProperty", true, new Color(0xFFD400)); //$NON-NLS-1$
 		registerToken("sylCount", true, new Color(0xAA2AFF)); //$NON-NLS-1$
 		registerToken("accentShape", true, new Color(0xFF2A7F)); //$NON-NLS-1$
+		registerToken("wordPos", true, new Color(0x149314)); //$NON-NLS-1$
+		registerAlias("section", "wordPos"); //$NON-NLS-1$ //$NON-NLS-2$
+		registerToken("painteIntegral", true, new Color(0x931493)); //$NON-NLS-1$
+		registerAlias("painteCurve", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
+		registerAlias("painteAngle", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
+		registerAlias("painteDistance", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
+		registerAlias("painteChannel", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	protected ConfigListener configListener;

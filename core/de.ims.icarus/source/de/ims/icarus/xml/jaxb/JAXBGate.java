@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
@@ -53,17 +54,24 @@ public abstract class JAXBGate<B extends Object> {
 
 	private AtomicBoolean updatePending = new AtomicBoolean(false);
 
+	private final Class<B> bufferClass;
+
 	public JAXBGate(Path file) {
+		this(file, null);
+	}
+
+	public JAXBGate(Path file, Class<B> bufferClass) {
 		if(file==null)
 			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 
 		this.file = file;
+		this.bufferClass = bufferClass;
 	}
 
 	/**
 	 * @return the file
 	 */
-	public Path getFile() {
+	public final Path getFile() {
 		return file;
 	}
 
@@ -71,8 +79,16 @@ public abstract class JAXBGate<B extends Object> {
 
 	protected abstract B createBuffer() throws Exception;
 
+	protected JAXBContext getJaxbContext() throws JAXBException {
+		if(bufferClass==null) {
+			return JAXBUtils.getSharedJAXBContext();
+		} else {
+			return JAXBContext.newInstance(bufferClass);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
-	public void loadBuffer() throws Exception {
+	public void load(Path file) throws Exception {
 
 		B buffer = null;
 		synchronized (bufferLock) {
@@ -82,12 +98,11 @@ public abstract class JAXBGate<B extends Object> {
 		// Try to load new buffer
 		if(buffer==null) {
 			synchronized (fileLock) {
-				Path file = getFile();
 				if(Files.notExists(file) || Files.size(file)==0) {
 					return;
 				}
 
-				JAXBContext context = JAXBUtils.getSharedJAXBContext();
+				JAXBContext context = getJaxbContext();
 				Unmarshaller unmarshaller = context.createUnmarshaller();
 				buffer = (B) unmarshaller.unmarshal(Files.newInputStream(file));
 			}
@@ -102,7 +117,14 @@ public abstract class JAXBGate<B extends Object> {
 		}
 	}
 
-	public void saveBuffer() throws Exception {
+	public void loadBuffer() throws Exception {
+		load(getFile());
+	}
+
+	public void save(Path file, boolean saveNow) throws Exception {
+		if(!saveNow && !getFile().equals(file))
+			throw new IllegalArgumentException("Cannot schedule timed export to foreign location: "+file); //$NON-NLS-1$
+
 		B buffer = null;
 
 		synchronized (gateLock) {
@@ -114,26 +136,22 @@ public abstract class JAXBGate<B extends Object> {
 		}
 
 		synchronized (bufferLock) {
-			pendingBuffer = buffer;
+			if(saveNow) {
+				save(buffer, file);
+			} else {
+				pendingBuffer = buffer;
 
-			scheduleUpdate();
+				scheduleUpdate();
+			}
 		}
 	}
 
+	public void saveBuffer() throws Exception {
+		save(getFile(), false);
+	}
+
 	public void saveBufferNow() throws Exception {
-		B buffer = null;
-
-		synchronized (gateLock) {
-			buffer = createBuffer();
-		}
-
-		if(buffer==null) {
-			return;
-		}
-
-		synchronized (bufferLock) {
-			save(buffer);
-		}
+		save(getFile(), true);
 	}
 
 	private void scheduleUpdate() {
@@ -148,11 +166,9 @@ public abstract class JAXBGate<B extends Object> {
 		}
 	}
 
-	private void save(B buffer) throws Exception {
+	private void save(B buffer, Path file) throws Exception {
 		synchronized (fileLock) {
-			Path file = getFile();
-
-			JAXBContext context = JAXBUtils.getSharedJAXBContext();
+			JAXBContext context = getJaxbContext();
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			marshaller.marshal(buffer, Files.newOutputStream(file));
@@ -179,7 +195,7 @@ public abstract class JAXBGate<B extends Object> {
 			}
 
 			try {
-				save(buffer);
+				save(buffer, getFile());
 			} catch (Exception e) {
 				LoggerFactory.error(this, "Failed to save buffer", e); //$NON-NLS-1$
 			}

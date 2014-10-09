@@ -27,39 +27,42 @@ package de.ims.icarus.plugins.prosody.painte;
 
 import java.io.Serializable;
 
+import javax.swing.Icon;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.util.Wrapper;
-import de.ims.icarus.util.classes.ClassUtils;
+import de.ims.icarus.util.id.Identity;
 
 @XmlRootElement(name="painte-wrapper")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Serializable {
+public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Serializable {
 
 	private static final long serialVersionUID = -2036008698457220647L;
 
 	@XmlElement(name="params")
 	private final PaIntEParams params;
-	@XmlElement(name="label", required=false)
+	@XmlElement(name="label", required=true)
 	private String label;
+	@XmlElement(name="description", required=false)
+	private String description;
 
 	protected PaIntEParamsWrapper() {
 		params = null;
 	}
 
-	public PaIntEParamsWrapper(PaIntEParams params) {
+	public PaIntEParamsWrapper(String label) {
+		params = new PaIntEParams();
+		setLabel(label);
+	}
+
+	public PaIntEParamsWrapper(PaIntEParams params, String label) {
 		if (params == null)
 			throw new NullPointerException("Invalid params"); //$NON-NLS-1$
 
 		this.params = params;
-	}
-
-	public PaIntEParamsWrapper(PaIntEParams params, String label) {
-		this(params);
-
 		setLabel(label);
 	}
 
@@ -89,7 +92,14 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Serializable 
 	 * @param label the label to set
 	 */
 	public void setLabel(String label) {
+		if (label == null)
+			throw new NullPointerException("Invalid label");  //$NON-NLS-1$
+
 		this.label = label;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override
@@ -101,7 +111,7 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Serializable 
 	public boolean equals(Object obj) {
 		if(obj instanceof PaIntEParamsWrapper) {
 			PaIntEParamsWrapper other = (PaIntEParamsWrapper)obj;
-			return ClassUtils.equals(label, other.label)
+			return label.equals(other.label)
 					&& params.equals(other.params);
 		}
 		return false;
@@ -109,7 +119,48 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Serializable 
 
 	@Override
 	public String toString() {
-		return (label==null ? "" : label)+":"+params.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return label+":"+params.toString(); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getId()
+	 */
+	@Override
+	public String getId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getName()
+	 */
+	@Override
+	public String getName() {
+		return label;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getIcon()
+	 */
+	@Override
+	public Icon getIcon() {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 
 }

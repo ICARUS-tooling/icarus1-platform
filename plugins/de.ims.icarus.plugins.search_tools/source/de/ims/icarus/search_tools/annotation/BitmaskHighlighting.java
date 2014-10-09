@@ -32,7 +32,7 @@ import gnu.trove.map.hash.TObjectLongHashMap;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +80,9 @@ public abstract class BitmaskHighlighting {
 	protected Set<String> nodeSet = new LinkedHashSet<>();
 	protected Set<String> edgeSet = new LinkedHashSet<>();
 
-	protected Map<String, Color> tokenColors = new Hashtable<>();
+	protected Map<String, Color> tokenColors = new HashMap<>();
+
+	protected Map<String, String> tokenAliases = new HashMap<>();
 
 	protected AtomicInteger tokenCount = new AtomicInteger();
 
@@ -101,16 +103,21 @@ public abstract class BitmaskHighlighting {
 		this(DEFAULT_BLOCK_SIZE);
 	}
 
+	public String getAlias(String token) {
+		String alias = tokenAliases.get(token);
+		return alias==null ? token : alias;
+	}
+
 	public long getHighlight(String token) {
-		return highlightMap.get(token);
+		return highlightMap.get(getAlias(token));
 	}
 
 	public int getOffset(String token) {
-		return offsetMap.get(token);
+		return offsetMap.get(getAlias(token));
 	}
 
 	public boolean isNodeConstraint(String token) {
-		return nodeSet.contains(token);
+		return nodeSet.contains(getAlias(token));
 	}
 
 	public long getNodeHighlightMask() {
@@ -245,6 +252,11 @@ public abstract class BitmaskHighlighting {
 		edgeGroupingMask = edgeHighlightMask = -1;
 	}
 
+	public void registerAlias(String token, String replacement) {
+		//TODO sanity checks!
+		tokenAliases.put(token, replacement);
+	}
+
 	protected Pattern pattern;
 	protected String toBin(long val) {
 		if(pattern==null) {
@@ -276,11 +288,11 @@ public abstract class BitmaskHighlighting {
 	}
 
 	public boolean isNodeToken(String token) {
-		return nodeSet.contains(token);
+		return nodeSet.contains(getAlias(token));
 	}
 
 	public boolean isEdgeToken(String token) {
-		return edgeSet.contains(token);
+		return edgeSet.contains(getAlias(token));
 	}
 
 	public String dumpHighlight(long highlight) {
@@ -335,6 +347,7 @@ public abstract class BitmaskHighlighting {
 		if(highlight==0L) {
 			return null;
 		}
+		token = getAlias(token);
 		long hl = getHighlight(token);
 		if(hl==0L) {
 			return null;
@@ -488,7 +501,7 @@ public abstract class BitmaskHighlighting {
 	}
 
 	public int getGroupId(long highlight, String token) {
-		int offset = getOffset(token) + 1;
+		int offset = getOffset(getAlias(token)) + 1;
 		return (int) (GROUP_MASK & (highlight >> offset)) - 1;
 	}
 
@@ -505,7 +518,7 @@ public abstract class BitmaskHighlighting {
 	}
 
 	public boolean isTokenHighlighted(long highlight, String token) {
-		long hl = (1L << getOffset(token));
+		long hl = (1L << getOffset(getAlias(token)));
 		return (highlight & hl) == hl;
 	}
 

@@ -425,7 +425,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		return panel;
 	}
 
-	private LabelPattern loadPattern(Handle handle, LabelPattern defaultPattern) {
+	private static LabelPattern loadPattern(Handle handle, LabelPattern defaultPattern) {
 		//TODO add sanity check and user notification
 		String s = handle.getSource().getString(handle);
 		if(s==null) {
@@ -438,6 +438,14 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	}
 
 	protected void reloadConfig(Handle handle) {
+		reloadConfig(panelConfig, handle);
+
+		// Refresh is required to allow the underlying document
+		// to adjust its style definitions to the new font and color settings
+		refresh();
+	}
+
+	public static void reloadConfig(PanelConfig panelConfig, Handle handle) {
 		ConfigRegistry registry = handle.getSource();
 
 		// General
@@ -490,11 +498,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		panelConfig.detailBorderColor = registry.getColor(registry.getChildHandle(detailHandle, "borderColor")); //$NON-NLS-1$
 		panelConfig.detailPaintGrid = registry.getBoolean(registry.getChildHandle(detailHandle, "paintGrid")); //$NON-NLS-1$
 		panelConfig.detailGridColor = registry.getColor(registry.getChildHandle(detailHandle, "gridColor")); //$NON-NLS-1$
-		panelConfig.detailGridStyle = registry.getValue(registry.getChildHandle(detailHandle, "gridStyle"), PaIntEGraph.DEFAULT_GRID_STYLE); //$NON-NLS-1$
-
-		// Refresh is required to allow the underlying document
-		// to adjust its style definitions to the new font and color settings
-		refresh();
+		panelConfig.detailGridStyle = registry.getValue(registry.getChildHandle(detailHandle, "gridStyle"), PaIntEGraph.DEFAULT_GRID_STYLE); //$NON-NLS-1
 	}
 
 	protected class Handler implements ConfigListener, ChangeListener {

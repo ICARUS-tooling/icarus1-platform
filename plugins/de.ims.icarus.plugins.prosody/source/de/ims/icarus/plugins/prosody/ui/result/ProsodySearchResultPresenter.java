@@ -32,6 +32,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -71,6 +73,7 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyPlugin;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.ui.view.outline.ProsodyOutlinePresenter;
 import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
@@ -83,6 +86,8 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.AnnotationControl;
+import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.Identity;
@@ -93,7 +98,7 @@ import de.ims.icarus.util.strings.StringUtil;
  * @version $Id$
  *
  */
-public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPresenter {
+public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPresenter, AnnotationController {
 
 	private ProsodicSentenceData sentence;
 	private Options options;
@@ -105,6 +110,8 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 	private ProsodyOutlinePresenter contextOutline;
 	private boolean showPropertyOutline = false;
 	private boolean showContextOutline = false;
+
+	protected ProsodicAnnotationManager annotationManager;
 
 	private Map<Extension, AWTPresenter> presenterInstances;
 
@@ -220,6 +227,13 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		return contentPanel;
 	}
 
+	private Handler getHandler() {
+		if(handler==null) {
+			handler = new Handler();
+		}
+		return handler;
+	}
+
 	private void buildPanel() {
 
 		// Load actions
@@ -237,8 +251,6 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 			UIDummies.createDefaultErrorOutput(contentPanel, e);
 			return;
 		}
-
-		handler = new Handler();
 
 		contentPanel = new JPanel(new BorderLayout());
 
@@ -270,7 +282,7 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		presenterSelect.setRenderer(new ExtensionListCellRenderer());
 		presenterSelect.setSelectedItem(loadDefaultPresenter());
 		UIUtil.fitToContent(presenterSelect, 80, 150, 22);
-		presenterSelect.addActionListener(handler);
+		presenterSelect.addActionListener(getHandler());
 
 		headerLabel = new JLabel();
 		UIUtil.resizeComponent(headerLabel, 300, 22);
@@ -280,6 +292,11 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		Options options = new Options();
 		options.put("selectPresenter", presenterSelect); //$NON-NLS-1$
 		options.put("headerLabel", headerLabel); //$NON-NLS-1$
+
+		AnnotationControl annotationControl = createAnnotationControl();
+		if(annotationControl!=null) {
+			options.put("annotationControl", annotationControl.getComponents()); //$NON-NLS-1$
+		}
 
 		toolBar = getActionManager().createToolBar(
 				"plugins.prosody.prosodySearchResultPresenter.toolBarList", options); //$NON-NLS-1$
@@ -405,6 +422,22 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		this.options = options==null ? null : options.clone();
 
 		refresh();
+	}
+
+	@Override
+	public ProsodicAnnotationManager getAnnotationManager() {
+		if(annotationManager==null) {
+			annotationManager = new ProsodicAnnotationManager();
+			annotationManager.addPropertyChangeListener("position", getHandler()); //$NON-NLS-1$
+			annotationManager.addPropertyChangeListener("displayMode", getHandler()); //$NON-NLS-1$
+		}
+		return annotationManager;
+	}
+
+	protected AnnotationControl createAnnotationControl() {
+		AnnotationControl annotationControl = new AnnotationControl(true);
+		annotationControl.setAnnotationManager(getAnnotationManager());
+		return annotationControl;
 	}
 
 	public void outlineWord(int wordIndex, Options options) {
@@ -727,7 +760,7 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		}
 	}
 
-	private class Handler implements ActionListener {
+	private class Handler implements ActionListener, PropertyChangeListener {
 
 		/**
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
@@ -740,6 +773,14 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 
 			presenter = null;
 
+			refresh();
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
 			refresh();
 		}
 

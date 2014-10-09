@@ -46,7 +46,9 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
@@ -61,6 +63,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
@@ -119,6 +122,10 @@ public class SentencePanel extends JPanel{
 	private final PanelConfig config;
 
 	private double translationAccuracy = 0.05;
+
+	private static JPopupMenu popupMenu;
+	private static JMenuItem copySyllableItem;
+//	private static JMenuItem copyWordItem;
 
 	private static final Border collapsedBorder = BorderFactory.createEmptyBorder(1, 2, 1, 2);
 	private static final Border expandedBorder = BorderFactory.createCompoundBorder(
@@ -411,7 +418,7 @@ public class SentencePanel extends JPanel{
 		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex);
 		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex);
 
-		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
+//		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
 
 		play(beginOffset, endOffset);
 	}
@@ -421,15 +428,70 @@ public class SentencePanel extends JPanel{
 		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex, sylIndex);
 		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex, sylIndex);
 
-		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
+//		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
 
 		play(beginOffset, endOffset);
+	}
+
+	private static ActionListener exportHandler = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource()==copySyllableItem) {
+				Object params = copySyllableItem.getClientProperty("params"); //$NON-NLS-1$
+
+				if(params instanceof PaIntEParams) {
+					PaIntEUtils.copyParams((PaIntEParams) params);
+				}
+			}
+		}
+	};
+
+	private static void showPopupMenu(SentencePanel panel, MouseEvent trigger) {
+		if(panel.sentenceInfo==null) {
+			return;
+		}
+
+		if(popupMenu==null) {
+			popupMenu = new JPopupMenu();
+
+			//FIXME loca!!!
+
+//			copyWordItem = new JMenuItem("Copy Word Params", IconRegistry.getGlobalRegistry().getIcon("copy_edit.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+//			copyWordItem.addActionListener(exportHandler);
+
+			copySyllableItem = new JMenuItem("Copy Syllable Params", IconRegistry.getGlobalRegistry().getIcon("copy_edit.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+			copySyllableItem.addActionListener(exportHandler);
+
+//			popupMenu.add(copyWordItem);
+			popupMenu.add(copySyllableItem);
+		}
+
+		Point p = trigger.getPoint();
+		PaIntEHitBox hitBox = panel.detailPanel.translate(p);
+
+		if(hitBox==null) {
+			return;
+		}
+
+		int wordIndex = hitBox.getWordIndex();
+		int sylIndex = hitBox.getSylIndex();
+
+		if(wordIndex==-1 || sylIndex==-1) {
+			return;
+		}
+
+		PaIntEParams params = new PaIntEParams();
+		params.setParams(panel.getSentenceInfo().getSentence(), wordIndex, sylIndex);
+
+		copySyllableItem.putClientProperty("params", params.clone()); //$NON-NLS-1$
+
+		popupMenu.show(panel.detailPanel, p.x, p.y);
 	}
 
 	private class Handler extends MouseAdapter implements ActionListener, ChangeListener {
 
 		private Cursor cursor;
-
 
 		/**
 		 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
@@ -478,15 +540,21 @@ public class SentencePanel extends JPanel{
 			}
 		}
 
-//		/**
-//		 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
-//		 */
-//		@Override
-//		public void mousePressed(MouseEvent e) {
-//			if(e.getSource()==wordCursor) {
-//				wordCursorModel.setIgnoreChanges(true);
-//			}
-//		}
+		private void maybeShowPopup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				showPopupMenu(SentencePanel.this, e);
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
 
 		/**
 		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
@@ -998,6 +1066,7 @@ public class SentencePanel extends JPanel{
 			graph.setGridStyle(config.detailGridStyle);
 			graph.setPaintBorder(config.detailPaintBorder);
 			graph.setPaintGrid(config.detailPaintGrid);
+			graph.getCurve().setAntiAliasingType(config.antiAliasingType);
 
 			xAxis.setAxisColor(config.detailAxisColor);
 			xAxis.setLabelColor(config.detailAxisLabelColor);
@@ -1176,7 +1245,12 @@ public class SentencePanel extends JPanel{
 						y -= area.y;
 						x -= area.x;
 
-						return graph.translate(x, y, g, area, params, translationAccuracy);
+						PaIntEHitBox hitBox = graph.translate(x, y, g, area, params, translationAccuracy);
+						if(hitBox!=null) {
+							hitBox.setWordIndex(wordIndex);
+							hitBox.setSylIndex(j);
+						}
+						return hitBox;
 					}
 
 					area.x += area.width;

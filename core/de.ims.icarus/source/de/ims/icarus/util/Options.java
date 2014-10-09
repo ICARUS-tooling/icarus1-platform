@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.ims.icarus.util;
 
@@ -9,19 +9,19 @@ import java.util.Map.Entry;
 
 /**
  * @author Markus Gärtner
- * 
+ *
  */
 public class Options extends HashMap<String, Object> {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 6318648432239062316L;
-	
+
 	public static final Options emptyOptions = new Options() {
 
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -6172790615021617955L;
 
@@ -46,13 +46,18 @@ public class Options extends HashMap<String, Object> {
 	public Options(Object... args) {
 		putAll(args);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <O extends Object> O get(String key, O defaultValue) {
 		Object value = get(key);
 		return value==null ? defaultValue : (O) value;
 	}
-	
+
+	public Object getOptional(String key, Object defaultValue) {
+		Object value = get(key);
+		return value==null ? defaultValue : value;
+	}
+
 	@Override
 	public Object put(String key, Object value) {
 		if(value==null) {
@@ -71,14 +76,14 @@ public class Options extends HashMap<String, Object> {
 			put(String.valueOf(args[i]), args[i + 1]);
 		}
 	}
-	
+
 	@Override
 	public void putAll(Map<? extends String, ? extends Object> m) {
 		// Silently fail when argument is null
 		if(m==null) {
 			return;
 		}
-		
+
 		super.putAll(m);
 	}
 
@@ -87,26 +92,26 @@ public class Options extends HashMap<String, Object> {
 			put(key, value);
 		}
 	}
-	
+
 	public void dump() {
 		System.out.println("Options: "); //$NON-NLS-1$
 		for(Entry<String, Object> entry : entrySet())
 			System.out.printf("  -key=%s value=%s\n",  //$NON-NLS-1$
 					entry.getKey(), String.valueOf(entry.getValue()));
 	}
-	
+
 	public Object firstSet(String...keys) {
 		Object value = null;
-		
+
 		for(String key : keys) {
 			if((value = get(key)) != null) {
 				break;
 			}
 		}
-		
+
 		return value;
 	}
-	
+
 	public int getInteger(String key, int defaultValue) {
 		Object result = get(key);
 		if(result instanceof String) {
@@ -116,14 +121,14 @@ public class Options extends HashMap<String, Object> {
 				// ignore
 			}
 		}
-		
+
 		return result instanceof Integer ? (int) result : defaultValue;
 	}
-	
+
 	public int getInteger(String key) {
 		return getInteger(key, 0);
 	}
-	
+
 	public long getLong(String key, long defaultValue) {
 		Object result = get(key);
 		if(result instanceof String) {
@@ -133,14 +138,14 @@ public class Options extends HashMap<String, Object> {
 				// ignore
 			}
 		}
-		
+
 		return result instanceof Long ? (long) result : defaultValue;
 	}
-	
+
 	public long getLong(String key) {
 		return getLong(key, 0l);
 	}
-	
+
 	public double getDouble(String key, double defaultValue) {
 		Object result = get(key);
 		if(result instanceof String) {
@@ -150,14 +155,14 @@ public class Options extends HashMap<String, Object> {
 				// ignore
 			}
 		}
-		
+
 		return result instanceof Double ? (double) result : defaultValue;
 	}
-	
+
 	public double getDouble(String key) {
 		return getDouble(key, 0d);
 	}
-	
+
 	public float getFloat(String key, float defaultValue) {
 		Object result = get(key);
 		if(result instanceof String) {
@@ -167,14 +172,14 @@ public class Options extends HashMap<String, Object> {
 				// ignore
 			}
 		}
-		
+
 		return result instanceof Float ? (float) result : defaultValue;
 	}
-	
+
 	public float getFloat(String key) {
 		return getFloat(key, 0f);
 	}
-	
+
 	public boolean getBoolean(String key, boolean defaultValue) {
 		Object result = get(key);
 		if(result instanceof String) {
@@ -184,21 +189,21 @@ public class Options extends HashMap<String, Object> {
 				// ignore
 			}
 		}
-		
+
 		return result instanceof Boolean ? (boolean) result : defaultValue;
 	}
-	
+
 	public boolean getBoolean(String key) {
 		return getBoolean(key, false);
 	}
-	
+
 	@Override
 	public Options clone() {
 		return new Options(this);
 	}
-	
+
 	// Collection of commonly used option keys
-	
+
 	public static final String NAME = "name"; //$NON-NLS-1$
 	public static final String DESCRIPTION = "description"; //$NON-NLS-1$
 	public static final String LABEL = "label"; //$NON-NLS-1$

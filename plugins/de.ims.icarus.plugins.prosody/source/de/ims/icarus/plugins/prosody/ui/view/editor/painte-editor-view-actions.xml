@@ -5,6 +5,9 @@
 	<!--
 		PAINTE EDITOR VIEW
 	-->
+	
+		
+	<!-- GENERAL ACTIONS --> 
 		
 	<!-- Open Preferences -->
 	<action id="plugins.prosody.painteEditorView.openPreferencesAction"
@@ -38,11 +41,6 @@
 		template="actions.default.clearAction"
 		name="${id}.name" desc="${id}.description" />
 		
-	<!-- Add Panel -->
-	<action id="plugins.prosody.painteEditorView.addParamsPanelAction"
-		template="actions.default.addAction"
-		name="${id}.name" desc="${id}.description" />
-		
 	<!-- Collapse All Panels -->
 	<action id="plugins.prosody.painteEditorView.collapseAllPanelsAction"
 		template="actions.default.collapseAllAction"
@@ -58,6 +56,63 @@
 		template="actions.default.copyAction"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Paste Params -->
+	<action id="plugins.prosody.painteEditorView.pastePainteParamsAction"
+		template="actions.default.pasteAction"
+		name="${id}.name" desc="${id}.description" />
+	
+			
+	<!-- PANEL ACTIONS -->
+		
+	<!-- Add Panel -->
+	<action id="plugins.prosody.painteEditorView.addParamsPanelAction"
+		template="actions.default.addAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Remove Panel -->
+	<action id="plugins.prosody.painteEditorView.removeParamsPanelAction"
+		template="actions.default.removeAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Color Panel -->
+	<action id="plugins.prosody.painteEditorView.colorParamsPanelAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Import Panel -->
+	<action id="plugins.prosody.painteEditorView.importParamsPanelAction"
+		template="actions.default.pasteAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Export Panel -->
+	<action id="plugins.prosody.painteEditorView.exportParamsPanelAction"
+		template="actions.default.copyAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Rename Panel -->
+	<action id="plugins.prosody.painteEditorView.renameParamsPanelAction"
+		template="actions.default.renameAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Clear Panel -->
+	<action id="plugins.prosody.painteEditorView.clearParamsPanelAction"
+		template="actions.default.clearAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Save Panel -->
+	<action id="plugins.prosody.painteEditorView.saveParamsPanelAction"
+		template="actions.default.saveAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Undo Panel -->
+	<action id="plugins.prosody.painteEditorView.undoParamsPanelAction"
+		template="actions.default.undoAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Redo Panel -->
+	<action id="plugins.prosody.painteEditorView.redoParamsPanelAction"
+		template="actions.default.redoAction"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.painteEditorView.toolBarList">
 		<item type="action" value="plugins.prosody.painteEditorView.openPreferencesAction" />
@@ -70,6 +125,8 @@
 		<item type="action" value="plugins.prosody.painteEditorView.clearParamsHistoryAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.importParamsHistoryAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsHistoryAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.pastePainteParamsAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.collapseAllPanelsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.expandAllPanelsAction" />
@@ -88,6 +145,23 @@
 		<item type="action" value="plugins.prosody.painteEditorView.clearParamsHistoryAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.importParamsHistoryAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsHistoryAction" />
+	</action-list>
+		
+	<!-- Parameter-Panel Menu list -->
+	<action-list id="plugins.prosody.painteEditorView.parameterPanelMenuList">
+		<item type="action" value="plugins.prosody.painteEditorView.addParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.removeParamsPanelAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.renameParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.clearParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.colorParamsPanelAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.importParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.saveParamsPanelAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.undoParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.redoParamsPanelAction" />
 	</action-list>
 	
 </actions>

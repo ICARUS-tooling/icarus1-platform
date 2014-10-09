@@ -25,6 +25,10 @@
  */
 package de.ims.icarus.plugins.prosody.painte;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+
 import de.ims.icarus.plugins.prosody.painte.PaIntEOperator.NumberOperator;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
@@ -166,6 +170,25 @@ public class PaIntEUtils {
 			return lessOrEqual;
 		} else
 			throw new IllegalArgumentException("Cannot translate search operator into numerical equivalent: "+operator.getName()); //$NON-NLS-1$
+	}
+
+	public static void copyParams(PaIntEParams params) {
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		if(clipboard==null) {
+			return;
+		}
+
+		StringSelection data = new StringSelection(params.toString());
+
+		clipboard.setContents(data, data);
+	}
+
+	public static void copyConstraints(PaIntEConstraintParams constraints) {
+		copyParams(constraints);
+	}
+
+	public static void copyWrapper(PaIntEParamsWrapper wrapper) {
+		copyParams(wrapper.getParams());
 	}
 
 	public static final NumberOperator lessThan = new NumberOperator() {

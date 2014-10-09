@@ -28,18 +28,23 @@ package de.ims.icarus.plugins.prosody.ui.details;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -47,14 +52,18 @@ import java.util.logging.Level;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.MutableComboBoxModel;
 import javax.swing.Scrollable;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import de.ims.icarus.config.ConfigEvent;
+import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
@@ -62,14 +71,20 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.coref.view.PatternExample;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
+import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
+import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
+import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
 import de.ims.icarus.plugins.prosody.sound.SoundPlayer;
 import de.ims.icarus.plugins.prosody.sound.SoundPlayer.SoundFile;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
+import de.ims.icarus.plugins.prosody.ui.geom.PaIntEHitBox;
 import de.ims.icarus.plugins.prosody.ui.view.SentenceInfo;
 import de.ims.icarus.plugins.prosody.ui.view.SyllableInfo;
 import de.ims.icarus.plugins.prosody.ui.view.WordInfo;
@@ -85,7 +100,10 @@ import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.HtmlUtils;
+import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.annotation.AnnotationController;
+import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -94,7 +112,12 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPresenter {
+public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPresenter, Installable {
+
+	public static final String DEFAULT_SENTENCE_PATTERN =
+			  "#syllable_label#\n#syllable_duration#\n" //$NON-NLS-1$
+			+ "#painte_a1#,#painte_a2#,#painte_b#\n" //$NON-NLS-1$
+			+ "#painte_c1#,#painte_c2#,#painte_d#"; //$NON-NLS-1$
 
 	private SentenceInfo sentenceInfo;
 
@@ -102,14 +125,18 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 	private Options options;
 	private JPanel contentPanel;
-	private JPanel sentencePanel;
+	private SentencePanel sentencePanel;
+
+	protected AnnotationController annotationSource;
 
 	private CallbackHandler callbackHandler;
 	private Handler handler;
 
+	private JPopupMenu popupMenu;
+
 	protected ActionManager actionManager;
 
-	protected static final String configPath = "plugins.prosody.appearance.outline"; //$NON-NLS-1$
+	protected static final String configPath = "plugins.prosody.appearance.details"; //$NON-NLS-1$
 
 	private static ActionManager sharedActionManager;
 
@@ -133,7 +160,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	}
 
 	public ProsodySentenceDetailPresenter() {
-		config.sentencePattern = new LabelPattern("#syllable_label#\n#syllable_duration#"); //$NON-NLS-1$
+		config.sentencePattern = new LabelPattern(DEFAULT_SENTENCE_PATTERN);
 	}
 
 	protected ActionManager getActionManager() {
@@ -153,18 +180,54 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			callbackHandler = new CallbackHandler();
 		}
 
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.openPreferencesAction", //$NON-NLS-1$
+				callbackHandler, "openPreferences"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.refreshAction", //$NON-NLS-1$
 				callbackHandler, "refresh"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.expandAllAction", //$NON-NLS-1$
-				callbackHandler, "expandAll"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.collapseAllAction", //$NON-NLS-1$
-				callbackHandler, "collapseAll"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.editLabelPatternsAction", //$NON-NLS-1$
+				callbackHandler, "editLabelPatterns"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction", //$NON-NLS-1$
+				callbackHandler, "playSentence"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.stopPlaybackAction", //$NON-NLS-1$
+				callbackHandler, "stopPlayback"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction", //$NON-NLS-1$
+				callbackHandler, "pausePlayback"); //$NON-NLS-1$
+	}
+
+	private SoundFile getSoundFile() {
+		SoundFile soundFile = null;
+
+		if(sentenceInfo!=null) {
+			ProsodicSentenceData sentence = sentenceInfo.getSentence();
+
+			try {
+				soundFile = SoundPlayer.getInstance().getSoundFile(sentence);
+			} catch (SoundException e) {
+				LoggerFactory.warning(this, "Unable to fetch sound file for document: "+sentence.getDocument().getId(), e); //$NON-NLS-1$
+			}
+		}
+
+		return soundFile;
 	}
 
 	protected void refreshActions() {
 		ActionManager actionManager = getActionManager();
 
-		//TODO
+
+		boolean hasData = sentenceInfo!=null;
+		SoundFile soundFile = getSoundFile();
+		boolean isPlaying = soundFile!=null && soundFile.isActive();
+		boolean isPaused = soundFile!=null && soundFile.isPaused();
+
+		actionManager.setEnabled(hasData,
+				"plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"); //$NON-NLS-1$
+		actionManager.setEnabled(isPlaying || isPaused,
+				"plugins.prosody.prosodySentenceDetailPresenter.stopPlaybackAction"); //$NON-NLS-1$
+		actionManager.setEnabled(isPlaying || isPaused,
+				"plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction"); //$NON-NLS-1$
+
+		actionManager.setSelected(isPaused,
+				"plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction"); //$NON-NLS-1$
 	}
 
 	/**
@@ -173,7 +236,9 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	@Override
 	public Component getPresentingComponent() {
 		if(contentPanel==null) {
+			ConfigRegistry.getGlobalRegistry().addGroupListener(configPath, getHandler());
 			contentPanel = createContentPanel();
+			reloadConfig(ConfigRegistry.getGlobalRegistry().getHandle(configPath));
 
 			refresh();
 		}
@@ -216,12 +281,25 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	}
 
 	private void setData(ProsodicSentenceData sentence) {
+		SoundFile oldSoundFile = getSoundFile();
+		if(oldSoundFile!=null) {
+			oldSoundFile.removeChangeListener(getHandler());
+		}
+
 		if(sentence!=null) {
 			sentenceInfo = new SentenceInfo(sentence);
 		} else {
 			sentenceInfo = null;
 		}
+
+		SoundFile newSoundFile = getSoundFile();
+		if(newSoundFile!=null) {
+			newSoundFile.addChangeListener(getHandler());
+		}
 	}
+
+	private static final String COL_KEY = "color"; //$NON-NLS-1$
+	private static final String GROUP_KEY = "group"; //$NON-NLS-1$
 
 	public void refresh() {
 		if(contentPanel==null) {
@@ -233,9 +311,57 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		sentencePanel.removeAll();
 
 		if(sentenceInfo!=null) {
-			for(int i=0; i<sentenceInfo.wordCount(); i++) {
-				WordPanel wordPanel = new WordPanel(sentenceInfo.wordInfo(i));
+
+	    	ProsodicAnnotationManager manager = (ProsodicAnnotationManager) getAnnotationManager();
+	    	ProsodicAnnotation annotation = getAnnotation();
+	    	manager.setAnnotation(annotation);
+
+			final boolean hasHighlight = manager.hasAnnotation();
+
+			for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
+				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
+
+				boolean wordHighlighted = false;
+
+				if(hasHighlight) {
+					long highlight = manager.getHighlight(wordIndex);
+
+					wordHighlighted = ProsodyHighlighting.getInstance().isHighlighted(highlight);
+
+					if(wordHighlighted) {
+						Color col = ProsodyHighlighting.getInstance().getGroupColor(highlight);
+						if(col!=null) {
+							wordInfo.setProperty(GROUP_KEY, true);
+						} else {
+							col = ProsodyHighlighting.getInstance().getHighlightColor(highlight);
+						}
+
+						wordInfo.setProperty(COL_KEY, col);
+					}
+				}
+
+				if(wordHighlighted) {
+					for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
+						SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
+
+						long highlight = annotation.getHighlight(wordIndex, sylIndex);
+						if(ProsodyHighlighting.getInstance().isHighlighted(highlight)) {
+							Color col = ProsodyHighlighting.getInstance().getGroupColor(highlight);
+							if(col!=null) {
+								sylInfo.setProperty(GROUP_KEY, true);
+							} else {
+								col = ProsodyHighlighting.getInstance().getHighlightColor(highlight);
+							}
+
+							sylInfo.setProperty(COL_KEY, col);
+						}
+					}
+				}
+
+				WordPanel wordPanel = new WordPanel(wordInfo);
 				wordPanel.rebuild();
+				wordPanel.addMouseListener(getHandler());
+				wordPanel.addMouseMotionListener(getHandler());
 				sentencePanel.add(wordPanel);
 			}
 		}
@@ -262,7 +388,6 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		}
 
 		sentencePanel = new SentencePanel();
-		//FIXME apply line break behavior!
 
 		JScrollPane scrollPane = new JScrollPane(sentencePanel);
 		UIUtil.defaultSetUnitIncrement(scrollPane);
@@ -285,6 +410,38 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	}
 
 	/**
+	 * @see de.ims.icarus.util.Installable#install(java.lang.Object)
+	 */
+	@Override
+	public void install(Object target) {
+		if(target instanceof AnnotationController) {
+			if(this.annotationSource!=null && this.annotationSource!=target)
+				throw new IllegalStateException("Cannot be assigned to multiple annotation controllers"); //$NON-NLS-1$
+
+			this.annotationSource = (AnnotationController)target;
+		} else {
+			this.annotationSource = null;
+		}
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Installable#uninstall(java.lang.Object)
+	 */
+	@Override
+	public void uninstall(Object target) {
+		this.annotationSource = null;
+	}
+
+	protected AnnotationManager getAnnotationManager() {
+		return annotationSource==null ? null : annotationSource.getAnnotationManager();
+	}
+
+	protected ProsodicAnnotation getAnnotation() {
+		return (sentenceInfo!=null && sentenceInfo.getSentence() instanceof AnnotatedProsodicSentenceData) ?
+				((AnnotatedProsodicSentenceData)sentenceInfo.getSentence()).getAnnotation() : null;
+	}
+
+	/**
 	 * @see de.ims.icarus.ui.view.Presenter#clear()
 	 */
 	@Override
@@ -300,6 +457,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	@Override
 	public void close() {
 		clear();
+		ConfigRegistry.getGlobalRegistry().removeGroupListener(configPath, getHandler());
 	}
 
 	/**
@@ -389,7 +547,235 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		refresh();
 	}
 
-	private class Handler extends MouseAdapter {
+	private void play(float beginOffset, float endOffset) {
+
+		if(sentenceInfo==null)
+			throw new IllegalStateException("Cannot play anything without a specified sentence..."); //$NON-NLS-1$
+
+		if(beginOffset<0 || endOffset<0) {
+			LoggerFactory.warning(this, String.format(
+					"Cannot play part of sentence - at least one offset is undefined or invalid: [%.02f , %.02f]", beginOffset, endOffset)); //$NON-NLS-1$
+			return;
+		}
+
+		try {
+			ProsodicSentenceData sentence = sentenceInfo.getSentence();
+
+			SoundPlayer player = SoundPlayer.getInstance();
+			SoundFile soundFile = player.getSoundFile(sentence);
+
+			if(!soundFile.isOpen()) {
+				player.open(soundFile);
+			}
+
+			soundFile.setStartOffset(beginOffset);
+			soundFile.setEndOffset(endOffset);
+			soundFile.setRepeating(config.loopSound);
+
+			player.start(soundFile);
+
+		} catch (SoundException e) {
+			LoggerFactory.error(this, "Failed to play sound for part of sentence '"+sentenceInfo.getLabel()+"'", e); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
+	private void playSentence() {
+		ProsodicSentenceData sentence = sentenceInfo.getSentence();
+		float beginOffset = SoundOffsets.getBeginOffset(sentence);
+		float endOffset = SoundOffsets.getEndOffset(sentence);
+
+		play(beginOffset, endOffset);
+	}
+
+	private void playWord(int wordIndex) {
+		ProsodicSentenceData sentence = sentenceInfo.getSentence();
+		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex);
+		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex);
+
+//		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
+
+		play(beginOffset, endOffset);
+	}
+
+	private void playSyllable(int wordIndex, int sylIndex) {
+		ProsodicSentenceData sentence = sentenceInfo.getSentence();
+		float beginOffset = SoundOffsets.getBeginOffset(sentence, wordIndex, sylIndex);
+		float endOffset = SoundOffsets.getEndOffset(sentence, wordIndex, sylIndex);
+
+//		System.out.printf("begin=%.03f end=%.03f\n", beginOffset, endOffset); //$NON-NLS-1$
+
+		play(beginOffset, endOffset);
+	}
+
+	private void showPopup(MouseEvent trigger) {
+		if(popupMenu==null) {
+			// Create new popup menu
+
+			Options options = null;
+			popupMenu = getActionManager().createPopupMenu(
+					"plugins.prosody.prosodySentenceDetailPresenter.popupMenuList", options); //$NON-NLS-1$
+
+			if(popupMenu!=null) {
+				popupMenu.pack();
+			} else {
+				LoggerFactory.log(this, Level.SEVERE, "Unable to create popup menu"); //$NON-NLS-1$
+			}
+		}
+
+		if(popupMenu!=null) {
+			refreshActions();
+
+			popupMenu.show((Component) trigger.getSource(), trigger.getX(), trigger.getY());
+		}
+	}
+
+	private class Handler extends MouseAdapter implements ChangeListener, ConfigListener {
+
+		private Cursor cursor;
+
+		private void maybeShowPopup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				//TODO
+			}
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				// Already handled by pressed/release callbacks
+				return;
+			}
+
+			if(e.getSource() instanceof WordPanel) {
+				WordPanel panel = (WordPanel) e.getSource();
+				PaIntEHitBox hitBox = panel.translate(e.getPoint());
+				if(hitBox==null) {
+					return;
+				}
+
+				switch (hitBox.getType()) {
+				case SYL_LABEL:
+					playSyllable(hitBox.getWordIndex(), hitBox.getSylIndex());
+					break;
+				case WORD_LABEL:
+					playWord(hitBox.getWordIndex());
+					break;
+
+				default:
+					break;
+				}
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseMoved(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			if(e.getSource() instanceof WordPanel) {
+				WordPanel panel = (WordPanel) e.getSource();
+				refreshWordPanel(panel, e.getPoint());
+			}
+		}
+
+		private final DecimalFormat decimalFormat = new DecimalFormat("#,###,###,##0.00"); //$NON-NLS-1$
+		private final String defaultTooltipFormat =
+				"<html>" //$NON-NLS-1$
+				+ "A<sub>1</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "A<sub>2</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "B<sub>&nbsp;</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "C<sub>1</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "C<sub>2</sub>:&nbsp;%.02f<br>" //$NON-NLS-1$
+				+ "D<sub>&nbsp;</sub>:&nbsp;%.02f"; //$NON-NLS-1$
+
+		private void refreshWordPanel(WordPanel panel, Point p) {
+			PaIntEHitBox hitBox = panel.translate(p);
+
+			String tooltip = null;
+			Cursor cursor = this.cursor;
+
+			if(hitBox!=null) {
+				switch (hitBox.getType()) {
+				case AXIS:
+					tooltip = decimalFormat.format(hitBox.getAxisValue());
+					break;
+
+				case CURVE:
+					tooltip = decimalFormat.format(hitBox.getX())+'/'+decimalFormat.format(hitBox.getY());
+					break;
+
+				case WORD_LABEL:
+				case SYL_LABEL:
+//					cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+					cursor = ProsodyUtils.getSpeakerCursor();
+					break;
+
+				case GRAPH:
+					PaIntEParams params = hitBox.getParams();
+					tooltip = String.format(Locale.ENGLISH, defaultTooltipFormat,
+							params.getA1(), params.getA2(), params.getB(),
+							params.getC1(), params.getC2(), params.getD());
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			panel.setCursor(cursor);
+			panel.setToolTipText(tooltip);
+//			detailPanel.repaint();
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			if(e.getSource() instanceof WordPanel) {
+				WordPanel panel = (WordPanel) e.getSource();
+				cursor = panel.getCursor();
+				refreshWordPanel(panel, e.getPoint());
+			}
+		}
+
+		/**
+		 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseExited(MouseEvent e) {
+			if(e.getSource() instanceof WordPanel) {
+				WordPanel panel = (WordPanel) e.getSource();
+				panel.setCursor(cursor);
+				cursor = null;
+			}
+		}
+
+		/**
+		 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+		 */
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			refreshActions();
+		}
+
+		/**
+		 * @see de.ims.icarus.config.ConfigListener#invoke(de.ims.icarus.config.ConfigRegistry, de.ims.icarus.config.ConfigEvent)
+		 */
+		@Override
+		public void invoke(ConfigRegistry sender, ConfigEvent event) {
+			reloadConfig(event.getHandle());
+		}
 
 	}
 
@@ -532,21 +918,21 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //
 //			FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
 //			formBuilder.addEntry("info", new DummyFormEntry( //$NON-NLS-1$
-//					"plugins.prosody.prosodyOutlinePresenter.dialogs.editPattern.info", patternSelectInfo)); //$NON-NLS-1$
+//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.info", patternSelectInfo)); //$NON-NLS-1$
 //			formBuilder.addEntry("sentencePattern", new ChoiceFormEntry( //$NON-NLS-1$
-//					"plugins.prosody.prosodyOutlinePresenter.dialogs.editPattern.sentencePattern", sentencePatternSelect)); //$NON-NLS-1$
+//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.sentencePattern", sentencePatternSelect)); //$NON-NLS-1$
 //			formBuilder.addEntry("headerPattern", new ChoiceFormEntry( //$NON-NLS-1$
-//					"plugins.prosody.prosodyOutlinePresenter.dialogs.editPattern.headerPattern", headerPatternSelect)); //$NON-NLS-1$
+//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.headerPattern", headerPatternSelect)); //$NON-NLS-1$
 //			formBuilder.addEntry("detailPattern", new ChoiceFormEntry( //$NON-NLS-1$
-//					"plugins.prosody.prosodyOutlinePresenter.dialogs.editPattern.detailPattern", detailPatternSelect)); //$NON-NLS-1$
+//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.detailPattern", detailPatternSelect)); //$NON-NLS-1$
 //
 //			formBuilder.buildForm();
 //
 //			if(DialogFactory.getGlobalFactory().showGenericDialog(
 //					null,
 //					DialogFactory.OK_CANCEL_OPTION,
-//					"plugins.prosody.prosodyOutlinePresenter.dialogs.editPattern.title", //$NON-NLS-1$
-//					"plugins.prosody.prosodyOutlinePresenter.dialogs.editPattern.message", //$NON-NLS-1$
+//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.title", //$NON-NLS-1$
+//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.message", //$NON-NLS-1$
 //					formBuilder.getContainer(),
 //					true)) {
 //
@@ -566,8 +952,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //
 //					UIUtil.beep();
 //					DialogFactory.getGlobalFactory().showError(null,
-//							"plugins.prosody.prosodyOutlinePresenter.dialogs.invalidSentencePattern.title",  //$NON-NLS-1$
-//							"plugins.prosody.prosodyOutlinePresenter.dialogs.invalidSentencePattern.message",  //$NON-NLS-1$
+//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidSentencePattern.title",  //$NON-NLS-1$
+//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidSentencePattern.message",  //$NON-NLS-1$
 //							sentencePattern);
 //
 //					return;
@@ -588,8 +974,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //
 //					UIUtil.beep();
 //					DialogFactory.getGlobalFactory().showError(null,
-//							"plugins.prosody.prosodyOutlinePresenter.dialogs.invalidHeaderPattern.title",  //$NON-NLS-1$
-//							"plugins.prosody.prosodyOutlinePresenter.dialogs.invalidHeaderPattern.message",  //$NON-NLS-1$
+//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidHeaderPattern.title",  //$NON-NLS-1$
+//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidHeaderPattern.message",  //$NON-NLS-1$
 //							headerPattern);
 //
 //					return;
@@ -610,8 +996,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //
 //					UIUtil.beep();
 //					DialogFactory.getGlobalFactory().showError(null,
-//							"plugins.prosody.prosodyOutlinePresenter.dialogs.invalidDetailPattern.title",  //$NON-NLS-1$
-//							"plugins.prosody.prosodyOutlinePresenter.dialogs.invalidDetailPattern.message",  //$NON-NLS-1$
+//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidDetailPattern.title",  //$NON-NLS-1$
+//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidDetailPattern.message",  //$NON-NLS-1$
 //							detailPattern);
 //
 //					return;
@@ -621,33 +1007,17 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //			}
 		}
 
-		public void playDocument(ActionEvent e) {
+		public void playSentence(ActionEvent e) {
 			if(sentenceInfo==null) {
 				return;
 			}
 
 			try {
 
-				ProsodicSentenceData sentence = sentenceInfo.getSentence();
-
-				SoundPlayer player = SoundPlayer.getInstance();
-				SoundFile soundFile = player.getSoundFile(sentence);
-
-				if(!soundFile.isOpen()) {
-					player.open(soundFile);
-				}
-
-				float beginOffset = SoundOffsets.getBeginOffset(sentence);
-				float endOffset = SoundOffsets.getEndOffset(sentence);
-
-				soundFile.setStartOffset(beginOffset);
-				soundFile.setEndOffset(endOffset);
-				soundFile.setRepeating(false);
-
-				player.start(soundFile);
+				ProsodySentenceDetailPresenter.this.playSentence();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to play current document", ex); //$NON-NLS-1$
+						"Failed to play current sentence", ex); //$NON-NLS-1$
 
 				UIUtil.beep();
 			}
@@ -713,7 +1083,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		public SentencePanel() {
 			super(new WrapLayout(FlowLayout.LEFT, 10, 10));
 
-			setBackground(UIManager.getColor("List.background"));
+			setBackground(UIManager.getColor("List.background")); //$NON-NLS-1$
 		}
 
 		/**
@@ -762,7 +1132,25 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 	}
 
-	private static final Border wordBorder = new LineBorder(Color.lightGray);
+	private static class WordBorder extends LineBorder {
+
+		private static final Color DEFAULT_COLOR = Color.lightGray;
+
+		/**
+		 * @param color
+		 */
+		public WordBorder() {
+			super(DEFAULT_COLOR);
+		}
+
+		public void setLineColor(Color color) {
+			if (color == null) {
+				color = DEFAULT_COLOR;
+			}
+
+			lineColor = color;
+		}
+	}
 
 	private class WordPanel extends JComponent {
 
@@ -773,7 +1161,11 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		private final PaIntEGraph graph;
 		private final PaIntEParams params;
 
+		private double translationAccuracy = 0.05;
+
 		private Dimension preferredSize;
+
+		private final WordBorder border = new WordBorder();
 
 		public WordPanel(WordInfo wordInfo) {
 			this.wordInfo = wordInfo;
@@ -782,7 +1174,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			graph = new PaIntEGraph();
 			params = new PaIntEParams();
 			setBackground(config.backgroundColor);
-			setBorder(wordBorder);
+			setBorder(border);
 		}
 
 		public WordInfo getWordInfo() {
@@ -805,6 +1197,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			graph.setGridStyle(config.detailGridStyle);
 			graph.setPaintBorder(config.detailPaintBorder);
 			graph.setPaintGrid(config.detailPaintGrid);
+			graph.getCurve().setAntiAliasingType(config.antiAliasingType);
 
 			xAxis.setAxisColor(config.detailAxisColor);
 			xAxis.setLabelColor(config.detailAxisLabelColor);
@@ -820,11 +1213,13 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			yAxis.setMarkerColor(config.detailAxisMarkerColor);
 			yAxis.setMarkerHeight(config.detailAxisMarkerHeight);
 
+			WordInfo wordInfo = getWordInfo();
+
+			yAxis.setMinValue(Math.min(50, (int)wordInfo.getSentenceInfo().getMinD()));
+			yAxis.setMaxValue(Math.max(200, (int)wordInfo.getSentenceInfo().getMaxD()));
+
 			LabelPattern pattern = config.sentencePattern;
 			textArea.setFont(config.sentenceFont);
-
-
-			WordInfo wordInfo = getWordInfo();
 
 			Dimension size = new Dimension();
 
@@ -850,10 +1245,9 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 					// Compute required space for text lines
 					textArea.getSize(this, lines, areaSize);
-					size.height = Math.max(size.height, areaSize.height);
 
 					int sylWidth = Math.max(areaSize.width, config.graphWidth);
-					sylWidth = Math.max(sylWidth, fm.stringWidth(sylInfo.getLabel()));
+					sylWidth = Math.max(sylWidth, fm.stringWidth(labelForSyllable(sylInfo)));
 
 //					System.out.printf("form=%s x=%d width=%d sw=%d\n",
 //							lines[0], width, areaSize.width, fm.stringWidth(lines[0]));
@@ -865,14 +1259,113 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 					width += sylWidth;
 				}
 
+				width = Math.max(width, fm.stringWidth(labelForWord(wordInfo)));
+
+				width = Math.max(width, 35);
+
 				size.width = width;
 
-				size.height += config.graphHeight + 3*config.graphSpacing + fm.getHeight();
+				size.height += fm.getHeight()*pattern.getElementCount()
+						+ textArea.getTopInsets() +textArea.getBottomInsets()
+						+ config.graphHeight + 3*config.graphSpacing + fm.getHeight();
 			}
+
+			border.setLineColor((Color) wordInfo.getProperty(COL_KEY));
 
 			wordInfo.setWidth(size.width);
 
 			preferredSize = size;
+		}
+
+		private String labelForSyllable(SyllableInfo sylInfo) {
+			return sylInfo.getLabel();
+		}
+
+		private String labelForWord(WordInfo wordInfo) {
+			return wordInfo.getLabel();
+		}
+
+		public PaIntEHitBox translate(Point p) {
+
+			WordInfo wordInfo = getWordInfo();
+
+			if(wordInfo==null || wordInfo.sylCount()==0) {
+				return null;
+			}
+
+			Rectangle bounds = new Rectangle(getSize());
+
+			if(bounds==null || (p.y>=bounds.y && !bounds.contains(p))) {
+				return null;
+			}
+
+			int x = p.x;
+			int y = p.y;
+
+			int wordIndex = wordInfo.getWordIndex();
+
+			Graphics2D g = (Graphics2D) getGraphics();
+			FontMetrics fm = g.getFontMetrics();
+
+			Rectangle area = new Rectangle();
+			area.y = fm.getHeight() + config.graphSpacing;
+
+			// Iterate over syllables of word
+			for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
+				SyllableInfo syInfo = wordInfo.syllableInfo(sylIndex);
+
+				area.x = syInfo.getX();
+				area.width = syInfo.getWidth();
+				area.height = config.graphHeight;
+
+				if(sylIndex>0) {
+					area.x += config.graphSpacing;
+				}
+
+				if(area.contains(x, y)) {
+
+					SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
+
+					String sylLabel = labelForSyllable(sylInfo);
+
+					// Label
+					if(sylLabel!=null) {
+						int sw = fm.stringWidth(sylLabel);
+						int sx = area.x + area.width/2 - sw/2;
+						int sy = area.y + fm.getHeight();
+
+						if(y<sy && x>=sx && x<=sx+sw) {
+							return new PaIntEHitBox(wordIndex, sylIndex);
+						}
+					}
+
+					params.setParams(wordInfo.getSentenceInfo().getSentence(), wordIndex, sylIndex);
+
+					y -= area.y;
+					x -= area.x;
+
+					return graph.translate(x, y, g, area, params, translationAccuracy);
+				}
+
+				area.x += area.width;
+			}
+
+			String wordLabel = labelForWord(wordInfo);
+
+			if(wordLabel!=null) {
+				int sw = fm.stringWidth(wordLabel);
+				int sx = bounds.width/2 - sw/2;
+				int sy = fm.getHeight();
+
+//					System.out.printf("x=%d y=%d sw=%d sx=%d sy=%d area=%s\n",
+//							x, y, sw, sx, sy, area);
+
+				if(y<=sy && x>=sx && x<=sx+sw) {
+					return new PaIntEHitBox(wordIndex);
+				}
+			}
+
+			return null;
 		}
 
 		@Override
@@ -922,16 +1415,22 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				// Paint graph
 
 				if(area.width>config.graphWidth) {
-					area.x = (area.width/2) - (config.graphWidth/2);
+					area.x += (area.width-config.graphWidth)/2;
 				}
 				area.height = config.graphHeight;
 				area.y = fm.getHeight()+config.graphSpacing;
 
 				params.setParams(sentence, wordInfo.getWordIndex(), sylIndex);
 
+				Color curveColor = (Color)sylInfo.getProperty(COL_KEY);
+				if(curveColor==null) {
+					curveColor = config.curveColor;
+				}
+
+				graph.getCurve().setColor(curveColor);
 				graph.paint(g, params, area);
 
-				String sylLabel = sylInfo.getLabel();
+				String sylLabel = labelForSyllable(sylInfo);
 
 				// Syllable Label
 				if(sylLabel!=null) {
@@ -946,15 +1445,20 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 						g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
 					}
 
+					Color fg = (Color)sylInfo.getProperty(COL_KEY);
+					if(fg==null) {
+						fg = config.sentenceTextColor;
+					}
+
 					g.setFont(config.sentenceFont);
-					g.setColor(config.sentenceTextColor);
+					g.setColor(fg);
 					g.drawString(sylLabel, x, y);
 
 					g.setColor(c);
 				}
 			}
 
-			String wordLabel = wordInfo.getLabel();
+			String wordLabel = labelForWord(wordInfo);
 
 			if(wordLabel!=null) {
 				int sw = fm.stringWidth(wordLabel);
@@ -968,8 +1472,13 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 					g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
 				}
 
+				Color fg = (Color)wordInfo.getProperty(COL_KEY);
+				if(fg==null) {
+					fg = config.sentenceTextColor;
+				}
+
 				g.setFont(config.sentenceFont);
-				g.setColor(config.sentenceTextColor);
+				g.setColor(fg);
 				g.drawString(wordLabel, x, y);
 
 				g.setColor(c);

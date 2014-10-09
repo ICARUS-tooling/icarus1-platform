@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.prosody.ui.view.editor;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -37,7 +38,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.FlavorEvent;
 import java.awt.datatransfer.FlavorListener;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
@@ -45,6 +45,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,38 +55,32 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
+import javax.activation.DataHandler;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.CC;
@@ -99,19 +95,24 @@ import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParamsWrapper;
+import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
-import de.ims.icarus.plugins.prosody.ui.list.PaIntEParamsListCellRenderer;
+import de.ims.icarus.plugins.prosody.ui.geom.PaIntEIcon;
+import de.ims.icarus.plugins.prosody.ui.helper.PaIntEParamsTableCellRenderer;
+import de.ims.icarus.plugins.prosody.ui.view.editor.PaIntERegistry.PaIntERegistryTableModel;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.NumberDocument;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
+import de.ims.icarus.ui.events.ChangeSource;
+import de.ims.icarus.ui.events.EventListener;
+import de.ims.icarus.ui.events.EventObject;
+import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.ui.events.ListenerProxies;
-import de.ims.icarus.ui.list.ListItemTransferHandler;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.classes.ClassUtils;
 
 /**
  * @author Markus Gärtner
@@ -134,10 +135,14 @@ public class PaIntEEditorView extends View {
 	private GraphComponent graphComponent;
 
 	private final List<ParamsPanel> paramsPanels = new ArrayList<>();
+	// Panel the current popup menu belongs to
+	private transient ParamsPanel owningPanel;
 	private Box paramsComponent;
 
-	private JList<PaIntEParamsWrapper> paramsHistoryList;
-	private DefaultListModel<PaIntEParamsWrapper> paramsHistoryListModel;
+	private JTable paramsTable;
+	private PaIntERegistryTableModel paramsTableModel;
+
+	private TransferManager transferManager;
 
 	private JPopupMenu popupMenu;
 
@@ -174,9 +179,11 @@ public class PaIntEEditorView extends View {
 			clipboard.addFlavorListener(ListenerProxies.getProxy(FlavorListener.class, getHandler()));
 		}
 
+		transferManager = new TransferManager();
+
 		graphComponent = new GraphComponent();
 		graphComponent.setBorder(new EmptyBorder(10, 10, 10, 10));
-		graphComponent.setTransferHandler(new PainteGraphTransferHandler());
+		graphComponent.setTransferHandler(transferManager);
 
 		paramsComponent = Box.createHorizontalBox();
 		paramsComponent.add(Box.createHorizontalGlue());
@@ -195,17 +202,32 @@ public class PaIntEEditorView extends View {
 //		UIUtil.defaultSetUnitIncrement(upperScrollPane);
 //		upperScrollPane.setMinimumSize(paramsComponent.getPreferredSize());
 
-		paramsHistoryListModel = new DefaultListModel<>();
-		paramsHistoryList = new JList<>(paramsHistoryListModel);
-		paramsHistoryList.setCellRenderer(new PaIntEParamsListCellRenderer(graphComponent.getGraph()));
-		paramsHistoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		paramsHistoryList.addMouseListener(getHandler());
-		paramsHistoryList.addListSelectionListener(getHandler());
-		paramsHistoryList.setDragEnabled(true);
-		paramsHistoryList.setTransferHandler(new ListItemTransferHandler());
-		UIUtil.enableRighClickListSelection(paramsHistoryList);
+		paramsTableModel = PaIntERegistry.getInstance().createTableModel();
+		paramsTableModel.install(this);
+		paramsTable = new JTable(paramsTableModel);
+		paramsTable.setColumnSelectionAllowed(false);
+		paramsTable.setDragEnabled(true);
+		paramsTable.addMouseListener(getHandler());
+		paramsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		PaIntEParamsTableCellRenderer renderer = new PaIntEParamsTableCellRenderer(graphComponent.getGraph());
+		paramsTable.setDefaultRenderer(PaIntEParamsWrapper.class, renderer);
+		paramsTable.setRowHeight(renderer.getPaIntEIcon().getIconHeight()+2);
+		paramsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		paramsTable.setDragEnabled(true);
+		paramsTable.setTransferHandler(transferManager);
+		UIUtil.enableRighClickTableSelection(paramsTable);
 
-		JScrollPane lowerScrollPane = new JScrollPane(paramsHistoryList);
+//		paramsHistoryListModel = new DefaultListModel<>();
+//		paramsHistoryList = new JList<>(paramsHistoryListModel);
+//		paramsHistoryList.setCellRenderer(new PaIntEParamsListCellRenderer(graphComponent.getGraph()));
+//		paramsHistoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//		paramsHistoryList.addMouseListener(getHandler());
+//		paramsHistoryList.addListSelectionListener(getHandler());
+//		paramsHistoryList.setDragEnabled(true);
+//		paramsHistoryList.setTransferHandler(new ListItemTransferHandler());
+//		UIUtil.enableRighClickListSelection(paramsHistoryList);
+
+		JScrollPane lowerScrollPane = new JScrollPane(paramsTable);
 		lowerScrollPane.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(lowerScrollPane);
 
@@ -227,6 +249,7 @@ public class PaIntEEditorView extends View {
 		refreshActions();
 
 		ConfigRegistry.getGlobalRegistry().addGroupListener(configPath, getHandler());
+		PaIntERegistry.getInstance().addListener(null, getHandler());
 
 		reloadConfig();
 	}
@@ -239,10 +262,14 @@ public class PaIntEEditorView extends View {
 	public void close() {
 		super.close();
 
+		paramsTableModel.uninstall(this);
+
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		if(clipboard!=null) {
 			clipboard.removeFlavorListener(ListenerProxies.getProxy(FlavorListener.class, getHandler()));
 		}
+
+		PaIntERegistry.getInstance().removeListener(getHandler());
 	}
 
 	private JToolBar createToolBar() {
@@ -264,6 +291,8 @@ public class PaIntEEditorView extends View {
 
 		ActionManager actionManager = getDefaultActionManager();
 
+		// GENERAL ACTIONS
+
 		actionManager.addHandler("plugins.prosody.painteEditorView.openPreferencesAction", //$NON-NLS-1$
 				callbackHandler, "openPreferences"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.removePainteParamsAction", //$NON-NLS-1$
@@ -278,37 +307,49 @@ public class PaIntEEditorView extends View {
 				callbackHandler, "importParamsHistory"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsHistoryAction", //$NON-NLS-1$
 				callbackHandler, "exportParamsHistory"); //$NON-NLS-1$
-		actionManager.addHandler("plugins.prosody.painteEditorView.addParamsPanelAction", //$NON-NLS-1$
-				callbackHandler, "addParamsPanel"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.copyPainteParamsAction", //$NON-NLS-1$
 				callbackHandler, "copyPainteParams"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.pastePainteParamsAction", //$NON-NLS-1$
+				callbackHandler, "pastePainteParams"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.collapseAllPanelsAction", //$NON-NLS-1$
 				callbackHandler, "collapseAllPanels"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.expandAllPanelsAction", //$NON-NLS-1$
 				callbackHandler, "expandAllPanels"); //$NON-NLS-1$
+
+		// PANEL ACTIONS
+		actionManager.addHandler("plugins.prosody.painteEditorView.addParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "addParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.removeParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "removeParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.renameParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "renameParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.clearParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "clearParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.importParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "importParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "exportParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.saveParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "saveParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.undoParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "undoParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.redoParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "redoParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.colorParamsPanelAction", //$NON-NLS-1$
+				callbackHandler, "colorParamsPanel"); //$NON-NLS-1$
 	}
 
 	private void refreshActions() {
 		ActionManager actionManager = getDefaultActionManager();
 
-		int index = paramsHistoryList.getSelectedIndex();
-		int historySize = paramsHistoryListModel.getSize();
+		int index = paramsTable.getSelectedRow();
+		int registrySize = paramsTableModel.getRowCount();
 
 		boolean hasSelection = index!=-1;
-		boolean hasHistory = historySize>0;
+		boolean hasHistory = registrySize>0;
 		boolean multipleParams = paramsPanels.size()>0; //TODO temporary fix, amybe change abck to 1?
 
-		boolean pasteable = false;
-		try {
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			Transferable t = clipboard.getContents(this);
-			if(t!=null && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-				new PaIntEConstraintParams((String) t.getTransferData(DataFlavor.stringFlavor));
-				pasteable = true;
-			}
-		} catch(Exception e) {
-			//ignore
-		}
+		boolean pasteable = isPaIntEClipboardContent();
 
 		actionManager.setEnabled(hasSelection,
 				"plugins.prosody.painteEditorView.removePainteParamsAction", //$NON-NLS-1$
@@ -321,10 +362,23 @@ public class PaIntEEditorView extends View {
 		actionManager.setEnabled(multipleParams,
 				"plugins.prosody.painteEditorView.collapseAllPanelsAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.expandAllPanelsAction"); //$NON-NLS-1$
+		actionManager.setEnabled(pasteable,
+				"plugins.prosody.painteEditorView.pastePainteParamsAction"); //$NON-NLS-1$
+	}
 
-		for(ParamsPanel panel : paramsPanels) {
-			panel.refreshPasteButton(pasteable);
+	private boolean isPaIntEClipboardContent() {
+		try {
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			Transferable t = clipboard.getContents(this);
+			if(t!=null && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+				new PaIntEConstraintParams((String) t.getTransferData(DataFlavor.stringFlavor));
+				return true;
+			}
+		} catch(Exception e) {
+			//ignore
 		}
+
+		return false;
 	}
 
 	private Handle getConfigHandle() {
@@ -371,15 +425,21 @@ public class PaIntEEditorView extends View {
 		refreshActions();
 	}
 
+	private PaIntEParamsWrapper getSelectedWrapper() {
+		int row = paramsTable.getSelectedRow();
+		return row==-1 ? null : paramsTableModel.getItem(row);
+	}
+
 	private void loadSelectedParams() {
-		PaIntEParamsWrapper params = paramsHistoryList.getSelectedValue();
+		PaIntEParamsWrapper params = getSelectedWrapper();
 		if(params==null) {
 			return;
 		}
 
-		addParamsPanel(null).setParams(params.getParams());
+		addParamsPanel(null).setWrapper(params);
 
 		refreshActions();
+		refreshParamComponents();
 	}
 
 	private void refreshGraph() {
@@ -391,16 +451,26 @@ public class PaIntEEditorView extends View {
 	}
 
 	private void refreshParamComponents() {
+		refreshParamComponents(null);
+	}
+
+	private void refreshParamComponents(PaIntEParamsWrapper wrapper) {
 
 		for(ParamsPanel panel : paramsPanels) {
+			if(wrapper!=null && panel.getWrapper()==wrapper) {
+				panel.syncToBuffer();
+			}
 			panel.refresh();
 		}
 
 		refreshGraph();
 	}
 
-	private void addParamsToHistory(PaIntEParams params) {
-		paramsHistoryListModel.addElement(new PaIntEParamsWrapper(params));
+	private void addParamsToHistory(PaIntEParamsWrapper params) {
+		//TODO make sure they get a proper name!!!
+		if(!PaIntERegistry.getInstance().containsParams(params)) {
+			PaIntERegistry.getInstance().addParams(params);
+		}
 	}
 
 	public void expandParamsPanels(boolean expanded) {
@@ -409,16 +479,17 @@ public class PaIntEEditorView extends View {
 		}
 	}
 
-	public void copyParams(PaIntEParams params) {
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		if(clipboard==null) {
-			return;
+	private ParamsPanel getOwningPanel(AWTEvent e) {
+		if(owningPanel!=null) {
+			return owningPanel;
 		}
 
-		String text = new PaIntEConstraintParams(params).toString();
-		StringSelection data = new StringSelection(text);
+		Object source = e.getSource();
+		if(source instanceof Component) {
+			return (ParamsPanel) SwingUtilities.getAncestorOfClass(ParamsPanel.class, (Component) source);
+		}
 
-		clipboard.setContents(data, data);
+		return null;
 	}
 
 	private void pasteParams(ParamsPanel panel) {
@@ -446,7 +517,12 @@ public class PaIntEEditorView extends View {
 
 		try {
 			PaIntEConstraintParams params = new PaIntEConstraintParams(text);
-			panel.setParams(params.toPaIntEParams());
+
+			if(panel==null) {
+				panel = addParamsPanel(null);
+			}
+
+			panel.setParams(params);
 		} catch(Exception e) {
 			//ignore invalid formats
 		}
@@ -470,11 +546,33 @@ public class PaIntEEditorView extends View {
 		if(popupMenu!=null) {
 			refreshActions();
 
-			popupMenu.show(paramsHistoryList, trigger.getX(), trigger.getY());
+			popupMenu.show(paramsTable, trigger.getX(), trigger.getY());
 		}
 	}
 
-	private class Handler extends MouseAdapter implements ConfigListener, ListSelectionListener, FlavorListener {
+	private static PaIntEParams extractParams(Object obj) {
+		if(obj instanceof String) {
+			return PaIntEParams.parsePaIntEParams((String) obj);
+		} else if(obj instanceof PaIntEParams) {
+			return (PaIntEParams) obj;
+		} else if(obj instanceof PaIntEParamsWrapper) {
+			return ((PaIntEParamsWrapper)obj).getParams();
+		} else {
+			return null;
+		}
+	}
+
+	private static PaIntEParamsWrapper extractWrapper(Object obj) {
+		if(obj instanceof PaIntEParamsWrapper) {
+			PaIntEParamsWrapper wrapper = (PaIntEParamsWrapper)obj;
+			PaIntEParamsWrapper savedWrapper = PaIntERegistry.getInstance().getParams(wrapper.getLabel());
+			return savedWrapper!=null ? savedWrapper : wrapper;
+		} else {
+			return null;
+		}
+	}
+
+	private class Handler extends MouseAdapter implements ConfigListener, ListSelectionListener, FlavorListener, EventListener {
 
 		private void maybeShowPopupMenu(MouseEvent e) {
 			if(e.isPopupTrigger()) {
@@ -532,6 +630,21 @@ public class PaIntEEditorView extends View {
 			refreshActions();
 		}
 
+		/**
+		 * @see de.ims.icarus.ui.events.EventListener#invoke(java.lang.Object, de.ims.icarus.ui.events.EventObject)
+		 */
+		@Override
+		public void invoke(Object sender, EventObject event) {
+
+			if(Events.CHANGED.equals(event.getName())
+					&& event.getProperty("wrapper")!=null) { //$NON-NLS-1$
+				PaIntEParamsWrapper wrapper = (PaIntEParamsWrapper) event.getProperty("wrapper"); //$NON-NLS-1$
+				refreshParamComponents(wrapper);
+			} else {
+				refreshParamComponents();
+			}
+		}
+
 	}
 
 	public class CallbackHandler {
@@ -564,11 +677,11 @@ public class PaIntEEditorView extends View {
 
 		public void copyPainteParams(ActionEvent e) {
 			try {
-				PaIntEParamsWrapper params = paramsHistoryList.getSelectedValue();
+				PaIntEParamsWrapper params = getSelectedWrapper();
 				if(params==null) {
 					return;
 				}
-				copyParams(params.getParams());
+				PaIntEUtils.copyWrapper(params);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to copy painte parameters to clipboard", ex); //$NON-NLS-1$
@@ -579,13 +692,29 @@ public class PaIntEEditorView extends View {
 			refreshActions();
 		}
 
+		public void pastePainteParams(ActionEvent e) {
+			try {
+				PaIntEEditorView.this.pasteParams(null);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to paste painte parameters from clipboard", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+			refreshActions();
+		}
+
 		public void removePainteParams(ActionEvent e) {
 			try {
-				int index = paramsHistoryList.getSelectedIndex();
-				if(index==-1) {
+				PaIntEParamsWrapper params = getSelectedWrapper();
+				if(params==null) {
 					return;
 				}
-				paramsHistoryListModel.remove(index);
+
+				//FIXME add confirmation dialog?
+
+				PaIntERegistry.getInstance().removeParams(params);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to remove painte parameters from history", ex); //$NON-NLS-1$
@@ -611,31 +740,28 @@ public class PaIntEEditorView extends View {
 
 		public void renamePainteParams(ActionEvent e) {
 			try {
-				PaIntEParamsWrapper params = paramsHistoryList.getSelectedValue();
+				PaIntEParamsWrapper params = getSelectedWrapper();
 				if(params==null) {
 					return;
 				}
-
 
 				String currentName = params.getLabel();
 				String newName = DialogFactory.getGlobalFactory().showInputDialog(getFrame(),
 						"plugins.prosody.painteEditorView.dialogs.renameParams.title",  //$NON-NLS-1$
 						"plugins.prosody.painteEditorView.dialogs.renameParams.message",  //$NON-NLS-1$
-						currentName);
+						currentName, currentName);
 
 				// Cancelled by user
-				if(newName==null) {
+				if(!PaIntERegistry.isLegalName(newName)) {
 					return;
 				}
 
 				// No changes
-				if(ClassUtils.equals(currentName, newName)) {
+				if(currentName.equals(newName)) {
 					return;
 				}
 
-				params.setLabel(newName);
-
-				paramsHistoryList.repaint();
+				PaIntERegistry.getInstance().renameParams(params, newName);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to rename painte parameters", ex); //$NON-NLS-1$
@@ -648,8 +774,9 @@ public class PaIntEEditorView extends View {
 
 		public void clearParamsHistory(ActionEvent e) {
 			try {
-				paramsHistoryListModel.removeAllElements();
-				paramsHistoryList.clearSelection();
+				//FIXME add confirmation dialog and erase registry content if requested
+
+				PaIntERegistry.getInstance().removeAllParams();
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to clear params history", ex); //$NON-NLS-1$
@@ -663,7 +790,7 @@ public class PaIntEEditorView extends View {
 		public void exportParamsHistory(ActionEvent e) {
 			try {
 
-				if(paramsHistoryListModel.getSize()==0) {
+				if(paramsTableModel.getRowCount()==0) {
 					return;
 				}
 
@@ -677,19 +804,7 @@ public class PaIntEEditorView extends View {
 					return;
 				}
 
-				// Collect history elements
-				ParamsHistory history = new ParamsHistory();
-				for(int i=0; i<paramsHistoryListModel.getSize(); i++) {
-					history.items.add(paramsHistoryListModel.get(i));
-				}
-
-				JAXBContext context = JAXBContext.newInstance(ParamsHistory.class);
-				Marshaller marshaller = context.createMarshaller();
-				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-				marshaller.marshal(history, Files.newOutputStream(file));
-
-				paramsHistoryList.clearSelection();
+				PaIntERegistry.getInstance().exportParams(file);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to export params history", ex); //$NON-NLS-1$
@@ -713,20 +828,7 @@ public class PaIntEEditorView extends View {
 					return;
 				}
 
-				JAXBContext context = JAXBContext.newInstance(ParamsHistory.class);
-				Unmarshaller unmarshaller = context.createUnmarshaller();
-
-				ParamsHistory history = (ParamsHistory) unmarshaller.unmarshal(Files.newInputStream(file));
-
-				if(history.items.isEmpty()) {
-					return;
-				}
-
-				for(PaIntEParamsWrapper params : history.items) {
-					paramsHistoryListModel.addElement(params);
-				}
-
-				paramsHistoryList.clearSelection();
+				PaIntERegistry.getInstance().importParams(file);
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to import params history", ex); //$NON-NLS-1$
@@ -735,17 +837,6 @@ public class PaIntEEditorView extends View {
 			}
 
 			refreshActions();
-		}
-
-		public void addParamsPanel(ActionEvent e) {
-			try {
-				PaIntEEditorView.this.addParamsPanel(null);
-			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to add params panel", ex); //$NON-NLS-1$
-
-				UIUtil.beep();
-			}
 		}
 
 		public void collapseAllPanels(ActionEvent e) {
@@ -769,27 +860,318 @@ public class PaIntEEditorView extends View {
 				UIUtil.beep();
 			}
 		}
+
+		// PANELS ACTIONS
+
+		// Allowed both for general context and panels!
+		public void addParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+
+			try {
+				PaIntEEditorView.this.addParamsPanel(owningPanel);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to add params panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void removeParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				PaIntEEditorView.this.removeParamsPanel(owningPanel);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to remove panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void clearParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				owningPanel.clear();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to clear panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void colorParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				owningPanel.selectColor();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to select color for panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void renameParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				PaIntEParamsWrapper params = owningPanel.getWrapper();
+
+				String currentName = params.getLabel();
+				String newName = DialogFactory.getGlobalFactory().showInputDialog(getFrame(),
+						"plugins.prosody.painteEditorView.dialogs.renameParams.title",  //$NON-NLS-1$
+						"plugins.prosody.painteEditorView.dialogs.renameParams.message",  //$NON-NLS-1$
+						currentName, currentName);
+
+				// Cancelled by user
+				if(!PaIntERegistry.isLegalName(newName)) {
+					return;
+				}
+
+				// No changes
+				if(currentName.equals(newName)) {
+					return;
+				}
+
+				if(owningPanel.isSaved()) {
+					PaIntERegistry.getInstance().renameParams(params, newName);
+				} else {
+					params.setLabel(newName);
+				}
+
+				refreshParamComponents();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to rename panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void importParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				//TODO
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to import panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void exportParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+
+				PaIntEUtils.copyWrapper(owningPanel.getWrapper());
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to export panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void saveParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+
+				if(owningPanel.isRegistered()) {
+					owningPanel.save();
+					return;
+				}
+
+				PaIntEParamsWrapper params = owningPanel.getWrapper();
+				String label = params.getLabel();
+
+				while(label!=null && DEFAULT_NAME.equals(label)) {
+					label = DialogFactory.getGlobalFactory().showInputDialog(getFrame(),
+							"plugins.prosody.painteEditorView.dialogs.renameParams.title",  //$NON-NLS-1$
+							"plugins.prosody.painteEditorView.dialogs.renameParams.message",  //$NON-NLS-1$
+							label);
+				}
+
+				// Cancelled by user
+				if(!PaIntERegistry.isLegalName(label)) {
+					return;
+				}
+
+				owningPanel.syncToWrapper();
+				params.setLabel(label);
+
+				PaIntERegistry.getInstance().addParams(params);
+
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to save panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void undoParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				owningPanel.undo();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to undo panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void redoParamsPanel(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				owningPanel.redo();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to redo panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
 	}
 
-	@XmlRootElement(name="params-history")
-	@XmlAccessorType(XmlAccessType.FIELD)
-	public static class ParamsHistory {
-		@XmlElement(name="entry")
-		public List<PaIntEParamsWrapper> items = new ArrayList<>();
+	private static final String DEFAULT_NAME = "<unnamed>"; //$NON-NLS-1$
+
+	private static class History extends ChangeSource {
+		private int undoLimit = 20;
+		private final List<ParamsChange> items = new ArrayList<>();
+		private int cursor = -1;
+
+		public void add(ParamsChange item) {
+			// Clear redo section
+			if(canRedo()) {
+				items.subList(cursor+1, items.size()).clear();
+			}
+
+			item.execute();
+
+			items.add(item);
+			if(items.size()>undoLimit) {
+				items.remove(0);
+			} else {
+				cursor++;
+			}
+
+			fireStateChanged();
+		}
+
+		public boolean canRedo() {
+			return !items.isEmpty() && cursor<items.size()-1;
+		}
+
+		public boolean canUndo() {
+			return !items.isEmpty() && cursor>=0;
+		}
+
+		public PaIntEParams undo() {
+			if(!canUndo())
+				throw new IllegalStateException("Cannot undo"); //$NON-NLS-1$
+
+			ParamsChange item = items.get(cursor);
+			cursor--;
+
+			fireStateChanged();
+
+			return item.execute();
+		}
+
+		public PaIntEParams redo() {
+			if(!canRedo())
+				throw new IllegalStateException("Cannot redo"); //$NON-NLS-1$
+
+			cursor++;
+			ParamsChange item = items.get(cursor);
+
+			fireStateChanged();
+
+			return item.execute();
+		}
+
+		public void clear() {
+			items.clear();
+			cursor = -1;
+
+			fireStateChanged();
+		}
 	}
 
-	private class ParamsPanel extends JPanel implements ActionListener {
+	private static class ParamsChange {
+		private PaIntEParams before, after;
+
+		public ParamsChange(PaIntEParams before, PaIntEParams after) {
+			this.before = before;
+			this.after = after;
+		}
+
+		public PaIntEParams execute() {
+			PaIntEParams newParams = after;
+			after = before;
+			before = newParams;
+
+			return newParams;
+		}
+
+	}
+
+	private class ParamsPanel extends JPanel implements ActionListener, PropertyChangeListener, ChangeListener {
 
 		private static final long serialVersionUID = -3162540273589172485L;
 
+		private JPopupMenu popupMenu;
+
 		private ParamComponents[] paramComponents;
 
-		private final PaIntEParams painteParams = new PaIntEParams();
+		private PaIntEParamsWrapper wrapper = new PaIntEParamsWrapper(DEFAULT_NAME);
+		private final PaIntEParams buffer = new PaIntEParams();
 
 		private Color color = Color.black;
-		private final JButton colorButton, addButton, removeButton, copyButton, pasteButton, saveButton;
+		private final JButton colorButton, menuButton, undoButton, redoButton;
 		private final JToggleButton toggleButton;
 		private final JLabel titleLabel;
+
+		private final History history;
 
 		private Icon colorIcon = new Icon() {
 
@@ -826,57 +1208,53 @@ public class PaIntEEditorView extends View {
 		};
 
 		public ParamsPanel() {
-			paramComponents = new ParamComponents[] {
-					new ParamComponents("a1"), //$NON-NLS-1$
-					new ParamComponents("a2"), //$NON-NLS-1$
-					new ParamComponents("b"), //$NON-NLS-1$
-					new ParamComponents("c1"), //$NON-NLS-1$
-					new ParamComponents("c2"), //$NON-NLS-1$
-					new ParamComponents("d"), //$NON-NLS-1$
-					new ParamComponents("alignment"), //$NON-NLS-1$
-			};
+			paramComponents = new ParamComponents[7];
+			for(int i=0; i<paramComponents.length; i++) {
+				paramComponents[i] = new ParamComponents(this, paramIds[i]);
+			}
 
-			colorButton = new JButton();
-			colorButton.setIcon(colorIcon);
-			colorButton.addActionListener(this);
-
-			addButton = new JButton();
-			addButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("add_obj.gif")); //$NON-NLS-1$
-			addButton.addActionListener(this);
-
-			removeButton = new JButton();
-			removeButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("delete_obj.gif")); //$NON-NLS-1$
-			removeButton.addActionListener(this);
-
-			copyButton = new JButton();
-			copyButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("copy_edit.gif")); //$NON-NLS-1$
-			copyButton.addActionListener(this);
-
-			pasteButton = new JButton();
-			pasteButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("paste_edit.gif")); //$NON-NLS-1$
-			pasteButton.addActionListener(this);
-
-			saveButton = new JButton();
-			saveButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("chart_curve_add.png")); //$NON-NLS-1$
-			saveButton.addActionListener(this);
+			history = new History();
+			history.addChangeListener(this);
 
 			toggleButton = new JToggleButton();
 			toggleButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("navi_left_mini.png")); //$NON-NLS-1$
 			toggleButton.setSelectedIcon(IconRegistry.getGlobalRegistry().getIcon("navi_right_mini.png")); //$NON-NLS-1$
+			toggleButton.setFocusable(false);
+			toggleButton.setFocusPainted(false);
 			toggleButton.addActionListener(this);
+
+			colorButton = new JButton(colorIcon);
+			colorButton.setFocusable(false);
+			colorButton.setFocusPainted(false);
+			colorButton.addActionListener(this);
 
 			titleLabel = new JLabel();
 			titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
+			setTransferHandler(transferManager);
+
+			menuButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("node_open.gif")); //$NON-NLS-1$
+			menuButton.addActionListener(this);
+			menuButton.setFocusable(false);
+			menuButton.setFocusPainted(false);
+
+			undoButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("undo_edit.gif")); //$NON-NLS-1$
+			undoButton.addActionListener(this);
+			undoButton.setFocusable(false);
+			undoButton.setFocusPainted(false);
+
+			redoButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("redo_edit.gif")); //$NON-NLS-1$
+			redoButton.addActionListener(this);
+			redoButton.setFocusable(false);
+			redoButton.setFocusPainted(false);
+
 			JToolBar toolBar = getDefaultActionManager().createEmptyToolBar();
 			toolBar.add(titleLabel);
 			toolBar.add(Box.createGlue());
-			toolBar.add(copyButton);
-			toolBar.add(pasteButton);
 			toolBar.add(colorButton);
-			toolBar.add(saveButton);
-			toolBar.add(addButton);
-			toolBar.add(removeButton);
+			toolBar.add(undoButton);
+			toolBar.add(redoButton);
+			toolBar.add(menuButton);
 			toolBar.add(toggleButton);
 
 			FormLayout layout = new FormLayout(
@@ -904,12 +1282,24 @@ public class PaIntEEditorView extends View {
 		}
 
 		public void refresh() {
-			int index = paramsPanels.indexOf(this);
+			String label = wrapper.getLabel();
 
-			String title = ResourceManager.getInstance().get("plugins.prosody.painteEditorView.labels.params")+" ("+(index+1)+")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			titleLabel.setText(title);
+			if(!isSaved()) {
+				label += "*"; //$NON-NLS-1$
+			}
 
-			removeButton.setVisible(paramsPanels.size()>1 && !toggleButton.isSelected());
+			titleLabel.setText(label);
+			titleLabel.setToolTipText(wrapper.getDescription());
+
+//			removeButton.setVisible(paramsPanels.size()>1 && !toggleButton.isSelected());
+		}
+
+		public boolean isSaved() {
+			return isRegistered() && wrapper.getParams().equals(buffer);
+		}
+
+		public boolean isRegistered() {
+			return PaIntERegistry.getInstance().containsParams(wrapper);
 		}
 
 		public double min(int index) {
@@ -928,29 +1318,101 @@ public class PaIntEEditorView extends View {
 			return color;
 		}
 
+		public void setColor(Color color) {
+			this.color = color;
+			colorButton.repaint();
+		}
+
+		public void clear() {
+			reloadConfig(getConfigHandle());
+		}
+
+		public void syncToWrapper() {
+			wrapper.getParams().setParams(buffer);
+		}
+
+		public void syncToBuffer() {
+			buffer.setParams(wrapper.getParams());
+
+			refreshComponents();
+		}
+
 		public PaIntEParams getParams() {
 
 			double[] params = new double[7];
 
 			for(int i=0; i<params.length; i++) {
-				params[i] = paramComponents[i].getValue();
+				params[i] = value(i);
 			}
 
-			painteParams.setParams(params);
+			buffer.setParams(params);
 
-			return painteParams;
+			return buffer;
 		}
 
-		public void setParams(PaIntEParams newParams) {
-			painteParams.setParams(newParams);
+		public PaIntEParamsWrapper getWrapper() {
+			return wrapper;
+		}
 
-			double[] params = newParams.getParams(new double[7]);
+		public void undo() {
+			PaIntEParams params = (PaIntEParams) history.undo();
+//			System.out.println("undo: "+params);
+			setParams0(params);
+		}
+
+		public void redo() {
+			PaIntEParams params = (PaIntEParams) history.redo();
+//			System.out.println("redo: "+params);
+			setParams0(params);
+		}
+
+		public void save() {
+			syncToWrapper();
+
+			PaIntERegistry.getInstance().paramsChanged(wrapper);
+		}
+
+		public void setWrapper(PaIntEParamsWrapper newParams) {
+			wrapper = newParams;
+
+			double[] params = newParams.getParams().getParams(new double[7]);
 
 			for(int i=0; i<params.length; i++) {
 				paramComponents[i].setValue(params[i]);
 			}
 
-			refreshGraph();
+			syncToBuffer();
+
+			history.clear();
+		}
+
+		public void setParams(PaIntEParams newParams) {
+			history.add(new ParamsChange(buffer.clone(), newParams));
+
+			setParams0(newParams);
+		}
+
+		private void refreshComponents() {
+
+			double[] params = buffer.getParams(new double[7]);
+
+			for(int i=0; i<params.length; i++) {
+				paramComponents[i].setValue(params[i]);
+			}
+		}
+
+		public void setParams0(PaIntEParams newParams) {
+			buffer.setParams(newParams);
+
+//			System.out.println("setParams0: "+newParams);
+
+			refreshComponents();
+
+			if(isSaved()) {
+				PaIntERegistry.getInstance().paramsChanged(wrapper);
+			} else {
+				refreshGraph();
+			}
 		}
 
 		private void reloadConfig(Handle handle) {
@@ -969,14 +1431,18 @@ public class PaIntEEditorView extends View {
 				paramComps.setMinMax(min, max);
 				paramComps.setValue(value);
 			}
+
+			history.clear();
 		}
 
 		public void setExpandedState(boolean expanded) {
 			colorButton.setVisible(expanded);
-			addButton.setVisible(expanded);
-			pasteButton.setVisible(expanded);
-			saveButton.setVisible(expanded);
-			removeButton.setVisible(expanded && paramsPanels.size()>1);
+			undoButton.setVisible(expanded);
+			redoButton.setVisible(expanded);
+//			addButton.setVisible(expanded);
+//			pasteButton.setVisible(expanded);
+//			saveButton.setVisible(expanded);
+//			removeButton.setVisible(expanded && paramsPanels.size()>1);
 
 			for(ParamComponents comp : paramComponents) {
 				comp.setExpandedState(expanded);
@@ -1001,8 +1467,75 @@ public class PaIntEEditorView extends View {
 			setMaximumSize(d);
 		}
 
-		public void refreshPasteButton(boolean pasteable) {
-			pasteButton.setEnabled(pasteable);
+		private void refreshPanelActions() {
+			ActionManager actionManager = getDefaultActionManager();
+
+			boolean savable = !isSaved();
+			boolean closable = paramsPanels.size() > 1;
+			boolean pasteable = isPaIntEClipboardContent();
+
+			boolean canUndo = history.canUndo();
+			boolean canRedo = history.canRedo();
+
+			actionManager.setEnabled(closable,
+					"plugins.prosody.painteEditorView.removeParamsPanelAction"); //$NON-NLS-1$
+			actionManager.setEnabled(pasteable,
+					"plugins.prosody.painteEditorView.importParamsPanelAction"); //$NON-NLS-1$
+			actionManager.setEnabled(savable,
+					"plugins.prosody.painteEditorView.saveParamsPanelAction"); //$NON-NLS-1$
+			actionManager.setEnabled(canUndo,
+					"plugins.prosody.painteEditorView.undoParamsPanelAction"); //$NON-NLS-1$
+			actionManager.setEnabled(canRedo,
+					"plugins.prosody.painteEditorView.redoParamsPanelAction"); //$NON-NLS-1$
+
+			undoButton.setEnabled(canUndo);
+			redoButton.setEnabled(canRedo);
+		}
+
+		private boolean changeInProgress = false;
+		private PaIntEParams beforeChange;
+
+		void valueChanged(ParamComponents comp, boolean valueIsAdjusting) {
+			if(!changeInProgress) {
+				changeInProgress = true;
+				beforeChange = buffer.clone();
+			}
+
+			if(!valueIsAdjusting) {
+				PaIntEParams afterChange = buffer.clone();
+				history.add(new ParamsChange(beforeChange, afterChange));
+				beforeChange = null;
+
+				changeInProgress = false;
+			}
+
+			refresh();
+			refreshGraph();
+		}
+
+		private void showPopuMenu() {
+			if(popupMenu==null) {
+				popupMenu = getDefaultActionManager().createPopupMenu(
+						"plugins.prosody.painteEditorView.parameterPanelMenuList", null); //$NON-NLS-1$
+				popupMenu.setInvoker(menuButton);
+				popupMenu.addPropertyChangeListener("visible", this); //$NON-NLS-1$
+			}
+
+			refreshPanelActions();
+
+			popupMenu.show(menuButton, 0, menuButton.getHeight());
+		}
+
+		public void selectColor() {
+            Color selectedColor = JColorChooser.showDialog(null,
+            		ResourceManager.getInstance().get("config.chooseColorPick.name"), //$NON-NLS-1$
+            		color);
+
+            if(selectedColor!=null) {
+            	color = selectedColor;
+
+            	refreshGraph();
+            }
 		}
 
 		/**
@@ -1011,28 +1544,46 @@ public class PaIntEEditorView extends View {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource()==colorButton) {
-	            Color selectedColor = JColorChooser.showDialog(null,
-	            		ResourceManager.getInstance().get("config.chooseColorPick.name"), //$NON-NLS-1$
-	            		color);
-
-	            if(selectedColor!=null) {
-	            	color = selectedColor;
-
-	            	refreshGraph();
-	            }
-			} else if(e.getSource()==addButton) {
-				addParamsPanel(this);
-			} else if(e.getSource()==removeButton) {
-				removeParamsPanel(this);
-			} else if(e.getSource()==saveButton) {
-				addParamsToHistory(getParams());
+				selectColor();
+			} else if(e.getSource()==menuButton) {
+				showPopuMenu();
 			} else if(e.getSource()==toggleButton) {
 				setExpandedState(!((JToggleButton)e.getSource()).isSelected());
-			} else if(e.getSource()==copyButton) {
-				copyParams(getParams());
-			} else if(e.getSource()==pasteButton) {
-				pasteParams(this);
+			} else if(e.getSource()==undoButton) {
+				undo();
+			} else if(e.getSource()==redoButton) {
+				redo();
 			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			if("visible".equals(evt.getPropertyName())) { //$NON-NLS-1$
+				boolean visible = (boolean) evt.getNewValue();
+
+				if(visible) {
+					owningPanel = this;
+				} else {
+					SwingUtilities.invokeLater(new Runnable() {
+
+						@Override
+						public void run() {
+							owningPanel = null;
+						}
+					});
+				}
+			}
+		}
+
+		/**
+		 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+		 */
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			refreshPanelActions();
 		}
 	}
 
@@ -1043,13 +1594,15 @@ public class PaIntEEditorView extends View {
 		private final JTextField textField;
 		private final JSlider slider;
 
-		private Color color = Color.black;
 		private double min, max;
 
-		public ParamComponents(String id) {
+		private final ParamsPanel panel;
+
+		public ParamComponents(ParamsPanel panel, String id) {
 			if (id == null)
 				throw new NullPointerException("Invalid id"); //$NON-NLS-1$
 
+			this.panel = panel;
 			this.id = id;
 
 			titleLabel = new JLabel();
@@ -1063,12 +1616,13 @@ public class PaIntEEditorView extends View {
 			textField.addActionListener(this);
 
 			slider = new JSlider(SwingConstants.HORIZONTAL);
-			slider.addChangeListener(this);
 			slider.setMinorTickSpacing(1);
 			slider.setMajorTickSpacing(10);
 			slider.setMaximum(1000);
+			slider.setFocusable(false);
 //			slider.setPaintTicks(true);
 			slider.addMouseWheelListener(this);
+			slider.addChangeListener(this);
 		}
 
 		public void setExpandedState(boolean expanded) {
@@ -1081,13 +1635,21 @@ public class PaIntEEditorView extends View {
 			return String.format(Locale.ENGLISH, "%.02f", value); //$NON-NLS-1$
 		}
 
+		private boolean ignoreChanges = false;
+
 		public void setValue(double value) {
-			textField.setText(toLabel(value));
+			ignoreChanges = true;
 
-			double relValue = (value-min)/(max-min);
-			int newValue = slider.getMinimum()+(int)((slider.getMaximum()-slider.getMinimum()) * relValue);
+			try {
+				textField.setText(toLabel(value));
 
-			slider.setValue(newValue);
+				double relValue = (value-min)/(max-min);
+				int newValue = slider.getMinimum()+(int)((slider.getMaximum()-slider.getMinimum()) * relValue);
+
+				slider.setValue(newValue);
+			} finally {
+				ignoreChanges = false;
+			}
 		}
 
 		public void setMinMax(double newMin, double newMax) {
@@ -1129,15 +1691,17 @@ public class PaIntEEditorView extends View {
 		 */
 		@Override
 		public void stateChanged(ChangeEvent e) {
+			if(ignoreChanges) {
+				return;
+			}
+
 			double value = slider.getValue();
 			double range = (double)slider.getMaximum()-(double)slider.getMinimum();
 
 			value = min + (max-min)*(value/range);
 			textField.setText(toLabel(value));
 
-//			if(!slider.getValueIsAdjusting()) {
-//			}
-			refreshGraph();
+			panel.valueChanged(this, slider.getValueIsAdjusting());
 		}
 
 		/**
@@ -1145,55 +1709,175 @@ public class PaIntEEditorView extends View {
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if(ignoreChanges) {
+				return;
+			}
+
 			if(e.getSource()==textField) {
-				float value = Float.parseFloat(textField.getText());
+				double value = Double.parseDouble(textField.getText());
 				setValue(value);
 			}
 
-
-			refreshGraph();
+			panel.valueChanged(this, false);
 		}
 	}
 
-	private class PainteGraphTransferHandler extends TransferHandler {
+	private class TransferManager extends TransferHandler {
 
+		private static final long serialVersionUID = 4248110860048880727L;
+
+		private int sourceIndex = -1;
+		private boolean logErrors = false;
+		private PaIntEIcon transferIcon;
+
+		public boolean isLogErrors() {
+			return logErrors;
+		}
+
+		public void setLogErrors(boolean logErrors) {
+			this.logErrors = logErrors;
+		}
 
 		@Override
 		public boolean canImport(TransferSupport info) {
-			if (!info.isDrop() || !info.isDataFlavorSupported(UIUtil.localObjectFlavor)) {
+			if (!info.isDrop()
+					|| !info.isDataFlavorSupported(UIUtil.localObjectFlavor)) {
 				return false;
 			}
 
-			// Ensure only copy mode is accepted
-		    boolean copySupported = (COPY & info.getSourceDropActions()) == COPY;
-		    if (copySupported) {
-		        info.setDropAction(COPY);
-		        return true;
-		    }
+			if (info.getComponent() != paramsTable) {
+				// Ensure only copy mode is accepted
+				boolean copySupported = (COPY & info.getSourceDropActions()) == COPY;
+				if (copySupported) {
+					info.setDropAction(COPY);
+					return true;
+				}
 
-			return false;
+				return false;
+			}
+
+			return true;
 		}
 
-		@SuppressWarnings("unchecked")
+		@Override
+		public int getSourceActions(JComponent c) {
+			return c==paramsTable ? COPY_OR_MOVE : NONE;
+		}
+
+		@Override
+		public Icon getVisualRepresentation(Transferable t) {
+			Object[] values = getTransferedValues(t);
+
+			if(values.length==0) {
+				return null;
+			}
+
+			if(transferIcon==null) {
+				transferIcon = new PaIntEIcon();
+			}
+
+			PaIntEParams params = extractParams(values[0]);
+
+			if(params==null) {
+				return null;
+			}
+
+			transferIcon.getParams().setParams(params);
+
+			return transferIcon;
+		}
+
+		@Override
+		protected Transferable createTransferable(JComponent c) {
+			if(c!=paramsTable) {
+				return null;
+			}
+
+			sourceIndex = paramsTable.getSelectedRow();
+			PaIntEParamsWrapper wrapper = paramsTableModel.getItem(sourceIndex);
+			Object[] values = new Object[]{wrapper};
+
+			return new DataHandler(values,
+					UIUtil.localObjectFlavor.getMimeType());
+		}
+
+		@Override
+		protected void exportDone(JComponent source, Transferable data, int action) {
+			sourceIndex = -1;
+		}
+
+		protected Object[] getTransferedValues(Transferable t) {
+
+			try {
+				return (Object[]) t.getTransferData(UIUtil.localObjectFlavor);
+			} catch (UnsupportedFlavorException e) {
+				if(isLogErrors()) {
+					LoggerFactory.error(this, "Encountered incompatible transfer data flavor", e); //$NON-NLS-1$
+				}
+			} catch (IOException e) {
+				if(isLogErrors()) {
+					LoggerFactory.error(this, "Failed to deserialize trasfer data", e); //$NON-NLS-1$
+				}
+			}
+
+			return new Object[0];
+		}
+
 		@Override
 		public boolean importData(TransferSupport info) {
 			if (!canImport(info)) {
 				return false;
 			}
-			try {
-				Object[] values = (Object[]) info.getTransferable()
-						.getTransferData(UIUtil.localObjectFlavor);
-				for (int i = 0; i < values.length; i++) {
-					PaIntEParamsWrapper params = (PaIntEParamsWrapper)values[i];
-					addParamsPanel(null).setParams(params.getParams());
-				}
-				return true;
-			} catch (UnsupportedFlavorException ufe) {
-				ufe.printStackTrace();
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
+
+			Object[] values = getTransferedValues(info.getTransferable());
+
+			if(values.length==0) {
+				return false;
 			}
-			return false;
+
+			int addCount = 0;
+
+			if(info.getComponent()==paramsTable) {
+
+				JTable.DropLocation dl = (JTable.DropLocation) info.getDropLocation();
+				int index = dl.getRow();
+				int max = paramsTableModel.getRowCount()-1;
+				if (index < 0 || index > max) {
+					index = max;
+				}
+
+				if(index!=sourceIndex) {
+					PaIntERegistry.getInstance().moveParams(sourceIndex, index);
+				}
+			} else {
+				ParamsPanel panel = null;
+				if(info.getComponent() instanceof ParamsPanel) {
+					panel = (ParamsPanel) info.getComponent();
+				}
+
+				boolean append = false;
+
+				for (int i = 0; i < values.length; i++) {
+					PaIntEParamsWrapper wrapper = extractWrapper(values[i]);
+
+					if(wrapper==null) {
+						continue;
+					}
+
+					if(append || panel==null) {
+						panel = addParamsPanel(panel);
+					}
+					panel.setWrapper(wrapper);
+					panel.refresh();
+					append = true;
+
+					addCount++;
+				}
+			}
+
+			refreshGraph();
+
+			return addCount>0;
 		}
 	}
 

@@ -135,7 +135,7 @@
 				TODO
 			</doc-text>
 		</doc>
-		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.list.ProsodyListCellRenderer" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.helper.ProsodyListCellRenderer" />
 		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
@@ -214,6 +214,8 @@
 		<parameter id="token" value="painteIntegral" />
 		<parameter id="token" value="painteCurve" />
 		<parameter id="token" value="painteAngle" />
+		<parameter id="token" value="painteDistance" />
+		<parameter id="token" value="painteChannel" />
 		<parameter id="factories">
 			<!-- factories "inherited" by dependency data -->
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
@@ -222,12 +224,14 @@
 			<parameter id="syllableProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllablePropertyConstraintFactory" />
 			<parameter id="wordProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPropertyConstraintFactory" />
 			<parameter id="sylCount" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllableCountConstraintFactory" />
-			<parameter id="accentShape" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyAccentShapeConstraintFactory" />
+			<parameter id="accentShape" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEAccentShapeConstraintFactory" />
 			<parameter id="wordPos" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPositionConstraintFactory" />
 			<parameter id="section" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyRelativeWordPositionConstraintFactory" />
 			<parameter id="painteIntegral" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEIntegralConstraintFactory" />
 			<parameter id="painteCurve" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntECurveConstraintFactory" />
 			<parameter id="painteAngle" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEAngleConstraintFactory" />
+			<parameter id="painteDistance" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEDistanceConstraintFactory" />
+			<parameter id="painteChannel" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEChannelConstraintFactory" />
 		</parameter>
 	</extension>
 	

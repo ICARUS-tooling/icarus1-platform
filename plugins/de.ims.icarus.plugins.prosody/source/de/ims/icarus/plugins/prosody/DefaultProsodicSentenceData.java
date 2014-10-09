@@ -158,7 +158,8 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	@Override
 	public Object getSyllableProperty(int index, String key, int sylIndex) {
 		Object array = getIndexedProperty(index, key);
-		return (array==null || Array.getLength(array)==0) ? null : Array.get(array, sylIndex);
+		return (array==null || !array.getClass().isArray() || Array.getLength(array)==0) ?
+				null : Array.get(array, sylIndex);
 	}
 
 	/**

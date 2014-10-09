@@ -94,4 +94,16 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String ACCENT_SHAPE_FALL_LABEL = "Fall"; //$NON-NLS-1$
 	public static final String ACCENT_SHAPE_RISE_FALL_LABEL = "Rise-Fall"; //$NON-NLS-1$
 	public static final String ACCENT_SHAPE_UNDEFINED_LABEL = "Unaccented"; //$NON-NLS-1$
+
+	// Painte channel constants
+	public static final int PAINTE_CHANNEL_INSIDE_VALUE = 1;
+	public static final int PAINTE_CHANNEL_ABOVE_VALUE = 2;
+	public static final int PAINTE_CHANNEL_BELOW_VALUE = 3;
+	public static final int PAINTE_CHANNEL_CROSSING_VALUE = 3;
+
+	public static final String PAINTE_CHANNEL_INSIDE_LABEL = "Inside"; //$NON-NLS-1$
+	public static final String PAINTE_CHANNEL_ABOVE_LABEL = "Above"; //$NON-NLS-1$
+	public static final String PAINTE_CHANNEL_BELOW_LABEL = "Below"; //$NON-NLS-1$
+	public static final String PAINTE_CHANNEL_CROSSING_LABEL = "Crossing"; //$NON-NLS-1$
+	public static final String PAINTE_CHANNEL_UNDEFINED_LABEL = "Unaccented"; //$NON-NLS-1$
 }

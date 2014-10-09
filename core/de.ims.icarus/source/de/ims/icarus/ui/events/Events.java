@@ -52,5 +52,10 @@ public interface Events {
 	public static final String UNDO = "undo"; //$NON-NLS-1$
 	public static final String REDO = "redo"; //$NON-NLS-1$
 
+	public static final String LOAD = "load"; //$NON-NLS-1$
+	public static final String LOADED = "loaded"; //$NON-NLS-1$
+	public static final String SAVE = "save"; //$NON-NLS-1$
+	public static final String SAVED = "saved"; //$NON-NLS-1$
+
 	public static final String SELECTION_CHANGED = "selectionChanged"; //$NON-NLS-1$
 }

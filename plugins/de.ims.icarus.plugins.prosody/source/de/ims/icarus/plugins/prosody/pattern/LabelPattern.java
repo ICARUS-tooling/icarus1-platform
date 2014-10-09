@@ -36,6 +36,7 @@ import java.util.Map;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.strings.StringUtil;
 
@@ -70,6 +71,7 @@ public class LabelPattern implements ProsodyConstants {
 					"c", "plugins.prosody.labelPattern.syllableCount", //$NON-NLS-1$ //$NON-NLS-2$
 					"n", "plugins.prosody.labelPattern.sentenceNumber", //$NON-NLS-1$ //$NON-NLS-2$
 					"d", "plugins.prosody.labelPattern.documentIndex", //$NON-NLS-1$ //$NON-NLS-2$
+					"p", "plugins.prosody.paintePattern.documentIndex", //$NON-NLS-1$ //$NON-NLS-2$
 					"%...%", "plugins.prosody.labelPattern.documentProperty", //$NON-NLS-1$ //$NON-NLS-2$
 					"$...$", "plugins.prosody.labelPattern.wordProperty", //$NON-NLS-1$ //$NON-NLS-2$
 					"#...#", "plugins.prosody.labelPattern.syllableProperty" //$NON-NLS-1$ //$NON-NLS-2$
@@ -219,7 +221,15 @@ public class LabelPattern implements ProsodyConstants {
 //					break;
 
 				case 'c':
+					consumeText(sb, buffer);
 					element = new SyllableCountElement();
+					buffer.add(element);
+					break;
+
+				case 'p':
+					consumeText(sb, buffer);
+					element = new PaIntEElement();
+					buffer.add(element);
 					break;
 
 				case 'n':
@@ -675,6 +685,50 @@ public class LabelPattern implements ProsodyConstants {
 
 			Object value = sentence.getSyllableProperty(wordIndex, property, sylIndex);
 			return val2String(value);
+		}
+	}
+
+	private static class PaIntEElement extends Element {
+
+		private final PaIntEParams params = new PaIntEParams();
+		private final StringBuilder buffer = new StringBuilder(50);
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex) {
+			int sylCount = sentence.getSyllableCount(wordIndex);
+
+			if(sylCount==0) {
+				return null;
+			}
+
+			for(int i=0; i<sylCount; i++) {
+				if(i>0) {
+					buffer.append(',');
+				}
+
+				params.setParams(sentence, wordIndex, i);
+
+				buffer.append(params.toString());
+			}
+
+			String result = buffer.toString();
+			buffer.setLength(0);
+
+			return result;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.LabelPattern.Element#getText(de.ims.icarus.plugins.prosody.ProsodicSentenceData, int, int)
+		 */
+		@Override
+		public String getText(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+
+			params.setParams(sentence, wordIndex, sylIndex);
+
+			return params.toString();
 		}
 	}
 }

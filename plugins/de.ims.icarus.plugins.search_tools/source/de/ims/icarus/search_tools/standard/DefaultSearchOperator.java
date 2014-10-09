@@ -274,6 +274,12 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		GROUPING,
 	};
 
+	private static final SearchOperator[] booleanOperators = {
+		EQUALS,
+		EQUALS_NOT,
+		GROUPING,
+	};
+
 	private static final SearchOperator[] comparingOperators = {
 		LESS_THAN,
 		LESS_OR_EQUAL,
@@ -300,6 +306,10 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 
 	public static SearchOperator[] numerical() {
 		return numericalOperators.clone();
+	}
+
+	public static SearchOperator[] binary() {
+		return booleanOperators.clone();
 	}
 
 	public static SearchOperator[] comparing() {

@@ -67,6 +67,30 @@ public class PaIntEParams implements Serializable {
 		alignment = DEFAULT_ALIGNMENT;
 	}
 
+	public PaIntEParams() {
+		// no-op
+	}
+
+	public PaIntEParams(PaIntEParams params) {
+		setParams(params);
+	}
+
+	public PaIntEParams(double[] params) {
+		setParams(params);
+	}
+
+	public PaIntEParams(PaIntEConstraintParams constraints) {
+		setParams(constraints);
+	}
+
+	public PaIntEParams(String encodedParams) {
+		setParams(encodedParams);
+	}
+
+	public PaIntEParams(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
+		setParams(sentence, wordIndex, sylIndex);
+	}
+
 	public void setParams(PaIntEParams params) {
 		a1 = params.a1;
 		a2 = params.a2;
@@ -97,6 +121,8 @@ public class PaIntEParams implements Serializable {
 
 		if(params.length>6) {
 			setAlignment(params[6]);
+		} else {
+			setAlignment(DEFAULT_ALIGNMENT);
 		}
 	}
 

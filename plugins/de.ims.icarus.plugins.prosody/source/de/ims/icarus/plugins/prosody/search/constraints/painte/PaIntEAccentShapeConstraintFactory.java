@@ -23,7 +23,7 @@
  * $LastChangedRevision: 269 $
  * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.plugins.prosody.search.constraints;
+package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
@@ -31,6 +31,7 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -42,13 +43,13 @@ import de.ims.icarus.util.Options;
  * @version $Id: DependencyRelationConstraintFactory.java 269 2014-07-07 22:09:53Z mcgaerty $
  *
  */
-public class ProsodyAccentShapeConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
+public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
 
 	public static final String TOKEN = "accentShape"; //$NON-NLS-1$
 
 	private static final String CONFIG_PATH = "plugins.prosody.search.accentShape"; //$NON-NLS-1$
 
-	public ProsodyAccentShapeConstraintFactory() {
+	public PaIntEAccentShapeConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
 				"plugins.prosody.constraints.accentShape.name",  //$NON-NLS-1$
 				"plugins.prosody.constraints.accentShape.description"); //$NON-NLS-1$

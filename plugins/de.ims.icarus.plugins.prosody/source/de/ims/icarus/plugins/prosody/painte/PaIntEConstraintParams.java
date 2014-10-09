@@ -25,11 +25,8 @@
  */
 package de.ims.icarus.plugins.prosody.painte;
 
-import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
@@ -41,12 +38,9 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
  */
 @XmlRootElement(name="painte")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaIntEConstraintParams implements Serializable {
+public class PaIntEConstraintParams extends PaIntEParams {
 
 	private static final long serialVersionUID = 5146300722493790738L;
-
-	@XmlAttribute
-	double a1, a2, b, c1, c2, d, alignment;
 
 	private int activeMask = 0;
 
@@ -80,70 +74,35 @@ public class PaIntEConstraintParams implements Serializable {
 		return activeMask==0;
 	}
 
+	@Override
 	public void setParams(PaIntEParams params) {
-		if (params == null)
-			throw new NullPointerException("Invalid params"); //$NON-NLS-1$
-
-		a1 = params.getA1();
-		a2 = params.getA2();
-		b = params.getB();
-		c1 = params.getC1();
-		c2 = params.getC2();
-		d = params.getD();
-		alignment = params.getAlignment();
+		super.setParams(params);
 
 		activeMask = ALL_SET;
 	}
 
+	@Override
 	public void setParams(PaIntEConstraintParams constraints) {
-		if (constraints == null)
-			throw new NullPointerException("Invalid constraints");  //$NON-NLS-1$
-
-		a1 = constraints.a1;
-		a2 = constraints.a2;
-		b = constraints.b;
-		c1 = constraints.c1;
-		c2 = constraints.c2;
-		d = constraints.d;
-		alignment = constraints.alignment;
+		super.setParams(constraints);
 
 		activeMask = constraints.activeMask;
 	}
 
+	@Override
 	public void setParams(double[] params) {
-		if (params == null)
-			throw new NullPointerException("Invalid params");  //$NON-NLS-1$
-
-		setA1(params[0]);
-		setA2(params[1]);
-		setB(params[2]);
-		setC1(params[3]);
-		setC2(params[4]);
-		setD(params[5]);
-
-		if(params.length>6) {
-			setAlignment(params[6]);
-		} else {
-			setAlignment(PaIntEParams.DEFAULT_ALIGNMENT);
-		}
+		super.setParams(params);
 
 		activeMask = ALL_SET;
 	}
 
+	@Override
 	public void setParams(ProsodicSentenceData sentence, int wordIndex, int sylIndex) {
-		if (sentence == null)
-			throw new NullPointerException("Invalid sentence");  //$NON-NLS-1$
-
-		setA1(sentence.getPainteA1(wordIndex, sylIndex));
-		setA2(sentence.getPainteA2(wordIndex, sylIndex));
-		setB(sentence.getPainteB(wordIndex, sylIndex));
-		setC1(sentence.getPainteC1(wordIndex, sylIndex));
-		setC2(sentence.getPainteC2(wordIndex, sylIndex));
-		setD(sentence.getPainteD(wordIndex, sylIndex));
+		super.setParams(sentence, wordIndex, sylIndex);
 
 		activeMask = ALL_SET;
 	}
 
+	@Override
 	public void setParams(String encodedParams) {
 		if (encodedParams == null)
 			throw new NullPointerException("Invalid encodedParams");  //$NON-NLS-1$
@@ -178,108 +137,6 @@ public class PaIntEConstraintParams implements Serializable {
 			activeMask |= mask;
 			return Double.parseDouble(s);
 		}
-	}
-
-	public double[] getParams() {
-		return getParams(new double[6]);
-	}
-
-	public double[] getParams(double[] params) {
-		params[0] = a1;
-		params[1] = a2;
-		params[2] = b;
-		params[3] = c1;
-		params[4] = c2;
-		params[5] = d;
-
-		return params;
-	}
-
-	public PaIntEParams toPaIntEParams() {
-		PaIntEParams params = new PaIntEParams();
-		params.setParams(this);
-		return params;
-	}
-
-	/**
-	 * @return the a1
-	 */
-	public double getA1() {
-		return a1;
-	}
-	/**
-	 * @return the a2
-	 */
-	public double getA2() {
-		return a2;
-	}
-	/**
-	 * @return the b
-	 */
-	public double getB() {
-		return b;
-	}
-	/**
-	 * @return the c1
-	 */
-	public double getC1() {
-		return c1;
-	}
-	/**
-	 * @return the c2
-	 */
-	public double getC2() {
-		return c2;
-	}
-	/**
-	 * @return the d
-	 */
-	public double getD() {
-		return d;
-	}
-	public double getAlignment() {
-		return alignment;
-	}
-
-	public void setAlignment(double alignment) {
-		this.alignment = alignment;
-	}
-
-	/**
-	 * @param a1 the a1 to set
-	 */
-	public void setA1(double a1) {
-		this.a1 = a1;
-	}
-	/**
-	 * @param a2 the a2 to set
-	 */
-	public void setA2(double a2) {
-		this.a2 = a2;
-	}
-	/**
-	 * @param b the b to set
-	 */
-	public void setB(double b) {
-		this.b = b;
-	}
-	/**
-	 * @param c1 the c1 to set
-	 */
-	public void setC1(double c1) {
-		this.c1 = c1;
-	}
-	/**
-	 * @param c2 the c2 to set
-	 */
-	public void setC2(double c2) {
-		this.c2 = c2;
-	}
-	/**
-	 * @param d the d to set
-	 */
-	public void setD(double d) {
-		this.d = d;
 	}
 
 	public boolean isA1Active() {
@@ -372,7 +229,7 @@ public class PaIntEConstraintParams implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return (int) (a1*a2*b*c1*c2*d*activeMask);
+		return super.hashCode()*activeMask;
 	}
 
 	@Override

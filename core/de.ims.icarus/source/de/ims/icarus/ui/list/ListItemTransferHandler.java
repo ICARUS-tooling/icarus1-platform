@@ -35,6 +35,7 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.TransferHandler;
 
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.UIUtil;
 
 /**
@@ -43,10 +44,19 @@ import de.ims.icarus.ui.UIUtil;
  *
  */
 public class ListItemTransferHandler extends TransferHandler {
-	private int[] indices = null;
-	private int addIndex = -1; // Location where items were added
-	private int addCount = 0; // Number of items added.
-	private Object[] transferedObjects = null;
+	protected int[] indices = null;
+	protected int addIndex = -1; // Location where items were added
+	protected int addCount = 0; // Number of items added.
+	protected Object[] transferedObjects = null;
+	protected boolean logErrors = false;
+
+	public boolean isLogErrors() {
+		return logErrors;
+	}
+
+	public void setLogErrors(boolean logErrors) {
+		this.logErrors = logErrors;
+	}
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -96,10 +106,14 @@ public class ListItemTransferHandler extends TransferHandler {
 				target.addSelectionInterval(idx, idx);
 			}
 			return true;
-		} catch (UnsupportedFlavorException ufe) {
-			ufe.printStackTrace();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+		} catch (UnsupportedFlavorException e) {
+			if(logErrors) {
+				LoggerFactory.error(this, "Unsupported data flavor in import operation", e);
+			}
+		} catch (IOException e) {
+			if(logErrors) {
+				LoggerFactory.error(this, "Error deserializing data", e);
+			}
 		}
 		return false;
 	}
@@ -109,7 +123,7 @@ public class ListItemTransferHandler extends TransferHandler {
 		cleanup(c, action == MOVE);
 	}
 
-	private void cleanup(JComponent c, boolean remove) {
+	protected void cleanup(JComponent c, boolean remove) {
 		if (remove && indices != null) {
 			JList source = (JList) c;
 			DefaultListModel model = (DefaultListModel) source.getModel();

@@ -39,14 +39,14 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
+public class PaIntEDistanceConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "painteAngle"; //$NON-NLS-1$
+	public static final String TOKEN = "painteDistance"; //$NON-NLS-1$
 
-	public PaIntEAngleConstraintFactory() {
+	public PaIntEDistanceConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.prosody.constraints.painteAngle.name",  //$NON-NLS-1$
-				"plugins.prosody.constraints.painteAngle.description"); //$NON-NLS-1$
+				"plugins.prosody.constraints.painteDistance.name",  //$NON-NLS-1$
+				"plugins.prosody.constraints.painteDistance.description"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -71,11 +71,7 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 
 	@Override
 	public Object labelToValue(Object label, Object specifier) {
-		double val = LanguageUtils.parseDoubleLabel((String)label);
-		if(val>=180.0) {
-			val %= 180.0;
-		}
-		return val;
+		return LanguageUtils.parseDoubleLabel((String)label);
 	}
 
 	@Override
@@ -89,20 +85,20 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new PaIntEAngleConstraint(value, operator, specifier);
+		return new PaIntEDistanceConstraint(value, operator, specifier);
 	}
 
-	private static class PaIntEAngleConstraint extends AbstractParameterizedPaIntEConstraint {
+	private static class PaIntEDistanceConstraint extends AbstractParameterizedPaIntEConstraint {
 
-		private static final long serialVersionUID = 5588616829782787261L;
+		private static final long serialVersionUID = 6887748634037055630L;
 
-		public PaIntEAngleConstraint(Object value, SearchOperator operator, Object specifier) {
+		public PaIntEDistanceConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new PaIntEAngleConstraint(getValue(), getOperator(), getSpecifier());
+			return new PaIntEDistanceConstraint(getValue(), getOperator(), getSpecifier());
 		}
 
 		/**
@@ -114,66 +110,47 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 			valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
 
 			/*
-			 * cos(y) = (a*b) / (|a|*|b|)
+			 * dist = ||a-b||2 = sqrt(sum((a1-b1)²...(an-bn)²))
 			 */
 
-			double scal = 0;
-			double quantA = 0;
-			double quantB = 0;
+			double sum = 0;
 
 			// A1
 			if(specifierParams.isA1Active()) {
-				scal += (specifierParams.getA1()*valueParams.getA1());
-				quantA += specifierParams.getA1()*specifierParams.getA1();
-				quantB += valueParams.getA1()*valueParams.getA1();
+				sum += Math.pow((specifierParams.getA1()-valueParams.getA1()), 2.0);
 			}
 
 			// A2
 			if(specifierParams.isA2Active()) {
-				scal += (specifierParams.getA2()*valueParams.getA2());
-				quantA += specifierParams.getA2()*specifierParams.getA2();
-				quantB += valueParams.getA2()*valueParams.getA2();
+				sum += Math.pow((specifierParams.getA2()-valueParams.getA2()), 2.0);
 			}
 
 			// B
 			if(specifierParams.isBActive()) {
-				scal += (specifierParams.getB()*valueParams.getB());
-				quantA += specifierParams.getB()*specifierParams.getB();
-				quantB += valueParams.getB()*valueParams.getB();
+				sum += Math.pow((specifierParams.getB()-valueParams.getB()), 2.0);
 			}
 
 			// C1
 			if(specifierParams.isC1Active()) {
-				scal += (specifierParams.getC1()*valueParams.getC1());
-				quantA += specifierParams.getC1()*specifierParams.getC1();
-				quantB += valueParams.getC1()*valueParams.getC1();
+				sum += Math.pow((specifierParams.getC1()-valueParams.getC1()), 2.0);
 			}
 
 			// C2
 			if(specifierParams.isC2Active()) {
-				scal += (specifierParams.getC2()*valueParams.getC2());
-				quantA += specifierParams.getC2()*specifierParams.getC2();
-				quantB += valueParams.getC2()*valueParams.getC2();
+				sum += Math.pow((specifierParams.getC2()-valueParams.getC2()), 2.0);
 			}
 
 			// D
 			if(specifierParams.isDActive()) {
-				scal += (specifierParams.getD()*valueParams.getD());
-				quantA += specifierParams.getD()*specifierParams.getD();
-				quantB += valueParams.getD()*valueParams.getD();
+				sum += Math.pow((specifierParams.getD()-valueParams.getD()), 2.0);
 			}
 
 			// Alignment
 			if(specifierParams.isAlignmentActive()) {
-				scal += (specifierParams.getAlignment()*valueParams.getAlignment());
-				quantA += specifierParams.getAlignment()*specifierParams.getAlignment();
-				quantB += valueParams.getAlignment()*valueParams.getAlignment();
+				sum += Math.pow((specifierParams.getAlignment()-valueParams.getAlignment()), 2.0);
 			}
 
-			quantA = Math.sqrt(quantA);
-			quantB = Math.sqrt(quantB);
-
-			return Math.acos(scal/(quantA*quantB))/Math.PI*180;
+			return Math.sqrt(sum);
 		}
 	}
 
