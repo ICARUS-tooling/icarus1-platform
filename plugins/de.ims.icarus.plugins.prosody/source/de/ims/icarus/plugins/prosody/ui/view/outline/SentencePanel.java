@@ -455,12 +455,12 @@ public class SentencePanel extends JPanel{
 		if(popupMenu==null) {
 			popupMenu = new JPopupMenu();
 
-			//FIXME loca!!!
-
-//			copyWordItem = new JMenuItem("Copy Word Params", IconRegistry.getGlobalRegistry().getIcon("copy_edit.gif")); //$NON-NLS-1$ //$NON-NLS-2$
-//			copyWordItem.addActionListener(exportHandler);
-
-			copySyllableItem = new JMenuItem("Copy Syllable Params", IconRegistry.getGlobalRegistry().getIcon("copy_edit.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+			copySyllableItem = new JMenuItem();
+			copySyllableItem.setIcon(IconRegistry.getGlobalRegistry().getIcon("copy_edit.gif")); //$NON-NLS-1$
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(copySyllableItem,
+					"plugins.prosody.copyPainteParamsAction.name", //$NON-NLS-1$
+					"plugins.prosody.copyPainteParamsAction.description"); //$NON-NLS-1$
+			ResourceManager.getInstance().getGlobalDomain().addComponent(copySyllableItem);
 			copySyllableItem.addActionListener(exportHandler);
 
 //			popupMenu.add(copyWordItem);

@@ -56,6 +56,11 @@
 		template="actions.default.copyAction"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Copy Params Id -->
+	<action id="plugins.prosody.painteEditorView.copyPainteParamsIdAction"
+		icon="cpyqual_menu.gif"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- Paste Params -->
 	<action id="plugins.prosody.painteEditorView.pastePainteParamsAction"
 		template="actions.default.pasteAction"
@@ -86,6 +91,11 @@
 	<!-- Export Panel -->
 	<action id="plugins.prosody.painteEditorView.exportParamsPanelAction"
 		template="actions.default.copyAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Export Param Id -->
+	<action id="plugins.prosody.painteEditorView.exportParamsPanelIdAction"
+		icon="cpyqual_menu.gif"
 		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Rename Panel -->
@@ -119,6 +129,7 @@
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.removePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
 		<separator />
@@ -139,6 +150,7 @@
 	<action-list id="plugins.prosody.painteEditorView.popupMenuList">
 		<item type="action" value="plugins.prosody.painteEditorView.removePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
 		<separator />
@@ -158,6 +170,7 @@
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.importParamsPanelAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.saveParamsPanelAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.undoParamsPanelAction" />

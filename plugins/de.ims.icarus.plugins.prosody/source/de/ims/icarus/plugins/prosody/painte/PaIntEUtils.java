@@ -172,15 +172,19 @@ public class PaIntEUtils {
 			throw new IllegalArgumentException("Cannot translate search operator into numerical equivalent: "+operator.getName()); //$NON-NLS-1$
 	}
 
-	public static void copyParams(PaIntEParams params) {
+	private static void copy(String data) {
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		if(clipboard==null) {
 			return;
 		}
 
-		StringSelection data = new StringSelection(params.toString());
+		StringSelection ss = new StringSelection(data);
 
-		clipboard.setContents(data, data);
+		clipboard.setContents(ss, ss);
+	}
+
+	public static void copyParams(PaIntEParams params) {
+		copy(params.toString());
 	}
 
 	public static void copyConstraints(PaIntEConstraintParams constraints) {
@@ -189,6 +193,10 @@ public class PaIntEUtils {
 
 	public static void copyWrapper(PaIntEParamsWrapper wrapper) {
 		copyParams(wrapper.getParams());
+	}
+
+	public static void copyWrapperId(PaIntEParamsWrapper wrapper) {
+		copy("$"+wrapper.getName()); //$NON-NLS-1$
 	}
 
 	public static final NumberOperator lessThan = new NumberOperator() {

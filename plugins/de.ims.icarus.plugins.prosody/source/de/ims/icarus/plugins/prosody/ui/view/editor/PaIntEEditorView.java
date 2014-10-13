@@ -56,6 +56,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 
 import javax.activation.DataHandler;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -309,6 +310,8 @@ public class PaIntEEditorView extends View {
 				callbackHandler, "exportParamsHistory"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.copyPainteParamsAction", //$NON-NLS-1$
 				callbackHandler, "copyPainteParams"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.copyPainteParamsIdAction", //$NON-NLS-1$
+				callbackHandler, "copyPainteParamsId"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.pastePainteParamsAction", //$NON-NLS-1$
 				callbackHandler, "pastePainteParams"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.collapseAllPanelsAction", //$NON-NLS-1$
@@ -329,6 +332,8 @@ public class PaIntEEditorView extends View {
 				callbackHandler, "importParamsPanel"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsPanelAction", //$NON-NLS-1$
 				callbackHandler, "exportParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsPanelIdAction", //$NON-NLS-1$
+				callbackHandler, "exportParamsPanelId"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.saveParamsPanelAction", //$NON-NLS-1$
 				callbackHandler, "saveParamsPanel"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.undoParamsPanelAction", //$NON-NLS-1$
@@ -355,6 +360,7 @@ public class PaIntEEditorView extends View {
 				"plugins.prosody.painteEditorView.removePainteParamsAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.renamePainteParamsAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.copyPainteParamsAction", //$NON-NLS-1$
+				"plugins.prosody.painteEditorView.copyPainteParamsIdAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.usePainteParamsAction"); //$NON-NLS-1$
 		actionManager.setEnabled(hasHistory,
 				"plugins.prosody.painteEditorView.exportParamsHistoryAction", //$NON-NLS-1$
@@ -515,17 +521,24 @@ public class PaIntEEditorView extends View {
 			return;
 		}
 
+		PaIntEConstraintParams params = null;
+
 		try {
-			PaIntEConstraintParams params = new PaIntEConstraintParams(text);
-
-			if(panel==null) {
-				panel = addParamsPanel(null);
-			}
-
-			panel.setParams(params);
+			params = new PaIntEConstraintParams(text);
 		} catch(Exception e) {
 			//ignore invalid formats
 		}
+
+		if(params==null) {
+			return;
+		}
+
+		if(panel==null) {
+			panel = addParamsPanel(null);
+		}
+
+		panel.setParams(params);
+		panel.clearHistory();
 	}
 
 	private void showPopup(MouseEvent trigger) {
@@ -564,9 +577,8 @@ public class PaIntEEditorView extends View {
 
 	private static PaIntEParamsWrapper extractWrapper(Object obj) {
 		if(obj instanceof PaIntEParamsWrapper) {
-			PaIntEParamsWrapper wrapper = (PaIntEParamsWrapper)obj;
-			PaIntEParamsWrapper savedWrapper = PaIntERegistry.getInstance().getParams(wrapper.getLabel());
-			return savedWrapper!=null ? savedWrapper : wrapper;
+			// Deserialization during transfer yields a new instance -> intern to ensure consistency!
+			return PaIntERegistry.getInstance().intern((PaIntEParamsWrapper) obj);
 		} else {
 			return null;
 		}
@@ -685,6 +697,23 @@ public class PaIntEEditorView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to copy painte parameters to clipboard", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+			refreshActions();
+		}
+
+		public void copyPainteParamsId(ActionEvent e) {
+			try {
+				PaIntEParamsWrapper params = getSelectedWrapper();
+				if(params==null) {
+					return;
+				}
+				PaIntEUtils.copyWrapperId(params);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to copy painte parameters id to clipboard", ex); //$NON-NLS-1$
 
 				UIUtil.beep();
 			}
@@ -998,6 +1027,23 @@ public class PaIntEEditorView extends View {
 			}
 		}
 
+		public void exportParamsPanelId(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+
+				PaIntEUtils.copyWrapperId(owningPanel.getWrapper());
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to export panel id", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
 		public void saveParamsPanel(ActionEvent e) {
 			ParamsPanel owningPanel = getOwningPanel(e);
 			if(owningPanel==null) {
@@ -1173,7 +1219,7 @@ public class PaIntEEditorView extends View {
 
 		private final History history;
 
-		private Icon colorIcon = new Icon() {
+		private final Icon colorIcon = new Icon() {
 
 			/**
 			 * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
@@ -1354,6 +1400,10 @@ public class PaIntEEditorView extends View {
 			return wrapper;
 		}
 
+		public void clearHistory() {
+			history.clear();
+		}
+
 		public void undo() {
 			PaIntEParams params = (PaIntEParams) history.undo();
 //			System.out.println("undo: "+params);
@@ -1470,7 +1520,8 @@ public class PaIntEEditorView extends View {
 		private void refreshPanelActions() {
 			ActionManager actionManager = getDefaultActionManager();
 
-			boolean savable = !isSaved();
+			boolean saved = isSaved();
+			boolean savable = !saved;
 			boolean closable = paramsPanels.size() > 1;
 			boolean pasteable = isPaIntEClipboardContent();
 
@@ -1483,10 +1534,16 @@ public class PaIntEEditorView extends View {
 					"plugins.prosody.painteEditorView.importParamsPanelAction"); //$NON-NLS-1$
 			actionManager.setEnabled(savable,
 					"plugins.prosody.painteEditorView.saveParamsPanelAction"); //$NON-NLS-1$
+			actionManager.setEnabled(saved,
+					"plugins.prosody.painteEditorView.exportParamsPanelIdAction"); //$NON-NLS-1$
 			actionManager.setEnabled(canUndo,
 					"plugins.prosody.painteEditorView.undoParamsPanelAction"); //$NON-NLS-1$
 			actionManager.setEnabled(canRedo,
 					"plugins.prosody.painteEditorView.redoParamsPanelAction"); //$NON-NLS-1$
+
+			Action colorAction = actionManager.getAction(
+					"plugins.prosody.painteEditorView.colorParamsPanelAction"); //$NON-NLS-1$
+			colorAction.putValue(Action.SMALL_ICON, colorIcon);
 
 			undoButton.setEnabled(canUndo);
 			redoButton.setEnabled(canRedo);

@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.ui.actions;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -117,7 +120,7 @@ public class ActionManager {
 	protected Map<String, Action> actionMap;
 	protected Map<String, ActionSet> actionSetMap;
 	protected Map<String, ActionList> actionListMap;
-	protected Map<Integer, ButtonGroup> groupMap;
+	protected TIntObjectMap<ButtonGroup> groupMap;
 	protected Map<String, ActionAttributes> attributeMap;
 
 	private static ActionManager instance;
@@ -482,10 +485,10 @@ public class ActionManager {
 		Exceptions.testNullArgument(comp, "comp"); //$NON-NLS-1$
 
 		if(groupMap==null) {
-			groupMap = new HashMap<>();
+			groupMap = new TIntObjectHashMap<>();
 		}
 
-		Integer key = new Integer(groupId.hashCode() ^ comp.hashCode());
+		int key = groupId.hashCode() ^ comp.hashCode();
 
 		ButtonGroup group = groupMap.get(key);
 		if(group==null) {

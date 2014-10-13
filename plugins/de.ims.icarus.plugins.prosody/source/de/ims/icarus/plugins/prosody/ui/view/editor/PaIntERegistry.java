@@ -43,6 +43,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import de.ims.icarus.Core;
 import de.ims.icarus.Core.NamedRunnable;
 import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParamsWrapper;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.events.EventListener;
@@ -51,6 +52,7 @@ import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.collections.CollectionUtils;
+import de.ims.icarus.util.intern.Interner;
 import de.ims.icarus.util.strings.StringUtil;
 import de.ims.icarus.xml.jaxb.JAXBGate;
 
@@ -59,7 +61,7 @@ import de.ims.icarus.xml.jaxb.JAXBGate;
  * @version $Id$
  *
  */
-public class PaIntERegistry {
+public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 
 	private List<PaIntEParamsWrapper> items = new ArrayList<>();
 	private Map<String, PaIntEParamsWrapper> idMap = new HashMap<>();
@@ -228,6 +230,18 @@ public class PaIntERegistry {
 		paramsChanged(wrapper);
 	}
 
+	public boolean setParams(PaIntEParamsWrapper wrapper, PaIntEParams newParams) {
+		wrapper.getParams().setParams(newParams);
+
+		boolean isRegistered = containsParams(wrapper);
+
+		if(isRegistered) {
+			paramsChanged(wrapper);
+		}
+
+		return isRegistered;
+	}
+
 	public void paramsChanged(PaIntEParamsWrapper wrapper) {
 		if (wrapper == null)
 			throw new NullPointerException("Invalid wrapper"); //$NON-NLS-1$
@@ -286,6 +300,12 @@ public class PaIntERegistry {
 			throw new NullPointerException("Invalid file"); //$NON-NLS-1$
 
 		paramsGate.save(file, true);
+	}
+
+	@Override
+	public PaIntEParamsWrapper intern(PaIntEParamsWrapper item) {
+		PaIntEParamsWrapper savedWrapper = PaIntERegistry.getInstance().getParams(item.getLabel());
+		return savedWrapper!=null ? savedWrapper : item;
 	}
 
 	private class ParamsGate extends JAXBGate<ParamsBuffer> {

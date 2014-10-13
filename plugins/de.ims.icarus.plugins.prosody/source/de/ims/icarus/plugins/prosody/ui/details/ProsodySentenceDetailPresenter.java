@@ -607,7 +607,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		play(beginOffset, endOffset);
 	}
 
-	private void showPopup(MouseEvent trigger) {
+	private void showPopupMenu(MouseEvent trigger) {
 		if(popupMenu==null) {
 			// Create new popup menu
 
@@ -635,7 +635,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 		private void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
-				//TODO
+				showPopupMenu(e);
 			}
 		}
 

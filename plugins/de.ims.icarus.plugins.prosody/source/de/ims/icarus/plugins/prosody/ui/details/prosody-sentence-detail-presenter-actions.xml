@@ -18,7 +18,7 @@
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.editLabelPatternsAction"
 		name="${id}.name" desc="${id}.description" icon="url.gif" />
 		
-	<!-- Play Document -->
+	<!-- Play Sentence -->
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"
 		template="actions.default.startAction"
 	 	name="${id}.name" desc="${id}.description" />
@@ -39,7 +39,8 @@
 	<!-- Copy Painte Syllable -->
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction"
 		template="actions.default.copyAction"
-	 	name="${id}.name" desc="${id}.description" />
+	 	name="plugins.prosody.copyPainteParamsAction.name" 
+		desc="plugins.prosody.copyPainteParamsAction.description" />
 		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.toolBarList">
@@ -59,7 +60,7 @@
 	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.popupMenuList">
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.refreshAction" />
 		<separator />
-		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteWordAction" />
+		<!--<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteWordAction" />-->
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction" />
 	</action-list>
 	

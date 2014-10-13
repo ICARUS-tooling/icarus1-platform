@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.util.data;
 
+import java.awt.datatransfer.DataFlavor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,39 +67,41 @@ public final class ContentTypeRegistry {
 	/**
 	 * Maps content type ids to their instances.
 	 */
-	private Map<String, ContentType> contentTypes = new LinkedHashMap<>();
+	private final transient Map<String, ContentType> contentTypes = new LinkedHashMap<>();
 
 	/**
 	 * Reverse mapping of classes to their directly defining
 	 * content type instances.
 	 */
-	private Map<String, ContentType> classMap = new HashMap<>();
+	private final transient Map<String, ContentType> classMap = new HashMap<>();
+
+	private final transient Map<ContentType, DataFlavor> dataFlavorMap = new HashMap<>();
 
 	/**
 	 * Maps results of {@link #findEnclosingType(Class)} calls to
 	 * argument class.
 	 */
-	private Map<Class<?>, ContentType> classCache;
+	private transient Map<Class<?>, ContentType> classCache;
 
 	/**
 	 * Maps content type ids to filters that are able to directly handle
 	 * the mapped type.
 	 */
-	private Map<String, Collection<Extension>> filters;
+	private transient Map<String, Collection<Extension>> filters;
 
 	/**
 	 * Collection of all registered {@code raw} converters, i.e.
 	 * all converters that have not been created by this framework
 	 * as an result of <i>conversion expansion</i>
 	 */
-	private Set<DataConverter> rawConverters;
+	private transient Set<DataConverter> rawConverters;
 
 	/**
 	 * Mapping of all existing conversion chains for fast lookup.
 	 */
-	private Map<ContentTypePair, DataConverter> converterLookup;
+	private transient Map<ContentTypePair, DataConverter> converterLookup;
 
-	private WeakEventSource eventSource = new WeakEventSource(this);
+	private final transient WeakEventSource eventSource = new WeakEventSource(this);
 
 	private ContentTypeRegistry() {
 		// Object content type not supported?
@@ -720,6 +723,23 @@ public final class ContentTypeRegistry {
 		checkConverters();
 
 		return getConverter0(inputType, resultType);
+	}
+
+	public DataFlavor getDataFlavor(ContentType contentType) {
+		if (contentType == null)
+			throw new NullPointerException("Invalid contentType"); //$NON-NLS-1$
+
+		DataFlavor dataFlavor = null;
+
+		synchronized (dataFlavorMap) {
+			dataFlavor = dataFlavorMap.get(contentType);
+			if(dataFlavor==null) {
+				dataFlavor = new ContentTypeDataFlavor(contentType);
+				dataFlavorMap.put(contentType, dataFlavor);
+			}
+		}
+
+		return dataFlavor;
 	}
 
 	/**
