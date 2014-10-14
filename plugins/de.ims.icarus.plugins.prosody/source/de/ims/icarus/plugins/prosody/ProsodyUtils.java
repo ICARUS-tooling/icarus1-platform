@@ -167,4 +167,34 @@ public class ProsodyUtils implements ProsodyConstants {
 			return LanguageConstants.DATA_UNDEFINED_VALUE;
 		}
 	}
+
+	public static String getPaIntEChannelLabel(int value) {
+		switch (value) {
+		case PAINTE_CHANNEL_ABOVE_VALUE:
+			return PAINTE_CHANNEL_ABOVE_LABEL;
+		case PAINTE_CHANNEL_BELOW_VALUE:
+			return PAINTE_CHANNEL_BELOW_LABEL;
+		case PAINTE_CHANNEL_INSIDE_VALUE:
+			return PAINTE_CHANNEL_INSIDE_LABEL;
+		case PAINTE_CHANNEL_CROSSING_VALUE:
+			return PAINTE_CHANNEL_CROSSING_LABEL;
+
+		default:
+			return LanguageConstants.DATA_UNDEFINED_LABEL;
+		}
+	}
+
+	public static int parsePaIntEChannelLabel(String label) {
+		if(PAINTE_CHANNEL_ABOVE_LABEL.equals(label)) {
+			return PAINTE_CHANNEL_ABOVE_VALUE;
+		} else if(PAINTE_CHANNEL_BELOW_LABEL.equals(label)) {
+			return PAINTE_CHANNEL_BELOW_VALUE;
+		} else if(PAINTE_CHANNEL_INSIDE_LABEL.equals(label)) {
+			return PAINTE_CHANNEL_INSIDE_VALUE;
+		} else if(PAINTE_CHANNEL_CROSSING_LABEL.equals(label)) {
+			return PAINTE_CHANNEL_CROSSING_VALUE;
+		} else {
+			return LanguageConstants.DATA_UNDEFINED_VALUE;
+		}
+	}
 }

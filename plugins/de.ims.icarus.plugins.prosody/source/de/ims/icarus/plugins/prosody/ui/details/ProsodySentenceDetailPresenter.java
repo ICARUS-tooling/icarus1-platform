@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.prosody.ui.details;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -38,12 +39,15 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,8 +79,10 @@ import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
+import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEConstraint;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
 import de.ims.icarus.plugins.prosody.sound.SoundPlayer;
@@ -90,6 +96,7 @@ import de.ims.icarus.plugins.prosody.ui.view.SyllableInfo;
 import de.ims.icarus.plugins.prosody.ui.view.WordInfo;
 import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
@@ -104,6 +111,7 @@ import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -121,7 +129,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 	private SentenceInfo sentenceInfo;
 
-	private PanelConfig config = new PanelConfig();
+	private WordPanelConfig config = new WordPanelConfig();
 
 	private Options options;
 	private JPanel contentPanel;
@@ -192,6 +200,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				callbackHandler, "stopPlayback"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction", //$NON-NLS-1$
 				callbackHandler, "pausePlayback"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction", //$NON-NLS-1$
+				callbackHandler, "toggleShowConstraints"); //$NON-NLS-1$
 	}
 
 	private SoundFile getSoundFile() {
@@ -218,6 +228,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		SoundFile soundFile = getSoundFile();
 		boolean isPlaying = soundFile!=null && soundFile.isActive();
 		boolean isPaused = soundFile!=null && soundFile.isPaused();
+		boolean showConstraints = config.showConstraints;
 
 		actionManager.setEnabled(hasData,
 				"plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"); //$NON-NLS-1$
@@ -228,6 +239,9 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 		actionManager.setSelected(isPaused,
 				"plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction"); //$NON-NLS-1$
+
+		actionManager.setSelected(showConstraints,
+				"plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction"); //$NON-NLS-1$
 	}
 
 	/**
@@ -300,6 +314,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 	private static final String COL_KEY = "color"; //$NON-NLS-1$
 	private static final String GROUP_KEY = "group"; //$NON-NLS-1$
+	private static final String CONSTRAINTS_KEY = "constraints"; //$NON-NLS-1$
 
 	public void refresh() {
 		if(contentPanel==null) {
@@ -317,6 +332,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	    	manager.setAnnotation(annotation);
 
 			final boolean hasHighlight = manager.hasAnnotation();
+			final boolean showConstraints = config.showConstraints;
 
 			for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
 				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
@@ -341,6 +357,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				}
 
 				if(wordHighlighted) {
+					wordInfo.setProperty(CONSTRAINTS_KEY, annotation.getConstraints(wordIndex, PaIntEConstraint.class));
+
 					for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
 						SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
 
@@ -492,6 +510,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		ConfigRegistry registry = handle.getSource();
 
 		// General
+		config.constraintColor = registry.getColor(registry.getChildHandle(handle, "constraintColor")); //$NON-NLS-1$
+		config.showConstraints = registry.getBoolean(registry.getChildHandle(handle, "showConstraints")); //$NON-NLS-1$
 		config.antiAliasingType = registry.getValue(registry.getChildHandle(handle, "antiAliasingType"), PanelConfig.DEFAULT_ANTIALIASING_TYPE); //$NON-NLS-1$
 		config.mouseWheelScrollSupported = registry.getBoolean(registry.getChildHandle(handle, "mouseWheelScrollSupported")); //$NON-NLS-1$
 		config.loopSound = registry.getBoolean(registry.getChildHandle(handle, "loopSound")); //$NON-NLS-1$
@@ -1074,6 +1094,39 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		public void pausePlayback(boolean b) {
 			// no-op
 		}
+
+		public void toggleShowConstraints(ActionEvent e) {
+			// no-op
+		}
+
+		public void toggleShowConstraints(boolean b) {
+			if(sentenceInfo==null) {
+				return;
+			}
+
+			try {
+				config.showConstraints = b;
+				sentencePanel.repaint();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to toggle 'showConstraints' flag", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+//			refreshActions();
+		}
+	}
+
+	public static class WordPanelConfig extends PanelConfig {
+
+		public static final Stroke CONSTRAINT_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{2, 2}, 0);
+
+		public static final boolean DEFAULT_SHOW_CONSTRAINTS = true;
+		public static final Color DEFAULT_CONSTRAINT_COLOR = new Color(0x0000CC);
+
+		public boolean showConstraints = DEFAULT_SHOW_CONSTRAINTS;
+		public Color constraintColor = DEFAULT_CONSTRAINT_COLOR;
 	}
 
 	private class SentencePanel extends JPanel implements Scrollable {
@@ -1398,6 +1451,23 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 			area.height = h;
 
+			SearchConstraint[] constraints = (SearchConstraint[])wordInfo.getProperty(CONSTRAINTS_KEY);
+			final boolean hasConstraints = constraints!=null;
+
+			List<PaIntEConstraintParams> painteParams = null;
+			if(hasConstraints) {
+				painteParams = new ArrayList<>();
+
+				for(SearchConstraint constraint : constraints) {
+					PaIntEConstraintParams[] params = ((PaIntEConstraint)constraint).getPaIntEConstraints();
+					if(params!=null) {
+						CollectionUtils.feedItems(painteParams, params);
+					}
+				}
+			}
+			int yAxisWidth = graph.getYAxis().getRequiredWidth(g);
+			int xAxisHeight = graph.getXAxis().getRequiredHeight(g);
+
 			for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
 				SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
 
@@ -1423,8 +1493,23 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				params.setParams(sentence, wordInfo.getWordIndex(), sylIndex);
 
 				Color curveColor = (Color)sylInfo.getProperty(COL_KEY);
+				boolean highlighted = curveColor!=null;
 				if(curveColor==null) {
 					curveColor = config.curveColor;
+				}
+
+				if(hasConstraints && highlighted && config.showConstraints) {
+					Stroke s = g.getStroke();
+					g.setStroke(WordPanelConfig.CONSTRAINT_STROKE);
+					graph.getCurve().setColor(config.constraintColor);
+
+					Rectangle curveArea = new Rectangle(area.x+yAxisWidth, area.y, area.width-yAxisWidth, area.height-xAxisHeight);
+
+					for(int i=0; i<painteParams.size(); i++) {
+						graph.getCurve().paint(graphics, painteParams.get(i), curveArea, graph.getXAxis(), graph.getYAxis());
+					}
+
+					g.setStroke(s);
 				}
 
 				graph.getCurve().setColor(curveColor);

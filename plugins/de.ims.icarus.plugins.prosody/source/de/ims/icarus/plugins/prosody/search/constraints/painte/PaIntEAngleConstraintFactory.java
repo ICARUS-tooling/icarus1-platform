@@ -105,6 +105,11 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 			return new PaIntEAngleConstraint(getValue(), getOperator(), getSpecifier());
 		}
 
+		@Override
+		protected String getConfigPath() {
+			return null;
+		}
+
 		/**
 		 * @see de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint#getInstance(de.ims.icarus.plugins.prosody.search.ProsodyTargetTree, int)
 		 */

@@ -212,6 +212,7 @@
 		<parameter id="token" value="wordPos" />
 		<parameter id="token" value="section" />
 		<parameter id="token" value="painteIntegral" />
+		<parameter id="token" value="painteRange" />
 		<parameter id="token" value="painteCurve" />
 		<parameter id="token" value="painteAngle" />
 		<parameter id="token" value="painteDistance" />
@@ -228,6 +229,7 @@
 			<parameter id="wordPos" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPositionConstraintFactory" />
 			<parameter id="section" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyRelativeWordPositionConstraintFactory" />
 			<parameter id="painteIntegral" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEIntegralConstraintFactory" />
+			<parameter id="painteRange" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntERangeConstraintFactory" />
 			<parameter id="painteCurve" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntECurveConstraintFactory" />
 			<parameter id="painteAngle" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEAngleConstraintFactory" />
 			<parameter id="painteDistance" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEDistanceConstraintFactory" />

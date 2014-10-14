@@ -97,6 +97,10 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 	public interface Highlight {
 
 		public long getHighlight(int index);
+
+		public boolean isHighlighted(int index);
+
+		public int getMatcherId(int index);
 	}
 
 	public static class DefaultHighlight implements Highlight {
@@ -129,6 +133,29 @@ public abstract class AbstractLazyResultAnnotator implements ResultAnnotator {
 			}
 
 			return 0L;
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator.Highlight#isHighlighted(int)
+		 */
+		@Override
+		public boolean isHighlighted(int index) {
+			return highlightedIndices.get(index);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator.Highlight#getMatcherId(int)
+		 */
+		@Override
+		public int getMatcherId(int index) {
+			if(highlightedIndices.get(index)) {
+				for(int i=0; i<indexMap.length; i++) {
+					if(indexMap[i]==index) {
+						return i;
+					}
+				}
+			}
+			return -1;
 		}
 	}
 

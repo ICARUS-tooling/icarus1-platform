@@ -60,6 +60,8 @@ public class DefaultConstraint implements SearchConstraint {
 	private SearchOperator operator;
 
 	public DefaultConstraint(String token, Object value, SearchOperator operator) {
+		init();
+
 		setToken(token);
 		setValue(value);
 		setOperator(operator);
@@ -72,11 +74,17 @@ public class DefaultConstraint implements SearchConstraint {
 	}
 
 	public DefaultConstraint(SearchConstraint source) {
+		init();
+
 		setToken(source.getToken());
 		setValue(source.getValue());
 		setOperator(source.getOperator());
 		setSpecifier(source.getSpecifier());
 		setActive(source.isActive());
+	}
+
+	protected void init() {
+		// for subclasses
 	}
 
 	@SuppressWarnings("unused")

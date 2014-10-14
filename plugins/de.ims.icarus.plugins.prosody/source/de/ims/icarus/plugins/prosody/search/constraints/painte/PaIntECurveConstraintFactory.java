@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
-import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEIntervalOperator;
 import de.ims.icarus.plugins.prosody.painte.PaIntEOperator.NumberOperator;
@@ -94,14 +92,15 @@ public class PaIntECurveConstraintFactory  extends AbstractConstraintFactory {
 
 			NumberOperator numberOperator = PaIntEUtils.getNumberOperator(operator);
 
-			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
-			Handle handle = registry.getHandle(CONFIG_PATH);
-
-			double leftBorder = registry.getDouble(registry.getChildHandle(handle, "leftBorder")); //$NON-NLS-1$
-			double rightBorder = registry.getDouble(registry.getChildHandle(handle, "rightBorder")); //$NON-NLS-1$
-			int resolution = registry.getInteger(registry.getChildHandle(handle, "resolution")); //$NON-NLS-1$
-
 			intervalOperator = new PaIntEIntervalOperator(leftBorder, rightBorder, resolution, numberOperator);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.search.constraints.painte.BoundedSyllableConstraint#getConfigPath()
+		 */
+		@Override
+		protected String getConfigPath() {
+			return CONFIG_PATH;
 		}
 	}
 }

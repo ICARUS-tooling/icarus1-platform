@@ -69,6 +69,10 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 		return matchers;
 	}
 
+	public Matcher getMatcher(int index) {
+		return matchers[index];
+	}
+
 	@Override
 	public int getHighlightCount() {
 		return matchers.length;

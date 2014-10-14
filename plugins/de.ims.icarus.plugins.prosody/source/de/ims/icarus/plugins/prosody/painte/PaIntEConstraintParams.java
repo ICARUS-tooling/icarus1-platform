@@ -54,6 +54,8 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	public static final int ALL_SET = MASK_A1 | MASK_A2 | MASK_B | MASK_C1 | MASK_C2 | MASK_D | MASK_ALIGNMENT;
 
+	public static final int DEFAULT_REQUIRED_FIELDS = MASK_A1 | MASK_A2 | MASK_B | MASK_C1 | MASK_C2 | MASK_D;
+
 	public PaIntEConstraintParams() {
 		// no-op
 	}
@@ -68,6 +70,92 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	public PaIntEConstraintParams(String s) {
 		setParams(s);
+	}
+
+	public void checkNonEmpty() {
+		checkNonEmpty(null);
+	}
+
+	public void checkNonEmpty(String msg) {
+		if(activeMask!=0) {
+			return;
+		}
+
+		String message = "PaIntE-constraint is empty - must provide at least one valid field"; //$NON-NLS-1$
+		if(msg!=null) {
+			message = msg+": "+message; //$NON-NLS-1$
+		}
+
+		throw new PaIntEConstraintException(message, this);
+	}
+
+	public void checkParams() {
+		checkParams(null, DEFAULT_REQUIRED_FIELDS);
+	}
+
+	public void checkParams(String msg) {
+		checkParams(msg, DEFAULT_REQUIRED_FIELDS);
+	}
+
+	public void checkParams(String msg, int mask) {
+		if(activeMask==mask) {
+			return;
+		}
+
+		int dif = (mask & ~activeMask);
+
+		if(dif==0) {
+			return;
+		}
+
+		StringBuilder sb = new StringBuilder();
+		if(msg!=null) {
+			sb.append(msg).append(": "); //$NON-NLS-1$
+		}
+
+		sb.append("Missing PaIntE fields ("); //$NON-NLS-1$
+
+		String[] fields = new String[Integer.bitCount(dif)];
+		int idx = 0;
+
+		if((dif & MASK_A1) == MASK_A1) {
+			fields[idx++] = "A1"; //$NON-NLS-1$
+		}
+
+		if((dif & MASK_A2) == MASK_A2) {
+			fields[idx++] = "A2"; //$NON-NLS-1$
+		}
+
+		if((dif & MASK_B) == MASK_B) {
+			fields[idx++] = "B"; //$NON-NLS-1$
+		}
+
+		if((dif & MASK_C1) == MASK_C1) {
+			fields[idx++] = "C1"; //$NON-NLS-1$
+		}
+
+		if((dif & MASK_C2) == MASK_C2) {
+			fields[idx++] = "C2"; //$NON-NLS-1$
+		}
+
+		if((dif & MASK_D) == MASK_D) {
+			fields[idx++] = "D"; //$NON-NLS-1$
+		}
+
+		if((dif & MASK_ALIGNMENT) == MASK_ALIGNMENT) {
+			fields[idx++] = "Alignment"; //$NON-NLS-1$
+		}
+
+		for(int i=0; i<fields.length; i++) {
+			if(i>0) {
+				sb.append(',');
+			}
+			sb.append(fields[i]);
+		}
+
+		sb.append(')');
+
+		throw new PaIntEConstraintException(sb.toString(), this);
 	}
 
 	public boolean isUndefined() {

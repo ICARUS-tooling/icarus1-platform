@@ -27,7 +27,6 @@ package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
-import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 
 /**
@@ -35,7 +34,7 @@ import de.ims.icarus.search_tools.SearchOperator;
  * @version $Id$
  *
  */
-public abstract class AbstractParameterizedPaIntEConstraint extends AbstractProsodySyllableConstraint {
+public abstract class AbstractParameterizedPaIntEConstraint extends BoundedSyllableConstraint implements PaIntEConstraint {
 
 	private static final long serialVersionUID = -8403821633243469371L;
 
@@ -48,6 +47,11 @@ public abstract class AbstractParameterizedPaIntEConstraint extends AbstractPros
 	}
 
 	@Override
+	public PaIntEConstraintParams[] getPaIntEConstraints() {
+		return new PaIntEConstraintParams[]{specifierParams};
+	}
+
+	@Override
 	public void setSpecifier(Object specifier) {
 		super.setSpecifier(specifier);
 
@@ -57,7 +61,13 @@ public abstract class AbstractParameterizedPaIntEConstraint extends AbstractPros
 				specifierParams = new PaIntEConstraintParams();
 			}
 
-			specifierParams.setParams(s);
+			parseConstraint(s, specifierParams);
+
+			specifierParams.checkNonEmpty();
 		}
+	}
+
+	protected void checkConstraint(PaIntEConstraintParams constraint) {
+		constraint.checkNonEmpty(getToken()+" constraint"); //$NON-NLS-1$
 	}
 }

@@ -29,11 +29,16 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.plugins.prosody.search.constraints.SyllableConstraint;
+import de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEConstraint;
 import de.ims.icarus.search_tools.EdgeType;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchEdge;
@@ -54,6 +59,7 @@ import de.ims.icarus.util.data.ContentType;
 public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 
 	protected final boolean hasSyllableConstraints;
+	protected final boolean hasPaIntEConstraints;
 
 	public ProsodyResultAnnotator(Matcher rootMatcher) {
 		this(ProsodyHighlighting.getInstance(), rootMatcher);
@@ -63,6 +69,7 @@ public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 		super(highlighting, rootMatcher);
 
 		boolean hasSyllableConstraints = false;
+		boolean hasPaIntEConstraints = false;
 
 		for(Matcher matcher : getMatchers()) {
 			SearchConstraint[] constraints = matcher.getConstraints();
@@ -72,12 +79,27 @@ public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 			for(SearchConstraint constraint : constraints) {
 				if(constraint instanceof SyllableConstraint) {
 					hasSyllableConstraints = true;
-					break;
 				}
+				if(constraint instanceof PaIntEConstraint) {
+					hasPaIntEConstraints = true;
+				}
+			}
+
+			if(hasSyllableConstraints && hasPaIntEConstraints) {
+				break;
 			}
 		}
 
 		this.hasSyllableConstraints = hasSyllableConstraints;
+		this.hasPaIntEConstraints = hasPaIntEConstraints;
+	}
+
+	public boolean hasSyllableConstraints() {
+		return hasSyllableConstraints;
+	}
+
+	public boolean hasPaIntEConstraints() {
+		return hasPaIntEConstraints;
 	}
 
 	/**
@@ -120,6 +142,37 @@ public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 	@Override
 	public ProsodyHighlighting getHighlighting() {
 		return (ProsodyHighlighting) super.getHighlighting();
+	}
+
+	private static transient List<SearchConstraint> constraintBuffer = new ArrayList<>();
+
+	protected SearchConstraint[] getConstraints(int matcherId, Class<?> constraintClass) {
+		if(matcherId==-1) {
+			return null;
+		}
+
+		Matcher matcher = getMatcher(matcherId);
+		SearchConstraint[] constraints = matcher.getConstraints();
+
+		if(constraints==null || constraints.length==0) {
+			return null;
+		}
+
+		for(SearchConstraint constraint : constraints) {
+			if(constraintClass.isInstance(constraint)) {
+				constraintBuffer.add(constraint);
+			}
+		}
+
+		if(constraintBuffer.isEmpty()) {
+			return null;
+		}
+
+		SearchConstraint[] result = constraintBuffer.toArray(new SearchConstraint[constraintBuffer.size()]);
+
+		constraintBuffer.clear();
+
+		return result;
 	}
 
 	private final transient ProsodyTargetTree targetTree = new ProsodyTargetTree();
@@ -379,6 +432,17 @@ public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 		@Override
 		public boolean isTokenHighlighted(int index, int sylIndex, String token) {
 			return getHighlighting().isTokenHighlighted(getHighlight(index, sylIndex), token);
+		}
+
+		@Override
+		public <S> SearchConstraint[] getConstraints(int index,
+				Class<S> constraintClass) {
+			Highlight highlight = getHighlight();
+			if(highlight.getHighlight(index)==0L) {
+				return null;
+			}
+
+			return getAnnotator().getConstraints(highlight.getMatcherId(index), constraintClass);
 		}
 
 	}

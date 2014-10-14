@@ -33,6 +33,15 @@ TODO:
 			-	check meta-data on target corpus
 			-	generate missing meta-data
 			-	execute registered processors
+			
+	- rework perspectives and views:
+		-	define view parameter "default-perspective" (multiplicity "any") that defines on which
+			perspectives a view should be present per default
+		-	use those informations to generate default perspective templates
+		-	allow user to change the instances of those templates (add/remove views, etc...)
+		-	and somehow implement a nice D&D support to move views around... (add more parameters to
+			view extension-point to define preferred size, like "horizontal coverage" in percent or something
+			ike that...)  
 
 DONE:
 

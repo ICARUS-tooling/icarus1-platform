@@ -18,6 +18,10 @@
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.editLabelPatternsAction"
 		name="${id}.name" desc="${id}.description" icon="url.gif" />
 		
+	<!-- Toggle 'showConstraints' -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction"
+		name="${id}.name" desc="${id}.description" icon="chart_curve2.png" type="toggle" />
+		
 	<!-- Play Sentence -->
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"
 		template="actions.default.startAction"
@@ -53,13 +57,13 @@
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.stopPlaybackAction" />
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction" />
 		<separator />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction" />
+		<separator />
 		<item type="glue" />
 	</action-list>
 		
 	<!-- Popup-Menu list -->
 	<action-list id="plugins.prosody.prosodySentenceDetailPresenter.popupMenuList">
-		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.refreshAction" />
-		<separator />
 		<!--<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteWordAction" />-->
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction" />
 	</action-list>

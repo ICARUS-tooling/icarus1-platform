@@ -99,16 +99,17 @@ public class ProsodyPreferences {
 		builder.addGroup("prosody", true); //$NON-NLS-1$
 		// APPEARANCE GROUP
 		builder.addGroup("appearance", true); //$NON-NLS-1$
+
 		// OUTLINE GROUP
 		builder.addGroup("outline", true); //$NON-NLS-1$
-
 		defaultBuildOutlineGroup(builder, null);
 		// END OUTLINE GROUP
 		builder.back();
 
 		// DETAIL GROUP
 		builder.addGroup("details", true); //$NON-NLS-1$
-
+		builder.addBooleanEntry("showConstraints", ProsodySentenceDetailPresenter.WordPanelConfig.DEFAULT_SHOW_CONSTRAINTS); //$NON-NLS-1$
+		builder.addColorEntry("constraintColor", ProsodySentenceDetailPresenter.WordPanelConfig.DEFAULT_CONSTRAINT_COLOR); //$NON-NLS-1$
 		defaultBuildOutlineGroup(builder, new Options("sentencePattern", ProsodySentenceDetailPresenter.DEFAULT_SENTENCE_PATTERN)); //$NON-NLS-1$
 		// END DETAIL GROUP
 		builder.back();

@@ -106,11 +106,15 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 
 		private static final long serialVersionUID = 3545419475427701670L;
 
-		private final transient int delta, excursion;
-		private final transient double minB, maxB;
+		private transient int delta, excursion;
+		private transient double minB, maxB;
 
 		public ProsodyAccentShapeConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator, null);
+		}
+
+		@Override
+		protected void init() {
 
 			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
 			Handle handle = registry.getHandle(CONFIG_PATH);

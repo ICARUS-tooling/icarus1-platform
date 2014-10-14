@@ -23,35 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.annotation;
+package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
-import de.ims.icarus.search_tools.SearchConstraint;
-import de.ims.icarus.search_tools.annotation.SearchAnnotation;
+import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ProsodicAnnotation extends SearchAnnotation {
+public interface PaIntEConstraint {
 
-
-	boolean isHighlighted(int index, int sylIndex);
-
-	int getGroupId(int index, int sylIndex);
-
-	int getGroupId(int index, int sylIndex, String token);
-
-	boolean isNodeHighlighted(int index, int sylIndex);
-	boolean isEdgeHighlighted(int index, int sylIndex);
-	boolean isTransitiveHighlighted(int index, int sylIndex);
-
-	long getHighlight(int index, int sylIndex);
-
-	boolean isTokenHighlighted(int index, int sylIndex, String token);
-
-	@Override
-	ProsodyResultAnnotator getAnnotator();
-
-	<S extends Object> SearchConstraint[] getConstraints( int index, Class<S> constraintClass);
+	PaIntEConstraintParams[] getPaIntEConstraints();
 }

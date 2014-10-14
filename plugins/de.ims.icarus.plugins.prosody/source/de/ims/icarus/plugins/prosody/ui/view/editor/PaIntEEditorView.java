@@ -427,6 +427,9 @@ public class PaIntEEditorView extends View {
 		paramsPanels.remove(panel);
 		paramsComponent.remove(panel);
 
+		paramsComponent.revalidate();
+		paramsComponent.repaint();
+
 		refreshParamComponents();
 		refreshActions();
 	}

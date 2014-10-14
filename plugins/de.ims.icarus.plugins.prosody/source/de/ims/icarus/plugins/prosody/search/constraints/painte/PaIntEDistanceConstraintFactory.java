@@ -102,6 +102,14 @@ public class PaIntEDistanceConstraintFactory extends AbstractConstraintFactory {
 		}
 
 		/**
+		 * @see de.ims.icarus.plugins.prosody.search.constraints.painte.BoundedSyllableConstraint#getConfigPath()
+		 */
+		@Override
+		protected String getConfigPath() {
+			return null;
+		}
+
+		/**
 		 * @see de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint#getInstance(de.ims.icarus.plugins.prosody.search.ProsodyTargetTree, int)
 		 */
 		@Override

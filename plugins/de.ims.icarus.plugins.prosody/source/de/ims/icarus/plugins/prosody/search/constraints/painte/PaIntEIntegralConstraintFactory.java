@@ -25,14 +25,11 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
-import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
-import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -90,20 +87,17 @@ public class PaIntEIntegralConstraintFactory extends AbstractConstraintFactory {
 		return new PaIntEIntegralConstraint(value, operator, specifier);
 	}
 
-	private static class PaIntEIntegralConstraint extends AbstractProsodySyllableConstraint {
+	private static class PaIntEIntegralConstraint extends BoundedSyllableConstraint {
 
 		private static final long serialVersionUID = -284378544802853009L;
 
-		private final double leftBorder, rightBorder;
-
 		public PaIntEIntegralConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
+		}
 
-			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
-			Handle handle = registry.getHandle(CONFIG_PATH);
-
-			leftBorder = registry.getDouble(registry.getChildHandle(handle, "leftBorder")); //$NON-NLS-1$
-			rightBorder = registry.getDouble(registry.getChildHandle(handle, "rightBorder")); //$NON-NLS-1$
+		@Override
+		protected String getConfigPath() {
+			return CONFIG_PATH;
 		}
 
 		@Override

@@ -23,35 +23,23 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.annotation;
-
-import de.ims.icarus.search_tools.SearchConstraint;
-import de.ims.icarus.search_tools.annotation.SearchAnnotation;
+package de.ims.icarus.search_tools.util;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ProsodicAnnotation extends SearchAnnotation {
+public class ConstraintException extends RuntimeException {
 
+	private static final long serialVersionUID = -4479754516789463064L;
 
-	boolean isHighlighted(int index, int sylIndex);
+	public ConstraintException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-	int getGroupId(int index, int sylIndex);
+	public ConstraintException(String message) {
+		super(message);
+	}
 
-	int getGroupId(int index, int sylIndex, String token);
-
-	boolean isNodeHighlighted(int index, int sylIndex);
-	boolean isEdgeHighlighted(int index, int sylIndex);
-	boolean isTransitiveHighlighted(int index, int sylIndex);
-
-	long getHighlight(int index, int sylIndex);
-
-	boolean isTokenHighlighted(int index, int sylIndex, String token);
-
-	@Override
-	ProsodyResultAnnotator getAnnotator();
-
-	<S extends Object> SearchConstraint[] getConstraints( int index, Class<S> constraintClass);
 }

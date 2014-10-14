@@ -25,22 +25,17 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
-import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
-import de.ims.icarus.plugins.prosody.painte.PaIntEParamsWrapper;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
-import de.ims.icarus.plugins.prosody.search.constraints.AbstractProsodySyllableConstraint;
-import de.ims.icarus.plugins.prosody.ui.view.editor.PaIntERegistry;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
-import de.ims.icarus.util.id.UnknownIdentifierException;
 
 /**
  * @author Markus Gärtner
@@ -73,6 +68,7 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[]{
 				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.EQUALS_NOT,
 				DefaultSearchOperator.GROUPING,
 		};
 	}
@@ -84,20 +80,22 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 	@Override
 	public Object labelToValue(Object label, Object specifier) {
-		return LanguageUtils.parseBooleanLabel((String)label);
+		return ProsodyUtils.parsePaIntEChannelLabel((String)label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value, Object specifier) {
-		return LanguageUtils.getBooleanLabel((int)value);
+		return ProsodyUtils.getPaIntEChannelLabel((int)value);
 	}
 
 	@Override
 	public Object[] getLabelSet(Object specifier) {
 		return new Object[]{
 				LanguageConstants.DATA_UNDEFINED_LABEL,
-				LanguageUtils.getBooleanLabel(LanguageConstants.DATA_YES_VALUE),
-				LanguageUtils.getBooleanLabel(LanguageConstants.DATA_NO_VALUE),
+				ProsodyConstants.PAINTE_CHANNEL_INSIDE_LABEL,
+				ProsodyConstants.PAINTE_CHANNEL_BELOW_LABEL,
+				ProsodyConstants.PAINTE_CHANNEL_ABOVE_LABEL,
+				ProsodyConstants.PAINTE_CHANNEL_CROSSING_LABEL,
 		};
 	}
 
@@ -110,26 +108,13 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		return new PaIntEChannelConstraint(value, operator, specifier);
 	}
 
-	private static void parseParams(String s, PaIntEConstraintParams constraints) {
-		if(s.startsWith("$")) { //$NON-NLS-1$
-			String name = s.substring(1);
-			PaIntEParamsWrapper wrapper = PaIntERegistry.getInstance().getParams(name);
-
-			if(wrapper==null)
-				throw new UnknownIdentifierException("No such painte parameter set available: "+name); //$NON-NLS-1$
-
-			constraints.setParams(wrapper.getParams());
-		} else {
-			constraints.setParams(s);
-		}
-	}
-
-	private static class PaIntEChannelConstraint extends AbstractProsodySyllableConstraint {
+	private static class PaIntEChannelConstraint extends BoundedSyllableConstraint implements PaIntEConstraint {
 
 		private static final long serialVersionUID = 6887748634037055630L;
 
-		private double leftBorder, rightBorder;
-		private int resolution;
+		private static final String LOWER_CURVE = "Lower PaIntE-constraint"; //$NON-NLS-1$
+
+		private static final String UPPER_CURVE = "Upper PaIntE-constraint"; //$NON-NLS-1$
 
 		protected final PaIntEConstraintParams valueParams = new PaIntEConstraintParams();
 		protected PaIntEConstraintParams lowerParams;
@@ -137,14 +122,16 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 		public PaIntEChannelConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
+		}
 
+		@Override
+		public PaIntEConstraintParams[] getPaIntEConstraints() {
+			return new PaIntEConstraintParams[]{lowerParams, upperParams};
+		}
 
-			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
-			Handle handle = registry.getHandle(CONFIG_PATH);
-
-			leftBorder = registry.getDouble(registry.getChildHandle(handle, "leftBorder")); //$NON-NLS-1$
-			rightBorder = registry.getDouble(registry.getChildHandle(handle, "rightBorder")); //$NON-NLS-1$
-			resolution = registry.getInteger(registry.getChildHandle(handle, "resolution")); //$NON-NLS-1$
+		@Override
+		protected String getConfigPath() {
+			return CONFIG_PATH;
 		}
 
 		@Override
@@ -160,36 +147,16 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 					upperParams = new PaIntEConstraintParams();
 				}
 
-				String[] parts = s.split(";"); //$NON-NLS-1$
+				parseConstraint(s, lowerParams, upperParams);
 
-				if(parts.length<2)
-					throw new IllegalArgumentException("Invalid channel parts - need at least 2 sets of painte parameters separated by semicolon: "+s); //$NON-NLS-1$
-
-				parseParams(parts[0], lowerParams);
-				parseParams(parts[1], upperParams);
-
-				if(parts.length>2 && !parts[2].isEmpty()) {
-					leftBorder = Double.parseDouble(parts[2]);
-				}
-
-				if(parts.length>3 && !parts[3].isEmpty()) {
-					rightBorder = Double.parseDouble(parts[3]);
-				}
-
-				if(parts.length>4 && !parts[4].isEmpty()) {
-					resolution = Integer.parseInt(parts[4]);
-				}
+				lowerParams.checkParams(LOWER_CURVE);
+				upperParams.checkParams(UPPER_CURVE);
 			}
 		}
 
 		@Override
 		public SearchConstraint clone() {
 			return new PaIntEChannelConstraint(getValue(), getOperator(), getSpecifier());
-		}
-
-		@Override
-		protected Object getConstraint() {
-			return getValue().equals(LanguageConstants.DATA_YES_VALUE);
 		}
 
 		/**
@@ -204,22 +171,93 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 			double x = leftBorder;
 
-			//TODO make the constraint recognize inside/above/below/crossing
+			CurveState state = CurveState.BLANK;
+			CurveState next = null;
 
 			while(x<=rightBorder) {
 				double yTarget = PaIntEUtils.calcY(x, valueParams);
 				double yUpper = PaIntEUtils.calcY(x, upperParams);
 				double yLower = PaIntEUtils.calcY(x, lowerParams);
 
-				if(yTarget>yUpper || yTarget <yLower) {
-					return false;
+				next = state.compute(yUpper, yLower, yTarget);
+
+//				System.out.printf("state=%s next=%s\n", state, next);
+
+				if(next==null) {
+					break;
 				}
 
+				state = next;
 				x += stepSize;
 			}
 
-			return true;
+			return state.getResult();
 		}
 	}
 
+	private enum CurveState {
+		BLANK(LanguageConstants.DATA_UNDEFINED_VALUE) {
+			@Override
+			public CurveState compute(double upper, double lower, double value) {
+				if(value>upper) {
+					return ABOVE;
+				} else if(value<lower) {
+					return BELOW;
+				} else {
+					return INSIDE;
+				}
+			}
+		},
+		BELOW(ProsodyConstants.PAINTE_CHANNEL_BELOW_VALUE) {
+			@Override
+			public CurveState compute(double upper, double lower, double value) {
+				if(value>=lower) {
+					return CROSSING;
+				} else {
+					return this;
+				}
+			}
+		},
+		ABOVE(ProsodyConstants.PAINTE_CHANNEL_ABOVE_VALUE) {
+			@Override
+			public CurveState compute(double upper, double lower, double value) {
+				if(value<=upper) {
+					return CROSSING;
+				} else {
+					return this;
+				}
+			}
+		},
+		INSIDE(ProsodyConstants.PAINTE_CHANNEL_INSIDE_VALUE) {
+			@Override
+			public CurveState compute(double upper, double lower, double value) {
+				if(value<lower || value>upper) {
+					return CROSSING;
+				} else {
+					return this;
+				}
+			}
+		},
+		CROSSING(ProsodyConstants.PAINTE_CHANNEL_CROSSING_VALUE) {
+			@Override
+			public CurveState compute(double upper, double lower, double value) {
+				// Final state, there is no further changing
+				return null;
+			}
+		},
+
+		;
+
+		private final int result;
+
+		private CurveState(int result) {
+			this.result = result;
+		}
+
+		public int getResult() {
+			return result;
+		}
+
+		public abstract CurveState compute(double upper, double lower, double value);
+	}
 }

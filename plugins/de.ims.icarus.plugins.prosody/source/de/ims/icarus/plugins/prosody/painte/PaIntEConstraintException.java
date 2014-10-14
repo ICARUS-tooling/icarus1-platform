@@ -23,35 +23,32 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.annotation;
+package de.ims.icarus.plugins.prosody.painte;
 
-import de.ims.icarus.search_tools.SearchConstraint;
-import de.ims.icarus.search_tools.annotation.SearchAnnotation;
+import de.ims.icarus.search_tools.util.ConstraintException;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ProsodicAnnotation extends SearchAnnotation {
+public class PaIntEConstraintException extends ConstraintException {
 
+	private static final long serialVersionUID = 7286009772139199841L;
 
-	boolean isHighlighted(int index, int sylIndex);
+	private final PaIntEConstraintParams constraint;
 
-	int getGroupId(int index, int sylIndex);
+	public PaIntEConstraintException(String message, PaIntEConstraintParams constraint, Throwable cause) {
+		super(message, cause);
 
-	int getGroupId(int index, int sylIndex, String token);
+		this.constraint = constraint==null ? null : constraint.clone();
+	}
 
-	boolean isNodeHighlighted(int index, int sylIndex);
-	boolean isEdgeHighlighted(int index, int sylIndex);
-	boolean isTransitiveHighlighted(int index, int sylIndex);
+	public PaIntEConstraintException(String message, PaIntEConstraintParams constraint) {
+		this(message, constraint, null);
+	}
 
-	long getHighlight(int index, int sylIndex);
-
-	boolean isTokenHighlighted(int index, int sylIndex, String token);
-
-	@Override
-	ProsodyResultAnnotator getAnnotator();
-
-	<S extends Object> SearchConstraint[] getConstraints( int index, Class<S> constraintClass);
+	public PaIntEConstraintParams getConstraint() {
+		return constraint;
+	}
 }
