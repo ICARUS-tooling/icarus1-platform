@@ -66,6 +66,12 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Ser
 		setLabel(label);
 	}
 
+	public PaIntEParamsWrapper(PaIntEParams params, String label, String description) {
+		this(params, label);
+
+		setDescription(description);
+	}
+
 	/**
 	 * @see de.ims.icarus.util.Wrapper#get()
 	 */
@@ -163,4 +169,8 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Ser
 		return this;
 	}
 
+	@Override
+	public PaIntEParamsWrapper clone() {
+		return new PaIntEParamsWrapper(params.clone(), label, description);
+	}
 }

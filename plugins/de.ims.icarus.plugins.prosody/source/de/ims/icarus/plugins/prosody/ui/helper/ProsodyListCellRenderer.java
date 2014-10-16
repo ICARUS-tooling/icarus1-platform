@@ -74,7 +74,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 
 	public static final String DEFAULT_HEADER_PATTERN = "%documentId::15:% (n) $speaker:::?:$\\:  "; //$NON-NLS-1$
 
-	private static final String CONFIG_PATH = "plugins.prosody.appearance.search.list"; //$NON-NLS-1$
+	private static final String CONFIG_PATH = "plugins.prosody.appearance.search.listOutline"; //$NON-NLS-1$
 
 	private static final long serialVersionUID = 8194402816943023015L;
 

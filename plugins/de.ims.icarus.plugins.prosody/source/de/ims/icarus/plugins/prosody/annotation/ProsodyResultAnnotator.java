@@ -46,6 +46,7 @@ import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.search_tools.result.Hit;
 import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.tree.AbstractTreeResultAnnotator;
+import de.ims.icarus.search_tools.tree.DummyGroupConstraint;
 import de.ims.icarus.search_tools.tree.Matcher;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.data.ContentType;
@@ -77,6 +78,10 @@ public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 				continue;
 			}
 			for(SearchConstraint constraint : constraints) {
+				if(constraint instanceof DummyGroupConstraint) {
+					constraint = ((DummyGroupConstraint)constraint).getSource();
+				}
+
 				if(constraint instanceof SyllableConstraint) {
 					hasSyllableConstraints = true;
 				}
@@ -159,6 +164,9 @@ public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {
 		}
 
 		for(SearchConstraint constraint : constraints) {
+			if(constraint instanceof DummyGroupConstraint) {
+				constraint = ((DummyGroupConstraint)constraint).getSource();
+			}
 			if(constraintClass.isInstance(constraint)) {
 				constraintBuffer.add(constraint);
 			}

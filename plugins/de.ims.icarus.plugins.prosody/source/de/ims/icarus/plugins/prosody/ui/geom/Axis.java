@@ -405,7 +405,7 @@ public abstract class Axis {
 
 			int cursor = 0;
 			int markerCount = 0;
-			while(cursor<=w) {
+			while((cursor = (int) (markerCount*markerStepSize*scale))<=w) {
 
 				// Draw marker
 				g.setColor(markerColor);
@@ -435,7 +435,6 @@ public abstract class Axis {
 					}
 				}
 
-				cursor += (int) (markerStepSize*scale);
 				markerCount++;
 			}
 		} // end vertical

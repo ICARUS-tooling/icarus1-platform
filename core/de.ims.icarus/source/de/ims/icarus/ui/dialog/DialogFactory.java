@@ -25,14 +25,15 @@
  */
 package de.ims.icarus.ui.dialog;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -79,7 +80,7 @@ public final class DialogFactory {
 		return globalFactory;
 	}
 
-	private static final Map<Integer, Object[]> _options = new HashMap<>();
+	private static final TIntObjectMap<Object[]> _options = new TIntObjectHashMap<>();
 
 	public static Object[] getOptions(int id) {
 		return _options.get(id).clone();
@@ -382,15 +383,17 @@ public final class DialogFactory {
 	}
 
 	public String showTextInputDialog(Component parent, String title,
-			String message, Object...params) {
-		return showTextInputDialog(parent, OK_CANCEL_OPTION, title, message, params);
+			String message, String text, Object...params) {
+		return showTextInputDialog(parent, OK_CANCEL_OPTION, title, message, text, params);
 	}
 
 	public String showTextInputDialog(Component parent, int options, String title,
-			String message, Object...params) {
+			String message, String text, Object...params) {
 
 		JTextArea textArea = createTextArea();
 		BasicDialogBuilder builder = new BasicDialogBuilder(getResourceDomain());
+
+		textArea.setText(text);
 
 		builder.setTitle(title);
 		builder.setMessage(message, params);
@@ -400,9 +403,9 @@ public final class DialogFactory {
 
 		builder.showDialog(parent);
 
-		String text = textArea.getText();
+		String newText = textArea.getText();
 
-		return builder.isYesValue() ? text : null;
+		return builder.isYesValue() ? newText : null;
 	}
 
 	public void showTextOutputDialog(Component parent, String title,

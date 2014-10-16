@@ -35,9 +35,17 @@ import de.ims.icarus.language.coref.CoreferenceDocumentData;
  */
 public interface ProsodyConstants extends LanguageConstants {
 
-	// PLugin ID
+	// Plugin ID
 	public static final String PROSODY_PLUGIN_ID =
 			"de.ims.icarus.prosody"; //$NON-NLS-1$
+
+	// Prosody Perspective Id
+	public static final String PROSODY_PERSPECTIVE_ID =
+			PROSODY_PLUGIN_ID+"@ProsodyPerspective"; //$NON-NLS-1$
+
+	// PaIntE-Editor View Id
+	public static final String PAINTE_EDITOR_VIEW_ID =
+			PROSODY_PLUGIN_ID+"@PaIntEEditorView"; //$NON-NLS-1$
 
 	// Document properties
 	public static final String DOCUMENT_ID = CoreferenceDocumentData.DOCUMENT_ID_PROPERTY;

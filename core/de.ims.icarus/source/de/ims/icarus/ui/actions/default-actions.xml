@@ -154,6 +154,12 @@
 		desc="save"
 		icon="save_edit.gif" />
 	
+	<!-- Save As -->
+	<action id="actions.default.saveAsAction" virtual="true"
+		name="saveAs" 
+		desc="saveAs"
+		icon="saveas_edit.gif" />
+	
 	<!-- New -->
 	<action id="actions.default.newAction" virtual="true"
 		name="new" 

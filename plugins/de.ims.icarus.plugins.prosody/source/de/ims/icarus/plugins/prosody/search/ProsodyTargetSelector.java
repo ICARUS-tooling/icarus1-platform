@@ -46,6 +46,7 @@ import de.ims.icarus.search_tools.SearchTargetSelector;
 import de.ims.icarus.ui.events.ListenerProxies;
 import de.ims.icarus.ui.helper.FilteredListModel;
 import de.ims.icarus.util.Filter;
+import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -142,7 +143,7 @@ public class ProsodyTargetSelector implements SearchTargetSelector, Filter {
 				|| ContentTypeRegistry.isCompatible(ProsodyUtils.getProsodyDocumentContentType(), targetType);
 	}
 
-	private static class DocumentSetDelegate extends WrappedSentenceDataList implements Loadable, ChangeListener {
+	private static class DocumentSetDelegate extends WrappedSentenceDataList implements Loadable, ChangeListener, NamedObject {
 
 		private final DocumentSetDescriptor descriptor;
 
@@ -215,6 +216,36 @@ public class ProsodyTargetSelector implements SearchTargetSelector, Filter {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			reload();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof DocumentSetDelegate) {
+				DocumentSetDelegate other = (DocumentSetDelegate)obj;
+				return descriptor==other.descriptor;
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return getName();
+		}
+
+		/**
+		 * @see de.ims.icarus.util.NamedObject#getName()
+		 */
+		@Override
+		public String getName() {
+			return descriptor.getName();
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return descriptor.hashCode();
 		}
 	}
 }

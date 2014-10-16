@@ -181,7 +181,7 @@ public class ResourceDomain {
 		}
 
 		// Replaces the placeholders with the values in the array
-		if (value != null && params != null) {
+		if (value != null && (params != null || value.indexOf('{')!=-1)) {
 			value = ResourceManager.format(value, params);
 		}
 

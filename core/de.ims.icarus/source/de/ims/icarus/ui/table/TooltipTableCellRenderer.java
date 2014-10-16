@@ -31,6 +31,7 @@ import java.awt.FontMetrics;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.strings.StringUtil;
 
 /**
@@ -65,13 +66,25 @@ public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
+		String tooltip = null;
+
 		if(value instanceof Integer) {
 			value = StringUtil.formatDecimal((int) value);
+		} else if(value instanceof String) {
+			String s = (String)value;
+			int lineBreak = s.indexOf('\n');
+			if(lineBreak!=-1) {
+				tooltip = s;
+				value = s.substring(0, lineBreak);
+			}
 		}
 
 		super.getTableCellRendererComponent(table, value, isSelected, hasFocus,	row, column);
 
-		String tooltip = getText();
+		if(tooltip==null) {
+			tooltip = getText();
+		}
+
 		int columnWidth = table.getColumnModel().getColumn(column).getWidth();
 		int textWidth = 0;
 
@@ -84,8 +97,12 @@ public class TooltipTableCellRenderer extends DefaultTableCellRenderer {
 			tooltip = null;
 		}
 
-		setToolTipText(tooltip);
+		setToolTipText(prepareToolTip(tooltip));
 
 		return this;
+	}
+
+	protected String prepareToolTip(String tooltip) {
+		return UIUtil.toUnwrappedSwingTooltip(tooltip);
 	}
 }

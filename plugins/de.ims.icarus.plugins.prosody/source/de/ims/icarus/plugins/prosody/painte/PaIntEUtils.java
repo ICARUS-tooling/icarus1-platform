@@ -97,7 +97,7 @@ public class PaIntEUtils {
 
 	public static double calcY(double x, PaIntEConstraintParams constraints) {
 		return calcY(x, constraints.a1, constraints.a2, constraints.b,
-				constraints.c1, constraints.c2, constraints.d, PaIntEParams.DEFAULT_ALIGNMENT);
+				constraints.c1, constraints.c2, constraints.d, constraints.alignment);
 	}
 
 	public static double calcY(double x, double a1, double a2, double b, double c1, double c2, double d, double alignment) {

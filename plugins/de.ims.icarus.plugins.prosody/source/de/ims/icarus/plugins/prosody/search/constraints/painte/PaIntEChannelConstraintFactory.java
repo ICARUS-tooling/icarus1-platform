@@ -167,6 +167,17 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 			valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
 
+//			boolean verbose = false;
+//
+//			if(tree.getSource().toString().startsWith("Die Sommerzeit")
+//					&& "96".equals(tree.getSource().getProperty(ProsodyConstants.SENTENCE_NUMBER_KEY))) {
+//				System.out.println();
+//				leftBorder = -0.3;
+//				rightBorder = 0.6;
+//				resolution = 20;
+//				verbose = true;
+//			}
+
 			double stepSize = (rightBorder-leftBorder)/resolution;
 
 			double x = leftBorder;
@@ -178,6 +189,9 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 				double yTarget = PaIntEUtils.calcY(x, valueParams);
 				double yUpper = PaIntEUtils.calcY(x, upperParams);
 				double yLower = PaIntEUtils.calcY(x, lowerParams);
+
+//				if(verbose)
+//				System.out.printf("value=%.02f lower=%.02f upper=%.02f\n", yTarget, yLower, yUpper);
 
 				next = state.compute(yUpper, yLower, yTarget);
 
@@ -192,6 +206,11 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 			}
 
 			return state.getResult();
+		}
+
+		@Override
+		public Object getLabel(Object value) {
+			return ProsodyUtils.getPaIntEChannelLabel((int)value);
 		}
 	}
 

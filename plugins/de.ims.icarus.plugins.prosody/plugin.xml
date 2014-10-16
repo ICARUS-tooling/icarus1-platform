@@ -53,23 +53,47 @@
 			</doc>
 		</parameter-def>
 	</extension-point>
+			
+	<extension-point id="ProsodyView" parent-point-id="View" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Special entry point for 'View' extensions that should only
+				be used in the prosody context (PaIntE-Editor, etc).
+			</doc-text>
+		</doc>
+	</extension-point>
 	
 	<!-- Standard Extensions -->
 	
 	<!-- PERSPECTIVES AND VIEWS -->
 	
-	<extension id="PaIntEEditorView" plugin-id="de.ims.icarus.coref" point-id="CoreferenceView">
+	<extension id="ProsodyPerspective" plugin-id="de.ims.icarus.core" point-id="Perspective">
 		<doc>
 			<doc-text>
-				Presentation view that allows for selection of different visualization
-				types for a single document and its allocations.
+				Perspective dedicated to the use of prosody tools.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.prosody.prosodyPerspective.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodyPerspective.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.ProsodyPerspective" />
+		<parameter id="icon" value="de/ims/icarus/plugins/prosody/ui/view/prosody-perspective.png" />
+		<parameter id="preview" value="de/ims/icarus/plugins/prosody/ui/view/prosody-perspective-preview.png" />
+	</extension>
+	
+	<extension id="PaIntEEditorView" plugin-id="de.ims.icarus.prosody" point-id="ProsodyView">
+		<doc>
+			<doc-text>
+				Visual frontend to the PaIntE-Registry and a little editor to play with PaIntE-Parameters
+				in a graphical way.
 			</doc-text>
 		</doc>
 		<parameter id="name" value="plugins.prosody.painteEditorView.identity.name" />
 		<parameter id="description" value="plugins.prosody.painteEditorView.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.editor.PaIntEEditorView" />
-		<parameter id="icon" value="de/ims/icarus/plugins/prosody/ui/view/painte-editor-view.gif" />
+		<parameter id="icon" value="de/ims/icarus/plugins/prosody/ui/view/editor/painte-editor-view.png" />
 		<parameter id="alignment" value="center" />
 		<parameter id="priority" value="low" />
 		
@@ -77,6 +101,7 @@
 		<parameter id="capabilities">
 			<parameter id="clear" />
 			<parameter id="present" value="PainteParamsContentType" />
+			<parameter id="present" value="PainteParamsWrapperContentType" />
 		</parameter>
 	</extension>
 	
@@ -186,6 +211,15 @@
 			</doc-text>
 		</doc>
 		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.painte.PaIntEParams" />
+	</extension>
+	
+	<extension id="PainteParamsWrapperContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+		<doc>
+			<doc-text>
+				Content type based on de.ims.icarus.plugins.prosody.painte.PaIntEParamsWrapper
+			</doc-text>
+		</doc>
+		<parameter id="contentClass" value="de.ims.icarus.plugins.prosody.painte.PaIntEParamsWrapper" />
 	</extension>
 	
 	<extension id="ProsodicAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">

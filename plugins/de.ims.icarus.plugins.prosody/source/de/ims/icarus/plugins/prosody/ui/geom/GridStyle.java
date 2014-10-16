@@ -105,10 +105,11 @@ public enum GridStyle {
 			// Horizontal parts
 
 			int cursorY = h;
+			int markerY = 1;
 
 			for(;;) {
 
-				cursorY -= (int)(yAxis.getMarkerStepSize() * scaleY);
+				cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY);
 
 				if(cursorY<1) {
 					break;
@@ -117,18 +118,15 @@ public enum GridStyle {
 				// Vertical parts
 
 				int cursorX = 0;
+				int markerX = 1;
 
-				for(;;) {
-
-					cursorX += (int)(xAxis.getMarkerStepSize() * scaleX);
-
-					if(cursorX>w-1) {
-						break;
-					}
+				while((cursorX = (int) (markerX*xAxis.getMarkerStepSize()*scaleX))<=w-1) {
 
 					graphics.drawLine(cursorX-1, cursorY, cursorX+1, cursorY);
 					graphics.drawLine(cursorX, cursorY-1, cursorX, cursorY+1);
 				}
+
+				markerY++;
 			}
 
 			g.setColor(c);
@@ -151,10 +149,11 @@ public enum GridStyle {
 			// Horizontal parts
 
 			int cursorY = h;
+			int markerY = 1;
 
 			for(;;) {
 
-				cursorY -= (int)(yAxis.getMarkerStepSize() * scaleY);
+				cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY);
 
 				if(cursorY<2) {
 					break;
@@ -163,18 +162,17 @@ public enum GridStyle {
 				// Vertical parts
 
 				int cursorX = 0;
+				int markerX = 1;
 
-				for(;;) {
-
-					cursorX += (int)(xAxis.getMarkerStepSize() * scaleX);
-
-					if(cursorX>w-2) {
-						break;
-					}
+				while((cursorX = (int) (markerX*xAxis.getMarkerStepSize()*scaleX))<=w-2) {
 
 					graphics.drawLine(cursorX-2, cursorY, cursorX+2, cursorY);
 					graphics.drawLine(cursorX, cursorY-2, cursorX, cursorY+2);
+
+					markerX++;
 				}
+
+				markerY++;
 			}
 
 			g.setColor(c);
@@ -193,17 +191,12 @@ public enum GridStyle {
 
 			// Horizontal lines
 
-			int cursorY = h;
+			int cursorY;
+			int markerY = 1;
 
-			for(;;) {
-
-				cursorY -= (int)(yAxis.getMarkerStepSize() * scaleY);
-
-				if(cursorY<0) {
-					break;
-				}
-
+			while((cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY))>=0) {
 				graphics.drawLine(0, cursorY, w, cursorY);
+				markerY++;
 			}
 		}
 
@@ -213,16 +206,11 @@ public enum GridStyle {
 			// Vertical lines
 
 			int cursorX = 0;
+			int markerX = 1;
 
-			for(;;) {
-
-				cursorX += (int)(xAxis.getMarkerStepSize() * scaleX);
-
-				if(cursorX>w) {
-					break;
-				}
-
+			while((cursorX = (int) (markerX*xAxis.getMarkerStepSize()*scaleX))<=w) {
 				graphics.drawLine(cursorX, 0, cursorX, h);
+				markerX++;
 			}
 		}
 	}

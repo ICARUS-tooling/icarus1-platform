@@ -51,6 +51,7 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.ui.events.Events;
 import de.ims.icarus.util.Installable;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.intern.Interner;
 import de.ims.icarus.util.strings.StringUtil;
@@ -226,6 +227,21 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 		}
 
 		wrapper.setLabel(uniqueName);
+
+		paramsChanged(wrapper);
+	}
+
+	public void editParamsDescription(PaIntEParamsWrapper wrapper, String description) {
+		if (wrapper == null)
+			throw new NullPointerException("Invalid wrapper"); //$NON-NLS-1$
+
+		String oldDescription = wrapper.getDescription();
+
+		if(ClassUtils.equals(description, oldDescription)) {
+			return;
+		}
+
+		wrapper.setDescription(description);
 
 		paramsChanged(wrapper);
 	}
@@ -433,7 +449,7 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex!=1;
+			return columnIndex!=1 && columnIndex!=2;
 		}
 
 		@Override

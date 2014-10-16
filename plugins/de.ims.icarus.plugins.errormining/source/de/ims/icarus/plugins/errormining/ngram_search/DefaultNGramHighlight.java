@@ -19,50 +19,50 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.util.BitSet;
 
-import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator.Highlight;
+import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 public class DefaultNGramHighlight implements Highlight {
-	
+
 	protected BitSet highlightedIndices;
 	protected int[] indexMap;
 	protected final long ngramHighlight;
 	protected final long ngramHeadHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
 	protected boolean highlightEdge;
-	
+
 	protected int[] dependencyInfo;
-	
+
 	public DefaultNGramHighlight(int[] indexMap, boolean highlightEdge) {
-		
+
 		int size = CollectionUtils.max(indexMap);
 		highlightedIndices = new BitSet(size);
-		
+
 		this.indexMap = indexMap;
 		this.highlightEdge = highlightEdge;
-		
+
 		if(highlightEdge){
 			ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT | BitmaskHighlighting.EDGE_HIGHLIGHT;
 		} else {
 			ngramHighlight = BitmaskHighlighting.NODE_HIGHLIGHT;
 		}
-		
+
 		for(int index : indexMap) {
 			if(index!=-1) {
 				highlightedIndices.set(index);
 			}
-		}		
+		}
 	}
-	
-	
+
+
 
 	/**
 	 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator.Highlight#getHighlight(int)
@@ -80,8 +80,28 @@ public class DefaultNGramHighlight implements Highlight {
 					}
 				}
 			}
-		}			
+		}
 		return 0L;
 	}
-	
+
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator.Highlight#isHighlighted(int)
+	 */
+	@Override
+	public boolean isHighlighted(int index) {
+		return highlightedIndices.get(index);
+	}
+
+
+
+	/**
+	 * @see de.ims.icarus.search_tools.annotation.AbstractLazyResultAnnotator.Highlight#getMatcherId(int)
+	 */
+	@Override
+	public int getMatcherId(int index) {
+		return -1;
+	}
+
 }

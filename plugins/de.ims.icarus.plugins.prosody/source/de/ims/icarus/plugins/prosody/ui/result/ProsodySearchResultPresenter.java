@@ -310,7 +310,7 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 	private Object loadDefaultPresenter() {
 
 		Object defaultPresenter = ConfigRegistry.getGlobalRegistry().getValue(
-				"plugins.prosody.appearance.search.result.defaultSentencePresenter"); //$NON-NLS-1$
+				"plugins.prosody.appearance.search.resultOutline.defaultSentencePresenter"); //$NON-NLS-1$
 
 		if("NONE".equals(defaultPresenter)) { //$NON-NLS-1$
 			defaultPresenter = null;

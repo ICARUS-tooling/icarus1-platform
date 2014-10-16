@@ -55,6 +55,7 @@ import java.util.logging.Level;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -81,6 +82,7 @@ import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
+import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
 import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEConstraint;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
@@ -95,11 +97,17 @@ import de.ims.icarus.plugins.prosody.ui.view.SentenceInfo;
 import de.ims.icarus.plugins.prosody.ui.view.SyllableInfo;
 import de.ims.icarus.plugins.prosody.ui.view.WordInfo;
 import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
+import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.SearchConstraint;
+import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
+import de.ims.icarus.ui.dialog.ChoiceFormEntry;
+import de.ims.icarus.ui.dialog.DialogFactory;
+import de.ims.icarus.ui.dialog.DummyFormEntry;
+import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.layout.WrapLayout;
 import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.ui.view.AWTPresenter;
@@ -135,18 +143,21 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	private JPanel contentPanel;
 	private SentencePanel sentencePanel;
 
-	protected AnnotationController annotationSource;
+	private AnnotationController annotationSource;
 
 	private CallbackHandler callbackHandler;
 	private Handler handler;
 
 	private JPopupMenu popupMenu;
 
-	protected ActionManager actionManager;
+	private ActionManager actionManager;
 
 	protected static final String configPath = "plugins.prosody.appearance.details"; //$NON-NLS-1$
 
 	private static ActionManager sharedActionManager;
+
+	private JComboBox<Object> syllablePatternSelect;
+	private JLabel patternSelectInfo;
 
 	protected static synchronized final ActionManager getSharedActionManager() {
 		if(sharedActionManager==null) {
@@ -202,6 +213,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				callbackHandler, "pausePlayback"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction", //$NON-NLS-1$
 				callbackHandler, "toggleShowConstraints"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction", //$NON-NLS-1$
+				callbackHandler, "copyPainteSyllable"); //$NON-NLS-1$
 	}
 
 	private SoundFile getSoundFile() {
@@ -332,7 +345,6 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	    	manager.setAnnotation(annotation);
 
 			final boolean hasHighlight = manager.hasAnnotation();
-			final boolean showConstraints = config.showConstraints;
 
 			for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
 				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
@@ -412,8 +424,6 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		scrollPane.setBorder(UIUtil.topLineBorder);
 
 		panel.add(scrollPane, BorderLayout.CENTER);
-
-		registerActionCallbacks();
 
 		refreshActions();
 
@@ -627,7 +637,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		play(beginOffset, endOffset);
 	}
 
-	private void showPopupMenu(MouseEvent trigger) {
+	private void showPopupMenu(WordPanel panel, MouseEvent trigger) {
 		if(popupMenu==null) {
 			// Create new popup menu
 
@@ -645,6 +655,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		if(popupMenu!=null) {
 			refreshActions();
 
+			popupMenu.putClientProperty("panel", panel); //$NON-NLS-1$
+			popupMenu.putClientProperty("point", trigger.getPoint()); //$NON-NLS-1$
 			popupMenu.show((Component) trigger.getSource(), trigger.getX(), trigger.getY());
 		}
 	}
@@ -655,7 +667,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 		private void maybeShowPopup(MouseEvent e) {
 			if(e.isPopupTrigger()) {
-				showPopupMenu(e);
+				WordPanel panel = (WordPanel) e.getSource();
+				showPopupMenu(panel, e);
 			}
 		}
 
@@ -897,11 +910,11 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		}
 
 		public void editLabelPatterns(ActionEvent e) {
-//			if(sentencePatternSelect==null) {
-//				String pattern = ConfigRegistry.getGlobalRegistry().getString(
-//						configPath+".text.sentencePattern"); //$NON-NLS-1$
-//				sentencePatternSelect = createPatternSelect(pattern);
-//			}
+			if(syllablePatternSelect==null) {
+				String pattern = ConfigRegistry.getGlobalRegistry().getString(
+						configPath+".text.sentencePattern"); //$NON-NLS-1$
+				syllablePatternSelect = createPatternSelect(pattern);
+			}
 //			if(headerPatternSelect==null) {
 //				String pattern = ConfigRegistry.getGlobalRegistry().getString(
 //						configPath+".text.headerPattern"); //$NON-NLS-1$
@@ -912,73 +925,73 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //						configPath+".detail.detailPattern"); //$NON-NLS-1$
 //				detailPatternSelect = createPatternSelect(pattern);
 //			}
-//
-//			if(patternSelectInfo==null) {
-//				final JLabel label = new JLabel();
-//				label.addMouseListener(new TooltipFreezer());
-//				label.setIcon(UIUtil.getInfoIcon());
-//
-//				Localizable localizable = new Localizable() {
-//
-//					@Override
-//					public void localize() {
-//						label.setToolTipText(createPatternSelectTooltip());
-//					}
-//				};
-//
-//				localizable.localize();
-//				ResourceManager.getInstance().getGlobalDomain().addItem(localizable);
-//
-//				patternSelectInfo = label;
-//			}
-//
-//			sentencePatternSelect.setSelectedItem(LabelPattern.escapePattern(config.sentencePattern.getPattern()));
+
+			if(patternSelectInfo==null) {
+				final JLabel label = new JLabel();
+				label.addMouseListener(new TooltipFreezer());
+				label.setIcon(UIUtil.getInfoIcon());
+
+				Localizable localizable = new Localizable() {
+
+					@Override
+					public void localize() {
+						label.setToolTipText(createPatternSelectTooltip());
+					}
+				};
+
+				localizable.localize();
+				ResourceManager.getInstance().getGlobalDomain().addItem(localizable);
+
+				patternSelectInfo = label;
+			}
+
+			syllablePatternSelect.setSelectedItem(LabelPattern.escapePattern(config.sentencePattern.getPattern()));
 //			headerPatternSelect.setSelectedItem(LabelPattern.escapePattern(config.headerPattern.getPattern()));
 //			detailPatternSelect.setSelectedItem(LabelPattern.escapePattern(config.detailPattern.getPattern()));
-//
-//			FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
-//			formBuilder.addEntry("info", new DummyFormEntry( //$NON-NLS-1$
-//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.info", patternSelectInfo)); //$NON-NLS-1$
-//			formBuilder.addEntry("sentencePattern", new ChoiceFormEntry( //$NON-NLS-1$
-//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.sentencePattern", sentencePatternSelect)); //$NON-NLS-1$
+
+			FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
+			formBuilder.addEntry("info", new DummyFormEntry( //$NON-NLS-1$
+					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.info", patternSelectInfo)); //$NON-NLS-1$
+			formBuilder.addEntry("sentencePattern", new ChoiceFormEntry( //$NON-NLS-1$
+					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.syllablePattern", syllablePatternSelect)); //$NON-NLS-1$
 //			formBuilder.addEntry("headerPattern", new ChoiceFormEntry( //$NON-NLS-1$
 //					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.headerPattern", headerPatternSelect)); //$NON-NLS-1$
 //			formBuilder.addEntry("detailPattern", new ChoiceFormEntry( //$NON-NLS-1$
 //					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.detailPattern", detailPatternSelect)); //$NON-NLS-1$
-//
-//			formBuilder.buildForm();
-//
-//			if(DialogFactory.getGlobalFactory().showGenericDialog(
-//					null,
-//					DialogFactory.OK_CANCEL_OPTION,
-//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.title", //$NON-NLS-1$
-//					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.message", //$NON-NLS-1$
-//					formBuilder.getContainer(),
-//					true)) {
-//
-//				// Sentence pattern
-//				String sentencePattern = getPattern(sentencePatternSelect);
-//				if(sentencePattern==null || sentencePattern.isEmpty()) {
-//					// Ensure minimum label!
-//					sentencePattern = "$form$"; //$NON-NLS-1$
-//				}
-//
-//				try {
-//					config.sentencePattern = new LabelPattern(LabelPattern.unescapePattern(sentencePattern));
-//					addPattern(sentencePattern, sentencePatternSelect);
-//				} catch(Exception ex) {
-//					LoggerFactory.log(this, Level.SEVERE,
-//							"Invalid node pattern: "+sentencePattern, ex); //$NON-NLS-1$
-//
-//					UIUtil.beep();
-//					DialogFactory.getGlobalFactory().showError(null,
-//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidSentencePattern.title",  //$NON-NLS-1$
-//							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidSentencePattern.message",  //$NON-NLS-1$
-//							sentencePattern);
-//
-//					return;
-//				}
-//
+
+			formBuilder.buildForm();
+
+			if(DialogFactory.getGlobalFactory().showGenericDialog(
+					null,
+					DialogFactory.OK_CANCEL_OPTION,
+					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.title", //$NON-NLS-1$
+					"plugins.prosody.prosodySentenceDetailPresenter.dialogs.editPattern.message", //$NON-NLS-1$
+					formBuilder.getContainer(),
+					true)) {
+
+				// Sentence pattern
+				String sentencePattern = getPattern(syllablePatternSelect);
+				if(sentencePattern==null || sentencePattern.isEmpty()) {
+					// Ensure minimum label!
+					sentencePattern = "$form$"; //$NON-NLS-1$
+				}
+
+				try {
+					config.sentencePattern = new LabelPattern(LabelPattern.unescapePattern(sentencePattern));
+					addPattern(sentencePattern, syllablePatternSelect);
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Invalid node pattern: "+sentencePattern, ex); //$NON-NLS-1$
+
+					UIUtil.beep();
+					DialogFactory.getGlobalFactory().showError(null,
+							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidSyllablePattern.title",  //$NON-NLS-1$
+							"plugins.prosody.prosodySentenceDetailPresenter.dialogs.invalidSyllablePattern.message",  //$NON-NLS-1$
+							sentencePattern);
+
+					return;
+				}
+
 //				// Header pattern
 //				String headerPattern = getPattern(headerPatternSelect);
 //				if(headerPattern==null) {
@@ -1000,8 +1013,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //
 //					return;
 //				}
-//
-//				// Header pattern
+
+//				// Detail pattern
 //				String detailPattern = getPattern(detailPatternSelect);
 //				if(detailPattern==null) {
 //					detailPattern = ""; //$NON-NLS-1$
@@ -1022,9 +1035,9 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //
 //					return;
 //				}
-//
-//				ProsodySentenceDetailPresenter.this.refresh();
-//			}
+
+				ProsodySentenceDetailPresenter.this.refresh();
+			}
 		}
 
 		public void playSentence(ActionEvent e) {
@@ -1112,6 +1125,46 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 						"Failed to toggle 'showConstraints' flag", ex); //$NON-NLS-1$
 
 				UIUtil.beep();
+			}
+
+//			refreshActions();
+		}
+
+		public void copyPainteSyllable(ActionEvent e) {
+			if(sentenceInfo==null) {
+				return;
+			}
+			if(popupMenu==null) {
+				return;
+			}
+
+			try {
+
+				WordPanel panel = (WordPanel) popupMenu.getClientProperty("panel"); //$NON-NLS-1$
+				Point p = (Point)popupMenu.getClientProperty("point"); //$NON-NLS-1$
+
+				PaIntEHitBox hitBox = panel.translate(p);
+				if(hitBox==null) {
+					return;
+				}
+
+				int sylIndex = hitBox.getSylIndex();
+				if(sylIndex==-1) {
+					return;
+				}
+
+				WordInfo wordInfo = panel.getWordInfo();
+				PaIntEParams params = new PaIntEParams(wordInfo.getSentenceInfo().getSentence(), wordInfo.getWordIndex(), sylIndex);
+
+				PaIntEUtils.copyParams(params);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to copy PaIntE parameters to clipboard", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			} finally {
+				popupMenu.putClientProperty("panel", null); //$NON-NLS-1$
+				popupMenu.putClientProperty("point", null); //$NON-NLS-1$
 			}
 
 //			refreshActions();
@@ -1397,7 +1450,12 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 					y -= area.y;
 					x -= area.x;
 
-					return graph.translate(x, y, g, area, params, translationAccuracy);
+					PaIntEHitBox hitBox = graph.translate(x, y, g, area, params, translationAccuracy);
+					if(hitBox!=null) {
+						hitBox.setWordIndex(wordIndex);
+						hitBox.setSylIndex(sylIndex);
+					}
+					return hitBox;
 				}
 
 				area.x += area.width;

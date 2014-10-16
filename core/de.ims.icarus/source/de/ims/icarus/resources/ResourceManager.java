@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.resources;
@@ -44,24 +44,24 @@ import de.ims.icarus.util.Exceptions;
 
 
 /**
- * 
- * @author Markus Gärtner 
+ *
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class ResourceManager {
 
 	private Locale locale = Locale.getDefault();
-	
+
 	private WeakHashMap<Object, Localizer> items = new WeakHashMap<Object, Localizer>();
 
 	private Set<WeakReference<ManagedResource>> managedResources = new HashSet<>();
-		
+
 	private List<ChangeListener> listeners;
 	private final ChangeEvent changeEvent = new ChangeEvent(this);
-	
+
 	private static ResourceManager instance;
-	
+
 	private static boolean notifyMissingResource = true;
 
 	public static boolean isNotifyMissingResource() {
@@ -81,50 +81,50 @@ public final class ResourceManager {
 				}
 			}
 		}
-		
+
 		return instance;
 	}
-	
+
 	public static final ResourceLoader DEFAULT_RESOURCE_LOADER
 			= new DefaultResourceLoader(ResourceManager.class.getClassLoader());
-	
+
 	private final ResourceDomain globalDomain = new ResourceDomain();
 
 	private ResourceManager() {
 		LoggerFactory.registerLogFile(
 				"de.ims.icarus.resources", "icarus.resources"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	// prevent multiple deserialization
 	private Object readResolve() throws ObjectStreamException {
 		return getInstance();
 	}
-	
+
 	// prevent cloning
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
-	
+
 	public ResourceDomain getGlobalDomain() {
 		return globalDomain;
 	}
-	
+
 	public void addChangeListener(ChangeListener listener) {
 		Exceptions.testNullArgument(listener, "listener"); //$NON-NLS-1$
-		
+
 		if(listeners==null)
 			listeners = new ArrayList<>();
-			
+
 		listeners.add(listener);
 	}
-	
+
 	public void removeChangeListener(ChangeListener listener) {
 		Exceptions.testNullArgument(listener, "listener"); //$NON-NLS-1$
-		
+
 		if(listeners==null)
 			return;
-		
+
 		listeners.remove(listener);
 	}
 
@@ -135,43 +135,43 @@ public final class ResourceManager {
 	public void addResource(String baseName) {
 		globalDomain.addResource(baseName);
 	}
-	
+
 	public void removeResource(String baseName) {
 		globalDomain.removeResource(baseName);
 	}
-	
+
 	public ManagedResource addManagedResource(String baseName, ResourceLoader loader) {
 		Exceptions.testNullArgument(baseName, "baseName"); //$NON-NLS-1$
-		
+
 		if(loader==null) {
 			loader = DEFAULT_RESOURCE_LOADER;
 		}
-		
+
 		ManagedResource managedResource = null;
-		
+
 		synchronized (managedResources) {
 			managedResource = getManagedResource(baseName);
-			
+
 			if(managedResource==null) {
 				managedResource = new ManagedResource(baseName, loader);
 				managedResources.add(new WeakReference<ManagedResource>(managedResource));
 			}
 		}
-		
+
 		return managedResource;
 	}
-	
+
 	public ManagedResource addManagedResource(String baseName) {
 		return addManagedResource(baseName, null);
 	}
-	
+
 	public ManagedResource getManagedResource(String baseName) {
 		Exceptions.testNullArgument(baseName, "baseName"); //$NON-NLS-1$
 
 		synchronized (managedResources) {
 			for(Iterator<WeakReference<ManagedResource>> i = managedResources.iterator(); i.hasNext();) {
 				WeakReference<ManagedResource> ref = i.next();
-				
+
 				ManagedResource res = ref.get();
 				if(res==null) {
 					i.remove();
@@ -180,16 +180,16 @@ public final class ResourceManager {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public ManagedResource removeManagedResource(String baseName) {
 
 		synchronized (managedResources) {
 			for(Iterator<WeakReference<ManagedResource>> i = managedResources.iterator(); i.hasNext();) {
 				WeakReference<ManagedResource> ref = i.next();
-				
+
 				ManagedResource res = ref.get();
 				if(res==null) {
 					i.remove();
@@ -199,10 +199,10 @@ public final class ResourceManager {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public static ResourceLoader createResourceLoader(ClassLoader classLoader) {
 		if(classLoader==null || ResourceManager.class.getClassLoader()==classLoader)
 			return DEFAULT_RESOURCE_LOADER;
@@ -221,26 +221,39 @@ public final class ResourceManager {
 	public String get(String key, Object...params) {
 		return globalDomain.get(key, null, params);
 	}
-	
+
 	public static String format(String text, Object...params) {
 		StringBuilder result = new StringBuilder();
 		String index = null;
+		boolean digit = false;
 
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
 
 			if (c == '{') {
 				index = ""; //$NON-NLS-1$
+				digit = true;
 			} else if (index != null && c == '}') {
-				int tmp = Integer.parseInt(index) - 1;
 
-				if (tmp >= 0 && tmp < params.length) {
-					result.append(params[tmp]);
+				if(digit) {
+					int tmp = Integer.parseInt(index) - 1;
+
+					if (tmp >= 0 && tmp < params.length) {
+						result.append(params[tmp]);
+					}
+				} else {
+					String replacement = getInstance().get(index);
+					if(replacement==null) {
+						replacement = index;
+					}
+					result.append(replacement);
 				}
 
 				index = null;
+				digit = false;
 			} else if (index != null) {
 				index += c;
+				digit &= Character.isDigit(c);
 			} else {
 				result.append(c);
 			}
@@ -253,11 +266,11 @@ public final class ResourceManager {
 		Exceptions.testNullArgument(value, "locale"); //$NON-NLS-1$
 		if (!locale.equals(value)) {
 			locale = value;
-			
+
 			if(listeners!=null)
 				for(ChangeListener listener : listeners)
 					listener.stateChanged(changeEvent);
-			
+
 			refresh();
 		}
 	}
@@ -291,16 +304,16 @@ public final class ResourceManager {
 		Exceptions.testNullArgument(item, "item"); //$NON-NLS-1$
 		return items.containsKey(item);
 	}
-	
+
 	public void localize(Object item) {
 		Exceptions.testNullArgument(item, "item"); //$NON-NLS-1$
-		
+
 		Localizer localizer = items.get(item);
-		
+
 		if (item instanceof Localizable) {
 			((Localizable) item).localize();
 		}
-		
+
 		if(localizer!=null)
 			localizer.localize(item);
 	}
@@ -309,11 +322,11 @@ public final class ResourceManager {
 		Entry<Object, Localizer> entry;
 		Object item;
 		Localizer localizer;
-		
+
 		// clear internal state of managed resources
 		for(Iterator<WeakReference<ManagedResource>> i = managedResources.iterator(); i.hasNext();) {
 			WeakReference<ManagedResource> ref = i.next();
-			
+
 			if(ref.get()==null)
 				i.remove();
 			else

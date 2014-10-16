@@ -26,18 +26,18 @@
 		template="actions.default.renameAction"
 		name="${id}.name" desc="${id}.description" />
 		
-	<!-- Export Params History -->
-	<action id="plugins.prosody.painteEditorView.exportParamsHistoryAction"
+	<!-- Export Params Registry -->
+	<action id="plugins.prosody.painteEditorView.exportParamsRegistryAction"
 		template="actions.default.exportAction"
 		name="${id}.name" desc="${id}.description" />
 		
-	<!-- Import Params History -->
-	<action id="plugins.prosody.painteEditorView.importParamsHistoryAction"
+	<!-- Import Params Registry -->
+	<action id="plugins.prosody.painteEditorView.importParamsRegistryAction"
 		template="actions.default.importAction"
 		name="${id}.name" desc="${id}.description" />
 		
-	<!-- Clear Params History -->
-	<action id="plugins.prosody.painteEditorView.clearParamsHistoryAction"
+	<!-- Clear Params Registry -->
+	<action id="plugins.prosody.painteEditorView.clearParamsRegistryAction"
 		template="actions.default.clearAction"
 		name="${id}.name" desc="${id}.description" />
 		
@@ -113,6 +113,11 @@
 		template="actions.default.saveAction"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Save Panel As -->
+	<action id="plugins.prosody.painteEditorView.saveParamsPanelAsAction"
+		template="actions.default.saveAsAction"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- Undo Panel -->
 	<action id="plugins.prosody.painteEditorView.undoParamsPanelAction"
 		template="actions.default.undoAction"
@@ -133,9 +138,9 @@
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
 		<separator />
-		<item type="action" value="plugins.prosody.painteEditorView.clearParamsHistoryAction" />
-		<item type="action" value="plugins.prosody.painteEditorView.importParamsHistoryAction" />
-		<item type="action" value="plugins.prosody.painteEditorView.exportParamsHistoryAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.clearParamsRegistryAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.importParamsRegistryAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.exportParamsRegistryAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.pastePainteParamsAction" />
 		<separator />
@@ -154,9 +159,9 @@
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
 		<separator />
-		<item type="action" value="plugins.prosody.painteEditorView.clearParamsHistoryAction" />
-		<item type="action" value="plugins.prosody.painteEditorView.importParamsHistoryAction" />
-		<item type="action" value="plugins.prosody.painteEditorView.exportParamsHistoryAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.clearParamsRegistryAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.importParamsRegistryAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.exportParamsRegistryAction" />
 	</action-list>
 		
 	<!-- Parameter-Panel Menu list -->
@@ -172,6 +177,7 @@
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.saveParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.saveParamsPanelAsAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.undoParamsPanelAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.redoParamsPanelAction" />
