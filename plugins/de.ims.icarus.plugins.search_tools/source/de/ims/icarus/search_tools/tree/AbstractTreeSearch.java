@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
@@ -40,14 +40,14 @@ import de.ims.icarus.util.Options;
  *
  */
 public abstract class AbstractTreeSearch extends AbstractParallelSearch {
-	
+
 	protected Matcher baseRootMatcher;
-	
+
 	protected AbstractTreeSearch(SearchFactory factory, SearchQuery query,
 			Options parameters, Object target) {
 		super(factory, query, parameters, target);
 	}
-	
+
 	@Override
 	protected boolean validateGraph() {
 		return TreeUtils.validateTree(getSearchGraph());
@@ -61,40 +61,41 @@ public abstract class AbstractTreeSearch extends AbstractParallelSearch {
 
 		baseRootMatcher.setLeftToRight(SearchUtils.isLeftToRightSearch(this));
 	}
-	
+
+	@Override
 	protected Worker createWorker(int id) {
 		return new SearchWorker(id);
 	}
-	
+
 	protected abstract TargetTree createTargetTree();
-	
+
 	protected Matcher createRootMatcher() {
 		if(baseRootMatcher==null)
 			throw new IllegalStateException("No root matcher available!"); //$NON-NLS-1$
-		
+
 		return new MatcherBuilder(this).cloneMatcher(baseRootMatcher);
 	}
-	
+
 	protected EntryBuilder createEntryBuilder() {
 		return new EntryBuilder(TreeUtils.getMaxId(baseRootMatcher)+1);
 	}
-	
+
 	protected GroupCache createCache() {
 		return result.createCache();
 	}
-	
+
 	protected Options createTreeOptions() {
 		return null;
 	}
 
 	protected class SearchWorker extends Worker {
-		
+
 		protected TargetTree targetTree;
 		protected GroupCache cache;
 		protected EntryBuilder entryBuilder;
 		protected Matcher rootMatcher;
 		protected Options treeOptions;
-		
+
 		protected SearchWorker(int id) {
 			super(id);
 		}
@@ -109,11 +110,13 @@ public abstract class AbstractTreeSearch extends AbstractParallelSearch {
 			rootMatcher = createRootMatcher();
 			entryBuilder = createEntryBuilder();
 			treeOptions = createTreeOptions();
-			
+
 			rootMatcher.setSearchMode(searchMode);
 			rootMatcher.setCache(cache);
 			rootMatcher.setTargetTree(targetTree);
 			rootMatcher.setEntryBuilder(entryBuilder);
+
+			rootMatcher.prepare();
 		}
 
 		/**
@@ -124,7 +127,7 @@ public abstract class AbstractTreeSearch extends AbstractParallelSearch {
 			// Init utilities
 			targetTree.reload(buffer.getData(), treeOptions);
 			entryBuilder.setIndex(buffer.getIndex());
-			
+
 			// Let matcher do its part
 			rootMatcher.matches();
 		}

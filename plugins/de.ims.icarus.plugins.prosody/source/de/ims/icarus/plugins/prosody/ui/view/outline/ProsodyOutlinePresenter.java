@@ -482,6 +482,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		panelConfig.wordSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "wordSpacing")); //$NON-NLS-1$
 		panelConfig.graphSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "graphSpacing")); //$NON-NLS-1$
 		panelConfig.clearLabelBackground = registry.getBoolean(registry.getChildHandle(detailHandle, "clearLabelBackground")); //$NON-NLS-1$
+		panelConfig.detailPaintCompact = registry.getBoolean(registry.getChildHandle(detailHandle, "paintCompact")); //$NON-NLS-1$
 		panelConfig.detailPattern = loadPattern(registry.getChildHandle(detailHandle, "detailPattern"), PanelConfig.DEFAULT_DETAIL_PATTERN); //$NON-NLS-1$
 		fontHandle = registry.getChildHandle(detailHandle, "font"); //$NON-NLS-1$
 		panelConfig.detailFont = ConfigUtils.defaultReadFont(fontHandle);

@@ -1258,6 +1258,10 @@ public class ActionManager {
 	public void loadActions(URL location) throws IOException {
 		Exceptions.testNullArgument(location, "location"); //$NON-NLS-1$
 
+		// Fix for umlauts and such causing problems with the xerces internal URL scheme
+		//FIXME spaces break the encoding when resolved back to files
+//		location = IOUtil.encodeURL(location);
+
 		if(loadedResources==null) {
 			loadedResources = new HashSet<>();
 		}

@@ -109,6 +109,31 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		}
 	}
 
+	public void prepare() {
+		if(constraints!=null) {
+			for(SearchConstraint constraint : constraints) {
+				constraint.prepare();
+			}
+		}
+
+		if(next!=null) {
+			next.prepare();
+		}
+		if(alternate!=null) {
+			alternate.prepare();
+		}
+		if(exclusions!=null) {
+			for(Matcher matcher : exclusions) {
+				matcher.prepare();
+			}
+		}
+		if(options!=null) {
+			for(Matcher matcher : options) {
+				matcher.prepare();
+			}
+		}
+	}
+
 	public boolean matches() {
 		int parentAllocation = parent.getAllocation();
 		targetTree.viewNode(parentAllocation);

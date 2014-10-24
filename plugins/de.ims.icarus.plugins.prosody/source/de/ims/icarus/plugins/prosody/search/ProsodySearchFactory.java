@@ -25,8 +25,11 @@
  */
 package de.ims.icarus.plugins.prosody.search;
 
+import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
+import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.language.dependency.search.DependencySearchFactory;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.search.ProsodyTargetSelector.DocumentSetDelegate;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.util.Options;
@@ -72,5 +75,23 @@ public class ProsodySearchFactory extends DependencySearchFactory {
 	@Override
 	public String getSerializedForm() {
 		return "de.ims.icarus.prosody@ProsodySearchFactory"; //$NON-NLS-1$
+	}
+
+	@Override
+	public Object resolveTarget(String target) {
+
+		DocumentSetDescriptor documentSet = CoreferenceRegistry.getInstance().getDocumentSet(target);
+
+		return new DocumentSetDelegate(documentSet);
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedTarget(de.ims.icarus.search_tools.Search)
+	 */
+	@Override
+	public String getSerializedTarget(Search search) {
+		DocumentSetDelegate bundle = (DocumentSetDelegate) search.getTarget();
+
+		return bundle.getDescriptor().getId();
 	}
 }

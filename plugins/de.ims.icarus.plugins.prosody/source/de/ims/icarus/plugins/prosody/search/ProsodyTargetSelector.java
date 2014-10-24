@@ -143,7 +143,7 @@ public class ProsodyTargetSelector implements SearchTargetSelector, Filter {
 				|| ContentTypeRegistry.isCompatible(ProsodyUtils.getProsodyDocumentContentType(), targetType);
 	}
 
-	private static class DocumentSetDelegate extends WrappedSentenceDataList implements Loadable, ChangeListener, NamedObject {
+	public static class DocumentSetDelegate extends WrappedSentenceDataList implements Loadable, ChangeListener, NamedObject {
 
 		private final DocumentSetDescriptor descriptor;
 
@@ -162,6 +162,10 @@ public class ProsodyTargetSelector implements SearchTargetSelector, Filter {
 			descriptor.addChangeListener(ListenerProxies.getProxy(ChangeListener.class, this));
 
 			reload();
+		}
+
+		public DocumentSetDescriptor getDescriptor() {
+			return descriptor;
 		}
 
 		/**

@@ -34,9 +34,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
@@ -346,6 +348,52 @@ public final class IOUtil {
             throw new MalformedURLException("unable to create absolute path: "  //$NON-NLS-1$
             		+ p + " " + ioe); //$NON-NLS-1$
         }
+    }
+
+    /**
+     * Creates a new {@code URL} that points to the same resource as the {@code source}
+     * argument, but has all its file parts properly encoded. Note that this method will yield
+     * undesired results if a part of the given {@code URL}'s file section has already been
+     * encoded!
+     */
+    public static URL encodeURL(URL source) throws MalformedURLException {
+    	String file = source.getPath();
+
+    	int fileBegin = file.lastIndexOf(':')+1;
+    	int jarSep = file.indexOf("!/", fileBegin); //$NON-NLS-1$
+    	if(jarSep==-1) {
+    		jarSep = file.length();
+    	}
+
+    	String part = file.substring(fileBegin, jarSep);
+
+    	StringBuilder sb = new StringBuilder();
+    	if(fileBegin>0) {
+    		sb.append(file, 0, fileBegin);
+    	}
+    	sb.append(encodeUrlFilePart(part));
+    	if(jarSep<file.length()) {
+    		sb.append(file, jarSep, file.length()-1);
+    	}
+
+    	return new URL(source.getProtocol(), source.getHost(), source.getPort(), sb.toString());
+    }
+
+    private static String encodeUrlFilePart(String file) {
+    	String[] items = file.split("/"); //$NON-NLS-1$
+    	for(int i = 0; i<items.length; i++) {
+    		if(items[i].isEmpty()) {
+    			continue;
+    		}
+
+    		try {
+				items[i] = URLEncoder.encode(items[i], "UTF-8"); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				// cannot happen
+			}
+    	}
+
+    	return StringUtil.join(items, "/"); //$NON-NLS-1$
     }
 
     public static Path toRelativePath(Path p) {

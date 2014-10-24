@@ -22,6 +22,10 @@
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction"
 		name="${id}.name" desc="${id}.description" icon="chart_curve2.png" type="toggle" />
 		
+	<!-- Toggle 'paintCompact' -->
+	<action id="plugins.prosody.prosodySentenceDetailPresenter.togglePaintCompactAction"
+		name="${id}.name" desc="${id}.description" icon="debug_view_compact.gif" type="toggle" />
+		
 	<!-- Play Sentence -->
 	<action id="plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"
 		template="actions.default.startAction"
@@ -58,6 +62,7 @@
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.pausePlaybackAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction" />
+		<item type="action" value="plugins.prosody.prosodySentenceDetailPresenter.togglePaintCompactAction" />
 		<separator />
 		<item type="glue" />
 	</action-list>

@@ -69,6 +69,11 @@ public abstract class AbstractPaIntEConstraint extends BoundedSyllableConstraint
 	}
 
 	@Override
+	public boolean hasBounds() {
+		return false;
+	}
+
+	@Override
 	public PaIntEConstraintParams[] getPaIntEConstraints() {
 		return new PaIntEConstraintParams[]{constraintParams};
 	}
@@ -99,7 +104,6 @@ public abstract class AbstractPaIntEConstraint extends BoundedSyllableConstraint
 		ProsodyTargetTree tree = (ProsodyTargetTree) value;
 
 		if(tree.hasSyllables()) {
-
 			return applyOperator(getInstance(tree, syllable));
 		}
 

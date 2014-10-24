@@ -67,6 +67,11 @@ public abstract class AbstractParameterizedPaIntEConstraint extends BoundedSylla
 		}
 	}
 
+	@Override
+	public boolean hasBounds() {
+		return false;
+	}
+
 	protected void checkConstraint(PaIntEConstraintParams constraint) {
 		constraint.checkNonEmpty(getToken()+" constraint"); //$NON-NLS-1$
 	}

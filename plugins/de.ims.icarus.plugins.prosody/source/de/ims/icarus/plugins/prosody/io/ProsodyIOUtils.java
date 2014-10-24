@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Stack;
 
+import de.ims.icarus.Core;
+import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
@@ -44,6 +46,7 @@ import de.ims.icarus.plugins.prosody.DefaultProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
+import de.ims.icarus.plugins.prosody.SampaMapper;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -122,6 +125,8 @@ import de.ims.icarus.util.strings.StringPrimitives;
  */
 public final class ProsodyIOUtils implements ProsodyConstants {
 
+	private static final boolean DEFAULT_SYLLABLES_FROM_SAMPA = false;
+
 	private ProsodyIOUtils() {
 		// no-op
 	}
@@ -131,7 +136,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static final String CBR = ")"; //$NON-NLS-1$
 	private static final char PIPE = '|';
 	private static final char SPACE = ' ';
-	private static final String COMMENT_BEGIN = "#";
+	private static final String COMMENT_BEGIN = "#"; //$NON-NLS-1$
 
 	public static final int ID_COL = 0;
 	public static final int FORM_COL = 1;
@@ -183,6 +188,12 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		DefaultProsodicDocumentData result = null;
 		TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
 
+		boolean syllableOffsetsFromSampa = DEFAULT_SYLLABLES_FROM_SAMPA;
+		if(!Core.isDebugActive()) {
+			syllableOffsetsFromSampa = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"plugins.prosody.prosodyReader.syllableOffsetsFromSampa"); //$NON-NLS-1$
+		}
+
 		while(buffer.next()) {
 			try {
 				if(result==null) {
@@ -194,7 +205,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 						continue;
 					}
 				}
-				createData(result, buffer, clusterMap);
+				createData(result, buffer, clusterMap, syllableOffsetsFromSampa);
 			} catch(Exception e) {
 				// Cannot be IOException or UnsupportedFormatException
 
@@ -243,8 +254,8 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		return true;
 	}
 
-	private static DefaultProsodicSentenceData createData(ProsodicDocumentData document,
-			CharTableBuffer buffer, TIntObjectMap<Cluster> clusterMap) {
+	private static DefaultProsodicSentenceData createData(final ProsodicDocumentData document,
+			final CharTableBuffer buffer, final TIntObjectMap<Cluster> clusterMap, final boolean syllableOffsetsFromSampa) {
 		int size = buffer.getRowCount();
 		LinkedList<Span> spanBuffer = new LinkedList<>();
 		Stack<Span> spanStack = new Stack<>();
@@ -362,15 +373,29 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
 			result.setProperty(i, BEGIN_TS_KEY, getFloat(row, BEGIN_TS_COL, DATA_UNDEFINED_VALUE));
 			result.setProperty(i, END_TS_KEY, getFloat(row, END_TS_COL, DATA_UNDEFINED_VALUE));
-
-			int[] offsets = getInts(row, SYL_OFFSET_COL);
-			if(offsets!=EMPTY_INTS) {
-				mapsSyllables = true;
-			}
-			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
 			result.setProperty(i, SYLLABLE_LABEL_KEY, getStrings(row, SYL_LABEL_COL));
 			result.setProperty(i, SYLLABLE_TIMESTAMP_KEY, getFloats(row, SYL_TIMESTAMP_COL));
 			result.setProperty(i, SYLLABLE_VOWEL_KEY, getStrings(row, SYL_VOWEL_COL));
+
+			int[] offsets = getInts(row, SYL_OFFSET_COL);
+			if(offsets==EMPTY_INTS) {
+				if(syllableOffsetsFromSampa) {
+					int sylCount = result.getSyllableCount(i);
+					if(sylCount>0) {
+						String[] sampa = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
+						String[] labels = SampaMapper.split(forms[i], sampa);
+						offsets = new int[sylCount];
+						int offset = 0;
+						for(int k=0; k<sylCount; k++) {
+							offsets[k] = offset;
+							offset += labels[k].length();
+						}
+					}
+				}
+			} else {
+				mapsSyllables = true;
+			}
+			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
 
 			// Special handling for stressed syllables (can be either a single value or an array)
 			int[] stressedIndices = getInts(row, SYL_STRESS_COL);
@@ -403,6 +428,9 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(SPEAKER_KEY, speaker);
 		}
 
+		if(syllableOffsetsFromSampa) {
+			mapsSyllables = true;
+		}
 		result.setMapsSyllables(mapsSyllables);
 		result.setSentenceIndex(document.size());
 		document.add(result);

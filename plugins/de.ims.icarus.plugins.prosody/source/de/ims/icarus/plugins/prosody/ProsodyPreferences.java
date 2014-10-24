@@ -42,6 +42,7 @@ import de.ims.icarus.plugins.prosody.ui.details.ProsodySentenceDetailPresenter;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.GridStyle;
+import de.ims.icarus.plugins.prosody.ui.geom.PaIntECurve;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
 import de.ims.icarus.plugins.prosody.ui.helper.ProsodyListCellRenderer;
 import de.ims.icarus.plugins.prosody.ui.view.PreviewSize;
@@ -200,8 +201,17 @@ public class ProsodyPreferences {
 		// END APPEARANCE GROUP
 		builder.back();
 
+		// READER GROUP
+		builder.addGroup("prosodyReader", true); //$NON-NLS-1$
+
+		builder.addBooleanEntry("syllableOffsetsFromSampa", false); //$NON-NLS-1$
+
+		// END READER GROUP
+		builder.back();
+
 		// SEARCH GROUP
 		builder.addGroup("search", true); //$NON-NLS-1$
+		builder.addBooleanEntry("allowCompactConstraints", false); //$NON-NLS-1$
 
 		// ACCENT SHAPE SUBGROUP
 		builder.addGroup("accentShape", true); //$NON-NLS-1$
@@ -215,6 +225,15 @@ public class ProsodyPreferences {
 		builder.addDoubleEntry("maxB", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
 
 		// END ACCENT SHAPE SUBGROUP
+		builder.back();
+
+		// PAINTE DISTANCE SUBGROUP
+		builder.addGroup("painteDistance", true); //$NON-NLS-1$
+		builder.virtual();
+
+		builder.addBooleanEntry("normalize", false); //$NON-NLS-1$
+
+		// END PAINTE DISTANCE SUBGROUP
 		builder.back();
 
 		// PAINTE INTEGRAL SUBGROUP
@@ -341,6 +360,7 @@ public class ProsodyPreferences {
 		builder.addIntegerEntry("graphWidth", PanelConfig.DEFAULT_GRAPH_WIDTH, 100, 500); //$NON-NLS-1$
 		builder.addIntegerEntry("wordSpacing", PanelConfig.DEFAULT_WORD_SPACING, 0, 50); //$NON-NLS-1$
 		builder.addIntegerEntry("graphSpacing", PanelConfig.DEFAULT_GRAPH_SPACING, 0, 50); //$NON-NLS-1$
+		builder.addBooleanEntry("paintCompact", PaIntECurve.DEFAULT_PAINT_COMPACT); //$NON-NLS-1$
 		builder.addBooleanEntry("clearLabelBackground", PanelConfig.DEFAULT_CLEAR_LABEL_BACKGROUND); //$NON-NLS-1$
 		builder.addStringEntry("detailPattern", escapePattern(options.getOptional("detailPattern", PanelConfig.DEFAULT_DETAIL_PATTERN))); //$NON-NLS-1$ //$NON-NLS-2$
 		// FONT SUBGROUP

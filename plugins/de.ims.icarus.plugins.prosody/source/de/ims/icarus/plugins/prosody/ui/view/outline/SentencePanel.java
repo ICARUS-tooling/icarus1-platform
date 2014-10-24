@@ -74,6 +74,7 @@ import de.ims.icarus.plugins.prosody.ui.TextComponent;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
 import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.GridStyle;
+import de.ims.icarus.plugins.prosody.ui.geom.PaIntECurve;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEHitBox;
 import de.ims.icarus.plugins.prosody.ui.view.PreviewSize;
@@ -684,7 +685,7 @@ public class SentencePanel extends JPanel{
 		public static final int DEFAULT_GRAPH_HEIGHT = 90;
 		public static final int DEFAULT_GRAPH_WIDTH = 120;
 		public static final int DEFAULT_WORD_SCOPE = 0;
-		public static final int DEFAULT_SYLLABLE_SCOPE = 1;
+		public static final int DEFAULT_SYLLABLE_SCOPE = 2;
 		public static final boolean  DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED = true;
 		public static final int DEFAULT_WORD_SPACING = 3;
 		public static final int DEFAULT_GRAPH_SPACING = 2;
@@ -724,6 +725,7 @@ public class SentencePanel extends JPanel{
 		public int detailAxisMarkerHeight = Axis.DEFAULT_MARKER_HEIGHT;
 		public boolean detailPaintGrid = PaIntEGraph.DEFAULT_PAINT_GRID;
 		public boolean detailPaintBorder = PaIntEGraph.DEFAULT_PAINT_BORDER;
+		public boolean detailPaintCompact = PaIntECurve.DEFAULT_PAINT_COMPACT;
 		public Color detailGridColor = PaIntEGraph.DEFAULT_GRID_COLOR;
 		public Color detailBorderColor = PaIntEGraph.DEFAULT_BORDER_COLOR;
 		public GridStyle detailGridStyle = PaIntEGraph.DEFAULT_GRID_STYLE;

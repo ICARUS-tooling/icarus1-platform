@@ -158,6 +158,11 @@ public class DefaultConstraint implements SearchConstraint {
 				token, operator.getSymbol(), value);
 	}
 
+	@Override
+	public void prepare() {
+		// nothing to do here
+	}
+
 	@XmlElements({
 		@XmlElement(name="string", type=String.class),
 		@XmlElement(name="integer", type=Integer.class),

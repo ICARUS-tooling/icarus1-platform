@@ -27,8 +27,14 @@ package de.ims.icarus.plugins.prosody.painte;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import de.ims.icarus.Core;
+import de.ims.icarus.config.ConfigEvent;
+import de.ims.icarus.config.ConfigListener;
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
 /**
@@ -42,7 +48,29 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	private static final long serialVersionUID = 5146300722493790738L;
 
+	private static boolean allowCompactConstraints = false;
+	static {
+		if(!Core.isDebugActive()) {
+			allowCompactConstraints = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"plugins.prosody.search.allowCompactConstraints"); //$NON-NLS-1$
+
+			ConfigRegistry.getGlobalRegistry().addGroupListener("plugins.prosody.search", new ConfigListener() {
+
+				@Override
+				public void invoke(ConfigRegistry sender, ConfigEvent event) {
+					Handle handle = event.getHandle();
+					ConfigRegistry registry = handle.getSource();
+					allowCompactConstraints = registry.getBoolean(registry.getChildHandle(handle, "allowCompactConstraints"));
+				}
+			});
+		}
+	}
+
+	@XmlAttribute(name="active")
 	private int activeMask = 0;
+
+	@XmlAttribute(name="compact")
+	private boolean compact = DEFAULT_COMPACT;
 
 	public static final int MASK_A1 = (1<<0);
 	public static final int MASK_A2 = (1<<1);
@@ -52,9 +80,13 @@ public class PaIntEConstraintParams extends PaIntEParams {
 	public static final int MASK_B = (1<<5);
 	public static final int MASK_ALIGNMENT = (1<<6);
 
+	public static final boolean DEFAULT_COMPACT = false;
+
 	public static final int ALL_SET = MASK_A1 | MASK_A2 | MASK_B | MASK_C1 | MASK_C2 | MASK_D | MASK_ALIGNMENT;
 
 	public static final int DEFAULT_REQUIRED_FIELDS = MASK_A1 | MASK_A2 | MASK_B | MASK_C1 | MASK_C2 | MASK_D;
+
+	public static final int COMPACT_REQUIRED_FIELDS = MASK_B | MASK_C1 | MASK_C2 | MASK_D;
 
 	public PaIntEConstraintParams() {
 		// no-op
@@ -95,6 +127,22 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	public void checkParams(String msg) {
 		checkParams(msg, DEFAULT_REQUIRED_FIELDS);
+	}
+
+	public void checkCompactParams() {
+		checkParams(null, COMPACT_REQUIRED_FIELDS);
+	}
+
+	public void checkCompactParams(String msg) {
+		checkParams(msg, COMPACT_REQUIRED_FIELDS);
+	}
+
+	public static void checkParams(PaIntEConstraintParams params, String msg) {
+		if(params.isCompact()) {
+			params.checkCompactParams(msg);
+		} else {
+			params.checkParams(msg);
+		}
 	}
 
 	public void checkParams(String msg, int mask) {
@@ -167,6 +215,7 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		super.setParams(params);
 
 		activeMask = ALL_SET;
+		compact = DEFAULT_COMPACT;
 	}
 
 	@Override
@@ -174,6 +223,7 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		super.setParams(constraints);
 
 		activeMask = constraints.activeMask;
+		compact = constraints.compact;
 	}
 
 	@Override
@@ -181,6 +231,7 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		super.setParams(params);
 
 		activeMask = ALL_SET;
+		compact = DEFAULT_COMPACT;
 	}
 
 	@Override
@@ -188,6 +239,7 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		super.setParams(sentence, wordIndex, sylIndex);
 
 		activeMask = ALL_SET;
+		compact = DEFAULT_COMPACT;
 	}
 
 	@Override
@@ -197,28 +249,41 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 		String[] items = encodedParams.split("\\|"); //$NON-NLS-1$
 
-		if(items.length<6 || items.length>7)
-			throw new IllegalArgumentException("Invalid params string - wrong number of pipe separated items: "+encodedParams); //$NON-NLS-1$
-
 		activeMask = 0;
 
-		a1 = parse(items[0], MASK_A1);
-		a2 = parse(items[1], MASK_A2);
-		b = parse(items[2], MASK_B);
-		c1 = parse(items[3], MASK_C1);
-		c2 = parse(items[4], MASK_C2);
-		d = parse(items[5], MASK_D);
-
-		if(items.length==7) {
-			alignment = parse(items[6], MASK_ALIGNMENT);
-		} else {
+		if(items.length==4 && allowCompactConstraints) {
+			a1 = parse("", MASK_A1); //$NON-NLS-1$
+			a2 = parse("", MASK_A2); //$NON-NLS-1$
+			b = parse(items[0], MASK_B);
+			c1 = parse(items[1], MASK_C1);
+			c2 = parse(items[2], MASK_C2);
+			d = parse(items[3], MASK_D);
 			alignment = PaIntEParams.DEFAULT_ALIGNMENT;
-			setAlignmentActive(true);
-		}
+			compact = true;
+		} else if(items.length==6 || items.length==7) {
+
+			a1 = parse(items[0], MASK_A1);
+			a2 = parse(items[1], MASK_A2);
+			b = parse(items[2], MASK_B);
+			c1 = parse(items[3], MASK_C1);
+			c2 = parse(items[4], MASK_C2);
+			d = parse(items[5], MASK_D);
+
+			compact = false;
+
+			if(items.length==7) {
+				alignment = parse(items[6], MASK_ALIGNMENT);
+			} else {
+				alignment = PaIntEParams.DEFAULT_ALIGNMENT;
+				setAlignmentActive(true);
+			}
+		} else
+			throw new IllegalArgumentException("Invalid params string - wrong number of pipe separated items: '"+encodedParams //$NON-NLS-1$
+					+"' expected 4 for compact mode and 6 or 7 for regular mode - got "+items.length); //$NON-NLS-1$
 	}
 
 	private double parse(String s, int mask) {
-		if(s==null || s.isEmpty()) {
+		if(s==null || s.isEmpty() || "_".equals(s)) { //$NON-NLS-1$
 			activeMask &= ~mask;
 			return 0D;
 		} else {
@@ -310,6 +375,14 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		return activeMask;
 	}
 
+	public boolean isCompact() {
+		return compact;
+	}
+
+	public void setCompact(boolean compact) {
+		this.compact = compact;
+	}
+
 	@Override
 	public PaIntEConstraintParams clone() {
 		return new PaIntEConstraintParams(this);
@@ -317,7 +390,11 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	@Override
 	public int hashCode() {
-		return super.hashCode()*activeMask;
+		double hc = b*c1*c2*d*activeMask;
+		if(!compact) {
+			hc *= a1*a2;
+		}
+		return (int) hc;
 	}
 
 	@Override
@@ -331,7 +408,8 @@ public class PaIntEConstraintParams extends PaIntEParams {
 					&& c2==other.c2
 					&& d==other.d
 					&& alignment==other.alignment
-					&& activeMask==other.activeMask;
+					&& activeMask==other.activeMask
+					&& compact==other.compact;
 		}
 
 		return false;
@@ -343,17 +421,19 @@ public class PaIntEConstraintParams extends PaIntEParams {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		// A1
-		if(isA1Active()) {
-			sb.append(a1);
-		}
-		sb.append(PIPE);
+		if(!compact) {
+			// A1
+			if(isA1Active()) {
+				sb.append(a1);
+			}
+			sb.append(PIPE);
 
-		// A2
-		if(isA2Active()) {
-			sb.append(a2);
+			// A2
+			if(isA2Active()) {
+				sb.append(a2);
+			}
+			sb.append(PIPE);
 		}
-		sb.append(PIPE);
 
 		// B
 		if(isBActive()) {
@@ -378,8 +458,8 @@ public class PaIntEConstraintParams extends PaIntEParams {
 			sb.append(d);
 		}
 
-		// Alignment
-		if(isAlignmentActive()) {
+		// Alignment (optional)
+		if(!compact && isAlignmentActive()) {
 			sb.append(PIPE);
 			sb.append(alignment);
 		}

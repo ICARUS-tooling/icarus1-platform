@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
+import java.util.Arrays;
+import java.util.Locale;
+
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
@@ -110,6 +113,8 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 	private static class PaIntEChannelConstraint extends BoundedSyllableConstraint implements PaIntEConstraint {
 
+		// TEST CONSTRAINTS: [painteChannel$"0.2|50|50|100;0.3|60|60|210"=Crossing]
+
 		private static final long serialVersionUID = 6887748634037055630L;
 
 		private static final String LOWER_CURVE = "Lower PaIntE-constraint"; //$NON-NLS-1$
@@ -119,6 +124,9 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		protected final PaIntEConstraintParams valueParams = new PaIntEConstraintParams();
 		protected PaIntEConstraintParams lowerParams;
 		protected PaIntEConstraintParams upperParams;
+
+		protected transient boolean compact = false;
+		protected transient CompactCurveBuffer curveBuffer;
 
 		public PaIntEChannelConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
@@ -132,6 +140,19 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		@Override
 		protected String getConfigPath() {
 			return CONFIG_PATH;
+		}
+
+		/**
+		 * Note that the channel bounds are only provided to external facilities if the
+		 * constraints used are <b>not</b> in compact mode! This is to not screw up
+		 * the visualization of "real" curves by artificially limiting their range on
+		 * the horizontal axis.
+		 *
+		 * @see de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEConstraint#hasBounds()
+		 */
+		@Override
+		public boolean hasBounds() {
+			return true;
 		}
 
 		@Override
@@ -149,14 +170,30 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 				parseConstraint(s, lowerParams, upperParams);
 
-				lowerParams.checkParams(LOWER_CURVE);
-				upperParams.checkParams(UPPER_CURVE);
+				PaIntEConstraintParams.checkParams(lowerParams, LOWER_CURVE);
+				PaIntEConstraintParams.checkParams(lowerParams, UPPER_CURVE);
 			}
 		}
 
 		@Override
 		public SearchConstraint clone() {
 			return new PaIntEChannelConstraint(getValue(), getOperator(), getSpecifier());
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#prepare()
+		 */
+		@Override
+		public void prepare() {
+			compact = lowerParams.isCompact() || upperParams.isCompact();
+
+			if(compact && curveBuffer==null) {
+				curveBuffer = new CompactCurveBuffer();
+			}
+		}
+
+		private boolean isInside(double v) {
+			return v>=leftBorder && v<=rightBorder;
 		}
 
 		/**
@@ -167,45 +204,65 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 
 			valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
 
-//			boolean verbose = false;
-//
-//			if(tree.getSource().toString().startsWith("Die Sommerzeit")
-//					&& "96".equals(tree.getSource().getProperty(ProsodyConstants.SENTENCE_NUMBER_KEY))) {
-//				System.out.println();
-//				leftBorder = -0.3;
-//				rightBorder = 0.6;
-//				resolution = 20;
-//				verbose = true;
-//			}
+			if(compact) {
 
-			double stepSize = (rightBorder-leftBorder)/resolution;
-
-			double x = leftBorder;
-
-			CurveState state = CurveState.BLANK;
-			CurveState next = null;
-
-			while(x<=rightBorder) {
-				double yTarget = PaIntEUtils.calcY(x, valueParams);
-				double yUpper = PaIntEUtils.calcY(x, upperParams);
-				double yLower = PaIntEUtils.calcY(x, lowerParams);
-
-//				if(verbose)
-//				System.out.printf("value=%.02f lower=%.02f upper=%.02f\n", yTarget, yLower, yUpper);
-
-				next = state.compute(yUpper, yLower, yTarget);
-
-//				System.out.printf("state=%s next=%s\n", state, next);
-
-				if(next==null) {
-					break;
+				if(!isInside(lowerParams.getB())
+						|| !isInside(upperParams.getB())
+						|| !isInside(valueParams.getB())) {
+					return LanguageConstants.DATA_UNDEFINED_VALUE;
 				}
 
-				state = next;
-				x += stepSize;
-			}
+				curveBuffer.fill(this);
 
-			return state.getResult();
+				CurveState state = CurveState.BLANK;
+				CurveState next = null;
+
+				for(int i=0; i<curveBuffer.pointCount(); i++) {
+					double yTarget = curveBuffer.pointYTarget(i);
+					double yUpper = curveBuffer.pointYUpper(i);
+					double yLower = curveBuffer.pointYLower(i);
+
+					next = state.compute(yUpper, yLower, yTarget);
+
+					if(next==null) {
+						break;
+					}
+
+					state = next;
+				}
+
+				return state.getResult();
+			} else {
+
+				double stepSize = (rightBorder-leftBorder)/resolution;
+
+				double x = leftBorder;
+
+				CurveState state = CurveState.BLANK;
+				CurveState next = null;
+
+				while(x<=rightBorder) {
+					double yTarget = PaIntEUtils.calcY(x, valueParams);
+					double yUpper = PaIntEUtils.calcY(x, upperParams);
+					double yLower = PaIntEUtils.calcY(x, lowerParams);
+
+	//				if(verbose)
+	//				System.out.printf("value=%.02f lower=%.02f upper=%.02f\n", yTarget, yLower, yUpper);
+
+					next = state.compute(yUpper, yLower, yTarget);
+
+	//				System.out.printf("state=%s next=%s\n", state, next);
+
+					if(next==null) {
+						break;
+					}
+
+					state = next;
+					x += stepSize;
+				}
+
+				return state.getResult();
+			}
 		}
 
 		@Override
@@ -278,5 +335,130 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		}
 
 		public abstract CurveState compute(double upper, double lower, double value);
+	}
+
+	private static class CompactCurveBuffer {
+
+		// 2 endpoints and 1 peek for each curve involved
+		static final int pointCount = 5;
+
+		final double[] pointsX = new double[pointCount];
+		final double[] pointsYLower = new double[pointCount];
+		final double[] pointsYUpper = new double[pointCount];
+		final double[] pointsYTarget = new double[pointCount];
+
+		final LineBuffer lowerLine = new LineBuffer();
+		final LineBuffer upperLine = new LineBuffer();
+		final LineBuffer targetLine = new LineBuffer();
+
+		public void fill(PaIntEChannelConstraint constraint) {
+			final double l = constraint.leftBorder;
+			final double r = constraint.rightBorder;
+
+			pointsX[0] = l;
+			pointsX[1] = constraint.lowerParams.getB();
+			pointsX[2] = constraint.upperParams.getB();
+			pointsX[3] = constraint.valueParams.getB();
+			pointsX[4] = r;
+
+			Arrays.sort(pointsX);
+
+			lowerLine.reset(l, r, constraint.lowerParams);
+			upperLine.reset(l, r, constraint.upperParams);
+			targetLine.reset(l, r, constraint.valueParams);
+
+			for(int i=0; i<pointCount; i++) {
+				double x = pointsX[i];
+
+				pointsYLower[i] = lowerLine.getY(x);
+				pointsYUpper[i] = upperLine.getY(x);
+				pointsYTarget[i] = targetLine.getY(x);
+			}
+		}
+
+		public int pointCount() {
+			return pointCount;
+		}
+
+		public double pointX(int index) {
+			return pointsX[index];
+		}
+
+		public double pointYLower(int index) {
+			return pointsYLower[index];
+		}
+
+		public double pointYUpper(int index) {
+			return pointsYUpper[index];
+		}
+
+		public double pointYTarget(int index) {
+			return pointsYTarget[index];
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+
+			sb.append("Lower Line:\n").append(lowerLine).append('\n');
+			sb.append("Target Line:\n").append(targetLine).append('\n');
+			sb.append("Upper Line:\n").append(upperLine).append('\n');
+
+			for(int i=0; i<pointCount; i++) {
+				sb.append(String.format(Locale.ENGLISH,
+						"x=%.02f lower=%.02f target=%,02f upper=%.02f",
+						pointX(i), pointYLower(i), pointYTarget(i), pointYUpper(i))).append('\n');
+			}
+
+			return sb.toString();
+		}
+	}
+
+	/**
+	 * Models the 2 lines that describe a compact PaIntE set.
+	 *
+	 * @author Markus Gärtner
+	 * @version $Id$
+	 *
+	 */
+	private static class LineBuffer {
+		private double m1, m2; // slopes for left and right line
+		private double c1, c2; // Points of the lines on the vertical axis
+		private double d;
+
+		private double b;
+
+		public double getY(double x) {
+			return x<b ? m1*x + c1 : (x>b ? m2*x+c2 : d);
+		}
+
+		public void reset(double l, double r, PaIntEConstraintParams params) {
+			b = params.getB();
+			d = params.getD();
+			final double y1 = params.getD()-params.getC1();
+			final double y2 = params.getD()-params.getC2();
+
+			// Ascending line
+			m1 = (d-y1) / (b-l); // always positive
+			c1 = y1 - l*m1;
+
+			// Descending line
+			m2 = (y2-d) / (r-b); // always negative
+			c2 = y2 - r*m2;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+
+			sb.append("b=").append(b).append(" d=").append(d).append('\n');
+			sb.append("line_asc=").append(m1).append("x+").append(c1).append('\n');
+			sb.append("line_desc=").append(m2).append("x+").append(c2);
+
+			return sb.toString();
+		}
 	}
 }

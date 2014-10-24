@@ -35,4 +35,9 @@ import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 public interface PaIntEConstraint {
 
 	PaIntEConstraintParams[] getPaIntEConstraints();
+
+	boolean hasBounds();
+
+	double getLeftBorder();
+	double getRightBorder();
 }

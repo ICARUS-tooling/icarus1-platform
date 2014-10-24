@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
@@ -42,6 +44,8 @@ import de.ims.icarus.util.Options;
 public class PaIntEDistanceConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "painteDistance"; //$NON-NLS-1$
+
+	private static final String CONFIG_PATH = "plugins.prosody.search.painteDistance"; //$NON-NLS-1$
 
 	public PaIntEDistanceConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
@@ -92,8 +96,33 @@ public class PaIntEDistanceConstraintFactory extends AbstractConstraintFactory {
 
 		private static final long serialVersionUID = 6887748634037055630L;
 
+		private transient boolean normalize;
+
 		public PaIntEDistanceConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#init()
+		 */
+		@Override
+		protected void init() {
+
+			String configPath = getConfigPath();
+
+			leftBorder = 0.0;
+			rightBorder = 1.0;
+			resolution = 30;
+
+			if(configPath==null) {
+				normalize = false;
+				return;
+			}
+
+			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+			Handle handle = registry.getHandle(configPath);
+
+			normalize = registry.getBoolean(registry.getChildHandle(handle, "normalize")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -106,7 +135,7 @@ public class PaIntEDistanceConstraintFactory extends AbstractConstraintFactory {
 		 */
 		@Override
 		protected String getConfigPath() {
-			return null;
+			return CONFIG_PATH;
 		}
 
 		/**
@@ -114,6 +143,8 @@ public class PaIntEDistanceConstraintFactory extends AbstractConstraintFactory {
 		 */
 		@Override
 		protected Object getInstance(ProsodyTargetTree tree, int syllable) {
+
+			//TODO apply normalization if required v' = v/||v|| (
 
 			valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
 

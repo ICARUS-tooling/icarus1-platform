@@ -52,6 +52,12 @@ public abstract class BoundedSyllableConstraint extends AbstractProsodySyllableC
 		super(token, value, operator, specifier);
 	}
 
+	protected void defaultSetUtilityFields() {
+		leftBorder = 0.0;
+		rightBorder = 1.0;
+		resolution = 30;
+	}
+
 	/**
 	 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#init()
 	 */
@@ -61,9 +67,7 @@ public abstract class BoundedSyllableConstraint extends AbstractProsodySyllableC
 		String configPath = getConfigPath();
 
 		if(configPath==null) {
-			leftBorder = 0.0;
-			rightBorder = 1.0;
-			resolution = 30;
+			defaultSetUtilityFields();
 			return;
 		}
 
@@ -122,7 +126,7 @@ public abstract class BoundedSyllableConstraint extends AbstractProsodySyllableC
 		String[] parts = s.split(";"); //$NON-NLS-1$
 
 		if(parts.length<constraintCount)
-			throw new IllegalArgumentException("Invalid channel parts - need at least "+constraintCount+" sets of painte parameters separated by semicolon: "+s); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException("Invalid constraint parts - need at least "+constraintCount+" sets of painte parameters separated by semicolon: "+s); //$NON-NLS-1$ //$NON-NLS-2$
 
 		for(int i=0; i<constraintCount; i++) {
 			parseParams(parts[i], constraints[i]);
@@ -143,13 +147,13 @@ public abstract class BoundedSyllableConstraint extends AbstractProsodySyllableC
 		}
 
 		if(leftBorder<-3)
-			throw new ConstraintException("Left border if PaIntE-Channel constraint is too small (min -3): "+leftBorder); //$NON-NLS-1$
+			throw new ConstraintException("Left border of PaIntE-Constraint is too small (min -3): "+leftBorder); //$NON-NLS-1$
 
 		if(rightBorder>3)
-			throw new ConstraintException("Left border if PaIntE-Channel constraint is too big (max 3): "+rightBorder); //$NON-NLS-1$
+			throw new ConstraintException("Left border of PaIntE-Constraint is too big (max 3): "+rightBorder); //$NON-NLS-1$
 
 		if(leftBorder>=rightBorder)
-			throw new ConstraintException("Invalid interval defined for PaIntE-Channel constraint (left border must be less then right one): "+leftBorder+" to "+rightBorder); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new ConstraintException("Invalid interval defined for PaIntE-Constraint (left border must be less then right one): "+leftBorder+" to "+rightBorder); //$NON-NLS-1$ //$NON-NLS-2$
 
 		if(resolution<10 || resolution>1000)
 			throw new ConstraintException("Resolution is out of bounds (10 to 1000): "+resolution); //$NON-NLS-1$

@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Stroke;
 
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
@@ -44,6 +45,7 @@ public class PaIntECurve {
 	public static final int DEFAULT_SAMPLE_DISTANCE = 2;
 	public static final Color DEFAULT_COLOR = Color.black;
 	public static final AntiAliasingType DEFAULT_ANTIALIASING_TYPE = AntiAliasingType.DEFAULT;
+	public static final boolean DEFAULT_PAINT_COMPACT = false;
 
 	private int maxSampleCount = DEFAULT_MAX_SAMPLE_COUNT;
 	private int sampleDistanc = DEFAULT_SAMPLE_DISTANCE;
@@ -52,6 +54,8 @@ public class PaIntECurve {
 
 	private Color color = DEFAULT_COLOR;
 	private Stroke stroke;
+
+	private boolean paintComapct = DEFAULT_PAINT_COMPACT;
 
 	public void paint(Graphics graphics, PaIntEParams params, Rectangle area, Axis xAxis, Axis yAxis) {
 
@@ -62,11 +66,14 @@ public class PaIntECurve {
 
 		final Color c = g.getColor();
 		final Stroke s = g.getStroke();
+		final Shape clip = g.getClip();
 
 		g.setColor(color);
 		if(stroke!=null) {
 			g.setStroke(stroke);
 		}
+
+		g.setClip(area);
 
 		g.translate(x, y);
 
@@ -77,41 +84,63 @@ public class PaIntECurve {
 		final double scaleX = area.width/rangeX;
 		final double scaleY = area.height/rangeY;
 
-		// Number of samples
-		final int stepCount = Math.min(area.width/sampleDistanc, maxSampleCount);
-		// Distance between two sample points in the figure space
-		final double stepSize = rangeX/stepCount;
-		// Translation from figure space to drawing coordinates
+		if(paintComapct) {
+			// Only paint 2 lines
 
-//		System.out.printf("offsetX=%d offsetY=%d rangeX=%1.02f rangeY=%1.02f stepCount=%d stepSize=%1.02f scaleX=%1.02f scaleY=%1.02f\n",
-//				offsetX, offsetY, rangeX, rangeY, stepCount, stepSize, scaleX, scaleY);
+			//TODO fix calculation of peekY
+			double peekX = (params.getB()-xAxis.getMinValue())*scaleX;
+//			double peekY = (yAxis.getMaxValue()-params.getD())*scaleY;
+			double peekY = area.height-(params.getD()-yAxis.getMinValue())*scaleY;
 
-		double lastX = 0D;
-		double lastY = 0D;
+			double startY = area.height-(params.getD()-params.getC1()-yAxis.getMinValue())*scaleY;
+			double endY = area.height-(params.getD()-params.getC2()-yAxis.getMinValue())*scaleY;
 
-		for(int i=0; i<stepCount; i++) {
+			g.drawLine(0, (int)startY, (int)peekX, (int)peekY);
+			g.drawLine((int)peekX, (int)peekY, area.width, (int)endY);
 
-			// Raw coordinates
-			double px = xAxis.getMinValue()+ (i * stepSize);
-			double py = params.calc(px);
+		} else {
+			// Paint complete curve
 
-			// Translate according to figure constraints in a format suitable for user space
-			px -= xAxis.getMinValue();
-			py = yAxis.getMaxValue()-py;
+			// Number of samples
+			final int stepCount = Math.min(area.width/sampleDistanc, maxSampleCount);
+			// Distance between two sample points in the figure space
+			final double stepSize = rangeX/stepCount;
+			// Translation from figure space to drawing coordinates
 
-			// Translate to device coordinates
-			px *= scaleX;
-			py *= scaleY;
+//			System.out.printf("offsetX=%d offsetY=%d rangeX=%1.02f rangeY=%1.02f stepCount=%d stepSize=%1.02f scaleX=%1.02f scaleY=%1.02f\n",
+//					offsetX, offsetY, rangeX, rangeY, stepCount, stepSize, scaleX, scaleY);
 
-			if(i>0) {
-				g.drawLine((int)lastX, (int)lastY, (int)px, (int)py);
+			double lastX = 0D;
+			double lastY = 0D;
+
+			for(int i=0; i<stepCount; i++) {
+
+				// Raw coordinates
+				double px = xAxis.getMinValue()+ (i * stepSize);
+				double py = params.calc(px);
+
+				// Translate according to figure constraints in a format suitable for user space
+				px -= xAxis.getMinValue();
+//				py = yAxis.getMaxValue()-py;
+				py -= yAxis.getMinValue();
+
+				// Translate to device coordinates
+				px *= scaleX;
+				py *= scaleY;
+
+				py = area.height-py;
+
+				if(i>0) {
+					g.drawLine((int)lastX, (int)lastY, (int)px, (int)py);
+				}
+
+				lastX = px;
+				lastY = py;
 			}
-
-			lastX = px;
-			lastY = py;
 		}
 
 		g.translate(-x, -y);
+		g.setClip(clip);
 		g.setColor(c);
 		g.setStroke(s);
 	}
@@ -206,5 +235,13 @@ public class PaIntECurve {
 	 */
 	public void setStroke(Stroke stroke) {
 		this.stroke = stroke;
+	}
+
+	public boolean isPaintComapct() {
+		return paintComapct;
+	}
+
+	public void setPaintComapct(boolean paintComapct) {
+		this.paintComapct = paintComapct;
 	}
 }

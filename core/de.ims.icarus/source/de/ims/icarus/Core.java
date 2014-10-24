@@ -146,6 +146,26 @@ import de.ims.icarus.util.Exceptions;
 public class Core {
 
 	private static Core core;
+	private static boolean debugActive = false;
+
+	public static void debugInit(String...args) {
+
+		debugActive = true;
+
+		try {
+			if(core!=null)
+				throw new IllegalStateException("Core already started!"); //$NON-NLS-1$
+
+			core = new Core(args);
+
+		} catch(Throwable e) {
+			new CoreErrorDialog(e);
+		}
+	}
+
+	public static boolean isDebugActive() {
+		return debugActive;
+	}
 
 	/**
 	 * @param args
@@ -320,7 +340,7 @@ public class Core {
 
 	public static boolean ignoreRedirect() {
 		String ignore = System.getProperty(IGNORE_STREAM_REDIRECT_PROPERTY);
-		return ignore!=null && Boolean.parseBoolean(ignore);
+		return debugActive || (ignore!=null && Boolean.parseBoolean(ignore));
 	}
 
 	// prevent multiple deserialization

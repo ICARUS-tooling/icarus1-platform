@@ -74,4 +74,6 @@ public interface SearchConstraint extends Serializable {
 	boolean isMultiplexing();
 
 	void group(GroupCache cache, int groupId, Object value);
+
+	void prepare();
 }

@@ -52,8 +52,8 @@ public class PaIntEGraph {
 	private boolean paintBorder = DEFAULT_PAINT_BORDER;
 	private boolean paintGrid = DEFAULT_PAINT_GRID;
 
-	private final Axis xAxis;
-	private final Axis yAxis;
+	private Axis xAxis;
+	private Axis yAxis;
 
 	private GridStyle gridStyle = DEFAULT_GRID_STYLE;
 	private Color gridColor = DEFAULT_GRID_COLOR;
@@ -74,21 +74,12 @@ public class PaIntEGraph {
 	}
 
 	public PaIntEGraph(Axis xAxis, Axis yAxis, PaIntECurve curve) {
-		if (xAxis == null)
-			throw new NullPointerException("Invalid xAxis"); //$NON-NLS-1$
-		if (yAxis == null)
-			throw new NullPointerException("Invalid yAxis"); //$NON-NLS-1$
 		if (curve == null)
 			throw new NullPointerException("Invalid curve"); //$NON-NLS-1$
 
-		if(xAxis.isVertical())
-			throw new IllegalArgumentException("Cannot use vertical axis for x values"); //$NON-NLS-1$
+		setXAxis(xAxis);
+		setYAxis(yAxis);
 
-		if(!yAxis.isVertical())
-			throw new IllegalArgumentException("Cannot use horizontal axis for y values"); //$NON-NLS-1$
-
-		this.xAxis = xAxis;
-		this.yAxis = yAxis;
 		this.curve = curve;
 	}
 
@@ -261,11 +252,31 @@ public class PaIntEGraph {
 		return yAxis;
 	}
 
+	public void setXAxis(Axis xAxis) {
+		if (xAxis == null)
+			throw new NullPointerException("Invalid xAxis");
+
+		if(xAxis.isVertical())
+			throw new IllegalArgumentException("Cannot use vertical axis for x values"); //$NON-NLS-1$
+
+		this.xAxis = xAxis;
+	}
+
 	/**
 	 * @return the curve
 	 */
 	public PaIntECurve getCurve() {
 		return curve;
+	}
+
+	public void setYAxis(Axis yAxis) {
+		if (yAxis == null)
+			throw new NullPointerException("Invalid yAxis");
+
+		if(!yAxis.isVertical())
+			throw new IllegalArgumentException("Cannot use horizontal axis for y values"); //$NON-NLS-1$
+
+		this.yAxis = yAxis;
 	}
 
 	/**

@@ -167,4 +167,12 @@ public class DummyGroupConstraint implements SearchConstraint {
 	public void group(GroupCache cache, int groupId, Object value) {
 		throw new UnsupportedOperationException();
 	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchConstraint#prepare()
+	 */
+	@Override
+	public void prepare() {
+		source.prepare();
+	}
 }

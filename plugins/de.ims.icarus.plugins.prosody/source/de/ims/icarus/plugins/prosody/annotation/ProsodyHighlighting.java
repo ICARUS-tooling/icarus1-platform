@@ -85,6 +85,7 @@ public class ProsodyHighlighting extends BitmaskHighlighting {
 		registerAlias("painteAngle", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
 		registerAlias("painteDistance", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
 		registerAlias("painteChannel", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
+		registerAlias("painteRange", "painteIntegral"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	protected ConfigListener configListener;

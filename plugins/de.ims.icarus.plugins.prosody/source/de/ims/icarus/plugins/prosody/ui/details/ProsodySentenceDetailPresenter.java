@@ -119,7 +119,6 @@ import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
-import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -155,6 +154,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	protected static final String configPath = "plugins.prosody.appearance.details"; //$NON-NLS-1$
 
 	private static ActionManager sharedActionManager;
+
+	private static final Axis.Double dummyAxis = new Axis.Double(false);
 
 	private JComboBox<Object> syllablePatternSelect;
 	private JLabel patternSelectInfo;
@@ -213,6 +214,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				callbackHandler, "pausePlayback"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction", //$NON-NLS-1$
 				callbackHandler, "toggleShowConstraints"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.togglePaintCompactAction", //$NON-NLS-1$
+				callbackHandler, "togglePaintCompact"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.prosodySentenceDetailPresenter.copyPainteSyllableAction", //$NON-NLS-1$
 				callbackHandler, "copyPainteSyllable"); //$NON-NLS-1$
 	}
@@ -242,6 +245,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		boolean isPlaying = soundFile!=null && soundFile.isActive();
 		boolean isPaused = soundFile!=null && soundFile.isPaused();
 		boolean showConstraints = config.showConstraints;
+		boolean paintCompact = config.detailPaintCompact;
 
 		actionManager.setEnabled(hasData,
 				"plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"); //$NON-NLS-1$
@@ -255,6 +259,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 		actionManager.setSelected(showConstraints,
 				"plugins.prosody.prosodySentenceDetailPresenter.toggleShowConstraintsAction"); //$NON-NLS-1$
+		actionManager.setSelected(paintCompact,
+				"plugins.prosody.prosodySentenceDetailPresenter.togglePaintCompactAction"); //$NON-NLS-1$
 	}
 
 	/**
@@ -1130,6 +1136,28 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 //			refreshActions();
 		}
 
+		public void togglePaintCompact(ActionEvent e) {
+			// no-op
+		}
+
+		public void togglePaintCompact(boolean b) {
+			if(sentenceInfo==null) {
+				return;
+			}
+
+			try {
+				config.detailPaintCompact = b;
+				sentencePanel.repaint();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to toggle 'paintCompact' flag", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+//			refreshActions();
+		}
+
 		public void copyPainteSyllable(ActionEvent e) {
 			if(sentenceInfo==null) {
 				return;
@@ -1512,14 +1540,14 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			SearchConstraint[] constraints = (SearchConstraint[])wordInfo.getProperty(CONSTRAINTS_KEY);
 			final boolean hasConstraints = constraints!=null;
 
-			List<PaIntEConstraintParams> painteParams = null;
+			List<PaIntEConstraint> painteParams = null;
 			if(hasConstraints) {
 				painteParams = new ArrayList<>();
 
 				for(SearchConstraint constraint : constraints) {
 					PaIntEConstraintParams[] params = ((PaIntEConstraint)constraint).getPaIntEConstraints();
 					if(params!=null) {
-						CollectionUtils.feedItems(painteParams, params);
+						painteParams.add((PaIntEConstraint)constraint);
 					}
 				}
 			}
@@ -1563,13 +1591,55 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 					Rectangle curveArea = new Rectangle(area.x+yAxisWidth, area.y, area.width-yAxisWidth, area.height-xAxisHeight);
 
+					boolean hasCompactCurve = false;
+
 					for(int i=0; i<painteParams.size(); i++) {
-						graph.getCurve().paint(graphics, painteParams.get(i), curveArea, graph.getXAxis(), graph.getYAxis());
+						PaIntEConstraint constraint = painteParams.get(i);
+
+						Rectangle r = curveArea;
+						Axis axis = graph.getXAxis();
+
+						// Translate the entire graph area if the constraint has a bounded interval
+						if(constraint.hasBounds()) {
+							r = new Rectangle();
+							r.height = curveArea.height;
+							r.y = curveArea.y;
+
+							dummyAxis.setMinValue(constraint.getLeftBorder());
+							dummyAxis.setMaxValue(constraint.getRightBorder());
+
+							int left = axis.translate(constraint.getLeftBorder(), curveArea.width);
+							int right = axis.translate(constraint.getRightBorder(), curveArea.width);
+
+							r.x = curveArea.x+left;
+							r.width = right-left+1;
+
+							graph.setXAxis(dummyAxis);
+						}
+
+						for(PaIntEConstraintParams params : constraint.getPaIntEConstraints()) {
+							hasCompactCurve |= params.isCompact();
+
+							graph.getCurve().setPaintComapct(params.isCompact());
+
+							graph.getCurve().paint(graphics, params, r, graph.getXAxis(), graph.getYAxis());
+						}
+
+						if(constraint.hasBounds()) {
+							graph.setXAxis(axis);
+						}
 					}
 
 					g.setStroke(s);
+
+					if(hasCompactCurve) {
+//						graph.getCurve().setPaintComapct(true);
+//						graph.getCurve().setColor(curveColor);
+//						graph.paint(g, params, area);
+					}
 				}
 
+				graph.getCurve().setPaintComapct(config.detailPaintCompact);
 				graph.getCurve().setColor(curveColor);
 				graph.paint(g, params, area);
 

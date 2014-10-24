@@ -33,7 +33,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SwingConstants;
 
@@ -78,15 +77,11 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 
 	private static final long serialVersionUID = 8194402816943023015L;
 
-	private static final int DEFAULT_HEIGHT = 15;
-
-
 	protected AnnotationController annotationSource;
 
 	private ProsodicSentenceData sentence;
 	private SentenceInfo sentenceInfo;
 
-	private JLabel sentenceLabel;
 	private SentenceComponent sentenceComponent;
 	private TextComponent headerLabel;
 

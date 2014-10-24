@@ -61,18 +61,13 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 		return DefaultSearchOperator.comparing();
 	}
 
-	@Override
-	public Class<?> getValueClass(Object specifier) {
-		return null;
-	}
-
 	/**
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new ProsodyPaIntERangeConstraint(value, operator);
+		return new ProsodyPaIntERangeConstraint(value, operator, specifier);
 	}
 
 	private static class ProsodyPaIntERangeConstraint extends AbstractPaIntEConstraint {
@@ -82,13 +77,18 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 		private transient PaIntEConstraintParams specifierParams;
 		private transient NumberOperator numberOperator;
 
-		public ProsodyPaIntERangeConstraint(Object value, SearchOperator operator) {
-			super(TOKEN, value, operator, null);
+		public ProsodyPaIntERangeConstraint(Object value, SearchOperator operator, Object specifier) {
+			super(TOKEN, value, operator, specifier);
 		}
 
 		@Override
 		public PaIntEConstraintParams[] getPaIntEConstraints() {
 			return new PaIntEConstraintParams[]{specifierParams};
+		}
+
+		@Override
+		public SearchConstraint clone() {
+			return new ProsodyPaIntERangeConstraint(getValue(), getOperator(), getSpecifier());
 		}
 
 		@Override
@@ -127,32 +127,35 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 		 */
 		@Override
 		protected boolean applyOperator(PaIntEConstraintParams target) {
-			if(specifierParams.isA1Active()
-					&& !numberOperator.apply(Math.abs(target.getA1()-constraintParams.getA1()), specifierParams.getA1())) {
+			if(!specifierParams.isCompact()) {
+				if(specifierParams.isA1Active() && constraintParams.isA1Active()
+						&& !numberOperator.apply(Math.abs(target.getA1()-specifierParams.getA1()), constraintParams.getA1())) {
+					return false;
+				}
+				if(specifierParams.isA2Active() && constraintParams.isA2Active()
+						&& !numberOperator.apply(Math.abs(target.getA2()-specifierParams.getA2()), constraintParams.getA2())) {
+					return false;
+				}
+				if(specifierParams.isAlignmentActive() && constraintParams.isAlignmentActive()
+						&& !numberOperator.apply(Math.abs(target.getAlignment()-specifierParams.getAlignment()), constraintParams.getAlignment())) {
+					return false;
+				}
+			}
+
+			if(specifierParams.isBActive() && constraintParams.isBActive()
+					&& !numberOperator.apply(Math.abs(target.getB()-specifierParams.getB()), constraintParams.getB())) {
 				return false;
 			}
-			if(specifierParams.isA2Active()
-					&& !numberOperator.apply(Math.abs(target.getA2()-constraintParams.getA2()), specifierParams.getA2())) {
+			if(specifierParams.isC1Active() && constraintParams.isC1Active()
+					&& !numberOperator.apply(Math.abs(target.getC1()-specifierParams.getC1()), constraintParams.getC1())) {
 				return false;
 			}
-			if(specifierParams.isBActive()
-					&& !numberOperator.apply(Math.abs(target.getB()-constraintParams.getB()), specifierParams.getB())) {
+			if(specifierParams.isC2Active() && constraintParams.isC2Active()
+					&& !numberOperator.apply(Math.abs(target.getC2()-specifierParams.getC2()), constraintParams.getC2())) {
 				return false;
 			}
-			if(specifierParams.isC1Active()
-					&& !numberOperator.apply(Math.abs(target.getC1()-constraintParams.getC1()), specifierParams.getC1())) {
-				return false;
-			}
-			if(specifierParams.isC2Active()
-					&& !numberOperator.apply(Math.abs(target.getC2()-constraintParams.getC2()), specifierParams.getC2())) {
-				return false;
-			}
-			if(specifierParams.isDActive()
-					&& !numberOperator.apply(Math.abs(target.getD()-constraintParams.getD()), specifierParams.getD())) {
-				return false;
-			}
-			if(specifierParams.isAlignmentActive()
-					&& !numberOperator.apply(Math.abs(target.getAlignment()-constraintParams.getAlignment()), specifierParams.getAlignment())) {
+			if(specifierParams.isDActive() && constraintParams.isDActive()
+					&& !numberOperator.apply(Math.abs(target.getD()-specifierParams.getD()), constraintParams.getD())) {
 				return false;
 			}
 

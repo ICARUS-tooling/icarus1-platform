@@ -403,8 +403,6 @@ public class PaIntEEditorView extends View {
 
 	private void reloadConfig() {
 		Handle handle = getConfigHandle();
-		ConfigRegistry registry = handle.getSource();
-
 		graphComponent.reloadConfig(handle);
 
 		for(ParamsPanel panel : paramsPanels) {

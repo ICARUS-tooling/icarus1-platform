@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody.sound;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -88,6 +89,10 @@ public class SoundPlayer {
 	public SoundFile getSoundFile(String fileName) {
 		if (fileName == null)
 			throw new NullPointerException("Invalid fileName"); //$NON-NLS-1$
+
+		if(!fileName.endsWith(".wav")) { //$NON-NLS-1$
+			fileName += ".wav"; //$NON-NLS-1$
+		}
 
 		SoundFile soundFile = fileCache.get(fileName);
 		if(soundFile==null) {
@@ -233,6 +238,79 @@ public class SoundPlayer {
 			throw new IllegalStateException("Cannot resume sound file while in state: "+state); //$NON-NLS-1$
 
 		dispatchThread().resumeFile();
+	}
+
+	public synchronized void export(SoundFile soundFile, OutputStream out) throws SoundException, IOException {
+		if (soundFile == null)
+			throw new NullPointerException("Invalid soundFile"); //$NON-NLS-1$
+
+		if(!soundFile.isOpen()) {
+			open(soundFile);
+		}
+
+		// Save settings for playback
+		long startFrame = soundFile.getStartFrame();
+		if(startFrame==LanguageConstants.DATA_UNDEFINED_VALUE) {
+			startFrame = 0;
+		}
+		long endFrame = soundFile.getEndFrame();
+		if(endFrame==LanguageConstants.DATA_UNDEFINED_VALUE) {
+			endFrame = soundFile.getFrameLength()-1;
+		}
+
+		RandomAccessFile source = soundFile.randomAccessFile;
+
+		AudioFormat audioFormat = soundFile.getAudioFormat();
+
+		float frameRate = audioFormat.getFrameRate();
+		if(frameRate==AudioSystem.NOT_SPECIFIED) {
+			frameRate = 16_000;
+		}
+		int frameSize = audioFormat.getFrameSize();
+		if(frameSize==AudioSystem.NOT_SPECIFIED) {
+			frameSize = 2;
+		}
+
+		long framesToRead = endFrame-startFrame+1;
+
+		int framesToBuffer = 8000;
+
+		int bufferSize = frameSize * framesToBuffer;
+		byte[] buffer = new byte[bufferSize];
+
+		int contentSize = (int) (framesToRead * frameSize);
+
+		// Copy wav header
+		source.seek(0);
+		byte[] header = new byte[WAV_HEADER_SIZE];
+		source.read(header);
+		//Modify header info
+		int fileSize = contentSize + WAV_HEADER_SIZE - 8;
+		insertInt(header, fileSize, 4);
+		int dataLength = contentSize-44;
+		insertInt(header, dataLength, 40);
+		out.write(header);
+
+		// Now move cursor to actual data and copy
+		long firstByteOffset = WAV_HEADER_SIZE + frameSize * startFrame;
+
+		source.seek(firstByteOffset);
+		int bytesToRead = frameSize * (int) Math.min(framesToRead, framesToBuffer);
+		int bytesRead;
+		while(framesToRead>0 && (bytesRead = source.read(buffer, 0, bytesToRead)) > 0 ) {
+
+			int bytesToWrite = Math.min((int)framesToRead*frameSize, bytesRead);
+			out.write(buffer, 0, bytesToWrite);
+
+			framesToRead -= bytesToWrite/frameSize;
+		}
+	}
+
+	private void insertInt(byte[] b, int val, int index) {
+		b[index++] = (byte) val;
+		b[index++] = (byte) (val>>8);
+		b[index++] = (byte) (val>>16);
+		b[index++] = (byte) (val>>24);
 	}
 
 	private enum FileState {

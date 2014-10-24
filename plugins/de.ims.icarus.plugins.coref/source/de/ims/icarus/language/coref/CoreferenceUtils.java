@@ -45,6 +45,7 @@ import java.util.Set;
 import javax.swing.JLabel;
 import javax.swing.ToolTipManager;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigEvent;
 import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
@@ -99,16 +100,18 @@ public final class CoreferenceUtils {
 	}
 
 	static {
-		ConfigRegistry.getGlobalRegistry().addGroupListener(
-				"plugins.coref.appearance.errorColors", new ConfigListener() { //$NON-NLS-1$
+		if(!Core.isDebugActive()) {
+			ConfigRegistry.getGlobalRegistry().addGroupListener(
+					"plugins.coref.appearance.errorColors", new ConfigListener() { //$NON-NLS-1$
 
-			@Override
-			public void invoke(ConfigRegistry sender, ConfigEvent event) {
-				loadErrorColors();
-			}
-		});
+				@Override
+				public void invoke(ConfigRegistry sender, ConfigEvent event) {
+					loadErrorColors();
+				}
+			});
 
-		loadErrorColors();
+			loadErrorColors();
+		}
 	}
 
 	public static Color getErrorColor(CorefErrorType errorType) {

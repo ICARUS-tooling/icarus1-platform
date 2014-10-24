@@ -472,6 +472,10 @@ public abstract class Axis {
 		return getMinValue() + getRange() * (double)value/range;
 	}
 
+	public int translate(double value, int range) {
+		return (int) ((value-getMinValue())/getRange() * range);
+	}
+
 	public abstract String getLabel(int marker);
 
 	protected void setMinValue0(double minValue) {
