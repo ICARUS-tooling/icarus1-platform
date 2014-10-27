@@ -395,6 +395,27 @@ public class PaIntEParams implements Serializable {
 		return sb.toString();
 	}
 
+	public String toCompactString() {
+		StringBuilder sb = new StringBuilder();
+
+		// B
+		sb.append(b);
+		sb.append(PIPE);
+
+		// C1
+		sb.append(c1);
+		sb.append(PIPE);
+
+		// C2
+		sb.append(c2);
+		sb.append(PIPE);
+
+		// D
+		sb.append(d);
+
+		return sb.toString();
+	}
+
 	public String format() {
 		return String.format(Locale.ENGLISH,
 				"%f|%.02f b=%.02f c1=%.02f c2=%.02f d=%.02f alignment=%.02f", //$NON-NLS-1$

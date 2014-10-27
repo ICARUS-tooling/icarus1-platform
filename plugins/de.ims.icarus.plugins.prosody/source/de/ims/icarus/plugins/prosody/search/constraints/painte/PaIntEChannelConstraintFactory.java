@@ -34,6 +34,7 @@ import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.plugins.prosody.ui.details.ProsodySentenceDetailPresenter;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
@@ -143,7 +144,10 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		}
 
 		/**
-		 * Note that the channel bounds are only provided to external facilities if the
+		 * The new implementation of the {@link ProsodySentenceDetailPresenter} allows us to always
+		 * consider boundaries when visualizing constraints.
+		 *
+		 * <b>Deprecated Info:</b> Note that the channel bounds are only provided to external facilities if the
 		 * constraints used are <b>not</b> in compact mode! This is to not screw up
 		 * the visualization of "real" curves by artificially limiting their range on
 		 * the horizontal axis.

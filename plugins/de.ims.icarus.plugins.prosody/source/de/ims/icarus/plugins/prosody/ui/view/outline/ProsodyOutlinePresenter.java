@@ -31,6 +31,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -117,6 +119,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected JScrollPane contentPane;
 	protected final PanelConfig panelConfig = new PanelConfig();
 
+	protected List<SentencePanel> sentencePanels = new ArrayList<>();
+
 	protected JComboBox<Object> sentencePatternSelect, detailPatternSelect, headerPatternSelect;
 	protected JLabel patternSelectInfo;
 
@@ -201,6 +205,12 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 				callbackHandler, "stopPlayback"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction", //$NON-NLS-1$
 				callbackHandler, "pausePlayback"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.togglePaintCompactAction", //$NON-NLS-1$
+				callbackHandler, "togglePaintCompact"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.expandAllAction", //$NON-NLS-1$
+				callbackHandler, "expandAll"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.prosodyOutlinePresenter.collapseAllAction", //$NON-NLS-1$
+				callbackHandler, "collapseAll"); //$NON-NLS-1$
 		//TODO
 	}
 
@@ -225,6 +235,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		SoundFile soundFile = getSoundFile();
 		boolean isPlaying = soundFile!=null && soundFile.isActive();
 		boolean isPaused = soundFile!=null && soundFile.isPaused();
+		boolean paintCompact = panelConfig.detailPaintCompact;
 
 		actionManager.setEnabled(hasData,
 				"plugins.prosody.prosodyOutlinePresenter.playDocumentAction"); //$NON-NLS-1$
@@ -235,6 +246,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 		actionManager.setSelected(isPaused,
 				"plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction"); //$NON-NLS-1$
+		actionManager.setSelected(paintCompact,
+				"plugins.prosody.prosodyOutlinePresenter.togglePaintCompactAction"); //$NON-NLS-1$
 	}
 
 	protected Handler createHandler() {
@@ -311,6 +324,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected void refresh() {
 
 		contentPane.setViewportView(null);
+		sentencePanels.clear();
 
 		refreshActions();
 
@@ -330,6 +344,9 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 			SentencePanel sentencePanel = new SentencePanel(panelConfig);
 			sentencePanel.refresh(sentence);
+
+			sentencePanels.add(sentencePanel);
+
 			builder.append(sentencePanel);
 		}
 
@@ -423,6 +440,16 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		}
 
 		return panel;
+	}
+
+	public void expandAll(boolean expand) {
+		if(sentencePanels.isEmpty()) {
+			return;
+		}
+
+		for(SentencePanel sentencePanel : sentencePanels) {
+			sentencePanel.setExpandedState(expand);
+		}
 	}
 
 	private static LabelPattern loadPattern(Handle handle, LabelPattern defaultPattern) {
@@ -831,6 +858,47 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 		public void pausePlayback(boolean b) {
 			// no-op
+		}
+
+		public void togglePaintCompact(ActionEvent e) {
+			// no-op
+		}
+
+		public void togglePaintCompact(boolean b) {
+			if(data==null) {
+				return;
+			}
+
+			try {
+				panelConfig.detailPaintCompact = b;
+
+				contentPane.getViewport().repaint();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to toggle 'paintCompact' flag", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+//			refreshActions();
+		}
+
+		public void expandAll(ActionEvent e) {
+			try {
+				ProsodyOutlinePresenter.this.expandAll(true);
+			} catch(Exception ex) {
+				LoggerFactory.error(this, "Failed to expand all detail panels", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
+
+		public void collapseAll(ActionEvent e) {
+			try {
+				ProsodyOutlinePresenter.this.expandAll(false);
+			} catch(Exception ex) {
+				LoggerFactory.error(this, "Failed to collapse all detail panels", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
 		}
 	}
 }

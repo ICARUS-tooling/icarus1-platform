@@ -187,12 +187,20 @@ public class PaIntEUtils {
 		copy(params.toString());
 	}
 
+	public static void copyParamsCompact(PaIntEParams params) {
+		copy(params.toCompactString());
+	}
+
 	public static void copyConstraints(PaIntEConstraintParams constraints) {
 		copyParams(constraints);
 	}
 
 	public static void copyWrapper(PaIntEParamsWrapper wrapper) {
 		copyParams(wrapper.getParams());
+	}
+
+	public static void copyWrapperCompact(PaIntEParamsWrapper wrapper) {
+		copyParamsCompact(wrapper.getParams());
 	}
 
 	public static void copyWrapperId(PaIntEParamsWrapper wrapper) {

@@ -271,6 +271,12 @@ public class SentencePanel extends JPanel{
 		return sentenceInfo;
 	}
 
+	public void setExpandedState(boolean expand) {
+		toggleDetailsButton.setSelected(expand);
+
+		toggleDetails();
+	}
+
 	private void refresh() {
 
 		Color bg = config.backgroundColor;
@@ -1300,6 +1306,8 @@ public class SentencePanel extends JPanel{
 
 			g.setColor(config.detailTextColor);
 			g.setFont(config.detailFont);
+
+			graph.getCurve().setPaintComapct(config.detailPaintCompact);
 
 			int leftWord = getFirstWordToPaint();
 			int rightWord = getLastWordToPaint();

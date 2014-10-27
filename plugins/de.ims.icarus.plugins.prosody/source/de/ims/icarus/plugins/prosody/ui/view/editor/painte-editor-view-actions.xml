@@ -61,9 +61,19 @@
 		icon="cpyqual_menu.gif"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Copy Params Compact -->
+	<action id="plugins.prosody.painteEditorView.copyPainteParamsCompactAction"
+		icon="copy_edit_compact.png"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- Paste Params -->
 	<action id="plugins.prosody.painteEditorView.pastePainteParamsAction"
 		template="actions.default.pasteAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Toggle 'paintAllCompact' -->
+	<action id="plugins.prosody.painteEditorView.togglePaintAllCompactAction"
+		icon="debug_view_compact.gif" type="toggle"
 		name="${id}.name" desc="${id}.description" />
 	
 			
@@ -98,6 +108,11 @@
 		icon="cpyqual_menu.gif"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Export Param Compact -->
+	<action id="plugins.prosody.painteEditorView.exportParamsPanelCompactAction"
+		icon="copy_edit_compact.png"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- Rename Panel -->
 	<action id="plugins.prosody.painteEditorView.renameParamsPanelAction"
 		template="actions.default.renameAction"
@@ -128,12 +143,18 @@
 		template="actions.default.redoAction"
 		name="${id}.name" desc="${id}.description" />
 		
+	<!-- Toggle 'paintCompact' for Panel -->
+	<action id="plugins.prosody.painteEditorView.toggleParamsPanelPaintCompactAction"
+		icon="debug_view_compact.gif" type="toggle"
+		name="${id}.name" desc="${id}.description" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.painteEditorView.toolBarList">
 		<item type="action" value="plugins.prosody.painteEditorView.openPreferencesAction" />
 		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.removePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsCompactAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
@@ -147,6 +168,8 @@
 		<item type="action" value="plugins.prosody.painteEditorView.collapseAllPanelsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.expandAllPanelsAction" />
 		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.togglePaintAllCompactAction" />
+		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.addParamsPanelAction" />
 		<item type="glue" />
 	</action-list>
@@ -155,6 +178,7 @@
 	<action-list id="plugins.prosody.painteEditorView.popupMenuList">
 		<item type="action" value="plugins.prosody.painteEditorView.removePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsCompactAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.copyPainteParamsIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.usePainteParamsAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.renamePainteParamsAction" />
@@ -173,8 +197,11 @@
 		<item type="action" value="plugins.prosody.painteEditorView.clearParamsPanelAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.colorParamsPanelAction" />
 		<separator />
+		<item type="action" value="plugins.prosody.painteEditorView.toggleParamsPanelPaintCompactAction" />
+		<separator />
 		<item type="action" value="plugins.prosody.painteEditorView.importParamsPanelAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelAction" />
+		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelCompactAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.exportParamsPanelIdAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.saveParamsPanelAction" />
 		<item type="action" value="plugins.prosody.painteEditorView.saveParamsPanelAsAction" />

@@ -80,6 +80,7 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 			ACCENT_SHAPE_RISE_LABEL,
 			ACCENT_SHAPE_FALL_LABEL,
 			ACCENT_SHAPE_RISE_FALL_LABEL,
+			ACCENT_SHAPE_UNACCENTED_LABEL,
 		};
 	}
 
@@ -151,7 +152,7 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 		@Override
 		public Object getLabel(Object value) {
 			if((int)value == DATA_UNDEFINED_VALUE) {
-				return ACCENT_SHAPE_UNDEFINED_LABEL;
+				return ACCENT_SHAPE_UNACCENTED_LABEL;
 			}
 			return ProsodyUtils.getAccentShapeLabel((int) value);
 		}

@@ -31,6 +31,18 @@
 	<action id="plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction"
 		template="actions.default.pauseAction" type="toggle" />
 		
+	<!-- Toggle 'paintCompact' -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.togglePaintCompactAction"
+		name="${id}.name" desc="${id}.description" icon="debug_view_compact.gif" type="toggle" />
+
+	<!-- Collapse All -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.collapseAllAction"
+		template="actions.default.collapseAllAction" />
+
+	<!-- Expand All -->
+	<action id="plugins.prosody.prosodyOutlinePresenter.expandAllAction"
+		template="actions.default.expandAllAction" />
+		
 	<!-- ToolBar List for header area -->
 	<action-list id="plugins.prosody.prosodyOutlinePresenter.toolBarList">
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.openPreferencesAction" />
@@ -41,6 +53,11 @@
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.playDocumentAction" />
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.stopPlaybackAction" />
 		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.pausePlaybackAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.collapseAllAction" />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.expandAllAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.prosodyOutlinePresenter.togglePaintCompactAction" />
 		<separator />
 		<item type="glue" />
 	</action-list>

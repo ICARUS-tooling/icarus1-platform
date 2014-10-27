@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import javax.activation.DataHandler;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -151,6 +152,8 @@ public class PaIntEEditorView extends View {
 
 	private JPopupMenu popupMenu;
 
+	private boolean paintAllCompact = false;
+
 	private static final String[] paramIds = {
 		"a1", //$NON-NLS-1$
 		"a2", //$NON-NLS-1$
@@ -230,6 +233,7 @@ public class PaIntEEditorView extends View {
 		paramsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		paramsTable.setDragEnabled(true);
 		paramsTable.setTransferHandler(transferManager);
+		paramsTable.getSelectionModel().addListSelectionListener(getHandler());
 		UIUtil.enableRighClickTableSelection(paramsTable);
 
 		TableColumn iconColumn = paramsTable.getColumnModel().getColumn(1);
@@ -320,12 +324,16 @@ public class PaIntEEditorView extends View {
 				callbackHandler, "copyPainteParams"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.copyPainteParamsIdAction", //$NON-NLS-1$
 				callbackHandler, "copyPainteParamsId"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.copyPainteParamsCompactAction", //$NON-NLS-1$
+				callbackHandler, "copyPainteParamsCompact"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.pastePainteParamsAction", //$NON-NLS-1$
 				callbackHandler, "pastePainteParams"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.collapseAllPanelsAction", //$NON-NLS-1$
 				callbackHandler, "collapseAllPanels"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.expandAllPanelsAction", //$NON-NLS-1$
 				callbackHandler, "expandAllPanels"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.togglePaintAllCompactAction", //$NON-NLS-1$
+				callbackHandler, "togglePaintAllCompact"); //$NON-NLS-1$
 
 		// PANEL ACTIONS
 		actionManager.addHandler("plugins.prosody.painteEditorView.addParamsPanelAction", //$NON-NLS-1$
@@ -340,6 +348,8 @@ public class PaIntEEditorView extends View {
 				callbackHandler, "importParamsPanel"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsPanelAction", //$NON-NLS-1$
 				callbackHandler, "exportParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsPanelCompactAction", //$NON-NLS-1$
+				callbackHandler, "exportParamsPanelCompact"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.exportParamsPanelIdAction", //$NON-NLS-1$
 				callbackHandler, "exportParamsPanelId"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.saveParamsPanelAction", //$NON-NLS-1$
@@ -352,6 +362,8 @@ public class PaIntEEditorView extends View {
 				callbackHandler, "redoParamsPanel"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.prosody.painteEditorView.colorParamsPanelAction", //$NON-NLS-1$
 				callbackHandler, "colorParamsPanel"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.prosody.painteEditorView.toggleParamsPanelPaintCompactAction", //$NON-NLS-1$
+				callbackHandler, "toggleParamsPanelPaintCompact"); //$NON-NLS-1$
 	}
 
 	private void refreshActions() {
@@ -370,6 +382,7 @@ public class PaIntEEditorView extends View {
 				"plugins.prosody.painteEditorView.removePainteParamsAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.renamePainteParamsAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.copyPainteParamsAction", //$NON-NLS-1$
+				"plugins.prosody.painteEditorView.copyPainteParamsCompactAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.copyPainteParamsIdAction", //$NON-NLS-1$
 				"plugins.prosody.painteEditorView.usePainteParamsAction"); //$NON-NLS-1$
 		actionManager.setEnabled(hasRegistry,
@@ -770,6 +783,23 @@ public class PaIntEEditorView extends View {
 			refreshActions();
 		}
 
+		public void copyPainteParamsCompact(ActionEvent e) {
+			try {
+				PaIntEParamsWrapper params = getSelectedWrapper();
+				if(params==null) {
+					return;
+				}
+				PaIntEUtils.copyWrapperCompact(params);
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to copy painte parameters in compact format to clipboard", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+
+			refreshActions();
+		}
+
 		public void pastePainteParams(ActionEvent e) {
 			try {
 				PaIntEEditorView.this.pasteParams(null);
@@ -943,6 +973,22 @@ public class PaIntEEditorView extends View {
 			}
 		}
 
+		public void togglePaintAllCompact(boolean b) {
+			try {
+				paintAllCompact = b;
+				refreshGraph();
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to toggle 'paintAllCompact' property", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void togglePaintAllCompact(ActionEvent e) {
+			// no-op
+		}
+
 		// PANELS ACTIONS
 
 		// Allowed both for general context and panels!
@@ -1071,10 +1117,27 @@ public class PaIntEEditorView extends View {
 
 			try {
 
-				PaIntEUtils.copyWrapper(owningPanel.getWrapper());
+				PaIntEUtils.copyParams(owningPanel.getParams());
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to export parameters from panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
+
+		public void exportParamsPanelCompact(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+
+				PaIntEUtils.copyParamsCompact(owningPanel.getParams());
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to export panel parameters in compact form", ex); //$NON-NLS-1$
 
 				UIUtil.beep();
 			}
@@ -1209,6 +1272,27 @@ public class PaIntEEditorView extends View {
 				UIUtil.beep();
 			}
 		}
+
+		public void toggleParamsPanelPaintCompact(boolean b) {
+			// no-op
+		}
+
+		public void toggleParamsPanelPaintCompact(ActionEvent e) {
+			ParamsPanel owningPanel = getOwningPanel(e);
+			if(owningPanel==null) {
+				return;
+			}
+
+			try {
+				AbstractButton b = (AbstractButton) e.getSource();
+				owningPanel.setPaintCompact(b.isSelected());
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to toggle 'paintCompact' property for panel", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+			}
+		}
 	}
 
 	private static final String DEFAULT_NAME = "<unnamed>"; //$NON-NLS-1$
@@ -1311,6 +1395,7 @@ public class PaIntEEditorView extends View {
 		private final JLabel titleLabel;
 
 		private final History history;
+		private boolean paintCompact = false;
 
 		private final Icon colorIcon = new Icon() {
 
@@ -1574,6 +1659,8 @@ public class PaIntEEditorView extends View {
 		private void reloadConfig(Handle handle) {
 			ConfigRegistry registry = handle.getSource();
 
+			boolean overwriteValue = !isRegistered() && !isSaved();
+
 			for(int i=0; i<paramComponents.length; i++) {
 				ParamComponents paramComps = paramComponents[i];
 				String id = paramComps.id;
@@ -1582,15 +1669,34 @@ public class PaIntEEditorView extends View {
 
 				double min = registry.getDouble(registry.getChildHandle(paramsHandle, "lower")); //$NON-NLS-1$
 				double max = registry.getDouble(registry.getChildHandle(paramsHandle, "upper")); //$NON-NLS-1$
-				double value = registry.getDouble(registry.getChildHandle(paramsHandle, "default")); //$NON-NLS-1$
-
-				value = Math.min(max, Math.max(value, min));
-
 				paramComps.setMinMax(min, max);
-				paramComps.setValue(value);
+
+				if(overwriteValue) {
+					double value = registry.getDouble(registry.getChildHandle(paramsHandle, "default")); //$NON-NLS-1$
+
+					value = Math.min(max, Math.max(value, min));
+
+					paramComps.setValue(value);
+				}
 			}
 
 			history.clear();
+		}
+
+		public void setPaintCompact(boolean paintCompact) {
+			if(this.paintCompact==paintCompact) {
+				return;
+			}
+
+			this.paintCompact = paintCompact;
+
+			//TODO maybe disable unused parameter components?
+
+			refreshGraph();
+		}
+
+		public boolean isPaintCompact() {
+			return paintCompact;
 		}
 
 		public void setExpandedState(boolean expanded) {
@@ -1627,6 +1733,9 @@ public class PaIntEEditorView extends View {
 
 		private void refreshPanelActions() {
 			ActionManager actionManager = getDefaultActionManager();
+
+			//FIXME needs checking on side effects!
+//			syncToWrapper(); -> no synching or we would always overwrite base data!
 
 			boolean saved = isSaved();
 			boolean savable = !saved;
@@ -1772,6 +1881,7 @@ public class PaIntEEditorView extends View {
 
 			titleLabel = new JLabel();
 			titleLabel.setText(ResourceManager.getInstance().get("plugins.prosody.painteEditorView.labels."+id+".name")); //$NON-NLS-1$ //$NON-NLS-2$
+			titleLabel.setToolTipText(ResourceManager.getInstance().get("plugins.prosody.painteEditorView.labels."+id+".description")); //$NON-NLS-1$ //$NON-NLS-2$
 
 			minLabel = new JLabel("-"); //$NON-NLS-1$
 			maxLabel = new JLabel("+"); //$NON-NLS-1$
@@ -2140,6 +2250,9 @@ public class PaIntEEditorView extends View {
 		}
 
 		private void paintPanel(Graphics g, ParamsPanel panel, Rectangle area) {
+
+			graph.getCurve().setPaintComapct(paintAllCompact || panel.isPaintCompact());
+
 			graph.getCurve().setColor(panel.color());
 			graph.getCurve().paint(g, panel.getParams(), area,
 					graph.getXAxis(), graph.getYAxis());
