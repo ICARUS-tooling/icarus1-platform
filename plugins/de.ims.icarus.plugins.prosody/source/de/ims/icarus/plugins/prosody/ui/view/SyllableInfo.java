@@ -46,11 +46,12 @@ public class SyllableInfo extends PartInfo {
 		d = sentence.getPainteD(wordIndex, sylIndex);
 
 		String token = sentence.getForm(wordIndex);
-		int sylCount = sentence.getSyllableCount(wordIndex);
-		if(sentence.isMapsSyllables()) {
-			int offset0 = sentence.getSyllableOffset(wordIndex, sylIndex);
-			int offset1 = sylIndex<sylCount-1 ? sentence.getSyllableOffset(wordIndex, sylIndex+1) : token.length();
-			setLabel(token.substring(offset0, offset1));
+//		int sylCount = sentence.getSyllableCount(wordIndex);
+		if(sentence.isMapsSyllables(wordIndex)) {
+//			int offset0 = sentence.getSyllableOffset(wordIndex, sylIndex);
+//			int offset1 = sylIndex<sylCount-1 ? sentence.getSyllableOffset(wordIndex, sylIndex+1) : token.length();
+//			setLabel(token.substring(offset0, offset1));
+			setLabel(sentence.getSyllableForm(wordIndex, sylIndex));
 		} else {
 			float beginTs = sentence.getBeginTimestamp(wordIndex);
 			float duration = sentence.getEndTimestamp(wordIndex)-beginTs;

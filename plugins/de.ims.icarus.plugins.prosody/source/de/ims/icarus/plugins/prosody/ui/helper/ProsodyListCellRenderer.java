@@ -45,6 +45,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
+import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
@@ -225,7 +226,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 				int width = 0;
 
 				for(int wordIndex=0; wordIndex<sentenceInfo.wordCount(); wordIndex++) {
-					// Honor ward spacing
+					// Honor word spacing
 					if(wordIndex>0) {
 						width += fm.charWidth(' ');
 					}
@@ -409,7 +410,9 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 				Color wordCol = (Color) wordInfo.getProperty(COL_KEY);
 				if(wordCol!=null) {
 
-					if(wordInfo.hasSyllables()) {
+					// Workaround for highlighted syllables ending up as '$$$' strings when using the
+					// result of our SampaMapper as labels
+					if(wordInfo.hasSyllables() && !ProsodyUtils.isNumberToken(wordInfo.getLabel())) {
 						int x = wordInfo.getX();
 
 						for(SyllableInfo sylInfo : wordInfo.getSyllables()) {

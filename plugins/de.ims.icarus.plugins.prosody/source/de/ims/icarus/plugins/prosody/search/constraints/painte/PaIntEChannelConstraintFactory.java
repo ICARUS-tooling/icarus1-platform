@@ -123,8 +123,8 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		private static final String UPPER_CURVE = "Upper PaIntE-constraint"; //$NON-NLS-1$
 
 		protected final PaIntEConstraintParams valueParams = new PaIntEConstraintParams();
-		protected PaIntEConstraintParams lowerParams;
-		protected PaIntEConstraintParams upperParams;
+		protected transient PaIntEConstraintParams lowerParams;
+		protected transient PaIntEConstraintParams upperParams;
 
 		protected transient boolean compact = false;
 		protected transient CompactCurveBuffer curveBuffer;

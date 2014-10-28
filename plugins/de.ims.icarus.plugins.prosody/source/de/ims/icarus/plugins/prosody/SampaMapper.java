@@ -51,6 +51,7 @@ import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.plugins.prosody.io.ProsodyDocumentReader;
+import de.ims.icarus.plugins.prosody.io.ProsodyIOUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.Locations;
@@ -68,12 +69,15 @@ public class SampaMapper {
 //		System.out.println(Arrays.deepToString(syllables));
 
 		Core.debugInit(args);
+		ProsodyIOUtils.DEFAULT_SYLLABLES_FROM_SAMPA = true;
 
 		CoreferenceDocumentSet set = new CoreferenceDocumentSet();
 		Reader<?> reader = new ProsodyDocumentReader();
 		Location location = Locations.getFileLocation("data/prosody/dirndl-test-output-prosodic-format-0.3.1"); //$NON-NLS-1$
 
 		CoreferenceUtils.loadDocumentSet((Reader<CoreferenceDocumentData>) reader, location, new Options(), set);
+
+		System.out.println("documents: "+set.size());
 	}
 
 	private static volatile SampaMapper instance;
@@ -296,6 +300,7 @@ public class SampaMapper {
 	private static class Node {
 		final char symbol;
 		final Node parent;
+		private int requiredCharCount = -1;
 
 		// Key is [lookahead,next] as in (lookahead<<16)|next
 		TIntObjectMap<Node> transitions = new TIntObjectHashMap<>(2);
@@ -303,6 +308,13 @@ public class SampaMapper {
 		Node(Node parent, char symbol) {
 			this.symbol = symbol;
 			this.parent = parent;
+		}
+
+		int getRequiredCharCount() {
+			if(requiredCharCount==-1) {
+				//TODO compute required char count
+			}
+			return requiredCharCount;
 		}
 
 		private int toKey(int next, int lookahead) {

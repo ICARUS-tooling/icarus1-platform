@@ -29,6 +29,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -42,11 +43,12 @@ import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.DefaultProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
-import de.ims.icarus.plugins.prosody.SampaMapper;
+import de.ims.icarus.plugins.prosody.SampaMapper2;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -125,7 +127,7 @@ import de.ims.icarus.util.strings.StringPrimitives;
  */
 public final class ProsodyIOUtils implements ProsodyConstants {
 
-	private static final boolean DEFAULT_SYLLABLES_FROM_SAMPA = false;
+	public static boolean DEFAULT_SYLLABLES_FROM_SAMPA = false;
 
 	private ProsodyIOUtils() {
 		// no-op
@@ -286,8 +288,6 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 		result.setProperties(properties);
 
-		boolean mapsSyllables = false;
-
 		String speaker = (String) result.getProperty(SPEAKER_KEY);
 
 		for(int i=0; i<size-headerOffset; i++) {
@@ -383,17 +383,22 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 					int sylCount = result.getSyllableCount(i);
 					if(sylCount>0) {
 						String[] sampa = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
-						String[] labels = SampaMapper.split(forms[i], sampa);
-						offsets = new int[sylCount];
-						int offset = 0;
-						for(int k=0; k<sylCount; k++) {
-							offsets[k] = offset;
-							offset += labels[k].length();
+						String[] labels = SampaMapper2.split(forms[i], sampa);
+						if(labels!=null) {
+							offsets = new int[sylCount];
+							int offset = 0;
+							for(int k=0; k<sylCount; k++) {
+								offsets[k] = offset;
+								offset += labels[k].length();
+							}
+							result.setProperty(i, SYLLABLE_FORM_KEY, labels);
+							result.setMapsSyllables(i, true);
+						} else {
+							LoggerFactory.info(ProsodyIOUtils.class,
+									buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[i]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					}
 				}
-			} else {
-				mapsSyllables = true;
 			}
 			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
 
@@ -428,10 +433,6 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(SPEAKER_KEY, speaker);
 		}
 
-		if(syllableOffsetsFromSampa) {
-			mapsSyllables = true;
-		}
-		result.setMapsSyllables(mapsSyllables);
 		result.setSentenceIndex(document.size());
 		document.add(result);
 

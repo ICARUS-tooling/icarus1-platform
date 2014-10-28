@@ -45,8 +45,6 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 
 	private TMap<Key, Object> indexedProperties = new THashMap<>();
 
-	private boolean mapsSyllables = false;
-
 	/**
 	 * @param document
 	 * @param forms
@@ -121,6 +119,20 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		return value==null ? 0L : (long)value;
 	}
 
+	public void setFlag(int index, long mask, boolean active) {
+		long flags = getFlags(index);
+		if(active) {
+			flags |= mask;
+		} else {
+			flags &= ~mask;
+		}
+		setFlags(index, flags);
+	}
+
+	public void setFlags(int index, long flags) {
+		setProperty(index, FLAGS_KEY, flags);
+	}
+
 	private final Key sharedKey = new Key();
 
 	private Object getIndexedProperty(int index, String key) {
@@ -185,7 +197,8 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public int getSyllableCount(int index) {
-		if(mapsSyllables) {
+		//TODO change to a single consistent strategy on storing syllable count!
+		if(isMapsSyllables(index)) {
 			int[] value = (int[])getIndexedProperty(index, SYLLABLE_OFFSET_KEY);
 			return value==null ? 0 : value.length;
 		} else {
@@ -223,6 +236,14 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	@Override
 	public String getSyllableLabel(int index, int syllable) {
 		return getSyllableStringProperty(index, SYLLABLE_LABEL_KEY, syllable);
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.prosody.ProsodicSentenceData#getSyllableForm(int, int)
+	 */
+	@Override
+	public String getSyllableForm(int index, int syllable) {
+		return getSyllableStringProperty(index, SYLLABLE_FORM_KEY, syllable);
 	}
 
 	/**
@@ -308,15 +329,15 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 * @return the mapsSyllables
 	 */
 	@Override
-	public boolean isMapsSyllables() {
-		return mapsSyllables;
+	public boolean isMapsSyllables(int index) {
+		return isFlagSet(index, FLAG_MAPS_SYLLABLES);
 	}
 
 	/**
 	 * @param mapsSyllables the mapsSyllables to set
 	 */
-	public void setMapsSyllables(boolean mapsSyllables) {
-		this.mapsSyllables = mapsSyllables;
+	public void setMapsSyllables(int index, boolean mapsSyllables) {
+		setFlag(index, FLAG_MAPS_SYLLABLES, mapsSyllables);
 	}
 
 	/**

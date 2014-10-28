@@ -121,8 +121,8 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 	}
 
 	@Override
-	public boolean isMapsSyllables() {
-		return source.isMapsSyllables();
+	public boolean isMapsSyllables(int index) {
+		return source.isMapsSyllables(index);
 	}
 
 	@Override
@@ -143,6 +143,11 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 	@Override
 	public String getSyllableLabel(int index, int syllable) {
 		return source.getSyllableLabel(index, syllable);
+	}
+
+	@Override
+	public String getSyllableForm(int index, int syllable) {
+		return source.getSyllableForm(index, syllable);
 	}
 
 	@Override

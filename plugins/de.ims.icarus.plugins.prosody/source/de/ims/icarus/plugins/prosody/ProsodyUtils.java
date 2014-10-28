@@ -76,6 +76,10 @@ public class ProsodyUtils implements ProsodyConstants {
 		return ContentTypeRegistry.getInstance().getTypeForClass(ProsodicAnnotation.class);
 	}
 
+	public static boolean isNumberToken(String word) {
+		return word!=null && !word.isEmpty() && Character.isDigit(word.charAt(0));
+	}
+
 	private static final String[] defaultWordPropertyKeys = {
 		FORM_KEY,
 		POS_KEY,

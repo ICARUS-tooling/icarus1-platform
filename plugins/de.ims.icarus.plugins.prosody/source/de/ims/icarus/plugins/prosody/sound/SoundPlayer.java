@@ -680,8 +680,8 @@ public class SoundPlayer {
 
 			long framesToRead = endFrame-startFrame+1;
 
-			System.out.printf("firstFrame=%d lastFrame=%d framesToRead=%d duration=%.02f frameRate=%.02f frameSize=%d\n", //$NON-NLS-1$
-					startFrame, startFrame+framesToRead, framesToRead, framesToRead/frameRate, frameRate, frameSize);
+//			System.out.printf("firstFrame=%d lastFrame=%d framesToRead=%d duration=%.02f frameRate=%.02f frameSize=%d\n", //$NON-NLS-1$
+//					startFrame, startFrame+framesToRead, framesToRead, framesToRead/frameRate, frameRate, frameSize);
 
 			// Make a small 0.1 seconds buffer
 			//TODO maybe increase?

@@ -397,6 +397,16 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		return (int) hc;
 	}
 
+	/**
+	 * @see de.ims.icarus.plugins.prosody.painte.PaIntEParams#clear()
+	 */
+	@Override
+	public void clear() {
+		super.clear();
+		compact = DEFAULT_COMPACT;
+		activeMask = ALL_SET;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof PaIntEConstraintParams) {

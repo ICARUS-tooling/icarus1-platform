@@ -45,7 +45,7 @@ public abstract class AbstractPaIntEConstraint extends BoundedSyllableConstraint
 	private static final long serialVersionUID = -361927812276915216L;
 
 	protected final PaIntEConstraintParams valueParams = new PaIntEConstraintParams();
-	protected PaIntEConstraintParams constraintParams;
+	protected transient PaIntEConstraintParams constraintParams;
 
 	public AbstractPaIntEConstraint(String token, Object value,
 			SearchOperator operator, Object specifier) {

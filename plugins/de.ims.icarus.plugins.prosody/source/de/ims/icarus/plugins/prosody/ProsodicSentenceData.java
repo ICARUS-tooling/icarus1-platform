@@ -45,10 +45,11 @@ public interface ProsodicSentenceData extends DependencyData, CoreferenceData, P
 
 	int getSyllableCount(int index);
 
-	boolean isMapsSyllables();
+	boolean isMapsSyllables(int index);
 
 	int getSyllableOffset(int index, int syllable);
 	String getSyllableLabel(int index, int syllable);
+	String getSyllableForm(int index, int syllable);
 	float getSyllableTimestamp(int index, int syllable);
 	String getSyllableVowel(int index, int syllable);
 	boolean isSyllableStressed(int index, int syllable);
