@@ -691,10 +691,11 @@ public class SentencePanel extends JPanel{
 		public static final int DEFAULT_GRAPH_HEIGHT = 90;
 		public static final int DEFAULT_GRAPH_WIDTH = 120;
 		public static final int DEFAULT_WORD_SCOPE = 0;
-		public static final int DEFAULT_SYLLABLE_SCOPE = 2;
 		public static final boolean  DEFAULT_MOUSE_WHEEL_SCROLL_SUPPORTED = true;
 		public static final int DEFAULT_WORD_SPACING = 3;
 		public static final int DEFAULT_GRAPH_SPACING = 2;
+		public static final int DEFAULT_LEFT_SYLLABLE_EXTEND = 1;
+		public static final int DEFAULT_RIGHT_SYLLABLE_EXTEND = 2;
 		public static final boolean  DEFAULT_CLEAR_LABEL_BACKGROUND = true;
 		public static final boolean  DEFAULT_LOOP_SOUND = false;
 		public static final PreviewSize DEFAULT_PREVIEW_SIZE = PreviewSize.MEDIUM;
@@ -715,7 +716,8 @@ public class SentencePanel extends JPanel{
 
 		// Detail
 		public int wordScope = DEFAULT_WORD_SCOPE;
-		public int syllableScope = DEFAULT_SYLLABLE_SCOPE;
+		public int leftSyllableExtent = DEFAULT_LEFT_SYLLABLE_EXTEND;
+		public int rightSyllableExtent = DEFAULT_RIGHT_SYLLABLE_EXTEND;
 		public int graphHeight = DEFAULT_GRAPH_HEIGHT;
 		public int graphWidth = DEFAULT_GRAPH_WIDTH;
 		public int wordSpacing = DEFAULT_WORD_SPACING;
@@ -1081,8 +1083,8 @@ public class SentencePanel extends JPanel{
 			xAxis.setLabelFont(config.detailAxisLabelFont);
 			xAxis.setMarkerColor(config.detailAxisMarkerColor);
 			xAxis.setMarkerHeight(config.detailAxisMarkerHeight);
-			xAxis.setMinValue(-config.syllableScope);
-			xAxis.setMaxValue(config.syllableScope);
+			xAxis.setMinValue(-config.leftSyllableExtent);
+			xAxis.setMaxValue(config.rightSyllableExtent);
 
 			yAxis.setAxisColor(config.detailAxisColor);
 			yAxis.setLabelColor(config.detailAxisLabelColor);

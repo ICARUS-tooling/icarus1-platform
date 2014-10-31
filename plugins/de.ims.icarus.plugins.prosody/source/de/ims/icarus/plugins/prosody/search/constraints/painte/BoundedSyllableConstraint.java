@@ -113,7 +113,7 @@ public abstract class BoundedSyllableConstraint extends AbstractProsodySyllableC
 			if(wrapper==null)
 				throw new UnknownIdentifierException("No such painte parameter set available: "+name); //$NON-NLS-1$
 
-			constraints.setParams(wrapper.getParams());
+			constraints.setParams(wrapper);
 		} else {
 			constraints.setParams(s);
 		}

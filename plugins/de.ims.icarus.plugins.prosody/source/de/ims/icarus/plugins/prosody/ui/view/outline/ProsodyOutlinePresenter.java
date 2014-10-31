@@ -503,7 +503,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		// Detail
 		Handle detailHandle = registry.getChildHandle(handle, "detail"); //$NON-NLS-1$
 		panelConfig.wordScope = registry.getInteger(registry.getChildHandle(detailHandle, "wordScope")); //$NON-NLS-1$
-		panelConfig.syllableScope = registry.getInteger(registry.getChildHandle(detailHandle, "syllableScope")); //$NON-NLS-1$
+		panelConfig.leftSyllableExtent = registry.getInteger(registry.getChildHandle(detailHandle, "leftSyllableExtent")); //$NON-NLS-1$
+		panelConfig.rightSyllableExtent = registry.getInteger(registry.getChildHandle(detailHandle, "rightSyllableExtent")); //$NON-NLS-1$
 		panelConfig.graphHeight = registry.getInteger(registry.getChildHandle(detailHandle, "graphHeight")); //$NON-NLS-1$
 		panelConfig.graphWidth = registry.getInteger(registry.getChildHandle(detailHandle, "graphWidth")); //$NON-NLS-1$
 		panelConfig.wordSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "wordSpacing")); //$NON-NLS-1$

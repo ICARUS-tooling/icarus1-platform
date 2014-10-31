@@ -554,7 +554,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		// Detail
 		Handle detailHandle = registry.getChildHandle(handle, "detail"); //$NON-NLS-1$
 		config.wordScope = registry.getInteger(registry.getChildHandle(detailHandle, "wordScope")); //$NON-NLS-1$
-		config.syllableScope = registry.getInteger(registry.getChildHandle(detailHandle, "syllableScope")); //$NON-NLS-1$
+		config.leftSyllableExtent = registry.getInteger(registry.getChildHandle(detailHandle, "leftSyllableExtent")); //$NON-NLS-1$
+		config.rightSyllableExtent = registry.getInteger(registry.getChildHandle(detailHandle, "rightSyllableExtent")); //$NON-NLS-1$
 		config.graphHeight = registry.getInteger(registry.getChildHandle(detailHandle, "graphHeight")); //$NON-NLS-1$
 		config.graphWidth = registry.getInteger(registry.getChildHandle(detailHandle, "graphWidth")); //$NON-NLS-1$
 		config.wordSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "wordSpacing")); //$NON-NLS-1$
@@ -1338,8 +1339,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			xAxis.setLabelFont(config.detailAxisLabelFont);
 			xAxis.setMarkerColor(config.detailAxisMarkerColor);
 			xAxis.setMarkerHeight(config.detailAxisMarkerHeight);
-			xAxis.setMinValue(-config.syllableScope);
-			xAxis.setMaxValue(config.syllableScope);
+			xAxis.setMinValue(-config.leftSyllableExtent);
+			xAxis.setMaxValue(config.rightSyllableExtent);
 
 			yAxis.setAxisColor(config.detailAxisColor);
 			yAxis.setLabelColor(config.detailAxisLabelColor);

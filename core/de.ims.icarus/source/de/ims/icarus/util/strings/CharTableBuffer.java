@@ -491,6 +491,10 @@ public class CharTableBuffer {
 			buffer = new char[size];
 		}
 
+		public int getRowIndex() {
+			return rowIndex;
+		}
+
 		private void reset() {
 			width = 0;
 			resetSplits();

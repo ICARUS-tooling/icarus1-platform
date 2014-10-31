@@ -81,13 +81,18 @@ public class PaIntEParamsTableCellRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
+		boolean paintCompact = false;
+
 		if(value instanceof PaIntEParamsWrapper) {
-			value = ((PaIntEParamsWrapper)value).getParams();
+			PaIntEParamsWrapper wrapper = (PaIntEParamsWrapper) value;
+			value = wrapper.getParams();
+			paintCompact = wrapper.isCompact();
 		}
 
 		super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
 				row, column);
 
+		painteIcon.getCurve().setPaintComapct(paintCompact);
 		paramsBuffer.setParams((PaIntEParams) value);
 
 		setIcon(painteIcon);

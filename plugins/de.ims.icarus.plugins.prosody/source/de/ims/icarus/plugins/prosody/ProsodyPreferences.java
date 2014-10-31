@@ -117,7 +117,8 @@ public class ProsodyPreferences {
 
 		// PAINTE EDITOR GROUP
 		builder.addGroup("painteEditor", true); //$NON-NLS-1$
-		builder.addIntegerEntry("syllableScope", 2, 1, 10); //$NON-NLS-1$
+		builder.addIntegerEntry("leftSyllableExtent", 1, 0, 10); //$NON-NLS-1$
+		builder.addIntegerEntry("rightSyllableExtent", 2, 1, 10); //$NON-NLS-1$
 		builder.addIntegerEntry("graphHeight", 200, 50, 400); //$NON-NLS-1$
 		builder.addIntegerEntry("graphWidth", 300, 100, 500); //$NON-NLS-1$
 		builder.addBooleanEntry("paintGrid", PaIntEGraph.DEFAULT_PAINT_GRID); //$NON-NLS-1$
@@ -241,7 +242,7 @@ public class ProsodyPreferences {
 		builder.virtual();
 
 		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
-		builder.addDoubleEntry("rightBorder", 1.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("rightBorder", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 
 		// END PAINTE INTEGRAL SUBGROUP
 		builder.back();
@@ -251,7 +252,7 @@ public class ProsodyPreferences {
 		builder.virtual();
 
 		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
-		builder.addDoubleEntry("rightBorder", 1.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("rightBorder", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 		builder.addIntegerEntry("resolution", 100, 20, 300, 1); //$NON-NLS-1$
 
 		// END PAINTE CURVE SUBGROUP
@@ -262,7 +263,7 @@ public class ProsodyPreferences {
 		builder.virtual();
 
 		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
-		builder.addDoubleEntry("rightBorder", 1.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("rightBorder", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 		builder.addIntegerEntry("resolution", 100, 20, 300, 1); //$NON-NLS-1$
 
 		// END PAINTE CHANNEL SUBGROUP
@@ -355,7 +356,8 @@ public class ProsodyPreferences {
 		builder.addGroup("detail", true); //$NON-NLS-1$
 
 		builder.addIntegerEntry("wordScope", PanelConfig.DEFAULT_WORD_SCOPE, 0, 5); //$NON-NLS-1$
-		builder.addIntegerEntry("syllableScope", PanelConfig.DEFAULT_SYLLABLE_SCOPE, 1, 10); //$NON-NLS-1$
+		builder.addIntegerEntry("leftSyllableExtent", 1, 0, 10); //$NON-NLS-1$
+		builder.addIntegerEntry("rightSyllableExtent", 2, 1, 10); //$NON-NLS-1$
 		builder.addIntegerEntry("graphHeight", PanelConfig.DEFAULT_GRAPH_HEIGHT, 50, 400); //$NON-NLS-1$
 		builder.addIntegerEntry("graphWidth", PanelConfig.DEFAULT_GRAPH_WIDTH, 100, 500); //$NON-NLS-1$
 		builder.addIntegerEntry("wordSpacing", PanelConfig.DEFAULT_WORD_SPACING, 0, 50); //$NON-NLS-1$

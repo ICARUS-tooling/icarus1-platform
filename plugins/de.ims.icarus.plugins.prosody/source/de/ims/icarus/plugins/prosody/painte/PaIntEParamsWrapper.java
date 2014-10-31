@@ -30,6 +30,7 @@ import java.io.Serializable;
 import javax.swing.Icon;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -48,6 +49,8 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Ser
 	private String label;
 	@XmlElement(name="description", required=false)
 	private String description;
+	@XmlAttribute(name="compact")
+	private boolean compact;
 
 	protected PaIntEParamsWrapper() {
 		params = null;
@@ -106,6 +109,14 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Ser
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public boolean isCompact() {
+		return compact;
+	}
+
+	public void setCompact(boolean compact) {
+		this.compact = compact;
 	}
 
 	@Override

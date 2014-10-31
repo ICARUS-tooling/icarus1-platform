@@ -482,6 +482,17 @@ public class PaIntEEditorView extends View {
 		PaIntERegistry.getInstance().editParamsDescription(params, newDescription);
 	}
 
+	private void toggleSelectedParamsCompact() {
+		PaIntEParamsWrapper params = getSelectedWrapper();
+		if(params==null) {
+			return;
+		}
+
+		boolean compact = params.isCompact();
+
+		PaIntERegistry.getInstance().setCompact(params, !compact);
+	}
+
 	private void loadSelectedParams() {
 		PaIntEParamsWrapper params = getSelectedWrapper();
 		if(params==null) {
@@ -660,13 +671,14 @@ public class PaIntEEditorView extends View {
 		 */
 		@Override
 		public void mouseClicked(MouseEvent e) {
+
 			if(e.getClickCount()==2) {
 
 				int columnIndex = paramsTable.columnAtPoint(e.getPoint());
 
-				if(columnIndex==2) {
+				if(columnIndex==3) {
 					editSelectedParamsDescription();
-				} else {
+				} else if(columnIndex!=2) {
 					loadSelectedParams();
 				}
 			}
@@ -717,6 +729,8 @@ public class PaIntEEditorView extends View {
 			} else {
 				refreshParamComponents();
 			}
+
+			refreshGraph();
 		}
 
 	}
@@ -1521,6 +1535,8 @@ public class PaIntEEditorView extends View {
 			titleLabel.setText(label);
 			titleLabel.setToolTipText(UIUtil.toUnwrappedSwingTooltip(wrapper.getDescription()));
 
+//			setPaintCompact(wrapper.isCompact());
+
 //			removeButton.setVisible(paramsPanels.size()>1 && !toggleButton.isSelected());
 		}
 
@@ -1615,6 +1631,7 @@ public class PaIntEEditorView extends View {
 
 		public void setWrapper(PaIntEParamsWrapper newParams) {
 			wrapper = newParams;
+//			paintCompact = wrapper.isCompact();
 
 			double[] params = newParams.getParams().getParams(new double[7]);
 
@@ -1699,6 +1716,10 @@ public class PaIntEEditorView extends View {
 			return paintCompact;
 		}
 
+		public boolean shouldPaintCompact() {
+			return paintCompact || wrapper.isCompact();
+		}
+
 		public void setExpandedState(boolean expanded) {
 			colorButton.setVisible(expanded);
 			undoButton.setVisible(expanded);
@@ -1742,6 +1763,8 @@ public class PaIntEEditorView extends View {
 			boolean closable = paramsPanels.size() > 1;
 			boolean pasteable = isPaIntEClipboardContent();
 
+			boolean forcedCompact = wrapper.isCompact();
+
 			boolean canUndo = history.canUndo();
 			boolean canRedo = history.canRedo();
 
@@ -1757,6 +1780,10 @@ public class PaIntEEditorView extends View {
 					"plugins.prosody.painteEditorView.undoParamsPanelAction"); //$NON-NLS-1$
 			actionManager.setEnabled(canRedo,
 					"plugins.prosody.painteEditorView.redoParamsPanelAction"); //$NON-NLS-1$
+			actionManager.setSelected(paintCompact || forcedCompact,
+					"plugins.prosody.painteEditorView.toggleParamsPanelPaintCompactAction"); //$NON-NLS-1$
+			actionManager.setEnabled(!forcedCompact,
+					"plugins.prosody.painteEditorView.toggleParamsPanelPaintCompactAction"); //$NON-NLS-1$
 
 			Action colorAction = actionManager.getAction(
 					"plugins.prosody.painteEditorView.colorParamsPanelAction"); //$NON-NLS-1$
@@ -2176,13 +2203,14 @@ public class PaIntEEditorView extends View {
 
 			int graphHeight = registry.getInteger(registry.getChildHandle(handle, "graphHeight")); //$NON-NLS-1$
 			int graphWidth = registry.getInteger(registry.getChildHandle(handle, "graphWidth")); //$NON-NLS-1$
-			int syllableScope = registry.getInteger(registry.getChildHandle(handle, "syllableScope")); //$NON-NLS-1$
+			int leftExtend = registry.getInteger(registry.getChildHandle(handle, "leftSyllableExtent")); //$NON-NLS-1$
+			int rightExtend = registry.getInteger(registry.getChildHandle(handle, "rightSyllableExtent")); //$NON-NLS-1$
 
 			setMinimumSize(new Dimension(graphWidth, graphHeight));
 
 			Axis.Integer xAxis = (Axis.Integer) graph.getXAxis();
-			xAxis.setMinValue(-syllableScope);
-			xAxis.setMaxValue(syllableScope);
+			xAxis.setMinValue(-leftExtend);
+			xAxis.setMaxValue(rightExtend);
 		}
 
 		public PaIntEGraph getGraph() {
@@ -2251,7 +2279,7 @@ public class PaIntEEditorView extends View {
 
 		private void paintPanel(Graphics g, ParamsPanel panel, Rectangle area) {
 
-			graph.getCurve().setPaintComapct(paintAllCompact || panel.isPaintCompact());
+			graph.getCurve().setPaintComapct(paintAllCompact || panel.shouldPaintCompact());
 
 			graph.getCurve().setColor(panel.color());
 			graph.getCurve().paint(g, panel.getParams(), area,

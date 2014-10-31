@@ -258,6 +258,22 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 		return isRegistered;
 	}
 
+	public boolean setCompact(PaIntEParamsWrapper wrapper, boolean compact) {
+		if(compact==wrapper.isCompact()) {
+			return false;
+		}
+
+		wrapper.setCompact(compact);
+
+		boolean isRegistered = containsParams(wrapper);
+
+		if(isRegistered) {
+			paramsChanged(wrapper);
+		}
+
+		return isRegistered;
+	}
+
 	public void paramsChanged(PaIntEParamsWrapper wrapper) {
 		if (wrapper == null)
 			throw new NullPointerException("Invalid wrapper"); //$NON-NLS-1$
@@ -395,6 +411,7 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 	private static final String[] columnKeys = {
 		"label", //$NON-NLS-1$
 		"curve", //$NON-NLS-1$
+		"compact", //$NON-NLS-1$
 		"description", //$NON-NLS-1$
 		"a1", //$NON-NLS-1$
 		"a2", //$NON-NLS-1$
@@ -436,11 +453,14 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 		public Class<?> getColumnClass(int columnIndex) {
 			switch (columnIndex) {
 			case 0:
-			case 2:
+			case 3:
 				return String.class;
 
 			case 1:
 				return PaIntEParamsWrapper.class;
+
+			case 2:
+				return Boolean.class;
 
 			default:
 				return Double.class;
@@ -449,7 +469,7 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex!=1 && columnIndex!=2;
+			return columnIndex!=1 && columnIndex!=1 && columnIndex!=3;
 		}
 
 		@Override
@@ -464,29 +484,32 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 				break;
 
 			case 2:
+				wrapper.setCompact((Boolean) aValue);
+				break;
+
+			case 3:
 				wrapper.setDescription((String) aValue);
 				break;
 
-
-			case 3:
+			case 4:
 				wrapper.getParams().setA1((Double)aValue);
 				break;
-			case 4:
+			case 5:
 				wrapper.getParams().setA2((Double)aValue);
 				break;
-			case 5:
+			case 6:
 				wrapper.getParams().setB((Double)aValue);
 				break;
-			case 6:
+			case 7:
 				wrapper.getParams().setC1((Double)aValue);
 				break;
-			case 7:
+			case 8:
 				wrapper.getParams().setC2((Double)aValue);
 				break;
-			case 8:
+			case 9:
 				wrapper.getParams().setD((Double)aValue);
 				break;
-			case 9:
+			case 10:
 				wrapper.getParams().setAlignment((Double)aValue);
 				break;
 
@@ -526,20 +549,22 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 			case 1:
 				return wrapper;
 			case 2:
-				return wrapper.getDescription();
+				return wrapper.isCompact();
 			case 3:
-				return wrapper.getParams().getA1();
+				return wrapper.getDescription();
 			case 4:
-				return wrapper.getParams().getA2();
+				return wrapper.getParams().getA1();
 			case 5:
-				return wrapper.getParams().getB();
+				return wrapper.getParams().getA2();
 			case 6:
-				return wrapper.getParams().getC1();
+				return wrapper.getParams().getB();
 			case 7:
-				return wrapper.getParams().getC2();
+				return wrapper.getParams().getC1();
 			case 8:
-				return wrapper.getParams().getD();
+				return wrapper.getParams().getC2();
 			case 9:
+				return wrapper.getParams().getD();
+			case 10:
 				return wrapper.getParams().getAlignment();
 
 			default:

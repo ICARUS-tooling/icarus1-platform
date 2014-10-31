@@ -229,7 +229,7 @@ public final class IOUtil {
 		return new BufferedReader(new InputStreamReader(is, cs));
 	}
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
+	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
 
 	public static final String CHARSET_OPTION = "charset"; //$NON-NLS-1$
 	public static final String CHARSET_NAME_OPTION = "charsetName"; //$NON-NLS-1$
@@ -245,7 +245,7 @@ public final class IOUtil {
 		}
 
 		if(charset == null) {
-			charset = defaultCharset==null ? DEFAULT_CHARSET : defaultCharset;
+			charset = defaultCharset==null ? UTF8_CHARSET : defaultCharset;
 		} else if(charset instanceof String) {
 			charset = Charset.forName((String)charset);
 		}

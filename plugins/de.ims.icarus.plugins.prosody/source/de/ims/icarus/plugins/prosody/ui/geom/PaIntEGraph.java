@@ -62,7 +62,7 @@ public class PaIntEGraph {
 	private final PaIntECurve curve;
 
 	public PaIntEGraph() {
-		xAxis = new Axis.Integer(false, -2, +2, 1);
+		xAxis = new Axis.Integer(false, -1, +2, 1);
 		xAxis.setLabelStepSize(1);
 		xAxis.setLabelVertical(false);
 

@@ -29,8 +29,10 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.Stack;
 
 import de.ims.icarus.Core;
@@ -48,7 +50,7 @@ import de.ims.icarus.plugins.prosody.DefaultProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
-import de.ims.icarus.plugins.prosody.SampaMapper2;
+import de.ims.icarus.plugins.prosody.sampa.SampaMapper2;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -128,6 +130,7 @@ import de.ims.icarus.util.strings.StringPrimitives;
 public final class ProsodyIOUtils implements ProsodyConstants {
 
 	public static boolean DEFAULT_SYLLABLES_FROM_SAMPA = false;
+	public static Set<String> SENTENCE_BLACKLIST = null;
 
 	private ProsodyIOUtils() {
 		// no-op
@@ -140,40 +143,40 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static final char SPACE = ' ';
 	private static final String COMMENT_BEGIN = "#"; //$NON-NLS-1$
 
-	public static final int ID_COL = 0;
-	public static final int FORM_COL = 1;
-	public static final int POS_COL = 2;
-	public static final int LEMMA_COL = 3;
-	public static final int FEATURES_COL = 4;
-	public static final int HEAD_COL = 5;
-	public static final int DEPREL_COL = 6;
-	public static final int SPEAKER_COL = 7;
-	public static final int SPEAKER_FEATURES_COL = 8;
-	public static final int ENTITY_COL = 9;
-	public static final int COREF_COL = 10;
-	public static final int BEGIN_TS_COL = 11;
-	public static final int END_TS_COL = 12;
-	public static final int SYL_OFFSET_COL = 13;
-	public static final int SYL_LABEL_COL = 14;
-	public static final int SYL_TIMESTAMP_COL = 15;
-	public static final int SYL_VOWEL_COL = 16;
-	public static final int SYL_STRESS_COL = 17;
-	public static final int SYL_DURATION_COL = 18;
-	public static final int VOWEL_DURATION_COL = 19;
-	public static final int SYL_STARTPITCH_COL = 20;
-	public static final int SYL_MIDPITCH_COL = 21;
-	public static final int SYL_ENDPITCH_COL = 22;
-	public static final int CODA_TYPE_COL = 23;
-	public static final int CODA_SIZE_COL = 24;
-	public static final int ONSET_TYPE_COL = 25;
-	public static final int ONSET_SIZE_COL = 26;
-	public static final int PHONEME_COUNT_COL = 27;
-	public static final int PAINTE_A1_COL = 28;
-	public static final int PAINTE_A2_COL = 29;
-	public static final int PAINTE_B_COL = 30;
-	public static final int PAINTE_C1_COL = 31;
-	public static final int PAINTE_C2_COL = 32;
-	public static final int PAINTE_D_COL = 33;
+//	public static final int ID_COL = 0;
+//	public static final int FORM_COL = 1;
+//	public static final int POS_COL = 2;
+//	public static final int LEMMA_COL = 3;
+//	public static final int FEATURES_COL = 4;
+//	public static final int HEAD_COL = 5;
+//	public static final int DEPREL_COL = 6;
+//	public static final int SPEAKER_COL = 7;
+//	public static final int SPEAKER_FEATURES_COL = 8;
+//	public static final int ENTITY_COL = 9;
+//	public static final int COREF_COL = 10;
+//	public static final int BEGIN_TS_COL = 11;
+//	public static final int END_TS_COL = 12;
+//	public static final int SYL_OFFSET_COL = 13;
+//	public static final int SYL_LABEL_COL = 14;
+//	public static final int SYL_TIMESTAMP_COL = 15;
+//	public static final int SYL_VOWEL_COL = 16;
+//	public static final int SYL_STRESS_COL = 17;
+//	public static final int SYL_DURATION_COL = 18;
+//	public static final int VOWEL_DURATION_COL = 19;
+//	public static final int SYL_STARTPITCH_COL = 20;
+//	public static final int SYL_MIDPITCH_COL = 21;
+//	public static final int SYL_ENDPITCH_COL = 22;
+//	public static final int CODA_TYPE_COL = 23;
+//	public static final int CODA_SIZE_COL = 24;
+//	public static final int ONSET_TYPE_COL = 25;
+//	public static final int ONSET_SIZE_COL = 26;
+//	public static final int PHONEME_COUNT_COL = 27;
+//	public static final int PAINTE_A1_COL = 28;
+//	public static final int PAINTE_A2_COL = 29;
+//	public static final int PAINTE_B_COL = 30;
+//	public static final int PAINTE_C1_COL = 31;
+//	public static final int PAINTE_C2_COL = 32;
+//	public static final int PAINTE_D_COL = 33;
 
 	public static final String BEGIN_DOCUMENT = "#begin document"; //$NON-NLS-1$
 	public static final String END_DOCUMENT = "#end document"; //$NON-NLS-1$
@@ -196,18 +199,28 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 					"plugins.prosody.prosodyReader.syllableOffsetsFromSampa"); //$NON-NLS-1$
 		}
 
+		SampaMapper2 sampaMapper = null;
+		if(syllableOffsetsFromSampa) {
+			//TODO provide multiple fies as options?
+			URL sampaRules = ProsodyIOUtils.class.getResource("sampa-table-de.csv"); //$NON-NLS-1$
+			sampaMapper = new SampaMapper2(sampaRules);
+		}
+		SentenceReader sentenceReader = null;
+
 		while(buffer.next()) {
 			try {
 				if(result==null) {
 					result = new DefaultProsodicDocumentData(documentSet, documentSet.size());
-					result.setId(blockHandler.getExpectedId());;
+					result.setId(blockHandler.getExpectedId());
 					documentSet.add(result);
+
+					sentenceReader = createReader(blockHandler.getFormatVersion());
 
 					if(readDocumentProperties(result, buffer)) {
 						continue;
 					}
 				}
-				createData(result, buffer, clusterMap, syllableOffsetsFromSampa);
+				sentenceReader.createData(result, buffer, clusterMap, sampaMapper);
 			} catch(Exception e) {
 				// Cannot be IOException or UnsupportedFormatException
 
@@ -256,199 +269,234 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		return true;
 	}
 
-	private static DefaultProsodicSentenceData createData(final ProsodicDocumentData document,
-			final CharTableBuffer buffer, final TIntObjectMap<Cluster> clusterMap, final boolean syllableOffsetsFromSampa) {
-		int size = buffer.getRowCount();
-		LinkedList<Span> spanBuffer = new LinkedList<>();
-		Stack<Span> spanStack = new Stack<>();
+	private static SentenceReader createReader(final String formatVersion) {
+		SentenceReader reader = null;
 
-		CorefProperties properties = new CorefProperties();
-		int headerOffset = 0;
-		for(int i=0; i<size; i++) {
-			Row row = buffer.getRow(i);
+		if(formatVersion!=null) {
+			switch (formatVersion) {
+			case "0.3": //$NON-NLS-1$
+				reader = new SentenceReaderV03();
+				break;
 
-			if(!row.startsWith(COMMENT_BEGIN)) {
+			case "0.4": //$NON-NLS-1$
+				reader = new SentenceReaderV04();
+				break;
+
+			default:
 				break;
 			}
-
-			int sepIndex = row.indexOf(SPACE);
-
-			// Only consider valid declarations
-			if(sepIndex!=-1) {
-				String key = row.subSequence(1, sepIndex).toString();
-				String value = row.subSequence(sepIndex+1, row.length()).toString();
-				properties.put(key, value);
-			}
-
-			headerOffset++;
 		}
 
-		String[] forms = new String[size-headerOffset];
-		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(document, forms);
-
-		result.setProperties(properties);
-
-		String speaker = (String) result.getProperty(SPEAKER_KEY);
-
-		for(int i=0; i<size-headerOffset; i++) {
-			Row row = buffer.getRow(i+headerOffset);
-
-			row.split(DELIMITER);
-
-//			if(!String.valueOf(i).equals(cols[WORD_COL]))
-//				throw new NullPointerException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
-
-			forms[i] = get(row, FORM_COL, EMPTY);
-
-			Cursor coref = row.getSplitCursor(row.getSplitCount()-1);
-			if(!coref.equals(HYPHEN)) {
-				// Build spans
-				coref.split('|');
-				for(int j=0; j<coref.getSplitCount(); j++) {
-					Cursor chunk = coref.getSplitCursor(j);
-					if(chunk.startsWith(OBR)) {
-						int i1 = chunk.length()-1;
-						if(chunk.endsWith(CBR)) {
-							i1--;
-						}
-						int clusterId = StringPrimitives.parseInt(chunk, 1, i1);
-
-						// Start of span definition
-						Span span = new Span(i, i, document.size());
-
-						if(clusterMap!=null) {
-							Cluster cluster = clusterMap.get(clusterId);
-							if (cluster==null) {
-								cluster = new Cluster(clusterId);
-								clusterMap.put(clusterId, cluster);
-							}
-							cluster.add(span);
-							span.setCluster(cluster);
-						}
-
-						spanStack.push(span);
-					}
-					if(chunk.endsWith(CBR)) {
-						int i0 = chunk.startsWith(OBR) ? 1 : 0;
-						int clusterId = StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
-
-						// End of span definition
-						Span span = null;
-						for(int idx=spanStack.size()-1; idx>-1; idx--) {
-							if(spanStack.get(idx).getClusterId()==clusterId) {
-								span = spanStack.remove(idx);
-								break;
-							}
-						}
-						if(span==null)
-							throw new IllegalArgumentException("No span introduced for cluster-id: "+clusterId); //$NON-NLS-1$
-						span.setEndIndex(i);
-
-						// Ensure there can be only one span covering the exact
-						// same range of indices (we keep the first such one and
-						// discard all subsequent spans for this range
-						if(span.compareTo(spanBuffer.peekLast())!=0) {
-							spanBuffer.offerLast(span);
-						}
-					}
-
-					chunk.recycle();
-				}
-			}
-
-			coref.recycle();
-
-			// Assign properties
-			result.setProperty(i, FORM_KEY, forms[i]);
-			result.setProperty(i, POS_KEY, get(row, POS_COL, EMPTY));
-			result.setProperty(i, LEMMA_KEY, get(row, LEMMA_COL, EMPTY));
-			result.setProperty(i, FEATURES_KEY, get(row, FEATURES_COL, EMPTY));
-			result.setProperty(i, HEAD_KEY, Math.max(getInt(row, HEAD_COL, DATA_UNDEFINED_VALUE)-1, DATA_UNDEFINED_VALUE));
-			result.setProperty(i, DEPREL_KEY, get(row, DEPREL_COL, EMPTY));
-			result.setProperty(i, SPEAKER_KEY, get(row, SPEAKER_COL, EMPTY));
-			if(speaker==null) {
-				speaker = (String) result.getProperty(i, SPEAKER_KEY);
-			}
-			result.setProperty(i, SPEAKER_FEATURES_KEY, get(row, SPEAKER_FEATURES_COL, EMPTY));
-			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
-			result.setProperty(i, BEGIN_TS_KEY, getFloat(row, BEGIN_TS_COL, DATA_UNDEFINED_VALUE));
-			result.setProperty(i, END_TS_KEY, getFloat(row, END_TS_COL, DATA_UNDEFINED_VALUE));
-			result.setProperty(i, SYLLABLE_LABEL_KEY, getStrings(row, SYL_LABEL_COL));
-			result.setProperty(i, SYLLABLE_TIMESTAMP_KEY, getFloats(row, SYL_TIMESTAMP_COL));
-			result.setProperty(i, SYLLABLE_VOWEL_KEY, getStrings(row, SYL_VOWEL_COL));
-
-			int[] offsets = getInts(row, SYL_OFFSET_COL);
-			if(offsets==EMPTY_INTS) {
-				if(syllableOffsetsFromSampa) {
-					int sylCount = result.getSyllableCount(i);
-					if(sylCount>0) {
-						String[] sampa = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
-						String[] labels = SampaMapper2.split(forms[i], sampa);
-						if(labels!=null) {
-							offsets = new int[sylCount];
-							int offset = 0;
-							for(int k=0; k<sylCount; k++) {
-								offsets[k] = offset;
-								offset += labels[k].length();
-							}
-							result.setProperty(i, SYLLABLE_FORM_KEY, labels);
-							result.setMapsSyllables(i, true);
-						} else {
-							LoggerFactory.info(ProsodyIOUtils.class,
-									buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[i]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
-					}
-				}
-			}
-			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
-
-			// Special handling for stressed syllables (can be either a single value or an array)
-			int[] stressedIndices = getInts(row, SYL_STRESS_COL);
-			for(int index : stressedIndices) {
-				result.setSyllableStressed(i, index, true);
-			}
-
-			result.setProperty(i, SYLLABLE_DURATION_KEY, getFloats(row, SYL_DURATION_COL));
-			result.setProperty(i, VOWEL_DURATION_KEY, getFloats(row, VOWEL_DURATION_COL));
-			result.setProperty(i, SYLLABLE_STARTPITCH_KEY, getFloats(row, SYL_STARTPITCH_COL));
-			result.setProperty(i, SYLLABLE_MIDPITCH_KEY, getFloats(row, SYL_MIDPITCH_COL));
-			result.setProperty(i, SYLLABLE_ENDPITCH_KEY, getFloats(row, SYL_ENDPITCH_COL));
-			result.setProperty(i, CODA_TYPE_KEY, getStrings(row, CODA_TYPE_COL));
-			result.setProperty(i, CODA_SIZE_KEY, getInts(row, CODA_SIZE_COL));
-			result.setProperty(i, ONSET_TYPE_KEY, getStrings(row, ONSET_TYPE_COL));
-			result.setProperty(i, ONSET_SIZE_KEY, getInts(row, ONSET_SIZE_COL));
-			result.setProperty(i, PHONEME_COUNT_KEY, getInts(row, PHONEME_COUNT_COL));
-			result.setProperty(i, PAINTE_A1_KEY, getFloats(row, PAINTE_A1_COL));
-			result.setProperty(i, PAINTE_A2_KEY, getFloats(row, PAINTE_A2_COL));
-			result.setProperty(i, PAINTE_B_KEY, getFloats(row, PAINTE_B_COL));
-			result.setProperty(i, PAINTE_C1_KEY, getFloats(row, PAINTE_C1_COL));
-			result.setProperty(i, PAINTE_C2_KEY, getFloats(row, PAINTE_C2_COL));
-			result.setProperty(i, PAINTE_D_KEY, getFloats(row, PAINTE_D_COL));
+		if(reader==null) {
+			reader = new SentenceReaderV03();
 		}
 
-		if(!spanStack.isEmpty())
-			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
-
-		if(speaker!=null) {
-			result.setProperty(SPEAKER_KEY, speaker);
-		}
-
-		result.setSentenceIndex(document.size());
-		document.add(result);
-
-		Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
-		if(spans!=null) {
-			CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
-			allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
-		}
-
-		return result;
+		return reader;
 	}
+
+//	private static DefaultProsodicSentenceData createData(final ProsodicDocumentData document,
+//			final CharTableBuffer buffer, final TIntObjectMap<Cluster> clusterMap, final SampaMapper2 sampaMapper) {
+//		int size = buffer.getRowCount();
+//		LinkedList<Span> spanBuffer = new LinkedList<>();
+//		Stack<Span> spanStack = new Stack<>();
+//
+//		CorefProperties properties = new CorefProperties();
+//		int headerOffset = 0;
+//		for(int i=0; i<size; i++) {
+//			Row row = buffer.getRow(i);
+//
+//			if(!row.startsWith(COMMENT_BEGIN)) {
+//				break;
+//			}
+//
+//			int sepIndex = row.indexOf(SPACE);
+//
+//			// Only consider valid declarations
+//			if(sepIndex!=-1) {
+//				String key = row.subSequence(1, sepIndex).toString();
+//				String value = row.subSequence(sepIndex+1, row.length()).toString();
+//				properties.put(key, value);
+//			}
+//
+//			headerOffset++;
+//		}
+//
+//		String[] forms = new String[size-headerOffset];
+//		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(document, forms);
+//
+//		result.setProperties(properties);
+//
+//		String speaker = (String) result.getProperty(SPEAKER_KEY);
+//
+//		for(int i=0; i<size-headerOffset; i++) {
+//			Row row = buffer.getRow(i+headerOffset);
+//
+//			row.split(DELIMITER);
+//
+////			if(!String.valueOf(i).equals(cols[WORD_COL]))
+////				throw new NullPointerException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
+//
+//			forms[i] = get(row, FORM_COL, EMPTY);
+//
+//			Cursor coref = row.getSplitCursor(row.getSplitCount()-1);
+//			if(!coref.equals(HYPHEN)) {
+//				// Build spans
+//				coref.split('|');
+//				for(int j=0; j<coref.getSplitCount(); j++) {
+//					Cursor chunk = coref.getSplitCursor(j);
+//					if(chunk.startsWith(OBR)) {
+//						int i1 = chunk.length()-1;
+//						if(chunk.endsWith(CBR)) {
+//							i1--;
+//						}
+//						int clusterId = StringPrimitives.parseInt(chunk, 1, i1);
+//
+//						// Start of span definition
+//						Span span = new Span(i, i, document.size());
+//
+//						if(clusterMap!=null) {
+//							Cluster cluster = clusterMap.get(clusterId);
+//							if (cluster==null) {
+//								cluster = new Cluster(clusterId);
+//								clusterMap.put(clusterId, cluster);
+//							}
+//							cluster.add(span);
+//							span.setCluster(cluster);
+//						}
+//
+//						spanStack.push(span);
+//					}
+//					if(chunk.endsWith(CBR)) {
+//						int i0 = chunk.startsWith(OBR) ? 1 : 0;
+//						int clusterId = StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
+//
+//						// End of span definition
+//						Span span = null;
+//						for(int idx=spanStack.size()-1; idx>-1; idx--) {
+//							if(spanStack.get(idx).getClusterId()==clusterId) {
+//								span = spanStack.remove(idx);
+//								break;
+//							}
+//						}
+//						if(span==null)
+//							throw new IllegalArgumentException("No span introduced for cluster-id: "+clusterId); //$NON-NLS-1$
+//						span.setEndIndex(i);
+//
+//						// Ensure there can be only one span covering the exact
+//						// same range of indices (we keep the first such one and
+//						// discard all subsequent spans for this range
+//						if(span.compareTo(spanBuffer.peekLast())!=0) {
+//							spanBuffer.offerLast(span);
+//						}
+//					}
+//
+//					chunk.recycle();
+//				}
+//			}
+//
+//			coref.recycle();
+//
+//			// Assign properties
+//			result.setProperty(i, FORM_KEY, forms[i]);
+//			result.setProperty(i, POS_KEY, get(row, POS_COL, EMPTY));
+//			result.setProperty(i, LEMMA_KEY, get(row, LEMMA_COL, EMPTY));
+//			result.setProperty(i, FEATURES_KEY, get(row, FEATURES_COL, EMPTY));
+//			result.setProperty(i, HEAD_KEY, Math.max(getInt(row, HEAD_COL, DATA_UNDEFINED_VALUE)-1, DATA_UNDEFINED_VALUE));
+//			result.setProperty(i, DEPREL_KEY, get(row, DEPREL_COL, EMPTY));
+//			result.setProperty(i, SPEAKER_KEY, get(row, SPEAKER_COL, EMPTY));
+//			if(speaker==null) {
+//				speaker = (String) result.getProperty(i, SPEAKER_KEY);
+//			}
+//			result.setProperty(i, SPEAKER_FEATURES_KEY, get(row, SPEAKER_FEATURES_COL, EMPTY));
+//			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
+//			result.setProperty(i, BEGIN_TS_KEY, getFloat(row, BEGIN_TS_COL, DATA_UNDEFINED_VALUE));
+//			result.setProperty(i, END_TS_KEY, getFloat(row, END_TS_COL, DATA_UNDEFINED_VALUE));
+//			result.setProperty(i, SYLLABLE_LABEL_KEY, getStrings(row, SYL_LABEL_COL));
+//			result.setProperty(i, SYLLABLE_TIMESTAMP_KEY, getFloats(row, SYL_TIMESTAMP_COL));
+//			result.setProperty(i, SYLLABLE_VOWEL_KEY, getStrings(row, SYL_VOWEL_COL));
+//
+//			int[] offsets = getInts(row, SYL_OFFSET_COL);
+//			if(offsets==EMPTY_INTS) {
+//				if(sampaMapper!=null) {
+//					int sylCount = result.getSyllableCount(i);
+//					if(sylCount>0) {
+//						String[] sampa = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
+//						String[] labels = sampaMapper.split(forms[i], sampa);
+//						if(labels!=null) {
+//							offsets = new int[sylCount];
+//							int offset = 0;
+//							for(int k=0; k<sylCount; k++) {
+//								offsets[k] = offset;
+//								offset += labels[k].length();
+//							}
+//							result.setProperty(i, SYLLABLE_FORM_KEY, labels);
+//							result.setMapsSyllables(i, true);
+//						} else {
+//							boolean report = true;
+//							if(SENTENCE_BLACKLIST!=null) {
+//								Object sentNum = result.getProperty(SENTENCE_NUMBER_KEY);
+//								if(sentNum!=null && SENTENCE_BLACKLIST.contains(sentNum)) {
+//									report = false;
+//								}
+//							}
+//
+//							if(report) {
+//								LoggerFactory.info(ProsodyIOUtils.class,
+//										buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[i]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//							}
+//						}
+//					}
+//				}
+//			}
+//			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
+//
+//			// Special handling for stressed syllables (can be either a single value or an array)
+//			int[] stressedIndices = getInts(row, SYL_STRESS_COL);
+//			for(int index : stressedIndices) {
+//				result.setSyllableStressed(i, index, true);
+//			}
+//
+//			result.setProperty(i, SYLLABLE_DURATION_KEY, getFloats(row, SYL_DURATION_COL));
+//			result.setProperty(i, VOWEL_DURATION_KEY, getFloats(row, VOWEL_DURATION_COL));
+//			result.setProperty(i, SYLLABLE_STARTPITCH_KEY, getFloats(row, SYL_STARTPITCH_COL));
+//			result.setProperty(i, SYLLABLE_MIDPITCH_KEY, getFloats(row, SYL_MIDPITCH_COL));
+//			result.setProperty(i, SYLLABLE_ENDPITCH_KEY, getFloats(row, SYL_ENDPITCH_COL));
+//			result.setProperty(i, CODA_TYPE_KEY, getStrings(row, CODA_TYPE_COL));
+//			result.setProperty(i, CODA_SIZE_KEY, getInts(row, CODA_SIZE_COL));
+//			result.setProperty(i, ONSET_TYPE_KEY, getStrings(row, ONSET_TYPE_COL));
+//			result.setProperty(i, ONSET_SIZE_KEY, getInts(row, ONSET_SIZE_COL));
+//			result.setProperty(i, PHONEME_COUNT_KEY, getInts(row, PHONEME_COUNT_COL));
+//			result.setProperty(i, PAINTE_A1_KEY, getFloats(row, PAINTE_A1_COL));
+//			result.setProperty(i, PAINTE_A2_KEY, getFloats(row, PAINTE_A2_COL));
+//			result.setProperty(i, PAINTE_B_KEY, getFloats(row, PAINTE_B_COL));
+//			result.setProperty(i, PAINTE_C1_KEY, getFloats(row, PAINTE_C1_COL));
+//			result.setProperty(i, PAINTE_C2_KEY, getFloats(row, PAINTE_C2_COL));
+//			result.setProperty(i, PAINTE_D_KEY, getFloats(row, PAINTE_D_COL));
+//		}
+//
+//		if(!spanStack.isEmpty())
+//			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
+//
+//		if(speaker!=null) {
+//			result.setProperty(SPEAKER_KEY, speaker);
+//		}
+//
+//		result.setSentenceIndex(document.size());
+//		document.add(result);
+//
+//		Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
+//		if(spans!=null) {
+//			CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
+//			allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
+//		}
+//
+//		return result;
+//	}
 
 	private static String get(Row row, int index, String def) {
 		Cursor cursor = row.getSplitCursor(index);
 		String s = EMPTY;
-		if(cursor.equals(US) || cursor.isEmpty()) {
+		if(index==-1 || cursor.equals(US) || cursor.isEmpty()) {
 			s = def;
 		} else {
 			s = cursor.toString();
@@ -462,7 +510,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static float getFloat(Row row, int index, float def) {
 		Cursor cursor = row.getSplitCursor(index);
 		float f = def;
-		if(!cursor.equals(US) && !cursor.isEmpty()) {
+		if(index!=-1 && !cursor.equals(US) && !cursor.isEmpty()) {
 			f = StringPrimitives.parseFloat(cursor);
 		}
 
@@ -474,7 +522,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static int getInt(Row row, int index, int def) {
 		Cursor cursor = row.getSplitCursor(index);
 		int i = def;
-		if(!cursor.equals(US) && !cursor.isEmpty()) {
+		if(index!=-1 && !cursor.equals(US) && !cursor.isEmpty()) {
 			i = StringPrimitives.parseInt(cursor);
 		}
 
@@ -489,7 +537,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		Cursor cursor = row.getSplitCursor(index);
 
 		float[] result;
-		if(cursor.equals(US) || cursor.isEmpty()) {
+		if(index==-1 || cursor.equals(US) || cursor.isEmpty()) {
 			result = EMPTY_FLOATS;
 		} else {
 			result = new float[cursor.split(PIPE)];
@@ -512,7 +560,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		Cursor cursor = row.getSplitCursor(index);
 
 		int[] result;
-		if(cursor.equals(US) || cursor.isEmpty()) {
+		if(index==-1 || cursor.equals(US) || cursor.isEmpty()) {
 			result = EMPTY_INTS;
 		} else {
 			result = new int[cursor.split(PIPE)];
@@ -535,7 +583,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		Cursor cursor = row.getSplitCursor(index);
 
 		String[] result;
-		if(cursor.equals(US) || cursor.isEmpty()) {
+		if(index==-1 || cursor.equals(US) || cursor.isEmpty()) {
 			result = EMPTY_STRINGS;
 		} else {
 			result = new String[cursor.split(PIPE)];
@@ -601,6 +649,409 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			} else {
 				return RowAction.VALID;
 			}
+		}
+	}
+
+	private abstract static class SentenceReader {
+
+		protected final LinkedList<Span> spanBuffer = new LinkedList<>();
+		protected final Stack<Span> spanStack = new Stack<>();
+
+		protected ProsodicDocumentData document;
+		protected CharTableBuffer buffer;
+		protected DefaultProsodicSentenceData result;
+		protected String[] forms;
+		protected TIntObjectMap<Cluster> clusterMap;
+		protected SampaMapper2 sampaMapper;
+
+		protected int ID_COL = 0;
+		protected int FORM_COL = 1;
+		protected int COREF_COL = 10;
+
+		public SentenceReader() {
+			initColumns();
+		}
+
+		protected abstract void initColumns();
+
+		protected void clearInternals() {
+			spanBuffer.clear();
+			spanStack.clear();
+		}
+
+		protected int readProperties(CorefProperties properties) {
+			int headerOffset = 0;
+			for(int i=0; i<buffer.getRowCount(); i++) {
+				Row row = buffer.getRow(i);
+
+				if(!row.startsWith(COMMENT_BEGIN)) {
+					break;
+				}
+
+				int sepIndex = row.indexOf(SPACE);
+
+				// Only consider valid declarations
+				if(sepIndex!=-1) {
+					String key = row.subSequence(1, sepIndex).toString();
+					String value = row.subSequence(sepIndex+1, row.length()).toString();
+					properties.put(key, value);
+				}
+
+				headerOffset++;
+			}
+
+			return headerOffset;
+		}
+
+		protected void readAdditionalColumns(int i, Row row) {
+			// for subclasses
+		}
+
+		protected void readCoref(int i, Row row) {
+			Cursor coref = row.getSplitCursor(COREF_COL);
+			if(!coref.equals(HYPHEN)) {
+				// Build spans
+				coref.split('|');
+				for(int j=0; j<coref.getSplitCount(); j++) {
+					Cursor chunk = coref.getSplitCursor(j);
+					if(chunk.startsWith(OBR)) {
+						int i1 = chunk.length()-1;
+						if(chunk.endsWith(CBR)) {
+							i1--;
+						}
+						int clusterId = StringPrimitives.parseInt(chunk, 1, i1);
+
+						// Start of span definition
+						Span span = new Span(i, i, document.size());
+
+						if(clusterMap!=null) {
+							Cluster cluster = clusterMap.get(clusterId);
+							if (cluster==null) {
+								cluster = new Cluster(clusterId);
+								clusterMap.put(clusterId, cluster);
+							}
+							cluster.add(span);
+							span.setCluster(cluster);
+						}
+
+						spanStack.push(span);
+					}
+					if(chunk.endsWith(CBR)) {
+						int i0 = chunk.startsWith(OBR) ? 1 : 0;
+						int clusterId = StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
+
+						// End of span definition
+						Span span = null;
+						for(int idx=spanStack.size()-1; idx>-1; idx--) {
+							if(spanStack.get(idx).getClusterId()==clusterId) {
+								span = spanStack.remove(idx);
+								break;
+							}
+						}
+						if(span==null)
+							throw new IllegalArgumentException("No span introduced for cluster-id: "+clusterId); //$NON-NLS-1$
+						span.setEndIndex(i);
+
+						// Ensure there can be only one span covering the exact
+						// same range of indices (we keep the first such one and
+						// discard all subsequent spans for this range
+						if(span.compareTo(spanBuffer.peekLast())!=0) {
+							spanBuffer.offerLast(span);
+						}
+					}
+
+					chunk.recycle();
+				}
+			}
+
+			coref.recycle();
+		}
+
+		protected void readLine(int i, Row row) {
+
+//			if(!String.valueOf(i).equals(cols[WORD_COL]))
+//				throw new NullPointerException("Invalid start of sentence - word order out of sync: "+i); //$NON-NLS-1$
+
+			forms[i] = get(row, FORM_COL, EMPTY);
+
+			readCoref(i, row);
+
+			readAdditionalColumns(i, row);
+		}
+
+		public DefaultProsodicSentenceData createData(final ProsodicDocumentData document,
+				final CharTableBuffer buffer, final TIntObjectMap<Cluster> clusterMap, final SampaMapper2 sampaMapper) {
+			int size = buffer.getRowCount();
+
+			this.document = document;
+			this.buffer = buffer;
+			this.clusterMap = clusterMap;
+			this.sampaMapper = sampaMapper;
+
+			clearInternals();
+
+			// Read in properties
+			CorefProperties properties = new CorefProperties();
+			int headerOffset = readProperties(properties);
+			forms = new String[size-headerOffset];
+			result = new DefaultProsodicSentenceData(document, forms);
+
+			result.setProperties(properties);
+
+			String speaker = (String) result.getProperty(SPEAKER_KEY);
+
+			for(int i=0; i<size-headerOffset; i++) {
+				Row row = buffer.getRow(i+headerOffset);
+
+				row.split(DELIMITER);
+
+				readLine(i, row);
+
+				if(speaker==null) {
+					speaker = (String) result.getProperty(i, SPEAKER_KEY);
+				}
+			}
+
+			if(!spanStack.isEmpty())
+				throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
+
+			if(speaker!=null) {
+				result.setProperty(SPEAKER_KEY, speaker);
+			}
+
+			result.setSentenceIndex(document.size());
+			document.add(result);
+
+			Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
+			if(spans!=null) {
+				CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
+				allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
+			}
+
+			clearInternals();
+
+			return result;
+		}
+	}
+
+	private static class SentenceReaderV03 extends SentenceReader {
+		protected int POS_COL = 2;
+		protected int LEMMA_COL = 3;
+		protected int FEATURES_COL = 4;
+		protected int HEAD_COL = 5;
+		protected int DEPREL_COL = 6;
+		protected int SPEAKER_COL = 7;
+		protected int SPEAKER_FEATURES_COL = 8;
+		protected int ENTITY_COL = 9;
+		protected int BEGIN_TS_COL = 11;
+		protected int END_TS_COL = 12;
+		protected int SYL_OFFSET_COL = 13;
+		protected int SYL_LABEL_COL = 14;
+		protected int SYL_TIMESTAMP_COL = 15;
+		protected int SYL_VOWEL_COL = 16;
+		protected int SYL_STRESS_COL = 17;
+		protected int SYL_DURATION_COL = 18;
+		protected int VOWEL_DURATION_COL = 19;
+		protected int SYL_STARTPITCH_COL = 20;
+		protected int SYL_MIDPITCH_COL = 21;
+		protected int SYL_ENDPITCH_COL = 22;
+		protected int CODA_TYPE_COL = 23;
+		protected int CODA_SIZE_COL = 24;
+		protected int ONSET_TYPE_COL = 25;
+		protected int ONSET_SIZE_COL = 26;
+		protected int PHONEME_COUNT_COL = 27;
+		protected int PAINTE_A1_COL = 28;
+		protected int PAINTE_A2_COL = 29;
+		protected int PAINTE_B_COL = 30;
+		protected int PAINTE_C1_COL = 31;
+		protected int PAINTE_C2_COL = 32;
+		protected int PAINTE_D_COL = 33;
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReader#initColumns()
+		 */
+		@Override
+		protected void initColumns() {
+			/*
+			 * VERSION 0.3
+			 */
+			ID_COL = 0;
+			FORM_COL = 1;
+			POS_COL = 2;
+			LEMMA_COL = 3;
+			FEATURES_COL = 4;
+			HEAD_COL = 5;
+			DEPREL_COL = 6;
+			SPEAKER_COL = 7;
+			SPEAKER_FEATURES_COL = 8;
+			ENTITY_COL = 9;
+			COREF_COL = 10;
+			BEGIN_TS_COL = 11;
+			END_TS_COL = 12;
+			SYL_OFFSET_COL = 13;
+			SYL_LABEL_COL = 14;
+			SYL_TIMESTAMP_COL = 15;
+			SYL_VOWEL_COL = 16;
+			SYL_STRESS_COL = 17;
+			SYL_DURATION_COL = 18;
+			VOWEL_DURATION_COL = 19;
+			SYL_STARTPITCH_COL = 20;
+			SYL_MIDPITCH_COL = 21;
+			SYL_ENDPITCH_COL = 22;
+			CODA_TYPE_COL = 23;
+			CODA_SIZE_COL = 24;
+			ONSET_TYPE_COL = 25;
+			ONSET_SIZE_COL = 26;
+			PHONEME_COUNT_COL = 27;
+			PAINTE_A1_COL = 28;
+			PAINTE_A2_COL = 29;
+			PAINTE_B_COL = 30;
+			PAINTE_C1_COL = 31;
+			PAINTE_C2_COL = 32;
+			PAINTE_D_COL = 33;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReader#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 */
+		@Override
+		protected void readAdditionalColumns(int i, Row row) {
+			super.readAdditionalColumns(i, row);
+
+
+			// Assign properties
+			result.setProperty(i, FORM_KEY, forms[i]);
+			result.setProperty(i, POS_KEY, get(row, POS_COL, EMPTY));
+			result.setProperty(i, LEMMA_KEY, get(row, LEMMA_COL, EMPTY));
+			result.setProperty(i, FEATURES_KEY, get(row, FEATURES_COL, EMPTY));
+			result.setProperty(i, HEAD_KEY, Math.max(getInt(row, HEAD_COL, DATA_UNDEFINED_VALUE)-1, DATA_UNDEFINED_VALUE));
+			result.setProperty(i, DEPREL_KEY, get(row, DEPREL_COL, EMPTY));
+			result.setProperty(i, SPEAKER_KEY, get(row, SPEAKER_COL, EMPTY));
+			result.setProperty(i, SPEAKER_FEATURES_KEY, get(row, SPEAKER_FEATURES_COL, EMPTY));
+			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
+			result.setProperty(i, BEGIN_TS_KEY, getFloat(row, BEGIN_TS_COL, DATA_UNDEFINED_VALUE));
+			result.setProperty(i, END_TS_KEY, getFloat(row, END_TS_COL, DATA_UNDEFINED_VALUE));
+			result.setProperty(i, SYLLABLE_LABEL_KEY, getStrings(row, SYL_LABEL_COL));
+			result.setProperty(i, SYLLABLE_TIMESTAMP_KEY, getFloats(row, SYL_TIMESTAMP_COL));
+			result.setProperty(i, SYLLABLE_VOWEL_KEY, getStrings(row, SYL_VOWEL_COL));
+
+			int[] offsets = getInts(row, SYL_OFFSET_COL);
+			if(offsets==EMPTY_INTS) {
+				if(sampaMapper!=null) {
+					int sylCount = result.getSyllableCount(i);
+					if(sylCount>0) {
+						String[] sampa = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
+						String[] labels = sampaMapper.split(forms[i], sampa);
+						if(labels!=null) {
+							offsets = new int[sylCount];
+							int offset = 0;
+							for(int k=0; k<sylCount; k++) {
+								offsets[k] = offset;
+								offset += labels[k].length();
+							}
+							result.setProperty(i, SYLLABLE_FORM_KEY, labels);
+							result.setMapsSyllables(i, true);
+						} else {
+							boolean report = true;
+							if(SENTENCE_BLACKLIST!=null) {
+								Object sentNum = result.getProperty(SENTENCE_NUMBER_KEY);
+								if(sentNum!=null && SENTENCE_BLACKLIST.contains(sentNum)) {
+									report = false;
+								}
+							}
+
+							if(report) {
+								LoggerFactory.info(ProsodyIOUtils.class,
+										buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[i]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							}
+						}
+					}
+				}
+			}
+			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
+
+			// Special handling for stressed syllables (can be either a single value or an array)
+			int[] stressedIndices = getInts(row, SYL_STRESS_COL);
+			for(int index : stressedIndices) {
+				result.setSyllableStressed(i, index, true);
+			}
+
+			result.setProperty(i, SYLLABLE_DURATION_KEY, getFloats(row, SYL_DURATION_COL));
+			result.setProperty(i, VOWEL_DURATION_KEY, getFloats(row, VOWEL_DURATION_COL));
+			result.setProperty(i, SYLLABLE_STARTPITCH_KEY, getFloats(row, SYL_STARTPITCH_COL));
+			result.setProperty(i, SYLLABLE_MIDPITCH_KEY, getFloats(row, SYL_MIDPITCH_COL));
+			result.setProperty(i, SYLLABLE_ENDPITCH_KEY, getFloats(row, SYL_ENDPITCH_COL));
+			result.setProperty(i, CODA_TYPE_KEY, getStrings(row, CODA_TYPE_COL));
+			result.setProperty(i, CODA_SIZE_KEY, getInts(row, CODA_SIZE_COL));
+			result.setProperty(i, ONSET_TYPE_KEY, getStrings(row, ONSET_TYPE_COL));
+			result.setProperty(i, ONSET_SIZE_KEY, getInts(row, ONSET_SIZE_COL));
+			result.setProperty(i, PHONEME_COUNT_KEY, getInts(row, PHONEME_COUNT_COL));
+			result.setProperty(i, PAINTE_A1_KEY, getFloats(row, PAINTE_A1_COL));
+			result.setProperty(i, PAINTE_A2_KEY, getFloats(row, PAINTE_A2_COL));
+			result.setProperty(i, PAINTE_B_KEY, getFloats(row, PAINTE_B_COL));
+			result.setProperty(i, PAINTE_C1_KEY, getFloats(row, PAINTE_C1_COL));
+			result.setProperty(i, PAINTE_C2_KEY, getFloats(row, PAINTE_C2_COL));
+			result.setProperty(i, PAINTE_D_KEY, getFloats(row, PAINTE_D_COL));
+		}
+	}
+
+	private static class SentenceReaderV04 extends SentenceReaderV03 {
+
+		protected int IS_LEX_COL = 11;
+		protected int IS_REF_COL = 12;
+
+		@Override
+		protected void initColumns() {
+			/*
+			 * VERSION 0.4
+			 */
+			ID_COL = 0;
+			FORM_COL = 1;
+			POS_COL = 2;
+			LEMMA_COL = 3;
+			FEATURES_COL = 4;
+			HEAD_COL = 5;
+			DEPREL_COL = 6;
+			SPEAKER_COL = 7;
+			SPEAKER_FEATURES_COL = 8;
+			ENTITY_COL = 9;
+			COREF_COL = 10;
+			IS_LEX_COL = 11;
+			IS_REF_COL = 12;
+			BEGIN_TS_COL = 13;
+			END_TS_COL = 14;
+			SYL_OFFSET_COL = 15;
+			SYL_LABEL_COL = 16;
+			SYL_TIMESTAMP_COL = 17;
+			SYL_VOWEL_COL = 18;
+			SYL_STRESS_COL = 19;
+			SYL_DURATION_COL = 20;
+			VOWEL_DURATION_COL = 21;
+			SYL_STARTPITCH_COL = 22;
+			SYL_MIDPITCH_COL = 23;
+			SYL_ENDPITCH_COL = 24;
+			CODA_TYPE_COL = 25;
+			CODA_SIZE_COL = 26;
+			ONSET_TYPE_COL = 27;
+			ONSET_SIZE_COL = 28;
+			PHONEME_COUNT_COL = 29;
+			PAINTE_A1_COL = 30;
+			PAINTE_A2_COL = 31;
+			PAINTE_B_COL = 32;
+			PAINTE_C1_COL = 33;
+			PAINTE_C2_COL = 34;
+			PAINTE_D_COL = 35;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReaderV03#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 */
+		@Override
+		protected void readAdditionalColumns(int i, Row row) {
+			super.readAdditionalColumns(i, row);
+
+			result.setProperty(i, IS_LEX, get(row, IS_LEX_COL, EMPTY));
+			result.setProperty(i, IS_REF, get(row, IS_REF_COL, EMPTY));
 		}
 	}
 }

@@ -25,9 +25,12 @@
  */
 package de.ims.icarus.ui.list;
 
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.swing.DefaultListModel;
@@ -36,21 +39,20 @@ import javax.swing.JList;
 import javax.swing.TransferHandler;
 
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.ui.UIUtil;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class ListItemTransferHandler extends TransferHandler {
+public class FileListTransferHandler extends TransferHandler {
 
-	private static final long serialVersionUID = -2369747527709918941L;
+	private static final long serialVersionUID = 5282181100643442395L;
 
 	protected int[] indices = null;
 	protected int addIndex = -1; // Location where items were added
 	protected int addCount = 0; // Number of items added.
-	protected Object[] transferedObjects = null;
+	protected List<File> transferedObjects = null;
 	protected boolean logErrors = false;
 
 	public boolean isLogErrors() {
@@ -61,19 +63,18 @@ public class ListItemTransferHandler extends TransferHandler {
 		this.logErrors = logErrors;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected Transferable createTransferable(JComponent c) {
-		JList list = (JList) c;
+		@SuppressWarnings("unchecked")
+		JList<File> list = (JList<File>) c;
 		indices = list.getSelectedIndices();
-		transferedObjects = list.getSelectedValues();
-		return new DataHandler(transferedObjects,
-				UIUtil.localObjectFlavor.getMimeType());
+		transferedObjects = list.getSelectedValuesList();
+		return new DataHandler(transferedObjects, DataFlavor.javaFileListFlavor.getMimeType());
 	}
 
 	@Override
 	public boolean canImport(TransferSupport info) {
-		if (!info.isDrop() || !info.isDataFlavorSupported(UIUtil.localObjectFlavor)) {
+		if (!info.isDrop() || !info.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 			return false;
 		}
 		return true;
@@ -90,9 +91,9 @@ public class ListItemTransferHandler extends TransferHandler {
 		if (!canImport(info)) {
 			return false;
 		}
-		JList target = (JList) info.getComponent();
+		JList<File> target = (JList<File>) info.getComponent();
 		JList.DropLocation dl = (JList.DropLocation) info.getDropLocation();
-		DefaultListModel listModel = (DefaultListModel) target.getModel();
+		DefaultListModel<File> listModel = (DefaultListModel<File>) target.getModel();
 		int index = dl.getIndex();
 		int max = listModel.getSize();
 		if (index < 0 || index > max) {
@@ -100,22 +101,22 @@ public class ListItemTransferHandler extends TransferHandler {
 		}
 		addIndex = index;
 		try {
-			Object[] values = (Object[]) info.getTransferable()
-					.getTransferData(UIUtil.localObjectFlavor);
-			addCount = values.length;
-			for (int i = 0; i < values.length; i++) {
+			List<File> values = (List<File>) info.getTransferable()
+					.getTransferData(DataFlavor.javaFileListFlavor);
+			addCount = values.size();
+			for (int i = 0; i < values.size(); i++) {
 				int idx = index++;
-				listModel.add(idx, values[i]);
+				listModel.add(idx, values.get(i));
 				target.addSelectionInterval(idx, idx);
 			}
 			return true;
 		} catch (UnsupportedFlavorException e) {
 			if(logErrors) {
-				LoggerFactory.error(this, "Unsupported data flavor in import operation", e);
+				LoggerFactory.error(this, "Unsupported data flavor in import operation", e); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			if(logErrors) {
-				LoggerFactory.error(this, "Error deserializing data", e);
+				LoggerFactory.error(this, "Error deserializing data", e); //$NON-NLS-1$
 			}
 		}
 		return false;
@@ -128,8 +129,9 @@ public class ListItemTransferHandler extends TransferHandler {
 
 	protected void cleanup(JComponent c, boolean remove) {
 		if (remove && indices != null) {
-			JList source = (JList) c;
-			DefaultListModel model = (DefaultListModel) source.getModel();
+			@SuppressWarnings("unchecked")
+			JList<File> source = (JList<File>) c;
+			DefaultListModel<File> model = (DefaultListModel<File>) source.getModel();
 			if (addCount > 0) {
 				// http://java-swing-tips.googlecode.com/svn/trunk/DnDReorderList/src/java/example/MainPanel.java
 				for (int i = 0; i < indices.length; i++) {

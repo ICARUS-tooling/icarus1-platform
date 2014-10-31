@@ -77,6 +77,10 @@ public class PaIntEIcon implements Icon {
 		return params;
 	}
 
+	public PaIntECurve getCurve() {
+		return graph.getCurve();
+	}
+
 	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 

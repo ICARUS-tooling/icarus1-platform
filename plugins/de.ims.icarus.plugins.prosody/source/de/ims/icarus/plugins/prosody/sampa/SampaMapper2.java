@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody;
+package de.ims.icarus.plugins.prosody.sampa;
 
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -36,22 +36,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.ims.icarus.Core;
 import de.ims.icarus.io.IOUtil;
-import de.ims.icarus.io.Reader;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
-import de.ims.icarus.language.coref.CoreferenceUtils;
-import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.plugins.prosody.io.ProsodyDocumentReader;
-import de.ims.icarus.plugins.prosody.io.ProsodyIOUtils;
-import de.ims.icarus.util.Options;
-import de.ims.icarus.util.location.Location;
-import de.ims.icarus.util.location.Locations;
 
 /**
  * @author Markus Gärtner
@@ -60,27 +50,25 @@ import de.ims.icarus.util.location.Locations;
  */
 public class SampaMapper2 {
 
-	public static void main(String[] args) throws Exception {
-//		SampaMapper mapper = getInstance();
-//		String[] syllables = mapper.split0("Einschüchterung", "aIn|SYC|t@|RUN".split("\\|")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//		System.out.println(Arrays.deepToString(syllables));
-
-		Core.debugInit(args);
-		ProsodyIOUtils.DEFAULT_SYLLABLES_FROM_SAMPA = true;
-
-		LoggerFactory.registerLogFile("de.ims.icarus.plugins.prosody", "icarus.prosody");
-		LoggerFactory.registerLogFile("de.ims.icarus.language.coref", "icarus.coref");
-
-		CoreferenceDocumentSet set = new CoreferenceDocumentSet();
-		Reader<?> reader = new ProsodyDocumentReader();
-		Location location = Locations.getFileLocation("data/prosody/dirndl-test-output-prosodic-format-0.3.1"); //$NON-NLS-1$
-
-		CoreferenceUtils.loadDocumentSet((Reader<CoreferenceDocumentData>) reader, location, new Options(), set);
-
-		System.out.println("documents: "+set.size());
-	}
-
-	private static volatile SampaMapper2 instance;
+//	public static void main(String[] args) throws Exception {
+////		SampaMapper mapper = getInstance();
+////		String[] syllables = mapper.split0("Einschüchterung", "aIn|SYC|t@|RUN".split("\\|")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+////		System.out.println(Arrays.deepToString(syllables));
+//
+//		Core.debugInit(args);
+//		ProsodyIOUtils.DEFAULT_SYLLABLES_FROM_SAMPA = true;
+//
+//		LoggerFactory.registerLogFile("de.ims.icarus.plugins.prosody", "icarus.prosody"); //$NON-NLS-1$ //$NON-NLS-2$
+//		LoggerFactory.registerLogFile("de.ims.icarus.language.coref", "icarus.coref"); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		CoreferenceDocumentSet set = new CoreferenceDocumentSet();
+//		Reader<?> reader = new ProsodyDocumentReader();
+//		Location location = Locations.getFileLocation("data/prosody/dirndl-test-output-prosodic-format-0.3.1 (orig)"); //$NON-NLS-1$
+//
+//		CoreferenceUtils.loadDocumentSet((Reader<CoreferenceDocumentData>) reader, location, new Options(), set);
+//
+//		System.out.println("documents: "+set.size()); //$NON-NLS-1$
+//	}
 
 	private static final char BLANK = '$';
 	private static final String BLANK_STRING = "$"; //$NON-NLS-1$
@@ -97,24 +85,24 @@ public class SampaMapper2 {
 		LOOKAHEAD_3_MASK,
 	};
 
-	private static SampaMapper2 getInstance() {
-		SampaMapper2 sm = instance;
-
-		if(sm==null) {
-			synchronized (SampaMapper2.class) {
-				sm = instance;
-				if(sm==null) {
-
-					sm = new SampaMapper2();
-					sm.init();
-
-					instance = sm;
-				}
-			}
-		}
-
-		return sm;
-	}
+//	private static SampaMapper2 getInstance() {
+//		SampaMapper2 sm = instance;
+//
+//		if(sm==null) {
+//			synchronized (SampaMapper2.class) {
+//				sm = instance;
+//				if(sm==null) {
+//
+//					sm = new SampaMapper2();
+//					sm.init();
+//
+//					instance = sm;
+//				}
+//			}
+//		}
+//
+//		return sm;
+//	}
 
 	/**
 	 * Maps chars and compounds to sampa data
@@ -153,18 +141,24 @@ public class SampaMapper2 {
 	 * Each lookahead character is shifted by 16 bits per lookahead-position.
 	 */
 	private long[] charList = new long[100];
+	private char[] origCharList = new char[100];
 
 	private final Matcher digitMatcher = Pattern.compile("^\\d+$").matcher(""); //$NON-NLS-1$ //$NON-NLS-2$
 	private final Matcher garbageMatcher = Pattern.compile("[^\\w\\däöüÄÖÜß]").matcher(""); //$NON-NLS-1$ //$NON-NLS-2$
 
-	private void init() {
+	public SampaMapper2(URL mappingRules) {
 		Pattern p = Pattern.compile(","); //$NON-NLS-1$
 
-		try(InputStream in = SampaMapper2.class.getResourceAsStream("sampa-table-de.csv")) { //$NON-NLS-1$
-			@SuppressWarnings("resource")
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in, IOUtil.DEFAULT_CHARSET));
+		try(InputStream in = mappingRules.openStream()) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in, IOUtil.UTF8_CHARSET));
 			String line;
 			while((line=reader.readLine())!=null) {
+
+				// Ignore comment lines
+				if(line.startsWith("#")) { //$NON-NLS-1$
+					continue;
+				}
+
 				String[] items = p.split(line);
 
 				SampaInfo info = new SampaInfo(items);
@@ -176,12 +170,15 @@ public class SampaMapper2 {
 					compoundPrefixes.add(toKey(symbol, 0, i));
 				}
 			}
+
+			reader.close();
 		} catch (IOException e) {
 			//TODO
 		}
 	}
 
 	private static final char[] charBuffer = new char[4];
+	@SuppressWarnings("unused")
 	private static char[] toChars(long key) {
 		int maxIdx = 0;
 
@@ -229,11 +226,11 @@ public class SampaMapper2 {
 		return toKey(s, 0, s.length()-1);
 	}
 
-	public static String[] split(String word, String... symbols) {
-		return getInstance().split0(word, symbols);
-	}
+//	public static String[] split(String word, String... symbols) {
+//		return getInstance().split0(word, symbols);
+//	}
 
-	private String[] split0(String word, String... symbolSets) {
+	public String[] split(String word, String... symbolSets) {
 		// Buffer for finished syllables
 		String[] result = new String[symbolSets.length];
 
@@ -244,13 +241,14 @@ public class SampaMapper2 {
 			return result;
 		}
 
+		//TODO removed the special casing for num_symbolSets==num_characters to prevent erroneous syllable generation
 		// Special case for exact match of syllable and character count
-		if(word.length()==symbolSets.length) {
-			for(int i=0; i<result.length; i++) {
-				result[i] = String.valueOf(word.charAt(i));
-			}
-			return result;
-		}
+//		if(word.length()==symbolSets.length) {
+//			for(int i=0; i<result.length; i++) {
+//				result[i] = String.valueOf(word.charAt(i));
+//			}
+//			return result;
+//		}
 
 		fillWordList(word);
 
@@ -268,7 +266,7 @@ public class SampaMapper2 {
 				}
 
 				// Use original characters here!!!
-				buffer.append(word.charAt(i));
+				buffer.append(origCharList[i]);
 			}
 
 			result[result.length-1] = buffer.toString();
@@ -291,11 +289,13 @@ public class SampaMapper2 {
 
 		if(wordCharCount>charList.length) {
 			charList = new long[wordCharCount*2];
+			origCharList = new char[wordCharCount*2];
 			charSyllableMap = new int[wordCharCount*2];
 		}
 
 		for(int i=0; i<wordCharCount; i++) {
 			charList[i] = toLowerKey(word, i, i+3);
+			origCharList[i] = word.charAt(i);
 			charSyllableMap[i] = -1;
 		}
 	}

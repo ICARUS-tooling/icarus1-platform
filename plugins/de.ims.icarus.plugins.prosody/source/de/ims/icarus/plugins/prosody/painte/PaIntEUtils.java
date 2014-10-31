@@ -42,6 +42,19 @@ import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
  */
 public class PaIntEUtils {
 
+	private static final String[] paramIds = {
+		"A1", //$NON-NLS-1$
+		"A2", //$NON-NLS-1$
+		"B", //$NON-NLS-1$
+		"C1", //$NON-NLS-1$
+		"C2", //$NON-NLS-1$
+		"D", //$NON-NLS-1$
+	};
+
+	public static String[] getParamIds() {
+		return paramIds.clone();
+	}
+
 	/*
 	 * Painte formula:
 	 * d - (c_1/(1+E^(-a_1*(b-x)+g))) - (c_2/(1+E^(-a_2*(x-b)+g)))

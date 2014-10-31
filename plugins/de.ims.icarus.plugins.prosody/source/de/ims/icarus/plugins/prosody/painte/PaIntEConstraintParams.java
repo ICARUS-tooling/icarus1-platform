@@ -54,13 +54,13 @@ public class PaIntEConstraintParams extends PaIntEParams {
 			allowCompactConstraints = ConfigRegistry.getGlobalRegistry().getBoolean(
 					"plugins.prosody.search.allowCompactConstraints"); //$NON-NLS-1$
 
-			ConfigRegistry.getGlobalRegistry().addGroupListener("plugins.prosody.search", new ConfigListener() {
+			ConfigRegistry.getGlobalRegistry().addGroupListener("plugins.prosody.search", new ConfigListener() { //$NON-NLS-1$
 
 				@Override
 				public void invoke(ConfigRegistry sender, ConfigEvent event) {
 					Handle handle = event.getHandle();
 					ConfigRegistry registry = handle.getSource();
-					allowCompactConstraints = registry.getBoolean(registry.getChildHandle(handle, "allowCompactConstraints"));
+					allowCompactConstraints = registry.getBoolean(registry.getChildHandle(handle, "allowCompactConstraints")); //$NON-NLS-1$
 				}
 			});
 		}
@@ -83,6 +83,7 @@ public class PaIntEConstraintParams extends PaIntEParams {
 	public static final boolean DEFAULT_COMPACT = false;
 
 	public static final int ALL_SET = MASK_A1 | MASK_A2 | MASK_B | MASK_C1 | MASK_C2 | MASK_D | MASK_ALIGNMENT;
+	public static final int COMPACT_SET = MASK_B | MASK_C1 | MASK_C2 | MASK_D;
 
 	public static final int DEFAULT_REQUIRED_FIELDS = MASK_A1 | MASK_A2 | MASK_B | MASK_C1 | MASK_C2 | MASK_D;
 
@@ -216,6 +217,13 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 		activeMask = ALL_SET;
 		compact = DEFAULT_COMPACT;
+	}
+
+	public void setParams(PaIntEParamsWrapper wrapper) {
+		super.setParams(wrapper.getParams());
+
+		compact = wrapper.isCompact();
+		activeMask = compact ? COMPACT_SET : ALL_SET;
 	}
 
 	@Override
