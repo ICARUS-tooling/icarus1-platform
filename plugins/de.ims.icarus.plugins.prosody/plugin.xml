@@ -95,13 +95,33 @@
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.editor.PaIntEEditorView" />
 		<parameter id="icon" value="de/ims/icarus/plugins/prosody/ui/view/editor/painte-editor-view.png" />
 		<parameter id="alignment" value="center" />
-		<parameter id="priority" value="low" />
+		<parameter id="priority" value="high" />
 		
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">
 			<parameter id="clear" />
 			<parameter id="present" value="PainteParamsContentType" />
 			<parameter id="present" value="PainteParamsWrapperContentType" />
+		</parameter>
+	</extension>
+	
+	<extension id="SampaValidationView" plugin-id="de.ims.icarus.prosody" point-id="ProsodyView">
+		<doc>
+			<doc-text>
+				Validation tool for sampa symbol to graphem mapping
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.prosody.sampaValidationView.identity.name" />
+		<parameter id="description" value="plugins.prosody.sampaValidationView.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.view.sampa.SampaValidationView" />
+		<parameter id="icon" value="de/ims/icarus/plugins/prosody/ui/view/sampa/sampa-validation-view.png" />
+		<parameter id="alignment" value="center" />
+		<parameter id="priority" value="low" />
+		
+		<!-- CAPABILITIES -->
+		<parameter id="capabilities">
+			<parameter id="clear" />
 		</parameter>
 	</extension>
 	
@@ -251,6 +271,7 @@
 		<parameter id="token" value="painteAngle" />
 		<parameter id="token" value="painteDistance" />
 		<parameter id="token" value="painteChannel" />
+		<parameter id="token" value="sylDif" />
 		<parameter id="factories">
 			<!-- factories "inherited" by dependency data -->
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
@@ -268,6 +289,7 @@
 			<parameter id="painteAngle" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEAngleConstraintFactory" />
 			<parameter id="painteDistance" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEDistanceConstraintFactory" />
 			<parameter id="painteChannel" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEChannelConstraintFactory" />
+			<parameter id="sylDif" value="de.ims.icarus.plugins.prosody.search.constraints.edge.SyllableDifferenceConstraintFactory" />
 		</parameter>
 	</extension>
 	

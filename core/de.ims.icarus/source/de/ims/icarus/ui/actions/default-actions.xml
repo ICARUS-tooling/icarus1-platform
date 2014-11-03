@@ -124,6 +124,12 @@
 		desc="load"
 		icon="fldr_obj.gif" />
 	
+	<!-- Execute -->
+	<action id="actions.default.executeAction" virtual="true"
+		name="execute" 
+		desc="execute"
+		icon="nav_go.gif" />
+	
 	<!-- Zoom In -->
 	<action id="actions.default.zoomInAction" virtual="true"
 		name="zoomIn" 

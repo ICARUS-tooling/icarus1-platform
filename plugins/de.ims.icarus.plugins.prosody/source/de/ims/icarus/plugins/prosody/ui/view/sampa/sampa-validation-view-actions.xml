@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<!DOCTYPE actions SYSTEM "action-list.dtd">
+<actions>
+
+	<!--
+		SAMPA VALIDATION VIEW
+	-->
+		
+	<!-- Open Preferences -->
+	<action id="plugins.prosody.sampaValidationView.openPreferencesAction"
+		template="actions.default.openPreferencesAction" />
+		
+	<!-- Clear -->
+	<action id="plugins.prosody.sampaValidationView.clearAction"
+		template="actions.default.clearAction" />
+		
+	<!-- Remove -->
+	<action id="plugins.prosody.sampaValidationView.removeAction"
+		template="actions.default.removeAction" />
+	
+	<!-- Word Files -->
+		
+	<!-- Clear Word Files -->
+	<action id="plugins.prosody.sampaValidationView.clearWordFilesAction"
+		template="actions.default.clearAction" />
+		
+	<!-- Remove Word Files -->
+	<action id="plugins.prosody.sampaValidationView.removeWordFilesAction"
+		template="actions.default.removeAction" />
+		
+	<!-- Add Word Files -->
+	<action id="plugins.prosody.sampaValidationView.addWordFilesAction"
+		template="actions.default.addAction" />
+	
+	<!-- Syllable Files -->
+		
+	<!-- Clear Syllable Files -->
+	<action id="plugins.prosody.sampaValidationView.clearSyllableFilesAction"
+		template="actions.default.clearAction" />
+		
+	<!-- Remove Syllable Files -->
+	<action id="plugins.prosody.sampaValidationView.removeSyllableFilesAction"
+		template="actions.default.removeAction" />
+		
+	<!-- Add Syllable Files -->
+	<action id="plugins.prosody.sampaValidationView.addSyllableFilesAction"
+		template="actions.default.addAction" />
+		
+	<!-- Execute -->
+	<action id="plugins.prosody.sampaValidationView.executeAction"
+		template="actions.default.executeAction" />
+		
+	<!-- ToolBar List for header area -->
+	<action-list id="plugins.prosody.sampaValidationView.toolBarList">
+		<item type="action" value="plugins.prosody.sampaValidationView.openPreferencesAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.sampaValidationView.clearAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.sampaValidationView.executeAction" />
+		<separator />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- ToolBar List for word file list -->
+	<action-list id="plugins.prosody.sampaValidationView.wordFileToolBarList">
+		<item type="label" value="plugins.prosody.sampaValidationView.labels.wordFilesList.title" />
+		<item type="action" value="plugins.prosody.sampaValidationView.clearWordFilesAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.sampaValidationView.removeWordFilesAction" />
+		<item type="action" value="plugins.prosody.sampaValidationView.addWordFilesAction" />
+		<separator />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- ToolBar List for syllable file list -->
+	<action-list id="plugins.prosody.sampaValidationView.syllableFileToolBarList">
+		<item type="label" value="plugins.prosody.sampaValidationView.labels.syllableFilesList.title" />
+		<item type="action" value="plugins.prosody.sampaValidationView.clearSyllableFilesAction" />
+		<separator />
+		<item type="action" value="plugins.prosody.sampaValidationView.removeSyllableFilesAction" />
+		<item type="action" value="plugins.prosody.sampaValidationView.addSyllableFilesAction" />
+		<separator />
+		<item type="glue" />
+	</action-list>
+		
+	<!-- Popup-Menu list -->
+	<action-list id="plugins.prosody.sampaValidationView.popupMenuList">
+		<item type="action" value="plugins.prosody.sampaValidationView.removeAction" />
+	</action-list>
+	
+</actions>

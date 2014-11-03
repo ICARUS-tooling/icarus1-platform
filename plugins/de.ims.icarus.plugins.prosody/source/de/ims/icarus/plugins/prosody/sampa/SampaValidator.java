@@ -19,11 +19,16 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.prosody.sampa;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import de.ims.icarus.util.ToolException;
 
 /**
  * @author Markus Gärtner
@@ -32,4 +37,88 @@ package de.ims.icarus.plugins.prosody.sampa;
  */
 public class SampaValidator {
 
+	private List<SampaIterator> iterators = new ArrayList<>();
+	private int wordCount = 0;
+	private int syllableCount = 0;
+	private boolean validationStarted = false;
+
+	private SampaMapper2 mapper;
+
+	private List<SampaSet> errors = new ArrayList<>();
+
+	public synchronized void addSampaIterator(SampaIterator iterator) {
+		if (iterator == null)
+			throw new NullPointerException("Invalid iterator"); //$NON-NLS-1$
+
+		if(validationStarted)
+			throw new IllegalStateException("Cannot add new data after validation has started"); //$NON-NLS-1$
+
+		iterators.add(iterator);
+	}
+
+	public synchronized void validate() throws ToolException {
+		if(validationStarted)
+			throw new IllegalStateException("Validator intented for one-time use only!"); //$NON-NLS-1$
+
+		validationStarted = true;
+
+		if(iterators.isEmpty())
+			throw new IllegalArgumentException("No data to be validated..."); //$NON-NLS-1$
+
+		if(mapper==null) {
+			mapper = new SampaMapper2();
+		}
+
+		for(int i=0; i<iterators.size(); i++) {
+			try (SampaIterator iterator = iterators.get(i)) {
+				iterator.reset();
+
+				SampaSet data;
+
+				while((data=iterator.next()) != null) {
+					wordCount++;
+					syllableCount += data.getSampaBlocks().length;
+
+					if(!validate(data)) {
+						errors.add(data);
+					}
+				}
+			}
+		}
+	}
+
+	public boolean validate(SampaSet data) {
+		return mapper.split(data.getWord(), data.getSampaBlocks())!=null;
+	}
+
+	public SampaMapper2 getMapper() {
+		return mapper;
+	}
+
+	public synchronized void setMapper(SampaMapper2 mapper) {
+		if(validationStarted)
+			throw new IllegalStateException("Cannot change mapper after validation has started"); //$NON-NLS-1$
+
+		this.mapper = mapper;
+	}
+
+	public int getWordCount() {
+		return wordCount;
+	}
+
+	public int getSyllableCount() {
+		return syllableCount;
+	}
+
+	public int getErrorCount() {
+		return errors.size();
+	}
+
+	public boolean hasErrors() {
+		return !errors.isEmpty();
+	}
+
+	public SampaSet getErroneousSetAt(int index) {
+		return errors.get(index);
+	}
 }

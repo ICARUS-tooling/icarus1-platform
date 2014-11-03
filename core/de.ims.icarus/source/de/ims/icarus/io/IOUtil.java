@@ -27,6 +27,7 @@ package de.ims.icarus.io;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOError;
 import java.io.IOException;
@@ -181,6 +182,14 @@ public final class IOUtil {
      */
     public static long readLong(InputStream in) throws IOException {
         return ((long)(readInt(in)) << 32) + (readInt(in) & 0xFFFFFFFFL);
+    }
+
+    public static void close(Closeable closeable) {
+    	try {
+			closeable.close();
+		} catch (IOException e) {
+			LoggerFactory.error(IOUtil.class, "Failed to close closeable resource", e); //$NON-NLS-1$
+		}
     }
 
 	public static boolean isLocalFile(URL url) {

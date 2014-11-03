@@ -32,10 +32,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import javax.activation.DataHandler;
+import javax.activation.ActivationDataFlavor;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JList;
+import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 
 import de.ims.icarus.logging.LoggerFactory;
@@ -48,6 +49,11 @@ import de.ims.icarus.logging.LoggerFactory;
 public class FileListTransferHandler extends TransferHandler {
 
 	private static final long serialVersionUID = 5282181100643442395L;
+
+	public static final DataFlavor activationFileListFLavor = new ActivationDataFlavor(
+			List.class,
+			DataFlavor.javaFileListFlavor.getMimeType(),
+			DataFlavor.javaFileListFlavor.getHumanPresentableName());
 
 	protected int[] indices = null;
 	protected int addIndex = -1; // Location where items were added
@@ -69,7 +75,7 @@ public class FileListTransferHandler extends TransferHandler {
 		JList<File> list = (JList<File>) c;
 		indices = list.getSelectedIndices();
 		transferedObjects = list.getSelectedValuesList();
-		return new DataHandler(transferedObjects, DataFlavor.javaFileListFlavor.getMimeType());
+		return new FileListTransferable(transferedObjects);
 	}
 
 	@Override
@@ -94,6 +100,7 @@ public class FileListTransferHandler extends TransferHandler {
 		JList<File> target = (JList<File>) info.getComponent();
 		JList.DropLocation dl = (JList.DropLocation) info.getDropLocation();
 		DefaultListModel<File> listModel = (DefaultListModel<File>) target.getModel();
+		ListSelectionModel selectionModel = target.getSelectionModel();
 		int index = dl.getIndex();
 		int max = listModel.getSize();
 		if (index < 0 || index > max) {
@@ -103,11 +110,12 @@ public class FileListTransferHandler extends TransferHandler {
 		try {
 			List<File> values = (List<File>) info.getTransferable()
 					.getTransferData(DataFlavor.javaFileListFlavor);
+			selectionModel.clearSelection();
 			addCount = values.size();
 			for (int i = 0; i < values.size(); i++) {
 				int idx = index++;
 				listModel.add(idx, values.get(i));
-				target.addSelectionInterval(idx, idx);
+				selectionModel.addSelectionInterval(idx, idx);
 			}
 			return true;
 		} catch (UnsupportedFlavorException e) {
@@ -141,11 +149,69 @@ public class FileListTransferHandler extends TransferHandler {
 				}
 			}
 			for (int i = indices.length - 1; i >= 0; i--) {
-				model.remove(indices[i]);
+				// If we moved data out of the source list, we might exceed its model's size with the indices
+				if(indices[i]<model.getSize()) {
+					model.remove(indices[i]);
+				}
 			}
 		}
 		indices = null;
 		addCount = 0;
 		addIndex = -1;
+	}
+
+	public static class FileListTransferable implements Transferable {
+
+		private final List<File> items;
+
+		private static final DataFlavor[] supportedDataFlavors = {
+			DataFlavor.javaFileListFlavor,
+		};
+
+		public FileListTransferable(List<File> files) {
+			if (files == null)
+				throw new NullPointerException("Invalid files"); //$NON-NLS-1$
+
+			this.items = files;
+		}
+
+		/**
+		 * @see java.awt.datatransfer.Transferable#getTransferDataFlavors()
+		 */
+		@Override
+		public DataFlavor[] getTransferDataFlavors() {
+			return supportedDataFlavors.clone();
+		}
+
+		/**
+		 * @see java.awt.datatransfer.Transferable#isDataFlavorSupported(java.awt.datatransfer.DataFlavor)
+		 */
+		@Override
+		public boolean isDataFlavorSupported(DataFlavor flavor) {
+			if(flavor.isFlavorJavaFileListType()) {
+				return true;
+			}
+
+			for(int i=0; i<supportedDataFlavors.length; i++) {
+				if(supportedDataFlavors[i].equals(flavor)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/**
+		 * @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor)
+		 */
+		@Override
+		public Object getTransferData(DataFlavor flavor)
+				throws UnsupportedFlavorException, IOException {
+			if(!isDataFlavorSupported(flavor))
+				throw new UnsupportedFlavorException(flavor);
+
+			return items;
+		}
+
 	}
 }

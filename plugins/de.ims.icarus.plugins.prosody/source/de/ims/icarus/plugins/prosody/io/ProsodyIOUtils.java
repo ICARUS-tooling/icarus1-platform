@@ -29,7 +29,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Set;
@@ -201,9 +200,8 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 		SampaMapper2 sampaMapper = null;
 		if(syllableOffsetsFromSampa) {
-			//TODO provide multiple fies as options?
-			URL sampaRules = ProsodyIOUtils.class.getResource("sampa-table-de.csv"); //$NON-NLS-1$
-			sampaMapper = new SampaMapper2(sampaRules);
+			//TODO provide multiple files as options?
+			sampaMapper = new SampaMapper2();
 		}
 		SentenceReader sentenceReader = null;
 

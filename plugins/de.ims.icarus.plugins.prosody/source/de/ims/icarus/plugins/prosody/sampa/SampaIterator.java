@@ -32,9 +32,12 @@ import de.ims.icarus.util.ToolException;
  * @version $Id$
  *
  */
-public interface SampaIterator {
+public interface SampaIterator extends AutoCloseable {
 
 	void reset() throws ToolException;
 
-	SampaSet next();
+	SampaSet next() throws ToolException;
+
+	@Override
+	void close();
 }

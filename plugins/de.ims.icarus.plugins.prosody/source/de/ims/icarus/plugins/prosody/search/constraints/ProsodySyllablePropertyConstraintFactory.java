@@ -50,6 +50,7 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 		propertyClassMap.put(SYLLABLE_DURATION_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(SYLLABLE_ENDPITCH_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(SYLLABLE_LABEL_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(SYLLABLE_FORM_KEY, ValueHandler.stringHandler);
 		propertyClassMap.put(SYLLABLE_MIDPITCH_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(SYLLABLE_OFFSET_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(SYLLABLE_STARTPITCH_KEY, ValueHandler.floatHandler);

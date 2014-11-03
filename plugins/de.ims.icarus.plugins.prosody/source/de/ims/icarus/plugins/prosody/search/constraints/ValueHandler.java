@@ -51,6 +51,8 @@ public abstract class ValueHandler {
 
 	public abstract Object getDefaultValue();
 
+	// Calc o1-o2
+	public abstract Object substract(Object o1, Object o2);
 
 
 	public static final ValueHandler stringHandler = new ValueHandler() {
@@ -63,6 +65,11 @@ public abstract class ValueHandler {
 		@Override
 		public Object getDefaultValue() {
 			return LanguageConstants.DATA_UNDEFINED_LABEL;
+		}
+
+		@Override
+		public Object substract(Object o1, Object o2) {
+			throw new UnsupportedOperationException("Cannot substract strings!");
 		}
 	};
 
@@ -87,6 +94,39 @@ public abstract class ValueHandler {
 		public String valueToLabel(Object value) {
 			return LanguageUtils.getLabel((int)value);
 		}
+
+		@Override
+		public Object substract(Object o1, Object o2) {
+			return (int)o1-(int)o2;
+		}
+	};
+
+	public static final ValueHandler longHandler = new ValueHandler() {
+
+		@Override
+		public Class<?> getValueClass() {
+			return Long.class;
+		}
+
+		@Override
+		public Object getDefaultValue() {
+			return LanguageConstants.DATA_UNDEFINED_VALUE;
+		}
+
+		@Override
+		public Object labelToValue(Object label) {
+			return LanguageUtils.parseIntegerLabel((String)label);
+		}
+
+		@Override
+		public String valueToLabel(Object value) {
+			return LanguageUtils.getLabel((int)value);
+		}
+
+		@Override
+		public Object substract(Object o1, Object o2) {
+			return (long)o1-(long)o2;
+		}
 	};
 
 	public static final ValueHandler floatHandler = new ValueHandler() {
@@ -110,6 +150,11 @@ public abstract class ValueHandler {
 		public String valueToLabel(Object value) {
 			return LanguageUtils.getLabel((float)value);
 		}
+
+		@Override
+		public Object substract(Object o1, Object o2) {
+			return (float)o1-(float)o2;
+		}
 	};
 
 	public static final ValueHandler doubleHandler = new ValueHandler() {
@@ -132,6 +177,11 @@ public abstract class ValueHandler {
 		@Override
 		public String valueToLabel(Object value) {
 			return LanguageUtils.getLabel((double)value);
+		}
+
+		@Override
+		public Object substract(Object o1, Object o2) {
+			return (double)o1-(double)o2;
 		}
 	};
 
@@ -159,6 +209,11 @@ public abstract class ValueHandler {
 					LanguageUtils.getBooleanLabel(LanguageConstants.DATA_YES_VALUE),
 					LanguageUtils.getBooleanLabel(LanguageConstants.DATA_NO_VALUE),
 			};
+		}
+
+		@Override
+		public Object substract(Object o1, Object o2) {
+			throw new UnsupportedOperationException("Cannot substarct boolean values!");
 		}
 	};
 }

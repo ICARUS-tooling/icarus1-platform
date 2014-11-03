@@ -70,6 +70,10 @@ public class SampaMapper2 {
 //		System.out.println("documents: "+set.size()); //$NON-NLS-1$
 //	}
 
+	public static URL getDefaultSampaTable() {
+		return SampaMapper2.class.getResource("sampa-table-de.csv"); //$NON-NLS-1$
+	}
+
 	private static final char BLANK = '$';
 	private static final String BLANK_STRING = "$"; //$NON-NLS-1$
 
@@ -145,6 +149,10 @@ public class SampaMapper2 {
 
 	private final Matcher digitMatcher = Pattern.compile("^\\d+$").matcher(""); //$NON-NLS-1$ //$NON-NLS-2$
 	private final Matcher garbageMatcher = Pattern.compile("[^\\w\\däöüÄÖÜß]").matcher(""); //$NON-NLS-1$ //$NON-NLS-2$
+
+	public SampaMapper2() {
+		this(getDefaultSampaTable());
+	}
 
 	public SampaMapper2(URL mappingRules) {
 		Pattern p = Pattern.compile(","); //$NON-NLS-1$

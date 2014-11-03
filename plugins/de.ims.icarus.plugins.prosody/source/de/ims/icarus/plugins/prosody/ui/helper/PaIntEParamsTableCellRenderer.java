@@ -53,11 +53,13 @@ public class PaIntEParamsTableCellRenderer extends DefaultTableCellRenderer {
 	public PaIntEParamsTableCellRenderer() {
 		graph = createGraph();
 		painteIcon = new PaIntEIcon(graph, paramsBuffer, true);
+		painteIcon.setClipCurve(false);
 	}
 
 	public PaIntEParamsTableCellRenderer(PaIntEGraph graph) {
 		this.graph = graph;
 		painteIcon = new PaIntEIcon(graph, paramsBuffer, false);
+		painteIcon.setClipCurve(false);
 	}
 
 	protected PaIntEGraph createGraph() {

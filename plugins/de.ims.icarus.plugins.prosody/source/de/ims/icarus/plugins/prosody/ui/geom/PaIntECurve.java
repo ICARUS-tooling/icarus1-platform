@@ -46,6 +46,7 @@ public class PaIntECurve {
 	public static final Color DEFAULT_COLOR = Color.black;
 	public static final AntiAliasingType DEFAULT_ANTIALIASING_TYPE = AntiAliasingType.DEFAULT;
 	public static final boolean DEFAULT_PAINT_COMPACT = false;
+	public static final boolean DEFAULT_CLIP_CURVE = true;
 
 	private int maxSampleCount = DEFAULT_MAX_SAMPLE_COUNT;
 	private int sampleDistanc = DEFAULT_SAMPLE_DISTANCE;
@@ -56,6 +57,7 @@ public class PaIntECurve {
 	private Stroke stroke;
 
 	private boolean paintComapct = DEFAULT_PAINT_COMPACT;
+	private boolean clipCurve = DEFAULT_CLIP_CURVE;
 
 	public void paint(Graphics graphics, PaIntEParams params, Rectangle area, Axis xAxis, Axis yAxis) {
 
@@ -73,7 +75,9 @@ public class PaIntECurve {
 			g.setStroke(stroke);
 		}
 
-		g.setClip(area);
+		if(clipCurve) {
+			g.setClip(area);
+		}
 
 		g.translate(x, y);
 
@@ -243,5 +247,13 @@ public class PaIntECurve {
 
 	public void setPaintComapct(boolean paintComapct) {
 		this.paintComapct = paintComapct;
+	}
+
+	public boolean isClipCurve() {
+		return clipCurve;
+	}
+
+	public void setClipCurve(boolean clipCurve) {
+		this.clipCurve = clipCurve;
 	}
 }

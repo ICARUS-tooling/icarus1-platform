@@ -50,6 +50,8 @@ public class PaIntEIcon implements Icon {
 
 	private final transient Rectangle bounds = new Rectangle();
 
+	private boolean clipCurve;
+
 	public PaIntEIcon() {
 
 		graph = new PaIntEGraph();
@@ -60,6 +62,7 @@ public class PaIntEIcon implements Icon {
 		params = new PaIntEParams();
 
 		adjustAxis = true;
+		clipCurve = graph.getCurve().isClipCurve();
 	}
 
 	public PaIntEIcon(PaIntEGraph graph, PaIntEParams params, boolean adjustAxis) {
@@ -71,6 +74,7 @@ public class PaIntEIcon implements Icon {
 		this.graph = graph;
 		this.params = params;
 		this.adjustAxis = adjustAxis;
+		clipCurve = graph.getCurve().isClipCurve();
 	}
 
 	public PaIntEParams getParams() {
@@ -98,8 +102,14 @@ public class PaIntEIcon implements Icon {
 		g.setColor(Color.black);
 		g.drawRect(x, y, getIconWidth()-1, getIconHeight()-1);
 
+		boolean doClip = graph.getCurve().isClipCurve();
+
+		graph.getCurve().setClipCurve(clipCurve);
+
 		graph.getCurve().paint(g, params, bounds,
 				graph.getXAxis(), graph.getYAxis());
+
+		graph.getCurve().setClipCurve(doClip);
 	}
 
 	@Override
@@ -121,5 +131,13 @@ public class PaIntEIcon implements Icon {
 			throw new NullPointerException("Invalid newSize"); //$NON-NLS-1$
 
 		iconSize.setSize(newSize);
+	}
+
+	public boolean isClipCurve() {
+		return clipCurve;
+	}
+
+	public void setClipCurve(boolean clipCurve) {
+		this.clipCurve = clipCurve;
 	}
 }
