@@ -107,6 +107,19 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
+	public static final SearchOperator RANGE = new DefaultSearchOperator("<>", "range") { //$NON-NLS-1$ //$NON-NLS-2$
+
+		private static final long serialVersionUID = 2640098895375772516L;
+
+		/**
+		 * @see de.ims.icarus.search_tools.SearchOperator#apply(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public boolean apply(Object value, Object constraint) {
+			return true;
+		}
+	};
+
 	public static final SearchOperator EQUALS = new DefaultSearchOperator("=", "equals") {  //$NON-NLS-1$//$NON-NLS-2$
 
 		private static final long serialVersionUID = -3692306391485959449L;
@@ -318,5 +331,9 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 
 	public static SearchOperator[] numericalNoGrouping() {
 		return numericalOperatorsNoGrouping.clone();
+	}
+
+	public static SearchOperator[] range() {
+		return new SearchOperator[]{RANGE};
 	}
 }

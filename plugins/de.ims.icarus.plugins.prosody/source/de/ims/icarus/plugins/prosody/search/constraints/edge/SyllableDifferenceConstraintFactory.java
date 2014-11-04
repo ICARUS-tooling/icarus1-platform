@@ -132,7 +132,13 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 		return new SyllableComparisonConstraint(value, operator, specifier);
 	}
 
+	private static final AggregationMode DEFAULT_AGGREGATION_MODE = AggregationMode.maxValue;
+
 	public static AggregationMode getAggregationMode(String id, ValueHandler handler) {
+		if("-".equals(id)) {
+			return DEFAULT_AGGREGATION_MODE;
+		}
+
 		try {
 			int index = Integer.parseInt(id);
 			return new AggregationMode.SingletonAggregation(index);
@@ -171,7 +177,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 		private static final long serialVersionUID = -2819824788436110048L;
 
-		private transient AggregationMode aggregationMode;
+		private transient AggregationMode sourceAggregationMode, targetAggregationMode;
 		private transient int fromIndex, toIndex;
 		private transient String key;
 		private transient boolean reverseFrom, reverseTo;
@@ -202,17 +208,25 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 			key = parts[0];
 
-			// Get aggregation mode
+			// Get source aggregation mode
 			if(parts.length>1) {
-				aggregationMode = getAggregationMode(parts[1], valueHandler);
+				sourceAggregationMode = getAggregationMode(parts[1], valueHandler);
 			} else {
 				// Max is default!
-				aggregationMode = AggregationMode.maxValue;
+				sourceAggregationMode = DEFAULT_AGGREGATION_MODE;
+			}
+
+			// Get target aggregation mode
+			if(parts.length>2) {
+				targetAggregationMode = getAggregationMode(parts[2], valueHandler);
+			} else {
+				// Max is default!
+				targetAggregationMode = DEFAULT_AGGREGATION_MODE;
 			}
 
 			// Get begin index
-			if(parts.length>2) {
-				fromIndex = Integer.parseInt(parts[2]);
+			if(parts.length>3) {
+				fromIndex = Integer.parseInt(parts[3]);
 				reverseFrom = fromIndex<0;
 			} else {
 				fromIndex = 0;
@@ -220,8 +234,8 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			}
 
 			// Get end index
-			if(parts.length>3) {
-				toIndex = Integer.parseInt(parts[3]);
+			if(parts.length>4) {
+				toIndex = Integer.parseInt(parts[4]);
 				reverseTo = toIndex<0;
 			} else {
 				toIndex = -1;
@@ -229,7 +243,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			}
 		}
 
-		protected Object getAggregatedInstance(ProsodyTargetTree tree) {
+		protected Object getAggregatedInstance(ProsodyTargetTree tree, AggregationMode aggregationMode) {
 			if(!tree.hasSyllables()) {
 				return null;
 			}
@@ -264,13 +278,13 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 			int targetIndex = tree.getNodeIndex();
 
-			Object targetValue = getAggregatedInstance(tree);
+			Object targetValue = getAggregatedInstance(tree, targetAggregationMode);
 			if(targetValue==null) {
 				return valueHandler.getDefaultValue();
 			}
 
 			tree.viewParent();
-			Object sourceValue = getAggregatedInstance(tree);
+			Object sourceValue = getAggregatedInstance(tree, sourceAggregationMode);
 			if(sourceValue==null) {
 				return valueHandler.getDefaultValue();
 			}

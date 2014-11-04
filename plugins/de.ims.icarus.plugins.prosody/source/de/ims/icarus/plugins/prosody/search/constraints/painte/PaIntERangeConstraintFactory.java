@@ -28,11 +28,12 @@ package de.ims.icarus.plugins.prosody.search.constraints.painte;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
-import de.ims.icarus.plugins.prosody.painte.PaIntEOperator.NumberOperator;
-import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
+import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.plugins.prosody.search.constraints.SyllableConstraint;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
+import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
@@ -53,12 +54,12 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 
 	@Override
 	public Object[] getSupportedSpecifiers() {
-		return new Object[0];
+		return DEFAULT_UNDEFINED_VALUESET;
 	}
 
 	@Override
 	public SearchOperator[] getSupportedOperators() {
-		return DefaultSearchOperator.comparing();
+		return DefaultSearchOperator.range();
 	}
 
 	/**
@@ -70,20 +71,16 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 		return new ProsodyPaIntERangeConstraint(value, operator, specifier);
 	}
 
-	private static class ProsodyPaIntERangeConstraint extends AbstractPaIntEConstraint {
+	private static class ProsodyPaIntERangeConstraint extends DefaultConstraint implements SyllableConstraint {
 
 		private static final long serialVersionUID = 7309790344228778387L;
 
-		private transient PaIntEConstraintParams specifierParams;
-		private transient NumberOperator numberOperator;
+		// lower <> upper
+		private transient PaIntEConstraintParams fromParams, toParams;
+		private final transient PaIntEConstraintParams targetParams = new PaIntEConstraintParams();
 
 		public ProsodyPaIntERangeConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
-		}
-
-		@Override
-		public PaIntEConstraintParams[] getPaIntEConstraints() {
-			return new PaIntEConstraintParams[]{specifierParams};
 		}
 
 		@Override
@@ -97,68 +94,118 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 
 			String s = (String)specifier;
 			if(s!=null && !LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
-				if(specifierParams==null) {
-					specifierParams = new PaIntEConstraintParams();
+				if(fromParams==null) {
+					fromParams = new PaIntEConstraintParams();
 				}
 
-				parseConstraint(s, specifierParams);
-
-				specifierParams.checkNonEmpty("PaIntE-constraint range"); //$NON-NLS-1$
+				BoundedSyllableConstraint.parseParams(s, fromParams);
 			}
 		}
 
 		@Override
-		public void setOperator(SearchOperator operator) {
-			super.setOperator(operator);
+		public void setValue(Object specifier) {
+			super.setValue(specifier);
 
-			numberOperator = PaIntEUtils.getNumberOperator(operator);
+			String s = (String)specifier;
+			if(s!=null && !LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
+				if(toParams==null) {
+					toParams = new PaIntEConstraintParams();
+				}
+
+				BoundedSyllableConstraint.parseParams(s, toParams);
+			}
+		}
+
+		@Override
+		public boolean isUndefined() {
+			return super.isUndefined()
+					|| (toParams!=null && toParams.isUndefined()
+							&& fromParams!=null && fromParams.isUndefined());
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.prosody.search.constraints.painte.BoundedSyllableConstraint#getConfigPath()
+		 * @see de.ims.icarus.search_tools.SearchConstraint#matches(java.lang.Object)
 		 */
 		@Override
-		protected String getConfigPath() {
-			return null;
+		public boolean matches(Object value) {
+			ProsodyTargetTree tree = (ProsodyTargetTree) value;
+
+			if(tree.hasSyllables()) {
+
+				for(int i=0; i<tree.getSyllableCount(); i++) {
+					if(matches(tree, i)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.prosody.search.constraints.painte.AbstractPaIntEConstraint#applyOperator(de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams)
+		 * @see de.ims.icarus.plugins.prosody.search.constraints.SyllableConstraint#matches(java.lang.Object, int)
 		 */
 		@Override
-		protected boolean applyOperator(PaIntEConstraintParams target) {
-			if(!specifierParams.isCompact()) {
-				if(specifierParams.isA1Active() && constraintParams.isA1Active()
-						&& !numberOperator.apply(Math.abs(target.getA1()-specifierParams.getA1()), constraintParams.getA1())) {
+		public boolean matches(Object value, int syllable) {
+			ProsodyTargetTree tree = (ProsodyTargetTree) value;
+
+			targetParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
+
+			if(!fromParams.isUndefined()) {
+				if(!fromParams.isCompact()) {
+					if(fromParams.isA1Active() && targetParams.getA1()<fromParams.getA1()) {
+						return false;
+					}
+					if(fromParams.isA2Active() && targetParams.getA2()<fromParams.getA2()) {
+						return false;
+					}
+					if(fromParams.isAlignmentActive() && targetParams.getAlignment()<fromParams.getAlignment()) {
+						return false;
+					}
+				}
+
+				if(fromParams.isBActive() && targetParams.getB()<fromParams.getB()) {
 					return false;
 				}
-				if(specifierParams.isA2Active() && constraintParams.isA2Active()
-						&& !numberOperator.apply(Math.abs(target.getA2()-specifierParams.getA2()), constraintParams.getA2())) {
+				if(fromParams.isC1Active() && targetParams.getC1()<fromParams.getC1()) {
 					return false;
 				}
-				if(specifierParams.isAlignmentActive() && constraintParams.isAlignmentActive()
-						&& !numberOperator.apply(Math.abs(target.getAlignment()-specifierParams.getAlignment()), constraintParams.getAlignment())) {
+				if(fromParams.isC2Active() && targetParams.getC2()<fromParams.getC2()) {
+					return false;
+				}
+				if(fromParams.isDActive() && targetParams.getD()<fromParams.getD()) {
 					return false;
 				}
 			}
 
-			if(specifierParams.isBActive() && constraintParams.isBActive()
-					&& !numberOperator.apply(Math.abs(target.getB()-specifierParams.getB()), constraintParams.getB())) {
-				return false;
-			}
-			if(specifierParams.isC1Active() && constraintParams.isC1Active()
-					&& !numberOperator.apply(Math.abs(target.getC1()-specifierParams.getC1()), constraintParams.getC1())) {
-				return false;
-			}
-			if(specifierParams.isC2Active() && constraintParams.isC2Active()
-					&& !numberOperator.apply(Math.abs(target.getC2()-specifierParams.getC2()), constraintParams.getC2())) {
-				return false;
-			}
-			if(specifierParams.isDActive() && constraintParams.isDActive()
-					&& !numberOperator.apply(Math.abs(target.getD()-specifierParams.getD()), constraintParams.getD())) {
-				return false;
+			if(!toParams.isUndefined()) {
+				if(!toParams.isCompact()) {
+					if(toParams.isA1Active() && targetParams.getA1()>toParams.getA1()) {
+						return false;
+					}
+					if(toParams.isA2Active() && targetParams.getA2()>toParams.getA2()) {
+						return false;
+					}
+					if(toParams.isAlignmentActive() && targetParams.getAlignment()>toParams.getAlignment()) {
+						return false;
+					}
+				}
+
+				if(toParams.isBActive() && targetParams.getB()>toParams.getB()) {
+					return false;
+				}
+				if(toParams.isC1Active() && targetParams.getC1()>toParams.getC1()) {
+					return false;
+				}
+				if(toParams.isC2Active() && targetParams.getC2()>toParams.getC2()) {
+					return false;
+				}
+				if(toParams.isDActive() && targetParams.getD()>toParams.getD()) {
+					return false;
+				}
 			}
 
+			// TODO Auto-generated method stub
 			return true;
 		}
 	}
