@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.prosody.painte;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -250,18 +253,52 @@ public class PaIntEConstraintParams extends PaIntEParams {
 		compact = DEFAULT_COMPACT;
 	}
 
+	private static String[] split(String s) {
+		if(s.isEmpty()) {
+			return new String[0];
+		}
+
+		List<String> buffer = new ArrayList<>();
+
+		StringBuilder sb = new StringBuilder();
+
+		boolean lastWasPipe = false;
+		for(int i=0; i<s.length(); i++) {
+			char c = s.charAt(i);
+
+			if(c=='|') {
+
+				buffer.add(sb.toString());
+				sb.setLength(0);
+
+				lastWasPipe = true;
+			} else {
+				lastWasPipe = false;
+				sb.append(c);
+			}
+		}
+
+		if(lastWasPipe) {
+			buffer.add(""); //$NON-NLS-1$
+		}
+
+		return buffer.toArray(new String[buffer.size()]);
+	}
+
 	@Override
 	public void setParams(String encodedParams) {
 		if (encodedParams == null)
 			throw new NullPointerException("Invalid encodedParams");  //$NON-NLS-1$
 
-		String[] items = encodedParams.split("\\|"); //$NON-NLS-1$
+		String[] items = split(encodedParams);
 
 		activeMask = 0;
 
 		if(items.length==4 && allowCompactConstraints) {
+			// Deactivate A1+A2
 			a1 = parse("", MASK_A1); //$NON-NLS-1$
 			a2 = parse("", MASK_A2); //$NON-NLS-1$
+
 			b = parse(items[0], MASK_B);
 			c1 = parse(items[1], MASK_C1);
 			c2 = parse(items[2], MASK_C2);

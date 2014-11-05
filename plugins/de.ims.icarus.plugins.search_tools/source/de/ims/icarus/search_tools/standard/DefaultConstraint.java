@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchOperator;
@@ -190,12 +190,12 @@ public class DefaultConstraint implements SearchConstraint {
 	 */
 	@Override
 	public boolean isUndefined() {
-		return !SearchManager.isGroupingOperator(operator)
-				&& (value==null || value.equals(LanguageConstants.DATA_UNDEFINED_LABEL)
-				|| value.equals(LanguageConstants.DATA_UNDEFINED_VALUE)
-				|| value.equals(LanguageConstants.DATA_UNDEFINED_FLOAT_VALUE)
-				|| value.equals(LanguageConstants.DATA_UNDEFINED_DOUBLE_VALUE)
-				|| "".equals(value)); //$NON-NLS-1$
+
+		if(SearchManager.isGroupingOperator(operator)) {
+			return false;
+		}
+
+		return LanguageUtils.isUndefined(value) && LanguageUtils.isUndefined(specifier);
 	}
 
 	/**

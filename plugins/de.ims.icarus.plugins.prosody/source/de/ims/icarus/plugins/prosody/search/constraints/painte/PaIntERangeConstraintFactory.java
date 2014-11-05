@@ -151,7 +151,7 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 
 			targetParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
 
-			if(!fromParams.isUndefined()) {
+			if(fromParams!=null && !fromParams.isUndefined()) {
 				if(!fromParams.isCompact()) {
 					if(fromParams.isA1Active() && targetParams.getA1()<fromParams.getA1()) {
 						return false;
@@ -178,7 +178,7 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 				}
 			}
 
-			if(!toParams.isUndefined()) {
+			if(toParams!=null && !toParams.isUndefined()) {
 				if(!toParams.isCompact()) {
 					if(toParams.isA1Active() && targetParams.getA1()>toParams.getA1()) {
 						return false;

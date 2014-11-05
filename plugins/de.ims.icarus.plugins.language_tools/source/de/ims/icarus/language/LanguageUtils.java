@@ -75,8 +75,17 @@ public final class LanguageUtils implements LanguageConstants {
 		return value==DATA_UNDEFINED_VALUE;
 	}
 
+	public static boolean isUndefined(Object value) {
+		return value==null || "".equals(value)
+				|| value.equals(DATA_UNDEFINED_LABEL)
+				|| value.equals(DATA_UNDEFINED_VALUE)
+				|| value.equals(DATA_UNDEFINED_DOUBLE_VALUE)
+				|| value.equals(DATA_UNDEFINED_FLOAT_VALUE);
+	}
+
 	public static boolean isUndefined(String value) {
-		return value==null || value.isEmpty() || value.equals(DATA_UNDEFINED_LABEL);
+		return value==null || value.isEmpty()
+				|| value.equals(DATA_UNDEFINED_LABEL);
 	}
 
 	public static String getBooleanLabel(int value) {
