@@ -49,7 +49,7 @@ public abstract class AbstractPaIntEEdgeConstraint extends DefaultConstraint {
 	// Aggregated parameter set for the target node
 	protected transient final PaIntEConstraintParams targetParams = new PaIntEConstraintParams();
 
-	protected AggregationMode aggregationMode = AggregationMode.AVG;
+	protected AggregationMode aggregationMode = AggregationMode.maxValue;
 
 	protected AbstractPaIntEEdgeConstraint(String token, Object value,
 			SearchOperator operator, Object specifier) {

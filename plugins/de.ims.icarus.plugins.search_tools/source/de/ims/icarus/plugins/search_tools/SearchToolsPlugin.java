@@ -73,6 +73,7 @@ public class SearchToolsPlugin extends Plugin {
 		SearchOperator.register(DefaultSearchOperator.GREATER_THAN);
 		SearchOperator.register(DefaultSearchOperator.GREATER_OR_EQUAL);
 		SearchOperator.register(DefaultSearchOperator.GROUPING);
+		SearchOperator.register(DefaultSearchOperator.RANGE);
 
 		for(Extension extension : getDescriptor().getExtensionPoint("SearchOperator").getConnectedExtensions()) { //$NON-NLS-1$
 			try {

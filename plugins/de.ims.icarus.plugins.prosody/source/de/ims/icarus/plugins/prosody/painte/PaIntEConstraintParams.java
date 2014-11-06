@@ -280,6 +280,8 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 		if(lastWasPipe) {
 			buffer.add(""); //$NON-NLS-1$
+		} else if(sb.length()>0) {
+			buffer.add(sb.toString());
 		}
 
 		return buffer.toArray(new String[buffer.size()]);

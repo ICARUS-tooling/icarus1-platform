@@ -214,7 +214,7 @@ public class ProsodyPreferences {
 
 		// SEARCH GROUP
 		builder.addGroup("search", true); //$NON-NLS-1$
-		builder.addBooleanEntry("allowCompactConstraints", false); //$NON-NLS-1$
+		builder.addBooleanEntry("allowCompactConstraints", true); //$NON-NLS-1$
 
 		// ACCENT SHAPE SUBGROUP
 		builder.addGroup("accentShape", true); //$NON-NLS-1$
