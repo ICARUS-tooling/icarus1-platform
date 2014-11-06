@@ -129,6 +129,7 @@ import de.ims.icarus.util.strings.StringPrimitives;
 public final class ProsodyIOUtils implements ProsodyConstants {
 
 	public static boolean DEFAULT_SYLLABLES_FROM_SAMPA = false;
+	public static boolean DEFAULT_MARK_ACCENTS = false;
 	public static Set<String> SENTENCE_BLACKLIST = null;
 
 	private ProsodyIOUtils() {
@@ -190,12 +191,17 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			CharTableBuffer buffer, BlockHandler blockHandler) throws IOException {
 
 		DefaultProsodicDocumentData result = null;
-		TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
 
 		boolean syllableOffsetsFromSampa = DEFAULT_SYLLABLES_FROM_SAMPA;
+		boolean markAccentOnWords = DEFAULT_MARK_ACCENTS;
+		int accentExcursion = -1;
 		if(!Core.isDebugActive()) {
 			syllableOffsetsFromSampa = ConfigRegistry.getGlobalRegistry().getBoolean(
 					"plugins.prosody.prosodyReader.syllableOffsetsFromSampa"); //$NON-NLS-1$
+			markAccentOnWords = ConfigRegistry.getGlobalRegistry().getBoolean(
+					"plugins.prosody.prosodyReader.markAccentOnWords"); //$NON-NLS-1$
+			accentExcursion = ConfigRegistry.getGlobalRegistry().getInteger(
+					"plugins.prosody.prosodyReader.accentExcursion"); //$NON-NLS-1$
 		}
 
 		SampaMapper2 sampaMapper = null;
@@ -214,11 +220,15 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 					sentenceReader = createReader(blockHandler.getFormatVersion());
 
+					sentenceReader.sampaMapper = sampaMapper;
+					sentenceReader.markAccentOnWords = markAccentOnWords;
+					sentenceReader.accentExcursion = accentExcursion;
+
 					if(readDocumentProperties(result, buffer)) {
 						continue;
 					}
 				}
-				sentenceReader.createData(result, buffer, clusterMap, sampaMapper);
+				sentenceReader.createData(result, buffer);
 			} catch(Exception e) {
 				// Cannot be IOException or UnsupportedFormatException
 
@@ -659,8 +669,11 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		protected CharTableBuffer buffer;
 		protected DefaultProsodicSentenceData result;
 		protected String[] forms;
-		protected TIntObjectMap<Cluster> clusterMap;
+		protected TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
 		protected SampaMapper2 sampaMapper;
+
+		protected boolean markAccentOnWords = false;
+		protected int accentExcursion = -1;
 
 		protected int ID_COL = 0;
 		protected int FORM_COL = 1;
@@ -777,14 +790,11 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			readAdditionalColumns(i, row);
 		}
 
-		public DefaultProsodicSentenceData createData(final ProsodicDocumentData document,
-				final CharTableBuffer buffer, final TIntObjectMap<Cluster> clusterMap, final SampaMapper2 sampaMapper) {
+		public DefaultProsodicSentenceData createData(final ProsodicDocumentData document, final CharTableBuffer buffer) {
 			int size = buffer.getRowCount();
 
 			this.document = document;
 			this.buffer = buffer;
-			this.clusterMap = clusterMap;
-			this.sampaMapper = sampaMapper;
 
 			clearInternals();
 
@@ -909,6 +919,57 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			PAINTE_D_COL = 33;
 		}
 
+		protected int[] mapSampa(int index) {
+			int[] offsets = EMPTY_INTS;
+			int sylCount = result.getSyllableCount(index);
+			if(sylCount>0) {
+				String[] sampa = (String[]) result.getProperty(index, SYLLABLE_LABEL_KEY);
+				String[] labels = sampaMapper.split(forms[index], sampa);
+				if(labels!=null) {
+					offsets = new int[sylCount];
+					int offset = 0;
+					for(int k=0; k<sylCount; k++) {
+						offsets[k] = offset;
+						offset += labels[k].length();
+					}
+					result.setProperty(index, SYLLABLE_FORM_KEY, labels);
+					result.setMapsSyllables(index, true);
+				} else {
+					boolean report = true;
+					if(SENTENCE_BLACKLIST!=null) {
+						Object sentNum = result.getProperty(SENTENCE_NUMBER_KEY);
+						if(sentNum!=null && SENTENCE_BLACKLIST.contains(sentNum)) {
+							report = false;
+						}
+					}
+
+					if(report) {
+						LoggerFactory.info(ProsodyIOUtils.class,
+								buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[index]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+				}
+			}
+
+			return offsets;
+		}
+
+		protected void markAccent(int index) {
+			int sylCount = result.getSyllableCount(index);
+			boolean hasAccent = false;
+
+			if(sylCount>0 && accentExcursion!=-1) {
+				for(int i=0; i<sylCount; i++) {
+					if(result.getPainteC1(index, i)>=accentExcursion
+							|| result.getPainteC2(index, i)>=accentExcursion) {
+						hasAccent = true;
+						break;
+					}
+				}
+			}
+
+			result.setProperty(index, ACCENT_KEY, hasAccent);
+		}
+
 		/**
 		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReader#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
 		 */
@@ -936,34 +997,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			int[] offsets = getInts(row, SYL_OFFSET_COL);
 			if(offsets==EMPTY_INTS) {
 				if(sampaMapper!=null) {
-					int sylCount = result.getSyllableCount(i);
-					if(sylCount>0) {
-						String[] sampa = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
-						String[] labels = sampaMapper.split(forms[i], sampa);
-						if(labels!=null) {
-							offsets = new int[sylCount];
-							int offset = 0;
-							for(int k=0; k<sylCount; k++) {
-								offsets[k] = offset;
-								offset += labels[k].length();
-							}
-							result.setProperty(i, SYLLABLE_FORM_KEY, labels);
-							result.setMapsSyllables(i, true);
-						} else {
-							boolean report = true;
-							if(SENTENCE_BLACKLIST!=null) {
-								Object sentNum = result.getProperty(SENTENCE_NUMBER_KEY);
-								if(sentNum!=null && SENTENCE_BLACKLIST.contains(sentNum)) {
-									report = false;
-								}
-							}
-
-							if(report) {
-								LoggerFactory.info(ProsodyIOUtils.class,
-										buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[i]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							}
-						}
-					}
+					offsets = mapSampa(i);
 				}
 			}
 			result.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
@@ -990,6 +1024,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, PAINTE_C1_KEY, getFloats(row, PAINTE_C1_COL));
 			result.setProperty(i, PAINTE_C2_KEY, getFloats(row, PAINTE_C2_COL));
 			result.setProperty(i, PAINTE_D_KEY, getFloats(row, PAINTE_D_COL));
+
+			if(markAccentOnWords) {
+				markAccent(i);
+			}
 		}
 	}
 

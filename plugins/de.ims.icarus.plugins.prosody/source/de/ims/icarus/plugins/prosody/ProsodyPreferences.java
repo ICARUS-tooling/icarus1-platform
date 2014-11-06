@@ -206,6 +206,8 @@ public class ProsodyPreferences {
 		builder.addGroup("prosodyReader", true); //$NON-NLS-1$
 
 		builder.addBooleanEntry("syllableOffsetsFromSampa", false); //$NON-NLS-1$
+		builder.addBooleanEntry("markAccentOnWords", true); //$NON-NLS-1$
+		builder.addIntegerEntry("accentExcursion", 30, 10, 150); //$NON-NLS-1$
 
 		// END READER GROUP
 		builder.back();

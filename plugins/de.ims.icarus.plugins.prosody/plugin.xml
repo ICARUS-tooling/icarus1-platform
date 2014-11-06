@@ -258,6 +258,12 @@
 		<!-- tokens "inherited" by dependency data -->
 		<parameter id="token" value="form" />
 		<parameter id="token" value="pos" />
+		<parameter id="token" value="relation">
+			<parameter id="alias" value="label" />
+		</parameter>
+		<parameter id="token" value="distance" />
+		<parameter id="token" value="direction" />
+		<parameter id="token" value="projectivity" />
 		<!-- new tokens -->
 		<parameter id="token" value="syllableProperty" />
 		<parameter id="token" value="wordProperty" />
@@ -276,6 +282,10 @@
 			<!-- factories "inherited" by dependency data -->
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
 			<parameter id="pos" value="de.ims.icarus.language.dependency.search.constraints.DependencyPosConstraintFactory" />
+			<parameter id="relation" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelationConstraintFactory" />
+			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
+			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
+			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
 			<!-- new factories -->
 			<parameter id="syllableProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllablePropertyConstraintFactory" />
 			<parameter id="wordProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPropertyConstraintFactory" />

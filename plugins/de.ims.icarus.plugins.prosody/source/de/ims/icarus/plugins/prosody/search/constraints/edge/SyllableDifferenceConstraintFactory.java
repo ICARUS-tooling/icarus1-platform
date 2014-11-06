@@ -135,7 +135,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 	private static final AggregationMode DEFAULT_AGGREGATION_MODE = AggregationMode.maxValue;
 
 	public static AggregationMode getAggregationMode(String id, ValueHandler handler) {
-		if("-".equals(id)) {
+		if("-".equals(id)) { //$NON-NLS-1$
 			return DEFAULT_AGGREGATION_MODE;
 		}
 
@@ -220,8 +220,8 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			if(parts.length>2) {
 				targetAggregationMode = getAggregationMode(parts[2], valueHandler);
 			} else {
-				// Max is default!
-				targetAggregationMode = DEFAULT_AGGREGATION_MODE;
+				// If only 1 custom aggregation is defined, use it for both source AND target
+				targetAggregationMode = sourceAggregationMode;
 			}
 
 			// Get begin index
@@ -252,13 +252,13 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 			int fromIndex = this.fromIndex;
 			if(fromIndex<0 && reverseFrom) {
-				fromIndex = maxIndex-fromIndex;
+				fromIndex = maxIndex+fromIndex+1;
 			}
 
 			int toIndex = this.toIndex;
 			if(toIndex<0) {
 				if(reverseTo) {
-					toIndex = maxIndex-toIndex;
+					toIndex = maxIndex+toIndex+1;
 				} else {
 					toIndex = maxIndex;
 				}

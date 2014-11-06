@@ -195,6 +195,7 @@ public class DefaultConstraint implements SearchConstraint {
 			return false;
 		}
 
+		// Considers the specifier, too!
 		return LanguageUtils.isUndefined(value) && LanguageUtils.isUndefined(specifier);
 	}
 
