@@ -127,6 +127,28 @@ public class ProsodyUtils implements ProsodyConstants {
 		return defaultSyllablePropertyKeys.clone();
 	}
 
+	private static final String[] defaultNumericalSyllablePropertyKeys = {
+		SYLLABLE_DURATION_KEY,
+		SYLLABLE_ENDPITCH_KEY,
+		SYLLABLE_MIDPITCH_KEY,
+		SYLLABLE_OFFSET_KEY,
+		SYLLABLE_STARTPITCH_KEY,
+		SYLLABLE_TIMESTAMP_KEY,
+		VOWEL_DURATION_KEY,
+		CODA_SIZE_KEY,
+		ONSET_SIZE_KEY,
+		PAINTE_A1_KEY,
+		PAINTE_A2_KEY,
+		PAINTE_B_KEY,
+		PAINTE_C1_KEY,
+		PAINTE_C2_KEY,
+		PAINTE_D_KEY,
+	};
+
+	public static String[] getDefaultNumericalSyllablePropertyKeys() {
+		return defaultNumericalSyllablePropertyKeys.clone();
+	}
+
 	private static final String[] defaultSentencePropertyKeys = {
 		SENTENCE_NUMBER_KEY,
 	};

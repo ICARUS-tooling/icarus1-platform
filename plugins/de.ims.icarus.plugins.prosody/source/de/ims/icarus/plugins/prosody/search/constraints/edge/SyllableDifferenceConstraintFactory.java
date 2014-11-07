@@ -61,7 +61,6 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 		propertyClassMap.put(CODA_SIZE_KEY, ValueHandler.integerHandler);
 		propertyClassMap.put(VOWEL_DURATION_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(ONSET_SIZE_KEY, ValueHandler.integerHandler);
-		propertyClassMap.put(PHONEME_COUNT_KEY, ValueHandler.integerHandler);
 		propertyClassMap.put(PAINTE_A1_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(PAINTE_A2_KEY, ValueHandler.floatHandler);
 		propertyClassMap.put(PAINTE_B_KEY, ValueHandler.floatHandler);
@@ -100,7 +99,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 	@Override
 	public Object[] getSupportedSpecifiers() {
-		return ProsodyUtils.getDefaultSyllablePropertyKeys();
+		return ProsodyUtils.getDefaultNumericalSyllablePropertyKeys();
 	}
 
 	@Override
@@ -169,7 +168,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 			//$FALL-THROUGH$
 		default:
-			throw new IllegalArgumentException("Not a valid aggregation mode: "+id); //$NON-NLS-1$
+			throw new IllegalArgumentException("Not a valid aggregation mode for this property: "+id); //$NON-NLS-1$
 		}
 	}
 
@@ -228,6 +227,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			if(parts.length>3) {
 				fromIndex = Integer.parseInt(parts[3]);
 				reverseFrom = fromIndex<0;
+				if(!reverseFrom) fromIndex--;
 			} else {
 				fromIndex = 0;
 				reverseFrom = false;
@@ -237,6 +237,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			if(parts.length>4) {
 				toIndex = Integer.parseInt(parts[4]);
 				reverseTo = toIndex<0;
+				if(!reverseTo) toIndex--;
 			} else {
 				toIndex = -1;
 				reverseTo = false;
@@ -265,7 +266,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			}
 
 			// Maybe give some error message or hint to the user?
-			if(fromIndex>toIndex) {
+			if(fromIndex>toIndex || fromIndex<0 || toIndex<0) {
 				return null;
 			}
 
