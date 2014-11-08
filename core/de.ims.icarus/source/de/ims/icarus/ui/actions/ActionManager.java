@@ -834,8 +834,12 @@ public class ActionManager {
 	}
 
 	public JToolBar createEmptyToolBar() {
+		return createEmptyToolBar(EMPTY_PROPERTIES);
+	}
+
+	public JToolBar createEmptyToolBar(Map<String, Object> properties) {
 		JToolBar toolBar = new JToolBar();
-		configureToolBar(toolBar, EMPTY_PROPERTIES);
+		configureToolBar(toolBar, properties);
 
 		return toolBar;
 	}

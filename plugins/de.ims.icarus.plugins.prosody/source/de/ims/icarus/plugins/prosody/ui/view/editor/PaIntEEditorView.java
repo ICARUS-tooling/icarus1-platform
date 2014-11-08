@@ -77,6 +77,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -208,6 +209,7 @@ public class PaIntEEditorView extends View {
 		paramsComponent.add(Box.createHorizontalGlue());
 
 		JScrollPane paramsScrollPane = new JScrollPane(paramsComponent);
+		paramsScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		paramsScrollPane.setBorder(null);
 		UIUtil.defaultSetUnitIncrement(paramsScrollPane);
 
@@ -255,7 +257,12 @@ public class PaIntEEditorView extends View {
 			container.add(toolBar, BorderLayout.NORTH);
 		}
 
-		addParamsPanel(null);
+		ParamsPanel defaultParamsPanel = addParamsPanel(null);
+
+		// FIX for height of params component not being updated properly
+		defaultParamsPanel.setExpandedState(false);
+		paramsScrollPane.setMinimumSize(paramsComponent.getPreferredSize());
+		defaultParamsPanel.setExpandedState(true);
 
 		registerActionCallbacks();
 
@@ -1406,7 +1413,8 @@ public class PaIntEEditorView extends View {
 		private Color color;
 		private final JButton colorButton, menuButton, undoButton, redoButton;
 		private final JToggleButton toggleButton;
-		private final JLabel titleLabel;
+		private final JLabel titleLabel, toolbarTitleLabel;
+		private final JToolBar toolBar;
 
 		private final History history;
 		private boolean paintCompact = false;
@@ -1475,6 +1483,9 @@ public class PaIntEEditorView extends View {
 			titleLabel = new JLabel();
 			titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
+			toolbarTitleLabel = new JLabel();
+			toolbarTitleLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
 			setTransferHandler(transferManager);
 
 			menuButton = new JButton(IconRegistry.getGlobalRegistry().getIcon("node_open.gif")); //$NON-NLS-1$
@@ -1492,8 +1503,8 @@ public class PaIntEEditorView extends View {
 			redoButton.setFocusable(false);
 			redoButton.setFocusPainted(false);
 
-			JToolBar toolBar = getDefaultActionManager().createEmptyToolBar();
-			toolBar.add(titleLabel);
+			toolBar = getDefaultActionManager().createEmptyToolBar();
+			toolBar.add(toolbarTitleLabel);
 			toolBar.add(Box.createGlue());
 			toolBar.add(colorButton);
 			toolBar.add(undoButton);
@@ -1503,16 +1514,18 @@ public class PaIntEEditorView extends View {
 
 			FormLayout layout = new FormLayout(
 					"fill:pref, 3dlu, pref, 3dlu, pref, 2dlu, min(65dlu;pref), 2dlu, pref", //$NON-NLS-1$
-					"pref, 4dlu, pref, pref, pref, pref, pref, pref, pref"); //$NON-NLS-1$
+					"min, 2dlu, min, pref, pref, pref, pref, pref, pref, pref"); //$NON-NLS-1$
 			layout.setRowGroups(new int[][]{{3,4,5,6,7,8,9}});
 
 			DefaultFormBuilder builder = new DefaultFormBuilder(layout, this);
-			builder.add(toolBar, CC.rchw(1, 1, 1, 9));
+			builder.add(titleLabel, CC.rchw(1, 1, 1, 9));
+			builder.nextLine();
+			builder.add(toolBar, CC.rchw(3, 1, 1, 9));
 			builder.nextLine();
 
 			for(int i=0; i<paramComponents.length; i++) {
 				ParamComponents paramComps = paramComponents[i];
-				int row = 3+i;
+				int row = 4+i;
 				builder.add(paramComps.titleLabel, CC.rc(row, 1));
 				builder.add(paramComps.textField, CC.rc(row, 3));
 				builder.add(paramComps.minLabel, CC.rc(row, 5));
@@ -1522,7 +1535,7 @@ public class PaIntEEditorView extends View {
 
 			setBorder(BorderFactory.createCompoundBorder(UIUtil.rightLineBorder, UIUtil.defaultContentBorder));
 
-			refreshSize();
+			setExpandedState(true);
 		}
 
 		public void refresh() {
@@ -1532,8 +1545,13 @@ public class PaIntEEditorView extends View {
 				label += "*"; //$NON-NLS-1$
 			}
 
+			String tooltip = UIUtil.toUnwrappedSwingTooltip(wrapper.getDescription());
+
 			titleLabel.setText(label);
-			titleLabel.setToolTipText(UIUtil.toUnwrappedSwingTooltip(wrapper.getDescription()));
+			titleLabel.setToolTipText(tooltip);
+
+			toolbarTitleLabel.setText(label);
+			toolbarTitleLabel.setToolTipText(tooltip);
 
 //			setPaintCompact(wrapper.isCompact());
 
@@ -1724,6 +1742,9 @@ public class PaIntEEditorView extends View {
 			colorButton.setVisible(expanded);
 			undoButton.setVisible(expanded);
 			redoButton.setVisible(expanded);
+			toolbarTitleLabel.setVisible(expanded);
+
+			titleLabel.setVisible(!expanded);
 //			addButton.setVisible(expanded);
 //			pasteButton.setVisible(expanded);
 //			saveButton.setVisible(expanded);
@@ -1742,6 +1763,10 @@ public class PaIntEEditorView extends View {
 			if(expanded==toggleButton.isSelected()) {
 				toggleButton.setSelected(!expanded);
 			}
+
+			revalidate();
+
+//			setMinimumSize(getPreferredSize());
 
 			refreshSize();
 		}

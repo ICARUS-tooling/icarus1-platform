@@ -238,7 +238,7 @@ public final class ResourceManager {
 				if(digit) {
 					int tmp = Integer.parseInt(index) - 1;
 
-					if (tmp >= 0 && tmp < params.length) {
+					if (tmp >= 0 && params!=null && tmp < params.length) {
 						result.append(params[tmp]);
 					}
 				} else {

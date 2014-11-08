@@ -205,7 +205,7 @@ public class ProsodyPreferences {
 		// READER GROUP
 		builder.addGroup("prosodyReader", true); //$NON-NLS-1$
 
-		builder.addBooleanEntry("syllableOffsetsFromSampa", false); //$NON-NLS-1$
+		builder.addBooleanEntry("syllableOffsetsFromSampa", true); //$NON-NLS-1$
 		builder.addBooleanEntry("markAccentOnWords", true); //$NON-NLS-1$
 		builder.addIntegerEntry("accentExcursion", 30, 10, 150); //$NON-NLS-1$
 
@@ -224,8 +224,12 @@ public class ProsodyPreferences {
 		builder.addIntegerEntry("delta", 10, 0, 50); //$NON-NLS-1$
 		// => Minimum values for c1 and c2
 		builder.addIntegerEntry("excursion", 30, 10, 150); //$NON-NLS-1$
-		builder.addDoubleEntry("minB", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
-		builder.addDoubleEntry("maxB", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("minBRise", 1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("maxBRise", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("minBFall", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("maxBFall", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("minBRiseFall", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("maxBRiseFall", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 
 		// END ACCENT SHAPE SUBGROUP
 		builder.back();

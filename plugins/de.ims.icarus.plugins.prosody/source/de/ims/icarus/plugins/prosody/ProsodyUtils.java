@@ -93,6 +93,8 @@ public class ProsodyUtils implements ProsodyConstants {
 		PHONEME_COUNT_KEY,
 		SPEAKER_KEY,
 		SPEAKER_FEATURES_KEY,
+		IS_LEX,
+		IS_REF,
 	};
 
 	public static String[] getDefaultWordPropertyKeys() {

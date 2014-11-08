@@ -104,26 +104,21 @@ public enum GridStyle {
 
 			// Horizontal parts
 
-			int cursorY = h;
+			int cursorY, cursorX;
 			int markerY = 1;
+			int markerX;
 
-			for(;;) {
-
-				cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY);
-
-				if(cursorY<1) {
-					break;
-				}
+			while((cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY))>=1) {
 
 				// Vertical parts
-
-				int cursorX = 0;
-				int markerX = 1;
+				markerX = 1;
 
 				while((cursorX = (int) (markerX*xAxis.getMarkerStepSize()*scaleX))<=w-1) {
 
 					graphics.drawLine(cursorX-1, cursorY, cursorX+1, cursorY);
 					graphics.drawLine(cursorX, cursorY-1, cursorX, cursorY+1);
+
+					markerX++;
 				}
 
 				markerY++;
@@ -148,21 +143,14 @@ public enum GridStyle {
 
 			// Horizontal parts
 
-			int cursorY = h;
+			int cursorY, cursorX;
 			int markerY = 1;
+			int markerX;
 
-			for(;;) {
-
-				cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY);
-
-				if(cursorY<2) {
-					break;
-				}
+			while((cursorY=(int) (h-markerY*yAxis.getMarkerStepSize()*scaleY))>=2) {
 
 				// Vertical parts
-
-				int cursorX = 0;
-				int markerX = 1;
+				markerX = 1;
 
 				while((cursorX = (int) (markerX*xAxis.getMarkerStepSize()*scaleX))<=w-2) {
 

@@ -108,7 +108,9 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 		private static final long serialVersionUID = 3545419475427701670L;
 
 		private transient int delta, excursion;
-		private transient double minB, maxB;
+		private transient double minBRise, maxBRise;
+		private transient double minBFall, maxBFall;
+		private transient double minBRiseFall, maxBRiseFall;
 
 		public ProsodyAccentShapeConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator, null);
@@ -122,17 +124,17 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 
 			excursion = registry.getInteger(registry.getChildHandle(handle, "excursion")); //$NON-NLS-1$
 			delta = registry.getInteger(registry.getChildHandle(handle, "delta")); //$NON-NLS-1$
-			minB = registry.getDouble(registry.getChildHandle(handle, "minB")); //$NON-NLS-1$
-			maxB = registry.getDouble(registry.getChildHandle(handle, "maxB")); //$NON-NLS-1$
+			minBRise = registry.getDouble(registry.getChildHandle(handle, "minBRise")); //$NON-NLS-1$
+			maxBRise = registry.getDouble(registry.getChildHandle(handle, "maxBRise")); //$NON-NLS-1$
+			minBFall = registry.getDouble(registry.getChildHandle(handle, "minBFall")); //$NON-NLS-1$
+			maxBFall = registry.getDouble(registry.getChildHandle(handle, "maxBFall")); //$NON-NLS-1$
+			minBRiseFall = registry.getDouble(registry.getChildHandle(handle, "minBRiseFall")); //$NON-NLS-1$
+			maxBRiseFall = registry.getDouble(registry.getChildHandle(handle, "maxBRiseFall")); //$NON-NLS-1$
 		}
 
 		@Override
 		public Object getInstance(ProsodyTargetTree tree, int sylIndex) {
 			float b = tree.getPainteB(sylIndex);
-			if(b<minB || b>maxB) {
-				return DATA_UNDEFINED_VALUE;
-			}
-
 			float c1 = tree.getPainteC1(sylIndex);
 			float c2 = tree.getPainteC2(sylIndex);
 
@@ -141,11 +143,11 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 			}
 
 			if(Math.abs(c1-c2)<=delta) {
-				return ACCENT_SHAPE_RISE_FALL_VALUE;
+				return (b>=minBRiseFall && b<=maxBRiseFall) ? ACCENT_SHAPE_RISE_FALL_VALUE : DATA_UNDEFINED_VALUE;
 			} else if(c1>c2) {
-				return ACCENT_SHAPE_RISE_VALUE;
+				return (b>=minBRise && b<=maxBRise) ? ACCENT_SHAPE_RISE_VALUE : DATA_UNDEFINED_VALUE;
 			} else {
-				return ACCENT_SHAPE_FALL_VALUE;
+				return (b>=minBFall && b<=maxBFall) ? ACCENT_SHAPE_FALL_VALUE : DATA_UNDEFINED_VALUE;
 			}
 		}
 

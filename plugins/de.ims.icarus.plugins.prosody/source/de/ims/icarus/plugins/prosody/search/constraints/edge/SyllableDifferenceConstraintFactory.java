@@ -140,7 +140,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 		try {
 			int index = Integer.parseInt(id);
-			return new AggregationMode.SingletonAggregation(index);
+			return new AggregationMode.SingletonAggregation(index-1);
 		} catch(NumberFormatException e) {
 			// ignore
 		}

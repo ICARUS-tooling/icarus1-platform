@@ -160,6 +160,9 @@ public abstract class AggregationMode {
 		private final int index;
 
 		public SingletonAggregation(int index) {
+			if(index<0)
+				throw new IllegalArgumentException("Index must not be negative: "+index); //$NON-NLS-1$
+
 			this.index = index;
 		}
 
