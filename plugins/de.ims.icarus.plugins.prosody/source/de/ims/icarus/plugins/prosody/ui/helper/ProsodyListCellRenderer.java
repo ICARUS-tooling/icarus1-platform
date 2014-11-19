@@ -50,7 +50,9 @@ import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
-import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
 import de.ims.icarus.plugins.prosody.ui.TextComponent;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
@@ -64,6 +66,7 @@ import de.ims.icarus.ui.list.AbstractListCellRendererPanel;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
@@ -72,7 +75,7 @@ import de.ims.icarus.util.annotation.AnnotationManager;
  */
 public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Object> implements SwingConstants, Installable {
 
-	public static final String DEFAULT_HEADER_PATTERN = "%documentId::15:% (n) $speaker:::?:$\\:  "; //$NON-NLS-1$
+	public static final String DEFAULT_HEADER_PATTERN = "{doc:id;max=15} ({sent:index}) {sent:speaker;def=?}:  "; //$NON-NLS-1$
 
 	private static final String CONFIG_PATH = "plugins.prosody.appearance.search.listOutline"; //$NON-NLS-1$
 
@@ -86,7 +89,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 	private SentenceComponent sentenceComponent;
 	private TextComponent headerLabel;
 
-	private LabelPattern labelPattern = new LabelPattern();
+	private TextSource labelPattern;
 	private boolean showCurvePreview = true;
 	private PreviewSize previewSize = PanelConfig.DEFAULT_PREVIEW_SIZE;
 	private AntiAliasingType antiAliasingType = PanelConfig.DEFAULT_ANTIALIASING_TYPE;
@@ -95,6 +98,8 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 	private Font textFont = TextArea.DEFAULT_FONT;
 	private float leftSyllableBound = PanelConfig.DEFAULT_LEFT_SYLLABLE_BOUND;
 	private float rightSyllableBound = PanelConfig.DEFAULT_RIGHT_SYLLABLE_BOUND;
+
+	private static final ProsodyData patternProxy = new ProsodyData();
 
 	private final ConfigListener configListener = new ConfigListener() {
 
@@ -138,7 +143,8 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 		if(labelPattern==null) {
 			headerLabel.setLines(null);
 		} else {
-			headerLabel.setLines(labelPattern.getText(sentence));
+			patternProxy.set(sentence);
+			headerLabel.setLines(new String[]{labelPattern.getText(patternProxy, null)});
 		}
 	}
 
@@ -149,7 +155,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 		String headerPattern = registry.getString(registry.getChildHandle(handle, "headerPattern")); //$NON-NLS-1$
 
 		try {
-			labelPattern.compile(headerPattern);
+			labelPattern = ProsodyPatternContext.createTextSource(ProsodyLevel.SENTENCE, headerPattern);
 		} catch (Exception e) {
 			LoggerFactory.error(this, "Faled to set new header label pattern: "+String.valueOf(headerPattern), e); //$NON-NLS-1$
 		}

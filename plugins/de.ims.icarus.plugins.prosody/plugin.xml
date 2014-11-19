@@ -139,23 +139,31 @@
 		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter.GraphBasedPresenter" />
 	</extension>
 	
+	<extension id="ProsodySearchResultExportHandler" plugin-id="de.ims.icarus.searchTools" point-id="SearchResultExportHandler">
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.search.ProsodySearchResultExportHandler" />
+		<parameter id="contentType" value="de.ims.icarus.prosody@ProsodicSentenceDataContentType" />
+		<parameter id="name" value="plugins.prosody.prosodySearchResultExportHandler.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySearchResultExportHandler.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+	</extension>
+	
 	<extension id="ProsodySentenceDetailPresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
 		<parameter id="name" value="plugins.prosody.prosodySentenceDetailPresenter.identity.name" />
-		<parameter id="description" value="plugins.prosody.prosodySentenceDetailPresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySentenceDetailPresenter.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.details.ProsodySentenceDetailPresenter" />
 	</extension>
 	
 	<extension id="ProsodySentenceGraphPresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
 		<parameter id="name" value="plugins.prosody.prosodySentenceGraphPresenter.identity.name" />
-		<parameter id="description" value="plugins.prosody.prosodySentenceGraphPresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySentenceGraphPresenter.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.graph.ProsodySentenceGraphPresenter" />
 	</extension>
 	
 	<extension id="ProsodySentenceTablePresenter" plugin-id="de.ims.icarus.prosody" point-id="ProsodySentencePresenter">
 		<parameter id="name" value="plugins.prosody.prosodySentenceTablePresenter.identity.name" />
-		<parameter id="description" value="plugins.prosody.prosodySentenceTablePresenter.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodySentenceTablePresenter.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.table.ProsodySentenceTablePresenter" />
 	</extension>

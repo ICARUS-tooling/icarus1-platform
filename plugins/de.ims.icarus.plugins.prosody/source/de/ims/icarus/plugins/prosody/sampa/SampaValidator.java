@@ -26,6 +26,7 @@
 package de.ims.icarus.plugins.prosody.sampa;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.ims.icarus.util.ToolException;
@@ -43,6 +44,7 @@ public class SampaValidator {
 	private boolean validationStarted = false;
 
 	private SampaMapper2 mapper;
+	private boolean verbose = false;
 
 	private List<SampaSet> errors = new ArrayList<>();
 
@@ -88,7 +90,15 @@ public class SampaValidator {
 	}
 
 	public boolean validate(SampaSet data) {
-		return mapper.split(data.getWord(), data.getSampaBlocks())!=null;
+		String[] parts = mapper.split(data.getWord(), data.getSampaBlocks());
+
+		if(verbose) {
+			System.out.printf("word='%s' sampa='%s' splits='%s'\n",
+					data.getWord(), Arrays.toString(data.getSampaBlocks()),
+					parts==null ? "-" : Arrays.toString(parts));
+		}
+
+		return parts!=null;
 	}
 
 	public SampaMapper2 getMapper() {
@@ -120,5 +130,16 @@ public class SampaValidator {
 
 	public SampaSet getErroneousSetAt(int index) {
 		return errors.get(index);
+	}
+
+	public boolean isVerbose() {
+		return verbose;
+	}
+
+	public synchronized void setVerbose(boolean verbose) {
+		if(validationStarted)
+			throw new IllegalStateException("Cannot change verbose state after validation has started"); //$NON-NLS-1$
+
+		this.verbose = verbose;
 	}
 }

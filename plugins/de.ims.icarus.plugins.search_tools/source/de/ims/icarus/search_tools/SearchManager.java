@@ -54,6 +54,7 @@ import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.search_tools.SearchToolsConstants;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -232,6 +233,33 @@ public final class SearchManager {
 
 	public static boolean isGroupingOperator(SearchOperator operator) {
 		return operator==DefaultSearchOperator.GROUPING;
+	}
+
+	private static Collection<Extension> availableResultExportHandlers;
+
+	public static Collection<Extension> getResultExportHandlers(SearchResult searchResult) {
+		if (searchResult == null)
+			throw new NullPointerException("Invalid searchResult"); //$NON-NLS-1$
+
+		if(availableResultExportHandlers==null) {
+			ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+					SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchResultExportHandler"); //$NON-NLS-1$
+			availableResultExportHandlers = Collections.unmodifiableCollection(extensionPoint.getConnectedExtensions());
+		}
+
+		ContentType targetType = searchResult.getContentType();
+
+		List<Extension> result = new ArrayList<>();
+
+		for(Extension extension : availableResultExportHandlers) {
+			Extension.Parameter param = extension.getParameter("contentType"); //$NON-NLS-1$
+			ContentType handlerType = ContentTypeRegistry.getInstance().getType(param.valueAsExtension());
+			if(ContentTypeRegistry.isCompatible(handlerType, targetType)) {
+				result.add(extension);
+			}
+		}
+
+		return result;
 	}
 
 	private Map<Extension, SearchFactory> factoryInstances;

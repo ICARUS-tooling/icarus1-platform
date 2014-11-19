@@ -30,14 +30,14 @@ import de.ims.icarus.language.treebank.TreebankDescriptor;
 import de.ims.icarus.language.treebank.TreebankListDelegate;
 import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.search_tools.Search;
-import de.ims.icarus.search_tools.SearchFactory;
+import de.ims.icarus.search_tools.standard.AbstractSearchFactory;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public abstract class AbstractCorpusSearchFactory implements SearchFactory {
+public abstract class AbstractCorpusSearchFactory extends AbstractSearchFactory {
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchFactory#getSerializedTarget(de.ims.icarus.search_tools.Search)

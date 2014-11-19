@@ -90,6 +90,8 @@ public class ProsodyUtils implements ProsodyConstants {
 		ENTITY_KEY,
 		FEATURES_KEY,
 		HEAD_KEY,
+		ACCENT_KEY,
+		STRESS_KEY,
 		PHONEME_COUNT_KEY,
 		SPEAKER_KEY,
 		SPEAKER_FEATURES_KEY,

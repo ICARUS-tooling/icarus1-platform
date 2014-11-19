@@ -77,6 +77,7 @@ public abstract class BoundedSyllableConstraint extends AbstractProsodySyllableC
 		leftBorder = registry.getDouble(registry.getChildHandle(handle, "leftBorder")); //$NON-NLS-1$
 		rightBorder = registry.getDouble(registry.getChildHandle(handle, "rightBorder")); //$NON-NLS-1$
 		resolution = registry.getInteger(registry.getChildHandle(handle, "resolution")); //$NON-NLS-1$
+		ignoreUnstressed = registry.getBoolean(registry.getChildHandle(handle, "ignoreUnstressedSyllables")); //$NON-NLS-1$
 	}
 
 	protected abstract String getConfigPath();

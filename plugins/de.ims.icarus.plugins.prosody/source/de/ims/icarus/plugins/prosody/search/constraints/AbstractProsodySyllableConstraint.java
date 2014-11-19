@@ -40,6 +40,7 @@ import de.ims.icarus.search_tools.standard.GroupCache;
 public abstract class AbstractProsodySyllableConstraint extends DefaultConstraint implements SyllableConstraint {
 
 	private static final long serialVersionUID = 8333873086091026549L;
+	protected transient boolean ignoreUnstressed = false;
 
 	public AbstractProsodySyllableConstraint(String token, Object value,
 			SearchOperator operator, Object specifier) {
@@ -60,7 +61,13 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 			Object constraint = getConstraint();
 
 			for(int i=0; i<tree.getSyllableCount(); i++) {
-				if(operator.apply(getInstance(tree, i), constraint)) {
+				if((ignoreUnstressed && !tree.isSyllableStressed(i))) {
+					continue;
+				}
+
+				Object instance = getInstance(tree, i);
+
+				if(instance!=null && operator.apply(instance, constraint)) {
 					return true;
 				}
 			}
@@ -73,12 +80,13 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 	public boolean matches(Object value, int syllable) {
 		ProsodyTargetTree tree = (ProsodyTargetTree) value;
 
-		if(tree.hasSyllables()) {
+		if(tree.hasSyllables() && (!ignoreUnstressed || tree.isSyllableStressed(syllable))) {
 
 			SearchOperator operator = getOperator();
 			Object constraint = getConstraint();
+			Object instance = getInstance(tree, syllable);
 
-			return operator.apply(getInstance(tree, syllable), constraint);
+			return instance!=null && operator.apply(instance, constraint);
 		}
 
 		return false;
@@ -98,6 +106,10 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 		if(tree.hasSyllables()) {
 			for(int i=0; i<tree.getSyllableCount(); i++) {
 				Object instance = getInstance(tree, i);
+
+				if(instance==null) {
+					continue;
+				}
 
 				if(instance instanceof Float) {
 					instance = (float)Math.floor((float)instance*100F)*0.01F;

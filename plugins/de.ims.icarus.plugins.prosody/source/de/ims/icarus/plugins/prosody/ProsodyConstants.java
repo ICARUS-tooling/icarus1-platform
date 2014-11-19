@@ -58,6 +58,9 @@ public interface ProsodyConstants extends LanguageConstants {
 	// Flags
 	public static final int FLAG_MAPS_SYLLABLES = (1 << 2);
 
+	// General properties
+	public static final String INDEX_KEY = "index"; //$NON-NLS-1$
+
 	// Word properties
 	public static final String FORM_KEY = "form"; //$NON-NLS-1$
 	public static final String POS_KEY = "pos"; //$NON-NLS-1$
@@ -66,7 +69,10 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String DEPREL_KEY = "deprel"; //$NON-NLS-1$
 	public static final String HEAD_KEY = "head"; //$NON-NLS-1$
 	public static final String ACCENT_KEY = "accent"; //$NON-NLS-1$
+	public static final String STRESS_KEY = "stress"; //$NON-NLS-1$
 	public static final String FLAGS_KEY = "flags"; //$NON-NLS-1$
+
+	public static final String SYLLABLE_COUNT = "syllable_count"; //$NON-NLS-1$
 
 	public static final String SPEAKER_KEY = "speaker"; //$NON-NLS-1$
 	public static final String SPEAKER_FEATURES_KEY = "speaker_features"; //$NON-NLS-1$

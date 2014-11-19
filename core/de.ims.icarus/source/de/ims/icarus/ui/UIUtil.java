@@ -225,15 +225,29 @@ public final class UIUtil {
 
 	public static final Color defaultBorderColor = new Color(128, 128, 128);
 
+	/**
+	 * Rounded line border in gray
+	 */
 	public static final Border defaultAreaBorder = BorderFactory.createLineBorder(defaultBorderColor, 1, true);
+
+	/**
+	 * Lined border in gray
+	 */
 	public static final Border defaultBoxBorder = BorderFactory.createLineBorder(defaultBorderColor, 1);
 
 	public static final Border topLineBorder = new SeparatingBorder(true, false, false, false);
 	public static final Border bottomLineBorder = new SeparatingBorder(false, false, true, false);
 	public static final Border rightLineBorder = new SeparatingBorder(false, true, false, false);
 	public static final Border leftLineBorder = new SeparatingBorder(false, false, false, true);
+
+	/**
+	 * Empty border
+	 */
 	public static final Border emptyBorder = new EmptyBorder(0, 0, 0, 0);
 
+	/**
+	 * Empty border (1, 3, 1, 3)
+	 */
 	public static final Border defaultContentBorder = new EmptyBorder(1, 3, 1, 3);
 
 	private static Map<String, Icon> blankIcons;

@@ -69,7 +69,7 @@ public abstract class ValueHandler {
 
 		@Override
 		public Object substract(Object o1, Object o2) {
-			throw new UnsupportedOperationException("Cannot substract strings!");
+			throw new UnsupportedOperationException("Cannot substract strings!"); //$NON-NLS-1$
 		}
 	};
 
@@ -189,7 +189,7 @@ public abstract class ValueHandler {
 
 		@Override
 		public Class<?> getValueClass() {
-			return Double.class;
+			return Boolean.class;
 		}
 
 		@Override
@@ -199,21 +199,38 @@ public abstract class ValueHandler {
 
 		@Override
 		public Object labelToValue(Object label) {
-			return LanguageUtils.parseBooleanLabel((String)label);
+//			return LanguageUtils.parseBooleanLabel((String)label);
+			if(LanguageConstants.DATA_GROUP_LABEL.equals(label)) {
+				return LanguageConstants.DATA_GROUP_VALUE;
+			} else if(LanguageConstants.DATA_UNDEFINED_LABEL.equals(label)) {
+				return LanguageConstants.DATA_UNDEFINED_VALUE;
+			} else {
+				return Boolean.parseBoolean((String)label);
+			}
+		}
+
+		@Override
+		public String valueToLabel(Object value) {
+//			return LanguageUtils.getBooleanLabel((int)value);
+			if(value instanceof Integer) {
+				return LanguageUtils.getBooleanLabel((int)value);
+			} else {
+				return Boolean.toString((boolean)value);
+			}
 		}
 
 		@Override
 		public Object[] getLabelSet() {
 			return new Object[]{
 					LanguageConstants.DATA_UNDEFINED_LABEL,
-					LanguageUtils.getBooleanLabel(LanguageConstants.DATA_YES_VALUE),
-					LanguageUtils.getBooleanLabel(LanguageConstants.DATA_NO_VALUE),
+					valueToLabel(true),
+					valueToLabel(false),
 			};
 		}
 
 		@Override
 		public Object substract(Object o1, Object o2) {
-			throw new UnsupportedOperationException("Cannot substarct boolean values!");
+			throw new UnsupportedOperationException("Cannot substract boolean values!"); //$NON-NLS-1$
 		}
 	};
 }

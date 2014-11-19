@@ -20,12 +20,17 @@
 		
 	<!-- Save Search -->
 	<action id="plugins.searchTools.searchManagerView.saveSearchAction"
-		template="actions.default.exportAction"
+		template="actions.default.saveAction"
 		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Open Search -->
 	<action id="plugins.searchTools.searchManagerView.openSearchAction"
-		template="actions.default.importAction"
+		template="actions.default.loadAction"
+		name="${id}.name" desc="${id}.description" />
+		
+	<!-- Export Result -->
+	<action id="plugins.searchTools.searchManagerView.exportResultAction"
+		template="actions.default.exportAction"
 		name="${id}.name" desc="${id}.description" />
 		
 	<!-- Load Search Target -->
@@ -105,6 +110,8 @@
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.saveSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.openSearchAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchManagerView.exportResultAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewSearchAction" />
 		<item type="action" value="plugins.searchTools.searchManagerView.viewResultAction" />

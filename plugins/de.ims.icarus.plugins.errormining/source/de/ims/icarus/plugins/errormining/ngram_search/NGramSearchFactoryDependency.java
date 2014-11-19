@@ -35,10 +35,10 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchConstraint;
-import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.standard.AbstractSearchFactory;
 import de.ims.icarus.search_tools.standard.DefaultSearchGraph;
 import de.ims.icarus.search_tools.standard.DefaultSearchQuery;
 import de.ims.icarus.ui.helper.Editor;
@@ -51,7 +51,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class NGramSearchFactoryDependency implements SearchFactory {
+public class NGramSearchFactoryDependency extends AbstractSearchFactory {
 
 	public NGramSearchFactoryDependency() {
 		// no-op
@@ -96,16 +96,6 @@ public class NGramSearchFactoryDependency implements SearchFactory {
 	public Editor<Options> createParameterEditor() {
 		return new NGramParameterEditor();
 	}
-
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#createExampleSearch()
-	 */
-	@Override
-	public Search createExampleSearch() throws Exception {
-		return null;
-	}
-
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchFactory#getDefaultEditorClass()

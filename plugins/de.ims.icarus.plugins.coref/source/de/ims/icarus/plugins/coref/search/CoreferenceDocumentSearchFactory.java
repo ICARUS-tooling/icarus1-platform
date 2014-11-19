@@ -29,15 +29,12 @@ import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
-import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
-import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
-import de.ims.icarus.search_tools.standard.DefaultParameterEditor;
+import de.ims.icarus.search_tools.standard.AbstractSearchFactory;
 import de.ims.icarus.search_tools.standard.DefaultSearchQuery;
-import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
@@ -48,7 +45,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentSearchFactory implements SearchFactory {
+public class CoreferenceDocumentSearchFactory extends AbstractSearchFactory {
 
 	public CoreferenceDocumentSearchFactory() {
 		// no-op
@@ -81,40 +78,6 @@ public class CoreferenceDocumentSearchFactory implements SearchFactory {
 	@Override
 	public ConstraintContext getConstraintContext() {
 		return SearchManager.getInstance().getConstraintContext(getContentType());
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#createParameterEditor()
-	 */
-	@Override
-	public Editor<Options> createParameterEditor() {
-		return new DefaultParameterEditor();
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#createExampleSearch()
-	 */
-	@Override
-	public Search createExampleSearch() throws Exception {
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#getDefaultEditorClass()
-	 */
-	@Override
-	public Class<? extends QueryEditor> getDefaultEditorClass() {
-		// Allow the framework to assign the default editor implementation
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#getQueryLabel(de.ims.icarus.search_tools.SearchQuery)
-	 */
-	@Override
-	public String getQueryLabel(SearchQuery query) {
-		// Allow framework to generate a default label
-		return null;
 	}
 
 	/**

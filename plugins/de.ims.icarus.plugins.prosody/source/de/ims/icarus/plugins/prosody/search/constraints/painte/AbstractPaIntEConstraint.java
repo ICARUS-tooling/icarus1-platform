@@ -103,7 +103,7 @@ public abstract class AbstractPaIntEConstraint extends BoundedSyllableConstraint
 	public boolean matches(Object value, int syllable) {
 		ProsodyTargetTree tree = (ProsodyTargetTree) value;
 
-		if(tree.hasSyllables()) {
+		if(tree.hasSyllables() && (!ignoreUnstressed || tree.isSyllableStressed(syllable))) {
 			return applyOperator(getInstance(tree, syllable));
 		}
 

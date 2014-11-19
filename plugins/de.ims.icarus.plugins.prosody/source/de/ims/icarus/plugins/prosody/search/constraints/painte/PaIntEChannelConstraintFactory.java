@@ -206,6 +206,10 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		@Override
 		protected Object getInstance(ProsodyTargetTree tree, int syllable) {
 
+			if(ignoreUnstressed && !tree.isSyllableStressed(syllable)) {
+				return null;
+			}
+
 			valueParams.setParams(tree.getSource(), tree.getNodeIndex(), syllable);
 
 			if(compact) {
@@ -404,13 +408,13 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 
-			sb.append("Lower Line:\n").append(lowerLine).append('\n');
-			sb.append("Target Line:\n").append(targetLine).append('\n');
-			sb.append("Upper Line:\n").append(upperLine).append('\n');
+			sb.append("Lower Line:\n").append(lowerLine).append('\n'); //$NON-NLS-1$
+			sb.append("Target Line:\n").append(targetLine).append('\n'); //$NON-NLS-1$
+			sb.append("Upper Line:\n").append(upperLine).append('\n'); //$NON-NLS-1$
 
 			for(int i=0; i<pointCount; i++) {
 				sb.append(String.format(Locale.ENGLISH,
-						"x=%.02f lower=%.02f target=%,02f upper=%.02f",
+						"x=%.02f lower=%.02f target=%,02f upper=%.02f", //$NON-NLS-1$
 						pointX(i), pointYLower(i), pointYTarget(i), pointYUpper(i))).append('\n');
 			}
 
@@ -458,9 +462,9 @@ public class PaIntEChannelConstraintFactory extends AbstractConstraintFactory {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 
-			sb.append("b=").append(b).append(" d=").append(d).append('\n');
-			sb.append("line_asc=").append(m1).append("x+").append(c1).append('\n');
-			sb.append("line_desc=").append(m2).append("x+").append(c2);
+			sb.append("b=").append(b).append(" d=").append(d).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append("line_asc=").append(m1).append("x+").append(c1).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append("line_desc=").append(m2).append("x+").append(c2); //$NON-NLS-1$ //$NON-NLS-2$
 
 			return sb.toString();
 		}

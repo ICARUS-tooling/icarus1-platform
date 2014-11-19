@@ -299,6 +299,8 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			reader = new SentenceReaderV03();
 		}
 
+		reader.init();
+
 		return reader;
 	}
 
@@ -679,7 +681,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		protected int FORM_COL = 1;
 		protected int COREF_COL = 10;
 
-		public SentenceReader() {
+		public void init() {
 			initColumns();
 		}
 
@@ -805,6 +807,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result = new DefaultProsodicSentenceData(document, forms);
 
 			result.setProperties(properties);
+			result.setProperty(INDEX_KEY, document.size());
 
 			String speaker = (String) result.getProperty(SPEAKER_KEY);
 
@@ -994,6 +997,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, SYLLABLE_TIMESTAMP_KEY, getFloats(row, SYL_TIMESTAMP_COL));
 			result.setProperty(i, SYLLABLE_VOWEL_KEY, getStrings(row, SYL_VOWEL_COL));
 
+			String[] labels = (String[]) result.getProperty(i, SYLLABLE_LABEL_KEY);
+			int sylCount = labels==null ? 0 : labels.length;
+			result.setProperty(i, SYLLABLE_COUNT, sylCount);
+
 			int[] offsets = getInts(row, SYL_OFFSET_COL);
 			if(offsets==EMPTY_INTS) {
 				if(sampaMapper!=null) {
@@ -1004,9 +1011,16 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 			// Special handling for stressed syllables (can be either a single value or an array)
 			int[] stressedIndices = getInts(row, SYL_STRESS_COL);
+			boolean[] stress = new boolean[sylCount];
+			boolean wordStressed = false;
 			for(int index : stressedIndices) {
-				result.setSyllableStressed(i, index, true);
+//				result.setSyllableStressed(i, index, true);
+				//FIXME stupid workaround
+				stress[index] = true;
+				wordStressed = true;
 			}
+			result.setProperty(i, SYLLABLE_STRESS_KEY, stress);
+			result.setProperty(i, STRESS_KEY, wordStressed);
 
 			result.setProperty(i, SYLLABLE_DURATION_KEY, getFloats(row, SYL_DURATION_COL));
 			result.setProperty(i, VOWEL_DURATION_KEY, getFloats(row, VOWEL_DURATION_COL));

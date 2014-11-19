@@ -88,6 +88,7 @@ import de.ims.icarus.search_tools.SearchDescriptor;
 import de.ims.icarus.search_tools.SearchFactory;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
+import de.ims.icarus.search_tools.SearchResultExportHandler;
 import de.ims.icarus.search_tools.SearchTargetSelector;
 import de.ims.icarus.search_tools.io.SearchReader;
 import de.ims.icarus.search_tools.io.SearchResolver;
@@ -243,13 +244,18 @@ public class SearchManagerView extends View {
 		descriptor = searchHistoryList.getSelectedValue();
 		boolean selected = descriptor!=null;
 		search = selected ? descriptor.getSearch() : null;
+		SearchResult result = search==null ? null : search.getResult();
+
+		Collection<Extension> exportHandlers = result==null ? null : SearchManager.getResultExportHandlers(result);
+
 		boolean canCancel = search!=null && search.isRunning();
-		boolean hasResult = search!=null && search.getResult()!=null;
+		boolean hasResult = result!=null;
 		boolean isLoadable = target instanceof Loadable;
 		boolean isLoading = isLoadable && ((Loadable)target).isLoading();
 		boolean canLoad = isLoadable && !isLoading && !((Loadable)target).isLoaded();
 		boolean canFree = isLoadable && !isLoading && ((Loadable)target).isLoaded();
 		boolean canSave = hasResult && search.isDone() && search.isSerializable();
+		boolean canExport = hasResult && search.isDone() && exportHandlers!=null && !exportHandlers.isEmpty();
 
 		actionManager.setEnabled(hasResult,
 				"plugins.searchTools.searchManagerView.viewResultAction"); //$NON-NLS-1$
@@ -266,6 +272,8 @@ public class SearchManagerView extends View {
 				"plugins.searchTools.searchManagerView.freeSearchTargetAction"); //$NON-NLS-1$
 		actionManager.setEnabled(canSave,
 				"plugins.searchTools.searchManagerView.saveSearchAction"); //$NON-NLS-1$
+		actionManager.setEnabled(canExport,
+				"plugins.searchTools.searchManagerView.exportResultAction"); //$NON-NLS-1$
 	}
 
 	protected void showPopup(MouseEvent trigger) {
@@ -329,6 +337,8 @@ public class SearchManagerView extends View {
 				callbackHandler, "saveSearch"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.searchManagerView.openSearchAction",  //$NON-NLS-1$
 				callbackHandler, "openSearch"); //$NON-NLS-1$
+		actionManager.addHandler("plugins.searchTools.searchManagerView.exportResultAction",  //$NON-NLS-1$
+				callbackHandler, "exportResult"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -1093,6 +1103,60 @@ public class SearchManagerView extends View {
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to open search", ex); //$NON-NLS-1$
+				UIUtil.beep();
+
+				showError(ex);
+			}
+		}
+
+		public void exportResult(ActionEvent e) {
+			SearchDescriptor descriptor = searchHistoryList.getSelectedValue();
+			if(descriptor==null) {
+				return;
+			}
+
+			try {
+				Search search = descriptor.getSearch();
+
+				if(!search.isDone() || search.isCancelled()) {
+					return;
+				}
+
+				SearchResult searchResult = search.getResult();
+
+				if(!searchResult.isFinal() || searchResult.getTotalMatchCount()<1) {
+					//TODO maybe add a notification?
+					return;
+				}
+
+				Collection<Extension> availableExtensions = SearchManager.getResultExportHandlers(searchResult);
+
+				if(availableExtensions.isEmpty()) {
+					//TODO notify user
+					return;
+				}
+
+				Extension selectedExtension = null;
+				if(availableExtensions.size()>1) {
+					selectedExtension = PluginUtil.showExtensionDialog(getFrame(),
+							"plugins.searchTools.searchManagerView.dialogs.selectExportHandler.title", //$NON-NLS-1$
+							availableExtensions, true);
+				} else {
+					selectedExtension = availableExtensions.iterator().next();
+				}
+
+				if(selectedExtension==null) {
+					// Cancelled by user
+					return;
+				}
+
+				SearchResultExportHandler handler = (SearchResultExportHandler) PluginUtil.instantiate(selectedExtension);
+
+				handler.exportResult(searchResult);
+
+			} catch(Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to initiate export of search result", ex); //$NON-NLS-1$
 				UIUtil.beep();
 
 				showError(ex);

@@ -218,7 +218,7 @@ public class ListGraphView extends View implements Outline {
 			graphPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphBasedPresenter.class, entryType, true, true);
 		}
 
-		// Signal missing list presenter
+		// Signal missing graph presenter
 		if(graphPresenter==null) {
 			String text = ResourceManager.getInstance().get(
 					"plugins.jgraph.listGraphView.unsupportedEntryType", entryType.getId()); //$NON-NLS-1$

@@ -31,12 +31,13 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigBuilder;
 import de.ims.icarus.config.ConfigConstants;
+import de.ims.icarus.config.ConfigRegistry.EntryType;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
-import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
 import de.ims.icarus.plugins.prosody.ui.details.ProsodySentenceDetailPresenter;
 import de.ims.icarus.plugins.prosody.ui.geom.AntiAliasingType;
@@ -50,6 +51,8 @@ import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.HighlightType;
+import de.ims.icarus.util.strings.pattern.PatternFactory;
+import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
@@ -62,11 +65,11 @@ public class ProsodyPreferences {
 		String s = null;
 		if(pattern instanceof String) {
 			s = (String) pattern;
-		} else if(pattern instanceof LabelPattern) {
-			s = ((LabelPattern)pattern).getPattern();
+		} else if(pattern instanceof TextSource) {
+			s = ((TextSource)pattern).getExternalForm();
 		}
 
-		return s==null ? "" : LabelPattern.escapePattern(s); //$NON-NLS-1$
+		return s==null ? "" : PatternFactory.escape(s); //$NON-NLS-1$
 	}
 
 	public ProsodyPreferences() {
@@ -230,6 +233,7 @@ public class ProsodyPreferences {
 		builder.addDoubleEntry("maxBFall", 1.1, -2.0, 3.0, 0.1); //$NON-NLS-1$
 		builder.addDoubleEntry("minBRiseFall", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
 		builder.addDoubleEntry("maxBRiseFall", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
 
 		// END ACCENT SHAPE SUBGROUP
 		builder.back();
@@ -239,6 +243,7 @@ public class ProsodyPreferences {
 		builder.virtual();
 
 		builder.addBooleanEntry("normalize", false); //$NON-NLS-1$
+		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
 
 		// END PAINTE DISTANCE SUBGROUP
 		builder.back();
@@ -249,6 +254,7 @@ public class ProsodyPreferences {
 
 		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
 		builder.addDoubleEntry("rightBorder", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
 
 		// END PAINTE INTEGRAL SUBGROUP
 		builder.back();
@@ -260,6 +266,7 @@ public class ProsodyPreferences {
 		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
 		builder.addDoubleEntry("rightBorder", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 		builder.addIntegerEntry("resolution", 100, 20, 300, 1); //$NON-NLS-1$
+		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
 
 		// END PAINTE CURVE SUBGROUP
 		builder.back();
@@ -271,11 +278,36 @@ public class ProsodyPreferences {
 		builder.addDoubleEntry("leftBorder", -1.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
 		builder.addDoubleEntry("rightBorder", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 		builder.addIntegerEntry("resolution", 100, 20, 300, 1); //$NON-NLS-1$
+		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
 
 		// END PAINTE CHANNEL SUBGROUP
 		builder.back();
 
+		// SYLLABLE DIFFERENCE SUBGROUP
+		builder.addGroup("sylDif", true); //$NON-NLS-1$
+		builder.virtual();
+
+		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
+
+		// END SYLLABLE DIFFERENCE SUBGROUP
+		builder.back();
+
 		// END SEARCH GROUP
+		builder.back();
+
+		// SAMPA VALIDATION GROUP
+		builder.addGroup("sampaValidation", true); //$NON-NLS-1$
+
+		builder.addBooleanEntry("useExternalSampaTable", false); //$NON-NLS-1$
+		builder.addEntry("sampaTableFile", EntryType.FILE, ""); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addBooleanEntry("pairFilesByName", true); //$NON-NLS-1$
+		builder.addBooleanEntry("verboseOutput", false); //$NON-NLS-1$
+		builder.addDoubleEntry("minSyllableCoverage", 0.5, 0.1, 0.9, 0.1); //$NON-NLS-1$
+		builder.addBooleanEntry("decodeEscapedCharacters", true); //$NON-NLS-1$
+		builder.addStringEntry("wordFilesEncoding", IOUtil.UTF8_ENCODING); //$NON-NLS-1$
+		builder.addStringEntry("syllableFilesEncoding", IOUtil.UTF8_ENCODING); //$NON-NLS-1$
+
+		// END SAMPA VALIDATION GROUP
 		builder.back();
 
 		// HIGHLIGHTING GROUP

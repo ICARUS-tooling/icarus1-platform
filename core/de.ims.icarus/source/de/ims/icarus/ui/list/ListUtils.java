@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.ui.list;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -64,6 +67,16 @@ public final class ListUtils {
 		}
 
 		return -1;
+	}
+
+	public static <T extends Object> List<T> asList(ListModel<T> model) {
+		List<T> result = new ArrayList<>();
+
+		for(int i=0; i<model.getSize(); i++) {
+			result.add(model.getElementAt(i));
+		}
+
+		return result;
 	}
 
 	public static void copySelectionState(ListSelectionModel m1, ListSelectionModel m2) {

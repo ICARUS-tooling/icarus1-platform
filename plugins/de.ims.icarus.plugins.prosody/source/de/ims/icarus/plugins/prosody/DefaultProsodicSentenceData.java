@@ -198,13 +198,15 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	@Override
 	public int getSyllableCount(int index) {
 		//TODO change to a single consistent strategy on storing syllable count!
-		if(isMapsSyllables(index)) {
-			int[] value = (int[])getIndexedProperty(index, SYLLABLE_OFFSET_KEY);
-			return value==null ? 0 : value.length;
-		} else {
-			String[] value = (String[])getIndexedProperty(index, SYLLABLE_LABEL_KEY);
-			return value==null ? 0 : value.length;
-		}
+//		if(isMapsSyllables(index)) {
+//			int[] value = (int[])getIndexedProperty(index, SYLLABLE_OFFSET_KEY);
+//			return value==null ? 0 : value.length;
+//		} else {
+//			String[] value = (String[])getIndexedProperty(index, SYLLABLE_LABEL_KEY);
+//			return value==null ? 0 : value.length;
+//		}
+		Object count = getProperty(index, SYLLABLE_COUNT);
+		return count==null ? 0 : (int) count;
 	}
 
 	private int getSyllableIntProperty(int index, String key, int syllable) {
@@ -220,6 +222,11 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	private String getSyllableStringProperty(int index, String key, int syllable) {
 		String[] value = (String[])getIndexedProperty(index, key);
 		return value==null ? null : value[syllable];
+	}
+
+	private boolean getSyllableBooleanProperty(int index, String key, int syllable) {
+		boolean[] value = (boolean[])getIndexedProperty(index, key);
+		return value==null ? false : value[syllable];
 	}
 
 	/**
@@ -267,14 +274,16 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public boolean isSyllableStressed(int index, int syllable) {
-		Object value = getIndexedProperty(index, SYLLABLE_STRESS_KEY);
-		if(value==null) {
-			return false;
-		}
+//		Object value = getIndexedProperty(index, SYLLABLE_STRESS_KEY);
+//		if(value==null) {
+//			return false;
+//		}
+//
+//		int mask = 1<<syllable;
+//
+//		return ((int)value & mask) == mask;
 
-		int mask = 1<<syllable;
-
-		return ((int)value & mask) == mask;
+		return getSyllableBooleanProperty(index, SYLLABLE_STRESS_KEY, syllable);
 	}
 
 	/**
@@ -420,27 +429,27 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		return getSyllableFloatProperty(index, PAINTE_D_KEY, syllable);
 	}
 
-	public void setSyllableStressed(int index, int syllable, boolean stressed) {
-		Object value = getIndexedProperty(index, SYLLABLE_STRESS_KEY);
-		int current;
-		if(value==null) {
-			current = 0;
-		} else {
-			current = (int) value;
-		}
-
-		int mask = 1<<syllable;
-
-		if(stressed) {
-			current |= mask;
-		} else {
-			current &= ~mask;
-		}
-
-		value = current;
-
-		setProperty(index, SYLLABLE_STRESS_KEY, value);
-	}
+//	public void setSyllableStressed(int index, int syllable, boolean stressed) {
+//		Object value = getIndexedProperty(index, SYLLABLE_STRESS_KEY);
+//		int current;
+//		if(value==null) {
+//			current = 0;
+//		} else {
+//			current = (int) value;
+//		}
+//
+//		int mask = 1<<syllable;
+//
+//		if(stressed) {
+//			current |= mask;
+//		} else {
+//			current &= ~mask;
+//		}
+//
+//		value = current;
+//
+//		setProperty(index, SYLLABLE_STRESS_KEY, value);
+//	}
 
 	private static class Key {
 		public String key;

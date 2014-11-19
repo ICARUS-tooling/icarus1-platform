@@ -142,6 +142,12 @@ public final class StringUtil {
 		return false;
 	}
 
+	private static final Pattern lineBreak = Pattern.compile("[\\n\\r]+"); //$NON-NLS-1$
+
+	public static String[] splitLines(String s) {
+		return s==null ? null : lineBreak.split(s);
+	}
+
 	// HASHING
 	//
 	// both hash functions mirror the default behavior of String.hashCode() so that
@@ -186,7 +192,192 @@ public final class StringUtil {
 		return new String(tmp);
 	}
 
-    static int indexOf(CharSequence source, int sourceOffset, int sourceCount,
+	/**
+	 * @see String#regionMatches(int, String, int, int)
+	 */
+    public static boolean regionMatches(CharSequence s, int toffset, CharSequence other, int ooffset,
+            int len) {
+    	int size = s.length();
+    	int sizeo = other.length();
+        int to = toffset;
+        int po = ooffset;
+        // Note: toffset, ooffset, or len might be near -1>>>1.
+        if ((ooffset < 0) || (toffset < 0)
+                || (toffset > (long)size - len)
+                || (ooffset > (long)sizeo - len)) {
+            return false;
+        }
+        while (len-- > 0) {
+            if (s.charAt(to++) != other.charAt(po++)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+	/**
+	 * @see String#regionMatches(boolean, int, String, int, int)
+	 */
+    public static boolean regionMatches(CharSequence s, boolean ignoreCase, int toffset,
+            CharSequence other, int ooffset, int len) {
+    	int size = s.length();
+    	int sizeo = other.length();
+        int to = toffset;
+        int po = ooffset;
+        // Note: toffset, ooffset, or len might be near -1>>>1.
+        if ((ooffset < 0) || (toffset < 0)
+                || (toffset > (long)size - len)
+                || (ooffset > (long)sizeo - len)) {
+            return false;
+        }
+        while (len-- > 0) {
+            char c1 = s.charAt(to++);
+            char c2 = other.charAt(po++);
+            if (c1 == c2) {
+                continue;
+            }
+            if (ignoreCase) {
+                // If characters don't match but case may be ignored,
+                // try converting both characters to uppercase.
+                // If the results match, then the comparison scan should
+                // continue.
+                char u1 = Character.toUpperCase(c1);
+                char u2 = Character.toUpperCase(c2);
+                if (u1 == u2) {
+                    continue;
+                }
+                // Unfortunately, conversion to uppercase does not work properly
+                // for the Georgian alphabet, which has strange rules about case
+                // conversion.  So we need to make one last check before
+                // exiting.
+                if (Character.toLowerCase(u1) == Character.toLowerCase(u2)) {
+                    continue;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+	/**
+	 * @see String#startsWith(String, int)
+	 */
+    public static boolean startsWith(CharSequence s, CharSequence prefix, int toffset) {
+        int to = toffset;
+        int po = 0;
+        int pc = prefix.length();
+        // Note: toffset might be near -1>>>1.
+        if ((toffset < 0) || (toffset > s.length() - pc)) {
+            return false;
+        }
+        while (--pc >= 0) {
+            if (s.charAt(to++) != prefix.charAt(po++)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+	 * @see String#startsWith(String)
+	 */
+    public static boolean startsWith(CharSequence s, CharSequence prefix) {
+        return startsWith(s, prefix, 0);
+    }
+
+    /**
+	 * @see String#endsWith(String)
+	 */
+    public static boolean endsWith(CharSequence s, CharSequence suffix) {
+        return startsWith(s, suffix, s.length() - suffix.length());
+    }
+
+    /**
+	 * @see String#indexOf(int)
+	 */
+    public static int indexOf(CharSequence s, char ch) {
+        return indexOf(s, ch, 0);
+    }
+
+    /**
+	 * @see String#indexOf(int, int)
+	 */
+    public static int indexOf(CharSequence s, char ch, int fromIndex) {
+//        final int max = s.length();
+//        if (fromIndex < 0) {
+//            fromIndex = 0;
+//        } else if (fromIndex >= max) {
+//            // Note: fromIndex might be near -1>>>1.
+//            return -1;
+//        }
+//
+//        for (int i = fromIndex; i < max; i++) {
+//            if (s.charAt(i) == ch) {
+//                return i;
+//            }
+//        }
+//        return -1;
+    	return indexOf(s, ch, fromIndex, s.length()-1);
+    }
+
+    /**
+	 * @see String#indexOf(int, int)
+	 */
+    public static int indexOf(CharSequence s, char ch, int fromIndex, int toIndex) {
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        } else if (fromIndex > toIndex) {
+            // Note: fromIndex might be near -1>>>1.
+            return -1;
+        }
+
+        for (int i = fromIndex; i <= toIndex; i++) {
+            if (s.charAt(i) == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+	 * @see String#lastIndexOf(int)
+	 */
+    public static int lastIndexOf(CharSequence s, char ch) {
+        return lastIndexOf(s, ch, s.length() - 1);
+    }
+
+    /**
+	 * @see String#lastIndexOf(int, int)
+	 */
+    public static int lastIndexOf(CharSequence s, char ch, int fromIndex) {
+        int i = Math.min(fromIndex, s.length() - 1);
+        for (; i >= 0; i--) {
+            if (s.charAt(i) == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int indexOf(CharSequence s, CharSequence str) {
+        return indexOf(s, str, 0);
+    }
+
+    public static int indexOf(CharSequence s, CharSequence str, int fromIndex) {
+        return indexOf(s, 0, s.length(),
+                str, 0, str.length(), fromIndex);
+    }
+
+    public static int lastIndexOf(CharSequence s, CharSequence str) {
+        return lastIndexOf(s, str, s.length());
+    }
+
+    public static int lastIndexOf(CharSequence s, CharSequence str, int fromIndex) {
+        return lastIndexOf(s, 0, s.length(),
+                str, 0, str.length(), fromIndex);
+    }
+
+    public static int indexOf(CharSequence source, int sourceOffset, int sourceCount,
     		CharSequence target, int targetOffset, int targetCount,
             int fromIndex) {
         if (fromIndex >= sourceCount) {
@@ -224,7 +415,7 @@ public final class StringUtil {
         return -1;
     }
 
-    static int lastIndexOf(CharSequence source, int sourceOffset, int sourceCount,
+    public static int lastIndexOf(CharSequence source, int sourceOffset, int sourceCount,
     		CharSequence target, int targetOffset, int targetCount,
             int fromIndex) {
         /*

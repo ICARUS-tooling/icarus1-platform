@@ -40,6 +40,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -64,7 +65,9 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
-import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
 import de.ims.icarus.plugins.prosody.sound.SoundPlayer;
@@ -86,6 +89,9 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.strings.StringUtil;
+import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
@@ -132,6 +138,9 @@ public class SentencePanel extends JPanel{
 	private static final Border expandedBorder = BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.lightGray),
 			BorderFactory.createEmptyBorder(0, 1, 0, 1));
+
+
+	private static final ProsodyData patternProxy = new ProsodyData();
 
 	public SentencePanel(PanelConfig config) {
 		if (config == null)
@@ -302,7 +311,8 @@ public class SentencePanel extends JPanel{
 			textPanel.rebuild();
 
 			// Header section
-			headerLabel.setLines(config.headerPattern.getText(sentence));
+			patternProxy.set(sentence);
+			headerLabel.setLines(StringUtil.splitLines(config.headerPattern.getText(patternProxy, null)));
 
 			// Refresh graph internals
 			Axis.Integer yAxis = (Axis.Integer)graph.getYAxis();
@@ -363,7 +373,8 @@ public class SentencePanel extends JPanel{
 		detailPanel.rebuild();
 
 		currentWord = wordCursorModel.getWordIndex();
-		detailHeaderLabel.setLines(config.detailPattern.getText(sentence, currentWord));
+		patternProxy.set(sentence, currentWord);
+		detailHeaderLabel.setLines(StringUtil.splitLines(config.detailPattern.getText(patternProxy, null)));
 
 //		System.out.printf("offset=%d syl=%d\n", offset, currentSyl); //$NON-NLS-1$
 
@@ -702,9 +713,19 @@ public class SentencePanel extends JPanel{
 		public static final float DEFAULT_LEFT_SYLLABLE_BOUND = 0F;
 		public static final float DEFAULT_RIGHT_SYLLABLE_BOUND = 1.1F;
 
-		public static final LabelPattern DEFAULT_HEADER_PATTERN = new LabelPattern("n"); //$NON-NLS-1$
-		public static final LabelPattern DEFAULT_SENTENCE_PATTERN = new LabelPattern("$form$\n$pos$"); //$NON-NLS-1$
-		public static final LabelPattern DEFAULT_DETAIL_PATTERN = new LabelPattern(""); //$NON-NLS-1$
+		public static final TextSource DEFAULT_HEADER_PATTERN;
+		public static final TextSource DEFAULT_SENTENCE_PATTERN;
+		public static final TextSource DEFAULT_DETAIL_PATTERN;
+
+		static {
+			try {
+				DEFAULT_HEADER_PATTERN = ProsodyPatternContext.createTextSource(ProsodyLevel.SENTENCE, "{sent:sent-num}"); //$NON-NLS-1$
+				DEFAULT_SENTENCE_PATTERN = ProsodyPatternContext.createTextSource(ProsodyLevel.WORD, "{word:form}\n{word:pos}"); //$NON-NLS-1$
+				DEFAULT_DETAIL_PATTERN = ProsodyPatternContext.createTextSource(ProsodyLevel.WORD, ""); //$NON-NLS-1$
+			} catch (ParseException e) {
+				throw new CorruptedStateException("Unexpected error in internal pattern definition", e); //$NON-NLS-1$
+			}
+		}
 
 		// General
 		public AntiAliasingType antiAliasingType = DEFAULT_ANTIALIASING_TYPE;
@@ -723,7 +744,7 @@ public class SentencePanel extends JPanel{
 		public int wordSpacing = DEFAULT_WORD_SPACING;
 		public int graphSpacing = DEFAULT_GRAPH_SPACING;
 		public boolean clearLabelBackground = DEFAULT_CLEAR_LABEL_BACKGROUND;
-		public LabelPattern detailPattern = DEFAULT_DETAIL_PATTERN;
+		public TextSource detailPattern = DEFAULT_DETAIL_PATTERN;
 		public Font detailFont = TextArea.DEFAULT_FONT;
 		public Color detailTextColor = TextArea.DEFAULT_TEXT_COLOR;
 		public Font detailAxisLabelFont = Axis.DEFAULT_FONT;
@@ -739,8 +760,8 @@ public class SentencePanel extends JPanel{
 		public GridStyle detailGridStyle = PaIntEGraph.DEFAULT_GRID_STYLE;
 
 		// Text
-		public LabelPattern sentencePattern = DEFAULT_SENTENCE_PATTERN;
-		public LabelPattern headerPattern = DEFAULT_HEADER_PATTERN;
+		public TextSource sentencePattern = DEFAULT_SENTENCE_PATTERN;
+		public TextSource headerPattern = DEFAULT_HEADER_PATTERN;
 		public Font sentenceFont = TextArea.DEFAULT_FONT;
 		public Color sentenceTextColor = TextArea.DEFAULT_TEXT_COLOR;
 		public boolean textShowAlignment = DEFAULT_TEXT_SHOW_ALIGNMENT;
@@ -891,7 +912,7 @@ public class SentencePanel extends JPanel{
 		private int curveHeight;
 
 		public void rebuild() {
-			LabelPattern pattern = config.sentencePattern;
+			TextSource pattern = config.sentencePattern;
 			textArea.setFont(config.sentenceFont);
 			SentenceInfo sentenceInfo = getSentenceInfo();
 
@@ -915,7 +936,9 @@ public class SentencePanel extends JPanel{
 					WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
 
 					// Compute text lines and save them
-					String[] lines = pattern.getText(sentence, wordIndex);
+					patternProxy.set(sentence, wordIndex);
+					String text = pattern.getText(patternProxy, null);
+					String[] lines = StringUtil.splitLines(text);
 					wordInfo.setProperty("lines", lines); //$NON-NLS-1$
 
 					// Compute required space for text lines

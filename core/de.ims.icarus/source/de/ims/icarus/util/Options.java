@@ -29,6 +29,11 @@ public class Options extends HashMap<String, Object> {
 		public Object put(String key, Object value) {
 			return null;
 		}
+
+		@Override
+		public Object remove(Object key) {
+			return null;
+		}
 	};
 
 	public Options() {

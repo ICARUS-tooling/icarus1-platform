@@ -31,10 +31,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
@@ -64,7 +63,8 @@ import de.ims.icarus.plugins.coref.view.PatternExample;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
-import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
 import de.ims.icarus.plugins.prosody.sound.SoundPlayer;
@@ -86,11 +86,12 @@ import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.util.strings.pattern.PatternFactory;
+import de.ims.icarus.util.strings.pattern.TextSource;
 import de.ims.icarus.util.transfer.ConsumerMenu;
 
 /**
@@ -452,16 +453,20 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		}
 	}
 
-	private static LabelPattern loadPattern(Handle handle, LabelPattern defaultPattern) {
+	private static TextSource loadPattern(Handle handle, ProsodyLevel level, TextSource defaultPattern) {
 		//TODO add sanity check and user notification
 		String s = handle.getSource().getString(handle);
 		if(s==null) {
 			return defaultPattern;
 		}
 
-		s = LabelPattern.unescapePattern(s);
+		s = PatternFactory.unescape(s);
 
-		return new LabelPattern(s);
+		try {
+			return ProsodyPatternContext.createTextSource(level, s);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Not a valid pattern string: "+s, e); //$NON-NLS-1$
+		}
 	}
 
 	protected void reloadConfig(Handle handle) {
@@ -485,8 +490,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 		// Text
 		Handle textHandle = registry.getChildHandle(handle, "text"); //$NON-NLS-1$
-		panelConfig.sentencePattern = loadPattern(registry.getChildHandle(textHandle, "sentencePattern"), PanelConfig.DEFAULT_SENTENCE_PATTERN); //$NON-NLS-1$
-		panelConfig.headerPattern = loadPattern(registry.getChildHandle(textHandle, "headerPattern"), PanelConfig.DEFAULT_HEADER_PATTERN); //$NON-NLS-1$
+		panelConfig.sentencePattern = loadPattern(registry.getChildHandle(textHandle, "sentencePattern"), ProsodyLevel.WORD, PanelConfig.DEFAULT_SENTENCE_PATTERN); //$NON-NLS-1$
+		panelConfig.headerPattern = loadPattern(registry.getChildHandle(textHandle, "headerPattern"), ProsodyLevel.SENTENCE, PanelConfig.DEFAULT_HEADER_PATTERN); //$NON-NLS-1$
 		panelConfig.textShowAlignment = registry.getBoolean(registry.getChildHandle(textHandle, "showAlignment")); //$NON-NLS-1$
 		Handle fontHandle = registry.getChildHandle(textHandle, "font"); //$NON-NLS-1$
 		panelConfig.sentenceFont = ConfigUtils.defaultReadFont(fontHandle);
@@ -511,7 +516,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		panelConfig.graphSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "graphSpacing")); //$NON-NLS-1$
 		panelConfig.clearLabelBackground = registry.getBoolean(registry.getChildHandle(detailHandle, "clearLabelBackground")); //$NON-NLS-1$
 		panelConfig.detailPaintCompact = registry.getBoolean(registry.getChildHandle(detailHandle, "paintCompact")); //$NON-NLS-1$
-		panelConfig.detailPattern = loadPattern(registry.getChildHandle(detailHandle, "detailPattern"), PanelConfig.DEFAULT_DETAIL_PATTERN); //$NON-NLS-1$
+		panelConfig.detailPattern = loadPattern(registry.getChildHandle(detailHandle, "detailPattern"), ProsodyLevel.WORD, PanelConfig.DEFAULT_DETAIL_PATTERN); //$NON-NLS-1$
 		fontHandle = registry.getChildHandle(detailHandle, "font"); //$NON-NLS-1$
 		panelConfig.detailFont = ConfigUtils.defaultReadFont(fontHandle);
 		panelConfig.detailTextColor = registry.getColor(registry.getChildHandle(fontHandle, "fontColor")); //$NON-NLS-1$
@@ -527,7 +532,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		panelConfig.detailBorderColor = registry.getColor(registry.getChildHandle(detailHandle, "borderColor")); //$NON-NLS-1$
 		panelConfig.detailPaintGrid = registry.getBoolean(registry.getChildHandle(detailHandle, "paintGrid")); //$NON-NLS-1$
 		panelConfig.detailGridColor = registry.getColor(registry.getChildHandle(detailHandle, "gridColor")); //$NON-NLS-1$
-		panelConfig.detailGridStyle = registry.getValue(registry.getChildHandle(detailHandle, "gridStyle"), PaIntEGraph.DEFAULT_GRID_STYLE); //$NON-NLS-1
+		panelConfig.detailGridStyle = registry.getValue(registry.getChildHandle(detailHandle, "gridStyle"), PaIntEGraph.DEFAULT_GRID_STYLE); //NON-NLS-1$
 	}
 
 	protected class Handler implements ConfigListener, ChangeListener {
@@ -624,28 +629,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		}
 
 		private String createPatternSelectTooltip() {
-			StringBuilder sb = new StringBuilder(300);
-			ResourceManager rm = ResourceManager.getInstance();
-
-			sb.append("<html>"); //$NON-NLS-1$
-			sb.append("<h3>").append(rm.get("plugins.prosody.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			sb.append("<table>"); //$NON-NLS-1$
-			sb.append("<tr><th>") //$NON-NLS-1$
-				.append(rm.get("plugins.prosody.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
-				.append(rm.get("plugins.prosody.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
-
-			Map<Object, Object> mc = LabelPattern.magicCharacters;
-			for(Entry<Object, Object> entry : mc.entrySet()) {
-				String c = entry.getKey().toString();
-				String key = entry.getValue().toString();
-
-				sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
-				.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
-			sb.append("</table>"); //$NON-NLS-1$
-
-			return sb.toString();
+			return ProsodyPatternContext.getInfoText();
 		}
 
 		public void editLabelPatterns(ActionEvent e) {
@@ -684,9 +668,9 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 				patternSelectInfo = label;
 			}
 
-			sentencePatternSelect.setSelectedItem(LabelPattern.escapePattern(panelConfig.sentencePattern.getPattern()));
-			headerPatternSelect.setSelectedItem(LabelPattern.escapePattern(panelConfig.headerPattern.getPattern()));
-			detailPatternSelect.setSelectedItem(LabelPattern.escapePattern(panelConfig.detailPattern.getPattern()));
+			sentencePatternSelect.setSelectedItem(PatternFactory.escape(panelConfig.sentencePattern.getExternalForm()));
+			headerPatternSelect.setSelectedItem(PatternFactory.escape(panelConfig.headerPattern.getExternalForm()));
+			detailPatternSelect.setSelectedItem(PatternFactory.escape(panelConfig.detailPattern.getExternalForm()));
 
 			FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
 			formBuilder.addEntry("info", new DummyFormEntry( //$NON-NLS-1$
@@ -716,7 +700,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 				}
 
 				try {
-					panelConfig.sentencePattern = new LabelPattern(LabelPattern.unescapePattern(sentencePattern));
+//					panelConfig.sentencePattern = new LabelPattern(LabelPattern.unescapePattern(sentencePattern));
+					panelConfig.sentencePattern = ProsodyPatternContext.createTextSource(ProsodyLevel.WORD, PatternFactory.unescape(sentencePattern));
 					addPattern(sentencePattern, sentencePatternSelect);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,
@@ -738,7 +723,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 				}
 
 				try {
-					panelConfig.headerPattern = new LabelPattern(LabelPattern.unescapePattern(headerPattern));
+//					panelConfig.headerPattern = new LabelPattern(LabelPattern.unescapePattern(headerPattern));
+					panelConfig.headerPattern = ProsodyPatternContext.createTextSource(ProsodyLevel.SENTENCE, PatternFactory.unescape(headerPattern));
 					addPattern(headerPattern, headerPatternSelect);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,
@@ -760,7 +746,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 				}
 
 				try {
-					panelConfig.detailPattern = new LabelPattern(LabelPattern.unescapePattern(detailPattern));
+//					panelConfig.detailPattern = new LabelPattern(LabelPattern.unescapePattern(detailPattern));
+					panelConfig.detailPattern = ProsodyPatternContext.createTextSource(ProsodyLevel.WORD, PatternFactory.unescape(detailPattern));
 					addPattern(detailPattern, detailPatternSelect);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,

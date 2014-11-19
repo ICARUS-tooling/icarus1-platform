@@ -173,7 +173,33 @@
 			<doc>
 				<doc-text>
 					Selector class itself, required to have no-args constructor and
+					implement de.ims.icarus.search_tools.SearchResultExportHandler!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
+	<extension-point id="SearchResultExportHandler" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
+		<doc>
+			<doc-text>
+				Helper class for the search framework to allow inclusion of arbitrary
+				targets.
+			</doc-text>
+		</doc>
+		<parameter-def id="class">
+			<doc>
+				<doc-text>
+					Selector class itself, required to have no-args constructor and
 					implement de.ims.icarus.search_tools.SearchTargetSelector!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="contentType" type="extension-id"
+				custom-data="de.ims.icarus.core@ContentType">
+			<doc>
+				<doc-text>
+					Content type this export handler is meant to handle.
 				</doc-text>
 			</doc>
 		</parameter-def>

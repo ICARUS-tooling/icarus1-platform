@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
@@ -49,6 +51,8 @@ import de.ims.icarus.util.Options;
 public class SyllableDifferenceConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
 
 	public static final String TOKEN = "sylDif"; //$NON-NLS-1$
+
+	private static final String CONFIG_PATH = "plugins.prosody.search.sylDif"; //$NON-NLS-1$
 
 	private static final Map<Object, ValueHandler> propertyClassMap = new HashMap<>();
 	static {
@@ -181,9 +185,28 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 		private transient String key;
 		private transient boolean reverseFrom, reverseTo;
 		private transient ValueHandler valueHandler;
+		protected transient boolean ignoreUnstressed = false;
 
 		public SyllableComparisonConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
+		}
+
+		/**
+		 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#init()
+		 */
+		@Override
+		protected void init() {
+
+			String configPath = getConfigPath();
+
+			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+			Handle handle = registry.getHandle(configPath);
+
+			ignoreUnstressed = registry.getBoolean(registry.getChildHandle(handle, "ignoreUnstressedSyllables")); //$NON-NLS-1$
+		}
+
+		protected String getConfigPath() {
+			return CONFIG_PATH;
 		}
 
 		@Override
@@ -270,7 +293,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 				return null;
 			}
 
-			return aggregationMode.getAggregatedValue(tree, key, fromIndex, toIndex);
+			return aggregationMode.getAggregatedValue(tree, key, fromIndex, toIndex, ignoreUnstressed);
 		}
 
 		@Override

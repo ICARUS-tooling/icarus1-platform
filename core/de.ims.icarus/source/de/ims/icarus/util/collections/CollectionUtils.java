@@ -510,6 +510,48 @@ public final class CollectionUtils {
 		return true;
 	}
 
+	@SafeVarargs
+	public static <K extends Object, V extends Object> V firstSet(Map<K, V> map, K...keys) {
+		for(K key : keys) {
+			V val = map.get(key);
+			if(val!=null) {
+				return val;
+			}
+		}
+
+		return null;
+	}
+
+	public static String firstSetString(Map<String, String> map, String defaultValue, String...keys) {
+		String val = firstSet(map, keys);
+		return val==null ? defaultValue : val;
+	}
+
+	public static int firstSetInt(Map<String, String> map, int defaultValue, String...keys) {
+		String val = firstSet(map, keys);
+		return val==null ? defaultValue : Integer.parseInt(val);
+	}
+
+	public static long firstSetLong(Map<String, String> map, long defaultValue, String...keys) {
+		String val = firstSet(map, keys);
+		return val==null ? defaultValue : Long.parseLong(val);
+	}
+
+	public static float firstSetFloat(Map<String, String> map, float defaultValue, String...keys) {
+		String val = firstSet(map, keys);
+		return val==null ? defaultValue : Float.parseFloat(val);
+	}
+
+	public static double firstSetDouble(Map<String, String> map, double defaultValue, String...keys) {
+		String val = firstSet(map, keys);
+		return val==null ? defaultValue : Double.parseDouble(val);
+	}
+
+	public static boolean firstSetBoolean(Map<String, String> map, boolean defaultValue, String...keys) {
+		String val = firstSet(map, keys);
+		return val==null ? defaultValue : Boolean.parseBoolean(val);
+	}
+
 	public static String toString(Collection<?> collection) {
 		return toString(collection, '_');
 	}

@@ -35,9 +35,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.DefaultListCellRenderer;
@@ -55,15 +61,19 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import de.ims.icarus.io.IOUtil;
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.plugins.prosody.sampa.SampaIterator;
+import de.ims.icarus.plugins.prosody.sampa.SampaMapper2;
 import de.ims.icarus.plugins.prosody.sampa.SampaSet;
 import de.ims.icarus.plugins.prosody.sampa.SampaValidator;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.list.FileListTransferHandler;
+import de.ims.icarus.ui.list.ListUtils;
+import de.ims.icarus.util.MutablePrimitives.MutableInteger;
 import de.ims.icarus.util.ToolException;
 import de.ims.icarus.util.classes.ClassUtils;
 
@@ -79,6 +89,8 @@ public class SampaValidationView extends View {
 
 	private CallbackHandler callbackHandler;
 	private Handler handler;
+
+	private static final String configPath = "plugins.prosody.sampaValidation"; //$NON-NLS-1$
 
 	public SampaValidationView() {
 		// no-op
@@ -102,8 +114,8 @@ public class SampaValidationView extends View {
 		wordFilesList = createFilesList(transferHandler, renderer);
 		syllableFilesList = createFilesList(transferHandler, renderer);
 
-		JPanel wordPanel = createListPanel(wordFilesList, "plugins.prosody.sampaValidationView.wordFileToolBarList");
-		JPanel syllablePanel = createListPanel(syllableFilesList, "plugins.prosody.sampaValidationView.syllableFileToolBarList");
+		JPanel wordPanel = createListPanel(wordFilesList, "plugins.prosody.sampaValidationView.wordFileToolBarList"); //$NON-NLS-1$
+		JPanel syllablePanel = createListPanel(syllableFilesList, "plugins.prosody.sampaValidationView.syllableFileToolBarList"); //$NON-NLS-1$
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, wordPanel, syllablePanel);
 //		UIUtil.defaultHideSplitPaneDecoration(splitPane);
@@ -215,16 +227,80 @@ public class SampaValidationView extends View {
 	//FIXME handle exceptions instead of the general throws clause!
 	private void executeValidation() throws Exception {
 
-		File wordFile = wordFilesList.getModel().getElementAt(0);
-		File syllableFile = syllableFilesList.getModel().getElementAt(0);
+		ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+		Handle handle = registry.getHandle(configPath);
+		boolean useExternalSampaTable = registry.getBoolean(registry.getChildHandle(handle, "useExternalSampaTable")); //$NON-NLS-1$
+		boolean pairFilesByName = registry.getBoolean(registry.getChildHandle(handle, "pairFilesByName")); //$NON-NLS-1$
+		boolean verboseOutput = registry.getBoolean(registry.getChildHandle(handle, "verboseOutput")); //$NON-NLS-1$
 
-		@SuppressWarnings("resource")
-		FilePairSampaIterator iterator = new FilePairSampaIterator(wordFile, syllableFile);
+		double minSyllableCoverage = registry.getDouble(registry.getChildHandle(handle, "minSyllableCoverage")); //$NON-NLS-1$
+		boolean decodeEscapedCharacters = registry.getBoolean(registry.getChildHandle(handle, "decodeEscapedCharacters")); //$NON-NLS-1$
+		String wordFilesEncoding = registry.getString(registry.getChildHandle(handle, "wordFilesEncoding")); //$NON-NLS-1$
+		String syllableFilesEncoding = registry.getString(registry.getChildHandle(handle, "syllableFilesEncoding")); //$NON-NLS-1$
 
 		SampaValidator validator = new SampaValidator();
-		validator.addSampaIterator(iterator);
+		validator.setVerbose(verboseOutput);
+
+		if(useExternalSampaTable) {
+			Path sampaTableFile = registry.getFile(registry.getChildHandle(handle, "sampaTableFile")); //$NON-NLS-1$
+			validator.setMapper(new SampaMapper2(sampaTableFile.toUri().toURL()));
+		}
+
+		List<File> wordFiles = ListUtils.asList(wordFilesList.getModel());
+		List<File> syllableFiles = ListUtils.asList(syllableFilesList.getModel());
+
+		if(wordFiles.size() != syllableFiles.size())
+			throw new IllegalArgumentException("Numbers of word and syllable files do not match"); //$NON-NLS-1$
+
+		if(pairFilesByName) {
+			Collections.sort(wordFiles);
+
+			Map<String, File> fileMap = new HashMap<>();
+
+			for(File syllableFile : syllableFiles) {
+				String name = name(syllableFile);
+
+				if(fileMap.containsKey(name))
+					throw new IllegalArgumentException("Cannot pair files by name - duplicate name extracted for syllable files: "+name); //$NON-NLS-1$
+
+				fileMap.put(name, syllableFile);
+			}
+
+			for(int i=0; i<wordFiles.size(); i++) {
+				File wordFile = wordFiles.get(i);
+				String name = name(wordFile);
+
+				File syllableFile = fileMap.get(name);
+				if(syllableFile==null)
+					throw new IllegalArgumentException("Cannot pair files by name - no matching syllable file for word file name: "+name); //$NON-NLS-1$
+
+				syllableFiles.set(i, syllableFile);
+			}
+		}
+
+		for(int i=0; i<wordFiles.size(); i++) {
+
+			File wordFile = wordFiles.get(i);
+			File syllableFile = syllableFiles.get(i);
+
+			if(verboseOutput) {
+				System.out.printf("Pairing files '%s' and '%s'", wordFile, syllableFile); //$NON-NLS-1$
+			}
+
+			@SuppressWarnings("resource")
+			FilePairSampaIterator iterator = new FilePairSampaIterator(wordFile, syllableFile);
+
+			iterator.decodeEscapedCharacters = decodeEscapedCharacters;
+			iterator.minSyllableCoverage = minSyllableCoverage;
+			iterator.wordFilesEncoding = wordFilesEncoding;
+			iterator.syllableFilesEncoding = syllableFilesEncoding;
+
+			validator.addSampaIterator(iterator);
+		}
 
 		validator.validate();
+
+		//TODO move validation output to other stream, file or UI!
 
 		System.out.printf("Validation result: %d words, %d syllables, %d errors\n", //$NON-NLS-1$
 				validator.getWordCount(), validator.getSyllableCount(), validator.getErrorCount());
@@ -234,6 +310,17 @@ public class SampaValidationView extends View {
 			System.out.println(data.getLocationInfo());
 			System.out.println(" -> Failed to map /"+Arrays.deepToString(data.getSampaBlocks())+"/ to word '"+data.getWord()+"'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
+	}
+
+	private static String name(File file) {
+		String name = file.getName();
+
+		int idx = name.lastIndexOf('.');
+		if(idx!=-1) {
+			name = name.substring(0, idx);
+		}
+
+		return name;
 	}
 
 	private void clearList(JList<File> list) {
@@ -304,7 +391,7 @@ public class SampaValidationView extends View {
 		public void openPreferences(ActionEvent e) {
 
 			try {
-				//TODO
+				UIUtil.openConfigDialog(configPath);
 			} catch (Exception ex) {
 				LoggerFactory.error(this, "Failed to open preferences for sampa vaildation view", ex); //$NON-NLS-1$
 				UIUtil.beep();
@@ -521,15 +608,40 @@ public class SampaValidationView extends View {
 
 	}
 
+	private enum DataType {
+
+		/**
+		 * Regular content
+		 */
+		CONTENT,
+
+		/**
+		 * <p> or <P>
+		 */
+		BREAK,
+
+		/**
+		 * Words to be ignored
+		 */
+		FILLER,
+
+		/**
+		 * Symbol marked with separator character '|'
+		 */
+		SYLLABLE_END,
+	}
+
 	private static class DataPoint {
 		final double timestamp, duration;
 		final String content;
 		final int lineNumber;
+		final DataType type;
 
-		public DataPoint(double timestamp, double duration, String content, int lineNumber) {
+		public DataPoint(double timestamp, double duration, String content, DataType type, int lineNumber) {
 			this.timestamp = timestamp;
 			this.duration = duration;
 			this.content = content;
+			this.type = type;
 			this.lineNumber = lineNumber;
 		}
 
@@ -542,17 +654,20 @@ public class SampaValidationView extends View {
 	private static class FilePairSampaIterator implements SampaIterator {
 
 		private final File wordFile, syllableFile;
-		private int wordCursor, syllableCursor;
+		private MutableInteger wordCursor, syllableCursor;
 
 		private List<String> syllableBuffer;
+		private StringBuilder charBuffer;
 
 		private List<DataPoint> words = new ArrayList<>(1000);
 		private List<DataPoint> syllables = new ArrayList<>(1000);
-		private boolean eof = false;
 
 		private final Pattern splitPattern = Pattern.compile("\\s+"); //$NON-NLS-1$
 
-		private final double minSyllableCoverage = 0.5;
+		private double minSyllableCoverage = 0.5;
+		private boolean decodeEscapedCharacters = true;
+		private String wordFilesEncoding = "UTF-8"; //$NON-NLS-1$
+		private String syllableFilesEncoding = "UTF-8"; //$NON-NLS-1$
 
 		public FilePairSampaIterator(File wordFile, File syllableFile) {
 			if (wordFile == null)
@@ -569,18 +684,18 @@ public class SampaValidationView extends View {
 		 */
 		@Override
 		public void reset() throws ToolException {
-			wordCursor = 0;
-			syllableCursor = 0;
+			wordCursor = new MutableInteger(0);
+			syllableCursor = new MutableInteger(0);
 
 			words.clear();
 			syllables.clear();
-			eof = false;
 
 			syllableBuffer = new ArrayList<>();
+			charBuffer = new StringBuilder(20);
 
 			// Load words
 			try {
-				readData(wordFile, words);
+				readData(wordFile, words, true, wordFilesEncoding);
 			} catch (FileNotFoundException e) {
 				throw new ToolException("Word file could not be found", e); //$NON-NLS-1$
 			}  catch (IOException e) {
@@ -589,7 +704,7 @@ public class SampaValidationView extends View {
 
 			// Load syllables
 			try {
-				readData(syllableFile, syllables);
+				readData(syllableFile, syllables, false, syllableFilesEncoding);
 			} catch (FileNotFoundException e) {
 				throw new ToolException("Syllable file could not be found", e); //$NON-NLS-1$
 			}  catch (IOException e) {
@@ -597,13 +712,80 @@ public class SampaValidationView extends View {
 			}
 		}
 
-		private void readData(File file, List<DataPoint> buffer) throws IOException {
+		private static final Matcher fillerMatcher = Pattern.compile("\\[[hf@tn]\\]").matcher(""); //$NON-NLS-1$ //$NON-NLS-2$
+		private static final Matcher breakMatcher = Pattern.compile("<[pP]>").matcher(""); //$NON-NLS-1$ //$NON-NLS-2$
+
+		private static final char STRESS_SYMBOL = '\"';
+		private static final char END_SYMBOL = '|';
+
+		private boolean isFiller(String s) {
+			fillerMatcher.reset(s);
+			return fillerMatcher.matches();
+		}
+
+		private boolean isBreak(String s) {
+			breakMatcher.reset(s);
+			return breakMatcher.matches();
+		}
+
+		private static final char ESCAPE_SYMBOL ='\"';
+
+		private String unescape(String s) throws ToolException {
+			charBuffer.setLength(0);
+			boolean unescaped = false;
+
+			boolean escapeNext = false;
+			for(int i=0; i<s.length(); i++) {
+				char c = s.charAt(i);
+
+				if(escapeNext) {
+					switch (c) {
+					case 'a':
+						c = 'ä';
+						break;
+					case 'A':
+						c = 'Ä';
+						break;
+					case 'o':
+						c = 'ö';
+						break;
+					case 'O':
+						c = 'Ö';
+						break;
+					case 'u':
+						c = 'ü';
+						break;
+					case 'U':
+						c = 'Ü';
+						break;
+					case 's':
+						c = 'ß';
+						break;
+
+					default:
+						throw new ToolException("Unrecognized escaped character: "+c); //$NON-NLS-1$
+					}
+				}
+
+				escapeNext = c==ESCAPE_SYMBOL;
+
+				if(!escapeNext) {
+					charBuffer.append(c);
+				}
+
+				unescaped |= escapeNext;
+			}
+
+			return unescaped ? charBuffer.toString() : s;
+		}
+
+		private void readData(File file, List<DataPoint> buffer, boolean isWordFile, String encoding) throws IOException, ToolException {
 			String line;
 			int lineNumber = -1;
 
 			boolean hashFound = false;
 
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), IOUtil.UTF8_CHARSET))) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName(encoding)))) {
 
 				DataPoint lastDataPoint = null;
 
@@ -625,7 +807,37 @@ public class SampaValidationView extends View {
 
 						double duration = lastDataPoint==null ? 0D : timestamp-lastDataPoint.timestamp;
 
-						DataPoint dataPoint = new DataPoint(timestamp, duration, content, lineNumber+1); // +1 for human readability
+						DataType type = DataType.CONTENT;
+
+						if(isWordFile) {
+							if(decodeEscapedCharacters) {
+								content = unescape(content);
+							}
+
+							if(isBreak(content)) {
+								type = DataType.BREAK;
+							} else if(isFiller(content)) {
+								type = DataType.FILLER;
+							}
+						} else {
+							if(isBreak(content)) {
+								type = DataType.BREAK;
+							} else  {
+								int from = 0;
+								int to = content.length();
+								if(content.charAt(from)==STRESS_SYMBOL) {
+									from++;
+								}
+								if(content.charAt(to-1)==END_SYMBOL) {
+									type = DataType.SYLLABLE_END;
+									to--;
+								}
+
+								content = content.substring(from, to);
+							}
+						}
+
+						DataPoint dataPoint = new DataPoint(timestamp, duration, content, type, lineNumber+1); // +1 for human readability
 
 						buffer.add(dataPoint);
 
@@ -638,64 +850,111 @@ public class SampaValidationView extends View {
 		}
 
 		/**
+		 * Skips all filler and break data points
+		 */
+		private DataPoint skipNonContent(MutableInteger cursor, List<DataPoint> list) {
+			while(cursor.getValue()<list.size()) {
+				DataPoint data = list.get(cursor.getValue());
+				if(data.type==DataType.CONTENT
+						|| data.type==DataType.SYLLABLE_END) {
+					return data;
+				}
+
+				cursor.increment();
+			}
+
+			return null;
+		}
+
+		private DataPoint seekEnd(MutableInteger cursor, List<DataPoint> list) {
+			while(cursor.getValue()<list.size()) {
+				DataPoint data = list.get(cursor.getValue());
+				if(data.type==DataType.SYLLABLE_END) {
+					return data;
+				}
+
+				cursor.increment();
+			}
+
+			return null;
+		}
+
+		/**
 		 * @see de.ims.icarus.plugins.prosody.sampa.SampaIterator#next()
 		 */
 		@Override
 		public SampaSet next() throws ToolException {
-			boolean wordsFininshed = wordCursor>=words.size();
-			boolean syllablesFinished = syllableCursor>=syllables.size();
 
-			if(wordsFininshed!=syllablesFinished)
-				throw new ToolException("Inconsistent end of data: wordsFinished="+wordsFininshed+" syllablesFinished="+syllablesFinished); //$NON-NLS-1$ //$NON-NLS-2$
+			syllableBuffer.clear();
+			charBuffer.setLength(0);
 
-			if(wordsFininshed && syllablesFinished) {
+			DataPoint word = skipNonContent(wordCursor, words);
+
+			if(word==null) {
 				return null;
 			}
 
-			syllableBuffer.clear();
+			int syllablesBeginLineNumber = -1;
+			int syllablesEndLineNumber = -1;
 
-			DataPoint word = words.get(wordCursor);
+			while(syllableCursor.getValue()<syllables.size()) {
 
-			FilePairSampaSet result = null;
-			int syllableBeginLineNumber = -1;
-			int syllableEndLineNumber = -1;
-
-			// Check current syllable to determine what word last syllable should be assigned to
-			while(syllableCursor<syllables.size()) {
-				DataPoint syllable = syllables.get(syllableCursor);
-
-				if(syllableBeginLineNumber==-1) {
-					syllableBeginLineNumber = syllable.lineNumber;
+				// Scan for next syllable
+				DataPoint sylBegin = skipNonContent(syllableCursor, syllables);
+				if(sylBegin==null) {
+//					throw new ToolException("Expected more syllable data for word (last syllable line: "+syllableCursor.getValue()+"): "+word+" in file "+wordFile); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					break;
+				}
+				if(syllablesBeginLineNumber==-1) {
+					syllablesBeginLineNumber = sylBegin.lineNumber;
 				}
 
-				// Syllable overlaps word -> can't be a member of previous word
-				if(syllable.timestamp>word.timestamp) {
-					double surplus = syllable.timestamp-word.timestamp;
+				int firstSampa = syllableCursor.getValue();
 
-					// If syllable is not covered to a certain degree by the current word
-					// discard it
-					if(surplus>minSyllableCoverage*syllable.duration) {
+				DataPoint sylEnd = seekEnd(syllableCursor, syllables);
+				if(sylEnd==null)
+					throw new ToolException("Expected more syllable data for word (missing end symbol for syllable "+sylBegin+"): "+word+" in file "+syllableFile); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				syllablesEndLineNumber = sylEnd.lineNumber;
+
+				int lastSampa = syllableCursor.getValue();
+
+				// Syllable overlaps word -> can't be a member of previous word
+				if(sylEnd.timestamp>word.timestamp) {
+					double surplus = sylEnd.timestamp-word.timestamp;
+
+					// If syllable is not covered to a certain degree by the current word discard it
+					double duration = sylEnd.timestamp-sylBegin.timestamp+sylBegin.duration;
+					if(surplus>minSyllableCoverage*duration) {
+						// Important: revert syllable cursor back to the syllable begin for next call
+						syllableCursor.setValue(firstSampa);
 						break;
 					}
 				}
 
-				syllableEndLineNumber = syllable.lineNumber;
+				// Build sampa block for syllable (skip breaks)
+				charBuffer.setLength(0);
+				for(int i=firstSampa; i<=lastSampa; i++) {
+					DataPoint data = syllables.get(i);
+					if(data.type==DataType.BREAK) {
+						continue;
+					}
+					charBuffer.append(data.content);
+				}
 
-				syllableBuffer.add(syllable.content);
-
-				syllableCursor++;
+				syllableBuffer.add(charBuffer.toString());
+				syllableCursor.increment();
 			}
 
 			if(syllableBuffer.isEmpty())
-				throw new ToolException("Unable to connect word "+word); //$NON-NLS-1$
+				throw new ToolException("Unable to connect word "+word+" (last syllable line: "+syllableCursor.getValue()+" in file "+syllableFile+") in file "+wordFile); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 			String[] sampaBlocks = new String[syllableBuffer.size()];
 			syllableBuffer.toArray(sampaBlocks);
-			result = new FilePairSampaSet(word.content, sampaBlocks);
+			FilePairSampaSet result = new FilePairSampaSet(word.content, sampaBlocks);
 			result.setWordInfo(wordFile, word.lineNumber);
-			result.setSyllableInfo(syllableFile, syllableBeginLineNumber, syllableEndLineNumber);
+			result.setSyllableInfo(syllableFile, syllablesBeginLineNumber, syllablesEndLineNumber);
 
-			wordCursor++;
+			wordCursor.increment();
 
 			return result;
 
@@ -735,7 +994,7 @@ public class SampaValidationView extends View {
 		 */
 		@Override
 		public void close() {
-			wordCursor = syllableCursor = -1;
+			wordCursor = syllableCursor = null;
 			words.clear();
 			syllables.clear();
 			syllableBuffer.clear();

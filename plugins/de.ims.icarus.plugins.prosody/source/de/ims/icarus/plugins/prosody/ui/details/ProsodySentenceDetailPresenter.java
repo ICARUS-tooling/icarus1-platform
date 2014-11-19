@@ -46,11 +46,10 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
@@ -83,7 +82,9 @@ import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
-import de.ims.icarus.plugins.prosody.pattern.LabelPattern;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEConstraint;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
 import de.ims.icarus.plugins.prosody.sound.SoundOffsets;
@@ -114,13 +115,15 @@ import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
+import de.ims.icarus.util.strings.StringUtil;
+import de.ims.icarus.util.strings.pattern.PatternFactory;
+import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
@@ -130,9 +133,9 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
 public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPresenter, Installable {
 
 	public static final String DEFAULT_SENTENCE_PATTERN =
-			  "#syllable_label#\n#syllable_duration#\n" //$NON-NLS-1$
-			+ "#painte_a1#,#painte_a2#,#painte_b#\n" //$NON-NLS-1$
-			+ "#painte_c1#,#painte_c2#,#painte_d#"; //$NON-NLS-1$
+			  "{syl:syllable_label}\n{syl:syllable_duration}\n" //$NON-NLS-1$
+			+ "{syl:painte_a1},{syl:painte_a2},{syl:painte_b}\n" //$NON-NLS-1$
+			+ "{syl:painte_c1},{syl:painte_c2},{syl:painte_d}"; //$NON-NLS-1$
 
 	private SentenceInfo sentenceInfo;
 
@@ -157,6 +160,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 	private static final Axis.Double dummyAxis = new Axis.Double(false);
 
+	private static final ProsodyData patternProxy = new ProsodyData();
+
 	private JComboBox<Object> syllablePatternSelect;
 	private JLabel patternSelectInfo;
 
@@ -180,7 +185,11 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 	}
 
 	public ProsodySentenceDetailPresenter() {
-		config.sentencePattern = new LabelPattern(DEFAULT_SENTENCE_PATTERN);
+		try {
+			config.sentencePattern = ProsodyPatternContext.createTextSource(ProsodyLevel.SYLLABLE, DEFAULT_SENTENCE_PATTERN);
+		} catch (ParseException e) {
+			throw new CorruptedStateException("Error in internal pattern string: "+DEFAULT_SENTENCE_PATTERN, e);
+		}
 	}
 
 	protected ActionManager getActionManager() {
@@ -510,16 +519,20 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		return sentenceInfo==null ? null : sentenceInfo.getSentence();
 	}
 
-	private LabelPattern loadPattern(Handle handle, LabelPattern defaultPattern) {
+	private static TextSource loadPattern(Handle handle, ProsodyLevel level, TextSource defaultPattern) {
 		//TODO add sanity check and user notification
 		String s = handle.getSource().getString(handle);
 		if(s==null) {
 			return defaultPattern;
 		}
 
-		s = LabelPattern.unescapePattern(s);
+		s = PatternFactory.unescape(s);
 
-		return new LabelPattern(s);
+		try {
+			return ProsodyPatternContext.createTextSource(level, s);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Not a valid pattern string: "+s, e); //$NON-NLS-1$
+		}
 	}
 
 	protected void reloadConfig(Handle handle) {
@@ -536,8 +549,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 		// Text
 		Handle textHandle = registry.getChildHandle(handle, "text"); //$NON-NLS-1$
-		config.sentencePattern = loadPattern(registry.getChildHandle(textHandle, "sentencePattern"), PanelConfig.DEFAULT_SENTENCE_PATTERN); //$NON-NLS-1$
-		config.headerPattern = loadPattern(registry.getChildHandle(textHandle, "headerPattern"), PanelConfig.DEFAULT_HEADER_PATTERN); //$NON-NLS-1$
+		config.sentencePattern = loadPattern(registry.getChildHandle(textHandle, "sentencePattern"), ProsodyLevel.SYLLABLE, PanelConfig.DEFAULT_SENTENCE_PATTERN); //$NON-NLS-1$
+		config.headerPattern = loadPattern(registry.getChildHandle(textHandle, "headerPattern"), ProsodyLevel.SENTENCE, PanelConfig.DEFAULT_HEADER_PATTERN); //$NON-NLS-1$
 		config.textShowAlignment = registry.getBoolean(registry.getChildHandle(textHandle, "showAlignment")); //$NON-NLS-1$
 		Handle fontHandle = registry.getChildHandle(textHandle, "font"); //$NON-NLS-1$
 		config.sentenceFont = ConfigUtils.defaultReadFont(fontHandle);
@@ -561,7 +574,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		config.wordSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "wordSpacing")); //$NON-NLS-1$
 		config.graphSpacing = registry.getInteger(registry.getChildHandle(detailHandle, "graphSpacing")); //$NON-NLS-1$
 		config.clearLabelBackground = registry.getBoolean(registry.getChildHandle(detailHandle, "clearLabelBackground")); //$NON-NLS-1$
-		config.detailPattern = loadPattern(registry.getChildHandle(detailHandle, "detailPattern"), PanelConfig.DEFAULT_DETAIL_PATTERN); //$NON-NLS-1$
+		config.detailPattern = loadPattern(registry.getChildHandle(detailHandle, "detailPattern"), ProsodyLevel.SYLLABLE, PanelConfig.DEFAULT_DETAIL_PATTERN); //$NON-NLS-1$
 		fontHandle = registry.getChildHandle(detailHandle, "font"); //$NON-NLS-1$
 		config.detailFont = ConfigUtils.defaultReadFont(fontHandle);
 		config.detailTextColor = registry.getColor(registry.getChildHandle(fontHandle, "fontColor")); //$NON-NLS-1$
@@ -892,28 +905,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 		}
 
 		private String createPatternSelectTooltip() {
-			StringBuilder sb = new StringBuilder(300);
-			ResourceManager rm = ResourceManager.getInstance();
-
-			sb.append("<html>"); //$NON-NLS-1$
-			sb.append("<h3>").append(rm.get("plugins.prosody.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			sb.append("<table>"); //$NON-NLS-1$
-			sb.append("<tr><th>") //$NON-NLS-1$
-				.append(rm.get("plugins.prosody.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
-				.append(rm.get("plugins.prosody.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
-
-			Map<Object, Object> mc = LabelPattern.magicCharacters;
-			for(Entry<Object, Object> entry : mc.entrySet()) {
-				String c = entry.getKey().toString();
-				String key = entry.getValue().toString();
-
-				sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
-				.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
-			sb.append("</table>"); //$NON-NLS-1$
-
-			return sb.toString();
+			return ProsodyPatternContext.getInfoText();
 		}
 
 		public void editLabelPatterns(ActionEvent e) {
@@ -952,7 +944,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				patternSelectInfo = label;
 			}
 
-			syllablePatternSelect.setSelectedItem(LabelPattern.escapePattern(config.sentencePattern.getPattern()));
+			syllablePatternSelect.setSelectedItem(PatternFactory.escape(config.sentencePattern.getExternalForm()));
 //			headerPatternSelect.setSelectedItem(LabelPattern.escapePattern(config.headerPattern.getPattern()));
 //			detailPatternSelect.setSelectedItem(LabelPattern.escapePattern(config.detailPattern.getPattern()));
 
@@ -984,7 +976,8 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				}
 
 				try {
-					config.sentencePattern = new LabelPattern(LabelPattern.unescapePattern(sentencePattern));
+//					config.sentencePattern = new LabelPattern(LabelPattern.unescapePattern(sentencePattern));
+					config.sentencePattern = ProsodyPatternContext.createTextSource(ProsodyLevel.SYLLABLE, PatternFactory.unescape(sentencePattern));
 					addPattern(sentencePattern, syllablePatternSelect);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,
@@ -1353,7 +1346,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 			yAxis.setMinValue(Math.min(50, (int)wordInfo.getSentenceInfo().getMinD()));
 			yAxis.setMaxValue(Math.max(200, (int)wordInfo.getSentenceInfo().getMaxD()));
 
-			LabelPattern pattern = config.sentencePattern;
+			TextSource pattern = config.sentencePattern;
 			textArea.setFont(config.sentenceFont);
 
 			Dimension size = new Dimension();
@@ -1365,6 +1358,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 				Dimension areaSize = new Dimension();
 				int width = 0;
+				int lineCount = 0;
 
 				for(int sylIndex=0; sylIndex<wordInfo.sylCount(); sylIndex++) {
 					// Honor graph spacing
@@ -1375,8 +1369,13 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 					SyllableInfo sylInfo = wordInfo.syllableInfo(sylIndex);
 
 					// Compute text lines and save them
-					String[] lines = pattern.getText(sentence, wordInfo.getWordIndex(), sylIndex);
+					patternProxy.set(sentence, wordInfo.getWordIndex(), sylIndex);
+					String[] lines = StringUtil.splitLines(pattern.getText(patternProxy, null));
 					sylInfo.setProperty("lines", lines); //$NON-NLS-1$
+
+					if(lines!=null) {
+						lineCount = Math.max(lineCount, lines.length);
+					}
 
 					// Compute required space for text lines
 					textArea.getSize(this, lines, areaSize);
@@ -1400,7 +1399,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 				size.width = width;
 
-				size.height += fm.getHeight()*pattern.getElementCount()
+				size.height += fm.getHeight()*lineCount
 						+ textArea.getTopInsets() +textArea.getBottomInsets()
 						+ config.graphHeight + 3*config.graphSpacing + fm.getHeight();
 			}
