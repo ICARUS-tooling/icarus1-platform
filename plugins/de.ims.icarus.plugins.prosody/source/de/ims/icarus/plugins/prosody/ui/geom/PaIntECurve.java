@@ -31,6 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.Rectangle2D;
 
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 
@@ -76,7 +77,13 @@ public class PaIntECurve {
 		}
 
 		if(clipCurve) {
-			g.setClip(area);
+			if(clip==null) {
+				g.setClip(area);
+			} else {
+				Rectangle newClip = new Rectangle();
+				Rectangle2D.intersect(area, clip.getBounds(), newClip);
+				g.setClip(newClip);
+			}
 		}
 
 		g.translate(x, y);
