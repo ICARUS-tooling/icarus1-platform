@@ -33,7 +33,7 @@ import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
-import de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.BlockHandler;
+import de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.ReaderControl;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
@@ -51,7 +51,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
 public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, DataCreater {
 
 	private CharTableBuffer buffer;
-	private BlockHandler blockHandler;
+	private ReaderControl readerControl;
 	private CoreferenceDocumentSet documentSet;
 
 	public ProsodyDocumentReader() {
@@ -69,11 +69,11 @@ public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, Data
 
 		documentSet = (CoreferenceDocumentSet) options.get("documentSet"); //$NON-NLS-1$
 
-		blockHandler = new BlockHandler();
+		readerControl = new ReaderControl();
 
 		buffer = new CharTableBuffer();
 		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
-		buffer.setRowFilter(blockHandler);
+		buffer.setRowFilter(readerControl);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, Data
 	 */
 	@Override
 	public ProsodicDocumentData next() throws IOException, UnsupportedFormatException {
-		return ProsodyIOUtils.readDocumentData(documentSet, buffer, blockHandler);
+		return ProsodyIOUtils.readDocumentData(documentSet, buffer, readerControl);
 	}
 
 	/**

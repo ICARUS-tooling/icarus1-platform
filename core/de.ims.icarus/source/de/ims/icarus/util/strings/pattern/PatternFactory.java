@@ -50,7 +50,6 @@ public class PatternFactory<L extends Enum<L>> {
 	private CharSequence source;
 	private int cursor;
 	private final StringBuilder buffer = new StringBuilder();
-	private L level;
 
 	public PatternFactory(PatternContext<L> context) {
 		if (context == null)
@@ -63,16 +62,11 @@ public class PatternFactory<L extends Enum<L>> {
 		return context;
 	}
 
-	public L getLevel() {
-		return level;
-	}
-
 	private void cleanup() {
 		root = null;
 		source = null;
 		cursor = -1;
 		buffer.setLength(0);
-		level = null;
 	}
 
 	public synchronized TextSource parse(L level, CharSequence input, Map<String, String> defaultOptions) throws ParseException {
@@ -99,12 +93,12 @@ public class PatternFactory<L extends Enum<L>> {
 		}
 	}
 
-	private static final char ESCAPE_SYMBOL = '\\';
-	private static final char TOKEN_DELIMITER = ':';
-	private static final char OPTION_DELIMITER = ';';
-	private static final char ASSIGNMENT_SYMBOL = '=';
-	private static final char ACCESSOR_BEGIN = '{';
-	private static final char ACCESSOR_END = '}';
+	public static final char ESCAPE_SYMBOL = '\\';
+	public static final char TOKEN_DELIMITER = ':';
+	public static final char OPTION_DELIMITER = ';';
+	public static final char ASSIGNMENT_SYMBOL = '=';
+	public static final char ACCESSOR_BEGIN = '{';
+	public static final char ACCESSOR_END = '}';
 
 	private TextSource parse0(L level, CharSequence input, int index, Map<String, String> defaultOptions) throws ParseException {
 		if (input == null)
@@ -118,7 +112,6 @@ public class PatternFactory<L extends Enum<L>> {
 		buffer.setLength(0);
 		source = input;
 		cursor = index;
-		this.level = level;
 
 		root.setExternalForm(unescapedPart(index, input.length()));
 
@@ -165,12 +158,41 @@ public class PatternFactory<L extends Enum<L>> {
 		return source.charAt(cursor);
 	}
 
-	/**
-	 * Assumes the current symbol is '{' (defined by the internal cursor).
-	 * After a successful match, the cursor will then be at the corresponding
-	 * '}' symbol.
-	 */
-	private TextSource parseAccessorSource(L level, Map<String, String> defaultOptions) throws ParseException {
+	public TextSource parse(String input, Map<String, String> defaultOptions) throws ParseException {
+		try {
+			if (input == null)
+				throw new NullPointerException("Invalid input"); //$NON-NLS-1$
+
+			if(defaultOptions==null) {
+				defaultOptions = Collections.emptyMap();
+			}
+
+			root = null;
+			buffer.setLength(0);
+			source = input.trim();
+			cursor = 0;
+
+			int accessBegin = cursor;
+
+			Accessor<L> accessor = parseAccessor0(defaultOptions);
+
+			try {
+
+				TextSource result = context.createTextSource(accessor.getLevel(), accessor);
+
+				result.setExternalForm(accessor.getSource());
+
+				return result;
+			} catch(Exception e) {
+				throw (ParseException)new ParseException("Unexpected error while parsing accessor", accessBegin).initCause(e); //$NON-NLS-1$
+			}
+
+		} finally {
+			cleanup();
+		}
+	}
+
+	private Accessor<L> parseAccessor0(Map<String, String> defaultOptions) throws ParseException {
 
 		if(current()!=ACCESSOR_BEGIN)
 			throw new IllegalStateException("Current cursor does not point to a valid opening symbol: "+current()); //$NON-NLS-1$
@@ -209,11 +231,28 @@ public class PatternFactory<L extends Enum<L>> {
 		}
 
 		try {
-			Accessor<L> accessor = context.ceateAccessor(statementString, tokenString, specifierString, options);
+			return context.ceateAccessor(statementString, tokenString, specifierString, options);
+		} catch(Exception e) {
+			throw (ParseException)new ParseException("Unexpected error while parsing accessor", accessBegin).initCause(e); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Assumes the current symbol is '{' (defined by the internal cursor).
+	 * After a successful match, the cursor will then be at the corresponding
+	 * '}' symbol.
+	 */
+	private TextSource parseAccessorSource(L level, Map<String, String> defaultOptions) throws ParseException {
+
+		int accessBegin = cursor;
+
+		Accessor<L> accessor = parseAccessor0(defaultOptions);
+
+		try {
 
 			TextSource result = context.createTextSource(level, accessor);
 
-			result.setExternalForm(statementString);
+			result.setExternalForm(accessor.getSource());
 
 			return result;
 		} catch(Exception e) {

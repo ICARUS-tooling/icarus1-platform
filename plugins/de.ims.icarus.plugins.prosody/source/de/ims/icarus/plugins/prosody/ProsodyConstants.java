@@ -47,6 +47,9 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String PAINTE_EDITOR_VIEW_ID =
 			PROSODY_PLUGIN_ID+"@PaIntEEditorView"; //$NON-NLS-1$
 
+	// General properties
+	public static final String INDEX_KEY = "index"; //$NON-NLS-1$
+
 	// Document properties
 	public static final String DOCUMENT_ID = CoreferenceDocumentData.DOCUMENT_ID_PROPERTY;
 	public static final String AUDIO_FILE_KEY = "audio-file"; //$NON-NLS-1$
@@ -57,9 +60,6 @@ public interface ProsodyConstants extends LanguageConstants {
 
 	// Flags
 	public static final int FLAG_MAPS_SYLLABLES = (1 << 2);
-
-	// General properties
-	public static final String INDEX_KEY = "index"; //$NON-NLS-1$
 
 	// Word properties
 	public static final String FORM_KEY = "form"; //$NON-NLS-1$

@@ -211,6 +211,7 @@ public class ProsodyPreferences {
 		builder.addBooleanEntry("syllableOffsetsFromSampa", true); //$NON-NLS-1$
 		builder.addBooleanEntry("markAccentOnWords", true); //$NON-NLS-1$
 		builder.addIntegerEntry("accentExcursion", 30, 10, 150); //$NON-NLS-1$
+		builder.addBooleanEntry("onlyConsiderStressedSylables", false); //$NON-NLS-1$
 
 		// END READER GROUP
 		builder.back();

@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody.pattern;
 
 import java.util.Map;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -186,7 +187,8 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 
 		@Override
 		public Object fetchProsodyValue(ProsodyData data, Options env) {
-			return env.get(getSpecifier());
+			Object value = env==null ? null : env.get(getSpecifier());
+			return value==null ? Core.getCore().getProperty(getSpecifier()) : value;
 		}
 
 	}

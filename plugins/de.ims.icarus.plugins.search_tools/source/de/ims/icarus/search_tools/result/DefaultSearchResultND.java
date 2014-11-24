@@ -92,22 +92,6 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		dummyKey = new Key(getDimension());
 	}
 
-	StringBuilder keyBuilder = new StringBuilder(10);
-
-//	protected String getKey(int... indices) {
-//		if(indices.length!=indexBuffer.length)
-//			throw new IllegalArgumentException("Illegal indices count: expected "+indexBuffer.length+" - got "+indices.length); //$NON-NLS-1$ //$NON-NLS-2$
-//
-//		keyBuilder.setLength(0);
-//		int last = indices.length - 1;
-//		for (int i = 0; i < last; i++) {
-//			keyBuilder.append(indices[i]).append('_');
-//		}
-//		keyBuilder.append(indices[last]);
-//
-//		return keyBuilder.toString();
-//	}
-
 	// UNSYNCHRONIZED ACCESS
 	protected List<ResultEntry> getList(int[] indices, boolean createIfMissing) {
 		if(indices.length!=indexBuffer.length)
@@ -371,7 +355,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		// Relink all entry lists
 		int[] tmp = new int[getDimension()];
 		for(Entry<Key, List<ResultEntry>> entry : entries.entrySet()) {
-			entry.getKey().copyTo(tmp);;
+			entry.getKey().copyTo(tmp);
 			CollectionUtils.permutate(tmp, permutation);
 
 			buffer.put(new Key(tmp), entry.getValue());

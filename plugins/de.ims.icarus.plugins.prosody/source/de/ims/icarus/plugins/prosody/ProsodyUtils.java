@@ -90,6 +90,7 @@ public class ProsodyUtils implements ProsodyConstants {
 		ENTITY_KEY,
 		FEATURES_KEY,
 		HEAD_KEY,
+		SYLLABLE_COUNT,
 		ACCENT_KEY,
 		STRESS_KEY,
 		PHONEME_COUNT_KEY,
@@ -115,6 +116,7 @@ public class ProsodyUtils implements ProsodyConstants {
 		SYLLABLE_TIMESTAMP_KEY,
 		SYLLABLE_VOWEL_KEY,
 		VOWEL_DURATION_KEY,
+		INDEX_KEY,
 		CODA_SIZE_KEY,
 		CODA_TYPE_KEY,
 		ONSET_SIZE_KEY,
@@ -139,6 +141,7 @@ public class ProsodyUtils implements ProsodyConstants {
 		SYLLABLE_STARTPITCH_KEY,
 		SYLLABLE_TIMESTAMP_KEY,
 		VOWEL_DURATION_KEY,
+		INDEX_KEY,
 		CODA_SIZE_KEY,
 		ONSET_SIZE_KEY,
 		PAINTE_A1_KEY,
@@ -155,10 +158,22 @@ public class ProsodyUtils implements ProsodyConstants {
 
 	private static final String[] defaultSentencePropertyKeys = {
 		SENTENCE_NUMBER_KEY,
+		INDEX_KEY,
 	};
 
 	public static String[] getDefaultSentencePropertyKeys() {
 		return defaultSentencePropertyKeys.clone();
+	}
+
+	private static final String[] defaultDocumentPropertyKeys = {
+		DOCUMENT_ID,
+		AUDIO_FILE_KEY,
+		AUDIO_OFFSET_KEY,
+		INDEX_KEY,
+	};
+
+	public static String[] getDefaultDocumentPropertyKeys() {
+		return defaultDocumentPropertyKeys.clone();
 	}
 
 	private static final char defaultDelimiter = ' ';

@@ -50,6 +50,7 @@ import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.sampa.SampaMapper2;
+import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -188,47 +189,23 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static final String EMPTY = ""; //$NON-NLS-1$
 
 	public static ProsodicDocumentData readDocumentData(CoreferenceDocumentSet documentSet,
-			CharTableBuffer buffer, BlockHandler blockHandler) throws IOException {
+			CharTableBuffer buffer, ReaderControl readerControl) throws IOException {
 
 		DefaultProsodicDocumentData result = null;
-
-		boolean syllableOffsetsFromSampa = DEFAULT_SYLLABLES_FROM_SAMPA;
-		boolean markAccentOnWords = DEFAULT_MARK_ACCENTS;
-		int accentExcursion = -1;
-		if(!Core.isDebugActive()) {
-			syllableOffsetsFromSampa = ConfigRegistry.getGlobalRegistry().getBoolean(
-					"plugins.prosody.prosodyReader.syllableOffsetsFromSampa"); //$NON-NLS-1$
-			markAccentOnWords = ConfigRegistry.getGlobalRegistry().getBoolean(
-					"plugins.prosody.prosodyReader.markAccentOnWords"); //$NON-NLS-1$
-			accentExcursion = ConfigRegistry.getGlobalRegistry().getInteger(
-					"plugins.prosody.prosodyReader.accentExcursion"); //$NON-NLS-1$
-		}
-
-		SampaMapper2 sampaMapper = null;
-		if(syllableOffsetsFromSampa) {
-			//TODO provide multiple files as options?
-			sampaMapper = new SampaMapper2();
-		}
-		SentenceReader sentenceReader = null;
 
 		while(buffer.next()) {
 			try {
 				if(result==null) {
 					result = new DefaultProsodicDocumentData(documentSet, documentSet.size());
-					result.setId(blockHandler.getExpectedId());
+					result.setId(readerControl.getExpectedId());
+					result.setProperty(INDEX_KEY, documentSet.size());
 					documentSet.add(result);
-
-					sentenceReader = createReader(blockHandler.getFormatVersion());
-
-					sentenceReader.sampaMapper = sampaMapper;
-					sentenceReader.markAccentOnWords = markAccentOnWords;
-					sentenceReader.accentExcursion = accentExcursion;
 
 					if(readDocumentProperties(result, buffer)) {
 						continue;
 					}
 				}
-				sentenceReader.createData(result, buffer);
+				readerControl.getReader().createData(result, buffer);
 			} catch(Exception e) {
 				// Cannot be IOException or UnsupportedFormatException
 
@@ -277,17 +254,18 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		return true;
 	}
 
-	private static SentenceReader createReader(final String formatVersion) {
+	private static SentenceReader createReader(ReaderControl readerControl) {
 		SentenceReader reader = null;
+		String formatVersion = readerControl.getFormatVersion();
 
 		if(formatVersion!=null) {
 			switch (formatVersion) {
 			case "0.3": //$NON-NLS-1$
-				reader = new SentenceReaderV03();
+				reader = new SentenceReaderV03(readerControl);
 				break;
 
 			case "0.4": //$NON-NLS-1$
-				reader = new SentenceReaderV04();
+				reader = new SentenceReaderV04(readerControl);
 				break;
 
 			default:
@@ -296,7 +274,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		}
 
 		if(reader==null) {
-			reader = new SentenceReaderV03();
+			reader = new SentenceReaderV03(readerControl);
 		}
 
 		reader.init();
@@ -542,6 +520,8 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	}
 
 	private static final float[] EMPTY_FLOATS = new float[0];
+	private static final int[] EMPTY_INTS = new int[0];
+	private static final String[] EMPTY_STRINGS = new String[0];
 
 	private static float[] getFloats(Row row, int index) {
 		Cursor cursor = row.getSplitCursor(index);
@@ -564,8 +544,6 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		return result;
 	}
 
-	private static final int[] EMPTY_INTS = new int[0];
-
 	private static int[] getInts(Row row, int index) {
 		Cursor cursor = row.getSplitCursor(index);
 
@@ -586,8 +564,6 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 		return result;
 	}
-
-	private static final String[] EMPTY_STRINGS = new String[0];
 
 	private static String[] getStrings(Row row, int index) {
 		Cursor cursor = row.getSplitCursor(index);
@@ -610,9 +586,70 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		return result;
 	}
 
-	public static class BlockHandler implements RowFilter {
+	public static class ReaderControl implements RowFilter {
 		private String expectedId;
 		private String formatVersion;
+		private boolean syllableOffsetsFromSampa;
+		private boolean markAccentOnWords = false;
+		private boolean onlyConsiderStressedSylables = false;
+		private int accentExcursion = -1;
+
+		private SentenceReader reader;
+		private SampaMapper2 sampaMapper;
+
+		public ReaderControl() {
+
+			syllableOffsetsFromSampa = DEFAULT_SYLLABLES_FROM_SAMPA;
+			markAccentOnWords = DEFAULT_MARK_ACCENTS;
+			accentExcursion = -1;
+			if(!Core.isDebugActive()) {
+				syllableOffsetsFromSampa = ConfigRegistry.getGlobalRegistry().getBoolean(
+						"plugins.prosody.prosodyReader.syllableOffsetsFromSampa"); //$NON-NLS-1$
+				markAccentOnWords = ConfigRegistry.getGlobalRegistry().getBoolean(
+						"plugins.prosody.prosodyReader.markAccentOnWords"); //$NON-NLS-1$
+				accentExcursion = ConfigRegistry.getGlobalRegistry().getInteger(
+						"plugins.prosody.prosodyReader.accentExcursion"); //$NON-NLS-1$
+				onlyConsiderStressedSylables = ConfigRegistry.getGlobalRegistry().getBoolean(
+						"plugins.prosody.prosodyReader.onlyConsiderStressedSylables"); //$NON-NLS-1$
+			}
+		}
+
+		public SampaMapper2 getSampaMapper() {
+			if(sampaMapper==null && syllableOffsetsFromSampa) {
+				//TODO provide multiple files as options?
+				sampaMapper = new SampaMapper2();
+			}
+
+			return sampaMapper;
+		}
+
+		public SentenceReader getReader() {
+			if(reader==null) {
+				reader = createDefaultReader(this);
+			}
+
+			return reader;
+		}
+
+		public boolean isSyllableOffsetsFromSampa() {
+			return syllableOffsetsFromSampa;
+		}
+
+		public boolean isMarkAccentOnWords() {
+			return markAccentOnWords;
+		}
+
+		public boolean isOnlyConsiderStressedSylables() {
+			return onlyConsiderStressedSylables;
+		}
+
+		public int getAccentExcursion() {
+			return accentExcursion;
+		}
+
+		public static SentenceReader createDefaultReader(ReaderControl readerControl) {
+			return new SentenceReaderV03(readerControl);
+		}
 
 		/**
 		 * @return the expectedId
@@ -643,6 +680,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 				if(formatVersion!=null)
 					throw new IllegalStateException("Duplicate format version declaration: "+row); //$NON-NLS-1$
 				formatVersion = row.subSequence(FORMAT_VERSION.length(), row.length()).toString().trim();
+				reader = createReader(this);
 			} if(row.startsWith(BEGIN_DOCUMENT)) {
 				if(expectedId!=null)
 					throw new IllegalStateException("Unexpected begin of document: "+row); //$NON-NLS-1$
@@ -672,14 +710,19 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		protected DefaultProsodicSentenceData result;
 		protected String[] forms;
 		protected TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
-		protected SampaMapper2 sampaMapper;
-
-		protected boolean markAccentOnWords = false;
-		protected int accentExcursion = -1;
 
 		protected int ID_COL = 0;
 		protected int FORM_COL = 1;
 		protected int COREF_COL = 10;
+
+		protected final ReaderControl readerControl;
+
+		protected SentenceReader(ReaderControl readerControl) {
+			if (readerControl == null)
+				throw new NullPointerException("Invalid readerControl"); //$NON-NLS-1$
+
+			this.readerControl = readerControl;
+		}
 
 		public void init() {
 			initColumns();
@@ -846,6 +889,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	}
 
 	private static class SentenceReaderV03 extends SentenceReader {
+
 		protected int POS_COL = 2;
 		protected int LEMMA_COL = 3;
 		protected int FEATURES_COL = 4;
@@ -877,6 +921,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		protected int PAINTE_C1_COL = 31;
 		protected int PAINTE_C2_COL = 32;
 		protected int PAINTE_D_COL = 33;
+
+		public SentenceReaderV03(ReaderControl readerControl) {
+			super(readerControl);
+		}
 
 		/**
 		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReader#initColumns()
@@ -927,7 +975,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			int sylCount = result.getSyllableCount(index);
 			if(sylCount>0) {
 				String[] sampa = (String[]) result.getProperty(index, SYLLABLE_LABEL_KEY);
-				String[] labels = sampaMapper.split(forms[index], sampa);
+				String[] labels = readerControl.getSampaMapper().split(forms[index], sampa);
 				if(labels!=null) {
 					offsets = new int[sylCount];
 					int offset = 0;
@@ -958,12 +1006,16 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 		protected void markAccent(int index) {
 			int sylCount = result.getSyllableCount(index);
-			boolean hasAccent = false;
 
+			int accentExcursion = readerControl.getAccentExcursion();
+			boolean onlyConsiderStressedSylables = readerControl.isOnlyConsiderStressedSylables();
+
+			boolean hasAccent = false;
 			if(sylCount>0 && accentExcursion!=-1) {
 				for(int i=0; i<sylCount; i++) {
-					if(result.getPainteC1(index, i)>=accentExcursion
-							|| result.getPainteC2(index, i)>=accentExcursion) {
+					if((!onlyConsiderStressedSylables || result.isSyllableStressed(index, i))
+							&& (result.getPainteC1(index, i)>=accentExcursion
+							|| result.getPainteC2(index, i)>=accentExcursion)) {
 						hasAccent = true;
 						break;
 					}
@@ -982,6 +1034,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 
 			// Assign properties
+			result.setProperty(i, INDEX_KEY, i);
 			result.setProperty(i, FORM_KEY, forms[i]);
 			result.setProperty(i, POS_KEY, get(row, POS_COL, EMPTY));
 			result.setProperty(i, LEMMA_KEY, get(row, LEMMA_COL, EMPTY));
@@ -1003,7 +1056,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 			int[] offsets = getInts(row, SYL_OFFSET_COL);
 			if(offsets==EMPTY_INTS) {
-				if(sampaMapper!=null) {
+				if(readerControl.getSampaMapper()!=null) {
 					offsets = mapSampa(i);
 				}
 			}
@@ -1022,6 +1075,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, SYLLABLE_STRESS_KEY, stress);
 			result.setProperty(i, STRESS_KEY, wordStressed);
 
+			int[] indices = new int[sylCount];
+			CollectionUtils.fillAscending(indices);
+
+			result.setProperty(i, INDEX_KEY, indices);
 			result.setProperty(i, SYLLABLE_DURATION_KEY, getFloats(row, SYL_DURATION_COL));
 			result.setProperty(i, VOWEL_DURATION_KEY, getFloats(row, VOWEL_DURATION_COL));
 			result.setProperty(i, SYLLABLE_STARTPITCH_KEY, getFloats(row, SYL_STARTPITCH_COL));
@@ -1039,7 +1096,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, PAINTE_C2_KEY, getFloats(row, PAINTE_C2_COL));
 			result.setProperty(i, PAINTE_D_KEY, getFloats(row, PAINTE_D_COL));
 
-			if(markAccentOnWords) {
+			if(readerControl.isMarkAccentOnWords()) {
 				markAccent(i);
 			}
 		}
@@ -1049,6 +1106,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 		protected int IS_LEX_COL = 11;
 		protected int IS_REF_COL = 12;
+
+		public SentenceReaderV04(ReaderControl readerControl) {
+			super(readerControl);
+		}
 
 		@Override
 		protected void initColumns() {

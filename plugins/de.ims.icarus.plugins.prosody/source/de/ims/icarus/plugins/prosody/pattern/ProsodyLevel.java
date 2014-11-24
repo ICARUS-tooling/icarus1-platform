@@ -28,29 +28,72 @@ package de.ims.icarus.plugins.prosody.pattern;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Icon;
+
+import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.util.id.Identity;
+
 /**
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public enum ProsodyLevel {
-	SYLLABLE("syl"), //$NON-NLS-1$
-	WORD("word"), //$NON-NLS-1$
-	SENTENCE("sent"), //$NON-NLS-1$
-	DOCUMENT("doc"), //$NON-NLS-1$
-	ENVIRONMENT("env"), //$NON-NLS-1$
+public enum ProsodyLevel implements Identity {
+	SYLLABLE("syl", "syllable") { //$NON-NLS-1$ //$NON-NLS-2$
+		@Override
+		public String[] getAvailableProperties() {
+			return ProsodyUtils.getDefaultSyllablePropertyKeys();
+		}
+	},
+	WORD("word", "word") { //$NON-NLS-1$ //$NON-NLS-2$
+		@Override
+		public String[] getAvailableProperties() {
+			return ProsodyUtils.getDefaultWordPropertyKeys();
+		}
+	},
+	SENTENCE("sent", "sentence") { //$NON-NLS-1$ //$NON-NLS-2$
+		@Override
+		public String[] getAvailableProperties() {
+			return ProsodyUtils.getDefaultSentencePropertyKeys();
+		}
+	},
+	DOCUMENT("doc", "document") { //$NON-NLS-1$ //$NON-NLS-2$
+		@Override
+		public String[] getAvailableProperties() {
+			return ProsodyUtils.getDefaultDocumentPropertyKeys();
+		}
+	},
+	ENVIRONMENT("env", "environment") { //$NON-NLS-1$ //$NON-NLS-2$
+		/**
+		 * Returns {@code null} since environmental properties are, well, ... environment specific.
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyLevel#getAvailableProperties()
+		 */
+		@Override
+		public String[] getAvailableProperties() {
+			return null;
+		}
+	},
 	;
 
 	private final String token;
+	private final String key;
 
-	ProsodyLevel(String token) {
+	ProsodyLevel(String token, String key) {
 		this.token = token;
+		this.key = key;
 	}
 
 	public String getToken() {
 		return token;
 	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public abstract String[] getAvailableProperties();
 
 	private static Map<String, ProsodyLevel> tokenMap;
 
@@ -66,5 +109,47 @@ public enum ProsodyLevel {
 		}
 
 		return tokenMap.get(s);
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getId()
+	 */
+	@Override
+	public String getId() {
+		return token;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getName()
+	 */
+	@Override
+	public String getName() {
+		return ResourceManager.getInstance().get(
+				"plugins.prosody.pattern."+token+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return ResourceManager.getInstance().get(
+				"plugins.prosody.pattern."+token+".description"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getIcon()
+	 */
+	@Override
+	public Icon getIcon() {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.id.Identity#getOwner()
+	 */
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 }

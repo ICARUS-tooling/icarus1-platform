@@ -26,6 +26,7 @@
 package de.ims.icarus.search_tools;
 
 import de.ims.icarus.search_tools.result.SearchResult;
+import de.ims.icarus.util.ToolException;
 
 /**
  * @author Markus Gärtner
@@ -40,5 +41,5 @@ public interface SearchResultExportHandler {
 	 * details on how to format/organize the result. Note that this
 	 * method is called on the <i>event-dispatch-thread</i>.
 	 */
-	void exportResult(SearchResult searchResult);
+	void exportResult(SearchResult searchResult) throws ToolException;
 }

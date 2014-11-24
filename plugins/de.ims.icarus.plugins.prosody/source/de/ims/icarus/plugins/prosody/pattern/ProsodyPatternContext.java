@@ -27,15 +27,9 @@ package de.ims.icarus.plugins.prosody.pattern;
 
 import java.text.ParseException;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
-import de.ims.icarus.plugins.prosody.DefaultProsodicDocumentData;
-import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource.IndexIterator;
 import de.ims.icarus.resources.ResourceManager;
-import de.ims.icarus.util.HtmlUtils;
-import de.ims.icarus.util.Options;
 import de.ims.icarus.util.strings.pattern.Accessor;
 import de.ims.icarus.util.strings.pattern.PatternContext;
 import de.ims.icarus.util.strings.pattern.PatternFactory;
@@ -48,37 +42,37 @@ import de.ims.icarus.util.strings.pattern.TextSource;
  */
 public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 
-	public static void main(String[] args) throws Exception {
-		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
-		DefaultProsodicDocumentData document = new DefaultProsodicDocumentData(documentSet, 0);
-
-		String[] forms = new String[]{"This", "is", "a", "test"};
-		DefaultProsodicSentenceData sentence = new DefaultProsodicSentenceData(document, forms);
-		sentence.setProperty("id", 1.234);
-
-		for(int i=0; i<sentence.length(); i++) {
-			sentence.setProperty(i, "form", sentence.getForm(i));
-			sentence.setProperty(i, "lemma", sentence.getForm(i).toLowerCase());
-		}
-
-		sentence.setProperty(0, "syllable_label", new String[]{"s0", "s1", "s2"});
-		sentence.setProperty(0, "syllable_count", 3);
-
-		String pattern = "{sent:id} {syl:syllable_label;pos=1,-2;pref=\\{;suf=\\}} {word:form;min=10} ({word:lemma}) {env:file}";
-
-		PatternFactory<ProsodyLevel> factory = new PatternFactory<>(new ProsodyPatternContext());
-
-		TextSource textSource = factory.parse(ProsodyLevel.WORD, pattern, null);
-
-		ProsodyData data = new ProsodyData();
-
-		data.set(sentence, 0);
-
-		Options options = new Options();
-		options.put("file", "<some-file-some-where>");
-
-		System.out.println(textSource.getText(data, options));
-	}
+//	public static void main(String[] args) throws Exception {
+//		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
+//		DefaultProsodicDocumentData document = new DefaultProsodicDocumentData(documentSet, 0);
+//
+//		String[] forms = new String[]{"This", "is", "a", "test"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//		DefaultProsodicSentenceData sentence = new DefaultProsodicSentenceData(document, forms);
+//		sentence.setProperty("id", 1.234); //$NON-NLS-1$
+//
+//		for(int i=0; i<sentence.length(); i++) {
+//			sentence.setProperty(i, "form", sentence.getForm(i)); //$NON-NLS-1$
+//			sentence.setProperty(i, "lemma", sentence.getForm(i).toLowerCase()); //$NON-NLS-1$
+//		}
+//
+//		sentence.setProperty(0, "syllable_label", new String[]{"s0", "s1", "s2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//		sentence.setProperty(0, "syllable_count", 3); //$NON-NLS-1$
+//
+//		String pattern = "{sent:id} {syl:syllable_label;pos=1,-2;pref=\\{;suf=\\}} {word:form;min=10} ({word:lemma}) {env:file}"; //$NON-NLS-1$
+//
+//		PatternFactory<ProsodyLevel> factory = new PatternFactory<>(new ProsodyPatternContext());
+//
+//		TextSource textSource = factory.parse(ProsodyLevel.WORD, pattern, null);
+//
+//		ProsodyData data = new ProsodyData();
+//
+//		data.set(sentence, 0);
+//
+//		Options options = new Options();
+//		options.put("file", "<some-file-some-where>"); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		System.out.println(textSource.getText(data, options));
+//	}
 
 	public static TextSource createTextSource(ProsodyLevel level, String pattern) throws ParseException {
 		return createTextSource(level, pattern, null);
@@ -92,27 +86,46 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 		return new PatternFactory<>(new ProsodyPatternContext()).parse(level, pattern, null);
 	}
 
+	public static TextSource createTextSource(String pattern, Map<String, String> options) throws ParseException {
+		if(pattern==null || pattern.isEmpty()) {
+			return EMPTY_TEXT_SOURCE;
+		}
+
+		return new PatternFactory<>(new ProsodyPatternContext()).parse(pattern, null);
+	}
+
+	public static String createStatement(ProsodyLevel level, String specifier) {
+		return PatternFactory.ACCESSOR_BEGIN+level.getToken()+PatternFactory.TOKEN_DELIMITER+specifier+PatternFactory.ACCESSOR_END;
+	}
+
 	public static String getInfoText() {
 		StringBuilder sb = new StringBuilder(300);
 		ResourceManager rm = ResourceManager.getInstance();
 
 		sb.append("<html>"); //$NON-NLS-1$
 		sb.append("<h3>").append(rm.get("plugins.prosody.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		sb.append("<table>"); //$NON-NLS-1$
-		sb.append("<tr><th>") //$NON-NLS-1$
-			.append(rm.get("plugins.prosody.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
-			.append(rm.get("plugins.prosody.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("<br>"); //$NON-NLS-1$
+		sb.append("{&lt;level&gt;:&lt;property-name&gt;[;option]}"); //$NON-NLS-1$
 
-		Map<Object, Object> mc = LabelPattern.magicCharacters;
-		for(Entry<Object, Object> entry : mc.entrySet()) {
-			String c = entry.getKey().toString();
-			String key = entry.getValue().toString();
+		for(ProsodyLevel level: ProsodyLevel.values()) {
+			sb.append("<br>"); //$NON-NLS-1$
+			sb.append("<h4>").append(level.getName()).append("&nbsp;(").append(level.getToken()).append(")</h4>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sb.append(level.getDescription());
 
-			sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
-			.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+			String[] properties = level.getAvailableProperties();
+			if(properties!=null) {
+				sb.append(" ("); //$NON-NLS-1$
+
+				for(int i=0; i<properties.length; i++) {
+					if(i>0) {
+						sb.append(","); //$NON-NLS-1$
+					}
+					sb.append(properties[i]);
+				}
+
+				sb.append(")"); //$NON-NLS-1$
+			}
 		}
-
-		sb.append("</table>"); //$NON-NLS-1$
 
 		return sb.toString();
 	}

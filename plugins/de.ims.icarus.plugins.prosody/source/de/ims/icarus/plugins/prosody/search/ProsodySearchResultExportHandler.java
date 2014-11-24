@@ -30,6 +30,13 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -38,7 +45,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -46,19 +56,31 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.text.BadLocationException;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.ims.icarus.Core;
+import de.ims.icarus.logging.LoggerFactory;
+import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
+import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
+import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
+import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.SearchResultExportHandler;
+import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.helper.DirectoryFileFilter;
+import de.ims.icarus.util.Options;
+import de.ims.icarus.util.ToolException;
+import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
@@ -76,6 +98,8 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 	// Format UI
 	private JTextArea taHeader, taContent;
 	private JButton bInsertPattern;
+	private JPopupMenu patterMenu;
+	private JComboBox<ProsodyLevel> cbLevel;
 
 	private JPanel contentPanel;
 	private Handler handler;
@@ -156,6 +180,26 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 		JPanel formatPanel = new JPanel(new BorderLayout());
 		formatPanel.setBorder(UIUtil.defaultContentBorder);
 
+		// Toolbar
+		JLabel lLevel = new JLabel(
+				rm.get("plugins.prosody.prosodySearchResultExportHandler.labels.outputLevel")); //$NON-NLS-1$
+		lLevel.setToolTipText(rm.get("plugins.prosody.prosodySearchResultExportHandler.tooltips.outputLevel")); //$NON-NLS-1$
+		lLevel.setBorder(UIUtil.defaultContentBorder);
+		DefaultComboBoxModel<ProsodyLevel> levelModel = new DefaultComboBoxModel<>();
+		levelModel.addElement(ProsodyLevel.SYLLABLE);
+		levelModel.addElement(ProsodyLevel.WORD);
+		levelModel.addElement(ProsodyLevel.SENTENCE);
+		levelModel.addElement(ProsodyLevel.DOCUMENT);
+		levelModel.setSelectedItem(ProsodyLevel.SYLLABLE);
+		cbLevel = new JComboBox<>(levelModel);
+		cbLevel.setEditable(false);
+		JToolBar tbFormat = ActionManager.globalManager().createEmptyToolBar();
+		tbFormat.add(lLevel);
+		tbFormat.add(Box.createGlue());
+		tbFormat.add(cbLevel);
+
+		formatPanel.add(tbFormat, BorderLayout.NORTH);
+
 		// Header
 		JPanel pHeader = new JPanel(new BorderLayout(0, 6));
 		JLabel lHeader = new JLabel(
@@ -195,7 +239,7 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
 		splitPane.setBorder(null);
-		splitPane.setDividerLocation(170);
+		splitPane.setDividerLocation(110);
 		splitPane.setDividerSize(7);
 		splitPane.setTopComponent(pHeader);
 		splitPane.setBottomComponent(pContent);
@@ -228,11 +272,88 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 		cbGroupBy.setEnabled(!isSingleFile);
 	}
 
+	//FIXME add loca for left out keys!!!
+	private String[] getEnvironmentProperties() {
+		return new String[]{
+			CURRENT_FILE_KEY,
+			CURRENT_TIME_KEY,
+			CURRENT_DATE_KEY,
+			TOTAL_MATCH_COUNT_KEY,
+			TOTAL_HIT_COUNT_KEY,
+			GROUP_COUNT_KEY,
+			QUERY_KEY,
+
+			CURRENT_HIT_COUNT_KEY,
+			CURRENT_GROUP_KEY,
+		};
+	}
+
+	private static String getLabel(ProsodyLevel level, String property) {
+		return ResourceManager.getInstance().get(
+				"plugins.prosody.properties."+level.getKey()+"."+property+".name"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	private static String getToolTip(ProsodyLevel level, String property) {
+		return ResourceManager.getInstance().get(
+				"plugins.prosody.properties."+level.getKey()+"."+property+".description"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	private void showPatternMenu() {
+		if(patterMenu==null) {
+			patterMenu = new JPopupMenu();
+
+			for(ProsodyLevel level : ProsodyLevel.values()) {
+				JMenu menu = new JMenu(level.getName());
+				menu.setToolTipText(level.getDescription());
+
+				String[] properties = level.getAvailableProperties();
+				if(level==ProsodyLevel.ENVIRONMENT) {
+					properties = getEnvironmentProperties();
+				}
+
+				if(properties!=null) {
+					Arrays.sort(properties);
+
+					for(String property : properties) {
+						String label = getLabel(level, property);
+						String tooltip = getToolTip(level, property);
+						String statement = ProsodyPatternContext.createStatement(level, property);
+
+						JMenuItem menuItem = menu.add(label+" "+statement); //$NON-NLS-1$
+						menuItem.setToolTipText(tooltip);
+						menuItem.putClientProperty("pattern", statement); //$NON-NLS-1$
+
+						menuItem.addActionListener(handler);
+					}
+				}
+
+				menu.setEnabled(properties!=null && properties.length>0);
+
+				patterMenu.add(menu);
+			}
+		}
+
+		patterMenu.show(bInsertPattern, bInsertPattern.getWidth(), 0);
+	}
+
+	// Global Environment
+	public static final String CURRENT_FILE_KEY = "current_file"; //$NON-NLS-1$
+	public static final String CURRENT_TIME_KEY = "current_time"; //$NON-NLS-1$
+	public static final String CURRENT_DATE_KEY = "current_date"; //$NON-NLS-1$
+	public static final String TOTAL_MATCH_COUNT_KEY = "total_matches"; //$NON-NLS-1$
+	public static final String TOTAL_HIT_COUNT_KEY = "total_hits"; //$NON-NLS-1$
+	public static final String GROUP_COUNT_KEY = "group_count"; //$NON-NLS-1$
+	public static final String QUERY_KEY = "query"; //$NON-NLS-1$
+
+	// Grouping Environment
+	public static final String CURRENT_HIT_COUNT_KEY = "hit_count"; //$NON-NLS-1$
+	public static final String CURRENT_GROUP_KEY = "current_group"; //$NON-NLS-1$
+
 	/**
 	 * @see de.ims.icarus.search_tools.SearchResultExportHandler#exportResult(de.ims.icarus.search_tools.result.SearchResult)
 	 */
 	@Override
-	public void exportResult(SearchResult searchResult) {
+	public void exportResult(SearchResult searchResult) throws ToolException {
 		initGUI();
 
 		if(!DialogFactory.getGlobalFactory().showGenericDialog(null,
@@ -241,6 +362,69 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 			// Cancelled by user
 			return;
 		}
+
+
+		// Fetch pattern
+		String headerPattern = taHeader.getText().trim();
+		String contentPattern = taContent.getText().trim();
+
+		if(contentPattern==null || contentPattern.isEmpty())
+			throw new ToolException("No content pattern defined"); //$NON-NLS-1$
+
+		ProsodyLevel outputLevel = (ProsodyLevel) cbLevel.getSelectedItem();
+
+		// Create content text source
+		TextSource contentTextSource = null;
+		try {
+			contentTextSource = ProsodyPatternContext.createTextSource(outputLevel, contentPattern);
+		} catch (ParseException e) {
+			throw new ToolException("Content pattern definition is invalid", e); //$NON-NLS-1$
+		}
+
+		// Create header text source
+		TextSource headerTextSource = null;
+		try {
+			if(headerPattern!=null) {
+				headerTextSource = ProsodyPatternContext.createTextSource(outputLevel, headerPattern);
+			}
+		} catch (ParseException e) {
+			throw new ToolException("Content pattern definition is invalid", e); //$NON-NLS-1$
+		}
+
+		List<Path> filesList = new ArrayList<>();
+		List<Options> environmentsList = new ArrayList<>();
+		List<Iterable<ResultEntry>> entryList = new ArrayList<>();
+
+		Options globalEnvironment = new Options();
+		globalEnvironment.put(CURRENT_DATE_KEY, new Date());
+		globalEnvironment.put(CURRENT_TIME_KEY, System.currentTimeMillis());
+		globalEnvironment.put(TOTAL_MATCH_COUNT_KEY, searchResult.getTotalMatchCount());
+		globalEnvironment.put(TOTAL_HIT_COUNT_KEY, searchResult.getTotalHitCount());
+		globalEnvironment.put(GROUP_COUNT_KEY, searchResult.getDimension());
+		globalEnvironment.put(QUERY_KEY, searchResult.getSource().getQuery().getQueryString());
+
+		if(rbSingleFile.isSelected()) {
+			// One file for all content
+
+			Path file = Paths.get(tfSingleFile.getText());
+			filesList.add(file);
+
+			List<ResultEntry> entries = new ArrayList<>(searchResult.getTotalMatchCount());
+			for(int i=0; i<searchResult.getTotalMatchCount(); i++) {
+				entries.add(searchResult.getRawEntry(i));
+			}
+			entryList.add(entries);
+
+			Options environment = globalEnvironment.clone();
+			environment.put(CURRENT_FILE_KEY, file.toString());
+
+			environmentsList.add(environment);
+
+		} else {
+			// Group stuff
+		}
+
+		//TODO complete!
 	}
 
 	private class Handler implements ActionListener {
@@ -302,11 +486,93 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 					tfFolder.setText(file.getAbsolutePath());
 				}
 			} else if(e.getSource()==bInsertPattern) {
-				//TODO
+				showPatternMenu();
 			} else {
+				// Source is a JMenuItem with a "pattern" client property holding
+				// the textual pattern to be inserted
 
+				JMenuItem menuItem = (JMenuItem) e.getSource();
+				String pattern = (String) menuItem.getClientProperty("pattern"); //$NON-NLS-1$
+
+				int pos = taContent.getCaretPosition();
+				try {
+					taContent.getDocument().insertString(pos, pattern, null);
+				} catch (BadLocationException ex) {
+					LoggerFactory.error(this, "Failed to insert pattern at index "+pos, ex); //$NON-NLS-1$
+				}
 			}
 		}
 
+	}
+
+	private static final ProsodicAnnotationManager annotationManager = new ProsodicAnnotationManager();
+
+	private interface GroupSelector {
+		Object getGroup(SearchResult searchResult, int globalIndex, ResultEntry entry, Options env, int...indices);
+	}
+
+	private static class PatternGroupSelector implements GroupSelector {
+
+		private final ProsodyData patternProxy = new ProsodyData();
+
+		private final TextSource textSource;
+
+		public PatternGroupSelector(TextSource textSource) {
+			if (textSource == null)
+				throw new NullPointerException("Invalid textSource");
+
+			this.textSource = textSource;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.search.ProsodySearchResultExportHandler.GroupSelector#getGroup(de.ims.icarus.search_tools.result.SearchResult, int, de.ims.icarus.search_tools.result.ResultEntry, int[])
+		 */
+		@Override
+		public Object getGroup(SearchResult searchResult, int globalIndex,
+				ResultEntry entry, Options env, int... indices) {
+
+			AnnotatedProsodicSentenceData sentence = (AnnotatedProsodicSentenceData) searchResult.getAnnotatedEntry(entry);
+			annotationManager.setAnnotation(sentence.getAnnotation());
+
+			ProsodyHighlighting highlighting = ProsodyHighlighting.getInstance();
+
+			if(annotationManager.hasAnnotation()) {
+				boolean highlightFound = false;
+
+				for(int i=0; i<sentence.length() && !highlightFound; i++) {
+					long highlight = annotationManager.getHighlight(i);
+
+					if(highlighting.isHighlighted(highlight)) {
+						int sylCount = sentence.getSyllableCount(i);
+
+						for(int j=0; j<sylCount && !highlightFound; j++) {
+
+							long sylHighlight = sentence.getAnnotation().getHighlight(i, j);
+							if(highlighting.isHighlighted(sylHighlight)) {
+
+								// Full hit
+								patternProxy.set(sentence, i, j);
+								highlightFound = true;
+							}
+						}
+
+						// Ensure the word is marked
+						if(!highlightFound) {
+							patternProxy.set(sentence, i);
+							highlightFound = true;
+						}
+					}
+				}
+
+				// Ensure sentence is considered
+				if(!highlightFound) {
+					patternProxy.set(sentence);
+				}
+			} else {
+				patternProxy.set(sentence);
+			}
+
+			return textSource.getText(patternProxy, env);
+		}
 	}
 }

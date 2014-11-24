@@ -142,7 +142,7 @@ public final class StringUtil {
 		return false;
 	}
 
-	private static final Pattern lineBreak = Pattern.compile("[\\n\\r]+"); //$NON-NLS-1$
+	private static final Pattern lineBreak = Pattern.compile("\r\n|\n\r|\n|\r"); //$NON-NLS-1$
 
 	public static String[] splitLines(String s) {
 		return s==null ? null : lineBreak.split(s);
