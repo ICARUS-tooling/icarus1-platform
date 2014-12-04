@@ -42,9 +42,12 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 
@@ -78,6 +81,70 @@ public final class IOUtil {
 				throw new Error("Unable to create directory: "+path); //$NON-NLS-1$
 			}
 		}
+	}
+
+	public static void deleteDirectory(final Path root) throws IOException {
+		Files.walkFileTree(root, new FileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir,
+					BasicFileAttributes attrs) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file,
+					BasicFileAttributes attrs) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc)
+					throws IOException {
+				throw exc;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+					throws IOException {
+				Files.delete(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	public static void cleanDirectory(final Path root) throws IOException {
+		Files.walkFileTree(root, new FileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir,
+					BasicFileAttributes attrs) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file,
+					BasicFileAttributes attrs) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc)
+					throws IOException {
+				throw exc;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+					throws IOException {
+				if(!Files.isSameFile(root, dir)) {
+					Files.delete(root);
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
 	}
 
 	public static boolean isZipSource(String name) {
@@ -432,6 +499,37 @@ public final class IOUtil {
     	return loadable.isLoaded() && !loadable.isLoading();
     }
 
+    public static boolean doLoad(Object owner, Loadable loadable) throws Exception {
+		// Wait while target is loading
+		while(loadable.isLoading());
+
+		if(loadable.isLoaded()) {
+			return false;
+		}
+
+		long start = System.currentTimeMillis();
+
+		loadable.load();
+
+		long end = System.currentTimeMillis();
+
+		String durationString = StringUtil.formatDuration(end-start);
+		if(durationString.isEmpty()) {
+			durationString = "<1S"; //$NON-NLS-1$
+		}
+
+		String name = StringUtil.getName(loadable);
+		if(name==null) {
+			name = "<anonymous loadable>"; //$NON-NLS-1$
+		}
+
+		LoggerFactory.log(owner, Level.INFO, String.format(
+				"Loaded '%s' in %s", name, //$NON-NLS-1$
+				durationString));
+
+		return true;
+    }
+
 	public static class LoadJob extends SwingWorker<Loadable, Object> {
 
 		private final Loadable loadable;
@@ -459,32 +557,9 @@ public final class IOUtil {
 			TaskManager.getInstance().setIndeterminate(this, true);
 
 			try {
-				// Wait while target is loading
-				while(loadable.isLoading());
-
-				if(loadable.isLoaded()) {
+				if(!doLoad(this, loadable)) {
 					return null;
 				}
-
-				long start = System.currentTimeMillis();
-
-				loadable.load();
-
-				long end = System.currentTimeMillis();
-
-				String durationString = StringUtil.formatDuration(end-start);
-				if(durationString.isEmpty()) {
-					durationString = "<1S"; //$NON-NLS-1$
-				}
-
-				String name = StringUtil.getName(loadable);
-				if(name==null) {
-					name = "<anonymous loadable>"; //$NON-NLS-1$
-				}
-
-				LoggerFactory.log(this, Level.INFO, String.format(
-						"Loaded '%s' in %s", name, //$NON-NLS-1$
-						durationString));
 			} finally {
 				TaskManager.getInstance().setIndeterminate(this, false);
 			}

@@ -111,6 +111,24 @@ public enum ProsodyLevel implements Identity {
 		return tokenMap.get(s);
 	}
 
+	private static ProsodyLevel[] values;
+
+	public ProsodyLevel up() {
+		if(values==null) {
+			values = values();
+		}
+
+		return values[ordinal()+1];
+	}
+
+	public ProsodyLevel down() {
+		if(values==null) {
+			values = values();
+		}
+
+		return values[ordinal()-1];
+	}
+
 	/**
 	 * @see de.ims.icarus.util.id.Identity#getId()
 	 */

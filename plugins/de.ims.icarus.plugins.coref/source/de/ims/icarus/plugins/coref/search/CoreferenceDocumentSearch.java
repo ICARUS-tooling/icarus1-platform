@@ -124,8 +124,8 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 		@Override
 		public Options prepareWrite(Options options) {
 			Options result = options.clone();
-			result.remove("allocation");
-			result.remove("goldAllocation");
+			result.remove("allocation"); //$NON-NLS-1$
+			result.remove("goldAllocation"); //$NON-NLS-1$
 
 			return result;
 		}

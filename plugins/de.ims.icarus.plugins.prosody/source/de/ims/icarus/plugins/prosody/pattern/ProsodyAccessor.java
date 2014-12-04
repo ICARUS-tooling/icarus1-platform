@@ -128,6 +128,26 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 		}
 	}
 
+	public static class WrappedProsodyAccessor extends ProsodyAccessor {
+
+		private final ProsodyTextSource textSource;
+
+		public WrappedProsodyAccessor(ProsodyTextSource textSource) {
+			super("", "", textSource.getAccessor().getLevel()); //$NON-NLS-1$ //$NON-NLS-2$
+
+			this.textSource = textSource;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyAccessor#fetchProsodyValue(de.ims.icarus.plugins.prosody.pattern.ProsodyData, de.ims.icarus.util.Options)
+		 */
+		@Override
+		protected Object fetchProsodyValue(ProsodyData data, Options env) {
+			return textSource.getText(data, env);
+		}
+
+	}
+
 	public static class SyllableAccessor extends ProsodyAccessor {
 
 		public SyllableAccessor(String source, String specifier) {
@@ -174,7 +194,7 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 
 		@Override
 		public Object fetchProsodyValue(ProsodyData data, Options env) {
-			return data.getSentence().getDocument().getProperty(getSpecifier());
+			return data.getDocument().getProperty(getSpecifier());
 		}
 
 	}

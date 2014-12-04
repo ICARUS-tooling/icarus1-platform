@@ -68,7 +68,7 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String FEATURES_KEY = "features"; //$NON-NLS-1$
 	public static final String DEPREL_KEY = "deprel"; //$NON-NLS-1$
 	public static final String HEAD_KEY = "head"; //$NON-NLS-1$
-	public static final String ACCENT_KEY = "accent"; //$NON-NLS-1$
+	public static final String TONAL_PROMINENCE_KEY = "tonal_prominence"; //$NON-NLS-1$
 	public static final String STRESS_KEY = "stress"; //$NON-NLS-1$
 	public static final String FLAGS_KEY = "flags"; //$NON-NLS-1$
 

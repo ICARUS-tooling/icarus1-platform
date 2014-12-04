@@ -160,33 +160,46 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 	public TextSource createTextSource(ProsodyLevel level,
 			Accessor<ProsodyLevel> accessor) {
 
-		// Sentence upwards does not support any form of aggregation
-		if(accessor.getLevel().compareTo(ProsodyLevel.SENTENCE)>=0) {
-			return new TextSource.DirectTextSource(accessor);
-		}
-
-		// Cannot step over more than one hierarchical boundary
-		if(level.ordinal()-accessor.getLevel().ordinal()>1) {
+		int dif = level.ordinal()-accessor.getLevel().ordinal();
+		if(accessor.getLevel()==ProsodyLevel.ENVIRONMENT) {
+			return new ProsodyTextSource.DirectProsodyTextSource((ProsodyAccessor) accessor);
+		} else if(dif>1) {
+		// Cannot step over more than one hierarchical boundary downwards
 			return EMPTY_TEXT_SOURCE;
+		} else if(dif<0) {
+			return new TextSource.DirectTextSource(accessor);
 		}
 
 		ProsodyAccessor prosodyAccessor = (ProsodyAccessor) accessor;
 
-		boolean isSyllableLevel = level==ProsodyLevel.SYLLABLE;
-		boolean isSyllableAccessor = accessor.getLevel()==ProsodyLevel.SYLLABLE;
+//		boolean isSyllableLevel = level==ProsodyLevel.SYLLABLE;
+//		boolean isSyllableAccessor = accessor.getLevel()==ProsodyLevel.SYLLABLE;
 
-		ProsodyTextSource textSource = isSyllableAccessor ?
-				new ProsodyTextSource.SyllableTextSource(prosodyAccessor) :
-					new ProsodyTextSource.WordTextSource(prosodyAccessor);
+		if(level!=prosodyAccessor.getLevel()) {
+			ProsodyTextSource textSource = textSourceForLevel(prosodyAccessor.getLevel(), prosodyAccessor);
 
-		IndexIterator indexIterator = iteratorForAccessor(prosodyAccessor);
-		if(indexIterator==null && isSyllableAccessor && !isSyllableLevel) {
-			indexIterator = new ProsodyTextSource.CompleteIndexIterator();
+			IndexIterator indexIterator = iteratorForAccessor(prosodyAccessor);
+			if(indexIterator==null) {
+				indexIterator = new ProsodyTextSource.CompleteIndexIterator();
+			}
+			textSource.setIndexIterator(indexIterator);
+
+			prosodyAccessor = new ProsodyAccessor.WrappedProsodyAccessor(textSource);
 		}
 
-		textSource.setIndexIterator(indexIterator);
+		return textSourceForLevel(level, prosodyAccessor);
+	}
 
-		return textSource;
+	private static ProsodyTextSource textSourceForLevel(ProsodyLevel level, ProsodyAccessor prosodyAccessor) {
+		switch (level) {
+		case SYLLABLE: return new ProsodyTextSource.SyllableTextSource(prosodyAccessor);
+		case WORD: return new ProsodyTextSource.WordTextSource(prosodyAccessor);
+		case SENTENCE: return new ProsodyTextSource.SentenceTextSource(prosodyAccessor);
+		case DOCUMENT: return new ProsodyTextSource.DocumentTextSource(prosodyAccessor);
+
+		default:
+			throw new IllegalArgumentException("Not a valid level: "+level);
+		}
 	}
 
 	private IndexIterator iteratorForAccessor(ProsodyAccessor accessor) {

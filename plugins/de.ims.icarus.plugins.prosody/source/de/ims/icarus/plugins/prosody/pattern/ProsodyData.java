@@ -25,12 +25,26 @@
  */
 package de.ims.icarus.plugins.prosody.pattern;
 
+import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
 public final class ProsodyData {
+
+	private CoreferenceDocumentSet documentSet;
+
+	private ProsodicDocumentData document;
 	private ProsodicSentenceData sentence;
-	private int wordIndex;
-	private int syllableIndex;
+
+	private int documentIndex, sentenceIndex, wordIndex, syllableIndex;
+
+	public CoreferenceDocumentSet getDocumentSet() {
+		return documentSet;
+	}
+
+	public ProsodicDocumentData getDocument() {
+		return document;
+	}
 
 	public ProsodicSentenceData getSentence() {
 		return sentence;
@@ -44,12 +58,35 @@ public final class ProsodyData {
 		return syllableIndex;
 	}
 
+	public int getDocumentIndex() {
+		return documentIndex;
+	}
+
+	public int getSentenceIndex() {
+		return sentenceIndex;
+	}
+
+	public boolean isDocumentIndexSet() {
+		return documentIndex!=-1;
+	}
+
+	public boolean isSentenceIndexSet() {
+		return sentenceIndex!=-1;
+	}
+
 	public boolean isWordIndexSet() {
 		return wordIndex!=-1;
 	}
 
 	public boolean isSyllableIndexSet() {
 		return syllableIndex!=-1;
+	}
+
+	public void set(ProsodicDocumentData document) {
+		clear();
+		this.documentIndex = document.getDocumentIndex();
+		this.document = document;
+		this.documentSet = document.getDocumentSet();
 	}
 
 	public void set(ProsodicSentenceData sentence) {
@@ -64,13 +101,20 @@ public final class ProsodyData {
 		if (sentence == null)
 			throw new NullPointerException("Invalid sentence"); //$NON-NLS-1$
 
+		this.document = sentence.getDocument();
+		this.documentSet = document.getDocumentSet();
 		this.sentence = sentence;
+		this.sentenceIndex = sentence.getIndex();
 		this.wordIndex = wordIndex;
 		this.syllableIndex = syllableIndex;
 	}
 
 	public void set(ProsodyData source) {
+		documentSet = source.documentSet;
+		document = source.document;
 		sentence = source.sentence;
+		documentIndex = source.documentIndex;
+		sentenceIndex = source.sentenceIndex;
 		wordIndex = source.wordIndex;
 		syllableIndex = source.syllableIndex;
 	}
@@ -83,8 +127,21 @@ public final class ProsodyData {
 		this.syllableIndex = syllableIndex;
 	}
 
-	public void clear() {
-		sentence = null;
+	public void setDocumentIndex(int documentIndex) {
+		this.documentIndex = documentIndex;
+		document = (ProsodicDocumentData) documentSet.get(documentIndex);
+		sentenceIndex = wordIndex = syllableIndex = -1;
+	}
+
+	public void setSentenceIndex(int sentenceIndex) {
+		this.sentenceIndex = sentenceIndex;
+		sentence = document.get(sentenceIndex);
 		wordIndex = syllableIndex = -1;
+	}
+
+	public void clear() {
+		document = null;
+		sentence = null;
+		documentIndex = sentenceIndex = wordIndex = syllableIndex = -1;
 	}
 }

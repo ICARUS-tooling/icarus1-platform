@@ -367,4 +367,76 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		}
 
 	}
+
+	public static class SentenceTextSource extends ProsodyTextSource {
+
+		public SentenceTextSource(ProsodyAccessor accessor) {
+			super(accessor);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(de.ims.icarus.plugins.prosody.pattern.ProsodyData, int, de.ims.icarus.plugins.prosody.pattern.ProsodyData)
+		 */
+		@Override
+		protected void setIndex(ProsodyData proxy, int index,
+				ProsodyData rawData) {
+			proxy.setSentenceIndex(index);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#prepareIndexIterator(de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource.IndexIterator, de.ims.icarus.plugins.prosody.pattern.ProsodyData)
+		 */
+		@Override
+		protected void prepareIndexIterator(IndexIterator indexIterator,
+				ProsodyData rawData) {
+
+			indexIterator.setCenter(rawData.getSentenceIndex());
+			indexIterator.refresh(rawData.getDocument().size());
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
+		 */
+		@Override
+		protected boolean indexValid(int index, ProsodyData rawData) {
+			return index<rawData.getDocument().size();
+		}
+
+	}
+
+	public static class DocumentTextSource extends ProsodyTextSource {
+
+		public DocumentTextSource(ProsodyAccessor accessor) {
+			super(accessor);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(de.ims.icarus.plugins.prosody.pattern.ProsodyData, int, de.ims.icarus.plugins.prosody.pattern.ProsodyData)
+		 */
+		@Override
+		protected void setIndex(ProsodyData proxy, int index,
+				ProsodyData rawData) {
+			proxy.setDocumentIndex(index);
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#prepareIndexIterator(de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource.IndexIterator, de.ims.icarus.plugins.prosody.pattern.ProsodyData)
+		 */
+		@Override
+		protected void prepareIndexIterator(IndexIterator indexIterator,
+				ProsodyData rawData) {
+
+			indexIterator.setCenter(rawData.getDocumentIndex());
+			indexIterator.refresh(rawData.getDocumentSet().size());
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
+		 */
+		@Override
+		protected boolean indexValid(int index, ProsodyData rawData) {
+			return index<rawData.getDocumentSet().size();
+		}
+
+	}
 }

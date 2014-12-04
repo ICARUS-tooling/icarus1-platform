@@ -159,8 +159,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 	}
 
 	protected synchronized void commit(ResultEntry entry) {
-		entries.add(entry);
-		hitCount += entry.getHitCount();
+		addEntry(entry);
 	}
 
 	/**
@@ -195,6 +194,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 	@Override
 	public void addEntry(ResultEntry entry, int... groupIndices) {
 		entries.add(entry);
+		hitCount += entry.getHitCount();
 	}
 
 	protected class Result0DCache implements GroupCache {

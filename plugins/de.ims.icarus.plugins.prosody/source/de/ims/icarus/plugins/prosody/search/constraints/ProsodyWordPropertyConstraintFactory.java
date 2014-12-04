@@ -25,6 +25,10 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -39,9 +43,36 @@ import de.ims.icarus.util.Options;
  * @version $Id: CoreferenceSentencePropertyConstraintFactory.java 270 2014-07-08 11:44:07Z mcgaerty $
  *
  */
-public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFactory {
+public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
 
 	public static final String TOKEN = "wordProperty"; //$NON-NLS-1$
+
+	private static final Map<Object, ValueHandler> propertyClassMap = new HashMap<>();
+	static {
+		propertyClassMap.put(FORM_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(POS_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(LEMMA_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(FEATURES_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(DEPREL_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(HEAD_KEY, ValueHandler.integerHandler);
+		propertyClassMap.put(TONAL_PROMINENCE_KEY, ValueHandler.booleanHandler);
+		propertyClassMap.put(STRESS_KEY, ValueHandler.booleanHandler);
+		propertyClassMap.put(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(FLAGS_KEY, ValueHandler.integerHandler);
+		propertyClassMap.put(SYLLABLE_COUNT, ValueHandler.integerHandler);
+		propertyClassMap.put(SPEAKER_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(SPEAKER_FEATURES_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(ENTITY_KEY, ValueHandler.stringHandler);
+		propertyClassMap.put(BEGIN_TS_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(END_TS_KEY, ValueHandler.floatHandler);
+		propertyClassMap.put(IS_LEX, ValueHandler.stringHandler);
+		propertyClassMap.put(IS_REF, ValueHandler.stringHandler);
+	}
+
+	private static ValueHandler getHandler(Object key) {
+		ValueHandler handler = propertyClassMap.get(key);
+		return handler==null ? ValueHandler.stringHandler : handler;
+	}
 
 	public ProsodyWordPropertyConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
@@ -52,6 +83,26 @@ public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFact
 	@Override
 	public Object[] getSupportedSpecifiers() {
 		return ProsodyUtils.getDefaultWordPropertyKeys();
+	}
+
+	@Override
+	public Class<?> getValueClass(Object specifier) {
+		return getHandler(specifier).getValueClass();
+	}
+
+	@Override
+	public Object getDefaultValue(Object specifier) {
+		return getHandler(specifier).getDefaultValue();
+	}
+
+	@Override
+	public Object labelToValue(Object label, Object specifier) {
+		return getHandler(specifier).labelToValue(label);
+	}
+
+	@Override
+	public Object valueToLabel(Object value, Object specifier) {
+		return getHandler(specifier).valueToLabel(value);
 	}
 
 	/**

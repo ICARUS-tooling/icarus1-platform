@@ -56,6 +56,8 @@ public abstract class BitmaskHighlighting {
 	public static final long EDGE_HIGHLIGHT = (1 << 2);
 	public static final long TRANSITIVE_HIGHLIGHT = (1 << 4);
 
+	protected static final long UNSPECIFIC_HIGHLIGHT_MASK = (1 << 4) - 1;
+
 	protected final long HEADER_MASK = 0x1F;
 
 	protected final long GROUP_MASK;
@@ -176,6 +178,14 @@ public abstract class BitmaskHighlighting {
 
 	public boolean isHighlighted(long highlight) {
 		return highlight!=0L;
+	}
+
+	public boolean isUnspecificHighlight(long highlight) {
+		return highlight!=0L && (highlight & ~UNSPECIFIC_HIGHLIGHT_MASK)==0L;
+	}
+
+	public boolean isSpecificHighlight(long highlight) {
+		return highlight!=0L && (highlight & ~UNSPECIFIC_HIGHLIGHT_MASK)!=0L;
 	}
 
 	public long getHighlight(SearchConstraint[] constraints, boolean node, boolean edge) {

@@ -146,7 +146,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		navigationControl = createNavigationControl();
 
 		JScrollPane scrollPane = new JScrollPane(list);
-		scrollPane.setBorder(null);
+		scrollPane.setBorder(UIUtil.topLineBorder);
 
 		textArea = new JTextArea();
 		textArea.setWrapStyleWord(true);

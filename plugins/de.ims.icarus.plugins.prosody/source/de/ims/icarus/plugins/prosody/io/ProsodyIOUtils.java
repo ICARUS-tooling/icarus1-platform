@@ -765,7 +765,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 		protected void readCoref(int i, Row row) {
 			Cursor coref = row.getSplitCursor(COREF_COL);
-			if(!coref.equals(HYPHEN)) {
+			if(!coref.equals(HYPHEN) && !coref.equals(US)) {
 				// Build spans
 				coref.split('|');
 				for(int j=0; j<coref.getSplitCount(); j++) {
@@ -1004,25 +1004,28 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			return offsets;
 		}
 
-		protected void markAccent(int index) {
+		protected void markTonalProminence(int index) {
 			int sylCount = result.getSyllableCount(index);
 
 			int accentExcursion = readerControl.getAccentExcursion();
 			boolean onlyConsiderStressedSylables = readerControl.isOnlyConsiderStressedSylables();
 
-			boolean hasAccent = false;
+			boolean hasTonalProminence = false;
 			if(sylCount>0 && accentExcursion!=-1) {
 				for(int i=0; i<sylCount; i++) {
-					if((!onlyConsiderStressedSylables || result.isSyllableStressed(index, i))
-							&& (result.getPainteC1(index, i)>=accentExcursion
-							|| result.getPainteC2(index, i)>=accentExcursion)) {
-						hasAccent = true;
+					if(onlyConsiderStressedSylables && !result.isSyllableStressed(index, i)) {
+						continue;
+					}
+
+					if(result.getPainteC1(index, i)>=accentExcursion
+							|| result.getPainteC2(index, i)>=accentExcursion) {
+						hasTonalProminence = true;
 						break;
 					}
 				}
 			}
 
-			result.setProperty(index, ACCENT_KEY, hasAccent);
+			result.setProperty(index, TONAL_PROMINENCE_KEY, hasTonalProminence);
 		}
 
 		/**
@@ -1097,7 +1100,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, PAINTE_D_KEY, getFloats(row, PAINTE_D_COL));
 
 			if(readerControl.isMarkAccentOnWords()) {
-				markAccent(i);
+				markTonalProminence(i);
 			}
 		}
 	}

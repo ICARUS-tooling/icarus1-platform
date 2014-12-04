@@ -1150,9 +1150,13 @@ public class SearchManagerView extends View {
 					return;
 				}
 
-				SearchResultExportHandler handler = (SearchResultExportHandler) PluginUtil.instantiate(selectedExtension);
+				SearchResultExportHandler exportHandler = (SearchResultExportHandler) PluginUtil.instantiate(selectedExtension);
 
-				handler.exportResult(searchResult);
+				String title = ResourceManager.getInstance().get("plugins.searchTools.searchManagerView.exportResultTask.title"); //$NON-NLS-1$
+
+				TaskManager.getInstance().schedule(
+						new ResultExportTask(searchResult, exportHandler),
+						title, null, null, TaskPriority.HIGH, true);
 
 			} catch(Exception ex) {
 				LoggerFactory.log(this, Level.SEVERE,
@@ -1171,7 +1175,7 @@ public class SearchManagerView extends View {
 
 		public SearchWriterTask(SearchWriter writer, Path path) {
 			if (writer == null)
-				throw new NullPointerException("Invalid reader"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid exportHandler"); //$NON-NLS-1$
 			if (path == null)
 				throw new NullPointerException("Invalid path"); //$NON-NLS-1$
 
@@ -1246,7 +1250,7 @@ public class SearchManagerView extends View {
 
 		public SearchReaderTask(SearchReader reader) {
 			if (reader == null)
-				throw new NullPointerException("Invalid reader"); //$NON-NLS-1$
+				throw new NullPointerException("Invalid exportHandler"); //$NON-NLS-1$
 
 			this.reader = reader;
 		}
@@ -1343,17 +1347,106 @@ public class SearchManagerView extends View {
 						reader.getPath());
 			}
 		}
+	}
+
+	protected class ResultExportTask extends SwingWorker<SearchResult, Object> {
+
+		private final SearchResultExportHandler exportHandler;
+		private final SearchResult searchResult;
+
+		public ResultExportTask(SearchResult searchResult, SearchResultExportHandler exportHandler) {
+			if (searchResult == null)
+				throw new NullPointerException("Invalid searchResult"); //$NON-NLS-1$
+			if (exportHandler == null)
+				throw new NullPointerException("Invalid exportHandler"); //$NON-NLS-1$
+
+			this.searchResult = searchResult;
+			this.exportHandler = exportHandler;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected SearchResult doInBackground() throws Exception {
+
+			TaskManager.getInstance().setIndeterminate(this, true);
+
+			Object target = searchResult.getSource().getTarget();
+
+			// Ensure we either have a loaded target or cancel the entire operation
+			if(target instanceof Loadable && !((Loadable)target).isLoaded()) {
+				if(!DialogFactory.getGlobalFactory().showConfirm(getFrame(),
+					"plugins.searchTools.searchManagerView.dialogs.exportResult.title", //$NON-NLS-1$
+					"plugins.searchTools.searchManagerView.dialogs.exportResult.loadTarget")) { //$NON-NLS-1$
+					return null;
+				}
+
+				final Loadable loadable = (Loadable) target;
+
+				String currentTitle = TaskManager.getInstance().getTitle(this);
+				String currentInfo = TaskManager.getInstance().getInfo(this);
+
+				String title = ResourceManager.getInstance().get(
+						"plugins.searchTools.searchManager.loadTargetJob.name"); //$NON-NLS-1$
+				String info = ResourceManager.getInstance().get(
+						"plugins.searchTools.searchManager.loadTargetJob.description", //$NON-NLS-1$
+						StringUtil.getName(loadable));
+
+				TaskManager.getInstance().setTitle(this, title);
+				TaskManager.getInstance().setInfo(this, info);
+
+				try {
+					IOUtil.doLoad(this, loadable);
+				} finally {
+					TaskManager.getInstance().setTitle(this, currentTitle);
+					TaskManager.getInstance().setInfo(this, currentInfo);
+				}
+
+				if(!loadable.isLoaded())
+					throw new IllegalStateException("Failed to load search target: "+StringUtil.getName(loadable)); //$NON-NLS-1$
+			}
+
+			// Target loaded, delegate work to export handler
+			exportHandler.exportResult(searchResult);
+
+			LoggerFactory.info(this, "Exported search result"); //$NON-NLS-1$
+
+			return searchResult;
+		}
+
+		/**
+		 * @see javax.swing.SwingWorker#done()
+		 */
+		@Override
+		protected void done() {
+			try {
+				get();
+
+				searchHistoryList.repaint();
+				refreshActions();
+
+			} catch (InterruptedException|CancellationException e) {
+				// no-op
+			} catch (ExecutionException e) {
+				Exception ex = (Exception) e.getCause();
+
+				LoggerFactory.error(this, "Export of search result failed", ex); //$NON-NLS-1$
+
+				UIUtil.beep();
+
+				DialogFactory.getGlobalFactory().showError(null,
+						"plugins.searchTools.searchManagerView.dialogs.exportResult.title", //$NON-NLS-1$
+						"plugins.searchTools.searchManagerView.dialogs.exportResult.failed"); //$NON-NLS-1$
+			}
+		}
 
 		/**
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			if(obj instanceof SearchReaderTask) {
-				return reader.equals(((SearchReaderTask)obj).reader);
-			}
-
-			return false;
+			return obj instanceof ResultExportTask;
 		}
 
 	}

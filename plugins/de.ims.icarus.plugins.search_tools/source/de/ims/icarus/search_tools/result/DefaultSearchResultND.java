@@ -392,6 +392,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	public void addEntry(ResultEntry entry, int... groupIndices) {
 		getList(groupIndices, true).add(entry);
 		totalEntries.add(entry);
+		hitCount += entry.getHitCount();
 	}
 
 	private static class Key {
