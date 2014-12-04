@@ -30,8 +30,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import de.ims.icarus.language.Grammar;
+import de.ims.icarus.language.BasicSentenceData;
 import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
 import de.ims.icarus.util.mem.Primitive;
@@ -46,16 +47,12 @@ import de.ims.icarus.util.mem.Primitive;
 @HeapMember
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SimpleDependencyData implements DependencyData {
+public class SimpleDependencyData extends BasicSentenceData<CompactProperties> implements DependencyData {
 
 	private static final long serialVersionUID = -6877590672027658180L;
 
 	@Primitive
 	private int index;
-
-	@Link
-	@XmlElement(name="form")
-	protected String[] forms;
 
 	@Link
 	@XmlElement(name="pos")
@@ -83,8 +80,8 @@ public class SimpleDependencyData implements DependencyData {
 
 	public SimpleDependencyData(int index, String[] forms, String[] lemmas,
 			String[] features, String[] poss, String[] relations, short[] heads, long[] flags) {
+		super(forms);
 		this.index = index;
-		this.forms = forms;
 		this.lemmas = lemmas;
 		this.features = features;
 		this.poss = poss;
@@ -94,10 +91,11 @@ public class SimpleDependencyData implements DependencyData {
 	}
 
 	public SimpleDependencyData(DependencyData source) {
+		super(source);
+
 		int size = source.length();
 
 		index = source.getIndex();
-		forms = new String[size];
 		lemmas = new String[size];
 		features = new String[size];
 		poss = new String[size];
@@ -105,7 +103,6 @@ public class SimpleDependencyData implements DependencyData {
 		heads = new short[size];
 
 		for(int index=0; index<size; index++) {
-			forms[index] = source.getForm(index);
 			lemmas[index] = source.getLemma(index);
 			features[index] = source.getFeatures(index);
 			poss[index] = source.getPos(index);
@@ -119,22 +116,11 @@ public class SimpleDependencyData implements DependencyData {
 		// Creates the empty sentence
 
 		index = -1;
-		forms = new String[0];
 		lemmas = new String[0];
 		features = new String[0];
 		poss = new String[0];
 		relations = new String[0];
 		heads = new short[0];
-	}
-
-	@Override
-	public int length() {
-		return forms.length;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return forms == null || forms.length == 0;
 	}
 
 	@Override
@@ -194,27 +180,11 @@ public class SimpleDependencyData implements DependencyData {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.SentenceData#getSourceGrammar()
-	 */
-	@Override
-	public Grammar getSourceGrammar() {
-		return DependencyUtils.getDependencyGrammar();
-	}
-
-	/**
 	 * @see de.ims.icarus.language.dependency.DependencyData#getFlags(int)
 	 */
 	@Override
 	public long getFlags(int index) {
 		return flags==null ? 0 : flags[index];
-	}
-
-	/**
-	 * @see de.ims.icarus.ui.helper.TextItem#getText()
-	 */
-	@Override
-	public String getText() {
-		return LanguageUtils.combine(this);
 	}
 
 	/**

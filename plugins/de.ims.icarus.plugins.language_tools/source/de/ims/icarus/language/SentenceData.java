@@ -58,6 +58,8 @@ public interface SentenceData extends Serializable, TextItem {
 	 */
 	String getForm(int index);
 
+	Object getProperty(int index, String key);
+
 	/**
 	 * Returns {@code true} if this {@code SentenceData} object
 	 * represents the empty sentence. This is equivalent with

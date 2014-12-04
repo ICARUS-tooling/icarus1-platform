@@ -469,6 +469,14 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	}
 
 	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(int, java.lang.String)
+	 */
+	@Override
+	public Object getProperty(int index, String key) {
+		return null;
+	}
+
+	/**
 	 *
 	 * @author Markus Gärtner
 	 * @version $Id$

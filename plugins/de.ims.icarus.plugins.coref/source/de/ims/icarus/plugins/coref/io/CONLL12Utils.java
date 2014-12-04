@@ -44,6 +44,7 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -76,7 +77,7 @@ import de.ims.icarus.util.strings.StringUtil;
  * @version $Id$
  *
  */
-public final class CONLL12Utils {
+public final class CONLL12Utils implements CorefConstants {
 
 	private CONLL12Utils() {
 		// no-op
@@ -97,15 +98,6 @@ public final class CONLL12Utils {
 	public static final int SENSE_COL = 8;
 	public static final int SPEAKER_COL = 9;
 	public static final int ENTITY_COL = 10;
-
-	public static final String FORM_KEY = "form"; //$NON-NLS-1$
-	public static final String TAG_KEY = "tag"; //$NON-NLS-1$
-	public static final String PARSE_KEY = "parse"; //$NON-NLS-1$
-	public static final String LEMMA_KEY = "lemma"; //$NON-NLS-1$
-	public static final String FRAMESET_KEY = "frameset"; //$NON-NLS-1$
-	public static final String SENSE_KEY = "sense"; //$NON-NLS-1$
-	public static final String SPEAKER_KEY = "speaker"; //$NON-NLS-1$
-	public static final String ENTITY_KEY = "entity"; //$NON-NLS-1$
 
 	public static final Pattern WS = Pattern.compile("\\s+"); //$NON-NLS-1$
 	public static final Pattern BLANK = Pattern.compile("^(_|-)$"); //$NON-NLS-1$

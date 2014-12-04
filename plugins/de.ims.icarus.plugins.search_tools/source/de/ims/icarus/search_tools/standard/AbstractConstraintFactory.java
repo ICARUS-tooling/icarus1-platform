@@ -25,12 +25,13 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.SearchParameters;
+import de.ims.icarus.search_tools.util.SharedPropertyRegistry;
+import de.ims.icarus.search_tools.util.ValueHandler;
 
 /**
  * @author Markus Gärtner
@@ -48,6 +49,16 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 	protected static final Object[] DEFAULT_UNDEFINED_VALUESET = {
 		LanguageUtils.DATA_UNDEFINED_LABEL
 	};
+
+	protected static final Object[] DEFAULT_EXTENDED_VALUESET = {
+		LanguageUtils.DATA_UNDEFINED_LABEL,
+		Boolean.TRUE,
+		Boolean.FALSE,
+	};
+
+	protected static ValueHandler getHandler(Object key) {
+		return SharedPropertyRegistry.getHandler(key);
+	}
 
 	public AbstractConstraintFactory(String token, int type, String nameKey, String descriptionKey) {
 		this.token = token;
@@ -93,28 +104,32 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 		return ResourceManager.getInstance().get(descriptionKey);
 	}
 
+	@Override
+	public Class<?> getValueClass(Object specifier) {
+		return getHandler(specifier).getValueClass();
+	}
+
+	@Override
+	public Object getDefaultValue(Object specifier) {
+		return getHandler(specifier).getDefaultValue();
+	}
+
+	@Override
+	public Object labelToValue(Object label, Object specifier) {
+		return getHandler(specifier).labelToValue(label);
+	}
+
+	@Override
+	public Object valueToLabel(Object value, Object specifier) {
+		return getHandler(specifier).valueToLabel(value);
+	}
+
 	/**
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#getSupportedOperators()
 	 */
 	@Override
 	public SearchOperator[] getSupportedOperators() {
 		return DefaultSearchOperator.values();
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.ConstraintFactory#getValueClass()
-	 */
-	@Override
-	public Class<?> getValueClass(Object specifier) {
-		return String.class;
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.ConstraintFactory#getDefaultValue()
-	 */
-	@Override
-	public Object getDefaultValue(Object specifier) {
-		return LanguageConstants.DATA_UNDEFINED_LABEL;
 	}
 
 	/**
@@ -126,18 +141,8 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 	}
 
 	@Override
-	public Object labelToValue(Object label, Object specifier) {
-		return label;
-	}
-
-	@Override
-	public Object valueToLabel(Object value, Object specifier) {
-		return value;
-	}
-
-	@Override
 	public int getMinInstanceCount() {
-		return 1;
+		return 0;
 	}
 
 	@Override

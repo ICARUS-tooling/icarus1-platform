@@ -29,6 +29,8 @@ import java.awt.Cursor;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
+import de.ims.icarus.search_tools.util.SharedPropertyRegistry;
+import de.ims.icarus.search_tools.util.ValueHandler;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 
@@ -38,6 +40,53 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  *
  */
 public class ProsodyUtils implements ProsodyConstants {
+
+	static {
+
+		// Syllable level
+		SharedPropertyRegistry.registerHandler(SYLLABLE_DURATION_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_ENDPITCH_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_LABEL_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_FORM_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_MIDPITCH_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_OFFSET_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_STARTPITCH_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_STRESS_KEY, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_VOWEL_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(CODA_SIZE_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(CODA_TYPE_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(VOWEL_DURATION_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(ONSET_SIZE_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(ONSET_TYPE_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(PHONEME_COUNT_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_A1_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_A2_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_B_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_C1_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_C2_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_D_KEY, ValueHandler.floatHandler);
+
+		// Word level
+		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(POS_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(FEATURES_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(DEPREL_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(HEAD_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(TONAL_PROMINENCE_KEY, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(STRESS_KEY, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(FLAGS_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_COUNT, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SPEAKER_FEATURES_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(BEGIN_TS_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(END_TS_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(IS_LEX, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(IS_REF, ValueHandler.stringHandler);
+	}
 
 //	private static Cursor speakerCursor;
 

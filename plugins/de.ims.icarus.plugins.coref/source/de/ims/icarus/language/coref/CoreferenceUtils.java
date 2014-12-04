@@ -52,8 +52,11 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.util.SharedPropertyRegistry;
+import de.ims.icarus.search_tools.util.ValueHandler;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.util.Filter;
@@ -73,7 +76,7 @@ import de.ims.icarus.util.strings.StringUtil;
  * @version $Id$
  *
  */
-public final class CoreferenceUtils {
+public final class CoreferenceUtils implements CorefConstants {
 
 	private CoreferenceUtils() {
 		// no-op
@@ -590,7 +593,7 @@ public final class CoreferenceUtils {
 		int endIndex = span.getEndIndex();
 
 		for(int i=beginIndex; i<=endIndex; i++) {
-			buffer.append(sentence.getProperty(key+'_'+i));
+			buffer.append(sentence.getProperty(i, key));
 			// TODO verify need of whitespace delimiter
 			if(i<endIndex) {
 				buffer.append(' ');
@@ -861,8 +864,38 @@ public final class CoreferenceUtils {
 
 	};
 
+	static {
+
+		// Word level
+		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(TAG_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(PARSE_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SENSE_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(FRAMESET_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler);
+
+		// Mention level
+		SharedPropertyRegistry.registerHandler(MENTION_HEAD_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(MENTION_SIZE_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(BEGIN_INDEX_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(END_INDEX_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(CLUSTER_ID_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(NUMBER, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(GENDER, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(MENTION_TYPE, ValueHandler.stringHandler);
+
+		// Edge level
+		SharedPropertyRegistry.registerHandler(EDGE_TYPE, ValueHandler.stringHandler);
+	}
+
 	private static final String[] defaultSpanPropertyKeys = {
-		// TODO
+		MENTION_HEAD_KEY,
+		MENTION_SIZE_KEY,
+		BEGIN_INDEX_KEY,
+		END_INDEX_KEY,
+		CLUSTER_ID_KEY,
 	};
 
 	public static String[] getDefaultSpanPropertyKeys() {
@@ -870,26 +903,25 @@ public final class CoreferenceUtils {
 	}
 
 	private static final String[] defaultEdgePropertyKeys = {
-		// TODO
+		EDGE_TYPE,
 	};
 
 	public static String[] getDefaultEdgePropertyKeys() {
 		return defaultEdgePropertyKeys.clone();
 	}
 
-	private static final String[] defaultSentencePropertyKeys = {
-		// TODO
+	private static final String[] defaultWordPropertyKeys = {
+		FORM_KEY,
+		TAG_KEY,
+		PARSE_KEY,
+		LEMMA_KEY,
+		SENSE_KEY,
+		SPEAKER_KEY,
+		ENTITY_KEY,
+		FRAMESET_KEY,
 	};
 
-	public static String[] getDefaultSentencePropertyKeys() {
-		return defaultSentencePropertyKeys.clone();
-	}
-
-	private static final String[] defaultHeadPropertyKeys = {
-		// TODO
-	};
-
-	public static String[] getDefaultHeadPropertyKeys() {
-		return defaultHeadPropertyKeys.clone();
+	public static String[] getDefaultWordPropertyKeys() {
+		return defaultWordPropertyKeys.clone();
 	}
 }

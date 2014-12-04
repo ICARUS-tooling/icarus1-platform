@@ -66,7 +66,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 	}
 
 	private static boolean contains0(Object value, Object constraint) {
-		return value==null ? constraint==null : ((String)value).contains((String)constraint);
+		return value==null ? constraint==null : (value.toString()).contains(constraint.toString());
 	}
 
 	private static boolean matches0(Object value, Object constraint) {
@@ -74,7 +74,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 			return constraint==null;
 		}
 
-		Matcher matcher = SearchManager.getMatcher((String)constraint, (String)value);
+		Matcher matcher = SearchManager.getMatcher(constraint.toString(), value.toString());
 		boolean result = matcher==null ? false : matcher.find();
 		SearchManager.recycleMatcher(matcher);
 

@@ -28,6 +28,7 @@ package de.ims.icarus.language.dependency.annotation;
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.annotation.AnnotatedSentenceData;
 import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.Annotation;
 
 /**
@@ -35,7 +36,7 @@ import de.ims.icarus.util.annotation.Annotation;
  * @version $Id$
  *
  */
-public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenceData {
+public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenceData, Wrapper<DependencyData> {
 
 	private static final long serialVersionUID = -883053201659702672L;
 
@@ -173,5 +174,21 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	@Override
 	public int getIndex() {
 		return source.getIndex();
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Wrapper#get()
+	 */
+	@Override
+	public DependencyData get() {
+		return source;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(int, java.lang.String)
+	 */
+	@Override
+	public Object getProperty(int index, String key) {
+		return source.getProperty(index, key);
 	}
 }

@@ -76,7 +76,7 @@ public final class LanguageUtils implements LanguageConstants {
 	}
 
 	public static boolean isUndefined(Object value) {
-		return value==null || "".equals(value)
+		return value==null || "".equals(value) //$NON-NLS-1$
 				|| value.equals(DATA_UNDEFINED_LABEL)
 				|| value.equals(DATA_UNDEFINED_VALUE)
 				|| value.equals(DATA_UNDEFINED_DOUBLE_VALUE)
@@ -286,50 +286,5 @@ public final class LanguageUtils implements LanguageConstants {
 				"plugins.languageTools.appearance.showCorpusIndex"); //$NON-NLS-1$
 	}
 
-	public static final SentenceData dummySentenceData = new SentenceData() {
-
-		private static final long serialVersionUID = 1565778089185335895L;
-
-		private final String[] tokens = {
-			"This", //$NON-NLS-1$
-			"is", //$NON-NLS-1$
-			"a", //$NON-NLS-1$
-			"test", //$NON-NLS-1$
-		};
-
-		@Override
-		public String getText() {
-			return combine(this);
-		}
-
-		@Override
-		public int length() {
-			return tokens.length;
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return false;
-		}
-
-		@Override
-		public Grammar getSourceGrammar() {
-			return null;
-		}
-
-		@Override
-		public String getForm(int index) {
-			return tokens[index];
-		}
-
-		@Override
-		public SentenceData clone() {
-			return this;
-		}
-
-		@Override
-		public int getIndex() {
-			return -1;
-		}
-	};
+	public static final SentenceData dummySentenceData = new BasicSentenceData("This", "is", "a", "test"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 }

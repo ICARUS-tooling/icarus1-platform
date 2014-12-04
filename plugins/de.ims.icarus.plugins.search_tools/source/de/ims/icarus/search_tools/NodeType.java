@@ -66,6 +66,11 @@ public enum NodeType implements Identity {
 	INTERMEDIATE("intermediate"), //$NON-NLS-1$
 
 	/**
+	 * A node that is not a root.
+	 */
+	NON_ROOT("non_root"), //$NON-NLS-1$
+
+	/**
 	 * A node that is not a leaf.
 	 */
 	PARENT("parent"); //$NON-NLS-1$

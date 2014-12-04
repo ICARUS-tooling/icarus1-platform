@@ -156,4 +156,13 @@ public class CompoundSentenceData implements SentenceData {
 		SentenceData data = getFirstSet();
 		return data==null ? -1 : data.getIndex();
 	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(java.lang.String, int)
+	 */
+	@Override
+	public Object getProperty(int index, String key) {
+		SentenceData data = getFirstSet();
+		return data==null ? null : data.getProperty(index, key);
+	}
 }

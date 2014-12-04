@@ -79,7 +79,7 @@ public class ProsodyTargetTree extends DependencyTargetTree implements ProsodyCo
 	}
 
 	public String getSpeaker() {
-		return (String) getSource().getProperty(nodePointer, SPEAKER_KEY);
+		return (String) getSource().getProperty(nodePointer, ProsodyConstants.SPEAKER_KEY);
 	}
 
 	public String getSpeakerFeatures() {
@@ -87,7 +87,7 @@ public class ProsodyTargetTree extends DependencyTargetTree implements ProsodyCo
 	}
 
 	public String getEntity() {
-		return (String) getSource().getProperty(nodePointer, ENTITY_KEY);
+		return (String) getSource().getProperty(nodePointer, ProsodyConstants.ENTITY_KEY);
 	}
 
 	public boolean hasSyllables() {

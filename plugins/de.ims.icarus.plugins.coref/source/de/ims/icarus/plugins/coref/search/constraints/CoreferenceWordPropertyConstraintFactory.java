@@ -39,11 +39,11 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstraintFactory {
+public class CoreferenceWordPropertyConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "sentenceProperty"; //$NON-NLS-1$
 
-	public CoreferenceSentencePropertyConstraintFactory() {
+	public CoreferenceWordPropertyConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
 				"plugins.coref.constraints.sentenceProperty.name",  //$NON-NLS-1$
 				"plugins.coref.constraints.sentenceProperty.description"); //$NON-NLS-1$
@@ -51,7 +51,7 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 
 	@Override
 	public Object[] getSupportedSpecifiers() {
-		return CoreferenceUtils.getDefaultSentencePropertyKeys();
+		return CoreferenceUtils.getDefaultWordPropertyKeys();
 	}
 
 	/**
@@ -61,16 +61,16 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new CoreferenceSentencePropertyConstraint(value, operator, specifier);
+			return new CoreferenceWordPropertyConstraint(value, operator, specifier);
 		else
-			return new CoreferenceSentencePropertyIConstraint(value, operator, specifier);
+			return new CoreferenceWordPropertyIConstraint(value, operator, specifier);
 	}
 
-	private static class CoreferenceSentencePropertyConstraint extends DefaultConstraint {
+	private static class CoreferenceWordPropertyConstraint extends DefaultConstraint {
 
 		private static final long serialVersionUID = 7498129138650807986L;
 
-		public CoreferenceSentencePropertyConstraint(Object value, SearchOperator operator, Object specifier) {
+		public CoreferenceWordPropertyConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
 
@@ -85,15 +85,15 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 
 		@Override
 		public SearchConstraint clone() {
-			return new CoreferenceSentencePropertyConstraint(getValue(), getOperator(), getSpecifier());
+			return new CoreferenceWordPropertyConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}
 
-	private static class CoreferenceSentencePropertyIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class CoreferenceWordPropertyIConstraint extends DefaultCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = 5213502377454018580L;
 
-		public CoreferenceSentencePropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
+		public CoreferenceWordPropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
 
@@ -103,12 +103,12 @@ public class CoreferenceSentencePropertyConstraintFactory extends AbstractConstr
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DocumentTargetTree)value).getSentenceProperties(getKey()).toString().toLowerCase();
+			return ((DocumentTargetTree)value).getSentenceProperties(getKey()).toLowerCase();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new CoreferenceSentencePropertyIConstraint(getValue(), getOperator(), getSpecifier());
+			return new CoreferenceWordPropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}
 }

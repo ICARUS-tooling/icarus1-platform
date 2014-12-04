@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
@@ -34,21 +34,21 @@ import java.util.Arrays;
  *
  */
 public class CompactTree {
-	
+
 	private static final int INITIAL_EDGE_BUFFER_SIZE = 3;
 
 	int[][] edges;
 	int[] heads;
-	
+
 	int root;
 	int size;
-	
+
 	protected int rootValue = -1;
 
 	public CompactTree() {
 		// no-op
 	}
-	
+
 	public CompactTree(int bufferSize) {
 		edges = new int[bufferSize][];
 		heads = new int[bufferSize];
@@ -57,25 +57,25 @@ public class CompactTree {
 	public void init(int[] heads) {
 		if(heads==null)
 			throw new NullPointerException("Invalid heads array"); //$NON-NLS-1$
-		
+
 		if(this.heads==null || this.heads.length<heads.length) {
 			this.heads = new int[heads.length+heads.length];
 		}
-		
+
 		if(edges==null || edges.length<heads.length) {
 			edges = new int[heads.length+heads.length][];
 		}
-		
+
 		size = heads.length;
-		
-		for (int i = 0; i < size; i++) {			
+
+		for (int i = 0; i < size; i++) {
 			this.heads[i] = heads[i];
 			int[] list = edges[i];
 			if(list!=null) {
 				list[0] = 0;
 			}
 		}
-		
+
 		for (int i = 0; i < size; i++) {
 			int head = heads[i];
 			if(head == rootValue) {
@@ -88,7 +88,7 @@ public class CompactTree {
 					list = new int[INITIAL_EDGE_BUFFER_SIZE];
 					edges[head] = list;
 				} else if (list[0] >= list.length - 1) {
-					edges[head] = Arrays.copyOf(list, list.length+list.length);
+					edges[head] = Arrays.copyOf(list, list.length<<1);
 				}
 
 				list[0]++;
@@ -96,20 +96,20 @@ public class CompactTree {
 			}
 		}
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
-	
+
 	public int getHead(int index) {
 		return heads[index];
 	}
-	
+
 	public int getChildCount(int index) {
 		int[] list = edges[index];
 		return list==null ? 0 : list[0];
 	}
-	
+
 	public int getChildAt(int index, int childIndex) {
 		return edges[index][childIndex];
 	}

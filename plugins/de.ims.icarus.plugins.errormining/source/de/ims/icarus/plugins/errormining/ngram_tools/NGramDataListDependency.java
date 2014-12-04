@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_tools;
@@ -50,7 +50,7 @@ import de.ims.icarus.util.data.ContentType;
  *
  */
 public class NGramDataListDependency implements SentenceDataList {
-	
+
 	protected Map<String,ArrayList<DependencyItemInNuclei>> nGramMap;
 	protected int index;
 	protected List<Integer> sentences;
@@ -58,20 +58,20 @@ public class NGramDataListDependency implements SentenceDataList {
 	protected Map<Integer, NewNGramSentenceData> nGramMapCache;
 	//SentenceView
 	protected List<CorpusType> corpusList;
-	
+
 	public NGramDataListDependency(Map<String,ArrayList<DependencyItemInNuclei>> nGramMap,
 			List<SentenceData> corpus){
 		if (nGramMap == null)
 			throw new IllegalArgumentException("No Data"); //$NON-NLS-1$
-		
+
 //		System.out.println("nGramap " + nGramMap.size()
 //							+ " CSize" + corpus.size());
-		
+
 		this.corpus = corpus;
 		setNGramMap(nGramMap);
-		
+
 	}
-	
+
 	/**
 	 * @return the nGramMap
 	 */
@@ -116,44 +116,44 @@ public class NGramDataListDependency implements SentenceDataList {
 
 		// System.out.println(nGramMap.size());
 		// TODO filtering
-		this.nGramMap = nGramMap;		
+		this.nGramMap = nGramMap;
 		filterNGramMap(nGramMap);
 
 	}
 
 	private Map<String, ArrayList<DependencyItemInNuclei>> filterNGramMap(Map<String, ArrayList<DependencyItemInNuclei>> nGramMap){
-		
+
 		List<String> tmpKey = new ArrayList<String>(nGramMap.keySet());
 		Collections.reverse(tmpKey);
-		
+
 		corpusList = new ArrayList<CorpusType>();
 		sentences = new ArrayList<Integer>();
-		
+
 		Map<String, ArrayList<DependencyItemInNuclei>> filterMap = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
-		
-//		
+
+//
 //		for(int j = 0; j < tmpKey.size(); j++){
 //			System.out.println();
 //			System.out.println("key" + tmpKey.get(j));
 //		}
-		
-		
+
+
 		for(int i = 0; i < tmpKey.size(); i++){
 			String key = tmpKey.get(i);
 			String[] keysplit = key.split(" "); //$NON-NLS-1$
-			
+
 			//System.out.println(key + keysplit.length);
-			
+
 			ArrayList<DependencyItemInNuclei> value = nGramMap.get(key);
 			for (int j = 0; j < value.size();j++){
 				DependencyItemInNuclei iin = value.get(j);
 //				System.out.println("PoSTag: "+ iin.getPosTag() +
 //								  " PoSCount: " + iin.getCount());
-				
+
 					for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 						int sentenceNR = iin.getSentenceInfoAt(k).getSentenceNr()-1;
 //						System.out.println(key + " " + sentenceNR);
-						if(sentences.contains(sentenceNR)){	
+						if(sentences.contains(sentenceNR)){
 							//donothing
 						} else {
 							//wenn nicht nur nuclei in liste aufnehmen
@@ -163,27 +163,27 @@ public class NGramDataListDependency implements SentenceDataList {
 								corpusList.add(new CorpusType(sentenceNR, key));
 								sentences.add(sentenceNR);
 							}
-							
+
 						}
 					}
 			}
 		}
-		
-		
+
+
 //		for (int i = 0; i < sentences.size(); i++){
 //			System.out.println("Satz: " + sentences.get(i));
 //		}
-		
+
 		// for(Iterator<String> i = filterMap.keySet().iterator(); i.hasNext();){
 		//		String key = i.next();
 		//		ArrayList<ItemInNuclei> arrItem = filterMap.get(key);
-		//		
+		//
 		//		System.out.println("\n### Wordform: " + key + " ###");
 		//		for (int j = 0; j < arrItem.size();j++){
 		//			ItemInNuclei iin = arrItem.get(j);
 		//			System.out.println("PoSTag: "+ iin.getPosTag() +
 		//							  "  PoSCount: " + iin.getCount());
-		//			
+		//
 		//			for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 		//				System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
 		//				System.out.print(" | NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
@@ -194,17 +194,17 @@ public class NGramDataListDependency implements SentenceDataList {
 		//			}
 		//		}
 		//	}
-		
+
 		//remaining keys in filtered map
 //		List<String> tmpK = new ArrayList<String>(filterMap.keySet());
 //		Collections.reverse(tmpKey);
-//		for(int k = 0; k < tmpK.size(); k++){				
+//		for(int k = 0; k < tmpK.size(); k++){
 //			System.out.println("key " + tmpK.get(k));
 //		}
 
 		return filterMap;
 	}
-	
+
 	private SentenceData getNGramDataFromIndex(int index) {
 		if (!nGramMapCache.containsKey(index)) {
 			NewNGramSentenceData ngramData = new NewNGramSentenceData(index);
@@ -212,9 +212,9 @@ public class NGramDataListDependency implements SentenceDataList {
 		}
 		return nGramMapCache.get(index);
 	}
-	
 
-	
+
+
 	/**
 	 * @see de.ims.icarus.util.data.DataList#size()
 	 */
@@ -244,7 +244,7 @@ public class NGramDataListDependency implements SentenceDataList {
 	 */
 	@Override
 	public void addChangeListener(ChangeListener listener) {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -252,7 +252,7 @@ public class NGramDataListDependency implements SentenceDataList {
 	 */
 	@Override
 	public void removeChangeListener(ChangeListener listener) {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -281,22 +281,23 @@ public class NGramDataListDependency implements SentenceDataList {
 	public SentenceData get(int index, DataType type,
 			AvailabilityObserver observer) {
 		return get(index, type);
-	}	
-	
-	
+	}
+
+
 	private class NewNGramSentenceData implements DependencyData {
 
 
 		private static final long serialVersionUID = 4937843525979650838L;
-		
+
 		DependencyData dd;
-		
+
 		public NewNGramSentenceData(int index) {
-			
+
 			dd = (DependencyData) corpus.get(index);
-			
+
 		}
 
+		@Override
 		public NewNGramSentenceData clone() {
 			return this;
 		}
@@ -403,7 +404,15 @@ public class NGramDataListDependency implements SentenceDataList {
 		public int getIndex() {
 			return dd.getIndex();
 		}
-		
+
+		/**
+		 * @see de.ims.icarus.language.SentenceData#getProperty(int, java.lang.String)
+		 */
+		@Override
+		public Object getProperty(int index, String key) {
+			return null;
+		}
+
 	}
 
 }

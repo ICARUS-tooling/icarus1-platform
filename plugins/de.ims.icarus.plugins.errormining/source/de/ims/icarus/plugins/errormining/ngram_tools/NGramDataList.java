@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus G�rtner and Gregor Thiele
  *
@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_tools;
 
@@ -50,8 +50,8 @@ import de.ims.icarus.util.data.ContentType;
  *
  */
 public class NGramDataList implements SentenceDataList {
-	
-	
+
+
 	protected Map<String,ArrayList<ItemInNuclei>> nGramMap;
 	protected int index;
 	protected List<Integer> sentences;
@@ -66,18 +66,18 @@ public class NGramDataList implements SentenceDataList {
 			List<SentenceData> corpus){
 		if (nGramMap == null)
 			throw new IllegalArgumentException("No Data"); //$NON-NLS-1$
-		
+
 		this.corpus = corpus;
 		setNGramMap(nGramMap);
-		
+
 	}
-	
+
 	// w/o Corpus for NGramSearch Only
 	public NGramDataList(Map<String,ArrayList<ItemInNuclei>> nGramMap){
 		if (nGramMap == null)
 			throw new IllegalArgumentException("No Data"); //$NON-NLS-1$
 
-		setNGramMap(nGramMap);		
+		setNGramMap(nGramMap);
 	}
 
 
@@ -122,45 +122,45 @@ public class NGramDataList implements SentenceDataList {
 
 		//TODO filter results
 		this.nGramMap = nGramMap;
-		
+
 		filterNGramMap(nGramMap);
-		
+
 	}
-	
-	
+
+
 	private Map<String, ArrayList<ItemInNuclei>> filterNGramMap(Map<String, ArrayList<ItemInNuclei>> nGramMap){
-		
+
 		List<String> tmpKey = new ArrayList<String>(nGramMap.keySet());
 		Collections.reverse(tmpKey);
-		
+
 		corpusList = new ArrayList<CorpusType>();
 		sentences = new ArrayList<Integer>();
-		
+
 		Map<String, ArrayList<ItemInNuclei>> filterMap = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
-		
-//		
+
+//
 //		for(int j = 0; j < tmpKey.size(); j++){
 //			System.out.println();
 //			System.out.println("key" + tmpKey.get(j));
 //		}
-		
-		
+
+
 		for(int i = 0; i < tmpKey.size(); i++){
 			String key = tmpKey.get(i);
 			String[] keysplit = key.split(" "); //$NON-NLS-1$
-			
+
 			//System.out.println(key + keysplit.length);
-			
+
 			ArrayList<ItemInNuclei> value = nGramMap.get(key);
 			for (int j = 0; j < value.size();j++){
 				ItemInNuclei iin = value.get(j);
 //				System.out.println("PoSTag: "+ iin.getPosTag() +
 //								  " PoSCount: " + iin.getCount());
-				
+
 					for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 						int sentenceNR = iin.getSentenceInfoAt(k).getSentenceNr()-1;
 //						System.out.println(key + " " + sentenceNR);
-						if(sentences.contains(sentenceNR)){	
+						if(sentences.contains(sentenceNR)){
 							//donothing
 						} else {
 							//wenn nicht nur nuclei in liste aufnehmen
@@ -170,27 +170,27 @@ public class NGramDataList implements SentenceDataList {
 								corpusList.add(new CorpusType(sentenceNR, key));
 								sentences.add(sentenceNR);
 							}
-							
+
 						}
 					}
 			}
 		}
-		
-		
+
+
 //		for (int i = 0; i < sentences.size(); i++){
 //			System.out.println("Satz: " + sentences.get(i));
 //		}
-		
+
 		// for(Iterator<String> i = filterMap.keySet().iterator(); i.hasNext();){
 		//		String key = i.next();
 		//		ArrayList<ItemInNuclei> arrItem = filterMap.get(key);
-		//		
+		//
 		//		System.out.println("\n### Wordform: " + key + " ###");
 		//		for (int j = 0; j < arrItem.size();j++){
 		//			ItemInNuclei iin = arrItem.get(j);
 		//			System.out.println("PoSTag: "+ iin.getPosTag() +
 		//							  "  PoSCount: " + iin.getCount());
-		//			
+		//
 		//			for (int k = 0; k < iin.getSentenceInfoSize(); k++){
 		//				System.out.print("SentenceNr: " + iin.getSentenceInfoAt(k).getSentenceNr());
 		//				System.out.print(" | NucleiCount: " + iin.getSentenceInfoAt(k).getNucleiIndexListSize());
@@ -201,28 +201,28 @@ public class NGramDataList implements SentenceDataList {
 		//			}
 		//		}
 		//	}
-		
+
 		//remaining keys in filtered map
 //		List<String> tmpK = new ArrayList<String>(filterMap.keySet());
 //		Collections.reverse(tmpKey);
-//		for(int k = 0; k < tmpK.size(); k++){				
+//		for(int k = 0; k < tmpK.size(); k++){
 //			System.out.println("key " + tmpK.get(k));
 //		}
 
 		return filterMap;
 	}
-	
+
 	//no more needed?
 //	private Map<String, ArrayList<ItemInNuclei>> getNGramMap(){
 //		return nGramMap;
 //	}
-//	
-//	
+//
+//
 //	private List<Integer> getSentences(){
 //		return sentences;
 //	}
-	
-	
+
+
 	private SentenceData getNGramDataFromIndex(int index) {
 		if (!nGramMapCache.containsKey(index)) {
 			NewNGramSentenceData ngramData = new NewNGramSentenceData(index);
@@ -240,7 +240,7 @@ public class NGramDataList implements SentenceDataList {
 		//return getNGramMap().size();
 		return sentences.size();
 	}
-	
+
 	public int getSentenceAtIndex(int i){
 		return sentences.get(i);
 	}
@@ -304,35 +304,35 @@ public class NGramDataList implements SentenceDataList {
 			AvailabilityObserver observer) {
 		return get(index, type);
 	}
-	
-	
-	
-	
+
+
+
+
 //	//data class
 //	private class NewNGramSentenceData implements AnnotatedSentenceData {
 //
 //		private static final long serialVersionUID = 3303973536847711267L;
 //
 //		private List<DependencyDataEntry> items = new ArrayList<>();
-//		
+//
 //		protected Annotation annotation = null; // TODO change to default value?
-//		
+//
 //		DependencyData dd;
-//		
+//
 //		public NewNGramSentenceData(int index){
 //			dd = (DependencyData) corpus.get(index);
-//			
-//			
+//
+//
 //		}
-//		
-//		
+//
+//
 //		//TODO
 //		@Override
 //		public NewNGramSentenceData clone() {
 //			return this;
 //		}
-//		
-//		
+//
+//
 //
 //		/**
 //		 * @see net.ikarus_systems.icarus.language.SentenceData#getForm(int)
@@ -388,29 +388,30 @@ public class NGramDataList implements SentenceDataList {
 //
 //	}
 
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @author Gregor Thiele
 	 * @version $Id$
 	 *
 	 */
-	
-	
+
+
 	private class NewNGramSentenceData implements DependencyData {
 
 
 		private static final long serialVersionUID = 4937843525979650838L;
-		
+
 		DependencyData dd;
-		
+
 		public NewNGramSentenceData(int index) {
-			
+
 			dd = (DependencyData) corpus.get(index);
-			
+
 		}
 
+		@Override
 		public NewNGramSentenceData clone() {
 			return this;
 		}
@@ -517,7 +518,15 @@ public class NGramDataList implements SentenceDataList {
 		public int getIndex() {
 			return dd.getIndex();
 		}
-		
+
+		/**
+		 * @see de.ims.icarus.language.SentenceData#getProperty(int, java.lang.String)
+		 */
+		@Override
+		public Object getProperty(int index, String key) {
+			return null;
+		}
+
 	}
 
 

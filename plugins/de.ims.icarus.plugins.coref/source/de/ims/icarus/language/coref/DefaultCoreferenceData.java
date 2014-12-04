@@ -25,10 +25,8 @@
  */
 package de.ims.icarus.language.coref;
 
-import de.ims.icarus.language.Grammar;
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.BasicSentenceData;
 import de.ims.icarus.util.mem.HeapMember;
-import de.ims.icarus.util.mem.Link;
 import de.ims.icarus.util.mem.Primitive;
 import de.ims.icarus.util.mem.Reference;
 import de.ims.icarus.util.mem.ReferenceType;
@@ -39,12 +37,9 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class DefaultCoreferenceData extends CorefMember implements CoreferenceData {
+public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> implements CoreferenceData {
 
 	private static final long serialVersionUID = 1641469565583964051L;
-
-	@Link
-	protected final String[] forms;
 
 	@Reference(ReferenceType.UPLINK)
 	protected CoreferenceDocumentData document;
@@ -53,51 +48,8 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 	protected int sentenceIndex = -1;
 
 	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
-		if(forms==null)
-			throw new NullPointerException("Invalid forms array"); //$NON-NLS-1$
-
-		this.forms = forms;
+		super(forms);
 		setDocument(document);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceData#getProperty(int, java.lang.String)
-	 */
-	@Override
-	public Object getProperty(int index, String key) {
-		return getProperty(key+'_'+index);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.SentenceData#getForm(int)
-	 */
-	@Override
-	public String getForm(int index) {
-		return forms[index];
-	}
-
-	/**
-	 * @see de.ims.icarus.language.SentenceData#isEmpty()
-	 */
-	@Override
-	public boolean isEmpty() {
-		return length()==0;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.SentenceData#length()
-	 */
-	@Override
-	public int length() {
-		return forms.length;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.SentenceData#getSourceGrammar()
-	 */
-	@Override
-	public Grammar getSourceGrammar() {
-		return null;
 	}
 
 	/**
@@ -115,19 +67,6 @@ public class DefaultCoreferenceData extends CorefMember implements CoreferenceDa
 		clone.setProperties(cloneProperties());
 
 		return clone;
-	}
-
-	@Override
-	public String toString() {
-		return getText();
-	}
-
-	/**
-	 * @see de.ims.icarus.ui.helper.TextItem#getText()
-	 */
-	@Override
-	public String getText() {
-		return LanguageUtils.combine(this);
 	}
 
 	@Override

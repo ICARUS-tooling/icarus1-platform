@@ -56,6 +56,8 @@ import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
@@ -88,6 +90,9 @@ import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
+import de.ims.icarus.util.Wrapper;
+import de.ims.icarus.util.annotation.AnnotatedData;
+import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.strings.pattern.PatternFactory;
@@ -102,7 +107,8 @@ import de.ims.icarus.util.transfer.ConsumerMenu;
 public class ProsodyOutlinePresenter implements AWTPresenter,
 	Installable, AWTPresenter.TextBasedPresenter{
 
-	protected ProsodicDocumentData data;
+	protected CoreferenceDocumentData data;
+	protected Annotation documentAnnotation; //FIXME use documentAnnotation to create highlights when no syllable based highlighting is available!!!
 
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 	protected JPopupMenu popupMenu;
@@ -218,9 +224,9 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	private SoundFile getSoundFile() {
 		SoundFile soundFile = null;
 
-		if(data!=null) {
+		if(hasProsodicData()) {
 			try {
-				soundFile = SoundPlayer.getInstance().getSoundFile(data);
+				soundFile = SoundPlayer.getInstance().getSoundFile(getPresentedProsodicData());
 			} catch (SoundException e) {
 				LoggerFactory.warning(this, "Unable to fetch sound file for document: "+data.getId(), e); //$NON-NLS-1$
 			}
@@ -271,7 +277,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	 */
 	@Override
 	public boolean supports(ContentType type) {
-		return ContentTypeRegistry.isCompatible(getContentType(), type);
+		return ContentTypeRegistry.isCompatible(getContentType(), type)
+				|| ContentTypeRegistry.isCompatible(CoreferenceUtils.getCoreferenceDocumentContentType(), type);
 	}
 
 	/**
@@ -314,7 +321,17 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 			oldSoundFile.removeChangeListener(getHandler());
 		}
 
-		this.data = (ProsodicDocumentData) data;
+		if(data instanceof AnnotatedData) {
+			documentAnnotation = ((AnnotatedData) data).getAnnotation();
+		} else {
+			documentAnnotation = null;
+		}
+
+		if(data instanceof Wrapper) {
+			data = ((Wrapper<?>)data).get();
+		}
+
+		this.data = (CoreferenceDocumentData) data;
 
 		SoundFile newSoundFile = getSoundFile();
 		if(newSoundFile!=null) {
@@ -329,9 +346,9 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 		refreshActions();
 
-		if(data==null || data.size()==0) {
+		if(!hasProsodicData() || data.size()==0) {
 
-			JLabel label = new JLabel("Nothing to display");//FIXME externalize string //$NON-NLS-1$
+			JLabel label = new JLabel("Nothing to display or data contains no prosody information");//FIXME externalize string //$NON-NLS-1$
 			contentPane.setViewportView(label);
 
 			return;
@@ -341,7 +358,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
 		for(int i=0; i<data.size(); i++) {
-			ProsodicSentenceData sentence = data.get(i);
+			ProsodicSentenceData sentence = (ProsodicSentenceData) data.get(i);
 
 			SentencePanel sentencePanel = new SentencePanel(panelConfig);
 			sentencePanel.refresh(sentence);
@@ -402,8 +419,16 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	 * @see de.ims.icarus.ui.view.Presenter#getPresentedData()
 	 */
 	@Override
-	public ProsodicDocumentData getPresentedData() {
+	public CoreferenceDocumentData getPresentedData() {
 		return data;
+	}
+
+	public ProsodicDocumentData getPresentedProsodicData() {
+		return (ProsodicDocumentData) data;
+	}
+
+	public boolean hasProsodicData() {
+		return data!=null && data instanceof ProsodicDocumentData;
 	}
 
 	/**
@@ -532,7 +557,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		panelConfig.detailBorderColor = registry.getColor(registry.getChildHandle(detailHandle, "borderColor")); //$NON-NLS-1$
 		panelConfig.detailPaintGrid = registry.getBoolean(registry.getChildHandle(detailHandle, "paintGrid")); //$NON-NLS-1$
 		panelConfig.detailGridColor = registry.getColor(registry.getChildHandle(detailHandle, "gridColor")); //$NON-NLS-1$
-		panelConfig.detailGridStyle = registry.getValue(registry.getChildHandle(detailHandle, "gridStyle"), PaIntEGraph.DEFAULT_GRID_STYLE); //NON-NLS-1$
+		panelConfig.detailGridStyle = registry.getValue(registry.getChildHandle(detailHandle, "gridStyle"), PaIntEGraph.DEFAULT_GRID_STYLE); //NON-NLS-1$ //$NON-NLS-1$
 	}
 
 	protected class Handler implements ConfigListener, ChangeListener {
@@ -767,11 +792,13 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		}
 
 		public void playDocument(ActionEvent e) {
-			if(data==null) {
+			if(!hasProsodicData()) {
 				return;
 			}
 
 			try {
+
+				ProsodicDocumentData data = getPresentedProsodicData();
 
 				SoundPlayer player = SoundPlayer.getInstance();
 				SoundFile soundFile = player.getSoundFile(data);
@@ -799,11 +826,13 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		}
 
 		public void stopPlayback(ActionEvent e) {
-			if(data==null) {
+			if(!hasProsodicData()) {
 				return;
 			}
 
 			try {
+
+				ProsodicDocumentData data = getPresentedProsodicData();
 
 				SoundPlayer player = SoundPlayer.getInstance();
 				SoundFile soundFile = player.getSoundFile(data);
@@ -820,11 +849,13 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		}
 
 		public void pausePlayback(ActionEvent e) {
-			if(data==null) {
+			if(!hasProsodicData()) {
 				return;
 			}
 
 			try {
+
+				ProsodicDocumentData data = getPresentedProsodicData();
 
 				SoundPlayer player = SoundPlayer.getInstance();
 				SoundFile soundFile = player.getSoundFile(data);

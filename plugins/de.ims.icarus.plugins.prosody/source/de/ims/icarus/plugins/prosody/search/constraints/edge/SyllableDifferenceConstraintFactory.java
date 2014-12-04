@@ -25,22 +25,20 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.edge;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
-import de.ims.icarus.plugins.prosody.search.constraints.ValueHandler;
 import de.ims.icarus.plugins.prosody.search.constraints.painte.AggregationMode;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
+import de.ims.icarus.search_tools.util.ValueHandler;
 import de.ims.icarus.util.Options;
 
 /**
@@ -54,26 +52,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 	private static final String CONFIG_PATH = "plugins.prosody.search.sylDif"; //$NON-NLS-1$
 
-	private static final Map<Object, ValueHandler> propertyClassMap = new HashMap<>();
-	static {
-		propertyClassMap.put(SYLLABLE_DURATION_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(SYLLABLE_ENDPITCH_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(SYLLABLE_MIDPITCH_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(SYLLABLE_OFFSET_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(SYLLABLE_STARTPITCH_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(CODA_SIZE_KEY, ValueHandler.integerHandler);
-		propertyClassMap.put(VOWEL_DURATION_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(ONSET_SIZE_KEY, ValueHandler.integerHandler);
-		propertyClassMap.put(PAINTE_A1_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(PAINTE_A2_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(PAINTE_B_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(PAINTE_C1_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(PAINTE_C2_KEY, ValueHandler.floatHandler);
-		propertyClassMap.put(PAINTE_D_KEY, ValueHandler.floatHandler);
-	}
-
-	private static ValueHandler getHandler(Object key) {
+	private ValueHandler parseHandler(Object key) {
 		if(key==null) {
 			return ValueHandler.stringHandler;
 		}
@@ -83,7 +62,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 		if(sep!=-1) {
 			key = s.substring(0, sep);
 		}
-		ValueHandler handler = propertyClassMap.get(key);
+		ValueHandler handler = getHandler(key);
 		if(handler==null)
 			throw new IllegalArgumentException("Not a number property: "+key); //$NON-NLS-1$
 
@@ -108,22 +87,22 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 
 	@Override
 	public Class<?> getValueClass(Object specifier) {
-		return getHandler(specifier).getValueClass();
+		return parseHandler(specifier).getValueClass();
 	}
 
 	@Override
 	public Object getDefaultValue(Object specifier) {
-		return getHandler(specifier).getDefaultValue();
+		return parseHandler(specifier).getDefaultValue();
 	}
 
 	@Override
 	public Object labelToValue(Object label, Object specifier) {
-		return getHandler(specifier).labelToValue(label);
+		return parseHandler(specifier).labelToValue(label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value, Object specifier) {
-		return getHandler(specifier).valueToLabel(value);
+		return parseHandler(specifier).valueToLabel(value);
 	}
 
 	/**

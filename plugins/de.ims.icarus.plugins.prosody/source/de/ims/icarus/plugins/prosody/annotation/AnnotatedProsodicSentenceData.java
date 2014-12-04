@@ -31,6 +31,7 @@ import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
+import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.Annotation;
 
 /**
@@ -38,7 +39,7 @@ import de.ims.icarus.util.annotation.Annotation;
  * @version $Id$
  *
  */
-public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, AnnotatedSentenceData {
+public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, AnnotatedSentenceData, Wrapper<ProsodicSentenceData> {
 
 	private static final long serialVersionUID = -8819152695167807937L;
 
@@ -308,5 +309,13 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 	@Override
 	public float getPainteD(int index, int syllable) {
 		return source.getPainteD(index, syllable);
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Wrapper#get()
+	 */
+	@Override
+	public ProsodicSentenceData get() {
+		return source;
 	}
 }

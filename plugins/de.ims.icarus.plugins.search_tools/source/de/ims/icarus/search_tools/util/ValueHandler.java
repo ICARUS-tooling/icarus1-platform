@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.search.constraints;
+package de.ims.icarus.search_tools.util;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;

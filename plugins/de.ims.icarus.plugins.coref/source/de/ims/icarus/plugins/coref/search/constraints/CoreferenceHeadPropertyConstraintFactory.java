@@ -26,6 +26,7 @@
 package de.ims.icarus.plugins.coref.search.constraints;
 
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.plugins.coref.search.DocumentTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
@@ -39,7 +40,7 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraintFactory {
+public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraintFactory implements CorefConstants {
 
 	public static final String TOKEN = "headProperty"; //$NON-NLS-1$
 
@@ -51,7 +52,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 
 	@Override
 	public Object[] getSupportedSpecifiers() {
-		return CoreferenceUtils.getDefaultSentencePropertyKeys();
+		return CoreferenceUtils.getDefaultWordPropertyKeys();
 	}
 
 	/**

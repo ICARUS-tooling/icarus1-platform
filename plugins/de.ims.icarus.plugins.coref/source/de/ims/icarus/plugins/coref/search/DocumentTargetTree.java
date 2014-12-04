@@ -25,9 +25,10 @@
  */
 package de.ims.icarus.plugins.coref.search;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
@@ -52,8 +53,8 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	protected SpanSet spanSet;
 	protected EdgeSet edgeSet;
 	//protected Edge[] headMap;
-	protected Map<Span, Integer> indexMap;
-	protected Map<Integer, Edge> headMap;
+	protected TObjectIntMap<Span> indexMap;
+	protected TIntObjectMap<Edge> headMap;
 
 	protected CompactTree tree;
 
@@ -85,7 +86,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 
 		// Generate reverse lookup for span indices
 		if(indexMap==null) {
-			indexMap = new HashMap<>();
+			indexMap = new TObjectIntHashMap<>();
 		} else {
 			indexMap.clear();
 		}
@@ -103,7 +104,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 //			Arrays.fill(headMap, 0, Math.max(0, size-1), null);
 //		}
 		if(headMap==null) {
-			headMap = new HashMap<>();
+			headMap = new TIntObjectHashMap<>();
 		} else {
 			headMap.clear();
 		}
@@ -146,7 +147,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 	 */
 	@Override
 	protected int fetchHead(int index) {
-		Integer head = null;
+		int head = LanguageConstants.DATA_HEAD_ROOT;
 		Edge edge = headMap.get(index);
 
 		if(edge!=null) {
@@ -156,7 +157,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 			}
 		}
 
-		return head==null ? LanguageConstants.DATA_HEAD_ROOT : head;
+		return head;
 	}
 
 	// Coreference data access methods

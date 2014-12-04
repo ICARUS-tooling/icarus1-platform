@@ -392,7 +392,7 @@
 			<parameter id="direction" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceDirectionConstraintFactory" />
 			<parameter id="spanProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceSpanPropertyConstraintFactory" />
 			<parameter id="edgeProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEdgePropertyConstraintFactory" />
-			<parameter id="sentenceProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceSentencePropertyConstraintFactory" />
+			<parameter id="sentenceProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceWordPropertyConstraintFactory" />
 			<parameter id="headProperty" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceHeadPropertyConstraintFactory" />
 		</parameter>
 	</extension>

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.coref.annotation;
@@ -35,6 +35,7 @@ import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.AnnotatedData;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.data.ContentType;
@@ -44,19 +45,19 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class AnnotatedCoreferenceDocumentData implements AnnotatedData, CoreferenceDocumentData {
+public class AnnotatedCoreferenceDocumentData implements AnnotatedData, CoreferenceDocumentData, Wrapper<CoreferenceDocumentData> {
 
 	private final CoreferenceDocumentData source;
 	private Annotation annotation;
-	
+
 	public AnnotatedCoreferenceDocumentData(CoreferenceDocumentData source, Annotation annotation) {
 		if(source==null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
-		
+
 		this.source = source;
 		this.annotation = annotation;
 	}
-	
+
 	public AnnotatedCoreferenceDocumentData(CoreferenceDocumentData source) {
 		this(source, null);
 	}
@@ -208,6 +209,14 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 
 	public void setAnnotation(Annotation annotation) {
 		this.annotation = annotation;
+	}
+
+	/**
+	 * @see de.ims.icarus.util.Wrapper#get()
+	 */
+	@Override
+	public CoreferenceDocumentData get() {
+		return source;
 	}
 
 }

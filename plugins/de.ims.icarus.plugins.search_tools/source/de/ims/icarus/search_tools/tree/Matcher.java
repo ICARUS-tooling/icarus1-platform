@@ -247,6 +247,8 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 			return targetTree.getEdgeCount()>0;
 		case PARENT:
 			return !targetTree.isRoot() && targetTree.getEdgeCount()>0;
+		case NON_ROOT:
+			return !targetTree.isRoot();
 
 		default:
 			return true;

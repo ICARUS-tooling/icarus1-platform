@@ -1,4 +1,4 @@
-/* 
+/*
  *  ICARUS -  Interactive platform for Corpus Analysis and Research tools, University of Stuttgart
  *  Copyright (C) 2012-2013 Markus Gärtner and Gregor Thiele
  *
@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$ 
- * $Date$ 
- * $URL$ 
- * 
- * $LastChangedDate$  
- * $LastChangedRevision$  
- * $LastChangedBy$ 
+ * $Revision$
+ * $Date$
+ * $URL$
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.errormining.ngram_tools;
 
@@ -44,12 +44,12 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 	private static final long serialVersionUID = 3303973536847711267L;
 
 	private List<DependencyDataEntry> items = new ArrayList<>();
-	
+
 	protected Annotation annotation = null; // TODO change to default value?
-	
+
 	public NGramSentenceData(int index){
 		//noop
-		
+
 	}
 
 
@@ -59,8 +59,8 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 	public NGramSentenceData clone() {
 		return this;
 	}
-	
-	
+
+
 
 	/**
 	 * @see net.ikarus_systems.icarus.language.SentenceData#getForm(int)
@@ -108,7 +108,6 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 	 */
 	@Override
 	public String getText() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -119,8 +118,17 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 	 */
 	@Override
 	public int getIndex() {
-		// TODO Auto-generated method stub
-		return 0;
+		return -1;
+	}
+
+
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(int, java.lang.String)
+	 */
+	@Override
+	public Object getProperty(int index, String key) {
+		return null;
 	}
 
 }
