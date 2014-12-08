@@ -136,7 +136,7 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 
 	private static final Key sharedKey = new Key();
 
-	private Object getIndexedProperty(int index, String key) {
+	protected final Object getIndexedProperty(int index, String key) {
 		if (key == null)
 			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
 
@@ -177,6 +177,7 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 			return index;
 
 		case SIZE_KEY:
+		case LENGTH_KEY:
 			return getForm(index).length();
 
 		default:

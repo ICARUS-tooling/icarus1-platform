@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody;
 
-import gnu.trove.map.TMap;
-import gnu.trove.map.hash.THashMap;
-
 import java.lang.reflect.Array;
 
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
@@ -41,8 +38,6 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
 public class DefaultProsodicSentenceData extends DefaultCoreferenceData implements ProsodicSentenceData {
 
 	private static final long serialVersionUID = 649080115736671895L;
-
-	private TMap<Key, Object> indexedProperties = new THashMap<>();
 
 	/**
 	 * @param document
@@ -132,38 +127,6 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		setProperty(index, FLAGS_KEY, flags);
 	}
 
-	private final Key sharedKey = new Key();
-
-	private Object getIndexedProperty(int index, String key) {
-		if (key == null)
-			throw new NullPointerException("Invalid key"); //$NON-NLS-1$
-
-		sharedKey.index = index;
-		sharedKey.key = key;
-
-		try {
-			return indexedProperties.get(sharedKey);
-		} finally {
-			sharedKey.index = -1;
-			sharedKey.key = null;
-		}
-	}
-
-	@Override
-	public void setProperty(int index, String key, Object value) {
-		Key newKey = new Key(key, index);
-
-		indexedProperties.put(newKey, value);
-	}
-
-	/**
-	 * @see de.ims.icarus.language.coref.DefaultCoreferenceData#getProperty(int, java.lang.String)
-	 */
-	@Override
-	public Object getProperty(int index, String key) {
-		return getIndexedProperty(index, key);
-	}
-
 	/**
 	 * @see de.ims.icarus.plugins.prosody.ProsodicSentenceData#getSyllableProperty(int, java.lang.String, int)
 	 */
@@ -172,6 +135,11 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		switch (key) {
 		case INDEX_KEY:
 			return sylIndex;
+
+		case SIZE_KEY:
+		case LENGTH_KEY:
+			String label = getSyllableForm(index, sylIndex);
+			return label==null ? 0 : label.length();
 
 		default:
 			Object array = getIndexedProperty(index, key);
@@ -457,53 +425,53 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 //		setProperty(index, SYLLABLE_STRESS_KEY, value);
 //	}
 
-	private static class Key {
-		public String key;
-		public int index;
-
-		public Key() {
-			// no-op
-		}
-
-		public Key(String key, int index) {
-			this.key = key;
-			this.index = index;
-		}
-
-		public Key(Key source) {
-			key = source.key;
-			index = source.index;
-		}
-
-		@Override
-		public Key clone() {
-			return new Key(this);
-		}
-
-		/**
-		 * @see java.lang.Object#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-			return key.hashCode() * (1+index);
-		}
-		/**
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(Object obj) {
-			if(obj instanceof Key) {
-				Key other = (Key) obj;
-				return index==other.index && key.equals(other.key);
-			}
-			return false;
-		}
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Key:"+key+"["+index+"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-	}
+//	private static class Key {
+//		public String key;
+//		public int index;
+//
+//		public Key() {
+//			// no-op
+//		}
+//
+//		public Key(String key, int index) {
+//			this.key = key;
+//			this.index = index;
+//		}
+//
+//		public Key(Key source) {
+//			key = source.key;
+//			index = source.index;
+//		}
+//
+//		@Override
+//		public Key clone() {
+//			return new Key(this);
+//		}
+//
+//		/**
+//		 * @see java.lang.Object#hashCode()
+//		 */
+//		@Override
+//		public int hashCode() {
+//			return key.hashCode() * (1+index);
+//		}
+//		/**
+//		 * @see java.lang.Object#equals(java.lang.Object)
+//		 */
+//		@Override
+//		public boolean equals(Object obj) {
+//			if(obj instanceof Key) {
+//				Key other = (Key) obj;
+//				return index==other.index && key.equals(other.key);
+//			}
+//			return false;
+//		}
+//		/**
+//		 * @see java.lang.Object#toString()
+//		 */
+//		@Override
+//		public String toString() {
+//			return "Key:"+key+"["+index+"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//		}
+//	}
 }

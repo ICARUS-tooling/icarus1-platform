@@ -28,12 +28,14 @@ package de.ims.icarus.search_tools.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.ims.icarus.language.LanguageConstants;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class SharedPropertyRegistry {
+public class SharedPropertyRegistry implements LanguageConstants {
 
 	private static Map<Object, ValueHandler> handlers = new HashMap<>();
 
@@ -48,5 +50,26 @@ public class SharedPropertyRegistry {
 
 		ValueHandler handler = handlers.get(specifier);
 		return handler==null ? ValueHandler.stringHandler : handler;
+	}
+
+	static {
+
+		// General level
+		SharedPropertyRegistry.registerHandler(NUMBER_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(GENDER_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SIZE_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(LENGTH_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(INDEX_KEY, ValueHandler.integerHandler);
+		SharedPropertyRegistry.registerHandler(ID_KEY, ValueHandler.stringHandler);
+
+		// Word level
+		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(TAG_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(PARSE_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SENSE_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(FRAMESET_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler);
 	}
 }

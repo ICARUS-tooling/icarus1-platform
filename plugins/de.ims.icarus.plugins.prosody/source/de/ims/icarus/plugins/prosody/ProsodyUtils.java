@@ -139,10 +139,11 @@ public class ProsodyUtils implements ProsodyConstants {
 		ENTITY_KEY,
 		FEATURES_KEY,
 		HEAD_KEY,
+		INDEX_KEY,
+		SIZE_KEY,
 		SYLLABLE_COUNT,
 		TONAL_PROMINENCE_KEY,
 		STRESS_KEY,
-		PHONEME_COUNT_KEY,
 		SPEAKER_KEY,
 		SPEAKER_FEATURES_KEY,
 		IS_LEX,
@@ -166,10 +167,12 @@ public class ProsodyUtils implements ProsodyConstants {
 		SYLLABLE_VOWEL_KEY,
 		VOWEL_DURATION_KEY,
 		INDEX_KEY,
+		SIZE_KEY,
 		CODA_SIZE_KEY,
 		CODA_TYPE_KEY,
 		ONSET_SIZE_KEY,
 		ONSET_TYPE_KEY,
+		PHONEME_COUNT_KEY,
 		PAINTE_A1_KEY,
 		PAINTE_A2_KEY,
 		PAINTE_B_KEY,
@@ -191,8 +194,10 @@ public class ProsodyUtils implements ProsodyConstants {
 		SYLLABLE_TIMESTAMP_KEY,
 		VOWEL_DURATION_KEY,
 		INDEX_KEY,
+		SIZE_KEY,
 		CODA_SIZE_KEY,
 		ONSET_SIZE_KEY,
+		PHONEME_COUNT_KEY,
 		PAINTE_A1_KEY,
 		PAINTE_A2_KEY,
 		PAINTE_B_KEY,
@@ -207,6 +212,7 @@ public class ProsodyUtils implements ProsodyConstants {
 
 	private static final String[] defaultSentencePropertyKeys = {
 		SENTENCE_NUMBER_KEY,
+		SIZE_KEY,
 		INDEX_KEY,
 	};
 
@@ -218,6 +224,8 @@ public class ProsodyUtils implements ProsodyConstants {
 		DOCUMENT_ID,
 		AUDIO_FILE_KEY,
 		AUDIO_OFFSET_KEY,
+		SIZE_KEY,
+		ID_KEY,
 		INDEX_KEY,
 	};
 

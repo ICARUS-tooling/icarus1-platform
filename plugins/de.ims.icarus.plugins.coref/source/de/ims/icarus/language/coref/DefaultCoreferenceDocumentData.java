@@ -182,6 +182,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 			return getId();
 
 		case SIZE_KEY:
+		case LENGTH_KEY:
 			return size();
 
 		default:

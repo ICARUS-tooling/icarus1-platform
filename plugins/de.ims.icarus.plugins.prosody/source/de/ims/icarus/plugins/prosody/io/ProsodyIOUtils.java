@@ -50,7 +50,6 @@ import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.sampa.SampaMapper2;
-import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -1078,10 +1077,6 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 			result.setProperty(i, SYLLABLE_STRESS_KEY, stress);
 			result.setProperty(i, STRESS_KEY, wordStressed);
 
-			int[] indices = new int[sylCount];
-			CollectionUtils.fillAscending(indices);
-
-			result.setProperty(i, INDEX_KEY, indices);
 			result.setProperty(i, SYLLABLE_DURATION_KEY, getFloats(row, SYL_DURATION_COL));
 			result.setProperty(i, VOWEL_DURATION_KEY, getFloats(row, VOWEL_DURATION_COL));
 			result.setProperty(i, SYLLABLE_STARTPITCH_KEY, getFloats(row, SYL_STARTPITCH_COL));

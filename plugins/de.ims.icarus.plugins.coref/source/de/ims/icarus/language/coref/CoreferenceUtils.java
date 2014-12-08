@@ -896,6 +896,8 @@ public final class CoreferenceUtils implements CorefConstants {
 		BEGIN_INDEX_KEY,
 		END_INDEX_KEY,
 		CLUSTER_ID_KEY,
+		SIZE_KEY,
+		INDEX_KEY,
 	};
 
 	public static String[] getDefaultSpanPropertyKeys() {
@@ -913,6 +915,8 @@ public final class CoreferenceUtils implements CorefConstants {
 	private static final String[] defaultWordPropertyKeys = {
 		FORM_KEY,
 		TAG_KEY,
+		SIZE_KEY,
+		INDEX_KEY,
 		PARSE_KEY,
 		LEMMA_KEY,
 		SENSE_KEY,

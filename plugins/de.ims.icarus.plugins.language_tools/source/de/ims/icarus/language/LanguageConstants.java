@@ -70,6 +70,7 @@ public interface LanguageConstants {
 	// General properties
 	public static final String ID_KEY = "id"; //$NON-NLS-1$
 	public static final String SIZE_KEY = "size"; //$NON-NLS-1$
+	public static final String LENGTH_KEY = "length"; //$NON-NLS-1$
 	public static final String INDEX_KEY = "index"; //$NON-NLS-1$
 	public static final String GENDER_KEY = "gender"; //$NON-NLS-1$
 	public static final String NUMBER_KEY = "number"; //$NON-NLS-1$
