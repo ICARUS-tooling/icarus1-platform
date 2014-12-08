@@ -47,9 +47,6 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String PAINTE_EDITOR_VIEW_ID =
 			PROSODY_PLUGIN_ID+"@PaIntEEditorView"; //$NON-NLS-1$
 
-	// General properties
-	public static final String INDEX_KEY = "index"; //$NON-NLS-1$
-
 	// Document properties
 	public static final String DOCUMENT_ID = CoreferenceDocumentData.DOCUMENT_ID_PROPERTY;
 	public static final String AUDIO_FILE_KEY = "audio-file"; //$NON-NLS-1$
@@ -62,21 +59,11 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final int FLAG_MAPS_SYLLABLES = (1 << 2);
 
 	// Word properties
-	public static final String FORM_KEY = "form"; //$NON-NLS-1$
-	public static final String POS_KEY = "pos"; //$NON-NLS-1$
-	public static final String LEMMA_KEY = "lemma"; //$NON-NLS-1$
-	public static final String FEATURES_KEY = "features"; //$NON-NLS-1$
-	public static final String DEPREL_KEY = "deprel"; //$NON-NLS-1$
-	public static final String HEAD_KEY = "head"; //$NON-NLS-1$
 	public static final String TONAL_PROMINENCE_KEY = "tonal_prominence"; //$NON-NLS-1$
 	public static final String STRESS_KEY = "stress"; //$NON-NLS-1$
-	public static final String FLAGS_KEY = "flags"; //$NON-NLS-1$
 
 	public static final String SYLLABLE_COUNT = "syllable_count"; //$NON-NLS-1$
 
-	public static final String SPEAKER_KEY = "speaker"; //$NON-NLS-1$
-	public static final String SPEAKER_FEATURES_KEY = "speaker_features"; //$NON-NLS-1$
-	public static final String ENTITY_KEY = "entity"; //$NON-NLS-1$
 	public static final String BEGIN_TS_KEY = "begin_timestamp"; //$NON-NLS-1$
 	public static final String END_TS_KEY = "end_timestamp"; //$NON-NLS-1$
 

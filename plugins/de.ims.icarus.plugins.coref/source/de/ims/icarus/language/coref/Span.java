@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
 import de.ims.icarus.util.mem.Primitive;
@@ -43,7 +44,7 @@ import de.ims.icarus.util.strings.StringPrimitives;
  *
  */
 @HeapMember
-public class Span extends CorefMember implements Serializable, Comparable<Span>, Cloneable {
+public class Span extends CorefMember implements Serializable, Comparable<Span>, Cloneable, CorefConstants {
 
 	private static final long serialVersionUID = 7035991391272077675L;
 
@@ -87,6 +88,28 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 
 	public Span() {
 		// no-op
+	}
+
+	@Override
+	public Object getProperty(String key) {
+		switch (key) {
+		case RANGE_KEY:
+		case SIZE_KEY:
+		case MENTION_SIZE_KEY:
+			return getRange();
+
+		case BEGIN_INDEX_KEY:
+			return getBeginIndex();
+
+		case END_INDEX_KEY:
+			return getEndIndex();
+
+		case MENTION_HEAD_KEY:
+			return getHead();
+
+		default:
+			return super.getProperty(key);
+		}
 	}
 
 	public int getSentenceIndex() {

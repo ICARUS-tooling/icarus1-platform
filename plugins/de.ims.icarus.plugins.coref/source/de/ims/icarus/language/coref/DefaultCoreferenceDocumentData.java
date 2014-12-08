@@ -28,6 +28,7 @@ package de.ims.icarus.language.coref;
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
@@ -42,7 +43,7 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData> implements CoreferenceDocumentData {
+public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData> implements CoreferenceDocumentData, CorefConstants {
 
 	@Reference(ReferenceType.UPLINK)
 	protected CoreferenceDocumentSet documentSet;
@@ -168,6 +169,24 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	@Override
 	public int getDocumentIndex() {
 		return documentIndex;
+	}
+
+	@Override
+	public Object getProperty(String key) {
+		switch (key) {
+		case DOCUMENT_INDEX_KEX:
+		case INDEX_KEY:
+			return getDocumentIndex();
+
+		case ID_KEY:
+			return getId();
+
+		case SIZE_KEY:
+			return size();
+
+		default:
+			return super.getProperty(key);
+		}
 	}
 
 	/**

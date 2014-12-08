@@ -30,7 +30,6 @@ import gnu.trove.map.hash.THashMap;
 
 import java.lang.reflect.Array;
 
-import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
 
@@ -39,7 +38,7 @@ import de.ims.icarus.language.coref.DefaultCoreferenceData;
  * @version $Id$
  *
  */
-public class DefaultProsodicSentenceData extends DefaultCoreferenceData implements ProsodicSentenceData, LanguageConstants {
+public class DefaultProsodicSentenceData extends DefaultCoreferenceData implements ProsodicSentenceData {
 
 	private static final long serialVersionUID = 649080115736671895L;
 
@@ -150,6 +149,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		}
 	}
 
+	@Override
 	public void setProperty(int index, String key, Object value) {
 		Key newKey = new Key(key, index);
 
@@ -169,9 +169,15 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public Object getSyllableProperty(int index, String key, int sylIndex) {
-		Object array = getIndexedProperty(index, key);
-		return (array==null || !array.getClass().isArray() || Array.getLength(array)==0) ?
-				null : Array.get(array, sylIndex);
+		switch (key) {
+		case INDEX_KEY:
+			return sylIndex;
+
+		default:
+			Object array = getIndexedProperty(index, key);
+			return (array==null || !array.getClass().isArray() || Array.getLength(array)==0) ?
+					null : Array.get(array, sylIndex);
+		}
 	}
 
 	/**

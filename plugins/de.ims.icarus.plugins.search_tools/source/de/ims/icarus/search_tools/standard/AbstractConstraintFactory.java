@@ -50,21 +50,15 @@ public abstract class AbstractConstraintFactory implements ConstraintFactory, Se
 		LanguageUtils.DATA_UNDEFINED_LABEL
 	};
 
-	protected static final Object[] DEFAULT_EXTENDED_VALUESET = {
-		LanguageUtils.DATA_UNDEFINED_LABEL,
-		Boolean.TRUE,
-		Boolean.FALSE,
-	};
-
-	protected static ValueHandler getHandler(Object key) {
-		return SharedPropertyRegistry.getHandler(key);
-	}
-
 	public AbstractConstraintFactory(String token, int type, String nameKey, String descriptionKey) {
 		this.token = token;
 		this.nameKey = nameKey;
 		this.descriptionKey = descriptionKey;
 		this.type = type;
+	}
+
+	protected static ValueHandler getHandler(Object key) {
+		return SharedPropertyRegistry.getHandler(key);
 	}
 
 	protected boolean isFlagSet(int flags, int mask) {

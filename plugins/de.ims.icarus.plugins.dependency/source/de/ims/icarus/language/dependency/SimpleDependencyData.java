@@ -124,6 +124,33 @@ public class SimpleDependencyData extends BasicSentenceData<CompactProperties> i
 	}
 
 	@Override
+	public Object getProperty(int index, String key) {
+		switch (key) {
+
+		case FORM_KEY:
+			return getForm(index);
+
+		case LEMMA_KEY:
+			return getLemma(index);
+
+		case DEPREL_KEY:
+			return getRelation(index);
+
+		case HEAD_KEY:
+			return getHead(index);
+
+		case POS_KEY:
+			return getPos(index);
+
+		case FEATURES_KEY:
+			return getFeatures(index);
+
+		default:
+			return super.getProperty(index, key);
+		}
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(200);
 

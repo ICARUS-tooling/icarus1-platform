@@ -25,12 +25,14 @@
  */
 package de.ims.icarus.plugins.coref;
 
+import de.ims.icarus.language.LanguageConstants;
+
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface CorefConstants {
+public interface CorefConstants extends LanguageConstants {
 
 	// Plugin ID
 	public static final String COREFERENCE_PLUGIN_ID =
@@ -54,26 +56,21 @@ public interface CorefConstants {
 	public static final String DOCUMENT_EXPLORER_SELECTION_CHANGED =
 			"corefTools:explorerSelectionChanged"; //$NON-NLS-1$
 
+	// Sentence Properties
+	public static final String SENTENCE_INDEX_KEX = "sentence_index"; //$NON-NLS-1$
+
 	// Mention Properties
 	public static final String MENTION_HEAD_KEY = "head"; //$NON-NLS-1$
 	public static final String MENTION_SIZE_KEY = "mention_size"; //$NON-NLS-1$
 	public static final String BEGIN_INDEX_KEY = "begin_index"; //$NON-NLS-1$
 	public static final String END_INDEX_KEY = "end_index"; //$NON-NLS-1$
 	public static final String CLUSTER_ID_KEY = "cluster_id"; //$NON-NLS-1$
-	public static final String GENDER = "gender"; //$NON-NLS-1$
 	public static final String MENTION_TYPE = "type"; //$NON-NLS-1$
-	public static final String NUMBER = "number"; //$NON-NLS-1$
-
-	// Word properties
-	public static final String FORM_KEY = "form"; //$NON-NLS-1$
-	public static final String TAG_KEY = "tag"; //$NON-NLS-1$
-	public static final String PARSE_KEY = "parse"; //$NON-NLS-1$
-	public static final String LEMMA_KEY = "lemma"; //$NON-NLS-1$
-	public static final String FRAMESET_KEY = "frameset"; //$NON-NLS-1$
-	public static final String SENSE_KEY = "sense"; //$NON-NLS-1$
-	public static final String SPEAKER_KEY = "speaker"; //$NON-NLS-1$
-	public static final String ENTITY_KEY = "entity"; //$NON-NLS-1$
+	public static final String RANGE_KEY = "range"; //$NON-NLS-1$
 
 	// Edge Properties
 	public static final String EDGE_TYPE = "type"; //$NON-NLS-1$
+
+	// Document Properties
+	public static final String DOCUMENT_INDEX_KEX = "document_index"; //$NON-NLS-1$
 }

@@ -26,6 +26,8 @@
 package de.ims.icarus.language.coref;
 
 import de.ims.icarus.language.BasicSentenceData;
+import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Primitive;
 import de.ims.icarus.util.mem.Reference;
@@ -37,7 +39,7 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> implements CoreferenceData {
+public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> implements CoreferenceData, CorefConstants, LanguageConstants {
 
 	private static final long serialVersionUID = 1641469565583964051L;
 
@@ -87,6 +89,18 @@ public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> i
 
 	public int getSentenceIndex() {
 		return sentenceIndex;
+	}
+
+	@Override
+	public Object getProperty(String key) {
+		switch (key) {
+
+		case SENTENCE_INDEX_KEX:
+			return getSentenceIndex();
+
+		default:
+			return super.getProperty(key);
+		}
 	}
 
 	public void setSentenceIndex(int sentenceIndex) {

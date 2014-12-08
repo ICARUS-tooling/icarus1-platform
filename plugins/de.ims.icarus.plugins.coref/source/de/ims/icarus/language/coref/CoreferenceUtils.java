@@ -882,8 +882,8 @@ public final class CoreferenceUtils implements CorefConstants {
 		SharedPropertyRegistry.registerHandler(BEGIN_INDEX_KEY, ValueHandler.integerHandler);
 		SharedPropertyRegistry.registerHandler(END_INDEX_KEY, ValueHandler.integerHandler);
 		SharedPropertyRegistry.registerHandler(CLUSTER_ID_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(NUMBER, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(GENDER, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(NUMBER_KEY, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(GENDER_KEY, ValueHandler.stringHandler);
 		SharedPropertyRegistry.registerHandler(MENTION_TYPE, ValueHandler.stringHandler);
 
 		// Edge level

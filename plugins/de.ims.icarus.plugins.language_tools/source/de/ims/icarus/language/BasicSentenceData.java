@@ -41,7 +41,7 @@ import de.ims.icarus.util.mem.Link;
  *
  */
 @XmlRootElement
-public class BasicSentenceData<P extends CompactProperties> implements SentenceData {
+public class BasicSentenceData<P extends CompactProperties> implements SentenceData, LanguageConstants {
 
 	private static final long serialVersionUID = 6042849879442946254L;
 
@@ -85,7 +85,16 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 	}
 
 	public Object getProperty(String key) {
-		return properties==null ? null : properties.get(key);
+		switch (key) {
+		case SIZE_KEY:
+			return length();
+
+		case INDEX_KEY:
+			return getIndex();
+
+		default:
+			return properties==null ? null : properties.get(key);
+		}
 	}
 
 	public void setProperty(String key, Object value) {
@@ -163,7 +172,16 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 	 */
 	@Override
 	public Object getProperty(int index, String key) {
-		return getIndexedProperty(index, key);
+		switch (key) {
+		case INDEX_KEY:
+			return index;
+
+		case SIZE_KEY:
+			return getForm(index).length();
+
+		default:
+			return getIndexedProperty(index, key);
+		}
 	}
 
 	/**
