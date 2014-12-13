@@ -104,7 +104,7 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 
 
 	/**
-	 * @see net.ikarus_systems.icarus.ui.helper.TextItem#getText()
+	 * @see de.ims.icarus.ui.text.ikarus_systems.icarus.ui.helper.TextItem#getText()
 	 */
 	@Override
 	public String getText() {

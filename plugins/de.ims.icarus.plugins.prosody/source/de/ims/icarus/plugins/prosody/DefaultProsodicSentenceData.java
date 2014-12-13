@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody;
 
 import java.lang.reflect.Array;
 
+import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
 
@@ -46,6 +47,14 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	public DefaultProsodicSentenceData(CoreferenceDocumentData document,
 			String[] forms) {
 		super(document, forms);
+	}
+
+	@Override
+	public CoreferenceData clone() {
+		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(getDocument(), forms);
+		result.setProperties(properties);
+
+		return result;
 	}
 
 	/**
@@ -140,6 +149,9 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		case LENGTH_KEY:
 			String label = getSyllableForm(index, sylIndex);
 			return label==null ? 0 : label.length();
+
+		case PAINTE_MAX_C_KEY:
+			return (double)Math.max(getPainteC1(index, sylIndex), getPainteC2(index, sylIndex));
 
 		default:
 			Object array = getIndexedProperty(index, key);

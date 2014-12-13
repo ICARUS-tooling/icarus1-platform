@@ -203,7 +203,7 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 		 * @see de.ims.icarus.search_tools.standard.GroupCache#cacheGroupInstance(int, java.lang.Object)
 		 */
 		@Override
-		public void cacheGroupInstance(int id, Object value) {
+		public void cacheGroupInstance(int id, Object value, boolean replace) {
 			// no-op
 		}
 

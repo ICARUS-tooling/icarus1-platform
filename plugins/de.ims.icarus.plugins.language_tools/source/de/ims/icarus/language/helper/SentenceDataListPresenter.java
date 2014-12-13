@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.helper;
@@ -53,10 +53,10 @@ import de.ims.icarus.util.strings.StringUtil;
  *
  */
 public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
-	
+
 	protected DataTypeButton[] dataTypeButtons;
 	protected ButtonGroup buttonGroup;
-	
+
 	public SentenceDataListPresenter() {
 		// no-op
 	}
@@ -74,7 +74,8 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	protected DynamicWidthList<SentenceData> createList() {
 		DynamicWidthList<SentenceData> list = super.createList();
 		list.setCellRenderer(new SentenceDataListCellRenderer());
-		
+		list.setTrackViewportWidth(false);
+
 		// Crucial performance settings:
 		// First let the list compute the fixed cell height based
 		// on some dummy input, then limit the width to some arbitrary
@@ -87,20 +88,20 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 		list.setPrototypeCellValue(LanguageUtils.dummySentenceData);
 		//list.setFixedCellWidth(200);
 		list.setPrototypeCellValue(null);
-		
+
 		return list;
 	}
 
 	@Override
 	protected DataListModel<SentenceData> createListModel() {
 		SentenceDataListModel model = new SentenceDataListModel();
-		
+
 		DataType dataType = model.getDataType();
 		getDataTypeButton(dataType).setSelected(true);
-		
+
 		return model;
 	}
-	
+
 	@Override
 	public SentenceDataListModel getDataListModel() {
 		if(dataListModel==null) {
@@ -108,7 +109,7 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 		}
 		return (SentenceDataListModel) dataListModel;
 	}
-	
+
 	@Override
 	protected void refreshUtilities() {
 		SentenceDataListModel model = getDataListModel();
@@ -116,7 +117,7 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 			getDataTypeButton(dataType).setEnabled(
 					model.isDataTypeSupported(dataType));
 		}
-		
+
 		getDataTypeButton(model.getDataType()).setSelected(true);
 	}
 
@@ -132,47 +133,47 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 				getDataTypeButton(DataType.GOLD),
 		};
 	}
-	
+
 	protected ButtonGroup getButtonGroup() {
 		if(buttonGroup==null) {
 			buttonGroup = new ButtonGroup();
 		}
 		return buttonGroup;
 	}
-	
+
 	protected DataTypeButton getDataTypeButton(DataType dataType) {
 		int index = dataType.ordinal();
 		if(dataTypeButtons==null) {
 			dataTypeButtons = new DataTypeButton[DataType.values().length];
 		}
-		
+
 		DataTypeButton button = dataTypeButtons[index];
 		if(button==null) {
 			button = new DataTypeButton(dataType);
 			getButtonGroup().add(button);
 			dataTypeButtons[index] = button;
 		}
-		
+
 		return button;
 	}
-	
+
 	@Override
 	protected int getEstimatedWidth(FontMetrics fm, SentenceData item) {
 		int width = 0;
 		int size = item.length();
-		
+
 		for(int i=0; i<size; i++) {
 			if(i>0) {
 				width += fm.charWidth(' ');
 			}
 			width += fm.stringWidth(item.getForm(i));
 		}
-		
+
 		return width;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -180,15 +181,15 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 	protected class DataTypeButton extends JToggleButton implements ActionListener {
 
 		private static final long serialVersionUID = 2032467669223802186L;
-		
+
 		private final DataType dataType;
-		
+
 		public DataTypeButton(DataType dataType) {
 			if(dataType==null)
 				throw new NullPointerException("Invalid data type"); //$NON-NLS-1$
-			
+
 			this.dataType = dataType;
-			
+
 			Icon icon = null;
 			switch (dataType) {
 			case GOLD:
@@ -203,19 +204,19 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 				icon = IconRegistry.getGlobalRegistry().getIcon("datatype_system.png"); //$NON-NLS-1$
 				break;
 			}
-			
+
 			setIcon(icon);
 			setFocusable(false);
 			setFocusPainted(false);
 			setRolloverEnabled(false);
-			
+
 			String key = StringUtil.capitalize(dataType.name().toLowerCase());
-			ResourceManager.getInstance().getGlobalDomain().prepareComponent(this, 
+			ResourceManager.getInstance().getGlobalDomain().prepareComponent(this,
 					null,
 					"plugins.languageTools.selectDataType"+key+"Action.description"); //$NON-NLS-1$ //$NON-NLS-2$
 			ResourceManager.getInstance().getGlobalDomain().addComponent(this);
 		}
-		
+
 		public DataType getDataType() {
 			return dataType;
 		}
@@ -227,6 +228,6 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 		public void actionPerformed(ActionEvent e) {
 			getDataListModel().setDataType(getDataType());
 		}
-		
+
 	}
 }

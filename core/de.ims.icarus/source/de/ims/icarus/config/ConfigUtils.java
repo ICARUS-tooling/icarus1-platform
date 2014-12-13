@@ -29,6 +29,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagLayout;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,7 @@ import java.util.TimerTask;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -44,7 +48,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry.Handle;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.GridBagUtil;
@@ -410,6 +416,131 @@ public class ConfigUtils implements ConfigConstants {
 				buildComponent();
 
 			valueField.setValue(valid ? value : null);
+		}
+	}
+
+	public static class FileHandler extends javax.swing.filechooser.FileFilter implements EntryHandler {
+		private JFileChooser fileChooser;
+		private final boolean allowFiles, allowFolders;
+
+		private Path file;
+
+		public FileHandler(boolean allowFiles, boolean allowFolders) {
+			if(!allowFiles && !allowFolders)
+				throw new IllegalArgumentException("MUst allow at least one of either file or folder type!"); //$NON-NLS-1$
+
+			this.allowFiles = allowFiles;
+			this.allowFolders = allowFolders;
+		}
+
+		/**
+		 * @see de.ims.icarus.config.EntryHandler#setValue(java.lang.Object)
+		 */
+		@Override
+		public void setValue(Object value) {
+			file = value==null ? null : Paths.get(value.toString());
+		}
+
+		/**
+		 * @see de.ims.icarus.config.EntryHandler#getValue()
+		 */
+		@Override
+		public Object getValue() {
+
+			File selectedFile = fileChooser==null ? null : fileChooser.getSelectedFile();
+
+			file = selectedFile==null ? null : selectedFile.toPath();
+
+			return file==null ? null : IOUtil.toRelativePath(file).toString();
+		}
+
+		protected JFileChooser createFileChooser(boolean allowFiles, boolean allowFolders) {
+			JFileChooser fileChooser = new JFileChooser();
+
+			fileChooser.setCurrentDirectory(Core.getCore().getRootFolder().toFile());
+			fileChooser.setFileFilter(this);
+
+			int fileMode = JFileChooser.FILES_ONLY;
+			if(allowFiles && allowFolders) {
+				fileMode = JFileChooser.FILES_AND_DIRECTORIES;
+			} else if(allowFolders) {
+				fileMode = JFileChooser.DIRECTORIES_ONLY;
+			}
+
+			fileChooser.setFileSelectionMode(fileMode);
+			fileChooser.setMultiSelectionEnabled(false);
+
+			return fileChooser;
+		}
+
+		/**
+		 * @see de.ims.icarus.config.EntryHandler#getComponent()
+		 */
+		@Override
+		public Component getComponent() {
+			if(fileChooser==null) {
+				fileChooser = createFileChooser(allowFiles, allowFolders);
+			}
+
+			File selectedFile = file==null ? Core.getCore().getRootFolder().toFile() : file.toFile();
+
+			fileChooser.setSelectedFile(selectedFile);
+
+			return fileChooser;
+		}
+
+		/**
+		 * @see de.ims.icarus.config.EntryHandler#isValueEditable()
+		 */
+		@Override
+		public boolean isValueEditable() {
+			return true;
+		}
+
+		/**
+		 * @see de.ims.icarus.config.EntryHandler#isValueValid()
+		 */
+		@Override
+		public boolean isValueValid() {
+			getValue();
+			return file!=null;
+		}
+
+		/**
+		 * @see de.ims.icarus.config.EntryHandler#newEntry()
+		 */
+		@Override
+		public Object newEntry() {
+			return Core.getCore().getRootFolder();
+		}
+
+		/**
+		 * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
+		 */
+		@Override
+		public boolean accept(File f) {
+			return (allowFolders && f.isDirectory()) || (allowFiles && f.isFile());
+		}
+
+		/**
+		 * @see javax.swing.filechooser.FileFilter#getDescription()
+		 */
+		@Override
+		public String getDescription() {
+			StringBuilder sb = new StringBuilder();
+			if(allowFiles) {
+				sb.append(ResourceManager.getInstance().get("labels.files")); //$NON-NLS-1$
+			}
+
+			if(allowFolders) {
+				if(sb.length()>0) {
+					sb.append(" + "); //$NON-NLS-1$
+				}
+
+				sb.append(ResourceManager.getInstance().get("labels.folders")); //$NON-NLS-1$
+			}
+
+			return sb.toString();
 		}
 	}
 

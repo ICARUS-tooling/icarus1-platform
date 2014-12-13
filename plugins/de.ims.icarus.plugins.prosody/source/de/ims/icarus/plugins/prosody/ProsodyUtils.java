@@ -66,6 +66,7 @@ public class ProsodyUtils implements ProsodyConstants {
 		SharedPropertyRegistry.registerHandler(PAINTE_C1_KEY, ValueHandler.floatHandler);
 		SharedPropertyRegistry.registerHandler(PAINTE_C2_KEY, ValueHandler.floatHandler);
 		SharedPropertyRegistry.registerHandler(PAINTE_D_KEY, ValueHandler.floatHandler);
+		SharedPropertyRegistry.registerHandler(PAINTE_MAX_C_KEY, ValueHandler.doubleHandler);
 
 		// Word level
 		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
@@ -179,6 +180,7 @@ public class ProsodyUtils implements ProsodyConstants {
 		PAINTE_C1_KEY,
 		PAINTE_C2_KEY,
 		PAINTE_D_KEY,
+		PAINTE_MAX_C_KEY,
 	};
 
 	public static String[] getDefaultSyllablePropertyKeys() {
@@ -204,6 +206,7 @@ public class ProsodyUtils implements ProsodyConstants {
 		PAINTE_C1_KEY,
 		PAINTE_C2_KEY,
 		PAINTE_D_KEY,
+		PAINTE_MAX_C_KEY,
 	};
 
 	public static String[] getDefaultNumericalSyllablePropertyKeys() {

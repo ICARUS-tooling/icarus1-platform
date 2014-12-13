@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.table;
@@ -47,46 +47,46 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public abstract class TablePresenter implements AWTPresenter {
-	
+public abstract class TablePresenter implements AWTPresenter.TableBasedPresenter {
+
 	protected JTable table;
-	
+
 	protected JPanel contentPanel;
 
 	protected TablePresenter() {
 		init();
 	}
-	
+
 	protected void init() {
 		// for subclasses
 	}
-	
+
 	protected abstract JTable createTable();
-	
+
 	protected ActionComponentBuilder createToolBar() {
 		return null;
 	}
-	
+
 	protected void buildPanel() {
 		contentPanel = new JPanel(new BorderLayout());
-		
+
 		JTable table = getTable();
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBorder(UIUtil.emptyBorder);
 		contentPanel.add(scrollPane, BorderLayout.CENTER);
-		
-		
+
+
 		ActionComponentBuilder builder = createToolBar();
 		if(builder!=null) {
 			contentPanel.add(builder.buildToolBar(), BorderLayout.NORTH);
 		}
 	}
-	
+
 	public JTable getTable() {
 		if(table==null) {
 			table = createTable();
 		}
-		
+
 		return table;
 	}
 
@@ -100,12 +100,12 @@ public abstract class TablePresenter implements AWTPresenter {
 			throws UnsupportedPresentationDataException {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
 		if(!PresenterUtils.presenterSupports(this, data))
 			throw new UnsupportedPresentationDataException("Unsupported data: "+data.getClass()); //$NON-NLS-1$
-		
+
 		setData(data, options);
-		
+
 		if(table!=null) {
 			table.revalidate();
 			table.repaint();
@@ -138,6 +138,6 @@ public abstract class TablePresenter implements AWTPresenter {
 	public boolean supports(ContentType type) {
 		return ContentTypeRegistry.isCompatible(getContentType(), type);
 	}
-	
+
 	protected abstract ContentType getContentType();
 }

@@ -41,10 +41,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -72,6 +74,22 @@ public final class IOUtil {
 	private IOUtil() {
 		// no-op
 	}
+
+	public static final Filter<Path> fileFilter = new Filter<Path>() {
+
+		@Override
+		public boolean accept(Path entry) throws IOException {
+			return Files.isRegularFile(entry, LinkOption.NOFOLLOW_LINKS);
+		}
+	};
+
+	public static final Filter<Path> directoryFilter = new Filter<Path>() {
+
+		@Override
+		public boolean accept(Path entry) throws IOException {
+			return Files.isDirectory(entry, LinkOption.NOFOLLOW_LINKS);
+		}
+	};
 
 	public static void ensureFolder(Path path) {
 		if(!Files.isDirectory(path) && Files.notExists(path)) {

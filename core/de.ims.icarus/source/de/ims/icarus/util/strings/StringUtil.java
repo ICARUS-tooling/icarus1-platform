@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.logging.LoggerFactory;
-import de.ims.icarus.ui.helper.TextItem;
+import de.ims.icarus.ui.text.TextItem;
 import de.ims.icarus.util.NamedObject;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;

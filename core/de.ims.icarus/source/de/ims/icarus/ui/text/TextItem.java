@@ -23,7 +23,7 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.ui.helper;
+package de.ims.icarus.ui.text;
 
 /**
  * @author Markus Gärtner

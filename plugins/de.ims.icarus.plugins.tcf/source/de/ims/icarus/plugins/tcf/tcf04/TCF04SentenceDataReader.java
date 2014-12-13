@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.tcf.tcf04;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,7 +40,6 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataReader;
 import de.ims.icarus.language.dependency.DependencyConstants;
-import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
@@ -143,6 +145,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			Token[] token = textCorpusStreamed.getSentencesLayer().getTokens(sentence);
 			int size = token.length;
 
+			TObjectIntMap<Object> tokenMap = new TObjectIntHashMap<>(size);
 
 			heads = new short[size];
 			poss = new String[size];
@@ -158,6 +161,8 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 
 
 				forms[index] = ensureDummy(token[index].getString(), "<empty>"); //$NON-NLS-1$
+
+				tokenMap.put(token[index], index);
 
 				//lemma
 				if(textCorpusStreamed.getLemmasLayer() !=null){
@@ -198,45 +203,9 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 
 				features[index] = ensureValid(morphfeatures);
 
-
-				//dependency stuff
-				if (textCorpusStreamed.getDependencyParsingLayer() != null) {
-					Dependency[] dep = textCorpusStreamed.getDependencyParsingLayer().getParse(sentenceIndex)
-					.getDependencies();
-					relations[index] = ensureValid(dep[index].getFunction());
-
-					// check if dependent or root
-					if (textCorpusStreamed.getDependencyParsingLayer()
-							.getGovernorTokens(dep[index]) != null) {
-						Token[] tSource = textCorpusStreamed
-								.getDependencyParsingLayer().getGovernorTokens(
-										dep[index]);
-
-						/*
-						 * workaround, we count dependency per sentence in out
-						 * simple dependency data, tcf use global counting for
-						 * dependencys: tSource[0].getOrder() -
-						 * tokenOffset[0].getOrder will give us the index we
-						 * need
-						 */
-						Sentence toksentence = textCorpusStreamed.getSentencesLayer()
-								.getSentence(tSource[0]);
-						Token[] tokenOffset = textCorpusStreamed.getSentencesLayer()
-								.getTokens(toksentence);
-						// System.out.println(st[0].getOrder());
-
-						heads[index] = (short) (tSource[0].getOrder()
-								- tokenOffset[0].getOrder());
-
-					} else {
-						// root
-						heads[index] = LanguageConstants.DATA_HEAD_ROOT;
-					}
-				} else {
-					//default value when sentence invalid
-					heads[index] = LanguageConstants.DATA_UNDEFINED_VALUE;
-					relations[index] = ""; //$NON-NLS-1$
-				}
+				//default value when sentence invalid
+				heads[index] = LanguageConstants.DATA_UNDEFINED_VALUE;
+				relations[index] = ""; //$NON-NLS-1$
 
 				/*
 				System.out.println(
@@ -249,8 +218,34 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 				*/
 			}
 
+			//dependency stuff
+			if (textCorpusStreamed.getDependencyParsingLayer() != null) {
+				Dependency[] deps = textCorpusStreamed.getDependencyParsingLayer().getParse(sentenceIndex)
+				.getDependencies();
+
+				for(Dependency dep : deps) {
+					Token[] depTokens = textCorpusStreamed.getDependencyParsingLayer().getDependentTokens(dep);
+					Token[] govTokens = textCorpusStreamed.getDependencyParsingLayer().getGovernorTokens(dep);
+
+					for(int i=0; i<depTokens.length; i++) {
+						int depIndex = tokenMap.get(depTokens[i]);
+
+						if(govTokens==null) {
+							// root
+							heads[depIndex] = LanguageConstants.DATA_HEAD_ROOT;
+						} else {
+							int govIndex = tokenMap.get(govTokens[i]);
+
+							heads[depIndex] = (short) govIndex;
+						}
+
+						relations[depIndex] = ensureValid(dep.getFunction());
+					}
+				}
+			}
+
 			sdd = new SimpleDependencyData(sentenceIndex, forms, lemmas, features, poss,relations, heads, flags);
-			DependencyUtils.fillProjectivityFlags(heads, flags);
+//			DependencyUtils.fillProjectivityFlags(heads, flags);
 			sentenceIndex++;
 
 		}

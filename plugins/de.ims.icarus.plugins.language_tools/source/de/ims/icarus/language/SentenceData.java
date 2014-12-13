@@ -27,7 +27,7 @@ package de.ims.icarus.language;
 
 import java.io.Serializable;
 
-import de.ims.icarus.ui.helper.TextItem;
+import de.ims.icarus.ui.text.TextItem;
 
 
 

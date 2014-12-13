@@ -135,6 +135,10 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 	protected void prepareRenderer(JList<?> list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus) {
 
+//		if(value instanceof Wrapper<?>) {
+//			value = ((Wrapper<?>)value).get();
+//		}
+
 		sentence = (ProsodicSentenceData) value;
 		sentenceInfo = new SentenceInfo(sentence);
 

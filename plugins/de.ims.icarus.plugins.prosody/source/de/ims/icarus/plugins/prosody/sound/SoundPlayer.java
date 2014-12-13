@@ -29,11 +29,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -46,6 +51,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.Core.NamedRunnable;
+import de.ims.icarus.config.ConfigEvent;
+import de.ims.icarus.config.ConfigListener;
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
@@ -79,11 +88,73 @@ public class SoundPlayer {
 		return result;
 	}
 
+	private Set<Path> folders = new HashSet<>();
+
 	// Maps file name to sound file instances
 	private Map<String, SoundFile> fileCache = new HashMap<>();
 
 	private SoundPlayer() {
 		Core.getCore().addShutdownHook(new ShutdownHook());
+
+		ConfigRegistry.getGlobalRegistry().addGroupListener("plugins.prosody.audioPlayer", new ConfigListener() { //$NON-NLS-1$
+
+			@Override
+			public void invoke(ConfigRegistry sender, ConfigEvent event) {
+				reloadFolders();
+			}
+		});
+
+		reloadFolders();
+
+		if(folders.isEmpty()) {
+			//FIXME prompt user to select audio folder!!!
+		}
+	}
+
+	private synchronized void reloadFolders() {
+		for(SoundFile soundFile : fileCache.values()) {
+			try {
+				close(soundFile);
+			} catch(Exception e) {
+				// ignore
+			}
+		}
+
+		folders.clear();
+
+		List<?> folderList = ConfigRegistry.getGlobalRegistry().getList("plugins.prosody.audioPlayer.folders"); //$NON-NLS-1$
+		boolean includeSubFolders = ConfigRegistry.getGlobalRegistry().getBoolean("plugins.prosody.audioPlayer.includeSubFolders"); //$NON-NLS-1$
+
+		if(folderList.isEmpty()) {
+			return;
+		}
+
+		for(Object entry : folderList) {
+			Path folder = Paths.get(entry.toString());
+			if(!folder.isAbsolute()) {
+				folder = Core.getCore().getRootFolder().resolve(folder);
+			}
+
+			folders.add(folder);
+
+			if(includeSubFolders) {
+				try {
+					collectSubFolders(folder);
+				} catch (IOException e) {
+					LoggerFactory.error(this, "Failed to collect sub-folders for folder: "+folder, e); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+
+	private void collectSubFolders(Path folder) throws IOException {
+		try(DirectoryStream<Path> stream = Files.newDirectoryStream(folder, IOUtil.directoryFilter)) {
+			for(Path subFolder : stream) {
+				folders.add(subFolder);
+
+				collectSubFolders(subFolder);
+			}
+		}
 	}
 
 	public SoundFile getSoundFile(String fileName) {
@@ -97,6 +168,10 @@ public class SoundPlayer {
 		SoundFile soundFile = fileCache.get(fileName);
 		if(soundFile==null) {
 			Path path = createPath(fileName);
+
+			if(path==null)
+				throw new IllegalArgumentException("No audio file available for name: "+fileName); //$NON-NLS-1$
+
 			soundFile = new SoundFile(path);
 			fileCache.put(fileName, soundFile);
 		}
@@ -125,8 +200,15 @@ public class SoundPlayer {
 		if(fileName.trim().isEmpty())
 			throw new IllegalArgumentException("File name is empty"); //$NON-NLS-1$
 
-		Path folder = Core.getCore().getDataFolder().resolve("sound"); //$NON-NLS-1$
-		return folder.resolve(fileName);
+		for(Path folder : folders) {
+			Path file = folder.resolve(fileName);
+
+			if(Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
+				return file;
+			}
+		}
+
+		return null;
 	}
 
 	public synchronized void open(SoundFile soundFile) throws SoundException {
@@ -480,6 +562,9 @@ public class SoundPlayer {
 		}
 	}
 
+	/**
+	 * Stable predicate: dispatchThread!={@code null}
+	 */
 	private static volatile SoundDispatchThread dispatchThread;
 //	private static final Semaphore semaphore = new Semaphore(0);
 

@@ -56,8 +56,13 @@ import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
+import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
@@ -65,6 +70,8 @@ import de.ims.icarus.plugins.coref.view.PatternExample;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
+import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
+import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
@@ -75,6 +82,7 @@ import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
 import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
 import de.ims.icarus.resources.Localizable;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionComponentBuilder;
@@ -93,6 +101,7 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.AnnotatedData;
 import de.ims.icarus.util.annotation.Annotation;
+import de.ims.icarus.util.annotation.AnnotationManager;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.strings.pattern.PatternFactory;
@@ -108,7 +117,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	Installable, AWTPresenter.TextBasedPresenter{
 
 	protected CoreferenceDocumentData data;
-	protected Annotation documentAnnotation; //FIXME use documentAnnotation to create highlights when no syllable based highlighting is available!!!
+	protected Annotation documentAnnotation;
+	protected ProsodicSentenceData highlightedSentence;
 
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 	protected JPopupMenu popupMenu;
@@ -134,6 +144,8 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	protected static final String configPath = "plugins.prosody.appearance.outline"; //$NON-NLS-1$
 
 	private static ActionManager sharedActionManager;
+
+	protected AnnotationManager corefAnnotationManager, prosodyAnnotationManager;
 
 	protected static synchronized final ActionManager getSharedActionManager() {
 		if(sharedActionManager==null) {
@@ -272,6 +284,10 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		return handler;
 	}
 
+	public CoreferenceAllocation getAllocation() {
+		return options==null ? null : (CoreferenceAllocation)options.get("allocation"); //$NON-NLS-1$
+	}
+
 	/**
 	 * @see de.ims.icarus.ui.view.Presenter#supports(de.ims.icarus.util.data.ContentType)
 	 */
@@ -306,6 +322,12 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 		this.options = options.clone();
 		setData(data);
 
+		highlightedSentence = null;
+
+		if(options.containsKey("sentence")) { //$NON-NLS-1$
+			highlightedSentence = (ProsodicSentenceData) options.get("sentence"); //$NON-NLS-1$
+		}
+
 		if(contentPanel==null) {
 			return;
 		}
@@ -321,10 +343,10 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 			oldSoundFile.removeChangeListener(getHandler());
 		}
 
+		documentAnnotation = null;
+
 		if(data instanceof AnnotatedData) {
 			documentAnnotation = ((AnnotatedData) data).getAnnotation();
-		} else {
-			documentAnnotation = null;
 		}
 
 		if(data instanceof Wrapper) {
@@ -368,7 +390,94 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 			builder.append(sentencePanel);
 		}
 
+		mapDocumentHighlighting();
+		mapSentenceHighlighting();
+
 		contentPane.setViewportView(builder.getPanel());
+	}
+
+	protected void mapDocumentHighlighting() {
+		if(documentAnnotation==null) {
+			return;
+		}
+
+		CoreferenceDocumentAnnotationManager annotationManager = (CoreferenceDocumentAnnotationManager) getCorefAnnotationManager();
+		if(annotationManager==null) {
+			return;
+		}
+
+		annotationManager.setAnnotation(documentAnnotation);
+
+		if(!annotationManager.hasAnnotation()) {
+			return;
+		}
+
+		CoreferenceAllocation allocation = getAllocation();
+
+		if(allocation==null) {
+			allocation = data.getDocumentSet().getDefaultAllocation();
+		}
+
+		if(allocation==null) {
+			return;
+		}
+
+		SpanSet spans = allocation.getSpanSet(data.getId());
+
+		if(spans==null) {
+			return;
+		}
+
+		CoreferenceDocumentHighlighting docHighlighting = CoreferenceDocumentHighlighting.getInstance();
+
+		for(int i=0; i<spans.size(); i++) {
+			long highlight = annotationManager.getHighlight(i);
+			if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
+				Span span = spans.get(i);
+
+				SentencePanel sentencePanel = sentencePanels.get(span.getSentenceIndex());
+
+				sentencePanel.addHighlight(span.getBeginIndex(), span.getEndIndex(), highlight, docHighlighting);
+			}
+		}
+	}
+
+	protected void mapSentenceHighlighting() {
+		if(highlightedSentence==null) {
+			return;
+		}
+
+		SentencePanel sentencePanel = sentencePanels.get(highlightedSentence.getIndex());
+
+		ProsodyHighlighting prosodyHighlighting = ProsodyHighlighting.getInstance();
+
+		sentencePanel.addHighlight(0, highlightedSentence.length()-1, BitmaskHighlighting.GENERAL_HIGHLIGHT, prosodyHighlighting);
+
+		if(highlightedSentence instanceof AnnotatedData) {
+			Annotation sentenceAnnotation = ((AnnotatedData)highlightedSentence).getAnnotation();
+			if(sentenceAnnotation==null) {
+				return;
+			}
+
+			ProsodicAnnotationManager annotationManager = (ProsodicAnnotationManager) getProsodyAnnotationManager();
+			if(annotationManager==null) {
+				return;
+			}
+
+			annotationManager.setAnnotation(sentenceAnnotation);
+
+			if(!annotationManager.hasAnnotation()) {
+				return;
+			}
+
+			for(int i=0; i<highlightedSentence.length(); i++) {
+				long highlight = annotationManager.getHighlight(i);
+
+				if(ProsodyHighlighting.getInstance().isHighlighted(highlight)) {
+					sentencePanel.addHighlight(i, i, highlight, prosodyHighlighting);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -405,6 +514,21 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	@Override
 	public void close() {
 		ConfigRegistry.getGlobalRegistry().removeGroupListener(configPath, getHandler());
+	}
+
+	public AnnotationManager getCorefAnnotationManager() {
+		if(corefAnnotationManager==null) {
+			//TODO ensure we are save with this type of annotation manager
+			corefAnnotationManager = new CoreferenceDocumentAnnotationManager();
+		}
+		return corefAnnotationManager;
+	}
+
+	public AnnotationManager getProsodyAnnotationManager() {
+		if(prosodyAnnotationManager==null) {
+			prosodyAnnotationManager = new ProsodicAnnotationManager();
+		}
+		return prosodyAnnotationManager;
 	}
 
 	/**

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -34,22 +34,22 @@ import de.ims.icarus.search_tools.result.ResultEntry;
  *
  */
 public interface GroupCache {
-	
-	void cacheGroupInstance(int id, Object value);
-	
+
+	void cacheGroupInstance(int id, Object value, boolean replace);
+
 	void lock();
-	
+
 	void reset();
-	
+
 	void commit(ResultEntry entry);
-	
+
 	/**
-	 * 
+	 *
 	 */
 	public static GroupCache dummyCache = new GroupCache() {
-		
+
 		@Override
-		public void cacheGroupInstance(int id, Object value) {
+		public void cacheGroupInstance(int id, Object value, boolean replace) {
 			// do nothing
 		}
 

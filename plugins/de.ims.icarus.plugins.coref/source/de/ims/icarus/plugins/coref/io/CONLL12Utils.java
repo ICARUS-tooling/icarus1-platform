@@ -51,7 +51,6 @@ import de.ims.icarus.util.strings.CharTableBuffer.Row;
 import de.ims.icarus.util.strings.CharTableBuffer.RowAction;
 import de.ims.icarus.util.strings.CharTableBuffer.RowFilter;
 import de.ims.icarus.util.strings.StringPrimitives;
-import de.ims.icarus.util.strings.StringUtil;
 
 
 /**
@@ -181,6 +180,9 @@ public final class CONLL12Utils implements CorefConstants {
 		CorefProperties properties = new CorefProperties();
 		Row row;
 
+		DefaultCoreferenceData result = new DefaultCoreferenceData(document, forms);
+		result.setProperties(properties);
+
 		// TODO evaluate need to expand storage to cover more than just form and spans
 		for(int i=0; i<size; i++) {
 			row = buffer.getRow(i);
@@ -257,21 +259,19 @@ public final class CONLL12Utils implements CorefConstants {
 			coref.recycle();
 
 			// Assign properties
-			properties.put(StringUtil.intern(FORM_KEY+'_'+i), get(row, FORM_COL, EMPTY));
-			properties.put(StringUtil.intern(TAG_KEY+'_'+i), get(row, TAG_COL, EMPTY));
-			properties.put(StringUtil.intern(PARSE_KEY+'_'+i), get(row, PARSE_COL, EMPTY));
-			properties.put(StringUtil.intern(LEMMA_KEY+'_'+i), get(row, LEMMA_COL, EMPTY));
-			properties.put(StringUtil.intern(FRAMESET_KEY+'_'+i), get(row, FRAMESET_COL, EMPTY));
-			properties.put(StringUtil.intern(SENSE_KEY+'_'+i), get(row, SENSE_COL, EMPTY));
-			properties.put(StringUtil.intern(SPEAKER_KEY+'_'+i), get(row, SPEAKER_COL, EMPTY));
-			properties.put(StringUtil.intern(ENTITY_KEY+'_'+i), get(row, ENTITY_COL, EMPTY));
+			result.setProperty(i, FORM_KEY, get(row, FORM_COL, EMPTY));
+			result.setProperty(i, TAG_KEY, get(row, TAG_COL, EMPTY));
+			result.setProperty(i, PARSE_KEY, get(row, PARSE_COL, EMPTY));
+			result.setProperty(i, LEMMA_KEY, get(row, LEMMA_COL, EMPTY));
+			result.setProperty(i, FRAMESET_KEY, get(row, FRAMESET_COL, EMPTY));
+			result.setProperty(i, SENSE_KEY, get(row, SENSE_COL, EMPTY));
+			result.setProperty(i, SPEAKER_KEY, get(row, SPEAKER_COL, EMPTY));
+			result.setProperty(i, ENTITY_KEY, get(row, ENTITY_COL, EMPTY));
 		}
 
 		if(!spanStack.isEmpty())
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 
-		DefaultCoreferenceData result = new DefaultCoreferenceData(document, forms);
-		result.setProperties(properties);
 		result.setSentenceIndex(document.size());
 		document.add(result);
 		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);

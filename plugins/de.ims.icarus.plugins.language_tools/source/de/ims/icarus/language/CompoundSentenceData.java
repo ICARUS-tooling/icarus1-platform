@@ -140,7 +140,7 @@ public class CompoundSentenceData implements SentenceData {
 	}
 
 	/**
-	 * @see de.ims.icarus.ui.helper.TextItem#getText()
+	 * @see de.ims.icarus.ui.text.TextItem#getText()
 	 */
 	@Override
 	public String getText() {

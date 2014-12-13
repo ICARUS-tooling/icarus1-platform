@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core.output;
@@ -37,7 +37,7 @@ import de.ims.icarus.ui.UIDummies;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.helper.Outline;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
-import de.ims.icarus.ui.table.TablePresenter;
+import de.ims.icarus.ui.view.AWTPresenter.TableBasedPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.Options;
@@ -53,9 +53,9 @@ import de.ims.icarus.util.mpi.ResultMessage;
  *
  */
 public class TableView extends View implements Outline {
-	
-	private TablePresenter presenter;
-	
+
+	private TableBasedPresenter presenter;
+
 	protected JTextArea infoLabel;
 	protected JPanel contentPanel;
 
@@ -68,19 +68,19 @@ public class TableView extends View implements Outline {
 	 */
 	@Override
 	public void init(JComponent container) {
-		
+
 		container.setLayout(new BorderLayout());
-		
+
 		infoLabel = UIUtil.defaultCreateInfoLabel(container);
 		container.add(infoLabel, BorderLayout.NORTH);
-		
+
 		contentPanel = new JPanel(new BorderLayout());
 		container.add(contentPanel, BorderLayout.CENTER);
-		
+
 		showInfo(null);
 	}
-	
-	public TablePresenter getPresenter() {
+
+	public TableBasedPresenter getPresenter() {
 		return presenter;
 	}
 
@@ -99,71 +99,71 @@ public class TableView extends View implements Outline {
 		if(contentPanel==null) {
 			return;
 		}
-		
+
 		displayData(null, null);
 	}
-	
+
 	protected void showInfo(String text) {
 		if(text==null) {
 			text = ResourceManager.getInstance().get(
 					"plugins.core.tableView.notAvailable"); //$NON-NLS-1$
 		}
 		infoLabel.setText(text);
-		
+
 		infoLabel.setVisible(true);
 		contentPanel.setVisible(false);
 		contentPanel.removeAll();
-		
+
 		// Close any active presenter and discard its reference
 		if(presenter!=null) {
 			presenter.close();
 			presenter = null;
 		}
 	}
-	
-	protected void setPresenter(TablePresenter presenter) {
+
+	protected void setPresenter(TableBasedPresenter presenter) {
 		if(this.presenter==presenter) {
 			return;
 		}
-		
+
 		if(this.presenter!=null) {
 			this.presenter.close();
 		}
-		
+
 		this.presenter = presenter;
-		
+
 		if(this.presenter==null) {
 			showInfo(null);
 		}
 	}
-	
+
 	protected void displayData(Object data, Options options) {
-		
+
 		// Show default info if nothing available to be displayed
 		if(data==null) {
 			showInfo(null);
 			return;
 		}
-		
+
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
-		
+
 		// Fetch content type for data
-		TablePresenter presenter = this.presenter;
-		
+		TableBasedPresenter presenter = this.presenter;
+
 		// Fetch new presenter
 		if(presenter==null || !PresenterUtils.presenterSupports(presenter, data)) {
 			ContentType contentType = (ContentType) options.get(Options.CONTENT_TYPE);
 			if(contentType!=null) {
 				presenter = UIHelperRegistry.globalRegistry().findHelper(
-						TablePresenter.class, contentType, true, false);
+						TableBasedPresenter.class, contentType, true, false);
 			} else {
 				presenter = UIHelperRegistry.globalRegistry().findHelper(
-						TablePresenter.class, data);
+						TableBasedPresenter.class, data);
 			}
 		}
-		
+
 		// Abort if presenter not available for content type
 		if(presenter==null) {
 			String text = ResourceManager.getInstance().get(
@@ -171,13 +171,13 @@ public class TableView extends View implements Outline {
 			showInfo(text);
 			return;
 		}
-		
+
 		selectViewTab();
-		
+
 		boolean refreshPresentingComponent = presenter!=this.presenter;
-		
+
 		setPresenter(presenter);
-		
+
 		try {
 			presenter.present(data, options);
 		} catch (UnsupportedPresentationDataException e) {
@@ -188,12 +188,12 @@ public class TableView extends View implements Outline {
 			refreshPresentingComponent = false;
 			return;
 		}
-		
+
 		if(refreshPresentingComponent) {
 			contentPanel.removeAll();
 			contentPanel.add(presenter.getPresentingComponent(), BorderLayout.CENTER);
 		}
-		
+
 		infoLabel.setVisible(false);
 		contentPanel.setVisible(true);
 	}
@@ -205,12 +205,12 @@ public class TableView extends View implements Outline {
 	 * <li>{@link Commands#PRESENT}</li>
 	 * <li>{@link Commands#CLEAR}</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.core.View#handleRequest(de.ims.icarus.util.mpi.Message)
 	 */
 	@Override
 	protected ResultMessage handleRequest(Message message) throws Exception {
-		
+
 		if(Commands.CLEAR.equals(message.getCommand())) {
 			reset();
 			return message.successResult(this, null);

@@ -60,7 +60,7 @@ public class DummyGroupConstraint implements SearchConstraint {
 		if(source.isMultiplexing()) {
 			source.group(cache,  getGroupId(), value);
 		} else {
-			cache.cacheGroupInstance(getGroupId(), getLabel(getInstance(value)));
+			cache.cacheGroupInstance(getGroupId(), getLabel(getInstance(value)), true);
 		}
 
 		return true;

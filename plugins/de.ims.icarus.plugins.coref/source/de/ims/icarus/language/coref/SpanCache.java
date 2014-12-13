@@ -50,8 +50,8 @@ public class SpanCache {
 	}
 
 	public int getIndex(Span span) {
-		Integer index = indexMap.get(span);
-		if(index==null)
+		int index = indexMap.get(span);
+		if(index==-1)
 			throw new IllegalArgumentException("Unknown span: "+span); //$NON-NLS-1$
 
 		return index;

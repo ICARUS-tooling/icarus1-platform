@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.list;
@@ -41,34 +41,34 @@ import javax.swing.ListModel;
 public class DynamicWidthList<E extends Object> extends JList<E> {
 
 	private static final long serialVersionUID = 6834514207357872598L;
-	
+
 	protected boolean trackViewportWidth = false;
 	protected boolean synchronizeFixedCellWidth = true;
-	
+
 	public DynamicWidthList() {
 		super();
-		
+
 		init();
 	}
 
 	public DynamicWidthList(E[] listData) {
 		super(listData);
-		
+
 		init();
 	}
 
 	public DynamicWidthList(ListModel<E> dataModel) {
 		super(dataModel);
-		
+
 		init();
 	}
 
 	public DynamicWidthList(Vector<? extends E> listData) {
 		super(listData);
-		
+
 		init();
 	}
-	
+
 	protected void init() {
 		addComponentListener(createSizeTracker());
 	}
@@ -81,7 +81,7 @@ public class DynamicWidthList<E extends Object> extends JList<E> {
 	public boolean isTrackViewportWidth() {
 		return trackViewportWidth;
 	}
-	
+
 	public boolean isSynchronizeFixedCellWidth() {
 		return synchronizeFixedCellWidth;
 	}
@@ -91,8 +91,8 @@ public class DynamicWidthList<E extends Object> extends JList<E> {
 	 * Disabling the automatic synchronization of the 'fixedCellWidth'
 	 * property based on the current width of the list component should
 	 * always be followed by manually setting the desired value for
-	 * this property or deactivating it alltogether!
-	 * 
+	 * this property or deactivating it altogether!
+	 *
 	 * @param synchronizeFixedCellWidth
 	 */
 	public void setSynchronizeFixedCellWidth(boolean synchronizeFixedCellWidth) {
@@ -107,17 +107,17 @@ public class DynamicWidthList<E extends Object> extends JList<E> {
 		if(trackViewportWidth==this.trackViewportWidth) {
 			return;
 		}
-		
+
 		boolean oldValue = this.trackViewportWidth;
 		this.trackViewportWidth = trackViewportWidth;
-		
+
 		revalidate();
-		
+
 		firePropertyChange("trackViewportWidth", oldValue, trackViewportWidth); //$NON-NLS-1$
 	}
-	
+
 	protected class SizeTracker extends ComponentAdapter {
-		
+
 		boolean ignoreResize = false;
 
 		@Override

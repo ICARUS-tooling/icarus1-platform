@@ -158,12 +158,12 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			@XmlElement(name="listEntry", type=ListEntry.class),
 			@XmlElement(name="mapEntry", type=MapEntry.class),
 		})
-		private List<Entry> entries = new ArrayList<>();
+		private List<ConfigEntry> entries = new ArrayList<>();
 
 		private Map<String, Object> toMap() {
 			Map<String, Object> map = new HashMap<>(entries.size());
 
-			for(Entry entry : entries) {
+			for(ConfigEntry entry : entries) {
 				map.put(entry.getKey(), entry.getValue());
 			}
 
@@ -174,7 +174,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			entries = new ArrayList<>(map.size());
 
 			for(Map.Entry<String, Object> mapEntry : map.entrySet()) {
-				Entry entry;
+				ConfigEntry entry;
 
 				if(mapEntry.getValue() instanceof Map) {
 					entry = new MapEntry(mapEntry);
@@ -189,6 +189,13 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 		}
 	}
 
+	private interface ConfigEntry {
+
+		String getKey();
+
+		Object getValue();
+	}
+
 	/**
 	 *
 	 * @author Markus Gärtner
@@ -197,7 +204,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement
-	private static class Entry {
+	private static class Entry implements ConfigEntry {
 
 		@XmlAttribute
 		private String key;
@@ -225,10 +232,14 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 			value = mapEntry.getValue();
 		}
 
+		@Override
+		public
 		String getKey() {
 			return key;
 		}
 
+		@Override
+		public
 		Object getValue() {
 			return value;
 		}
@@ -242,7 +253,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement
-	private static class ListEntry extends Entry {
+	private static class ListEntry implements ConfigEntry {
 
 		@XmlAttribute
 		private String key;
@@ -271,8 +282,17 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 		}
 
 		@Override
+		public
 		Object getValue() {
 			return CollectionUtils.asList(value);
+		}
+
+		/**
+		 * @see de.ims.icarus.config.JAXBConfigStorage.ConfigEntry#getKey()
+		 */
+		@Override
+		public String getKey() {
+			return key;
 		}
 	}
 
@@ -284,7 +304,7 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlRootElement
-	private static class MapEntry extends Entry {
+	private static class MapEntry implements ConfigEntry {
 
 		@XmlAttribute
 		private String key;
@@ -303,8 +323,17 @@ public class JAXBConfigStorage extends AbstractConfigStorage {
 		}
 
 		@Override
+		public
 		Object getValue() {
 			return (Map<?, ?>) value;
+		}
+
+		/**
+		 * @see de.ims.icarus.config.JAXBConfigStorage.ConfigEntry#getKey()
+		 */
+		@Override
+		public String getKey() {
+			return key;
 		}
 	}
 }

@@ -205,6 +205,16 @@ public class ProsodyPreferences {
 		// END APPEARANCE GROUP
 		builder.back();
 
+		// AUDIO PLAYER GROUP
+		builder.addGroup("audioPlayer", true); //$NON-NLS-1$
+
+		builder.setProperties(builder.addListEntry("folders", EntryType.STRING), //$NON-NLS-1$
+				ConfigConstants.HANDLER, new ConfigUtils.FileHandler(false, true));
+		builder.addBooleanEntry("includeSubFolders", false); //$NON-NLS-1$
+
+		// END AUDIO PLAYER GROUP
+		builder.back();
+
 		// READER GROUP
 		builder.addGroup("prosodyReader", true); //$NON-NLS-1$
 

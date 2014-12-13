@@ -326,7 +326,7 @@ public class NGramDataListDependency implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.ui.helper.TextItem#getText()
+		 * @see de.ims.icarus.ui.text.TextItem#getText()
 		 */
 		@Override
 		public String getText() {

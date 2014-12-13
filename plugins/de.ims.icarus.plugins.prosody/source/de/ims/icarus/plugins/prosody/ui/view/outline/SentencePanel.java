@@ -86,6 +86,7 @@ import de.ims.icarus.plugins.prosody.ui.view.SyllableInfo;
 import de.ims.icarus.plugins.prosody.ui.view.WordInfo;
 import de.ims.icarus.resources.ResourceDomain;
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.ui.IconRegistry;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
@@ -284,6 +285,28 @@ public class SentencePanel extends JPanel{
 		toggleDetailsButton.setSelected(expand);
 
 		toggleDetails();
+	}
+
+	private static final String COL_KEY = "color"; //$NON-NLS-1$
+	private static final String GROUP_KEY = "group"; //$NON-NLS-1$
+
+	public void addHighlight(int fromIndex, int toIndex, long highlight, BitmaskHighlighting highlighting) {
+		Color col = highlighting.getGroupColor(highlight);
+		boolean isGroup = false;
+		if(col!=null) {
+			isGroup = true;
+		} else {
+			col = highlighting.getHighlightColor(highlight);
+		}
+
+		SentenceInfo sentenceInfo = getSentenceInfo();
+
+		for(int i=fromIndex; i<=toIndex; i++) {
+			WordInfo wordInfo = sentenceInfo.wordInfo(i);
+
+			wordInfo.setProperty(COL_KEY, col);
+			wordInfo.setProperty(GROUP_KEY, isGroup);
+		}
 	}
 
 	private void refresh() {
@@ -1049,6 +1072,14 @@ public class SentencePanel extends JPanel{
 				}
 
 				// Paint text
+
+				// Fetch highlight color if available
+				Color col = (Color) wordInfo.getProperty(COL_KEY);
+				if(col==null) {
+					col = config.sentenceTextColor;
+				}
+
+				textArea.setTextColor(col);
 				textArea.paint(g, lines, area);
 			}
 		}
@@ -1329,6 +1360,8 @@ public class SentencePanel extends JPanel{
 
 			Graphics2D g = (Graphics2D) graphics;
 
+			SentenceInfo sentenceInfo = getSentenceInfo();
+
 			g.setColor(config.detailTextColor);
 			g.setFont(config.detailFont);
 
@@ -1376,7 +1409,9 @@ public class SentencePanel extends JPanel{
 
 				int begin = area.x;
 				int wordIndex = leftWord+i;
-				int sylCount = sentenceInfo.sylCount(wordIndex);
+
+				WordInfo wordInfo = sentenceInfo.wordInfo(wordIndex);
+				int sylCount = wordInfo.sylCount();
 
 				if(sylCount==0) {
 					continue;
@@ -1440,8 +1475,13 @@ public class SentencePanel extends JPanel{
 						g.fillRect(x-1, y-fm.getAscent(), sw+2, fm.getHeight());
 					}
 
+					Color col = (Color) wordInfo.getProperty(COL_KEY);
+					if(col==null) {
+						col = config.detailTextColor;
+					}
+
 					g.setFont(config.detailFont);
-					g.setColor(config.detailTextColor);
+					g.setColor(col);
 					g.drawString(wordLabel, x, y);
 
 					g.setColor(c);

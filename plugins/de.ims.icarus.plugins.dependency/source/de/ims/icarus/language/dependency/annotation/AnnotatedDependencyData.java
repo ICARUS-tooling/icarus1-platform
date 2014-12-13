@@ -85,7 +85,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.ui.helper.TextItem#getText()
+	 * @see de.ims.icarus.ui.text.TextItem#getText()
 	 */
 	@Override
 	public String getText() {

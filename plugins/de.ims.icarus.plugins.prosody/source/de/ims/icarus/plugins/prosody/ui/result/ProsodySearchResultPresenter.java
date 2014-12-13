@@ -580,8 +580,10 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		}
 
 		if(showContextOutline) {
+			Options outlineOptions = options.clone();
+			outlineOptions.put("sentence", sentence);
 			try {
-				contextOutline.present(sentence.getDocument(), null);
+				contextOutline.present(sentence.getDocument(), outlineOptions);
 			} catch (Exception e) {
 				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to forward presentation of surrounding document to context outline", e); //$NON-NLS-1$

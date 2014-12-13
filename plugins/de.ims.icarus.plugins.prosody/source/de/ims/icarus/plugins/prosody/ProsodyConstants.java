@@ -93,6 +93,7 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String PAINTE_C1_KEY = "painte_c1"; //$NON-NLS-1$
 	public static final String PAINTE_C2_KEY = "painte_c2"; //$NON-NLS-1$
 	public static final String PAINTE_D_KEY = "painte_d"; //$NON-NLS-1$
+	public static final String PAINTE_MAX_C_KEY = "painte_max_c"; //$NON-NLS-1$
 
 	// Accent shape constants
 	public static final int ACCENT_SHAPE_RISE_VALUE = 1;

@@ -474,11 +474,19 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		 * @see de.ims.icarus.search_tools.standard.GroupCache#cacheGroupInstance(int, java.lang.Object)
 		 */
 		@Override
-		public void cacheGroupInstance(int id, Object value) {
+		public void cacheGroupInstance(int id, Object value, boolean replace) {
+//			System.out.printf("id=%d value=%s replace=%b\n", id, value, replace);
 			if(!locked) {
-				Set<String> list = instanceBuffer[groupIndexMap[id]];
-				list.add(String.valueOf(value));
-				multiValueSets |= list.size()>1;
+				Set<String> set = instanceBuffer[groupIndexMap[id]];
+
+				// If cache in replace mode make sure the set is always emptied before adding
+				// a new entry.
+				//TODO maybe keep 2 buffers, one being a simple array, to reduce overhead by java.util.Set
+				if(replace) {
+					set.clear();
+				}
+				set.add(String.valueOf(value));
+				multiValueSets |= set.size()>1;
 			}
 		}
 

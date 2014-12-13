@@ -117,7 +117,7 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 					instance = Math.floor((double)instance*100D)*0.01D;
 				}
 
-				cache.cacheGroupInstance(groupId, getLabel(instance));
+				cache.cacheGroupInstance(groupId, getLabel(instance), false);
 			}
 		}
 	}

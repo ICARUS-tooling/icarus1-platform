@@ -985,10 +985,10 @@
 	<extension id="TextItemContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Represents the de.ims.icarus.ui.helper.TextItem content type.
+				Represents the de.ims.icarus.ui.text.TextItem content type.
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="de.ims.icarus.ui.helper.TextItem" />
+		<parameter id="contentClass" value="de.ims.icarus.ui.text.TextItem" />
 	</extension>
 	
 	<extension id="StringContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
