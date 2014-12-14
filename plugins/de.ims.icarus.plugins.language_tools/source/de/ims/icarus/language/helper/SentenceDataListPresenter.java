@@ -89,6 +89,8 @@ public class SentenceDataListPresenter extends DataListPresenter<SentenceData> {
 		//list.setFixedCellWidth(200);
 		list.setPrototypeCellValue(null);
 
+		list.setTrackViewportWidth(true);
+
 		return list;
 	}
 

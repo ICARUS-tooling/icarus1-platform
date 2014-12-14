@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.search_tools.result;
 
+import static de.ims.icarus.search_tools.util.SearchUtils.checkResultEntry;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -208,6 +210,19 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		return new ResultNDCache();
 	}
 
+	private void incrementGroupCount(int groupId, int instanceId) {
+
+		int[] counts = groupMatchCounts[groupId];
+		if(counts==null) {
+			counts = new int[Math.max(instanceId*2, 100)];
+			groupMatchCounts[groupId] = counts;
+		} else if(counts.length<=instanceId) {
+			counts = Arrays.copyOf(counts, instanceId*2);
+			groupMatchCounts[groupId] = counts;
+		}
+		counts[instanceId]++;
+	}
+
 	private void commitRecursive(ResultEntry entry, ResultNDCache cache, final int rawIndex) {
 //		System.out.println(cache.instanceBuffer[indexPermutator[rawIndex]]);
 
@@ -218,15 +233,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 			int index = groupInstances[rawIndex].substitute(value);
 			indexBuffer[rawIndex] = index;
 
-			int[] counts = groupMatchCounts[rawIndex];
-			if(counts==null) {
-				counts = new int[Math.max(index*2, 100)];
-				groupMatchCounts[rawIndex] = counts;
-			} else if(counts.length<=index) {
-				counts = Arrays.copyOf(counts, index*2);
-				groupMatchCounts[rawIndex] = counts;
-			}
-			counts[index]++;
+			incrementGroupCount(rawIndex, index);
 
 			if(rawIndex<indexBuffer.length-1) {
 				commitRecursive(entry, cache, rawIndex+1);
@@ -243,6 +250,8 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	}
 
 	protected synchronized void commit(ResultEntry entry, ResultNDCache cache) {
+		checkResultEntry(entry);
+
 		if(cache.multiValueSets) {
 			commitRecursive(entry, cache, 0);
 		} else {
@@ -255,15 +264,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 				int index = groupInstances[i].substitute(value);
 				indexBuffer[i] = index;
 
-				int[] counts = groupMatchCounts[i];
-				if(counts==null) {
-					counts = new int[Math.max(index*2, 100)];
-					groupMatchCounts[i] = counts;
-				} else if(counts.length<=index) {
-					counts = Arrays.copyOf(counts, index*2);
-					groupMatchCounts[i] = counts;
-				}
-				counts[index]++;
+				incrementGroupCount(i, index);
 			}
 
 			// Generate key and ensure valid result list
@@ -390,9 +391,19 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 
 	@Override
 	public void addEntry(ResultEntry entry, int... groupIndices) {
+		checkResultEntry(entry);
+
 		getList(groupIndices, true).add(entry);
 		totalEntries.add(entry);
 		hitCount += entry.getHitCount();
+
+		// Make sure that counts for each group's instances are updated as well!
+		for(int i=0; i<groupIndices.length; i++) {
+
+			int index = groupIndices[i];
+
+			incrementGroupCount(i, index);
+		}
 	}
 
 	private static class Key {

@@ -58,14 +58,6 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 		this(source, null);
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return source.toString();
-	}
-
 	@Override
 	public AnnotatedProsodicSentenceData clone() {
 		return new AnnotatedProsodicSentenceData(source, annotation);
@@ -317,5 +309,10 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 	@Override
 	public ProsodicSentenceData get() {
 		return source;
+	}
+
+	@Override
+	public String toString() {
+		return source.toString();
 	}
 }

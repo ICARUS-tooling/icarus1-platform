@@ -191,4 +191,9 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	public Object getProperty(int index, String key) {
 		return source.getProperty(index, key);
 	}
+
+	@Override
+	public String toString() {
+		return source.toString();
+	}
 }

@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.search_tools.result;
 
+import static de.ims.icarus.search_tools.util.SearchUtils.checkResultEntry;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,6 +195,8 @@ public class DefaultSearchResult0D extends AbstractSearchResult {
 	 */
 	@Override
 	public void addEntry(ResultEntry entry, int... groupIndices) {
+		checkResultEntry(entry);
+
 		entries.add(entry);
 		hitCount += entry.getHitCount();
 	}

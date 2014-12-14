@@ -219,4 +219,9 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 		return source;
 	}
 
+	@Override
+	public String toString() {
+		return source.toString();
+	}
+
 }

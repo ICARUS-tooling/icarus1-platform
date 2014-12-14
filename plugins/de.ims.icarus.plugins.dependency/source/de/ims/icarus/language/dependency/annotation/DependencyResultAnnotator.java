@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.annotation;
@@ -42,7 +42,7 @@ import de.ims.icarus.util.data.ContentType;
  *
  */
 public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
-	
+
 	public DependencyResultAnnotator(BitmaskHighlighting highlighting, Matcher rootMatcher) {
 		super(highlighting, rootMatcher);
 	}
@@ -82,7 +82,7 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 	protected AnnotatedData createAnnotatedData(Object data, ResultEntry entry) {
 		return new LazyAnnotatedDependencyData((DependencyData) data, entry);
 	}
-	
+
 	@Override
 	protected Annotation createAnnotation(Object data, ResultEntry entry) {
 		return new LazyDependencyAnnotation(data, entry);
@@ -95,28 +95,28 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 
 		public LazyAnnotatedDependencyData(DependencyData source, ResultEntry entry) {
 			super(source);
-			
+
 			this.entry = entry;
 		}
 
 		@Override
 		public Annotation getAnnotation() {
 			Annotation annotation = super.getAnnotation();
-			
+
 			if(annotation==null) {
 				annotation = createAnnotation(this, entry);
 				setAnnotation(annotation);
 			}
-			
+
 			return annotation;
-		}		
+		}
 	}
-	
+
 	protected class LazyDependencyAnnotation extends LazyAnnotation implements DependencyAnnotation {
 
 		public LazyDependencyAnnotation(Object data, ResultEntry entry) {
 			super(data, entry);
 		}
-		
+
 	}
 }

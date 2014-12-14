@@ -42,7 +42,7 @@ public class DynamicWidthList<E extends Object> extends JList<E> {
 
 	private static final long serialVersionUID = 6834514207357872598L;
 
-	protected boolean trackViewportWidth = false;
+	protected boolean trackViewportWidth = true;
 	protected boolean synchronizeFixedCellWidth = true;
 
 	public DynamicWidthList() {

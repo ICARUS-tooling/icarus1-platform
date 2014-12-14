@@ -83,6 +83,7 @@ import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.PropertyChangeSource;
+import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.AnnotationContainer;
 import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.annotation.AnnotationController;
@@ -361,6 +362,7 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 					ListCellRenderer.class, dataList.getContentType(),
 					true, true);
 		}
+
 		if(renderer==null) {
 			renderer = new DefaultListCellRenderer();
 		}
@@ -520,6 +522,11 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 			if(prototype!=null) {
 				list.setPrototypeCellValue(prototype);
 				list.setPrototypeCellValue(null);
+
+//				int fixedWidth = list.getFixedCellWidth();
+//				if(list.getWidth()<=0 && fixedWidth<list.getWidth()) {
+//					list.setFixedCellWidth(list.getWidth());
+//				}
 				list.setTrackViewportWidth(false);
 			}
 		} finally {
@@ -663,7 +670,11 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected int getEstimatedWidth(FontMetrics fm, T item) {
+		if(item instanceof Wrapper) {
+			item = (T) ((Wrapper<?>)item).get();
+		}
 		return fm.stringWidth(item.toString());
 	}
 
@@ -843,7 +854,10 @@ public class DataListPresenter<T extends Object> extends PropertyChangeSource
 				}
 
 				T item = model.getElementAt(i);
+
 				int width = item==null ? 0 : getEstimatedWidth(fm, item);
+
+//				System.out.printf("width=%d item=%s\n",width, item);
 
 				if(width>maxWidth) {
 					maxWidth = width;
